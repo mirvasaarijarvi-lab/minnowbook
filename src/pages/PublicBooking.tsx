@@ -819,7 +819,7 @@ const PublicBooking = () => {
                           <CalendarIcon className="mr-2 h-4 w-4" />
                           {form.check_out_date
                             ? format(new Date(form.check_out_date + "T00:00:00"), "PPP")
-                            : <span>{t("booking.pickDate" as any) || "Pick a date"}</span>}
+                            : <span>{t("booking.pickDate")}</span>}
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
