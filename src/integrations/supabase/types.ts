@@ -478,6 +478,23 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_tenant: {
+        Args: {
+          p_accent_color?: string
+          p_allowed_reservation_types?: string[]
+          p_business_address?: string
+          p_business_description?: string
+          p_business_email?: string
+          p_business_phone?: string
+          p_display_name?: string
+          p_name: string
+          p_primary_color?: string
+          p_secondary_color?: string
+          p_slug: string
+          p_tier?: string
+        }
+        Returns: string
+      }
       get_user_tenant_id: { Args: { p_user_id: string }; Returns: string }
       has_tenant_role: {
         Args: {
