@@ -106,7 +106,7 @@ const ReservationList = () => {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between" data-tour="reservations-filters">
         <h2 className="text-2xl font-serif font-bold text-foreground">{t("nav.reservations")}</h2>
         <div className="flex gap-2">
           <Button
