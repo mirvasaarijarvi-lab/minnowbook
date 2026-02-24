@@ -238,15 +238,23 @@ const ReportsPanel = () => {
     return d > 0 ? d : 1;
   }, []);
 
+  const isAccommodation = useCallback((r: ReservationRow) => r.reservation_type === "guesthouse" || r.reservation_type === "hotel", []);
+
+  const calcBreakfastPrice = useCallback((r: ReservationRow) => {
+    if (!r.breakfast_included || !isAccommodation(r)) return 0;
+    const n = calcNights(r);
+    return (r.breakfast_price_per_person ?? 15) * (r.guests_count ?? 1) * n;
+  }, [calcNights, isAccommodation]);
+
+  const calcRoomPrice = useCallback((r: ReservationRow) => {
+    if (!isAccommodation(r)) return r.price_eur ?? 0;
+    const n = calcNights(r);
+    return (r.price_eur ?? 0) * n;
+  }, [calcNights, isAccommodation]);
+
   const effectivePrice = useCallback((r: ReservationRow) => {
-    if (r.reservation_type === "guesthouse") {
-      const n = calcNights(r);
-      const room = (r.price_eur ?? 0) * n;
-      const bf = r.breakfast_included ? (r.breakfast_price_per_person ?? 15) * (r.guests_count ?? 1) * n : 0;
-      return room + bf;
-    }
-    return r.price_eur ?? 0;
-  }, [calcNights]);
+    return calcRoomPrice(r) + calcBreakfastPrice(r);
+  }, [calcRoomPrice, calcBreakfastPrice]);
 
   const stats = useMemo(() => {
     const calc = (items: ReservationRow[]) => ({
@@ -286,18 +294,23 @@ const ReportsPanel = () => {
 
   /* ── CSV Export ──────────────────────────────────────── */
   const handleExportCSV = () => {
-    const headers = [t("common.date"), t("reports.guest"), t("common.type"), t("common.guests"), t("common.status"), t("reports.invoiced"), `${t("common.price")} (€)`, t("reports.notes")];
-    const rows = reservations.map((r) => [
-      format(new Date(r.date + "T00:00:00"), "d.M.yyyy"),
-      r.guest_name,
-      r.reservation_type,
-      String(r.guests_count || r.estimated_guests || "-"),
-      r.status,
-      r.is_invoiced ? t("reports.yes") : t("reports.no"),
-      effectivePrice(r).toFixed(2),
-      r.internal_notes || "",
-    ]);
-    rows.push(["", "", "", "", "", t("reports.grandTotal"), grandTotal.toFixed(2), ""]);
+    const headers = [t("common.date"), t("reports.guest"), t("common.type"), t("common.guests"), t("common.status"), t("reports.used" as any), t("reports.breakfast" as any), t("reports.invoiced"), `${t("common.price")} (€)`, t("reports.notes")];
+    const rows = reservations.map((r) => {
+      const bfPrice = calcBreakfastPrice(r);
+      return [
+        format(new Date(r.date + "T00:00:00"), "d.M.yyyy"),
+        r.guest_name,
+        r.reservation_type,
+        String(r.guests_count || r.estimated_guests || "-"),
+        r.status,
+        r.status === "confirmed" ? t("reports.yes") : t("reports.no"),
+        r.breakfast_included ? `${t("reports.yes")} (${bfPrice.toFixed(2)}€)` : t("reports.no"),
+        r.is_invoiced ? t("reports.yes") : t("reports.no"),
+        effectivePrice(r).toFixed(2),
+        r.internal_notes || "",
+      ];
+    });
+    rows.push(["", "", "", "", "", "", "", t("reports.grandTotal"), grandTotal.toFixed(2), ""]);
 
     const csv = [headers, ...rows].map((row) => row.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(";")).join("\n");
     const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
@@ -320,12 +333,16 @@ const ReportsPanel = () => {
 
     const tableRows = reservations.map((r) => {
       const total = effectivePrice(r);
+      const bfPrice = calcBreakfastPrice(r);
+      const roomPrice = calcRoomPrice(r);
       return `<tr>
         <td>${format(new Date(r.date + "T00:00:00"), "d.M.yyyy")}</td>
         <td>${r.guest_name}</td>
         <td>${r.reservation_type}</td>
         <td>${r.guests_count || r.estimated_guests || "-"}</td>
         <td>${r.status}</td>
+        <td>${r.status === "confirmed" ? "✓" : "✗"}</td>
+        <td>${r.breakfast_included ? "✓ (" + fmtEur(bfPrice) + ")" : "✗"}</td>
         <td>${r.is_invoiced ? "✓" : "✗"}</td>
         <td style="text-align:right">${total > 0 ? fmtEur(total) : "—"}</td>
       </tr>`;
@@ -360,9 +377,9 @@ const ReportsPanel = () => {
 
       <h2>${t("reports.details")}</h2>
       <table>
-        <thead><tr><th>${t("common.date")}</th><th>${t("reports.guest")}</th><th>${t("common.type")}</th><th>${t("common.guests")}</th><th>${t("common.status")}</th><th>${t("reports.invoiced")}</th><th>${t("common.price")} (€)</th></tr></thead>
+        <thead><tr><th>${t("common.date")}</th><th>${t("reports.guest")}</th><th>${t("common.type")}</th><th>${t("common.guests")}</th><th>${t("common.status")}</th><th>${t("reports.used" as any)}</th><th>${t("reports.breakfast" as any)}</th><th>${t("reports.invoiced")}</th><th>${t("common.price")} (€)</th></tr></thead>
         <tbody>${tableRows}</tbody>
-        <tfoot><tr><td colspan="6" style="text-align:right">${t("reports.grandTotal")}</td><td style="text-align:right">${fmtEur(grandTotal)}</td></tr></tfoot>
+        <tfoot><tr><td colspan="8" style="text-align:right">${t("reports.grandTotal")}</td><td style="text-align:right">${fmtEur(grandTotal)}</td></tr></tfoot>
       </table>
     </body></html>`);
     pw.document.close();
@@ -629,6 +646,8 @@ const ReportsPanel = () => {
                       <TableHead>{t("common.type")}</TableHead>
                       <TableHead>{t("common.guests")}</TableHead>
                       <TableHead>{t("common.status")}</TableHead>
+                      <TableHead>{t("reports.used" as any)}</TableHead>
+                      <TableHead>{t("reports.breakfast" as any)}</TableHead>
                       <TableHead>{t("reports.invoiced")}</TableHead>
                       <TableHead>{t("common.price")} (€)</TableHead>
                       <TableHead>{t("reports.notes")}</TableHead>
@@ -637,6 +656,7 @@ const ReportsPanel = () => {
                   <TableBody>
                     {reservations.map((r) => {
                       const total = effectivePrice(r);
+                      const bfPrice = calcBreakfastPrice(r);
                       return (
                         <TableRow key={r.id}>
                           <TableCell className="whitespace-nowrap">{format(new Date(r.date + "T00:00:00"), "d.M.yyyy")}</TableCell>
@@ -645,6 +665,18 @@ const ReportsPanel = () => {
                           <TableCell>{r.guests_count || r.estimated_guests || "-"}</TableCell>
                           <TableCell>
                             <Badge variant={r.status === "confirmed" ? "default" : "secondary"}>{r.status}</Badge>
+                          </TableCell>
+                          <TableCell>
+                            {r.status === "confirmed"
+                              ? <span className="flex items-center gap-1 text-green-600"><CheckCircle2 className="h-4 w-4" />{t("reports.used" as any)}</span>
+                              : <span className="flex items-center gap-1 text-muted-foreground"><Clock className="h-4 w-4" />{t("reports.notUsed" as any)}</span>
+                            }
+                          </TableCell>
+                          <TableCell>
+                            {r.breakfast_included
+                              ? <span className="flex items-center gap-1 text-primary"><Coffee className="h-4 w-4" />{bfPrice > 0 ? `${bfPrice.toLocaleString("fi-FI", { minimumFractionDigits: 2 })} €` : t("reports.yes")}</span>
+                              : <span className="text-muted-foreground">—</span>
+                            }
                           </TableCell>
                           <TableCell>
                             {r.is_invoiced
@@ -662,7 +694,7 @@ const ReportsPanel = () => {
                   </TableBody>
                   <TableFooter>
                     <TableRow>
-                      <TableCell colSpan={6} className="text-right font-semibold">{t("reports.grandTotal")}</TableCell>
+                      <TableCell colSpan={8} className="text-right font-semibold">{t("reports.grandTotal")}</TableCell>
                       <TableCell className="font-bold whitespace-nowrap">{grandTotal.toLocaleString("fi-FI", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €</TableCell>
                       <TableCell />
                     </TableRow>

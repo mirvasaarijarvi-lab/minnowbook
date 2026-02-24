@@ -80,6 +80,11 @@ type TranslationKeys = {
   "reports.period.half": string;
   "reports.period.year": string;
   "reports.period.custom": string;
+  "reports.breakfast": string;
+  "reports.breakfastRevenue": string;
+  "reports.used": string;
+  "reports.notUsed": string;
+  "reports.roomPrice": string;
 
   // Settings
   "settings.businessDetails": string;
@@ -459,6 +464,11 @@ const en: TranslationKeys = {
   "reports.period.half": "Half year",
   "reports.period.year": "Year",
   "reports.period.custom": "Custom",
+  "reports.breakfast": "Breakfast",
+  "reports.breakfastRevenue": "Breakfast revenue",
+  "reports.used": "Used",
+  "reports.notUsed": "Not used",
+  "reports.roomPrice": "Room",
 
   // Settings
   "settings.businessDetails": "Business Details",
@@ -832,6 +842,11 @@ const fi: TranslationKeys = {
   "reports.period.half": "Puoli vuotta",
   "reports.period.year": "Vuosi",
   "reports.period.custom": "Mukautettu",
+  "reports.breakfast": "Aamiainen",
+  "reports.breakfastRevenue": "Aamiaistulo",
+  "reports.used": "Käytetty",
+  "reports.notUsed": "Ei käytetty",
+  "reports.roomPrice": "Huone",
 
   // Settings
   "settings.businessDetails": "Yritystiedot",
@@ -1204,6 +1219,11 @@ const sv: TranslationKeys = {
   "reports.period.half": "Halvår",
   "reports.period.year": "År",
   "reports.period.custom": "Anpassad",
+  "reports.breakfast": "Frukost",
+  "reports.breakfastRevenue": "Frukostintäkt",
+  "reports.used": "Använd",
+  "reports.notUsed": "Ej använd",
+  "reports.roomPrice": "Rum",
 
   // Settings
   "settings.businessDetails": "Företagsinformation",
