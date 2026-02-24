@@ -42,7 +42,7 @@ const DashboardSidebar = ({ currentView, onViewChange, userEmail, onSignOut, mob
       {/* Mobile overlay */}
       {mobileOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
+          className="fixed inset-0 z-40 bg-black/70 backdrop-blur-md lg:hidden"
           onClick={onMobileToggle}
           aria-hidden="true"
         />

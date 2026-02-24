@@ -68,7 +68,7 @@ const Dashboard = () => {
           <div className="w-6" />
         </header>
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-x-hidden overflow-y-auto">
           {viewComponents[currentView]}
         </main>
       </div>
