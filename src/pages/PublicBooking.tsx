@@ -39,6 +39,13 @@ const typeIcons: Record<string, React.ElementType> = {
   hotel: Home,
 };
 
+const typeDescKeys: Record<string, string> = {
+  restaurant: "booking.typeDescRestaurant",
+  venue: "booking.typeDescVenue",
+  guesthouse: "booking.typeDescGuesthouse",
+  hotel: "booking.typeDescGuesthouse",
+};
+
 /* ── Availability Calendar ──────────────────────────────── */
 const AvailabilityCalendar = ({
   tenantId,
@@ -543,25 +550,56 @@ const PublicBooking = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid gap-3 sm:grid-cols-3">
+                <div className="grid gap-4 sm:grid-cols-3">
                   {allowedTypes.map((type) => {
                     const Icon = typeIcons[type] ?? Building2;
                     const isSelected = form.reservation_type === type;
+                    const descKey = typeDescKeys[type] ?? "";
                     return (
                       <button
                         key={type}
                         type="button"
                         onClick={() => updateField("reservation_type", type)}
-                        className="flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-all"
+                        className="group relative flex flex-col items-center gap-3 p-5 sm:p-6 rounded-xl border-2 transition-all duration-200 text-center"
                         style={{
-                          borderColor: isSelected ? accentColor : "#e5e5e5",
-                          backgroundColor: isSelected ? `${accentColor}15` : "transparent",
+                          borderColor: isSelected ? accentColor : "#e5e7eb",
+                          backgroundColor: isSelected ? `${accentColor}10` : "transparent",
+                          boxShadow: isSelected ? `0 0 0 1px ${accentColor}40, 0 4px 12px ${accentColor}15` : "0 1px 3px rgba(0,0,0,0.04)",
                         }}
                       >
-                        <Icon className="h-6 w-6" style={{ color: isSelected ? accentColor : primaryColor }} />
-                        <span className="text-sm font-medium capitalize" style={{ color: primaryColor }}>
-                          {t(`dashboard.${type}` as any)}
+                        {isSelected && (
+                          <span
+                            className="absolute top-2.5 right-2.5 h-2 w-2 rounded-full"
+                            style={{ backgroundColor: accentColor }}
+                          />
+                        )}
+                        <span
+                          className="flex items-center justify-center h-12 w-12 rounded-full transition-colors duration-200"
+                          style={{
+                            backgroundColor: isSelected ? `${accentColor}20` : `${primaryColor}10`,
+                          }}
+                        >
+                          <Icon
+                            className="h-6 w-6 transition-colors duration-200"
+                            style={{ color: isSelected ? accentColor : primaryColor }}
+                          />
                         </span>
+                        <div className="space-y-1">
+                          <span
+                            className="text-sm font-semibold capitalize block"
+                            style={{ color: primaryColor }}
+                          >
+                            {t(`dashboard.${type}` as any)}
+                          </span>
+                          {descKey && (
+                            <span
+                              className="text-xs block leading-relaxed"
+                              style={{ color: `${primaryColor}80` }}
+                            >
+                              {t(descKey as any)}
+                            </span>
+                          )}
+                        </div>
                       </button>
                     );
                   })}

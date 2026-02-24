@@ -113,6 +113,9 @@ type TranslationKeys = {
   // Booking (public)
   "booking.title": string;
   "booking.selectType": string;
+  "booking.typeDescRestaurant": string;
+  "booking.typeDescVenue": string;
+  "booking.typeDescGuesthouse": string;
   "booking.selectDateTime": string;
   "booking.selectTime": string;
   "booking.selectResource": string;
@@ -483,6 +486,9 @@ const en: TranslationKeys = {
   // Booking
   "booking.title": "Make a Reservation",
   "booking.selectType": "What would you like to book?",
+  "booking.typeDescRestaurant": "Reserve a table for dining",
+  "booking.typeDescVenue": "Book a space for your event",
+  "booking.typeDescGuesthouse": "Book a room for your stay",
   "booking.selectDateTime": "Select Date & Time",
   "booking.selectTime": "Select a time",
   "booking.selectResource": "Choose a space",
@@ -847,6 +853,9 @@ const fi: TranslationKeys = {
   // Booking
   "booking.title": "Tee varaus",
   "booking.selectType": "Mitä haluat varata?",
+  "booking.typeDescRestaurant": "Varaa pöytä ravintolasta",
+  "booking.typeDescVenue": "Varaa tila tapahtumallesi",
+  "booking.typeDescGuesthouse": "Varaa huone yöpymiseen",
   "booking.selectDateTime": "Valitse päivä ja aika",
   "booking.selectTime": "Valitse aika",
   "booking.selectResource": "Valitse tila",
@@ -1210,6 +1219,9 @@ const sv: TranslationKeys = {
   // Booking
   "booking.title": "Gör en bokning",
   "booking.selectType": "Vad vill du boka?",
+  "booking.typeDescRestaurant": "Reservera ett bord för middag",
+  "booking.typeDescVenue": "Boka en lokal för ditt evenemang",
+  "booking.typeDescGuesthouse": "Boka ett rum för din vistelse",
   "booking.selectDateTime": "Välj datum och tid",
   "booking.selectTime": "Välj en tid",
   "booking.selectResource": "Välj ett utrymme",
