@@ -12,7 +12,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Calendar } from "@/components/ui/calendar";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Loader2, CheckCircle, UtensilsCrossed, Building2, Home, Clock, CalendarDays } from "lucide-react";
+import { Loader2, CheckCircle, UtensilsCrossed, Building2, Home, Clock, CalendarDays, BedDouble, Coffee, Users } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { format, startOfMonth, endOfMonth, addMonths, subMonths, isSameDay } from "date-fns";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
@@ -161,6 +162,14 @@ const PublicBooking = () => {
     start_time: "",
     special_requests: "",
     resource_id: "",
+    // Hotel / Guesthouse fields
+    check_out_date: "",
+    room_type: "",
+    breakfast_included: false,
+    // Venue fields
+    event_type: "",
+    estimated_guests: "",
+    catering_needed: false,
   });
 
   // Fetch tenant by slug
@@ -300,6 +309,9 @@ const PublicBooking = () => {
         resource_id: form.resource_id || undefined,
       });
 
+      const isAccommodation = form.reservation_type === "hotel" || form.reservation_type === "guesthouse";
+      const isVenue = form.reservation_type === "venue";
+
       const { error } = await supabase.from("reservations").insert({
         tenant_id: tenant.id,
         guest_name: parsed.guest_name,
@@ -311,6 +323,18 @@ const PublicBooking = () => {
         start_time: parsed.start_time ?? null,
         special_requests: parsed.special_requests ?? null,
         status: "pending",
+        // Accommodation-specific
+        ...(isAccommodation && {
+          check_out_date: form.check_out_date || null,
+          room_type: form.room_type || null,
+          breakfast_included: form.breakfast_included,
+        }),
+        // Venue-specific
+        ...(isVenue && {
+          event_type: form.event_type || null,
+          estimated_guests: form.estimated_guests ? parseInt(form.estimated_guests) : null,
+          catering_needed: form.catering_needed,
+        }),
       });
       if (error) throw error;
     },
@@ -352,6 +376,13 @@ const PublicBooking = () => {
     if (errors[key]) setErrors((prev) => ({ ...prev, [key]: "" }));
   };
 
+  const updateBoolField = (key: string, value: boolean) => {
+    setForm((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const isAccommodationType = form.reservation_type === "hotel" || form.reservation_type === "guesthouse";
+  const isVenueType = form.reservation_type === "venue";
+
   const primaryColor = settings?.primary_color ?? "#1e3a5f";
   const secondaryColor = settings?.secondary_color ?? "#f5f0e8";
   const accentColor = settings?.accent_color ?? "#d4a853";
@@ -388,7 +419,7 @@ const PublicBooking = () => {
             <p className="text-muted-foreground">{t("booking.confirmationMsg")}</p>
             <Button
               variant="outline"
-              onClick={() => { setSubmitted(false); setForm({ guest_name: "", guest_email: "", guest_phone: "", guests_count: "", reservation_type: "", start_time: "", special_requests: "", resource_id: "" }); setSelectedDate(undefined); }}
+              onClick={() => { setSubmitted(false); setForm({ guest_name: "", guest_email: "", guest_phone: "", guests_count: "", reservation_type: "", start_time: "", special_requests: "", resource_id: "", check_out_date: "", room_type: "", breakfast_included: false, event_type: "", estimated_guests: "", catering_needed: false }); setSelectedDate(undefined); }}
             >
               {t("booking.makeAnother")}
             </Button>
@@ -574,7 +605,105 @@ const PublicBooking = () => {
             </CardContent>
           </Card>
 
-          {/* Step 3: Resource selection (optional) */}
+          {/* Type-specific fields: Hotel / Guesthouse */}
+          {isAccommodationType && selectedDate && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg font-serif flex items-center gap-2" style={{ color: primaryColor }}>
+                  <BedDouble className="h-5 w-5" />
+                  {t("booking.roomType" as any)}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="check_out_date">{t("booking.checkOutDate" as any)} *</Label>
+                    <Input
+                      id="check_out_date"
+                      type="date"
+                      value={form.check_out_date}
+                      min={selectedDate ? format(new Date(selectedDate.getTime() + 86400000), "yyyy-MM-dd") : ""}
+                      onChange={(e) => updateField("check_out_date", e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>{t("booking.roomType" as any)}</Label>
+                    <Select value={form.room_type} onValueChange={(v) => updateField("room_type", v)}>
+                      <SelectTrigger><SelectValue placeholder={t("booking.roomType" as any)} /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="single">{t("booking.roomSingle" as any)}</SelectItem>
+                        <SelectItem value="double">{t("booking.roomDouble" as any)}</SelectItem>
+                        <SelectItem value="suite">{t("booking.roomSuite" as any)}</SelectItem>
+                        <SelectItem value="dorm">{t("booking.roomDorm" as any)}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    id="breakfast_included"
+                    checked={form.breakfast_included}
+                    onCheckedChange={(checked) => updateBoolField("breakfast_included", !!checked)}
+                  />
+                  <Label htmlFor="breakfast_included" className="flex items-center gap-1.5 cursor-pointer">
+                    <Coffee className="h-4 w-4" />
+                    {t("booking.breakfastIncluded" as any)}
+                  </Label>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Type-specific fields: Venue / Event space */}
+          {isVenueType && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg font-serif flex items-center gap-2" style={{ color: primaryColor }}>
+                  <Users className="h-5 w-5" />
+                  {t("booking.eventType" as any)}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label>{t("booking.eventType" as any)}</Label>
+                    <Select value={form.event_type} onValueChange={(v) => updateField("event_type", v)}>
+                      <SelectTrigger><SelectValue placeholder={t("booking.eventType" as any)} /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="wedding">{t("booking.eventWedding" as any)}</SelectItem>
+                        <SelectItem value="corporate">{t("booking.eventCorporate" as any)}</SelectItem>
+                        <SelectItem value="birthday">{t("booking.eventBirthday" as any)}</SelectItem>
+                        <SelectItem value="conference">{t("booking.eventConference" as any)}</SelectItem>
+                        <SelectItem value="other">{t("booking.eventOther" as any)}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="estimated_guests">{t("booking.estimatedGuests" as any)}</Label>
+                    <Input
+                      id="estimated_guests"
+                      type="number"
+                      min={1}
+                      max={1000}
+                      value={form.estimated_guests}
+                      onChange={(e) => updateField("estimated_guests", e.target.value)}
+                    />
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    id="catering_needed"
+                    checked={form.catering_needed}
+                    onCheckedChange={(checked) => updateBoolField("catering_needed", !!checked)}
+                  />
+                  <Label htmlFor="catering_needed" className="cursor-pointer">
+                    {t("booking.cateringNeeded" as any)}
+                  </Label>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {resources && resources.length > 0 && (
             <Card>
               <CardHeader>

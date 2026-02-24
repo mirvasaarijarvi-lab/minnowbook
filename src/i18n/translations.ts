@@ -121,6 +121,21 @@ type TranslationKeys = {
   "booking.specialRequests": string;
   "booking.preferredTime": string;
   "booking.closedDay": string;
+  "booking.checkOutDate": string;
+  "booking.roomType": string;
+  "booking.breakfastIncluded": string;
+  "booking.eventType": string;
+  "booking.estimatedGuests": string;
+  "booking.cateringNeeded": string;
+  "booking.roomSingle": string;
+  "booking.roomDouble": string;
+  "booking.roomSuite": string;
+  "booking.roomDorm": string;
+  "booking.eventWedding": string;
+  "booking.eventCorporate": string;
+  "booking.eventBirthday": string;
+  "booking.eventConference": string;
+  "booking.eventOther": string;
   "booking.submit": string;
   "booking.availabilityCalendar": string;
   "booking.availabilityDesc": string;
@@ -453,6 +468,21 @@ const en: TranslationKeys = {
   "booking.specialRequests": "Special requests",
   "booking.preferredTime": "Preferred time",
   "booking.closedDay": "Closed on this day.",
+  "booking.checkOutDate": "Check-out date",
+  "booking.roomType": "Room type",
+  "booking.breakfastIncluded": "Include breakfast",
+  "booking.eventType": "Event type",
+  "booking.estimatedGuests": "Estimated guests",
+  "booking.cateringNeeded": "Catering needed",
+  "booking.roomSingle": "Single",
+  "booking.roomDouble": "Double",
+  "booking.roomSuite": "Suite",
+  "booking.roomDorm": "Dormitory",
+  "booking.eventWedding": "Wedding",
+  "booking.eventCorporate": "Corporate event",
+  "booking.eventBirthday": "Birthday party",
+  "booking.eventConference": "Conference",
+  "booking.eventOther": "Other",
   "booking.submit": "Submit Reservation",
   "booking.availabilityCalendar": "Availability",
   "booking.availabilityDesc": "See which dates are available for booking.",
@@ -781,6 +811,21 @@ const fi: TranslationKeys = {
   "booking.specialRequests": "Erityistoiveet",
   "booking.preferredTime": "Toivottu aika",
   "booking.closedDay": "Suljettu tänä päivänä.",
+  "booking.checkOutDate": "Lähtöpäivä",
+  "booking.roomType": "Huonetyyppi",
+  "booking.breakfastIncluded": "Sisällytä aamiainen",
+  "booking.eventType": "Tapahtumatyyppi",
+  "booking.estimatedGuests": "Arvioitu vierasmäärä",
+  "booking.cateringNeeded": "Catering-palvelu",
+  "booking.roomSingle": "Yhden hengen",
+  "booking.roomDouble": "Kahden hengen",
+  "booking.roomSuite": "Sviitti",
+  "booking.roomDorm": "Makuusali",
+  "booking.eventWedding": "Häät",
+  "booking.eventCorporate": "Yritystilaisuus",
+  "booking.eventBirthday": "Syntymäpäiväjuhlat",
+  "booking.eventConference": "Konferenssi",
+  "booking.eventOther": "Muu",
   "booking.submit": "Lähetä varaus",
   "booking.availabilityCalendar": "Saatavuus",
   "booking.availabilityDesc": "Katso mitkä päivät ovat vapaana varauksille.",
@@ -1108,6 +1153,21 @@ const sv: TranslationKeys = {
   "booking.specialRequests": "Speciella önskemål",
   "booking.preferredTime": "Önskad tid",
   "booking.closedDay": "Stängt denna dag.",
+  "booking.checkOutDate": "Utcheckningsdatum",
+  "booking.roomType": "Rumstyp",
+  "booking.breakfastIncluded": "Inkludera frukost",
+  "booking.eventType": "Evenemangstyp",
+  "booking.estimatedGuests": "Uppskattat antal gäster",
+  "booking.cateringNeeded": "Catering behövs",
+  "booking.roomSingle": "Enkelrum",
+  "booking.roomDouble": "Dubbelrum",
+  "booking.roomSuite": "Svit",
+  "booking.roomDorm": "Sovsal",
+  "booking.eventWedding": "Bröllop",
+  "booking.eventCorporate": "Företagsevent",
+  "booking.eventBirthday": "Födelsedagsfest",
+  "booking.eventConference": "Konferens",
+  "booking.eventOther": "Övrigt",
   "booking.submit": "Skicka bokning",
   "booking.availabilityCalendar": "Tillgänglighet",
   "booking.availabilityDesc": "Se vilka datum som är lediga för bokning.",
