@@ -40,10 +40,14 @@ const MarketingFooter = () => {
             </h4>
             <ul className="space-y-2.5">
               <li>
-                <span className="text-sm text-primary-foreground/40">{t("footer.aboutComingSoon")}</span>
+                <Link to="/about" className="text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors">
+                  {t("nav.about" as any)}
+                </Link>
               </li>
               <li>
-                <span className="text-sm text-primary-foreground/40">{t("footer.contactComingSoon")}</span>
+                <Link to="/support" className="text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors">
+                  Support
+                </Link>
               </li>
             </ul>
           </div>
@@ -54,10 +58,14 @@ const MarketingFooter = () => {
             </h4>
             <ul className="space-y-2.5">
               <li>
-                <span className="text-sm text-primary-foreground/40">{t("footer.privacyPolicy")}</span>
+                <Link to="/privacy" className="text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors">
+                  {t("footer.privacyPolicy")}
+                </Link>
               </li>
               <li>
-                <span className="text-sm text-primary-foreground/40">{t("footer.termsOfService")}</span>
+                <Link to="/accessibility" className="text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors">
+                  {t("nav.accessibility" as any)}
+                </Link>
               </li>
             </ul>
           </div>

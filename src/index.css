@@ -181,3 +181,25 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Accessibility widget styles */
+.high-contrast {
+  --foreground: 0 0% 0% !important;
+  --background: 0 0% 100% !important;
+  --muted-foreground: 0 0% 20% !important;
+}
+
+.dyslexia-font {
+  font-family: "OpenDyslexic", "Comic Sans MS", sans-serif !important;
+}
+
+.reduced-motion *, .reduced-motion *::before, .reduced-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
+
+.focus-highlight *:focus {
+  outline: 3px solid hsl(var(--accent)) !important;
+  outline-offset: 2px !important;
+}

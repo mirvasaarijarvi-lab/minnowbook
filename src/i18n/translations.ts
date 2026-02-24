@@ -390,6 +390,111 @@ type TranslationKeys = {
   "footer.privacyPolicy": string;
   "footer.termsOfService": string;
   "footer.allRightsReserved": string;
+
+  // Nav extras
+  "nav.about": string;
+  "nav.accessibility": string;
+
+  // About
+  "about.heroBadge": string;
+  "about.heroTitle": string;
+  "about.heroSubtitle": string;
+  "about.missionBadge": string;
+  "about.missionTitle": string;
+  "about.missionP1": string;
+  "about.missionP2": string;
+  "about.point1Title": string;
+  "about.point1Desc": string;
+  "about.point2Title": string;
+  "about.point2Desc": string;
+  "about.point3Title": string;
+  "about.point3Desc": string;
+  "about.valuesTitle": string;
+  "about.valuesSubtitle": string;
+  "about.valuePrecision": string;
+  "about.valuePrecisionDesc": string;
+  "about.valueInnovation": string;
+  "about.valueInnovationDesc": string;
+  "about.valueCollaboration": string;
+  "about.valueCollaborationDesc": string;
+  "about.valueTrust": string;
+  "about.valueTrustDesc": string;
+  "about.valuePassion": string;
+  "about.valuePassionDesc": string;
+  "about.valueGlobal": string;
+  "about.valueGlobalDesc": string;
+  "about.ctaTitle": string;
+  "about.ctaSubtitle": string;
+
+  // Privacy
+  "privacy.title": string;
+  "privacy.lastUpdated": string;
+  "privacy.s1Title": string;
+  "privacy.s1P1": string;
+  "privacy.s2Title": string;
+  "privacy.s2P1": string;
+  "privacy.s3Title": string;
+  "privacy.s3P1": string;
+  "privacy.s3Item1": string;
+  "privacy.s3Item2": string;
+  "privacy.s3Item3": string;
+  "privacy.s3Item4": string;
+  "privacy.s4Title": string;
+  "privacy.s4P1": string;
+  "privacy.s4Item1": string;
+  "privacy.s4Item2": string;
+  "privacy.s4Item3": string;
+  "privacy.s5Title": string;
+  "privacy.s5P1": string;
+  "privacy.s6Title": string;
+  "privacy.s6P1": string;
+  "privacy.s6Item1": string;
+  "privacy.s6Item2": string;
+  "privacy.s6Item3": string;
+  "privacy.s6Item4": string;
+  "privacy.s6Item5": string;
+  "privacy.s7Title": string;
+  "privacy.s7P1": string;
+  "privacy.s8Title": string;
+  "privacy.s8P1": string;
+
+  // Accessibility
+  "a11y.title": string;
+  "a11y.lastUpdated": string;
+  "a11y.s1Title": string;
+  "a11y.s1P1": string;
+  "a11y.s2Title": string;
+  "a11y.s2P1": string;
+  "a11y.s2Item1": string;
+  "a11y.s2Item2": string;
+  "a11y.s2Item3": string;
+  "a11y.s2Item4": string;
+  "a11y.s2Item5": string;
+  "a11y.s2Item6": string;
+  "a11y.s3Title": string;
+  "a11y.s3P1": string;
+  "a11y.s3Item1": string;
+  "a11y.s3Item2": string;
+  "a11y.s3Item3": string;
+  "a11y.s4Title": string;
+  "a11y.s4P1": string;
+  "a11y.s5Title": string;
+  "a11y.s5P1": string;
+  "a11y.widgetTitle": string;
+  "a11y.fontSize": string;
+  "a11y.highContrast": string;
+  "a11y.dyslexiaFont": string;
+  "a11y.reducedMotion": string;
+  "a11y.focusHighlight": string;
+  "a11y.resetAll": string;
+  "a11y.on": string;
+  "a11y.off": string;
+
+  // Cookie
+  "cookie.message": string;
+  "cookie.privacyPolicy": string;
+  "cookie.accept": string;
+  "cookie.reject": string;
 };
 
 export type TranslationKey = keyof TranslationKeys;
@@ -773,6 +878,106 @@ const en: TranslationKeys = {
   "footer.privacyPolicy": "Privacy Policy",
   "footer.termsOfService": "Terms of Service",
   "footer.allRightsReserved": "All rights reserved.",
+
+  "nav.about": "About",
+  "nav.accessibility": "Accessibility",
+
+  "about.heroBadge": "Our Story",
+  "about.heroTitle": "The reservation platform built with care",
+  "about.heroSubtitle": "We help hospitality businesses manage their bookings effortlessly — so they can focus on creating memorable guest experiences.",
+  "about.missionBadge": "Our Mission",
+  "about.missionTitle": "Making reservation management simple and elegant",
+  "about.missionP1": "Small hospitality businesses deserve the same powerful tools that large chains use. We started MinnowBook to make that happen.",
+  "about.missionP2": "Our platform brings reservations, branding, team management, and reporting into one unified workspace — eliminating scattered notebooks and missed bookings.",
+  "about.point1Title": "Speed without compromise",
+  "about.point1Desc": "Get your branded booking page live in minutes, not weeks.",
+  "about.point2Title": "Data-driven insights",
+  "about.point2Desc": "Track reservation trends, occupancy, and revenue at a glance.",
+  "about.point3Title": "Built for teams",
+  "about.point3Desc": "Role-based access and multi-staff support built in.",
+  "about.valuesTitle": "Our core values",
+  "about.valuesSubtitle": "These principles guide every decision we make, from product design to customer support.",
+  "about.valuePrecision": "Precision",
+  "about.valuePrecisionDesc": "Every detail matters — from pixel-perfect booking pages to accurate availability calendars.",
+  "about.valueInnovation": "Innovation",
+  "about.valueInnovationDesc": "We continuously improve our platform with the latest technology and user feedback.",
+  "about.valueCollaboration": "Collaboration",
+  "about.valueCollaborationDesc": "We work closely with hospitality businesses to understand their real needs.",
+  "about.valueTrust": "Trust",
+  "about.valueTrustDesc": "Your data is secure. We follow GDPR standards and best security practices.",
+  "about.valuePassion": "Passion",
+  "about.valuePassionDesc": "We're passionate about helping small businesses succeed in hospitality.",
+  "about.valueGlobal": "Accessibility",
+  "about.valueGlobalDesc": "Our platform is multilingual and designed to be accessible to everyone.",
+  "about.ctaTitle": "Ready to simplify your reservations?",
+  "about.ctaSubtitle": "Join hospitality businesses already using MinnowBook to streamline their bookings.",
+
+  "privacy.title": "Privacy Policy",
+  "privacy.lastUpdated": "Last updated:",
+  "privacy.s1Title": "1. Introduction",
+  "privacy.s1P1": "This privacy policy explains how MinnowBook collects, uses, stores, and protects your personal data when you use our reservation management platform. We are committed to protecting your privacy in accordance with the EU General Data Protection Regulation (GDPR).",
+  "privacy.s2Title": "2. Data Controller",
+  "privacy.s2P1": "MinnowBook is the data controller for the personal data processed through this platform. For data protection inquiries, please contact us through the Support page.",
+  "privacy.s3Title": "3. Data We Collect",
+  "privacy.s3P1": "We collect the following categories of personal data:",
+  "privacy.s3Item1": "Account information: name, email address, password (hashed)",
+  "privacy.s3Item2": "Business information: business name, address, phone number",
+  "privacy.s3Item3": "Reservation data: guest names, emails, phone numbers, booking details",
+  "privacy.s3Item4": "Usage data: pages visited, features used, browser type",
+  "privacy.s4Title": "4. Purpose of Processing",
+  "privacy.s4P1": "We process your data for the following purposes:",
+  "privacy.s4Item1": "To provide and maintain our reservation management service",
+  "privacy.s4Item2": "To send booking confirmations, reminders, and cancellation notices",
+  "privacy.s4Item3": "To improve our platform and develop new features",
+  "privacy.s5Title": "5. Data Retention",
+  "privacy.s5P1": "We retain your personal data for as long as your account is active or as needed to provide our services. Reservation data is retained for the duration of your subscription plus 12 months. You can request deletion of your data at any time.",
+  "privacy.s6Title": "6. Your Rights",
+  "privacy.s6P1": "Under GDPR, you have the following rights regarding your personal data:",
+  "privacy.s6Item1": "Right of access — request a copy of your personal data",
+  "privacy.s6Item2": "Right to rectification — correct inaccurate data",
+  "privacy.s6Item3": "Right to erasure — request deletion of your data",
+  "privacy.s6Item4": "Right to restrict processing",
+  "privacy.s6Item5": "Right to data portability — receive your data in a structured format",
+  "privacy.s7Title": "7. Cookies",
+  "privacy.s7P1": "We use essential cookies required for the platform to function. Analytics cookies are only loaded after you give explicit consent via our cookie banner. You can change your cookie preferences at any time.",
+  "privacy.s8Title": "8. Contact",
+  "privacy.s8P1": "For any questions about this privacy policy or to exercise your data protection rights, please contact us through the Support page.",
+
+  "a11y.title": "Accessibility Statement",
+  "a11y.lastUpdated": "Last updated:",
+  "a11y.s1Title": "1. Our Commitment",
+  "a11y.s1P1": "MinnowBook is committed to ensuring digital accessibility for people of all abilities. We continually improve the user experience for everyone and apply relevant accessibility standards.",
+  "a11y.s2Title": "2. Accessibility Features",
+  "a11y.s2P1": "Our platform includes the following accessibility features:",
+  "a11y.s2Item1": "Adjustable font size (80%–150%)",
+  "a11y.s2Item2": "High contrast mode for improved readability",
+  "a11y.s2Item3": "Dyslexia-friendly font option",
+  "a11y.s2Item4": "Reduced motion mode to minimize animations",
+  "a11y.s2Item5": "Enhanced focus indicators for keyboard navigation",
+  "a11y.s2Item6": "Keyboard shortcut (Alt+A) to open the accessibility widget",
+  "a11y.s3Title": "3. Standards",
+  "a11y.s3P1": "We aim to conform to the Web Content Accessibility Guidelines (WCAG) 2.1 Level AA. Key areas include:",
+  "a11y.s3Item1": "Semantic HTML for screen reader compatibility",
+  "a11y.s3Item2": "Sufficient color contrast ratios",
+  "a11y.s3Item3": "Keyboard-navigable interface throughout",
+  "a11y.s4Title": "4. Known Limitations",
+  "a11y.s4P1": "While we strive for full accessibility, some third-party components or dynamically loaded content may not yet meet all WCAG 2.1 AA criteria. We are actively working to address these.",
+  "a11y.s5Title": "5. Feedback",
+  "a11y.s5P1": "We welcome your feedback on the accessibility of MinnowBook. Please contact us through the Support page if you encounter any barriers or have suggestions for improvement.",
+  "a11y.widgetTitle": "Accessibility",
+  "a11y.fontSize": "Font size",
+  "a11y.highContrast": "High contrast",
+  "a11y.dyslexiaFont": "Dyslexia font",
+  "a11y.reducedMotion": "Reduced motion",
+  "a11y.focusHighlight": "Focus highlight",
+  "a11y.resetAll": "Reset all",
+  "a11y.on": "On",
+  "a11y.off": "Off",
+
+  "cookie.message": "We use cookies to improve your experience.",
+  "cookie.privacyPolicy": "Privacy Policy",
+  "cookie.accept": "Accept",
+  "cookie.reject": "Reject",
 };
 
 const fi: TranslationKeys = {
@@ -1153,6 +1358,106 @@ const fi: TranslationKeys = {
   "footer.privacyPolicy": "Tietosuojakäytäntö",
   "footer.termsOfService": "Käyttöehdot",
   "footer.allRightsReserved": "Kaikki oikeudet pidätetään.",
+
+  "nav.about": "Tietoa meistä",
+  "nav.accessibility": "Saavutettavuus",
+
+  "about.heroBadge": "Tarinamme",
+  "about.heroTitle": "Huolella rakennettu varausjärjestelmä",
+  "about.heroSubtitle": "Autamme ravintola-alan yrityksiä hallitsemaan varauksiaan vaivattomasti — jotta he voivat keskittyä luomaan unohtumattomia vieraskokemuksia.",
+  "about.missionBadge": "Missiomme",
+  "about.missionTitle": "Varausten hallinta yksinkertaiseksi ja tyylikkääksi",
+  "about.missionP1": "Pienet ravintola-alan yritykset ansaitsevat samat tehokkaat työkalut kuin suuret ketjut. Siksi loimme MinnowBookin.",
+  "about.missionP2": "Alustamme yhdistää varaukset, brändäyksen, tiimin hallinnan ja raportoinnin yhteen työkaluun.",
+  "about.point1Title": "Nopeutta ilman kompromisseja",
+  "about.point1Desc": "Saat brändätyn varaussivun käyttöön minuuteissa.",
+  "about.point2Title": "Tietoon perustuvat päätökset",
+  "about.point2Desc": "Seuraa varaustrendejä, käyttöastetta ja liikevaihtoa.",
+  "about.point3Title": "Rakennettu tiimeille",
+  "about.point3Desc": "Roolipohjainen pääsy ja monihenkilöstötuki sisäänrakennettuna.",
+  "about.valuesTitle": "Perusarvomme",
+  "about.valuesSubtitle": "Nämä periaatteet ohjaavat jokaista päätöstämme.",
+  "about.valuePrecision": "Tarkkuus",
+  "about.valuePrecisionDesc": "Jokainen yksityiskohta on tärkeä — varaussivuista saatavuuskalentereihin.",
+  "about.valueInnovation": "Innovaatio",
+  "about.valueInnovationDesc": "Kehitämme alustaamme jatkuvasti uusimman teknologian avulla.",
+  "about.valueCollaboration": "Yhteistyö",
+  "about.valueCollaborationDesc": "Työskentelemme tiiviisti yritysten kanssa ymmärtääksemme todelliset tarpeet.",
+  "about.valueTrust": "Luottamus",
+  "about.valueTrustDesc": "Tietosi ovat turvassa. Noudatamme GDPR-standardeja.",
+  "about.valuePassion": "Intohimo",
+  "about.valuePassionDesc": "Meillä on intohimo auttaa pieniä yrityksiä menestymään.",
+  "about.valueGlobal": "Saavutettavuus",
+  "about.valueGlobalDesc": "Alustamme on monikielinen ja suunniteltu kaikille saavutettavaksi.",
+  "about.ctaTitle": "Valmis yksinkertaistamaan varauksiasi?",
+  "about.ctaSubtitle": "Liity yrityksiin, jotka jo käyttävät MinnowBookia varausten hallintaan.",
+
+  "privacy.title": "Tietosuojakäytäntö",
+  "privacy.lastUpdated": "Päivitetty viimeksi:",
+  "privacy.s1Title": "1. Johdanto",
+  "privacy.s1P1": "Tämä tietosuojakäytäntö selittää, miten MinnowBook kerää, käyttää ja suojaa henkilötietojasi. Noudatamme EU:n yleistä tietosuoja-asetusta (GDPR).",
+  "privacy.s2Title": "2. Rekisterinpitäjä",
+  "privacy.s2P1": "MinnowBook on henkilötietojen rekisterinpitäjä. Tietosuojakyselyissä ota yhteyttä tukisivumme kautta.",
+  "privacy.s3Title": "3. Kerättävät tiedot",
+  "privacy.s3P1": "Keräämme seuraavat henkilötietoluokat:",
+  "privacy.s3Item1": "Tilitiedot: nimi, sähköposti, salasana (tiivistetty)",
+  "privacy.s3Item2": "Yritystiedot: yrityksen nimi, osoite, puhelinnumero",
+  "privacy.s3Item3": "Varaustiedot: vieraiden nimet, sähköpostit, puhelinnumerot, varaustiedot",
+  "privacy.s3Item4": "Käyttötiedot: vieraillut sivut, käytetyt ominaisuudet, selaintyyppi",
+  "privacy.s4Title": "4. Käsittelyn tarkoitus",
+  "privacy.s4P1": "Käsittelemme tietojasi seuraaviin tarkoituksiin:",
+  "privacy.s4Item1": "Varausten hallintapalvelun tarjoaminen ja ylläpitäminen",
+  "privacy.s4Item2": "Varausvahvistusten, muistutusten ja peruutusilmoitusten lähettäminen",
+  "privacy.s4Item3": "Alustan parantaminen ja uusien ominaisuuksien kehittäminen",
+  "privacy.s5Title": "5. Tietojen säilytys",
+  "privacy.s5P1": "Säilytämme henkilötietojasi niin kauan kuin tilisi on aktiivinen. Varaustiedot säilytetään tilauksen keston ja 12 kuukauden ajan. Voit pyytää tietojesi poistamista milloin tahansa.",
+  "privacy.s6Title": "6. Oikeutesi",
+  "privacy.s6P1": "GDPR:n mukaisesti sinulla on seuraavat oikeudet:",
+  "privacy.s6Item1": "Oikeus saada pääsy tietoihisi",
+  "privacy.s6Item2": "Oikeus oikaista virheellisiä tietoja",
+  "privacy.s6Item3": "Oikeus tietojen poistamiseen",
+  "privacy.s6Item4": "Oikeus rajoittaa käsittelyä",
+  "privacy.s6Item5": "Oikeus siirtää tiedot toiseen palveluun",
+  "privacy.s7Title": "7. Evästeet",
+  "privacy.s7P1": "Käytämme välttämättömiä evästeitä alustan toiminnan turvaamiseksi. Analytiikkaevästeet ladataan vasta antamallasi suostumuksella.",
+  "privacy.s8Title": "8. Yhteydenotto",
+  "privacy.s8P1": "Tietosuojakysymyksissä ota yhteyttä tukisivumme kautta.",
+
+  "a11y.title": "Saavutettavuusseloste",
+  "a11y.lastUpdated": "Päivitetty viimeksi:",
+  "a11y.s1Title": "1. Sitoumuksemme",
+  "a11y.s1P1": "MinnowBook on sitoutunut varmistamaan digitaalisen saavutettavuuden kaikille. Parannamme jatkuvasti käyttökokemusta ja noudatamme saavutettavuusstandardeja.",
+  "a11y.s2Title": "2. Saavutettavuusominaisuudet",
+  "a11y.s2P1": "Alustamme sisältää seuraavat saavutettavuusominaisuudet:",
+  "a11y.s2Item1": "Säädettävä fonttikoko (80%–150%)",
+  "a11y.s2Item2": "Korkean kontrastin tila",
+  "a11y.s2Item3": "Lukihäiriöystävällinen fontti",
+  "a11y.s2Item4": "Vähennetyn liikkeen tila",
+  "a11y.s2Item5": "Korostetut kohdistustilat näppäimistönavigointiin",
+  "a11y.s2Item6": "Pikanäppäin (Alt+A) saavutettavuuswidgetin avaamiseen",
+  "a11y.s3Title": "3. Standardit",
+  "a11y.s3P1": "Pyrimme noudattamaan WCAG 2.1 AA -ohjeita. Keskeisiä alueita:",
+  "a11y.s3Item1": "Semanttinen HTML ruudunlukijayhteensopivuuteen",
+  "a11y.s3Item2": "Riittävät värikontrastisuhteet",
+  "a11y.s3Item3": "Näppäimistöllä navigoitava käyttöliittymä",
+  "a11y.s4Title": "4. Tunnetut rajoitukset",
+  "a11y.s4P1": "Vaikka pyrimme täyseen saavutettavuuteen, jotkin kolmannen osapuolen komponentit eivät välttämättä täytä kaikkia WCAG 2.1 AA -kriteerejä.",
+  "a11y.s5Title": "5. Palaute",
+  "a11y.s5P1": "Otamme mielellämme vastaan palautetta saavutettavuudesta. Ota yhteyttä tukisivumme kautta.",
+  "a11y.widgetTitle": "Saavutettavuus",
+  "a11y.fontSize": "Fonttikoko",
+  "a11y.highContrast": "Korkea kontrasti",
+  "a11y.dyslexiaFont": "Lukihäiriöfontti",
+  "a11y.reducedMotion": "Vähennetty liike",
+  "a11y.focusHighlight": "Kohdistus",
+  "a11y.resetAll": "Palauta kaikki",
+  "a11y.on": "Päällä",
+  "a11y.off": "Pois",
+
+  "cookie.message": "Käytämme evästeitä parantaaksemme kokemustasi.",
+  "cookie.privacyPolicy": "Tietosuojakäytäntö",
+  "cookie.accept": "Hyväksy",
+  "cookie.reject": "Hylkää",
 };
 
 const sv: TranslationKeys = {
@@ -1533,6 +1838,106 @@ const sv: TranslationKeys = {
   "footer.privacyPolicy": "Integritetspolicy",
   "footer.termsOfService": "Användarvillkor",
   "footer.allRightsReserved": "Alla rättigheter förbehållna.",
+
+  "nav.about": "Om oss",
+  "nav.accessibility": "Tillgänglighet",
+
+  "about.heroBadge": "Vår berättelse",
+  "about.heroTitle": "Bokningsplattformen byggd med omsorg",
+  "about.heroSubtitle": "Vi hjälper hotell- och restaurangföretag att hantera sina bokningar enkelt — så de kan fokusera på att skapa minnesvärda gästupplevelser.",
+  "about.missionBadge": "Vårt uppdrag",
+  "about.missionTitle": "Göra bokningshantering enkel och elegant",
+  "about.missionP1": "Små hotell- och restaurangföretag förtjänar samma kraftfulla verktyg som stora kedjor. Därför skapade vi MinnowBook.",
+  "about.missionP2": "Vår plattform samlar bokningar, varumärkeshantering, teamhantering och rapportering på ett ställe.",
+  "about.point1Title": "Snabbhet utan kompromisser",
+  "about.point1Desc": "Få din varumärkta bokningssida live på minuter.",
+  "about.point2Title": "Datadrivna insikter",
+  "about.point2Desc": "Följ bokningstrender, beläggning och intäkter.",
+  "about.point3Title": "Byggt för team",
+  "about.point3Desc": "Rollbaserad åtkomst och stöd för flera medarbetare.",
+  "about.valuesTitle": "Våra kärnvärden",
+  "about.valuesSubtitle": "Dessa principer vägleder varje beslut vi tar.",
+  "about.valuePrecision": "Precision",
+  "about.valuePrecisionDesc": "Varje detalj spelar roll — från bokningssidor till tillgänglighetskalendrar.",
+  "about.valueInnovation": "Innovation",
+  "about.valueInnovationDesc": "Vi förbättrar ständigt vår plattform med den senaste tekniken.",
+  "about.valueCollaboration": "Samarbete",
+  "about.valueCollaborationDesc": "Vi arbetar nära företag för att förstå deras verkliga behov.",
+  "about.valueTrust": "Förtroende",
+  "about.valueTrustDesc": "Din data är säker. Vi följer GDPR-standarder.",
+  "about.valuePassion": "Passion",
+  "about.valuePassionDesc": "Vi brinner för att hjälpa småföretag att lyckas.",
+  "about.valueGlobal": "Tillgänglighet",
+  "about.valueGlobalDesc": "Vår plattform är flerspråkig och designad för att vara tillgänglig för alla.",
+  "about.ctaTitle": "Redo att förenkla dina bokningar?",
+  "about.ctaSubtitle": "Gå med bland företag som redan använder MinnowBook.",
+
+  "privacy.title": "Integritetspolicy",
+  "privacy.lastUpdated": "Senast uppdaterad:",
+  "privacy.s1Title": "1. Introduktion",
+  "privacy.s1P1": "Denna integritetspolicy förklarar hur MinnowBook samlar in, använder och skyddar dina personuppgifter. Vi följer EU:s allmänna dataskyddsförordning (GDPR).",
+  "privacy.s2Title": "2. Personuppgiftsansvarig",
+  "privacy.s2P1": "MinnowBook är personuppgiftsansvarig. Kontakta oss via supportsidan för dataskyddsfrågor.",
+  "privacy.s3Title": "3. Data vi samlar in",
+  "privacy.s3P1": "Vi samlar in följande kategorier av personuppgifter:",
+  "privacy.s3Item1": "Kontoinformation: namn, e-postadress, lösenord (hashad)",
+  "privacy.s3Item2": "Företagsinformation: företagsnamn, adress, telefonnummer",
+  "privacy.s3Item3": "Bokningsdata: gästnamn, e-post, telefonnummer, bokningsdetaljer",
+  "privacy.s3Item4": "Användningsdata: besökta sidor, använda funktioner, webbläsartyp",
+  "privacy.s4Title": "4. Syfte med behandling",
+  "privacy.s4P1": "Vi behandlar dina uppgifter för följande ändamål:",
+  "privacy.s4Item1": "Att tillhandahålla och underhålla vår bokningshanteringstjänst",
+  "privacy.s4Item2": "Att skicka bokningsbekräftelser, påminnelser och avbokningsmeddelanden",
+  "privacy.s4Item3": "Att förbättra vår plattform och utveckla nya funktioner",
+  "privacy.s5Title": "5. Datalagring",
+  "privacy.s5P1": "Vi behåller dina personuppgifter så länge ditt konto är aktivt. Bokningsdata behålls under prenumerationsperioden plus 12 månader.",
+  "privacy.s6Title": "6. Dina rättigheter",
+  "privacy.s6P1": "Enligt GDPR har du följande rättigheter:",
+  "privacy.s6Item1": "Rätt till tillgång — begär en kopia av dina personuppgifter",
+  "privacy.s6Item2": "Rätt till rättelse — korrigera felaktiga uppgifter",
+  "privacy.s6Item3": "Rätt till radering — begär radering av dina uppgifter",
+  "privacy.s6Item4": "Rätt att begränsa behandling",
+  "privacy.s6Item5": "Rätt till dataportabilitet",
+  "privacy.s7Title": "7. Cookies",
+  "privacy.s7P1": "Vi använder nödvändiga cookies för att plattformen ska fungera. Analyticscookies laddas först efter ditt uttryckliga samtycke.",
+  "privacy.s8Title": "8. Kontakt",
+  "privacy.s8P1": "Kontakta oss via supportsidan för frågor om denna integritetspolicy.",
+
+  "a11y.title": "Tillgänglighetsredogörelse",
+  "a11y.lastUpdated": "Senast uppdaterad:",
+  "a11y.s1Title": "1. Vårt åtagande",
+  "a11y.s1P1": "MinnowBook är engagerat i att säkerställa digital tillgänglighet för alla. Vi förbättrar ständigt användarupplevelsen och tillämpar relevanta tillgänglighetsstandarder.",
+  "a11y.s2Title": "2. Tillgänglighetsfunktioner",
+  "a11y.s2P1": "Vår plattform inkluderar följande tillgänglighetsfunktioner:",
+  "a11y.s2Item1": "Justerbar teckenstorlek (80%–150%)",
+  "a11y.s2Item2": "Högkontrastläge för förbättrad läsbarhet",
+  "a11y.s2Item3": "Dyslexivänligt teckensnitt",
+  "a11y.s2Item4": "Reducerat rörelseläge",
+  "a11y.s2Item5": "Förstärkta fokusindikatorer för tangentbordsnavigering",
+  "a11y.s2Item6": "Kortkommando (Alt+A) för att öppna tillgänglighetswidgeten",
+  "a11y.s3Title": "3. Standarder",
+  "a11y.s3P1": "Vi strävar efter att uppfylla WCAG 2.1 nivå AA. Viktiga områden:",
+  "a11y.s3Item1": "Semantisk HTML för skärmläsarkompatibilitet",
+  "a11y.s3Item2": "Tillräckliga färgkontrastförhållanden",
+  "a11y.s3Item3": "Tangentbordsnavigerbart gränssnitt",
+  "a11y.s4Title": "4. Kända begränsningar",
+  "a11y.s4P1": "Vissa tredjepartskomponenter uppfyller kanske inte alla WCAG 2.1 AA-kriterier. Vi arbetar aktivt med att åtgärda dessa.",
+  "a11y.s5Title": "5. Feedback",
+  "a11y.s5P1": "Vi välkomnar din feedback om tillgängligheten. Kontakta oss via supportsidan.",
+  "a11y.widgetTitle": "Tillgänglighet",
+  "a11y.fontSize": "Teckenstorlek",
+  "a11y.highContrast": "Hög kontrast",
+  "a11y.dyslexiaFont": "Dyslexiteckensnitt",
+  "a11y.reducedMotion": "Reducerad rörelse",
+  "a11y.focusHighlight": "Fokusmarkering",
+  "a11y.resetAll": "Återställ alla",
+  "a11y.on": "På",
+  "a11y.off": "Av",
+
+  "cookie.message": "Vi använder cookies för att förbättra din upplevelse.",
+  "cookie.privacyPolicy": "Integritetspolicy",
+  "cookie.accept": "Acceptera",
+  "cookie.reject": "Avvisa",
 };
 
 export const translations: Record<Language, TranslationKeys> = { en, fi, sv };
