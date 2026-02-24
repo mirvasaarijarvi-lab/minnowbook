@@ -10,8 +10,8 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash2, BedDouble, UtensilsCrossed, Building2 } from "lucide-react";
-import { useState } from "react";
+import { Plus, Pencil, Trash2, BedDouble, UtensilsCrossed, Building2, Upload, X, Loader2 } from "lucide-react";
+import { useState, useRef } from "react";
 import { useT } from "@/contexts/I18nContext";
 
 const typeIcons: Record<string, React.ElementType> = {
@@ -21,14 +21,19 @@ const typeIcons: Record<string, React.ElementType> = {
   venue: Building2,
 };
 
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
+const ALLOWED_IMAGE_TYPES = ["image/png", "image/jpeg", "image/webp"];
+
 const ResourceManagement = () => {
   const { tenantId, isAdmin } = useTenant();
   const queryClient = useQueryClient();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const imageInputRef = useRef<HTMLInputElement>(null);
   const t = useT();
   const [form, setForm] = useState({
-    name: "", resource_type: "restaurant", capacity: "", price_per_night: "", description: "",
+    name: "", resource_type: "restaurant", capacity: "", price_per_night: "", description: "", image_url: "",
   });
 
   const { data: resources, isLoading } = useQuery({
@@ -42,14 +47,54 @@ const ResourceManagement = () => {
     enabled: !!tenantId,
   });
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !tenantId) return;
+
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      toast({ title: "Error", description: "Use PNG, JPG or WebP.", variant: "destructive" });
+      return;
+    }
+    if (file.size > MAX_IMAGE_SIZE) {
+      toast({ title: "Error", description: "Max 5 MB.", variant: "destructive" });
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop();
+      const fileName = `resource-${Date.now()}.${ext}`;
+      const filePath = `${tenantId}/resources/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("tenant-assets")
+        .upload(filePath, file, { upsert: true });
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage
+        .from("tenant-assets")
+        .getPublicUrl(filePath);
+
+      const publicUrl = `${urlData.publicUrl}?t=${Date.now()}`;
+      setForm((prev) => ({ ...prev, image_url: publicUrl }));
+      toast({ title: t("dashboard.imageUploaded") });
+    } catch (err) {
+      toast({ title: t("dashboard.imageUploadError"), variant: "destructive" });
+    } finally {
+      setUploading(false);
+      if (imageInputRef.current) imageInputRef.current.value = "";
+    }
+  };
+
   const upsertMutation = useMutation({
     mutationFn: async () => {
       if (!tenantId) throw new Error("No tenant");
-      const payload = {
+      const payload: any = {
         tenant_id: tenantId, name: form.name, resource_type: form.resource_type,
         capacity: form.capacity ? parseInt(form.capacity) : null,
         price_per_night: form.price_per_night ? parseFloat(form.price_per_night) : null,
         description: form.description || null,
+        image_url: form.image_url || null,
       };
       if (editingId) {
         const { error } = await supabase.from("resources").update(payload).eq("id", editingId);
@@ -91,7 +136,7 @@ const ResourceManagement = () => {
 
   const resetForm = () => {
     setEditingId(null);
-    setForm({ name: "", resource_type: "restaurant", capacity: "", price_per_night: "", description: "" });
+    setForm({ name: "", resource_type: "restaurant", capacity: "", price_per_night: "", description: "", image_url: "" });
   };
 
   const openEdit = (r: any) => {
@@ -99,7 +144,7 @@ const ResourceManagement = () => {
     setForm({
       name: r.name, resource_type: r.resource_type,
       capacity: r.capacity?.toString() ?? "", price_per_night: r.price_per_night?.toString() ?? "",
-      description: r.description ?? "",
+      description: r.description ?? "", image_url: r.image_url ?? "",
     });
     setDialogOpen(true);
   };
@@ -118,6 +163,46 @@ const ResourceManagement = () => {
                 <DialogTitle className="font-serif">{editingId ? t("dashboard.editResource") : t("dashboard.addResource")}</DialogTitle>
               </DialogHeader>
               <div className="space-y-4 pt-2">
+                {/* Image upload */}
+                <div className="space-y-2">
+                  <Label>{t("dashboard.uploadImage")}</Label>
+                  {form.image_url ? (
+                    <div className="relative">
+                      <img src={form.image_url} alt="" className="w-full h-40 rounded-lg object-cover border border-border" />
+                      <button
+                        type="button"
+                        onClick={() => setForm((prev) => ({ ...prev, image_url: "" }))}
+                        className="absolute top-2 right-2 h-6 w-6 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => imageInputRef.current?.click()}
+                      disabled={uploading}
+                      className="w-full h-32 rounded-lg border-2 border-dashed border-border flex flex-col items-center justify-center gap-2 bg-secondary/30 hover:bg-secondary/50 transition-colors cursor-pointer"
+                    >
+                      {uploading ? (
+                        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                      ) : (
+                        <>
+                          <Upload className="h-6 w-6 text-muted-foreground" />
+                          <span className="text-sm text-muted-foreground">PNG, JPG, WebP · max 5 MB</span>
+                        </>
+                      )}
+                    </button>
+                  )}
+                  <input
+                    ref={imageInputRef}
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp"
+                    className="hidden"
+                    onChange={handleImageUpload}
+                  />
+                </div>
+
                 <div>
                   <Label>{t("common.name")}</Label>
                   <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g. Main Dining Room" />
@@ -165,10 +250,15 @@ const ResourceManagement = () => {
         <Card><CardContent className="p-8 text-center text-muted-foreground">{t("dashboard.noResources")}</CardContent></Card>
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {resources.map((r) => {
+          {resources.map((r: any) => {
             const Icon = typeIcons[r.resource_type] ?? Building2;
             return (
-              <Card key={r.id} className={`transition-shadow hover:shadow-hover ${!r.is_active ? "opacity-60" : ""}`}>
+              <Card key={r.id} className={`transition-shadow hover:shadow-hover overflow-hidden ${!r.is_active ? "opacity-60" : ""}`}>
+                {r.image_url && (
+                  <div className="h-36 overflow-hidden">
+                    <img src={r.image_url} alt={r.name} className="w-full h-full object-cover" />
+                  </div>
+                )}
                 <CardHeader className="pb-2">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-2">

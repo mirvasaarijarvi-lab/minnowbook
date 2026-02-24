@@ -517,34 +517,39 @@ const PublicBooking = () => {
               </CardHeader>
               <CardContent>
                 <div className="grid gap-3 sm:grid-cols-2">
-                  {resources.map((res) => {
+                  {resources.map((res: any) => {
                     const isSelected = form.resource_id === res.id;
                     return (
                       <button
                         key={res.id}
                         type="button"
                         onClick={() => updateField("resource_id", isSelected ? "" : res.id)}
-                        className="text-left p-4 rounded-lg border-2 transition-all"
+                        className="text-left rounded-lg border-2 transition-all overflow-hidden"
                         style={{
                           borderColor: isSelected ? accentColor : "#e5e5e5",
                           backgroundColor: isSelected ? `${accentColor}15` : "transparent",
                         }}
                       >
-                        <p className="font-medium" style={{ color: primaryColor }}>{res.name}</p>
-                        {res.description && (
-                          <p className="text-xs mt-1 text-muted-foreground">{res.description}</p>
+                        {res.image_url && (
+                          <img src={res.image_url} alt={res.name} className="w-full h-28 object-cover" />
                         )}
-                        <div className="flex gap-2 mt-2">
-                          {res.capacity && (
-                            <Badge variant="outline" className="text-xs">
-                              {res.capacity} {t("common.guests")}
-                            </Badge>
+                        <div className="p-4">
+                          <p className="font-medium" style={{ color: primaryColor }}>{res.name}</p>
+                          {res.description && (
+                            <p className="text-xs mt-1 text-muted-foreground">{res.description}</p>
                           )}
-                          {res.price_per_night != null && (
-                            <Badge variant="outline" className="text-xs">
-                              €{Number(res.price_per_night).toFixed(0)}{t("dashboard.perNight")}
-                            </Badge>
-                          )}
+                          <div className="flex gap-2 mt-2">
+                            {res.capacity && (
+                              <Badge variant="outline" className="text-xs">
+                                {res.capacity} {t("common.guests")}
+                              </Badge>
+                            )}
+                            {res.price_per_night != null && (
+                              <Badge variant="outline" className="text-xs">
+                                €{Number(res.price_per_night).toFixed(0)}{t("dashboard.perNight")}
+                              </Badge>
+                            )}
+                          </div>
                         </div>
                       </button>
                     );

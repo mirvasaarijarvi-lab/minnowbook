@@ -264,6 +264,9 @@ type TranslationKeys = {
   "dashboard.resourceCreated": string;
   "dashboard.resourceUpdated": string;
   "dashboard.resourceDeleted": string;
+  "dashboard.uploadImage": string;
+  "dashboard.imageUploaded": string;
+  "dashboard.imageUploadError": string;
   "dashboard.restaurant": string;
   "dashboard.venue": string;
   "dashboard.guesthouse": string;
@@ -578,6 +581,9 @@ const en: TranslationKeys = {
   "dashboard.resourceCreated": "Resource created",
   "dashboard.resourceUpdated": "Resource updated",
   "dashboard.resourceDeleted": "Resource deleted",
+  "dashboard.uploadImage": "Upload image",
+  "dashboard.imageUploaded": "Image uploaded",
+  "dashboard.imageUploadError": "Failed to upload image",
   "dashboard.restaurant": "Restaurant",
   "dashboard.venue": "Venue",
   "dashboard.guesthouse": "Hotel / Gasthaus",
@@ -888,6 +894,9 @@ const fi: TranslationKeys = {
   "dashboard.resourceCreated": "Resurssi luotu",
   "dashboard.resourceUpdated": "Resurssi päivitetty",
   "dashboard.resourceDeleted": "Resurssi poistettu",
+  "dashboard.uploadImage": "Lataa kuva",
+  "dashboard.imageUploaded": "Kuva ladattu",
+  "dashboard.imageUploadError": "Kuvan lataus epäonnistui",
   "dashboard.restaurant": "Ravintola",
   "dashboard.venue": "Tila",
   "dashboard.guesthouse": "Hotelli / Gasthaus",
@@ -1198,6 +1207,9 @@ const sv: TranslationKeys = {
   "dashboard.resourceCreated": "Resurs skapad",
   "dashboard.resourceUpdated": "Resurs uppdaterad",
   "dashboard.resourceDeleted": "Resurs raderad",
+  "dashboard.uploadImage": "Ladda upp bild",
+  "dashboard.imageUploaded": "Bild uppladdad",
+  "dashboard.imageUploadError": "Kunde inte ladda upp bild",
   "dashboard.restaurant": "Restaurang",
   "dashboard.venue": "Lokal",
   "dashboard.guesthouse": "Hotell / Gasthaus",
