@@ -1,0 +1,1 @@
+UPDATE public.tenants SET allowed_reservation_types = ARRAY['restaurant','venue','guesthouse','hotel'] WHERE id = '9ac05fbf-0834-44fd-a52a-d030b7074a30'
