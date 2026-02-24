@@ -706,6 +706,17 @@ const PublicBooking = () => {
                       min={selectedDate ? format(new Date(selectedDate.getTime() + 86400000), "yyyy-MM-dd") : ""}
                       onChange={(e) => updateField("check_out_date", e.target.value)}
                     />
+                    {(() => {
+                      if (!form.check_out_date || !selectedDate) return null;
+                      const checkOut = new Date(form.check_out_date + "T00:00:00");
+                      const nights = Math.max(0, Math.round((checkOut.getTime() - selectedDate.getTime()) / 86400000));
+                      if (nights <= 0) return null;
+                      return (
+                        <p className="text-xs text-muted-foreground">
+                          {nights} {nights === 1 ? t("booking.night" as any) : t("booking.nights" as any)}
+                        </p>
+                      );
+                    })()}
                   </div>
                   <div className="space-y-2">
                     <Label>{t("booking.roomType" as any)}</Label>
