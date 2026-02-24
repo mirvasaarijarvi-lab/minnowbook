@@ -265,20 +265,27 @@ const ResourceManagement = () => {
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="grid grid-cols-3 gap-3">
-                  <div>
-                    <Label>{t("dashboard.capacity")}</Label>
-                    <Input type="number" value={form.capacity} onChange={(e) => setForm({ ...form, capacity: e.target.value })} placeholder="e.g. 40" />
-                  </div>
-                  <div>
-                    <Label>{t("common.price")} (€{t("dashboard.perNight")})</Label>
-                    <Input type="number" step="0.01" value={form.price_per_night} onChange={(e) => setForm({ ...form, price_per_night: e.target.value })} placeholder="e.g. 120" />
-                  </div>
-                  <div>
-                    <Label>{t("booking.breakfastIncluded" as any)} (€)</Label>
-                    <Input type="number" step="0.01" value={form.breakfast_price_per_person} onChange={(e) => setForm({ ...form, breakfast_price_per_person: e.target.value })} placeholder="e.g. 15" />
-                  </div>
-                </div>
+                {(() => {
+                  const isAccom = form.resource_type === "hotel" || form.resource_type === "guesthouse";
+                  return (
+                    <div className={`grid gap-3 ${isAccom ? "grid-cols-3" : "grid-cols-2"}`}>
+                      <div>
+                        <Label>{t("dashboard.capacity")}</Label>
+                        <Input type="number" value={form.capacity} onChange={(e) => setForm({ ...form, capacity: e.target.value })} placeholder="e.g. 40" />
+                      </div>
+                      <div>
+                        <Label>{t("common.price")} (€{isAccom ? t("dashboard.perNight") : ""})</Label>
+                        <Input type="number" step="0.01" value={form.price_per_night} onChange={(e) => setForm({ ...form, price_per_night: e.target.value })} placeholder="e.g. 120" />
+                      </div>
+                      {isAccom && (
+                        <div>
+                          <Label>{t("booking.breakfastIncluded" as any)} (€)</Label>
+                          <Input type="number" step="0.01" value={form.breakfast_price_per_person} onChange={(e) => setForm({ ...form, breakfast_price_per_person: e.target.value })} placeholder="e.g. 15" />
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
                 {(form.resource_type === "hotel" || form.resource_type === "guesthouse") && (
                   <div className="space-y-2">
                     <Label className="font-medium">{t("dashboard.roomMultipliers")}</Label>
@@ -361,7 +368,7 @@ const ResourceManagement = () => {
                   {r.description && <p className="text-sm text-muted-foreground mb-2">{r.description}</p>}
                   <div className="flex items-center gap-3 text-sm text-muted-foreground">
                     {r.capacity && <span>{r.capacity} {t("dashboard.capacity")}</span>}
-                    {r.price_per_night != null && <span>€{Number(r.price_per_night).toFixed(0)}{t("dashboard.perNight")}</span>}
+                    {r.price_per_night != null && <span>€{Number(r.price_per_night).toFixed(0)}{(r.resource_type === "hotel" || r.resource_type === "guesthouse") ? t("dashboard.perNight") : ""}</span>}
                   </div>
                   {isAdmin && (
                     <div className="flex gap-1 mt-3">
