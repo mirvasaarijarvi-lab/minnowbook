@@ -32,6 +32,8 @@ interface BusinessData {
 interface ConfirmationEmailPreviewProps {
   reservation: ReservationData;
   business: BusinessData;
+  /** "confirmation" (default) or "cancellation" */
+  variant?: "confirmation" | "cancellation";
   /** Custom subject override */
   customSubject?: string;
   /** Custom body HTML inserted before the details table */
@@ -41,11 +43,13 @@ interface ConfirmationEmailPreviewProps {
 const ConfirmationEmailPreview = ({
   reservation,
   business,
+  variant = "confirmation",
   customSubject,
   customMessage,
 }: ConfirmationEmailPreviewProps) => {
   const t = useT();
 
+  const isCancellation = variant === "cancellation";
   const primaryColor = business.primary_color || "#1e3a5f";
   const accentColor = business.accent_color || "#d4a853";
   const businessName = business.business_name || "Business";
@@ -113,9 +117,29 @@ const ConfirmationEmailPreview = ({
     return Math.max(0, Math.round((checkOut.getTime() - checkIn.getTime()) / 86400000));
   }, [reservation.date, reservation.check_out_date]);
 
-  const subject =
-    customSubject ||
-    `${t("email.confirmationSubject" as any)} — ${businessName}`;
+  const defaultSubject = isCancellation
+    ? `${t("email.cancellationSubject" as any)} — ${businessName}`
+    : `${t("email.confirmationSubject" as any)} — ${businessName}`;
+
+  const subject = customSubject || defaultSubject;
+
+  const title = isCancellation
+    ? t("email.cancellationTitle" as any)
+    : t("email.confirmationTitle" as any);
+
+  const bodyText = isCancellation
+    ? t("email.cancellationBody" as any)
+    : t("email.confirmationBody" as any);
+
+  const footerText = isCancellation
+    ? t("email.cancellationFooter" as any)
+    : t("email.confirmationFooter" as any);
+
+  const headerBgColor = isCancellation ? "#7f1d1d" : primaryColor;
+  const titleColor = isCancellation ? "#991b1b" : primaryColor;
+  const iconEmoji = isCancellation ? "✕" : "✉️";
+  const iconBg = isCancellation ? "#fecaca" : `${accentColor}20`;
+  const iconColor = isCancellation ? "#991b1b" : undefined;
 
   const detailRows: { label: string; value: string }[] = [
     { label: t("common.type"), value: typeLabel },
@@ -182,7 +206,7 @@ const ConfirmationEmailPreview = ({
         {/* Header */}
         <div
           className="px-6 py-5 text-center"
-          style={{ backgroundColor: primaryColor }}
+          style={{ backgroundColor: headerBgColor }}
         >
           {business.logo_url && (
             <img
@@ -202,15 +226,17 @@ const ConfirmationEmailPreview = ({
           <div className="text-center space-y-2">
             <div
               className="inline-flex items-center justify-center h-12 w-12 rounded-full mx-auto"
-              style={{ backgroundColor: `${accentColor}20` }}
+              style={{ backgroundColor: iconBg }}
             >
-              <span className="text-2xl">✉️</span>
+              <span className="text-2xl" style={iconColor ? { color: iconColor } : undefined}>
+                {iconEmoji}
+              </span>
             </div>
             <h3
               className="text-xl font-serif font-bold"
-              style={{ color: primaryColor }}
+              style={{ color: titleColor }}
             >
-              {t("email.confirmationTitle" as any)}
+              {title}
             </h3>
             <p className="text-sm text-gray-600">
               {t("email.greeting" as any)}{" "}
@@ -227,7 +253,7 @@ const ConfirmationEmailPreview = ({
           )}
 
           <p className="text-sm text-gray-600">
-            {t("email.confirmationBody" as any)}
+            {bodyText}
           </p>
 
           {/* Details table */}
@@ -250,7 +276,7 @@ const ConfirmationEmailPreview = ({
           </div>
 
           <p className="text-sm text-gray-600">
-            {t("email.confirmationFooter" as any)}
+            {footerText}
           </p>
         </div>
 

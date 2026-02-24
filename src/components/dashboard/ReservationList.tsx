@@ -11,6 +11,7 @@ import { useState } from "react";
 import { format } from "date-fns";
 import { CalendarDays, User, Mail, Phone, MoreVertical, CheckCircle2, XCircle, Pencil } from "lucide-react";
 import EditReservationDialog from "./EditReservationDialog";
+import ConfirmationEmailPreview from "@/components/ConfirmationEmailPreview";
 import { useT } from "@/contexts/I18nContext";
 import { toast } from "sonner";
 
@@ -21,7 +22,7 @@ const statusColors: Record<string, string> = {
 };
 
 const ReservationList = () => {
-  const { tenantId } = useTenant();
+  const { tenantId, tenant } = useTenant();
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [confirmDialog, setConfirmDialog] = useState<{ id: string; action: "confirmed" | "cancelled" } | null>(null);
@@ -37,6 +38,21 @@ const ReservationList = () => {
       if (statusFilter !== "all") query = query.eq("status", statusFilter);
       if (typeFilter !== "all") query = query.eq("reservation_type", typeFilter);
       const { data, error } = await query.limit(100);
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!tenantId,
+  });
+
+  const { data: settings } = useQuery({
+    queryKey: ["tenant-settings", tenantId],
+    queryFn: async () => {
+      if (!tenantId) return null;
+      const { data, error } = await supabase
+        .from("tenant_settings")
+        .select("*")
+        .eq("tenant_id", tenantId)
+        .maybeSingle();
       if (error) throw error;
       return data;
     },
@@ -163,7 +179,7 @@ const ReservationList = () => {
 
       {/* Confirmation dialog */}
       <Dialog open={!!confirmDialog} onOpenChange={(open) => !open && setConfirmDialog(null)}>
-        <DialogContent>
+        <DialogContent className={confirmDialog?.action === "cancelled" ? "sm:max-w-2xl max-h-[90vh] overflow-y-auto" : ""}>
           <DialogHeader>
             <DialogTitle>
               {confirmDialog?.action === "confirmed" ? t("dashboard.confirmReservation") : t("dashboard.cancelReservation")}
@@ -172,6 +188,40 @@ const ReservationList = () => {
               {confirmDialog?.action === "confirmed" ? t("dashboard.confirmReservationMsg") : t("dashboard.cancelReservationMsg")}
             </DialogDescription>
           </DialogHeader>
+          {confirmDialog?.action === "cancelled" && (() => {
+            const r = reservations?.find((res) => res.id === confirmDialog.id);
+            if (!r) return null;
+            return (
+              <ConfirmationEmailPreview
+                variant="cancellation"
+                reservation={{
+                  guest_name: r.guest_name,
+                  guest_email: r.guest_email,
+                  date: r.date,
+                  start_time: r.start_time,
+                  reservation_type: r.reservation_type,
+                  guests_count: r.guests_count,
+                  check_out_date: r.check_out_date,
+                  room_type: r.room_type,
+                  breakfast_included: r.breakfast_included ?? false,
+                  event_type: r.event_type,
+                  estimated_guests: r.estimated_guests,
+                  catering_needed: r.catering_needed ?? false,
+                  special_requests: r.special_requests,
+                  price_eur: r.price_eur,
+                }}
+                business={{
+                  business_name: settings?.business_name ?? tenant?.name ?? "",
+                  business_email: settings?.business_email ?? "",
+                  business_phone: settings?.business_phone ?? "",
+                  business_address: settings?.business_address ?? "",
+                  primary_color: settings?.primary_color ?? "#1e3a5f",
+                  accent_color: settings?.accent_color ?? "#d4a853",
+                  logo_url: settings?.logo_url ?? "",
+                }}
+              />
+            );
+          })()}
           <DialogFooter>
             <Button variant="outline" onClick={() => setConfirmDialog(null)}>{t("common.cancel")}</Button>
             <Button

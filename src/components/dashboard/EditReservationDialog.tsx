@@ -31,7 +31,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { format } from "date-fns";
-import { CalendarIcon, Loader2, Mail, Pencil } from "lucide-react";
+import { CalendarIcon, Loader2, Mail, Pencil, XCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import ConfirmationEmailPreview from "@/components/ConfirmationEmailPreview";
 
@@ -76,6 +76,7 @@ const EditReservationDialog = ({
 
   const [activeTab, setActiveTab] = useState("details");
   const [customMessage, setCustomMessage] = useState("");
+  const [cancelCustomMessage, setCancelCustomMessage] = useState("");
 
   const [form, setForm] = useState({
     guest_name: "",
@@ -156,6 +157,7 @@ const EditReservationDialog = ({
       });
       setSelectedResourceId("");
       setCustomMessage("");
+      setCancelCustomMessage("");
       setActiveTab("details");
     }
   }, [reservation]);
@@ -223,14 +225,18 @@ const EditReservationDialog = ({
         </DialogHeader>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="details" className="gap-1.5">
               <Pencil className="h-3.5 w-3.5" />
               {t("email.editDetails" as any)}
             </TabsTrigger>
             <TabsTrigger value="email" className="gap-1.5">
               <Mail className="h-3.5 w-3.5" />
-              {t("email.previewTab" as any)}
+              {t("email.confirmationTab" as any)}
+            </TabsTrigger>
+            <TabsTrigger value="cancel-email" className="gap-1.5 text-destructive">
+              <XCircle className="h-3.5 w-3.5" />
+              {t("email.cancellationTab" as any)}
             </TabsTrigger>
           </TabsList>
 
@@ -473,6 +479,50 @@ const EditReservationDialog = ({
                 logo_url: settings?.logo_url ?? "",
               }}
               customMessage={customMessage || undefined}
+            />
+          </TabsContent>
+
+          {/* ── Cancellation Email Tab ── */}
+          <TabsContent value="cancel-email" className="space-y-4 pt-2">
+            <div className="space-y-2">
+              <Label htmlFor="cancel-custom-message">{t("email.customMessage" as any)}</Label>
+              <Textarea
+                id="cancel-custom-message"
+                rows={3}
+                value={cancelCustomMessage}
+                onChange={(e) => setCancelCustomMessage(e.target.value)}
+                placeholder={t("email.customMessagePlaceholder" as any)}
+              />
+            </div>
+
+            <ConfirmationEmailPreview
+              variant="cancellation"
+              reservation={{
+                guest_name: form.guest_name || "Guest",
+                guest_email: form.guest_email,
+                date: form.date,
+                start_time: form.start_time || null,
+                reservation_type: form.reservation_type,
+                guests_count: form.guests_count ? parseInt(form.guests_count) : null,
+                check_out_date: form.check_out_date || null,
+                room_type: form.room_type || null,
+                breakfast_included: form.breakfast_included,
+                event_type: form.event_type || null,
+                estimated_guests: form.estimated_guests ? parseInt(form.estimated_guests) : null,
+                catering_needed: form.catering_needed,
+                special_requests: form.special_requests || null,
+                price_eur: form.price_eur ? parseFloat(form.price_eur) : null,
+              }}
+              business={{
+                business_name: settings?.business_name ?? tenant?.name ?? "",
+                business_email: settings?.business_email ?? "",
+                business_phone: settings?.business_phone ?? "",
+                business_address: settings?.business_address ?? "",
+                primary_color: settings?.primary_color ?? "#1e3a5f",
+                accent_color: settings?.accent_color ?? "#d4a853",
+                logo_url: settings?.logo_url ?? "",
+              }}
+              customMessage={cancelCustomMessage || undefined}
             />
           </TabsContent>
         </Tabs>
