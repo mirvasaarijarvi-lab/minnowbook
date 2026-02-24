@@ -252,12 +252,33 @@ const SupportChatWidget = ({ businessTier = false }: SupportChatWidgetProps) => 
 
           {/* Messages */}
           <div ref={scrollRef} className="flex-1 overflow-y-auto p-3 space-y-3 min-h-[200px] max-h-[320px]">
-            {messages.length === 0 && (
-              <div className="space-y-2">
+            {/* Quick guides — always visible */}
+            <div className="space-y-2">
+              {messages.length === 0 && (
                 <p className="text-xs text-muted-foreground text-center mb-3">
                   Ask a question or try a quick guide:
                 </p>
-                {quickGuides.map((g) => (
+              )}
+              {messages.length > 0 && (
+                <details className="group">
+                  <summary className="text-xs text-muted-foreground cursor-pointer hover:text-foreground transition-colors select-none mb-2">
+                    Quick guides ▸
+                  </summary>
+                  <div className="space-y-1.5 pb-2">
+                    {quickGuides.map((g) => (
+                      <button
+                        key={g.q}
+                        onClick={() => handleQuickGuide(g)}
+                        className="w-full text-left text-xs px-3 py-2 rounded-lg border border-border bg-secondary/30 hover:bg-secondary/60 text-foreground transition-colors"
+                      >
+                        {g.q}
+                      </button>
+                    ))}
+                  </div>
+                </details>
+              )}
+              {messages.length === 0 &&
+                quickGuides.map((g) => (
                   <button
                     key={g.q}
                     onClick={() => handleQuickGuide(g)}
@@ -266,8 +287,7 @@ const SupportChatWidget = ({ businessTier = false }: SupportChatWidgetProps) => 
                     {g.q}
                   </button>
                 ))}
-              </div>
-            )}
+            </div>
 
             {messages.map((msg, i) => (
               <div
