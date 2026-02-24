@@ -45,6 +45,20 @@ type TranslationKeys = {
   "nav.reservations": string;
   "nav.resources": string;
   "nav.admin": string;
+  "nav.settings": string;
+
+  // Settings
+  "settings.businessDetails": string;
+  "settings.brandColors": string;
+  "settings.presets": string;
+  "settings.primary": string;
+  "settings.secondary": string;
+  "settings.accent": string;
+  "settings.preview": string;
+  "settings.primaryBtn": string;
+  "settings.accentBtn": string;
+  "settings.saved": string;
+  "settings.saveError": string;
 
   // Admin
   "admin.addUser": string;
@@ -263,6 +277,20 @@ const en: TranslationKeys = {
   "nav.reservations": "Reservations",
   "nav.resources": "Resources",
   "nav.admin": "Admin",
+  "nav.settings": "Settings",
+
+  // Settings
+  "settings.businessDetails": "Business Details",
+  "settings.brandColors": "Brand Colors",
+  "settings.presets": "Presets",
+  "settings.primary": "Primary",
+  "settings.secondary": "Secondary",
+  "settings.accent": "Accent",
+  "settings.preview": "Preview",
+  "settings.primaryBtn": "Primary Button",
+  "settings.accentBtn": "Accent Button",
+  "settings.saved": "Settings saved",
+  "settings.saveError": "Failed to save settings",
 
   // Admin
   "admin.addUser": "Add User",
@@ -479,6 +507,20 @@ const fi: TranslationKeys = {
   "nav.reservations": "Varaukset",
   "nav.resources": "Resurssit",
   "nav.admin": "Hallinta",
+  "nav.settings": "Asetukset",
+
+  // Settings
+  "settings.businessDetails": "Yritystiedot",
+  "settings.brandColors": "Brändivärit",
+  "settings.presets": "Esiasetukset",
+  "settings.primary": "Pääväri",
+  "settings.secondary": "Toissijainen",
+  "settings.accent": "Korostus",
+  "settings.preview": "Esikatselu",
+  "settings.primaryBtn": "Pääpainike",
+  "settings.accentBtn": "Korostuspainike",
+  "settings.saved": "Asetukset tallennettu",
+  "settings.saveError": "Asetusten tallennus epäonnistui",
 
   // Admin
   "admin.addUser": "Lisää käyttäjä",
@@ -694,6 +736,20 @@ const sv: TranslationKeys = {
   "nav.reservations": "Bokningar",
   "nav.resources": "Resurser",
   "nav.admin": "Admin",
+  "nav.settings": "Inställningar",
+
+  // Settings
+  "settings.businessDetails": "Företagsinformation",
+  "settings.brandColors": "Varumärkesfärger",
+  "settings.presets": "Förval",
+  "settings.primary": "Primär",
+  "settings.secondary": "Sekundär",
+  "settings.accent": "Accent",
+  "settings.preview": "Förhandsvisning",
+  "settings.primaryBtn": "Primär knapp",
+  "settings.accentBtn": "Accentknapp",
+  "settings.saved": "Inställningar sparade",
+  "settings.saveError": "Kunde inte spara inställningar",
 
   // Admin
   "admin.addUser": "Lägg till användare",
