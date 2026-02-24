@@ -196,12 +196,13 @@ const ResourceImageGallery = ({ resourceId, tenantId }: Props) => {
     const touch = e.touches[0];
     touchStartPos.current = { x: touch.clientX, y: touch.clientY };
     // Long press to initiate drag (300ms)
+    // 400ms long press to avoid accidental activation
     longPressTimer.current = setTimeout(() => {
       setDragIndex(index);
       setIsTouchDragging(true);
       // Vibrate for haptic feedback if available
       if (navigator.vibrate) navigator.vibrate(50);
-    }, 300);
+    }, 400);
   }, []);
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
@@ -252,21 +253,24 @@ const ResourceImageGallery = ({ resourceId, tenantId }: Props) => {
               dragIndex === index ? "opacity-40 scale-95" : ""
             } ${overIndex === index && dragIndex !== index ? "ring-2 ring-accent ring-offset-1 rounded-lg" : ""}`}
           >
-            <div className={`absolute top-0.5 left-0.5 z-10 h-5 w-5 rounded bg-black/40 text-white flex items-center justify-center transition-opacity pointer-events-none ${
-              isTouchDragging ? "opacity-100" : "opacity-0 group-hover:opacity-100"
-            }`}>
+            {/* Drag handle – always visible on mobile-sized thumbnails */}
+            <div className="absolute top-0.5 left-0.5 z-10 h-5 w-5 rounded bg-black/50 text-white flex items-center justify-center sm:opacity-0 sm:group-hover:opacity-100 transition-opacity pointer-events-none">
               <GripVertical className="h-3 w-3" />
+            </div>
+            {/* Sort order badge */}
+            <div className="absolute bottom-0.5 left-0.5 z-10 h-4 min-w-4 px-0.5 rounded bg-black/50 text-white flex items-center justify-center text-[10px] font-medium pointer-events-none">
+              {index + 1}
             </div>
             <img
               src={img.image_url}
               alt=""
-              className="h-20 w-20 rounded-lg object-cover border border-border"
+              className="h-20 w-20 sm:h-20 sm:w-20 rounded-lg object-cover border border-border"
             />
             <button
               type="button"
               onClick={() => deleteMutation.mutate(img.id)}
-              className={`absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center transition-opacity ${
-                isTouchDragging ? "opacity-0" : "opacity-0 group-hover:opacity-100"
+              className={`absolute -top-1.5 -right-1.5 h-6 w-6 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center transition-opacity ${
+                isTouchDragging ? "opacity-0" : "sm:opacity-0 sm:group-hover:opacity-100"
               }`}
             >
               <X className="h-3 w-3" />
