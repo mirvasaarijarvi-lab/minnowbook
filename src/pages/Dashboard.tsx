@@ -64,13 +64,6 @@ const tourSteps: TourStep[] = [
     view: "reservations",
   },
   {
-    target: "[data-tour='reservations-filters']",
-    title: "Filter Reservations",
-    content: "Use the status, type, and date filters to quickly narrow down your reservation list. Toggle 'Today' for a quick daily view.",
-    placement: "bottom",
-    view: "reservations",
-  },
-  {
     target: "[data-tour='resources-header']",
     title: "Manage Resources",
     content: "Add and manage your bookable spaces — rooms, tables, or venues. Set capacity, pricing, and upload photos for each resource.",
