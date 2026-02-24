@@ -1,11 +1,10 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useT } from "@/contexts/I18nContext";
-import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
-import { Upload, X, Loader2 } from "lucide-react";
+import { Upload, X, Loader2, GripVertical } from "lucide-react";
 
 const MAX_IMAGES = 5;
 const MAX_SIZE = 5 * 1024 * 1024;
@@ -21,6 +20,8 @@ const ResourceImageGallery = ({ resourceId, tenantId }: Props) => {
   const queryClient = useQueryClient();
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const [overIndex, setOverIndex] = useState<number | null>(null);
 
   const { data: images = [], isLoading } = useQuery({
     queryKey: ["resource-images", resourceId],
@@ -86,6 +87,28 @@ const ResourceImageGallery = ({ resourceId, tenantId }: Props) => {
     },
   });
 
+  const reorderMutation = useMutation({
+    mutationFn: async (reordered: { id: string; sort_order: number }[]) => {
+      // Update each image's sort_order
+      const updates = reordered.map((item) =>
+        supabase
+          .from("resource_images")
+          .update({ sort_order: item.sort_order })
+          .eq("id", item.id)
+      );
+      const results = await Promise.all(updates);
+      const failed = results.find((r) => r.error);
+      if (failed?.error) throw failed.error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["resource-images", resourceId] });
+    },
+    onError: () => {
+      toast({ title: t("settings.saveError"), variant: "destructive" });
+      queryClient.invalidateQueries({ queryKey: ["resource-images", resourceId] });
+    },
+  });
+
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -112,14 +135,55 @@ const ResourceImageGallery = ({ resourceId, tenantId }: Props) => {
     }
   };
 
+  /* ── Drag & Drop handlers ── */
+  const handleDragStart = useCallback((index: number) => {
+    setDragIndex(index);
+  }, []);
+
+  const handleDragOver = useCallback((e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    setOverIndex(index);
+  }, []);
+
+  const handleDragEnd = useCallback(() => {
+    if (dragIndex !== null && overIndex !== null && dragIndex !== overIndex) {
+      const reordered = [...images];
+      const [moved] = reordered.splice(dragIndex, 1);
+      reordered.splice(overIndex, 0, moved);
+
+      const updates = reordered.map((img: any, i: number) => ({
+        id: img.id,
+        sort_order: i,
+      }));
+
+      // Optimistic update via cache
+      queryClient.setQueryData(["resource-images", resourceId], reordered.map((img: any, i: number) => ({ ...img, sort_order: i })));
+      reorderMutation.mutate(updates);
+    }
+    setDragIndex(null);
+    setOverIndex(null);
+  }, [dragIndex, overIndex, images, queryClient, resourceId, reorderMutation]);
+
   return (
     <div className="space-y-2">
       <Label>{t("dashboard.gallery")}</Label>
 
-      {/* Thumbnails grid */}
+      {/* Thumbnails grid with drag-and-drop */}
       <div className="flex flex-wrap gap-2">
-        {images.map((img: any) => (
-          <div key={img.id} className="relative group">
+        {images.map((img: any, index: number) => (
+          <div
+            key={img.id}
+            draggable
+            onDragStart={() => handleDragStart(index)}
+            onDragOver={(e) => handleDragOver(e, index)}
+            onDragEnd={handleDragEnd}
+            className={`relative group cursor-grab active:cursor-grabbing transition-all ${
+              dragIndex === index ? "opacity-40 scale-95" : ""
+            } ${overIndex === index && dragIndex !== index ? "ring-2 ring-accent ring-offset-1 rounded-lg" : ""}`}
+          >
+            <div className="absolute top-0.5 left-0.5 z-10 h-5 w-5 rounded bg-black/40 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+              <GripVertical className="h-3 w-3" />
+            </div>
             <img
               src={img.image_url}
               alt=""
