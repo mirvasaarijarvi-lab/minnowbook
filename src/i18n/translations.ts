@@ -59,6 +59,14 @@ type TranslationKeys = {
   "settings.accentBtn": string;
   "settings.saved": string;
   "settings.saveError": string;
+  "settings.logo": string;
+  "settings.uploadLogo": string;
+  "settings.uploading": string;
+  "settings.logoHint": string;
+  "settings.logoUploaded": string;
+  "settings.logoUploadError": string;
+  "settings.logoInvalidType": string;
+  "settings.logoTooLarge": string;
 
   // Booking (public)
   "booking.title": string;
@@ -311,6 +319,14 @@ const en: TranslationKeys = {
   "settings.accentBtn": "Accent Button",
   "settings.saved": "Settings saved",
   "settings.saveError": "Failed to save settings",
+  "settings.logo": "Logo",
+  "settings.uploadLogo": "Upload logo",
+  "settings.uploading": "Uploading...",
+  "settings.logoHint": "PNG, JPG, WebP or SVG. Max 2 MB.",
+  "settings.logoUploaded": "Logo uploaded",
+  "settings.logoUploadError": "Failed to upload logo",
+  "settings.logoInvalidType": "Invalid file type. Use PNG, JPG, WebP or SVG.",
+  "settings.logoTooLarge": "File too large. Max 2 MB.",
 
   // Booking
   "booking.title": "Make a Reservation",
@@ -560,6 +576,14 @@ const fi: TranslationKeys = {
   "settings.accentBtn": "Korostuspainike",
   "settings.saved": "Asetukset tallennettu",
   "settings.saveError": "Asetusten tallennus epäonnistui",
+  "settings.logo": "Logo",
+  "settings.uploadLogo": "Lataa logo",
+  "settings.uploading": "Ladataan...",
+  "settings.logoHint": "PNG, JPG, WebP tai SVG. Maks. 2 Mt.",
+  "settings.logoUploaded": "Logo ladattu",
+  "settings.logoUploadError": "Logon lataus epäonnistui",
+  "settings.logoInvalidType": "Virheellinen tiedostotyyppi. Käytä PNG, JPG, WebP tai SVG.",
+  "settings.logoTooLarge": "Tiedosto liian suuri. Maks. 2 Mt.",
 
   // Booking
   "booking.title": "Tee varaus",
@@ -808,6 +832,14 @@ const sv: TranslationKeys = {
   "settings.accentBtn": "Accentknapp",
   "settings.saved": "Inställningar sparade",
   "settings.saveError": "Kunde inte spara inställningar",
+  "settings.logo": "Logotyp",
+  "settings.uploadLogo": "Ladda upp logotyp",
+  "settings.uploading": "Laddar upp...",
+  "settings.logoHint": "PNG, JPG, WebP eller SVG. Max 2 MB.",
+  "settings.logoUploaded": "Logotyp uppladdad",
+  "settings.logoUploadError": "Kunde inte ladda upp logotyp",
+  "settings.logoInvalidType": "Ogiltig filtyp. Använd PNG, JPG, WebP eller SVG.",
+  "settings.logoTooLarge": "Filen är för stor. Max 2 MB.",
 
   // Booking
   "booking.title": "Gör en bokning",
