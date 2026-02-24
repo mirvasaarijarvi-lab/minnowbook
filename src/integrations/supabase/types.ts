@@ -92,6 +92,7 @@ export type Database = {
           internal_notes: string | null
           is_checked_in: boolean
           is_invoiced: boolean | null
+          is_used: boolean
           language: string | null
           no_email_ack: boolean | null
           no_email_cancel: boolean | null
@@ -130,6 +131,7 @@ export type Database = {
           internal_notes?: string | null
           is_checked_in?: boolean
           is_invoiced?: boolean | null
+          is_used?: boolean
           language?: string | null
           no_email_ack?: boolean | null
           no_email_cancel?: boolean | null
@@ -168,6 +170,7 @@ export type Database = {
           internal_notes?: string | null
           is_checked_in?: boolean
           is_invoiced?: boolean | null
+          is_used?: boolean
           language?: string | null
           no_email_ack?: boolean | null
           no_email_cancel?: boolean | null
