@@ -318,7 +318,7 @@ const ReportsPanel = () => {
         String(r.guests_count || r.estimated_guests || "-"),
         r.status,
         (r as any).is_used ? t("reports.yes") : t("reports.no"),
-        r.breakfast_included ? t("reports.yes") : t("reports.no"),
+        r.breakfast_included ? `${t("reports.yes")} (${bfPrice.toFixed(2)}€)` : t("reports.no"),
         r.is_invoiced ? t("reports.yes") : t("reports.no"),
         roomPrice.toFixed(2),
         bfPrice.toFixed(2),
