@@ -136,6 +136,12 @@ type TranslationKeys = {
   "booking.eventBirthday": string;
   "booking.eventConference": string;
   "booking.eventOther": string;
+  "booking.priceSummary": string;
+  "booking.night": string;
+  "booking.nights": string;
+  "booking.accommodation": string;
+  "booking.estimatedTotal": string;
+  "booking.selectRoomForPrice": string;
   "booking.submit": string;
   "booking.availabilityCalendar": string;
   "booking.availabilityDesc": string;
@@ -483,6 +489,12 @@ const en: TranslationKeys = {
   "booking.eventBirthday": "Birthday party",
   "booking.eventConference": "Conference",
   "booking.eventOther": "Other",
+  "booking.priceSummary": "Price estimate",
+  "booking.night": "night",
+  "booking.nights": "nights",
+  "booking.accommodation": "Accommodation",
+  "booking.estimatedTotal": "Estimated total",
+  "booking.selectRoomForPrice": "Select a room to see pricing",
   "booking.submit": "Submit Reservation",
   "booking.availabilityCalendar": "Availability",
   "booking.availabilityDesc": "See which dates are available for booking.",
@@ -826,6 +838,12 @@ const fi: TranslationKeys = {
   "booking.eventBirthday": "Syntymäpäiväjuhlat",
   "booking.eventConference": "Konferenssi",
   "booking.eventOther": "Muu",
+  "booking.priceSummary": "Hinta-arvio",
+  "booking.night": "yö",
+  "booking.nights": "yötä",
+  "booking.accommodation": "Majoitus",
+  "booking.estimatedTotal": "Arvioitu kokonaishinta",
+  "booking.selectRoomForPrice": "Valitse huone nähdäksesi hinnat",
   "booking.submit": "Lähetä varaus",
   "booking.availabilityCalendar": "Saatavuus",
   "booking.availabilityDesc": "Katso mitkä päivät ovat vapaana varauksille.",
@@ -1168,6 +1186,12 @@ const sv: TranslationKeys = {
   "booking.eventBirthday": "Födelsedagsfest",
   "booking.eventConference": "Konferens",
   "booking.eventOther": "Övrigt",
+  "booking.priceSummary": "Prisuppskattning",
+  "booking.night": "natt",
+  "booking.nights": "nätter",
+  "booking.accommodation": "Boende",
+  "booking.estimatedTotal": "Uppskattat totalt",
+  "booking.selectRoomForPrice": "Välj ett rum för att se priser",
   "booking.submit": "Skicka bokning",
   "booking.availabilityCalendar": "Tillgänglighet",
   "booking.availabilityDesc": "Se vilka datum som är lediga för bokning.",

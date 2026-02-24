@@ -650,6 +650,64 @@ const PublicBooking = () => {
                     {t("booking.breakfastIncluded" as any)}
                   </Label>
                 </div>
+
+                {/* Pricing summary */}
+                {(() => {
+                  if (!form.check_out_date || !selectedDate) return null;
+                  const checkOut = new Date(form.check_out_date + "T00:00:00");
+                  const nights = Math.max(0, Math.round((checkOut.getTime() - selectedDate.getTime()) / 86400000));
+                  if (nights <= 0) return null;
+
+                  const selectedResource = resources?.find((r: any) => r.id === form.resource_id);
+                  const pricePerNight = selectedResource?.price_per_night;
+                  const breakfastPrice = selectedResource?.breakfast_price_per_person;
+                  const guestsCount = form.guests_count ? parseInt(form.guests_count) : 1;
+
+                  const roomTotal = pricePerNight ? nights * pricePerNight : null;
+                  const breakfastTotal = form.breakfast_included && breakfastPrice ? nights * guestsCount * breakfastPrice : 0;
+                  const grandTotal = roomTotal !== null ? roomTotal + breakfastTotal : null;
+
+                  return (
+                    <div
+                      className="rounded-lg border p-4 space-y-2"
+                      style={{ backgroundColor: `${accentColor}08`, borderColor: `${accentColor}30` }}
+                    >
+                      <h4 className="text-sm font-semibold flex items-center gap-1.5" style={{ color: primaryColor }}>
+                        {t("booking.priceSummary" as any)}
+                      </h4>
+                      <div className="text-sm space-y-1 text-muted-foreground">
+                        <div className="flex justify-between">
+                          <span>{nights} {nights === 1 ? t("booking.night" as any) : t("booking.nights" as any)}</span>
+                          {pricePerNight != null && (
+                            <span>€{pricePerNight} / {t("booking.night" as any)}</span>
+                          )}
+                        </div>
+                        {roomTotal != null && (
+                          <div className="flex justify-between">
+                            <span>{t("booking.accommodation" as any)}</span>
+                            <span>€{roomTotal.toFixed(2)}</span>
+                          </div>
+                        )}
+                        {form.breakfast_included && breakfastPrice != null && (
+                          <div className="flex justify-between">
+                            <span>{t("booking.breakfastIncluded" as any)} ({guestsCount} × {nights})</span>
+                            <span>€{breakfastTotal.toFixed(2)}</span>
+                          </div>
+                        )}
+                      </div>
+                      {grandTotal != null ? (
+                        <div className="flex justify-between font-semibold text-sm pt-2 border-t" style={{ borderColor: `${accentColor}30`, color: primaryColor }}>
+                          <span>{t("booking.estimatedTotal" as any)}</span>
+                          <span>€{grandTotal.toFixed(2)}</span>
+                        </div>
+                      ) : (
+                        <p className="text-xs text-muted-foreground italic">
+                          {t("booking.selectRoomForPrice" as any)}
+                        </p>
+                      )}
+                    </div>
+                  );
+                })()}
               </CardContent>
             </Card>
           )}
