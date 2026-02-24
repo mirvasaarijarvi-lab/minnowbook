@@ -101,6 +101,11 @@ type TranslationKeys = {
   "settings.logoUploadError": string;
   "settings.logoInvalidType": string;
   "settings.logoTooLarge": string;
+  "settings.heroImage": string;
+  "settings.uploadHeroImage": string;
+  "settings.heroImageHint": string;
+  "settings.heroImageUploaded": string;
+  "settings.heroImageUploadError": string;
 
   // Booking (public)
   "booking.title": string;
@@ -411,6 +416,11 @@ const en: TranslationKeys = {
   "settings.logoUploadError": "Failed to upload logo",
   "settings.logoInvalidType": "Invalid file type. Use PNG, JPG, WebP or SVG.",
   "settings.logoTooLarge": "File too large. Max 2 MB.",
+  "settings.heroImage": "Hero Image",
+  "settings.uploadHeroImage": "Upload hero image",
+  "settings.heroImageHint": "Recommended: 1600×600 px. PNG, JPG or WebP. Max 5 MB.",
+  "settings.heroImageUploaded": "Hero image uploaded",
+  "settings.heroImageUploadError": "Failed to upload hero image",
 
   // Booking
   "booking.title": "Make a Reservation",
@@ -717,6 +727,11 @@ const fi: TranslationKeys = {
   "settings.logoUploadError": "Logon lataus epäonnistui",
   "settings.logoInvalidType": "Virheellinen tiedostotyyppi. Käytä PNG, JPG, WebP tai SVG.",
   "settings.logoTooLarge": "Tiedosto liian suuri. Maks. 2 Mt.",
+  "settings.heroImage": "Hero-kuva",
+  "settings.uploadHeroImage": "Lataa hero-kuva",
+  "settings.heroImageHint": "Suositus: 1600×600 px. PNG, JPG tai WebP. Maks. 5 Mt.",
+  "settings.heroImageUploaded": "Hero-kuva ladattu",
+  "settings.heroImageUploadError": "Hero-kuvan lataus epäonnistui",
 
   // Booking
   "booking.title": "Tee varaus",
@@ -1022,6 +1037,11 @@ const sv: TranslationKeys = {
   "settings.logoUploadError": "Kunde inte ladda upp logotyp",
   "settings.logoInvalidType": "Ogiltig filtyp. Använd PNG, JPG, WebP eller SVG.",
   "settings.logoTooLarge": "Filen är för stor. Max 2 MB.",
+  "settings.heroImage": "Hero-bild",
+  "settings.uploadHeroImage": "Ladda upp hero-bild",
+  "settings.heroImageHint": "Rekommenderat: 1600×600 px. PNG, JPG eller WebP. Max 5 MB.",
+  "settings.heroImageUploaded": "Hero-bild uppladdad",
+  "settings.heroImageUploadError": "Kunde inte ladda upp hero-bild",
 
   // Booking
   "booking.title": "Gör en bokning",
