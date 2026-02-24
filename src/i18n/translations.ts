@@ -130,6 +130,7 @@ type TranslationKeys = {
   "booking.specialRequests": string;
   "booking.preferredTime": string;
   "booking.closedDay": string;
+  "booking.pickDate": string;
   "booking.checkOutDate": string;
   "booking.roomType": string;
   "booking.breakfastIncluded": string;
@@ -629,6 +630,7 @@ const en: TranslationKeys = {
   "booking.specialRequests": "Special requests",
   "booking.preferredTime": "Preferred time",
   "booking.closedDay": "Closed on this day.",
+  "booking.pickDate": "Pick a date",
   "booking.checkOutDate": "Check-out date",
   "booking.roomType": "Room type",
   "booking.breakfastIncluded": "Include breakfast",
@@ -1117,6 +1119,7 @@ const fi: TranslationKeys = {
   "booking.specialRequests": "Erityistoiveet",
   "booking.preferredTime": "Toivottu aika",
   "booking.closedDay": "Suljettu tänä päivänä.",
+  "booking.pickDate": "Valitse päivämäärä",
   "booking.checkOutDate": "Lähtöpäivä",
   "booking.roomType": "Huonetyyppi",
   "booking.breakfastIncluded": "Sisällytä aamiainen",
@@ -1604,6 +1607,7 @@ const sv: TranslationKeys = {
   "booking.specialRequests": "Speciella önskemål",
   "booking.preferredTime": "Önskad tid",
   "booking.closedDay": "Stängt denna dag.",
+  "booking.pickDate": "Välj datum",
   "booking.checkOutDate": "Utcheckningsdatum",
   "booking.roomType": "Rumstyp",
   "booking.breakfastIncluded": "Inkludera frukost",
