@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Loader2, Upload, X } from "lucide-react";
+import { Loader2, Upload, X, ImageIcon } from "lucide-react";
 
 const COLOR_PRESETS = [
   { name: "Navy & Amber", primary: "#1e3a5f", secondary: "#f5f0e8", accent: "#d4a853" },
@@ -20,14 +20,18 @@ const COLOR_PRESETS = [
 ];
 
 const MAX_LOGO_SIZE = 2 * 1024 * 1024; // 2MB
+const MAX_HERO_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_TYPES = ["image/png", "image/jpeg", "image/webp", "image/svg+xml"];
+const ALLOWED_HERO_TYPES = ["image/png", "image/jpeg", "image/webp"];
 
 const SettingsPanel = () => {
   const { tenantId } = useTenant();
   const t = useT();
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const heroInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadingHero, setUploadingHero] = useState(false);
 
   const { data: settings, isLoading } = useQuery({
     queryKey: ["tenant-settings", tenantId],
@@ -54,6 +58,7 @@ const SettingsPanel = () => {
     secondary_color: "#f5f0e8",
     accent_color: "#d4a853",
     logo_url: "",
+    hero_image_url: "",
   });
 
   useEffect(() => {
@@ -68,6 +73,7 @@ const SettingsPanel = () => {
         secondary_color: settings.secondary_color ?? "#f5f0e8",
         accent_color: settings.accent_color ?? "#d4a853",
         logo_url: settings.logo_url ?? "",
+        hero_image_url: settings.hero_image_url ?? "",
       });
     }
   }, [settings]);
@@ -112,9 +118,47 @@ const SettingsPanel = () => {
     }
   };
 
-  const removeLogo = () => {
-    setForm((prev) => ({ ...prev, logo_url: "" }));
+  const removeLogo = () => setForm((prev) => ({ ...prev, logo_url: "" }));
+
+  const handleHeroUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !tenantId) return;
+
+    if (!ALLOWED_HERO_TYPES.includes(file.type)) {
+      toast.error(t("settings.logoInvalidType"));
+      return;
+    }
+    if (file.size > MAX_HERO_SIZE) {
+      toast.error(t("settings.logoTooLarge"));
+      return;
+    }
+
+    setUploadingHero(true);
+    try {
+      const ext = file.name.split(".").pop();
+      const filePath = `${tenantId}/hero.${ext}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("tenant-assets")
+        .upload(filePath, file, { upsert: true });
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage
+        .from("tenant-assets")
+        .getPublicUrl(filePath);
+
+      const publicUrl = `${urlData.publicUrl}?t=${Date.now()}`;
+      setForm((prev) => ({ ...prev, hero_image_url: publicUrl }));
+      toast.success(t("settings.heroImageUploaded"));
+    } catch (err) {
+      toast.error(t("settings.heroImageUploadError"));
+    } finally {
+      setUploadingHero(false);
+      if (heroInputRef.current) heroInputRef.current.value = "";
+    }
   };
+
+  const removeHero = () => setForm((prev) => ({ ...prev, hero_image_url: "" }));
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -131,6 +175,7 @@ const SettingsPanel = () => {
           secondary_color: form.secondary_color,
           accent_color: form.accent_color,
           logo_url: form.logo_url || null,
+          hero_image_url: form.hero_image_url || null,
         })
         .eq("id", settings.id);
       if (error) throw error;
@@ -222,6 +267,62 @@ const SettingsPanel = () => {
                 onChange={handleLogoUpload}
               />
             </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Hero Image */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg font-serif">{t("settings.heroImage")}</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {form.hero_image_url ? (
+            <div className="relative">
+              <img
+                src={form.hero_image_url}
+                alt="Hero"
+                className="w-full max-h-48 rounded-lg object-cover border border-border"
+              />
+              <button
+                type="button"
+                onClick={removeHero}
+                className="absolute top-2 right-2 h-6 w-6 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          ) : (
+            <div className="w-full h-32 rounded-lg border-2 border-dashed border-border flex flex-col items-center justify-center gap-2 bg-secondary/30">
+              <ImageIcon className="h-8 w-8 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">1600 × 600 px</span>
+            </div>
+          )}
+          <div className="space-y-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => heroInputRef.current?.click()}
+              disabled={uploadingHero}
+            >
+              {uploadingHero ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  {t("settings.uploading")}
+                </>
+              ) : (
+                t("settings.uploadHeroImage")
+              )}
+            </Button>
+            <p className="text-xs text-muted-foreground">{t("settings.heroImageHint")}</p>
+            <input
+              ref={heroInputRef}
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              className="hidden"
+              onChange={handleHeroUpload}
+            />
           </div>
         </CardContent>
       </Card>
