@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTenant } from "@/hooks/useTenant";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
@@ -26,11 +27,32 @@ const colorPresets = [
 
 const Onboarding = () => {
   const { user } = useAuth();
+  const { tenantId, loading: tenantLoading } = useTenant();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
   const t = useT();
+  const [selectedTier, setSelectedTier] = useState("basic");
+  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
+  const [branding, setBranding] = useState({
+    businessName: "", businessEmail: user?.email ?? "", businessPhone: "",
+    businessAddress: "", businessDescription: "",
+    primaryColor: "#4a1d7a", secondaryColor: "#f5efe4", accentColor: "#ff4d1c",
+  });
+
+  // If user already has a tenant, redirect to dashboard
+  if (tenantLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-spin h-8 w-8 border-4 border-accent border-t-transparent rounded-full" />
+      </div>
+    );
+  }
+
+  if (tenantId) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   const STEPS: TranslationKey[] = ["onboarding.tierStep", "onboarding.typesStep", "onboarding.brandingStep"];
 
@@ -45,14 +67,6 @@ const Onboarding = () => {
     { id: "venue", labelKey: "dashboard.venue" as TranslationKey, icon: Building2, descKey: "onboarding.venueDesc" as TranslationKey },
     { id: "guesthouse", labelKey: "dashboard.guesthouse" as TranslationKey, icon: BedDouble, descKey: "onboarding.guesthouseDesc" as TranslationKey },
   ];
-
-  const [selectedTier, setSelectedTier] = useState("basic");
-  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
-  const [branding, setBranding] = useState({
-    businessName: "", businessEmail: user?.email ?? "", businessPhone: "",
-    businessAddress: "", businessDescription: "",
-    primaryColor: "#4a1d7a", secondaryColor: "#f5efe4", accentColor: "#ff4d1c",
-  });
 
   const toggleType = (id: string) => {
     setSelectedTypes((prev) => prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id]);
