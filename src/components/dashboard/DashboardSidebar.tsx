@@ -89,7 +89,7 @@ const DashboardSidebar = ({ currentView, onViewChange, userEmail, onSignOut, mob
 
         <div className="p-3 border-t border-sidebar-border space-y-2">
           <p className="text-xs text-muted-foreground truncate px-3">{userEmail}</p>
-          <Button variant="ghost" size="sm" className="w-full justify-start gap-2" onClick={onSignOut}>
+          <Button variant="outline" size="sm" className="w-full justify-start gap-2 border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive" onClick={onSignOut}>
             <LogOut className="h-4 w-4" />
             {t("common.logOut")}
           </Button>
