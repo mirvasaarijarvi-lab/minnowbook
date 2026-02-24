@@ -169,6 +169,12 @@ type TranslationKeys = {
   "email.greeting": string;
   "email.confirmationBody": string;
   "email.confirmationFooter": string;
+  "email.cancellationSubject": string;
+  "email.cancellationTitle": string;
+  "email.cancellationBody": string;
+  "email.cancellationFooter": string;
+  "email.confirmationTab": string;
+  "email.cancellationTab": string;
   "email.at": string;
   "email.duration": string;
   "email.preview": string;
@@ -540,6 +546,12 @@ const en: TranslationKeys = {
   "email.greeting": "Dear",
   "email.confirmationBody": "We're pleased to confirm your reservation. Here are the details:",
   "email.confirmationFooter": "If you have any questions, don't hesitate to contact us. We look forward to welcoming you!",
+  "email.cancellationSubject": "Booking Cancellation",
+  "email.cancellationTitle": "Booking Cancelled",
+  "email.cancellationBody": "We're sorry to inform you that your reservation has been cancelled. Here were the details:",
+  "email.cancellationFooter": "If you believe this is an error or would like to rebook, please don't hesitate to contact us.",
+  "email.confirmationTab": "Confirmation",
+  "email.cancellationTab": "Cancellation",
   "email.at": "at",
   "email.duration": "Duration",
   "email.preview": "Email Preview",
@@ -907,6 +919,12 @@ const fi: TranslationKeys = {
   "email.greeting": "Hyvä",
   "email.confirmationBody": "Meillä on ilo vahvistaa varauksenne. Tässä ovat tiedot:",
   "email.confirmationFooter": "Jos sinulla on kysyttävää, ota rohkeasti yhteyttä. Odotamme innolla vierailuasi!",
+  "email.cancellationSubject": "Varauksen peruutus",
+  "email.cancellationTitle": "Varaus peruutettu",
+  "email.cancellationBody": "Valitettavasti varauksesi on peruutettu. Tässä olivat varauksen tiedot:",
+  "email.cancellationFooter": "Jos uskot tämän olevan virhe tai haluat tehdä uuden varauksen, ota meihin yhteyttä.",
+  "email.confirmationTab": "Vahvistus",
+  "email.cancellationTab": "Peruutus",
   "email.at": "klo",
   "email.duration": "Kesto",
   "email.preview": "Sähköpostin esikatselu",
@@ -1273,6 +1291,12 @@ const sv: TranslationKeys = {
   "email.greeting": "Kära",
   "email.confirmationBody": "Vi har nöjet att bekräfta din bokning. Här är detaljerna:",
   "email.confirmationFooter": "Om du har några frågor, tveka inte att kontakta oss. Vi ser fram emot att välkomna dig!",
+  "email.cancellationSubject": "Bokningsavbokning",
+  "email.cancellationTitle": "Bokning avbokad",
+  "email.cancellationBody": "Vi beklagar att din bokning har avbokats. Här var detaljerna:",
+  "email.cancellationFooter": "Om du tror att detta är ett misstag eller vill boka om, tveka inte att kontakta oss.",
+  "email.confirmationTab": "Bekräftelse",
+  "email.cancellationTab": "Avbokning",
   "email.at": "kl",
   "email.duration": "Varaktighet",
   "email.preview": "E-postförhandsgranskning",
