@@ -93,6 +93,9 @@ type TranslationKeys = {
   "settings.accentBtn": string;
   "settings.saved": string;
   "settings.saveError": string;
+  "settings.availabilityThresholds": string;
+  "settings.availabilityThresholdsDesc": string;
+  "settings.fullThreshold": string;
   "settings.logo": string;
   "settings.uploadLogo": string;
   "settings.uploading": string;
@@ -411,6 +414,9 @@ const en: TranslationKeys = {
   "settings.accentBtn": "Accent Button",
   "settings.saved": "Settings saved",
   "settings.saveError": "Failed to save settings",
+  "settings.availabilityThresholds": "Availability Thresholds",
+  "settings.availabilityThresholdsDesc": "Number of reservations before a day shows as 'Full' in the calendar.",
+  "settings.fullThreshold": "Full at",
   "settings.logo": "Logo",
   "settings.uploadLogo": "Upload logo",
   "settings.uploading": "Uploading...",
@@ -725,6 +731,9 @@ const fi: TranslationKeys = {
   "settings.accentBtn": "Korostuspainike",
   "settings.saved": "Asetukset tallennettu",
   "settings.saveError": "Asetusten tallennus epäonnistui",
+  "settings.availabilityThresholds": "Saatavuusrajat",
+  "settings.availabilityThresholdsDesc": "Varausten määrä, jolloin päivä näytetään kalenterissa 'Täynnä'-tilassa.",
+  "settings.fullThreshold": "Täynnä kun",
   "settings.logo": "Logo",
   "settings.uploadLogo": "Lataa logo",
   "settings.uploading": "Ladataan...",
@@ -1038,6 +1047,9 @@ const sv: TranslationKeys = {
   "settings.accentBtn": "Accentknapp",
   "settings.saved": "Inställningar sparade",
   "settings.saveError": "Kunde inte spara inställningar",
+  "settings.availabilityThresholds": "Tillgänglighetsgränser",
+  "settings.availabilityThresholdsDesc": "Antal bokningar innan en dag visas som 'Full' i kalendern.",
+  "settings.fullThreshold": "Full vid",
   "settings.logo": "Logotyp",
   "settings.uploadLogo": "Ladda upp logotyp",
   "settings.uploading": "Laddar upp...",

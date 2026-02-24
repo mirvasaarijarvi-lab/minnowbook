@@ -41,11 +41,13 @@ const AvailabilityCalendar = ({
   tenantId,
   primaryColor,
   accentColor,
+  thresholds,
   t,
 }: {
   tenantId: string;
   primaryColor: string;
   accentColor: string;
+  thresholds: Record<string, number>;
   t: (key: string) => string;
 }) => {
   const [calMonth, setCalMonth] = useState(new Date());
@@ -78,15 +80,21 @@ const AvailabilityCalendar = ({
     return counts;
   }, [monthReservations]);
 
+  // Use the max threshold across all types as the general full limit
+  const fullThreshold = useMemo(() => {
+    const values = Object.values(thresholds);
+    return values.length > 0 ? Math.min(...values) : 5;
+  }, [thresholds]);
+
   const getDayStatus = useCallback(
     (date: Date): "available" | "busy" | "full" => {
       const key = format(date, "yyyy-MM-dd");
       const count = dayCounts[key] || 0;
       if (count === 0) return "available";
-      if (count >= 5) return "full";
+      if (count >= fullThreshold) return "full";
       return "busy";
     },
-    [dayCounts],
+    [dayCounts, fullThreshold],
   );
 
   return (
@@ -396,6 +404,7 @@ const PublicBooking = () => {
           tenantId={tenant.id}
           primaryColor={primaryColor}
           accentColor={accentColor}
+          thresholds={(settings?.availability_thresholds as Record<string, number>) ?? { restaurant: 5, venue: 5, guesthouse: 5, hotel: 5 }}
           t={t}
         />
 
