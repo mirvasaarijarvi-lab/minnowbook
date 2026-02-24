@@ -7,6 +7,7 @@ import { CalendarDays, CheckCircle, Clock, Users, Link2, Copy, ExternalLink } fr
 import { format } from "date-fns";
 import { useT } from "@/contexts/I18nContext";
 import { toast } from "sonner";
+import DashboardTooltip from "./DashboardTooltip";
 
 const DashboardOverview = () => {
   const { tenantId, tenant } = useTenant();
@@ -59,11 +60,16 @@ const DashboardOverview = () => {
         <p className="text-muted-foreground text-sm">{format(new Date(), "EEEE, MMMM d, yyyy")}</p>
       </div>
 
-      <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
+      <div data-tour="stats-grid" className="grid gap-3 grid-cols-2 lg:grid-cols-4">
         {cards.map(({ label, value, icon: Icon, color }) => (
           <Card key={label}>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">{label}</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-1">
+                {label}
+                {label === t("dashboard.todaysReservations") && (
+                  <DashboardTooltip text="Total reservations scheduled for today across all types." />
+                )}
+              </CardTitle>
               <Icon className={`h-4 w-4 ${color}`} />
             </CardHeader>
             <CardContent>
@@ -75,11 +81,12 @@ const DashboardOverview = () => {
 
       {/* Booking link card */}
       {bookingUrl && (
-        <Card className="border-primary/20 bg-primary/5">
+        <Card data-tour="booking-link" className="border-primary/20 bg-primary/5">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
               <Link2 className="h-4 w-4 text-primary" />
               {t("dashboard.bookingLink")}
+              <DashboardTooltip text="Share this link with your customers so they can make reservations online." />
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
