@@ -542,7 +542,8 @@ const PublicBooking = () => {
                   const res = resources?.find((r: any) => r.id === form.resource_id);
                   if (!isAcc || !res?.price_per_night || !selectedDate || !form.check_out_date) return null;
                   const n = Math.max(0, Math.round((new Date(form.check_out_date + "T00:00:00").getTime() - new Date(format(selectedDate, "yyyy-MM-dd") + "T00:00:00").getTime()) / 86400000));
-                  const mult = form.room_type ? ({ single: 1.0, double: 1.5, suite: 2.5, dorm: 0.6 }[form.room_type] ?? 1.0) : 1.0;
+                  const resPricing = (res as any)?.room_type_pricing ?? { single: 1.0, double: 1.5, suite: 2.5, dorm: 0.6 };
+                  const mult = form.room_type ? (resPricing[form.room_type] ?? 1.0) : 1.0;
                   const roomT = n * Math.round(res.price_per_night * mult * 100) / 100;
                   const bfT = form.breakfast_included ? n * (form.guests_count ? parseInt(form.guests_count) : 1) * (res.breakfast_price_per_person ?? 15) : 0;
                   return roomT + bfT;
