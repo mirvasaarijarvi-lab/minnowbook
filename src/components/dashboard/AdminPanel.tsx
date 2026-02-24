@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { toast } from "@/hooks/use-toast";
 import { Plus, Key, Trash2, Shield, UserCog } from "lucide-react";
 import { useT } from "@/contexts/I18nContext";
+import SupportRequestsBoard from "./SupportRequestsBoard";
 
 interface TenantUser {
   id: string;
@@ -280,6 +281,9 @@ const AdminPanel = () => {
           ))}
         </div>
       )}
+
+      {/* Support Requests Board */}
+      <SupportRequestsBoard />
     </div>
   );
 };

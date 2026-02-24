@@ -1,7 +1,12 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { MessageCircle, X, Send, Loader2 } from "lucide-react";
+import { MessageCircle, X, Send, Loader2, Flag, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { useTenant } from "@/hooks/useTenant";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 interface Message {
   role: "user" | "assistant";
@@ -11,8 +16,8 @@ interface Message {
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/support-chat`;
 
 interface SupportChatWidgetProps {
-  /** If true, messages go through AI. Otherwise it's a static guide. */
-  aiEnabled?: boolean;
+  /** If true, user can escalate requests to admin */
+  businessTier?: boolean;
 }
 
 const quickGuides = [
@@ -28,16 +33,59 @@ const quickGuides = [
   { q: "How do I block dates or time slots?", a: "In **Dashboard → Calendar**, click on a date and use the **Block Slot** option to prevent bookings for specific dates, times, or resources." },
 ];
 
-const SupportChatWidget = ({ aiEnabled = false }: SupportChatWidgetProps) => {
+const SupportChatWidget = ({ businessTier = false }: SupportChatWidgetProps) => {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [escalateMode, setEscalateMode] = useState(false);
+  const [escalateSubject, setEscalateSubject] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
+  const { session } = useAuth();
+  const { tenantId } = useTenant();
+  const queryClient = useQueryClient();
+
+  // Query unread support request responses for Business tier users
+  const { data: unreadCount = 0 } = useQuery({
+    queryKey: ["unread-support-responses", tenantId],
+    queryFn: async () => {
+      if (!tenantId || !session?.user?.id) return 0;
+      const { count, error } = await supabase
+        .from("support_requests")
+        .select("id", { count: "exact", head: true })
+        .eq("tenant_id", tenantId)
+        .eq("user_id", session.user.id)
+        .eq("status", "fixed")
+        .eq("is_read_by_user", false);
+      if (error) return 0;
+      return count ?? 0;
+    },
+    enabled: !!tenantId && !!session?.user?.id && businessTier,
+    refetchInterval: 30000, // poll every 30s
+  });
+
+  const markResponsesRead = async () => {
+    if (!tenantId || !session?.user?.id || unreadCount === 0) return;
+    await supabase
+      .from("support_requests")
+      .update({ is_read_by_user: true })
+      .eq("tenant_id", tenantId)
+      .eq("user_id", session.user.id)
+      .eq("status", "fixed")
+      .eq("is_read_by_user", false);
+    queryClient.invalidateQueries({ queryKey: ["unread-support-responses"] });
+  };
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages]);
+
+  // When chat opens, mark responses as read
+  useEffect(() => {
+    if (open && unreadCount > 0) {
+      markResponsesRead();
+    }
+  }, [open]);
 
   const handleQuickGuide = (guide: typeof quickGuides[0]) => {
     setMessages((prev) => [
@@ -56,12 +104,18 @@ const SupportChatWidget = ({ aiEnabled = false }: SupportChatWidgetProps) => {
     const allMessages = [...messages, userMsg];
 
     try {
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+      };
+      // Pass user's auth token if available
+      if (session?.access_token) {
+        headers["Authorization"] = `Bearer ${session.access_token}`;
+      }
+
       const resp = await fetch(CHAT_URL, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-        },
+        headers,
         body: JSON.stringify({ messages: allMessages }),
       });
 
@@ -127,26 +181,42 @@ const SupportChatWidget = ({ aiEnabled = false }: SupportChatWidgetProps) => {
     }
 
     setIsLoading(false);
-  }, [messages]);
+  }, [messages, session]);
 
   const handleSend = () => {
     if (!input.trim()) return;
     const msg = input.trim();
     setInput("");
+    sendAI(msg);
+  };
 
-    if (aiEnabled) {
-      sendAI(msg);
-    } else {
-      // Static mode: show a helpful fallback
+  const handleEscalate = async () => {
+    if (!escalateSubject.trim() || !input.trim()) return;
+    if (!tenantId) {
+      toast.error("Unable to submit request — no tenant found.");
+      return;
+    }
+
+    try {
+      const { error } = await supabase.from("support_requests").insert({
+        tenant_id: tenantId,
+        user_id: session?.user?.id,
+        subject: escalateSubject.trim(),
+        message: input.trim(),
+      });
+      if (error) throw error;
+
       setMessages((prev) => [
         ...prev,
-        { role: "user", content: msg },
-        {
-          role: "assistant",
-          content:
-            "Thanks for your question! Browse the quick guides below, or visit our [Support page](/support) for more help. **Business plan** customers get AI-powered answers right here in the dashboard.",
-        },
+        { role: "user", content: `📋 **Support Request:** ${escalateSubject.trim()}\n${input.trim()}` },
+        { role: "assistant", content: "Your support request has been submitted! Your admin team will review it and respond soon. You'll see a notification when it's been addressed." },
       ]);
+      setInput("");
+      setEscalateSubject("");
+      setEscalateMode(false);
+      toast.success("Support request submitted");
+    } catch (e: any) {
+      toast.error(e.message || "Failed to submit request");
     }
   };
 
@@ -164,6 +234,11 @@ const SupportChatWidget = ({ aiEnabled = false }: SupportChatWidgetProps) => {
         aria-label={open ? "Close support chat" : "Open support chat"}
       >
         {open ? <X className="h-5 w-5" /> : <MessageCircle className="h-5 w-5" />}
+        {!open && unreadCount > 0 && (
+          <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold">
+            {unreadCount}
+          </span>
+        )}
       </button>
 
       {/* Chat panel */}
@@ -171,12 +246,8 @@ const SupportChatWidget = ({ aiEnabled = false }: SupportChatWidgetProps) => {
         <div className="fixed bottom-24 right-6 z-50 w-[360px] max-h-[520px] rounded-2xl border border-border bg-card shadow-hero flex flex-col overflow-hidden animate-scale-in">
           {/* Header */}
           <div className="gradient-hero px-4 py-3 text-primary-foreground">
-            <h3 className="font-serif font-semibold text-sm">
-              {aiEnabled ? "AI Support" : "Support Guide"}
-            </h3>
-            <p className="text-xs text-primary-foreground/70">
-              {aiEnabled ? "Ask anything about MinnowBook" : "Quick guides & help"}
-            </p>
+            <h3 className="font-serif font-semibold text-sm">AI Support</h3>
+            <p className="text-xs text-primary-foreground/70">Ask anything about MinnowBook</p>
           </div>
 
           {/* Messages */}
@@ -184,7 +255,7 @@ const SupportChatWidget = ({ aiEnabled = false }: SupportChatWidgetProps) => {
             {messages.length === 0 && (
               <div className="space-y-2">
                 <p className="text-xs text-muted-foreground text-center mb-3">
-                  {aiEnabled ? "Ask a question or try a quick guide:" : "Select a quick guide:"}
+                  Ask a question or try a quick guide:
                 </p>
                 {quickGuides.map((g) => (
                   <button
@@ -226,33 +297,79 @@ const SupportChatWidget = ({ aiEnabled = false }: SupportChatWidgetProps) => {
             )}
           </div>
 
+          {/* Escalate toggle for Business tier */}
+          {businessTier && (
+            <div className="px-3 pt-1">
+              <button
+                onClick={() => setEscalateMode(!escalateMode)}
+                className={cn(
+                  "flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border transition-colors",
+                  escalateMode
+                    ? "bg-accent/10 text-accent border-accent/30"
+                    : "text-muted-foreground border-border hover:bg-secondary/50"
+                )}
+              >
+                <Flag className="h-3 w-3" />
+                {escalateMode ? "Cancel request" : "Submit support request"}
+              </button>
+            </div>
+          )}
+
           {/* Input */}
           <div className="border-t border-border p-3">
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleSend();
-              }}
-              className="flex gap-2"
-            >
-              <input
-                type="text"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder={aiEnabled ? "Type your question..." : "Ask a question..."}
-                className="flex-1 text-sm bg-secondary/30 border border-border rounded-lg px-3 py-2 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-                disabled={isLoading}
-              />
-              <Button
-                type="submit"
-                size="sm"
-                variant="default"
-                disabled={!input.trim() || isLoading}
-                className="shrink-0"
+            {escalateMode ? (
+              <div className="space-y-2">
+                <input
+                  type="text"
+                  value={escalateSubject}
+                  onChange={(e) => setEscalateSubject(e.target.value)}
+                  placeholder="Subject (e.g. Feature request)"
+                  className="w-full text-sm bg-secondary/30 border border-border rounded-lg px-3 py-2 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                />
+                <textarea
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder="Describe your request or suggestion..."
+                  rows={3}
+                  className="w-full text-sm bg-secondary/30 border border-border rounded-lg px-3 py-2 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring resize-none"
+                />
+                <Button
+                  size="sm"
+                  onClick={handleEscalate}
+                  disabled={!escalateSubject.trim() || !input.trim()}
+                  className="w-full gap-1.5"
+                >
+                  <Flag className="h-3.5 w-3.5" />
+                  Submit to Admin
+                </Button>
+              </div>
+            ) : (
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleSend();
+                }}
+                className="flex gap-2"
               >
-                <Send className="h-3.5 w-3.5" />
-              </Button>
-            </form>
+                <input
+                  type="text"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder="Type your question..."
+                  className="flex-1 text-sm bg-secondary/30 border border-border rounded-lg px-3 py-2 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                  disabled={isLoading}
+                />
+                <Button
+                  type="submit"
+                  size="sm"
+                  variant="default"
+                  disabled={!input.trim() || isLoading}
+                  className="shrink-0"
+                >
+                  <Send className="h-3.5 w-3.5" />
+                </Button>
+              </form>
+            )}
           </div>
         </div>
       )}
