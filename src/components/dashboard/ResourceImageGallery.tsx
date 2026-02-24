@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback } from "react";
+import { useRef, useState, useCallback, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useT } from "@/contexts/I18nContext";
@@ -19,9 +19,13 @@ const ResourceImageGallery = ({ resourceId, tenantId }: Props) => {
   const t = useT();
   const queryClient = useQueryClient();
   const inputRef = useRef<HTMLInputElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [uploading, setUploading] = useState(false);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [overIndex, setOverIndex] = useState<number | null>(null);
+  const touchStartPos = useRef<{ x: number; y: number } | null>(null);
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [isTouchDragging, setIsTouchDragging] = useState(false);
 
   const { data: images = [], isLoading } = useQuery({
     queryKey: ["resource-images", resourceId],
@@ -145,31 +149,97 @@ const ResourceImageGallery = ({ resourceId, tenantId }: Props) => {
     setOverIndex(index);
   }, []);
 
+  const commitReorder = useCallback((fromIndex: number, toIndex: number) => {
+    if (fromIndex === toIndex) return;
+    const reordered = [...images];
+    const [moved] = reordered.splice(fromIndex, 1);
+    reordered.splice(toIndex, 0, moved);
+
+    const updates = reordered.map((img: any, i: number) => ({
+      id: img.id,
+      sort_order: i,
+    }));
+
+    queryClient.setQueryData(["resource-images", resourceId], reordered.map((img: any, i: number) => ({ ...img, sort_order: i })));
+    reorderMutation.mutate(updates);
+  }, [images, queryClient, resourceId, reorderMutation]);
+
   const handleDragEnd = useCallback(() => {
     if (dragIndex !== null && overIndex !== null && dragIndex !== overIndex) {
-      const reordered = [...images];
-      const [moved] = reordered.splice(dragIndex, 1);
-      reordered.splice(overIndex, 0, moved);
-
-      const updates = reordered.map((img: any, i: number) => ({
-        id: img.id,
-        sort_order: i,
-      }));
-
-      // Optimistic update via cache
-      queryClient.setQueryData(["resource-images", resourceId], reordered.map((img: any, i: number) => ({ ...img, sort_order: i })));
-      reorderMutation.mutate(updates);
+      commitReorder(dragIndex, overIndex);
     }
     setDragIndex(null);
     setOverIndex(null);
-  }, [dragIndex, overIndex, images, queryClient, resourceId, reorderMutation]);
+  }, [dragIndex, overIndex, commitReorder]);
+
+  /* ── Touch handlers for mobile ── */
+  const getTouchTargetIndex = useCallback((touch: { clientX: number; clientY: number }): number | null => {
+    const container = containerRef.current;
+    if (!container) return null;
+    const children = Array.from(container.children) as HTMLElement[];
+    for (let i = 0; i < images.length; i++) {
+      const rect = children[i]?.getBoundingClientRect();
+      if (!rect) continue;
+      if (
+        touch.clientX >= rect.left &&
+        touch.clientX <= rect.right &&
+        touch.clientY >= rect.top &&
+        touch.clientY <= rect.bottom
+      ) {
+        return i;
+      }
+    }
+    return null;
+  }, [images.length]);
+
+  const handleTouchStart = useCallback((e: React.TouchEvent, index: number) => {
+    const touch = e.touches[0];
+    touchStartPos.current = { x: touch.clientX, y: touch.clientY };
+    // Long press to initiate drag (300ms)
+    longPressTimer.current = setTimeout(() => {
+      setDragIndex(index);
+      setIsTouchDragging(true);
+      // Vibrate for haptic feedback if available
+      if (navigator.vibrate) navigator.vibrate(50);
+    }, 300);
+  }, []);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    // Cancel long press if finger moved too much before activation
+    if (!isTouchDragging && touchStartPos.current) {
+      const dx = Math.abs(touch.clientX - touchStartPos.current.x);
+      const dy = Math.abs(touch.clientY - touchStartPos.current.y);
+      if (dx > 10 || dy > 10) {
+        if (longPressTimer.current) clearTimeout(longPressTimer.current);
+      }
+    }
+    if (isTouchDragging) {
+      e.preventDefault(); // prevent scroll while dragging
+      const targetIndex = getTouchTargetIndex(touch);
+      if (targetIndex !== null) {
+        setOverIndex(targetIndex);
+      }
+    }
+  }, [isTouchDragging, getTouchTargetIndex]);
+
+  const handleTouchEnd = useCallback(() => {
+    if (longPressTimer.current) clearTimeout(longPressTimer.current);
+    if (isTouchDragging && dragIndex !== null && overIndex !== null) {
+      commitReorder(dragIndex, overIndex);
+    }
+    setDragIndex(null);
+    setOverIndex(null);
+    setIsTouchDragging(false);
+    touchStartPos.current = null;
+  }, [isTouchDragging, dragIndex, overIndex, commitReorder]);
 
   return (
     <div className="space-y-2">
       <Label>{t("dashboard.gallery")}</Label>
 
       {/* Thumbnails grid with drag-and-drop */}
-      <div className="flex flex-wrap gap-2">
+      <div ref={containerRef} className="flex flex-wrap gap-2" onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}>
         {images.map((img: any, index: number) => (
           <div
             key={img.id}
@@ -177,11 +247,14 @@ const ResourceImageGallery = ({ resourceId, tenantId }: Props) => {
             onDragStart={() => handleDragStart(index)}
             onDragOver={(e) => handleDragOver(e, index)}
             onDragEnd={handleDragEnd}
-            className={`relative group cursor-grab active:cursor-grabbing transition-all ${
+            onTouchStart={(e) => handleTouchStart(e, index)}
+            className={`relative group cursor-grab active:cursor-grabbing transition-all touch-none ${
               dragIndex === index ? "opacity-40 scale-95" : ""
             } ${overIndex === index && dragIndex !== index ? "ring-2 ring-accent ring-offset-1 rounded-lg" : ""}`}
           >
-            <div className="absolute top-0.5 left-0.5 z-10 h-5 w-5 rounded bg-black/40 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+            <div className={`absolute top-0.5 left-0.5 z-10 h-5 w-5 rounded bg-black/40 text-white flex items-center justify-center transition-opacity pointer-events-none ${
+              isTouchDragging ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+            }`}>
               <GripVertical className="h-3 w-3" />
             </div>
             <img
@@ -192,7 +265,9 @@ const ResourceImageGallery = ({ resourceId, tenantId }: Props) => {
             <button
               type="button"
               onClick={() => deleteMutation.mutate(img.id)}
-              className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+              className={`absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center transition-opacity ${
+                isTouchDragging ? "opacity-0" : "opacity-0 group-hover:opacity-100"
+              }`}
             >
               <X className="h-3 w-3" />
             </button>
