@@ -418,8 +418,11 @@ const PublicBooking = () => {
 
   if (submitted) {
     return (
-      <div className="min-h-screen p-4 sm:p-8" style={{ backgroundColor: secondaryColor }}>
-        <div className="max-w-2xl mx-auto space-y-6">
+        <div className="min-h-screen p-4 sm:p-8" style={{ backgroundColor: secondaryColor }}>
+          <div className="flex justify-end mb-4 max-w-2xl mx-auto">
+            <LanguageSwitcher />
+          </div>
+          <div className="max-w-2xl mx-auto space-y-6">
           <Card className="text-center">
             <CardContent className="pt-8 pb-8 space-y-4">
               <CheckCircle className="h-16 w-16 mx-auto" style={{ color: accentColor }} />
