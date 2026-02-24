@@ -14,7 +14,7 @@ const MarketingHeader = () => {
               <CalendarCheck className="h-5 w-5 text-primary-foreground" />
             </div>
             <span className="text-lg font-serif font-semibold text-foreground">
-              Reserv<span className="text-gradient">Hub</span>
+              Minnow<span className="text-gradient">Book</span>
             </span>
           </Link>
 

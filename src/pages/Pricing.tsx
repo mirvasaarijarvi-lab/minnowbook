@@ -73,7 +73,7 @@ const faqs = [
   },
   {
     q: "Can I use my own domain?",
-    a: "Each business gets a branded subdomain (e.g., yourbusiness.reservhub.com). Custom domain support is on our roadmap.",
+    a: "Each business gets a branded subdomain (e.g., yourbusiness.minnowbook.com). Custom domain support is on our roadmap.",
   },
 ];
 
