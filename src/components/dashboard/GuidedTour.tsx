@@ -12,6 +12,8 @@ export interface TourStep {
   content: string;
   /** Position of the tooltip relative to the target */
   placement?: "top" | "bottom" | "left" | "right";
+  /** Dashboard view this step belongs to — triggers navigation if provided */
+  view?: string;
 }
 
 interface GuidedTourProps {
@@ -20,12 +22,14 @@ interface GuidedTourProps {
   onClose: () => void;
   /** Called when the tour finishes all steps */
   onComplete?: () => void;
+  /** Called when a step requires navigating to a different view */
+  onNavigate?: (view: string) => void;
 }
 
 const PADDING = 8;
 const TOOLTIP_GAP = 12;
 
-const GuidedTour = ({ steps, isOpen, onClose, onComplete }: GuidedTourProps) => {
+const GuidedTour = ({ steps, isOpen, onClose, onComplete, onNavigate }: GuidedTourProps) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [tooltipStyle, setTooltipStyle] = useState<React.CSSProperties>({});
   const [spotlightStyle, setSpotlightStyle] = useState<React.CSSProperties>({});
@@ -92,15 +96,23 @@ const GuidedTour = ({ steps, isOpen, onClose, onComplete }: GuidedTourProps) => 
     setTooltipStyle(style);
   }, [step, isOpen]);
 
+  // Navigate to the correct view when the step changes
+  useEffect(() => {
+    if (!isOpen || !step?.view) return;
+    onNavigate?.(step.view);
+  }, [isOpen, currentStep]);
+
+  // Position tooltip after a short delay to allow view to render
   useEffect(() => {
     if (!isOpen) return;
-    positionTooltip();
+    const timer = setTimeout(positionTooltip, 150);
 
     const handleResize = () => positionTooltip();
     window.addEventListener("resize", handleResize);
     window.addEventListener("scroll", handleResize, true);
 
     return () => {
+      clearTimeout(timer);
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("scroll", handleResize, true);
     };

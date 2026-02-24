@@ -26,18 +26,49 @@ const tourSteps: TourStep[] = [
     title: "Dashboard Overview",
     content: "Here you can see today's key metrics at a glance — reservations, pending bookings, confirmed count, and active resources.",
     placement: "bottom",
+    view: "overview",
   },
   {
     target: "[data-tour='booking-link']",
     title: "Your Booking Link",
     content: "Share this link with your customers so they can make reservations online. Copy it or open it in a new tab to preview.",
     placement: "top",
+    view: "overview",
   },
   {
     target: "[data-tour='sidebar-nav']",
     title: "Navigation",
-    content: "Use the sidebar to switch between Calendar, Reservations, Resources, Reports, Settings, and Admin views.",
+    content: "Use the sidebar to switch between Calendar, Reservations, Resources, Reports, Settings, and more.",
     placement: "right",
+    view: "overview",
+  },
+  {
+    target: "[data-tour='calendar-grid']",
+    title: "Calendar View",
+    content: "Browse reservations month-by-month. Dates with bookings are highlighted so you can spot busy days at a glance.",
+    placement: "bottom",
+    view: "calendar",
+  },
+  {
+    target: "[data-tour='calendar-day-detail']",
+    title: "Day Details",
+    content: "Click any date to see its reservations listed here — guest names, times, party sizes, and statuses.",
+    placement: "left",
+    view: "calendar",
+  },
+  {
+    target: "[data-tour='reservations-filters']",
+    title: "Filter Reservations",
+    content: "Use the status, type, and date filters to quickly narrow down your reservation list. Toggle 'Today' for a quick daily view.",
+    placement: "bottom",
+    view: "reservations",
+  },
+  {
+    target: "[data-tour='settings-panel']",
+    title: "Settings",
+    content: "Configure your branding, upload your logo and hero image, set business details, customize colors, and manage email templates.",
+    placement: "top",
+    view: "settings",
   },
 ];
 
@@ -155,6 +186,7 @@ const Dashboard = () => {
         isOpen={tourOpen}
         onClose={() => setTourOpen(false)}
         onComplete={handleTourComplete}
+        onNavigate={(view) => setCurrentView(view as DashboardView)}
       />
     </div>
   );

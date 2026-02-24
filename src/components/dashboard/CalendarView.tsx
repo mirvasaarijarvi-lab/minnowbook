@@ -46,7 +46,7 @@ const CalendarView = () => {
   return (
     <div className="space-y-4">
       <h2 className="text-2xl font-serif font-bold text-foreground">{t("nav.calendar")}</h2>
-      <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr] gap-6">
+      <div data-tour="calendar-grid" className="grid grid-cols-1 lg:grid-cols-[auto_1fr] gap-6">
         <Card>
           <CardContent className="p-4">
             <Calendar
@@ -59,7 +59,7 @@ const CalendarView = () => {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card data-tour="calendar-day-detail">
           <CardHeader className="pb-3">
             <CardTitle className="text-lg font-serif">
               {selectedDate ? format(selectedDate, "EEEE, MMMM d, yyyy") : t("dashboard.selectDate")}

@@ -218,7 +218,7 @@ const SettingsPanel = () => {
   }
 
   return (
-    <div className="space-y-6 max-w-3xl">
+    <div data-tour="settings-panel" className="space-y-6 max-w-3xl">
       <h2 className="text-2xl font-serif font-bold text-foreground">{t("nav.settings")}</h2>
 
       {/* Logo */}
