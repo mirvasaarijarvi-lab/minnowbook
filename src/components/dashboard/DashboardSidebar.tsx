@@ -1,4 +1,4 @@
-import { CalendarDays, List, Settings, LogOut, LayoutDashboard, Menu, X } from "lucide-react";
+import { CalendarDays, List, Settings, LogOut, LayoutDashboard, Menu, X, ShieldCheck } from "lucide-react";
 import Logo from "@/components/Logo";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -6,7 +6,7 @@ import { useT } from "@/contexts/I18nContext";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { TranslationKey } from "@/i18n/translations";
 
-export type DashboardView = "overview" | "calendar" | "reservations" | "resources";
+export type DashboardView = "overview" | "calendar" | "reservations" | "resources" | "admin";
 
 interface DashboardSidebarProps {
   currentView: DashboardView;
@@ -15,17 +15,20 @@ interface DashboardSidebarProps {
   onSignOut: () => void;
   mobileOpen?: boolean;
   onMobileToggle?: () => void;
+  isAdmin?: boolean;
 }
 
-const navItems: { view: DashboardView; labelKey: TranslationKey; icon: React.ElementType }[] = [
+const navItems: { view: DashboardView; labelKey: TranslationKey; icon: React.ElementType; adminOnly?: boolean }[] = [
   { view: "overview", labelKey: "nav.overview", icon: LayoutDashboard },
   { view: "calendar", labelKey: "nav.calendar", icon: CalendarDays },
   { view: "reservations", labelKey: "nav.reservations", icon: List },
   { view: "resources", labelKey: "nav.resources", icon: Settings },
+  { view: "admin", labelKey: "nav.admin", icon: ShieldCheck, adminOnly: true },
 ];
 
-const DashboardSidebar = ({ currentView, onViewChange, userEmail, onSignOut, mobileOpen, onMobileToggle }: DashboardSidebarProps) => {
+const DashboardSidebar = ({ currentView, onViewChange, userEmail, onSignOut, mobileOpen, onMobileToggle, isAdmin: isAdminUser }: DashboardSidebarProps) => {
   const t = useT();
+  const visibleItems = navItems.filter((item) => !item.adminOnly || isAdminUser);
 
   const handleNavClick = (view: DashboardView) => {
     onViewChange(view);
@@ -57,7 +60,7 @@ const DashboardSidebar = ({ currentView, onViewChange, userEmail, onSignOut, mob
         </div>
 
         <nav className="flex-1 p-3 space-y-1">
-          {navItems.map(({ view, labelKey, icon: Icon }) => (
+          {visibleItems.map(({ view, labelKey, icon: Icon }) => (
             <button
               key={view}
               onClick={() => handleNavClick(view)}
