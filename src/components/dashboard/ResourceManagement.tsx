@@ -281,12 +281,14 @@ const ResourceManagement = () => {
                 </div>
                 {(form.resource_type === "hotel" || form.resource_type === "guesthouse") && (
                   <div className="space-y-2">
-                    <Label className="font-medium">Room type price multipliers</Label>
-                    <p className="text-xs text-muted-foreground">Multiplied by base price per night. E.g. 1.5× at €100 base = €150.</p>
+                    <Label className="font-medium">{t("dashboard.roomMultipliers")}</Label>
+                    <p className="text-xs text-muted-foreground">{t("dashboard.roomMultipliersDesc")}</p>
                     <div className="grid grid-cols-2 gap-3">
-                      {(["single", "double", "suite", "dorm"] as const).map((rt) => (
+                      {(["single", "double", "suite", "dorm"] as const).map((rt) => {
+                        const roomLabelKey = `dashboard.room${rt.charAt(0).toUpperCase() + rt.slice(1)}` as any;
+                        return (
                         <div key={rt}>
-                          <Label className="capitalize text-xs">{rt}</Label>
+                          <Label className="text-xs">{t(roomLabelKey)}</Label>
                           <Input
                             type="number"
                             step="0.1"
@@ -301,7 +303,8 @@ const ResourceManagement = () => {
                             placeholder="1.0"
                           />
                         </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                 )}

@@ -341,6 +341,12 @@ type TranslationKeys = {
   "dashboard.galleryHint": string;
   "dashboard.imageDeleted": string;
   "dashboard.maxImages": string;
+  "dashboard.roomMultipliers": string;
+  "dashboard.roomMultipliersDesc": string;
+  "dashboard.roomSingle": string;
+  "dashboard.roomDouble": string;
+  "dashboard.roomSuite": string;
+  "dashboard.roomDorm": string;
 
   // Onboarding
   "onboarding.tierStep": string;
@@ -831,6 +837,12 @@ const en: TranslationKeys = {
   "dashboard.galleryHint": "Up to 5 images. PNG, JPG or WebP. Max 5 MB each.",
   "dashboard.imageDeleted": "Image deleted",
   "dashboard.maxImages": "Maximum 5 images reached",
+  "dashboard.roomMultipliers": "Room type price multipliers",
+  "dashboard.roomMultipliersDesc": "Multiplied by base price per night. E.g. 1.5× at €100 base = €150.",
+  "dashboard.roomSingle": "Single",
+  "dashboard.roomDouble": "Double",
+  "dashboard.roomSuite": "Suite",
+  "dashboard.roomDorm": "Dorm",
 
   // Onboarding
   "onboarding.tierStep": "Tier",
@@ -1312,6 +1324,12 @@ const fi: TranslationKeys = {
   "dashboard.galleryHint": "Enintään 5 kuvaa. PNG, JPG tai WebP. Max 5 MB/kuva.",
   "dashboard.imageDeleted": "Kuva poistettu",
   "dashboard.maxImages": "Enintään 5 kuvaa",
+  "dashboard.roomMultipliers": "Huonetyyppien hintakertoimet",
+  "dashboard.roomMultipliersDesc": "Kerrotaan yöhinnalla. Esim. 1,5× ja €100 pohja = €150.",
+  "dashboard.roomSingle": "Yhden hengen",
+  "dashboard.roomDouble": "Kahden hengen",
+  "dashboard.roomSuite": "Sviitti",
+  "dashboard.roomDorm": "Makuusali",
 
   // Onboarding
   "onboarding.tierStep": "Suunnitelma",
@@ -1793,6 +1811,12 @@ const sv: TranslationKeys = {
   "dashboard.galleryHint": "Upp till 5 bilder. PNG, JPG eller WebP. Max 5 MB per bild.",
   "dashboard.imageDeleted": "Bild raderad",
   "dashboard.maxImages": "Max 5 bilder",
+  "dashboard.roomMultipliers": "Rumstypsprismultiplikatorer",
+  "dashboard.roomMultipliersDesc": "Multipliceras med baspris per natt. T.ex. 1,5× vid €100 bas = €150.",
+  "dashboard.roomSingle": "Enkelrum",
+  "dashboard.roomDouble": "Dubbelrum",
+  "dashboard.roomSuite": "Svit",
+  "dashboard.roomDorm": "Sovsal",
 
   // Onboarding
   "onboarding.tierStep": "Plan",
