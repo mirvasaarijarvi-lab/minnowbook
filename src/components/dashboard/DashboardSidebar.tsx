@@ -1,4 +1,4 @@
-import { CalendarDays, List, Settings, LogOut, LayoutDashboard, Menu, X, ShieldCheck, Cog, BarChart3 } from "lucide-react";
+import { CalendarDays, List, Settings, LogOut, LayoutDashboard, Menu, X, ShieldCheck, Cog, BarChart3, LifeBuoy } from "lucide-react";
 import Logo from "@/components/Logo";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -6,7 +6,7 @@ import { useT } from "@/contexts/I18nContext";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { TranslationKey } from "@/i18n/translations";
 
-export type DashboardView = "overview" | "calendar" | "reservations" | "resources" | "reports" | "settings" | "admin";
+export type DashboardView = "overview" | "calendar" | "reservations" | "resources" | "reports" | "settings" | "admin" | "support";
 
 interface DashboardSidebarProps {
   currentView: DashboardView;
@@ -26,6 +26,7 @@ const navItems: { view: DashboardView; labelKey: TranslationKey; icon: React.Ele
   { view: "reports", labelKey: "nav.reports", icon: BarChart3 },
   { view: "settings", labelKey: "nav.settings", icon: Cog },
   { view: "admin", labelKey: "nav.admin", icon: ShieldCheck, adminOnly: true },
+  { view: "support", labelKey: "nav.support", icon: LifeBuoy },
 ];
 
 const DashboardSidebar = ({ currentView, onViewChange, userEmail, onSignOut, mobileOpen, onMobileToggle, isAdmin: isAdminUser }: DashboardSidebarProps) => {

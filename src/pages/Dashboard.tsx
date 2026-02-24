@@ -11,6 +11,7 @@ import ResourceManagement from "@/components/dashboard/ResourceManagement";
 import SettingsPanel from "@/components/dashboard/SettingsPanel";
 import ReportsPanel from "@/components/dashboard/ReportsPanel";
 import AdminPanel from "@/components/dashboard/AdminPanel";
+import DashboardSupportPanel from "@/components/dashboard/DashboardSupportPanel";
 import Logo from "@/components/Logo";
 import SupportChatWidget from "@/components/SupportChatWidget";
 import GuidedTour, { TourStep } from "@/components/dashboard/GuidedTour";
@@ -90,6 +91,7 @@ const Dashboard = () => {
     reports: <ReportsPanel />,
     settings: <SettingsPanel />,
     admin: <AdminPanel />,
+    support: <DashboardSupportPanel />,
   };
 
   return (

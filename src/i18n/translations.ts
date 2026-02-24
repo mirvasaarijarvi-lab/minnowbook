@@ -47,6 +47,7 @@ type TranslationKeys = {
   "nav.admin": string;
   "nav.settings": string;
   "nav.reports": string;
+  "nav.support": string;
 
   // Reports
   "reports.total": string;
@@ -540,6 +541,7 @@ const en: TranslationKeys = {
   "nav.admin": "Admin",
   "nav.settings": "Settings",
   "nav.reports": "Reports",
+  "nav.support": "Support",
 
   "reports.total": "Total",
   "reports.confirmed": "Confirmed",
@@ -1021,6 +1023,7 @@ const fi: TranslationKeys = {
   "nav.admin": "Hallinta",
   "nav.settings": "Asetukset",
   "nav.reports": "Raportit",
+  "nav.support": "Tuki",
 
   "reports.total": "Yhteensä",
   "reports.confirmed": "Vahvistettu",
@@ -1501,6 +1504,7 @@ const sv: TranslationKeys = {
   "nav.admin": "Admin",
   "nav.settings": "Inställningar",
   "nav.reports": "Rapporter",
+  "nav.support": "Support",
 
   "reports.total": "Totalt",
   "reports.confirmed": "Bekräftad",
