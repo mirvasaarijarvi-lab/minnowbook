@@ -232,6 +232,11 @@ type TranslationKeys = {
   "dashboard.cancelled": string;
   "dashboard.activeResources": string;
   "dashboard.noReservations": string;
+  "dashboard.confirmReservation": string;
+  "dashboard.cancelReservation": string;
+  "dashboard.confirmReservationMsg": string;
+  "dashboard.cancelReservationMsg": string;
+  "dashboard.statusUpdated": string;
   "dashboard.noReservationsDay": string;
   "dashboard.selectDate": string;
   "dashboard.allStatuses": string;
@@ -524,6 +529,11 @@ const en: TranslationKeys = {
   "dashboard.cancelled": "Cancelled",
   "dashboard.activeResources": "Active Resources",
   "dashboard.noReservations": "No reservations found.",
+  "dashboard.confirmReservation": "Confirm",
+  "dashboard.cancelReservation": "Cancel",
+  "dashboard.confirmReservationMsg": "Confirm this reservation?",
+  "dashboard.cancelReservationMsg": "Cancel this reservation?",
+  "dashboard.statusUpdated": "Status updated",
   "dashboard.noReservationsDay": "No reservations on this day.",
   "dashboard.selectDate": "Select a date",
   "dashboard.allStatuses": "All statuses",
@@ -813,6 +823,11 @@ const fi: TranslationKeys = {
   "dashboard.cancelled": "Peruutettu",
   "dashboard.activeResources": "Aktiiviset resurssit",
   "dashboard.noReservations": "Ei varauksia.",
+  "dashboard.confirmReservation": "Vahvista",
+  "dashboard.cancelReservation": "Peruuta",
+  "dashboard.confirmReservationMsg": "Vahvista tämä varaus?",
+  "dashboard.cancelReservationMsg": "Peruuta tämä varaus?",
+  "dashboard.statusUpdated": "Tila päivitetty",
   "dashboard.noReservationsDay": "Ei varauksia tänä päivänä.",
   "dashboard.selectDate": "Valitse päivämäärä",
   "dashboard.allStatuses": "Kaikki tilat",
@@ -1102,6 +1117,11 @@ const sv: TranslationKeys = {
   "dashboard.cancelled": "Avbokad",
   "dashboard.activeResources": "Aktiva resurser",
   "dashboard.noReservations": "Inga bokningar hittades.",
+  "dashboard.confirmReservation": "Bekräfta",
+  "dashboard.cancelReservation": "Avboka",
+  "dashboard.confirmReservationMsg": "Bekräfta denna bokning?",
+  "dashboard.cancelReservationMsg": "Avboka denna bokning?",
+  "dashboard.statusUpdated": "Status uppdaterad",
   "dashboard.noReservationsDay": "Inga bokningar denna dag.",
   "dashboard.selectDate": "Välj ett datum",
   "dashboard.allStatuses": "Alla statusar",
