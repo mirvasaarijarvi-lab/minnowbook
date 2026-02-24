@@ -2,6 +2,7 @@ import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
+import { useT } from "@/contexts/I18nContext";
 
 interface PricingTierProps {
   name: string;
@@ -15,29 +16,23 @@ interface PricingTierProps {
 }
 
 const PricingTier = ({
-  name,
-  price,
-  description,
-  features,
-  reservationTypes,
-  staffUsers,
-  isPopular = false,
-  delay = 0,
+  name, price, description, features, reservationTypes, staffUsers,
+  isPopular = false, delay = 0,
 }: PricingTierProps) => {
+  const t = useT();
+
   return (
     <div
       className={cn(
         "relative flex flex-col rounded-2xl border p-8 transition-all duration-300 hover:shadow-hover",
-        isPopular
-          ? "border-accent shadow-hero scale-[1.02] bg-card"
-          : "border-border shadow-card bg-card"
+        isPopular ? "border-accent shadow-hero scale-[1.02] bg-card" : "border-border shadow-card bg-card"
       )}
       style={{ animationDelay: `${delay}ms` }}
     >
       {isPopular && (
         <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
           <span className="gradient-accent text-accent-foreground text-xs font-semibold px-4 py-1.5 rounded-full">
-            Most Popular
+            {t("pricing.mostPopular")}
           </span>
         </div>
       )}
@@ -50,18 +45,18 @@ const PricingTier = ({
       <div className="mb-6">
         <div className="flex items-baseline gap-1">
           <span className="text-4xl font-serif font-bold text-foreground">€{price}</span>
-          <span className="text-muted-foreground text-sm">/month</span>
+          <span className="text-muted-foreground text-sm">{t("pricing.perMonth")}</span>
         </div>
-        <p className="text-xs text-muted-foreground mt-1">30-day free trial included</p>
+        <p className="text-xs text-muted-foreground mt-1">{t("pricing.trialIncluded")}</p>
       </div>
 
       <div className="mb-6 space-y-2 pb-6 border-b border-border">
         <div className="flex items-center justify-between text-sm">
-          <span className="text-muted-foreground">Reservation types</span>
+          <span className="text-muted-foreground">{t("pricing.reservationTypes")}</span>
           <span className="font-medium text-foreground">{reservationTypes}</span>
         </div>
         <div className="flex items-center justify-between text-sm">
-          <span className="text-muted-foreground">Staff users</span>
+          <span className="text-muted-foreground">{t("pricing.staffUsers")}</span>
           <span className="font-medium text-foreground">{staffUsers}</span>
         </div>
       </div>
@@ -78,12 +73,8 @@ const PricingTier = ({
       </ul>
 
       <Link to="/signup">
-        <Button
-          variant={isPopular ? "hero" : "default"}
-          size="lg"
-          className="w-full"
-        >
-          Start Free Trial
+        <Button variant={isPopular ? "hero" : "default"} size="lg" className="w-full">
+          {t("common.startFreeTrial")}
         </Button>
       </Link>
     </div>

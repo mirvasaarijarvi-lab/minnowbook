@@ -3,10 +3,13 @@ import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import Logo from "@/components/Logo";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
+import { useT } from "@/contexts/I18nContext";
 
 const MarketingHeader = () => {
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const t = useT();
 
   const navLinkClass = (path: string) =>
     `text-sm font-medium transition-colors hover:text-foreground ${
@@ -22,16 +25,17 @@ const MarketingHeader = () => {
           </Link>
 
           <nav className="hidden md:flex items-center gap-6">
-            <Link to="/" className={navLinkClass("/")}>Home</Link>
-            <Link to="/pricing" className={navLinkClass("/pricing")}>Pricing</Link>
+            <Link to="/" className={navLinkClass("/")}>{t("nav.home")}</Link>
+            <Link to="/pricing" className={navLinkClass("/pricing")}>{t("nav.pricing")}</Link>
           </nav>
 
           <div className="hidden md:flex items-center gap-3">
+            <LanguageSwitcher variant="compact" />
             <Link to="/login">
-              <Button variant="ghost" size="sm">Log in</Button>
+              <Button variant="ghost" size="sm">{t("common.logIn")}</Button>
             </Link>
             <Link to="/signup">
-              <Button variant="hero" size="sm">Start Free Trial</Button>
+              <Button variant="hero" size="sm">{t("common.startFreeTrial")}</Button>
             </Link>
           </div>
 
@@ -45,18 +49,18 @@ const MarketingHeader = () => {
         </div>
       </div>
 
-      {/* Mobile menu */}
       {mobileOpen && (
         <div className="md:hidden border-t border-border/50 bg-card/95 backdrop-blur-lg animate-fade-in">
           <div className="container mx-auto px-4 py-4 flex flex-col gap-3">
-            <Link to="/" className={navLinkClass("/")} onClick={() => setMobileOpen(false)}>Home</Link>
-            <Link to="/pricing" className={navLinkClass("/pricing")} onClick={() => setMobileOpen(false)}>Pricing</Link>
+            <Link to="/" className={navLinkClass("/")} onClick={() => setMobileOpen(false)}>{t("nav.home")}</Link>
+            <Link to="/pricing" className={navLinkClass("/pricing")} onClick={() => setMobileOpen(false)}>{t("nav.pricing")}</Link>
+            <LanguageSwitcher variant="compact" className="py-2" />
             <div className="border-t border-border/50 pt-3 flex flex-col gap-2">
               <Link to="/login" onClick={() => setMobileOpen(false)}>
-                <Button variant="ghost" size="sm" className="w-full justify-center">Log in</Button>
+                <Button variant="ghost" size="sm" className="w-full justify-center">{t("common.logIn")}</Button>
               </Link>
               <Link to="/signup" onClick={() => setMobileOpen(false)}>
-                <Button variant="hero" size="sm" className="w-full justify-center">Start Free Trial</Button>
+                <Button variant="hero" size="sm" className="w-full justify-center">{t("common.startFreeTrial")}</Button>
               </Link>
             </div>
           </div>

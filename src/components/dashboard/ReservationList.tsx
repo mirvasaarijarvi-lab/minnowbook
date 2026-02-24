@@ -2,11 +2,12 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/hooks/useTenant";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState } from "react";
 import { format } from "date-fns";
 import { CalendarDays, User, Mail, Phone } from "lucide-react";
+import { useT } from "@/contexts/I18nContext";
 
 const statusColors: Record<string, string> = {
   pending: "bg-yellow-100 text-yellow-800 border-yellow-200",
@@ -18,20 +19,15 @@ const ReservationList = () => {
   const { tenantId } = useTenant();
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
+  const t = useT();
 
   const { data: reservations, isLoading } = useQuery({
     queryKey: ["reservations", tenantId, statusFilter, typeFilter],
     queryFn: async () => {
       if (!tenantId) return [];
-      let query = supabase
-        .from("reservations")
-        .select("*")
-        .eq("tenant_id", tenantId)
-        .order("date", { ascending: false });
-
+      let query = supabase.from("reservations").select("*").eq("tenant_id", tenantId).order("date", { ascending: false });
       if (statusFilter !== "all") query = query.eq("status", statusFilter);
       if (typeFilter !== "all") query = query.eq("reservation_type", typeFilter);
-
       const { data, error } = await query.limit(100);
       if (error) throw error;
       return data;
@@ -42,28 +38,24 @@ const ReservationList = () => {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-serif font-bold text-foreground">Reservations</h2>
+        <h2 className="text-2xl font-serif font-bold text-foreground">{t("nav.reservations")}</h2>
         <div className="flex gap-2">
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-[140px]">
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
+            <SelectTrigger className="w-[140px]"><SelectValue placeholder={t("common.status")} /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All statuses</SelectItem>
-              <SelectItem value="pending">Pending</SelectItem>
-              <SelectItem value="confirmed">Confirmed</SelectItem>
-              <SelectItem value="cancelled">Cancelled</SelectItem>
+              <SelectItem value="all">{t("dashboard.allStatuses")}</SelectItem>
+              <SelectItem value="pending">{t("dashboard.pending")}</SelectItem>
+              <SelectItem value="confirmed">{t("dashboard.confirmed")}</SelectItem>
+              <SelectItem value="cancelled">{t("dashboard.cancelled")}</SelectItem>
             </SelectContent>
           </Select>
           <Select value={typeFilter} onValueChange={setTypeFilter}>
-            <SelectTrigger className="w-[160px]">
-              <SelectValue placeholder="Type" />
-            </SelectTrigger>
+            <SelectTrigger className="w-[160px]"><SelectValue placeholder={t("common.type")} /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All types</SelectItem>
-              <SelectItem value="restaurant">Restaurant</SelectItem>
-              <SelectItem value="venue">Venue</SelectItem>
-              <SelectItem value="guesthouse">Guesthouse</SelectItem>
+              <SelectItem value="all">{t("dashboard.allTypes")}</SelectItem>
+              <SelectItem value="restaurant">{t("dashboard.restaurant")}</SelectItem>
+              <SelectItem value="venue">{t("dashboard.venue")}</SelectItem>
+              <SelectItem value="guesthouse">{t("dashboard.guesthouse")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -72,17 +64,11 @@ const ReservationList = () => {
       {isLoading ? (
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
-            <Card key={i} className="animate-pulse">
-              <CardContent className="p-4 h-20" />
-            </Card>
+            <Card key={i} className="animate-pulse"><CardContent className="p-4 h-20" /></Card>
           ))}
         </div>
       ) : !reservations?.length ? (
-        <Card>
-          <CardContent className="p-8 text-center text-muted-foreground">
-            No reservations found.
-          </CardContent>
-        </Card>
+        <Card><CardContent className="p-8 text-center text-muted-foreground">{t("dashboard.noReservations")}</CardContent></Card>
       ) : (
         <div className="space-y-2">
           {reservations.map((r) => (
@@ -92,12 +78,8 @@ const ReservationList = () => {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                       <span className="font-semibold text-foreground">{r.guest_name}</span>
-                      <Badge variant="outline" className="text-xs capitalize">
-                        {r.reservation_type}
-                      </Badge>
-                      <Badge className={`text-xs ${statusColors[r.status ?? "pending"] ?? ""}`}>
-                        {r.status}
-                      </Badge>
+                      <Badge variant="outline" className="text-xs capitalize">{r.reservation_type}</Badge>
+                      <Badge className={`text-xs ${statusColors[r.status ?? "pending"] ?? ""}`}>{r.status}</Badge>
                     </div>
                     <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
                       <span className="flex items-center gap-1">
@@ -105,28 +87,13 @@ const ReservationList = () => {
                         {format(new Date(r.date), "PPP")}
                         {r.start_time && ` at ${r.start_time.slice(0, 5)}`}
                       </span>
-                      <span className="flex items-center gap-1">
-                        <Mail className="h-3.5 w-3.5" />
-                        {r.guest_email}
-                      </span>
-                      {r.guest_phone && (
-                        <span className="flex items-center gap-1">
-                          <Phone className="h-3.5 w-3.5" />
-                          {r.guest_phone}
-                        </span>
-                      )}
-                      {r.guests_count && (
-                        <span className="flex items-center gap-1">
-                          <User className="h-3.5 w-3.5" />
-                          {r.guests_count} guests
-                        </span>
-                      )}
+                      <span className="flex items-center gap-1"><Mail className="h-3.5 w-3.5" />{r.guest_email}</span>
+                      {r.guest_phone && <span className="flex items-center gap-1"><Phone className="h-3.5 w-3.5" />{r.guest_phone}</span>}
+                      {r.guests_count && <span className="flex items-center gap-1"><User className="h-3.5 w-3.5" />{r.guests_count} {t("common.guests")}</span>}
                     </div>
                   </div>
                   {r.price_eur != null && (
-                    <span className="text-sm font-semibold text-foreground whitespace-nowrap">
-                      €{Number(r.price_eur).toFixed(2)}
-                    </span>
+                    <span className="text-sm font-semibold text-foreground whitespace-nowrap">€{Number(r.price_eur).toFixed(2)}</span>
                   )}
                 </div>
               </CardContent>
