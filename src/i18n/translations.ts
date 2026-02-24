@@ -262,6 +262,7 @@ type TranslationKeys = {
   "dashboard.restaurant": string;
   "dashboard.venue": string;
   "dashboard.guesthouse": string;
+  "dashboard.hotel": string;
 
   // Onboarding
   "onboarding.tierStep": string;
@@ -287,6 +288,7 @@ type TranslationKeys = {
   "onboarding.restaurantDesc": string;
   "onboarding.venueDesc": string;
   "onboarding.guesthouseDesc": string;
+  "onboarding.hotelDesc": string;
 
   // Tiers
   "tier.basic": string;
@@ -568,7 +570,8 @@ const en: TranslationKeys = {
   "dashboard.resourceDeleted": "Resource deleted",
   "dashboard.restaurant": "Restaurant",
   "dashboard.venue": "Venue",
-  "dashboard.guesthouse": "Guesthouse",
+  "dashboard.guesthouse": "Hotel / Gasthaus",
+  "dashboard.hotel": "Hotel / Gasthaus",
 
   // Onboarding
   "onboarding.tierStep": "Tier",
@@ -594,7 +597,7 @@ const en: TranslationKeys = {
   "onboarding.restaurantDesc": "Table reservations and dining",
   "onboarding.venueDesc": "Event spaces, meetings, celebrations",
   "onboarding.guesthouseDesc": "Room bookings and accommodation",
-
+  "onboarding.hotelDesc": "Hotel and gasthaus rooms.",
   // Tiers
   "tier.basic": "Basic",
   "tier.basicDesc": "Perfect for small businesses just getting started.",
@@ -872,7 +875,8 @@ const fi: TranslationKeys = {
   "dashboard.resourceDeleted": "Resurssi poistettu",
   "dashboard.restaurant": "Ravintola",
   "dashboard.venue": "Tila",
-  "dashboard.guesthouse": "Majatalo",
+  "dashboard.guesthouse": "Hotelli / Gasthaus",
+  "dashboard.hotel": "Hotelli / Gasthaus",
 
   // Onboarding
   "onboarding.tierStep": "Suunnitelma",
@@ -898,7 +902,7 @@ const fi: TranslationKeys = {
   "onboarding.restaurantDesc": "Pöytävaraukset ja ruokailu",
   "onboarding.venueDesc": "Tapahtumatilat, kokoukset, juhlat",
   "onboarding.guesthouseDesc": "Huonevaraukset ja majoitus",
-
+  "onboarding.hotelDesc": "Hotelli- ja majatalohuoneet.",
   // Tiers
   "tier.basic": "Basic",
   "tier.basicDesc": "Täydellinen pienille yrityksille, jotka ovat vasta aloittamassa.",
@@ -1176,7 +1180,8 @@ const sv: TranslationKeys = {
   "dashboard.resourceDeleted": "Resurs raderad",
   "dashboard.restaurant": "Restaurang",
   "dashboard.venue": "Lokal",
-  "dashboard.guesthouse": "Gästhus",
+  "dashboard.guesthouse": "Hotell / Gasthaus",
+  "dashboard.hotel": "Hotell / Gasthaus",
 
   // Onboarding
   "onboarding.tierStep": "Plan",
@@ -1202,7 +1207,7 @@ const sv: TranslationKeys = {
   "onboarding.restaurantDesc": "Bordsreservationer och matservering",
   "onboarding.venueDesc": "Evenemangslokaler, möten, festligheter",
   "onboarding.guesthouseDesc": "Rumsreservationer och boende",
-
+  "onboarding.hotelDesc": "Hotell- och gästhusrump.",
   // Tiers
   "tier.basic": "Basic",
   "tier.basicDesc": "Perfekt för småföretag som precis har börjat.",
