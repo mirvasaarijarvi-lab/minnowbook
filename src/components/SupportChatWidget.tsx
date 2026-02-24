@@ -20,6 +20,12 @@ const quickGuides = [
   { q: "How do I customize my booking page?", a: "Navigate to **Settings** in your dashboard. Upload your logo, set brand colors, and add a hero image. Your public booking page updates automatically." },
   { q: "How do I set up email templates?", a: "In **Settings → Email Templates**, you can customize both confirmation and cancellation emails. Use the preview tab to see how they'll look to guests." },
   { q: "How do I add staff members?", a: "Go to **Admin → Users** to invite new staff. You can set roles (Owner, Admin, Staff) and approve or remove team members." },
+  { q: "How do I add or edit resources?", a: "Go to **Dashboard → Resources** to create rooms, tables, or venues. You can set capacity, pricing, upload up to 5 images, and toggle active/inactive status." },
+  { q: "How do I set opening hours?", a: "In **Settings → Opening Hours**, configure open/close times for each day of the week per resource type. Mark days as closed when needed." },
+  { q: "How do I view reports?", a: "Navigate to **Dashboard → Reports** to see reservation trends, occupancy rates, and revenue summaries. You can filter by date range and export printable reports." },
+  { q: "How does pricing work for rooms?", a: "Set a **base price per night** on each resource, then configure **room type multipliers** (Single 1.0×, Double 1.5×, Suite 2.5×, etc.). The booking page calculates totals automatically." },
+  { q: "How do I share my booking link?", a: "Your public booking link is shown on the **Dashboard Overview**. Click **Copy link** to copy it, or open it in a new tab to preview. Share it on your website or social media." },
+  { q: "How do I block dates or time slots?", a: "In **Dashboard → Calendar**, click on a date and use the **Block Slot** option to prevent bookings for specific dates, times, or resources." },
 ];
 
 const SupportChatWidget = ({ aiEnabled = false }: SupportChatWidgetProps) => {
