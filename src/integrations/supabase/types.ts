@@ -247,6 +247,7 @@ export type Database = {
           name: string
           price_per_night: number | null
           resource_type: string
+          room_type_pricing: Json | null
           tenant_id: string
         }
         Insert: {
@@ -260,6 +261,7 @@ export type Database = {
           name: string
           price_per_night?: number | null
           resource_type: string
+          room_type_pricing?: Json | null
           tenant_id: string
         }
         Update: {
@@ -273,6 +275,7 @@ export type Database = {
           name?: string
           price_per_night?: number | null
           resource_type?: string
+          room_type_pricing?: Json | null
           tenant_id?: string
         }
         Relationships: [

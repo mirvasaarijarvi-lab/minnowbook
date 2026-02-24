@@ -454,8 +454,8 @@ const PublicBooking = () => {
               nights = Math.max(0, Math.round((checkOut.getTime() - checkIn.getTime()) / 86400000));
             }
 
-            const roomTypeMultipliers: Record<string, number> = { single: 1.0, double: 1.5, suite: 2.5, dorm: 0.6 };
-            const multiplier = form.room_type ? (roomTypeMultipliers[form.room_type] ?? 1.0) : 1.0;
+            const resourcePricing = (selectedResource as any)?.room_type_pricing ?? { single: 1.0, double: 1.5, suite: 2.5, dorm: 0.6 };
+            const multiplier = form.room_type ? (resourcePricing[form.room_type] ?? 1.0) : 1.0;
             const adjustedPrice = basePrice ? Math.round(basePrice * multiplier * 100) / 100 : null;
             const roomTotal = adjustedPrice && nights > 0 ? nights * adjustedPrice : null;
             const breakfastTotal = form.breakfast_included && breakfastPrice ? nights * guestsCount * breakfastPrice : 0;
@@ -854,14 +854,9 @@ const PublicBooking = () => {
                   const breakfastPrice = selectedResource?.breakfast_price_per_person;
                   const guestsCount = form.guests_count ? parseInt(form.guests_count) : 1;
 
-                  // Room type multipliers
-                  const roomTypeMultipliers: Record<string, number> = {
-                    single: 1.0,
-                    double: 1.3,
-                    suite: 1.8,
-                    dorm: 0.6,
-                  };
-                  const multiplier = form.room_type ? (roomTypeMultipliers[form.room_type] ?? 1.0) : 1.0;
+                  // Room type multipliers from resource config
+                  const resourcePricing = (selectedResource as any)?.room_type_pricing ?? { single: 1.0, double: 1.5, suite: 2.5, dorm: 0.6 };
+                  const multiplier = form.room_type ? (resourcePricing[form.room_type] ?? 1.0) : 1.0;
                   const adjustedPrice = basePrice ? Math.round(basePrice * multiplier * 100) / 100 : null;
 
                   const roomTotal = adjustedPrice ? nights * adjustedPrice : null;
