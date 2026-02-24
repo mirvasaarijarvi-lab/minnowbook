@@ -1,0 +1,1 @@
+ALTER TABLE public.reservations ADD COLUMN is_used boolean NOT NULL DEFAULT false;

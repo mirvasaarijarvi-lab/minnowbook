@@ -39,6 +39,7 @@ interface ReservationRow {
   date: string;
   check_out_date: string | null;
   is_invoiced: boolean | null;
+  is_used: boolean | null;
   guest_name: string;
   guests_count: number | null;
   estimated_guests: number | null;
@@ -274,16 +275,27 @@ const ReportsPanel = () => {
     const src = typeFilteredRaw;
     const total = src.length;
     const invoiced = src.filter((r) => r.is_invoiced).length;
+    const used = src.filter((r) => (r as any).is_used).length;
     const totalEur = src.reduce((s, r) => s + effectivePrice(r), 0);
     const invoicedEur = src.filter((r) => r.is_invoiced).reduce((s, r) => s + effectivePrice(r), 0);
+    const usedEur = src.filter((r) => (r as any).is_used).reduce((s, r) => s + effectivePrice(r), 0);
     const byType = (tp: string) => {
       const items = src.filter((r) => r.reservation_type === tp);
       const inv = items.filter((r) => r.is_invoiced);
-      return { total: items.length, invoiced: inv.length, notInvoiced: items.length - inv.length, totalEur: items.reduce((s, r) => s + effectivePrice(r), 0), invoicedEur: inv.reduce((s, r) => s + effectivePrice(r), 0) };
+      const usedItems = items.filter((r) => (r as any).is_used);
+      return {
+        total: items.length, invoiced: inv.length, notInvoiced: items.length - inv.length,
+        used: usedItems.length, notUsed: items.length - usedItems.length,
+        totalEur: items.reduce((s, r) => s + effectivePrice(r), 0),
+        invoicedEur: inv.reduce((s, r) => s + effectivePrice(r), 0),
+        usedEur: usedItems.reduce((s, r) => s + effectivePrice(r), 0),
+      };
     };
     const result: Record<string, any> = {
       total, invoiced, notInvoiced: total - invoiced,
+      used, notUsed: total - used,
       totalEur, invoicedEur, notInvoicedEur: totalEur - invoicedEur,
+      usedEur, notUsedEur: totalEur - usedEur,
     };
     allowedTypes.forEach((tp) => { result[tp] = byType(tp); });
     return result;
@@ -304,7 +316,7 @@ const ReportsPanel = () => {
         r.reservation_type,
         String(r.guests_count || r.estimated_guests || "-"),
         r.status,
-        r.status === "confirmed" ? t("reports.yes") : t("reports.no"),
+        (r as any).is_used ? t("reports.yes") : t("reports.no"),
         r.breakfast_included ? `${t("reports.yes")} (${bfPrice.toFixed(2)}€)` : t("reports.no"),
         r.is_invoiced ? t("reports.yes") : t("reports.no"),
         effectivePrice(r).toFixed(2),
@@ -342,7 +354,7 @@ const ReportsPanel = () => {
         <td>${r.reservation_type}</td>
         <td>${r.guests_count || r.estimated_guests || "-"}</td>
         <td>${r.status}</td>
-        <td>${r.status === "confirmed" ? "✓" : "✗"}</td>
+        <td>${(r as any).is_used ? "✓" : "✗"}</td>
         <td>${r.breakfast_included ? "✓ (" + fmtEur(bfPrice) + ")" : "✗"}</td>
         <td>${r.is_invoiced ? "✓" : "✗"}</td>
         <td style="text-align:right">${total > 0 ? fmtEur(total) : "—"}</td>
@@ -535,7 +547,19 @@ const ReportsPanel = () => {
 
       {/* Revenue hero cards */}
       {!isLoading && (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <Card>
+            <CardContent className="pt-5 pb-5">
+              <div className="flex items-start justify-between">
+                <div className="space-y-1">
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Used</p>
+                  <p className="text-3xl font-bold tracking-tight">{invoicingStats.used}</p>
+                  <p className="text-sm text-muted-foreground">{invoicingStats.notUsed} not used</p>
+                </div>
+                <div className="p-2 rounded-lg bg-primary/10 text-primary"><CheckCircle2 className="h-5 w-5" /></div>
+              </div>
+            </CardContent>
+          </Card>
           <Card>
             <CardContent className="pt-5 pb-5">
               <div className="flex items-start justify-between">
@@ -671,9 +695,9 @@ const ReportsPanel = () => {
                             <Badge variant={r.status === "confirmed" ? "default" : "secondary"}>{r.status}</Badge>
                           </TableCell>
                           <TableCell>
-                            {r.status === "confirmed"
-                              ? <span className="flex items-center gap-1 text-green-600"><CheckCircle2 className="h-4 w-4" />{t("reports.used" as any)}</span>
-                              : <span className="flex items-center gap-1 text-muted-foreground"><Clock className="h-4 w-4" />{t("reports.notUsed" as any)}</span>
+                            {(r as any).is_used
+                              ? <span className="flex items-center gap-1 text-primary"><CheckCircle2 className="h-4 w-4" />{t("reports.yes")}</span>
+                              : <span className="flex items-center gap-1 text-muted-foreground"><Clock className="h-4 w-4" />{t("reports.no")}</span>
                             }
                           </TableCell>
                           <TableCell>
