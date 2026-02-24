@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/hooks/useTenant";
@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, Upload, X } from "lucide-react";
 
 const COLOR_PRESETS = [
   { name: "Navy & Amber", primary: "#1e3a5f", secondary: "#f5f0e8", accent: "#d4a853" },
@@ -19,10 +19,15 @@ const COLOR_PRESETS = [
   { name: "Indigo & Rose", primary: "#3730a3", secondary: "#f5f3ff", accent: "#e11d48" },
 ];
 
+const MAX_LOGO_SIZE = 2 * 1024 * 1024; // 2MB
+const ALLOWED_TYPES = ["image/png", "image/jpeg", "image/webp", "image/svg+xml"];
+
 const SettingsPanel = () => {
   const { tenantId } = useTenant();
   const t = useT();
   const queryClient = useQueryClient();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
 
   const { data: settings, isLoading } = useQuery({
     queryKey: ["tenant-settings", tenantId],
@@ -48,6 +53,7 @@ const SettingsPanel = () => {
     primary_color: "#1e3a5f",
     secondary_color: "#f5f0e8",
     accent_color: "#d4a853",
+    logo_url: "",
   });
 
   useEffect(() => {
@@ -61,9 +67,54 @@ const SettingsPanel = () => {
         primary_color: settings.primary_color ?? "#1e3a5f",
         secondary_color: settings.secondary_color ?? "#f5f0e8",
         accent_color: settings.accent_color ?? "#d4a853",
+        logo_url: settings.logo_url ?? "",
       });
     }
   }, [settings]);
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !tenantId) return;
+
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      toast.error(t("settings.logoInvalidType"));
+      return;
+    }
+    if (file.size > MAX_LOGO_SIZE) {
+      toast.error(t("settings.logoTooLarge"));
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop();
+      const filePath = `${tenantId}/logo.${ext}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("tenant-assets")
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage
+        .from("tenant-assets")
+        .getPublicUrl(filePath);
+
+      // Add cache-buster to force refresh
+      const publicUrl = `${urlData.publicUrl}?t=${Date.now()}`;
+      setForm((prev) => ({ ...prev, logo_url: publicUrl }));
+      toast.success(t("settings.logoUploaded"));
+    } catch (err) {
+      toast.error(t("settings.logoUploadError"));
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const removeLogo = () => {
+    setForm((prev) => ({ ...prev, logo_url: "" }));
+  };
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -79,6 +130,7 @@ const SettingsPanel = () => {
           primary_color: form.primary_color,
           secondary_color: form.secondary_color,
           accent_color: form.accent_color,
+          logo_url: form.logo_url || null,
         })
         .eq("id", settings.id);
       if (error) throw error;
@@ -116,6 +168,63 @@ const SettingsPanel = () => {
   return (
     <div className="space-y-6 max-w-3xl">
       <h2 className="text-2xl font-serif font-bold text-foreground">{t("nav.settings")}</h2>
+
+      {/* Logo */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg font-serif">{t("settings.logo")}</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center gap-4">
+            {form.logo_url ? (
+              <div className="relative">
+                <img
+                  src={form.logo_url}
+                  alt="Logo"
+                  className="h-20 w-20 rounded-lg object-contain border border-border bg-white p-1"
+                />
+                <button
+                  type="button"
+                  onClick={removeLogo}
+                  className="absolute -top-2 -right-2 h-5 w-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            ) : (
+              <div className="h-20 w-20 rounded-lg border-2 border-dashed border-border flex items-center justify-center bg-secondary/30">
+                <Upload className="h-6 w-6 text-muted-foreground" />
+              </div>
+            )}
+            <div className="space-y-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+              >
+                {uploading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    {t("settings.uploading")}
+                  </>
+                ) : (
+                  t("settings.uploadLogo")
+                )}
+              </Button>
+              <p className="text-xs text-muted-foreground">{t("settings.logoHint")}</p>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                className="hidden"
+                onChange={handleLogoUpload}
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Business Details */}
       <Card>
@@ -201,7 +310,11 @@ const SettingsPanel = () => {
             <Label>{t("settings.preview")}</Label>
             <div className="rounded-lg border border-border p-4" style={{ backgroundColor: form.secondary_color }}>
               <div className="flex items-center gap-3 mb-3">
-                <div className="h-8 w-8 rounded-full" style={{ backgroundColor: form.primary_color }} />
+                {form.logo_url ? (
+                  <img src={form.logo_url} alt="" className="h-8 w-8 rounded-full object-cover" />
+                ) : (
+                  <div className="h-8 w-8 rounded-full" style={{ backgroundColor: form.primary_color }} />
+                )}
                 <span className="font-serif font-bold" style={{ color: form.primary_color }}>
                   {form.business_name || "Your Business"}
                 </span>
