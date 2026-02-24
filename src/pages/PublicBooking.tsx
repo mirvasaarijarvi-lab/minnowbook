@@ -1,0 +1,544 @@
+import { useState, useMemo } from "react";
+import { useParams } from "react-router-dom";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useT } from "@/contexts/I18nContext";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Calendar } from "@/components/ui/calendar";
+import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
+import { Loader2, CheckCircle, UtensilsCrossed, Building2, Home, Clock } from "lucide-react";
+import { format } from "date-fns";
+import { z } from "zod";
+
+const bookingSchema = z.object({
+  guest_name: z.string().trim().min(1, "Name is required").max(100),
+  guest_email: z.string().trim().email("Invalid email").max(255),
+  guest_phone: z.string().trim().max(30).optional(),
+  guests_count: z.number().int().min(1).max(500).optional(),
+  reservation_type: z.string().min(1, "Type is required"),
+  date: z.string().min(1, "Date is required"),
+  start_time: z.string().optional(),
+  special_requests: z.string().trim().max(1000).optional(),
+  resource_id: z.string().uuid().optional(),
+});
+
+const typeIcons: Record<string, React.ElementType> = {
+  restaurant: UtensilsCrossed,
+  venue: Building2,
+  guesthouse: Home,
+};
+
+const PublicBooking = () => {
+  const { slug } = useParams<{ slug: string }>();
+  const t = useT();
+  const [submitted, setSubmitted] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>();
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const [form, setForm] = useState({
+    guest_name: "",
+    guest_email: "",
+    guest_phone: "",
+    guests_count: "",
+    reservation_type: "",
+    start_time: "",
+    special_requests: "",
+    resource_id: "",
+  });
+
+  // Fetch tenant by slug
+  const { data: tenant, isLoading: loadingTenant } = useQuery({
+    queryKey: ["public-tenant", slug],
+    queryFn: async () => {
+      if (!slug) return null;
+      const { data, error } = await supabase
+        .from("tenants")
+        .select("*")
+        .eq("slug", slug)
+        .eq("is_active", true)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!slug,
+  });
+
+  // Fetch tenant settings for branding
+  const { data: settings } = useQuery({
+    queryKey: ["public-tenant-settings", tenant?.id],
+    queryFn: async () => {
+      if (!tenant?.id) return null;
+      const { data, error } = await supabase
+        .from("tenant_settings")
+        .select("*")
+        .eq("tenant_id", tenant.id)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!tenant?.id,
+  });
+
+  // Fetch active resources
+  const { data: resources } = useQuery({
+    queryKey: ["public-resources", tenant?.id, form.reservation_type],
+    queryFn: async () => {
+      if (!tenant?.id) return [];
+      let query = supabase
+        .from("resources")
+        .select("*")
+        .eq("tenant_id", tenant.id)
+        .eq("is_active", true);
+      if (form.reservation_type) {
+        query = query.eq("resource_type", form.reservation_type);
+      }
+      const { data, error } = await query.order("name");
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!tenant?.id,
+  });
+
+  // Fetch opening hours
+  const { data: openingHours } = useQuery({
+    queryKey: ["public-opening-hours", tenant?.id, form.reservation_type],
+    queryFn: async () => {
+      if (!tenant?.id || !form.reservation_type) return [];
+      const { data, error } = await supabase
+        .from("tenant_opening_hours")
+        .select("*")
+        .eq("tenant_id", tenant.id)
+        .eq("resource_type", form.reservation_type);
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!tenant?.id && !!form.reservation_type,
+  });
+
+  // Generate time slots from opening hours for selected day
+  const timeSlots = useMemo(() => {
+    if (!selectedDate || !openingHours?.length) return [];
+    const dayOfWeek = selectedDate.getDay();
+    const dayHours = openingHours.find((h) => h.day_of_week === dayOfWeek);
+    if (!dayHours || dayHours.is_closed || !dayHours.open_time || !dayHours.close_time) return [];
+
+    const slots: string[] = [];
+    const [openH, openM] = dayHours.open_time.split(":").map(Number);
+    const [closeH, closeM] = dayHours.close_time.split(":").map(Number);
+    let h = openH, m = openM;
+    while (h < closeH || (h === closeH && m < closeM)) {
+      slots.push(`${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`);
+      m += 30;
+      if (m >= 60) { h++; m = 0; }
+    }
+    return slots;
+  }, [selectedDate, openingHours]);
+
+  // Check if a date's day of week is closed
+  const isDateDisabled = (date: Date) => {
+    if (date < new Date(new Date().setHours(0, 0, 0, 0))) return true;
+    if (!openingHours?.length) return false;
+    const dayOfWeek = date.getDay();
+    const dayHours = openingHours.find((h) => h.day_of_week === dayOfWeek);
+    return dayHours?.is_closed === true;
+  };
+
+  const submitMutation = useMutation({
+    mutationFn: async () => {
+      if (!tenant?.id) throw new Error("No tenant");
+
+      const parsed = bookingSchema.parse({
+        guest_name: form.guest_name,
+        guest_email: form.guest_email,
+        guest_phone: form.guest_phone || undefined,
+        guests_count: form.guests_count ? parseInt(form.guests_count) : undefined,
+        reservation_type: form.reservation_type,
+        date: selectedDate ? format(selectedDate, "yyyy-MM-dd") : "",
+        start_time: form.start_time || undefined,
+        special_requests: form.special_requests || undefined,
+        resource_id: form.resource_id || undefined,
+      });
+
+      const { error } = await supabase.from("reservations").insert({
+        tenant_id: tenant.id,
+        guest_name: parsed.guest_name,
+        guest_email: parsed.guest_email,
+        guest_phone: parsed.guest_phone ?? null,
+        guests_count: parsed.guests_count ?? null,
+        reservation_type: parsed.reservation_type,
+        date: parsed.date,
+        start_time: parsed.start_time ?? null,
+        special_requests: parsed.special_requests ?? null,
+        status: "pending",
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => setSubmitted(true),
+    onError: (err) => {
+      toast.error(t("booking.submitError"));
+    },
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrors({});
+
+    try {
+      bookingSchema.parse({
+        guest_name: form.guest_name,
+        guest_email: form.guest_email,
+        guest_phone: form.guest_phone || undefined,
+        guests_count: form.guests_count ? parseInt(form.guests_count) : undefined,
+        reservation_type: form.reservation_type,
+        date: selectedDate ? format(selectedDate, "yyyy-MM-dd") : "",
+        start_time: form.start_time || undefined,
+        special_requests: form.special_requests || undefined,
+      });
+      submitMutation.mutate();
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        const fieldErrors: Record<string, string> = {};
+        err.errors.forEach((e) => {
+          if (e.path[0]) fieldErrors[String(e.path[0])] = e.message;
+        });
+        setErrors(fieldErrors);
+      }
+    }
+  };
+
+  const updateField = (key: string, value: string) => {
+    setForm((prev) => ({ ...prev, [key]: value }));
+    if (errors[key]) setErrors((prev) => ({ ...prev, [key]: "" }));
+  };
+
+  const primaryColor = settings?.primary_color ?? "#1e3a5f";
+  const secondaryColor = settings?.secondary_color ?? "#f5f0e8";
+  const accentColor = settings?.accent_color ?? "#d4a853";
+  const businessName = settings?.business_name ?? tenant?.name ?? "";
+
+  if (loadingTenant) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: secondaryColor }}>
+        <Loader2 className="h-8 w-8 animate-spin" style={{ color: primaryColor }} />
+      </div>
+    );
+  }
+
+  if (!tenant) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center space-y-2">
+          <h1 className="text-2xl font-serif font-bold text-foreground">{t("booking.notFound")}</h1>
+          <p className="text-muted-foreground">{t("booking.notFoundDesc")}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (submitted) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: secondaryColor }}>
+        <Card className="max-w-md w-full text-center">
+          <CardContent className="pt-8 pb-8 space-y-4">
+            <CheckCircle className="h-16 w-16 mx-auto" style={{ color: accentColor }} />
+            <h2 className="text-2xl font-serif font-bold" style={{ color: primaryColor }}>
+              {t("booking.thankYou")}
+            </h2>
+            <p className="text-muted-foreground">{t("booking.confirmationMsg")}</p>
+            <Button
+              variant="outline"
+              onClick={() => { setSubmitted(false); setForm({ guest_name: "", guest_email: "", guest_phone: "", guests_count: "", reservation_type: "", start_time: "", special_requests: "", resource_id: "" }); setSelectedDate(undefined); }}
+            >
+              {t("booking.makeAnother")}
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const allowedTypes = tenant.allowed_reservation_types ?? [];
+
+  return (
+    <div className="min-h-screen" style={{ backgroundColor: secondaryColor }}>
+      {/* Header */}
+      <header className="border-b py-4 px-4 sm:px-6" style={{ backgroundColor: primaryColor }}>
+        <div className="max-w-3xl mx-auto flex items-center gap-3">
+          {settings?.logo_url && (
+            <img src={settings.logo_url} alt="" className="h-8 w-8 rounded-full object-cover" />
+          )}
+          <h1 className="text-xl font-serif font-bold text-white">{businessName}</h1>
+        </div>
+      </header>
+
+      <main className="max-w-3xl mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
+        <div>
+          <h2 className="text-2xl sm:text-3xl font-serif font-bold" style={{ color: primaryColor }}>
+            {t("booking.title")}
+          </h2>
+          {settings?.business_description && (
+            <p className="mt-1 text-sm" style={{ color: `${primaryColor}99` }}>
+              {settings.business_description}
+            </p>
+          )}
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Step 1: Type Selection */}
+          {allowedTypes.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg font-serif" style={{ color: primaryColor }}>
+                  {t("booking.selectType")}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-3 sm:grid-cols-3">
+                  {allowedTypes.map((type) => {
+                    const Icon = typeIcons[type] ?? Building2;
+                    const isSelected = form.reservation_type === type;
+                    return (
+                      <button
+                        key={type}
+                        type="button"
+                        onClick={() => updateField("reservation_type", type)}
+                        className="flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-all"
+                        style={{
+                          borderColor: isSelected ? accentColor : "#e5e5e5",
+                          backgroundColor: isSelected ? `${accentColor}15` : "transparent",
+                        }}
+                      >
+                        <Icon className="h-6 w-6" style={{ color: isSelected ? accentColor : primaryColor }} />
+                        <span className="text-sm font-medium capitalize" style={{ color: primaryColor }}>
+                          {t(`dashboard.${type}` as any)}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+                {errors.reservation_type && (
+                  <p className="text-sm text-destructive mt-2">{errors.reservation_type}</p>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Step 2: Date & Time */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg font-serif" style={{ color: primaryColor }}>
+                {t("booking.selectDateTime")}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-6 lg:grid-cols-[auto_1fr]">
+                <Calendar
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={(date) => { setSelectedDate(date); updateField("start_time", ""); }}
+                  disabled={isDateDisabled}
+                  className="rounded-md border p-3"
+                />
+                <div className="space-y-3">
+                  {selectedDate && (
+                    <p className="text-sm font-medium" style={{ color: primaryColor }}>
+                      {format(selectedDate, "EEEE, MMMM d, yyyy")}
+                    </p>
+                  )}
+                  {selectedDate && timeSlots.length > 0 && (
+                    <div className="space-y-2">
+                      <Label className="flex items-center gap-1">
+                        <Clock className="h-3.5 w-3.5" />
+                        {t("booking.selectTime")}
+                      </Label>
+                      <div className="flex flex-wrap gap-2">
+                        {timeSlots.map((slot) => (
+                          <button
+                            key={slot}
+                            type="button"
+                            onClick={() => updateField("start_time", slot)}
+                            className="px-3 py-1.5 text-sm rounded-md border transition-all"
+                            style={{
+                              borderColor: form.start_time === slot ? accentColor : "#e5e5e5",
+                              backgroundColor: form.start_time === slot ? `${accentColor}15` : "transparent",
+                              color: primaryColor,
+                            }}
+                          >
+                            {slot}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {selectedDate && timeSlots.length === 0 && openingHours && openingHours.length > 0 && (
+                    <p className="text-sm text-muted-foreground">{t("booking.closedDay")}</p>
+                  )}
+                  {/* Manual time if no opening hours configured */}
+                  {selectedDate && (!openingHours || openingHours.length === 0) && (
+                    <div className="space-y-2">
+                      <Label htmlFor="start_time">{t("booking.preferredTime")}</Label>
+                      <Input
+                        id="start_time"
+                        type="time"
+                        value={form.start_time}
+                        onChange={(e) => updateField("start_time", e.target.value)}
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+              {errors.date && <p className="text-sm text-destructive mt-2">{errors.date}</p>}
+            </CardContent>
+          </Card>
+
+          {/* Step 3: Resource selection (optional) */}
+          {resources && resources.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg font-serif" style={{ color: primaryColor }}>
+                  {t("booking.selectResource")}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {resources.map((res) => {
+                    const isSelected = form.resource_id === res.id;
+                    return (
+                      <button
+                        key={res.id}
+                        type="button"
+                        onClick={() => updateField("resource_id", isSelected ? "" : res.id)}
+                        className="text-left p-4 rounded-lg border-2 transition-all"
+                        style={{
+                          borderColor: isSelected ? accentColor : "#e5e5e5",
+                          backgroundColor: isSelected ? `${accentColor}15` : "transparent",
+                        }}
+                      >
+                        <p className="font-medium" style={{ color: primaryColor }}>{res.name}</p>
+                        {res.description && (
+                          <p className="text-xs mt-1 text-muted-foreground">{res.description}</p>
+                        )}
+                        <div className="flex gap-2 mt-2">
+                          {res.capacity && (
+                            <Badge variant="outline" className="text-xs">
+                              {res.capacity} {t("common.guests")}
+                            </Badge>
+                          )}
+                          {res.price_per_night != null && (
+                            <Badge variant="outline" className="text-xs">
+                              €{Number(res.price_per_night).toFixed(0)}{t("dashboard.perNight")}
+                            </Badge>
+                          )}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Step 4: Guest Details */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg font-serif" style={{ color: primaryColor }}>
+                {t("booking.yourDetails")}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="guest_name">{t("common.name")} *</Label>
+                  <Input
+                    id="guest_name"
+                    value={form.guest_name}
+                    onChange={(e) => updateField("guest_name", e.target.value)}
+                    maxLength={100}
+                    required
+                  />
+                  {errors.guest_name && <p className="text-sm text-destructive">{errors.guest_name}</p>}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="guest_email">{t("common.email")} *</Label>
+                  <Input
+                    id="guest_email"
+                    type="email"
+                    value={form.guest_email}
+                    onChange={(e) => updateField("guest_email", e.target.value)}
+                    maxLength={255}
+                    required
+                  />
+                  {errors.guest_email && <p className="text-sm text-destructive">{errors.guest_email}</p>}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="guest_phone">{t("common.phone")}</Label>
+                  <Input
+                    id="guest_phone"
+                    type="tel"
+                    value={form.guest_phone}
+                    onChange={(e) => updateField("guest_phone", e.target.value)}
+                    maxLength={30}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="guests_count">{t("booking.guestCount")}</Label>
+                  <Input
+                    id="guests_count"
+                    type="number"
+                    min={1}
+                    max={500}
+                    value={form.guests_count}
+                    onChange={(e) => updateField("guests_count", e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="special_requests">{t("booking.specialRequests")}</Label>
+                <Textarea
+                  id="special_requests"
+                  rows={3}
+                  value={form.special_requests}
+                  onChange={(e) => updateField("special_requests", e.target.value)}
+                  maxLength={1000}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Submit */}
+          <Button
+            type="submit"
+            size="lg"
+            className="w-full text-white font-medium"
+            style={{ backgroundColor: accentColor }}
+            disabled={submitMutation.isPending || !selectedDate || !form.reservation_type}
+          >
+            {submitMutation.isPending ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                {t("booking.submitting")}
+              </>
+            ) : (
+              t("booking.submit")
+            )}
+          </Button>
+        </form>
+
+        {/* Footer */}
+        <footer className="text-center py-6 text-xs text-muted-foreground">
+          {businessName && <p>{businessName}</p>}
+          {settings?.business_address && <p>{settings.business_address}</p>}
+          {settings?.business_phone && <p>{settings.business_phone}</p>}
+        </footer>
+      </main>
+    </div>
+  );
+};
+
+export default PublicBooking;

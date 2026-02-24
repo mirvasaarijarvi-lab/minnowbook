@@ -13,6 +13,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import Dashboard from "./pages/Dashboard";
 import Onboarding from "./pages/Onboarding";
+import PublicBooking from "./pages/PublicBooking";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -63,6 +64,7 @@ const App = () => (
                   </ProtectedRoute>
                 }
               />
+              <Route path="/book/:slug" element={<PublicBooking />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
