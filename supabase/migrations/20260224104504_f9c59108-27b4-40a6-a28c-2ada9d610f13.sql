@@ -1,0 +1,2 @@
+INSERT INTO public.reservations (tenant_id, reservation_type, date, guest_name, guest_email, guest_phone, guests_count, status)
+VALUES ('9ac05fbf-0834-44fd-a52a-d030b7074a30', 'hotel', '2026-02-25', 'Hotel Test Guest', 'hotel@example.com', '+358401234567', 2, 'pending')
