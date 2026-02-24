@@ -307,9 +307,10 @@ const ReportsPanel = () => {
 
   /* ── CSV Export ──────────────────────────────────────── */
   const handleExportCSV = () => {
-    const headers = [t("common.date"), t("reports.guest"), t("common.type"), t("common.guests"), t("common.status"), t("reports.used" as any), t("reports.breakfast" as any), t("reports.invoiced"), `${t("common.price")} (€)`, t("reports.notes")];
+    const headers = [t("common.date"), t("reports.guest"), t("common.type"), t("common.guests"), t("common.status"), t("reports.used" as any), t("reports.breakfast" as any), t("reports.invoiced"), `${t("common.price")} (€)`, `${t("reports.breakfast" as any)} (€)`, `${t("reports.total" as any)} (€)`, t("reports.notes")];
     const rows = reservations.map((r) => {
       const bfPrice = calcBreakfastPrice(r);
+      const roomPrice = calcRoomPrice(r);
       return [
         format(new Date(r.date + "T00:00:00"), "d.M.yyyy"),
         r.guest_name,
@@ -319,11 +320,13 @@ const ReportsPanel = () => {
         (r as any).is_used ? t("reports.yes") : t("reports.no"),
         r.breakfast_included ? t("reports.yes") : t("reports.no"),
         r.is_invoiced ? t("reports.yes") : t("reports.no"),
+        roomPrice.toFixed(2),
+        bfPrice.toFixed(2),
         effectivePrice(r).toFixed(2),
         r.internal_notes || "",
       ];
     });
-    rows.push(["", "", "", "", "", "", "", t("reports.grandTotal"), grandTotal.toFixed(2), ""]);
+    rows.push(["", "", "", "", "", "", "", t("reports.grandTotal"), "", "", grandTotal.toFixed(2), ""]);
 
     const csv = [headers, ...rows].map((row) => row.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(";")).join("\n");
     const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
