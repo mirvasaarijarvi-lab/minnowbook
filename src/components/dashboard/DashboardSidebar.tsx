@@ -2,6 +2,9 @@ import { CalendarDays, List, Settings, LogOut, LayoutDashboard } from "lucide-re
 import Logo from "@/components/Logo";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useT } from "@/contexts/I18nContext";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
+import { TranslationKey } from "@/i18n/translations";
 
 export type DashboardView = "overview" | "calendar" | "reservations" | "resources";
 
@@ -12,14 +15,16 @@ interface DashboardSidebarProps {
   onSignOut: () => void;
 }
 
-const navItems: { view: DashboardView; label: string; icon: React.ElementType }[] = [
-  { view: "overview", label: "Overview", icon: LayoutDashboard },
-  { view: "calendar", label: "Calendar", icon: CalendarDays },
-  { view: "reservations", label: "Reservations", icon: List },
-  { view: "resources", label: "Resources", icon: Settings },
+const navItems: { view: DashboardView; labelKey: TranslationKey; icon: React.ElementType }[] = [
+  { view: "overview", labelKey: "nav.overview", icon: LayoutDashboard },
+  { view: "calendar", labelKey: "nav.calendar", icon: CalendarDays },
+  { view: "reservations", labelKey: "nav.reservations", icon: List },
+  { view: "resources", labelKey: "nav.resources", icon: Settings },
 ];
 
 const DashboardSidebar = ({ currentView, onViewChange, userEmail, onSignOut }: DashboardSidebarProps) => {
+  const t = useT();
+
   return (
     <aside className="flex flex-col w-64 min-h-screen bg-sidebar-background border-r border-sidebar-border">
       <div className="p-4 border-b border-sidebar-border">
@@ -27,7 +32,7 @@ const DashboardSidebar = ({ currentView, onViewChange, userEmail, onSignOut }: D
       </div>
 
       <nav className="flex-1 p-3 space-y-1">
-        {navItems.map(({ view, label, icon: Icon }) => (
+        {navItems.map(({ view, labelKey, icon: Icon }) => (
           <button
             key={view}
             onClick={() => onViewChange(view)}
@@ -39,16 +44,17 @@ const DashboardSidebar = ({ currentView, onViewChange, userEmail, onSignOut }: D
             )}
           >
             <Icon className="h-4 w-4" />
-            {label}
+            {t(labelKey)}
           </button>
         ))}
       </nav>
 
       <div className="p-3 border-t border-sidebar-border space-y-2">
+        <LanguageSwitcher variant="compact" className="px-3" />
         <p className="text-xs text-muted-foreground truncate px-3">{userEmail}</p>
         <Button variant="ghost" size="sm" className="w-full justify-start gap-2" onClick={onSignOut}>
           <LogOut className="h-4 w-4" />
-          Log out
+          {t("common.logOut")}
         </Button>
       </div>
     </aside>

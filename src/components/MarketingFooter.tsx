@@ -1,64 +1,63 @@
 import { Link } from "react-router-dom";
 import Logo from "@/components/Logo";
+import { useT } from "@/contexts/I18nContext";
 
 const MarketingFooter = () => {
+  const t = useT();
+
   return (
     <footer className="border-t border-border bg-primary text-primary-foreground">
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* Brand */}
           <div className="md:col-span-1">
             <div className="mb-4">
               <Logo variant="negative" size="sm" showText={true} className="text-primary-foreground" />
             </div>
             <p className="text-sm text-primary-foreground/70 leading-relaxed">
-              The modern reservation platform for restaurants, venues, and guesthouses.
+              {t("footer.tagline")}
             </p>
           </div>
 
-          {/* Product */}
           <div>
             <h4 className="font-sans font-semibold text-sm mb-4 uppercase tracking-wider text-primary-foreground/50">
-              Product
+              {t("footer.product")}
             </h4>
             <ul className="space-y-2.5">
               <li>
                 <Link to="/pricing" className="text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors">
-                  Pricing
+                  {t("nav.pricing")}
                 </Link>
               </li>
               <li>
-                <span className="text-sm text-primary-foreground/40">Features (coming soon)</span>
+                <span className="text-sm text-primary-foreground/40">{t("footer.featuresComingSoon")}</span>
               </li>
             </ul>
           </div>
 
-          {/* Company */}
           <div>
             <h4 className="font-sans font-semibold text-sm mb-4 uppercase tracking-wider text-primary-foreground/50">
-              Company
+              {t("footer.company")}
             </h4>
             <ul className="space-y-2.5">
               <li>
-                <span className="text-sm text-primary-foreground/40">About (coming soon)</span>
+                <span className="text-sm text-primary-foreground/40">{t("footer.aboutComingSoon")}</span>
               </li>
               <li>
-                <span className="text-sm text-primary-foreground/40">Contact (coming soon)</span>
+                <span className="text-sm text-primary-foreground/40">{t("footer.contactComingSoon")}</span>
               </li>
             </ul>
           </div>
 
-          {/* Legal */}
           <div>
             <h4 className="font-sans font-semibold text-sm mb-4 uppercase tracking-wider text-primary-foreground/50">
-              Legal
+              {t("footer.legal")}
             </h4>
             <ul className="space-y-2.5">
               <li>
-                <span className="text-sm text-primary-foreground/40">Privacy Policy</span>
+                <span className="text-sm text-primary-foreground/40">{t("footer.privacyPolicy")}</span>
               </li>
               <li>
-                <span className="text-sm text-primary-foreground/40">Terms of Service</span>
+                <span className="text-sm text-primary-foreground/40">{t("footer.termsOfService")}</span>
               </li>
             </ul>
           </div>
@@ -66,7 +65,7 @@ const MarketingFooter = () => {
 
         <div className="border-t border-primary-foreground/10 mt-10 pt-6 text-center">
           <p className="text-xs text-primary-foreground/40">
-            © {new Date().getFullYear()} MinnowBook. All rights reserved.
+            © {new Date().getFullYear()} MinnowBook. {t("footer.allRightsReserved")}
           </p>
         </div>
       </div>

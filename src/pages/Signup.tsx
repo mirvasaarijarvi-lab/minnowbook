@@ -7,10 +7,13 @@ import { ArrowRight } from "lucide-react";
 import Logo from "@/components/Logo";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useT } from "@/contexts/I18nContext";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 const Signup = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const t = useT();
   const [form, setForm] = useState({
     businessName: "",
     ownerName: "",
@@ -21,12 +24,6 @@ const Signup = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
-
-  const generateSlug = (name: string) =>
-    name
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-|-$/g, "");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,9 +44,7 @@ const Signup = () => {
 
       if (authError) throw authError;
 
-      toast.success(
-        "Account created! Please check your email to verify your account before logging in."
-      );
+      toast.success(t("signup.accountCreated"));
       navigate("/login");
     } catch (error: any) {
       toast.error(error.message || "Failed to create account");
@@ -60,101 +55,53 @@ const Signup = () => {
 
   return (
     <div className="min-h-screen bg-background flex">
-      {/* Left side — branding */}
       <div className="hidden lg:flex lg:w-1/2 gradient-hero items-center justify-center p-12">
         <div className="max-w-md text-center">
           <Logo variant="negative" size="lg" className="justify-center mb-8" />
-          <h2 className="text-3xl font-serif font-bold text-white mb-4">
-            Start managing reservations today
-          </h2>
-          <p className="text-white/70 text-lg">
-            30-day free trial. No credit card required. Set up in minutes.
-          </p>
+          <h2 className="text-3xl font-serif font-bold text-white mb-4">{t("signup.heroTitle")}</h2>
+          <p className="text-white/70 text-lg">{t("signup.heroSubtitle")}</p>
         </div>
       </div>
 
-      {/* Right side — form */}
       <div className="flex-1 flex items-center justify-center p-8">
         <div className="w-full max-w-md">
-          <div className="lg:hidden mb-8">
-            <Link to="/">
-              <Logo variant="color" size="sm" />
-            </Link>
+          <div className="flex items-center justify-between mb-8">
+            <div className="lg:hidden">
+              <Link to="/"><Logo variant="color" size="sm" /></Link>
+            </div>
+            <LanguageSwitcher variant="compact" className="ml-auto" />
           </div>
 
-          <h1 className="text-2xl font-serif font-bold text-foreground mb-2">
-            Create your account
-          </h1>
-          <p className="text-muted-foreground mb-8">
-            Start your 30-day free trial, no credit card required.
-          </p>
+          <h1 className="text-2xl font-serif font-bold text-foreground mb-2">{t("signup.title")}</h1>
+          <p className="text-muted-foreground mb-8">{t("signup.subtitle")}</p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <Label htmlFor="businessName">Business name</Label>
-              <Input
-                id="businessName"
-                name="businessName"
-                placeholder="e.g. Restaurant Wiurila"
-                value={form.businessName}
-                onChange={handleChange}
-                required
-              />
+              <Label htmlFor="businessName">{t("signup.businessName")}</Label>
+              <Input id="businessName" name="businessName" placeholder="e.g. Restaurant Wiurila" value={form.businessName} onChange={handleChange} required />
             </div>
             <div>
-              <Label htmlFor="ownerName">Your name</Label>
-              <Input
-                id="ownerName"
-                name="ownerName"
-                placeholder="e.g. Matti Meikäläinen"
-                value={form.ownerName}
-                onChange={handleChange}
-                required
-              />
+              <Label htmlFor="ownerName">{t("signup.yourName")}</Label>
+              <Input id="ownerName" name="ownerName" placeholder="e.g. Matti Meikäläinen" value={form.ownerName} onChange={handleChange} required />
             </div>
             <div>
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                placeholder="you@example.com"
-                value={form.email}
-                onChange={handleChange}
-                required
-              />
+              <Label htmlFor="email">{t("common.email")}</Label>
+              <Input id="email" name="email" type="email" placeholder="you@example.com" value={form.email} onChange={handleChange} required />
             </div>
             <div>
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                placeholder="At least 6 characters"
-                value={form.password}
-                onChange={handleChange}
-                minLength={6}
-                required
-              />
+              <Label htmlFor="password">{t("common.password")}</Label>
+              <Input id="password" name="password" type="password" placeholder="At least 6 characters" value={form.password} onChange={handleChange} minLength={6} required />
             </div>
 
-            <Button
-              type="submit"
-              variant="hero"
-              size="lg"
-              className="w-full"
-              disabled={loading}
-            >
-              {loading ? "Creating account..." : "Start Free Trial"}
+            <Button type="submit" variant="hero" size="lg" className="w-full" disabled={loading}>
+              {loading ? t("signup.creatingAccount") : t("common.startFreeTrial")}
               <ArrowRight className="h-4 w-4" />
             </Button>
           </form>
 
           <p className="mt-6 text-center text-sm text-muted-foreground">
-            Already have an account?{" "}
-            <Link to="/login" className="text-accent font-medium hover:underline">
-              Log in
-            </Link>
+            {t("signup.alreadyHaveAccount")}{" "}
+            <Link to="/login" className="text-accent font-medium hover:underline">{t("common.logIn")}</Link>
           </p>
         </div>
       </div>

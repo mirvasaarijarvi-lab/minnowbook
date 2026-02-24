@@ -5,13 +5,15 @@ import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useState, useMemo } from "react";
-import { format, startOfMonth, endOfMonth, isSameDay } from "date-fns";
+import { format, startOfMonth, endOfMonth } from "date-fns";
 import { cn } from "@/lib/utils";
+import { useT } from "@/contexts/I18nContext";
 
 const CalendarView = () => {
   const { tenantId } = useTenant();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [month, setMonth] = useState(new Date());
+  const t = useT();
 
   const monthStart = format(startOfMonth(month), "yyyy-MM-dd");
   const monthEnd = format(endOfMonth(month), "yyyy-MM-dd");
@@ -21,11 +23,8 @@ const CalendarView = () => {
     queryFn: async () => {
       if (!tenantId) return [];
       const { data, error } = await supabase
-        .from("reservations")
-        .select("*")
-        .eq("tenant_id", tenantId)
-        .gte("date", monthStart)
-        .lte("date", monthEnd)
+        .from("reservations").select("*").eq("tenant_id", tenantId)
+        .gte("date", monthStart).lte("date", monthEnd)
         .order("start_time", { ascending: true });
       if (error) throw error;
       return data;
@@ -35,41 +34,27 @@ const CalendarView = () => {
 
   const reservationDates = useMemo(() => {
     const map = new Map<string, number>();
-    reservations?.forEach((r) => {
-      const key = r.date;
-      map.set(key, (map.get(key) ?? 0) + 1);
-    });
+    reservations?.forEach((r) => { map.set(r.date, (map.get(r.date) ?? 0) + 1); });
     return map;
   }, [reservations]);
 
   const selectedDayReservations = useMemo(() => {
     if (!selectedDate || !reservations) return [];
-    const dateStr = format(selectedDate, "yyyy-MM-dd");
-    return reservations.filter((r) => r.date === dateStr);
+    return reservations.filter((r) => r.date === format(selectedDate, "yyyy-MM-dd"));
   }, [selectedDate, reservations]);
 
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl font-serif font-bold text-foreground">Calendar</h2>
+      <h2 className="text-2xl font-serif font-bold text-foreground">{t("nav.calendar")}</h2>
       <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr] gap-6">
         <Card>
           <CardContent className="p-4">
             <Calendar
-              mode="single"
-              selected={selectedDate}
-              onSelect={setSelectedDate}
-              month={month}
-              onMonthChange={setMonth}
+              mode="single" selected={selectedDate} onSelect={setSelectedDate}
+              month={month} onMonthChange={setMonth}
               className={cn("p-3 pointer-events-auto")}
-              modifiers={{
-                hasReservation: (date) => {
-                  const key = format(date, "yyyy-MM-dd");
-                  return reservationDates.has(key);
-                },
-              }}
-              modifiersClassNames={{
-                hasReservation: "bg-accent/20 font-bold text-accent-foreground",
-              }}
+              modifiers={{ hasReservation: (date) => reservationDates.has(format(date, "yyyy-MM-dd")) }}
+              modifiersClassNames={{ hasReservation: "bg-accent/20 font-bold text-accent-foreground" }}
             />
           </CardContent>
         </Card>
@@ -77,12 +62,12 @@ const CalendarView = () => {
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-lg font-serif">
-              {selectedDate ? format(selectedDate, "EEEE, MMMM d, yyyy") : "Select a date"}
+              {selectedDate ? format(selectedDate, "EEEE, MMMM d, yyyy") : t("dashboard.selectDate")}
             </CardTitle>
           </CardHeader>
           <CardContent>
             {selectedDayReservations.length === 0 ? (
-              <p className="text-muted-foreground text-sm">No reservations on this day.</p>
+              <p className="text-muted-foreground text-sm">{t("dashboard.noReservationsDay")}</p>
             ) : (
               <div className="space-y-3">
                 {selectedDayReservations.map((r) => (
@@ -92,7 +77,7 @@ const CalendarView = () => {
                       <p className="text-sm text-muted-foreground">
                         {r.start_time?.slice(0, 5)}
                         {r.end_time && ` – ${r.end_time.slice(0, 5)}`}
-                        {r.guests_count && ` · ${r.guests_count} guests`}
+                        {r.guests_count && ` · ${r.guests_count} ${t("common.guests")}`}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
@@ -102,9 +87,7 @@ const CalendarView = () => {
                         r.status === "confirmed" && "bg-green-100 text-green-800",
                         r.status === "pending" && "bg-yellow-100 text-yellow-800",
                         r.status === "cancelled" && "bg-red-100 text-red-800",
-                      )}>
-                        {r.status}
-                      </Badge>
+                      )}>{r.status}</Badge>
                     </div>
                   </div>
                 ))}
