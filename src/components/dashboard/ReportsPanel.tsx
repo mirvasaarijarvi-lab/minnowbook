@@ -39,7 +39,7 @@ interface ReservationRow {
   date: string;
   check_out_date: string | null;
   is_invoiced: boolean | null;
-  is_used: boolean | null;
+  is_used: boolean;
   guest_name: string;
   guests_count: number | null;
   estimated_guests: number | null;
@@ -48,6 +48,7 @@ interface ReservationRow {
   internal_notes: string | null;
   breakfast_included: boolean | null;
   breakfast_price_per_person: number | null;
+  room_type: string | null;
 }
 
 const localeMap: Record<string, Locale> = { fi: fiFns, en: enUS, sv: svFns };
@@ -171,7 +172,7 @@ const ReportsPanel = () => {
       if (!tenantId) return [];
       const { data, error } = await supabase
         .from("reservations")
-        .select("id, reservation_type, status, date, check_out_date, is_invoiced, guest_name, guests_count, estimated_guests, price_eur, pricing_details, internal_notes, breakfast_included, breakfast_price_per_person")
+        .select("id, reservation_type, status, date, check_out_date, is_invoiced, is_used, guest_name, guests_count, estimated_guests, price_eur, pricing_details, internal_notes, breakfast_included, breakfast_price_per_person, room_type")
         .eq("tenant_id", tenantId)
         .gte("date", startStr)
         .lte("date", endStr)
@@ -189,7 +190,7 @@ const ReportsPanel = () => {
       if (!tenantId) return [];
       const { data, error } = await supabase
         .from("reservations")
-        .select("id, reservation_type, status, date, check_out_date, is_invoiced, guest_name, guests_count, estimated_guests, price_eur, pricing_details, internal_notes, breakfast_included, breakfast_price_per_person")
+        .select("id, reservation_type, status, date, check_out_date, is_invoiced, is_used, guest_name, guests_count, estimated_guests, price_eur, pricing_details, internal_notes, breakfast_included, breakfast_price_per_person, room_type")
         .eq("tenant_id", tenantId)
         .gte("date", prevStartStr)
         .lte("date", prevEndStr)
@@ -275,14 +276,14 @@ const ReportsPanel = () => {
     const src = typeFilteredRaw;
     const total = src.length;
     const invoiced = src.filter((r) => r.is_invoiced).length;
-    const used = src.filter((r) => (r as any).is_used).length;
+    const used = src.filter((r) => r.is_used).length;
     const totalEur = src.reduce((s, r) => s + effectivePrice(r), 0);
     const invoicedEur = src.filter((r) => r.is_invoiced).reduce((s, r) => s + effectivePrice(r), 0);
-    const usedEur = src.filter((r) => (r as any).is_used).reduce((s, r) => s + effectivePrice(r), 0);
+    const usedEur = src.filter((r) => r.is_used).reduce((s, r) => s + effectivePrice(r), 0);
     const byType = (tp: string) => {
       const items = src.filter((r) => r.reservation_type === tp);
       const inv = items.filter((r) => r.is_invoiced);
-      const usedItems = items.filter((r) => (r as any).is_used);
+      const usedItems = items.filter((r) => r.is_used);
       return {
         total: items.length, invoiced: inv.length, notInvoiced: items.length - inv.length,
         used: usedItems.length, notUsed: items.length - usedItems.length,
@@ -317,7 +318,7 @@ const ReportsPanel = () => {
         r.reservation_type,
         String(r.guests_count || r.estimated_guests || "-"),
         r.status,
-        (r as any).is_used ? t("reports.yes") : t("reports.no"),
+        r.is_used ? t("reports.yes") : t("reports.no"),
         r.breakfast_included ? `${t("reports.yes")} (${bfPrice.toFixed(2)}€)` : t("reports.no"),
         r.is_invoiced ? t("reports.yes") : t("reports.no"),
         roomPrice.toFixed(2),
@@ -357,7 +358,7 @@ const ReportsPanel = () => {
         <td>${r.reservation_type}</td>
         <td>${r.guests_count || r.estimated_guests || "-"}</td>
         <td>${r.status}</td>
-        <td>${(r as any).is_used ? "✓" : "✗"}</td>
+        <td>${r.is_used ? "✓" : "✗"}</td>
         <td>${r.breakfast_included ? "✓ (" + fmtEur(bfPrice) + ")" : "✗"}</td>
         <td>${r.is_invoiced ? "✓" : "✗"}</td>
         <td style="text-align:right">${total > 0 ? fmtEur(total) : "—"}</td>
@@ -698,14 +699,14 @@ const ReportsPanel = () => {
                             <Badge variant={r.status === "confirmed" ? "default" : "secondary"}>{r.status}</Badge>
                           </TableCell>
                           <TableCell>
-                            {(r as any).is_used
+                            {r.is_used
                               ? <span className="flex items-center gap-1 text-primary"><CheckCircle2 className="h-4 w-4" />{t("reports.yes")}</span>
                               : <span className="flex items-center gap-1 text-muted-foreground"><Clock className="h-4 w-4" />{t("reports.no")}</span>
                             }
                           </TableCell>
                           <TableCell>
                             {r.breakfast_included
-                              ? <span className="flex items-center gap-1 text-primary"><Coffee className="h-4 w-4" />{t("reports.yes")}</span>
+                              ? <span className="flex items-center gap-1 text-primary"><Coffee className="h-4 w-4" />{t("reports.yes")} ({bfPrice.toLocaleString("fi-FI", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €)</span>
                               : <span className="text-muted-foreground">—</span>
                             }
                           </TableCell>
