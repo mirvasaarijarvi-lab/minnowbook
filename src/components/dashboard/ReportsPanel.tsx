@@ -308,10 +308,17 @@ const ReportsPanel = () => {
 
   /* ── CSV Export ──────────────────────────────────────── */
   const handleExportCSV = () => {
-    const headers = [t("common.date"), t("reports.guest"), t("common.type"), t("common.guests"), t("common.status"), t("reports.used" as any), t("reports.breakfast" as any), t("reports.invoiced"), `${t("common.price")} (€)`, `${t("reports.breakfast" as any)} (€)`, `${t("reports.total" as any)} (€)`, t("reports.notes")];
+    const headers = [t("common.date"), t("reports.guest"), t("common.type"), t("common.guests"), t("common.status"), t("reports.used" as any), t("reports.breakfast" as any), t("reports.invoiced"), `${t("common.price")} (€)`, t("reports.notes")];
     const rows = reservations.map((r) => {
       const bfPrice = calcBreakfastPrice(r);
       const roomPrice = calcRoomPrice(r);
+      const total = effectivePrice(r);
+      let priceStr: string;
+      if (bfPrice > 0) {
+        priceStr = `${t("dashboard.room" as any)}: ${roomPrice.toFixed(2)} + ${t("reports.breakfast" as any)}: ${bfPrice.toFixed(2)} = ${total.toFixed(2)}`;
+      } else {
+        priceStr = total.toFixed(2);
+      }
       return [
         format(new Date(r.date + "T00:00:00"), "d.M.yyyy"),
         r.guest_name,
@@ -319,15 +326,13 @@ const ReportsPanel = () => {
         String(r.guests_count || r.estimated_guests || "-"),
         r.status,
         r.is_used ? t("reports.yes") : t("reports.no"),
-        r.breakfast_included ? `${t("reports.yes")} (${bfPrice.toFixed(2)}€)` : t("reports.no"),
+        r.breakfast_included ? t("reports.yes") : t("reports.no"),
         r.is_invoiced ? t("reports.yes") : t("reports.no"),
-        roomPrice.toFixed(2),
-        bfPrice.toFixed(2),
-        effectivePrice(r).toFixed(2),
+        priceStr,
         r.internal_notes || "",
       ];
     });
-    rows.push(["", "", "", "", "", "", "", t("reports.grandTotal"), "", "", grandTotal.toFixed(2), ""]);
+    rows.push(["", "", "", "", "", "", "", t("reports.grandTotal"), grandTotal.toFixed(2), ""]);
 
     const csv = [headers, ...rows].map((row) => row.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(";")).join("\n");
     const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
@@ -352,6 +357,12 @@ const ReportsPanel = () => {
       const total = effectivePrice(r);
       const bfPrice = calcBreakfastPrice(r);
       const roomPrice = calcRoomPrice(r);
+      let priceCell: string;
+      if (bfPrice > 0 && total > 0) {
+        priceCell = `<span style="white-space:nowrap">${fmtEur(roomPrice)}</span><br><span style="font-size:0.7rem;color:#666">+ ${t("reports.breakfast" as any)}: ${fmtEur(bfPrice)}</span><br><strong>${fmtEur(total)}</strong>`;
+      } else {
+        priceCell = total > 0 ? fmtEur(total) : "—";
+      }
       return `<tr>
         <td>${format(new Date(r.date + "T00:00:00"), "d.M.yyyy")}</td>
         <td>${r.guest_name}</td>
@@ -359,9 +370,9 @@ const ReportsPanel = () => {
         <td>${r.guests_count || r.estimated_guests || "-"}</td>
         <td>${r.status}</td>
         <td>${r.is_used ? "✓" : "✗"}</td>
-        <td>${r.breakfast_included ? "✓ (" + fmtEur(bfPrice) + ")" : "✗"}</td>
+        <td>${r.breakfast_included ? "✓" : "✗"}</td>
         <td>${r.is_invoiced ? "✓" : "✗"}</td>
-        <td style="text-align:right">${total > 0 ? fmtEur(total) : "—"}</td>
+        <td style="text-align:right">${priceCell}</td>
       </tr>`;
     }).join("");
 
@@ -706,7 +717,7 @@ const ReportsPanel = () => {
                           </TableCell>
                           <TableCell>
                             {r.breakfast_included
-                              ? <span className="flex items-center gap-1 text-primary"><Coffee className="h-4 w-4" />{t("reports.yes")} ({bfPrice.toLocaleString("fi-FI", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €)</span>
+                              ? <span className="flex items-center gap-1 text-primary"><Coffee className="h-4 w-4" />{t("reports.yes")}</span>
                               : <span className="text-muted-foreground">—</span>
                             }
                           </TableCell>
@@ -717,7 +728,17 @@ const ReportsPanel = () => {
                             }
                           </TableCell>
                           <TableCell className="text-sm font-medium whitespace-nowrap">
-                            {total > 0 ? `${total.toLocaleString("fi-FI", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €` : "—"}
+                            {total > 0 ? (
+                              bfPrice > 0 ? (
+                                <div>
+                                  <span>{calcRoomPrice(r).toLocaleString("fi-FI", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €</span>
+                                  <div className="text-xs text-muted-foreground font-normal">+ {t("reports.breakfast" as any)}: {bfPrice.toLocaleString("fi-FI", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €</div>
+                                  <span className="font-bold">{total.toLocaleString("fi-FI", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €</span>
+                                </div>
+                              ) : (
+                                `${total.toLocaleString("fi-FI", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`
+                              )
+                            ) : "—"}
                           </TableCell>
                           <TableCell className="text-sm text-muted-foreground max-w-[200px] truncate">{r.internal_notes || "-"}</TableCell>
                         </TableRow>
