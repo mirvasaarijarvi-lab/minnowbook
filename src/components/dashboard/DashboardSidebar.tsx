@@ -59,11 +59,14 @@ const DashboardSidebar = ({ currentView, onViewChange, userEmail, onSignOut, mob
           mobileOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full lg:translate-x-0"
         )}
       >
-        <div className="p-4 border-b border-sidebar-border flex items-center justify-between">
-          <Logo variant="color" size="sm" />
-          <button className="lg:hidden p-1.5 rounded-md hover:bg-sidebar-accent/50 text-muted-foreground transition-colors" onClick={onMobileToggle} aria-label="Close menu">
-            <X className="h-5 w-5" />
-          </button>
+        <div className="p-4 border-b border-sidebar-border space-y-3">
+          <div className="flex items-center justify-between">
+            <Logo variant="color" size="sm" />
+            <button className="lg:hidden p-1.5 rounded-md hover:bg-sidebar-accent/50 text-muted-foreground transition-colors" onClick={onMobileToggle} aria-label="Close menu">
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+          <LanguageSwitcher variant="compact" />
         </div>
 
         <nav data-tour="sidebar-nav" className="flex-1 p-3 space-y-1 overflow-y-auto">
@@ -85,7 +88,6 @@ const DashboardSidebar = ({ currentView, onViewChange, userEmail, onSignOut, mob
         </nav>
 
         <div className="p-3 border-t border-sidebar-border space-y-2">
-          <LanguageSwitcher variant="compact" className="px-3" />
           <p className="text-xs text-muted-foreground truncate px-3">{userEmail}</p>
           <Button variant="ghost" size="sm" className="w-full justify-start gap-2" onClick={onSignOut}>
             <LogOut className="h-4 w-4" />
