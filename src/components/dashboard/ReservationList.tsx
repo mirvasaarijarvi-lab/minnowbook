@@ -9,7 +9,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useState } from "react";
 import { format } from "date-fns";
-import { CalendarDays, User, Mail, Phone, MoreVertical, CheckCircle2, XCircle } from "lucide-react";
+import { CalendarDays, User, Mail, Phone, MoreVertical, CheckCircle2, XCircle, Pencil } from "lucide-react";
+import EditReservationDialog from "./EditReservationDialog";
 import { useT } from "@/contexts/I18nContext";
 import { toast } from "sonner";
 
@@ -24,6 +25,7 @@ const ReservationList = () => {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [confirmDialog, setConfirmDialog] = useState<{ id: string; action: "confirmed" | "cancelled" } | null>(null);
+  const [editingReservation, setEditingReservation] = useState<any | null>(null);
   const t = useT();
   const queryClient = useQueryClient();
 
@@ -132,19 +134,23 @@ const ReservationList = () => {
                           <MoreVertical className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        {r.status !== "confirmed" && (
-                          <DropdownMenuItem onClick={() => setConfirmDialog({ id: r.id, action: "confirmed" })} className="gap-2">
-                            <CheckCircle2 className="h-4 w-4 text-primary" />
-                            {t("dashboard.confirmReservation")}
+                        <DropdownMenuContent align="end">
+                         <DropdownMenuItem onClick={() => setEditingReservation(r)} className="gap-2">
+                            <Pencil className="h-4 w-4" />
+                            {t("dashboard.editReservation")}
                           </DropdownMenuItem>
-                        )}
-                        {r.status !== "cancelled" && (
-                          <DropdownMenuItem onClick={() => setConfirmDialog({ id: r.id, action: "cancelled" })} className="gap-2 text-destructive focus:text-destructive">
-                            <XCircle className="h-4 w-4" />
-                            {t("dashboard.cancelReservation")}
-                          </DropdownMenuItem>
-                        )}
+                          {r.status !== "confirmed" && (
+                           <DropdownMenuItem onClick={() => setConfirmDialog({ id: r.id, action: "confirmed" })} className="gap-2">
+                             <CheckCircle2 className="h-4 w-4 text-primary" />
+                             {t("dashboard.confirmReservation")}
+                           </DropdownMenuItem>
+                         )}
+                         {r.status !== "cancelled" && (
+                           <DropdownMenuItem onClick={() => setConfirmDialog({ id: r.id, action: "cancelled" })} className="gap-2 text-destructive focus:text-destructive">
+                             <XCircle className="h-4 w-4" />
+                             {t("dashboard.cancelReservation")}
+                           </DropdownMenuItem>
+                         )}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
@@ -178,6 +184,13 @@ const ReservationList = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Edit dialog */}
+      <EditReservationDialog
+        reservation={editingReservation}
+        open={!!editingReservation}
+        onOpenChange={(open) => !open && setEditingReservation(null)}
+      />
     </div>
   );
 };
