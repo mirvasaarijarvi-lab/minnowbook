@@ -717,20 +717,37 @@ const PublicBooking = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid gap-6 lg:grid-cols-[auto_1fr]">
-                <Calendar
-                  mode="single"
-                  selected={selectedDate}
-                  onSelect={(date) => { setSelectedDate(date); updateField("start_time", ""); }}
-                  disabled={isDateDisabled}
-                  className="rounded-md border p-3"
-                />
+              <div className="grid gap-6 lg:grid-cols-[1fr_1fr]">
+                <div className="space-y-2">
+                  <Label>{t("common.date")} *</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !selectedDate && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {selectedDate
+                          ? format(selectedDate, "EEEE, MMMM d, yyyy")
+                          : <span>{t("booking.pickDate" as any) || "Pick a date"}</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={selectedDate}
+                        onSelect={(date) => { setSelectedDate(date); updateField("start_time", ""); }}
+                        disabled={isDateDisabled}
+                        initialFocus
+                        className={cn("p-3 pointer-events-auto")}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
                 <div className="space-y-3">
-                  {selectedDate && (
-                    <p className="text-sm font-medium" style={{ color: primaryColor }}>
-                      {format(selectedDate, "EEEE, MMMM d, yyyy")}
-                    </p>
-                  )}
                   {selectedDate && timeSlots.length > 0 && (
                     <div className="space-y-2">
                       <Label className="flex items-center gap-1">
