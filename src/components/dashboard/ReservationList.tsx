@@ -88,6 +88,7 @@ const ReservationList = () => {
               <SelectItem value="restaurant">{t("dashboard.restaurant")}</SelectItem>
               <SelectItem value="venue">{t("dashboard.venue")}</SelectItem>
               <SelectItem value="guesthouse">{t("dashboard.guesthouse")}</SelectItem>
+              <SelectItem value="hotel">{t("dashboard.hotel")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
