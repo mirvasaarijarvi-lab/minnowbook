@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import DashboardTooltip from "./DashboardTooltip";
 import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/hooks/useTenant";
 import { Badge } from "@/components/ui/badge";
@@ -107,7 +108,10 @@ const ReservationList = () => {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between" data-tour="reservations-filters">
-        <h2 className="text-2xl font-serif font-bold text-foreground">{t("nav.reservations")}</h2>
+        <div className="flex items-center gap-2">
+          <h2 className="text-2xl font-serif font-bold text-foreground">{t("nav.reservations")}</h2>
+          <DashboardTooltip text="View, filter, and manage all reservations. Use status and type filters to narrow results. Click a reservation to edit details, confirm, cancel, or check in guests." />
+        </div>
         <div className="flex gap-2">
           <Button
             variant={dateFilter === "today" ? "default" : "outline"}

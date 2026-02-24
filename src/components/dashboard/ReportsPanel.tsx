@@ -30,6 +30,7 @@ import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
+import DashboardTooltip from "./DashboardTooltip";
 
 interface ReservationRow {
   id: string;
@@ -434,7 +435,10 @@ const ReportsPanel = () => {
 
   return (
     <div className="space-y-6 max-w-6xl">
-      <h2 className="text-2xl font-serif font-bold text-foreground">{t("nav.reports")}</h2>
+      <div className="flex items-center gap-2">
+        <h2 className="text-2xl font-serif font-bold text-foreground">{t("nav.reports")}</h2>
+        <DashboardTooltip text="Analyze reservation trends, revenue, and occupancy. Filter by time period and compare against previous periods. Export CSV or print reports for your records." />
+      </div>
 
       {/* Filters row */}
        <div className="flex flex-wrap items-center gap-2" data-tour="reports-filters">
