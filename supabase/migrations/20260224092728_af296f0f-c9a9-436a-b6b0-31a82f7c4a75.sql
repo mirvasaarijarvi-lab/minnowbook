@@ -1,0 +1,1 @@
+ALTER TABLE public.tenant_settings ADD COLUMN availability_thresholds jsonb DEFAULT '{"restaurant": 5, "venue": 5, "guesthouse": 5, "hotel": 5}'::jsonb;

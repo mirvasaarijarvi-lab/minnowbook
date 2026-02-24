@@ -328,6 +328,7 @@ export type Database = {
       tenant_settings: {
         Row: {
           accent_color: string | null
+          availability_thresholds: Json | null
           business_address: string | null
           business_description: string | null
           business_email: string | null
@@ -346,6 +347,7 @@ export type Database = {
         }
         Insert: {
           accent_color?: string | null
+          availability_thresholds?: Json | null
           business_address?: string | null
           business_description?: string | null
           business_email?: string | null
@@ -364,6 +366,7 @@ export type Database = {
         }
         Update: {
           accent_color?: string | null
+          availability_thresholds?: Json | null
           business_address?: string | null
           business_description?: string | null
           business_email?: string | null

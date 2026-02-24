@@ -25,7 +25,7 @@ const ALLOWED_TYPES = ["image/png", "image/jpeg", "image/webp", "image/svg+xml"]
 const ALLOWED_HERO_TYPES = ["image/png", "image/jpeg", "image/webp"];
 
 const SettingsPanel = () => {
-  const { tenantId } = useTenant();
+  const { tenantId, tenant } = useTenant();
   const t = useT();
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -61,6 +61,9 @@ const SettingsPanel = () => {
     hero_image_url: "",
   });
 
+  const DEFAULT_THRESHOLDS: Record<string, number> = { restaurant: 5, venue: 5, guesthouse: 5, hotel: 5 };
+  const [thresholds, setThresholds] = useState<Record<string, number>>(DEFAULT_THRESHOLDS);
+
   useEffect(() => {
     if (settings) {
       setForm({
@@ -75,6 +78,9 @@ const SettingsPanel = () => {
         logo_url: settings.logo_url ?? "",
         hero_image_url: settings.hero_image_url ?? "",
       });
+      if (settings.availability_thresholds && typeof settings.availability_thresholds === "object") {
+        setThresholds({ ...DEFAULT_THRESHOLDS, ...(settings.availability_thresholds as Record<string, number>) });
+      }
     }
   }, [settings]);
 
@@ -176,6 +182,7 @@ const SettingsPanel = () => {
           accent_color: form.accent_color,
           logo_url: form.logo_url || null,
           hero_image_url: form.hero_image_url || null,
+          availability_thresholds: thresholds as any,
         })
         .eq("id", settings.id);
       if (error) throw error;
@@ -432,6 +439,36 @@ const SettingsPanel = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Availability Thresholds */}
+      {tenant?.allowed_reservation_types?.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg font-serif">{t("settings.availabilityThresholds")}</CardTitle>
+            <p className="text-sm text-muted-foreground">{t("settings.availabilityThresholdsDesc")}</p>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {(tenant.allowed_reservation_types as string[]).map((type: string) => (
+                <div key={type} className="space-y-2">
+                  <Label className="capitalize">{t(`dashboard.${type}` as any)}</Label>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="number"
+                      min={1}
+                      max={100}
+                      value={thresholds[type] ?? 5}
+                      onChange={(e) => setThresholds((prev) => ({ ...prev, [type]: parseInt(e.target.value) || 5 }))}
+                      className="w-24"
+                    />
+                    <span className="text-sm text-muted-foreground">{t("booking.reservations")}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Save */}
       <div className="flex justify-end">
