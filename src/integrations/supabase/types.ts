@@ -90,6 +90,7 @@ export type Database = {
           guests_count: number | null
           id: string
           internal_notes: string | null
+          is_checked_in: boolean
           is_invoiced: boolean | null
           language: string | null
           no_email_ack: boolean | null
@@ -127,6 +128,7 @@ export type Database = {
           guests_count?: number | null
           id?: string
           internal_notes?: string | null
+          is_checked_in?: boolean
           is_invoiced?: boolean | null
           language?: string | null
           no_email_ack?: boolean | null
@@ -164,6 +166,7 @@ export type Database = {
           guests_count?: number | null
           id?: string
           internal_notes?: string | null
+          is_checked_in?: boolean
           is_invoiced?: boolean | null
           language?: string | null
           no_email_ack?: boolean | null

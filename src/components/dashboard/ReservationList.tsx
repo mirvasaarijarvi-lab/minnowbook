@@ -4,6 +4,7 @@ import { useTenant } from "@/hooks/useTenant";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -25,18 +26,21 @@ const ReservationList = () => {
   const { tenantId, tenant } = useTenant();
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [dateFilter, setDateFilter] = useState<string>("all");
   const [confirmDialog, setConfirmDialog] = useState<{ id: string; action: "confirmed" | "cancelled" } | null>(null);
   const [editingReservation, setEditingReservation] = useState<any | null>(null);
   const t = useT();
   const queryClient = useQueryClient();
+  const today = format(new Date(), "yyyy-MM-dd");
 
   const { data: reservations, isLoading } = useQuery({
-    queryKey: ["reservations", tenantId, statusFilter, typeFilter],
+    queryKey: ["reservations", tenantId, statusFilter, typeFilter, dateFilter],
     queryFn: async () => {
       if (!tenantId) return [];
       let query = supabase.from("reservations").select("*").eq("tenant_id", tenantId).order("date", { ascending: false });
       if (statusFilter !== "all") query = query.eq("status", statusFilter);
       if (typeFilter !== "all") query = query.eq("reservation_type", typeFilter);
+      if (dateFilter === "today") query = query.eq("date", today);
       const { data, error } = await query.limit(100);
       if (error) throw error;
       return data;
@@ -78,6 +82,23 @@ const ReservationList = () => {
     },
   });
 
+  const toggleCheckIn = useMutation({
+    mutationFn: async ({ id, checked }: { id: string; checked: boolean }) => {
+      const { error } = await supabase
+        .from("reservations")
+        .update({ is_checked_in: checked, updated_at: new Date().toISOString() } as any)
+        .eq("id", id)
+        .eq("tenant_id", tenantId!);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["reservations"] });
+    },
+    onError: () => {
+      toast.error("Error updating check-in status");
+    },
+  });
+
   const handleAction = () => {
     if (!confirmDialog) return;
     updateStatus.mutate({ id: confirmDialog.id, status: confirmDialog.action });
@@ -88,6 +109,13 @@ const ReservationList = () => {
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-serif font-bold text-foreground">{t("nav.reservations")}</h2>
         <div className="flex gap-2">
+          <Button
+            variant={dateFilter === "today" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setDateFilter(dateFilter === "today" ? "all" : "today")}
+          >
+            {t("dashboard.todayFilter" as any)}
+          </Button>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="w-[140px]"><SelectValue placeholder={t("common.status")} /></SelectTrigger>
             <SelectContent>
@@ -120,15 +148,34 @@ const ReservationList = () => {
       ) : (
         <div className="space-y-2">
           {reservations.map((r) => (
-            <Card key={r.id} className="hover:shadow-hover transition-shadow">
+            <Card
+              key={r.id}
+              className="hover:shadow-hover transition-shadow cursor-pointer"
+              onClick={() => {
+                const current = (r as any).is_checked_in ?? false;
+                toggleCheckIn.mutate({ id: r.id, checked: !current });
+              }}
+            >
               <CardContent className="p-4">
                 <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1 min-w-0">
+                  <div className="flex items-start gap-3">
+                    <Checkbox
+                      checked={(r as any).is_checked_in ?? false}
+                      className="mt-1"
+                      onClick={(e) => e.stopPropagation()}
+                      onCheckedChange={(checked) => {
+                        toggleCheckIn.mutate({ id: r.id, checked: !!checked });
+                      }}
+                    />
+                    <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                       <span className="font-semibold text-foreground">{r.guest_name}</span>
                       <Badge variant="outline" className="text-xs capitalize">{r.reservation_type}</Badge>
-                      <Badge className={`text-xs ${statusColors[r.status ?? "pending"] ?? ""}`}>{r.status}</Badge>
-                    </div>
+                        <Badge className={`text-xs ${statusColors[r.status ?? "pending"] ?? ""}`}>{r.status}</Badge>
+                        {(r as any).is_checked_in && (
+                          <Badge className="text-xs bg-emerald-100 text-emerald-800 border-emerald-200">{t("dashboard.checkedIn" as any)}</Badge>
+                        )}
+                      </div>
                     <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
                       <span className="flex items-center gap-1">
                         <CalendarDays className="h-3.5 w-3.5" />
@@ -138,6 +185,7 @@ const ReservationList = () => {
                       <span className="flex items-center gap-1"><Mail className="h-3.5 w-3.5" />{r.guest_email}</span>
                       {r.guest_phone && <span className="flex items-center gap-1"><Phone className="h-3.5 w-3.5" />{r.guest_phone}</span>}
                       {r.guests_count && <span className="flex items-center gap-1"><User className="h-3.5 w-3.5" />{r.guests_count} {t("common.guests")}</span>}
+                    </div>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
