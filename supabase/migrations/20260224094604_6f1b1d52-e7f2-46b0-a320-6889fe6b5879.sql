@@ -1,0 +1,1 @@
+UPDATE tenant_settings SET availability_thresholds = '{"restaurant": 1, "venue": 5, "guesthouse": 5, "hotel": 5}'::jsonb WHERE tenant_id = (SELECT id FROM tenants WHERE slug = 'mimmin-testi');
