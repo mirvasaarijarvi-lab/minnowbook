@@ -1,8 +1,8 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate, Navigate } from "react-router-dom";
-import { useState, lazy, Suspense } from "react";
+import { useState, useEffect } from "react";
 import { useTenant } from "@/hooks/useTenant";
-import { Menu } from "lucide-react";
+import { Menu, HelpCircle } from "lucide-react";
 import DashboardSidebar, { DashboardView } from "@/components/dashboard/DashboardSidebar";
 import DashboardOverview from "@/components/dashboard/DashboardOverview";
 import CalendarView from "@/components/dashboard/CalendarView";
@@ -13,6 +13,32 @@ import ReportsPanel from "@/components/dashboard/ReportsPanel";
 import AdminPanel from "@/components/dashboard/AdminPanel";
 import Logo from "@/components/Logo";
 import SupportChatWidget from "@/components/SupportChatWidget";
+import GuidedTour, { TourStep } from "@/components/dashboard/GuidedTour";
+import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+
+const TOUR_STORAGE_KEY = "minnowbook-tour-completed";
+
+const tourSteps: TourStep[] = [
+  {
+    target: "[data-tour='stats-grid']",
+    title: "Dashboard Overview",
+    content: "Here you can see today's key metrics at a glance — reservations, pending bookings, confirmed count, and active resources.",
+    placement: "bottom",
+  },
+  {
+    target: "[data-tour='booking-link']",
+    title: "Your Booking Link",
+    content: "Share this link with your customers so they can make reservations online. Copy it or open it in a new tab to preview.",
+    placement: "top",
+  },
+  {
+    target: "[data-tour='sidebar-nav']",
+    title: "Navigation",
+    content: "Use the sidebar to switch between Calendar, Reservations, Resources, Reports, Settings, and Admin views.",
+    placement: "right",
+  },
+];
 
 const Dashboard = () => {
   const { user, signOut } = useAuth();
@@ -20,6 +46,24 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [currentView, setCurrentView] = useState<DashboardView>("overview");
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [tourOpen, setTourOpen] = useState(false);
+
+  // Auto-open tour on first visit
+  useEffect(() => {
+    if (!loading && tenantId && currentView === "overview") {
+      const completed = localStorage.getItem(TOUR_STORAGE_KEY);
+      if (!completed) {
+        // Small delay to let the DOM render
+        const timer = setTimeout(() => setTourOpen(true), 800);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [loading, tenantId, currentView]);
+
+  const handleTourComplete = () => {
+    localStorage.setItem(TOUR_STORAGE_KEY, "true");
+    setTourOpen(false);
+  };
 
   const handleSignOut = async () => {
     await signOut();
@@ -66,15 +110,50 @@ const Dashboard = () => {
             <Menu className="h-6 w-6 text-foreground" />
           </button>
           <Logo variant="color" size="sm" showText={false} />
-          <div className="w-6" />
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                onClick={() => setTourOpen(true)}
+                className="p-1 rounded-md hover:bg-muted transition-colors text-muted-foreground"
+                aria-label="Start guided tour"
+              >
+                <HelpCircle className="h-5 w-5" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>Start guided tour</TooltipContent>
+          </Tooltip>
         </header>
 
         <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-x-hidden overflow-y-auto">
+          <div className="flex items-center justify-between mb-0">
+            <div />
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setTourOpen(true)}
+                  className="hidden lg:flex gap-1.5 text-muted-foreground hover:text-foreground"
+                >
+                  <HelpCircle className="h-4 w-4" />
+                  Guided Tour
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Restart the guided tour</TooltipContent>
+            </Tooltip>
+          </div>
           {viewComponents[currentView]}
         </main>
       </div>
 
       <SupportChatWidget aiEnabled={tenant?.tier === "business"} />
+
+      <GuidedTour
+        steps={tourSteps}
+        isOpen={tourOpen}
+        onClose={() => setTourOpen(false)}
+        onComplete={handleTourComplete}
+      />
     </div>
   );
 };
