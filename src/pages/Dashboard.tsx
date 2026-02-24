@@ -1,40 +1,39 @@
+import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { Button } from "@/components/ui/button";
-import { LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import Logo from "@/components/Logo";
+import DashboardSidebar, { DashboardView } from "@/components/dashboard/DashboardSidebar";
+import DashboardOverview from "@/components/dashboard/DashboardOverview";
+import CalendarView from "@/components/dashboard/CalendarView";
+import ReservationList from "@/components/dashboard/ReservationList";
+import ResourceManagement from "@/components/dashboard/ResourceManagement";
 
 const Dashboard = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const [currentView, setCurrentView] = useState<DashboardView>("overview");
 
   const handleSignOut = async () => {
     await signOut();
     navigate("/");
   };
 
-  return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card">
-        <div className="container mx-auto px-4 flex h-16 items-center justify-between">
-          <Logo variant="color" size="sm" />
-          <div className="flex items-center gap-3">
-            <span className="text-sm text-muted-foreground">{user?.email}</span>
-            <Button variant="ghost" size="sm" onClick={handleSignOut}>
-              <LogOut className="h-4 w-4" />
-              Log out
-            </Button>
-          </div>
-        </div>
-      </header>
+  const viewComponents: Record<DashboardView, React.ReactNode> = {
+    overview: <DashboardOverview />,
+    calendar: <CalendarView />,
+    reservations: <ReservationList />,
+    resources: <ResourceManagement />,
+  };
 
-      <main className="container mx-auto px-4 py-12">
-        <h1 className="text-3xl font-serif font-bold text-foreground mb-4">
-          Dashboard
-        </h1>
-        <p className="text-muted-foreground text-lg">
-          Welcome! Your tenant setup wizard and dashboard will be built here next.
-        </p>
+  return (
+    <div className="flex min-h-screen bg-background">
+      <DashboardSidebar
+        currentView={currentView}
+        onViewChange={setCurrentView}
+        userEmail={user?.email}
+        onSignOut={handleSignOut}
+      />
+      <main className="flex-1 p-6 lg:p-8 overflow-auto">
+        {viewComponents[currentView]}
       </main>
     </div>
   );
