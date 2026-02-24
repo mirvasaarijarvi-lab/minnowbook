@@ -3,7 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { CalendarCheck, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import Logo from "@/components/Logo";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -39,14 +40,7 @@ const Login = () => {
       {/* Left side — branding */}
       <div className="hidden lg:flex lg:w-1/2 gradient-hero items-center justify-center p-12">
         <div className="max-w-md text-center">
-          <div className="flex items-center justify-center gap-2.5 mb-8">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent">
-              <CalendarCheck className="h-7 w-7 text-accent-foreground" />
-            </div>
-            <span className="text-2xl font-serif font-semibold text-white">
-              MinnowBook
-            </span>
-          </div>
+          <Logo variant="negative" size="lg" className="justify-center mb-8" />
           <h2 className="text-3xl font-serif font-bold text-white mb-4">
             Welcome back
           </h2>
@@ -59,14 +53,9 @@ const Login = () => {
       {/* Right side — form */}
       <div className="flex-1 flex items-center justify-center p-8">
         <div className="w-full max-w-md">
-          <div className="lg:hidden flex items-center gap-2.5 mb-8">
-            <Link to="/" className="flex items-center gap-2.5">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-                <CalendarCheck className="h-5 w-5 text-primary-foreground" />
-              </div>
-              <span className="text-lg font-serif font-semibold text-foreground">
-                Minnow<span className="text-gradient">Book</span>
-              </span>
+          <div className="lg:hidden mb-8">
+            <Link to="/">
+              <Logo variant="color" size="sm" />
             </Link>
           </div>
 

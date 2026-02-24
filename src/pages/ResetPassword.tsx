@@ -3,7 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { CalendarCheck, CheckCircle2 } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
+import Logo from "@/components/Logo";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -57,13 +58,8 @@ const ResetPassword = () => {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-8">
       <div className="w-full max-w-md">
-        <Link to="/" className="flex items-center gap-2.5 mb-8">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-            <CalendarCheck className="h-5 w-5 text-primary-foreground" />
-          </div>
-          <span className="text-lg font-serif font-semibold text-foreground">
-            Minnow<span className="text-gradient">Book</span>
-          </span>
+        <Link to="/" className="mb-8 inline-block">
+          <Logo variant="color" size="sm" />
         </Link>
 
         {success ? (
