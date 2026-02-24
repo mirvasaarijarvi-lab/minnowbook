@@ -1,21 +1,21 @@
 import { useAuth } from "@/contexts/AuthContext";
-import { Button } from "@/components/ui/button";
-import { LogOut } from "lucide-react";
 import { useNavigate, Navigate } from "react-router-dom";
 import { useState } from "react";
 import { useTenant } from "@/hooks/useTenant";
-import Logo from "@/components/Logo";
+import { Menu } from "lucide-react";
 import DashboardSidebar, { DashboardView } from "@/components/dashboard/DashboardSidebar";
 import DashboardOverview from "@/components/dashboard/DashboardOverview";
 import CalendarView from "@/components/dashboard/CalendarView";
 import ReservationList from "@/components/dashboard/ReservationList";
 import ResourceManagement from "@/components/dashboard/ResourceManagement";
+import Logo from "@/components/Logo";
 
 const Dashboard = () => {
   const { user, signOut } = useAuth();
   const { tenantId, loading } = useTenant();
   const navigate = useNavigate();
   const [currentView, setCurrentView] = useState<DashboardView>("overview");
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleSignOut = async () => {
     await signOut();
@@ -30,7 +30,6 @@ const Dashboard = () => {
     );
   }
 
-  // Redirect to onboarding if user has no tenant
   if (!tenantId) {
     return <Navigate to="/onboarding" replace />;
   }
@@ -49,10 +48,24 @@ const Dashboard = () => {
         onViewChange={setCurrentView}
         userEmail={user?.email}
         onSignOut={handleSignOut}
+        mobileOpen={mobileOpen}
+        onMobileToggle={() => setMobileOpen(false)}
       />
-      <main className="flex-1 p-6 lg:p-8 overflow-auto">
-        {viewComponents[currentView]}
-      </main>
+
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Mobile top bar */}
+        <header className="lg:hidden flex items-center justify-between border-b border-border px-4 py-3 bg-card">
+          <button onClick={() => setMobileOpen(true)} aria-label="Open menu">
+            <Menu className="h-6 w-6 text-foreground" />
+          </button>
+          <Logo variant="color" size="sm" showText={false} />
+          <div className="w-6" />
+        </header>
+
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto">
+          {viewComponents[currentView]}
+        </main>
+      </div>
     </div>
   );
 };
