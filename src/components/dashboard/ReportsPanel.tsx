@@ -437,7 +437,7 @@ const ReportsPanel = () => {
       <h2 className="text-2xl font-serif font-bold text-foreground">{t("nav.reports")}</h2>
 
       {/* Filters row */}
-      <div className="flex flex-wrap items-center gap-2">
+       <div className="flex flex-wrap items-center gap-2" data-tour="reports-filters">
         <Select value={period} onValueChange={(v) => { setPeriod(v as Period); setReferenceDate(new Date()); }}>
           <SelectTrigger className="w-[160px]"><SelectValue /></SelectTrigger>
           <SelectContent>
