@@ -27,10 +27,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { format } from "date-fns";
-import { CalendarIcon, Loader2 } from "lucide-react";
+import { CalendarIcon, Loader2, Mail, Pencil } from "lucide-react";
 import { cn } from "@/lib/utils";
+import ConfirmationEmailPreview from "@/components/ConfirmationEmailPreview";
 
 interface Reservation {
   id: string;
@@ -47,6 +50,11 @@ interface Reservation {
   internal_notes: string | null;
   staff_notes: string | null;
   reservation_type: string;
+  room_type?: string | null;
+  breakfast_included?: boolean | null;
+  event_type?: string | null;
+  estimated_guests?: number | null;
+  catering_needed?: boolean | null;
 }
 
 interface EditReservationDialogProps {
@@ -64,7 +72,10 @@ const EditReservationDialog = ({
 }: EditReservationDialogProps) => {
   const t = useT();
   const queryClient = useQueryClient();
-  const { tenant } = useTenant();
+  const { tenant, tenantId } = useTenant();
+
+  const [activeTab, setActiveTab] = useState("details");
+  const [customMessage, setCustomMessage] = useState("");
 
   const [form, setForm] = useState({
     guest_name: "",
@@ -79,9 +90,30 @@ const EditReservationDialog = ({
     internal_notes: "",
     staff_notes: "",
     reservation_type: "",
+    room_type: "",
+    breakfast_included: false,
+    event_type: "",
+    estimated_guests: "",
+    catering_needed: false,
   });
 
   const [selectedResourceId, setSelectedResourceId] = useState<string>("");
+
+  // Fetch tenant settings for email preview branding
+  const { data: settings } = useQuery({
+    queryKey: ["tenant-settings", tenantId],
+    queryFn: async () => {
+      if (!tenantId) return null;
+      const { data, error } = await supabase
+        .from("tenant_settings")
+        .select("*")
+        .eq("tenant_id", tenantId)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!tenantId,
+  });
 
   // Fetch resources for the selected reservation type
   const { data: resources = [] } = useQuery({
@@ -116,8 +148,15 @@ const EditReservationDialog = ({
         internal_notes: reservation.internal_notes ?? "",
         staff_notes: reservation.staff_notes ?? "",
         reservation_type: reservation.reservation_type ?? "",
+        room_type: reservation.room_type ?? "",
+        breakfast_included: reservation.breakfast_included ?? false,
+        event_type: reservation.event_type ?? "",
+        estimated_guests: reservation.estimated_guests?.toString() ?? "",
+        catering_needed: reservation.catering_needed ?? false,
       });
       setSelectedResourceId("");
+      setCustomMessage("");
+      setActiveTab("details");
     }
   }, [reservation]);
 
@@ -141,6 +180,11 @@ const EditReservationDialog = ({
           internal_notes: form.internal_notes.trim() || null,
           staff_notes: form.staff_notes.trim() || null,
           reservation_type: form.reservation_type,
+          room_type: form.room_type || null,
+          breakfast_included: form.breakfast_included,
+          event_type: form.event_type || null,
+          estimated_guests: form.estimated_guests ? parseInt(form.estimated_guests) : null,
+          catering_needed: form.catering_needed,
           updated_at: new Date().toISOString(),
         })
         .eq("id", reservation.id)
@@ -167,237 +211,271 @@ const EditReservationDialog = ({
     form.reservation_type === "guesthouse" ||
     form.reservation_type === "hotel";
 
+  const isVenueType = form.reservation_type === "venue";
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="font-serif">
             {t("dashboard.editReservation")}
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4 py-2">
-          {/* Reservation type & resource */}
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className="space-y-1.5">
-              <Label>{t("common.type")} *</Label>
-              <Select
-                value={form.reservation_type}
-                onValueChange={(v) => {
-                  updateField("reservation_type", v);
-                  setSelectedResourceId("");
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {(allowedTypes.length > 0 ? allowedTypes : RESERVATION_TYPES).map((type) => (
-                    <SelectItem key={type} value={type}>
-                      {t(`dashboard.${type}` as any)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-1.5">
-              <Label>{t("booking.selectResource")}</Label>
-              <Select
-                value={selectedResourceId}
-                onValueChange={setSelectedResourceId}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="—" />
-                </SelectTrigger>
-                <SelectContent>
-                  {resources.map((r) => (
-                    <SelectItem key={r.id} value={r.id}>
-                      {r.name}
-                    </SelectItem>
-                  ))}
-                  {resources.length === 0 && (
-                    <div className="px-2 py-1.5 text-sm text-muted-foreground">
-                      {t("common.noResults")}
-                    </div>
-                  )}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="details" className="gap-1.5">
+              <Pencil className="h-3.5 w-3.5" />
+              {t("email.editDetails" as any)}
+            </TabsTrigger>
+            <TabsTrigger value="email" className="gap-1.5">
+              <Mail className="h-3.5 w-3.5" />
+              {t("email.previewTab" as any)}
+            </TabsTrigger>
+          </TabsList>
 
-          {/* Guest details */}
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className="space-y-1.5">
-              <Label htmlFor="edit-name">{t("common.name")} *</Label>
-              <Input
-                id="edit-name"
-                value={form.guest_name}
-                onChange={(e) => updateField("guest_name", e.target.value)}
-                maxLength={100}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="edit-email">{t("common.email")} *</Label>
-              <Input
-                id="edit-email"
-                type="email"
-                value={form.guest_email}
-                onChange={(e) => updateField("guest_email", e.target.value)}
-                maxLength={255}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="edit-phone">{t("common.phone")}</Label>
-              <Input
-                id="edit-phone"
-                value={form.guest_phone}
-                onChange={(e) => updateField("guest_phone", e.target.value)}
-                maxLength={30}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="edit-guests">{t("common.guests")}</Label>
-              <Input
-                id="edit-guests"
-                type="number"
-                min={1}
-                max={500}
-                value={form.guests_count}
-                onChange={(e) => updateField("guests_count", e.target.value)}
-              />
-            </div>
-          </div>
-
-          {/* Date & time */}
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className="space-y-1.5">
-              <Label>{t("booking.selectDateTime").split("&")[0].trim()} *</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !form.date && "text-muted-foreground"
+          {/* ── Details Tab ── */}
+          <TabsContent value="details" className="space-y-4 pt-2">
+            {/* Reservation type & resource */}
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label>{t("common.type")} *</Label>
+                <Select
+                  value={form.reservation_type}
+                  onValueChange={(v) => {
+                    updateField("reservation_type", v);
+                    setSelectedResourceId("");
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(allowedTypes.length > 0 ? allowedTypes : RESERVATION_TYPES).map((type) => (
+                      <SelectItem key={type} value={type}>
+                        {t(`dashboard.${type}` as any)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <Label>{t("booking.selectResource")}</Label>
+                <Select
+                  value={selectedResourceId}
+                  onValueChange={setSelectedResourceId}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="—" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {resources.map((r) => (
+                      <SelectItem key={r.id} value={r.id}>
+                        {r.name}
+                      </SelectItem>
+                    ))}
+                    {resources.length === 0 && (
+                      <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                        {t("common.noResults")}
+                      </div>
                     )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {form.date
-                      ? format(new Date(form.date + "T00:00:00"), "PPP")
-                      : t("dashboard.selectDate")}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={form.date ? new Date(form.date + "T00:00:00") : undefined}
-                    onSelect={(d) =>
-                      d && updateField("date", format(d, "yyyy-MM-dd"))
-                    }
-                    className={cn("p-3 pointer-events-auto")}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Guest details */}
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label htmlFor="edit-name">{t("common.name")} *</Label>
+                <Input id="edit-name" value={form.guest_name} onChange={(e) => updateField("guest_name", e.target.value)} maxLength={100} />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="edit-email">{t("common.email")} *</Label>
+                <Input id="edit-email" type="email" value={form.guest_email} onChange={(e) => updateField("guest_email", e.target.value)} maxLength={255} />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="edit-phone">{t("common.phone")}</Label>
+                <Input id="edit-phone" value={form.guest_phone} onChange={(e) => updateField("guest_phone", e.target.value)} maxLength={30} />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="edit-guests">{t("common.guests")}</Label>
+                <Input id="edit-guests" type="number" min={1} max={500} value={form.guests_count} onChange={(e) => updateField("guests_count", e.target.value)} />
+              </div>
+            </div>
+
+            {/* Date & time */}
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label>{t("booking.selectDateTime").split("&")[0].trim()} *</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !form.date && "text-muted-foreground")}>
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {form.date ? format(new Date(form.date + "T00:00:00"), "PPP") : t("dashboard.selectDate")}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar mode="single" selected={form.date ? new Date(form.date + "T00:00:00") : undefined} onSelect={(d) => d && updateField("date", format(d, "yyyy-MM-dd"))} className={cn("p-3 pointer-events-auto")} />
+                  </PopoverContent>
+                </Popover>
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="edit-time">{t("booking.preferredTime")}</Label>
+                <Input id="edit-time" type="time" value={form.start_time} onChange={(e) => updateField("start_time", e.target.value)} />
+              </div>
+            </div>
+
+            {/* Accommodation fields */}
+            {isHotelType && (
+              <div className="space-y-3 rounded-lg border border-border p-3">
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="space-y-1.5">
+                    <Label>{t("dashboard.checkOutDate")}</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !form.check_out_date && "text-muted-foreground")}>
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {form.check_out_date ? format(new Date(form.check_out_date + "T00:00:00"), "PPP") : "—"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar mode="single" selected={form.check_out_date ? new Date(form.check_out_date + "T00:00:00") : undefined} onSelect={(d) => d && updateField("check_out_date", format(d, "yyyy-MM-dd"))} className={cn("p-3 pointer-events-auto")} />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>{t("booking.roomType" as any)}</Label>
+                    <Select value={form.room_type} onValueChange={(v) => updateField("room_type", v)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="—" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="single">{t("booking.roomSingle" as any)}</SelectItem>
+                        <SelectItem value="double">{t("booking.roomDouble" as any)}</SelectItem>
+                        <SelectItem value="suite">{t("booking.roomSuite" as any)}</SelectItem>
+                        <SelectItem value="dorm">{t("booking.roomDorm" as any)}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    id="edit-breakfast"
+                    checked={form.breakfast_included}
+                    onCheckedChange={(checked) => setForm((prev) => ({ ...prev, breakfast_included: !!checked }))}
                   />
-                </PopoverContent>
-              </Popover>
+                  <Label htmlFor="edit-breakfast" className="cursor-pointer">
+                    {t("booking.breakfastIncluded" as any)}
+                  </Label>
+                </div>
+              </div>
+            )}
+
+            {/* Venue fields */}
+            {isVenueType && (
+              <div className="space-y-3 rounded-lg border border-border p-3">
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="space-y-1.5">
+                    <Label>{t("booking.eventType" as any)}</Label>
+                    <Select value={form.event_type} onValueChange={(v) => updateField("event_type", v)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="—" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="wedding">{t("booking.eventWedding" as any)}</SelectItem>
+                        <SelectItem value="corporate">{t("booking.eventCorporate" as any)}</SelectItem>
+                        <SelectItem value="birthday">{t("booking.eventBirthday" as any)}</SelectItem>
+                        <SelectItem value="conference">{t("booking.eventConference" as any)}</SelectItem>
+                        <SelectItem value="other">{t("booking.eventOther" as any)}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="edit-est-guests">{t("booking.estimatedGuests" as any)}</Label>
+                    <Input id="edit-est-guests" type="number" min={1} max={1000} value={form.estimated_guests} onChange={(e) => updateField("estimated_guests", e.target.value)} />
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    id="edit-catering"
+                    checked={form.catering_needed}
+                    onCheckedChange={(checked) => setForm((prev) => ({ ...prev, catering_needed: !!checked }))}
+                  />
+                  <Label htmlFor="edit-catering" className="cursor-pointer">
+                    {t("booking.cateringNeeded" as any)}
+                  </Label>
+                </div>
+              </div>
+            )}
+
+            {/* Price */}
+            <div className="space-y-1.5">
+              <Label htmlFor="edit-price">{t("dashboard.priceEur")}</Label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">€</span>
+                <Input id="edit-price" type="number" min={0} step={0.01} value={form.price_eur} onChange={(e) => updateField("price_eur", e.target.value)} className="pl-7" />
+              </div>
+            </div>
+
+            {/* Notes */}
+            <div className="space-y-1.5">
+              <Label htmlFor="edit-requests">{t("booking.specialRequests")}</Label>
+              <Textarea id="edit-requests" rows={2} value={form.special_requests} onChange={(e) => updateField("special_requests", e.target.value)} maxLength={1000} />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="edit-time">{t("booking.preferredTime")}</Label>
-              <Input
-                id="edit-time"
-                type="time"
-                value={form.start_time}
-                onChange={(e) => updateField("start_time", e.target.value)}
-              />
+              <Label htmlFor="edit-notes">{t("dashboard.internalNotes")}</Label>
+              <Textarea id="edit-notes" rows={2} value={form.internal_notes} onChange={(e) => updateField("internal_notes", e.target.value)} maxLength={1000} />
             </div>
-          </div>
-
-          {/* Check-out date for hotel types */}
-          {isHotelType && (
             <div className="space-y-1.5">
-              <Label>{t("dashboard.checkOutDate")}</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !form.check_out_date && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {form.check_out_date
-                      ? format(new Date(form.check_out_date + "T00:00:00"), "PPP")
-                      : "—"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={
-                      form.check_out_date
-                        ? new Date(form.check_out_date + "T00:00:00")
-                        : undefined
-                    }
-                    onSelect={(d) =>
-                      d && updateField("check_out_date", format(d, "yyyy-MM-dd"))
-                    }
-                    className={cn("p-3 pointer-events-auto")}
-                  />
-                </PopoverContent>
-              </Popover>
+              <Label htmlFor="edit-staff-notes">{t("dashboard.staffNotes")}</Label>
+              <Textarea id="edit-staff-notes" rows={2} value={form.staff_notes} onChange={(e) => updateField("staff_notes", e.target.value)} maxLength={1000} />
             </div>
-          )}
+          </TabsContent>
 
-          {/* Price */}
-          <div className="space-y-1.5">
-            <Label htmlFor="edit-price">{t("dashboard.priceEur")}</Label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
-                €
-              </span>
-              <Input
-                id="edit-price"
-                type="number"
-                min={0}
-                step={0.01}
-                value={form.price_eur}
-                onChange={(e) => updateField("price_eur", e.target.value)}
-                className="pl-7"
+          {/* ── Email Preview Tab ── */}
+          <TabsContent value="email" className="space-y-4 pt-2">
+            <div className="space-y-2">
+              <Label htmlFor="custom-message">{t("email.customMessage" as any)}</Label>
+              <Textarea
+                id="custom-message"
+                rows={3}
+                value={customMessage}
+                onChange={(e) => setCustomMessage(e.target.value)}
+                placeholder={t("email.customMessagePlaceholder" as any)}
               />
             </div>
-          </div>
 
-          {/* Notes */}
-          <div className="space-y-1.5">
-            <Label htmlFor="edit-requests">{t("booking.specialRequests")}</Label>
-            <Textarea
-              id="edit-requests"
-              rows={2}
-              value={form.special_requests}
-              onChange={(e) => updateField("special_requests", e.target.value)}
-              maxLength={1000}
+            <ConfirmationEmailPreview
+              reservation={{
+                guest_name: form.guest_name || "Guest",
+                guest_email: form.guest_email,
+                date: form.date,
+                start_time: form.start_time || null,
+                reservation_type: form.reservation_type,
+                guests_count: form.guests_count ? parseInt(form.guests_count) : null,
+                check_out_date: form.check_out_date || null,
+                room_type: form.room_type || null,
+                breakfast_included: form.breakfast_included,
+                event_type: form.event_type || null,
+                estimated_guests: form.estimated_guests ? parseInt(form.estimated_guests) : null,
+                catering_needed: form.catering_needed,
+                special_requests: form.special_requests || null,
+                price_eur: form.price_eur ? parseFloat(form.price_eur) : null,
+              }}
+              business={{
+                business_name: settings?.business_name ?? tenant?.name ?? "",
+                business_email: settings?.business_email ?? "",
+                business_phone: settings?.business_phone ?? "",
+                business_address: settings?.business_address ?? "",
+                primary_color: settings?.primary_color ?? "#1e3a5f",
+                accent_color: settings?.accent_color ?? "#d4a853",
+                logo_url: settings?.logo_url ?? "",
+              }}
+              customMessage={customMessage || undefined}
             />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="edit-notes">{t("dashboard.internalNotes")}</Label>
-            <Textarea
-              id="edit-notes"
-              rows={2}
-              value={form.internal_notes}
-              onChange={(e) => updateField("internal_notes", e.target.value)}
-              maxLength={1000}
-            />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="edit-staff-notes">{t("dashboard.staffNotes")}</Label>
-            <Textarea
-              id="edit-staff-notes"
-              rows={2}
-              value={form.staff_notes}
-              onChange={(e) => updateField("staff_notes", e.target.value)}
-              maxLength={1000}
-            />
-          </div>
-        </div>
+          </TabsContent>
+        </Tabs>
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>

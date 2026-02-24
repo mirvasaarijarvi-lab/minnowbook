@@ -156,6 +156,23 @@ type TranslationKeys = {
   "booking.makeAnother": string;
   "booking.notFound": string;
   "booking.notFoundDesc": string;
+  "booking.emailPreviewTitle": string;
+  "booking.whatGuestReceives": string;
+
+  // Email
+  "email.subject": string;
+  "email.confirmationSubject": string;
+  "email.confirmationTitle": string;
+  "email.greeting": string;
+  "email.confirmationBody": string;
+  "email.confirmationFooter": string;
+  "email.at": string;
+  "email.duration": string;
+  "email.preview": string;
+  "email.customMessage": string;
+  "email.customMessagePlaceholder": string;
+  "email.editDetails": string;
+  "email.previewTab": string;
 
   // Admin
   "admin.addUser": string;
@@ -509,6 +526,21 @@ const en: TranslationKeys = {
   "booking.makeAnother": "Make another reservation",
   "booking.notFound": "Business not found",
   "booking.notFoundDesc": "The booking page you're looking for doesn't exist.",
+  "booking.emailPreviewTitle": "Confirmation email preview",
+  "booking.whatGuestReceives": "This is what the guest will receive via email:",
+  "email.subject": "Subject",
+  "email.confirmationSubject": "Booking Confirmation",
+  "email.confirmationTitle": "Booking Confirmed!",
+  "email.greeting": "Dear",
+  "email.confirmationBody": "We're pleased to confirm your reservation. Here are the details:",
+  "email.confirmationFooter": "If you have any questions, don't hesitate to contact us. We look forward to welcoming you!",
+  "email.at": "at",
+  "email.duration": "Duration",
+  "email.preview": "Email Preview",
+  "email.customMessage": "Custom message",
+  "email.customMessagePlaceholder": "Add a personal message to include in the email...",
+  "email.editDetails": "Edit Details",
+  "email.previewTab": "Email Preview",
 
   "admin.addUser": "Add User",
   "admin.role": "Role",
@@ -858,6 +890,21 @@ const fi: TranslationKeys = {
   "booking.makeAnother": "Tee uusi varaus",
   "booking.notFound": "Yritystä ei löytynyt",
   "booking.notFoundDesc": "Etsimääsi varaussivua ei ole olemassa.",
+  "booking.emailPreviewTitle": "Vahvistussähköpostin esikatselu",
+  "booking.whatGuestReceives": "Tämän vierailija saa sähköpostitse:",
+  "email.subject": "Aihe",
+  "email.confirmationSubject": "Varausvahvistus",
+  "email.confirmationTitle": "Varaus vahvistettu!",
+  "email.greeting": "Hyvä",
+  "email.confirmationBody": "Meillä on ilo vahvistaa varauksenne. Tässä ovat tiedot:",
+  "email.confirmationFooter": "Jos sinulla on kysyttävää, ota rohkeasti yhteyttä. Odotamme innolla vierailuasi!",
+  "email.at": "klo",
+  "email.duration": "Kesto",
+  "email.preview": "Sähköpostin esikatselu",
+  "email.customMessage": "Mukautettu viesti",
+  "email.customMessagePlaceholder": "Lisää henkilökohtainen viesti sähköpostiin...",
+  "email.editDetails": "Muokkaa tietoja",
+  "email.previewTab": "Sähköpostin esikatselu",
 
   "admin.addUser": "Lisää käyttäjä",
   "admin.role": "Rooli",
@@ -1206,6 +1253,21 @@ const sv: TranslationKeys = {
   "booking.makeAnother": "Gör en ny bokning",
   "booking.notFound": "Företag hittades inte",
   "booking.notFoundDesc": "Bokningssidan du letar efter finns inte.",
+  "booking.emailPreviewTitle": "Förhandsgranskning av bekräftelsemail",
+  "booking.whatGuestReceives": "Detta är vad gästen kommer att få via e-post:",
+  "email.subject": "Ämne",
+  "email.confirmationSubject": "Bokningsbekräftelse",
+  "email.confirmationTitle": "Bokning bekräftad!",
+  "email.greeting": "Kära",
+  "email.confirmationBody": "Vi har nöjet att bekräfta din bokning. Här är detaljerna:",
+  "email.confirmationFooter": "Om du har några frågor, tveka inte att kontakta oss. Vi ser fram emot att välkomna dig!",
+  "email.at": "kl",
+  "email.duration": "Varaktighet",
+  "email.preview": "E-postförhandsgranskning",
+  "email.customMessage": "Anpassat meddelande",
+  "email.customMessagePlaceholder": "Lägg till ett personligt meddelande i e-postmeddelandet...",
+  "email.editDetails": "Redigera detaljer",
+  "email.previewTab": "E-postförhandsgranskning",
 
   "admin.addUser": "Lägg till användare",
   "admin.role": "Roll",
