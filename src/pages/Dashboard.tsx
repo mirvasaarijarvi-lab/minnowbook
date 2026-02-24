@@ -179,7 +179,9 @@ const Dashboard = () => {
         </main>
       </div>
 
-      <SupportChatWidget businessTier={tenant?.tier === "business"} />
+      {currentView !== "support" && (
+        <SupportChatWidget businessTier={tenant?.tier === "business"} />
+      )}
 
       <GuidedTour
         steps={tourSteps}
