@@ -59,7 +59,7 @@ const DashboardOverview = () => {
         <p className="text-muted-foreground text-sm">{format(new Date(), "EEEE, MMMM d, yyyy")}</p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
         {cards.map(({ label, value, icon: Icon, color }) => (
           <Card key={label}>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -84,19 +84,21 @@ const DashboardOverview = () => {
           </CardHeader>
           <CardContent className="space-y-2">
             <p className="text-sm text-muted-foreground">{t("dashboard.bookingLinkDesc")}</p>
-            <div className="flex items-center gap-2">
-              <code className="flex-1 min-w-0 truncate rounded-md bg-muted px-3 py-2 text-sm font-mono text-foreground">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+              <code className="flex-1 min-w-0 truncate rounded-md bg-muted px-3 py-2 text-xs sm:text-sm font-mono text-foreground">
                 {bookingUrl}
               </code>
-              <Button variant="outline" size="sm" onClick={copyLink} className="gap-1.5 shrink-0">
-                <Copy className="h-3.5 w-3.5" />
-                {t("dashboard.copyLink")}
-              </Button>
-              <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0" asChild>
-                <a href={bookingUrl} target="_blank" rel="noopener noreferrer">
-                  <ExternalLink className="h-4 w-4" />
-                </a>
-              </Button>
+              <div className="flex items-center gap-2 shrink-0">
+                <Button variant="outline" size="sm" onClick={copyLink} className="gap-1.5 flex-1 sm:flex-none">
+                  <Copy className="h-3.5 w-3.5" />
+                  {t("dashboard.copyLink")}
+                </Button>
+                <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0" asChild>
+                  <a href={bookingUrl} target="_blank" rel="noopener noreferrer">
+                    <ExternalLink className="h-4 w-4" />
+                  </a>
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
