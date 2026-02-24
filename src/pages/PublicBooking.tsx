@@ -439,6 +439,83 @@ const PublicBooking = () => {
             </CardContent>
           </Card>
 
+          {/* Booking summary with price breakdown */}
+          {(() => {
+            const isAccommodation = form.reservation_type === "hotel" || form.reservation_type === "guesthouse";
+            const selectedResource = resources?.find((r: any) => r.id === form.resource_id);
+            const basePrice = selectedResource?.price_per_night;
+            const breakfastPrice = selectedResource?.breakfast_price_per_person ?? 15;
+            const guestsCount = form.guests_count ? parseInt(form.guests_count) : 1;
+
+            let nights = 0;
+            if (isAccommodation && selectedDate && form.check_out_date) {
+              const checkIn = new Date(format(selectedDate, "yyyy-MM-dd") + "T00:00:00");
+              const checkOut = new Date(form.check_out_date + "T00:00:00");
+              nights = Math.max(0, Math.round((checkOut.getTime() - checkIn.getTime()) / 86400000));
+            }
+
+            const roomTypeMultipliers: Record<string, number> = { single: 1.0, double: 1.5, suite: 2.5, dorm: 0.6 };
+            const multiplier = form.room_type ? (roomTypeMultipliers[form.room_type] ?? 1.0) : 1.0;
+            const adjustedPrice = basePrice ? Math.round(basePrice * multiplier * 100) / 100 : null;
+            const roomTotal = adjustedPrice && nights > 0 ? nights * adjustedPrice : null;
+            const breakfastTotal = form.breakfast_included && breakfastPrice ? nights * guestsCount * breakfastPrice : 0;
+            const grandTotal = roomTotal !== null ? roomTotal + breakfastTotal : null;
+
+            return (
+              <Card>
+                <CardContent className="pt-6 space-y-3">
+                  <h3 className="text-sm font-semibold" style={{ color: primaryColor }}>
+                    {t("booking.priceSummary" as any)}
+                  </h3>
+                  <div className="text-sm space-y-2 text-muted-foreground">
+                    <div className="flex justify-between">
+                      <span>{t("common.date")}</span>
+                      <span>{selectedDate ? format(selectedDate, "d.M.yyyy") : "-"}</span>
+                    </div>
+                    {isAccommodation && form.check_out_date && (
+                      <>
+                        <div className="flex justify-between">
+                          <span>{t("booking.checkOutDate" as any)}</span>
+                          <span>{format(new Date(form.check_out_date + "T00:00:00"), "d.M.yyyy")}</span>
+                        </div>
+                        {nights > 0 && (
+                          <div className="flex justify-between">
+                            <span>{t("email.duration" as any)}</span>
+                            <span>{nights} {nights === 1 ? t("booking.night" as any) : t("booking.nights" as any)}</span>
+                          </div>
+                        )}
+                      </>
+                    )}
+                    {selectedResource && (
+                      <div className="flex justify-between">
+                        <span>{selectedResource.name}</span>
+                        {adjustedPrice != null && <span>€{adjustedPrice.toFixed(2)} / {t("booking.night" as any)}</span>}
+                      </div>
+                    )}
+                    {roomTotal != null && (
+                      <div className="flex justify-between">
+                        <span>{t("reports.roomPrice" as any)}</span>
+                        <span>€{roomTotal.toFixed(2)}</span>
+                      </div>
+                    )}
+                    {form.breakfast_included && breakfastTotal > 0 && (
+                      <div className="flex justify-between">
+                        <span>{t("booking.breakfastIncluded" as any)} ({guestsCount} × {nights} × €{breakfastPrice})</span>
+                        <span>€{breakfastTotal.toFixed(2)}</span>
+                      </div>
+                    )}
+                    {grandTotal != null && (
+                      <div className="flex justify-between font-semibold pt-2 border-t" style={{ borderColor: `${accentColor}30`, color: primaryColor }}>
+                        <span>{t("booking.estimatedTotal" as any)}</span>
+                        <span>€{grandTotal.toFixed(2)}</span>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })()}
+
           {/* Email preview for guest */}
           <div className="space-y-2">
             <h3 className="text-sm font-medium text-muted-foreground">
@@ -459,6 +536,16 @@ const PublicBooking = () => {
                 estimated_guests: form.estimated_guests ? parseInt(form.estimated_guests) : null,
                 catering_needed: form.catering_needed,
                 special_requests: form.special_requests || null,
+                price_eur: (() => {
+                  const isAcc = form.reservation_type === "hotel" || form.reservation_type === "guesthouse";
+                  const res = resources?.find((r: any) => r.id === form.resource_id);
+                  if (!isAcc || !res?.price_per_night || !selectedDate || !form.check_out_date) return null;
+                  const n = Math.max(0, Math.round((new Date(form.check_out_date + "T00:00:00").getTime() - new Date(format(selectedDate, "yyyy-MM-dd") + "T00:00:00").getTime()) / 86400000));
+                  const mult = form.room_type ? ({ single: 1.0, double: 1.5, suite: 2.5, dorm: 0.6 }[form.room_type] ?? 1.0) : 1.0;
+                  const roomT = n * Math.round(res.price_per_night * mult * 100) / 100;
+                  const bfT = form.breakfast_included ? n * (form.guests_count ? parseInt(form.guests_count) : 1) * (res.breakfast_price_per_person ?? 15) : 0;
+                  return roomT + bfT;
+                })(),
               }}
               business={{
                 business_name: businessName,
