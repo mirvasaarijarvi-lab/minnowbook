@@ -1,0 +1,1 @@
+ALTER TABLE public.reservations ADD COLUMN is_checked_in boolean NOT NULL DEFAULT false;

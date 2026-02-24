@@ -296,6 +296,9 @@ type TranslationKeys = {
   "dashboard.pending": string;
   "dashboard.confirmed": string;
   "dashboard.cancelled": string;
+  "dashboard.checkedIn": string;
+  "dashboard.notCheckedIn": string;
+  "dashboard.todayFilter": string;
   "dashboard.activeResources": string;
   "dashboard.bookingLink": string;
   "dashboard.bookingLinkDesc": string;
@@ -677,6 +680,9 @@ const en: TranslationKeys = {
   "dashboard.pending": "Pending",
   "dashboard.confirmed": "Confirmed",
   "dashboard.cancelled": "Cancelled",
+  "dashboard.checkedIn": "Checked in",
+  "dashboard.notCheckedIn": "Not checked in",
+  "dashboard.todayFilter": "Today",
   "dashboard.activeResources": "Active Resources",
   "dashboard.bookingLink": "Booking Link",
   "dashboard.bookingLinkDesc": "Share this link with your customers so they can make reservations.",
@@ -1054,6 +1060,9 @@ const fi: TranslationKeys = {
   "dashboard.pending": "Odottaa",
   "dashboard.confirmed": "Vahvistettu",
   "dashboard.cancelled": "Peruutettu",
+  "dashboard.checkedIn": "Kirjautunut",
+  "dashboard.notCheckedIn": "Ei kirjautunut",
+  "dashboard.todayFilter": "Tänään",
   "dashboard.activeResources": "Aktiiviset resurssit",
   "dashboard.bookingLink": "Varauslinkki",
   "dashboard.bookingLinkDesc": "Jaa tämä linkki asiakkaillesi, jotta he voivat tehdä varauksia.",
@@ -1431,6 +1440,9 @@ const sv: TranslationKeys = {
   "dashboard.pending": "Väntande",
   "dashboard.confirmed": "Bekräftad",
   "dashboard.cancelled": "Avbokad",
+  "dashboard.checkedIn": "Incheckad",
+  "dashboard.notCheckedIn": "Ej incheckad",
+  "dashboard.todayFilter": "Idag",
   "dashboard.activeResources": "Aktiva resurser",
   "dashboard.bookingLink": "Bokningslänk",
   "dashboard.bookingLinkDesc": "Dela denna länk med dina kunder så att de kan boka.",
