@@ -60,6 +60,26 @@ type TranslationKeys = {
   "settings.saved": string;
   "settings.saveError": string;
 
+  // Booking (public)
+  "booking.title": string;
+  "booking.selectType": string;
+  "booking.selectDateTime": string;
+  "booking.selectTime": string;
+  "booking.selectResource": string;
+  "booking.yourDetails": string;
+  "booking.guestCount": string;
+  "booking.specialRequests": string;
+  "booking.preferredTime": string;
+  "booking.closedDay": string;
+  "booking.submit": string;
+  "booking.submitting": string;
+  "booking.submitError": string;
+  "booking.thankYou": string;
+  "booking.confirmationMsg": string;
+  "booking.makeAnother": string;
+  "booking.notFound": string;
+  "booking.notFoundDesc": string;
+
   // Admin
   "admin.addUser": string;
   "admin.role": string;
@@ -292,7 +312,26 @@ const en: TranslationKeys = {
   "settings.saved": "Settings saved",
   "settings.saveError": "Failed to save settings",
 
-  // Admin
+  // Booking
+  "booking.title": "Make a Reservation",
+  "booking.selectType": "What would you like to book?",
+  "booking.selectDateTime": "Select Date & Time",
+  "booking.selectTime": "Select a time",
+  "booking.selectResource": "Choose a space",
+  "booking.yourDetails": "Your Details",
+  "booking.guestCount": "Number of guests",
+  "booking.specialRequests": "Special requests",
+  "booking.preferredTime": "Preferred time",
+  "booking.closedDay": "Closed on this day.",
+  "booking.submit": "Submit Reservation",
+  "booking.submitting": "Submitting...",
+  "booking.submitError": "Failed to submit reservation. Please try again.",
+  "booking.thankYou": "Thank you!",
+  "booking.confirmationMsg": "Your reservation has been received. We will confirm it shortly via email.",
+  "booking.makeAnother": "Make another reservation",
+  "booking.notFound": "Business not found",
+  "booking.notFoundDesc": "The booking page you're looking for doesn't exist.",
+
   "admin.addUser": "Add User",
   "admin.role": "Role",
   "admin.staff": "Staff",
@@ -522,7 +561,26 @@ const fi: TranslationKeys = {
   "settings.saved": "Asetukset tallennettu",
   "settings.saveError": "Asetusten tallennus epäonnistui",
 
-  // Admin
+  // Booking
+  "booking.title": "Tee varaus",
+  "booking.selectType": "Mitä haluat varata?",
+  "booking.selectDateTime": "Valitse päivä ja aika",
+  "booking.selectTime": "Valitse aika",
+  "booking.selectResource": "Valitse tila",
+  "booking.yourDetails": "Omat tiedot",
+  "booking.guestCount": "Vieraiden määrä",
+  "booking.specialRequests": "Erityistoiveet",
+  "booking.preferredTime": "Toivottu aika",
+  "booking.closedDay": "Suljettu tänä päivänä.",
+  "booking.submit": "Lähetä varaus",
+  "booking.submitting": "Lähetetään...",
+  "booking.submitError": "Varauksen lähetys epäonnistui. Yritä uudelleen.",
+  "booking.thankYou": "Kiitos!",
+  "booking.confirmationMsg": "Varauksesi on vastaanotettu. Vahvistamme sen pian sähköpostitse.",
+  "booking.makeAnother": "Tee uusi varaus",
+  "booking.notFound": "Yritystä ei löytynyt",
+  "booking.notFoundDesc": "Etsimääsi varaussivua ei ole olemassa.",
+
   "admin.addUser": "Lisää käyttäjä",
   "admin.role": "Rooli",
   "admin.staff": "Henkilökunta",
@@ -751,7 +809,26 @@ const sv: TranslationKeys = {
   "settings.saved": "Inställningar sparade",
   "settings.saveError": "Kunde inte spara inställningar",
 
-  // Admin
+  // Booking
+  "booking.title": "Gör en bokning",
+  "booking.selectType": "Vad vill du boka?",
+  "booking.selectDateTime": "Välj datum och tid",
+  "booking.selectTime": "Välj en tid",
+  "booking.selectResource": "Välj ett utrymme",
+  "booking.yourDetails": "Dina uppgifter",
+  "booking.guestCount": "Antal gäster",
+  "booking.specialRequests": "Speciella önskemål",
+  "booking.preferredTime": "Önskad tid",
+  "booking.closedDay": "Stängt denna dag.",
+  "booking.submit": "Skicka bokning",
+  "booking.submitting": "Skickar...",
+  "booking.submitError": "Kunde inte skicka bokningen. Försök igen.",
+  "booking.thankYou": "Tack!",
+  "booking.confirmationMsg": "Din bokning har mottagits. Vi bekräftar den inom kort via e-post.",
+  "booking.makeAnother": "Gör en ny bokning",
+  "booking.notFound": "Företag hittades inte",
+  "booking.notFoundDesc": "Bokningssidan du letar efter finns inte.",
+
   "admin.addUser": "Lägg till användare",
   "admin.role": "Roll",
   "admin.staff": "Personal",
