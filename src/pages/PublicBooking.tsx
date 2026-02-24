@@ -751,13 +751,30 @@ const PublicBooking = () => {
                   if (nights <= 0) return null;
 
                   const selectedResource = resources?.find((r: any) => r.id === form.resource_id);
-                  const pricePerNight = selectedResource?.price_per_night;
+                  const basePrice = selectedResource?.price_per_night;
                   const breakfastPrice = selectedResource?.breakfast_price_per_person;
                   const guestsCount = form.guests_count ? parseInt(form.guests_count) : 1;
 
-                  const roomTotal = pricePerNight ? nights * pricePerNight : null;
+                  // Room type multipliers
+                  const roomTypeMultipliers: Record<string, number> = {
+                    single: 1.0,
+                    double: 1.3,
+                    suite: 1.8,
+                    dorm: 0.6,
+                  };
+                  const multiplier = form.room_type ? (roomTypeMultipliers[form.room_type] ?? 1.0) : 1.0;
+                  const adjustedPrice = basePrice ? Math.round(basePrice * multiplier * 100) / 100 : null;
+
+                  const roomTotal = adjustedPrice ? nights * adjustedPrice : null;
                   const breakfastTotal = form.breakfast_included && breakfastPrice ? nights * guestsCount * breakfastPrice : 0;
                   const grandTotal = roomTotal !== null ? roomTotal + breakfastTotal : null;
+
+                  const roomTypeLabels: Record<string, string> = {
+                    single: t("booking.roomSingle" as any),
+                    double: t("booking.roomDouble" as any),
+                    suite: t("booking.roomSuite" as any),
+                    dorm: t("booking.roomDorm" as any),
+                  };
 
                   return (
                     <div
@@ -768,21 +785,28 @@ const PublicBooking = () => {
                         {t("booking.priceSummary" as any)}
                       </h4>
                       <div className="text-sm space-y-1 text-muted-foreground">
-                        <div className="flex justify-between">
-                          <span>{nights} {nights === 1 ? t("booking.night" as any) : t("booking.nights" as any)}</span>
-                          {pricePerNight != null && (
-                            <span>€{pricePerNight} / {t("booking.night" as any)}</span>
-                          )}
-                        </div>
-                        {roomTotal != null && (
+                        {adjustedPrice != null && (
                           <div className="flex justify-between">
-                            <span>{t("booking.accommodation" as any)}</span>
-                            <span>€{roomTotal.toFixed(2)}</span>
+                            <span>
+                              {form.room_type ? roomTypeLabels[form.room_type] : selectedResource?.name}
+                              {multiplier !== 1.0 && basePrice && (
+                                <span className="text-xs ml-1 opacity-60">
+                                  (×{multiplier})
+                                </span>
+                              )}
+                            </span>
+                            <span>€{adjustedPrice.toFixed(2)} / {t("booking.night" as any)}</span>
                           </div>
                         )}
+                        <div className="flex justify-between">
+                          <span>{nights} {nights === 1 ? t("booking.night" as any) : t("booking.nights" as any)}</span>
+                          {roomTotal != null && (
+                            <span>€{roomTotal.toFixed(2)}</span>
+                          )}
+                        </div>
                         {form.breakfast_included && breakfastPrice != null && (
                           <div className="flex justify-between">
-                            <span>{t("booking.breakfastIncluded" as any)} ({guestsCount} × {nights})</span>
+                            <span>{t("booking.breakfastIncluded" as any)} ({guestsCount} × {nights} × €{breakfastPrice})</span>
                             <span>€{breakfastTotal.toFixed(2)}</span>
                           </div>
                         )}
