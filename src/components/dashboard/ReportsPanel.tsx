@@ -702,7 +702,7 @@ const ReportsPanel = () => {
                           </TableCell>
                           <TableCell>
                             {r.breakfast_included
-                              ? <span className="flex items-center gap-1 text-primary"><Coffee className="h-4 w-4" />{bfPrice > 0 ? `${bfPrice.toLocaleString("fi-FI", { minimumFractionDigits: 2 })} €` : t("reports.yes")}</span>
+                              ? <span className="flex items-center gap-1 text-primary"><Coffee className="h-4 w-4" />{t("reports.yes")}</span>
                               : <span className="text-muted-foreground">—</span>
                             }
                           </TableCell>
