@@ -264,7 +264,7 @@ const SupportChatWidget = ({ businessTier = false }: SupportChatWidgetProps) => 
                   <summary className="text-xs text-muted-foreground cursor-pointer hover:text-foreground transition-colors select-none mb-2">
                     Quick guides ▸
                   </summary>
-                  <div className="space-y-1.5 pb-2">
+                  <div className="space-y-1.5 pb-2 max-h-[180px] overflow-y-auto">
                     {quickGuides.map((g) => (
                       <button
                         key={g.q}
@@ -277,16 +277,19 @@ const SupportChatWidget = ({ businessTier = false }: SupportChatWidgetProps) => 
                   </div>
                 </details>
               )}
-              {messages.length === 0 &&
-                quickGuides.map((g) => (
-                  <button
-                    key={g.q}
-                    onClick={() => handleQuickGuide(g)}
-                    className="w-full text-left text-xs px-3 py-2 rounded-lg border border-border bg-secondary/30 hover:bg-secondary/60 text-foreground transition-colors"
-                  >
-                    {g.q}
-                  </button>
-                ))}
+              {messages.length === 0 && (
+                <div className="space-y-1.5 max-h-[240px] overflow-y-auto">
+                  {quickGuides.map((g) => (
+                    <button
+                      key={g.q}
+                      onClick={() => handleQuickGuide(g)}
+                      className="w-full text-left text-xs px-3 py-2 rounded-lg border border-border bg-secondary/30 hover:bg-secondary/60 text-foreground transition-colors"
+                    >
+                      {g.q}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             {messages.map((msg, i) => (
