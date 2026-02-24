@@ -1,5 +1,5 @@
-import { useState, useMemo, useCallback } from "react";
-import { useParams } from "react-router-dom";
+import { useState, useMemo, useCallback, useEffect } from "react";
+import { useParams, useSearchParams } from "react-router-dom";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useT } from "@/contexts/I18nContext";
@@ -158,6 +158,7 @@ const AvailabilityCalendar = ({
 
 const PublicBooking = () => {
   const { slug } = useParams<{ slug: string }>();
+  const [searchParams] = useSearchParams();
   const t = useT();
   const [submitted, setSubmitted] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
@@ -181,6 +182,14 @@ const PublicBooking = () => {
     estimated_guests: "",
     catering_needed: false,
   });
+
+  // Pre-select booking type from URL query param (?type=venue, ?type=guesthouse, etc.)
+  useEffect(() => {
+    const typeParam = searchParams.get("type");
+    if (typeParam && !form.reservation_type) {
+      setForm((prev) => ({ ...prev, reservation_type: typeParam }));
+    }
+  }, [searchParams]);
 
   // Fetch tenant by slug
   const { data: tenant, isLoading: loadingTenant } = useQuery({
