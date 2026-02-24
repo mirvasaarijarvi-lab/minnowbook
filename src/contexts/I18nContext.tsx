@@ -15,6 +15,10 @@ const I18nContext = createContext<I18nContextType>({
 
 export const useI18n = () => useContext(I18nContext);
 export const useT = () => useContext(I18nContext).t;
+export const useLanguage = () => {
+  const ctx = useContext(I18nContext);
+  return { language: ctx.language, setLanguage: ctx.setLanguage };
+};
 
 export const I18nProvider = ({ children }: { children: ReactNode }) => {
   const [language, setLanguageState] = useState<Language>(() => {

@@ -9,6 +9,7 @@ import CalendarView from "@/components/dashboard/CalendarView";
 import ReservationList from "@/components/dashboard/ReservationList";
 import ResourceManagement from "@/components/dashboard/ResourceManagement";
 import SettingsPanel from "@/components/dashboard/SettingsPanel";
+import ReportsPanel from "@/components/dashboard/ReportsPanel";
 import AdminPanel from "@/components/dashboard/AdminPanel";
 import Logo from "@/components/Logo";
 
@@ -41,6 +42,7 @@ const Dashboard = () => {
     calendar: <CalendarView />,
     reservations: <ReservationList />,
     resources: <ResourceManagement />,
+    reports: <ReportsPanel />,
     settings: <SettingsPanel />,
     admin: <AdminPanel />,
   };

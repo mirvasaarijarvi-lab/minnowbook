@@ -46,6 +46,40 @@ type TranslationKeys = {
   "nav.resources": string;
   "nav.admin": string;
   "nav.settings": string;
+  "nav.reports": string;
+
+  // Reports
+  "reports.total": string;
+  "reports.confirmed": string;
+  "reports.pending": string;
+  "reports.guest": string;
+  "reports.invoiced": string;
+  "reports.notInvoiced": string;
+  "reports.notes": string;
+  "reports.yes": string;
+  "reports.no": string;
+  "reports.grandTotal": string;
+  "reports.totalRevenue": string;
+  "reports.invoicing": string;
+  "reports.details": string;
+  "reports.chart.title": string;
+  "reports.print": string;
+  "reports.print.title": string;
+  "reports.print.period": string;
+  "reports.print.generated": string;
+  "reports.print.summary": string;
+  "reports.exportCsv": string;
+  "reports.compare": string;
+  "reports.vs": string;
+  "reports.today": string;
+  "reports.filter.all": string;
+  "reports.filter.notInvoiced": string;
+  "reports.period.week": string;
+  "reports.period.month": string;
+  "reports.period.quarter": string;
+  "reports.period.half": string;
+  "reports.period.year": string;
+  "reports.period.custom": string;
 
   // Settings
   "settings.businessDetails": string;
@@ -306,6 +340,39 @@ const en: TranslationKeys = {
   "nav.resources": "Resources",
   "nav.admin": "Admin",
   "nav.settings": "Settings",
+  "nav.reports": "Reports",
+
+  "reports.total": "Total",
+  "reports.confirmed": "Confirmed",
+  "reports.pending": "Pending",
+  "reports.guest": "Guest",
+  "reports.invoiced": "Invoiced",
+  "reports.notInvoiced": "Not invoiced",
+  "reports.notes": "Notes",
+  "reports.yes": "Yes",
+  "reports.no": "No",
+  "reports.grandTotal": "Grand Total",
+  "reports.totalRevenue": "Total Revenue",
+  "reports.invoicing": "Invoicing",
+  "reports.details": "Detailed list",
+  "reports.chart.title": "Reservations by type",
+  "reports.print": "Print",
+  "reports.print.title": "Reservation Report",
+  "reports.print.period": "Period",
+  "reports.print.generated": "Generated",
+  "reports.print.summary": "Summary",
+  "reports.exportCsv": "Export CSV",
+  "reports.compare": "Compare",
+  "reports.vs": "vs",
+  "reports.today": "Today",
+  "reports.filter.all": "All",
+  "reports.filter.notInvoiced": "Not invoiced",
+  "reports.period.week": "Week",
+  "reports.period.month": "Month",
+  "reports.period.quarter": "Quarter",
+  "reports.period.half": "Half year",
+  "reports.period.year": "Year",
+  "reports.period.custom": "Custom",
 
   // Settings
   "settings.businessDetails": "Business Details",
@@ -563,6 +630,39 @@ const fi: TranslationKeys = {
   "nav.resources": "Resurssit",
   "nav.admin": "Hallinta",
   "nav.settings": "Asetukset",
+  "nav.reports": "Raportit",
+
+  "reports.total": "Yhteensä",
+  "reports.confirmed": "Vahvistettu",
+  "reports.pending": "Odottaa",
+  "reports.guest": "Vieras",
+  "reports.invoiced": "Laskutettu",
+  "reports.notInvoiced": "Laskuttamatta",
+  "reports.notes": "Muistiinpanot",
+  "reports.yes": "Kyllä",
+  "reports.no": "Ei",
+  "reports.grandTotal": "Kokonaissumma",
+  "reports.totalRevenue": "Kokonaistulo",
+  "reports.invoicing": "Laskutus",
+  "reports.details": "Yksityiskohtainen lista",
+  "reports.chart.title": "Varaukset tyypeittäin",
+  "reports.print": "Tulosta",
+  "reports.print.title": "Varausraportti",
+  "reports.print.period": "Jakso",
+  "reports.print.generated": "Luotu",
+  "reports.print.summary": "Yhteenveto",
+  "reports.exportCsv": "Vie CSV",
+  "reports.compare": "Vertaa",
+  "reports.vs": "vs",
+  "reports.today": "Tänään",
+  "reports.filter.all": "Kaikki",
+  "reports.filter.notInvoiced": "Laskuttamatta",
+  "reports.period.week": "Viikko",
+  "reports.period.month": "Kuukausi",
+  "reports.period.quarter": "Neljännes",
+  "reports.period.half": "Puoli vuotta",
+  "reports.period.year": "Vuosi",
+  "reports.period.custom": "Mukautettu",
 
   // Settings
   "settings.businessDetails": "Yritystiedot",
@@ -819,6 +919,39 @@ const sv: TranslationKeys = {
   "nav.resources": "Resurser",
   "nav.admin": "Admin",
   "nav.settings": "Inställningar",
+  "nav.reports": "Rapporter",
+
+  "reports.total": "Totalt",
+  "reports.confirmed": "Bekräftad",
+  "reports.pending": "Väntande",
+  "reports.guest": "Gäst",
+  "reports.invoiced": "Fakturerad",
+  "reports.notInvoiced": "Ej fakturerad",
+  "reports.notes": "Anteckningar",
+  "reports.yes": "Ja",
+  "reports.no": "Nej",
+  "reports.grandTotal": "Totalsumma",
+  "reports.totalRevenue": "Total intäkt",
+  "reports.invoicing": "Fakturering",
+  "reports.details": "Detaljerad lista",
+  "reports.chart.title": "Bokningar per typ",
+  "reports.print": "Skriv ut",
+  "reports.print.title": "Bokningsrapport",
+  "reports.print.period": "Period",
+  "reports.print.generated": "Genererad",
+  "reports.print.summary": "Sammanfattning",
+  "reports.exportCsv": "Exportera CSV",
+  "reports.compare": "Jämför",
+  "reports.vs": "vs",
+  "reports.today": "Idag",
+  "reports.filter.all": "Alla",
+  "reports.filter.notInvoiced": "Ej fakturerad",
+  "reports.period.week": "Vecka",
+  "reports.period.month": "Månad",
+  "reports.period.quarter": "Kvartal",
+  "reports.period.half": "Halvår",
+  "reports.period.year": "År",
+  "reports.period.custom": "Anpassad",
 
   // Settings
   "settings.businessDetails": "Företagsinformation",
