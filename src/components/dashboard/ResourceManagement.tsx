@@ -14,6 +14,7 @@ import { Plus, Pencil, Trash2, BedDouble, UtensilsCrossed, Building2, Upload, X,
 import { useState, useRef } from "react";
 import { useT } from "@/contexts/I18nContext";
 import ResourceImageGallery from "./ResourceImageGallery";
+import ResourceCarousel from "@/components/ResourceCarousel";
 
 const typeIcons: Record<string, React.ElementType> = {
   guesthouse: BedDouble,
@@ -47,6 +48,25 @@ const ResourceManagement = () => {
     },
     enabled: !!tenantId,
   });
+
+  const resourceIds = (resources ?? []).map((r: any) => r.id);
+  const { data: allResourceImages = [] } = useQuery({
+    queryKey: ["resource-images-dashboard", resourceIds],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("resource_images")
+        .select("*")
+        .in("resource_id", resourceIds)
+        .order("sort_order");
+      return data ?? [];
+    },
+    enabled: resourceIds.length > 0,
+  });
+
+  const imagesByResource = allResourceImages.reduce((acc: Record<string, any[]>, img: any) => {
+    acc[img.resource_id] = [...(acc[img.resource_id] || []), img];
+    return acc;
+  }, {} as Record<string, any[]>);
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -260,9 +280,14 @@ const ResourceManagement = () => {
             const Icon = typeIcons[r.resource_type] ?? Building2;
             return (
               <Card key={r.id} className={`transition-shadow hover:shadow-hover overflow-hidden ${!r.is_active ? "opacity-60" : ""}`}>
-                {r.image_url && (
+                {(r.image_url || (imagesByResource[r.id]?.length > 0)) && (
                   <div className="h-36 overflow-hidden">
-                    <img src={r.image_url} alt={r.name} className="w-full h-full object-cover" />
+                    <ResourceCarousel
+                      images={imagesByResource[r.id] ?? []}
+                      mainImage={r.image_url}
+                      alt={r.name}
+                      className="w-full h-36 object-cover"
+                    />
                   </div>
                 )}
                 <CardHeader className="pb-2">
