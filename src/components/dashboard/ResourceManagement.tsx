@@ -189,7 +189,7 @@ const ResourceManagement = () => {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between" data-tour="resources-header">
         <div className="flex items-center gap-2">
           <h2 className="text-2xl font-serif font-bold text-foreground">{t("nav.resources")}</h2>
           <DashboardTooltip text="Add rooms, tables, or venues here. Set capacity, pricing, and upload photos. Toggle resources active/inactive to control booking availability." />
@@ -335,7 +335,7 @@ const ResourceManagement = () => {
       ) : !resources?.length ? (
         <Card><CardContent className="p-8 text-center text-muted-foreground">{t("dashboard.noResources")}</CardContent></Card>
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3" data-tour="resources-grid">
           {resources.map((r: any) => {
             const Icon = typeIcons[r.resource_type] ?? Building2;
             return (
