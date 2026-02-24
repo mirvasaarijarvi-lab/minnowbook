@@ -1,13 +1,17 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/hooks/useTenant";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useState } from "react";
 import { format } from "date-fns";
-import { CalendarDays, User, Mail, Phone } from "lucide-react";
+import { CalendarDays, User, Mail, Phone, MoreVertical, CheckCircle2, XCircle } from "lucide-react";
 import { useT } from "@/contexts/I18nContext";
+import { toast } from "sonner";
 
 const statusColors: Record<string, string> = {
   pending: "bg-yellow-100 text-yellow-800 border-yellow-200",
@@ -19,7 +23,9 @@ const ReservationList = () => {
   const { tenantId } = useTenant();
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [confirmDialog, setConfirmDialog] = useState<{ id: string; action: "confirmed" | "cancelled" } | null>(null);
   const t = useT();
+  const queryClient = useQueryClient();
 
   const { data: reservations, isLoading } = useQuery({
     queryKey: ["reservations", tenantId, statusFilter, typeFilter],
@@ -34,6 +40,30 @@ const ReservationList = () => {
     },
     enabled: !!tenantId,
   });
+
+  const updateStatus = useMutation({
+    mutationFn: async ({ id, status }: { id: string; status: string }) => {
+      const { error } = await supabase
+        .from("reservations")
+        .update({ status, updated_at: new Date().toISOString() })
+        .eq("id", id)
+        .eq("tenant_id", tenantId!);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["reservations"] });
+      toast.success(t("dashboard.statusUpdated"));
+      setConfirmDialog(null);
+    },
+    onError: () => {
+      toast.error("Error updating status");
+    },
+  });
+
+  const handleAction = () => {
+    if (!confirmDialog) return;
+    updateStatus.mutate({ id: confirmDialog.id, status: confirmDialog.action });
+  };
 
   return (
     <div className="space-y-4">
@@ -92,15 +122,62 @@ const ReservationList = () => {
                       {r.guests_count && <span className="flex items-center gap-1"><User className="h-3.5 w-3.5" />{r.guests_count} {t("common.guests")}</span>}
                     </div>
                   </div>
-                  {r.price_eur != null && (
-                    <span className="text-sm font-semibold text-foreground whitespace-nowrap">€{Number(r.price_eur).toFixed(2)}</span>
-                  )}
+                  <div className="flex items-center gap-2 shrink-0">
+                    {r.price_eur != null && (
+                      <span className="text-sm font-semibold text-foreground whitespace-nowrap">€{Number(r.price_eur).toFixed(2)}</span>
+                    )}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        {r.status !== "confirmed" && (
+                          <DropdownMenuItem onClick={() => setConfirmDialog({ id: r.id, action: "confirmed" })} className="gap-2">
+                            <CheckCircle2 className="h-4 w-4 text-primary" />
+                            {t("dashboard.confirmReservation")}
+                          </DropdownMenuItem>
+                        )}
+                        {r.status !== "cancelled" && (
+                          <DropdownMenuItem onClick={() => setConfirmDialog({ id: r.id, action: "cancelled" })} className="gap-2 text-destructive focus:text-destructive">
+                            <XCircle className="h-4 w-4" />
+                            {t("dashboard.cancelReservation")}
+                          </DropdownMenuItem>
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
                 </div>
               </CardContent>
             </Card>
           ))}
         </div>
       )}
+
+      {/* Confirmation dialog */}
+      <Dialog open={!!confirmDialog} onOpenChange={(open) => !open && setConfirmDialog(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {confirmDialog?.action === "confirmed" ? t("dashboard.confirmReservation") : t("dashboard.cancelReservation")}
+            </DialogTitle>
+            <DialogDescription>
+              {confirmDialog?.action === "confirmed" ? t("dashboard.confirmReservationMsg") : t("dashboard.cancelReservationMsg")}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setConfirmDialog(null)}>{t("common.cancel")}</Button>
+            <Button
+              variant={confirmDialog?.action === "cancelled" ? "destructive" : "default"}
+              onClick={handleAction}
+              disabled={updateStatus.isPending}
+            >
+              {confirmDialog?.action === "confirmed" ? t("dashboard.confirmReservation") : t("dashboard.cancelReservation")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
