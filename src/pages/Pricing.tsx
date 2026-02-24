@@ -57,7 +57,7 @@ const tiers = [
 const faqs = [
   {
     q: "What happens after the 30-day trial?",
-    a: "Your trial converts to a paid subscription. You can cancel anytime before the trial ends — no charge.",
+    a: "Your trial converts to a paid subscription. You can cancel anytime before the trial ends, no charge.",
   },
   {
     q: "Can I change my plan later?",

@@ -21,7 +21,7 @@ const features = [
   {
     icon: CalendarCheck,
     title: "Smart Reservations",
-    description: "Handle restaurant bookings, venue inquiries, and guesthouse stays — all from one dashboard.",
+    description: "Handle restaurant bookings, venue inquiries, and guesthouse stays, all from one dashboard.",
   },
   {
     icon: Palette,
@@ -132,15 +132,15 @@ const Index = () => {
             >
               <Sparkles className="h-3.5 w-3.5 text-accent" />
               <span className="text-xs font-medium text-white/90">
-                Now in beta — 30-day free trial
+                Now in beta. 30-day free trial
               </span>
             </div>
 
             <h1
               className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white leading-tight mb-6 opacity-0 animate-fade-up drop-shadow-lg"
             >
-              The reservation platform built for{" "}
-              <span className="text-gradient">hospitality</span>
+              The reservation tool built for{" "}
+              <span className="text-gradient">the ones who do it all</span>
             </h1>
 
             <p
@@ -148,7 +148,7 @@ const Index = () => {
               style={{ animationDelay: "150ms" }}
             >
               Manage restaurant bookings, venue inquiries, and guesthouse reservations
-              — all from one elegant dashboard. Branded booking pages, automated emails,
+              all from one elegant dashboard. Branded booking pages, automated emails,
               and team management included.
             </p>
 
@@ -194,7 +194,7 @@ const Index = () => {
               Everything you need to manage reservations
             </h2>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              A complete toolkit for hospitality businesses — from booking pages to team management.
+              A complete toolkit for hospitality businesses, from booking pages to team management.
             </p>
           </div>
 

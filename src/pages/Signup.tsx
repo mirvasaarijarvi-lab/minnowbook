@@ -86,7 +86,7 @@ const Signup = () => {
             Create your account
           </h1>
           <p className="text-muted-foreground mb-8">
-            Start your 30-day free trial — no credit card required.
+            Start your 30-day free trial, no credit card required.
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
