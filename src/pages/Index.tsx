@@ -122,28 +122,28 @@ const Index = () => {
       <section className="relative overflow-hidden py-24 md:py-32">
         <div className="absolute inset-0">
           <img src={heroBg} alt="" className="w-full h-full object-cover" aria-hidden="true" />
-          <div className="absolute inset-0 bg-primary/30" />
+          <div className="absolute inset-0 bg-gradient-to-b from-primary/60 via-primary/30 to-primary/60" />
         </div>
         <div className="container mx-auto px-4 relative">
           <div className="max-w-3xl mx-auto text-center">
             <div
-              className="inline-flex items-center gap-2 bg-primary-foreground/10 border border-primary-foreground/20 rounded-full px-4 py-1.5 mb-8 opacity-0 animate-fade-in"
+              className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 mb-8 opacity-0 animate-fade-in backdrop-blur-sm"
             >
               <Sparkles className="h-3.5 w-3.5 text-accent" />
-              <span className="text-xs font-medium text-primary-foreground/80">
+              <span className="text-xs font-medium text-white/90">
                 Now in beta — 30-day free trial
               </span>
             </div>
 
             <h1
-              className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-primary-foreground leading-tight mb-6 opacity-0 animate-fade-up"
+              className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white leading-tight mb-6 opacity-0 animate-fade-up drop-shadow-lg"
             >
               The reservation platform built for{" "}
               <span className="text-gradient">hospitality</span>
             </h1>
 
             <p
-              className="text-lg md:text-xl text-primary-foreground/70 mb-10 max-w-2xl mx-auto leading-relaxed opacity-0 animate-fade-up"
+              className="text-lg md:text-xl text-white/80 mb-10 max-w-2xl mx-auto leading-relaxed opacity-0 animate-fade-up"
               style={{ animationDelay: "150ms" }}
             >
               Manage restaurant bookings, venue inquiries, and guesthouse reservations
@@ -169,7 +169,7 @@ const Index = () => {
             </div>
 
             <div
-              className="mt-10 flex items-center justify-center gap-6 text-primary-foreground/50 text-sm opacity-0 animate-fade-in"
+              className="mt-10 flex items-center justify-center gap-6 text-white/60 text-sm opacity-0 animate-fade-in"
               style={{ animationDelay: "500ms" }}
             >
               <div className="flex items-center gap-1.5">
