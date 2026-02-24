@@ -740,6 +740,15 @@ const PublicBooking = () => {
                   <Label htmlFor="breakfast_included" className="flex items-center gap-1.5 cursor-pointer">
                     <Coffee className="h-4 w-4" />
                     {t("booking.breakfastIncluded" as any)}
+                    {(() => {
+                      const selectedResource = resources?.find((r: any) => r.id === form.resource_id);
+                      const bfPrice = selectedResource?.breakfast_price_per_person ?? 15;
+                      return (
+                        <span className="text-xs font-normal" style={{ color: `${primaryColor}80` }}>
+                          (€{Number(bfPrice).toFixed(0)} / {t("common.guests") || "guest"})
+                        </span>
+                      );
+                    })()}
                   </Label>
                 </div>
 

@@ -35,7 +35,7 @@ const ResourceManagement = () => {
   const imageInputRef = useRef<HTMLInputElement>(null);
   const t = useT();
   const [form, setForm] = useState({
-    name: "", resource_type: "restaurant", capacity: "", price_per_night: "", description: "", image_url: "",
+    name: "", resource_type: "restaurant", capacity: "", price_per_night: "", description: "", image_url: "", breakfast_price_per_person: "",
   });
 
   const { data: resources, isLoading } = useQuery({
@@ -116,6 +116,7 @@ const ResourceManagement = () => {
         price_per_night: form.price_per_night ? parseFloat(form.price_per_night) : null,
         description: form.description || null,
         image_url: form.image_url || null,
+        breakfast_price_per_person: form.breakfast_price_per_person ? parseFloat(form.breakfast_price_per_person) : null,
       };
       if (editingId) {
         const { error } = await supabase.from("resources").update(payload).eq("id", editingId);
@@ -157,7 +158,7 @@ const ResourceManagement = () => {
 
   const resetForm = () => {
     setEditingId(null);
-    setForm({ name: "", resource_type: "restaurant", capacity: "", price_per_night: "", description: "", image_url: "" });
+    setForm({ name: "", resource_type: "restaurant", capacity: "", price_per_night: "", description: "", image_url: "", breakfast_price_per_person: "" });
   };
 
   const openEdit = (r: any) => {
@@ -166,6 +167,7 @@ const ResourceManagement = () => {
       name: r.name, resource_type: r.resource_type,
       capacity: r.capacity?.toString() ?? "", price_per_night: r.price_per_night?.toString() ?? "",
       description: r.description ?? "", image_url: r.image_url ?? "",
+      breakfast_price_per_person: r.breakfast_price_per_person?.toString() ?? "",
     });
     setDialogOpen(true);
   };
@@ -245,7 +247,7 @@ const ResourceManagement = () => {
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-3 gap-3">
                   <div>
                     <Label>{t("dashboard.capacity")}</Label>
                     <Input type="number" value={form.capacity} onChange={(e) => setForm({ ...form, capacity: e.target.value })} placeholder="e.g. 40" />
@@ -253,6 +255,10 @@ const ResourceManagement = () => {
                   <div>
                     <Label>{t("common.price")} (€{t("dashboard.perNight")})</Label>
                     <Input type="number" step="0.01" value={form.price_per_night} onChange={(e) => setForm({ ...form, price_per_night: e.target.value })} placeholder="e.g. 120" />
+                  </div>
+                  <div>
+                    <Label>{t("booking.breakfastIncluded" as any)} (€)</Label>
+                    <Input type="number" step="0.01" value={form.breakfast_price_per_person} onChange={(e) => setForm({ ...form, breakfast_price_per_person: e.target.value })} placeholder="e.g. 15" />
                   </div>
                 </div>
                 <div>
