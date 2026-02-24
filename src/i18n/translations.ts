@@ -231,6 +231,10 @@ type TranslationKeys = {
   "dashboard.confirmed": string;
   "dashboard.cancelled": string;
   "dashboard.activeResources": string;
+  "dashboard.bookingLink": string;
+  "dashboard.bookingLinkDesc": string;
+  "dashboard.copyLink": string;
+  "dashboard.linkCopied": string;
   "dashboard.noReservations": string;
   "dashboard.confirmReservation": string;
   "dashboard.cancelReservation": string;
@@ -528,6 +532,10 @@ const en: TranslationKeys = {
   "dashboard.confirmed": "Confirmed",
   "dashboard.cancelled": "Cancelled",
   "dashboard.activeResources": "Active Resources",
+  "dashboard.bookingLink": "Booking Link",
+  "dashboard.bookingLinkDesc": "Share this link with your customers so they can make reservations.",
+  "dashboard.copyLink": "Copy link",
+  "dashboard.linkCopied": "Link copied to clipboard!",
   "dashboard.noReservations": "No reservations found.",
   "dashboard.confirmReservation": "Confirm",
   "dashboard.cancelReservation": "Cancel",
@@ -822,6 +830,10 @@ const fi: TranslationKeys = {
   "dashboard.confirmed": "Vahvistettu",
   "dashboard.cancelled": "Peruutettu",
   "dashboard.activeResources": "Aktiiviset resurssit",
+  "dashboard.bookingLink": "Varauslinkki",
+  "dashboard.bookingLinkDesc": "Jaa tämä linkki asiakkaillesi, jotta he voivat tehdä varauksia.",
+  "dashboard.copyLink": "Kopioi linkki",
+  "dashboard.linkCopied": "Linkki kopioitu leikepöydälle!",
   "dashboard.noReservations": "Ei varauksia.",
   "dashboard.confirmReservation": "Vahvista",
   "dashboard.cancelReservation": "Peruuta",
@@ -1116,6 +1128,10 @@ const sv: TranslationKeys = {
   "dashboard.confirmed": "Bekräftad",
   "dashboard.cancelled": "Avbokad",
   "dashboard.activeResources": "Aktiva resurser",
+  "dashboard.bookingLink": "Bokningslänk",
+  "dashboard.bookingLinkDesc": "Dela denna länk med dina kunder så att de kan boka.",
+  "dashboard.copyLink": "Kopiera länk",
+  "dashboard.linkCopied": "Länken kopierad!",
   "dashboard.noReservations": "Inga bokningar hittades.",
   "dashboard.confirmReservation": "Bekräfta",
   "dashboard.cancelReservation": "Avboka",
