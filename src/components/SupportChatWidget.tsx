@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { MessageCircle, X, Send, Loader2, Flag, Bell } from "lucide-react";
+import { MessageCircle, X, Send, Loader2, Flag, Bell, Inbox, ChevronLeft, Clock, CheckCircle2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,7 +7,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useTenant } from "@/hooks/useTenant";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { format } from "date-fns";
 
+// ... keep existing code (Message interface, CHAT_URL, SupportChatWidgetProps, quickGuides)
 interface Message {
   role: "user" | "assistant";
   content: string;
@@ -33,6 +35,15 @@ const quickGuides = [
   { q: "How do I block dates or time slots?", a: "In **Dashboard → Calendar**, click on a date and use the **Block Slot** option to prevent bookings for specific dates, times, or resources." },
 ];
 
+type ViewMode = "chat" | "requests";
+
+const statusConfig: Record<string, { icon: React.ElementType; label: string; className: string }> = {
+  open: { icon: Clock, label: "Open", className: "text-amber-600 bg-amber-50" },
+  "in-progress": { icon: Loader2, label: "In Progress", className: "text-blue-600 bg-blue-50" },
+  fixed: { icon: CheckCircle2, label: "Resolved", className: "text-emerald-600 bg-emerald-50" },
+  closed: { icon: AlertCircle, label: "Closed", className: "text-muted-foreground bg-muted" },
+};
+
 const SupportChatWidget = ({ businessTier = false }: SupportChatWidgetProps) => {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -40,6 +51,8 @@ const SupportChatWidget = ({ businessTier = false }: SupportChatWidgetProps) => 
   const [isLoading, setIsLoading] = useState(false);
   const [escalateMode, setEscalateMode] = useState(false);
   const [escalateSubject, setEscalateSubject] = useState("");
+  const [viewMode, setViewMode] = useState<ViewMode>("chat");
+  const [expandedRequest, setExpandedRequest] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { session } = useAuth();
   const { tenantId } = useTenant();
@@ -61,7 +74,25 @@ const SupportChatWidget = ({ businessTier = false }: SupportChatWidgetProps) => 
       return count ?? 0;
     },
     enabled: !!tenantId && !!session?.user?.id && businessTier,
-    refetchInterval: 30000, // poll every 30s
+    refetchInterval: 30000,
+  });
+
+  // Query user's support requests
+  const { data: supportRequests = [], isLoading: requestsLoading } = useQuery({
+    queryKey: ["my-support-requests", tenantId, session?.user?.id],
+    queryFn: async () => {
+      if (!tenantId || !session?.user?.id) return [];
+      const { data, error } = await supabase
+        .from("support_requests")
+        .select("*")
+        .eq("tenant_id", tenantId)
+        .eq("user_id", session.user.id)
+        .order("created_at", { ascending: false })
+        .limit(20);
+      if (error) throw error;
+      return data ?? [];
+    },
+    enabled: !!tenantId && !!session?.user?.id && businessTier && viewMode === "requests",
   });
 
   const markResponsesRead = async () => {
@@ -80,7 +111,6 @@ const SupportChatWidget = ({ businessTier = false }: SupportChatWidgetProps) => 
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages]);
 
-  // When chat opens, mark responses as read
   useEffect(() => {
     if (open && unreadCount > 0) {
       markResponsesRead();
@@ -108,7 +138,6 @@ const SupportChatWidget = ({ businessTier = false }: SupportChatWidgetProps) => 
         "Content-Type": "application/json",
         Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
       };
-      // Pass user's auth token if available
       if (session?.access_token) {
         headers["Authorization"] = `Bearer ${session.access_token}`;
       }
@@ -214,11 +243,17 @@ const SupportChatWidget = ({ businessTier = false }: SupportChatWidgetProps) => 
       setInput("");
       setEscalateSubject("");
       setEscalateMode(false);
+      queryClient.invalidateQueries({ queryKey: ["my-support-requests"] });
       toast.success("Support request submitted");
     } catch (e: any) {
       toast.error(e.message || "Failed to submit request");
     }
   };
+
+  const renderBoldText = (text: string) =>
+    text.split("**").map((part, pi) =>
+      pi % 2 === 1 ? <strong key={pi}>{part}</strong> : <span key={pi}>{part}</span>
+    );
 
   return (
     <>
@@ -246,154 +281,255 @@ const SupportChatWidget = ({ businessTier = false }: SupportChatWidgetProps) => 
         <div className="fixed bottom-24 right-6 z-50 w-[360px] max-h-[520px] rounded-2xl border border-border bg-card shadow-hero flex flex-col overflow-hidden animate-scale-in">
           {/* Header */}
           <div className="gradient-hero px-4 py-3 text-primary-foreground">
-            <h3 className="font-serif font-semibold text-sm">AI Support</h3>
-            <p className="text-xs text-primary-foreground/70">Ask anything about MinnowBook</p>
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-serif font-semibold text-sm">
+                  {viewMode === "requests" ? "My Requests" : "AI Support"}
+                </h3>
+                <p className="text-xs text-primary-foreground/70">
+                  {viewMode === "requests" ? "Your submitted support requests" : "Ask anything about MinnowBook"}
+                </p>
+              </div>
+              {businessTier && (
+                <button
+                  onClick={() => {
+                    setViewMode(viewMode === "chat" ? "requests" : "chat");
+                    setExpandedRequest(null);
+                  }}
+                  className="flex items-center gap-1 text-xs px-2 py-1 rounded-lg bg-primary-foreground/15 hover:bg-primary-foreground/25 text-primary-foreground transition-colors"
+                >
+                  {viewMode === "requests" ? (
+                    <>
+                      <ChevronLeft className="h-3 w-3" />
+                      Chat
+                    </>
+                  ) : (
+                    <>
+                      <Inbox className="h-3 w-3" />
+                      Requests
+                      {unreadCount > 0 && (
+                        <span className="ml-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[9px] font-bold">
+                          {unreadCount}
+                        </span>
+                      )}
+                    </>
+                  )}
+                </button>
+              )}
+            </div>
           </div>
 
-          {/* Messages */}
-          <div ref={scrollRef} className="flex-1 overflow-y-auto p-3 space-y-3 min-h-[200px] max-h-[320px]">
-            {/* Quick guides — always visible */}
-            <div className="space-y-2">
-              {messages.length === 0 && (
-                <p className="text-xs text-muted-foreground text-center mb-3">
-                  Ask a question or try a quick guide:
-                </p>
-              )}
-              {messages.length > 0 && (
-                <details className="group">
-                  <summary className="text-xs text-muted-foreground cursor-pointer hover:text-foreground transition-colors select-none mb-2">
-                    Quick guides ▸
-                  </summary>
-                  <div className="space-y-1.5 pb-2 max-h-[180px] overflow-y-auto">
-                    {quickGuides.map((g) => (
-                      <button
-                        key={g.q}
-                        onClick={() => handleQuickGuide(g)}
-                        className="w-full text-left text-xs px-3 py-2 rounded-lg border border-border bg-secondary/30 hover:bg-secondary/60 text-foreground transition-colors"
-                      >
-                        {g.q}
-                      </button>
-                    ))}
-                  </div>
-                </details>
-              )}
-              {messages.length === 0 && (
-                <div className="space-y-1.5 max-h-[240px] overflow-y-auto">
-                  {quickGuides.map((g) => (
+          {viewMode === "requests" ? (
+            /* My Requests view */
+            <div className="flex-1 overflow-y-auto p-3 space-y-2 min-h-[200px] max-h-[380px]">
+              {requestsLoading ? (
+                <div className="flex items-center justify-center py-8 text-muted-foreground">
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  <span className="text-sm">Loading requests...</span>
+                </div>
+              ) : supportRequests.length === 0 ? (
+                <div className="text-center py-8">
+                  <Inbox className="h-8 w-8 mx-auto text-muted-foreground/40 mb-2" />
+                  <p className="text-sm text-muted-foreground">No support requests yet.</p>
+                  <p className="text-xs text-muted-foreground mt-1">Submit one from the chat view.</p>
+                </div>
+              ) : (
+                supportRequests.map((req: any) => {
+                  const status = statusConfig[req.status] ?? statusConfig.open;
+                  const StatusIcon = status.icon;
+                  const isExpanded = expandedRequest === req.id;
+
+                  return (
                     <button
-                      key={g.q}
-                      onClick={() => handleQuickGuide(g)}
-                      className="w-full text-left text-xs px-3 py-2 rounded-lg border border-border bg-secondary/30 hover:bg-secondary/60 text-foreground transition-colors"
+                      key={req.id}
+                      onClick={() => setExpandedRequest(isExpanded ? null : req.id)}
+                      className={cn(
+                        "w-full text-left rounded-xl border transition-all",
+                        isExpanded ? "border-accent/40 bg-accent/5" : "border-border bg-card hover:bg-secondary/30",
+                        !req.is_read_by_user && req.admin_response && "ring-2 ring-accent/30"
+                      )}
                     >
-                      {g.q}
+                      <div className="px-3 py-2.5">
+                        <div className="flex items-start justify-between gap-2">
+                          <h4 className="text-sm font-medium text-foreground line-clamp-1">{req.subject}</h4>
+                          <span className={cn("shrink-0 inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded-full", status.className)}>
+                            <StatusIcon className="h-2.5 w-2.5" />
+                            {status.label}
+                          </span>
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {format(new Date(req.created_at), "MMM d, yyyy 'at' h:mm a")}
+                        </p>
+
+                        {isExpanded && (
+                          <div className="mt-2.5 space-y-2.5">
+                            <div className="rounded-lg bg-secondary/40 px-3 py-2">
+                              <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-1">Your message</p>
+                              <p className="text-xs text-foreground whitespace-pre-wrap">{req.message}</p>
+                            </div>
+                            {req.admin_response ? (
+                              <div className="rounded-lg bg-accent/10 border border-accent/20 px-3 py-2">
+                                <p className="text-[10px] font-medium text-accent uppercase tracking-wider mb-1">Admin response</p>
+                                <p className="text-xs text-foreground whitespace-pre-wrap">{req.admin_response}</p>
+                                {req.responded_at && (
+                                  <p className="text-[10px] text-muted-foreground mt-1.5">
+                                    {format(new Date(req.responded_at), "MMM d, yyyy 'at' h:mm a")}
+                                  </p>
+                                )}
+                              </div>
+                            ) : (
+                              <p className="text-xs text-muted-foreground italic px-1">Awaiting admin response...</p>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </button>
-                  ))}
+                  );
+                })
+              )}
+            </div>
+          ) : (
+            /* Chat view */
+            <>
+              <div ref={scrollRef} className="flex-1 overflow-y-auto p-3 space-y-3 min-h-[200px] max-h-[320px]">
+                {/* Quick guides */}
+                <div className="space-y-2">
+                  {messages.length === 0 && (
+                    <p className="text-xs text-muted-foreground text-center mb-3">
+                      Ask a question or try a quick guide:
+                    </p>
+                  )}
+                  {messages.length > 0 && (
+                    <details className="group">
+                      <summary className="text-xs text-muted-foreground cursor-pointer hover:text-foreground transition-colors select-none mb-2">
+                        Quick guides ▸
+                      </summary>
+                      <div className="space-y-1.5 pb-2 max-h-[180px] overflow-y-auto">
+                        {quickGuides.map((g) => (
+                          <button
+                            key={g.q}
+                            onClick={() => handleQuickGuide(g)}
+                            className="w-full text-left text-xs px-3 py-2 rounded-lg border border-border bg-secondary/30 hover:bg-secondary/60 text-foreground transition-colors"
+                          >
+                            {g.q}
+                          </button>
+                        ))}
+                      </div>
+                    </details>
+                  )}
+                  {messages.length === 0 && (
+                    <div className="space-y-1.5 max-h-[240px] overflow-y-auto">
+                      {quickGuides.map((g) => (
+                        <button
+                          key={g.q}
+                          onClick={() => handleQuickGuide(g)}
+                          className="w-full text-left text-xs px-3 py-2 rounded-lg border border-border bg-secondary/30 hover:bg-secondary/60 text-foreground transition-colors"
+                        >
+                          {g.q}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {messages.map((msg, i) => (
+                  <div
+                    key={i}
+                    className={cn(
+                      "text-sm px-3 py-2 rounded-xl max-w-[85%]",
+                      msg.role === "user"
+                        ? "ml-auto bg-accent text-accent-foreground"
+                        : "bg-secondary text-secondary-foreground"
+                    )}
+                  >
+                    {renderBoldText(msg.content)}
+                  </div>
+                ))}
+
+                {isLoading && (
+                  <div className="flex items-center gap-2 text-muted-foreground text-xs px-3">
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                    Thinking...
+                  </div>
+                )}
+              </div>
+
+              {/* Escalate toggle for Business tier */}
+              {businessTier && (
+                <div className="px-3 pt-1">
+                  <button
+                    onClick={() => setEscalateMode(!escalateMode)}
+                    className={cn(
+                      "flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border transition-colors",
+                      escalateMode
+                        ? "bg-accent/10 text-accent border-accent/30"
+                        : "text-muted-foreground border-border hover:bg-secondary/50"
+                    )}
+                  >
+                    <Flag className="h-3 w-3" />
+                    {escalateMode ? "Cancel request" : "Submit support request"}
+                  </button>
                 </div>
               )}
-            </div>
 
-            {messages.map((msg, i) => (
-              <div
-                key={i}
-                className={cn(
-                  "text-sm px-3 py-2 rounded-xl max-w-[85%]",
-                  msg.role === "user"
-                    ? "ml-auto bg-accent text-accent-foreground"
-                    : "bg-secondary text-secondary-foreground"
-                )}
-              >
-                {msg.content.split("**").map((part, pi) =>
-                  pi % 2 === 1 ? (
-                    <strong key={pi}>{part}</strong>
-                  ) : (
-                    <span key={pi}>{part}</span>
-                  )
+              {/* Input */}
+              <div className="border-t border-border p-3">
+                {escalateMode ? (
+                  <div className="space-y-2">
+                    <input
+                      type="text"
+                      value={escalateSubject}
+                      onChange={(e) => setEscalateSubject(e.target.value)}
+                      placeholder="Subject (e.g. Feature request)"
+                      className="w-full text-sm bg-secondary/30 border border-border rounded-lg px-3 py-2 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                    />
+                    <textarea
+                      value={input}
+                      onChange={(e) => setInput(e.target.value)}
+                      placeholder="Describe your request or suggestion..."
+                      rows={3}
+                      className="w-full text-sm bg-secondary/30 border border-border rounded-lg px-3 py-2 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring resize-none"
+                    />
+                    <Button
+                      size="sm"
+                      onClick={handleEscalate}
+                      disabled={!escalateSubject.trim() || !input.trim()}
+                      className="w-full gap-1.5"
+                    >
+                      <Flag className="h-3.5 w-3.5" />
+                      Submit to Admin
+                    </Button>
+                  </div>
+                ) : (
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      handleSend();
+                    }}
+                    className="flex gap-2"
+                  >
+                    <input
+                      type="text"
+                      value={input}
+                      onChange={(e) => setInput(e.target.value)}
+                      placeholder="Type your question..."
+                      className="flex-1 text-sm bg-secondary/30 border border-border rounded-lg px-3 py-2 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                      disabled={isLoading}
+                    />
+                    <Button
+                      type="submit"
+                      size="sm"
+                      variant="default"
+                      disabled={!input.trim() || isLoading}
+                      className="shrink-0"
+                    >
+                      <Send className="h-3.5 w-3.5" />
+                    </Button>
+                  </form>
                 )}
               </div>
-            ))}
-
-            {isLoading && (
-              <div className="flex items-center gap-2 text-muted-foreground text-xs px-3">
-                <Loader2 className="h-3 w-3 animate-spin" />
-                Thinking...
-              </div>
-            )}
-          </div>
-
-          {/* Escalate toggle for Business tier */}
-          {businessTier && (
-            <div className="px-3 pt-1">
-              <button
-                onClick={() => setEscalateMode(!escalateMode)}
-                className={cn(
-                  "flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border transition-colors",
-                  escalateMode
-                    ? "bg-accent/10 text-accent border-accent/30"
-                    : "text-muted-foreground border-border hover:bg-secondary/50"
-                )}
-              >
-                <Flag className="h-3 w-3" />
-                {escalateMode ? "Cancel request" : "Submit support request"}
-              </button>
-            </div>
+            </>
           )}
-
-          {/* Input */}
-          <div className="border-t border-border p-3">
-            {escalateMode ? (
-              <div className="space-y-2">
-                <input
-                  type="text"
-                  value={escalateSubject}
-                  onChange={(e) => setEscalateSubject(e.target.value)}
-                  placeholder="Subject (e.g. Feature request)"
-                  className="w-full text-sm bg-secondary/30 border border-border rounded-lg px-3 py-2 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-                />
-                <textarea
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  placeholder="Describe your request or suggestion..."
-                  rows={3}
-                  className="w-full text-sm bg-secondary/30 border border-border rounded-lg px-3 py-2 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring resize-none"
-                />
-                <Button
-                  size="sm"
-                  onClick={handleEscalate}
-                  disabled={!escalateSubject.trim() || !input.trim()}
-                  className="w-full gap-1.5"
-                >
-                  <Flag className="h-3.5 w-3.5" />
-                  Submit to Admin
-                </Button>
-              </div>
-            ) : (
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  handleSend();
-                }}
-                className="flex gap-2"
-              >
-                <input
-                  type="text"
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  placeholder="Type your question..."
-                  className="flex-1 text-sm bg-secondary/30 border border-border rounded-lg px-3 py-2 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-                  disabled={isLoading}
-                />
-                <Button
-                  type="submit"
-                  size="sm"
-                  variant="default"
-                  disabled={!input.trim() || isLoading}
-                  className="shrink-0"
-                >
-                  <Send className="h-3.5 w-3.5" />
-                </Button>
-              </form>
-            )}
-          </div>
         </div>
       )}
     </>
