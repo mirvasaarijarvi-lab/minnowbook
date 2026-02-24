@@ -8,6 +8,7 @@ import { useState, useMemo } from "react";
 import { format, startOfMonth, endOfMonth } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useT } from "@/contexts/I18nContext";
+import DashboardTooltip from "./DashboardTooltip";
 
 const CalendarView = () => {
   const { tenantId } = useTenant();
@@ -45,7 +46,10 @@ const CalendarView = () => {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl font-serif font-bold text-foreground">{t("nav.calendar")}</h2>
+      <div className="flex items-center gap-2">
+        <h2 className="text-2xl font-serif font-bold text-foreground">{t("nav.calendar")}</h2>
+        <DashboardTooltip text="Click a date to see its reservations. Highlighted dates have bookings. Navigate months with the arrows." />
+      </div>
       <div data-tour="calendar-grid" className="grid grid-cols-1 lg:grid-cols-[auto_1fr] gap-6">
         <Card>
           <CardContent className="p-4">
