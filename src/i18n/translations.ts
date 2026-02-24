@@ -274,6 +274,13 @@ type TranslationKeys = {
   "dashboard.venue": string;
   "dashboard.guesthouse": string;
   "dashboard.hotel": string;
+  "dashboard.editReservation": string;
+  "dashboard.reservationUpdated": string;
+  "dashboard.reservationUpdateError": string;
+  "dashboard.checkOutDate": string;
+  "dashboard.priceEur": string;
+  "dashboard.internalNotes": string;
+  "dashboard.staffNotes": string;
 
   // Onboarding
   "onboarding.tierStep": string;
@@ -594,6 +601,13 @@ const en: TranslationKeys = {
   "dashboard.venue": "Venue",
   "dashboard.guesthouse": "Hotel / Gasthaus",
   "dashboard.hotel": "Hotel / Gasthaus",
+  "dashboard.editReservation": "Edit Reservation",
+  "dashboard.reservationUpdated": "Reservation updated",
+  "dashboard.reservationUpdateError": "Failed to update reservation",
+  "dashboard.checkOutDate": "Check-out date",
+  "dashboard.priceEur": "Price (EUR)",
+  "dashboard.internalNotes": "Internal notes",
+  "dashboard.staffNotes": "Staff notes",
 
   // Onboarding
   "onboarding.tierStep": "Tier",
@@ -910,6 +924,13 @@ const fi: TranslationKeys = {
   "dashboard.venue": "Tila",
   "dashboard.guesthouse": "Hotelli / Gasthaus",
   "dashboard.hotel": "Hotelli / Gasthaus",
+  "dashboard.editReservation": "Muokkaa varausta",
+  "dashboard.reservationUpdated": "Varaus päivitetty",
+  "dashboard.reservationUpdateError": "Varauksen päivitys epäonnistui",
+  "dashboard.checkOutDate": "Lähtöpäivä",
+  "dashboard.priceEur": "Hinta (EUR)",
+  "dashboard.internalNotes": "Sisäiset muistiinpanot",
+  "dashboard.staffNotes": "Henkilökunnan muistiinpanot",
 
   // Onboarding
   "onboarding.tierStep": "Suunnitelma",
@@ -1226,6 +1247,13 @@ const sv: TranslationKeys = {
   "dashboard.venue": "Lokal",
   "dashboard.guesthouse": "Hotell / Gasthaus",
   "dashboard.hotel": "Hotell / Gasthaus",
+  "dashboard.editReservation": "Redigera bokning",
+  "dashboard.reservationUpdated": "Bokning uppdaterad",
+  "dashboard.reservationUpdateError": "Kunde inte uppdatera bokningen",
+  "dashboard.checkOutDate": "Utcheckningsdatum",
+  "dashboard.priceEur": "Pris (EUR)",
+  "dashboard.internalNotes": "Interna anteckningar",
+  "dashboard.staffNotes": "Personalanteckningar",
 
   // Onboarding
   "onboarding.tierStep": "Plan",
