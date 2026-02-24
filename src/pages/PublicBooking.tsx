@@ -1023,7 +1023,7 @@ const PublicBooking = () => {
             </Card>
           )}
 
-          {resources && resources.length > 0 && (
+          {resources && resources.length > 0 && form.reservation_type !== "restaurant" && (
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg font-serif" style={{ color: primaryColor }}>
