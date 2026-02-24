@@ -377,27 +377,60 @@ const PublicBooking = () => {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: secondaryColor }}>
-      {/* Header */}
-      <header className="border-b py-4 px-4 sm:px-6" style={{ backgroundColor: primaryColor }}>
-        <div className="max-w-3xl mx-auto flex items-center gap-3">
-          {settings?.logo_url && (
-            <img src={settings.logo_url} alt="" className="h-8 w-8 rounded-full object-cover" />
-          )}
-          <h1 className="text-xl font-serif font-bold text-white">{businessName}</h1>
-        </div>
-      </header>
+      {/* Header with optional hero image */}
+      {settings?.hero_image_url ? (
+        <header className="relative overflow-hidden" style={{ backgroundColor: primaryColor }}>
+          <img
+            src={settings.hero_image_url}
+            alt=""
+            className="absolute inset-0 w-full h-full object-cover opacity-40"
+          />
+          <div className="relative">
+            <div className="border-b border-white/20 py-4 px-4 sm:px-6">
+              <div className="max-w-3xl mx-auto flex items-center gap-3">
+                {settings?.logo_url && (
+                  <img src={settings.logo_url} alt="" className="h-8 w-8 rounded-full object-cover" />
+                )}
+                <h1 className="text-xl font-serif font-bold text-white">{businessName}</h1>
+              </div>
+            </div>
+            <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10 sm:py-16">
+              <h2 className="text-3xl sm:text-4xl font-serif font-bold text-white drop-shadow-md">
+                {t("booking.title")}
+              </h2>
+              {settings?.business_description && (
+                <p className="mt-2 text-sm text-white/80 max-w-lg">
+                  {settings.business_description}
+                </p>
+              )}
+            </div>
+          </div>
+        </header>
+      ) : (
+        <header className="border-b py-4 px-4 sm:px-6" style={{ backgroundColor: primaryColor }}>
+          <div className="max-w-3xl mx-auto flex items-center gap-3">
+            {settings?.logo_url && (
+              <img src={settings.logo_url} alt="" className="h-8 w-8 rounded-full object-cover" />
+            )}
+            <h1 className="text-xl font-serif font-bold text-white">{businessName}</h1>
+          </div>
+        </header>
+      )}
 
       <main className="max-w-3xl mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
-        <div>
-          <h2 className="text-2xl sm:text-3xl font-serif font-bold" style={{ color: primaryColor }}>
-            {t("booking.title")}
-          </h2>
-          {settings?.business_description && (
-            <p className="mt-1 text-sm" style={{ color: `${primaryColor}99` }}>
-              {settings.business_description}
-            </p>
-          )}
-        </div>
+        {/* Show title below only when no hero */}
+        {!settings?.hero_image_url && (
+          <div>
+            <h2 className="text-2xl sm:text-3xl font-serif font-bold" style={{ color: primaryColor }}>
+              {t("booking.title")}
+            </h2>
+            {settings?.business_description && (
+              <p className="mt-1 text-sm" style={{ color: `${primaryColor}99` }}>
+                {settings.business_description}
+              </p>
+            )}
+          </div>
+        )}
 
         {/* Availability Calendar */}
         <AvailabilityCalendar
