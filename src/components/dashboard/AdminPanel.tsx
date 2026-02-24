@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { toast } from "@/hooks/use-toast";
 import { Plus, Key, Trash2, Shield, UserCog } from "lucide-react";
 import { useT } from "@/contexts/I18nContext";
+import DashboardTooltip from "./DashboardTooltip";
 import SupportRequestsBoard from "./SupportRequestsBoard";
 
 interface TenantUser {
@@ -120,7 +121,10 @@ const AdminPanel = () => {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-serif font-bold text-foreground">{t("nav.admin")}</h2>
+        <div className="flex items-center gap-2">
+          <h2 className="text-2xl font-serif font-bold text-foreground">{t("nav.admin")}</h2>
+          <DashboardTooltip text="Manage team members, assign roles (Owner, Admin, Staff), reset passwords, and review support requests from your users." />
+        </div>
         <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
           <DialogTrigger asChild>
             <Button size="sm" className="gap-1.5">
