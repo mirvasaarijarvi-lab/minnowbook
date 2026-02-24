@@ -12,7 +12,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Calendar } from "@/components/ui/calendar";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Loader2, CheckCircle, UtensilsCrossed, Building2, Home, Clock, CalendarDays, BedDouble, Coffee, Users } from "lucide-react";
+import { Loader2, CheckCircle, UtensilsCrossed, Building2, Home, Clock, CalendarDays, CalendarIcon, BedDouble, Coffee, Users } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
 import { format, startOfMonth, endOfMonth, addMonths, subMonths, isSameDay } from "date-fns";
 import { z } from "zod";
@@ -788,14 +789,37 @@ const PublicBooking = () => {
               <CardContent className="space-y-4">
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
-                    <Label htmlFor="check_out_date">{t("booking.checkOutDate" as any)} *</Label>
-                    <Input
-                      id="check_out_date"
-                      type="date"
-                      value={form.check_out_date}
-                      min={selectedDate ? format(new Date(selectedDate.getTime() + 86400000), "yyyy-MM-dd") : ""}
-                      onChange={(e) => updateField("check_out_date", e.target.value)}
-                    />
+                    <Label>{t("booking.checkOutDate" as any)} *</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-start text-left font-normal",
+                            !form.check_out_date && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {form.check_out_date
+                            ? format(new Date(form.check_out_date + "T00:00:00"), "PPP")
+                            : <span>{t("booking.pickDate" as any) || "Pick a date"}</span>}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={form.check_out_date ? new Date(form.check_out_date + "T00:00:00") : undefined}
+                          onSelect={(date) => {
+                            if (date) updateField("check_out_date", format(date, "yyyy-MM-dd"));
+                          }}
+                          disabled={(date) =>
+                            !selectedDate || date <= selectedDate
+                          }
+                          initialFocus
+                          className={cn("p-3 pointer-events-auto")}
+                        />
+                      </PopoverContent>
+                    </Popover>
                     {(() => {
                       if (!form.check_out_date || !selectedDate) return null;
                       const checkOut = new Date(form.check_out_date + "T00:00:00");
