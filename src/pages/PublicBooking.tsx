@@ -18,6 +18,7 @@ import { format, startOfMonth, endOfMonth, addMonths, subMonths, isSameDay } fro
 import { z } from "zod";
 import { cn } from "@/lib/utils";
 import ResourceCarousel from "@/components/ResourceCarousel";
+import ConfirmationEmailPreview from "@/components/ConfirmationEmailPreview";
 
 const bookingSchema = z.object({
   guest_name: z.string().trim().min(1, "Name is required").max(100),
@@ -409,22 +410,57 @@ const PublicBooking = () => {
 
   if (submitted) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: secondaryColor }}>
-        <Card className="max-w-md w-full text-center">
-          <CardContent className="pt-8 pb-8 space-y-4">
-            <CheckCircle className="h-16 w-16 mx-auto" style={{ color: accentColor }} />
-            <h2 className="text-2xl font-serif font-bold" style={{ color: primaryColor }}>
-              {t("booking.thankYou")}
-            </h2>
-            <p className="text-muted-foreground">{t("booking.confirmationMsg")}</p>
-            <Button
-              variant="outline"
-              onClick={() => { setSubmitted(false); setForm({ guest_name: "", guest_email: "", guest_phone: "", guests_count: "", reservation_type: "", start_time: "", special_requests: "", resource_id: "", check_out_date: "", room_type: "", breakfast_included: false, event_type: "", estimated_guests: "", catering_needed: false }); setSelectedDate(undefined); }}
-            >
-              {t("booking.makeAnother")}
-            </Button>
-          </CardContent>
-        </Card>
+      <div className="min-h-screen p-4 sm:p-8" style={{ backgroundColor: secondaryColor }}>
+        <div className="max-w-2xl mx-auto space-y-6">
+          <Card className="text-center">
+            <CardContent className="pt-8 pb-8 space-y-4">
+              <CheckCircle className="h-16 w-16 mx-auto" style={{ color: accentColor }} />
+              <h2 className="text-2xl font-serif font-bold" style={{ color: primaryColor }}>
+                {t("booking.thankYou")}
+              </h2>
+              <p className="text-muted-foreground">{t("booking.confirmationMsg")}</p>
+              <Button
+                variant="outline"
+                onClick={() => { setSubmitted(false); setForm({ guest_name: "", guest_email: "", guest_phone: "", guests_count: "", reservation_type: "", start_time: "", special_requests: "", resource_id: "", check_out_date: "", room_type: "", breakfast_included: false, event_type: "", estimated_guests: "", catering_needed: false }); setSelectedDate(undefined); }}
+              >
+                {t("booking.makeAnother")}
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Email preview for guest */}
+          <div className="space-y-2">
+            <h3 className="text-sm font-medium text-muted-foreground">
+              {t("booking.whatGuestReceives" as any)}
+            </h3>
+            <ConfirmationEmailPreview
+              reservation={{
+                guest_name: form.guest_name,
+                guest_email: form.guest_email,
+                date: selectedDate ? format(selectedDate, "yyyy-MM-dd") : "",
+                start_time: form.start_time || null,
+                reservation_type: form.reservation_type,
+                guests_count: form.guests_count ? parseInt(form.guests_count) : null,
+                check_out_date: form.check_out_date || null,
+                room_type: form.room_type || null,
+                breakfast_included: form.breakfast_included,
+                event_type: form.event_type || null,
+                estimated_guests: form.estimated_guests ? parseInt(form.estimated_guests) : null,
+                catering_needed: form.catering_needed,
+                special_requests: form.special_requests || null,
+              }}
+              business={{
+                business_name: businessName,
+                business_email: settings?.business_email ?? "",
+                business_phone: settings?.business_phone ?? "",
+                business_address: settings?.business_address ?? "",
+                primary_color: primaryColor,
+                accent_color: accentColor,
+                logo_url: settings?.logo_url ?? "",
+              }}
+            />
+          </div>
+        </div>
       </div>
     );
   }
