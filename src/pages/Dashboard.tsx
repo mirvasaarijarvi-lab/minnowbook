@@ -1,6 +1,10 @@
-import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { LogOut } from "lucide-react";
+import { useNavigate, Navigate } from "react-router-dom";
+import { useState } from "react";
+import { useTenant } from "@/hooks/useTenant";
+import Logo from "@/components/Logo";
 import DashboardSidebar, { DashboardView } from "@/components/dashboard/DashboardSidebar";
 import DashboardOverview from "@/components/dashboard/DashboardOverview";
 import CalendarView from "@/components/dashboard/CalendarView";
@@ -9,6 +13,7 @@ import ResourceManagement from "@/components/dashboard/ResourceManagement";
 
 const Dashboard = () => {
   const { user, signOut } = useAuth();
+  const { tenantId, loading } = useTenant();
   const navigate = useNavigate();
   const [currentView, setCurrentView] = useState<DashboardView>("overview");
 
@@ -16,6 +21,19 @@ const Dashboard = () => {
     await signOut();
     navigate("/");
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-spin h-8 w-8 border-4 border-accent border-t-transparent rounded-full" />
+      </div>
+    );
+  }
+
+  // Redirect to onboarding if user has no tenant
+  if (!tenantId) {
+    return <Navigate to="/onboarding" replace />;
+  }
 
   const viewComponents: Record<DashboardView, React.ReactNode> = {
     overview: <DashboardOverview />,
