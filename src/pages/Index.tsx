@@ -14,6 +14,7 @@ import {
 import MarketingHeader from "@/components/MarketingHeader";
 import MarketingFooter from "@/components/MarketingFooter";
 import PricingTier from "@/components/PricingTier";
+import heroBg from "@/assets/hero-bg.png";
 
 const features = [
   {
@@ -118,11 +119,10 @@ const Index = () => {
       <MarketingHeader />
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden gradient-hero py-24 md:py-32">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute inset-0" style={{
-            backgroundImage: 'radial-gradient(circle at 25% 25%, rgba(255,255,255,0.1) 0%, transparent 50%), radial-gradient(circle at 75% 75%, rgba(255,255,255,0.05) 0%, transparent 50%)',
-          }} />
+      <section className="relative overflow-hidden py-24 md:py-32">
+        <div className="absolute inset-0">
+          <img src={heroBg} alt="" className="w-full h-full object-cover" aria-hidden="true" />
+          <div className="absolute inset-0 bg-primary/30" />
         </div>
         <div className="container mx-auto px-4 relative">
           <div className="max-w-3xl mx-auto text-center">
