@@ -1014,7 +1014,7 @@ const PublicBooking = () => {
                         key={res.id}
                         type="button"
                         onClick={() => updateField("resource_id", isSelected ? "" : res.id)}
-                        className="group relative text-left rounded-xl border-2 transition-all duration-300 overflow-hidden hover:scale-[1.02] hover:shadow-lg"
+                        className="group relative text-left rounded-xl border-2 transition-all duration-300 overflow-hidden hover:scale-105 hover:shadow-lg hover:-translate-y-0.5"
                         style={{
                           borderColor: isSelected ? accentColor : "#e5e7eb",
                           backgroundColor: isSelected ? `${accentColor}10` : "transparent",
