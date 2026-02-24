@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,9 +12,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Calendar } from "@/components/ui/calendar";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Loader2, CheckCircle, UtensilsCrossed, Building2, Home, Clock } from "lucide-react";
-import { format } from "date-fns";
+import { Loader2, CheckCircle, UtensilsCrossed, Building2, Home, Clock, CalendarDays } from "lucide-react";
+import { format, startOfMonth, endOfMonth, addMonths, subMonths, isSameDay } from "date-fns";
 import { z } from "zod";
+import { cn } from "@/lib/utils";
 
 const bookingSchema = z.object({
   guest_name: z.string().trim().min(1, "Name is required").max(100),
@@ -32,6 +33,106 @@ const typeIcons: Record<string, React.ElementType> = {
   restaurant: UtensilsCrossed,
   venue: Building2,
   guesthouse: Home,
+};
+
+/* ── Availability Calendar ──────────────────────────────── */
+const AvailabilityCalendar = ({
+  tenantId,
+  primaryColor,
+  accentColor,
+  t,
+}: {
+  tenantId: string;
+  primaryColor: string;
+  accentColor: string;
+  t: (key: string) => string;
+}) => {
+  const [calMonth, setCalMonth] = useState(new Date());
+
+  const monthStart = format(startOfMonth(calMonth), "yyyy-MM-dd");
+  const monthEnd = format(endOfMonth(calMonth), "yyyy-MM-dd");
+
+  const { data: monthReservations = [] } = useQuery({
+    queryKey: ["public-availability", tenantId, monthStart, monthEnd],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("reservations")
+        .select("date, status")
+        .eq("tenant_id", tenantId)
+        .gte("date", monthStart)
+        .lte("date", monthEnd)
+        .in("status", ["pending", "confirmed"]);
+      if (error) throw error;
+      return data ?? [];
+    },
+    enabled: !!tenantId,
+  });
+
+  // Count reservations per day
+  const dayCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    monthReservations.forEach((r) => {
+      counts[r.date] = (counts[r.date] || 0) + 1;
+    });
+    return counts;
+  }, [monthReservations]);
+
+  const getDayStatus = useCallback(
+    (date: Date): "available" | "busy" | "full" => {
+      const key = format(date, "yyyy-MM-dd");
+      const count = dayCounts[key] || 0;
+      if (count === 0) return "available";
+      if (count >= 5) return "full";
+      return "busy";
+    },
+    [dayCounts],
+  );
+
+  return (
+    <Card>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-lg font-serif flex items-center gap-2" style={{ color: primaryColor }}>
+          <CalendarDays className="h-5 w-5" />
+          {t("booking.availabilityCalendar")}
+        </CardTitle>
+        <p className="text-sm text-muted-foreground">{t("booking.availabilityDesc")}</p>
+      </CardHeader>
+      <CardContent>
+        <Calendar
+          mode="single"
+          month={calMonth}
+          onMonthChange={setCalMonth}
+          disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+          className={cn("p-3 pointer-events-auto rounded-md border")}
+          modifiers={{
+            available: (date) => getDayStatus(date) === "available" && date >= new Date(new Date().setHours(0, 0, 0, 0)),
+            busy: (date) => getDayStatus(date) === "busy",
+            full: (date) => getDayStatus(date) === "full",
+          }}
+          modifiersStyles={{
+            available: { backgroundColor: "#dcfce7", color: "#166534", fontWeight: 600 },
+            busy: { backgroundColor: "#fef9c3", color: "#854d0e", fontWeight: 600 },
+            full: { backgroundColor: "#fecaca", color: "#991b1b", fontWeight: 600 },
+          }}
+          showOutsideDays={false}
+        />
+        <div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground">
+          <span className="flex items-center gap-1.5">
+            <span className="w-3 h-3 rounded-full" style={{ backgroundColor: "#dcfce7", border: "1px solid #bbf7d0" }} />
+            {t("booking.available")}
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="w-3 h-3 rounded-full" style={{ backgroundColor: "#fef9c3", border: "1px solid #fde68a" }} />
+            {t("booking.busy")}
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="w-3 h-3 rounded-full" style={{ backgroundColor: "#fecaca", border: "1px solid #fca5a5" }} />
+            {t("booking.full")}
+          </span>
+        </div>
+      </CardContent>
+    </Card>
+  );
 };
 
 const PublicBooking = () => {
@@ -288,6 +389,14 @@ const PublicBooking = () => {
             </p>
           )}
         </div>
+
+        {/* Availability Calendar */}
+        <AvailabilityCalendar
+          tenantId={tenant.id}
+          primaryColor={primaryColor}
+          accentColor={accentColor}
+          t={t}
+        />
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Step 1: Type Selection */}
