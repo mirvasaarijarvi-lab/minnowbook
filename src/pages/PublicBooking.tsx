@@ -886,42 +886,67 @@ const PublicBooking = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid gap-3 sm:grid-cols-2">
+                <div className="grid gap-4 sm:grid-cols-2">
                   {resources.map((res: any) => {
                     const isSelected = form.resource_id === res.id;
+                    const Icon = typeIcons[res.resource_type] ?? Building2;
+                    const hasImages = res.image_url || (imagesByResource[res.id]?.length > 0);
                     return (
                       <button
                         key={res.id}
                         type="button"
                         onClick={() => updateField("resource_id", isSelected ? "" : res.id)}
-                        className="text-left rounded-lg border-2 transition-all overflow-hidden"
+                        className="group relative text-left rounded-xl border-2 transition-all duration-300 overflow-hidden hover:scale-[1.02] hover:shadow-lg"
                         style={{
-                          borderColor: isSelected ? accentColor : "#e5e5e5",
-                          backgroundColor: isSelected ? `${accentColor}15` : "transparent",
+                          borderColor: isSelected ? accentColor : "#e5e7eb",
+                          backgroundColor: isSelected ? `${accentColor}10` : "transparent",
+                          boxShadow: isSelected ? `0 0 0 1px ${accentColor}40, 0 4px 12px ${accentColor}15` : undefined,
                         }}
                       >
-                        <ResourceCarousel
-                          images={imagesByResource[res.id] ?? []}
-                          mainImage={res.image_url}
-                          alt={res.name}
-                          className="w-full h-28 object-cover"
-                        />
-                        <div className="p-4">
-                          <p className="font-medium" style={{ color: primaryColor }}>{res.name}</p>
-                          {res.description && (
-                            <p className="text-xs mt-1 text-muted-foreground">{res.description}</p>
-                          )}
-                          <div className="flex gap-2 mt-2">
-                            {res.capacity && (
-                              <Badge variant="outline" className="text-xs">
-                                {res.capacity} {t("common.guests")}
-                              </Badge>
+                        {isSelected && (
+                          <span
+                            className="absolute top-2.5 right-2.5 h-2 w-2 rounded-full z-10"
+                            style={{ backgroundColor: accentColor }}
+                          />
+                        )}
+                        {hasImages && (
+                          <ResourceCarousel
+                            images={imagesByResource[res.id] ?? []}
+                            mainImage={res.image_url}
+                            alt={res.name}
+                            className="w-full h-28 object-cover"
+                          />
+                        )}
+                        <div className="p-4 flex gap-3">
+                          <span
+                            className="flex items-center justify-center h-10 w-10 rounded-full shrink-0 transition-colors duration-200"
+                            style={{
+                              backgroundColor: isSelected ? `${accentColor}20` : `${primaryColor}10`,
+                            }}
+                          >
+                            <Icon
+                              className="h-5 w-5 transition-colors duration-200"
+                              style={{ color: isSelected ? accentColor : primaryColor }}
+                            />
+                          </span>
+                          <div className="min-w-0 space-y-1">
+                            <p className="font-semibold text-sm" style={{ color: primaryColor }}>{res.name}</p>
+                            {res.description && (
+                              <p className="text-xs leading-relaxed" style={{ color: `${primaryColor}80` }}>{res.description}</p>
                             )}
-                            {res.price_per_night != null && (
-                              <Badge variant="outline" className="text-xs">
-                                €{Number(res.price_per_night).toFixed(0)}{t("dashboard.perNight")}
-                              </Badge>
-                            )}
+                            <div className="flex flex-wrap gap-1.5 mt-1.5">
+                              {res.capacity && (
+                                <Badge variant="outline" className="text-xs">
+                                  <Users className="h-3 w-3 mr-1" />
+                                  {res.capacity} {t("common.guests")}
+                                </Badge>
+                              )}
+                              {res.price_per_night != null && (
+                                <Badge variant="outline" className="text-xs">
+                                  €{Number(res.price_per_night).toFixed(0)}{t("dashboard.perNight")}
+                                </Badge>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </button>
