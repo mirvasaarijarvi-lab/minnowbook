@@ -1,0 +1,1 @@
+ALTER TABLE public.resources ADD COLUMN room_type_pricing jsonb DEFAULT '{"single": 1.0, "double": 1.5, "suite": 2.5, "dorm": 0.6}'::jsonb;

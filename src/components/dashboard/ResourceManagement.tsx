@@ -34,8 +34,10 @@ const ResourceManagement = () => {
   const [uploading, setUploading] = useState(false);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const t = useT();
+  const defaultRoomPricing = { single: "1.0", double: "1.5", suite: "2.5", dorm: "0.6" };
   const [form, setForm] = useState({
     name: "", resource_type: "restaurant", capacity: "", price_per_night: "", description: "", image_url: "", breakfast_price_per_person: "",
+    room_type_pricing: { ...defaultRoomPricing },
   });
 
   const { data: resources, isLoading } = useQuery({
@@ -110,6 +112,10 @@ const ResourceManagement = () => {
   const upsertMutation = useMutation({
     mutationFn: async () => {
       if (!tenantId) throw new Error("No tenant");
+      const isAccom = form.resource_type === "hotel" || form.resource_type === "guesthouse";
+      const roomPricing = isAccom ? Object.fromEntries(
+        Object.entries(form.room_type_pricing).map(([k, v]) => [k, parseFloat(v as string) || 1.0])
+      ) : undefined;
       const payload: any = {
         tenant_id: tenantId, name: form.name, resource_type: form.resource_type,
         capacity: form.capacity ? parseInt(form.capacity) : null,
@@ -117,6 +123,7 @@ const ResourceManagement = () => {
         description: form.description || null,
         image_url: form.image_url || null,
         breakfast_price_per_person: form.breakfast_price_per_person ? parseFloat(form.breakfast_price_per_person) : null,
+        ...(isAccom && { room_type_pricing: roomPricing }),
       };
       if (editingId) {
         const { error } = await supabase.from("resources").update(payload).eq("id", editingId);
@@ -158,16 +165,23 @@ const ResourceManagement = () => {
 
   const resetForm = () => {
     setEditingId(null);
-    setForm({ name: "", resource_type: "restaurant", capacity: "", price_per_night: "", description: "", image_url: "", breakfast_price_per_person: "" });
+    setForm({ name: "", resource_type: "restaurant", capacity: "", price_per_night: "", description: "", image_url: "", breakfast_price_per_person: "", room_type_pricing: { ...defaultRoomPricing } });
   };
 
   const openEdit = (r: any) => {
     setEditingId(r.id);
+    const rtp = r.room_type_pricing ?? {};
     setForm({
       name: r.name, resource_type: r.resource_type,
       capacity: r.capacity?.toString() ?? "", price_per_night: r.price_per_night?.toString() ?? "",
       description: r.description ?? "", image_url: r.image_url ?? "",
       breakfast_price_per_person: r.breakfast_price_per_person?.toString() ?? "",
+      room_type_pricing: {
+        single: rtp.single?.toString() ?? "1.0",
+        double: rtp.double?.toString() ?? "1.5",
+        suite: rtp.suite?.toString() ?? "2.5",
+        dorm: rtp.dorm?.toString() ?? "0.6",
+      },
     });
     setDialogOpen(true);
   };
@@ -261,6 +275,32 @@ const ResourceManagement = () => {
                     <Input type="number" step="0.01" value={form.breakfast_price_per_person} onChange={(e) => setForm({ ...form, breakfast_price_per_person: e.target.value })} placeholder="e.g. 15" />
                   </div>
                 </div>
+                {(form.resource_type === "hotel" || form.resource_type === "guesthouse") && (
+                  <div className="space-y-2">
+                    <Label className="font-medium">Room type price multipliers</Label>
+                    <p className="text-xs text-muted-foreground">Multiplied by base price per night. E.g. 1.5× at €100 base = €150.</p>
+                    <div className="grid grid-cols-2 gap-3">
+                      {(["single", "double", "suite", "dorm"] as const).map((rt) => (
+                        <div key={rt}>
+                          <Label className="capitalize text-xs">{rt}</Label>
+                          <Input
+                            type="number"
+                            step="0.1"
+                            min="0"
+                            value={form.room_type_pricing[rt]}
+                            onChange={(e) =>
+                              setForm((prev) => ({
+                                ...prev,
+                                room_type_pricing: { ...prev.room_type_pricing, [rt]: e.target.value },
+                              }))
+                            }
+                            placeholder="1.0"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 <div>
                   <Label>{t("common.description")}</Label>
                   <Input value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Short description" />
