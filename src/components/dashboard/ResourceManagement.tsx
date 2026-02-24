@@ -13,6 +13,7 @@ import { toast } from "@/hooks/use-toast";
 import { Plus, Pencil, Trash2, BedDouble, UtensilsCrossed, Building2, Upload, X, Loader2 } from "lucide-react";
 import { useState, useRef } from "react";
 import { useT } from "@/contexts/I18nContext";
+import ResourceImageGallery from "./ResourceImageGallery";
 
 const typeIcons: Record<string, React.ElementType> = {
   guesthouse: BedDouble,
@@ -202,6 +203,11 @@ const ResourceManagement = () => {
                     onChange={handleImageUpload}
                   />
                 </div>
+
+                {/* Gallery (only when editing existing resource) */}
+                {editingId && tenantId && (
+                  <ResourceImageGallery resourceId={editingId} tenantId={tenantId} />
+                )}
 
                 <div>
                   <Label>{t("common.name")}</Label>

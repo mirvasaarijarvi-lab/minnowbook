@@ -16,6 +16,7 @@ import { Loader2, CheckCircle, UtensilsCrossed, Building2, Home, Clock, Calendar
 import { format, startOfMonth, endOfMonth, addMonths, subMonths, isSameDay } from "date-fns";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
+import ResourceCarousel from "@/components/ResourceCarousel";
 
 const bookingSchema = z.object({
   guest_name: z.string().trim().min(1, "Name is required").max(100),
@@ -214,6 +215,30 @@ const PublicBooking = () => {
     },
     enabled: !!tenant?.id,
   });
+
+  // Fetch resource images for gallery
+  const resourceIds = resources?.map((r: any) => r.id) ?? [];
+  const { data: resourceImages = [] } = useQuery({
+    queryKey: ["public-resource-images", resourceIds],
+    queryFn: async () => {
+      if (resourceIds.length === 0) return [];
+      const { data, error } = await supabase
+        .from("resource_images")
+        .select("*")
+        .in("resource_id", resourceIds)
+        .order("sort_order");
+      if (error) throw error;
+      return data;
+    },
+    enabled: resourceIds.length > 0,
+  });
+
+  // Group images by resource
+  const imagesByResource = resourceImages.reduce((acc: Record<string, any[]>, img: any) => {
+    acc[img.resource_id] = acc[img.resource_id] || [];
+    acc[img.resource_id].push(img);
+    return acc;
+  }, {});
 
   // Fetch opening hours
   const { data: openingHours } = useQuery({
@@ -572,9 +597,12 @@ const PublicBooking = () => {
                           backgroundColor: isSelected ? `${accentColor}15` : "transparent",
                         }}
                       >
-                        {res.image_url && (
-                          <img src={res.image_url} alt={res.name} className="w-full h-28 object-cover" />
-                        )}
+                        <ResourceCarousel
+                          images={imagesByResource[res.id] ?? []}
+                          mainImage={res.image_url}
+                          alt={res.name}
+                          className="w-full h-28 object-cover"
+                        />
                         <div className="p-4">
                           <p className="font-medium" style={{ color: primaryColor }}>{res.name}</p>
                           {res.description && (
