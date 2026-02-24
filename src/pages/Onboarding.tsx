@@ -66,6 +66,7 @@ const Onboarding = () => {
     { id: "restaurant", labelKey: "dashboard.restaurant" as TranslationKey, icon: UtensilsCrossed, descKey: "onboarding.restaurantDesc" as TranslationKey },
     { id: "venue", labelKey: "dashboard.venue" as TranslationKey, icon: Building2, descKey: "onboarding.venueDesc" as TranslationKey },
     { id: "guesthouse", labelKey: "dashboard.guesthouse" as TranslationKey, icon: BedDouble, descKey: "onboarding.guesthouseDesc" as TranslationKey },
+    { id: "hotel", labelKey: "dashboard.hotel" as TranslationKey, icon: BedDouble, descKey: "onboarding.hotelDesc" as TranslationKey },
   ];
 
   const toggleType = (id: string) => {

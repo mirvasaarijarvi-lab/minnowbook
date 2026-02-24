@@ -33,6 +33,7 @@ const typeIcons: Record<string, React.ElementType> = {
   restaurant: UtensilsCrossed,
   venue: Building2,
   guesthouse: Home,
+  hotel: Home,
 };
 
 /* ── Availability Calendar ──────────────────────────────── */

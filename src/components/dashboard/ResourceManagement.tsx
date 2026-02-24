@@ -16,6 +16,7 @@ import { useT } from "@/contexts/I18nContext";
 
 const typeIcons: Record<string, React.ElementType> = {
   guesthouse: BedDouble,
+  hotel: BedDouble,
   restaurant: UtensilsCrossed,
   venue: Building2,
 };
@@ -129,6 +130,7 @@ const ResourceManagement = () => {
                       <SelectItem value="restaurant">{t("dashboard.restaurant")}</SelectItem>
                       <SelectItem value="venue">{t("dashboard.venue")}</SelectItem>
                       <SelectItem value="guesthouse">{t("dashboard.guesthouse")}</SelectItem>
+                      <SelectItem value="hotel">{t("dashboard.hotel")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
