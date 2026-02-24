@@ -44,6 +44,22 @@ type TranslationKeys = {
   "nav.calendar": string;
   "nav.reservations": string;
   "nav.resources": string;
+  "nav.admin": string;
+
+  // Admin
+  "admin.addUser": string;
+  "admin.role": string;
+  "admin.staff": string;
+  "admin.adminRole": string;
+  "admin.owner": string;
+  "admin.changePassword": string;
+  "admin.newPassword": string;
+  "admin.removeUser": string;
+  "admin.userCreated": string;
+  "admin.roleUpdated": string;
+  "admin.passwordChanged": string;
+  "admin.userRemoved": string;
+  "admin.noUsers": string;
 
   // Hero
   "hero.badge": string;
@@ -246,6 +262,22 @@ const en: TranslationKeys = {
   "nav.calendar": "Calendar",
   "nav.reservations": "Reservations",
   "nav.resources": "Resources",
+  "nav.admin": "Admin",
+
+  // Admin
+  "admin.addUser": "Add User",
+  "admin.role": "Role",
+  "admin.staff": "Staff",
+  "admin.adminRole": "Admin",
+  "admin.owner": "Owner",
+  "admin.changePassword": "Change Password",
+  "admin.newPassword": "New Password",
+  "admin.removeUser": "Remove User",
+  "admin.userCreated": "User created",
+  "admin.roleUpdated": "Role updated",
+  "admin.passwordChanged": "Password changed",
+  "admin.userRemoved": "User removed",
+  "admin.noUsers": "No users found.",
 
   // Hero
   "hero.badge": "Now in beta. 30-day free trial",
@@ -446,8 +478,23 @@ const fi: TranslationKeys = {
   "nav.calendar": "Kalenteri",
   "nav.reservations": "Varaukset",
   "nav.resources": "Resurssit",
+  "nav.admin": "Hallinta",
 
-  // Hero
+  // Admin
+  "admin.addUser": "Lisää käyttäjä",
+  "admin.role": "Rooli",
+  "admin.staff": "Henkilökunta",
+  "admin.adminRole": "Ylläpitäjä",
+  "admin.owner": "Omistaja",
+  "admin.changePassword": "Vaihda salasana",
+  "admin.newPassword": "Uusi salasana",
+  "admin.removeUser": "Poista käyttäjä",
+  "admin.userCreated": "Käyttäjä luotu",
+  "admin.roleUpdated": "Rooli päivitetty",
+  "admin.passwordChanged": "Salasana vaihdettu",
+  "admin.userRemoved": "Käyttäjä poistettu",
+  "admin.noUsers": "Ei käyttäjiä.",
+
   "hero.badge": "Nyt betassa. 30 päivän ilmainen kokeilu",
   "hero.title": "Varaustyökalu niille,",
   "hero.titleHighlight": "jotka hoitavat kaiken",
@@ -646,8 +693,23 @@ const sv: TranslationKeys = {
   "nav.calendar": "Kalender",
   "nav.reservations": "Bokningar",
   "nav.resources": "Resurser",
+  "nav.admin": "Admin",
 
-  // Hero
+  // Admin
+  "admin.addUser": "Lägg till användare",
+  "admin.role": "Roll",
+  "admin.staff": "Personal",
+  "admin.adminRole": "Admin",
+  "admin.owner": "Ägare",
+  "admin.changePassword": "Ändra lösenord",
+  "admin.newPassword": "Nytt lösenord",
+  "admin.removeUser": "Ta bort användare",
+  "admin.userCreated": "Användare skapad",
+  "admin.roleUpdated": "Roll uppdaterad",
+  "admin.passwordChanged": "Lösenord ändrat",
+  "admin.userRemoved": "Användare borttagen",
+  "admin.noUsers": "Inga användare hittades.",
+
   "hero.badge": "Nu i beta. 30 dagars gratis provperiod",
   "hero.title": "Bokningsverktyget byggt för",
   "hero.titleHighlight": "dem som gör allt",
