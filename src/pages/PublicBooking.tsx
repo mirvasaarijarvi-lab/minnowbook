@@ -507,7 +507,7 @@ const PublicBooking = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid gap-3 grid-cols-2 sm:grid-cols-4">
+                <div className="grid gap-3 sm:grid-cols-3">
                   {allowedTypes.map((type) => {
                     const Icon = typeIcons[type] ?? Building2;
                     const isSelected = form.reservation_type === type;
