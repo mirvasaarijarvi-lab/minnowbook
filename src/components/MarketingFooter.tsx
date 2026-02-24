@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { CalendarCheck } from "lucide-react";
+import Logo from "@/components/Logo";
 
 const MarketingFooter = () => {
   return (
@@ -8,11 +8,8 @@ const MarketingFooter = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand */}
           <div className="md:col-span-1">
-            <div className="flex items-center gap-2.5 mb-4">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent">
-                <CalendarCheck className="h-5 w-5 text-accent-foreground" />
-              </div>
-              <span className="text-lg font-serif font-semibold">MinnowBook</span>
+            <div className="mb-4">
+              <Logo variant="negative" size="sm" showText={true} className="text-primary-foreground" />
             </div>
             <p className="text-sm text-primary-foreground/70 leading-relaxed">
               The modern reservation platform for restaurants, venues, and guesthouses.

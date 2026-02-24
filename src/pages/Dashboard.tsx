@@ -1,7 +1,8 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { CalendarCheck, LogOut } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import Logo from "@/components/Logo";
 
 const Dashboard = () => {
   const { user, signOut } = useAuth();
@@ -16,14 +17,7 @@ const Dashboard = () => {
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-card">
         <div className="container mx-auto px-4 flex h-16 items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-              <CalendarCheck className="h-5 w-5 text-primary-foreground" />
-            </div>
-            <span className="text-lg font-serif font-semibold text-foreground">
-              Minnow<span className="text-gradient">Book</span>
-            </span>
-          </div>
+          <Logo variant="color" size="sm" />
           <div className="flex items-center gap-3">
             <span className="text-sm text-muted-foreground">{user?.email}</span>
             <Button variant="ghost" size="sm" onClick={handleSignOut}>
