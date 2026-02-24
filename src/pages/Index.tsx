@@ -1,154 +1,292 @@
 import { Link } from "react-router-dom";
-import restaurantImg from "@/assets/restaurant-wiurila.jpg";
-import venueImg from "@/assets/venue-wiurila.jpg";
-import gasthausImg from "@/assets/gasthaus-wiurila.jpg";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { UtensilsCrossed, Building2, Bed, Lock } from "lucide-react";
+import {
+  CalendarCheck,
+  Palette,
+  Users,
+  Globe,
+  BarChart3,
+  Mail,
+  ArrowRight,
+  CheckCircle2,
+  Sparkles,
+} from "lucide-react";
+import MarketingHeader from "@/components/MarketingHeader";
+import MarketingFooter from "@/components/MarketingFooter";
+import PricingTier from "@/components/PricingTier";
 
-const bookingTypes = [
+const features = [
   {
-    icon: UtensilsCrossed,
-    title: "Ravintola",
-    description: "Varaa pöytä ravintola Sigridistä",
-    link: "/ravintola",
-    cta: "Varaa pöytä",
-    image: restaurantImg,
+    icon: CalendarCheck,
+    title: "Smart Reservations",
+    description: "Handle restaurant bookings, venue inquiries, and guesthouse stays — all from one dashboard.",
   },
   {
-    icon: Building2,
-    title: "Juhlatilat",
-    description: "Tiedustele juhlatiloja tapahtumallesi",
-    link: "/juhlatilat",
-    cta: "Tiedustele tiloja",
-    image: venueImg,
+    icon: Palette,
+    title: "Custom Branding",
+    description: "Your logo, your colors, your images. Every booking page matches your brand identity.",
   },
   {
-    icon: Bed,
-    title: "Gasthaus",
-    description: "Varaa majoitus Gasthaus Wiurilasta",
-    link: "/gasthaus",
-    cta: "Varaa majoitus",
-    image: gasthausImg,
+    icon: Users,
+    title: "Team Management",
+    description: "Invite staff members, assign roles, and manage permissions with ease.",
+  },
+  {
+    icon: Globe,
+    title: "Branded Booking Pages",
+    description: "Give customers a polished booking experience on your own subdomain.",
+  },
+  {
+    icon: BarChart3,
+    title: "Reports & Insights",
+    description: "Track reservation trends, occupancy rates, and revenue at a glance.",
+  },
+  {
+    icon: Mail,
+    title: "Automated Emails",
+    description: "Send confirmation, reminder, and cancellation emails automatically.",
+  },
+];
+
+const steps = [
+  {
+    step: "01",
+    title: "Sign up & pick your plan",
+    description: "Create your account in seconds and start your 30-day free trial.",
+  },
+  {
+    step: "02",
+    title: "Set up your business",
+    description: "Upload your branding, add your resources, and configure opening hours.",
+  },
+  {
+    step: "03",
+    title: "Share your booking link",
+    description: "Send your custom booking page to customers and start receiving reservations.",
+  },
+];
+
+const tiers = [
+  {
+    name: "Basic",
+    price: 29,
+    description: "Perfect for small businesses just getting started.",
+    reservationTypes: "1 type",
+    staffUsers: "1–3",
+    features: [
+      "Custom branding (logo, colors, images)",
+      "Default email templates",
+      "Opening hours configuration",
+      "Branded booking page",
+      "Basic reservation management",
+    ],
+  },
+  {
+    name: "Pro",
+    price: 79,
+    description: "For growing businesses that need more control.",
+    reservationTypes: "1 type",
+    staffUsers: "Up to 10",
+    isPopular: true,
+    features: [
+      "Everything in Basic",
+      "Custom email templates",
+      "Advanced opening hours & rules",
+      "Priority support",
+      "Detailed analytics",
+    ],
+  },
+  {
+    name: "Business",
+    price: 199,
+    description: "Full-featured platform for established businesses.",
+    reservationTypes: "All 3 types",
+    staffUsers: "Unlimited",
+    features: [
+      "Everything in Pro",
+      "Restaurant, venue & guesthouse",
+      "Unlimited staff accounts",
+      "Advanced reporting",
+      "Dedicated support",
+    ],
   },
 ];
 
 const Index = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <a href="#main-content" className="skip-to-content">
-        Siirry sisältöön
-      </a>
+      <MarketingHeader />
 
-      {/* Top bar */}
-      <div className="bg-muted/50 border-b border-border">
-        <div className="container mx-auto px-4 py-2">
-          <a
-            href="https://wiurila.fi"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary transition-colors"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-            Takaisin wiurila.fi
-          </a>
+      {/* Hero Section */}
+      <section className="relative overflow-hidden gradient-hero py-24 md:py-32">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0" style={{
+            backgroundImage: 'radial-gradient(circle at 25% 25%, rgba(255,255,255,0.1) 0%, transparent 50%), radial-gradient(circle at 75% 75%, rgba(255,255,255,0.05) 0%, transparent 50%)',
+          }} />
         </div>
-      </div>
-
-      {/* Header */}
-      <header className="border-b border-border bg-card" role="banner">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-serif font-semibold text-primary">
-                Wiurilan kartano
-              </h1>
-              <p className="text-muted-foreground mt-1">Varausjärjestelmä</p>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main id="main-content" className="container mx-auto px-4 py-8 flex-1" role="main">
-        <div className="max-w-6xl mx-auto space-y-10">
-          {/* Booking cards */}
-          <section aria-labelledby="booking-section-title">
-            <div className="text-center mb-8 animate-fade-up">
-              <h2 id="booking-section-title" className="text-3xl font-serif font-semibold mb-2">
-                Tervetuloa varaamaan
-              </h2>
-              <p className="text-muted-foreground">
-                Valitse palvelu, jonka haluat varata
-              </p>
+        <div className="container mx-auto px-4 relative">
+          <div className="max-w-3xl mx-auto text-center">
+            <div
+              className="inline-flex items-center gap-2 bg-primary-foreground/10 border border-primary-foreground/20 rounded-full px-4 py-1.5 mb-8 opacity-0 animate-fade-in"
+            >
+              <Sparkles className="h-3.5 w-3.5 text-accent" />
+              <span className="text-xs font-medium text-primary-foreground/80">
+                Now in beta — 30-day free trial
+              </span>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {bookingTypes.map((type, i) => (
-                <Card
-                  key={type.title}
-                  className="h-full shadow-card hover:shadow-hover transition-shadow duration-300"
-                  style={{ animationDelay: `${i * 100}ms` }}
-                >
-                  <CardHeader className="text-center">
-                    <div className="w-14 h-14 bg-secondary rounded-full flex items-center justify-center mx-auto mb-4">
-                      <type.icon className="h-7 w-7 text-primary" />
-                    </div>
-                    <CardTitle className="text-lg">{type.title}</CardTitle>
-                    <CardDescription>{type.description}</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <Link to={type.link}>
-                      <Button variant="default" className="w-full">
-                        {type.cta}
-                      </Button>
-                    </Link>
-                    <div className="w-full aspect-[4/3] rounded-lg overflow-hidden">
-                      <img
-                        src={type.image}
-                        alt={type.title}
-                        className="w-full h-full object-cover"
-                        loading="lazy"
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </section>
+            <h1
+              className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-primary-foreground leading-tight mb-6 opacity-0 animate-fade-up"
+            >
+              The reservation platform built for{" "}
+              <span className="text-gradient">hospitality</span>
+            </h1>
 
-          {/* Info */}
-          <div className="text-center text-sm text-muted-foreground">
-            <p>Varauspyynnöt käsitellään arkipäivisin.</p>
-            <p className="mt-3 font-medium text-foreground">
-              Kiireellisissä asioissa ota yhteyttä suoraan:
+            <p
+              className="text-lg md:text-xl text-primary-foreground/70 mb-10 max-w-2xl mx-auto leading-relaxed opacity-0 animate-fade-up"
+              style={{ animationDelay: "150ms" }}
+            >
+              Manage restaurant bookings, venue inquiries, and guesthouse reservations
+              — all from one elegant dashboard. Branded booking pages, automated emails,
+              and team management included.
             </p>
-            <div className="mt-1 flex flex-wrap justify-center gap-x-1 gap-y-1 items-center">
-              <a href="https://wiurila.fi" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline whitespace-nowrap">www.wiurila.fi</a>
-              <span className="text-muted-foreground">•</span>
-              <a href="tel:+358400121900" className="text-primary hover:underline whitespace-nowrap">+358 400 121 900</a>
-              <span className="text-muted-foreground">•</span>
-              <a href="mailto:wiurila@wiurila.fi" className="text-primary hover:underline whitespace-nowrap">wiurila@wiurila.fi</a>
-              <span className="text-muted-foreground">•</span>
-              <span className="whitespace-nowrap">Viurilantie 126, Salo</span>
+
+            <div
+              className="flex flex-col sm:flex-row items-center justify-center gap-4 opacity-0 animate-fade-up"
+              style={{ animationDelay: "300ms" }}
+            >
+              <Link to="/signup">
+                <Button variant="hero" size="xl">
+                  Start Free Trial
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Link>
+              <Link to="/pricing">
+                <Button variant="hero-outline" size="xl">
+                  View Pricing
+                </Button>
+              </Link>
+            </div>
+
+            <div
+              className="mt-10 flex items-center justify-center gap-6 text-primary-foreground/50 text-sm opacity-0 animate-fade-in"
+              style={{ animationDelay: "500ms" }}
+            >
+              <div className="flex items-center gap-1.5">
+                <CheckCircle2 className="h-4 w-4" />
+                <span>No credit card required</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <CheckCircle2 className="h-4 w-4" />
+                <span>Cancel anytime</span>
+              </div>
             </div>
           </div>
         </div>
-      </main>
+      </section>
 
-      {/* Footer */}
-      <footer className="border-t border-border bg-card mt-auto" role="contentinfo">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex flex-col items-center gap-2">
-            <Link to="/henkilokunta">
-              <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground hover:text-foreground">
-                <Lock className="h-4 w-4" />
-                Henkilökunta
-              </Button>
-            </Link>
+      {/* Features Section */}
+      <section className="py-20 md:py-28">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-serif font-bold text-foreground mb-4">
+              Everything you need to manage reservations
+            </h2>
+            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+              A complete toolkit for hospitality businesses — from booking pages to team management.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {features.map((feature, i) => (
+              <div
+                key={feature.title}
+                className="group p-6 rounded-xl border border-border bg-card shadow-card hover:shadow-hover transition-all duration-300"
+              >
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 mb-5 group-hover:bg-accent/20 transition-colors">
+                  <feature.icon className="h-6 w-6 text-accent" />
+                </div>
+                <h3 className="font-serif text-lg font-semibold text-foreground mb-2">
+                  {feature.title}
+                </h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {feature.description}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
-      </footer>
+      </section>
+
+      {/* How It Works */}
+      <section className="py-20 bg-secondary/50">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-serif font-bold text-foreground mb-4">
+              Up and running in minutes
+            </h2>
+            <p className="text-muted-foreground text-lg">
+              Three simple steps to start accepting online reservations.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+            {steps.map((step, i) => (
+              <div key={step.step} className="text-center">
+                <div className="inline-flex items-center justify-center h-14 w-14 rounded-full gradient-hero text-primary-foreground font-serif font-bold text-lg mb-5">
+                  {step.step}
+                </div>
+                <h3 className="font-serif text-lg font-semibold text-foreground mb-2">
+                  {step.title}
+                </h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {step.description}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing Preview */}
+      <section className="py-20 md:py-28">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-serif font-bold text-foreground mb-4">
+              Simple, transparent pricing
+            </h2>
+            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+              Start with a 30-day free trial. No credit card required. Upgrade or cancel anytime.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            {tiers.map((tier, i) => (
+              <PricingTier key={tier.name} {...tier} delay={i * 100} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-20 gradient-hero">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-3xl md:text-4xl font-serif font-bold text-primary-foreground mb-4">
+            Ready to modernize your reservations?
+          </h2>
+          <p className="text-primary-foreground/70 text-lg mb-8 max-w-xl mx-auto">
+            Join hospitality businesses already using ReservHub to streamline their bookings.
+          </p>
+          <Link to="/signup">
+            <Button variant="hero" size="xl">
+              Start Your Free Trial
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          </Link>
+        </div>
+      </section>
+
+      <MarketingFooter />
     </div>
   );
 };
