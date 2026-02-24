@@ -13,6 +13,7 @@ import { toast } from "@/hooks/use-toast";
 import { Plus, Pencil, Trash2, BedDouble, UtensilsCrossed, Building2, Upload, X, Loader2 } from "lucide-react";
 import { useState, useRef } from "react";
 import { useT } from "@/contexts/I18nContext";
+import DashboardTooltip from "./DashboardTooltip";
 import ResourceImageGallery from "./ResourceImageGallery";
 import ResourceCarousel from "@/components/ResourceCarousel";
 
@@ -189,7 +190,10 @@ const ResourceManagement = () => {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-serif font-bold text-foreground">{t("nav.resources")}</h2>
+        <div className="flex items-center gap-2">
+          <h2 className="text-2xl font-serif font-bold text-foreground">{t("nav.resources")}</h2>
+          <DashboardTooltip text="Add rooms, tables, or venues here. Set capacity, pricing, and upload photos. Toggle resources active/inactive to control booking availability." />
+        </div>
         {isAdmin && (
           <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) resetForm(); }}>
             <DialogTrigger asChild>

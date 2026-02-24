@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Loader2, Upload, X, ImageIcon } from "lucide-react";
+import DashboardTooltip from "./DashboardTooltip";
 
 const COLOR_PRESETS = [
   { name: "Navy & Amber", primary: "#1e3a5f", secondary: "#f5f0e8", accent: "#d4a853" },
@@ -219,7 +220,10 @@ const SettingsPanel = () => {
 
   return (
     <div data-tour="settings-panel" className="space-y-6 max-w-3xl">
-      <h2 className="text-2xl font-serif font-bold text-foreground">{t("nav.settings")}</h2>
+      <div className="flex items-center gap-2">
+        <h2 className="text-2xl font-serif font-bold text-foreground">{t("nav.settings")}</h2>
+        <DashboardTooltip text="Customize your branding, business info, colors, and email templates. Changes apply to your public booking page instantly." />
+      </div>
 
       {/* Logo */}
       <Card>
