@@ -42,26 +42,30 @@ const DashboardSidebar = ({ currentView, onViewChange, userEmail, onSignOut, mob
       {/* Mobile overlay */}
       {mobileOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
           onClick={onMobileToggle}
+          aria-hidden="true"
         />
       )}
 
       <aside
         className={cn(
           "flex flex-col w-64 min-h-screen bg-sidebar-background border-r border-sidebar-border",
-          "fixed inset-y-0 left-0 z-50 transition-transform duration-200 lg:relative lg:translate-x-0",
-          mobileOpen ? "translate-x-0" : "-translate-x-full"
+          // Desktop: static in layout flow
+          "lg:relative lg:translate-x-0 lg:z-auto",
+          // Mobile: fixed overlay with slide animation
+          "fixed inset-y-0 left-0 z-50 transition-transform duration-200 ease-in-out",
+          mobileOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full lg:translate-x-0"
         )}
       >
         <div className="p-4 border-b border-sidebar-border flex items-center justify-between">
           <Logo variant="color" size="sm" />
-          <button className="lg:hidden p-1 text-muted-foreground" onClick={onMobileToggle} aria-label="Close menu">
+          <button className="lg:hidden p-1.5 rounded-md hover:bg-sidebar-accent/50 text-muted-foreground transition-colors" onClick={onMobileToggle} aria-label="Close menu">
             <X className="h-5 w-5" />
           </button>
         </div>
 
-        <nav className="flex-1 p-3 space-y-1">
+        <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
           {visibleItems.map(({ view, labelKey, icon: Icon }) => (
             <button
               key={view}
@@ -73,8 +77,8 @@ const DashboardSidebar = ({ currentView, onViewChange, userEmail, onSignOut, mob
                   : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
               )}
             >
-              <Icon className="h-4 w-4" />
-              {t(labelKey)}
+              <Icon className="h-4 w-4 shrink-0" />
+              <span className="truncate">{t(labelKey)}</span>
             </button>
           ))}
         </nav>
