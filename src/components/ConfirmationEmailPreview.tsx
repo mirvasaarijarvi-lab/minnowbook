@@ -1,6 +1,7 @@
 import { useMemo } from "react";
-import { useT } from "@/contexts/I18nContext";
+import { useT, useLanguage } from "@/contexts/I18nContext";
 import { format } from "date-fns";
+import { fi as fiFns, enUS, sv as svFns, type Locale } from "date-fns/locale";
 
 interface ReservationData {
   guest_name: string;
@@ -48,7 +49,8 @@ const ConfirmationEmailPreview = ({
   customMessage,
 }: ConfirmationEmailPreviewProps) => {
   const t = useT();
-
+  const { language } = useLanguage();
+  const dateLocale: Locale = language === "fi" ? fiFns : language === "sv" ? svFns : enUS;
   const isCancellation = variant === "cancellation";
   const primaryColor = business.primary_color || "#1e3a5f";
   const accentColor = business.accent_color || "#d4a853";
@@ -95,20 +97,20 @@ const ConfirmationEmailPreview = ({
 
   const formattedDate = useMemo(() => {
     try {
-      return format(new Date(reservation.date + "T00:00:00"), "EEEE, MMMM d, yyyy");
+      return format(new Date(reservation.date + "T00:00:00"), "EEEE, d. MMMM yyyy", { locale: dateLocale });
     } catch {
       return reservation.date;
     }
-  }, [reservation.date]);
+  }, [reservation.date, dateLocale]);
 
   const formattedCheckOut = useMemo(() => {
     if (!reservation.check_out_date) return null;
     try {
-      return format(new Date(reservation.check_out_date + "T00:00:00"), "EEEE, MMMM d, yyyy");
+      return format(new Date(reservation.check_out_date + "T00:00:00"), "EEEE, d. MMMM yyyy", { locale: dateLocale });
     } catch {
       return reservation.check_out_date;
     }
-  }, [reservation.check_out_date]);
+  }, [reservation.check_out_date, dateLocale]);
 
   const nights = useMemo(() => {
     if (!reservation.check_out_date || !reservation.date) return 0;
