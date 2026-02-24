@@ -32,20 +32,8 @@ serve(async (req) => {
     } = await supabase.auth.getUser();
     if (authError || !user) throw new Error("Not authenticated");
 
-    // Check tenant tier
-    const { data: tenantUser } = await supabase
-      .from("tenant_users")
-      .select("tenant_id, tenants(tier)")
-      .eq("user_id", user.id)
-      .maybeSingle();
+    // AI chat is available to all authenticated users
 
-    const tier = (tenantUser?.tenants as any)?.tier;
-    if (tier !== "business") {
-      return new Response(
-        JSON.stringify({ error: "In-app support chat is only available on the Business plan." }),
-        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
 
     const { messages } = await req.json();
 

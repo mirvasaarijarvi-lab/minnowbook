@@ -146,7 +146,7 @@ const Dashboard = () => {
         </main>
       </div>
 
-      <SupportChatWidget aiEnabled={tenant?.tier === "business"} />
+      <SupportChatWidget businessTier={tenant?.tier === "business"} />
 
       <GuidedTour
         steps={tourSteps}

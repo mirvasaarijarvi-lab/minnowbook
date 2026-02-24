@@ -208,7 +208,7 @@ const Index = () => {
       </section>
 
       <MarketingFooter />
-      <SupportChatWidget aiEnabled={false} />
+      <SupportChatWidget />
     </div>
   );
 };

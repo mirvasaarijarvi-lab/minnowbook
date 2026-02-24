@@ -288,6 +288,56 @@ export type Database = {
           },
         ]
       }
+      support_requests: {
+        Row: {
+          admin_response: string | null
+          created_at: string | null
+          id: string
+          is_read_by_user: boolean
+          message: string
+          responded_at: string | null
+          status: string
+          subject: string
+          tenant_id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          admin_response?: string | null
+          created_at?: string | null
+          id?: string
+          is_read_by_user?: boolean
+          message: string
+          responded_at?: string | null
+          status?: string
+          subject: string
+          tenant_id: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          admin_response?: string | null
+          created_at?: string | null
+          id?: string
+          is_read_by_user?: boolean
+          message?: string
+          responded_at?: string | null
+          status?: string
+          subject?: string
+          tenant_id?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_requests_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tenant_email_templates: {
         Row: {
           body_html: string
