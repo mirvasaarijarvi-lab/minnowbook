@@ -11,7 +11,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useState } from "react";
 import { format } from "date-fns";
-import { CalendarDays, User, Mail, Phone, MoreVertical, CheckCircle2, XCircle, Pencil, Receipt, PackageCheck } from "lucide-react";
+import { CalendarDays, User, Mail, Phone, MoreVertical, CheckCircle2, XCircle, Pencil, Receipt, PackageCheck, Coffee } from "lucide-react";
 import EditReservationDialog from "./EditReservationDialog";
 import ConfirmationEmailPreview from "@/components/ConfirmationEmailPreview";
 import { useT } from "@/contexts/I18nContext";
@@ -218,6 +218,9 @@ const ReservationList = () => {
                       <span className="flex items-center gap-1"><Mail className="h-3.5 w-3.5" />{r.guest_email}</span>
                       {r.guest_phone && <span className="flex items-center gap-1"><Phone className="h-3.5 w-3.5" />{r.guest_phone}</span>}
                       {r.guests_count && <span className="flex items-center gap-1"><User className="h-3.5 w-3.5" />{r.guests_count} {t("common.guests")}</span>}
+                      {(r.reservation_type === "guesthouse" || r.reservation_type === "hotel") && r.breakfast_included && (
+                        <span className="flex items-center gap-1 text-primary"><Coffee className="h-3.5 w-3.5" />{t("reports.breakfast" as any)}</span>
+                      )}
                     </div>
 
                     {/* Used & Invoiced toggles */}
