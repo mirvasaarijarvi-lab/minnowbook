@@ -658,7 +658,7 @@ const PublicBooking = () => {
                         key={type}
                         type="button"
                         onClick={() => updateField("reservation_type", type)}
-                        className="group relative flex flex-col items-center gap-3 p-5 sm:p-6 rounded-xl border-2 transition-all duration-300 text-center hover:scale-105 hover:shadow-lg"
+                        className="group relative flex flex-col items-center gap-2 p-3 sm:p-6 rounded-xl border-2 transition-all duration-300 text-center hover:scale-105 hover:shadow-lg"
                         style={{
                           borderColor: isSelected ? accentColor : "#e5e7eb",
                           backgroundColor: isSelected ? `${accentColor}10` : "transparent",
