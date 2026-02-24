@@ -275,7 +275,7 @@ const Index = () => {
             Ready to modernize your reservations?
           </h2>
           <p className="text-primary-foreground/70 text-lg mb-8 max-w-xl mx-auto">
-            Join hospitality businesses already using ReservHub to streamline their bookings.
+            Join hospitality businesses already using MinnowBook to streamline their bookings.
           </p>
           <Link to="/signup">
             <Button variant="hero" size="xl">

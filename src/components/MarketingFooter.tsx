@@ -12,7 +12,7 @@ const MarketingFooter = () => {
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent">
                 <CalendarCheck className="h-5 w-5 text-accent-foreground" />
               </div>
-              <span className="text-lg font-serif font-semibold">ReservHub</span>
+              <span className="text-lg font-serif font-semibold">MinnowBook</span>
             </div>
             <p className="text-sm text-primary-foreground/70 leading-relaxed">
               The modern reservation platform for restaurants, venues, and guesthouses.
@@ -69,7 +69,7 @@ const MarketingFooter = () => {
 
         <div className="border-t border-primary-foreground/10 mt-10 pt-6 text-center">
           <p className="text-xs text-primary-foreground/40">
-            © {new Date().getFullYear()} ReservHub. All rights reserved.
+            © {new Date().getFullYear()} MinnowBook. All rights reserved.
           </p>
         </div>
       </div>
