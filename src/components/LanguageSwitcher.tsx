@@ -3,12 +3,34 @@ import { LANGUAGES, Language } from "@/i18n/translations";
 import { cn } from "@/lib/utils";
 
 interface LanguageSwitcherProps {
-  variant?: "default" | "compact";
+  variant?: "default" | "compact" | "dark";
   className?: string;
 }
 
 const LanguageSwitcher = ({ variant = "default", className }: LanguageSwitcherProps) => {
   const { language, setLanguage } = useI18n();
+
+  if (variant === "dark") {
+    return (
+      <div className={cn("flex items-center gap-1", className)}>
+        {LANGUAGES.map((lang) => (
+          <button
+            key={lang.code}
+            onClick={() => setLanguage(lang.code)}
+            className={cn(
+              "text-xs font-medium px-2 py-1 rounded transition-colors",
+              language === lang.code
+                ? "bg-white/20 text-white"
+                : "text-white/60 hover:text-white hover:bg-white/10"
+            )}
+            aria-label={lang.label}
+          >
+            {lang.code.toUpperCase()}
+          </button>
+        ))}
+      </div>
+    );
+  }
 
   if (variant === "compact") {
     return (

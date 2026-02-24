@@ -19,6 +19,7 @@ import { z } from "zod";
 import { cn } from "@/lib/utils";
 import ResourceCarousel from "@/components/ResourceCarousel";
 import ConfirmationEmailPreview from "@/components/ConfirmationEmailPreview";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 const bookingSchema = z.object({
   guest_name: z.string().trim().min(1, "Name is required").max(100),
@@ -486,11 +487,14 @@ const PublicBooking = () => {
           />
           <div className="relative">
             <div className="border-b border-white/20 py-4 px-4 sm:px-6">
-              <div className="max-w-3xl mx-auto flex items-center gap-3">
-                {settings?.logo_url && (
-                  <img src={settings.logo_url} alt="" className="h-8 w-8 rounded-full object-cover" />
-                )}
-                <h1 className="text-xl font-serif font-bold text-white">{businessName}</h1>
+              <div className="max-w-3xl mx-auto flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  {settings?.logo_url && (
+                    <img src={settings.logo_url} alt="" className="h-8 w-8 rounded-full object-cover" />
+                  )}
+                  <h1 className="text-xl font-serif font-bold text-white">{businessName}</h1>
+                </div>
+                <LanguageSwitcher variant="dark" />
               </div>
             </div>
             <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10 sm:py-16">
@@ -507,11 +511,14 @@ const PublicBooking = () => {
         </header>
       ) : (
         <header className="border-b py-4 px-4 sm:px-6" style={{ backgroundColor: primaryColor }}>
-          <div className="max-w-3xl mx-auto flex items-center gap-3">
-            {settings?.logo_url && (
-              <img src={settings.logo_url} alt="" className="h-8 w-8 rounded-full object-cover" />
-            )}
-            <h1 className="text-xl font-serif font-bold text-white">{businessName}</h1>
+          <div className="max-w-3xl mx-auto flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              {settings?.logo_url && (
+                <img src={settings.logo_url} alt="" className="h-8 w-8 rounded-full object-cover" />
+              )}
+              <h1 className="text-xl font-serif font-bold text-white">{businessName}</h1>
+            </div>
+            <LanguageSwitcher variant="dark" />
           </div>
         </header>
       )}
