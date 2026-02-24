@@ -281,6 +281,10 @@ type TranslationKeys = {
   "dashboard.priceEur": string;
   "dashboard.internalNotes": string;
   "dashboard.staffNotes": string;
+  "dashboard.gallery": string;
+  "dashboard.galleryHint": string;
+  "dashboard.imageDeleted": string;
+  "dashboard.maxImages": string;
 
   // Onboarding
   "onboarding.tierStep": string;
@@ -608,6 +612,10 @@ const en: TranslationKeys = {
   "dashboard.priceEur": "Price (EUR)",
   "dashboard.internalNotes": "Internal notes",
   "dashboard.staffNotes": "Staff notes",
+  "dashboard.gallery": "Image Gallery",
+  "dashboard.galleryHint": "Up to 5 images. PNG, JPG or WebP. Max 5 MB each.",
+  "dashboard.imageDeleted": "Image deleted",
+  "dashboard.maxImages": "Maximum 5 images reached",
 
   // Onboarding
   "onboarding.tierStep": "Tier",
@@ -931,6 +939,10 @@ const fi: TranslationKeys = {
   "dashboard.priceEur": "Hinta (EUR)",
   "dashboard.internalNotes": "Sisäiset muistiinpanot",
   "dashboard.staffNotes": "Henkilökunnan muistiinpanot",
+  "dashboard.gallery": "Kuvagalleria",
+  "dashboard.galleryHint": "Enintään 5 kuvaa. PNG, JPG tai WebP. Max 5 MB/kuva.",
+  "dashboard.imageDeleted": "Kuva poistettu",
+  "dashboard.maxImages": "Enintään 5 kuvaa",
 
   // Onboarding
   "onboarding.tierStep": "Suunnitelma",
@@ -1254,6 +1266,10 @@ const sv: TranslationKeys = {
   "dashboard.priceEur": "Pris (EUR)",
   "dashboard.internalNotes": "Interna anteckningar",
   "dashboard.staffNotes": "Personalanteckningar",
+  "dashboard.gallery": "Bildgalleri",
+  "dashboard.galleryHint": "Upp till 5 bilder. PNG, JPG eller WebP. Max 5 MB per bild.",
+  "dashboard.imageDeleted": "Bild raderad",
+  "dashboard.maxImages": "Max 5 bilder",
 
   // Onboarding
   "onboarding.tierStep": "Plan",

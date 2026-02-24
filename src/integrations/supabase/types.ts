@@ -190,6 +190,48 @@ export type Database = {
           },
         ]
       }
+      resource_images: {
+        Row: {
+          created_at: string | null
+          id: string
+          image_url: string
+          resource_id: string
+          sort_order: number
+          tenant_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          image_url: string
+          resource_id: string
+          sort_order?: number
+          tenant_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          image_url?: string
+          resource_id?: string
+          sort_order?: number
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resource_images_resource_id_fkey"
+            columns: ["resource_id"]
+            isOneToOne: false
+            referencedRelation: "resources"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "resource_images_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       resources: {
         Row: {
           breakfast_price_per_person: number | null
