@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useT } from "@/contexts/I18nContext";
+import { useTenant } from "@/hooks/useTenant";
 import {
   Dialog,
   DialogContent,
@@ -19,6 +20,13 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { CalendarIcon, Loader2 } from "lucide-react";
@@ -47,6 +55,8 @@ interface EditReservationDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
+const RESERVATION_TYPES = ["restaurant", "venue", "guesthouse", "hotel"] as const;
+
 const EditReservationDialog = ({
   reservation,
   open,
@@ -54,6 +64,7 @@ const EditReservationDialog = ({
 }: EditReservationDialogProps) => {
   const t = useT();
   const queryClient = useQueryClient();
+  const { tenant } = useTenant();
 
   const [form, setForm] = useState({
     guest_name: "",
@@ -67,6 +78,27 @@ const EditReservationDialog = ({
     special_requests: "",
     internal_notes: "",
     staff_notes: "",
+    reservation_type: "",
+  });
+
+  const [selectedResourceId, setSelectedResourceId] = useState<string>("");
+
+  // Fetch resources for the selected reservation type
+  const { data: resources = [] } = useQuery({
+    queryKey: ["resources-for-type", reservation?.tenant_id, form.reservation_type],
+    queryFn: async () => {
+      if (!reservation?.tenant_id || !form.reservation_type) return [];
+      const { data, error } = await supabase
+        .from("resources")
+        .select("id, name, resource_type, is_active")
+        .eq("tenant_id", reservation.tenant_id)
+        .eq("resource_type", form.reservation_type)
+        .eq("is_active", true)
+        .order("name");
+      if (error) throw error;
+      return data ?? [];
+    },
+    enabled: !!reservation?.tenant_id && !!form.reservation_type,
   });
 
   useEffect(() => {
@@ -83,9 +115,13 @@ const EditReservationDialog = ({
         special_requests: reservation.special_requests ?? "",
         internal_notes: reservation.internal_notes ?? "",
         staff_notes: reservation.staff_notes ?? "",
+        reservation_type: reservation.reservation_type ?? "",
       });
+      setSelectedResourceId("");
     }
   }, [reservation]);
+
+  const allowedTypes = (tenant?.allowed_reservation_types as string[]) ?? [];
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -104,6 +140,7 @@ const EditReservationDialog = ({
           special_requests: form.special_requests.trim() || null,
           internal_notes: form.internal_notes.trim() || null,
           staff_notes: form.staff_notes.trim() || null,
+          reservation_type: form.reservation_type,
           updated_at: new Date().toISOString(),
         })
         .eq("id", reservation.id)
@@ -124,11 +161,11 @@ const EditReservationDialog = ({
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
-  const isValid = form.guest_name.trim() && form.guest_email.trim() && form.date;
+  const isValid = form.guest_name.trim() && form.guest_email.trim() && form.date && form.reservation_type;
 
   const isHotelType =
-    reservation?.reservation_type === "guesthouse" ||
-    reservation?.reservation_type === "hotel";
+    form.reservation_type === "guesthouse" ||
+    form.reservation_type === "hotel";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -140,6 +177,54 @@ const EditReservationDialog = ({
         </DialogHeader>
 
         <div className="space-y-4 py-2">
+          {/* Reservation type & resource */}
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label>{t("common.type")} *</Label>
+              <Select
+                value={form.reservation_type}
+                onValueChange={(v) => {
+                  updateField("reservation_type", v);
+                  setSelectedResourceId("");
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {(allowedTypes.length > 0 ? allowedTypes : RESERVATION_TYPES).map((type) => (
+                    <SelectItem key={type} value={type}>
+                      {t(`dashboard.${type}` as any)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label>{t("booking.selectResource")}</Label>
+              <Select
+                value={selectedResourceId}
+                onValueChange={setSelectedResourceId}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="—" />
+                </SelectTrigger>
+                <SelectContent>
+                  {resources.map((r) => (
+                    <SelectItem key={r.id} value={r.id}>
+                      {r.name}
+                    </SelectItem>
+                  ))}
+                  {resources.length === 0 && (
+                    <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                      {t("common.noResults")}
+                    </div>
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
           {/* Guest details */}
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="space-y-1.5">
