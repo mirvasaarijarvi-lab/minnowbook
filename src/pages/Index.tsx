@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import MarketingHeader from "@/components/MarketingHeader";
 import MarketingFooter from "@/components/MarketingFooter";
+import SupportChatWidget from "@/components/SupportChatWidget";
 import PricingTier from "@/components/PricingTier";
 import heroBg from "@/assets/hero-bg.png";
 import ctaBg from "@/assets/cta-bg.png";
@@ -207,6 +208,7 @@ const Index = () => {
       </section>
 
       <MarketingFooter />
+      <SupportChatWidget aiEnabled={false} />
     </div>
   );
 };

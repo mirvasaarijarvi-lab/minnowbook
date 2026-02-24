@@ -12,10 +12,11 @@ import SettingsPanel from "@/components/dashboard/SettingsPanel";
 import ReportsPanel from "@/components/dashboard/ReportsPanel";
 import AdminPanel from "@/components/dashboard/AdminPanel";
 import Logo from "@/components/Logo";
+import SupportChatWidget from "@/components/SupportChatWidget";
 
 const Dashboard = () => {
   const { user, signOut } = useAuth();
-  const { tenantId, isAdmin, loading } = useTenant();
+  const { tenantId, tenant, isAdmin, loading } = useTenant();
   const navigate = useNavigate();
   const [currentView, setCurrentView] = useState<DashboardView>("overview");
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -72,6 +73,8 @@ const Dashboard = () => {
           {viewComponents[currentView]}
         </main>
       </div>
+
+      <SupportChatWidget aiEnabled={tenant?.tier === "business"} />
     </div>
   );
 };
