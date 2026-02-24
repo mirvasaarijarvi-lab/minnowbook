@@ -114,6 +114,12 @@ type TranslationKeys = {
   "booking.preferredTime": string;
   "booking.closedDay": string;
   "booking.submit": string;
+  "booking.availabilityCalendar": string;
+  "booking.availabilityDesc": string;
+  "booking.available": string;
+  "booking.busy": string;
+  "booking.full": string;
+  "booking.reservations": string;
   "booking.submitting": string;
   "booking.submitError": string;
   "booking.thankYou": string;
@@ -416,6 +422,12 @@ const en: TranslationKeys = {
   "booking.preferredTime": "Preferred time",
   "booking.closedDay": "Closed on this day.",
   "booking.submit": "Submit Reservation",
+  "booking.availabilityCalendar": "Availability",
+  "booking.availabilityDesc": "See which dates are available for booking.",
+  "booking.available": "Available",
+  "booking.busy": "Busy",
+  "booking.full": "Full",
+  "booking.reservations": "reservations",
   "booking.submitting": "Submitting...",
   "booking.submitError": "Failed to submit reservation. Please try again.",
   "booking.thankYou": "Thank you!",
@@ -715,6 +727,12 @@ const fi: TranslationKeys = {
   "booking.preferredTime": "Toivottu aika",
   "booking.closedDay": "Suljettu tänä päivänä.",
   "booking.submit": "Lähetä varaus",
+  "booking.availabilityCalendar": "Saatavuus",
+  "booking.availabilityDesc": "Katso mitkä päivät ovat vapaana varauksille.",
+  "booking.available": "Vapaa",
+  "booking.busy": "Varattu",
+  "booking.full": "Täynnä",
+  "booking.reservations": "varausta",
   "booking.submitting": "Lähetetään...",
   "booking.submitError": "Varauksen lähetys epäonnistui. Yritä uudelleen.",
   "booking.thankYou": "Kiitos!",
@@ -1013,6 +1031,12 @@ const sv: TranslationKeys = {
   "booking.preferredTime": "Önskad tid",
   "booking.closedDay": "Stängt denna dag.",
   "booking.submit": "Skicka bokning",
+  "booking.availabilityCalendar": "Tillgänglighet",
+  "booking.availabilityDesc": "Se vilka datum som är lediga för bokning.",
+  "booking.available": "Ledigt",
+  "booking.busy": "Upptaget",
+  "booking.full": "Fullt",
+  "booking.reservations": "bokningar",
   "booking.submitting": "Skickar...",
   "booking.submitError": "Kunde inte skicka bokningen. Försök igen.",
   "booking.thankYou": "Tack!",
