@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useTenant } from "@/hooks/useTenant";
 import { Menu, HelpCircle } from "lucide-react";
 import DashboardSidebar, { DashboardView } from "@/components/dashboard/DashboardSidebar";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 import DashboardOverview from "@/components/dashboard/DashboardOverview";
 import CalendarView from "@/components/dashboard/CalendarView";
 import ReservationList from "@/components/dashboard/ReservationList";
@@ -164,18 +165,21 @@ const Dashboard = () => {
             <Menu className="h-6 w-6 text-foreground" />
           </button>
           <Logo variant="color" size="sm" showText={false} />
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                onClick={() => setTourOpen(true)}
-                className="p-1 rounded-md hover:bg-muted transition-colors text-muted-foreground"
-                aria-label="Start guided tour"
-              >
-                <HelpCircle className="h-5 w-5" />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent>Start guided tour</TooltipContent>
-          </Tooltip>
+          <div className="flex items-center gap-1">
+            <LanguageSwitcher variant="compact" />
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => setTourOpen(true)}
+                  className="p-1 rounded-md hover:bg-muted transition-colors text-muted-foreground"
+                  aria-label="Start guided tour"
+                >
+                  <HelpCircle className="h-5 w-5" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>Start guided tour</TooltipContent>
+            </Tooltip>
+          </div>
         </header>
 
         <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-x-hidden overflow-y-auto">
