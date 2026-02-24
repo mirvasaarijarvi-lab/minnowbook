@@ -15,6 +15,7 @@ import MarketingHeader from "@/components/MarketingHeader";
 import MarketingFooter from "@/components/MarketingFooter";
 import PricingTier from "@/components/PricingTier";
 import heroBg from "@/assets/hero-bg.png";
+import ctaBg from "@/assets/cta-bg.png";
 
 const features = [
   {
@@ -269,12 +270,16 @@ const Index = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 gradient-hero">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-serif font-bold text-primary-foreground mb-4">
+      <section className="relative py-20 overflow-hidden">
+        <div className="absolute inset-0">
+          <img src={ctaBg} alt="" className="w-full h-full object-cover" aria-hidden="true" />
+          <div className="absolute inset-0 bg-gradient-to-b from-primary/50 via-primary/20 to-primary/50" />
+        </div>
+        <div className="container mx-auto px-4 text-center relative">
+          <h2 className="text-3xl md:text-4xl font-serif font-bold text-white drop-shadow-lg mb-4">
             Ready to modernize your reservations?
           </h2>
-          <p className="text-primary-foreground/70 text-lg mb-8 max-w-xl mx-auto">
+          <p className="text-white/80 text-lg mb-8 max-w-xl mx-auto">
             Join hospitality businesses already using MinnowBook to streamline their bookings.
           </p>
           <Link to="/signup">
