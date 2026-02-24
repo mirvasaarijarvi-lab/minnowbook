@@ -77,9 +77,9 @@ const App = () => (
               <Route path="/book/:slug" element={<PublicBooking />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
+            <CookieConsent />
+            <AccessibilityWidget />
           </BrowserRouter>
-          <CookieConsent />
-          <AccessibilityWidget />
         </TooltipProvider>
       </AuthProvider>
     </I18nProvider>
