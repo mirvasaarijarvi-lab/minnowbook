@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useT } from "@/contexts/I18nContext";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
+import PasswordInput from "@/components/PasswordInput";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -65,7 +66,12 @@ const Login = () => {
                 <Label htmlFor="password">{t("common.password")}</Label>
                 <Link to="/forgot-password" className="text-xs text-accent hover:underline">{t("login.forgotPassword")}</Link>
               </div>
-              <Input id="password" type="password" placeholder="Your password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+              <PasswordInput
+                id="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                showRequirements={false}
+              />
             </div>
 
             <Button type="submit" variant="hero" size="lg" className="w-full" disabled={loading}>

@@ -503,6 +503,15 @@ type TranslationKeys = {
   "cookie.privacyPolicy": string;
   "cookie.accept": string;
   "cookie.reject": string;
+
+  // Password validation
+  "password.minLength": string;
+  "password.uppercase": string;
+  "password.lowercase": string;
+  "password.number": string;
+  "password.checking": string;
+  "password.breached": string;
+  "password.safe": string;
 };
 
 export type TranslationKey = keyof TranslationKeys;
@@ -994,6 +1003,13 @@ const en: TranslationKeys = {
   "cookie.privacyPolicy": "Privacy Policy",
   "cookie.accept": "Accept",
   "cookie.reject": "Reject",
+  "password.minLength": "At least 12 characters",
+  "password.uppercase": "One uppercase letter",
+  "password.lowercase": "One lowercase letter",
+  "password.number": "One number",
+  "password.checking": "Checking for leaked passwords…",
+  "password.breached": "This password has been found in data breaches — choose a different one",
+  "password.safe": "Password not found in known breaches",
 };
 
 const fi: TranslationKeys = {
@@ -1482,6 +1498,13 @@ const fi: TranslationKeys = {
   "cookie.privacyPolicy": "Tietosuojakäytäntö",
   "cookie.accept": "Hyväksy",
   "cookie.reject": "Hylkää",
+  "password.minLength": "Vähintään 12 merkkiä",
+  "password.uppercase": "Yksi iso kirjain",
+  "password.lowercase": "Yksi pieni kirjain",
+  "password.number": "Yksi numero",
+  "password.checking": "Tarkistetaan vuotaneita salasanoja…",
+  "password.breached": "Tämä salasana on löytynyt tietovuodoista — valitse toinen",
+  "password.safe": "Salasanaa ei löytynyt tunnetuista vuodoista",
 };
 
 const sv: TranslationKeys = {
@@ -1970,6 +1993,13 @@ const sv: TranslationKeys = {
   "cookie.privacyPolicy": "Integritetspolicy",
   "cookie.accept": "Acceptera",
   "cookie.reject": "Avvisa",
+  "password.minLength": "Minst 12 tecken",
+  "password.uppercase": "En stor bokstav",
+  "password.lowercase": "En liten bokstav",
+  "password.number": "En siffra",
+  "password.checking": "Kontrollerar läckta lösenord…",
+  "password.breached": "Detta lösenord har hittats i dataintrång — välj ett annat",
+  "password.safe": "Lösenordet hittades inte i kända intrång",
 };
 
 export const translations: Record<Language, TranslationKeys> = { en, fi, sv };
