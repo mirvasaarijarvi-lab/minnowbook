@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
 import { Plus, Key, Trash2, Shield, UserCog } from "lucide-react";
+import PasswordInput from "@/components/PasswordInput";
 import { useT } from "@/contexts/I18nContext";
 import DashboardTooltip from "./DashboardTooltip";
 import SupportRequestsBoard from "./SupportRequestsBoard";
@@ -40,6 +41,8 @@ const AdminPanel = () => {
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [newPassword, setNewPassword] = useState("");
+  const [newPasswordValid, setNewPasswordValid] = useState(false);
+  const [newUserPasswordValid, setNewUserPasswordValid] = useState(false);
   const [newUser, setNewUser] = useState({
     email: "",
     password: "",
@@ -155,13 +158,12 @@ const AdminPanel = () => {
                 />
               </div>
               <div>
-                <Label>{t("common.password")}</Label>
-                <Input
-                  type="password"
+                <PasswordInput
+                  id="new-user-password"
                   value={newUser.password}
                   onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
-                  placeholder="Min. 6 characters"
-                  minLength={6}
+                  label={t("common.password")}
+                  onValidChange={setNewUserPasswordValid}
                 />
               </div>
               <div>
@@ -178,7 +180,7 @@ const AdminPanel = () => {
               <Button
                 className="w-full"
                 onClick={() => createMutation.mutate()}
-                disabled={!newUser.email || !newUser.password || createMutation.isPending}
+                disabled={!newUser.email || !newUserPasswordValid || createMutation.isPending}
               >
                 {createMutation.isPending ? t("common.saving") : t("admin.addUser")}
               </Button>
@@ -193,21 +195,18 @@ const AdminPanel = () => {
           <DialogHeader>
             <DialogTitle className="font-serif">{t("admin.changePassword")}</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 pt-2">
-            <div>
-              <Label>{t("admin.newPassword")}</Label>
-              <Input
-                type="password"
+            <div className="space-y-4 pt-2">
+              <PasswordInput
+                id="change-password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="Min. 6 characters"
-                minLength={6}
+                label={t("admin.newPassword")}
+                onValidChange={setNewPasswordValid}
               />
-            </div>
             <Button
               className="w-full"
               onClick={() => changePasswordMutation.mutate()}
-              disabled={newPassword.length < 6 || changePasswordMutation.isPending}
+              disabled={!newPasswordValid || changePasswordMutation.isPending}
             >
               {changePasswordMutation.isPending ? t("common.saving") : t("admin.changePassword")}
             </Button>

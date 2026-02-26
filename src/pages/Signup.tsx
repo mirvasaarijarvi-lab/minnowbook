@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,10 +9,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useT } from "@/contexts/I18nContext";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
+import PasswordInput from "@/components/PasswordInput";
 
 const Signup = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [passwordValid, setPasswordValid] = useState(false);
   const t = useT();
   const [form, setForm] = useState({
     businessName: "",
@@ -88,12 +90,16 @@ const Signup = () => {
               <Label htmlFor="email">{t("common.email")}</Label>
               <Input id="email" name="email" type="email" placeholder="you@example.com" value={form.email} onChange={handleChange} required />
             </div>
-            <div>
-              <Label htmlFor="password">{t("common.password")}</Label>
-              <Input id="password" name="password" type="password" placeholder="At least 6 characters" value={form.password} onChange={handleChange} minLength={6} required />
-            </div>
+            <PasswordInput
+              id="password"
+              name="password"
+              value={form.password}
+              onChange={handleChange}
+              label={t("common.password")}
+              onValidChange={setPasswordValid}
+            />
 
-            <Button type="submit" variant="hero" size="lg" className="w-full" disabled={loading}>
+            <Button type="submit" variant="hero" size="lg" className="w-full" disabled={loading || !passwordValid}>
               {loading ? t("signup.creatingAccount") : t("common.startFreeTrial")}
               <ArrowRight className="h-4 w-4" />
             </Button>
