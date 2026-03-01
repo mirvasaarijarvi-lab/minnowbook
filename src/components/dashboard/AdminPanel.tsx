@@ -18,6 +18,7 @@ import SupportRequestsBoard from "./SupportRequestsBoard";
 import BookingLinksCard from "./BookingLinksCard";
 import LoginHistoryPanel from "./LoginHistoryPanel";
 import AuditLogPanel from "./AuditLogPanel";
+import PermissionsEditor from "./PermissionsEditor";
 
 interface TenantUser {
   id: string;
@@ -290,6 +291,9 @@ const AdminPanel = () => {
 
       {/* Login History */}
       <LoginHistoryPanel />
+
+      {/* Role Permissions Editor */}
+      {isOwner && <PermissionsEditor />}
 
       {/* Audit / Change Log */}
       <AuditLogPanel />
