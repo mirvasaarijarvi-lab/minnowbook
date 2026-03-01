@@ -24,6 +24,7 @@ interface TenantUser {
   id: string;
   user_id: string;
   role: string;
+  custom_role_key: string | null;
   display_name: string | null;
   is_approved: boolean;
   email: string;
@@ -34,6 +35,16 @@ const roleBadgeColors: Record<string, string> = {
   owner: "bg-primary/10 text-primary border-primary/20",
   admin: "bg-accent/10 text-accent border-accent/20",
   staff: "bg-muted text-muted-foreground border-border",
+};
+
+/** Get the effective role key for a user (custom_role_key takes precedence) */
+const getEffectiveRole = (u: TenantUser) => u.custom_role_key || u.role;
+
+/** Get display label for a role */
+const getRoleLabel = (u: TenantUser, roleDefs: { role_key: string; display_name: string }[]) => {
+  const effective = getEffectiveRole(u);
+  const def = roleDefs.find((r) => r.role_key === effective);
+  return def?.display_name || effective;
 };
 
 const AdminPanel = () => {
@@ -68,15 +79,32 @@ const AdminPanel = () => {
     enabled: !!tenantId,
   });
 
+  // Fetch custom role definitions for dropdown
+  const { data: roleDefinitions } = useQuery({
+    queryKey: ["role-definitions-for-select", tenantId],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("role_definitions")
+        .select("role_key, display_name, is_system")
+        .eq("tenant_id", tenantId!)
+        .order("hierarchy_level");
+      return data ?? [];
+    },
+    enabled: !!tenantId,
+  });
+
   const createMutation = useMutation({
-    mutationFn: () =>
-      invokeAdmin({
+    mutationFn: () => {
+      const isSystemRole = ["owner", "admin", "staff"].includes(newUser.role);
+      return invokeAdmin({
         action: "create",
         email: newUser.email,
         password: newUser.password,
         displayName: newUser.displayName,
-        role: newUser.role,
-      }),
+        role: isSystemRole ? newUser.role : "staff",
+        customRoleKey: isSystemRole ? undefined : newUser.role,
+      });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-users"] });
       setAddDialogOpen(false);
@@ -177,6 +205,13 @@ const AdminPanel = () => {
                     <SelectItem value="staff">{t("admin.staff")}</SelectItem>
                     <SelectItem value="admin">{t("admin.adminRole")}</SelectItem>
                     {isOwner && <SelectItem value="owner">{t("admin.owner")}</SelectItem>}
+                    {(roleDefinitions ?? [])
+                      .filter((r) => !r.is_system)
+                      .map((r) => (
+                        <SelectItem key={r.role_key} value={r.role_key}>
+                          {r.display_name}
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -236,9 +271,9 @@ const AdminPanel = () => {
                       <span className="font-semibold text-foreground">
                         {u.display_name || u.email}
                       </span>
-                      <Badge variant="outline" className={`text-xs capitalize ${roleBadgeColors[u.role] ?? ""}`}>
+                      <Badge variant="outline" className={`text-xs capitalize ${roleBadgeColors[getEffectiveRole(u)] ?? "border-secondary text-secondary-foreground"}`}>
                         <Shield className="h-3 w-3 mr-1" />
-                        {u.role}
+                        {getRoleLabel(u, roleDefinitions ?? [])}
                       </Badge>
                     </div>
                     <p className="text-sm text-muted-foreground">{u.email}</p>
@@ -247,10 +282,10 @@ const AdminPanel = () => {
                   <div className="flex items-center gap-1">
                     {/* Role change */}
                     <Select
-                      value={u.role}
+                      value={getEffectiveRole(u)}
                       onValueChange={(role) => updateRoleMutation.mutate({ userId: u.user_id, role })}
                     >
-                      <SelectTrigger className="w-[110px] h-8 text-xs">
+                      <SelectTrigger className="w-[120px] h-8 text-xs">
                         <UserCog className="h-3 w-3 mr-1" />
                         <SelectValue />
                       </SelectTrigger>
@@ -258,6 +293,13 @@ const AdminPanel = () => {
                         <SelectItem value="staff">{t("admin.staff")}</SelectItem>
                         <SelectItem value="admin">{t("admin.adminRole")}</SelectItem>
                         {isOwner && <SelectItem value="owner">{t("admin.owner")}</SelectItem>}
+                        {(roleDefinitions ?? [])
+                          .filter((r) => !r.is_system)
+                          .map((r) => (
+                            <SelectItem key={r.role_key} value={r.role_key}>
+                              {r.display_name}
+                            </SelectItem>
+                          ))}
                       </SelectContent>
                     </Select>
 
