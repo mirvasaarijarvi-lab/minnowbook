@@ -206,6 +206,8 @@ type TranslationKeys = {
   "admin.noUsers": string;
   "admin.loginHistory": string;
   "admin.noLoginHistory": string;
+  "admin.auditLog": string;
+  "admin.noAuditLog": string;
 
   // Hero
   "hero.badge": string;
@@ -731,6 +733,8 @@ const en: TranslationKeys = {
   "admin.noUsers": "No users found.",
   "admin.loginHistory": "Login History",
   "admin.noLoginHistory": "No login activity recorded yet.",
+  "admin.auditLog": "Change Log",
+  "admin.noAuditLog": "No changes recorded yet.",
 
   // Hero
   "hero.badge": "Now in beta. 30-day free trial",
@@ -1244,6 +1248,8 @@ const fi: TranslationKeys = {
   "admin.noUsers": "Ei käyttäjiä.",
   "admin.loginHistory": "Kirjautumishistoria",
   "admin.noLoginHistory": "Kirjautumistietoja ei ole vielä tallennettu.",
+  "admin.auditLog": "Muutosloki",
+  "admin.noAuditLog": "Muutoksia ei ole vielä tallennettu.",
 
   "hero.badge": "Nyt betassa. 30 päivän ilmainen kokeilu",
   "hero.title": "Varaustyökalu niille,",
@@ -1756,6 +1762,8 @@ const sv: TranslationKeys = {
   "admin.noUsers": "Inga användare hittades.",
   "admin.loginHistory": "Inloggningshistorik",
   "admin.noLoginHistory": "Ingen inloggningsaktivitet registrerad ännu.",
+  "admin.auditLog": "Ändringslogg",
+  "admin.noAuditLog": "Inga ändringar registrerade ännu.",
 
   "hero.badge": "Nu i beta. 30 dagars gratis provperiod",
   "hero.title": "Bokningsverktyget byggt för",
