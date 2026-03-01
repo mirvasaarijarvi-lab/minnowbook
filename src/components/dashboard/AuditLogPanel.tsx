@@ -1,12 +1,16 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/hooks/useTenant";
 import { useT } from "@/contexts/I18nContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ClipboardList, Plus, Pencil, Trash2, User, ChevronDown, ChevronRight } from "lucide-react";
-import { format, formatDistanceToNow } from "date-fns";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { ClipboardList, Plus, Pencil, Trash2, User, ChevronDown, ChevronRight, CalendarIcon, X, Loader2 } from "lucide-react";
+import { format, formatDistanceToNow, startOfDay, endOfDay } from "date-fns";
+import { cn } from "@/lib/utils";
 import DashboardTooltip from "./DashboardTooltip";
 import { Json } from "@/integrations/supabase/types";
 
@@ -105,10 +109,15 @@ function formatValue(val: unknown): string {
   return String(val);
 }
 
+const PAGE_SIZE = 25;
+
 const AuditLogPanel = () => {
   const { tenantId } = useTenant();
   const t = useT();
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+  const [dateFrom, setDateFrom] = useState<Date | undefined>(undefined);
+  const [dateTo, setDateTo] = useState<Date | undefined>(undefined);
+  const [page, setPage] = useState(0);
 
   const toggleExpand = (id: string) => {
     setExpandedIds((prev) => {
@@ -119,16 +128,35 @@ const AuditLogPanel = () => {
     });
   };
 
-  const { data: auditLog, isLoading } = useQuery({
-    queryKey: ["audit-log", tenantId],
+  const resetFilters = useCallback(() => {
+    setDateFrom(undefined);
+    setDateTo(undefined);
+    setPage(0);
+  }, []);
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["audit-log", tenantId, dateFrom?.toISOString(), dateTo?.toISOString(), page],
     queryFn: async () => {
-      const { data: logs, error } = await supabase
+      let query = supabase
         .from("audit_log")
         .select("id, user_id, table_name, action, summary, created_at, old_data, new_data")
-        .order("created_at", { ascending: false })
-        .limit(100);
+        .order("created_at", { ascending: false });
 
+      if (dateFrom) {
+        query = query.gte("created_at", startOfDay(dateFrom).toISOString());
+      }
+      if (dateTo) {
+        query = query.lte("created_at", endOfDay(dateTo).toISOString());
+      }
+
+      // Fetch one extra to know if there's a next page
+      query = query.range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+
+      const { data: logs, error } = await query;
       if (error) throw error;
+
+      const hasMore = (logs?.length ?? 0) > PAGE_SIZE;
+      const trimmedLogs = hasMore ? logs!.slice(0, PAGE_SIZE) : (logs ?? []);
 
       const { data: tenantUsers } = await supabase
         .from("tenant_users")
@@ -138,21 +166,76 @@ const AuditLogPanel = () => {
         (tenantUsers ?? []).map((u) => [u.user_id, u.display_name])
       );
 
-      return (logs ?? []).map((l) => ({
+      const entries = trimmedLogs.map((l) => ({
         ...l,
         display_name: l.user_id ? userMap.get(l.user_id) ?? undefined : undefined,
       })) as AuditEntry[];
+
+      return { entries, hasMore };
     },
     enabled: !!tenantId,
   });
 
+  const auditLog = data?.entries;
+  const hasMore = data?.hasMore ?? false;
+  const hasFilters = !!dateFrom || !!dateTo;
+
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center gap-2">
-          <ClipboardList className="h-5 w-5 text-primary" />
-          <CardTitle className="font-serif">{t("admin.auditLog")}</CardTitle>
-          <DashboardTooltip text="A chronological record of all changes made by team members — reservations, resources, settings, and more. Click an entry to see field-level details." />
+        <div className="flex items-center justify-between flex-wrap gap-2">
+          <div className="flex items-center gap-2">
+            <ClipboardList className="h-5 w-5 text-primary" />
+            <CardTitle className="font-serif">{t("admin.auditLog")}</CardTitle>
+            <DashboardTooltip text="A chronological record of all changes made by team members — reservations, resources, settings, and more. Click an entry to see field-level details." />
+          </div>
+
+          {/* Date filters */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm" className={cn("gap-1.5 text-xs", dateFrom && "border-primary/50")}>
+                  <CalendarIcon className="h-3.5 w-3.5" />
+                  {dateFrom ? format(dateFrom, "dd.MM.yyyy") : "From"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="end">
+                <Calendar
+                  mode="single"
+                  selected={dateFrom}
+                  onSelect={(d) => { setDateFrom(d); setPage(0); }}
+                  disabled={(d) => (dateTo ? d > dateTo : false)}
+                  initialFocus
+                  className={cn("p-3 pointer-events-auto")}
+                />
+              </PopoverContent>
+            </Popover>
+
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm" className={cn("gap-1.5 text-xs", dateTo && "border-primary/50")}>
+                  <CalendarIcon className="h-3.5 w-3.5" />
+                  {dateTo ? format(dateTo, "dd.MM.yyyy") : "To"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="end">
+                <Calendar
+                  mode="single"
+                  selected={dateTo}
+                  onSelect={(d) => { setDateTo(d); setPage(0); }}
+                  disabled={(d) => (dateFrom ? d < dateFrom : false)}
+                  initialFocus
+                  className={cn("p-3 pointer-events-auto")}
+                />
+              </PopoverContent>
+            </Popover>
+
+            {hasFilters && (
+              <Button variant="ghost" size="sm" onClick={resetFilters} className="gap-1 text-xs text-muted-foreground">
+                <X className="h-3.5 w-3.5" /> Clear
+              </Button>
+            )}
+          </div>
         </div>
       </CardHeader>
       <CardContent>
@@ -164,89 +247,116 @@ const AuditLogPanel = () => {
           </div>
         ) : !auditLog?.length ? (
           <p className="text-sm text-muted-foreground text-center py-6">
-            {t("admin.noAuditLog")}
+            {hasFilters ? "No entries match the selected date range." : t("admin.noAuditLog")}
           </p>
         ) : (
-          <div className="space-y-2 max-h-[500px] overflow-y-auto">
-            {auditLog.map((entry) => {
-              const config = actionConfig[entry.action] ?? actionConfig.UPDATE;
-              const ActionIcon = config.icon;
-              const entryDate = new Date(entry.created_at);
-              const isExpanded = expandedIds.has(entry.id);
+          <>
+            <div className="space-y-2 max-h-[500px] overflow-y-auto">
+              {auditLog.map((entry) => {
+                const config = actionConfig[entry.action] ?? actionConfig.UPDATE;
+                const ActionIcon = config.icon;
+                const entryDate = new Date(entry.created_at);
+                const isExpanded = expandedIds.has(entry.id);
 
-              const changes =
-                entry.action === "UPDATE"
-                  ? computeChangedFields(
-                      entry.old_data as Record<string, unknown> | null,
-                      entry.new_data as Record<string, unknown> | null
-                    )
-                  : [];
+                const changes =
+                  entry.action === "UPDATE"
+                    ? computeChangedFields(
+                        entry.old_data as Record<string, unknown> | null,
+                        entry.new_data as Record<string, unknown> | null
+                      )
+                    : [];
 
-              const hasDetails = changes.length > 0;
+                const hasDetails = changes.length > 0;
 
-              return (
-                <div
-                  key={entry.id}
-                  className={`rounded-lg border border-border text-sm transition-colors ${hasDetails ? "cursor-pointer hover:bg-muted/30" : ""}`}
-                  onClick={() => hasDetails && toggleExpand(entry.id)}
-                >
-                  <div className="flex items-start gap-3 p-3">
-                    {hasDetails && (
-                      <span className="shrink-0 mt-1 text-muted-foreground">
-                        {isExpanded ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
-                      </span>
-                    )}
-                    <Badge variant="outline" className={`shrink-0 mt-0.5 ${config.color}`}>
-                      <ActionIcon className="h-3 w-3 mr-1" />
-                      {config.label}
-                    </Badge>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-foreground">
-                        {entry.summary || `${config.label} ${tableLabels[entry.table_name] ?? entry.table_name}`}
-                      </p>
-                      <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
-                        <span className="flex items-center gap-1">
-                          <User className="h-3 w-3" />
-                          {entry.display_name || (entry.user_id ? entry.user_id.slice(0, 8) + "…" : "System")}
+                return (
+                  <div
+                    key={entry.id}
+                    className={`rounded-lg border border-border text-sm transition-colors ${hasDetails ? "cursor-pointer hover:bg-muted/30" : ""}`}
+                    onClick={() => hasDetails && toggleExpand(entry.id)}
+                  >
+                    <div className="flex items-start gap-3 p-3">
+                      {hasDetails && (
+                        <span className="shrink-0 mt-1 text-muted-foreground">
+                          {isExpanded ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
                         </span>
-                        <span>·</span>
-                        <span>{formatDistanceToNow(entryDate, { addSuffix: true })}</span>
-                        <span className="hidden sm:inline">·</span>
-                        <span className="hidden sm:inline text-muted-foreground/60">
-                          {format(entryDate, "dd.MM.yyyy HH:mm")}
-                        </span>
-                        {hasDetails && (
-                          <>
-                            <span>·</span>
-                            <span className="text-primary/70">{changes.length} field{changes.length !== 1 ? "s" : ""} changed</span>
-                          </>
-                        )}
+                      )}
+                      <Badge variant="outline" className={`shrink-0 mt-0.5 ${config.color}`}>
+                        <ActionIcon className="h-3 w-3 mr-1" />
+                        {config.label}
+                      </Badge>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-foreground">
+                          {entry.summary || `${config.label} ${tableLabels[entry.table_name] ?? entry.table_name}`}
+                        </p>
+                        <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
+                          <span className="flex items-center gap-1">
+                            <User className="h-3 w-3" />
+                            {entry.display_name || (entry.user_id ? entry.user_id.slice(0, 8) + "…" : "System")}
+                          </span>
+                          <span>·</span>
+                          <span>{formatDistanceToNow(entryDate, { addSuffix: true })}</span>
+                          <span className="hidden sm:inline">·</span>
+                          <span className="hidden sm:inline text-muted-foreground/60">
+                            {format(entryDate, "dd.MM.yyyy HH:mm")}
+                          </span>
+                          {hasDetails && (
+                            <>
+                              <span>·</span>
+                              <span className="text-primary/70">{changes.length} field{changes.length !== 1 ? "s" : ""} changed</span>
+                            </>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  {isExpanded && hasDetails && (
-                    <div className="border-t border-border bg-muted/20 px-4 py-3 space-y-1.5">
-                      {changes.map((c) => (
-                        <div key={c.field} className="flex items-baseline gap-2 text-xs">
-                          <span className="font-medium text-foreground min-w-[120px]">
-                            {fieldLabels[c.field] ?? c.field}
-                          </span>
-                          <span className="text-destructive/70 line-through">
-                            {formatValue(c.from)}
-                          </span>
-                          <span className="text-muted-foreground">→</span>
-                          <span className="text-emerald-600 font-medium">
-                            {formatValue(c.to)}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
+                    {isExpanded && hasDetails && (
+                      <div className="border-t border-border bg-muted/20 px-4 py-3 space-y-1.5">
+                        {changes.map((c) => (
+                          <div key={c.field} className="flex items-baseline gap-2 text-xs">
+                            <span className="font-medium text-foreground min-w-[120px]">
+                              {fieldLabels[c.field] ?? c.field}
+                            </span>
+                            <span className="text-destructive/70 line-through">
+                              {formatValue(c.from)}
+                            </span>
+                            <span className="text-muted-foreground">→</span>
+                            <span className="text-emerald-600 font-medium">
+                              {formatValue(c.to)}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Pagination controls */}
+            <div className="flex items-center justify-between mt-4 pt-3 border-t border-border">
+              <p className="text-xs text-muted-foreground">
+                Page {page + 1}{hasFilters ? " (filtered)" : ""}
+              </p>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={page === 0}
+                  onClick={() => setPage((p) => p - 1)}
+                >
+                  Previous
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={!hasMore}
+                  onClick={() => setPage((p) => p + 1)}
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
+          </>
         )}
       </CardContent>
     </Card>
