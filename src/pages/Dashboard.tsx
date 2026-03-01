@@ -2,7 +2,17 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate, Navigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useTenant } from "@/hooks/useTenant";
-import { Menu, HelpCircle } from "lucide-react";
+import { usePermissions } from "@/hooks/usePermissions";
+import {
+  PERM_CALENDAR_VIEW,
+  PERM_RESERVATIONS_VIEW,
+  PERM_RESOURCES_VIEW,
+  PERM_REPORTS_VIEW,
+  PERM_SETTINGS_VIEW,
+  PERM_ADMIN_VIEW,
+  PERM_SUPPORT_VIEW,
+} from "@/lib/permissions";
+import { Menu, HelpCircle, ShieldAlert } from "lucide-react";
 import DashboardSidebar, { DashboardView } from "@/components/dashboard/DashboardSidebar";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import DashboardOverview from "@/components/dashboard/DashboardOverview";
@@ -97,6 +107,7 @@ const tourSteps: TourStep[] = [
 const Dashboard = () => {
   const { user, signOut } = useAuth();
   const { tenantId, tenant, isAdmin, loading } = useTenant();
+  const { can } = usePermissions();
   const navigate = useNavigate();
   const [currentView, setCurrentView] = useState<DashboardView>("overview");
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -136,15 +147,39 @@ const Dashboard = () => {
     return <Navigate to="/onboarding" replace />;
   }
 
+  const permissionGate: Partial<Record<DashboardView, string>> = {
+    calendar: PERM_CALENDAR_VIEW,
+    reservations: PERM_RESERVATIONS_VIEW,
+    resources: PERM_RESOURCES_VIEW,
+    reports: PERM_REPORTS_VIEW,
+    settings: PERM_SETTINGS_VIEW,
+    admin: PERM_ADMIN_VIEW,
+    support: PERM_SUPPORT_VIEW,
+  };
+
+  const AccessDenied = () => (
+    <div className="flex flex-col items-center justify-center py-20 text-muted-foreground gap-3">
+      <ShieldAlert className="h-12 w-12" />
+      <p className="text-lg font-medium">Access denied</p>
+      <p className="text-sm">You don't have permission to view this section.</p>
+    </div>
+  );
+
+  const gatedView = (view: DashboardView, component: React.ReactNode) => {
+    const requiredPerm = permissionGate[view];
+    if (requiredPerm && !can(requiredPerm)) return <AccessDenied />;
+    return component;
+  };
+
   const viewComponents: Record<DashboardView, React.ReactNode> = {
     overview: <DashboardOverview />,
-    calendar: <CalendarView />,
-    reservations: <ReservationList />,
-    resources: <ResourceManagement />,
-    reports: <ReportsPanel />,
-    settings: <SettingsPanel />,
-    admin: <AdminPanel />,
-    support: <DashboardSupportPanel />,
+    calendar: gatedView("calendar", <CalendarView />),
+    reservations: gatedView("reservations", <ReservationList />),
+    resources: gatedView("resources", <ResourceManagement />),
+    reports: gatedView("reports", <ReportsPanel />),
+    settings: gatedView("settings", <SettingsPanel />),
+    admin: gatedView("admin", <AdminPanel />),
+    support: gatedView("support", <DashboardSupportPanel />),
   };
 
   return (
