@@ -516,6 +516,19 @@ type TranslationKeys = {
   "password.strengthFair": string;
   "password.strengthStrong": string;
   "password.strengthVeryStrong": string;
+
+  // Reset password
+  "resetPassword.title": string;
+  "resetPassword.subtitle": string;
+  "resetPassword.newPassword": string;
+  "resetPassword.confirmPassword": string;
+  "resetPassword.confirmPlaceholder": string;
+  "resetPassword.mismatch": string;
+  "resetPassword.updating": string;
+  "resetPassword.updateButton": string;
+  "resetPassword.success": string;
+  "resetPassword.updated": string;
+  "resetPassword.redirecting": string;
 };
 
 export type TranslationKey = keyof TranslationKeys;
@@ -1018,6 +1031,17 @@ const en: TranslationKeys = {
   "password.strengthFair": "Fair",
   "password.strengthStrong": "Strong",
   "password.strengthVeryStrong": "Very strong",
+  "resetPassword.title": "Set new password",
+  "resetPassword.subtitle": "Enter your new password below.",
+  "resetPassword.newPassword": "New password",
+  "resetPassword.confirmPassword": "Confirm new password",
+  "resetPassword.confirmPlaceholder": "Repeat your password",
+  "resetPassword.mismatch": "Passwords do not match",
+  "resetPassword.updating": "Updating...",
+  "resetPassword.updateButton": "Update password",
+  "resetPassword.success": "Password updated successfully!",
+  "resetPassword.updated": "Password updated",
+  "resetPassword.redirecting": "Redirecting you to login...",
 };
 
 const fi: TranslationKeys = {
@@ -1517,6 +1541,17 @@ const fi: TranslationKeys = {
   "password.strengthFair": "Kohtalainen",
   "password.strengthStrong": "Vahva",
   "password.strengthVeryStrong": "Erittäin vahva",
+  "resetPassword.title": "Aseta uusi salasana",
+  "resetPassword.subtitle": "Kirjoita uusi salasanasi alle.",
+  "resetPassword.newPassword": "Uusi salasana",
+  "resetPassword.confirmPassword": "Vahvista uusi salasana",
+  "resetPassword.confirmPlaceholder": "Toista salasanasi",
+  "resetPassword.mismatch": "Salasanat eivät täsmää",
+  "resetPassword.updating": "Päivitetään...",
+  "resetPassword.updateButton": "Päivitä salasana",
+  "resetPassword.success": "Salasana päivitetty!",
+  "resetPassword.updated": "Salasana päivitetty",
+  "resetPassword.redirecting": "Ohjataan kirjautumiseen...",
 };
 
 const sv: TranslationKeys = {
@@ -2016,6 +2051,17 @@ const sv: TranslationKeys = {
   "password.strengthFair": "Godtagbart",
   "password.strengthStrong": "Starkt",
   "password.strengthVeryStrong": "Mycket starkt",
+  "resetPassword.title": "Ange nytt lösenord",
+  "resetPassword.subtitle": "Ange ditt nya lösenord nedan.",
+  "resetPassword.newPassword": "Nytt lösenord",
+  "resetPassword.confirmPassword": "Bekräfta nytt lösenord",
+  "resetPassword.confirmPlaceholder": "Upprepa ditt lösenord",
+  "resetPassword.mismatch": "Lösenorden matchar inte",
+  "resetPassword.updating": "Uppdaterar...",
+  "resetPassword.updateButton": "Uppdatera lösenord",
+  "resetPassword.success": "Lösenordet har uppdaterats!",
+  "resetPassword.updated": "Lösenord uppdaterat",
+  "resetPassword.redirecting": "Omdirigerar till inloggning...",
 };
 
 export const translations: Record<Language, TranslationKeys> = { en, fi, sv };
