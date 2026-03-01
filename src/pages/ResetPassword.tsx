@@ -7,16 +7,20 @@ import { CheckCircle2 } from "lucide-react";
 import Logo from "@/components/Logo";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import PasswordInput from "@/components/PasswordInput";
+import { useT } from "@/contexts/I18nContext";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 const ResetPassword = () => {
   const navigate = useNavigate();
+  const t = useT();
   const [loading, setLoading] = useState(false);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordValid, setPasswordValid] = useState(false);
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
-    // Check for recovery token in URL hash
     const hash = window.location.hash;
     if (!hash.includes("type=recovery")) {
       // No recovery token — might have been consumed already by auth listener
@@ -27,26 +31,18 @@ const ResetPassword = () => {
     e.preventDefault();
 
     if (password !== confirmPassword) {
-      toast.error("Passwords do not match");
-      return;
-    }
-
-    if (password.length < 6) {
-      toast.error("Password must be at least 6 characters");
+      toast.error(t("resetPassword.mismatch"));
       return;
     }
 
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.updateUser({
-        password,
-      });
-
+      const { error } = await supabase.auth.updateUser({ password });
       if (error) throw error;
 
       setSuccess(true);
-      toast.success("Password updated successfully!");
+      toast.success(t("resetPassword.success"));
       setTimeout(() => navigate("/login"), 2000);
     } catch (error: any) {
       toast.error(error.message || "Failed to update password");
@@ -58,9 +54,12 @@ const ResetPassword = () => {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-8">
       <div className="w-full max-w-md">
-        <Link to="/" className="mb-8 inline-block">
-          <Logo variant="color" size="sm" />
-        </Link>
+        <div className="flex items-center justify-between mb-8">
+          <Link to="/">
+            <Logo variant="color" size="sm" />
+          </Link>
+          <LanguageSwitcher variant="compact" />
+        </div>
 
         {success ? (
           <div className="text-center">
@@ -68,43 +67,37 @@ const ResetPassword = () => {
               <CheckCircle2 className="h-8 w-8 text-success" />
             </div>
             <h1 className="text-2xl font-serif font-bold text-foreground mb-2">
-              Password updated
+              {t("resetPassword.updated")}
             </h1>
             <p className="text-muted-foreground">
-              Redirecting you to login...
+              {t("resetPassword.redirecting")}
             </p>
           </div>
         ) : (
           <>
             <h1 className="text-2xl font-serif font-bold text-foreground mb-2">
-              Set new password
+              {t("resetPassword.title")}
             </h1>
             <p className="text-muted-foreground mb-8">
-              Enter your new password below.
+              {t("resetPassword.subtitle")}
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-4">
+              <PasswordInput
+                id="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                label={t("resetPassword.newPassword")}
+                onValidChange={setPasswordValid}
+              />
               <div>
-                <Label htmlFor="password">New password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="At least 6 characters"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  minLength={6}
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="confirmPassword">Confirm new password</Label>
+                <Label htmlFor="confirmPassword">{t("resetPassword.confirmPassword")}</Label>
                 <Input
                   id="confirmPassword"
                   type="password"
-                  placeholder="Repeat your password"
+                  placeholder={t("resetPassword.confirmPlaceholder")}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  minLength={6}
                   required
                 />
               </div>
@@ -114,9 +107,9 @@ const ResetPassword = () => {
                 variant="hero"
                 size="lg"
                 className="w-full"
-                disabled={loading}
+                disabled={loading || !passwordValid || password !== confirmPassword}
               >
-                {loading ? "Updating..." : "Update password"}
+                {loading ? t("resetPassword.updating") : t("resetPassword.updateButton")}
               </Button>
             </form>
           </>
