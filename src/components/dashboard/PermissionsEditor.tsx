@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { toast } from "@/hooks/use-toast";
-import { ShieldCheck, Plus, Loader2, Trash2 } from "lucide-react";
+import { ShieldCheck, Plus, Loader2, Trash2, Pencil } from "lucide-react";
 import DashboardTooltip from "./DashboardTooltip";
 
 interface RoleDefinition {
@@ -37,6 +37,8 @@ const PermissionsEditor = () => {
   const [addRoleOpen, setAddRoleOpen] = useState(false);
   const [newRoleName, setNewRoleName] = useState("");
   const [newRoleKey, setNewRoleKey] = useState("");
+  const [editingRoleKey, setEditingRoleKey] = useState<string | null>(null);
+  const [editingDisplayName, setEditingDisplayName] = useState("");
 
   // Fetch role definitions
   const { data: roles, isLoading: rolesLoading } = useQuery({
@@ -123,7 +125,6 @@ const PermissionsEditor = () => {
   // Delete custom role
   const deleteRoleMutation = useMutation({
     mutationFn: async (roleKey: string) => {
-      // Delete permissions first, then the role definition
       const { error: permErr } = await supabase
         .from("role_permissions")
         .delete()
@@ -144,6 +145,28 @@ const PermissionsEditor = () => {
       queryClient.invalidateQueries({ queryKey: ["role-permissions", tenantId] });
       queryClient.invalidateQueries({ queryKey: ["my-permissions"] });
       toast({ title: "Role deleted" });
+    },
+    onError: (err: any) => {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    },
+  });
+
+  // Rename custom role
+  const renameRoleMutation = useMutation({
+    mutationFn: async ({ roleKey, displayName }: { roleKey: string; displayName: string }) => {
+      const { error } = await supabase
+        .from("role_definitions")
+        .update({ display_name: displayName })
+        .eq("tenant_id", tenantId!)
+        .eq("role_key", roleKey)
+        .eq("is_system", false);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["role-definitions", tenantId] });
+      queryClient.invalidateQueries({ queryKey: ["role-definitions-for-select", tenantId] });
+      setEditingRoleKey(null);
+      toast({ title: "Role renamed" });
     },
     onError: (err: any) => {
       toast({ title: "Error", description: err.message, variant: "destructive" });
@@ -229,13 +252,52 @@ const PermissionsEditor = () => {
                   {editableRoles.map((role) => (
                     <th key={role.role_key} className="text-center py-2 px-3 font-medium min-w-[90px]">
                       <div className="flex flex-col items-center gap-1">
-                        <Badge
-                          variant="outline"
-                          className={`text-xs capitalize ${role.is_system ? "border-primary/30 text-primary" : "border-accent/30 text-accent"}`}
-                        >
-                          {role.display_name}
-                        </Badge>
-                        {!role.is_system && (
+                        {editingRoleKey === role.role_key ? (
+                          <div className="flex items-center gap-1">
+                            <Input
+                              value={editingDisplayName}
+                              onChange={(e) => setEditingDisplayName(e.target.value)}
+                              className="h-6 w-24 text-xs"
+                              autoFocus
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter" && editingDisplayName.trim()) {
+                                  renameRoleMutation.mutate({ roleKey: role.role_key, displayName: editingDisplayName.trim() });
+                                } else if (e.key === "Escape") {
+                                  setEditingRoleKey(null);
+                                }
+                              }}
+                            />
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 w-6 p-0"
+                              onClick={() => {
+                                if (editingDisplayName.trim()) {
+                                  renameRoleMutation.mutate({ roleKey: role.role_key, displayName: editingDisplayName.trim() });
+                                }
+                              }}
+                              disabled={renameRoleMutation.isPending}
+                            >
+                              ✓
+                            </Button>
+                          </div>
+                        ) : (
+                          <Badge
+                            variant="outline"
+                            className={`text-xs capitalize ${role.is_system ? "border-primary/30 text-primary" : "border-accent/30 text-accent cursor-pointer"}`}
+                            onClick={() => {
+                              if (!role.is_system) {
+                                setEditingRoleKey(role.role_key);
+                                setEditingDisplayName(role.display_name);
+                              }
+                            }}
+                            title={!role.is_system ? "Click to rename" : undefined}
+                          >
+                            {role.display_name}
+                            {!role.is_system && <Pencil className="h-2.5 w-2.5 ml-1 opacity-50" />}
+                          </Badge>
+                        )}
+                        {!role.is_system && editingRoleKey !== role.role_key && (
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
                               <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-destructive hover:text-destructive hover:bg-destructive/10">
