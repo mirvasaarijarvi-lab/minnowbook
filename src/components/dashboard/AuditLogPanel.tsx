@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ClipboardList, Plus, Pencil, Trash2, User, ChevronDown, ChevronRight, CalendarIcon, X, Loader2, Undo2 } from "lucide-react";
 import { format, formatDistanceToNow, startOfDay, endOfDay } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -120,6 +121,7 @@ const AuditLogPanel = () => {
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const [dateFrom, setDateFrom] = useState<Date | undefined>(undefined);
   const [dateTo, setDateTo] = useState<Date | undefined>(undefined);
+  const [selectedAction, setSelectedAction] = useState<string>("all");
   const [page, setPage] = useState(0);
   const [revertTarget, setRevertTarget] = useState<AuditEntry | null>(null);
 
@@ -135,6 +137,7 @@ const AuditLogPanel = () => {
   const resetFilters = useCallback(() => {
     setDateFrom(undefined);
     setDateTo(undefined);
+    setSelectedAction("all");
     setPage(0);
   }, []);
 
@@ -198,7 +201,7 @@ const AuditLogPanel = () => {
   });
 
   const { data, isLoading } = useQuery({
-    queryKey: ["audit-log", tenantId, dateFrom?.toISOString(), dateTo?.toISOString(), page],
+    queryKey: ["audit-log", tenantId, dateFrom?.toISOString(), dateTo?.toISOString(), selectedAction, page],
     queryFn: async () => {
       let query = supabase
         .from("audit_log")
@@ -210,6 +213,9 @@ const AuditLogPanel = () => {
       }
       if (dateTo) {
         query = query.lte("created_at", endOfDay(dateTo).toISOString());
+      }
+      if (selectedAction !== "all") {
+        query = query.eq("action", selectedAction);
       }
 
       // Fetch one extra to know if there's a next page
@@ -241,7 +247,7 @@ const AuditLogPanel = () => {
 
   const auditLog = data?.entries;
   const hasMore = data?.hasMore ?? false;
-  const hasFilters = !!dateFrom || !!dateTo;
+  const hasFilters = !!dateFrom || !!dateTo || selectedAction !== "all";
 
   return (
     <>
@@ -254,8 +260,21 @@ const AuditLogPanel = () => {
             <DashboardTooltip text="A chronological record of all changes made by team members — reservations, resources, settings, and more. Click an entry to see field-level details." />
           </div>
 
-          {/* Date filters */}
+          {/* Filters */}
           <div className="flex items-center gap-2 flex-wrap">
+            {/* Action filter */}
+            <Select value={selectedAction} onValueChange={(v) => { setSelectedAction(v); setPage(0); }}>
+              <SelectTrigger className={cn("w-[130px] h-8 text-xs", selectedAction !== "all" && "border-primary/50")}>
+                <SelectValue placeholder="All actions" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All actions</SelectItem>
+                <SelectItem value="INSERT">Created</SelectItem>
+                <SelectItem value="UPDATE">Updated</SelectItem>
+                <SelectItem value="DELETE">Deleted</SelectItem>
+              </SelectContent>
+            </Select>
+
             <Popover>
               <PopoverTrigger asChild>
                 <Button variant="outline" size="sm" className={cn("gap-1.5 text-xs", dateFrom && "border-primary/50")}>
