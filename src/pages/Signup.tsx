@@ -15,6 +15,7 @@ const Signup = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [passwordValid, setPasswordValid] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState("");
   const t = useT();
   const [form, setForm] = useState({
     businessName: "",
@@ -22,6 +23,8 @@ const Signup = () => {
     email: "",
     password: "",
   });
+
+  const passwordMismatch = confirmPassword.length > 0 && form.password !== confirmPassword;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -99,7 +102,22 @@ const Signup = () => {
               onValidChange={setPasswordValid}
             />
 
-            <Button type="submit" variant="hero" size="lg" className="w-full" disabled={loading || !passwordValid}>
+            <div>
+              <Label htmlFor="confirmPassword">Confirm password</Label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                placeholder="Re-enter your password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+              />
+              {passwordMismatch && (
+                <p className="text-sm text-destructive mt-1">Passwords do not match</p>
+              )}
+            </div>
+
+            <Button type="submit" variant="hero" size="lg" className="w-full" disabled={loading || !passwordValid || passwordMismatch || confirmPassword.length === 0}>
               {loading ? t("signup.creatingAccount") : t("common.startFreeTrial")}
               <ArrowRight className="h-4 w-4" />
             </Button>
