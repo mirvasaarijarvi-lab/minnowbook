@@ -1,10 +1,40 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff, Check, X, AlertTriangle, Shield } from "lucide-react";
 import { validatePasswordSync, checkPasswordBreach, MIN_LENGTH } from "@/lib/password-validation";
 import { useT } from "@/contexts/I18nContext";
+import type { TranslationKey } from "@/i18n/translations";
 import { cn } from "@/lib/utils";
+import { Progress } from "@/components/ui/progress";
+
+type StrengthLevel = "weak" | "fair" | "strong" | "veryStrong";
+
+function getPasswordStrength(password: string): { level: StrengthLevel; score: number } {
+  if (!password) return { level: "weak", score: 0 };
+  let score = 0;
+  if (password.length >= MIN_LENGTH) score += 25;
+  else if (password.length >= 8) score += 10;
+  if (/[A-Z]/.test(password)) score += 15;
+  if (/[a-z]/.test(password)) score += 15;
+  if (/[0-9]/.test(password)) score += 15;
+  if (/[^A-Za-z0-9]/.test(password)) score += 15;
+  if (password.length >= 16) score += 10;
+  if (password.length >= 20) score += 5;
+  score = Math.min(score, 100);
+
+  if (score < 30) return { level: "weak", score };
+  if (score < 55) return { level: "fair", score };
+  if (score < 80) return { level: "strong", score };
+  return { level: "veryStrong", score };
+}
+
+const strengthConfig: Record<StrengthLevel, { label: TranslationKey; color: string }> = {
+  weak: { label: "password.strengthWeak", color: "bg-destructive" },
+  fair: { label: "password.strengthFair", color: "bg-orange-500" },
+  strong: { label: "password.strengthStrong", color: "bg-primary" },
+  veryStrong: { label: "password.strengthVeryStrong", color: "bg-emerald-500" },
+};
 
 interface PasswordInputProps {
   id?: string;
@@ -95,11 +125,32 @@ const PasswordInput = ({
       </div>
 
       {showRequirements && value.length > 0 && (
-        <div className="mt-2 space-y-1">
-          <Indicator ok={validation.lengthOk} text={t("password.minLength")} />
-          <Indicator ok={validation.hasUppercase} text={t("password.uppercase")} />
-          <Indicator ok={validation.hasLowercase} text={t("password.lowercase")} />
-          <Indicator ok={validation.hasNumber} text={t("password.number")} />
+        <div className="mt-2 space-y-2">
+          {/* Strength meter */}
+          {(() => {
+            const { level, score } = getPasswordStrength(value);
+            const config = strengthConfig[level];
+            return (
+              <div className="space-y-1">
+                <div className="relative h-1.5 w-full overflow-hidden rounded-full bg-secondary">
+                  <div
+                    className={cn("h-full rounded-full transition-all duration-300", config.color)}
+                    style={{ width: `${score}%` }}
+                  />
+                </div>
+                <p className={cn("text-xs font-medium", level === "weak" ? "text-destructive" : level === "fair" ? "text-orange-500" : level === "strong" ? "text-primary" : "text-emerald-500")}>
+                  {t(config.label)}
+                </p>
+              </div>
+            );
+          })()}
+
+          <div className="space-y-1">
+            <Indicator ok={validation.lengthOk} text={t("password.minLength")} />
+            <Indicator ok={validation.hasUppercase} text={t("password.uppercase")} />
+            <Indicator ok={validation.hasLowercase} text={t("password.lowercase")} />
+            <Indicator ok={validation.hasNumber} text={t("password.number")} />
+          </div>
 
           {checkingBreach && (
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">

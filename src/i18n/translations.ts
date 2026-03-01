@@ -512,6 +512,10 @@ type TranslationKeys = {
   "password.checking": string;
   "password.breached": string;
   "password.safe": string;
+  "password.strengthWeak": string;
+  "password.strengthFair": string;
+  "password.strengthStrong": string;
+  "password.strengthVeryStrong": string;
 };
 
 export type TranslationKey = keyof TranslationKeys;
@@ -1010,6 +1014,10 @@ const en: TranslationKeys = {
   "password.checking": "Checking for leaked passwords…",
   "password.breached": "This password has been found in data breaches — choose a different one",
   "password.safe": "Password not found in known breaches",
+  "password.strengthWeak": "Weak",
+  "password.strengthFair": "Fair",
+  "password.strengthStrong": "Strong",
+  "password.strengthVeryStrong": "Very strong",
 };
 
 const fi: TranslationKeys = {
@@ -1505,6 +1513,10 @@ const fi: TranslationKeys = {
   "password.checking": "Tarkistetaan vuotaneita salasanoja…",
   "password.breached": "Tämä salasana on löytynyt tietovuodoista — valitse toinen",
   "password.safe": "Salasanaa ei löytynyt tunnetuista vuodoista",
+  "password.strengthWeak": "Heikko",
+  "password.strengthFair": "Kohtalainen",
+  "password.strengthStrong": "Vahva",
+  "password.strengthVeryStrong": "Erittäin vahva",
 };
 
 const sv: TranslationKeys = {
@@ -2000,6 +2012,10 @@ const sv: TranslationKeys = {
   "password.checking": "Kontrollerar läckta lösenord…",
   "password.breached": "Detta lösenord har hittats i dataintrång — välj ett annat",
   "password.safe": "Lösenordet hittades inte i kända intrång",
+  "password.strengthWeak": "Svagt",
+  "password.strengthFair": "Godtagbart",
+  "password.strengthStrong": "Starkt",
+  "password.strengthVeryStrong": "Mycket starkt",
 };
 
 export const translations: Record<Language, TranslationKeys> = { en, fi, sv };
