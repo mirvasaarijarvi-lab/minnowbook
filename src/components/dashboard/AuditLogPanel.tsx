@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/hooks/useTenant";
 import { useT } from "@/contexts/I18nContext";
@@ -8,11 +8,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { ClipboardList, Plus, Pencil, Trash2, User, ChevronDown, ChevronRight, CalendarIcon, X, Loader2 } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { ClipboardList, Plus, Pencil, Trash2, User, ChevronDown, ChevronRight, CalendarIcon, X, Loader2, Undo2 } from "lucide-react";
 import { format, formatDistanceToNow, startOfDay, endOfDay } from "date-fns";
 import { cn } from "@/lib/utils";
 import DashboardTooltip from "./DashboardTooltip";
 import { Json } from "@/integrations/supabase/types";
+import { toast } from "@/hooks/use-toast";
 
 interface AuditEntry {
   id: string;
@@ -114,10 +116,12 @@ const PAGE_SIZE = 25;
 const AuditLogPanel = () => {
   const { tenantId } = useTenant();
   const t = useT();
+  const queryClient = useQueryClient();
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const [dateFrom, setDateFrom] = useState<Date | undefined>(undefined);
   const [dateTo, setDateTo] = useState<Date | undefined>(undefined);
   const [page, setPage] = useState(0);
+  const [revertTarget, setRevertTarget] = useState<AuditEntry | null>(null);
 
   const toggleExpand = (id: string) => {
     setExpandedIds((prev) => {
@@ -133,6 +137,65 @@ const AuditLogPanel = () => {
     setDateTo(undefined);
     setPage(0);
   }, []);
+
+  /** Tables we support reverting on */
+  const REVERTABLE_TABLES = new Set(["reservations", "resources", "blocked_slots", "tenant_settings", "tenant_email_templates"]);
+
+  const canRevert = (entry: AuditEntry): boolean => {
+    if (!REVERTABLE_TABLES.has(entry.table_name)) return false;
+    if (entry.action === "UPDATE" && entry.old_data) return true;
+    if (entry.action === "INSERT" && entry.new_data) return true;
+    if (entry.action === "DELETE" && entry.old_data) return true;
+    return false;
+  };
+
+  const revertMutation = useMutation({
+    mutationFn: async (entry: AuditEntry) => {
+      const table = entry.table_name as "reservations" | "resources" | "blocked_slots" | "tenant_settings" | "tenant_email_templates";
+
+      if (entry.action === "UPDATE" && entry.old_data) {
+        // Restore old values (only changed fields)
+        const oldRecord = entry.old_data as Record<string, unknown>;
+        const { id: recordId, ...fieldsToRestore } = oldRecord;
+        // Remove fields we shouldn't update
+        delete fieldsToRestore.created_at;
+        delete fieldsToRestore.tenant_id;
+
+        const { error } = await supabase
+          .from(table)
+          .update(fieldsToRestore as any)
+          .eq("id", recordId as string);
+        if (error) throw error;
+      } else if (entry.action === "INSERT" && entry.new_data) {
+        // Undo creation = delete the record
+        const newRecord = entry.new_data as Record<string, unknown>;
+        const { error } = await supabase
+          .from(table)
+          .delete()
+          .eq("id", newRecord.id as string);
+        if (error) throw error;
+      } else if (entry.action === "DELETE" && entry.old_data) {
+        // Undo deletion = re-insert the record
+        const oldRecord = entry.old_data as Record<string, unknown>;
+        const { error } = await supabase
+          .from(table)
+          .insert(oldRecord as any);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["audit-log"] });
+      // Also refresh related data
+      queryClient.invalidateQueries({ queryKey: ["reservations"] });
+      queryClient.invalidateQueries({ queryKey: ["resources"] });
+      toast({ title: "Change reverted", description: "The record has been restored to its previous state." });
+      setRevertTarget(null);
+    },
+    onError: (err: any) => {
+      toast({ title: "Revert failed", description: err.message, variant: "destructive" });
+      setRevertTarget(null);
+    },
+  });
 
   const { data, isLoading } = useQuery({
     queryKey: ["audit-log", tenantId, dateFrom?.toISOString(), dateTo?.toISOString(), page],
@@ -181,6 +244,7 @@ const AuditLogPanel = () => {
   const hasFilters = !!dateFrom || !!dateTo;
 
   return (
+    <>
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between flex-wrap gap-2">
@@ -307,6 +371,20 @@ const AuditLogPanel = () => {
                           )}
                         </div>
                       </div>
+                      {canRevert(entry) && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="shrink-0 gap-1 text-xs text-muted-foreground hover:text-foreground"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setRevertTarget(entry);
+                          }}
+                        >
+                          <Undo2 className="h-3.5 w-3.5" />
+                          Revert
+                        </Button>
+                      )}
                     </div>
 
                     {isExpanded && hasDetails && (
@@ -360,6 +438,31 @@ const AuditLogPanel = () => {
         )}
       </CardContent>
     </Card>
+
+      {/* Revert confirmation dialog */}
+      <AlertDialog open={!!revertTarget} onOpenChange={(open) => !open && setRevertTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Revert this change?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {revertTarget?.action === "UPDATE" && "This will restore the record to its previous values."}
+              {revertTarget?.action === "INSERT" && "This will delete the record that was created."}
+              {revertTarget?.action === "DELETE" && "This will re-create the record that was deleted."}
+              {" "}This action will be logged in the audit trail.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => revertTarget && revertMutation.mutate(revertTarget)}
+              disabled={revertMutation.isPending}
+            >
+              {revertMutation.isPending ? "Reverting..." : "Revert"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 };
 
