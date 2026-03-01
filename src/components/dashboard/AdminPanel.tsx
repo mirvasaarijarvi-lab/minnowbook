@@ -17,6 +17,7 @@ import DashboardTooltip from "./DashboardTooltip";
 import SupportRequestsBoard from "./SupportRequestsBoard";
 import BookingLinksCard from "./BookingLinksCard";
 import LoginHistoryPanel from "./LoginHistoryPanel";
+import AuditLogPanel from "./AuditLogPanel";
 
 interface TenantUser {
   id: string;
@@ -289,6 +290,9 @@ const AdminPanel = () => {
 
       {/* Login History */}
       <LoginHistoryPanel />
+
+      {/* Audit / Change Log */}
+      <AuditLogPanel />
 
       {/* Support Requests Board */}
       <SupportRequestsBoard />
