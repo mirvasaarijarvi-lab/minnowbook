@@ -99,7 +99,11 @@ const ResetPassword = () => {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
+                  className={confirmPassword.length > 0 && password !== confirmPassword ? "border-destructive" : ""}
                 />
+                {confirmPassword.length > 0 && password !== confirmPassword && (
+                  <p className="text-xs text-destructive mt-1">{t("resetPassword.mismatch")}</p>
+                )}
               </div>
 
               <Button
