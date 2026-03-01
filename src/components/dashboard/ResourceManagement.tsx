@@ -16,6 +16,8 @@ import { useT } from "@/contexts/I18nContext";
 import DashboardTooltip from "./DashboardTooltip";
 import ResourceImageGallery from "./ResourceImageGallery";
 import ResourceCarousel from "@/components/ResourceCarousel";
+import { usePermissions } from "@/hooks/usePermissions";
+import { PERM_RESOURCES_MANAGE } from "@/lib/permissions";
 
 const typeIcons: Record<string, React.ElementType> = {
   guesthouse: BedDouble,
@@ -29,6 +31,8 @@ const ALLOWED_IMAGE_TYPES = ["image/png", "image/jpeg", "image/webp"];
 
 const ResourceManagement = () => {
   const { tenantId, isAdmin } = useTenant();
+  const { can } = usePermissions();
+  const canManage = can(PERM_RESOURCES_MANAGE);
   const queryClient = useQueryClient();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -194,7 +198,7 @@ const ResourceManagement = () => {
           <h2 className="text-2xl font-serif font-bold text-foreground">{t("nav.resources")}</h2>
           <DashboardTooltip text="Add rooms, tables, or venues here. Set capacity, pricing, and upload photos. Toggle resources active/inactive to control booking availability." />
         </div>
-        {isAdmin && (
+        {canManage && (
           <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) resetForm(); }}>
             <DialogTrigger asChild>
               <Button size="sm" className="gap-1.5"><Plus className="h-4 w-4" /> {t("dashboard.addResource")}</Button>
@@ -358,7 +362,7 @@ const ResourceManagement = () => {
                         <Badge variant="outline" className="text-xs capitalize mt-0.5">{r.resource_type}</Badge>
                       </div>
                     </div>
-                    {isAdmin && (
+                    {canManage && (
                       <Switch checked={r.is_active ?? true} onCheckedChange={(checked) => toggleActiveMutation.mutate({ id: r.id, is_active: checked })} />
                     )}
                   </div>
@@ -369,7 +373,7 @@ const ResourceManagement = () => {
                     {r.capacity && <span>{r.capacity} {t("dashboard.capacity")}</span>}
                     {r.price_per_night != null && <span>€{Number(r.price_per_night).toFixed(0)}{(r.resource_type === "hotel" || r.resource_type === "guesthouse") ? t("dashboard.perNight") : ""}</span>}
                   </div>
-                  {isAdmin && (
+                  {canManage && (
                     <div className="flex gap-1 mt-3">
                       <Button variant="ghost" size="sm" onClick={() => openEdit(r)}>
                         <Pencil className="h-3.5 w-3.5 mr-1" /> {t("common.edit")}

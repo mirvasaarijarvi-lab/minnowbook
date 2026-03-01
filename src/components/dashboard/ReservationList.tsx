@@ -16,6 +16,12 @@ import EditReservationDialog from "./EditReservationDialog";
 import ConfirmationEmailPreview from "@/components/ConfirmationEmailPreview";
 import { useT } from "@/contexts/I18nContext";
 import { toast } from "sonner";
+import { usePermissions } from "@/hooks/usePermissions";
+import {
+  PERM_RESERVATIONS_CREATE,
+  PERM_RESERVATIONS_EDIT,
+  PERM_RESERVATIONS_DELETE,
+} from "@/lib/permissions";
 
 const statusColors: Record<string, string> = {
   pending: "bg-yellow-100 text-yellow-800 border-yellow-200",
@@ -31,6 +37,10 @@ const ReservationList = () => {
   const [confirmDialog, setConfirmDialog] = useState<{ id: string; action: "confirmed" | "cancelled" } | null>(null);
   const [editingReservation, setEditingReservation] = useState<any | null>(null);
   const t = useT();
+  const { can } = usePermissions();
+  const canCreate = can(PERM_RESERVATIONS_CREATE);
+  const canEdit = can(PERM_RESERVATIONS_EDIT);
+  const canDelete = can(PERM_RESERVATIONS_DELETE);
   const queryClient = useQueryClient();
   const today = format(new Date(), "yyyy-MM-dd");
 
@@ -193,6 +203,7 @@ const ReservationList = () => {
               <CardContent className="p-4">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-start gap-3">
+                    {canEdit && (
                     <Checkbox
                       checked={(r as any).is_checked_in ?? false}
                       className="mt-1"
@@ -200,6 +211,7 @@ const ReservationList = () => {
                         toggleCheckIn.mutate({ id: r.id, checked: !!checked });
                       }}
                     />
+                    )}
                     <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                       <span className="font-semibold text-foreground">{r.guest_name}</span>
@@ -224,6 +236,7 @@ const ReservationList = () => {
                     </div>
 
                     {/* Used & Invoiced toggles */}
+                    {canEdit && (
                     <div className="flex items-center gap-4 mt-2 pt-2 border-t border-border">
                       <label
                         className="flex items-center gap-1.5 text-xs cursor-pointer select-none"
@@ -252,12 +265,14 @@ const ReservationList = () => {
                         <span className="text-muted-foreground">Invoiced</span>
                       </label>
                     </div>
+                    )}
                     </div>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     {r.price_eur != null && (
                       <span className="text-sm font-semibold text-foreground whitespace-nowrap">€{Number(r.price_eur).toFixed(2)}</span>
                     )}
+                    {(canEdit || canDelete) && (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -265,17 +280,19 @@ const ReservationList = () => {
                         </Button>
                       </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                         <DropdownMenuItem onClick={() => setEditingReservation(r)} className="gap-2">
-                            <Pencil className="h-4 w-4" />
-                            {t("dashboard.editReservation")}
-                          </DropdownMenuItem>
-                          {r.status !== "confirmed" && (
+                          {canEdit && (
+                           <DropdownMenuItem onClick={() => setEditingReservation(r)} className="gap-2">
+                             <Pencil className="h-4 w-4" />
+                             {t("dashboard.editReservation")}
+                           </DropdownMenuItem>
+                          )}
+                          {canEdit && r.status !== "confirmed" && (
                            <DropdownMenuItem onClick={() => setConfirmDialog({ id: r.id, action: "confirmed" })} className="gap-2">
                              <CheckCircle2 className="h-4 w-4 text-primary" />
                              {t("dashboard.confirmReservation")}
                            </DropdownMenuItem>
                          )}
-                         {r.status !== "cancelled" && (
+                         {canDelete && r.status !== "cancelled" && (
                            <DropdownMenuItem onClick={() => setConfirmDialog({ id: r.id, action: "cancelled" })} className="gap-2 text-destructive focus:text-destructive">
                              <XCircle className="h-4 w-4" />
                              {t("dashboard.cancelReservation")}
@@ -283,6 +300,7 @@ const ReservationList = () => {
                          )}
                       </DropdownMenuContent>
                     </DropdownMenu>
+                    )}
                   </div>
                 </div>
               </CardContent>
