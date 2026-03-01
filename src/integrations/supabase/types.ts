@@ -326,6 +326,76 @@ export type Database = {
           },
         ]
       }
+      role_definitions: {
+        Row: {
+          created_at: string
+          display_name: string
+          hierarchy_level: number
+          id: string
+          is_system: boolean
+          role_key: string
+          tenant_id: string
+        }
+        Insert: {
+          created_at?: string
+          display_name: string
+          hierarchy_level?: number
+          id?: string
+          is_system?: boolean
+          role_key: string
+          tenant_id: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string
+          hierarchy_level?: number
+          id?: string
+          is_system?: boolean
+          role_key?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_definitions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      role_permissions: {
+        Row: {
+          created_at: string
+          id: string
+          permission: string
+          role_key: string
+          tenant_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          permission: string
+          role_key: string
+          tenant_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          permission?: string
+          role_key?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_permissions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       support_requests: {
         Row: {
           admin_response: string | null
@@ -375,6 +445,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      system_admins: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
       tenant_email_templates: {
         Row: {
@@ -638,12 +729,21 @@ export type Database = {
         Returns: string
       }
       get_user_tenant_id: { Args: { p_user_id: string }; Returns: string }
+      has_permission: {
+        Args: { p_permission: string; p_user_id: string }
+        Returns: boolean
+      }
       has_tenant_role: {
         Args: {
           p_role: Database["public"]["Enums"]["app_role"]
           p_user_id: string
         }
         Returns: boolean
+      }
+      is_system_admin: { Args: { p_user_id: string }; Returns: boolean }
+      seed_tenant_roles_and_permissions: {
+        Args: { p_tenant_id: string }
+        Returns: undefined
       }
     }
     Enums: {
