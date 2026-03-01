@@ -22,6 +22,7 @@ import Accessibility from "./pages/Accessibility";
 import Superadmin from "./pages/Superadmin";
 import CookieConsent from "./components/CookieConsent";
 import AccessibilityWidget from "./components/AccessibilityWidget";
+import { ImpersonationProvider } from "./contexts/ImpersonationContext";
 
 const queryClient = new QueryClient();
 
@@ -44,6 +45,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <I18nProvider>
       <AuthProvider>
+        <ImpersonationProvider>
         <TooltipProvider>
           <Toaster />
           <Sonner />
@@ -90,6 +92,7 @@ const App = () => (
             <AccessibilityWidget />
           </BrowserRouter>
         </TooltipProvider>
+        </ImpersonationProvider>
       </AuthProvider>
     </I18nProvider>
   </QueryClientProvider>
