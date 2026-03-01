@@ -122,6 +122,7 @@ const AuditLogPanel = () => {
   const [dateFrom, setDateFrom] = useState<Date | undefined>(undefined);
   const [dateTo, setDateTo] = useState<Date | undefined>(undefined);
   const [selectedAction, setSelectedAction] = useState<string>("all");
+  const [selectedTable, setSelectedTable] = useState<string>("all");
   const [page, setPage] = useState(0);
   const [revertTarget, setRevertTarget] = useState<AuditEntry | null>(null);
 
@@ -138,6 +139,7 @@ const AuditLogPanel = () => {
     setDateFrom(undefined);
     setDateTo(undefined);
     setSelectedAction("all");
+    setSelectedTable("all");
     setPage(0);
   }, []);
 
@@ -201,7 +203,7 @@ const AuditLogPanel = () => {
   });
 
   const { data, isLoading } = useQuery({
-    queryKey: ["audit-log", tenantId, dateFrom?.toISOString(), dateTo?.toISOString(), selectedAction, page],
+    queryKey: ["audit-log", tenantId, dateFrom?.toISOString(), dateTo?.toISOString(), selectedAction, selectedTable, page],
     queryFn: async () => {
       let query = supabase
         .from("audit_log")
@@ -216,6 +218,9 @@ const AuditLogPanel = () => {
       }
       if (selectedAction !== "all") {
         query = query.eq("action", selectedAction);
+      }
+      if (selectedTable !== "all") {
+        query = query.eq("table_name", selectedTable);
       }
 
       // Fetch one extra to know if there's a next page
@@ -247,7 +252,7 @@ const AuditLogPanel = () => {
 
   const auditLog = data?.entries;
   const hasMore = data?.hasMore ?? false;
-  const hasFilters = !!dateFrom || !!dateTo || selectedAction !== "all";
+  const hasFilters = !!dateFrom || !!dateTo || selectedAction !== "all" || selectedTable !== "all";
 
   return (
     <>
@@ -272,6 +277,19 @@ const AuditLogPanel = () => {
                 <SelectItem value="INSERT">Created</SelectItem>
                 <SelectItem value="UPDATE">Updated</SelectItem>
                 <SelectItem value="DELETE">Deleted</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {/* Entity/table filter */}
+            <Select value={selectedTable} onValueChange={(v) => { setSelectedTable(v); setPage(0); }}>
+              <SelectTrigger className={cn("w-[140px] h-8 text-xs", selectedTable !== "all" && "border-primary/50")}>
+                <SelectValue placeholder="All entities" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All entities</SelectItem>
+                {Object.entries(tableLabels).map(([key, label]) => (
+                  <SelectItem key={key} value={key}>{label}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
 
