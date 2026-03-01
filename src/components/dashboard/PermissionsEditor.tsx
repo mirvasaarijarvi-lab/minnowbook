@@ -11,8 +11,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { toast } from "@/hooks/use-toast";
-import { ShieldCheck, Plus, Loader2 } from "lucide-react";
+import { ShieldCheck, Plus, Loader2, Trash2 } from "lucide-react";
 import DashboardTooltip from "./DashboardTooltip";
 
 interface RoleDefinition {
@@ -119,6 +120,36 @@ const PermissionsEditor = () => {
     },
   });
 
+  // Delete custom role
+  const deleteRoleMutation = useMutation({
+    mutationFn: async (roleKey: string) => {
+      // Delete permissions first, then the role definition
+      const { error: permErr } = await supabase
+        .from("role_permissions")
+        .delete()
+        .eq("tenant_id", tenantId!)
+        .eq("role_key", roleKey);
+      if (permErr) throw permErr;
+
+      const { error: roleErr } = await supabase
+        .from("role_definitions")
+        .delete()
+        .eq("tenant_id", tenantId!)
+        .eq("role_key", roleKey)
+        .eq("is_system", false);
+      if (roleErr) throw roleErr;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["role-definitions", tenantId] });
+      queryClient.invalidateQueries({ queryKey: ["role-permissions", tenantId] });
+      queryClient.invalidateQueries({ queryKey: ["my-permissions"] });
+      toast({ title: "Role deleted" });
+    },
+    onError: (err: any) => {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    },
+  });
+
   const hasPermission = (roleKey: string, permission: string) =>
     permissions?.some((p) => p.role_key === roleKey && p.permission === permission) ?? false;
 
@@ -197,12 +228,40 @@ const PermissionsEditor = () => {
                   </th>
                   {editableRoles.map((role) => (
                     <th key={role.role_key} className="text-center py-2 px-3 font-medium min-w-[90px]">
-                      <Badge
-                        variant="outline"
-                        className={`text-xs capitalize ${role.is_system ? "border-primary/30 text-primary" : "border-accent/30 text-accent"}`}
-                      >
-                        {role.display_name}
-                      </Badge>
+                      <div className="flex flex-col items-center gap-1">
+                        <Badge
+                          variant="outline"
+                          className={`text-xs capitalize ${role.is_system ? "border-primary/30 text-primary" : "border-accent/30 text-accent"}`}
+                        >
+                          {role.display_name}
+                        </Badge>
+                        {!role.is_system && (
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-destructive hover:text-destructive hover:bg-destructive/10">
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Delete role "{role.display_name}"?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  This will permanently remove this custom role and all its permissions. Users assigned to this role will lose access.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => deleteRoleMutation.mutate(role.role_key)}
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                >
+                                  Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        )}
+                      </div>
                     </th>
                   ))}
                 </tr>
