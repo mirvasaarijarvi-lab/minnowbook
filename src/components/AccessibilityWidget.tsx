@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, forwardRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Accessibility, Plus, Minus, Type, Eye, RotateCcw, MousePointer, Pause } from "lucide-react";
 import { useT } from "@/contexts/I18nContext";
@@ -37,7 +37,7 @@ function applyToDOM(prefs: A11yPrefs) {
   document.documentElement.classList.toggle("focus-highlight", prefs.focusHighlight);
 }
 
-export default function AccessibilityWidget() {
+const AccessibilityWidget = forwardRef<HTMLDivElement>(function AccessibilityWidget(_props, ref) {
   const t = useT();
   const [open, setOpen] = useState(false);
   const [prefs, setPrefs] = useState<A11yPrefs>(loadPrefs);
@@ -85,7 +85,7 @@ export default function AccessibilityWidget() {
   );
 
   return (
-    <div className="fixed bottom-4 left-4 md:bottom-6 md:left-6 z-[90]">
+    <div ref={ref} className="fixed bottom-4 left-4 md:bottom-6 md:left-6 z-[90]">
       {open && (
         <div className="absolute bottom-14 left-0 bg-card border border-border rounded-xl shadow-lg p-4 w-60 space-y-2.5 max-h-[70vh] overflow-y-auto animate-fade-in">
           <p className="text-xs font-semibold text-foreground uppercase tracking-wider">
@@ -130,4 +130,6 @@ export default function AccessibilityWidget() {
       </Button>
     </div>
   );
-}
+});
+
+export default AccessibilityWidget;
