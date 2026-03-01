@@ -16,6 +16,7 @@ import { useT } from "@/contexts/I18nContext";
 import DashboardTooltip from "./DashboardTooltip";
 import SupportRequestsBoard from "./SupportRequestsBoard";
 import BookingLinksCard from "./BookingLinksCard";
+import LoginHistoryPanel from "./LoginHistoryPanel";
 
 interface TenantUser {
   id: string;
@@ -285,6 +286,9 @@ const AdminPanel = () => {
           ))}
         </div>
       )}
+
+      {/* Login History */}
+      <LoginHistoryPanel />
 
       {/* Support Requests Board */}
       <SupportRequestsBoard />
