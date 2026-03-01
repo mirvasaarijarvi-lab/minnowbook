@@ -25,7 +25,9 @@ import {
   Pencil,
   Power,
   ArrowLeft,
+  Eye,
 } from "lucide-react";
+import { useImpersonation } from "@/contexts/ImpersonationContext";
 
 interface TenantWithStats {
   id: string;
@@ -50,6 +52,7 @@ const Superadmin = () => {
   const [search, setSearch] = useState("");
   const [editTenant, setEditTenant] = useState<TenantWithStats | null>(null);
   const [editForm, setEditForm] = useState({ name: "", tier: "", max_staff_users: 3 });
+  const { startImpersonation } = useImpersonation();
 
   // Check system admin
   const { data: isSysAdmin, isLoading: adminLoading } = useQuery({
@@ -318,6 +321,18 @@ const Superadmin = () => {
                       >
                         <Pencil className="h-3.5 w-3.5" />
                         Edit
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          startImpersonation(t.id, t.name);
+                          navigate("/dashboard");
+                        }}
+                        className="gap-1 text-muted-foreground hover:text-foreground"
+                      >
+                        <Eye className="h-3.5 w-3.5" />
+                        Impersonate
                       </Button>
                       <Button
                         variant={t.is_active ? "outline" : "default"}

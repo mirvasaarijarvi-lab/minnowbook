@@ -12,7 +12,8 @@ import {
   PERM_ADMIN_VIEW,
   PERM_SUPPORT_VIEW,
 } from "@/lib/permissions";
-import { Menu, HelpCircle, ShieldAlert } from "lucide-react";
+import { Menu, HelpCircle, ShieldAlert, X, Eye } from "lucide-react";
+import { useImpersonation } from "@/contexts/ImpersonationContext";
 import DashboardSidebar, { DashboardView } from "@/components/dashboard/DashboardSidebar";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import DashboardOverview from "@/components/dashboard/DashboardOverview";
@@ -108,6 +109,7 @@ const Dashboard = () => {
   const { user, signOut } = useAuth();
   const { tenantId, tenant, isAdmin, loading } = useTenant();
   const { can } = usePermissions();
+  const { impersonating, isImpersonating, stopImpersonation } = useImpersonation();
   const navigate = useNavigate();
   const [currentView, setCurrentView] = useState<DashboardView>("overview");
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -183,7 +185,28 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex min-h-screen bg-background flex-col">
+      {isImpersonating && (
+        <div className="bg-accent text-accent-foreground px-4 py-2 flex items-center justify-between text-sm font-medium z-50">
+          <div className="flex items-center gap-2">
+            <Eye className="h-4 w-4" />
+            Impersonating tenant: <strong>{impersonating.tenantName}</strong>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              stopImpersonation();
+              navigate("/superadmin");
+            }}
+            className="gap-1 text-accent-foreground hover:bg-accent-foreground/10 h-7"
+          >
+            <X className="h-3.5 w-3.5" />
+            Exit
+          </Button>
+        </div>
+      )}
+      <div className="flex flex-1 min-h-0">
       <DashboardSidebar
         currentView={currentView}
         onViewChange={setCurrentView}
@@ -250,6 +273,7 @@ const Dashboard = () => {
         onComplete={handleTourComplete}
         onNavigate={(view) => setCurrentView(view as DashboardView)}
       />
+      </div>
     </div>
   );
 };
