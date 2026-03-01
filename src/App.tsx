@@ -19,6 +19,7 @@ import Support from "./pages/Support";
 import About from "./pages/About";
 import Privacy from "./pages/Privacy";
 import Accessibility from "./pages/Accessibility";
+import Superadmin from "./pages/Superadmin";
 import CookieConsent from "./components/CookieConsent";
 import AccessibilityWidget from "./components/AccessibilityWidget";
 
@@ -71,6 +72,14 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <Dashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/superadmin"
+                element={
+                  <ProtectedRoute>
+                    <Superadmin />
                   </ProtectedRoute>
                 }
               />
