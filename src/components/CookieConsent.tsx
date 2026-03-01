@@ -1,10 +1,10 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, forwardRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Shield } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useT } from "@/contexts/I18nContext";
 
-export default function CookieConsent() {
+const CookieConsent = forwardRef<HTMLDivElement>(function CookieConsent(_props, ref) {
   const t = useT();
   const [visible, setVisible] = useState(false);
 
@@ -29,7 +29,7 @@ export default function CookieConsent() {
   if (!visible) return null;
 
   return (
-    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] w-[calc(100%-2rem)] max-w-xl animate-fade-up">
+    <div ref={ref} className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] w-[calc(100%-2rem)] max-w-xl animate-fade-up">
       <div className="bg-card border border-border rounded-xl shadow-lg p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4">
         <Shield className="h-5 w-5 text-accent shrink-0 mt-0.5 sm:mt-0" />
         <p className="text-sm text-muted-foreground leading-relaxed flex-1">
@@ -49,4 +49,6 @@ export default function CookieConsent() {
       </div>
     </div>
   );
-}
+});
+
+export default CookieConsent;
