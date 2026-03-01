@@ -5,6 +5,16 @@ import { cn } from "@/lib/utils";
 import { useT } from "@/contexts/I18nContext";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { TranslationKey } from "@/i18n/translations";
+import { usePermissions } from "@/hooks/usePermissions";
+import {
+  PERM_CALENDAR_VIEW,
+  PERM_RESERVATIONS_VIEW,
+  PERM_RESOURCES_VIEW,
+  PERM_REPORTS_VIEW,
+  PERM_SETTINGS_VIEW,
+  PERM_ADMIN_VIEW,
+  PERM_SUPPORT_VIEW,
+} from "@/lib/permissions";
 
 export type DashboardView = "overview" | "calendar" | "reservations" | "resources" | "reports" | "settings" | "admin" | "support";
 
@@ -18,20 +28,25 @@ interface DashboardSidebarProps {
   isAdmin?: boolean;
 }
 
-const navItems: { view: DashboardView; labelKey: TranslationKey; icon: React.ElementType; adminOnly?: boolean }[] = [
+const navItems: { view: DashboardView; labelKey: TranslationKey; icon: React.ElementType; adminOnly?: boolean; permission?: string }[] = [
   { view: "overview", labelKey: "nav.overview", icon: LayoutDashboard },
-  { view: "calendar", labelKey: "nav.calendar", icon: CalendarDays },
-  { view: "reservations", labelKey: "nav.reservations", icon: List },
-  { view: "resources", labelKey: "nav.resources", icon: Settings },
-  { view: "reports", labelKey: "nav.reports", icon: BarChart3 },
-  { view: "settings", labelKey: "nav.settings", icon: Cog },
-  { view: "admin", labelKey: "nav.admin", icon: ShieldCheck, adminOnly: true },
-  { view: "support", labelKey: "nav.support", icon: LifeBuoy },
+  { view: "calendar", labelKey: "nav.calendar", icon: CalendarDays, permission: PERM_CALENDAR_VIEW },
+  { view: "reservations", labelKey: "nav.reservations", icon: List, permission: PERM_RESERVATIONS_VIEW },
+  { view: "resources", labelKey: "nav.resources", icon: Settings, permission: PERM_RESOURCES_VIEW },
+  { view: "reports", labelKey: "nav.reports", icon: BarChart3, permission: PERM_REPORTS_VIEW },
+  { view: "settings", labelKey: "nav.settings", icon: Cog, permission: PERM_SETTINGS_VIEW },
+  { view: "admin", labelKey: "nav.admin", icon: ShieldCheck, adminOnly: true, permission: PERM_ADMIN_VIEW },
+  { view: "support", labelKey: "nav.support", icon: LifeBuoy, permission: PERM_SUPPORT_VIEW },
 ];
 
 const DashboardSidebar = ({ currentView, onViewChange, userEmail, onSignOut, mobileOpen, onMobileToggle, isAdmin: isAdminUser }: DashboardSidebarProps) => {
   const t = useT();
-  const visibleItems = navItems.filter((item) => !item.adminOnly || isAdminUser);
+  const { can } = usePermissions();
+  const visibleItems = navItems.filter((item) => {
+    if (item.adminOnly && !isAdminUser) return false;
+    if (item.permission && !can(item.permission)) return false;
+    return true;
+  });
 
   const handleNavClick = (view: DashboardView) => {
     onViewChange(view);

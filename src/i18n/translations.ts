@@ -208,6 +208,11 @@ type TranslationKeys = {
   "admin.noLoginHistory": string;
   "admin.auditLog": string;
   "admin.noAuditLog": string;
+  "admin.permissions": string;
+  "admin.addRole": string;
+  "admin.roleName": string;
+  "admin.roleKey": string;
+  "admin.roleCreated": string;
 
   // Hero
   "hero.badge": string;
@@ -735,6 +740,11 @@ const en: TranslationKeys = {
   "admin.noLoginHistory": "No login activity recorded yet.",
   "admin.auditLog": "Change Log",
   "admin.noAuditLog": "No changes recorded yet.",
+  "admin.permissions": "Role Permissions",
+  "admin.addRole": "Add Role",
+  "admin.roleName": "Role Name",
+  "admin.roleKey": "Role Key",
+  "admin.roleCreated": "Role created",
 
   // Hero
   "hero.badge": "Now in beta. 30-day free trial",
@@ -1250,6 +1260,11 @@ const fi: TranslationKeys = {
   "admin.noLoginHistory": "Kirjautumistietoja ei ole vielä tallennettu.",
   "admin.auditLog": "Muutosloki",
   "admin.noAuditLog": "Muutoksia ei ole vielä tallennettu.",
+  "admin.permissions": "Roolien oikeudet",
+  "admin.addRole": "Lisää rooli",
+  "admin.roleName": "Roolin nimi",
+  "admin.roleKey": "Roolin avain",
+  "admin.roleCreated": "Rooli luotu",
 
   "hero.badge": "Nyt betassa. 30 päivän ilmainen kokeilu",
   "hero.title": "Varaustyökalu niille,",
@@ -1764,6 +1779,11 @@ const sv: TranslationKeys = {
   "admin.noLoginHistory": "Ingen inloggningsaktivitet registrerad ännu.",
   "admin.auditLog": "Ändringslogg",
   "admin.noAuditLog": "Inga ändringar registrerade ännu.",
+  "admin.permissions": "Rollbehörigheter",
+  "admin.addRole": "Lägg till roll",
+  "admin.roleName": "Rollnamn",
+  "admin.roleKey": "Rollnyckel",
+  "admin.roleCreated": "Roll skapad",
 
   "hero.badge": "Nu i beta. 30 dagars gratis provperiod",
   "hero.title": "Bokningsverktyget byggt för",
