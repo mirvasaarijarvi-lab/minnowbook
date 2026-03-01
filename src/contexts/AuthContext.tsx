@@ -25,10 +25,31 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
+      async (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
+
+        // Record login event
+        if (event === "SIGNED_IN" && session?.user) {
+          // Use setTimeout to avoid blocking the auth flow
+          setTimeout(async () => {
+            try {
+              const tenantId = await supabase.rpc("get_user_tenant_id", {
+                p_user_id: session.user.id,
+              });
+              if (tenantId.data) {
+                await supabase.from("login_history").insert({
+                  user_id: session.user.id,
+                  tenant_id: tenantId.data,
+                  user_agent: navigator.userAgent,
+                });
+              }
+            } catch {
+              // Non-critical — don't block auth
+            }
+          }, 0);
+        }
       }
     );
 
