@@ -670,6 +670,7 @@ export type Database = {
       tenant_users: {
         Row: {
           created_at: string | null
+          custom_role_key: string | null
           display_name: string | null
           id: string
           is_approved: boolean | null
@@ -679,6 +680,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          custom_role_key?: string | null
           display_name?: string | null
           id?: string
           is_approved?: boolean | null
@@ -688,6 +690,7 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          custom_role_key?: string | null
           display_name?: string | null
           id?: string
           is_approved?: boolean | null

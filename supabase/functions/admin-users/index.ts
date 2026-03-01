@@ -50,7 +50,6 @@ Deno.serve(async (req) => {
       if (error) throw error;
 
       // Get emails from auth
-      const userIds = users.map((u: any) => u.user_id);
       const enriched = [];
       for (const u of users) {
         const { data: { user: authUser } } = await adminClient.auth.admin.getUserById(u.user_id);
@@ -65,8 +64,11 @@ Deno.serve(async (req) => {
     }
 
     if (action === "create") {
-      const { email, password, displayName, role } = params;
+      const { email, password, displayName, role, customRoleKey } = params;
       if (!email || !password) throw new Error("Email and password required");
+
+      // Determine base role: custom roles use 'staff' as base
+      const baseRole = (role === "owner" || role === "admin") ? role : "staff";
 
       // Create auth user
       const { data: newUser, error: createError } = await adminClient.auth.admin.createUser({
@@ -80,12 +82,12 @@ Deno.serve(async (req) => {
       const { error: tuError } = await adminClient.from("tenant_users").insert({
         tenant_id: tenantId,
         user_id: newUser.user!.id,
-        role: role || "staff",
+        role: baseRole,
+        custom_role_key: customRoleKey || null,
         display_name: displayName || null,
         is_approved: true,
       });
       if (tuError) {
-        // Cleanup: delete the auth user if tenant_users insert fails
         await adminClient.auth.admin.deleteUser(newUser.user!.id);
         throw tuError;
       }
@@ -96,12 +98,18 @@ Deno.serve(async (req) => {
     }
 
     if (action === "update_role") {
-      const { userId, role } = params;
+      const { userId, role, customRoleKey } = params;
       if (!userId || !role) throw new Error("userId and role required");
+
+      // System roles (owner, admin, staff) clear customRoleKey
+      // Custom roles set base role to 'staff' and store customRoleKey
+      const isSystemRole = ["owner", "admin", "staff"].includes(role);
+      const baseRole = isSystemRole ? role : "staff";
+      const effectiveCustomKey = isSystemRole ? null : role;
 
       const { error } = await adminClient
         .from("tenant_users")
-        .update({ role })
+        .update({ role: baseRole, custom_role_key: effectiveCustomKey })
         .eq("user_id", userId)
         .eq("tenant_id", tenantId);
       if (error) throw error;
@@ -115,7 +123,6 @@ Deno.serve(async (req) => {
       const { userId, newPassword } = params;
       if (!userId || !newPassword) throw new Error("userId and newPassword required");
 
-      // Verify user belongs to this tenant
       const { data: tu } = await adminClient
         .from("tenant_users")
         .select("id")
@@ -139,7 +146,6 @@ Deno.serve(async (req) => {
       if (!userId) throw new Error("userId required");
       if (userId === callingUser.id) throw new Error("Cannot delete yourself");
 
-      // Remove from tenant_users
       const { error: tuError } = await adminClient
         .from("tenant_users")
         .delete()

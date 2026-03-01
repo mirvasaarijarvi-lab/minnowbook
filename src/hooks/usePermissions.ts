@@ -7,6 +7,9 @@ import { useTenant } from "@/hooks/useTenant";
  * Fetches the current user's granted permissions and provides
  * a `can(permission)` helper. Owner and system admin roles
  * automatically have all permissions.
+ *
+ * Supports custom_role_key: if set on tenant_users, permissions
+ * are looked up by custom_role_key instead of the enum role.
  */
 export function usePermissions() {
   const { user } = useAuth();
@@ -26,26 +29,29 @@ export function usePermissions() {
 
       if (sysAdmin) return "__all__";
 
-      // Fetch role permissions for this user's role
+      // Fetch role + custom_role_key for this user
       const { data: tenantUser } = await supabase
         .from("tenant_users")
-        .select("role")
+        .select("role, custom_role_key")
         .eq("user_id", user!.id)
         .eq("tenant_id", tenantId!)
         .maybeSingle();
 
       if (!tenantUser) return [] as string[];
 
+      // Use custom_role_key if set, otherwise fall back to enum role
+      const effectiveRole = (tenantUser as any).custom_role_key || tenantUser.role;
+
       const { data: perms } = await supabase
         .from("role_permissions")
         .select("permission")
         .eq("tenant_id", tenantId!)
-        .eq("role_key", tenantUser.role);
+        .eq("role_key", effectiveRole);
 
       return (perms ?? []).map((p) => p.permission);
     },
     enabled: !!user?.id && !!tenantId,
-    staleTime: 60_000, // Cache for 1 minute
+    staleTime: 60_000,
   });
 
   const can = (permission: string): boolean => {
