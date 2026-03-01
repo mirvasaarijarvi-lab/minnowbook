@@ -1,4 +1,4 @@
-import { CalendarDays, List, Settings, LogOut, LayoutDashboard, Menu, X, ShieldCheck, Cog, BarChart3, LifeBuoy } from "lucide-react";
+import { CalendarDays, List, Settings, LogOut, LayoutDashboard, Menu, X, ShieldCheck, Cog, BarChart3, LifeBuoy, Shield } from "lucide-react";
 import Logo from "@/components/Logo";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -6,6 +6,7 @@ import { useT } from "@/contexts/I18nContext";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { TranslationKey } from "@/i18n/translations";
 import { usePermissions } from "@/hooks/usePermissions";
+import { useNavigate } from "react-router-dom";
 import {
   PERM_CALENDAR_VIEW,
   PERM_RESERVATIONS_VIEW,
@@ -41,7 +42,8 @@ const navItems: { view: DashboardView; labelKey: TranslationKey; icon: React.Ele
 
 const DashboardSidebar = ({ currentView, onViewChange, userEmail, onSignOut, mobileOpen, onMobileToggle, isAdmin: isAdminUser }: DashboardSidebarProps) => {
   const t = useT();
-  const { can } = usePermissions();
+  const { can, isSystemAdmin } = usePermissions();
+  const navigate = useNavigate();
   const visibleItems = navItems.filter((item) => {
     if (item.adminOnly && !isAdminUser) return false;
     if (item.permission && !can(item.permission)) return false;
@@ -100,6 +102,15 @@ const DashboardSidebar = ({ currentView, onViewChange, userEmail, onSignOut, mob
               <span className="truncate">{t(labelKey)}</span>
             </button>
           ))}
+          {isSystemAdmin && (
+            <button
+              onClick={() => navigate("/superadmin")}
+              className="flex items-center gap-3 w-full px-3 py-2.5 rounded-md text-sm font-medium transition-colors text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+            >
+              <Shield className="h-4 w-4 shrink-0" />
+              <span className="truncate">Superadmin</span>
+            </button>
+          )}
         </nav>
 
         <div className="p-3 border-t border-sidebar-border space-y-2">
