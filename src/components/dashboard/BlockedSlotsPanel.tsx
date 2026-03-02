@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/hooks/useTenant";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,13 +12,13 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "@/hooks/use-toast";
-import { Plus, Trash2, Ban, Clock } from "lucide-react";
-import { format } from "date-fns";
+import { Plus, Trash2, Ban, Clock, CalendarIcon } from "lucide-react";
+import { format, eachDayOfInterval, isBefore, startOfDay } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { CalendarIcon } from "lucide-react";
 import DashboardTooltip from "./DashboardTooltip";
+import type { DateRange } from "react-day-picker";
 
 interface BlockedSlot {
   id: string;
@@ -41,8 +41,8 @@ const BlockedSlotsPanel = () => {
   const [blockSpecificResource, setBlockSpecificResource] = useState(false);
   const [datePickerOpen, setDatePickerOpen] = useState(false);
 
+  const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [form, setForm] = useState({
-    date: undefined as Date | undefined,
     start_time: "",
     end_time: "",
     resource_type: "hotel",
@@ -81,24 +81,33 @@ const BlockedSlotsPanel = () => {
 
   const createMutation = useMutation({
     mutationFn: async () => {
-      if (!tenantId || !form.date) throw new Error("Missing required fields");
-      const payload: any = {
+      if (!tenantId || !dateRange?.from) throw new Error("Missing required fields");
+
+      const from = dateRange.from;
+      const to = dateRange.to ?? dateRange.from;
+      const days = eachDayOfInterval({ start: from, end: to });
+
+      const rows = days.map((day) => ({
         tenant_id: tenantId,
-        date: format(form.date, "yyyy-MM-dd"),
+        date: format(day, "yyyy-MM-dd"),
         resource_type: form.resource_type,
         resource_id: blockSpecificResource && form.resource_id ? form.resource_id : null,
         start_time: useTimeRange && form.start_time ? form.start_time : null,
         end_time: useTimeRange && form.end_time ? form.end_time : null,
         reason: form.reason || null,
-      };
-      const { error } = await supabase.from("blocked_slots").insert(payload);
+      }));
+
+      const { error } = await supabase.from("blocked_slots").insert(rows);
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["blocked-slots"] });
       setDialogOpen(false);
       resetForm();
-      toast({ title: "Block created" });
+      const count = dateRange?.to
+        ? eachDayOfInterval({ start: dateRange.from!, end: dateRange.to }).length
+        : 1;
+      toast({ title: `${count} day${count > 1 ? "s" : ""} blocked` });
     },
     onError: (err: any) => {
       toast({ title: "Error", description: err.message, variant: "destructive" });
@@ -117,7 +126,8 @@ const BlockedSlotsPanel = () => {
   });
 
   const resetForm = () => {
-    setForm({ date: undefined, start_time: "", end_time: "", resource_type: "hotel", resource_id: "", reason: "" });
+    setDateRange(undefined);
+    setForm({ start_time: "", end_time: "", resource_type: "hotel", resource_id: "", reason: "" });
     setUseTimeRange(false);
     setBlockSpecificResource(false);
   };
@@ -129,6 +139,14 @@ const BlockedSlotsPanel = () => {
     venue: "Venue / Event Space",
   };
 
+  const dateLabel = useMemo(() => {
+    if (!dateRange?.from) return "Pick a date or range";
+    if (!dateRange.to || format(dateRange.from, "yyyy-MM-dd") === format(dateRange.to, "yyyy-MM-dd")) {
+      return format(dateRange.from, "PPP");
+    }
+    return `${format(dateRange.from, "MMM d")} – ${format(dateRange.to, "MMM d, yyyy")}`;
+  }, [dateRange]);
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -137,7 +155,7 @@ const BlockedSlotsPanel = () => {
             <Ban className="h-5 w-5" />
             Blocked Dates & Times
           </h3>
-          <DashboardTooltip text="Block entire resource types (e.g. the whole hotel) or specific resources (a single room) on chosen dates. Optionally restrict to specific hours." />
+          <DashboardTooltip text="Block entire resource types or specific resources on chosen dates or date ranges. Optionally restrict to specific hours." />
         </div>
         <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) resetForm(); }}>
           <DialogTrigger asChild>
@@ -147,7 +165,7 @@ const BlockedSlotsPanel = () => {
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle className="font-serif">Block a Date / Time</DialogTitle>
+              <DialogTitle className="font-serif">Block Dates / Times</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 pt-2">
               {/* Resource type */}
@@ -186,20 +204,28 @@ const BlockedSlotsPanel = () => {
                 </div>
               )}
 
-              {/* Date picker */}
+              {/* Date range picker */}
               <div>
-                <Label>Date</Label>
+                <Label>Date(s)</Label>
                 <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
                   <PopoverTrigger asChild>
-                    <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !form.date && "text-muted-foreground")}>
+                    <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !dateRange?.from && "text-muted-foreground")}>
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {form.date ? format(form.date, "PPP") : "Pick a date"}
+                      {dateLabel}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar mode="single" selected={form.date} onSelect={(d) => { setForm({ ...form, date: d }); setDatePickerOpen(false); }} />
+                    <Calendar
+                      mode="range"
+                      selected={dateRange}
+                      onSelect={setDateRange}
+                      numberOfMonths={2}
+                      disabled={(date) => isBefore(date, startOfDay(new Date()))}
+                      className={cn("p-3 pointer-events-auto")}
+                    />
                   </PopoverContent>
                 </Popover>
+                <p className="text-xs text-muted-foreground mt-1">Click once for a single day, or click two dates to select a range.</p>
               </div>
 
               {/* Time range toggle */}
@@ -233,9 +259,11 @@ const BlockedSlotsPanel = () => {
               <Button
                 className="w-full"
                 onClick={() => createMutation.mutate()}
-                disabled={!form.date || createMutation.isPending}
+                disabled={!dateRange?.from || createMutation.isPending}
               >
-                {createMutation.isPending ? "Creating..." : "Create Block"}
+                {createMutation.isPending ? "Creating..." : dateRange?.to && format(dateRange.from!, "yyyy-MM-dd") !== format(dateRange.to, "yyyy-MM-dd")
+                  ? `Block ${eachDayOfInterval({ start: dateRange.from!, end: dateRange.to }).length} days`
+                  : "Create Block"}
               </Button>
             </div>
           </DialogContent>
