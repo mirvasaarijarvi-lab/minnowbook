@@ -181,8 +181,8 @@ const CalendarView = () => {
               modifiersClassNames={{
                 hasReservation: "bg-accent/20 font-bold text-accent-foreground",
                 isBlocked: "bg-destructive/15 text-destructive font-bold ring-1 ring-inset ring-destructive/30",
-                isRecurring: "bg-violet-100 text-violet-800 font-bold ring-1 ring-inset ring-dashed ring-violet-400",
-                isRecurringAndBlocked: "bg-destructive/15 text-destructive font-bold ring-2 ring-inset ring-violet-400",
+                isRecurring: "bg-violet-100 text-violet-800 font-bold border border-dashed border-violet-400",
+                isRecurringAndBlocked: "bg-destructive/15 text-destructive font-bold border-2 border-dashed border-violet-400",
                 hasBoth: "bg-accent/20 font-bold text-accent-foreground ring-2 ring-inset ring-destructive/40",
               }}
             />
