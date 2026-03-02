@@ -312,7 +312,7 @@ const ReportsPanel = () => {
 
   /* ── CSV Export ──────────────────────────────────────── */
   const handleExportCSV = () => {
-    const headers = [t("common.date"), t("reports.guest"), t("common.type"), t("common.guests"), t("common.status"), t("reports.used" as any), t("reports.breakfast" as any), t("reports.invoiced"), `${t("common.price")} (€)`, `${t("reports.totalPrice" as any)} (€)`, t("reports.notes")];
+    const headers = [t("common.date"), t("reports.guest"), t("common.type"), t("common.guests"), t("common.status"), t("reports.used" as any), t("reports.breakfast" as any), t("reports.invoiced"), `${t("common.price")} (EUR)`, `${t("reports.totalPrice" as any)} (EUR)`, t("reports.notes")];
     const rows = reservations.map((r) => {
       const bfPrice = calcBreakfastPrice(r);
       const roomPrice = calcRoomPrice(r);
@@ -325,8 +325,8 @@ const ReportsPanel = () => {
           ? `${roomPrice.toFixed(2)} + ${t("reports.breakfast" as any)}: ${bfPrice.toFixed(2)} = ${total.toFixed(2)}`
           : total.toFixed(2);
       } else {
-        priceStr = total > 0 ? total.toFixed(2) : "—";
-        totalStr = total > 0 ? total.toFixed(2) : "—";
+        priceStr = total > 0 ? total.toFixed(2) : "-";
+        totalStr = total > 0 ? total.toFixed(2) : "-";
       }
       return [
         format(new Date(r.date + "T00:00:00"), "d.M.yyyy"),
@@ -344,9 +344,12 @@ const ReportsPanel = () => {
     });
     rows.push(["", "", "", "", "", "", "", "", t("reports.grandTotal"), grandTotal.toFixed(2), ""]);
 
-    const sanitize = (v: string) => String(v).replace(/"/g, '""').replace(/[\r\n]+/g, " ");
-    const csv = "sep=;\n" + [headers, ...rows].map((row) => row.map((c) => `"${sanitize(c)}"`).join(";")).join("\n");
-    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+    const sanitize = (v: string) => String(v).replace(/"/g, '""').replace(/[\r\n]+/g, " ").replace(/\u2014/g, "-").replace(/\u20AC/g, "EUR");
+    const csvContent = "sep=;\n" + [headers, ...rows].map((row) => row.map((c) => `"${sanitize(c)}"`).join(";")).join("\r\n");
+    const encoder = new TextEncoder();
+    const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
+    const csvBytes = encoder.encode(csvContent);
+    const blob = new Blob([bom, csvBytes], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
