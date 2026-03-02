@@ -10,7 +10,7 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash2, BedDouble, UtensilsCrossed, Building2, Upload, X, Loader2 } from "lucide-react";
+import { Plus, Pencil, Trash2, BedDouble, UtensilsCrossed, Building2, Upload, X, Loader2, ExternalLink } from "lucide-react";
 import { useState, useRef } from "react";
 import { useT } from "@/contexts/I18nContext";
 import DashboardTooltip from "./DashboardTooltip";
@@ -31,7 +31,7 @@ const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_IMAGE_TYPES = ["image/png", "image/jpeg", "image/webp"];
 
 const ResourceManagement = () => {
-  const { tenantId, isAdmin } = useTenant();
+  const { tenantId, tenant, isAdmin } = useTenant();
   const { can } = usePermissions();
   const canManage = can(PERM_RESOURCES_MANAGE);
   const queryClient = useQueryClient();
@@ -194,11 +194,20 @@ const ResourceManagement = () => {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between" data-tour="resources-header">
+      <div className="flex items-center justify-between flex-wrap gap-2" data-tour="resources-header">
         <div className="flex items-center gap-2">
           <h2 className="text-2xl font-serif font-bold text-foreground">{t("nav.resources")}</h2>
           <DashboardTooltip text="Add rooms, tables, or venues here. Set capacity, pricing, and upload photos. Toggle resources active/inactive to control booking availability." />
         </div>
+        <div className="flex items-center gap-2">
+          {(tenant as any)?.slug && (
+            <Button variant="outline" size="sm" className="gap-1.5" asChild>
+              <a href={`/book/${(tenant as any).slug}`} target="_blank" rel="noopener noreferrer">
+                <ExternalLink className="h-4 w-4" />
+                {t("dashboard.bookingLink")}
+              </a>
+            </Button>
+          )}
         {canManage && (
           <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) resetForm(); }}>
             <DialogTrigger asChild>
@@ -330,6 +339,7 @@ const ResourceManagement = () => {
             </DialogContent>
           </Dialog>
         )}
+        </div>
       </div>
 
       {isLoading ? (
