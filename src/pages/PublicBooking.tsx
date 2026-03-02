@@ -164,6 +164,11 @@ const PublicBooking = () => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  // Bot protection: honeypot + time-based
+  const [honeypot, setHoneypot] = useState("");
+  const [formLoadedAt] = useState(() => Date.now());
+  const MIN_SUBMIT_TIME_MS = 3000; // 3 seconds minimum
+
   const [form, setForm] = useState({
     guest_name: "",
     guest_email: "",
@@ -366,6 +371,18 @@ const PublicBooking = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
+
+    // Bot protection checks
+    if (honeypot) {
+      // Silently reject - honeypot was filled (likely a bot)
+      setSubmitted(true);
+      return;
+    }
+    if (Date.now() - formLoadedAt < MIN_SUBMIT_TIME_MS) {
+      // Form submitted too quickly - likely a bot
+      toast.error(t("booking.submitError"));
+      return;
+    }
 
     try {
       bookingSchema.parse({
@@ -649,6 +666,19 @@ const PublicBooking = () => {
         />
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Honeypot field - hidden from real users, bots will fill it */}
+          <div aria-hidden="true" style={{ position: "absolute", left: "-9999px", top: "-9999px", opacity: 0, height: 0, overflow: "hidden" }}>
+            <label htmlFor="website_url">Website</label>
+            <input
+              type="text"
+              id="website_url"
+              name="website_url"
+              tabIndex={-1}
+              autoComplete="off"
+              value={honeypot}
+              onChange={(e) => setHoneypot(e.target.value)}
+            />
+          </div>
           {/* Step 1: Type Selection */}
           {allowedTypes.length > 0 && (
             <Card>
