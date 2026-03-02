@@ -12,7 +12,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "@/hooks/use-toast";
-import { Plus, Trash2, Ban, Clock, CalendarIcon } from "lucide-react";
+import { Plus, Trash2, Ban, Clock, CalendarIcon, Filter } from "lucide-react";
 import { format, eachDayOfInterval, isBefore, startOfDay } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -42,6 +42,8 @@ const BlockedSlotsPanel = () => {
   const [blockSpecificResource, setBlockSpecificResource] = useState(false);
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [bulkDatePickerOpen, setBulkDatePickerOpen] = useState(false);
+  const [filterType, setFilterType] = useState<string>("all");
+  const [filterResourceId, setFilterResourceId] = useState<string>("all");
 
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [bulkDeleteRange, setBulkDeleteRange] = useState<DateRange | undefined>();
@@ -81,6 +83,22 @@ const BlockedSlotsPanel = () => {
   const filteredResources = useMemo(() => {
     return (resources ?? []).filter((r) => r.resource_type === form.resource_type);
   }, [resources, form.resource_type]);
+
+  // Resources available for the filter dropdown (based on filterType)
+  const filterResources = useMemo(() => {
+    if (filterType === "all") return resources ?? [];
+    return (resources ?? []).filter((r) => r.resource_type === filterType);
+  }, [resources, filterType]);
+
+  // Filtered blocked slots for display
+  const filteredSlots = useMemo(() => {
+    if (!blockedSlots) return [];
+    return blockedSlots.filter((slot) => {
+      if (filterType !== "all" && slot.resource_type !== filterType) return false;
+      if (filterResourceId !== "all" && slot.resource_id !== filterResourceId) return false;
+      return true;
+    });
+  }, [blockedSlots, filterType, filterResourceId]);
 
   const createMutation = useMutation({
     mutationFn: async () => {
@@ -370,6 +388,48 @@ const BlockedSlotsPanel = () => {
         </div>
       </div>
 
+      {/* Filters */}
+      {(blockedSlots?.length ?? 0) > 0 && (
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+            <Filter className="h-4 w-4" />
+            <span>Filter:</span>
+          </div>
+          <Select value={filterType} onValueChange={(v) => { setFilterType(v); setFilterResourceId("all"); }}>
+            <SelectTrigger className="w-[160px] h-8 text-sm">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All types</SelectItem>
+              {Object.entries(resourceTypeLabels).map(([key, label]) => (
+                <SelectItem key={key} value={key}>{label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {filterResources.length > 0 && (
+            <Select value={filterResourceId} onValueChange={setFilterResourceId}>
+              <SelectTrigger className="w-[180px] h-8 text-sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All resources</SelectItem>
+                {filterResources.map((r) => (
+                  <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+          {(filterType !== "all" || filterResourceId !== "all") && (
+            <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={() => { setFilterType("all"); setFilterResourceId("all"); }}>
+              Clear filters
+            </Button>
+          )}
+          <span className="text-xs text-muted-foreground ml-auto">
+            {filteredSlots.length} of {blockedSlots?.length ?? 0} block{(blockedSlots?.length ?? 0) !== 1 ? "s" : ""}
+          </span>
+        </div>
+      )}
+
       {/* List of blocked slots */}
       {isLoading ? (
         <div className="space-y-2">
@@ -377,9 +437,11 @@ const BlockedSlotsPanel = () => {
         </div>
       ) : !blockedSlots?.length ? (
         <Card><CardContent className="p-6 text-center text-muted-foreground text-sm">No blocked dates or times configured.</CardContent></Card>
+      ) : filteredSlots.length === 0 ? (
+        <Card><CardContent className="p-6 text-center text-muted-foreground text-sm">No blocks match the current filter.</CardContent></Card>
       ) : (
         <div className="space-y-2">
-          {blockedSlots.map((slot) => (
+          {filteredSlots.map((slot) => (
             <Card key={slot.id} className="hover:shadow-hover transition-shadow">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between gap-3">
