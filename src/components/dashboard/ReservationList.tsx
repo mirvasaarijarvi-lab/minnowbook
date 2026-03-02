@@ -11,8 +11,9 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useState } from "react";
 import { format } from "date-fns";
-import { CalendarDays, User, Mail, Phone, MoreVertical, CheckCircle2, XCircle, Pencil, Receipt, PackageCheck, Coffee } from "lucide-react";
+import { CalendarDays, User, Mail, Phone, MoreVertical, CheckCircle2, XCircle, Pencil, Receipt, PackageCheck, Coffee, Plus } from "lucide-react";
 import EditReservationDialog from "./EditReservationDialog";
+import ManualReservationDialog from "./ManualReservationDialog";
 import ConfirmationEmailPreview from "@/components/ConfirmationEmailPreview";
 import { useT } from "@/contexts/I18nContext";
 import { toast } from "sonner";
@@ -36,6 +37,7 @@ const ReservationList = () => {
   const [dateFilter, setDateFilter] = useState<string>("all");
   const [confirmDialog, setConfirmDialog] = useState<{ id: string; action: "confirmed" | "cancelled" } | null>(null);
   const [editingReservation, setEditingReservation] = useState<any | null>(null);
+  const [newReservationOpen, setNewReservationOpen] = useState(false);
   const t = useT();
   const { can } = usePermissions();
   const canCreate = can(PERM_RESERVATIONS_CREATE);
@@ -151,12 +153,18 @@ const ReservationList = () => {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between" data-tour="reservations-filters">
+      <div className="flex items-center justify-between flex-wrap gap-2" data-tour="reservations-filters">
         <div className="flex items-center gap-2">
           <h2 className="text-2xl font-serif font-bold text-foreground">{t("nav.reservations")}</h2>
           <DashboardTooltip text="View, filter, and manage all reservations. Use status and type filters to narrow results. Click a reservation to edit details, confirm, cancel, or check in guests." />
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
+          {canCreate && (
+            <Button size="sm" className="gap-1.5" onClick={() => setNewReservationOpen(true)}>
+              <Plus className="h-4 w-4" />
+              {t("dashboard.newReservation" as any)}
+            </Button>
+          )}
           <Button
             variant={dateFilter === "today" ? "default" : "outline"}
             size="sm"
@@ -372,6 +380,12 @@ const ReservationList = () => {
         reservation={editingReservation}
         open={!!editingReservation}
         onOpenChange={(open) => !open && setEditingReservation(null)}
+      />
+
+      {/* New reservation dialog */}
+      <ManualReservationDialog
+        open={newReservationOpen}
+        onOpenChange={setNewReservationOpen}
       />
     </div>
   );

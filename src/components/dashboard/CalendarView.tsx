@@ -4,12 +4,16 @@ import { useTenant } from "@/hooks/useTenant";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { useState, useMemo } from "react";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useT } from "@/contexts/I18nContext";
 import DashboardTooltip from "./DashboardTooltip";
-import { Ban, Clock, RefreshCw } from "lucide-react";
+import ManualReservationDialog from "./ManualReservationDialog";
+import { Ban, Clock, RefreshCw, Plus } from "lucide-react";
+import { usePermissions } from "@/hooks/usePermissions";
+import { PERM_RESERVATIONS_CREATE } from "@/lib/permissions";
 
 const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
@@ -17,7 +21,10 @@ const CalendarView = () => {
   const { tenantId } = useTenant();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [month, setMonth] = useState(new Date());
+  const [newReservationOpen, setNewReservationOpen] = useState(false);
   const t = useT();
+  const { can } = usePermissions();
+  const canCreate = can(PERM_RESERVATIONS_CREATE);
 
   const monthStart = format(startOfMonth(month), "yyyy-MM-dd");
   const monthEnd = format(endOfMonth(month), "yyyy-MM-dd");
@@ -124,9 +131,17 @@ const CalendarView = () => {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <h2 className="text-2xl font-serif font-bold text-foreground">{t("nav.calendar")}</h2>
-        <DashboardTooltip text="Click a date to see its reservations. Highlighted dates have bookings. Red dates have one-off blocks. Purple dashed dates have recurring blocks." />
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <h2 className="text-2xl font-serif font-bold text-foreground">{t("nav.calendar")}</h2>
+          <DashboardTooltip text="Click a date to see its reservations. Highlighted dates have bookings. Red dates have one-off blocks. Purple dashed dates have recurring blocks." />
+        </div>
+        {canCreate && (
+          <Button size="sm" className="gap-1.5" onClick={() => setNewReservationOpen(true)}>
+            <Plus className="h-4 w-4" />
+            {t("dashboard.newReservation" as any)}
+          </Button>
+        )}
       </div>
 
       {/* Legend */}
@@ -301,6 +316,12 @@ const CalendarView = () => {
           </CardContent>
         </Card>
       </div>
+
+      <ManualReservationDialog
+        open={newReservationOpen}
+        onOpenChange={setNewReservationOpen}
+        defaultDate={selectedDate}
+      />
     </div>
   );
 };
