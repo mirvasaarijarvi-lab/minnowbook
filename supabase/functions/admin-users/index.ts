@@ -56,9 +56,43 @@ function validateUuid(value: string, fieldName: string): string {
   return value;
 }
 
+// --- Rate limiting ---
+const RATE_LIMIT_WINDOW_MS = 60_000; // 1 minute
+const RATE_LIMIT_MAX = 30; // max requests per window per IP
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const entry = rateLimitMap.get(ip);
+  if (!entry || now > entry.resetAt) {
+    rateLimitMap.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+    return true;
+  }
+  entry.count++;
+  return entry.count <= RATE_LIMIT_MAX;
+}
+
+// Cleanup stale entries periodically (every 5 min)
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, val] of rateLimitMap) {
+    if (now > val.resetAt) rateLimitMap.delete(key);
+  }
+}, 300_000);
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
+  }
+
+  // Rate limit check
+  const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    req.headers.get("cf-connecting-ip") || "unknown";
+  if (!checkRateLimit(clientIp)) {
+    return new Response(JSON.stringify({ error: "Too many requests. Please try again later." }), {
+      status: 429,
+      headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": "60" },
+    });
   }
 
   try {
