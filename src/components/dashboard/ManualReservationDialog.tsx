@@ -1,0 +1,405 @@
+import { useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useT } from "@/contexts/I18nContext";
+import { useTenant } from "@/hooks/useTenant";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { toast } from "sonner";
+import { format } from "date-fns";
+import { CalendarIcon, Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+interface ManualReservationDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  /** Pre-select a reservation type */
+  defaultType?: string;
+  /** Pre-select a date */
+  defaultDate?: Date;
+}
+
+const emptyForm = {
+  guest_name: "",
+  guest_email: "",
+  guest_phone: "",
+  guests_count: "",
+  start_time: "",
+  special_requests: "",
+  internal_notes: "",
+  price_eur: "",
+  reservation_type: "",
+  // Accommodation
+  check_out_date: "",
+  room_type: "",
+  breakfast_included: false,
+  // Venue
+  event_type: "",
+  estimated_guests: "",
+  catering_needed: false,
+};
+
+const ManualReservationDialog = ({
+  open,
+  onOpenChange,
+  defaultType,
+  defaultDate,
+}: ManualReservationDialogProps) => {
+  const t = useT();
+  const queryClient = useQueryClient();
+  const { tenant, tenantId } = useTenant();
+
+  const [form, setForm] = useState({ ...emptyForm, reservation_type: defaultType ?? "" });
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(defaultDate);
+  const [selectedResourceId, setSelectedResourceId] = useState("");
+
+  // Reset form when dialog opens
+  const handleOpenChange = (isOpen: boolean) => {
+    if (isOpen) {
+      const allowedTypes = (tenant?.allowed_reservation_types as string[]) ?? [];
+      const autoType = defaultType || (allowedTypes.length === 1 ? allowedTypes[0] : "");
+      setForm({ ...emptyForm, reservation_type: autoType });
+      setSelectedDate(defaultDate);
+      setSelectedResourceId("");
+    }
+    onOpenChange(isOpen);
+  };
+
+  const allowedTypes = (tenant?.allowed_reservation_types as string[]) ?? [];
+
+  // Fetch resources for the selected type
+  const { data: resources = [] } = useQuery({
+    queryKey: ["resources-for-type", tenantId, form.reservation_type],
+    queryFn: async () => {
+      if (!tenantId || !form.reservation_type) return [];
+      const types = form.reservation_type === "hotel" || form.reservation_type === "guesthouse"
+        ? ["hotel", "guesthouse"]
+        : [form.reservation_type];
+      const { data, error } = await supabase
+        .from("resources")
+        .select("id, name, resource_type, is_active, price_per_night, breakfast_price_per_person, room_type_pricing")
+        .eq("tenant_id", tenantId)
+        .in("resource_type", types)
+        .eq("is_active", true)
+        .order("name");
+      if (error) throw error;
+      return data ?? [];
+    },
+    enabled: !!tenantId && !!form.reservation_type,
+  });
+
+  const createMutation = useMutation({
+    mutationFn: async () => {
+      if (!tenantId || !selectedDate) throw new Error("Missing required fields");
+
+      const isAccommodation = form.reservation_type === "hotel" || form.reservation_type === "guesthouse";
+      const isVenue = form.reservation_type === "venue";
+
+      const { error } = await supabase.from("reservations").insert({
+        tenant_id: tenantId,
+        guest_name: form.guest_name.trim(),
+        guest_email: form.guest_email.trim(),
+        guest_phone: form.guest_phone.trim() || null,
+        guests_count: form.guests_count ? parseInt(form.guests_count) : null,
+        reservation_type: form.reservation_type,
+        date: format(selectedDate, "yyyy-MM-dd"),
+        start_time: form.start_time || null,
+        special_requests: form.special_requests.trim() || null,
+        internal_notes: form.internal_notes.trim() || null,
+        price_eur: form.price_eur ? parseFloat(form.price_eur) : null,
+        status: "confirmed",
+        ...(isAccommodation && {
+          check_out_date: form.check_out_date || null,
+          room_type: form.room_type || null,
+          breakfast_included: form.breakfast_included,
+        }),
+        ...(isVenue && {
+          event_type: form.event_type || null,
+          estimated_guests: form.estimated_guests ? parseInt(form.estimated_guests) : null,
+          catering_needed: form.catering_needed,
+        }),
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["reservations"] });
+      queryClient.invalidateQueries({ queryKey: ["calendar-reservations"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
+      toast.success(t("dashboard.reservationCreated" as any));
+      onOpenChange(false);
+    },
+    onError: (err: any) => {
+      toast.error(err.message || "Error creating reservation");
+    },
+  });
+
+  const updateField = (key: string, value: string) => {
+    setForm((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const isValid =
+    form.guest_name.trim() &&
+    form.guest_email.trim() &&
+    selectedDate &&
+    form.reservation_type;
+
+  const isHotelType = form.reservation_type === "guesthouse" || form.reservation_type === "hotel";
+  const isVenueType = form.reservation_type === "venue";
+
+  // Compute price from selected resource
+  const selectedResource = resources.find((r) => r.id === selectedResourceId);
+  const computePrice = () => {
+    if (!isHotelType || !selectedResource?.price_per_night || !selectedDate || !form.check_out_date) return;
+    const checkIn = new Date(format(selectedDate, "yyyy-MM-dd") + "T00:00:00");
+    const checkOut = new Date(form.check_out_date + "T00:00:00");
+    const nights = Math.max(0, Math.round((checkOut.getTime() - checkIn.getTime()) / 86400000));
+    if (nights <= 0) return;
+    const pricing = (selectedResource as any)?.room_type_pricing ?? { single: 1.0, double: 1.5, suite: 2.5, dorm: 0.6 };
+    const multiplier = form.room_type ? (pricing[form.room_type] ?? 1.0) : 1.0;
+    const roomTotal = nights * Math.round(selectedResource.price_per_night * multiplier * 100) / 100;
+    const guestsCount = form.guests_count ? parseInt(form.guests_count) : 1;
+    const bfPrice = selectedResource.breakfast_price_per_person ?? 15;
+    const bfTotal = form.breakfast_included ? nights * guestsCount * bfPrice : 0;
+    setForm((prev) => ({ ...prev, price_eur: (roomTotal + bfTotal).toFixed(2) }));
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="font-serif">
+            {t("dashboard.newReservation" as any)}
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-4 pt-2">
+          {/* Reservation type */}
+          {allowedTypes.length > 1 && (
+            <div className="space-y-1.5">
+              <Label>{t("common.type")} *</Label>
+              <Select
+                value={form.reservation_type}
+                onValueChange={(v) => {
+                  setForm({ ...emptyForm, reservation_type: v, guest_name: form.guest_name, guest_email: form.guest_email, guest_phone: form.guest_phone });
+                  setSelectedResourceId("");
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={t("booking.selectType")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {allowedTypes.map((type) => (
+                    <SelectItem key={type} value={type}>
+                      {t(`dashboard.${type}` as any)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {/* Resource selection */}
+          {resources.length > 0 && (
+            <div className="space-y-1.5">
+              <Label>{t("booking.selectResource")}</Label>
+              <Select value={selectedResourceId} onValueChange={setSelectedResourceId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="—" />
+                </SelectTrigger>
+                <SelectContent>
+                  {resources.map((r) => (
+                    <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {/* Guest details */}
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label>{t("common.name")} *</Label>
+              <Input value={form.guest_name} onChange={(e) => updateField("guest_name", e.target.value)} maxLength={100} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>{t("common.email")} *</Label>
+              <Input type="email" value={form.guest_email} onChange={(e) => updateField("guest_email", e.target.value)} maxLength={255} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>{t("common.phone")}</Label>
+              <Input value={form.guest_phone} onChange={(e) => updateField("guest_phone", e.target.value)} maxLength={30} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>{t("common.guests")}</Label>
+              <Input type="number" min={1} max={500} value={form.guests_count} onChange={(e) => updateField("guests_count", e.target.value)} />
+            </div>
+          </div>
+
+          {/* Date & time */}
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label>{t("common.date")} *</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !selectedDate && "text-muted-foreground")}>
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {selectedDate ? format(selectedDate, "PPP") : t("booking.pickDate")}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar mode="single" selected={selectedDate} onSelect={setSelectedDate} className={cn("p-3 pointer-events-auto")} />
+                </PopoverContent>
+              </Popover>
+            </div>
+            <div className="space-y-1.5">
+              <Label>{t("booking.preferredTime")}</Label>
+              <Input type="time" value={form.start_time} onChange={(e) => updateField("start_time", e.target.value)} />
+            </div>
+          </div>
+
+          {/* Accommodation fields */}
+          {isHotelType && (
+            <div className="space-y-3 rounded-lg border border-border p-3">
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <Label>{t("dashboard.checkOutDate")}</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !form.check_out_date && "text-muted-foreground")}>
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {form.check_out_date ? format(new Date(form.check_out_date + "T00:00:00"), "PPP") : "—"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={form.check_out_date ? new Date(form.check_out_date + "T00:00:00") : undefined}
+                        onSelect={(d) => d && updateField("check_out_date", format(d, "yyyy-MM-dd"))}
+                        disabled={(date) => !selectedDate || date <= selectedDate}
+                        className={cn("p-3 pointer-events-auto")}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+                <div className="space-y-1.5">
+                  <Label>{t("booking.roomType" as any)}</Label>
+                  <Select value={form.room_type} onValueChange={(v) => updateField("room_type", v)}>
+                    <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="single">{t("booking.roomSingle" as any)}</SelectItem>
+                      <SelectItem value="double">{t("booking.roomDouble" as any)}</SelectItem>
+                      <SelectItem value="suite">{t("booking.roomSuite" as any)}</SelectItem>
+                      <SelectItem value="dorm">{t("booking.roomDorm" as any)}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="new-breakfast"
+                  checked={form.breakfast_included}
+                  onCheckedChange={(checked) => setForm((prev) => ({ ...prev, breakfast_included: !!checked }))}
+                />
+                <Label htmlFor="new-breakfast" className="cursor-pointer">
+                  {t("booking.breakfastIncluded" as any)}
+                </Label>
+              </div>
+              {selectedResource?.price_per_night && (
+                <Button type="button" variant="outline" size="sm" onClick={computePrice}>
+                  {t("booking.calculatePrice" as any)}
+                </Button>
+              )}
+            </div>
+          )}
+
+          {/* Venue fields */}
+          {isVenueType && (
+            <div className="space-y-3 rounded-lg border border-border p-3">
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <Label>{t("booking.eventType" as any)}</Label>
+                  <Select value={form.event_type} onValueChange={(v) => updateField("event_type", v)}>
+                    <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="wedding">{t("booking.eventWedding" as any)}</SelectItem>
+                      <SelectItem value="corporate">{t("booking.eventCorporate" as any)}</SelectItem>
+                      <SelectItem value="birthday">{t("booking.eventBirthday" as any)}</SelectItem>
+                      <SelectItem value="conference">{t("booking.eventConference" as any)}</SelectItem>
+                      <SelectItem value="other">{t("booking.eventOther" as any)}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label>{t("booking.estimatedGuests" as any)}</Label>
+                  <Input type="number" min={1} max={1000} value={form.estimated_guests} onChange={(e) => updateField("estimated_guests", e.target.value)} />
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="new-catering"
+                  checked={form.catering_needed}
+                  onCheckedChange={(checked) => setForm((prev) => ({ ...prev, catering_needed: !!checked }))}
+                />
+                <Label htmlFor="new-catering" className="cursor-pointer">
+                  {t("booking.cateringNeeded" as any)}
+                </Label>
+              </div>
+            </div>
+          )}
+
+          {/* Price & notes */}
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label>{t("common.price")} (€)</Label>
+              <Input type="number" step="0.01" min={0} value={form.price_eur} onChange={(e) => updateField("price_eur", e.target.value)} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>{t("booking.specialRequests" as any)}</Label>
+              <Input value={form.special_requests} onChange={(e) => updateField("special_requests", e.target.value)} maxLength={1000} />
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label>{t("dashboard.internalNotes" as any)}</Label>
+            <Textarea value={form.internal_notes} onChange={(e) => updateField("internal_notes", e.target.value)} rows={2} maxLength={2000} />
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            {t("common.cancel")}
+          </Button>
+          <Button onClick={() => createMutation.mutate()} disabled={!isValid || createMutation.isPending}>
+            {createMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+            {t("dashboard.createReservation" as any)}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+export default ManualReservationDialog;
