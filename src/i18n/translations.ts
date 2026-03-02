@@ -357,6 +357,10 @@ type TranslationKeys = {
   "dashboard.roomDouble": string;
   "dashboard.roomSuite": string;
   "dashboard.roomDorm": string;
+  "dashboard.newReservation": string;
+  "dashboard.createReservation": string;
+  "dashboard.reservationCreated": string;
+  "booking.calculatePrice": string;
 
   // Onboarding
   "onboarding.tierStep": string;
@@ -889,6 +893,10 @@ const en: TranslationKeys = {
   "dashboard.roomDouble": "Double",
   "dashboard.roomSuite": "Suite",
   "dashboard.roomDorm": "Dorm",
+  "dashboard.newReservation": "New Reservation",
+  "dashboard.createReservation": "Create Reservation",
+  "dashboard.reservationCreated": "Reservation created successfully",
+  "booking.calculatePrice": "Calculate Price",
 
   // Onboarding
   "onboarding.tierStep": "Tier",
@@ -1408,6 +1416,10 @@ const fi: TranslationKeys = {
   "dashboard.roomDouble": "Kahden hengen",
   "dashboard.roomSuite": "Sviitti",
   "dashboard.roomDorm": "Makuusali",
+  "dashboard.newReservation": "Uusi varaus",
+  "dashboard.createReservation": "Luo varaus",
+  "dashboard.reservationCreated": "Varaus luotu onnistuneesti",
+  "booking.calculatePrice": "Laske hinta",
 
   // Onboarding
   "onboarding.tierStep": "Suunnitelma",
@@ -1927,6 +1939,10 @@ const sv: TranslationKeys = {
   "dashboard.roomDouble": "Dubbelrum",
   "dashboard.roomSuite": "Svit",
   "dashboard.roomDorm": "Sovsal",
+  "dashboard.newReservation": "Ny bokning",
+  "dashboard.createReservation": "Skapa bokning",
+  "dashboard.reservationCreated": "Bokningen har skapats",
+  "booking.calculatePrice": "Beräkna pris",
 
   // Onboarding
   "onboarding.tierStep": "Plan",
