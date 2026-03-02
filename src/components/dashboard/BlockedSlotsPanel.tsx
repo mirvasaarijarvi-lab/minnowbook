@@ -82,20 +82,25 @@ const BlockedSlotsPanel = () => {
   });
 
   const filteredResources = useMemo(() => {
-    return (resources ?? []).filter((r) => r.resource_type === form.resource_type);
+    const types = form.resource_type === "hotel" ? ["hotel", "guesthouse"] : [form.resource_type];
+    return (resources ?? []).filter((r) => types.includes(r.resource_type));
   }, [resources, form.resource_type]);
 
   // Resources available for the filter dropdown (based on filterType)
   const filterResources = useMemo(() => {
     if (filterType === "all") return resources ?? [];
-    return (resources ?? []).filter((r) => r.resource_type === filterType);
+    const types = filterType === "hotel" ? ["hotel", "guesthouse"] : [filterType];
+    return (resources ?? []).filter((r) => types.includes(r.resource_type));
   }, [resources, filterType]);
 
   // Filtered blocked slots for display
   const filteredSlots = useMemo(() => {
     if (!blockedSlots) return [];
     return blockedSlots.filter((slot) => {
-      if (filterType !== "all" && slot.resource_type !== filterType) return false;
+      if (filterType !== "all") {
+        const types = filterType === "hotel" ? ["hotel", "guesthouse"] : [filterType];
+        if (!types.includes(slot.resource_type)) return false;
+      }
       if (filterResourceId !== "all" && slot.resource_id !== filterResourceId) return false;
       return true;
     });
@@ -187,8 +192,7 @@ const BlockedSlotsPanel = () => {
   };
 
   const resourceTypeLabels: Record<string, string> = {
-    hotel: "Hotel",
-    guesthouse: "Guesthouse",
+    hotel: "Hotel / Guesthouse",
     restaurant: "Restaurant",
     venue: "Venue / Event Space",
   };

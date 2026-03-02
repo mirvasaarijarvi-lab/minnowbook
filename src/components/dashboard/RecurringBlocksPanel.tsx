@@ -33,8 +33,7 @@ interface RecurringBlock {
 const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 const resourceTypeLabels: Record<string, string> = {
-  hotel: "Hotel",
-  guesthouse: "Guesthouse",
+  hotel: "Hotel / Guesthouse",
   restaurant: "Restaurant",
   venue: "Venue / Event Space",
 };
@@ -80,7 +79,8 @@ const RecurringBlocksPanel = () => {
   });
 
   const filteredResources = useMemo(() => {
-    return (resources ?? []).filter((r) => r.resource_type === form.resource_type);
+    const types = form.resource_type === "hotel" ? ["hotel", "guesthouse"] : [form.resource_type];
+    return (resources ?? []).filter((r) => types.includes(r.resource_type));
   }, [resources, form.resource_type]);
 
   const toggleDay = (day: number) => {
