@@ -238,8 +238,8 @@ const ReservationList = () => {
                       <span className="flex items-center gap-1"><Mail className="h-3.5 w-3.5" />{r.guest_email}</span>
                       {r.guest_phone && <span className="flex items-center gap-1"><Phone className="h-3.5 w-3.5" />{r.guest_phone}</span>}
                       {r.guests_count && <span className="flex items-center gap-1"><User className="h-3.5 w-3.5" />{r.guests_count} {t("common.guests")}</span>}
-                      {(r.reservation_type === "guesthouse" || r.reservation_type === "hotel") && r.breakfast_included && (
-                        <span className="flex items-center gap-1 text-primary"><Coffee className="h-3.5 w-3.5" />{t("reports.breakfast" as any)}</span>
+                      {r.breakfast_included && (
+                        <Badge className="text-xs bg-amber-100 text-amber-800 border-amber-200 gap-1"><Coffee className="h-3 w-3" />{t("reports.breakfast" as any)}</Badge>
                       )}
                     </div>
 
