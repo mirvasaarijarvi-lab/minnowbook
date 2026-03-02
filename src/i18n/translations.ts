@@ -60,6 +60,7 @@ type TranslationKeys = {
   "reports.yes": string;
   "reports.no": string;
   "reports.grandTotal": string;
+  "reports.totalPrice": string;
   "reports.totalRevenue": string;
   "reports.invoicing": string;
   "reports.details": string;
@@ -603,6 +604,7 @@ const en: TranslationKeys = {
   "reports.yes": "Yes",
   "reports.no": "No",
   "reports.grandTotal": "Grand Total",
+  "reports.totalPrice": "Total",
   "reports.totalRevenue": "Total Revenue",
   "reports.invoicing": "Invoicing",
   "reports.details": "Detailed list",
@@ -1131,6 +1133,7 @@ const fi: TranslationKeys = {
   "reports.yes": "Kyllä",
   "reports.no": "Ei",
   "reports.grandTotal": "Kokonaissumma",
+  "reports.totalPrice": "Yhteensä",
   "reports.totalRevenue": "Kokonaistulo",
   "reports.invoicing": "Laskutus",
   "reports.details": "Yksityiskohtainen lista",
@@ -1658,6 +1661,7 @@ const sv: TranslationKeys = {
   "reports.yes": "Ja",
   "reports.no": "Nej",
   "reports.grandTotal": "Totalsumma",
+  "reports.totalPrice": "Totalt",
   "reports.totalRevenue": "Total intäkt",
   "reports.invoicing": "Fakturering",
   "reports.details": "Detaljerad lista",
