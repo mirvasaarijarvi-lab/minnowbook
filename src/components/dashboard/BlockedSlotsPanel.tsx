@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import RecurringBlocksPanel from "./RecurringBlocksPanel";
 import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/hooks/useTenant";
 import { Card, CardContent } from "@/components/ui/card";
@@ -497,6 +498,11 @@ const BlockedSlotsPanel = () => {
           ))}
         </div>
       )}
+
+      {/* Recurring Blocks Section */}
+      <div className="border-t border-border pt-6 mt-6">
+        <RecurringBlocksPanel />
+      </div>
     </div>
   );
 };
