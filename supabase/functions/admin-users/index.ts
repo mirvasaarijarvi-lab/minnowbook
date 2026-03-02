@@ -6,6 +6,56 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+// --- Input validation helpers ---
+const MAX_EMAIL_LENGTH = 255;
+const MAX_NAME_LENGTH = 100;
+const MAX_PASSWORD_LENGTH = 128;
+const MIN_PASSWORD_LENGTH = 12;
+const VALID_ROLES = ["owner", "admin", "staff"];
+
+function validateEmail(email: string): string {
+  if (!email || typeof email !== "string") throw new Error("Email is required");
+  const trimmed = email.trim().toLowerCase();
+  if (trimmed.length > MAX_EMAIL_LENGTH) throw new Error("Email too long");
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(trimmed)) throw new Error("Invalid email format");
+  return trimmed;
+}
+
+function validatePassword(password: string): string {
+  if (!password || typeof password !== "string") throw new Error("Password is required");
+  if (password.length < MIN_PASSWORD_LENGTH) throw new Error(`Password must be at least ${MIN_PASSWORD_LENGTH} characters`);
+  if (password.length > MAX_PASSWORD_LENGTH) throw new Error("Password too long");
+  if (!/[A-Z]/.test(password)) throw new Error("Password must contain an uppercase letter");
+  if (!/[a-z]/.test(password)) throw new Error("Password must contain a lowercase letter");
+  if (!/[0-9]/.test(password)) throw new Error("Password must contain a number");
+  if (!/[^A-Za-z0-9]/.test(password)) throw new Error("Password must contain a special character");
+  return password;
+}
+
+function validateDisplayName(name: string | undefined | null): string | null {
+  if (!name) return null;
+  if (typeof name !== "string") throw new Error("Invalid display name");
+  const trimmed = name.trim();
+  if (trimmed.length > MAX_NAME_LENGTH) throw new Error("Display name too long");
+  return trimmed || null;
+}
+
+function validateRole(role: string): string {
+  if (!role || typeof role !== "string") throw new Error("Role is required");
+  // Allow system roles and custom role keys (alphanumeric + underscore/hyphen, max 50 chars)
+  if (VALID_ROLES.includes(role)) return role;
+  if (!/^[a-zA-Z0-9_-]{1,50}$/.test(role)) throw new Error("Invalid role format");
+  return role;
+}
+
+function validateUuid(value: string, fieldName: string): string {
+  if (!value || typeof value !== "string") throw new Error(`${fieldName} is required`);
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!uuidRegex.test(value)) throw new Error(`Invalid ${fieldName} format`);
+  return value;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -39,7 +89,12 @@ Deno.serve(async (req) => {
     }
 
     const tenantId = callerRole.tenant_id;
-    const { action, ...params } = await req.json();
+    const body = await req.json();
+    const action = body?.action;
+
+    if (typeof action !== "string" || !action) {
+      throw new Error("Action is required");
+    }
 
     if (action === "list") {
       const { data: users, error } = await adminClient
@@ -64,8 +119,11 @@ Deno.serve(async (req) => {
     }
 
     if (action === "create") {
-      const { email, password, displayName, role, customRoleKey } = params;
-      if (!email || !password) throw new Error("Email and password required");
+      const email = validateEmail(body.email);
+      const password = validatePassword(body.password);
+      const displayName = validateDisplayName(body.displayName);
+      const role = validateRole(body.role || "staff");
+      const customRoleKey = body.customRoleKey ? validateRole(body.customRoleKey) : null;
 
       // Determine base role: custom roles use 'staff' as base
       const baseRole = (role === "owner" || role === "admin") ? role : "staff";
@@ -84,7 +142,7 @@ Deno.serve(async (req) => {
         user_id: newUser.user!.id,
         role: baseRole,
         custom_role_key: customRoleKey || null,
-        display_name: displayName || null,
+        display_name: displayName,
         is_approved: true,
       });
       if (tuError) {
@@ -98,12 +156,12 @@ Deno.serve(async (req) => {
     }
 
     if (action === "update_role") {
-      const { userId, role, customRoleKey } = params;
-      if (!userId || !role) throw new Error("userId and role required");
+      const userId = validateUuid(body.userId, "userId");
+      const role = validateRole(body.role);
+      const customRoleKey = body.customRoleKey ? validateRole(body.customRoleKey) : null;
 
       // System roles (owner, admin, staff) clear customRoleKey
-      // Custom roles set base role to 'staff' and store customRoleKey
-      const isSystemRole = ["owner", "admin", "staff"].includes(role);
+      const isSystemRole = VALID_ROLES.includes(role);
       const baseRole = isSystemRole ? role : "staff";
       const effectiveCustomKey = isSystemRole ? null : role;
 
@@ -120,8 +178,8 @@ Deno.serve(async (req) => {
     }
 
     if (action === "change_password") {
-      const { userId, newPassword } = params;
-      if (!userId || !newPassword) throw new Error("userId and newPassword required");
+      const userId = validateUuid(body.userId, "userId");
+      const newPassword = validatePassword(body.newPassword);
 
       const { data: tu } = await adminClient
         .from("tenant_users")
@@ -142,8 +200,7 @@ Deno.serve(async (req) => {
     }
 
     if (action === "delete") {
-      const { userId } = params;
-      if (!userId) throw new Error("userId required");
+      const userId = validateUuid(body.userId, "userId");
       if (userId === callingUser.id) throw new Error("Cannot delete yourself");
 
       const { error: tuError } = await adminClient
@@ -158,7 +215,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    throw new Error(`Unknown action: ${action}`);
+    throw new Error("Unknown action");
   } catch (error: any) {
     return new Response(JSON.stringify({ error: error.message }), {
       status: 400,
