@@ -2,3 +2,6 @@ project_id = "lsgznskkxadplwnxplhd"
 
 [functions.support-chat]
 verify_jwt = false
+
+[functions.public-booking]
+verify_jwt = false

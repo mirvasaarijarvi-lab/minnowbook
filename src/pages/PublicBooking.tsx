@@ -458,7 +458,7 @@ const PublicBooking = () => {
       const isAccommodation = form.reservation_type === "hotel" || form.reservation_type === "guesthouse";
       const isVenue = form.reservation_type === "venue";
 
-      const { error } = await supabase.from("reservations").insert({
+      const payload: Record<string, unknown> = {
         tenant_id: tenant.id,
         guest_name: parsed.guest_name,
         guest_email: parsed.guest_email,
@@ -468,26 +468,28 @@ const PublicBooking = () => {
         date: parsed.date,
         start_time: parsed.start_time ?? null,
         special_requests: parsed.special_requests ?? null,
-        status: "pending",
-        // Accommodation-specific
-        ...(isAccommodation && {
-          check_out_date: form.check_out_date || null,
-          room_type: form.room_type || null,
-          breakfast_included: form.breakfast_included,
-        }),
-        // Venue-specific
-        ...(isVenue && {
-          event_type: form.event_type || null,
-          estimated_guests: form.estimated_guests ? parseInt(form.estimated_guests) : null,
-          catering_needed: form.catering_needed,
-        }),
-        // Restaurant-specific
-        ...(parsed.reservation_type === "restaurant" && {
-          pricing_type: form.pricing_type || null,
-          price_eur: form.pricing_type === "fixed_price" && form.fixed_price ? parseFloat(form.fixed_price) : null,
-        }),
-      } as any);
+      };
+
+      if (isAccommodation) {
+        payload.check_out_date = form.check_out_date || null;
+        payload.room_type = form.room_type || null;
+        payload.breakfast_included = form.breakfast_included;
+      }
+      if (isVenue) {
+        payload.event_type = form.event_type || null;
+        payload.estimated_guests = form.estimated_guests ? parseInt(form.estimated_guests) : null;
+        payload.catering_needed = form.catering_needed;
+      }
+      if (parsed.reservation_type === "restaurant") {
+        payload.pricing_type = form.pricing_type || null;
+        payload.fixed_price = form.pricing_type === "fixed_price" && form.fixed_price ? parseFloat(form.fixed_price) : null;
+      }
+
+      const { data, error } = await supabase.functions.invoke("public-booking", {
+        body: payload,
+      });
       if (error) throw error;
+      if (data?.error) throw new Error(data.error);
     },
     onSuccess: () => setSubmitted(true),
     onError: (err) => {
