@@ -2,7 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/hooks/useTenant";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CalendarDays, CheckCircle, Clock, Users } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { CalendarDays, CheckCircle, Clock, Users, ExternalLink } from "lucide-react";
 import { format } from "date-fns";
 import { useT } from "@/contexts/I18nContext";
 import DashboardTooltip from "./DashboardTooltip";
@@ -42,11 +43,21 @@ const DashboardOverview = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-serif font-bold text-foreground">
-          {tenant?.name ? `${t("dashboard.welcome")}, ${tenant.name}` : t("nav.overview")}
-        </h2>
-        <p className="text-muted-foreground text-sm">{format(new Date(), "EEEE, MMMM d, yyyy")}</p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-serif font-bold text-foreground">
+            {tenant?.name ? `${t("dashboard.welcome")}, ${tenant.name}` : t("nav.overview")}
+          </h2>
+          <p className="text-muted-foreground text-sm">{format(new Date(), "EEEE, MMMM d, yyyy")}</p>
+        </div>
+        {tenant?.slug && (
+          <Button variant="outline" size="sm" className="gap-1.5 shrink-0" asChild>
+            <a href={`/book/${tenant.slug}`} target="_blank" rel="noopener noreferrer">
+              <ExternalLink className="h-3.5 w-3.5" />
+              {t("dashboard.bookingLink")}
+            </a>
+          </Button>
+        )}
       </div>
 
       <div data-tour="stats-grid" className="grid gap-3 grid-cols-2 lg:grid-cols-4">
