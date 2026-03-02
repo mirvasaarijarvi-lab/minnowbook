@@ -34,9 +34,12 @@ const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Frid
 
 const resourceTypeLabels: Record<string, string> = {
   hotel: "Hotel / Guesthouse",
+  guesthouse: "Hotel / Guesthouse",
   restaurant: "Restaurant",
   venue: "Venue / Event Space",
 };
+
+const selectableTypes = { hotel: "Hotel / Guesthouse", restaurant: "Restaurant", venue: "Venue / Event Space" };
 
 const RecurringBlocksPanel = () => {
   const { tenantId } = useTenant();
@@ -171,15 +174,16 @@ const RecurringBlocksPanel = () => {
               <div>
                 <Label>Resource Type</Label>
                 <Select value={form.resource_type} onValueChange={(v) => {
-                  const hasMultipleResources = (resources ?? []).filter((r) => r.resource_type === v).length > 1;
+                  const types = v === "hotel" ? ["hotel", "guesthouse"] : [v];
+                  const hasMultipleResources = (resources ?? []).filter((r) => types.includes(r.resource_type)).length > 1;
                   setForm({ ...form, resource_type: v, resource_id: "" });
-                  if (v === "hotel" || v === "guesthouse" || v === "venue") {
+                  if (v === "hotel" || v === "venue") {
                     setBlockSpecificResource(hasMultipleResources);
                   }
                 }}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    {Object.entries(resourceTypeLabels).map(([key, label]) => (
+                    {Object.entries(selectableTypes).map(([key, label]) => (
                       <SelectItem key={key} value={key}>{label}</SelectItem>
                     ))}
                   </SelectContent>
