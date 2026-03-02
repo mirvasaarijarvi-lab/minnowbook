@@ -16,6 +16,7 @@ import { useT } from "@/contexts/I18nContext";
 import DashboardTooltip from "./DashboardTooltip";
 import ResourceImageGallery from "./ResourceImageGallery";
 import ResourceCarousel from "@/components/ResourceCarousel";
+import BlockedSlotsPanel from "./BlockedSlotsPanel";
 import { usePermissions } from "@/hooks/usePermissions";
 import { PERM_RESOURCES_MANAGE } from "@/lib/permissions";
 
@@ -389,6 +390,9 @@ const ResourceManagement = () => {
           })}
         </div>
       )}
+
+      {/* Blocked Slots */}
+      {canManage && <BlockedSlotsPanel />}
     </div>
   );
 };
