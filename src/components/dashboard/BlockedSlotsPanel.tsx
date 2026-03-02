@@ -289,7 +289,14 @@ const BlockedSlotsPanel = () => {
               {/* Resource type */}
               <div>
                 <Label>Resource Type</Label>
-                <Select value={form.resource_type} onValueChange={(v) => setForm({ ...form, resource_type: v, resource_id: "" })}>
+                <Select value={form.resource_type} onValueChange={(v) => {
+                  const hasMultipleResources = (resources ?? []).filter((r) => r.resource_type === v).length > 1;
+                  setForm({ ...form, resource_type: v, resource_id: "" });
+                  // Auto-enable specific resource for types that typically have multiple rooms/spaces
+                  if (v === "hotel" || v === "guesthouse" || v === "venue") {
+                    setBlockSpecificResource(hasMultipleResources);
+                  }
+                }}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {Object.entries(resourceTypeLabels).map(([key, label]) => (
@@ -299,26 +306,30 @@ const BlockedSlotsPanel = () => {
                 </Select>
               </div>
 
-              {/* Specific resource toggle */}
-              <div className="flex items-center justify-between">
-                <Label>Block a specific resource</Label>
-                <Switch checked={blockSpecificResource} onCheckedChange={setBlockSpecificResource} />
-              </div>
-
-              {blockSpecificResource && (
-                <div>
-                  <Label>Resource</Label>
-                  <Select value={form.resource_id} onValueChange={(v) => setForm({ ...form, resource_id: v })}>
-                    <SelectTrigger><SelectValue placeholder="Select resource..." /></SelectTrigger>
-                    <SelectContent>
-                      {filteredResources.map((r) => (
-                        <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
-                      ))}
-                      {filteredResources.length === 0 && (
-                        <div className="px-3 py-2 text-sm text-muted-foreground">No resources of this type</div>
-                      )}
-                    </SelectContent>
-                  </Select>
+              {/* Specific resource selector */}
+              {filteredResources.length > 0 && (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label className="flex items-center gap-1.5">
+                      Block specific {form.resource_type === "restaurant" ? "table/area" : form.resource_type === "venue" ? "event space" : "room"}
+                    </Label>
+                    <Switch checked={blockSpecificResource} onCheckedChange={(checked) => { setBlockSpecificResource(checked); if (!checked) setForm({ ...form, resource_id: "" }); }} />
+                  </div>
+                  {!blockSpecificResource && (
+                    <p className="text-xs text-muted-foreground">
+                      All {filteredResources.length} {form.resource_type === "restaurant" ? "tables/areas" : form.resource_type === "venue" ? "event spaces" : "rooms"} will be blocked.
+                    </p>
+                  )}
+                  {blockSpecificResource && (
+                    <Select value={form.resource_id} onValueChange={(v) => setForm({ ...form, resource_id: v })}>
+                      <SelectTrigger><SelectValue placeholder={`Select ${form.resource_type === "restaurant" ? "table/area" : form.resource_type === "venue" ? "event space" : "room"}...`} /></SelectTrigger>
+                      <SelectContent>
+                        {filteredResources.map((r) => (
+                          <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
                 </div>
               )}
 
@@ -346,13 +357,31 @@ const BlockedSlotsPanel = () => {
                 <p className="text-xs text-muted-foreground mt-1">Click once for a single day, or click two dates to select a range.</p>
               </div>
 
-              {/* Time range toggle */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-muted-foreground" />
-                  <Label>Block specific hours only</Label>
+              {/* Duration: Full day vs Specific hours */}
+              <div className="space-y-2">
+                <Label>Duration</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  <Button
+                    type="button"
+                    variant={!useTimeRange ? "default" : "outline"}
+                    size="sm"
+                    className="gap-1.5"
+                    onClick={() => setUseTimeRange(false)}
+                  >
+                    <Ban className="h-3.5 w-3.5" />
+                    Full day
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={useTimeRange ? "default" : "outline"}
+                    size="sm"
+                    className="gap-1.5"
+                    onClick={() => setUseTimeRange(true)}
+                  >
+                    <Clock className="h-3.5 w-3.5" />
+                    Specific hours
+                  </Button>
                 </div>
-                <Switch checked={useTimeRange} onCheckedChange={setUseTimeRange} />
               </div>
 
               {useTimeRange && (
@@ -365,6 +394,9 @@ const BlockedSlotsPanel = () => {
                     <Label>End Time</Label>
                     <Input type="time" value={form.end_time} onChange={(e) => setForm({ ...form, end_time: e.target.value })} />
                   </div>
+                  <p className="col-span-2 text-xs text-muted-foreground">
+                    Only the selected hours will be blocked. Bookings outside this window remain available.
+                  </p>
                 </div>
               )}
 
