@@ -277,9 +277,11 @@ const ReservationList = () => {
                     </div>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    {r.price_eur != null && (
+                    {r.reservation_type === "restaurant" && (r as any).pricing_type === "menu" ? (
+                      <span className="text-sm text-muted-foreground whitespace-nowrap">—</span>
+                    ) : r.price_eur != null ? (
                       <span className="text-sm font-semibold text-foreground whitespace-nowrap">€{Number(r.price_eur).toFixed(2)}</span>
-                    )}
+                    ) : null}
                     {(canEdit || canDelete) && (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>

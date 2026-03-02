@@ -1,0 +1,1 @@
+ALTER TABLE public.reservations ADD COLUMN pricing_type text DEFAULT NULL;
