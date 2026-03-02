@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import DOMPurify from "dompurify";
 import { useT, useLanguage } from "@/contexts/I18nContext";
 import { format } from "date-fns";
 import { fi as fiFns, enUS, sv as svFns, type Locale } from "date-fns/locale";
@@ -250,7 +251,7 @@ const ConfirmationEmailPreview = ({
           {customMessage && (
             <div
               className="text-sm text-gray-700 leading-relaxed"
-              dangerouslySetInnerHTML={{ __html: customMessage }}
+              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(customMessage, { ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'a', 'p', 'br', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'span', 'div'], ALLOWED_ATTR: ['href', 'target', 'style', 'class'] }) }}
             />
           )}
 
