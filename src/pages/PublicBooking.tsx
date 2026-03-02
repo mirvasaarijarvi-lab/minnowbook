@@ -289,6 +289,22 @@ const PublicBooking = () => {
     enabled: !!tenant?.id && !!form.reservation_type,
   });
 
+  // Fetch blocked slots for this tenant
+  const { data: blockedSlots } = useQuery({
+    queryKey: ["public-blocked-slots", tenant?.id],
+    queryFn: async () => {
+      if (!tenant?.id) return [];
+      const { data, error } = await supabase
+        .from("blocked_slots")
+        .select("*")
+        .eq("tenant_id", tenant.id)
+        .gte("date", format(new Date(), "yyyy-MM-dd"));
+      if (error) throw error;
+      return data ?? [];
+    },
+    enabled: !!tenant?.id,
+  });
+
   // Generate time slots from opening hours for selected day
   const timeSlots = useMemo(() => {
     if (!selectedDate || !openingHours?.length) return [];
@@ -308,9 +324,55 @@ const PublicBooking = () => {
     return slots;
   }, [selectedDate, openingHours]);
 
+  // Check if a date is fully blocked for the selected resource type (and optionally specific resource)
+  const isDateFullyBlocked = useCallback((date: Date) => {
+    if (!blockedSlots?.length || !form.reservation_type) return false;
+    const dateStr = format(date, "yyyy-MM-dd");
+    // Find blocks matching this date and resource type
+    const matchingBlocks = blockedSlots.filter((b: any) => {
+      if (b.date !== dateStr) return false;
+      if (b.resource_type !== form.reservation_type) return false;
+      // If block is for a specific resource and user selected a different one, skip
+      if (b.resource_id && form.resource_id && b.resource_id !== form.resource_id) return false;
+      // Full-day block (no time range) for the entire type or the selected resource
+      if (!b.start_time && !b.end_time) {
+        // Block applies to entire type if no resource_id, or to the specific resource
+        if (!b.resource_id) return true; // blocks everything of this type
+        if (!form.resource_id || b.resource_id === form.resource_id) return true;
+      }
+      return false;
+    });
+    return matchingBlocks.length > 0;
+  }, [blockedSlots, form.reservation_type, form.resource_id]);
+
+  // Get blocked time ranges for a specific date
+  const getBlockedTimeRanges = useCallback((date: Date) => {
+    if (!blockedSlots?.length || !form.reservation_type) return [];
+    const dateStr = format(date, "yyyy-MM-dd");
+    return blockedSlots.filter((b: any) => {
+      if (b.date !== dateStr) return false;
+      if (b.resource_type !== form.reservation_type) return false;
+      if (b.resource_id && form.resource_id && b.resource_id !== form.resource_id) return false;
+      if (!b.resource_id || !form.resource_id || b.resource_id === form.resource_id) {
+        return b.start_time && b.end_time;
+      }
+      return false;
+    });
+  }, [blockedSlots, form.reservation_type, form.resource_id]);
+
+  // Check if a specific time slot falls within any blocked range
+  const isTimeSlotBlocked = useCallback((time: string, date: Date) => {
+    const ranges = getBlockedTimeRanges(date);
+    return ranges.some((b: any) => {
+      const slotTime = time;
+      return slotTime >= b.start_time.slice(0, 5) && slotTime < b.end_time.slice(0, 5);
+    });
+  }, [getBlockedTimeRanges]);
+
   // Check if a date's day of week is closed
   const isDateDisabled = (date: Date) => {
     if (date < new Date(new Date().setHours(0, 0, 0, 0))) return true;
+    if (isDateFullyBlocked(date)) return true;
     if (!openingHours?.length) return false;
     const dayOfWeek = date.getDay();
     const dayHours = openingHours.find((h) => h.day_of_week === dayOfWeek);
@@ -382,6 +444,18 @@ const PublicBooking = () => {
       // Form submitted too quickly - likely a bot
       toast.error(t("booking.submitError"));
       return;
+    }
+
+    // Block check: prevent booking on blocked dates/times
+    if (selectedDate) {
+      if (isDateFullyBlocked(selectedDate)) {
+        toast.error("This date is not available for booking.");
+        return;
+      }
+      if (form.start_time && isTimeSlotBlocked(form.start_time, selectedDate)) {
+        toast.error("This time slot is not available for booking.");
+        return;
+      }
     }
 
     try {
@@ -809,21 +883,29 @@ const PublicBooking = () => {
                         {t("booking.selectTime")}
                       </Label>
                       <div className="flex flex-wrap gap-2">
-                        {timeSlots.map((slot) => (
+                        {timeSlots.map((slot) => {
+                          const blocked = selectedDate ? isTimeSlotBlocked(slot, selectedDate) : false;
+                          return (
                           <button
                             key={slot}
                             type="button"
-                            onClick={() => updateField("start_time", slot)}
-                            className="px-3 py-1.5 text-sm rounded-md border transition-all"
+                            onClick={() => !blocked && updateField("start_time", slot)}
+                            disabled={blocked}
+                            className={cn(
+                              "px-3 py-1.5 text-sm rounded-md border transition-all",
+                              blocked && "opacity-40 cursor-not-allowed line-through"
+                            )}
                             style={{
-                              borderColor: form.start_time === slot ? accentColor : "#e5e5e5",
-                              backgroundColor: form.start_time === slot ? `${accentColor}15` : "transparent",
-                              color: primaryColor,
+                              borderColor: blocked ? "#ef4444" : form.start_time === slot ? accentColor : "#e5e5e5",
+                              backgroundColor: blocked ? "#fef2f2" : form.start_time === slot ? `${accentColor}15` : "transparent",
+                              color: blocked ? "#991b1b" : primaryColor,
                             }}
+                            title={blocked ? "Blocked" : undefined}
                           >
                             {slot}
                           </button>
-                        ))}
+                          );
+                        })}
                       </div>
                     </div>
                   )}
