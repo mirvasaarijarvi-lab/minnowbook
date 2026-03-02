@@ -74,7 +74,61 @@ serve(async (req) => {
     // AI chat is available to all authenticated users
 
 
-    const { messages } = await req.json();
+    const body = await req.json();
+
+    // --- Input validation ---
+    const { messages } = body;
+
+    if (!Array.isArray(messages)) {
+      return new Response(JSON.stringify({ error: "messages must be an array" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const MAX_MESSAGES = 50;
+    const MAX_MESSAGE_LENGTH = 4000;
+    const VALID_ROLES = ["user", "assistant"];
+
+    if (messages.length === 0 || messages.length > MAX_MESSAGES) {
+      return new Response(JSON.stringify({ error: `messages must contain 1-${MAX_MESSAGES} items` }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    for (const msg of messages) {
+      if (!msg || typeof msg !== "object") {
+        return new Response(JSON.stringify({ error: "Each message must be an object" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (!VALID_ROLES.includes(msg.role)) {
+        return new Response(JSON.stringify({ error: `Invalid message role. Allowed: ${VALID_ROLES.join(", ")}` }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (typeof msg.content !== "string" || msg.content.trim().length === 0) {
+        return new Response(JSON.stringify({ error: "Message content must be a non-empty string" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (msg.content.length > MAX_MESSAGE_LENGTH) {
+        return new Response(JSON.stringify({ error: `Message content must be at most ${MAX_MESSAGE_LENGTH} characters` }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
+
+    // Sanitize messages to only pass role + content
+    const sanitizedMessages = messages.map((m: { role: string; content: string }) => ({
+      role: m.role,
+      content: m.content.trim(),
+    }));
 
     const response = await fetch(
       "https://ai.gateway.lovable.dev/v1/chat/completions",
@@ -100,7 +154,7 @@ serve(async (req) => {
 Keep answers concise, friendly, and actionable. Use markdown formatting for clarity.
 If you don't know something specific to their account, suggest they contact their dedicated account manager.`,
             },
-            ...messages,
+            ...sanitizedMessages,
           ],
           stream: true,
         }),
