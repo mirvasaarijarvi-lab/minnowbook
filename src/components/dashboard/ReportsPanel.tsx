@@ -344,7 +344,8 @@ const ReportsPanel = () => {
     });
     rows.push(["", "", "", "", "", "", "", "", t("reports.grandTotal"), grandTotal.toFixed(2), ""]);
 
-    const csv = [headers, ...rows].map((row) => row.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(";")).join("\n");
+    const sanitize = (v: string) => String(v).replace(/"/g, '""').replace(/[\r\n]+/g, " ");
+    const csv = "sep=;\n" + [headers, ...rows].map((row) => row.map((c) => `"${sanitize(c)}"`).join(";")).join("\n");
     const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
