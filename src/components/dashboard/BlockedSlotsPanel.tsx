@@ -37,11 +37,14 @@ const BlockedSlotsPanel = () => {
   const { tenantId } = useTenant();
   const queryClient = useQueryClient();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
   const [useTimeRange, setUseTimeRange] = useState(false);
   const [blockSpecificResource, setBlockSpecificResource] = useState(false);
   const [datePickerOpen, setDatePickerOpen] = useState(false);
+  const [bulkDatePickerOpen, setBulkDatePickerOpen] = useState(false);
 
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
+  const [bulkDeleteRange, setBulkDeleteRange] = useState<DateRange | undefined>();
   const [form, setForm] = useState({
     start_time: "",
     end_time: "",
@@ -125,6 +128,38 @@ const BlockedSlotsPanel = () => {
     },
   });
 
+  const bulkDeleteMutation = useMutation({
+    mutationFn: async () => {
+      if (!tenantId || !bulkDeleteRange?.from) throw new Error("Select a date range");
+      const from = format(bulkDeleteRange.from, "yyyy-MM-dd");
+      const to = format(bulkDeleteRange.to ?? bulkDeleteRange.from, "yyyy-MM-dd");
+      const { error } = await supabase
+        .from("blocked_slots")
+        .delete()
+        .eq("tenant_id", tenantId)
+        .gte("date", from)
+        .lte("date", to);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["blocked-slots"] });
+      setBulkDeleteOpen(false);
+      setBulkDeleteRange(undefined);
+      toast({ title: "Blocks removed" });
+    },
+    onError: (err: any) => {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    },
+  });
+
+  // Count how many existing blocks fall in the bulk delete range
+  const bulkDeleteCount = useMemo(() => {
+    if (!bulkDeleteRange?.from || !blockedSlots?.length) return 0;
+    const from = format(bulkDeleteRange.from, "yyyy-MM-dd");
+    const to = format(bulkDeleteRange.to ?? bulkDeleteRange.from, "yyyy-MM-dd");
+    return blockedSlots.filter((s) => s.date >= from && s.date <= to).length;
+  }, [bulkDeleteRange, blockedSlots]);
+
   const resetForm = () => {
     setDateRange(undefined);
     setForm({ start_time: "", end_time: "", resource_type: "hotel", resource_id: "", reason: "" });
@@ -147,6 +182,14 @@ const BlockedSlotsPanel = () => {
     return `${format(dateRange.from, "MMM d")} – ${format(dateRange.to, "MMM d, yyyy")}`;
   }, [dateRange]);
 
+  const bulkDeleteLabel = useMemo(() => {
+    if (!bulkDeleteRange?.from) return "Select date range to clear";
+    if (!bulkDeleteRange.to || format(bulkDeleteRange.from, "yyyy-MM-dd") === format(bulkDeleteRange.to, "yyyy-MM-dd")) {
+      return format(bulkDeleteRange.from, "PPP");
+    }
+    return `${format(bulkDeleteRange.from, "MMM d")} – ${format(bulkDeleteRange.to, "MMM d, yyyy")}`;
+  }, [bulkDeleteRange]);
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -157,12 +200,68 @@ const BlockedSlotsPanel = () => {
           </h3>
           <DashboardTooltip text="Block entire resource types or specific resources on chosen dates or date ranges. Optionally restrict to specific hours." />
         </div>
-        <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) resetForm(); }}>
-          <DialogTrigger asChild>
-            <Button size="sm" className="gap-1.5">
-              <Plus className="h-4 w-4" /> Add Block
-            </Button>
-          </DialogTrigger>
+        <div className="flex items-center gap-2">
+          {/* Bulk delete */}
+          <Dialog open={bulkDeleteOpen} onOpenChange={(open) => { setBulkDeleteOpen(open); if (!open) setBulkDeleteRange(undefined); }}>
+            <DialogTrigger asChild>
+              <Button size="sm" variant="outline" className="gap-1.5 text-destructive border-destructive/30 hover:bg-destructive/10">
+                <Trash2 className="h-4 w-4" /> Clear Range
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle className="font-serif">Remove Blocks by Date Range</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 pt-2">
+                <div>
+                  <Label>Date Range</Label>
+                  <Popover open={bulkDatePickerOpen} onOpenChange={setBulkDatePickerOpen}>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !bulkDeleteRange?.from && "text-muted-foreground")}>
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {bulkDeleteLabel}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="range"
+                        selected={bulkDeleteRange}
+                        onSelect={setBulkDeleteRange}
+                        numberOfMonths={2}
+                        className={cn("p-3 pointer-events-auto")}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  <p className="text-xs text-muted-foreground mt-1">All blocks within this range will be removed.</p>
+                </div>
+
+                {bulkDeleteRange?.from && (
+                  <p className="text-sm font-medium">
+                    {bulkDeleteCount === 0
+                      ? "No blocks found in this range."
+                      : `${bulkDeleteCount} block${bulkDeleteCount > 1 ? "s" : ""} will be removed.`}
+                  </p>
+                )}
+
+                <Button
+                  variant="destructive"
+                  className="w-full"
+                  onClick={() => bulkDeleteMutation.mutate()}
+                  disabled={!bulkDeleteRange?.from || bulkDeleteCount === 0 || bulkDeleteMutation.isPending}
+                >
+                  {bulkDeleteMutation.isPending ? "Removing..." : `Remove ${bulkDeleteCount} block${bulkDeleteCount !== 1 ? "s" : ""}`}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Add block */}
+          <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) resetForm(); }}>
+            <DialogTrigger asChild>
+              <Button size="sm" className="gap-1.5">
+                <Plus className="h-4 w-4" /> Add Block
+              </Button>
+            </DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle className="font-serif">Block Dates / Times</DialogTitle>
@@ -268,6 +367,7 @@ const BlockedSlotsPanel = () => {
             </div>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       {/* List of blocked slots */}
