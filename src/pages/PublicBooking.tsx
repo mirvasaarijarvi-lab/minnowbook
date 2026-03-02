@@ -305,6 +305,22 @@ const PublicBooking = () => {
     enabled: !!tenant?.id,
   });
 
+  // Fetch recurring blocked slots
+  const { data: recurringBlocks } = useQuery({
+    queryKey: ["public-recurring-blocks", tenant?.id],
+    queryFn: async () => {
+      if (!tenant?.id) return [];
+      const { data, error } = await supabase
+        .from("recurring_blocked_slots")
+        .select("*")
+        .eq("tenant_id", tenant.id)
+        .eq("is_active", true);
+      if (error) throw error;
+      return data ?? [];
+    },
+    enabled: !!tenant?.id,
+  });
+
   // Generate time slots from opening hours for selected day
   const timeSlots = useMemo(() => {
     if (!selectedDate || !openingHours?.length) return [];
@@ -326,39 +342,80 @@ const PublicBooking = () => {
 
   // Check if a date is fully blocked for the selected resource type (and optionally specific resource)
   const isDateFullyBlocked = useCallback((date: Date) => {
-    if (!blockedSlots?.length || !form.reservation_type) return false;
+    if (!form.reservation_type) return false;
     const dateStr = format(date, "yyyy-MM-dd");
-    // Find blocks matching this date and resource type
-    const matchingBlocks = blockedSlots.filter((b: any) => {
-      if (b.date !== dateStr) return false;
-      if (b.resource_type !== form.reservation_type) return false;
-      // If block is for a specific resource and user selected a different one, skip
-      if (b.resource_id && form.resource_id && b.resource_id !== form.resource_id) return false;
-      // Full-day block (no time range) for the entire type or the selected resource
-      if (!b.start_time && !b.end_time) {
-        // Block applies to entire type if no resource_id, or to the specific resource
-        if (!b.resource_id) return true; // blocks everything of this type
-        if (!form.resource_id || b.resource_id === form.resource_id) return true;
-      }
-      return false;
-    });
-    return matchingBlocks.length > 0;
-  }, [blockedSlots, form.reservation_type, form.resource_id]);
+    const dayOfWeek = date.getDay();
 
-  // Get blocked time ranges for a specific date
+    // Check one-off blocked slots
+    if (blockedSlots?.length) {
+      const matchingBlocks = blockedSlots.filter((b: any) => {
+        if (b.date !== dateStr) return false;
+        if (b.resource_type !== form.reservation_type) return false;
+        if (b.resource_id && form.resource_id && b.resource_id !== form.resource_id) return false;
+        if (!b.start_time && !b.end_time) {
+          if (!b.resource_id) return true;
+          if (!form.resource_id || b.resource_id === form.resource_id) return true;
+        }
+        return false;
+      });
+      if (matchingBlocks.length > 0) return true;
+    }
+
+    // Check recurring blocked slots
+    if (recurringBlocks?.length) {
+      const matchingRecurring = recurringBlocks.filter((b: any) => {
+        if (b.day_of_week !== dayOfWeek) return false;
+        if (b.resource_type !== form.reservation_type) return false;
+        if (b.resource_id && form.resource_id && b.resource_id !== form.resource_id) return false;
+        if (!b.start_time && !b.end_time) {
+          if (!b.resource_id) return true;
+          if (!form.resource_id || b.resource_id === form.resource_id) return true;
+        }
+        return false;
+      });
+      if (matchingRecurring.length > 0) return true;
+    }
+
+    return false;
+  }, [blockedSlots, recurringBlocks, form.reservation_type, form.resource_id]);
+
+  // Get blocked time ranges for a specific date (one-off + recurring)
   const getBlockedTimeRanges = useCallback((date: Date) => {
-    if (!blockedSlots?.length || !form.reservation_type) return [];
+    if (!form.reservation_type) return [];
     const dateStr = format(date, "yyyy-MM-dd");
-    return blockedSlots.filter((b: any) => {
-      if (b.date !== dateStr) return false;
-      if (b.resource_type !== form.reservation_type) return false;
-      if (b.resource_id && form.resource_id && b.resource_id !== form.resource_id) return false;
-      if (!b.resource_id || !form.resource_id || b.resource_id === form.resource_id) {
-        return b.start_time && b.end_time;
-      }
-      return false;
-    });
-  }, [blockedSlots, form.reservation_type, form.resource_id]);
+    const dayOfWeek = date.getDay();
+    const ranges: Array<{ start_time: string; end_time: string }> = [];
+
+    // One-off time blocks
+    if (blockedSlots?.length) {
+      blockedSlots.forEach((b: any) => {
+        if (b.date !== dateStr) return;
+        if (b.resource_type !== form.reservation_type) return;
+        if (b.resource_id && form.resource_id && b.resource_id !== form.resource_id) return;
+        if (b.start_time && b.end_time) {
+          if (!b.resource_id || !form.resource_id || b.resource_id === form.resource_id) {
+            ranges.push({ start_time: b.start_time, end_time: b.end_time });
+          }
+        }
+      });
+    }
+
+    // Recurring time blocks
+    if (recurringBlocks?.length) {
+      recurringBlocks.forEach((b: any) => {
+        if (b.day_of_week !== dayOfWeek) return;
+        if (b.resource_type !== form.reservation_type) return;
+        if (b.resource_id && form.resource_id && b.resource_id !== form.resource_id) return;
+        if (b.start_time && b.end_time) {
+          if (!b.resource_id || !form.resource_id || b.resource_id === form.resource_id) {
+            ranges.push({ start_time: b.start_time, end_time: b.end_time });
+          }
+        }
+      });
+    }
+
+    return ranges;
+  }, [blockedSlots, recurringBlocks, form.reservation_type, form.resource_id]);
 
   // Check if a specific time slot falls within any blocked range
   const isTimeSlotBlocked = useCallback((time: string, date: Date) => {

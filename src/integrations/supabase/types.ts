@@ -150,6 +150,63 @@ export type Database = {
           },
         ]
       }
+      recurring_blocked_slots: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          day_of_week: number
+          end_time: string | null
+          id: string
+          is_active: boolean
+          reason: string | null
+          resource_id: string | null
+          resource_type: string
+          start_time: string | null
+          tenant_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          day_of_week: number
+          end_time?: string | null
+          id?: string
+          is_active?: boolean
+          reason?: string | null
+          resource_id?: string | null
+          resource_type: string
+          start_time?: string | null
+          tenant_id: string
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          day_of_week?: number
+          end_time?: string | null
+          id?: string
+          is_active?: boolean
+          reason?: string | null
+          resource_id?: string | null
+          resource_type?: string
+          start_time?: string | null
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recurring_blocked_slots_resource_id_fkey"
+            columns: ["resource_id"]
+            isOneToOne: false
+            referencedRelation: "resources"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recurring_blocked_slots_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reservations: {
         Row: {
           accommodation_needed: boolean | null
