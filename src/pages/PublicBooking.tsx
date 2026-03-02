@@ -186,6 +186,9 @@ const PublicBooking = () => {
     event_type: "",
     estimated_guests: "",
     catering_needed: false,
+    // Restaurant fields
+    pricing_type: "" as "" | "menu" | "fixed_price",
+    fixed_price: "",
   });
 
   // Pre-select booking type from URL query param (?type=venue, ?type=guesthouse, etc.)
@@ -478,7 +481,12 @@ const PublicBooking = () => {
           estimated_guests: form.estimated_guests ? parseInt(form.estimated_guests) : null,
           catering_needed: form.catering_needed,
         }),
-      });
+        // Restaurant-specific
+        ...(parsed.reservation_type === "restaurant" && {
+          pricing_type: form.pricing_type || null,
+          price_eur: form.pricing_type === "fixed_price" && form.fixed_price ? parseFloat(form.fixed_price) : null,
+        }),
+      } as any);
       if (error) throw error;
     },
     onSuccess: () => setSubmitted(true),
@@ -590,7 +598,7 @@ const PublicBooking = () => {
               <p className="text-muted-foreground">{t("booking.confirmationMsg")}</p>
               <Button
                 variant="outline"
-                onClick={() => { setSubmitted(false); setForm({ guest_name: "", guest_email: "", guest_phone: "", guests_count: "", reservation_type: "", start_time: "", special_requests: "", resource_id: "", check_out_date: "", room_type: "", breakfast_included: false, event_type: "", estimated_guests: "", catering_needed: false }); setSelectedDate(undefined); }}
+                onClick={() => { setSubmitted(false); setForm({ guest_name: "", guest_email: "", guest_phone: "", guests_count: "", reservation_type: "", start_time: "", special_requests: "", resource_id: "", check_out_date: "", room_type: "", breakfast_included: false, event_type: "", estimated_guests: "", catering_needed: false, pricing_type: "", fixed_price: "" }); setSelectedDate(undefined); }}
               >
                 {t("booking.makeAnother")}
               </Button>
@@ -840,6 +848,7 @@ const PublicBooking = () => {
                             event_type: "",
                             estimated_guests: "",
                             catering_needed: false,
+                            pricing_type: "",
                           }));
                           if (errors.reservation_type) setErrors((prev) => ({ ...prev, reservation_type: "" }));
                         }}
@@ -1202,6 +1211,53 @@ const PublicBooking = () => {
                     {t("booking.cateringNeeded" as any)}
                   </Label>
                 </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Type-specific fields: Restaurant pricing */}
+          {form.reservation_type === "restaurant" && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg font-serif flex items-center gap-2" style={{ color: primaryColor }}>
+                  <UtensilsCrossed className="h-5 w-5" />
+                  {t("booking.pricingType" as any)}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center gap-4">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <Checkbox
+                      checked={form.pricing_type === "menu"}
+                      onCheckedChange={(checked) => {
+                        if (checked) setForm((prev) => ({ ...prev, pricing_type: "menu", fixed_price: "" }));
+                      }}
+                    />
+                    <span className="text-sm">{t("booking.pricingMenu" as any)}</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <Checkbox
+                      checked={form.pricing_type === "fixed_price"}
+                      onCheckedChange={(checked) => {
+                        if (checked) setForm((prev) => ({ ...prev, pricing_type: "fixed_price" }));
+                      }}
+                    />
+                    <span className="text-sm">{t("booking.pricingFixed" as any)}</span>
+                  </label>
+                </div>
+                {form.pricing_type === "fixed_price" && (
+                  <div className="space-y-2">
+                    <Label>{t("booking.fixedPrice" as any)}</Label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      min={0}
+                      value={form.fixed_price}
+                      onChange={(e) => updateField("fixed_price", e.target.value)}
+                      placeholder="e.g. 45.00"
+                    />
+                  </div>
+                )}
               </CardContent>
             </Card>
           )}

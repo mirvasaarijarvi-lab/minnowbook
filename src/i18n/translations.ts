@@ -168,6 +168,10 @@ type TranslationKeys = {
   "booking.notFoundDesc": string;
   "booking.emailPreviewTitle": string;
   "booking.whatGuestReceives": string;
+  "booking.pricingType": string;
+  "booking.pricingMenu": string;
+  "booking.pricingFixed": string;
+  "booking.fixedPrice": string;
 
   // Email
   "email.subject": string;
@@ -707,6 +711,10 @@ const en: TranslationKeys = {
   "booking.notFoundDesc": "The booking page you're looking for doesn't exist.",
   "booking.emailPreviewTitle": "Confirmation email preview",
   "booking.whatGuestReceives": "This is what the guest will receive via email:",
+  "booking.pricingType": "Pricing",
+  "booking.pricingMenu": "According to menu",
+  "booking.pricingFixed": "Fixed price",
+  "booking.fixedPrice": "Fixed price (€)",
   "email.subject": "Subject",
   "email.confirmationSubject": "Booking Confirmation",
   "email.confirmationTitle": "Booking Confirmed!",
@@ -1231,6 +1239,10 @@ const fi: TranslationKeys = {
   "booking.notFoundDesc": "Etsimääsi varaussivua ei ole olemassa.",
   "booking.emailPreviewTitle": "Vahvistussähköpostin esikatselu",
   "booking.whatGuestReceives": "Tämän vierailija saa sähköpostitse:",
+  "booking.pricingType": "Hinnoittelu",
+  "booking.pricingMenu": "Listan mukaan",
+  "booking.pricingFixed": "Kiinteä hinta",
+  "booking.fixedPrice": "Kiinteä hinta (€)",
   "email.subject": "Aihe",
   "email.confirmationSubject": "Varausvahvistus",
   "email.confirmationTitle": "Varaus vahvistettu!",
@@ -1754,6 +1766,10 @@ const sv: TranslationKeys = {
   "booking.notFoundDesc": "Bokningssidan du letar efter finns inte.",
   "booking.emailPreviewTitle": "Förhandsgranskning av bekräftelsemail",
   "booking.whatGuestReceives": "Detta är vad gästen kommer att få via e-post:",
+  "booking.pricingType": "Prissättning",
+  "booking.pricingMenu": "Enligt meny",
+  "booking.pricingFixed": "Fast pris",
+  "booking.fixedPrice": "Fast pris (€)",
   "email.subject": "Ämne",
   "email.confirmationSubject": "Bokningsbekräftelse",
   "email.confirmationTitle": "Bokning bekräftad!",

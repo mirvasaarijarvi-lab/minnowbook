@@ -49,6 +49,7 @@ interface ReservationRow {
   breakfast_included: boolean | null;
   breakfast_price_per_person: number | null;
   room_type: string | null;
+  pricing_type: string | null;
 }
 
 const localeMap: Record<string, Locale> = { fi: fiFns, en: enUS, sv: svFns };
@@ -172,7 +173,7 @@ const ReportsPanel = () => {
       if (!tenantId) return [];
       const { data, error } = await supabase
         .from("reservations")
-        .select("id, reservation_type, status, date, check_out_date, is_invoiced, is_used, guest_name, guests_count, estimated_guests, price_eur, pricing_details, internal_notes, breakfast_included, breakfast_price_per_person, room_type")
+        .select("id, reservation_type, status, date, check_out_date, is_invoiced, is_used, guest_name, guests_count, estimated_guests, price_eur, pricing_details, internal_notes, breakfast_included, breakfast_price_per_person, room_type, pricing_type")
         .eq("tenant_id", tenantId)
         .gte("date", startStr)
         .lte("date", endStr)
@@ -190,7 +191,7 @@ const ReportsPanel = () => {
       if (!tenantId) return [];
       const { data, error } = await supabase
         .from("reservations")
-        .select("id, reservation_type, status, date, check_out_date, is_invoiced, is_used, guest_name, guests_count, estimated_guests, price_eur, pricing_details, internal_notes, breakfast_included, breakfast_price_per_person, room_type")
+        .select("id, reservation_type, status, date, check_out_date, is_invoiced, is_used, guest_name, guests_count, estimated_guests, price_eur, pricing_details, internal_notes, breakfast_included, breakfast_price_per_person, room_type, pricing_type")
         .eq("tenant_id", tenantId)
         .gte("date", prevStartStr)
         .lte("date", prevEndStr)
@@ -256,6 +257,9 @@ const ReportsPanel = () => {
   }, [calcNights, isAccommodation]);
 
   const effectivePrice = useCallback((r: ReservationRow) => {
+    // Restaurant "according to menu" has no fixed price
+    if (r.reservation_type === "restaurant" && r.pricing_type === "menu") return 0;
+    if (r.reservation_type === "restaurant") return r.price_eur ?? 0;
     return calcRoomPrice(r) + calcBreakfastPrice(r);
   }, [calcRoomPrice, calcBreakfastPrice]);
 
@@ -728,7 +732,13 @@ const ReportsPanel = () => {
                             }
                           </TableCell>
                           <TableCell className="text-sm font-medium whitespace-nowrap">
-                            {total > 0 ? (
+                            {r.reservation_type === "restaurant" && r.pricing_type === "menu" ? (
+                              <span className="text-muted-foreground">—</span>
+                            ) : r.reservation_type === "restaurant" && r.pricing_type === "fixed_price" ? (
+                              r.price_eur != null && r.price_eur > 0
+                                ? `${Number(r.price_eur).toLocaleString("fi-FI", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`
+                                : "—"
+                            ) : total > 0 ? (
                               bfPrice > 0 ? (
                                 <div>
                                   <span>{calcRoomPrice(r).toLocaleString("fi-FI", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €</span>

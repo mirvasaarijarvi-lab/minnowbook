@@ -60,6 +60,8 @@ const emptyForm = {
   event_type: "",
   estimated_guests: "",
   catering_needed: false,
+  // Restaurant
+  pricing_type: "" as "" | "menu" | "fixed_price",
 };
 
 const ManualReservationDialog = ({
@@ -141,7 +143,11 @@ const ManualReservationDialog = ({
           estimated_guests: form.estimated_guests ? parseInt(form.estimated_guests) : null,
           catering_needed: form.catering_needed,
         }),
-      });
+        ...(form.reservation_type === "restaurant" && {
+          pricing_type: form.pricing_type || null,
+          price_eur: form.pricing_type === "fixed_price" && form.price_eur ? parseFloat(form.price_eur) : null,
+        }),
+      } as any);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -168,6 +174,7 @@ const ManualReservationDialog = ({
 
   const isHotelType = form.reservation_type === "guesthouse" || form.reservation_type === "hotel";
   const isVenueType = form.reservation_type === "venue";
+  const isRestaurantType = form.reservation_type === "restaurant";
 
   // Compute price from selected resource
   const selectedResource = resources.find((r) => r.id === selectedResourceId);
@@ -366,6 +373,33 @@ const ManualReservationDialog = ({
                 <Label htmlFor="new-catering" className="cursor-pointer">
                   {t("booking.cateringNeeded" as any)}
                 </Label>
+              </div>
+            </div>
+          )}
+
+          {/* Restaurant pricing type */}
+          {isRestaurantType && (
+            <div className="space-y-3 rounded-lg border border-border p-3">
+              <Label>{t("booking.pricingType" as any)}</Label>
+              <div className="flex items-center gap-4">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <Checkbox
+                    checked={form.pricing_type === "menu"}
+                    onCheckedChange={(checked) => {
+                      if (checked) setForm((prev) => ({ ...prev, pricing_type: "menu" as const, price_eur: "" }));
+                    }}
+                  />
+                  <span className="text-sm">{t("booking.pricingMenu" as any)}</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <Checkbox
+                    checked={form.pricing_type === "fixed_price"}
+                    onCheckedChange={(checked) => {
+                      if (checked) setForm((prev) => ({ ...prev, pricing_type: "fixed_price" as const }));
+                    }}
+                  />
+                  <span className="text-sm">{t("booking.pricingFixed" as any)}</span>
+                </label>
               </div>
             </div>
           )}

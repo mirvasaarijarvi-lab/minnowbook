@@ -238,6 +238,7 @@ export type Database = {
           no_email_confirm: boolean | null
           price_eur: number | null
           pricing_details: string | null
+          pricing_type: string | null
           reservation_type: string
           room_type: string | null
           special_requests: string | null
@@ -277,6 +278,7 @@ export type Database = {
           no_email_confirm?: boolean | null
           price_eur?: number | null
           pricing_details?: string | null
+          pricing_type?: string | null
           reservation_type: string
           room_type?: string | null
           special_requests?: string | null
@@ -316,6 +318,7 @@ export type Database = {
           no_email_confirm?: boolean | null
           price_eur?: number | null
           pricing_details?: string | null
+          pricing_type?: string | null
           reservation_type?: string
           room_type?: string | null
           special_requests?: string | null
