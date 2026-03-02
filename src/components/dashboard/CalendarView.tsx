@@ -140,7 +140,7 @@ const CalendarView = () => {
           <span>Blocked</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded-sm bg-violet-200 border border-dashed border-violet-400" />
+          <div className="w-3 h-3 rounded-sm bg-primary/15 border border-dashed border-primary/40" />
           <span>Recurring block</span>
         </div>
         <div className="flex items-center gap-1.5">
@@ -181,8 +181,8 @@ const CalendarView = () => {
               modifiersClassNames={{
                 hasReservation: "bg-accent/20 font-bold text-accent-foreground",
                 isBlocked: "bg-destructive/15 text-destructive font-bold ring-1 ring-inset ring-destructive/30",
-                isRecurring: "bg-violet-100 text-violet-800 font-bold border border-dashed border-violet-400",
-                isRecurringAndBlocked: "bg-destructive/15 text-destructive font-bold border-2 border-dashed border-violet-400",
+                isRecurring: "bg-primary/10 text-primary font-bold border border-dashed border-primary/40",
+                isRecurringAndBlocked: "bg-destructive/15 text-destructive font-bold border-2 border-dashed border-primary/40",
                 hasBoth: "bg-accent/20 font-bold text-accent-foreground ring-2 ring-inset ring-destructive/40",
               }}
             />
@@ -199,11 +199,11 @@ const CalendarView = () => {
             {/* Recurring blocks for selected day */}
             {selectedDayRecurring.length > 0 && (
               <div className="space-y-2">
-                <p className="text-xs font-medium text-violet-700 uppercase tracking-wide flex items-center gap-1.5">
+                <p className="text-xs font-medium text-primary uppercase tracking-wide flex items-center gap-1.5">
                   <RefreshCw className="h-3.5 w-3.5" /> Recurring Blocks
                 </p>
                 {selectedDayRecurring.map((block: any) => (
-                  <div key={block.id} className="flex items-center justify-between p-3 rounded-md bg-violet-50 border border-dashed border-violet-300">
+                  <div key={block.id} className="flex items-center justify-between p-3 rounded-md bg-primary/5 border border-dashed border-primary/30">
                     <div>
                       <div className="flex items-center gap-2">
                         <span className="font-medium text-foreground">
@@ -225,7 +225,7 @@ const CalendarView = () => {
                         ) : (
                           "All day"
                         )}
-                        {block.reason && ` · ${block.reason}`}
+                        {block.reason && `, ${block.reason}`}
                       </p>
                     </div>
                   </div>
@@ -289,9 +289,9 @@ const CalendarView = () => {
                       <Badge variant="outline" className="capitalize text-xs">{r.reservation_type}</Badge>
                       <Badge className={cn(
                         "text-xs",
-                        r.status === "confirmed" && "bg-green-100 text-green-800",
-                        r.status === "pending" && "bg-yellow-100 text-yellow-800",
-                        r.status === "cancelled" && "bg-red-100 text-red-800",
+                        r.status === "confirmed" && "bg-success/20 text-success-foreground border border-success/30",
+                        r.status === "pending" && "bg-accent/20 text-accent-foreground border border-accent/30",
+                        r.status === "cancelled" && "bg-destructive/20 text-destructive border border-destructive/30",
                       )}>{r.status}</Badge>
                     </div>
                   </div>
