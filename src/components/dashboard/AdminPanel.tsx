@@ -10,8 +10,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "@/hooks/use-toast";
-import { Plus, Key, Trash2, Shield, UserCog } from "lucide-react";
+import { Plus, Key, Trash2, Shield, Users } from "lucide-react";
 import PasswordInput from "@/components/PasswordInput";
 import { useT } from "@/contexts/I18nContext";
 import DashboardTooltip from "./DashboardTooltip";
@@ -38,10 +39,8 @@ const roleBadgeColors: Record<string, string> = {
   staff: "bg-muted text-muted-foreground border-border",
 };
 
-/** Get the effective role key for a user (custom_role_key takes precedence) */
 const getEffectiveRole = (u: TenantUser) => u.custom_role_key || u.role;
 
-/** Get display label for a role */
 const getRoleLabel = (u: TenantUser, roleDefs: { role_key: string; display_name: string }[]) => {
   const effective = getEffectiveRole(u);
   const def = roleDefs.find((r) => r.role_key === effective);
@@ -66,9 +65,7 @@ const AdminPanel = () => {
   });
 
   const invokeAdmin = async (body: any) => {
-    const { data, error } = await supabase.functions.invoke("admin-users", {
-      body,
-    });
+    const { data, error } = await supabase.functions.invoke("admin-users", { body });
     if (error) throw error;
     if (data?.error) throw new Error(data.error);
     return data;
@@ -80,7 +77,6 @@ const AdminPanel = () => {
     enabled: !!tenantId,
   });
 
-  // Fetch custom role definitions for dropdown
   const { data: roleDefinitions } = useQuery({
     queryKey: ["role-definitions-for-select", tenantId],
     queryFn: async () => {
@@ -154,215 +150,183 @@ const AdminPanel = () => {
     },
   });
 
+  const userList = (users as TenantUser[]) ?? [];
+
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <h2 className="text-2xl font-serif font-bold text-foreground">{t("nav.admin")}</h2>
-          <DashboardTooltip text="Manage team members, assign roles (Owner, Admin, Staff), reset passwords, and review support requests from your users." />
-        </div>
-        <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
-          <DialogTrigger asChild>
-            <Button size="sm" className="gap-1.5">
-              <Plus className="h-4 w-4" /> {t("admin.addUser")}
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle className="font-serif">{t("admin.addUser")}</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4 pt-2">
-              <div>
-                <Label>{t("common.email")}</Label>
-                <Input
-                  type="email"
-                  value={newUser.email}
-                  onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
-                  placeholder="user@example.com"
-                />
-              </div>
-              <div>
-                <Label>{t("common.name")}</Label>
-                <Input
-                  value={newUser.displayName}
-                  onChange={(e) => setNewUser({ ...newUser, displayName: e.target.value })}
-                  placeholder="Display name"
-                />
-              </div>
-              <div>
-                <PasswordInput
-                  id="new-user-password"
-                  value={newUser.password}
-                  onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
-                  label={t("common.password")}
-                  onValidChange={setNewUserPasswordValid}
-                />
-              </div>
-              <div>
-                <Label>{t("admin.role")}</Label>
-                <Select value={newUser.role} onValueChange={(v) => setNewUser({ ...newUser, role: v })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="staff">{t("admin.staff")}</SelectItem>
-                    <SelectItem value="admin">{t("admin.adminRole")}</SelectItem>
-                    {isOwner && <SelectItem value="owner">{t("admin.owner")}</SelectItem>}
-                    {(roleDefinitions ?? [])
-                      .filter((r) => !r.is_system)
-                      .map((r) => (
-                        <SelectItem key={r.role_key} value={r.role_key}>
-                          {r.display_name}
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <Button
-                className="w-full"
-                onClick={() => createMutation.mutate()}
-                disabled={!newUser.email || !newUserPasswordValid || createMutation.isPending}
-              >
-                {createMutation.isPending ? t("common.saving") : t("admin.addUser")}
-              </Button>
+    <div className="space-y-6">
+      {/* User Management */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div className="flex items-center gap-2">
+              <Users className="h-5 w-5 text-primary" />
+              <CardTitle className="font-serif">{t("admin.userManagement")}</CardTitle>
+              <DashboardTooltip text={t("admin.userManagementDesc")} />
             </div>
-          </DialogContent>
-        </Dialog>
-      </div>
-
-      {/* Change password dialog */}
-      <Dialog open={passwordDialogOpen} onOpenChange={(open) => { setPasswordDialogOpen(open); if (!open) { setNewPassword(""); setSelectedUserId(null); } }}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="font-serif">{t("admin.changePassword")}</DialogTitle>
-          </DialogHeader>
-            <div className="space-y-4 pt-2">
-              <PasswordInput
-                id="change-password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                label={t("admin.newPassword")}
-                onValidChange={setNewPasswordValid}
-              />
-            <Button
-              className="w-full"
-              onClick={() => changePasswordMutation.mutate()}
-              disabled={!newPasswordValid || changePasswordMutation.isPending}
-            >
-              {changePasswordMutation.isPending ? t("common.saving") : t("admin.changePassword")}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {isLoading ? (
-        <div className="space-y-3">
-          {[1, 2].map((i) => (
-            <Card key={i} className="animate-pulse"><CardContent className="p-4 h-20" /></Card>
-          ))}
-        </div>
-      ) : !users?.length ? (
-        <Card><CardContent className="p-8 text-center text-muted-foreground">{t("admin.noUsers")}</CardContent></Card>
-      ) : (
-        <div className="space-y-2">
-          {(users as TenantUser[]).map((u) => (
-            <Card key={u.id} className="hover:shadow-hover transition-shadow">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between gap-4">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="font-semibold text-foreground">
-                        {u.display_name || u.email}
-                      </span>
-                      <Badge variant="outline" className={`text-xs capitalize ${roleBadgeColors[getEffectiveRole(u)] ?? "border-secondary text-secondary-foreground"}`}>
-                        <Shield className="h-3 w-3 mr-1" />
-                        {getRoleLabel(u, roleDefinitions ?? [])}
-                      </Badge>
-                    </div>
-                    <p className="text-sm text-muted-foreground">{u.email}</p>
+            <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
+              <DialogTrigger asChild>
+                <Button size="sm" className="gap-1.5">
+                  <Plus className="h-4 w-4" /> {t("admin.addUser")}
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle className="font-serif">{t("admin.addUser")}</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 pt-2">
+                  <div>
+                    <Label>{t("common.email")}</Label>
+                    <Input type="email" value={newUser.email} onChange={(e) => setNewUser({ ...newUser, email: e.target.value })} placeholder="user@example.com" />
                   </div>
-
-                  <div className="flex items-center gap-1">
-                    {/* Role change */}
-                    <Select
-                      value={getEffectiveRole(u)}
-                      onValueChange={(role) => updateRoleMutation.mutate({ userId: u.user_id, role })}
-                    >
-                      <SelectTrigger className="w-[120px] h-8 text-xs">
-                        <UserCog className="h-3 w-3 mr-1" />
-                        <SelectValue />
-                      </SelectTrigger>
+                  <div>
+                    <Label>{t("common.name")}</Label>
+                    <Input value={newUser.displayName} onChange={(e) => setNewUser({ ...newUser, displayName: e.target.value })} placeholder="Display name" />
+                  </div>
+                  <div>
+                    <PasswordInput id="new-user-password" value={newUser.password} onChange={(e) => setNewUser({ ...newUser, password: e.target.value })} label={t("common.password")} onValidChange={setNewUserPasswordValid} />
+                  </div>
+                  <div>
+                    <Label>{t("admin.role")}</Label>
+                    <Select value={newUser.role} onValueChange={(v) => setNewUser({ ...newUser, role: v })}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="staff">{t("admin.staff")}</SelectItem>
                         <SelectItem value="admin">{t("admin.adminRole")}</SelectItem>
                         {isOwner && <SelectItem value="owner">{t("admin.owner")}</SelectItem>}
-                        {(roleDefinitions ?? [])
-                          .filter((r) => !r.is_system)
-                          .map((r) => (
-                            <SelectItem key={r.role_key} value={r.role_key}>
-                              {r.display_name}
-                            </SelectItem>
-                          ))}
+                        {(roleDefinitions ?? []).filter((r) => !r.is_system).map((r) => (
+                          <SelectItem key={r.role_key} value={r.role_key}>{r.display_name}</SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
-
-                    {/* Change password */}
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => { setSelectedUserId(u.user_id); setPasswordDialogOpen(true); }}
-                      title={t("admin.changePassword")}
-                    >
-                      <Key className="h-4 w-4" />
-                    </Button>
-
-                    {/* Delete */}
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-destructive hover:text-destructive"
-                          title={t("admin.removeUser")}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>{t("admin.removeUser")}</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Are you sure you want to remove <strong>{u.display_name || u.email}</strong>? This action cannot be undone.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                            onClick={() => deleteMutation.mutate(u.user_id)}
-                          >
-                            Remove
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
                   </div>
+                  <Button className="w-full" onClick={() => createMutation.mutate()} disabled={!newUser.email || !newUserPasswordValid || createMutation.isPending}>
+                    {createMutation.isPending ? t("common.saving") : t("admin.addUser")}
+                  </Button>
                 </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
+              </DialogContent>
+            </Dialog>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {/* Change password dialog */}
+          <Dialog open={passwordDialogOpen} onOpenChange={(open) => { setPasswordDialogOpen(open); if (!open) { setNewPassword(""); setSelectedUserId(null); } }}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle className="font-serif">{t("admin.changePassword")}</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 pt-2">
+                <PasswordInput id="change-password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} label={t("admin.newPassword")} onValidChange={setNewPasswordValid} />
+                <Button className="w-full" onClick={() => changePasswordMutation.mutate()} disabled={!newPasswordValid || changePasswordMutation.isPending}>
+                  {changePasswordMutation.isPending ? t("common.saving") : t("admin.changePassword")}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
 
-      {/* Login History */}
-      <LoginHistoryPanel />
+          {userList.length > 0 && (
+            <div className="mb-3">
+              <Badge variant="secondary" className="text-xs gap-1">
+                <Shield className="h-3 w-3" />
+                {t("admin.approvedUsers")} ({userList.length})
+              </Badge>
+            </div>
+          )}
+
+          {isLoading ? (
+            <div className="space-y-3">
+              {[1, 2].map((i) => (
+                <div key={i} className="h-12 rounded-md bg-muted animate-pulse" />
+              ))}
+            </div>
+          ) : !userList.length ? (
+            <p className="text-sm text-muted-foreground text-center py-6">{t("admin.noUsers")}</p>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>{t("admin.colName")}</TableHead>
+                  <TableHead>{t("admin.colEmail")}</TableHead>
+                  <TableHead>{t("admin.colRole")}</TableHead>
+                  <TableHead>{t("admin.colStatus")}</TableHead>
+                  <TableHead className="text-right">{t("admin.colActions")}</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {userList.map((u) => (
+                  <TableRow key={u.id}>
+                    <TableCell className="font-medium">{u.display_name || "—"}</TableCell>
+                    <TableCell className="text-muted-foreground">{u.email}</TableCell>
+                    <TableCell>
+                      <Select
+                        value={getEffectiveRole(u)}
+                        onValueChange={(role) => updateRoleMutation.mutate({ userId: u.user_id, role })}
+                      >
+                        <SelectTrigger className="w-[120px] h-8 text-xs">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="staff">{t("admin.staff")}</SelectItem>
+                          <SelectItem value="admin">{t("admin.adminRole")}</SelectItem>
+                          {isOwner && <SelectItem value="owner">{t("admin.owner")}</SelectItem>}
+                          {(roleDefinitions ?? []).filter((r) => !r.is_system).map((r) => (
+                            <SelectItem key={r.role_key} value={r.role_key}>{r.display_name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className={`text-xs ${u.is_approved ? "border-emerald-500/30 text-emerald-600 bg-emerald-500/10" : "border-yellow-500/30 text-yellow-600 bg-yellow-500/10"}`}>
+                        {u.is_approved ? t("admin.statusApproved") : t("admin.statusPending")}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-1">
+                        <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => { setSelectedUserId(u.user_id); setPasswordDialogOpen(true); }}>
+                          <Key className="h-3 w-3" /> {t("admin.changePassword")}
+                        </Button>
+                        <Button variant="outline" size="sm" className="gap-1 text-xs text-muted-foreground">
+                          {t("admin.colStatus")}
+                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>{t("admin.confirmRemove")}</AlertDialogTitle>
+                              <AlertDialogDescription>{t("admin.confirmRemoveDesc")}</AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>{t("admin.cancel")}</AlertDialogCancel>
+                              <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={() => deleteMutation.mutate(u.user_id)}>
+                                {t("admin.remove")}
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Role Permissions Editor */}
       {isOwner && <PermissionsEditor />}
 
-      {/* Audit / Change Log */}
-      <AuditLogPanel />
-
       {/* Support Requests Board */}
       <SupportRequestsBoard />
+
+      {/* Login History */}
+      <LoginHistoryPanel />
+
+      {/* Audit / Change Log */}
+      <AuditLogPanel />
 
       {/* Shareable Booking Links */}
       <BookingLinksCard />

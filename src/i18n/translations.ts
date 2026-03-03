@@ -229,6 +229,61 @@ type TranslationKeys = {
   "admin.roleName": string;
   "admin.roleKey": string;
   "admin.roleCreated": string;
+  "admin.userManagement": string;
+  "admin.userManagementDesc": string;
+  "admin.approvedUsers": string;
+  "admin.colName": string;
+  "admin.colEmail": string;
+  "admin.colRole": string;
+  "admin.colStatus": string;
+  "admin.colActions": string;
+  "admin.statusApproved": string;
+  "admin.statusPending": string;
+  "admin.confirmRemove": string;
+  "admin.confirmRemoveDesc": string;
+  "admin.cancel": string;
+  "admin.remove": string;
+  "admin.supportRequests": string;
+  "admin.noSupportRequests": string;
+  "admin.supportRequestsDesc": string;
+  "admin.colTime": string;
+  "admin.colUser": string;
+  "admin.colDevice": string;
+  "admin.loginCount": string;
+  "admin.auditLogDesc": string;
+  "admin.colDate": string;
+  "admin.colUserAudit": string;
+  "admin.colEntity": string;
+  "admin.colAction": string;
+  "admin.colSummary": string;
+  "admin.downloadPdf": string;
+  "admin.previous": string;
+  "admin.next": string;
+  "admin.page": string;
+  "admin.filtered": string;
+  "admin.allActions": string;
+  "admin.allEntities": string;
+  "admin.created": string;
+  "admin.updated": string;
+  "admin.deleted": string;
+  "admin.fieldsChanged": string;
+  "admin.revert": string;
+  "admin.revertConfirm": string;
+  "admin.revertUpdate": string;
+  "admin.revertInsert": string;
+  "admin.revertDelete": string;
+  "admin.reverting": string;
+  "admin.reverted": string;
+  "admin.revertedDesc": string;
+  "admin.clear": string;
+  "admin.from": string;
+  "admin.to": string;
+  "admin.allUsers": string;
+  "admin.noMatchFilters": string;
+  "admin.respondMarkFixed": string;
+  "admin.sending": string;
+  "admin.open": string;
+  "admin.resolved": string;
 
   // Hero
   "hero.badge": string;
@@ -873,6 +928,61 @@ const en: TranslationKeys = {
   "admin.roleName": "Role Name",
   "admin.roleKey": "Role Key",
   "admin.roleCreated": "Role created",
+  "admin.userManagement": "User Management",
+  "admin.userManagementDesc": "Manage team members, assign roles, and control access.",
+  "admin.approvedUsers": "Approved Users",
+  "admin.colName": "Name",
+  "admin.colEmail": "Email",
+  "admin.colRole": "Role",
+  "admin.colStatus": "Status",
+  "admin.colActions": "Actions",
+  "admin.statusApproved": "Approved",
+  "admin.statusPending": "Pending",
+  "admin.confirmRemove": "Are you sure?",
+  "admin.confirmRemoveDesc": "Are you sure you want to remove this user? This action cannot be undone.",
+  "admin.cancel": "Cancel",
+  "admin.remove": "Remove",
+  "admin.supportRequests": "Support Requests",
+  "admin.noSupportRequests": "No support requests yet.",
+  "admin.supportRequestsDesc": "Business tier users can submit requests via the chat widget.",
+  "admin.colTime": "Time",
+  "admin.colUser": "User",
+  "admin.colDevice": "Device",
+  "admin.loginCount": "entries",
+  "admin.auditLogDesc": "A chronological record of all changes.",
+  "admin.colDate": "Date",
+  "admin.colUserAudit": "User",
+  "admin.colEntity": "Entity",
+  "admin.colAction": "Action",
+  "admin.colSummary": "Summary",
+  "admin.downloadPdf": "Download PDF",
+  "admin.previous": "Previous",
+  "admin.next": "Next",
+  "admin.page": "Page",
+  "admin.filtered": "filtered",
+  "admin.allActions": "All actions",
+  "admin.allEntities": "All entities",
+  "admin.created": "Created",
+  "admin.updated": "Updated",
+  "admin.deleted": "Deleted",
+  "admin.fieldsChanged": "fields changed",
+  "admin.revert": "Revert",
+  "admin.revertConfirm": "Revert this change?",
+  "admin.revertUpdate": "This will restore the record to its previous values.",
+  "admin.revertInsert": "This will delete the record that was created.",
+  "admin.revertDelete": "This will re-create the record that was deleted.",
+  "admin.reverting": "Reverting...",
+  "admin.reverted": "Change reverted",
+  "admin.revertedDesc": "The record has been restored to its previous state.",
+  "admin.clear": "Clear",
+  "admin.from": "From",
+  "admin.to": "To",
+  "admin.allUsers": "All users",
+  "admin.noMatchFilters": "No entries match the selected filters.",
+  "admin.respondMarkFixed": "Respond & Mark as Fixed",
+  "admin.sending": "Sending...",
+  "admin.open": "Open",
+  "admin.resolved": "Resolved",
 
   // Hero
   "hero.badge": "Now in beta. 30-day free trial",
@@ -1505,6 +1615,61 @@ const fi: TranslationKeys = {
   "admin.roleName": "Roolin nimi",
   "admin.roleKey": "Roolin avain",
   "admin.roleCreated": "Rooli luotu",
+  "admin.userManagement": "Käyttäjähallinta",
+  "admin.userManagementDesc": "Hallitse tiimin jäseniä, rooleja ja käyttöoikeuksia.",
+  "admin.approvedUsers": "Hyväksytyt käyttäjät",
+  "admin.colName": "Nimi",
+  "admin.colEmail": "Sähköposti",
+  "admin.colRole": "Rooli",
+  "admin.colStatus": "Tila",
+  "admin.colActions": "Toiminnot",
+  "admin.statusApproved": "Hyväksytty",
+  "admin.statusPending": "Odottaa",
+  "admin.confirmRemove": "Oletko varma?",
+  "admin.confirmRemoveDesc": "Haluatko varmasti poistaa tämän käyttäjän? Toimintoa ei voi perua.",
+  "admin.cancel": "Peruuta",
+  "admin.remove": "Poista",
+  "admin.supportRequests": "Avustajapyynnöt",
+  "admin.noSupportRequests": "Ei avustajapyyntöjä vielä.",
+  "admin.supportRequestsDesc": "Business-tason käyttäjät voivat lähettää pyyntöjä chat-widgetin kautta.",
+  "admin.colTime": "Aika",
+  "admin.colUser": "Käyttäjä",
+  "admin.colDevice": "Laite",
+  "admin.loginCount": "merkintää",
+  "admin.auditLogDesc": "Kronologinen lokitiedosto kaikista muutoksista.",
+  "admin.colDate": "Päivämäärä",
+  "admin.colUserAudit": "Käyttäjä",
+  "admin.colEntity": "Kohde",
+  "admin.colAction": "Toiminto",
+  "admin.colSummary": "Yhteenveto",
+  "admin.downloadPdf": "Tulosta PDF",
+  "admin.previous": "Edellinen",
+  "admin.next": "Seuraava",
+  "admin.page": "Sivu",
+  "admin.filtered": "suodatettu",
+  "admin.allActions": "Kaikki toiminnot",
+  "admin.allEntities": "Kaikki kohteet",
+  "admin.created": "Luotu",
+  "admin.updated": "Päivitetty",
+  "admin.deleted": "Poistettu",
+  "admin.fieldsChanged": "kenttää muutettu",
+  "admin.revert": "Palauta",
+  "admin.revertConfirm": "Palautetaanko tämä muutos?",
+  "admin.revertUpdate": "Tämä palauttaa tietueen aiempiin arvoihin.",
+  "admin.revertInsert": "Tämä poistaa luodun tietueen.",
+  "admin.revertDelete": "Tämä luo uudelleen poistetun tietueen.",
+  "admin.reverting": "Palautetaan...",
+  "admin.reverted": "Muutos palautettu",
+  "admin.revertedDesc": "Tietue on palautettu aiempaan tilaansa.",
+  "admin.clear": "Tyhjennä",
+  "admin.from": "Alkaen",
+  "admin.to": "Päättyen",
+  "admin.allUsers": "Kaikki käyttäjät",
+  "admin.noMatchFilters": "Valitut suodattimet eivät tuottaneet tuloksia.",
+  "admin.respondMarkFixed": "Vastaa ja merkitse ratkaistuksi",
+  "admin.sending": "Lähetetään...",
+  "admin.open": "Avoin",
+  "admin.resolved": "Ratkaistu",
 
   "hero.badge": "Nyt betassa. 30 päivän ilmainen kokeilu",
   "hero.title": "Varaustyökalu niille,",
@@ -2136,6 +2301,61 @@ const sv: TranslationKeys = {
   "admin.roleName": "Rollnamn",
   "admin.roleKey": "Rollnyckel",
   "admin.roleCreated": "Roll skapad",
+  "admin.userManagement": "Användarhantering",
+  "admin.userManagementDesc": "Hantera teammedlemmar, tilldela roller och kontrollera åtkomst.",
+  "admin.approvedUsers": "Godkända användare",
+  "admin.colName": "Namn",
+  "admin.colEmail": "E-post",
+  "admin.colRole": "Roll",
+  "admin.colStatus": "Status",
+  "admin.colActions": "Åtgärder",
+  "admin.statusApproved": "Godkänd",
+  "admin.statusPending": "Väntar",
+  "admin.confirmRemove": "Är du säker?",
+  "admin.confirmRemoveDesc": "Är du säker på att du vill ta bort denna användare? Denna åtgärd kan inte ångras.",
+  "admin.cancel": "Avbryt",
+  "admin.remove": "Ta bort",
+  "admin.supportRequests": "Supportförfrågningar",
+  "admin.noSupportRequests": "Inga supportförfrågningar ännu.",
+  "admin.supportRequestsDesc": "Business-användare kan skicka förfrågningar via chattwidgeten.",
+  "admin.colTime": "Tid",
+  "admin.colUser": "Användare",
+  "admin.colDevice": "Enhet",
+  "admin.loginCount": "poster",
+  "admin.auditLogDesc": "En kronologisk logg över alla ändringar.",
+  "admin.colDate": "Datum",
+  "admin.colUserAudit": "Användare",
+  "admin.colEntity": "Entitet",
+  "admin.colAction": "Åtgärd",
+  "admin.colSummary": "Sammanfattning",
+  "admin.downloadPdf": "Ladda ner PDF",
+  "admin.previous": "Föregående",
+  "admin.next": "Nästa",
+  "admin.page": "Sida",
+  "admin.filtered": "filtrerad",
+  "admin.allActions": "Alla åtgärder",
+  "admin.allEntities": "Alla entiteter",
+  "admin.created": "Skapad",
+  "admin.updated": "Uppdaterad",
+  "admin.deleted": "Borttagen",
+  "admin.fieldsChanged": "fält ändrade",
+  "admin.revert": "Återställ",
+  "admin.revertConfirm": "Återställ denna ändring?",
+  "admin.revertUpdate": "Detta återställer posten till dess tidigare värden.",
+  "admin.revertInsert": "Detta tar bort den skapade posten.",
+  "admin.revertDelete": "Detta återskapar den borttagna posten.",
+  "admin.reverting": "Återställer...",
+  "admin.reverted": "Ändring återställd",
+  "admin.revertedDesc": "Posten har återställts till sitt tidigare tillstånd.",
+  "admin.clear": "Rensa",
+  "admin.from": "Från",
+  "admin.to": "Till",
+  "admin.allUsers": "Alla användare",
+  "admin.noMatchFilters": "Inga poster matchar valda filter.",
+  "admin.respondMarkFixed": "Svara och markera som löst",
+  "admin.sending": "Skickar...",
+  "admin.open": "Öppen",
+  "admin.resolved": "Löst",
 
   "hero.badge": "Nu i beta. 30 dagars gratis provperiod",
   "hero.title": "Bokningsverktyget byggt för",

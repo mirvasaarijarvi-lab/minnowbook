@@ -9,8 +9,9 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { History, Monitor, Smartphone, Globe, CalendarIcon, X } from "lucide-react";
-import { format, formatDistanceToNow, startOfDay, endOfDay } from "date-fns";
+import { format, startOfDay, endOfDay } from "date-fns";
 import { cn } from "@/lib/utils";
 import DashboardTooltip from "./DashboardTooltip";
 
@@ -20,6 +21,7 @@ interface LoginEntry {
   user_agent: string | null;
   logged_in_at: string;
   display_name?: string;
+  email?: string;
 }
 
 function parseDevice(ua: string | null): { icon: typeof Monitor; label: string } {
@@ -54,7 +56,6 @@ const LoginHistoryPanel = () => {
     setPage(0);
   }, []);
 
-  // Fetch tenant users for the user filter dropdown
   const { data: tenantUsers } = useQuery({
     queryKey: ["tenant-users-for-filter", tenantId],
     queryFn: async () => {
@@ -75,17 +76,10 @@ const LoginHistoryPanel = () => {
         .select("*")
         .order("logged_in_at", { ascending: false });
 
-      if (dateFrom) {
-        query = query.gte("logged_in_at", startOfDay(dateFrom).toISOString());
-      }
-      if (dateTo) {
-        query = query.lte("logged_in_at", endOfDay(dateTo).toISOString());
-      }
-      if (selectedUserId !== "all") {
-        query = query.eq("user_id", selectedUserId);
-      }
+      if (dateFrom) query = query.gte("logged_in_at", startOfDay(dateFrom).toISOString());
+      if (dateTo) query = query.lte("logged_in_at", endOfDay(dateTo).toISOString());
+      if (selectedUserId !== "all") query = query.eq("user_id", selectedUserId);
 
-      // Fetch one extra to detect next page
       query = query.range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
 
       const { data: logins, error } = await query;
@@ -119,18 +113,21 @@ const LoginHistoryPanel = () => {
           <div className="flex items-center gap-2">
             <History className="h-5 w-5 text-primary" />
             <CardTitle className="font-serif">{t("admin.loginHistory")}</CardTitle>
-            <DashboardTooltip text="Recent login activity for all team members in your organisation." />
+            {loginHistory && (
+              <span className="text-xs text-muted-foreground">
+                {loginHistory.length} {t("admin.loginCount")}
+              </span>
+            )}
+            <DashboardTooltip text="Recent login activity for all team members." />
           </div>
 
-          {/* Filters */}
           <div className="flex items-center gap-2 flex-wrap">
-            {/* User filter */}
             <Select value={selectedUserId} onValueChange={(v) => { setSelectedUserId(v); setPage(0); }}>
               <SelectTrigger className={cn("w-[160px] h-8 text-xs", selectedUserId !== "all" && "border-primary/50")}>
-                <SelectValue placeholder="All users" />
+                <SelectValue placeholder={t("admin.allUsers")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All users</SelectItem>
+                <SelectItem value="all">{t("admin.allUsers")}</SelectItem>
                 {(tenantUsers ?? []).map((u) => (
                   <SelectItem key={u.user_id} value={u.user_id}>
                     {u.display_name || u.user_id.slice(0, 8) + "…"}
@@ -139,49 +136,33 @@ const LoginHistoryPanel = () => {
               </SelectContent>
             </Select>
 
-            {/* Date from */}
             <Popover>
               <PopoverTrigger asChild>
                 <Button variant="outline" size="sm" className={cn("gap-1.5 text-xs", dateFrom && "border-primary/50")}>
                   <CalendarIcon className="h-3.5 w-3.5" />
-                  {dateFrom ? format(dateFrom, "dd.MM.yyyy") : "From"}
+                  {dateFrom ? format(dateFrom, "dd.MM.yyyy") : t("admin.from")}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="end">
-                <Calendar
-                  mode="single"
-                  selected={dateFrom}
-                  onSelect={(d) => { setDateFrom(d); setPage(0); }}
-                  disabled={(d) => (dateTo ? d > dateTo : false)}
-                  initialFocus
-                  className={cn("p-3 pointer-events-auto")}
-                />
+                <Calendar mode="single" selected={dateFrom} onSelect={(d) => { setDateFrom(d); setPage(0); }} disabled={(d) => (dateTo ? d > dateTo : false)} initialFocus className="p-3 pointer-events-auto" />
               </PopoverContent>
             </Popover>
 
-            {/* Date to */}
             <Popover>
               <PopoverTrigger asChild>
                 <Button variant="outline" size="sm" className={cn("gap-1.5 text-xs", dateTo && "border-primary/50")}>
                   <CalendarIcon className="h-3.5 w-3.5" />
-                  {dateTo ? format(dateTo, "dd.MM.yyyy") : "To"}
+                  {dateTo ? format(dateTo, "dd.MM.yyyy") : t("admin.to")}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="end">
-                <Calendar
-                  mode="single"
-                  selected={dateTo}
-                  onSelect={(d) => { setDateTo(d); setPage(0); }}
-                  disabled={(d) => (dateFrom ? d < dateFrom : false)}
-                  initialFocus
-                  className={cn("p-3 pointer-events-auto")}
-                />
+                <Calendar mode="single" selected={dateTo} onSelect={(d) => { setDateTo(d); setPage(0); }} disabled={(d) => (dateFrom ? d < dateFrom : false)} initialFocus className="p-3 pointer-events-auto" />
               </PopoverContent>
             </Popover>
 
             {hasFilters && (
               <Button variant="ghost" size="sm" onClick={resetFilters} className="gap-1 text-xs text-muted-foreground">
-                <X className="h-3.5 w-3.5" /> Clear
+                <X className="h-3.5 w-3.5" /> {t("admin.clear")}
               </Button>
             )}
           </div>
@@ -191,72 +172,66 @@ const LoginHistoryPanel = () => {
         {isLoading ? (
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-12 rounded-md bg-muted animate-pulse" />
+              <div key={i} className="h-10 rounded-md bg-muted animate-pulse" />
             ))}
           </div>
         ) : !loginHistory?.length ? (
           <p className="text-sm text-muted-foreground text-center py-6">
-            {hasFilters ? "No entries match the selected filters." : t("admin.noLoginHistory")}
+            {hasFilters ? t("admin.noMatchFilters") : t("admin.noLoginHistory")}
           </p>
         ) : (
           <>
-            <div className="space-y-2 max-h-[400px] overflow-y-auto">
-              {loginHistory.map((entry) => {
-                const device = parseDevice(entry.user_agent);
-                const DeviceIcon = device.icon;
-                const browser = parseBrowser(entry.user_agent);
-                const loginDate = new Date(entry.logged_in_at);
+            <div className="max-h-[500px] overflow-y-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>{t("admin.colTime")}</TableHead>
+                    <TableHead>{t("admin.colEmail")}</TableHead>
+                    <TableHead>{t("admin.colUser")}</TableHead>
+                    <TableHead>{t("admin.colDevice")}</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {loginHistory.map((entry) => {
+                    const device = parseDevice(entry.user_agent);
+                    const DeviceIcon = device.icon;
+                    const browser = parseBrowser(entry.user_agent);
+                    const loginDate = new Date(entry.logged_in_at);
 
-                return (
-                  <div
-                    key={entry.id}
-                    className="flex items-center justify-between gap-3 rounded-lg border border-border p-3 text-sm"
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <DeviceIcon className="h-4 w-4 text-muted-foreground shrink-0" />
-                      <div className="min-w-0">
-                        <p className="font-medium text-foreground truncate">
-                          {entry.display_name || entry.user_id.slice(0, 8) + "…"}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {browser} · {device.label}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="text-right shrink-0">
-                      <p className="text-xs text-muted-foreground">
-                        {formatDistanceToNow(loginDate, { addSuffix: true })}
-                      </p>
-                      <p className="text-xs text-muted-foreground/60">
-                        {format(loginDate, "dd.MM.yyyy HH:mm")}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })}
+                    return (
+                      <TableRow key={entry.id}>
+                        <TableCell className="whitespace-nowrap text-muted-foreground">
+                          {format(loginDate, "d.M.yyyy HH:mm")}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {entry.email || entry.user_id.slice(0, 8) + "…"}
+                        </TableCell>
+                        <TableCell className="font-medium">
+                          {entry.display_name || "—"}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className="text-xs gap-1">
+                            <DeviceIcon className="h-3 w-3" />
+                            {browser}
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
             </div>
 
-            {/* Pagination */}
             <div className="flex items-center justify-between mt-4 pt-3 border-t border-border">
               <p className="text-xs text-muted-foreground">
-                Page {page + 1}{hasFilters ? " (filtered)" : ""}
+                {t("admin.page")} {page + 1}{hasFilters ? ` (${t("admin.filtered")})` : ""}
               </p>
               <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={page === 0}
-                  onClick={() => setPage((p) => p - 1)}
-                >
-                  Previous
+                <Button variant="outline" size="sm" disabled={page === 0} onClick={() => setPage((p) => p - 1)}>
+                  {t("admin.previous")}
                 </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={!hasMore}
-                  onClick={() => setPage((p) => p + 1)}
-                >
-                  Next
+                <Button variant="outline" size="sm" disabled={!hasMore} onClick={() => setPage((p) => p + 1)}>
+                  {t("admin.next")}
                 </Button>
               </div>
             </div>
