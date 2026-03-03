@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   CalendarCheck, Palette, Users, Globe, BarChart3, Mail,
-  ArrowRight, CheckCircle2, Sparkles,
+  ArrowRight, CheckCircle2,
 } from "lucide-react";
 import MarketingHeader from "@/components/MarketingHeader";
 import MarketingFooter from "@/components/MarketingFooter";
@@ -89,10 +89,6 @@ const Index = () => {
         </div>
         <div className="container mx-auto px-4 relative">
           <div className="max-w-3xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 mb-8 opacity-0 animate-fade-in backdrop-blur-sm">
-              <Sparkles className="h-3.5 w-3.5 text-accent" />
-              <span className="text-xs font-medium text-white/90">{t("hero.badge")}</span>
-            </div>
 
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white leading-tight mb-6 opacity-0 animate-fade-up drop-shadow-lg">
               {t("hero.title")}{" "}
