@@ -12,7 +12,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useState } from "react";
 import { format } from "date-fns";
-import { CalendarDays, User, Mail, Phone, MoreVertical, CheckCircle2, XCircle, Pencil, Receipt, PackageCheck, Coffee, Plus } from "lucide-react";
+import { CalendarDays, User, Mail, Phone, MoreVertical, CheckCircle2, XCircle, Pencil, Receipt, PackageCheck, Coffee, Plus, Building2 } from "lucide-react";
 import EditReservationDialog from "./EditReservationDialog";
 import ManualReservationDialog from "./ManualReservationDialog";
 import ConfirmationEmailPreview from "@/components/ConfirmationEmailPreview";
@@ -59,6 +59,20 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
   const canDelete = can(PERM_RESERVATIONS_DELETE);
   const queryClient = useQueryClient();
   const today = format(new Date(), "yyyy-MM-dd");
+
+  const { data: sites } = useQuery({
+    queryKey: ["sites", tenantId],
+    queryFn: async () => {
+      if (!tenantId) return [];
+      const { data, error } = await supabase.from("sites").select("id, name").eq("tenant_id", tenantId);
+      if (error) throw error;
+      return data ?? [];
+    },
+    enabled: !!tenantId,
+  });
+
+  const siteMap = Object.fromEntries((sites ?? []).map((s) => [s.id, s.name]));
+  const showSiteLabel = (sites?.length ?? 0) > 0 && !selectedSiteId;
 
   const { data: reservations, isLoading } = useQuery({
     queryKey: ["reservations", tenantId, selectedSiteId, statusFilter, typeFilter, dateFilter, invoicedFilter, checkoutTodayFilter],
@@ -270,6 +284,12 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
                       <span className="font-semibold text-foreground">{r.guest_name}</span>
                       <Badge variant="outline" className="text-xs capitalize">{typeLabel(r.reservation_type)}</Badge>
                         <Badge className={`text-xs ${statusColors[r.status ?? "pending"] ?? ""}`}>{t(`dashboard.${r.status ?? "pending"}` as any)}</Badge>
+                        {showSiteLabel && r.site_id && siteMap[r.site_id] && (
+                          <Badge variant="outline" className="text-xs font-normal gap-1">
+                            <Building2 className="h-3 w-3" />
+                            {siteMap[r.site_id]}
+                          </Badge>
+                        )}
                         {(r as any).is_checked_in && (
                           <Badge className="text-xs bg-emerald-100 text-emerald-800 border-emerald-200">{t("dashboard.checkedIn" as any)}</Badge>
                         )}

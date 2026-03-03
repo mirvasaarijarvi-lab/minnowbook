@@ -56,6 +56,20 @@ const ResourceManagement = () => {
     room_type_pricing: { ...defaultRoomPricing }, is_active: true,
   });
 
+  const { data: sites } = useQuery({
+    queryKey: ["sites", tenantId],
+    queryFn: async () => {
+      if (!tenantId) return [];
+      const { data, error } = await supabase.from("sites").select("id, name").eq("tenant_id", tenantId);
+      if (error) throw error;
+      return data ?? [];
+    },
+    enabled: !!tenantId,
+  });
+
+  const siteMap = Object.fromEntries((sites ?? []).map((s) => [s.id, s.name]));
+  const showSiteColumn = (sites?.length ?? 0) > 0 && !selectedSiteId;
+
   const { data: resources, isLoading } = useQuery({
     queryKey: ["resources", tenantId, selectedSiteId],
     queryFn: async () => {
@@ -366,6 +380,7 @@ const ResourceManagement = () => {
                   <TableHead className="w-10"></TableHead>
                   <TableHead>{t("common.name")}</TableHead>
                   <TableHead>{t("common.type")}</TableHead>
+                  {showSiteColumn && <TableHead>Site</TableHead>}
                   <TableHead>{t("common.description")}</TableHead>
                   <TableHead className="text-center">{t("dashboard.capacity")}</TableHead>
                   <TableHead className="text-right">{t("common.price")}</TableHead>
@@ -385,6 +400,15 @@ const ResourceManagement = () => {
                       </TableCell>
                       <TableCell className="font-medium">{r.name}</TableCell>
                       <TableCell>{typeLabel(r.resource_type)}</TableCell>
+                      {showSiteColumn && (
+                        <TableCell>
+                          {r.site_id && siteMap[r.site_id] ? (
+                            <Badge variant="outline" className="text-xs font-normal">{siteMap[r.site_id]}</Badge>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">—</span>
+                          )}
+                        </TableCell>
+                      )}
                       <TableCell className="text-muted-foreground max-w-[260px] truncate">{r.description ?? "–"}</TableCell>
                       <TableCell className="text-center">{r.capacity ?? "–"}</TableCell>
                       <TableCell className="text-right">
