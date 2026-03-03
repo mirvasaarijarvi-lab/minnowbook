@@ -11,19 +11,19 @@ import CalendarSection from "./CalendarSection";
 const SECTIONS = [
   {
     key: "hotel",
-    labelKey: "Hotel / Guesthouse",
+    labelKey: "dashboard.calendarHotel" as const,
     reservationTypes: ["hotel", "guesthouse"],
     resourceTypes: ["hotel", "guesthouse"],
   },
   {
     key: "venue",
-    labelKey: "Event Spaces",
+    labelKey: "dashboard.calendarVenue" as const,
     reservationTypes: ["venue"],
     resourceTypes: ["venue"],
   },
   {
     key: "restaurant",
-    labelKey: "Restaurant",
+    labelKey: "dashboard.calendarRestaurant" as const,
     reservationTypes: ["restaurant"],
     resourceTypes: ["restaurant"],
   },
@@ -74,7 +74,7 @@ const CalendarView = () => {
       {SECTIONS.map((section) => (
         <CalendarSection
           key={section.key}
-          title={section.labelKey}
+          title={t(section.labelKey)}
           reservationTypes={section.reservationTypes as unknown as string[]}
           resourceTypes={section.resourceTypes as unknown as string[]}
           onSelectDate={setDefaultDate}

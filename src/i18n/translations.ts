@@ -376,6 +376,9 @@ type TranslationKeys = {
   "dashboard.quickInfo": string;
   "dashboard.checkoutsToday": string;
   "dashboard.uninvoiced": string;
+  "dashboard.calendarHotel": string;
+  "dashboard.calendarVenue": string;
+  "dashboard.calendarRestaurant": string;
   "booking.calculatePrice": string;
 
   // Onboarding
@@ -928,6 +931,9 @@ const en: TranslationKeys = {
   "dashboard.quickInfo": "Quick info",
   "dashboard.checkoutsToday": "Check-outs today",
   "dashboard.uninvoiced": "Uninvoiced",
+  "dashboard.calendarHotel": "Hotel / Guesthouse",
+  "dashboard.calendarVenue": "Event Spaces",
+  "dashboard.calendarRestaurant": "Restaurant",
   "booking.calculatePrice": "Calculate Price",
 
   // Onboarding
@@ -1467,6 +1473,9 @@ const fi: TranslationKeys = {
   "dashboard.quickInfo": "Pikatiedot",
   "dashboard.checkoutsToday": "Uloskirjaukset tänään",
   "dashboard.uninvoiced": "Laskuttamatta",
+  "dashboard.calendarHotel": "Hotelli / Majatalo",
+  "dashboard.calendarVenue": "Juhlatilat",
+  "dashboard.calendarRestaurant": "Ravintola",
   "booking.calculatePrice": "Laske hinta",
 
   // Onboarding
@@ -2006,6 +2015,9 @@ const sv: TranslationKeys = {
   "dashboard.quickInfo": "Snabbinfo",
   "dashboard.checkoutsToday": "Utcheckningar idag",
   "dashboard.uninvoiced": "Ej fakturerade",
+  "dashboard.calendarHotel": "Hotell / Gästhus",
+  "dashboard.calendarVenue": "Festlokaler",
+  "dashboard.calendarRestaurant": "Restaurang",
   "booking.calculatePrice": "Beräkna pris",
 
   // Onboarding
