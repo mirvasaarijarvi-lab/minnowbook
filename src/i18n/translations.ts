@@ -414,6 +414,7 @@ type TranslationKeys = {
   "dashboard.venue": string;
   "dashboard.guesthouse": string;
   "dashboard.hotel": string;
+  "dashboard.checkoutToday": string;
   "dashboard.editReservation": string;
   "dashboard.reservationUpdated": string;
   "dashboard.reservationUpdateError": string;
@@ -1186,8 +1187,9 @@ const en: TranslationKeys = {
   "dashboard.restaurant": "Restaurant",
   "dashboard.venue": "Venue",
   "dashboard.guesthouse": "Hotel / Gasthaus",
-  "dashboard.hotel": "Hotel / Gasthaus",
-  "dashboard.editReservation": "Edit Reservation",
+   "dashboard.hotel": "Hotel / Gasthaus",
+   "dashboard.checkoutToday": "Check-outs today",
+   "dashboard.editReservation": "Edit Reservation",
   "dashboard.reservationUpdated": "Reservation updated",
   "dashboard.reservationUpdateError": "Failed to update reservation",
   "dashboard.checkOutDate": "Check-out date",
@@ -1946,8 +1948,9 @@ const fi: TranslationKeys = {
   "dashboard.restaurant": "Ravintola",
   "dashboard.venue": "Tila",
   "dashboard.guesthouse": "Hotelli / Gasthaus",
-  "dashboard.hotel": "Hotelli / Gasthaus",
-  "dashboard.editReservation": "Muokkaa varausta",
+   "dashboard.hotel": "Hotelli / Gasthaus",
+   "dashboard.checkoutToday": "Uloskirjaukset tänään",
+   "dashboard.editReservation": "Muokkaa varausta",
   "dashboard.reservationUpdated": "Varaus päivitetty",
   "dashboard.reservationUpdateError": "Varauksen päivitys epäonnistui",
   "dashboard.checkOutDate": "Lähtöpäivä",
@@ -2706,8 +2709,9 @@ const sv: TranslationKeys = {
   "dashboard.restaurant": "Restaurang",
   "dashboard.venue": "Lokal",
   "dashboard.guesthouse": "Hotell / Gasthaus",
-  "dashboard.hotel": "Hotell / Gasthaus",
-  "dashboard.editReservation": "Redigera bokning",
+   "dashboard.hotel": "Hotell / Gasthaus",
+   "dashboard.checkoutToday": "Utcheckningar idag",
+   "dashboard.editReservation": "Redigera bokning",
   "dashboard.reservationUpdated": "Bokning uppdaterad",
   "dashboard.reservationUpdateError": "Kunde inte uppdatera bokningen",
   "dashboard.checkOutDate": "Utcheckningsdatum",
