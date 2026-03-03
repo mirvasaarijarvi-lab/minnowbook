@@ -185,7 +185,7 @@ const EditReservationDialog = ({
           room_type: form.room_type || null,
           breakfast_included: form.breakfast_included,
           event_type: form.event_type || null,
-          estimated_guests: form.estimated_guests ? parseInt(form.estimated_guests) : null,
+          estimated_guests: form.guests_count ? parseInt(form.guests_count) : null,
           catering_needed: form.catering_needed,
           updated_at: new Date().toISOString(),
         })
@@ -381,26 +381,20 @@ const EditReservationDialog = ({
             {/* Venue fields */}
             {isVenueType && (
               <div className="space-y-3 rounded-lg border border-border p-3">
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <div className="space-y-1.5">
-                    <Label>{t("booking.eventType" as any)}</Label>
-                    <Select value={form.event_type} onValueChange={(v) => updateField("event_type", v)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="—" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="wedding">{t("booking.eventWedding" as any)}</SelectItem>
-                        <SelectItem value="corporate">{t("booking.eventCorporate" as any)}</SelectItem>
-                        <SelectItem value="birthday">{t("booking.eventBirthday" as any)}</SelectItem>
-                        <SelectItem value="conference">{t("booking.eventConference" as any)}</SelectItem>
-                        <SelectItem value="other">{t("booking.eventOther" as any)}</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="edit-est-guests">{t("booking.estimatedGuests" as any)}</Label>
-                    <Input id="edit-est-guests" type="number" min={1} max={1000} value={form.estimated_guests} onChange={(e) => updateField("estimated_guests", e.target.value)} />
-                  </div>
+                <div className="space-y-1.5">
+                  <Label>{t("booking.eventType" as any)}</Label>
+                  <Select value={form.event_type} onValueChange={(v) => updateField("event_type", v)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="—" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="wedding">{t("booking.eventWedding" as any)}</SelectItem>
+                      <SelectItem value="corporate">{t("booking.eventCorporate" as any)}</SelectItem>
+                      <SelectItem value="birthday">{t("booking.eventBirthday" as any)}</SelectItem>
+                      <SelectItem value="conference">{t("booking.eventConference" as any)}</SelectItem>
+                      <SelectItem value="other">{t("booking.eventOther" as any)}</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="flex items-center gap-2">
                   <Checkbox
@@ -464,7 +458,7 @@ const EditReservationDialog = ({
                 room_type: form.room_type || null,
                 breakfast_included: form.breakfast_included,
                 event_type: form.event_type || null,
-                estimated_guests: form.estimated_guests ? parseInt(form.estimated_guests) : null,
+                estimated_guests: form.guests_count ? parseInt(form.guests_count) : null,
                 catering_needed: form.catering_needed,
                 special_requests: form.special_requests || null,
                 price_eur: form.price_eur ? parseFloat(form.price_eur) : null,
@@ -508,7 +502,7 @@ const EditReservationDialog = ({
                 room_type: form.room_type || null,
                 breakfast_included: form.breakfast_included,
                 event_type: form.event_type || null,
-                estimated_guests: form.estimated_guests ? parseInt(form.estimated_guests) : null,
+                estimated_guests: form.guests_count ? parseInt(form.guests_count) : null,
                 catering_needed: form.catering_needed,
                 special_requests: form.special_requests || null,
                 price_eur: form.price_eur ? parseFloat(form.price_eur) : null,

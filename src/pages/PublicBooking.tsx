@@ -477,7 +477,7 @@ const PublicBooking = () => {
       }
       if (isVenue) {
         payload.event_type = form.event_type || null;
-        payload.estimated_guests = form.estimated_guests ? parseInt(form.estimated_guests) : null;
+        payload.estimated_guests = parsed.guests_count ?? null;
         payload.catering_needed = form.catering_needed;
       }
       if (parsed.reservation_type === "restaurant") {
@@ -1177,8 +1177,7 @@ const PublicBooking = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-2">
+                <div className="space-y-2">
                     <Label>{t("booking.eventType" as any)}</Label>
                     <Select value={form.event_type} onValueChange={(v) => updateField("event_type", v)}>
                       <SelectTrigger><SelectValue placeholder={t("booking.eventType" as any)} /></SelectTrigger>
@@ -1191,18 +1190,6 @@ const PublicBooking = () => {
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="estimated_guests">{t("booking.estimatedGuests" as any)}</Label>
-                    <Input
-                      id="estimated_guests"
-                      type="number"
-                      min={1}
-                      max={1000}
-                      value={form.estimated_guests}
-                      onChange={(e) => updateField("estimated_guests", e.target.value)}
-                    />
-                  </div>
-                </div>
                 <div className="flex items-center gap-2">
                   <Checkbox
                     id="catering_needed"
