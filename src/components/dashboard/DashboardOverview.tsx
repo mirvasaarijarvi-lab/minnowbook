@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/hooks/useTenant";
 import { useSiteContext } from "@/hooks/useSiteContext";
+import { usePermissions } from "@/hooks/usePermissions";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -39,12 +40,13 @@ interface DashboardOverviewProps {
 const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
   const { tenantId, tenant, isOwner, isAdmin } = useTenant();
   const { selectedSiteId, setSelectedSiteId } = useSiteContext();
+  const { isSystemAdmin } = usePermissions();
   const today = format(new Date(), "yyyy-MM-dd");
   const t = useT();
   const { typeLabel } = useResourceTypeLabel();
   const dateFnsLocale = useDateLocale();
 
-  const isBusinessOwnerAdmin = tenant?.tier === "business" && (isOwner || isAdmin);
+  const isBusinessOwnerAdmin = (tenant?.tier === "business" && (isOwner || isAdmin)) || isSystemAdmin;
 
   // Fetch sites for tab rendering (business tier owner/admin only)
   const { data: sites } = useQuery({
