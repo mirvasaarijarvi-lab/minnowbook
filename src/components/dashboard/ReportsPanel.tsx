@@ -460,15 +460,16 @@ const ReportsPanel = () => {
     title: string; total: number; confirmed: number; pending: number; icon: React.ReactNode; prevTotal?: number;
   }) => (
     <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-medium flex items-center gap-2">{icon}{title}</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-2">
+      <CardContent className="pt-5 pb-4">
+        <div className="flex items-center gap-2 mb-1">
+          {icon}
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{title}</p>
+        </div>
         <div className="flex items-center gap-2">
           <span className="text-3xl font-bold">{total}</span>
           <DeltaBadge current={total} previous={prevTotal} />
         </div>
-        <div className="flex gap-3 text-sm">
+        <div className="flex gap-3 text-sm mt-1">
           <span className="flex items-center gap-1 text-muted-foreground"><CheckCircle2 className="h-3.5 w-3.5 text-primary" />{confirmed} {t("reports.confirmed")}</span>
           <span className="flex items-center gap-1 text-muted-foreground"><Clock className="h-3.5 w-3.5" />{pending} {t("reports.pending")}</span>
         </div>
@@ -476,15 +477,59 @@ const ReportsPanel = () => {
     </Card>
   );
 
+  const fmtEur = (v: number) => v.toLocaleString("fi-FI", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  // Accommodation-specific stats
+  const accomStats = useMemo(() => {
+    const accomReservations = typeFilteredRaw.filter((r) => isAccommodation(r));
+    const totalNights = accomReservations.reduce((s, r) => s + calcNights(r), 0);
+    const totalRoomRevenue = accomReservations.reduce((s, r) => s + calcRoomPrice(r), 0);
+    const bfReservations = accomReservations.filter((r) => r.breakfast_included);
+    const totalBfNights = bfReservations.reduce((s, r) => s + calcNights(r), 0);
+    const totalBfGuests = bfReservations.reduce((s, r) => s + (r.guests_count ?? 1), 0);
+    const totalBfRevenue = accomReservations.reduce((s, r) => s + calcBreakfastPrice(r), 0);
+    const avgBfPrice = bfReservations.length > 0 ? totalBfRevenue / (totalBfNights * totalBfGuests || 1) : 0;
+    const totalAccomRevenue = totalRoomRevenue + totalBfRevenue;
+    return {
+      count: accomReservations.length, totalNights, totalRoomRevenue,
+      bfCount: bfReservations.length, totalBfNights, totalBfGuests, totalBfRevenue, avgBfPrice,
+      totalAccomRevenue,
+    };
+  }, [typeFilteredRaw, isAccommodation, calcNights, calcRoomPrice, calcBreakfastPrice]);
+
+  // Uninvoiced stats for alert
+  const uninvoicedStats = useMemo(() => {
+    const notInv = typeFilteredRaw.filter((r) => !r.is_invoiced);
+    return {
+      count: notInv.length,
+      total: typeFilteredRaw.length,
+      amount: notInv.reduce((s, r) => s + effectivePrice(r), 0),
+    };
+  }, [typeFilteredRaw, effectivePrice]);
+
+  const typeLabel = (tp: string) => {
+    const map: Record<string, string> = {
+      restaurant: t("dashboard.restaurant"),
+      venue: t("dashboard.venue"),
+      guesthouse: t("dashboard.guesthouse"),
+      hotel: t("dashboard.hotel"),
+    };
+    return map[tp] ?? tp;
+  };
+
   return (
     <div className="space-y-6 max-w-6xl">
-      <div className="flex items-center gap-2">
-        <h2 className="text-2xl font-serif font-bold text-foreground">{t("nav.reports")}</h2>
-        <DashboardTooltip text="Analyze reservation trends, revenue, and occupancy. Filter by time period and compare against previous periods. Export CSV or print reports for your records." />
+      {/* Header */}
+      <div>
+        <div className="flex items-center gap-2">
+          <h2 className="text-2xl font-serif font-bold text-foreground">{t("nav.reports")}</h2>
+          <DashboardTooltip text="Analyze reservation trends, revenue, and occupancy. Filter by time period and compare against previous periods. Export CSV or print reports for your records." />
+        </div>
+        <p className="text-sm text-muted-foreground">{t("reports.subtitle")}</p>
       </div>
 
       {/* Filters row */}
-       <div className="flex flex-wrap items-center gap-2" data-tour="reports-filters">
+      <div className="flex flex-wrap items-center gap-2" data-tour="reports-filters">
         <Select value={period} onValueChange={(v) => { setPeriod(v as Period); setReferenceDate(new Date()); }}>
           <SelectTrigger className="w-[160px]"><SelectValue /></SelectTrigger>
           <SelectContent>
@@ -519,26 +564,26 @@ const ReportsPanel = () => {
           </div>
         )}
 
-        {allowedTypes.length > 1 && (
-          <Select value={typeFilter} onValueChange={setTypeFilter}>
-            <SelectTrigger className="w-[160px]"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{t("reports.filter.all")}</SelectItem>
-              {allowedTypes.map((tp) => (
-                <SelectItem key={tp} value={tp}>{tp}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        )}
-
         <Select value={invoicedFilter} onValueChange={(v) => setInvoicedFilter(v as typeof invoicedFilter)}>
           <SelectTrigger className="w-[180px]"><SelectValue /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">{t("reports.filter.all")}</SelectItem>
+            <SelectItem value="all">{t("reports.filter.all")} ({t("reports.invoicing").toLowerCase()})</SelectItem>
             <SelectItem value="invoiced">{t("reports.invoiced")}</SelectItem>
             <SelectItem value="not_invoiced">{t("reports.filter.notInvoiced")}</SelectItem>
           </SelectContent>
         </Select>
+
+        {allowedTypes.length > 1 && (
+          <Select value={typeFilter} onValueChange={setTypeFilter}>
+            <SelectTrigger className="w-[180px]"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t("reports.filter.all")} ({t("reports.invoicing").toLowerCase()})</SelectItem>
+              {allowedTypes.map((tp) => (
+                <SelectItem key={tp} value={tp}>{typeLabel(tp)}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
       </div>
 
       {/* Nav + actions */}
@@ -576,70 +621,110 @@ const ReportsPanel = () => {
         </div>
       )}
 
-      {/* Revenue hero cards */}
-      {!isLoading && (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Card>
-            <CardContent className="pt-5 pb-5">
-              <div className="flex items-start justify-between">
-                <div className="space-y-1">
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Used</p>
-                  <p className="text-3xl font-bold tracking-tight">{invoicingStats.used}</p>
-                  <p className="text-sm text-muted-foreground">{invoicingStats.notUsed} not used</p>
-                </div>
-                <div className="p-2 rounded-lg bg-primary/10 text-primary"><CheckCircle2 className="h-5 w-5" /></div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-5 pb-5">
-              <div className="flex items-start justify-between">
-                <div className="space-y-1">
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t("reports.invoiced")}</p>
-                  <p className="text-3xl font-bold tracking-tight">{invoicingStats.invoicedEur.toLocaleString("fi-FI", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €</p>
-                  <p className="text-sm text-muted-foreground">{invoicingStats.invoiced} {t("reports.total").toLowerCase()}</p>
-                </div>
-                <div className="p-2 rounded-lg bg-primary/10 text-primary"><TrendingUp className="h-5 w-5" /></div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className={invoicingStats.notInvoicedEur > 0 ? "border-accent/60 bg-accent/5" : ""}>
-            <CardContent className="pt-5 pb-5">
-              <div className="flex items-start justify-between">
-                <div className="space-y-1">
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t("reports.notInvoiced")}</p>
-                  <p className="text-3xl font-bold tracking-tight">{invoicingStats.notInvoicedEur.toLocaleString("fi-FI", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €</p>
-                  <p className="text-sm text-muted-foreground">{invoicingStats.notInvoiced} {t("reports.total").toLowerCase()}</p>
-                </div>
-                <div className="p-2 rounded-lg bg-muted text-muted-foreground"><AlertCircle className="h-5 w-5" /></div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-5 pb-5">
-              <div className="flex items-start justify-between">
-                <div className="space-y-1">
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t("reports.totalRevenue")}</p>
-                  <p className="text-3xl font-bold tracking-tight">{invoicingStats.totalEur.toLocaleString("fi-FI", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €</p>
-                  <p className="text-sm text-muted-foreground">{invoicingStats.total} {t("reports.total").toLowerCase()}</p>
-                </div>
-                <div className="p-2 rounded-lg bg-muted text-muted-foreground"><Euro className="h-5 w-5" /></div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
-
       {isLoading ? (
         <div className="text-center py-12 text-muted-foreground">{t("common.loading")}</div>
       ) : (
         <>
-          {/* Summary cards */}
-          <div className={cn("grid grid-cols-1 gap-4", `sm:grid-cols-2 lg:grid-cols-${Math.min(Object.keys(stats).length, 4)}`)}>
+          {/* Revenue hero cards - 3 columns */}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            {/* Invoiced */}
+            <Card className="border-primary/40 bg-primary/5">
+              <CardContent className="pt-5 pb-5">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-1">
+                    <p className="text-xs font-medium text-primary uppercase tracking-wide">{t("reports.invoiced")}</p>
+                    <p className="text-3xl font-bold tracking-tight">{fmtEur(invoicingStats.invoicedEur)} €</p>
+                    <p className="text-sm text-muted-foreground">{invoicingStats.invoiced} {t("reports.ofTotal")}</p>
+                  </div>
+                  <div className="p-2 rounded-lg bg-primary/10 text-primary"><CheckCircle2 className="h-5 w-5" /></div>
+                </div>
+              </CardContent>
+            </Card>
+            {/* Not invoiced */}
+            <Card className={invoicingStats.notInvoicedEur > 0 ? "border-accent/60 bg-accent/5" : ""}>
+              <CardContent className="pt-5 pb-5">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-1">
+                    <p className="text-xs font-medium text-accent-foreground uppercase tracking-wide">{t("reports.notInvoiced")}</p>
+                    <p className="text-3xl font-bold tracking-tight">{fmtEur(invoicingStats.notInvoicedEur)} €</p>
+                    <p className="text-sm text-muted-foreground">{invoicingStats.notInvoiced} {t("reports.ofTotal")}</p>
+                  </div>
+                  <div className="p-2 rounded-lg bg-accent/10 text-accent-foreground"><AlertCircle className="h-5 w-5" /></div>
+                </div>
+              </CardContent>
+            </Card>
+            {/* Total */}
+            <Card>
+              <CardContent className="pt-5 pb-5">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-1">
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t("reports.totalRevenue")}</p>
+                    <p className="text-3xl font-bold tracking-tight">{fmtEur(invoicingStats.totalEur)} €</p>
+                    <p className="text-sm text-muted-foreground">{invoicingStats.total} {t("reports.ofTotal")}</p>
+                  </div>
+                  <div className="p-2 rounded-lg bg-muted text-muted-foreground"><Euro className="h-5 w-5" /></div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Accommodation breakdown (only if accommodation types exist) */}
+          {accomStats.count > 0 && (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              {/* Room revenue */}
+              <Card className="border-primary/20">
+                <CardContent className="pt-5 pb-5">
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-1">
+                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t("reports.roomRevenue")} ({t("dashboard.guesthouse")})</p>
+                      <p className="text-3xl font-bold tracking-tight">{fmtEur(accomStats.totalRoomRevenue)} €</p>
+                      <p className="text-xs text-muted-foreground">
+                        {accomStats.totalNights} {t("reports.nights")} • {t("reports.roomPrice").toLowerCase()}<br />
+                        {accomStats.count} {t("reports.reservations")}
+                      </p>
+                    </div>
+                    <div className="p-2 rounded-lg bg-primary/10 text-primary"><BedDouble className="h-5 w-5" /></div>
+                  </div>
+                </CardContent>
+              </Card>
+              {/* Breakfast */}
+              <Card className="border-primary/20">
+                <CardContent className="pt-5 pb-5">
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-1">
+                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t("reports.breakfastLabel")}</p>
+                      <p className="text-3xl font-bold tracking-tight">{fmtEur(accomStats.totalBfRevenue)} €</p>
+                      <p className="text-xs text-muted-foreground">
+                        {accomStats.totalBfNights} {t("reports.nights")} • {accomStats.totalBfGuests} hlö • {fmtEur(accomStats.avgBfPrice)} €/hlö<br />
+                        {accomStats.bfCount} {t("reports.reservations")}
+                      </p>
+                    </div>
+                    <div className="p-2 rounded-lg bg-accent/10 text-accent-foreground"><Coffee className="h-5 w-5" /></div>
+                  </div>
+                </CardContent>
+              </Card>
+              {/* Accommodation total */}
+              <Card className="border-primary/20">
+                <CardContent className="pt-5 pb-5">
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-1">
+                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t("dashboard.guesthouse")} {t("reports.total").toLowerCase()}</p>
+                      <p className="text-3xl font-bold tracking-tight">{fmtEur(accomStats.totalAccomRevenue)} €</p>
+                      <p className="text-xs text-muted-foreground">{t("reports.roomAndBreakfast")}</p>
+                    </div>
+                    <div className="p-2 rounded-lg bg-muted text-muted-foreground"><Euro className="h-5 w-5" /></div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {/* Reservation count cards */}
+          <div className={cn("grid grid-cols-2 gap-4", `lg:grid-cols-${Math.min(Object.keys(stats).length, 4)}`)}>
             {Object.entries(stats).map(([key, s]) => (
               <StatCard
                 key={key}
-                title={key === "all" ? t("reports.total") : key}
+                title={key === "all" ? t("reports.total") : typeLabel(key)}
                 {...s}
                 icon={<CalendarIcon className="h-4 w-4" />}
               />
@@ -655,25 +740,46 @@ const ReportsPanel = () => {
               <div className={cn("grid gap-4", `grid-cols-2 sm:grid-cols-${Math.min(1 + allowedTypes.length, 4)}`)}>
                 {[
                   { label: t("reports.total"), data: { invoiced: invoicingStats.invoiced, total: invoicingStats.total, invoicedEur: invoicingStats.invoicedEur, totalEur: invoicingStats.totalEur } },
-                  ...allowedTypes.map((tp) => ({ label: tp, data: invoicingStats[tp] || { invoiced: 0, total: 0, invoicedEur: 0, totalEur: 0 } })),
+                  ...allowedTypes.map((tp) => ({ label: typeLabel(tp), data: invoicingStats[tp] || { invoiced: 0, total: 0, invoicedEur: 0, totalEur: 0 } })),
                 ].map(({ label, data }) => (
                   <div key={label} className="space-y-1">
-                    <p className="text-xs text-muted-foreground">{label}</p>
+                    <p className="text-xs text-muted-foreground font-medium">{label}</p>
                     <div className="flex items-end gap-2">
                       <span className="text-2xl font-bold">{data.invoiced}</span>
                       <span className="text-sm text-muted-foreground pb-0.5">/ {data.total}</span>
                     </div>
                     {data.totalEur > 0 && (
-                      <p className="text-sm font-medium">{data.invoicedEur.toLocaleString("fi-FI", { minimumFractionDigits: 2 })} € <span className="text-xs text-muted-foreground font-normal">/ {data.totalEur.toLocaleString("fi-FI", { minimumFractionDigits: 2 })} €</span></p>
+                      <p className="text-sm font-medium">{fmtEur(data.invoicedEur)} € <span className="text-xs text-muted-foreground font-normal">/ {fmtEur(data.totalEur)} €</span></p>
                     )}
                     <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
                       <div className="bg-primary h-2 rounded-full transition-all" style={{ width: data.total > 0 ? `${Math.round((data.invoiced / data.total) * 100)}%` : "0%" }} />
                     </div>
+                    <p className="text-xs text-muted-foreground">{data.total > 0 ? Math.round((data.invoiced / data.total) * 100) : 0}% {t("reports.invoicedPercent")}</p>
                   </div>
                 ))}
               </div>
             </CardContent>
           </Card>
+
+          {/* Alert banners */}
+          {uninvoicedStats.count > 0 && (
+            <div className="rounded-lg border border-accent/40 bg-accent/5 px-4 py-3 text-sm flex items-center gap-2">
+              <AlertCircle className="h-4 w-4 text-accent-foreground shrink-0" />
+              <span>{t("reports.uninvoicedAlert")
+                .replace("{count}", String(uninvoicedStats.count))
+                .replace("{total}", String(uninvoicedStats.total))
+                .replace("{amount}", `${fmtEur(uninvoicedStats.amount)} €`)}</span>
+            </div>
+          )}
+          {accomStats.bfCount > 0 && (
+            <div className="rounded-lg border border-accent/40 bg-accent/5 px-4 py-3 text-sm flex items-center gap-2">
+              <Coffee className="h-4 w-4 text-accent-foreground shrink-0" />
+              <span>{t("reports.breakfastAlert")
+                .replace("{count}", String(accomStats.bfCount))
+                .replace("{nights}", String(accomStats.totalBfNights))
+                .replace("{amount}", `${fmtEur(accomStats.totalBfRevenue)} €`)}</span>
+            </div>
+          )}
 
           {/* Chart */}
           {reservations.length > 0 && (
@@ -705,11 +811,11 @@ const ReportsPanel = () => {
                       <TableHead>{t("common.type")}</TableHead>
                       <TableHead>{t("common.guests")}</TableHead>
                       <TableHead>{t("common.status")}</TableHead>
-                      <TableHead>{t("reports.used" as any)}</TableHead>
-                      <TableHead>{t("reports.breakfast" as any)}</TableHead>
+                      <TableHead>{t("reports.used")}</TableHead>
+                      <TableHead>{t("reports.breakfast")}</TableHead>
                       <TableHead>{t("reports.invoiced")}</TableHead>
                       <TableHead>{t("common.price")} (€)</TableHead>
-                      <TableHead>{t("reports.totalPrice" as any)} (€)</TableHead>
+                      <TableHead>{t("reports.totalPrice")}</TableHead>
                       <TableHead>{t("reports.notes")}</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -721,7 +827,7 @@ const ReportsPanel = () => {
                         <TableRow key={r.id}>
                           <TableCell className="whitespace-nowrap">{format(new Date(r.date + "T00:00:00"), "d.M.yyyy")}</TableCell>
                           <TableCell>{r.guest_name}</TableCell>
-                          <TableCell><Badge variant="outline">{r.reservation_type}</Badge></TableCell>
+                          <TableCell><Badge variant="outline">{typeLabel(r.reservation_type)}</Badge></TableCell>
                           <TableCell>{r.guests_count || r.estimated_guests || "-"}</TableCell>
                           <TableCell>
                             <Badge variant={r.status === "confirmed" ? "default" : "secondary"}>{r.status}</Badge>
@@ -734,7 +840,7 @@ const ReportsPanel = () => {
                           </TableCell>
                           <TableCell>
                             {r.breakfast_included
-                              ? <Badge className="bg-amber-100 text-amber-800 border-amber-200 gap-1"><Coffee className="h-3.5 w-3.5" />{t("reports.breakfast" as any)}</Badge>
+                              ? <Badge className="bg-amber-100 text-amber-800 border-amber-200 gap-1"><Coffee className="h-3.5 w-3.5" />{t("reports.breakfast")}</Badge>
                               : <span className="text-muted-foreground">—</span>
                             }
                           </TableCell>
@@ -746,24 +852,24 @@ const ReportsPanel = () => {
                           </TableCell>
                           <TableCell className="text-sm font-medium whitespace-nowrap">
                             {isAccommodation(r) ? (
-                              calcRoomPrice(r) > 0 ? `${calcRoomPrice(r).toLocaleString("fi-FI", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €` : "—"
+                              calcRoomPrice(r) > 0 ? `${fmtEur(calcRoomPrice(r))} €` : "—"
                             ) : r.reservation_type === "restaurant" && r.pricing_type === "menu" ? (
                               <span className="text-muted-foreground">—</span>
                             ) : total > 0 ? (
-                              `${total.toLocaleString("fi-FI", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`
+                              `${fmtEur(total)} €`
                             ) : "—"}
                           </TableCell>
                           <TableCell className="text-sm font-bold whitespace-nowrap">
                             {total > 0 ? (
                               isAccommodation(r) && bfPrice > 0 ? (
                                 <div>
-                                  <span>{total.toLocaleString("fi-FI", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €</span>
+                                  <span>{fmtEur(total)} €</span>
                                   <div className="text-xs text-muted-foreground font-normal">
-                                    {t("reports.breakfast" as any)}: {bfPrice.toLocaleString("fi-FI", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
+                                    {t("reports.breakfast")}: {fmtEur(bfPrice)} €
                                   </div>
                                 </div>
                               ) : (
-                                `${total.toLocaleString("fi-FI", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`
+                                `${fmtEur(total)} €`
                               )
                             ) : "—"}
                           </TableCell>
@@ -775,7 +881,7 @@ const ReportsPanel = () => {
                   <TableFooter>
                     <TableRow>
                       <TableCell colSpan={9} className="text-right font-semibold">{t("reports.grandTotal")}</TableCell>
-                      <TableCell className="font-bold whitespace-nowrap">{grandTotal.toLocaleString("fi-FI", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €</TableCell>
+                      <TableCell className="font-bold whitespace-nowrap">{fmtEur(grandTotal)} €</TableCell>
                       <TableCell />
                     </TableRow>
                   </TableFooter>
