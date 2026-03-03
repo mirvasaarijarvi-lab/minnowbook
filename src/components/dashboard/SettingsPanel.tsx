@@ -180,33 +180,43 @@ const SettingsPanel = () => {
 
   const mutation = useMutation({
     mutationFn: async () => {
-      if (!tenantId || !settings?.id) throw new Error("No settings found");
-      const { error } = await supabase
-        .from("tenant_settings")
-        .update({
-          business_name: form.business_name || null,
-          business_description: form.business_description || null,
-          business_email: form.business_email || null,
-          business_phone: form.business_phone || null,
-          business_address: form.business_address || null,
-          primary_color: form.primary_color,
-          secondary_color: form.secondary_color,
-          accent_color: form.accent_color,
-          logo_url: form.logo_url || null,
-          hero_image_url: form.hero_image_url || null,
-          availability_thresholds: thresholds as any,
-          resource_type_names: resourceTypeNames as any,
-          resource_type_descriptions: resourceTypeDescriptions as any,
-        })
-        .eq("id", settings.id);
+      if (!tenantId) throw new Error("No tenant found");
+
+      const payload = {
+        tenant_id: tenantId,
+        business_name: form.business_name || null,
+        business_description: form.business_description || null,
+        business_email: form.business_email || null,
+        business_phone: form.business_phone || null,
+        business_address: form.business_address || null,
+        primary_color: form.primary_color,
+        secondary_color: form.secondary_color,
+        accent_color: form.accent_color,
+        logo_url: form.logo_url || null,
+        hero_image_url: form.hero_image_url || null,
+        availability_thresholds: thresholds as any,
+        resource_type_names: resourceTypeNames as any,
+        resource_type_descriptions: resourceTypeDescriptions as any,
+      };
+
+      const { error } = settings?.id
+        ? await supabase
+            .from("tenant_settings")
+            .update(payload)
+            .eq("id", settings.id)
+            .eq("tenant_id", tenantId)
+        : await supabase
+            .from("tenant_settings")
+            .upsert(payload, { onConflict: "tenant_id" });
+
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tenant-settings"] });
       toast.success(t("settings.saved"));
     },
-    onError: () => {
-      toast.error(t("settings.saveError"));
+    onError: (error: any) => {
+      toast.error(error?.message || t("settings.saveError"));
     },
   });
 
