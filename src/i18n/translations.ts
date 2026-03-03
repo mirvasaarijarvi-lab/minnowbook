@@ -990,6 +990,10 @@ type TranslationKeys = {
   "sites.typeHotel": string;
   "sites.typeRestaurant": string;
   "sites.typeVenue": string;
+  "sites.resourceName": string;
+  "sites.resourceType": string;
+  "sites.capacity": string;
+  "sites.noResourcesInSite": string;
 
   // Approval Queue
   "approval.colType": string;
@@ -1990,6 +1994,10 @@ const en: TranslationKeys = {
   "sites.typeHotel": "Hotel / Guesthouse",
   "sites.typeRestaurant": "Restaurant",
   "sites.typeVenue": "Event Space",
+  "sites.resourceName": "Resource Name",
+  "sites.resourceType": "Resource Type",
+  "sites.capacity": "Capacity",
+  "sites.noResourcesInSite": "No resources in this site yet.",
   "approval.colType": "Type",
   "approval.colName": "Name",
   "approval.colDetail": "Detail",
@@ -2985,6 +2993,10 @@ const fi: TranslationKeys = {
   "sites.typeHotel": "Hotelli / Majatalo",
   "sites.typeRestaurant": "Ravintola",
   "sites.typeVenue": "Tapahtumatila",
+  "sites.resourceName": "Resurssin nimi",
+  "sites.resourceType": "Resurssityyppi",
+  "sites.capacity": "Kapasiteetti",
+  "sites.noResourcesInSite": "Tässä toimipisteessä ei ole vielä resursseja.",
   "approval.colType": "Tyyppi",
   "approval.colName": "Nimi",
   "approval.colDetail": "Lisätieto",
@@ -3980,6 +3992,10 @@ const sv: TranslationKeys = {
   "sites.typeHotel": "Hotell / Gästhus",
   "sites.typeRestaurant": "Restaurang",
   "sites.typeVenue": "Eventlokal",
+  "sites.resourceName": "Resursnamn",
+  "sites.resourceType": "Resurstyp",
+  "sites.capacity": "Kapacitet",
+  "sites.noResourcesInSite": "Inga resurser på denna plats ännu.",
   "approval.colType": "Typ",
   "approval.colName": "Namn",
   "approval.colDetail": "Detalj",
