@@ -22,6 +22,7 @@ import { useDateLocale } from "@/hooks/useDateLocale";
 import ResourceCarousel from "@/components/ResourceCarousel";
 import ConfirmationEmailPreview from "@/components/ConfirmationEmailPreview";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
+import React from "react";
 
 const bookingSchema = z.object({
   guest_name: z.string().trim().min(1, "Name is required").max(100),
@@ -49,9 +50,28 @@ const typeDescKeys: Record<string, string> = {
   hotel: "booking.typeDescGuesthouse",
 };
 
+/* ── Error Boundary ──────────────────────────────── */
+class BookingErrorBoundary extends React.Component<
+  { children: React.ReactNode; fallback: React.ReactNode },
+  { hasError: boolean }
+> {
+  constructor(props: any) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  render() {
+    if (this.state.hasError) return this.props.fallback;
+    return this.props.children;
+  }
+}
+
 /* ── Availability Calendar ──────────────────────────────── */
 const AvailabilityCalendar = ({
   tenantId,
+  siteId,
   primaryColor,
   accentColor,
   thresholds,
@@ -59,6 +79,7 @@ const AvailabilityCalendar = ({
   t,
 }: {
   tenantId: string;
+  siteId: string | null;
   primaryColor: string;
   accentColor: string;
   thresholds: Record<string, number>;
@@ -78,7 +99,7 @@ const AvailabilityCalendar = ({
   }, [reservationType]);
 
   const { data: monthReservations = [] } = useQuery({
-    queryKey: ["public-availability", tenantId, monthStart, monthEnd, reservationType],
+    queryKey: ["public-availability", tenantId, siteId, monthStart, monthEnd, reservationType],
     queryFn: async () => {
       let query = supabase
         .from("reservations")
@@ -89,6 +110,9 @@ const AvailabilityCalendar = ({
         .in("status", ["pending", "confirmed"]);
       if (mappedTypes.length > 0) {
         query = query.in("reservation_type", mappedTypes);
+      }
+      if (siteId) {
+        query = query.eq("site_id", siteId);
       }
       const { data, error } = await query;
       if (error) throw error;
@@ -171,7 +195,7 @@ const AvailabilityCalendar = ({
   );
 };
 
-const PublicBooking = () => {
+const PublicBookingInner = () => {
   const { slug } = useParams<{ slug: string }>();
   const [searchParams] = useSearchParams();
   const t = useT();
@@ -313,9 +337,12 @@ const PublicBooking = () => {
     };
   }, [tenantSettings, siteSettings]);
 
-  // Fetch active resources
+  // The resolved site ID for filtering queries
+  const activeSiteId = site?.id ?? null;
+
+  // Fetch active resources — filter by site when site is selected
   const { data: resources } = useQuery({
-    queryKey: ["public-resources", tenant?.id, form.reservation_type],
+    queryKey: ["public-resources", tenant?.id, form.reservation_type, activeSiteId],
     queryFn: async () => {
       if (!tenant?.id) return [];
       let query = supabase
@@ -326,7 +353,30 @@ const PublicBooking = () => {
       if (form.reservation_type) {
         query = query.eq("resource_type", form.reservation_type);
       }
+      if (activeSiteId) {
+        query = query.eq("site_id", activeSiteId);
+      }
       const { data, error } = await query.order("name");
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!tenant?.id,
+  });
+
+  // Fetch ALL resources for the site to derive available types
+  const { data: allSiteResources } = useQuery({
+    queryKey: ["public-site-all-resources", tenant?.id, activeSiteId],
+    queryFn: async () => {
+      if (!tenant?.id) return [];
+      let query = supabase
+        .from("resources")
+        .select("resource_type")
+        .eq("tenant_id", tenant.id)
+        .eq("is_active", true);
+      if (activeSiteId) {
+        query = query.eq("site_id", activeSiteId);
+      }
+      const { data, error } = await query;
       if (error) throw error;
       return data;
     },
@@ -357,48 +407,60 @@ const PublicBooking = () => {
     return acc;
   }, {});
 
-  // Fetch opening hours
+  // Fetch opening hours — filter by site when site is selected
   const { data: openingHours } = useQuery({
-    queryKey: ["public-opening-hours", tenant?.id, form.reservation_type],
+    queryKey: ["public-opening-hours", tenant?.id, form.reservation_type, activeSiteId],
     queryFn: async () => {
       if (!tenant?.id || !form.reservation_type) return [];
-      const { data, error } = await supabase
+      let query = supabase
         .from("tenant_opening_hours")
         .select("*")
         .eq("tenant_id", tenant.id)
         .eq("resource_type", form.reservation_type);
+      if (activeSiteId) {
+        query = query.eq("site_id", activeSiteId);
+      }
+      const { data, error } = await query;
       if (error) throw error;
       return data;
     },
     enabled: !!tenant?.id && !!form.reservation_type,
   });
 
-  // Fetch blocked slots for this tenant
+  // Fetch blocked slots — filter by site
   const { data: blockedSlots } = useQuery({
-    queryKey: ["public-blocked-slots", tenant?.id],
+    queryKey: ["public-blocked-slots", tenant?.id, activeSiteId],
     queryFn: async () => {
       if (!tenant?.id) return [];
-      const { data, error } = await supabase
+      let query = supabase
         .from("blocked_slots")
         .select("*")
         .eq("tenant_id", tenant.id)
         .gte("date", format(new Date(), "yyyy-MM-dd"));
+      if (activeSiteId) {
+        query = query.eq("site_id", activeSiteId);
+      }
+      const { data, error } = await query;
       if (error) throw error;
       return data ?? [];
     },
     enabled: !!tenant?.id,
   });
 
-  // Fetch recurring blocked slots
+  // Fetch recurring blocked slots — filter by site
   const { data: recurringBlocks } = useQuery({
-    queryKey: ["public-recurring-blocks", tenant?.id],
+    queryKey: ["public-recurring-blocks", tenant?.id, activeSiteId],
     queryFn: async () => {
       if (!tenant?.id) return [];
-      const { data, error } = await supabase
+      let query = supabase
         .from("recurring_blocked_slots")
         .select("*")
         .eq("tenant_id", tenant.id)
         .eq("is_active", true);
+      if (activeSiteId) {
+        query = query.eq("site_id", activeSiteId);
+      }
+      const { data, error } = await query;
       if (error) throw error;
       return data ?? [];
     },
@@ -541,7 +603,7 @@ const PublicBooking = () => {
 
       const payload: Record<string, unknown> = {
         tenant_id: tenant.id,
-        site_id: site?.id ?? null,
+        site_id: activeSiteId,
         guest_name: parsed.guest_name,
         guest_email: parsed.guest_email,
         guest_phone: parsed.guest_phone ?? null,
@@ -667,6 +729,22 @@ const PublicBooking = () => {
   const secondaryColor = settings?.secondary_color ?? "#f5f0e8";
   const accentColor = settings?.accent_color ?? "#d4a853";
   const businessName = settings?.business_name ?? tenant?.name ?? "";
+
+  // Derive allowed types: when a site is selected, use its resource types;
+  // otherwise fall back to tenant-wide allowed_reservation_types
+  const allowedTypes = useMemo(() => {
+    const tenantTypes: string[] = tenant?.allowed_reservation_types ?? [];
+    if (activeSiteId && allSiteResources && allSiteResources.length > 0) {
+      // Get unique resource types available at this site
+      const siteResourceTypes = [...new Set(allSiteResources.map((r) => r.resource_type))];
+      // Intersect with tenant's allowed types to respect tenant config
+      return tenantTypes.filter((t) => siteResourceTypes.includes(t));
+    }
+    return tenantTypes;
+  }, [tenant?.allowed_reservation_types, activeSiteId, allSiteResources]);
+
+  // Display name: show site name if selected, otherwise business name
+  const displayName = site?.name ? `${businessName} — ${site.name}` : businessName;
 
   if (loadingTenant) {
     return (
@@ -830,8 +908,6 @@ const PublicBooking = () => {
     );
   }
 
-  const allowedTypes = tenant.allowed_reservation_types ?? [];
-
   return (
     <div className="min-h-screen" style={{ backgroundColor: secondaryColor }}>
       {/* Header with optional hero image */}
@@ -849,7 +925,7 @@ const PublicBooking = () => {
                   {settings?.logo_url && (
                     <img src={settings.logo_url} alt="" className="h-8 w-8 rounded-full object-cover" />
                   )}
-                  <h1 className="text-xl font-serif font-bold text-white">{businessName}</h1>
+                  <h1 className="text-xl font-serif font-bold text-white">{displayName}</h1>
                 </div>
                 <LanguageSwitcher variant="dark" />
               </div>
@@ -873,7 +949,7 @@ const PublicBooking = () => {
               {settings?.logo_url && (
                 <img src={settings.logo_url} alt="" className="h-8 w-8 rounded-full object-cover" />
               )}
-              <h1 className="text-xl font-serif font-bold text-white">{businessName}</h1>
+              <h1 className="text-xl font-serif font-bold text-white">{displayName}</h1>
             </div>
             <LanguageSwitcher variant="dark" />
           </div>
@@ -1011,6 +1087,7 @@ const PublicBooking = () => {
               {/* Left: Availability Calendar (read-only) */}
               <AvailabilityCalendar
                 tenantId={tenant.id}
+                siteId={activeSiteId}
                 primaryColor={primaryColor}
                 accentColor={accentColor}
                 thresholds={(settings?.availability_thresholds as Record<string, number>) ?? { restaurant: 5, venue: 5, guesthouse: 5, hotel: 5 }}
@@ -1669,6 +1746,28 @@ const PublicBooking = () => {
         </footer>
       </main>
     </div>
+  );
+};
+
+const PublicBooking = () => {
+  const t = useT();
+  return (
+    <BookingErrorBoundary
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-background">
+          <div className="text-center space-y-2">
+            <h1 className="text-2xl font-serif font-bold text-foreground">
+              {t("booking.notFound")}
+            </h1>
+            <p className="text-muted-foreground">
+              Something went wrong. Please try refreshing the page.
+            </p>
+          </div>
+        </div>
+      }
+    >
+      <PublicBookingInner />
+    </BookingErrorBoundary>
   );
 };
 
