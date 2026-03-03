@@ -56,6 +56,8 @@ const AvailabilityCalendar = ({
   thresholds,
   reservationType,
   t,
+  onDateSelect,
+  selectedDate: externalSelectedDate,
 }: {
   tenantId: string;
   primaryColor: string;
@@ -63,6 +65,8 @@ const AvailabilityCalendar = ({
   thresholds: Record<string, number>;
   reservationType: string;
   t: (key: string) => string;
+  onDateSelect?: (date: Date) => void;
+  selectedDate?: Date;
 }) => {
   const [calMonth, setCalMonth] = useState(new Date());
 
@@ -128,9 +132,13 @@ const AvailabilityCalendar = ({
       <CardContent>
         <Calendar
           mode="single"
+          selected={externalSelectedDate}
+          onSelect={(date) => {
+            if (date && onDateSelect) onDateSelect(date);
+          }}
           month={calMonth}
           onMonthChange={setCalMonth}
-          disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+          disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0)) || getDayStatus(date) === "full"}
           className={cn("p-3 pointer-events-auto rounded-md border")}
           modifiers={{
             available: (date) => getDayStatus(date) === "available" && date >= new Date(new Date().setHours(0, 0, 0, 0)),
@@ -913,6 +921,8 @@ const PublicBooking = () => {
               thresholds={(settings?.availability_thresholds as Record<string, number>) ?? { restaurant: 5, venue: 5, guesthouse: 5, hotel: 5 }}
               reservationType={form.reservation_type}
               t={t}
+              selectedDate={selectedDate}
+              onDateSelect={(date) => { setSelectedDate(date); updateField("start_time", ""); }}
             />
           )}
 
