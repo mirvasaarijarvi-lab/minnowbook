@@ -21,124 +21,26 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTenant } from "@/hooks/useTenant";
 import { toast } from "sonner";
+import { useT } from "@/contexts/I18nContext";
+import { TranslationKey } from "@/i18n/translations";
 
 interface GuideArticle {
-  title: string;
-  description: string;
+  titleKey: string;
+  descKey: string;
   icon: React.ElementType;
-  category: string;
-  content: string[];
+  contentKeys: string[];
 }
 
-const articles: GuideArticle[] = [
-  {
-    title: "Getting Started",
-    description: "Set up your account and create your first booking page in minutes.",
-    icon: BookOpen,
-    category: "Basics",
-    content: [
-      "Sign up for a free 30-day trial — no credit card needed.",
-      "Complete the onboarding wizard to name your business and choose your reservation types.",
-      "Customize your branding (logo, colors) in Settings.",
-      "Share your booking link with customers!",
-    ],
-  },
-  {
-    title: "Managing Reservations",
-    description: "View, edit, confirm, and cancel reservations from your dashboard.",
-    icon: CalendarDays,
-    category: "Reservations",
-    content: [
-      "Use the Calendar view for a visual overview of upcoming bookings.",
-      "Switch to the List view to filter by status, type, or date range.",
-      "Click any reservation to edit details, add notes, or change status.",
-      "Confirmation and cancellation emails are sent automatically.",
-    ],
-  },
-  {
-    title: "Email Templates",
-    description: "Customize confirmation and cancellation emails sent to guests.",
-    icon: Mail,
-    category: "Communication",
-    content: [
-      "Go to Settings → Email Templates to customize your emails.",
-      "Preview how emails look before sending using the built-in preview.",
-      "Add custom messages per reservation when confirming or cancelling.",
-      "Emails support multi-language content (EN, FI, SV).",
-    ],
-  },
-  {
-    title: "Branding & Booking Page",
-    description: "Customize your public booking page with your brand identity.",
-    icon: Palette,
-    category: "Customization",
-    content: [
-      "Upload your logo and set primary/accent colors in Settings.",
-      "Add a hero image for your booking page header.",
-      "Your booking page is available at /book/your-slug.",
-      "Business description appears on the booking page for guests.",
-    ],
-  },
-  {
-    title: "Opening Hours",
-    description: "Configure when your business accepts bookings for each type.",
-    icon: Clock,
-    category: "Configuration",
-    content: [
-      "Set opening hours per reservation type (restaurant, venue, hotel).",
-      "Mark specific days as closed.",
-      "Opening hours determine available time slots on the booking page.",
-      "Use blocked slots to temporarily close specific dates.",
-    ],
-  },
-  {
-    title: "Resources & Rooms",
-    description: "Manage rooms, tables, and event spaces that can be booked.",
-    icon: Settings,
-    category: "Configuration",
-    content: [
-      "Add resources in the Resources section of your dashboard.",
-      "Set capacity, pricing, and descriptions for each resource.",
-      "Upload photos to showcase your spaces on the booking page.",
-      "Deactivate resources to temporarily hide them from bookings.",
-    ],
-  },
-  {
-    title: "Staff & User Management",
-    description: "Invite team members and manage roles and permissions.",
-    icon: Users,
-    category: "Team",
-    content: [
-      "Owners can invite staff via the Admin panel.",
-      "Roles: Owner (full access), Admin (manage resources), Staff (view reservations).",
-      "Approve or remove team members at any time.",
-      "Each plan has a staff user limit — upgrade to add more.",
-    ],
-  },
-  {
-    title: "Plans & Billing",
-    description: "Understand pricing tiers and manage your subscription.",
-    icon: CreditCard,
-    category: "Billing",
-    content: [
-      "Basic (€29/mo) — 1 type, 1–3 staff, default templates.",
-      "Pro (€79/mo) — 1 type, 10 staff, custom templates, analytics.",
-      "Business (€199/mo) — All types, unlimited staff, dedicated support, AI chat.",
-      "Upgrade or downgrade anytime. Changes take effect next billing cycle.",
-    ],
-  },
-  {
-    title: "Frequently Asked Questions",
-    description: "Answers to the most common questions about MinnowBook.",
-    icon: HelpCircle,
-    category: "FAQ",
-    content: [
-      "Q: Do I need a credit card for the trial? A: No!",
-      "Q: Can I use my own domain? A: Custom domains are on our roadmap.",
-      "Q: How do guests receive confirmations? A: Automatically via email when you confirm a booking.",
-      "Q: Can I export my data? A: Yes, reports can be exported from the Reports panel.",
-    ],
-  },
+const articleDefs: GuideArticle[] = [
+  { titleKey: "help.art1Title", descKey: "help.art1Desc", icon: BookOpen, contentKeys: ["help.art1C1", "help.art1C2", "help.art1C3", "help.art1C4"] },
+  { titleKey: "help.art2Title", descKey: "help.art2Desc", icon: CalendarDays, contentKeys: ["help.art2C1", "help.art2C2", "help.art2C3", "help.art2C4"] },
+  { titleKey: "help.art3Title", descKey: "help.art3Desc", icon: Mail, contentKeys: ["help.art3C1", "help.art3C2", "help.art3C3", "help.art3C4"] },
+  { titleKey: "help.art4Title", descKey: "help.art4Desc", icon: Palette, contentKeys: ["help.art4C1", "help.art4C2", "help.art4C3", "help.art4C4"] },
+  { titleKey: "help.art5Title", descKey: "help.art5Desc", icon: Clock, contentKeys: ["help.art5C1", "help.art5C2", "help.art5C3", "help.art5C4"] },
+  { titleKey: "help.art6Title", descKey: "help.art6Desc", icon: Settings, contentKeys: ["help.art6C1", "help.art6C2", "help.art6C3", "help.art6C4"] },
+  { titleKey: "help.art7Title", descKey: "help.art7Desc", icon: Users, contentKeys: ["help.art7C1", "help.art7C2", "help.art7C3", "help.art7C4"] },
+  { titleKey: "help.art8Title", descKey: "help.art8Desc", icon: CreditCard, contentKeys: ["help.art8C1", "help.art8C2", "help.art8C3", "help.art8C4"] },
+  { titleKey: "help.art9Title", descKey: "help.art9Desc", icon: HelpCircle, contentKeys: ["help.art9C1", "help.art9C2", "help.art9C3", "help.art9C4"] },
 ];
 
 interface ChatMessage {
@@ -148,15 +50,10 @@ interface ChatMessage {
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/support-chat`;
 
-const quickGuides = [
-  { q: "How do I manage reservations?", a: "Go to your **Dashboard → Reservations** to view, filter, edit, and manage all bookings. You can confirm or cancel reservations from the action menu on each card." },
-  { q: "How do I customize my booking page?", a: "Navigate to **Settings** in your dashboard. Upload your logo, set brand colors, and add a hero image. Your public booking page updates automatically." },
-  { q: "How do I set up email templates?", a: "In **Settings → Email Templates**, you can customize both confirmation and cancellation emails. Use the preview tab to see how they'll look to guests." },
-  { q: "How do I add staff members?", a: "Go to **Admin → Users** to invite new staff. You can set roles (Owner, Admin, Staff) and approve or remove team members." },
-  { q: "How do I add or edit resources?", a: "Go to **Dashboard → Resources** to create rooms, tables, or venues. You can set capacity, pricing, upload up to 5 images, and toggle active/inactive status." },
-];
+const GUIDE_KEYS = [1, 2, 3, 4, 5] as const;
 
 const DashboardSupportPanel = () => {
+  const t = useT();
   const [search, setSearch] = useState("");
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState("");
@@ -169,20 +66,24 @@ const DashboardSupportPanel = () => {
   const businessTier = tenant?.tier === "business";
 
   const filtered = useMemo(() => {
-    if (!search.trim()) return articles;
+    if (!search.trim()) return articleDefs;
     const q = search.toLowerCase();
-    return articles.filter(
+    return articleDefs.filter(
       (a) =>
-        a.title.toLowerCase().includes(q) ||
-        a.description.toLowerCase().includes(q) ||
-        a.category.toLowerCase().includes(q) ||
-        a.content.some((c) => c.toLowerCase().includes(q))
+        t(a.titleKey as TranslationKey).toLowerCase().includes(q) ||
+        t(a.descKey as TranslationKey).toLowerCase().includes(q) ||
+        a.contentKeys.some((c) => t(c as TranslationKey).toLowerCase().includes(q))
     );
-  }, [search]);
+  }, [search, t]);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [chatMessages]);
+
+  const quickGuides = GUIDE_KEYS.map((n) => ({
+    q: t(`help.guide${n}Q` as TranslationKey),
+    a: t(`help.guide${n}A` as TranslationKey),
+  }));
 
   const handleQuickGuide = (guide: (typeof quickGuides)[0]) => {
     setChatMessages((prev) => [
@@ -217,10 +118,10 @@ const DashboardSupportPanel = () => {
         });
 
         if (!resp.ok) {
-          const err = await resp.json().catch(() => ({ error: "Something went wrong." }));
+          const err = await resp.json().catch(() => ({ error: t("help.errorConnect" as TranslationKey) }));
           setChatMessages((prev) => [
             ...prev,
-            { role: "assistant", content: err.error || "Sorry, something went wrong." },
+            { role: "assistant", content: err.error || t("help.errorConnect" as TranslationKey) },
           ]);
           setIsLoading(false);
           return;
@@ -273,13 +174,13 @@ const DashboardSupportPanel = () => {
         console.error("Support chat error:", e);
         setChatMessages((prev) => [
           ...prev,
-          { role: "assistant", content: "Sorry, I couldn't connect. Please try again." },
+          { role: "assistant", content: t("help.errorConnect" as TranslationKey) },
         ]);
       }
 
       setIsLoading(false);
     },
-    [chatMessages, session]
+    [chatMessages, session, t]
   );
 
   const handleSend = () => {
@@ -292,7 +193,7 @@ const DashboardSupportPanel = () => {
   const handleEscalate = async () => {
     if (!escalateSubject.trim() || !chatInput.trim()) return;
     if (!tenantId) {
-      toast.error("Unable to submit request — no tenant found.");
+      toast.error(t("help.errorNoTenant" as TranslationKey));
       return;
     }
 
@@ -307,23 +208,23 @@ const DashboardSupportPanel = () => {
 
       setChatMessages((prev) => [
         ...prev,
-        { role: "user", content: `📋 **Support Request:** ${escalateSubject.trim()}\n${chatInput.trim()}` },
-        { role: "assistant", content: "Your support request has been submitted! Your admin team will review it and respond soon." },
+        { role: "user", content: `📋 **${t("help.requestSubmitted" as TranslationKey)}:** ${escalateSubject.trim()}\n${chatInput.trim()}` },
+        { role: "assistant", content: t("help.requestSubmittedDetail" as TranslationKey) },
       ]);
       setChatInput("");
       setEscalateSubject("");
       setEscalateMode(false);
-      toast.success("Support request submitted");
+      toast.success(t("help.successSubmit" as TranslationKey));
     } catch (e: any) {
-      toast.error(e.message || "Failed to submit request");
+      toast.error(e.message || t("help.errorSubmit" as TranslationKey));
     }
   };
 
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-2xl font-serif font-bold text-foreground mb-1">Help & Support</h2>
-        <p className="text-muted-foreground text-sm">Browse guides, FAQs, and ask the AI assistant.</p>
+        <h2 className="text-2xl font-serif font-bold text-foreground mb-1">{t("help.title" as TranslationKey)}</h2>
+        <p className="text-muted-foreground text-sm">{t("help.subtitle" as TranslationKey)}</p>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
@@ -332,7 +233,7 @@ const DashboardSupportPanel = () => {
           <div className="relative max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search for help..."
+              placeholder={t("help.searchPlaceholder" as TranslationKey)}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-10"
@@ -341,7 +242,7 @@ const DashboardSupportPanel = () => {
 
           {filtered.length === 0 ? (
             <p className="text-muted-foreground text-sm py-8 text-center">
-              No results found. Try a different search term.
+              {t("help.noResults" as TranslationKey)}
             </p>
           ) : (
             <div className="grid gap-3 sm:grid-cols-2">
@@ -349,7 +250,7 @@ const DashboardSupportPanel = () => {
                 const Icon = article.icon;
                 return (
                   <details
-                    key={article.title}
+                    key={article.titleKey}
                     className="group rounded-xl border border-border bg-card shadow-sm hover:shadow-md transition-shadow overflow-hidden"
                   >
                     <summary className="flex items-start gap-3 p-4 cursor-pointer list-none [&::-webkit-details-marker]:hidden">
@@ -358,19 +259,19 @@ const DashboardSupportPanel = () => {
                       </div>
                       <div className="flex-1 min-w-0">
                         <h3 className="font-semibold text-foreground text-sm leading-tight">
-                          {article.title}
+                          {t(article.titleKey as TranslationKey)}
                         </h3>
                         <p className="text-xs text-muted-foreground mt-0.5">
-                          {article.description}
+                          {t(article.descKey as TranslationKey)}
                         </p>
                       </div>
                     </summary>
                     <div className="px-4 pb-4 pt-0 animate-fade-in">
                       <ul className="space-y-1.5 ml-12">
-                        {article.content.map((item, i) => (
+                        {article.contentKeys.map((key, i) => (
                           <li key={i} className="text-xs text-foreground/80 leading-relaxed flex items-start gap-1.5">
                             <span className="text-accent mt-0.5">•</span>
-                            {item}
+                            {t(key as TranslationKey)}
                           </li>
                         ))}
                       </ul>
@@ -386,15 +287,15 @@ const DashboardSupportPanel = () => {
         <div className="xl:col-span-1">
           <div className="rounded-xl border border-border bg-card shadow-sm flex flex-col h-[560px] overflow-hidden sticky top-8">
             <div className="gradient-hero px-4 py-3 text-primary-foreground">
-              <h3 className="font-serif font-semibold text-sm">AI Support</h3>
-              <p className="text-xs text-primary-foreground/70">Ask anything about MinnowBook</p>
+              <h3 className="font-serif font-semibold text-sm">{t("help.aiTitle" as TranslationKey)}</h3>
+              <p className="text-xs text-primary-foreground/70">{t("help.aiSubtitle" as TranslationKey)}</p>
             </div>
 
             <div ref={scrollRef} className="flex-1 overflow-y-auto p-3 space-y-3">
               {chatMessages.length === 0 && (
                 <div className="space-y-2">
                   <p className="text-xs text-muted-foreground text-center mb-3">
-                    Ask a question or try a quick guide:
+                    {t("help.askOrGuide" as TranslationKey)}
                   </p>
                   {quickGuides.map((g) => (
                     <button
@@ -431,7 +332,7 @@ const DashboardSupportPanel = () => {
               {isLoading && (
                 <div className="flex items-center gap-2 text-muted-foreground text-xs px-3">
                   <Loader2 className="h-3 w-3 animate-spin" />
-                  Thinking...
+                  {t("help.thinking" as TranslationKey)}
                 </div>
               )}
             </div>
@@ -449,7 +350,7 @@ const DashboardSupportPanel = () => {
                   )}
                 >
                   <Flag className="h-3 w-3" />
-                  {escalateMode ? "Cancel request" : "Submit support request"}
+                  {escalateMode ? t("help.cancelRequest" as TranslationKey) : t("help.submitRequest" as TranslationKey)}
                 </button>
               </div>
             )}
@@ -462,13 +363,13 @@ const DashboardSupportPanel = () => {
                     type="text"
                     value={escalateSubject}
                     onChange={(e) => setEscalateSubject(e.target.value)}
-                    placeholder="Subject (e.g. Feature request)"
+                    placeholder={t("help.subjectPlaceholder" as TranslationKey)}
                     className="w-full text-sm bg-secondary/30 border border-border rounded-lg px-3 py-2 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
                   />
                   <textarea
                     value={chatInput}
                     onChange={(e) => setChatInput(e.target.value)}
-                    placeholder="Describe your request..."
+                    placeholder={t("help.describePlaceholder" as TranslationKey)}
                     rows={2}
                     className="w-full text-sm bg-secondary/30 border border-border rounded-lg px-3 py-2 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring resize-none"
                   />
@@ -479,7 +380,7 @@ const DashboardSupportPanel = () => {
                     className="w-full gap-1.5"
                   >
                     <Flag className="h-3.5 w-3.5" />
-                    Submit to Admin
+                    {t("help.submitToAdmin" as TranslationKey)}
                   </Button>
                 </div>
               ) : (
@@ -494,7 +395,7 @@ const DashboardSupportPanel = () => {
                     type="text"
                     value={chatInput}
                     onChange={(e) => setChatInput(e.target.value)}
-                    placeholder="Type your question..."
+                    placeholder={t("help.typePlaceholder" as TranslationKey)}
                     className="flex-1 text-sm bg-secondary/30 border border-border rounded-lg px-3 py-2 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
                     disabled={isLoading}
                   />

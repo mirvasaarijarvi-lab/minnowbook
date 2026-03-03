@@ -762,7 +762,92 @@ type TranslationKeys = {
   "resetPassword.updated": string;
   "resetPassword.redirecting": string;
 
-  // MinnowAid chat widget
+  // Help & Support page (DashboardSupportPanel)
+  "help.title": string;
+  "help.subtitle": string;
+  "help.searchPlaceholder": string;
+  "help.noResults": string;
+  "help.aiTitle": string;
+  "help.aiSubtitle": string;
+  "help.askOrGuide": string;
+  "help.thinking": string;
+  "help.cancelRequest": string;
+  "help.submitRequest": string;
+  "help.subjectPlaceholder": string;
+  "help.describePlaceholder": string;
+  "help.submitToAdmin": string;
+  "help.typePlaceholder": string;
+  "help.errorNoTenant": string;
+  "help.errorSubmit": string;
+  "help.successSubmit": string;
+  "help.errorConnect": string;
+  "help.requestSubmitted": string;
+  "help.requestSubmittedDetail": string;
+  "help.art1Title": string;
+  "help.art1Desc": string;
+  "help.art1C1": string;
+  "help.art1C2": string;
+  "help.art1C3": string;
+  "help.art1C4": string;
+  "help.art2Title": string;
+  "help.art2Desc": string;
+  "help.art2C1": string;
+  "help.art2C2": string;
+  "help.art2C3": string;
+  "help.art2C4": string;
+  "help.art3Title": string;
+  "help.art3Desc": string;
+  "help.art3C1": string;
+  "help.art3C2": string;
+  "help.art3C3": string;
+  "help.art3C4": string;
+  "help.art4Title": string;
+  "help.art4Desc": string;
+  "help.art4C1": string;
+  "help.art4C2": string;
+  "help.art4C3": string;
+  "help.art4C4": string;
+  "help.art5Title": string;
+  "help.art5Desc": string;
+  "help.art5C1": string;
+  "help.art5C2": string;
+  "help.art5C3": string;
+  "help.art5C4": string;
+  "help.art6Title": string;
+  "help.art6Desc": string;
+  "help.art6C1": string;
+  "help.art6C2": string;
+  "help.art6C3": string;
+  "help.art6C4": string;
+  "help.art7Title": string;
+  "help.art7Desc": string;
+  "help.art7C1": string;
+  "help.art7C2": string;
+  "help.art7C3": string;
+  "help.art7C4": string;
+  "help.art8Title": string;
+  "help.art8Desc": string;
+  "help.art8C1": string;
+  "help.art8C2": string;
+  "help.art8C3": string;
+  "help.art8C4": string;
+  "help.art9Title": string;
+  "help.art9Desc": string;
+  "help.art9C1": string;
+  "help.art9C2": string;
+  "help.art9C3": string;
+  "help.art9C4": string;
+  "help.guide1Q": string;
+  "help.guide1A": string;
+  "help.guide2Q": string;
+  "help.guide2A": string;
+  "help.guide3Q": string;
+  "help.guide3A": string;
+  "help.guide4Q": string;
+  "help.guide4A": string;
+  "help.guide5Q": string;
+  "help.guide5A": string;
+
   "aid.title": string;
   "aid.subtitle": string;
   "aid.myRequests": string;
@@ -1562,6 +1647,92 @@ const en: TranslationKeys = {
   "resetPassword.updated": "Password updated",
   "resetPassword.redirecting": "Redirecting you to login...",
 
+  // Help & Support page
+  "help.title": "Help & Support",
+  "help.subtitle": "Browse guides, FAQs, and ask the AI assistant.",
+  "help.searchPlaceholder": "Search for help...",
+  "help.noResults": "No results found. Try a different search term.",
+  "help.aiTitle": "MinnowSupporter",
+  "help.aiSubtitle": "Ask anything about MinnowBook",
+  "help.askOrGuide": "Ask a question or try a quick guide:",
+  "help.thinking": "Thinking...",
+  "help.cancelRequest": "Cancel request",
+  "help.submitRequest": "Submit support request",
+  "help.subjectPlaceholder": "Subject (e.g. Feature request)",
+  "help.describePlaceholder": "Describe your request...",
+  "help.submitToAdmin": "Submit to Admin",
+  "help.typePlaceholder": "Type your question...",
+  "help.errorNoTenant": "Unable to submit request — no tenant found.",
+  "help.errorSubmit": "Failed to submit request",
+  "help.successSubmit": "Support request submitted",
+  "help.errorConnect": "Sorry, I couldn't connect. Please try again.",
+  "help.requestSubmitted": "Support Request",
+  "help.requestSubmittedDetail": "Your support request has been submitted! Your admin team will review it and respond soon.",
+  "help.art1Title": "Getting Started",
+  "help.art1Desc": "Set up your account and create your first booking page in minutes.",
+  "help.art1C1": "Sign up for a free 30-day trial — no credit card needed.",
+  "help.art1C2": "Complete the onboarding wizard to name your business and choose your reservation types.",
+  "help.art1C3": "Customize your branding (logo, colors) in Settings.",
+  "help.art1C4": "Share your booking link with customers!",
+  "help.art2Title": "Managing Reservations",
+  "help.art2Desc": "View, edit, confirm, and cancel reservations from your dashboard.",
+  "help.art2C1": "Use the Calendar view for a visual overview of upcoming bookings.",
+  "help.art2C2": "Switch to the List view to filter by status, type, or date range.",
+  "help.art2C3": "Click any reservation to edit details, add notes, or change status.",
+  "help.art2C4": "Confirmation and cancellation emails are sent automatically.",
+  "help.art3Title": "Email Templates",
+  "help.art3Desc": "Customize confirmation and cancellation emails sent to guests.",
+  "help.art3C1": "Go to Settings → Email Templates to customize your emails.",
+  "help.art3C2": "Preview how emails look before sending using the built-in preview.",
+  "help.art3C3": "Add custom messages per reservation when confirming or cancelling.",
+  "help.art3C4": "Emails support multi-language content (EN, FI, SV).",
+  "help.art4Title": "Branding & Booking Page",
+  "help.art4Desc": "Customize your public booking page with your brand identity.",
+  "help.art4C1": "Upload your logo and set primary/accent colors in Settings.",
+  "help.art4C2": "Add a hero image for your booking page header.",
+  "help.art4C3": "Your booking page is available at /book/your-slug.",
+  "help.art4C4": "Business description appears on the booking page for guests.",
+  "help.art5Title": "Opening Hours",
+  "help.art5Desc": "Configure when your business accepts bookings for each type.",
+  "help.art5C1": "Set opening hours per reservation type (restaurant, venue, hotel).",
+  "help.art5C2": "Mark specific days as closed.",
+  "help.art5C3": "Opening hours determine available time slots on the booking page.",
+  "help.art5C4": "Use blocked slots to temporarily close specific dates.",
+  "help.art6Title": "Resources & Rooms",
+  "help.art6Desc": "Manage rooms, tables, and event spaces that can be booked.",
+  "help.art6C1": "Add resources in the Resources section of your dashboard.",
+  "help.art6C2": "Set capacity, pricing, and descriptions for each resource.",
+  "help.art6C3": "Upload photos to showcase your spaces on the booking page.",
+  "help.art6C4": "Deactivate resources to temporarily hide them from bookings.",
+  "help.art7Title": "Staff & User Management",
+  "help.art7Desc": "Invite team members and manage roles and permissions.",
+  "help.art7C1": "Owners can invite staff via the Admin panel.",
+  "help.art7C2": "Roles: Owner (full access), Admin (manage resources), Staff (view reservations).",
+  "help.art7C3": "Approve or remove team members at any time.",
+  "help.art7C4": "Each plan has a staff user limit — upgrade to add more.",
+  "help.art8Title": "Plans & Billing",
+  "help.art8Desc": "Understand pricing tiers and manage your subscription.",
+  "help.art8C1": "Basic (€29/mo) — 1 type, 1–3 staff, default templates.",
+  "help.art8C2": "Pro (€79/mo) — 1 type, 10 staff, custom templates, analytics.",
+  "help.art8C3": "Business (€199/mo) — All types, unlimited staff, dedicated support, AI chat.",
+  "help.art8C4": "Upgrade or downgrade anytime. Changes take effect next billing cycle.",
+  "help.art9Title": "Frequently Asked Questions",
+  "help.art9Desc": "Answers to the most common questions about MinnowBook.",
+  "help.art9C1": "Q: Do I need a credit card for the trial? A: No!",
+  "help.art9C2": "Q: Can I use my own domain? A: Custom domains are on our roadmap.",
+  "help.art9C3": "Q: How do guests receive confirmations? A: Automatically via email when you confirm a booking.",
+  "help.art9C4": "Q: Can I export my data? A: Yes, reports can be exported from the Reports panel.",
+  "help.guide1Q": "How do I manage reservations?",
+  "help.guide1A": "Go to your **Dashboard → Reservations** to view, filter, edit, and manage all bookings. You can confirm or cancel reservations from the action menu on each card.",
+  "help.guide2Q": "How do I customize my booking page?",
+  "help.guide2A": "Navigate to **Settings** in your dashboard. Upload your logo, set brand colors, and add a hero image. Your public booking page updates automatically.",
+  "help.guide3Q": "How do I set up email templates?",
+  "help.guide3A": "In **Settings → Email Templates**, you can customize both confirmation and cancellation emails. Use the preview tab to see how they'll look to guests.",
+  "help.guide4Q": "How do I add staff members?",
+  "help.guide4A": "Go to **Admin → Users** to invite new staff. You can set roles (Owner, Admin, Staff) and approve or remove team members.",
+  "help.guide5Q": "How do I add or edit resources?",
+  "help.guide5A": "Go to **Dashboard → Resources** to create rooms, tables, or venues. You can set capacity, pricing, upload up to 5 images, and toggle active/inactive status.",
+
   // MinnowAid
   "aid.title": "MinnowAid",
   "aid.subtitle": "Ask anything about MinnowBook",
@@ -2359,6 +2530,92 @@ const fi: TranslationKeys = {
   "resetPassword.updated": "Salasana päivitetty",
   "resetPassword.redirecting": "Ohjataan kirjautumiseen...",
 
+  // Help & Support page
+  "help.title": "Ohjeet ja tuki",
+  "help.subtitle": "Selaa ohjeita, UKK:ta ja kysy tekoälyavustajalta.",
+  "help.searchPlaceholder": "Hae ohjeista...",
+  "help.noResults": "Ei tuloksia. Kokeile toista hakusanaa.",
+  "help.aiTitle": "MinnowSupporter",
+  "help.aiSubtitle": "Kysy mitä tahansa MinnowBookista",
+  "help.askOrGuide": "Kysy kysymys tai kokeile pikaopasta:",
+  "help.thinking": "Miettii...",
+  "help.cancelRequest": "Peruuta pyyntö",
+  "help.submitRequest": "Lähetä tukipyyntö",
+  "help.subjectPlaceholder": "Aihe (esim. Ominaisuustoive)",
+  "help.describePlaceholder": "Kuvaile pyyntösi...",
+  "help.submitToAdmin": "Lähetä ylläpidolle",
+  "help.typePlaceholder": "Kirjoita kysymyksesi...",
+  "help.errorNoTenant": "Pyyntöä ei voi lähettää — vuokralaista ei löydy.",
+  "help.errorSubmit": "Pyynnön lähettäminen epäonnistui",
+  "help.successSubmit": "Tukipyyntö lähetetty",
+  "help.errorConnect": "Yhteys ei onnistunut. Yritä uudelleen.",
+  "help.requestSubmitted": "Tukipyyntö",
+  "help.requestSubmittedDetail": "Tukipyyntösi on lähetetty! Ylläpitotiimi tarkistaa sen ja vastaa pian.",
+  "help.art1Title": "Aloittaminen",
+  "help.art1Desc": "Luo tili ja ensimmäinen varaussivu muutamassa minuutissa.",
+  "help.art1C1": "Rekisteröidy 30 päivän ilmaiseen kokeiluun — luottokorttia ei tarvita.",
+  "help.art1C2": "Täytä ohjattu asennus nimetäksesi yrityksesi ja valitaksesi varaustyypit.",
+  "help.art1C3": "Mukauta brändi (logo, värit) Asetuksissa.",
+  "help.art1C4": "Jaa varauslinkki asiakkaillesi!",
+  "help.art2Title": "Varausten hallinta",
+  "help.art2Desc": "Selaa, muokkaa, vahvista ja peruuta varauksia hallintapaneelista.",
+  "help.art2C1": "Käytä kalenterinäkymää visuaaliseen yleiskatsaukseen.",
+  "help.art2C2": "Vaihda listanäkymään suodattaaksesi tilan, tyypin tai päivämäärän mukaan.",
+  "help.art2C3": "Napsauta varausta muokataksesi tietoja, lisätäksesi huomioita tai muuttaaksesi tilaa.",
+  "help.art2C4": "Vahvistus- ja peruutussähköpostit lähetetään automaattisesti.",
+  "help.art3Title": "Sähköpostimallit",
+  "help.art3Desc": "Mukauta vieraille lähetettävät vahvistus- ja peruutussähköpostit.",
+  "help.art3C1": "Siirry kohtaan Asetukset → Sähköpostimallit muokataksesi sähköpostejasi.",
+  "help.art3C2": "Esikatsele sähköpostien ulkoasua ennen lähettämistä.",
+  "help.art3C3": "Lisää mukautettuja viestejä vahvistaessa tai peruuttaessa.",
+  "help.art3C4": "Sähköpostit tukevat monikielistä sisältöä (EN, FI, SV).",
+  "help.art4Title": "Brändi ja varaussivu",
+  "help.art4Desc": "Mukauta julkinen varaussivu brändi-identiteettisi mukaiseksi.",
+  "help.art4C1": "Lataa logo ja aseta pää-/korostusvärit Asetuksissa.",
+  "help.art4C2": "Lisää hero-kuva varaussivun yläosaan.",
+  "help.art4C3": "Varaussivusi on osoitteessa /book/oma-slug.",
+  "help.art4C4": "Yrityskuvaus näkyy vieraille varaussivulla.",
+  "help.art5Title": "Aukioloajat",
+  "help.art5Desc": "Määritä milloin yrityksesi vastaanottaa varauksia kullekin tyypille.",
+  "help.art5C1": "Aseta aukioloajat varaustyypeittäin (ravintola, juhlatila, hotelli).",
+  "help.art5C2": "Merkitse yksittäiset päivät suljetuksi.",
+  "help.art5C3": "Aukioloajat määrittävät käytettävissä olevat ajat varaussivulla.",
+  "help.art5C4": "Käytä estettyjä aikoja tilapäiseen sulkemiseen.",
+  "help.art6Title": "Resurssit ja huoneet",
+  "help.art6Desc": "Hallinnoi huoneita, pöytiä ja juhlatiloja, jotka ovat varattavissa.",
+  "help.art6C1": "Lisää resursseja Resurssit-osiossa.",
+  "help.art6C2": "Aseta kapasiteetti, hinnoittelu ja kuvaukset kullekin resurssille.",
+  "help.art6C3": "Lataa kuvia tilojen esittelyyn varaussivulla.",
+  "help.art6C4": "Poista resursseja käytöstä piilottaaksesi ne väliaikaisesti.",
+  "help.art7Title": "Henkilöstö ja käyttäjähallinta",
+  "help.art7Desc": "Kutsu tiimin jäseniä ja hallinnoi rooleja ja käyttöoikeuksia.",
+  "help.art7C1": "Omistajat voivat kutsua henkilöstöä Hallinta-paneelista.",
+  "help.art7C2": "Roolit: Omistaja (täysi pääsy), Admin (resurssien hallinta), Henkilöstö (varausten tarkastelu).",
+  "help.art7C3": "Hyväksy tai poista tiimin jäseniä milloin tahansa.",
+  "help.art7C4": "Jokaisella tilauksella on henkilöstöraja — päivitä lisätäksesi.",
+  "help.art8Title": "Tilaukset ja laskutus",
+  "help.art8Desc": "Tutustu hinnoittelutasoihin ja hallinnoi tilaustasi.",
+  "help.art8C1": "Basic (29 €/kk) — 1 tyyppi, 1–3 henkilöä, oletusmallit.",
+  "help.art8C2": "Pro (79 €/kk) — 1 tyyppi, 10 henkilöä, mukautetut mallit, analytiikka.",
+  "help.art8C3": "Business (199 €/kk) — Kaikki tyypit, rajaton henkilöstö, omistautunut tuki, AI-chat.",
+  "help.art8C4": "Päivitä tai alenna milloin tahansa. Muutokset astuvat voimaan seuraavalla laskutuskaudella.",
+  "help.art9Title": "Usein kysytyt kysymykset",
+  "help.art9Desc": "Vastauksia yleisimpiin kysymyksiin MinnowBookista.",
+  "help.art9C1": "K: Tarvitsenko luottokortin kokeiluun? V: Ei!",
+  "help.art9C2": "K: Voinko käyttää omaa verkkotunnusta? V: Omat verkkotunnukset ovat suunnitelmissa.",
+  "help.art9C3": "K: Miten vieraat saavat vahvistuksen? V: Automaattisesti sähköpostitse vahvistuksen yhteydessä.",
+  "help.art9C4": "K: Voinko viedä tietoni? V: Kyllä, raportit voidaan viedä Raportit-paneelista.",
+  "help.guide1Q": "Miten hallitsen varauksia?",
+  "help.guide1A": "Siirry kohtaan **Hallintapaneeli → Varaukset** selataksesi, suodattaaksesi, muokataksesi ja hallinnoitsesi kaikkia varauksia.",
+  "help.guide2Q": "Miten mukautan varaussivua?",
+  "help.guide2A": "Siirry **Asetuksiin** hallintapaneelissa. Lataa logo, aseta brändivärit ja lisää hero-kuva.",
+  "help.guide3Q": "Miten asetan sähköpostimallit?",
+  "help.guide3A": "Kohdassa **Asetukset → Sähköpostimallit** voit mukauttaa vahvistus- ja peruutussähköpostit.",
+  "help.guide4Q": "Miten lisään henkilöstöä?",
+  "help.guide4A": "Siirry kohtaan **Hallinta → Käyttäjät** kutsuaksesi uutta henkilöstöä. Voit asettaa rooleja ja hyväksyä tai poistaa jäseniä.",
+  "help.guide5Q": "Miten lisään tai muokkaan resursseja?",
+  "help.guide5A": "Siirry kohtaan **Hallintapaneeli → Resurssit** luodaksesi huoneita, pöytiä tai tiloja.",
+
   // MinnowAid
   "aid.title": "MinnowAid",
   "aid.subtitle": "Kysy mitä tahansa MinnowBookista",
@@ -3155,6 +3412,92 @@ const sv: TranslationKeys = {
   "resetPassword.success": "Lösenordet har uppdaterats!",
   "resetPassword.updated": "Lösenord uppdaterat",
   "resetPassword.redirecting": "Omdirigerar till inloggning...",
+
+  // Help & Support page
+  "help.title": "Hjälp & Support",
+  "help.subtitle": "Bläddra bland guider, vanliga frågor och fråga AI-assistenten.",
+  "help.searchPlaceholder": "Sök efter hjälp...",
+  "help.noResults": "Inga resultat hittades. Prova ett annat sökord.",
+  "help.aiTitle": "MinnowSupporter",
+  "help.aiSubtitle": "Fråga vad som helst om MinnowBook",
+  "help.askOrGuide": "Ställ en fråga eller prova en snabbguide:",
+  "help.thinking": "Tänker...",
+  "help.cancelRequest": "Avbryt förfrågan",
+  "help.submitRequest": "Skicka supportärende",
+  "help.subjectPlaceholder": "Ämne (t.ex. Funktionsönskemål)",
+  "help.describePlaceholder": "Beskriv din förfrågan...",
+  "help.submitToAdmin": "Skicka till admin",
+  "help.typePlaceholder": "Skriv din fråga...",
+  "help.errorNoTenant": "Kan inte skicka förfrågan — ingen klient hittades.",
+  "help.errorSubmit": "Kunde inte skicka förfrågan",
+  "help.successSubmit": "Supportärende skickat",
+  "help.errorConnect": "Kunde inte ansluta. Försök igen.",
+  "help.requestSubmitted": "Supportärende",
+  "help.requestSubmittedDetail": "Ditt supportärende har skickats! Adminteamet granskar det och svarar snart.",
+  "help.art1Title": "Komma igång",
+  "help.art1Desc": "Skapa ditt konto och din första bokningssida på några minuter.",
+  "help.art1C1": "Registrera dig för en gratis 30-dagars provperiod — inget kreditkort behövs.",
+  "help.art1C2": "Slutför installationsguiden för att namnge ditt företag och välja bokningstyper.",
+  "help.art1C3": "Anpassa ditt varumärke (logotyp, färger) i Inställningar.",
+  "help.art1C4": "Dela din bokningslänk med kunderna!",
+  "help.art2Title": "Hantera bokningar",
+  "help.art2Desc": "Visa, redigera, bekräfta och avboka bokningar från instrumentpanelen.",
+  "help.art2C1": "Använd kalendervyn för en visuell översikt av kommande bokningar.",
+  "help.art2C2": "Byt till listvyn för att filtrera efter status, typ eller datumintervall.",
+  "help.art2C3": "Klicka på en bokning för att redigera detaljer, lägga till anteckningar eller ändra status.",
+  "help.art2C4": "Bekräftelse- och avbokningsmeddelanden skickas automatiskt.",
+  "help.art3Title": "E-postmallar",
+  "help.art3Desc": "Anpassa bekräftelse- och avbokningsmejl som skickas till gäster.",
+  "help.art3C1": "Gå till Inställningar → E-postmallar för att anpassa dina mejl.",
+  "help.art3C2": "Förhandsgranska mejlens utseende innan du skickar dem.",
+  "help.art3C3": "Lägg till anpassade meddelanden vid bekräftelse eller avbokning.",
+  "help.art3C4": "Mejl stöder flerspråkigt innehåll (EN, FI, SV).",
+  "help.art4Title": "Varumärke & Bokningssida",
+  "help.art4Desc": "Anpassa din offentliga bokningssida med din varumärkesidentitet.",
+  "help.art4C1": "Ladda upp din logotyp och ange primär-/accentfärger i Inställningar.",
+  "help.art4C2": "Lägg till en hero-bild för bokningssidans rubrik.",
+  "help.art4C3": "Din bokningssida finns på /book/din-slug.",
+  "help.art4C4": "Företagsbeskrivningen visas för gäster på bokningssidan.",
+  "help.art5Title": "Öppettider",
+  "help.art5Desc": "Konfigurera när ditt företag tar emot bokningar för varje typ.",
+  "help.art5C1": "Ange öppettider per bokningstyp (restaurang, lokal, hotell).",
+  "help.art5C2": "Markera specifika dagar som stängda.",
+  "help.art5C3": "Öppettider bestämmer tillgängliga tider på bokningssidan.",
+  "help.art5C4": "Använd blockerade tider för att tillfälligt stänga specifika datum.",
+  "help.art6Title": "Resurser & Rum",
+  "help.art6Desc": "Hantera rum, bord och evenemangslokaler som kan bokas.",
+  "help.art6C1": "Lägg till resurser i Resurser-sektionen.",
+  "help.art6C2": "Ange kapacitet, prissättning och beskrivningar för varje resurs.",
+  "help.art6C3": "Ladda upp bilder för att visa dina utrymmen på bokningssidan.",
+  "help.art6C4": "Inaktivera resurser för att tillfälligt dölja dem.",
+  "help.art7Title": "Personal & Användarhantering",
+  "help.art7Desc": "Bjud in teammedlemmar och hantera roller och behörigheter.",
+  "help.art7C1": "Ägare kan bjuda in personal via Adminpanelen.",
+  "help.art7C2": "Roller: Ägare (full åtkomst), Admin (hantera resurser), Personal (visa bokningar).",
+  "help.art7C3": "Godkänn eller ta bort teammedlemmar när som helst.",
+  "help.art7C4": "Varje plan har en personalgräns — uppgradera för att lägga till fler.",
+  "help.art8Title": "Planer & Fakturering",
+  "help.art8Desc": "Förstå prisnivåer och hantera din prenumeration.",
+  "help.art8C1": "Basic (29 €/mån) — 1 typ, 1–3 personal, standardmallar.",
+  "help.art8C2": "Pro (79 €/mån) — 1 typ, 10 personal, anpassade mallar, analys.",
+  "help.art8C3": "Business (199 €/mån) — Alla typer, obegränsad personal, dedicerad support, AI-chatt.",
+  "help.art8C4": "Uppgradera eller nedgradera när som helst. Ändringar börjar gälla nästa faktureringsperiod.",
+  "help.art9Title": "Vanliga frågor",
+  "help.art9Desc": "Svar på de vanligaste frågorna om MinnowBook.",
+  "help.art9C1": "F: Behöver jag ett kreditkort för provperioden? S: Nej!",
+  "help.art9C2": "F: Kan jag använda min egen domän? S: Egna domäner finns på vår roadmap.",
+  "help.art9C3": "F: Hur får gäster bekräftelser? S: Automatiskt via mejl när du bekräftar en bokning.",
+  "help.art9C4": "F: Kan jag exportera mina data? S: Ja, rapporter kan exporteras från Rapporter-panelen.",
+  "help.guide1Q": "Hur hanterar jag bokningar?",
+  "help.guide1A": "Gå till **Instrumentpanel → Bokningar** för att visa, filtrera, redigera och hantera alla bokningar.",
+  "help.guide2Q": "Hur anpassar jag min bokningssida?",
+  "help.guide2A": "Navigera till **Inställningar** i instrumentpanelen. Ladda upp din logotyp, ange varumärkesfärger och lägg till en hero-bild.",
+  "help.guide3Q": "Hur konfigurerar jag e-postmallar?",
+  "help.guide3A": "I **Inställningar → E-postmallar** kan du anpassa bekräftelse- och avbokningsmejl.",
+  "help.guide4Q": "Hur lägger jag till personal?",
+  "help.guide4A": "Gå till **Admin → Användare** för att bjuda in ny personal. Du kan ange roller och godkänna eller ta bort medlemmar.",
+  "help.guide5Q": "Hur lägger jag till eller redigerar resurser?",
+  "help.guide5A": "Gå till **Instrumentpanel → Resurser** för att skapa rum, bord eller lokaler.",
 
   // MinnowAid
   "aid.title": "MinnowAid",
