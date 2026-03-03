@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/hooks/useTenant";
 import { useSiteContext } from "@/hooks/useSiteContext";
+import { useUserSites } from "@/hooks/useUserSites";
 import { useT, useLanguage } from "@/contexts/I18nContext";
 import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
 import type { TranslationKey } from "@/i18n/translations";
@@ -117,6 +118,7 @@ const ReportsPanel = () => {
   const { language } = useLanguage();
   const { tenantId } = useTenant();
   const { selectedSiteId } = useSiteContext();
+  const { applySiteFilter, siteIds } = useUserSites();
   const dateLocale = localeMap[language] || fiFns;
 
   const [period, setPeriod] = useState<Period>("month");
@@ -129,7 +131,7 @@ const ReportsPanel = () => {
   const [reportSiteId, setReportSiteId] = useState<string | null>(null);
 
   // Sites query for site filter
-  const { data: sites } = useQuery({
+  const { data: allSites } = useQuery({
     queryKey: ["reports-sites", tenantId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -143,6 +145,11 @@ const ReportsPanel = () => {
     },
     enabled: !!tenantId,
   });
+
+  // Filter sites for staff users
+  const sites = siteIds
+    ? (allSites ?? []).filter((s) => siteIds.includes(s.id))
+    : allSites;
 
   // Effective site filter: local report filter takes precedence, then global site selector
   const effectiveSiteId = reportSiteId ?? selectedSiteId;
@@ -192,7 +199,7 @@ const ReportsPanel = () => {
   const prevEndStr = format(prevEnd, "yyyy-MM-dd");
 
   const { data: rawReservations = [], isLoading } = useQuery({
-    queryKey: ["reports-reservations", tenantId, effectiveSiteId, startStr, endStr],
+    queryKey: ["reports-reservations", tenantId, effectiveSiteId, siteIds, startStr, endStr],
     queryFn: async () => {
       if (!tenantId) return [];
       let query = supabase
@@ -203,7 +210,7 @@ const ReportsPanel = () => {
         .lte("date", endStr)
         .neq("status", "cancelled")
         .order("date", { ascending: true });
-      if (effectiveSiteId) query = query.eq("site_id", effectiveSiteId);
+      query = applySiteFilter(query, effectiveSiteId);
       const { data, error } = await query;
       if (error) throw error;
       return (data ?? []) as (ReservationRow & { site_id?: string | null })[];
@@ -212,7 +219,7 @@ const ReportsPanel = () => {
   });
 
   const { data: prevReservations = [] } = useQuery({
-    queryKey: ["reports-reservations-prev", tenantId, effectiveSiteId, prevStartStr, prevEndStr],
+    queryKey: ["reports-reservations-prev", tenantId, effectiveSiteId, siteIds, prevStartStr, prevEndStr],
     queryFn: async () => {
       if (!tenantId) return [];
       let query = supabase
@@ -223,7 +230,7 @@ const ReportsPanel = () => {
         .lte("date", prevEndStr)
         .neq("status", "cancelled")
         .order("date", { ascending: true });
-      if (effectiveSiteId) query = query.eq("site_id", effectiveSiteId);
+      query = applySiteFilter(query, effectiveSiteId);
       const { data, error } = await query;
       if (error) throw error;
       return (data ?? []) as ReservationRow[];

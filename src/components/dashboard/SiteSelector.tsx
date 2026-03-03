@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/hooks/useTenant";
 import { useSiteContext } from "@/hooks/useSiteContext";
+import { useUserSites } from "@/hooks/useUserSites";
 import { useT } from "@/contexts/I18nContext";
 import { Building2, Hotel, UtensilsCrossed, CalendarDays, ChevronDown } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -20,6 +21,7 @@ const typeIcons: Record<string, React.ElementType> = {
 const SiteSelector = () => {
   const { tenantId, tenant } = useTenant();
   const { selectedSiteId, setSelectedSiteId, selectedResourceId, setSelectedResourceId } = useSiteContext();
+  const { siteIds: allowedSiteIds, isRestricted } = useUserSites();
   const t = useT();
   const [open, setOpen] = useState(false);
 
@@ -53,7 +55,12 @@ const SiteSelector = () => {
     enabled: !!tenantId,
   });
 
-  if (!sites || sites.length < 1) return null;
+  // Filter sites to only those the user is allowed to access
+  const visibleSites = isRestricted && allowedSiteIds
+    ? (sites ?? []).filter((s) => allowedSiteIds.includes(s.id))
+    : (sites ?? []);
+
+  if (visibleSites.length < 1) return null;
 
   const getResourcesForSite = (siteId: string) =>
     (resources ?? []).filter((r) => r.site_id === siteId);
@@ -65,7 +72,7 @@ const SiteSelector = () => {
       return res?.name ?? "Resource";
     }
     if (selectedSiteId) {
-      const site = sites.find((s) => s.id === selectedSiteId);
+      const site = visibleSites.find((s) => s.id === selectedSiteId);
       return site?.name ?? "Site";
     }
     return t("sites.allSites" as any) || "All sites";
@@ -107,21 +114,23 @@ const SiteSelector = () => {
         </PopoverTrigger>
         <PopoverContent className="w-64 p-1.5" align="start" side="bottom">
           <div className="max-h-72 overflow-y-auto space-y-0.5">
-            {/* All sites option */}
-            <button
-              onClick={handleSelectAll}
-              className={cn(
-                "w-full text-left px-2.5 py-2 rounded-md text-sm font-medium transition-colors",
-                !selectedSiteId && !selectedResourceId
-                  ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                  : "text-foreground/80 hover:bg-muted"
-              )}
-            >
-              {t("sites.allSites" as any) || "All sites"}
-            </button>
+            {/* All sites option — only for unrestricted users */}
+            {!isRestricted && (
+              <button
+                onClick={handleSelectAll}
+                className={cn(
+                  "w-full text-left px-2.5 py-2 rounded-md text-sm font-medium transition-colors",
+                  !selectedSiteId && !selectedResourceId
+                    ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                    : "text-foreground/80 hover:bg-muted"
+                )}
+              >
+                {t("sites.allSites" as any) || "All sites"}
+              </button>
+            )}
 
             {/* Grouped sites with resources */}
-            {sites.map((site) => {
+            {visibleSites.map((site) => {
               const siteResources = getResourcesForSite(site.id);
               const isSiteSelected = selectedSiteId === site.id && !selectedResourceId;
 

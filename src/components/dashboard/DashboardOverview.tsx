@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/hooks/useTenant";
 import { useSiteContext } from "@/hooks/useSiteContext";
+import { useUserSites } from "@/hooks/useUserSites";
 import { usePermissions } from "@/hooks/usePermissions";
 import SiteTabs from "./SiteTabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -40,6 +41,7 @@ interface DashboardOverviewProps {
 const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
   const { tenantId, tenant, isOwner, isAdmin } = useTenant();
   const { selectedSiteId, setSelectedSiteId } = useSiteContext();
+  const { applySiteFilter, siteIds } = useUserSites();
   const { isSystemAdmin } = usePermissions();
   const today = format(new Date(), "yyyy-MM-dd");
   const t = useT();
@@ -53,12 +55,12 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
 
   // Main stats query
   const { data: stats } = useQuery({
-    queryKey: ["dashboard-stats-full", tenantId, selectedSiteId, today, weekStart],
+    queryKey: ["dashboard-stats-full", tenantId, selectedSiteId, siteIds, today, weekStart],
     queryFn: async () => {
       if (!tenantId) return null;
 
-      // Helper to apply site filter
-      const sf = (q: any) => selectedSiteId ? q.eq("site_id", selectedSiteId) : q;
+      // Helper to apply site filter (respects staff site assignments)
+      const sf = (q: any) => applySiteFilter(q, selectedSiteId);
 
       const [
         todayRes,
