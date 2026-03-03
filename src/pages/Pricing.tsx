@@ -13,6 +13,8 @@ const tiers = [
     reservationTypes: "1 type (you choose)",
     staffUsers: "1–3",
     features: [
+      "1 site / location",
+      "1 reservation type (you choose)",
       "Custom branding (logo, colors, images)",
       "Branded booking page on your subdomain",
       "Default email templates",
@@ -24,11 +26,13 @@ const tiers = [
   {
     name: "Pro",
     price: 79,
-    description: "For growing businesses that need more flexibility and customization.",
-    reservationTypes: "1 type (you choose)",
+    description: "For growing businesses that need all service types under one roof.",
+    reservationTypes: "All 3 types included",
     staffUsers: "Up to 10",
     isPopular: true,
     features: [
+      "1 site / location",
+      "All 3 reservation types",
       "Everything in Basic",
       "Custom email templates (HTML editor)",
       "Advanced opening hours & booking rules",
@@ -40,13 +44,14 @@ const tiers = [
   {
     name: "Business",
     price: 199,
-    description: "Full-featured platform for established hospitality businesses.",
-    reservationTypes: "All 3 types included",
+    description: "Full-featured platform for multi-location hospitality businesses.",
+    reservationTypes: "All types included",
     staffUsers: "Unlimited",
     features: [
+      "Unlimited sites & locations",
+      "All reservation types",
       "Everything in Pro",
-      "Multi-site management",
-      "Restaurant, venue & guesthouse booking",
+      "Multi-site management dashboard",
       "Unlimited staff accounts",
       "Advanced revenue reporting",
       "Dedicated account manager",
@@ -66,7 +71,7 @@ const faqs = [
   },
   {
     q: "What reservation types can I choose?",
-    a: "Restaurant (table bookings), Venue (event space inquiries), and Gasthaus/Guesthouse (room reservations). Basic and Pro plans let you pick one; Business includes all three.",
+    a: "Restaurant (table bookings), Venue (event space inquiries), and Gasthaus/Guesthouse (room reservations). Basic lets you pick one; Pro unlocks all three on a single site; Business adds unlimited sites.",
   },
   {
     q: "Do I need a credit card to start the trial?",
@@ -128,7 +133,8 @@ const Pricing = () => {
                 {[
                   ["Monthly price", "€29", "€79", "€199"],
                   ["Free trial", "30 days", "30 days", "30 days"],
-                  ["Reservation types", "1", "1", "All 3"],
+                  ["Sites / locations", "1", "1", "Unlimited"],
+                  ["Reservation types", "1", "All 3", "All"],
                   ["Staff users", "1–3", "Up to 10", "Unlimited"],
                   ["Custom branding", "✓", "✓", "✓"],
                   ["Branded booking page", "✓", "✓", "✓"],
@@ -140,14 +146,17 @@ const Pricing = () => {
                   ["Analytics & reports", "Basic", "Advanced", "Advanced"],
                   ["Priority support", "—", "✓", "✓"],
                   ["Dedicated support", "—", "—", "✓"],
-                ].map(([feature, basic, pro, business]) => (
-                  <tr key={feature} className="border-b border-border/50">
-                    <td className="py-3 pr-4 text-foreground/80">{feature}</td>
+                ].map(([feature, basic, pro, business]) => {
+                  const isHighlight = feature === "Sites / locations" || feature === "Reservation types";
+                  return (
+                  <tr key={feature} className={`border-b border-border/50 ${isHighlight ? "bg-accent/5" : ""}`}>
+                    <td className={`py-3 pr-4 ${isHighlight ? "text-foreground font-medium" : "text-foreground/80"}`}>{feature}</td>
                     <td className="py-3 px-4 text-center text-muted-foreground">{basic}</td>
-                    <td className="py-3 px-4 text-center text-foreground font-medium">{pro}</td>
-                    <td className="py-3 px-4 text-center text-foreground font-medium">{business}</td>
+                    <td className={`py-3 px-4 text-center font-medium ${isHighlight ? "text-accent" : "text-foreground"}`}>{pro}</td>
+                    <td className={`py-3 px-4 text-center font-medium ${isHighlight ? "text-accent" : "text-foreground"}`}>{business}</td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>
