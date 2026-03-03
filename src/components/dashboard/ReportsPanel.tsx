@@ -25,7 +25,7 @@ import { fi as fiFns, enUS, sv as svFns, type Locale } from "date-fns/locale";
 import {
   ChevronLeft, ChevronRight, CheckCircle2, Clock, XCircle,
   CalendarIcon, Download, Printer, Receipt, TrendingUp, TrendingDown,
-  Minus, AlertCircle, Euro, Coffee, BedDouble, GitCompareArrows,
+  Minus, AlertCircle, Euro, Coffee, BedDouble, GitCompareArrows, Building2,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -126,6 +126,27 @@ const ReportsPanel = () => {
   const [invoicedFilter, setInvoicedFilter] = useState<"all" | "invoiced" | "not_invoiced">("all");
   const [typeFilter, setTypeFilter] = useState<"all" | string>("all");
   const [compareMode, setCompareMode] = useState(false);
+  const [reportSiteId, setReportSiteId] = useState<string | null>(null);
+
+  // Sites query for site filter
+  const { data: sites } = useQuery({
+    queryKey: ["reports-sites", tenantId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("sites")
+        .select("id, name, is_active")
+        .eq("tenant_id", tenantId!)
+        .eq("is_active", true)
+        .order("name");
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!tenantId,
+  });
+
+  // Effective site filter: local report filter takes precedence, then global site selector
+  const effectiveSiteId = reportSiteId ?? selectedSiteId;
+  const effectiveSiteName = effectiveSiteId ? sites?.find((s) => s.id === effectiveSiteId)?.name : null;
 
   // Tenant reservation types
   const { data: tenant } = useQuery({
@@ -171,38 +192,38 @@ const ReportsPanel = () => {
   const prevEndStr = format(prevEnd, "yyyy-MM-dd");
 
   const { data: rawReservations = [], isLoading } = useQuery({
-    queryKey: ["reports-reservations", tenantId, selectedSiteId, startStr, endStr],
+    queryKey: ["reports-reservations", tenantId, effectiveSiteId, startStr, endStr],
     queryFn: async () => {
       if (!tenantId) return [];
       let query = supabase
         .from("reservations")
-        .select("id, reservation_type, status, date, check_out_date, is_invoiced, is_used, guest_name, guests_count, estimated_guests, price_eur, pricing_details, internal_notes, breakfast_included, breakfast_price_per_person, room_type, pricing_type")
+        .select("id, reservation_type, status, date, check_out_date, is_invoiced, is_used, guest_name, guests_count, estimated_guests, price_eur, pricing_details, internal_notes, breakfast_included, breakfast_price_per_person, room_type, pricing_type, site_id")
         .eq("tenant_id", tenantId)
         .gte("date", startStr)
         .lte("date", endStr)
         .neq("status", "cancelled")
         .order("date", { ascending: true });
-      if (selectedSiteId) query = query.eq("site_id", selectedSiteId);
+      if (effectiveSiteId) query = query.eq("site_id", effectiveSiteId);
       const { data, error } = await query;
       if (error) throw error;
-      return (data ?? []) as ReservationRow[];
+      return (data ?? []) as (ReservationRow & { site_id?: string | null })[];
     },
     enabled: !!tenantId,
   });
 
   const { data: prevReservations = [] } = useQuery({
-    queryKey: ["reports-reservations-prev", tenantId, selectedSiteId, prevStartStr, prevEndStr],
+    queryKey: ["reports-reservations-prev", tenantId, effectiveSiteId, prevStartStr, prevEndStr],
     queryFn: async () => {
       if (!tenantId) return [];
       let query = supabase
         .from("reservations")
-        .select("id, reservation_type, status, date, check_out_date, is_invoiced, is_used, guest_name, guests_count, estimated_guests, price_eur, pricing_details, internal_notes, breakfast_included, breakfast_price_per_person, room_type, pricing_type")
+        .select("id, reservation_type, status, date, check_out_date, is_invoiced, is_used, guest_name, guests_count, estimated_guests, price_eur, pricing_details, internal_notes, breakfast_included, breakfast_price_per_person, room_type, pricing_type, site_id")
         .eq("tenant_id", tenantId)
         .gte("date", prevStartStr)
         .lte("date", prevEndStr)
         .neq("status", "cancelled")
         .order("date", { ascending: true });
-      if (selectedSiteId) query = query.eq("site_id", selectedSiteId);
+      if (effectiveSiteId) query = query.eq("site_id", effectiveSiteId);
       const { data, error } = await query;
       if (error) throw error;
       return (data ?? []) as ReservationRow[];
@@ -360,7 +381,7 @@ const ReportsPanel = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `report_${periodLabel.replace(/\s/g, "_")}.csv`;
+    a.download = `report_${periodLabel.replace(/\s/g, "_")}${effectiveSiteName ? `_${effectiveSiteName.replace(/\s/g, "_")}` : ""}.csv`;
     a.style.display = "none";
     document.body.appendChild(a);
     a.click();
@@ -417,8 +438,8 @@ const ReportsPanel = () => {
         tfoot td { font-weight: 700; border-top: 2px solid #999; background: #f5f5f5; }
         @media print { body { padding: 0; } }
       </style></head><body>
-      <h1>${t("reports.print.title")}</h1>
-      <p class="meta">${t("reports.print.period")}: ${periodLabel} &nbsp;|&nbsp; ${t("reports.print.generated")}: ${format(new Date(), "d.M.yyyy HH:mm")}</p>
+      <h1>${t("reports.print.title")}${effectiveSiteName ? ` — ${effectiveSiteName}` : ""}</h1>
+      <p class="meta">${t("reports.print.period")}: ${periodLabel}${effectiveSiteName ? ` &nbsp;|&nbsp; Site: ${effectiveSiteName}` : ""} &nbsp;|&nbsp; ${t("reports.print.generated")}: ${format(new Date(), "d.M.yyyy HH:mm")}</p>
 
       <h2>${t("reports.print.summary")}</h2>
       <table>
@@ -579,6 +600,21 @@ const ReportsPanel = () => {
               <SelectItem value="all">{t("reports.filter.all")} ({t("reports.invoicing").toLowerCase()})</SelectItem>
               {allowedTypes.map((tp) => (
                 <SelectItem key={tp} value={tp}>{typeLabel(tp)}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
+
+        {(sites?.length ?? 0) > 0 && (
+          <Select value={reportSiteId ?? "all"} onValueChange={(v) => setReportSiteId(v === "all" ? null : v)}>
+            <SelectTrigger className="w-[180px]">
+              <Building2 className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+              <SelectValue placeholder="All sites" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All sites</SelectItem>
+              {sites!.map((site) => (
+                <SelectItem key={site.id} value={site.id}>{site.name}</SelectItem>
               ))}
             </SelectContent>
           </Select>
