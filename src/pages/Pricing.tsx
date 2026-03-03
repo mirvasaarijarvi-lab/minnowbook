@@ -81,6 +81,10 @@ const faqs = [
     q: "Can I use my own domain?",
     a: "Each business gets a branded subdomain (e.g., yourbusiness.minnowbook.com). Custom domain support is on our roadmap.",
   },
+  {
+    q: "What's the difference between AI chatbot support and priority support?",
+    a: "All plans include MinnowAid, our AI chatbot that can answer questions, help troubleshoot issues, and guide you through features instantly — available 24/7 in your dashboard. The Business plan adds priority support: you can escalate any conversation to our team and receive a guaranteed response within 24 hours.",
+  },
 ];
 
 const Pricing = () => {
