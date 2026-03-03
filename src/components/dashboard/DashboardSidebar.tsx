@@ -1,6 +1,7 @@
-import { CalendarDays, List, Settings, LogOut, LayoutDashboard, Menu, X, ShieldCheck, Cog, BarChart3, LifeBuoy, Shield, Building2 } from "lucide-react";
+import { CalendarDays, List, Settings, LogOut, LayoutDashboard, Menu, X, ShieldCheck, Cog, BarChart3, LifeBuoy, Shield, Building2, Crown } from "lucide-react";
 import Logo from "@/components/Logo";
 import SiteSelector from "./SiteSelector";
+import { useTenant } from "@/hooks/useTenant";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useT } from "@/contexts/I18nContext";
@@ -31,7 +32,7 @@ interface DashboardSidebarProps {
   isAdmin?: boolean;
 }
 
-const navItems: { view: DashboardView; labelKey: TranslationKey; icon: React.ElementType; adminOnly?: boolean; permission?: string }[] = [
+const navItems: { view: DashboardView; labelKey: TranslationKey; icon: React.ElementType; adminOnly?: boolean; permission?: string; tierRequired?: string }[] = [
   { view: "overview", labelKey: "nav.overview", icon: LayoutDashboard },
   { view: "calendar", labelKey: "nav.calendar", icon: CalendarDays, permission: PERM_CALENDAR_VIEW },
   { view: "reservations", labelKey: "nav.reservations", icon: List, permission: PERM_RESERVATIONS_VIEW },
@@ -39,17 +40,20 @@ const navItems: { view: DashboardView; labelKey: TranslationKey; icon: React.Ele
   { view: "reports", labelKey: "nav.reports", icon: BarChart3, permission: PERM_REPORTS_VIEW },
   { view: "settings", labelKey: "nav.settings", icon: Cog, permission: PERM_SETTINGS_VIEW },
   { view: "admin", labelKey: "nav.admin", icon: ShieldCheck, adminOnly: true, permission: PERM_ADMIN_VIEW },
-  { view: "sites", labelKey: "nav.sites" as TranslationKey, icon: Building2, permission: PERM_SITES_VIEW },
+  { view: "sites", labelKey: "nav.sites" as TranslationKey, icon: Building2, permission: PERM_SITES_VIEW, tierRequired: "business" },
   { view: "support", labelKey: "nav.support", icon: LifeBuoy, permission: PERM_SUPPORT_VIEW },
 ];
 
 const DashboardSidebar = ({ currentView, onViewChange, userEmail, onSignOut, mobileOpen, onMobileToggle, isAdmin: isAdminUser }: DashboardSidebarProps) => {
   const t = useT();
   const { can, isSystemAdmin } = usePermissions();
+  const { tenant } = useTenant();
   const navigate = useNavigate();
+  const tenantTier = tenant?.tier ?? "basic";
   const visibleItems = navItems.filter((item) => {
     if (item.adminOnly && !isAdminUser) return false;
     if (item.permission && !can(item.permission)) return false;
+    if (item.tierRequired && tenantTier !== item.tierRequired && !isSystemAdmin) return false;
     return true;
   });
 
@@ -89,7 +93,7 @@ const DashboardSidebar = ({ currentView, onViewChange, userEmail, onSignOut, mob
           <LanguageSwitcher variant="compact" />
         </div>
 
-        <SiteSelector />
+        {(tenantTier === "business" || isSystemAdmin) && <SiteSelector />}
         <nav data-tour="sidebar-nav" className="flex-1 p-3 space-y-1 overflow-y-auto">
           {visibleItems.map(({ view, labelKey, icon: Icon }) => (
             <button
