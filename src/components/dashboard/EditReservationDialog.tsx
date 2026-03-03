@@ -32,7 +32,7 @@ import { useDateLocale } from "@/hooks/useDateLocale";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { format } from "date-fns";
-import { CalendarIcon, Loader2, Mail, Pencil, XCircle } from "lucide-react";
+import { CalendarIcon, Loader2, Mail, Pencil, XCircle, Tag } from "lucide-react";
 import { cn } from "@/lib/utils";
 import ConfirmationEmailPreview from "@/components/ConfirmationEmailPreview";
 
@@ -98,6 +98,9 @@ const EditReservationDialog = ({
     event_type: "",
     estimated_guests: "",
     catering_needed: false,
+    discount_type: "" as "" | "percentage" | "fixed" | "free_nights",
+    discount_value: "",
+    discount_reason: "",
   });
 
   const [selectedResourceId, setSelectedResourceId] = useState<string>("");
@@ -156,6 +159,9 @@ const EditReservationDialog = ({
         event_type: reservation.event_type ?? "",
         estimated_guests: reservation.estimated_guests?.toString() ?? "",
         catering_needed: reservation.catering_needed ?? false,
+        discount_type: (reservation as any).discount_type ?? "",
+        discount_value: (reservation as any).discount_value?.toString() ?? "",
+        discount_reason: (reservation as any).discount_reason ?? "",
       });
       setSelectedResourceId("");
       setCustomMessage("");
@@ -189,8 +195,11 @@ const EditReservationDialog = ({
           event_type: form.event_type || null,
           estimated_guests: form.guests_count ? parseInt(form.guests_count) : null,
           catering_needed: form.catering_needed,
+          discount_type: form.discount_type || null,
+          discount_value: form.discount_value ? parseFloat(form.discount_value) : null,
+          discount_reason: form.discount_reason.trim() || null,
           updated_at: new Date().toISOString(),
-        })
+        } as any)
         .eq("id", reservation.id)
         .eq("tenant_id", reservation.tenant_id);
       if (error) throw error;
@@ -410,6 +419,35 @@ const EditReservationDialog = ({
                 </div>
               </div>
             )}
+
+            {/* Discount */}
+            <div className="space-y-3 rounded-lg border border-border p-3">
+              <Label className="font-medium flex items-center gap-1.5">
+                <Tag className="h-3.5 w-3.5 text-accent" />
+                {t("discount.title" as any) || "Discount"}
+              </Label>
+              <div className="grid gap-3 sm:grid-cols-3">
+                <div className="space-y-1.5">
+                  <Label className="text-xs">{t("discount.type" as any) || "Type"}</Label>
+                  <Select value={form.discount_type} onValueChange={(v) => setForm((prev) => ({ ...prev, discount_type: v as any }))}>
+                    <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="percentage">{t("discount.percentage" as any) || "Percentage (%)"}</SelectItem>
+                      <SelectItem value="fixed">{t("discount.fixed" as any) || "Fixed amount (€)"}</SelectItem>
+                      <SelectItem value="free_nights">{t("discount.freeNights" as any) || "Free nights/meals"}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">{t("discount.value" as any) || "Value"}</Label>
+                  <Input type="number" step="0.01" min={0} value={form.discount_value} onChange={(e) => updateField("discount_value", e.target.value)} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">{t("discount.reason" as any) || "Reason"}</Label>
+                  <Input value={form.discount_reason} onChange={(e) => updateField("discount_reason", e.target.value)} maxLength={200} />
+                </div>
+              </div>
+            </div>
 
             {/* Price */}
             <div className="space-y-1.5">

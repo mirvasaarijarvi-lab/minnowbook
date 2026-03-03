@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Calendar } from "@/components/ui/calendar";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Loader2, CheckCircle, UtensilsCrossed, Building2, Home, Clock, CalendarDays, CalendarIcon, BedDouble, Coffee, Users, Truck, ShoppingBag, ChefHat, Plug, Droplets } from "lucide-react";
+import { Loader2, CheckCircle, UtensilsCrossed, Building2, Home, Clock, CalendarDays, CalendarIcon, BedDouble, Coffee, Users, Truck, ShoppingBag, ChefHat, Plug, Droplets, Tag } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
 import { format, startOfMonth, endOfMonth, addMonths, subMonths, isSameDay } from "date-fns";
@@ -213,6 +213,8 @@ const PublicBooking = () => {
     staff_needed: false,
     // Pop-up fields
     festival_name: "",
+    // Promo code
+    promo_code: "",
     stall_size: "",
     electricity_needed: false,
     water_needed: false,
@@ -530,6 +532,11 @@ const PublicBooking = () => {
         }
       }
 
+      // Promo code
+      if (form.promo_code.trim()) {
+        payload.promo_code = form.promo_code.trim().toUpperCase();
+      }
+
       const { data, error } = await supabase.functions.invoke("public-booking", {
         body: payload,
       });
@@ -645,7 +652,7 @@ const PublicBooking = () => {
               <p className="text-muted-foreground">{t("booking.confirmationMsg")}</p>
               <Button
                 variant="outline"
-                onClick={() => { setSubmitted(false); setForm({ guest_name: "", guest_email: "", guest_phone: "", guests_count: "", reservation_type: "", start_time: "", special_requests: "", resource_id: "", check_out_date: "", room_type: "", breakfast_included: false, event_type: "", estimated_guests: "", catering_needed: false, pricing_type: "", fixed_price: "", restaurant_sub_type: "dine_in", delivery_address: "", dietary_notes: "", equipment_needed: false, staff_needed: false, festival_name: "", stall_size: "", electricity_needed: false, water_needed: false, food_permits: "", stall_fee: "" }); setSelectedDate(undefined); }}
+                onClick={() => { setSubmitted(false); setForm({ guest_name: "", guest_email: "", guest_phone: "", guests_count: "", reservation_type: "", start_time: "", special_requests: "", resource_id: "", check_out_date: "", room_type: "", breakfast_included: false, event_type: "", estimated_guests: "", catering_needed: false, pricing_type: "", fixed_price: "", restaurant_sub_type: "dine_in", delivery_address: "", dietary_notes: "", equipment_needed: false, staff_needed: false, festival_name: "", stall_size: "", electricity_needed: false, water_needed: false, food_permits: "", stall_fee: "", promo_code: "" }); setSelectedDate(undefined); }}
               >
                 {t("booking.makeAnother")}
               </Button>
@@ -1566,6 +1573,20 @@ const PublicBooking = () => {
                   onChange={(e) => updateField("special_requests", e.target.value)}
                   maxLength={1000}
                 />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="promo_code">{t("discount.promoCode" as any) || "Promo Code"}</Label>
+                <div className="relative">
+                  <Tag className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="promo_code"
+                    value={form.promo_code}
+                    onChange={(e) => updateField("promo_code", e.target.value.toUpperCase())}
+                    maxLength={50}
+                    className="pl-9 uppercase"
+                    placeholder={t("discount.promoCodePlaceholder" as any) || "Enter code if you have one"}
+                  />
+                </div>
               </div>
             </CardContent>
           </Card>

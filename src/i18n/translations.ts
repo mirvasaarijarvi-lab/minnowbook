@@ -995,6 +995,18 @@ type TranslationKeys = {
   "sites.capacity": string;
   "sites.noResourcesInSite": string;
 
+  // Discount
+  "discount.title": string;
+  "discount.type": string;
+  "discount.value": string;
+  "discount.reason": string;
+  "discount.reasonPlaceholder": string;
+  "discount.percentage": string;
+  "discount.fixed": string;
+  "discount.freeNights": string;
+  "discount.promoCode": string;
+  "discount.promoCodePlaceholder": string;
+
   // Approval Queue
   "approval.colType": string;
   "approval.colName": string;
@@ -1998,6 +2010,17 @@ const en: TranslationKeys = {
   "sites.resourceType": "Resource Type",
   "sites.capacity": "Capacity",
   "sites.noResourcesInSite": "No resources in this site yet.",
+  // Discount
+  "discount.title": "Discount",
+  "discount.type": "Type",
+  "discount.value": "Value",
+  "discount.reason": "Reason",
+  "discount.reasonPlaceholder": "e.g. Loyalty customer",
+  "discount.percentage": "Percentage (%)",
+  "discount.fixed": "Fixed amount (€)",
+  "discount.freeNights": "Free nights/meals",
+  "discount.promoCode": "Promo Code",
+  "discount.promoCodePlaceholder": "Enter code if you have one",
   "approval.colType": "Type",
   "approval.colName": "Name",
   "approval.colDetail": "Detail",
@@ -2997,6 +3020,16 @@ const fi: TranslationKeys = {
   "sites.resourceType": "Resurssityyppi",
   "sites.capacity": "Kapasiteetti",
   "sites.noResourcesInSite": "Tässä toimipisteessä ei ole vielä resursseja.",
+  "discount.title": "Alennus",
+  "discount.type": "Tyyppi",
+  "discount.value": "Arvo",
+  "discount.reason": "Syy",
+  "discount.reasonPlaceholder": "esim. Kanta-asiakas",
+  "discount.percentage": "Prosentti (%)",
+  "discount.fixed": "Kiinteä summa (€)",
+  "discount.freeNights": "Ilmaiset yöt/ateriat",
+  "discount.promoCode": "Tarjouskoodi",
+  "discount.promoCodePlaceholder": "Syötä koodi, jos sinulla on sellainen",
   "approval.colType": "Tyyppi",
   "approval.colName": "Nimi",
   "approval.colDetail": "Lisätieto",
@@ -3996,6 +4029,16 @@ const sv: TranslationKeys = {
   "sites.resourceType": "Resurstyp",
   "sites.capacity": "Kapacitet",
   "sites.noResourcesInSite": "Inga resurser på denna plats ännu.",
+  "discount.title": "Rabatt",
+  "discount.type": "Typ",
+  "discount.value": "Värde",
+  "discount.reason": "Anledning",
+  "discount.reasonPlaceholder": "t.ex. Stammkund",
+  "discount.percentage": "Procent (%)",
+  "discount.fixed": "Fast belopp (€)",
+  "discount.freeNights": "Gratis nätter/måltider",
+  "discount.promoCode": "Kampanjkod",
+  "discount.promoCodePlaceholder": "Ange kod om du har en",
   "approval.colType": "Typ",
   "approval.colName": "Namn",
   "approval.colDetail": "Detalj",

@@ -134,6 +134,68 @@ export type Database = {
           },
         ]
       }
+      discount_codes: {
+        Row: {
+          applies_to: string[] | null
+          code: string
+          created_at: string
+          description: string | null
+          discount_type: string
+          discount_value: number
+          id: string
+          is_active: boolean
+          max_uses: number | null
+          min_price_eur: number | null
+          tenant_id: string
+          updated_at: string
+          used_count: number
+          valid_from: string | null
+          valid_until: string | null
+        }
+        Insert: {
+          applies_to?: string[] | null
+          code: string
+          created_at?: string
+          description?: string | null
+          discount_type?: string
+          discount_value?: number
+          id?: string
+          is_active?: boolean
+          max_uses?: number | null
+          min_price_eur?: number | null
+          tenant_id: string
+          updated_at?: string
+          used_count?: number
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Update: {
+          applies_to?: string[] | null
+          code?: string
+          created_at?: string
+          description?: string | null
+          discount_type?: string
+          discount_value?: number
+          id?: string
+          is_active?: boolean
+          max_uses?: number | null
+          min_price_eur?: number | null
+          tenant_id?: string
+          updated_at?: string
+          used_count?: number
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "discount_codes_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       login_history: {
         Row: {
           id: string
@@ -260,6 +322,10 @@ export type Database = {
           date: string
           delivery_address: string | null
           dietary_notes: string | null
+          discount_code_id: string | null
+          discount_reason: string | null
+          discount_type: string | null
+          discount_value: number | null
           electricity_needed: boolean | null
           end_time: string | null
           equipment_needed: boolean | null
@@ -280,6 +346,7 @@ export type Database = {
           no_email_ack: boolean | null
           no_email_cancel: boolean | null
           no_email_confirm: boolean | null
+          original_price_eur: number | null
           price_eur: number | null
           pricing_details: string | null
           pricing_type: string | null
@@ -312,6 +379,10 @@ export type Database = {
           date: string
           delivery_address?: string | null
           dietary_notes?: string | null
+          discount_code_id?: string | null
+          discount_reason?: string | null
+          discount_type?: string | null
+          discount_value?: number | null
           electricity_needed?: boolean | null
           end_time?: string | null
           equipment_needed?: boolean | null
@@ -332,6 +403,7 @@ export type Database = {
           no_email_ack?: boolean | null
           no_email_cancel?: boolean | null
           no_email_confirm?: boolean | null
+          original_price_eur?: number | null
           price_eur?: number | null
           pricing_details?: string | null
           pricing_type?: string | null
@@ -364,6 +436,10 @@ export type Database = {
           date?: string
           delivery_address?: string | null
           dietary_notes?: string | null
+          discount_code_id?: string | null
+          discount_reason?: string | null
+          discount_type?: string | null
+          discount_value?: number | null
           electricity_needed?: boolean | null
           end_time?: string | null
           equipment_needed?: boolean | null
@@ -384,6 +460,7 @@ export type Database = {
           no_email_ack?: boolean | null
           no_email_cancel?: boolean | null
           no_email_confirm?: boolean | null
+          original_price_eur?: number | null
           price_eur?: number | null
           pricing_details?: string | null
           pricing_type?: string | null
