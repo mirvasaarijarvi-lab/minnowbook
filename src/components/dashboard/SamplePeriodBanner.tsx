@@ -1,45 +1,64 @@
 import { useSamplePeriod, SampleStatus } from "@/hooks/useSamplePeriod";
+import { useT } from "@/contexts/I18nContext";
 import { AlertTriangle, Clock, Lock, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const bannerConfig: Record<string, { icon: React.ElementType; className: string; label: (days: number | null, overdue: number | null) => string } | null> = {
-  no_sample: null,
-  not_started: null,
-  active: null,
+interface BannerConfig {
+  icon: React.ElementType;
+  className: string;
+  translationKey: string;
+}
+
+const bannerConfig: Partial<Record<SampleStatus, BannerConfig>> = {
   warning_week: {
     icon: Info,
     className: "bg-accent/10 border-accent/30 text-accent-foreground",
-    label: (days) => `Your free trial ends in ${days} day${days !== 1 ? "s" : ""}. Contact support to upgrade.`,
+    translationKey: "sample.warningWeek",
   },
   warning_day: {
     icon: AlertTriangle,
     className: "bg-warning/15 border-warning/40 text-warning-foreground",
-    label: (days) => `Your free trial expires ${days === 1 ? "tomorrow" : "today"}! Contact support to continue using the platform.`,
+    translationKey: "sample.warningDay",
   },
   read_only: {
     icon: Clock,
     className: "bg-destructive/10 border-destructive/30 text-destructive",
-    label: (_d, overdue) => `Your free trial has expired. Dashboard is read-only for ${10 - (overdue ?? 0)} more day${10 - (overdue ?? 0) !== 1 ? "s" : ""}, then access will be blocked. Contact support to upgrade.`,
+    translationKey: "sample.readOnly",
   },
   blocked: {
     icon: Lock,
     className: "bg-destructive/15 border-destructive/40 text-destructive",
-    label: () => "Your free trial has expired and access is blocked. Contact support to reactivate your account.",
+    translationKey: "sample.blocked",
   },
 };
 
 const SamplePeriodBanner = () => {
   const { status, daysRemaining, daysOverdue } = useSamplePeriod();
+  const t = useT();
 
   const config = bannerConfig[status];
   if (!config) return null;
 
   const Icon = config.icon;
 
+  // Pick the right key for "tomorrow" vs "today"
+  const key =
+    status === "warning_day" && daysRemaining === 1
+      ? "sample.warningDayTomorrow"
+      : config.translationKey;
+
+  // Replace {days} placeholder
+  const daysValue =
+    status === "read_only"
+      ? String(Math.max(0, 10 - (daysOverdue ?? 0)))
+      : String(daysRemaining ?? 0);
+
+  const message = (t as any)(key).replace("{days}", daysValue);
+
   return (
     <div className={cn("mx-4 sm:mx-6 lg:mx-8 mt-4 px-4 py-3 rounded-lg border flex items-center gap-3 text-sm font-medium", config.className)}>
       <Icon className="h-4 w-4 shrink-0" />
-      <span>{config.label(daysRemaining, daysOverdue)}</span>
+      <span>{message}</span>
     </div>
   );
 };

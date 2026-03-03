@@ -995,6 +995,13 @@ type TranslationKeys = {
   "sites.capacity": string;
   "sites.noResourcesInSite": string;
 
+  // Sample period
+  "sample.warningWeek": string;
+  "sample.warningDay": string;
+  "sample.warningDayTomorrow": string;
+  "sample.readOnly": string;
+  "sample.blocked": string;
+
   // Discount
   "discount.title": string;
   "discount.type": string;
@@ -2010,6 +2017,12 @@ const en: TranslationKeys = {
   "sites.resourceType": "Resource Type",
   "sites.capacity": "Capacity",
   "sites.noResourcesInSite": "No resources in this site yet.",
+  // Sample period
+  "sample.warningWeek": "Your free trial ends in {days} days. Contact support to upgrade.",
+  "sample.warningDay": "Your free trial expires today! Contact support to continue.",
+  "sample.warningDayTomorrow": "Your free trial expires tomorrow! Contact support to continue.",
+  "sample.readOnly": "Your free trial has expired. Dashboard is read-only for {days} more days. Contact support to upgrade.",
+  "sample.blocked": "Your free trial has expired and access is blocked. Contact support to reactivate.",
   // Discount
   "discount.title": "Discount",
   "discount.type": "Type",
@@ -3020,6 +3033,12 @@ const fi: TranslationKeys = {
   "sites.resourceType": "Resurssityyppi",
   "sites.capacity": "Kapasiteetti",
   "sites.noResourcesInSite": "Tässä toimipisteessä ei ole vielä resursseja.",
+  // Sample period
+  "sample.warningWeek": "Ilmainen kokeilujaksosi päättyy {days} päivän kuluttua. Ota yhteyttä tukeen päivittääksesi.",
+  "sample.warningDay": "Ilmainen kokeilujaksosi päättyy tänään! Ota yhteyttä tukeen jatkaaksesi.",
+  "sample.warningDayTomorrow": "Ilmainen kokeilujaksosi päättyy huomenna! Ota yhteyttä tukeen jatkaaksesi.",
+  "sample.readOnly": "Ilmainen kokeilujaksosi on päättynyt. Hallintapaneeli on vain luku -tilassa vielä {days} päivää. Ota yhteyttä tukeen.",
+  "sample.blocked": "Ilmainen kokeilujaksosi on päättynyt ja pääsy on estetty. Ota yhteyttä tukeen aktivoidaksesi tilisi.",
   "discount.title": "Alennus",
   "discount.type": "Tyyppi",
   "discount.value": "Arvo",
@@ -4029,6 +4048,12 @@ const sv: TranslationKeys = {
   "sites.resourceType": "Resurstyp",
   "sites.capacity": "Kapacitet",
   "sites.noResourcesInSite": "Inga resurser på denna plats ännu.",
+  // Sample period
+  "sample.warningWeek": "Din gratis provperiod slutar om {days} dagar. Kontakta support för att uppgradera.",
+  "sample.warningDay": "Din gratis provperiod löper ut idag! Kontakta support för att fortsätta.",
+  "sample.warningDayTomorrow": "Din gratis provperiod löper ut imorgon! Kontakta support för att fortsätta.",
+  "sample.readOnly": "Din provperiod har löpt ut. Instrumentpanelen är skrivskyddad i {days} dagar till. Kontakta support.",
+  "sample.blocked": "Din provperiod har löpt ut och åtkomst är blockerad. Kontakta support för att återaktivera.",
   "discount.title": "Rabatt",
   "discount.type": "Typ",
   "discount.value": "Värde",
