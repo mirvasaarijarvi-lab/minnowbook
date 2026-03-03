@@ -95,6 +95,21 @@ const SitesManagementPanel = () => {
   const { tenantId, tenant } = useTenant();
   const { can } = usePermissions();
 
+  const { data: tenantSettings } = useQuery({
+    queryKey: ["tenant-settings-business", tenantId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("tenant_settings")
+        .select("business_name")
+        .eq("tenant_id", tenantId!)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!tenantId,
+  });
+
+  const companyName = tenantSettings?.business_name || null;
   const queryClient = useQueryClient();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingSite, setEditingSite] = useState<Site | null>(null);
@@ -504,6 +519,12 @@ const SitesManagementPanel = () => {
                               >
                                 {site.is_active ? t("sites.active") : t("sites.draft")}
                               </Badge>
+                              {companyName && (
+                                <Badge variant="secondary" className="text-[10px] gap-1">
+                                  <Building2 className="h-3 w-3" />
+                                  {companyName}
+                                </Badge>
+                              )}
                             </div>
                             <div className="mt-1">
                               {renderResourceTypeSummary(site.id)}
