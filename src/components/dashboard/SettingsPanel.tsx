@@ -58,7 +58,7 @@ const SiteSettingsInfo = ({ siteId, tenantId }: { siteId: string; tenantId: stri
     queryFn: async () => {
       const { data, error } = await supabase
         .from("sites")
-        .select("name, slug, location, description, site_type")
+        .select("name, slug, location, description")
         .eq("id", siteId)
         .maybeSingle();
       if (error) throw error;
@@ -206,7 +206,7 @@ const SiteSettingsInfo = ({ siteId, tenantId }: { siteId: string; tenantId: stri
           <div className="flex items-center gap-2">
             <Building2 className="h-5 w-5 text-primary" />
             <CardTitle className="text-lg font-serif">{site.name}</CardTitle>
-            <Badge variant="outline" className="text-[10px]">{site.site_type}</Badge>
+            
           </div>
           {site.location && (
             <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
