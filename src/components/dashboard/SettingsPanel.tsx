@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Loader2, Upload, X, ImageIcon } from "lucide-react";
 import DashboardTooltip from "./DashboardTooltip";
+import OpeningHoursSettings from "./OpeningHoursSettings";
 
 const COLOR_PRESETS = [
   { name: "Navy & Amber", primary: "#1e3a5f", secondary: "#f5f0e8", accent: "#d4a853" },
@@ -453,6 +454,9 @@ const SettingsPanel = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Opening Hours */}
+      <OpeningHoursSettings />
 
       {/* Resource Type Names & Descriptions */}
       {tenant?.allowed_reservation_types?.length > 0 && (
