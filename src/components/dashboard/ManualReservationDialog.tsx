@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useT } from "@/contexts/I18nContext";
+import { useSiteContext } from "@/hooks/useSiteContext";
 import { useTenant } from "@/hooks/useTenant";
 import {
   Dialog,
@@ -90,6 +91,7 @@ const ManualReservationDialog = ({
   const dateFnsLocale = useDateLocale();
   const queryClient = useQueryClient();
   const { tenant, tenantId } = useTenant();
+  const { selectedSiteId } = useSiteContext();
 
   const [form, setForm] = useState({ ...emptyForm, reservation_type: defaultType ?? "" });
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(defaultDate);
@@ -137,8 +139,23 @@ const ManualReservationDialog = ({
       const isAccommodation = form.reservation_type === "hotel" || form.reservation_type === "guesthouse";
       const isVenue = form.reservation_type === "venue";
 
+      // Resolve site_id: use selected site, or find matching site by resource type
+      let resolvedSiteId = selectedSiteId;
+      if (!resolvedSiteId && form.reservation_type) {
+        const { data: matchingSite } = await supabase
+          .from("resources")
+          .select("site_id")
+          .eq("tenant_id", tenantId)
+          .eq("resource_type", form.reservation_type)
+          .not("site_id", "is", null)
+          .limit(1)
+          .maybeSingle();
+        resolvedSiteId = matchingSite?.site_id ?? null;
+      }
+
       const { error } = await supabase.from("reservations").insert({
         tenant_id: tenantId,
+        site_id: resolvedSiteId,
         guest_name: form.guest_name.trim(),
         guest_email: form.guest_email.trim(),
         guest_phone: form.guest_phone.trim() || null,
