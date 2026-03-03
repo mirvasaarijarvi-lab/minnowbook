@@ -168,7 +168,7 @@ const AdminPanel = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-users"] });
       setSiteDialogOpen(false);
-      toast({ title: t("admin.siteAssignmentsUpdated" as any) || "Site assignments updated" });
+      toast({ title: t("admin.siteAssignmentsUpdated") });
     },
     onError: (err: any) => {
       toast({ title: "Error", description: err.message, variant: "destructive" });
@@ -318,13 +318,13 @@ const AdminPanel = () => {
               <DialogHeader>
                 <DialogTitle className="font-serif flex items-center gap-2">
                   <Building2 className="h-5 w-5" />
-                  {t("admin.siteAssignments" as any) || "Site Assignments"} — {selectedUserName}
+                  {t("admin.siteAssignments")} — {selectedUserName}
                 </DialogTitle>
               </DialogHeader>
               <div className="space-y-3 pt-2">
                 {!sites?.length ? (
                   <p className="text-sm text-muted-foreground text-center py-4">
-                    {t("admin.noSitesAvailable" as any) || "No active sites available"}
+                    {t("admin.noSitesAvailable")}
                   </p>
                 ) : (
                   sites.map((site) => {
@@ -394,7 +394,7 @@ const AdminPanel = () => {
                   <TableHead>{t("admin.colName")}</TableHead>
                   <TableHead>{t("admin.colEmail")}</TableHead>
                   <TableHead>{t("admin.colRole")}</TableHead>
-                  {isBusiness && <TableHead>{t("admin.colSites" as any) || "Sites"}</TableHead>}
+                  {isBusiness && <TableHead>{t("admin.colSites")}</TableHead>}
                   <TableHead>{t("admin.colStatus")}</TableHead>
                   <TableHead className="text-right">{t("admin.colActions")}</TableHead>
                 </TableRow>

@@ -263,6 +263,10 @@ type TranslationKeys = {
   "admin.colRole": string;
   "admin.colStatus": string;
   "admin.colActions": string;
+  "admin.colSites": string;
+  "admin.siteAssignments": string;
+  "admin.siteAssignmentsUpdated": string;
+  "admin.noSitesAvailable": string;
   "admin.statusApproved": string;
   "admin.statusPending": string;
   "admin.confirmRemove": string;
@@ -1247,6 +1251,10 @@ const en: TranslationKeys = {
   "admin.colRole": "Role",
   "admin.colStatus": "Status",
   "admin.colActions": "Actions",
+  "admin.colSites": "Sites",
+  "admin.siteAssignments": "Site Assignments",
+  "admin.siteAssignmentsUpdated": "Site assignments updated",
+  "admin.noSitesAvailable": "No active sites available",
   "admin.statusApproved": "Approved",
   "admin.statusPending": "Pending",
   "admin.confirmRemove": "Are you sure?",
@@ -2217,6 +2225,10 @@ const fi: TranslationKeys = {
   "admin.colRole": "Rooli",
   "admin.colStatus": "Tila",
   "admin.colActions": "Toiminnot",
+  "admin.colSites": "Toimipisteet",
+  "admin.siteAssignments": "Toimipisteiden käyttöoikeudet",
+  "admin.siteAssignmentsUpdated": "Toimipisteiden käyttöoikeudet päivitetty",
+  "admin.noSitesAvailable": "Ei aktiivisia toimipisteitä",
   "admin.statusApproved": "Hyväksytty",
   "admin.statusPending": "Odottaa",
   "admin.confirmRemove": "Oletko varma?",
@@ -3186,6 +3198,10 @@ const sv: TranslationKeys = {
   "admin.colRole": "Roll",
   "admin.colStatus": "Status",
   "admin.colActions": "Åtgärder",
+  "admin.colSites": "Platser",
+  "admin.siteAssignments": "Platstilldelningar",
+  "admin.siteAssignmentsUpdated": "Platstilldelningar uppdaterade",
+  "admin.noSitesAvailable": "Inga aktiva platser tillgängliga",
   "admin.statusApproved": "Godkänd",
   "admin.statusPending": "Väntar",
   "admin.confirmRemove": "Är du säker?",
