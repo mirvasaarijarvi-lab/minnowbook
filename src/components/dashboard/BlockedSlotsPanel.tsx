@@ -15,12 +15,15 @@ import { Switch } from "@/components/ui/switch";
 import { toast } from "@/hooks/use-toast";
 import { Plus, Trash2, Ban, Clock, CalendarIcon, Filter } from "lucide-react";
 import { format, eachDayOfInterval, isBefore, startOfDay } from "date-fns";
+import { fi as fiFns, enUS, sv as svFns, type Locale } from "date-fns/locale";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import DashboardTooltip from "./DashboardTooltip";
-import { useT } from "@/contexts/I18nContext";
+import { useT, useLanguage } from "@/contexts/I18nContext";
 import type { DateRange } from "react-day-picker";
+
+const LOCALE_MAP: Record<string, Locale> = { fi: fiFns, sv: svFns, en: enUS };
 
 interface BlockedSlot {
   id: string;
@@ -39,6 +42,8 @@ const BlockedSlotsPanel = () => {
   const { tenantId } = useTenant();
   const queryClient = useQueryClient();
   const t = useT();
+  const { language } = useLanguage();
+  const dateFnsLocale = LOCALE_MAP[language] ?? enUS;
   const [dialogOpen, setDialogOpen] = useState(false);
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
   const [useTimeRange, setUseTimeRange] = useState(false);
@@ -209,17 +214,17 @@ const BlockedSlotsPanel = () => {
   const dateLabel = useMemo(() => {
     if (!dateRange?.from) return t("blocking.pickDate");
     if (!dateRange.to || format(dateRange.from, "yyyy-MM-dd") === format(dateRange.to, "yyyy-MM-dd")) {
-      return format(dateRange.from, "PPP");
+      return format(dateRange.from, "PPP", { locale: dateFnsLocale });
     }
-    return `${format(dateRange.from, "MMM d")} – ${format(dateRange.to, "MMM d, yyyy")}`;
+    return `${format(dateRange.from, "MMM d", { locale: dateFnsLocale })} – ${format(dateRange.to, "MMM d, yyyy", { locale: dateFnsLocale })}`;
   }, [dateRange, t]);
 
   const bulkDeleteLabel = useMemo(() => {
     if (!bulkDeleteRange?.from) return t("blocking.pickDate");
     if (!bulkDeleteRange.to || format(bulkDeleteRange.from, "yyyy-MM-dd") === format(bulkDeleteRange.to, "yyyy-MM-dd")) {
-      return format(bulkDeleteRange.from, "PPP");
+      return format(bulkDeleteRange.from, "PPP", { locale: dateFnsLocale });
     }
-    return `${format(bulkDeleteRange.from, "MMM d")} – ${format(bulkDeleteRange.to, "MMM d, yyyy")}`;
+    return `${format(bulkDeleteRange.from, "MMM d", { locale: dateFnsLocale })} – ${format(bulkDeleteRange.to, "MMM d, yyyy", { locale: dateFnsLocale })}`;
   }, [bulkDeleteRange, t]);
 
   return (
@@ -255,7 +260,7 @@ const BlockedSlotsPanel = () => {
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar mode="range" selected={bulkDeleteRange} onSelect={setBulkDeleteRange} numberOfMonths={2} className={cn("p-3 pointer-events-auto")} />
+                      <Calendar mode="range" selected={bulkDeleteRange} onSelect={setBulkDeleteRange} numberOfMonths={2} locale={dateFnsLocale} className={cn("p-3 pointer-events-auto")} />
                     </PopoverContent>
                   </Popover>
                   <p className="text-xs text-muted-foreground mt-1">{t("blocking.rangeHint")}</p>
@@ -346,7 +351,7 @@ const BlockedSlotsPanel = () => {
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar mode="range" selected={dateRange} onSelect={setDateRange} numberOfMonths={2} disabled={(date) => isBefore(date, startOfDay(new Date()))} className={cn("p-3 pointer-events-auto")} />
+                    <Calendar mode="range" selected={dateRange} onSelect={setDateRange} numberOfMonths={2} disabled={(date) => isBefore(date, startOfDay(new Date()))} locale={dateFnsLocale} className={cn("p-3 pointer-events-auto")} />
                   </PopoverContent>
                 </Popover>
                 <p className="text-xs text-muted-foreground mt-1">{t("blocking.dateHint")}</p>
@@ -454,7 +459,7 @@ const BlockedSlotsPanel = () => {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1 flex-wrap">
                       <span className="font-semibold text-foreground">
-                        {format(new Date(slot.date + "T00:00:00"), "PPP")}
+                        {format(new Date(slot.date + "T00:00:00"), "PPP", { locale: dateFnsLocale })}
                       </span>
                       {slot.start_time && slot.end_time && (
                         <Badge variant="outline" className="text-xs">
@@ -483,7 +488,7 @@ const BlockedSlotsPanel = () => {
                       <AlertDialogHeader>
                         <AlertDialogTitle>{t("blocking.removeBlock")}</AlertDialogTitle>
                         <AlertDialogDescription>
-                          {t("blocking.removeBlockDesc").replace("{date}", format(new Date(slot.date + "T00:00:00"), "PPP"))}
+                          {t("blocking.removeBlockDesc").replace("{date}", format(new Date(slot.date + "T00:00:00"), "PPP", { locale: dateFnsLocale }))}
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
