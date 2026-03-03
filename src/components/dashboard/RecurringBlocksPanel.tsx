@@ -15,6 +15,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
 import { Plus, Trash2, RefreshCw, Clock } from "lucide-react";
 import DashboardTooltip from "./DashboardTooltip";
+import { useT } from "@/contexts/I18nContext";
 
 interface RecurringBlock {
   id: string;
@@ -30,20 +31,13 @@ interface RecurringBlock {
   resource?: { name: string } | null;
 }
 
-const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-
-const resourceTypeLabels: Record<string, string> = {
-  hotel: "Hotel / Guesthouse",
-  guesthouse: "Hotel / Guesthouse",
-  restaurant: "Restaurant",
-  venue: "Venue / Event Space",
-};
-
-const selectableTypes = { hotel: "Hotel / Guesthouse", restaurant: "Restaurant", venue: "Venue / Event Space" };
+// Full day names for display (English fallback, used with "Every")
+const DAY_NAMES_EN = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 const RecurringBlocksPanel = () => {
   const { tenantId } = useTenant();
   const queryClient = useQueryClient();
+  const t = useT();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [useTimeRange, setUseTimeRange] = useState(false);
   const [blockSpecificResource, setBlockSpecificResource] = useState(false);
@@ -55,6 +49,27 @@ const RecurringBlocksPanel = () => {
     resource_id: "",
     reason: "",
   });
+
+  const dayAbbreviations = t("blocking.dayNames").split(",");
+
+  const selectableTypes: Record<string, string> = {
+    hotel: t("blocking.hotelGuesthouse"),
+    restaurant: t("blocking.restaurant"),
+    venue: t("blocking.venueEventSpace"),
+  };
+
+  const resourceTypeLabels: Record<string, string> = {
+    hotel: t("blocking.hotelGuesthouse"),
+    guesthouse: t("blocking.hotelGuesthouse"),
+    restaurant: t("blocking.restaurant"),
+    venue: t("blocking.venueEventSpace"),
+  };
+
+  const resourceNoun = (type: string) => {
+    if (type === "restaurant") return t("blocking.tableArea");
+    if (type === "venue") return t("blocking.eventSpace");
+    return t("blocking.room");
+  };
 
   const { data: resources } = useQuery({
     queryKey: ["resources", tenantId],
@@ -95,7 +110,6 @@ const RecurringBlocksPanel = () => {
   const createMutation = useMutation({
     mutationFn: async () => {
       if (!tenantId || selectedDays.length === 0) throw new Error("Select at least one day");
-
       const rows = selectedDays.map((day) => ({
         tenant_id: tenantId,
         day_of_week: day,
@@ -106,7 +120,6 @@ const RecurringBlocksPanel = () => {
         reason: form.reason || null,
         is_active: true,
       }));
-
       const { error } = await supabase.from("recurring_blocked_slots").insert(rows);
       if (error) throw error;
     },
@@ -114,7 +127,7 @@ const RecurringBlocksPanel = () => {
       queryClient.invalidateQueries({ queryKey: ["recurring-blocked-slots"] });
       setDialogOpen(false);
       resetForm();
-      toast({ title: "Recurring block created" });
+      toast({ title: t("blocking.recurringCreated") });
     },
     onError: (err: any) => {
       toast({ title: "Error", description: err.message, variant: "destructive" });
@@ -128,7 +141,7 @@ const RecurringBlocksPanel = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["recurring-blocked-slots"] });
-      toast({ title: "Recurring block removed" });
+      toast({ title: t("blocking.recurringRemoved") });
     },
   });
 
@@ -155,24 +168,23 @@ const RecurringBlocksPanel = () => {
         <div className="flex items-center gap-2">
           <h3 className="text-lg font-serif font-bold text-foreground flex items-center gap-2">
             <RefreshCw className="h-5 w-5" />
-            Recurring Blocks
+            {t("blocking.recurringTitle")}
           </h3>
-          <DashboardTooltip text="Block specific days of the week on a recurring basis. E.g. block every Monday for restaurant." />
+          <DashboardTooltip text={t("blocking.recurringTooltip")} />
         </div>
         <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) resetForm(); }}>
           <DialogTrigger asChild>
             <Button size="sm" className="gap-1.5">
-              <Plus className="h-4 w-4" /> Add Recurring Block
+              <Plus className="h-4 w-4" /> {t("blocking.addRecurring")}
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle className="font-serif">Add Recurring Block</DialogTitle>
+              <DialogTitle className="font-serif">{t("blocking.addRecurringTitle")}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 pt-2">
-              {/* Resource type */}
               <div>
-                <Label>Resource Type</Label>
+                <Label>{t("blocking.resourceType")}</Label>
                 <Select value={form.resource_type} onValueChange={(v) => {
                   const types = v === "hotel" ? ["hotel", "guesthouse"] : [v];
                   const hasMultipleResources = (resources ?? []).filter((r) => types.includes(r.resource_type)).length > 1;
@@ -190,23 +202,22 @@ const RecurringBlocksPanel = () => {
                 </Select>
               </div>
 
-              {/* Specific resource selector */}
               {filteredResources.length > 0 && (
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <Label className="flex items-center gap-1.5">
-                      Block specific {form.resource_type === "restaurant" ? "table/area" : form.resource_type === "venue" ? "event space" : "room"}
+                      {t("blocking.blockSpecific")} {resourceNoun(form.resource_type)}
                     </Label>
                     <Switch checked={blockSpecificResource} onCheckedChange={(checked) => { setBlockSpecificResource(checked); if (!checked) setForm({ ...form, resource_id: "" }); }} />
                   </div>
                   {!blockSpecificResource && (
                     <p className="text-xs text-muted-foreground">
-                      All {filteredResources.length} {form.resource_type === "restaurant" ? "tables/areas" : form.resource_type === "venue" ? "event spaces" : "rooms"} will be blocked.
+                      {t("blocking.allWillBeBlocked").replace("{count}", String(filteredResources.length)).replace("{type}", resourceNoun(form.resource_type))}
                     </p>
                   )}
                   {blockSpecificResource && (
                     <Select value={form.resource_id} onValueChange={(v) => setForm({ ...form, resource_id: v })}>
-                      <SelectTrigger><SelectValue placeholder={`Select ${form.resource_type === "restaurant" ? "table/area" : form.resource_type === "venue" ? "event space" : "room"}...`} /></SelectTrigger>
+                      <SelectTrigger><SelectValue placeholder={t("blocking.selectResource").replace("{type}", resourceNoun(form.resource_type))} /></SelectTrigger>
                       <SelectContent>
                         {filteredResources.map((r) => (
                           <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
@@ -217,48 +228,26 @@ const RecurringBlocksPanel = () => {
                 </div>
               )}
 
-              {/* Day of week selection */}
               <div>
-                <Label>Days of Week</Label>
+                <Label>{t("blocking.daysOfWeek")}</Label>
                 <div className="grid grid-cols-4 gap-2 mt-2">
-                  {DAY_NAMES.map((name, idx) => (
-                    <label
-                      key={idx}
-                      className="flex items-center gap-2 text-sm cursor-pointer"
-                    >
-                      <Checkbox
-                        checked={selectedDays.includes(idx)}
-                        onCheckedChange={() => toggleDay(idx)}
-                      />
-                      {name.slice(0, 3)}
+                  {dayAbbreviations.map((name, idx) => (
+                    <label key={idx} className="flex items-center gap-2 text-sm cursor-pointer">
+                      <Checkbox checked={selectedDays.includes(idx)} onCheckedChange={() => toggleDay(idx)} />
+                      {name}
                     </label>
                   ))}
                 </div>
               </div>
 
-              {/* Duration: Full day vs Specific hours */}
               <div className="space-y-2">
-                <Label>Duration</Label>
+                <Label>{t("blocking.duration")}</Label>
                 <div className="grid grid-cols-2 gap-2">
-                  <Button
-                    type="button"
-                    variant={!useTimeRange ? "default" : "outline"}
-                    size="sm"
-                    className="gap-1.5"
-                    onClick={() => setUseTimeRange(false)}
-                  >
-                    <RefreshCw className="h-3.5 w-3.5" />
-                    Full day
+                  <Button type="button" variant={!useTimeRange ? "default" : "outline"} size="sm" className="gap-1.5" onClick={() => setUseTimeRange(false)}>
+                    <RefreshCw className="h-3.5 w-3.5" /> {t("blocking.fullDay")}
                   </Button>
-                  <Button
-                    type="button"
-                    variant={useTimeRange ? "default" : "outline"}
-                    size="sm"
-                    className="gap-1.5"
-                    onClick={() => setUseTimeRange(true)}
-                  >
-                    <Clock className="h-3.5 w-3.5" />
-                    Specific hours
+                  <Button type="button" variant={useTimeRange ? "default" : "outline"} size="sm" className="gap-1.5" onClick={() => setUseTimeRange(true)}>
+                    <Clock className="h-3.5 w-3.5" /> {t("blocking.specificHours")}
                   </Button>
                 </div>
               </div>
@@ -266,23 +255,20 @@ const RecurringBlocksPanel = () => {
               {useTimeRange && (
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <Label>Start Time</Label>
+                    <Label>{t("blocking.startTime")}</Label>
                     <Input type="time" value={form.start_time} onChange={(e) => setForm({ ...form, start_time: e.target.value })} />
                   </div>
                   <div>
-                    <Label>End Time</Label>
+                    <Label>{t("blocking.endTime")}</Label>
                     <Input type="time" value={form.end_time} onChange={(e) => setForm({ ...form, end_time: e.target.value })} />
                   </div>
-                  <p className="col-span-2 text-xs text-muted-foreground">
-                    Only the selected hours will be blocked each week. Bookings outside this window remain available.
-                  </p>
+                  <p className="col-span-2 text-xs text-muted-foreground">{t("blocking.recurringTimeHint")}</p>
                 </div>
               )}
 
-              {/* Reason */}
               <div>
-                <Label>Reason (optional)</Label>
-                <Input value={form.reason} onChange={(e) => setForm({ ...form, reason: e.target.value })} placeholder="e.g. Closed on Mondays, Staff day off..." />
+                <Label>{t("blocking.reason")}</Label>
+                <Input value={form.reason} onChange={(e) => setForm({ ...form, reason: e.target.value })} placeholder={t("blocking.recurringReasonPlaceholder")} />
               </div>
 
               <Button
@@ -290,7 +276,7 @@ const RecurringBlocksPanel = () => {
                 onClick={() => createMutation.mutate()}
                 disabled={selectedDays.length === 0 || createMutation.isPending}
               >
-                {createMutation.isPending ? "Creating..." : `Block ${selectedDays.length} day${selectedDays.length !== 1 ? "s" : ""} weekly`}
+                {createMutation.isPending ? t("blocking.creating") : t("blocking.blockWeekly").replace("{count}", String(selectedDays.length))}
               </Button>
             </div>
           </DialogContent>
@@ -303,7 +289,7 @@ const RecurringBlocksPanel = () => {
           {[1, 2].map((i) => <Card key={i} className="animate-pulse"><CardContent className="p-4 h-16" /></Card>)}
         </div>
       ) : !recurringBlocks?.length ? (
-        <Card><CardContent className="p-6 text-center text-muted-foreground text-sm">No recurring blocks configured.</CardContent></Card>
+        <Card><CardContent className="p-6 text-center text-muted-foreground text-sm">{t("blocking.noRecurring")}</CardContent></Card>
       ) : (
         <div className="space-y-2">
           {recurringBlocks.map((block) => (
@@ -313,7 +299,7 @@ const RecurringBlocksPanel = () => {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1 flex-wrap">
                       <span className="font-semibold text-foreground">
-                        Every {DAY_NAMES[block.day_of_week]}
+                        {t("blocking.every")} {DAY_NAMES_EN[block.day_of_week]}
                       </span>
                       {block.start_time && block.end_time && (
                         <Badge variant="outline" className="text-xs">
@@ -322,7 +308,7 @@ const RecurringBlocksPanel = () => {
                         </Badge>
                       )}
                       {!block.start_time && !block.end_time && (
-                        <Badge variant="outline" className="text-xs">All day</Badge>
+                        <Badge variant="outline" className="text-xs">{t("blocking.allDay")}</Badge>
                       )}
                       <Badge variant="secondary" className="text-xs capitalize">
                         {resourceTypeLabels[block.resource_type] ?? block.resource_type}
@@ -339,7 +325,6 @@ const RecurringBlocksPanel = () => {
                     <Switch
                       checked={block.is_active}
                       onCheckedChange={(checked) => toggleActiveMutation.mutate({ id: block.id, is_active: checked })}
-                      aria-label="Toggle active"
                     />
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
@@ -349,18 +334,18 @@ const RecurringBlocksPanel = () => {
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
-                          <AlertDialogTitle>Remove Recurring Block</AlertDialogTitle>
+                          <AlertDialogTitle>{t("blocking.removeRecurring")}</AlertDialogTitle>
                           <AlertDialogDescription>
-                            This will remove the recurring block for every {DAY_NAMES[block.day_of_week]}.
+                            {t("blocking.removeRecurringDesc").replace("{day}", DAY_NAMES_EN[block.day_of_week])}
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
                           <AlertDialogAction
                             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                             onClick={() => deleteMutation.mutate(block.id)}
                           >
-                            Remove
+                            {t("blocking.remove")}
                           </AlertDialogAction>
                         </AlertDialogFooter>
                       </AlertDialogContent>

@@ -393,6 +393,70 @@ type TranslationKeys = {
   "dashboard.roomPrice": string;
   "dashboard.breakfastPrice": string;
   "dashboard.pricingHint": string;
+  "blocking.title": string;
+  "blocking.tooltip": string;
+  "blocking.addBlock": string;
+  "blocking.clearRange": string;
+  "blocking.removeByRange": string;
+  "blocking.blockDates": string;
+  "blocking.resourceType": string;
+  "blocking.blockSpecific": string;
+  "blocking.allWillBeBlocked": string;
+  "blocking.selectResource": string;
+  "blocking.dates": string;
+  "blocking.pickDate": string;
+  "blocking.dateHint": string;
+  "blocking.duration": string;
+  "blocking.fullDay": string;
+  "blocking.specificHours": string;
+  "blocking.startTime": string;
+  "blocking.endTime": string;
+  "blocking.timeHint": string;
+  "blocking.reason": string;
+  "blocking.reasonPlaceholder": string;
+  "blocking.creating": string;
+  "blocking.createBlock": string;
+  "blocking.blockDays": string;
+  "blocking.daysBlocked": string;
+  "blocking.blockRemoved": string;
+  "blocking.blocksRemoved": string;
+  "blocking.removeBlock": string;
+  "blocking.removeBlockDesc": string;
+  "blocking.remove": string;
+  "blocking.noBlocks": string;
+  "blocking.noMatch": string;
+  "blocking.allTypes": string;
+  "blocking.allResources": string;
+  "blocking.clearFilters": string;
+  "blocking.filter": string;
+  "blocking.dateRange": string;
+  "blocking.rangeHint": string;
+  "blocking.noBlocksInRange": string;
+  "blocking.blocksWillBeRemoved": string;
+  "blocking.removing": string;
+  "blocking.removeCount": string;
+  "blocking.allDay": string;
+  "blocking.hotelGuesthouse": string;
+  "blocking.restaurant": string;
+  "blocking.venueEventSpace": string;
+  "blocking.room": string;
+  "blocking.tableArea": string;
+  "blocking.eventSpace": string;
+  "blocking.recurringTitle": string;
+  "blocking.recurringTooltip": string;
+  "blocking.addRecurring": string;
+  "blocking.addRecurringTitle": string;
+  "blocking.daysOfWeek": string;
+  "blocking.recurringTimeHint": string;
+  "blocking.recurringReasonPlaceholder": string;
+  "blocking.blockWeekly": string;
+  "blocking.recurringCreated": string;
+  "blocking.recurringRemoved": string;
+  "blocking.removeRecurring": string;
+  "blocking.removeRecurringDesc": string;
+  "blocking.noRecurring": string;
+  "blocking.every": string;
+  "blocking.dayNames": string;
   "booking.calculatePrice": string;
 
   // Onboarding
@@ -962,6 +1026,70 @@ const en: TranslationKeys = {
   "dashboard.roomPrice": "Room price (€/night)",
   "dashboard.breakfastPrice": "Breakfast price (€/person/morning)",
   "dashboard.pricingHint": "Default price for new reservations. Individual reservation prices can be adjusted in the reservation details.",
+  "blocking.title": "Blocked Dates & Times",
+  "blocking.tooltip": "Block entire resource types or specific resources on chosen dates or date ranges. Optionally restrict to specific hours.",
+  "blocking.addBlock": "Add Block",
+  "blocking.clearRange": "Clear Range",
+  "blocking.removeByRange": "Remove Blocks by Date Range",
+  "blocking.blockDates": "Block Dates / Times",
+  "blocking.resourceType": "Resource Type",
+  "blocking.blockSpecific": "Block specific",
+  "blocking.allWillBeBlocked": "All {count} {type} will be blocked.",
+  "blocking.selectResource": "Select {type}...",
+  "blocking.dates": "Date(s)",
+  "blocking.pickDate": "Pick a date or range",
+  "blocking.dateHint": "Click once for a single day, or click two dates to select a range.",
+  "blocking.duration": "Duration",
+  "blocking.fullDay": "Full day",
+  "blocking.specificHours": "Specific hours",
+  "blocking.startTime": "Start Time",
+  "blocking.endTime": "End Time",
+  "blocking.timeHint": "Only the selected hours will be blocked. Bookings outside this window remain available.",
+  "blocking.reason": "Reason (optional)",
+  "blocking.reasonPlaceholder": "e.g. Maintenance, Private event...",
+  "blocking.creating": "Creating...",
+  "blocking.createBlock": "Create Block",
+  "blocking.blockDays": "Block {count} days",
+  "blocking.daysBlocked": "{count} day(s) blocked",
+  "blocking.blockRemoved": "Block removed",
+  "blocking.blocksRemoved": "Blocks removed",
+  "blocking.removeBlock": "Remove Block",
+  "blocking.removeBlockDesc": "This will remove the block for {date}. Bookings will be allowed again.",
+  "blocking.remove": "Remove",
+  "blocking.noBlocks": "No blocked dates or times configured.",
+  "blocking.noMatch": "No blocks match the current filter.",
+  "blocking.allTypes": "All types",
+  "blocking.allResources": "All resources",
+  "blocking.clearFilters": "Clear filters",
+  "blocking.filter": "Filter:",
+  "blocking.dateRange": "Date Range",
+  "blocking.rangeHint": "All blocks within this range will be removed.",
+  "blocking.noBlocksInRange": "No blocks found in this range.",
+  "blocking.blocksWillBeRemoved": "{count} block(s) will be removed.",
+  "blocking.removing": "Removing...",
+  "blocking.removeCount": "Remove {count} block(s)",
+  "blocking.allDay": "All day",
+  "blocking.hotelGuesthouse": "Hotel / Guesthouse",
+  "blocking.restaurant": "Restaurant",
+  "blocking.venueEventSpace": "Venue / Event Space",
+  "blocking.room": "room",
+  "blocking.tableArea": "table/area",
+  "blocking.eventSpace": "event space",
+  "blocking.recurringTitle": "Recurring Blocks",
+  "blocking.recurringTooltip": "Block specific days of the week on a recurring basis. E.g. block every Monday for restaurant.",
+  "blocking.addRecurring": "Add Recurring Block",
+  "blocking.addRecurringTitle": "Add Recurring Block",
+  "blocking.daysOfWeek": "Days of Week",
+  "blocking.recurringTimeHint": "Only the selected hours will be blocked each week. Bookings outside this window remain available.",
+  "blocking.recurringReasonPlaceholder": "e.g. Closed on Mondays, Staff day off...",
+  "blocking.blockWeekly": "Block {count} day(s) weekly",
+  "blocking.recurringCreated": "Recurring block created",
+  "blocking.recurringRemoved": "Recurring block removed",
+  "blocking.removeRecurring": "Remove Recurring Block",
+  "blocking.removeRecurringDesc": "This will remove the recurring block for every {day}.",
+  "blocking.noRecurring": "No recurring blocks configured.",
+  "blocking.every": "Every",
+  "blocking.dayNames": "Sun,Mon,Tue,Wed,Thu,Fri,Sat",
   "booking.calculatePrice": "Calculate Price",
 
   // Onboarding
@@ -1518,6 +1646,70 @@ const fi: TranslationKeys = {
   "dashboard.roomPrice": "Huonehinta (€/yö)",
   "dashboard.breakfastPrice": "Aamupalahinta (€/hlö/aamu)",
   "dashboard.pricingHint": "Oletushinta uusille varauksille. Yksittäisen varauksen hintaa voi muuttaa sisäisissä tiedoissa.",
+  "blocking.title": "Estetyt päivät ja ajat",
+  "blocking.tooltip": "Estä kokonaisia resurssityyppejä tai yksittäisiä resursseja valituille päiville tai ajanjaksoille. Voit rajata myös tiettyihin tunteihin.",
+  "blocking.addBlock": "Lisää esto",
+  "blocking.clearRange": "Tyhjennä jakso",
+  "blocking.removeByRange": "Poista estot ajanjaksolta",
+  "blocking.blockDates": "Estä päivät / ajat",
+  "blocking.resourceType": "Resurssityyppi",
+  "blocking.blockSpecific": "Estä tietty",
+  "blocking.allWillBeBlocked": "Kaikki {count} {type} estetään.",
+  "blocking.selectResource": "Valitse {type}...",
+  "blocking.dates": "Päivämäärä(t)",
+  "blocking.pickDate": "Valitse päivä tai jakso",
+  "blocking.dateHint": "Klikkaa kerran yksittäiselle päivälle tai klikkaa kaksi päivää valitaksesi jakso.",
+  "blocking.duration": "Kesto",
+  "blocking.fullDay": "Koko päivä",
+  "blocking.specificHours": "Tietyt tunnit",
+  "blocking.startTime": "Alkuaika",
+  "blocking.endTime": "Loppuaika",
+  "blocking.timeHint": "Vain valitut tunnit estetään. Varaukset muina aikoina ovat mahdollisia.",
+  "blocking.reason": "Syy (valinnainen)",
+  "blocking.reasonPlaceholder": "esim. Huolto, Yksityistilaisuus...",
+  "blocking.creating": "Luodaan...",
+  "blocking.createBlock": "Luo esto",
+  "blocking.blockDays": "Estä {count} päivää",
+  "blocking.daysBlocked": "{count} päivä(ä) estetty",
+  "blocking.blockRemoved": "Esto poistettu",
+  "blocking.blocksRemoved": "Estot poistettu",
+  "blocking.removeBlock": "Poista esto",
+  "blocking.removeBlockDesc": "Tämä poistaa eston päivälle {date}. Varaukset ovat jälleen mahdollisia.",
+  "blocking.remove": "Poista",
+  "blocking.noBlocks": "Ei estettyjä päiviä tai aikoja.",
+  "blocking.noMatch": "Ei suodatinta vastaavia estoja.",
+  "blocking.allTypes": "Kaikki tyypit",
+  "blocking.allResources": "Kaikki resurssit",
+  "blocking.clearFilters": "Tyhjennä suodattimet",
+  "blocking.filter": "Suodata:",
+  "blocking.dateRange": "Ajanjakso",
+  "blocking.rangeHint": "Kaikki estot tältä ajanjaksolta poistetaan.",
+  "blocking.noBlocksInRange": "Ei estoja tältä ajanjaksolta.",
+  "blocking.blocksWillBeRemoved": "{count} esto(a) poistetaan.",
+  "blocking.removing": "Poistetaan...",
+  "blocking.removeCount": "Poista {count} esto(a)",
+  "blocking.allDay": "Koko päivä",
+  "blocking.hotelGuesthouse": "Hotelli / Majatalo",
+  "blocking.restaurant": "Ravintola",
+  "blocking.venueEventSpace": "Juhlatilat",
+  "blocking.room": "huone",
+  "blocking.tableArea": "pöytä/alue",
+  "blocking.eventSpace": "juhlatila",
+  "blocking.recurringTitle": "Toistuvat estot",
+  "blocking.recurringTooltip": "Estä tietyt viikonpäivät toistuvasti. Esim. estä joka maanantai ravintolalle.",
+  "blocking.addRecurring": "Lisää toistuva esto",
+  "blocking.addRecurringTitle": "Lisää toistuva esto",
+  "blocking.daysOfWeek": "Viikonpäivät",
+  "blocking.recurringTimeHint": "Vain valitut tunnit estetään joka viikko. Varaukset muina aikoina ovat mahdollisia.",
+  "blocking.recurringReasonPlaceholder": "esim. Suljettu maanantaisin, Vapaapäivä...",
+  "blocking.blockWeekly": "Estä {count} päivä(ä) viikoittain",
+  "blocking.recurringCreated": "Toistuva esto luotu",
+  "blocking.recurringRemoved": "Toistuva esto poistettu",
+  "blocking.removeRecurring": "Poista toistuva esto",
+  "blocking.removeRecurringDesc": "Tämä poistaa toistuvan eston joka {day}.",
+  "blocking.noRecurring": "Ei toistuvia estoja.",
+  "blocking.every": "Joka",
+  "blocking.dayNames": "Su,Ma,Ti,Ke,To,Pe,La",
   "booking.calculatePrice": "Laske hinta",
 
   // Onboarding
@@ -2074,6 +2266,70 @@ const sv: TranslationKeys = {
   "dashboard.roomPrice": "Rumpris (€/natt)",
   "dashboard.breakfastPrice": "Frukostpris (€/pers/morgon)",
   "dashboard.pricingHint": "Standardpris för nya bokningar. Enskilda bokningspriser kan justeras i bokningsdetaljerna.",
+  "blocking.title": "Blockerade dagar & tider",
+  "blocking.tooltip": "Blockera hela resurstyper eller specifika resurser på valda datum eller datumintervall. Valfritt begränsa till specifika timmar.",
+  "blocking.addBlock": "Lägg till blockering",
+  "blocking.clearRange": "Rensa intervall",
+  "blocking.removeByRange": "Ta bort blockeringar per datumintervall",
+  "blocking.blockDates": "Blockera datum / tider",
+  "blocking.resourceType": "Resurstyp",
+  "blocking.blockSpecific": "Blockera specifik",
+  "blocking.allWillBeBlocked": "Alla {count} {type} kommer att blockeras.",
+  "blocking.selectResource": "Välj {type}...",
+  "blocking.dates": "Datum",
+  "blocking.pickDate": "Välj ett datum eller intervall",
+  "blocking.dateHint": "Klicka en gång för en enskild dag eller klicka på två datum för att välja ett intervall.",
+  "blocking.duration": "Varaktighet",
+  "blocking.fullDay": "Heldag",
+  "blocking.specificHours": "Specifika timmar",
+  "blocking.startTime": "Starttid",
+  "blocking.endTime": "Sluttid",
+  "blocking.timeHint": "Bara de valda timmarna blockeras. Bokningar utanför detta fönster är fortfarande tillgängliga.",
+  "blocking.reason": "Orsak (valfritt)",
+  "blocking.reasonPlaceholder": "t.ex. Underhåll, Privat evenemang...",
+  "blocking.creating": "Skapar...",
+  "blocking.createBlock": "Skapa blockering",
+  "blocking.blockDays": "Blockera {count} dagar",
+  "blocking.daysBlocked": "{count} dag(ar) blockerad(e)",
+  "blocking.blockRemoved": "Blockering borttagen",
+  "blocking.blocksRemoved": "Blockeringar borttagna",
+  "blocking.removeBlock": "Ta bort blockering",
+  "blocking.removeBlockDesc": "Detta tar bort blockeringen för {date}. Bokningar kommer att tillåtas igen.",
+  "blocking.remove": "Ta bort",
+  "blocking.noBlocks": "Inga blockerade datum eller tider konfigurerade.",
+  "blocking.noMatch": "Inga blockeringar matchar det aktuella filtret.",
+  "blocking.allTypes": "Alla typer",
+  "blocking.allResources": "Alla resurser",
+  "blocking.clearFilters": "Rensa filter",
+  "blocking.filter": "Filter:",
+  "blocking.dateRange": "Datumintervall",
+  "blocking.rangeHint": "Alla blockeringar inom detta intervall kommer att tas bort.",
+  "blocking.noBlocksInRange": "Inga blockeringar hittade i detta intervall.",
+  "blocking.blocksWillBeRemoved": "{count} blockering(ar) kommer att tas bort.",
+  "blocking.removing": "Tar bort...",
+  "blocking.removeCount": "Ta bort {count} blockering(ar)",
+  "blocking.allDay": "Heldag",
+  "blocking.hotelGuesthouse": "Hotell / Gästhus",
+  "blocking.restaurant": "Restaurang",
+  "blocking.venueEventSpace": "Festlokaler",
+  "blocking.room": "rum",
+  "blocking.tableArea": "bord/yta",
+  "blocking.eventSpace": "festlokal",
+  "blocking.recurringTitle": "Återkommande blockeringar",
+  "blocking.recurringTooltip": "Blockera specifika veckodagar återkommande. T.ex. blockera varje måndag för restaurangen.",
+  "blocking.addRecurring": "Lägg till återkommande blockering",
+  "blocking.addRecurringTitle": "Lägg till återkommande blockering",
+  "blocking.daysOfWeek": "Veckodagar",
+  "blocking.recurringTimeHint": "Bara de valda timmarna blockeras varje vecka. Bokningar utanför detta fönster är fortfarande tillgängliga.",
+  "blocking.recurringReasonPlaceholder": "t.ex. Stängt på måndagar, Ledig dag...",
+  "blocking.blockWeekly": "Blockera {count} dag(ar) veckovis",
+  "blocking.recurringCreated": "Återkommande blockering skapad",
+  "blocking.recurringRemoved": "Återkommande blockering borttagen",
+  "blocking.removeRecurring": "Ta bort återkommande blockering",
+  "blocking.removeRecurringDesc": "Detta tar bort den återkommande blockeringen för varje {day}.",
+  "blocking.noRecurring": "Inga återkommande blockeringar konfigurerade.",
+  "blocking.every": "Varje",
+  "blocking.dayNames": "Sön,Mån,Tis,Ons,Tor,Fre,Lör",
   "booking.calculatePrice": "Beräkna pris",
 
   // Onboarding
