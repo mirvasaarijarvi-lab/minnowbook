@@ -892,12 +892,12 @@ const PublicBooking = () => {
                           >
                             {(settings?.resource_type_names as Record<string, string>)?.[type] || t(`dashboard.${type}` as any)}
                           </span>
-                          {descKey && (
+                          {((settings?.resource_type_descriptions as Record<string, string>)?.[type] || (descKey && t(descKey as any))) && (
                             <span
                               className="text-xs block leading-relaxed"
                               style={{ color: `${primaryColor}80` }}
                             >
-                              {t(descKey as any)}
+                              {(settings?.resource_type_descriptions as Record<string, string>)?.[type] || t(descKey as any)}
                             </span>
                           )}
                         </div>
