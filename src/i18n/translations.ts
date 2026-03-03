@@ -1019,6 +1019,39 @@ type TranslationKeys = {
   "discount.promoCode": string;
   "discount.promoCodePlaceholder": string;
 
+  // Discount Codes Management
+  "discountCodes.title": string;
+  "discountCodes.description": string;
+  "discountCodes.add": string;
+  "discountCodes.addTitle": string;
+  "discountCodes.editTitle": string;
+  "discountCodes.formDesc": string;
+  "discountCodes.code": string;
+  "discountCodes.discountCol": string;
+  "discountCodes.discountType": string;
+  "discountCodes.value": string;
+  "discountCodes.uses": string;
+  "discountCodes.validity": string;
+  "discountCodes.actions": string;
+  "discountCodes.maxUses": string;
+  "discountCodes.unlimited": string;
+  "discountCodes.minPrice": string;
+  "discountCodes.validFrom": string;
+  "discountCodes.validUntil": string;
+  "discountCodes.from": string;
+  "discountCodes.until": string;
+  "discountCodes.active": string;
+  "discountCodes.inactive": string;
+  "discountCodes.activeLabel": string;
+  "discountCodes.empty": string;
+  "discountCodes.created": string;
+  "discountCodes.updated": string;
+  "discountCodes.deleted": string;
+  "discountCodes.saveError": string;
+  "discountCodes.deleteError": string;
+  "discountCodes.deleteTitle": string;
+  "discountCodes.deleteConfirm": string;
+
   // Approval Queue
   "approval.colType": string;
   "approval.colName": string;
@@ -2044,6 +2077,37 @@ const en: TranslationKeys = {
   "discount.freeNights": "Free nights/meals",
   "discount.promoCode": "Promo Code",
   "discount.promoCodePlaceholder": "Enter code if you have one",
+  "discountCodes.title": "Discount Codes",
+  "discountCodes.description": "Create and manage promotional discount codes for your customers.",
+  "discountCodes.add": "Add Code",
+  "discountCodes.addTitle": "Create Discount Code",
+  "discountCodes.editTitle": "Edit Discount Code",
+  "discountCodes.formDesc": "Configure the discount code details and validity.",
+  "discountCodes.code": "Code",
+  "discountCodes.discountCol": "Discount",
+  "discountCodes.discountType": "Discount Type",
+  "discountCodes.value": "Value",
+  "discountCodes.uses": "Uses",
+  "discountCodes.validity": "Validity",
+  "discountCodes.actions": "Actions",
+  "discountCodes.maxUses": "Max Uses",
+  "discountCodes.unlimited": "Unlimited",
+  "discountCodes.minPrice": "Min Order (€)",
+  "discountCodes.validFrom": "Valid From",
+  "discountCodes.validUntil": "Valid Until",
+  "discountCodes.from": "From",
+  "discountCodes.until": "Until",
+  "discountCodes.active": "Active",
+  "discountCodes.inactive": "Inactive",
+  "discountCodes.activeLabel": "Active on creation",
+  "discountCodes.empty": "No discount codes yet. Create your first one!",
+  "discountCodes.created": "Discount code created",
+  "discountCodes.updated": "Discount code updated",
+  "discountCodes.deleted": "Discount code deleted",
+  "discountCodes.saveError": "Failed to save discount code",
+  "discountCodes.deleteError": "Failed to delete discount code",
+  "discountCodes.deleteTitle": "Delete Discount Code",
+  "discountCodes.deleteConfirm": "Are you sure you want to delete this discount code? This action cannot be undone.",
   "approval.colType": "Type",
   "approval.colName": "Name",
   "approval.colDetail": "Detail",
@@ -3064,6 +3128,37 @@ const fi: TranslationKeys = {
   "discount.freeNights": "Ilmaiset yöt/ateriat",
   "discount.promoCode": "Tarjouskoodi",
   "discount.promoCodePlaceholder": "Syötä koodi, jos sinulla on sellainen",
+  "discountCodes.title": "Alennuskoodit",
+  "discountCodes.description": "Luo ja hallinnoi kampanja-alennuskoodeja asiakkaillesi.",
+  "discountCodes.add": "Lisää koodi",
+  "discountCodes.addTitle": "Luo alennuskoodi",
+  "discountCodes.editTitle": "Muokkaa alennuskoodia",
+  "discountCodes.formDesc": "Määritä alennuskoodin tiedot ja voimassaolo.",
+  "discountCodes.code": "Koodi",
+  "discountCodes.discountCol": "Alennus",
+  "discountCodes.discountType": "Alennustyyppi",
+  "discountCodes.value": "Arvo",
+  "discountCodes.uses": "Käyttökerrat",
+  "discountCodes.validity": "Voimassaolo",
+  "discountCodes.actions": "Toiminnot",
+  "discountCodes.maxUses": "Enimmäiskäyttö",
+  "discountCodes.unlimited": "Rajoittamaton",
+  "discountCodes.minPrice": "Vähimmäistilaus (€)",
+  "discountCodes.validFrom": "Voimassa alkaen",
+  "discountCodes.validUntil": "Voimassa asti",
+  "discountCodes.from": "Alkaen",
+  "discountCodes.until": "Asti",
+  "discountCodes.active": "Aktiivinen",
+  "discountCodes.inactive": "Ei käytössä",
+  "discountCodes.activeLabel": "Aktiivinen luotaessa",
+  "discountCodes.empty": "Ei alennuskoodeja vielä. Luo ensimmäinen!",
+  "discountCodes.created": "Alennuskoodi luotu",
+  "discountCodes.updated": "Alennuskoodi päivitetty",
+  "discountCodes.deleted": "Alennuskoodi poistettu",
+  "discountCodes.saveError": "Alennuskoodin tallennus epäonnistui",
+  "discountCodes.deleteError": "Alennuskoodin poisto epäonnistui",
+  "discountCodes.deleteTitle": "Poista alennuskoodi",
+  "discountCodes.deleteConfirm": "Haluatko varmasti poistaa tämän alennuskoodin? Toimintoa ei voi peruuttaa.",
   "approval.colType": "Tyyppi",
   "approval.colName": "Nimi",
   "approval.colDetail": "Lisätieto",
@@ -4084,6 +4179,37 @@ const sv: TranslationKeys = {
   "discount.freeNights": "Gratis nätter/måltider",
   "discount.promoCode": "Kampanjkod",
   "discount.promoCodePlaceholder": "Ange kod om du har en",
+  "discountCodes.title": "Rabattkoder",
+  "discountCodes.description": "Skapa och hantera kampanjrabattkoder för dina kunder.",
+  "discountCodes.add": "Lägg till kod",
+  "discountCodes.addTitle": "Skapa rabattkod",
+  "discountCodes.editTitle": "Redigera rabattkod",
+  "discountCodes.formDesc": "Konfigurera rabattkodens detaljer och giltighet.",
+  "discountCodes.code": "Kod",
+  "discountCodes.discountCol": "Rabatt",
+  "discountCodes.discountType": "Rabattyp",
+  "discountCodes.value": "Värde",
+  "discountCodes.uses": "Användningar",
+  "discountCodes.validity": "Giltighet",
+  "discountCodes.actions": "Åtgärder",
+  "discountCodes.maxUses": "Max användningar",
+  "discountCodes.unlimited": "Obegränsad",
+  "discountCodes.minPrice": "Minbeställning (€)",
+  "discountCodes.validFrom": "Giltig från",
+  "discountCodes.validUntil": "Giltig till",
+  "discountCodes.from": "Från",
+  "discountCodes.until": "Till",
+  "discountCodes.active": "Aktiv",
+  "discountCodes.inactive": "Inaktiv",
+  "discountCodes.activeLabel": "Aktiv vid skapande",
+  "discountCodes.empty": "Inga rabattkoder ännu. Skapa din första!",
+  "discountCodes.created": "Rabattkod skapad",
+  "discountCodes.updated": "Rabattkod uppdaterad",
+  "discountCodes.deleted": "Rabattkod borttagen",
+  "discountCodes.saveError": "Kunde inte spara rabattkod",
+  "discountCodes.deleteError": "Kunde inte ta bort rabattkod",
+  "discountCodes.deleteTitle": "Ta bort rabattkod",
+  "discountCodes.deleteConfirm": "Är du säker på att du vill ta bort denna rabattkod? Åtgärden kan inte ångras.",
   "approval.colType": "Typ",
   "approval.colName": "Namn",
   "approval.colDetail": "Detalj",
