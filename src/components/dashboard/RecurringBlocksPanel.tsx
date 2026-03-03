@@ -19,6 +19,7 @@ import { fi as fiFns, enUS, sv as svFns, type Locale } from "date-fns/locale";
 import DashboardTooltip from "./DashboardTooltip";
 import { useT, useLanguage } from "@/contexts/I18nContext";
 import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
+import { useAutoApproval } from "@/hooks/useAutoApproval";
 
 const LOCALE_MAP: Record<string, Locale> = { fi: fiFns, sv: svFns, en: enUS };
 
@@ -46,6 +47,7 @@ const getDayName = (dayOfWeek: number, locale: Locale) => {
 
 const RecurringBlocksPanel = () => {
   const { tenantId } = useTenant();
+  const { isPrivileged, getApprovalStatus } = useAutoApproval();
   const queryClient = useQueryClient();
   const t = useT();
   const { language } = useLanguage();
@@ -127,15 +129,18 @@ const RecurringBlocksPanel = () => {
         end_time: useTimeRange && form.end_time ? form.end_time : null,
         reason: form.reason || null,
         is_active: true,
+        approval_status: getApprovalStatus(),
       }));
       const { error } = await supabase.from("recurring_blocked_slots").insert(rows);
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["recurring-blocked-slots"] });
+      queryClient.invalidateQueries({ queryKey: ["approval-queue-count"] });
       setDialogOpen(false);
       resetForm();
-      toast({ title: t("blocking.recurringCreated") });
+      const statusMsg = !isPrivileged ? ` (${t("blocking.pendingApproval" as any)})` : "";
+      toast({ title: t("blocking.recurringCreated") + statusMsg });
     },
     onError: (err: any) => {
       toast({ title: "Error", description: err.message, variant: "destructive" });

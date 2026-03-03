@@ -22,6 +22,7 @@ import { cn } from "@/lib/utils";
 import DashboardTooltip from "./DashboardTooltip";
 import { useT, useLanguage } from "@/contexts/I18nContext";
 import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
+import { useAutoApproval } from "@/hooks/useAutoApproval";
 import type { DateRange } from "react-day-picker";
 
 const LOCALE_MAP: Record<string, Locale> = { fi: fiFns, sv: svFns, en: enUS };
@@ -41,6 +42,7 @@ interface BlockedSlot {
 
 const BlockedSlotsPanel = () => {
   const { tenantId } = useTenant();
+  const { isPrivileged, getApprovalStatus } = useAutoApproval();
   const queryClient = useQueryClient();
   const t = useT();
   const { language } = useLanguage();
@@ -141,18 +143,21 @@ const BlockedSlotsPanel = () => {
         start_time: useTimeRange && form.start_time ? form.start_time : null,
         end_time: useTimeRange && form.end_time ? form.end_time : null,
         reason: form.reason || null,
+        approval_status: getApprovalStatus(),
       }));
       const { error } = await supabase.from("blocked_slots").insert(rows);
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["blocked-slots"] });
+      queryClient.invalidateQueries({ queryKey: ["approval-queue-count"] });
       setDialogOpen(false);
       const count = dateRange?.to
         ? eachDayOfInterval({ start: dateRange.from!, end: dateRange.to }).length
         : 1;
       resetForm();
-      toast({ title: t("blocking.daysBlocked").replace("{count}", String(count)) });
+      const statusMsg = !isPrivileged ? ` (${t("blocking.pendingApproval" as any)})` : "";
+      toast({ title: t("blocking.daysBlocked").replace("{count}", String(count)) + statusMsg });
     },
     onError: (err: any) => {
       toast({ title: "Error", description: err.message, variant: "destructive" });
