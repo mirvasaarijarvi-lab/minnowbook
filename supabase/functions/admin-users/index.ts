@@ -277,6 +277,68 @@ Deno.serve(async (req) => {
       });
     }
 
+    if (action === "bulk_site_assignments") {
+      const siteId = validateUuid(body.siteId, "siteId");
+      const role = VALID_SITE_ROLES.includes(body.role) ? body.role : "staff";
+
+      if (!Array.isArray(body.userIds) || body.userIds.length === 0) {
+        throw new Error("userIds array is required");
+      }
+      if (body.userIds.length > 100) {
+        throw new Error("Cannot assign more than 100 users at once");
+      }
+
+      // Verify site belongs to tenant
+      const { data: site } = await adminClient
+        .from("sites")
+        .select("id")
+        .eq("id", siteId)
+        .eq("tenant_id", tenantId)
+        .single();
+      if (!site) throw new Error("Site not found in your tenant");
+
+      // Verify all users belong to tenant
+      const { data: tenantUsers } = await adminClient
+        .from("tenant_users")
+        .select("user_id")
+        .eq("tenant_id", tenantId)
+        .in("user_id", body.userIds);
+
+      const validUserIds = new Set((tenantUsers ?? []).map((tu: any) => tu.user_id));
+      const verifiedIds = body.userIds.filter((uid: string) => {
+        validateUuid(uid, "userId");
+        return validUserIds.has(uid);
+      });
+
+      if (verifiedIds.length === 0) {
+        throw new Error("No valid users found in your tenant");
+      }
+
+      // Upsert: delete existing assignments for these users on this site, then insert
+      for (const userId of verifiedIds) {
+        await adminClient
+          .from("site_users")
+          .delete()
+          .eq("user_id", userId)
+          .eq("site_id", siteId)
+          .eq("tenant_id", tenantId);
+      }
+
+      const rows = verifiedIds.map((userId: string) => ({
+        tenant_id: tenantId,
+        site_id: siteId,
+        user_id: userId,
+        role,
+      }));
+
+      const { error: insertError } = await adminClient.from("site_users").insert(rows);
+      if (insertError) throw insertError;
+
+      return new Response(JSON.stringify({ success: true, assigned: verifiedIds.length }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     if (action === "change_password") {
       const userId = validateUuid(body.userId, "userId");
       const newPassword = validatePassword(body.newPassword);

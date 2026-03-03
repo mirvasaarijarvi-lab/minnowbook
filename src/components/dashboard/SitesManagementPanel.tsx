@@ -40,8 +40,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { toast } from "@/hooks/use-toast";
-import { Plus, MapPin, Pencil, Trash2, Building2, UtensilsCrossed, Hotel, CalendarDays, ChevronDown, ChevronRight } from "lucide-react";
+import { Plus, MapPin, Pencil, Trash2, Building2, UtensilsCrossed, Hotel, CalendarDays, ChevronDown, ChevronRight, Users } from "lucide-react";
 import DashboardTooltip from "./DashboardTooltip";
+import BulkAssignUsersDialog from "./BulkAssignUsersDialog";
 import {
   Select,
   SelectContent,
@@ -114,6 +115,7 @@ const SitesManagementPanel = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingSite, setEditingSite] = useState<Site | null>(null);
   const [expandedSites, setExpandedSites] = useState<Set<string>>(new Set());
+  const [bulkAssignSite, setBulkAssignSite] = useState<{ id: string; name: string } | null>(null);
   const [form, setForm] = useState({
     name: "",
     slug: "",
@@ -542,6 +544,14 @@ const SitesManagementPanel = () => {
                             )}
                             {canManage && (
                               <>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="gap-1 text-xs h-7"
+                                  onClick={() => setBulkAssignSite({ id: site.id, name: site.name })}
+                                >
+                                  <Users className="h-3 w-3" />
+                                </Button>
                                 <Button variant="outline" size="sm" className="gap-1 text-xs h-7" onClick={() => openEdit(site)}>
                                   <Pencil className="h-3 w-3" />
                                 </Button>
@@ -646,6 +656,13 @@ const SitesManagementPanel = () => {
           <ApprovalQueuePanel />
         </TabsContent>
       </Tabs>
+      {/* Bulk assign users dialog */}
+      <BulkAssignUsersDialog
+        open={!!bulkAssignSite}
+        onOpenChange={(open) => { if (!open) setBulkAssignSite(null); }}
+        siteId={bulkAssignSite?.id ?? ""}
+        siteName={bulkAssignSite?.name ?? ""}
+      />
     </div>
   );
 };
