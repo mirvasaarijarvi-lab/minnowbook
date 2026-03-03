@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/hooks/useTenant";
 import { useSiteContext } from "@/hooks/useSiteContext";
 import { usePermissions } from "@/hooks/usePermissions";
+import { isMultiSiteTier } from "@/lib/tier-limits";
 import { useT } from "@/contexts/I18nContext";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -16,7 +17,7 @@ const SiteTabs = () => {
   const t = useT();
 
   const isBusinessOwnerAdmin =
-    (tenant?.tier === "business" && (isOwner || isAdmin)) || isSystemAdmin;
+    (isMultiSiteTier(tenant?.tier) && (isOwner || isAdmin)) || isSystemAdmin;
 
   const { data: sites } = useQuery({
     queryKey: ["site-tabs", tenantId],

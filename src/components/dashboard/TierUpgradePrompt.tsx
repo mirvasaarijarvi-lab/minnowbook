@@ -24,19 +24,34 @@ const upgradeInfo: Record<string, { targetTier: string; features: string[] }> = 
   "basic-sites": {
     targetTier: "business",
     features: [
-      "Unlimited sites & locations",
-      "Unlimited reservation types",
+      "Up to 3 sites & locations",
+      "All reservation types",
       "Unlimited staff users",
-      "API access & dedicated support",
+      "Multi-site management dashboard",
     ],
   },
   "professional-sites": {
     targetTier: "business",
     features: [
+      "Up to 3 sites & locations",
+      "Unlimited staff users",
+      "Multi-site management dashboard",
+      "Advanced reporting",
+    ],
+  },
+  "professional-types": {
+    targetTier: "professional",
+    features: [
+      "All reservation types already included",
+    ],
+  },
+  "business-sites": {
+    targetTier: "enterprise",
+    features: [
       "Unlimited sites & locations",
       "Unlimited staff users",
       "API access",
-      "Dedicated support",
+      "Dedicated account manager",
     ],
   },
 };
@@ -47,10 +62,17 @@ const TierUpgradePrompt = ({ open, onOpenChange, currentTier, feature }: TierUpg
   const currentLabel = getTierLabel(currentTier);
   const targetLabel = getTierLabel(info.targetTier);
 
-  const message =
-    feature === "sites"
-      ? `Your ${currentLabel} plan supports 1 site. Upgrade to ${targetLabel} for unlimited locations.`
-      : `Your ${currentLabel} plan supports 1 reservation type. Upgrade to ${targetLabel} to unlock all types.`;
+  const messageMap: Record<string, string> = {
+    "basic-sites": `Your ${currentLabel} plan supports 1 site. Upgrade to ${targetLabel} for up to 3 locations.`,
+    "basic-types": `Your ${currentLabel} plan supports 1 reservation type. Upgrade to ${targetLabel} to unlock all types.`,
+    "professional-sites": `Your ${currentLabel} plan supports 1 site. Upgrade to ${targetLabel} for up to 3 locations.`,
+    "business-sites": `Your ${targetLabel} plan supports up to 3 sites. Upgrade to ${targetLabel} for unlimited locations.`,
+  };
+
+  const message = messageMap[key] ??
+    (feature === "sites"
+      ? `Upgrade to ${targetLabel} for more locations.`
+      : `Upgrade to ${targetLabel} to unlock all types.`);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

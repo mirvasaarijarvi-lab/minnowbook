@@ -14,6 +14,7 @@ import {
   PERM_SUPPORT_VIEW,
   PERM_SITES_VIEW,
 } from "@/lib/permissions";
+import { isMultiSiteTier } from "@/lib/tier-limits";
 import { Menu, HelpCircle, ShieldAlert, X, Eye, BookOpen } from "lucide-react";
 import { useImpersonation } from "@/contexts/ImpersonationContext";
 import DashboardSidebar, { DashboardView } from "@/components/dashboard/DashboardSidebar";
@@ -320,7 +321,7 @@ const Dashboard = () => {
       </div>
 
       {currentView !== "support" && (
-        <SupportChatWidget businessTier={tenant?.tier === "business"} />
+        <SupportChatWidget businessTier={isMultiSiteTier(tenant?.tier)} />
       )}
 
       <GuidedTour

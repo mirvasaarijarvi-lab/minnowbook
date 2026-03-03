@@ -25,14 +25,14 @@ const tiers = [
   },
   {
     name: "Pro",
-    price: 79,
+    price: 59,
     description: "For growing businesses that need all service types under one roof.",
-    reservationTypes: "All 3 types included",
+    reservationTypes: "All types included",
     staffUsers: "Up to 10",
     isPopular: true,
     features: [
       "1 site / location",
-      "All 3 reservation types",
+      "All reservation types",
       "Everything in Basic",
       "Custom email templates (HTML editor)",
       "Advanced opening hours & booking rules",
@@ -43,19 +43,36 @@ const tiers = [
   },
   {
     name: "Business",
+    price: 99,
+    description: "Multi-location management for growing hospitality businesses.",
+    reservationTypes: "All types included",
+    staffUsers: "Unlimited",
+    features: [
+      "Up to 3 sites / locations",
+      "All reservation types",
+      "Everything in Pro",
+      "Multi-site management dashboard",
+      "Unlimited staff accounts",
+      "Per-site branding & settings",
+      "Advanced revenue reporting",
+      "Priority support",
+    ],
+  },
+  {
+    name: "Enterprise",
     price: 199,
-    description: "Full-featured platform for multi-location hospitality businesses.",
+    description: "Full-featured platform for large-scale hospitality operations.",
     reservationTypes: "All types included",
     staffUsers: "Unlimited",
     features: [
       "Unlimited sites & locations",
       "All reservation types",
-      "Everything in Pro",
-      "Multi-site management dashboard",
-      "Unlimited staff accounts",
-      "Advanced revenue reporting",
+      "Everything in Business",
       "Dedicated account manager",
       "Custom integrations support",
+      "API access",
+      "SLA guarantee",
+      "White-glove onboarding",
     ],
   },
 ];
@@ -71,7 +88,7 @@ const faqs = [
   },
   {
     q: "What reservation types can I choose?",
-    a: "Restaurant (table bookings), Venue (event space inquiries), and Gasthaus/Guesthouse (room reservations). Basic lets you pick one; Pro unlocks all three on a single site; Business adds unlimited sites.",
+    a: "Restaurant (table bookings), Venue (event space inquiries), and Gasthaus/Guesthouse (room reservations). Basic lets you pick one; Pro unlocks all types on a single site; Business adds up to 3 sites; Enterprise offers unlimited locations.",
   },
   {
     q: "Do I need a credit card to start the trial?",
@@ -104,7 +121,7 @@ const Pricing = () => {
       {/* Tiers */}
       <section className="pb-20">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
             {tiers.map((tier, i) => (
               <PricingTier key={tier.name} {...tier} delay={i * 100} />
             ))}
@@ -124,36 +141,39 @@ const Pricing = () => {
               <thead>
                 <tr className="border-b border-border">
                   <th className="text-left py-4 pr-4 font-sans font-semibold text-muted-foreground">Feature</th>
-                  <th className="text-center py-4 px-4 font-serif font-semibold text-foreground">Basic</th>
-                  <th className="text-center py-4 px-4 font-serif font-semibold text-foreground">Pro</th>
-                  <th className="text-center py-4 px-4 font-serif font-semibold text-foreground">Business</th>
+                  <th className="text-center py-4 px-3 font-serif font-semibold text-foreground">Basic</th>
+                  <th className="text-center py-4 px-3 font-serif font-semibold text-foreground">Pro</th>
+                  <th className="text-center py-4 px-3 font-serif font-semibold text-foreground">Business</th>
+                  <th className="text-center py-4 px-3 font-serif font-semibold text-foreground">Enterprise</th>
                 </tr>
               </thead>
               <tbody>
                 {[
-                  ["Monthly price", "€29", "€79", "€199"],
-                  ["Free trial", "30 days", "30 days", "30 days"],
-                  ["Sites / locations", "1", "1", "Unlimited"],
-                  ["Reservation types", "1", "All 3", "All"],
-                  ["Staff users", "1–3", "Up to 10", "Unlimited"],
-                  ["Custom branding", "✓", "✓", "✓"],
-                  ["Branded booking page", "✓", "✓", "✓"],
-                  ["Default email templates", "✓", "✓", "✓"],
-                  ["Custom email templates", "—", "✓", "✓"],
-                  ["Advanced booking rules", "—", "✓", "✓"],
-                  ["Multi-language support", "—", "✓", "✓"],
-                  ["Multi-site management", "—", "—", "✓"],
-                  ["Analytics & reports", "Basic", "Advanced", "Advanced"],
-                  ["Priority support", "—", "✓", "✓"],
-                  ["Dedicated support", "—", "—", "✓"],
-                ].map(([feature, basic, pro, business]) => {
+                  ["Monthly price", "€29", "€59", "€99", "€199"],
+                  ["Free trial", "30 days", "30 days", "30 days", "30 days"],
+                  ["Sites / locations", "1", "1", "Up to 3", "Unlimited"],
+                  ["Reservation types", "1", "All", "All", "All"],
+                  ["Staff users", "1–3", "Up to 10", "Unlimited", "Unlimited"],
+                  ["Custom branding", "✓", "✓", "✓", "✓"],
+                  ["Branded booking page", "✓", "✓", "✓", "✓"],
+                  ["Default email templates", "✓", "✓", "✓", "✓"],
+                  ["Custom email templates", "—", "✓", "✓", "✓"],
+                  ["Advanced booking rules", "—", "✓", "✓", "✓"],
+                  ["Multi-language support", "—", "✓", "✓", "✓"],
+                  ["Multi-site management", "—", "—", "✓", "✓"],
+                  ["Analytics & reports", "Basic", "Advanced", "Advanced", "Advanced"],
+                  ["Priority support", "—", "✓", "✓", "✓"],
+                  ["Dedicated support", "—", "—", "—", "✓"],
+                  ["API access", "—", "—", "—", "✓"],
+                ].map(([feature, basic, pro, business, enterprise]) => {
                   const isHighlight = feature === "Sites / locations" || feature === "Reservation types";
                   return (
                   <tr key={feature} className={`border-b border-border/50 ${isHighlight ? "bg-accent/5" : ""}`}>
                     <td className={`py-3 pr-4 ${isHighlight ? "text-foreground font-medium" : "text-foreground/80"}`}>{feature}</td>
-                    <td className="py-3 px-4 text-center text-muted-foreground">{basic}</td>
-                    <td className={`py-3 px-4 text-center font-medium ${isHighlight ? "text-accent" : "text-foreground"}`}>{pro}</td>
-                    <td className={`py-3 px-4 text-center font-medium ${isHighlight ? "text-accent" : "text-foreground"}`}>{business}</td>
+                    <td className="py-3 px-3 text-center text-muted-foreground">{basic}</td>
+                    <td className={`py-3 px-3 text-center font-medium ${isHighlight ? "text-accent" : "text-foreground"}`}>{pro}</td>
+                    <td className={`py-3 px-3 text-center font-medium ${isHighlight ? "text-accent" : "text-foreground"}`}>{business}</td>
+                    <td className={`py-3 px-3 text-center font-medium ${isHighlight ? "text-accent" : "text-foreground"}`}>{enterprise}</td>
                   </tr>
                   );
                 })}
@@ -175,10 +195,10 @@ const Pricing = () => {
                 Managing multiple locations?
               </h3>
               <p className="text-muted-foreground leading-relaxed mb-4">
-                The <strong className="text-foreground">Business</strong> plan includes <strong className="text-foreground">multi-site management</strong> — run
-                hotels, restaurants, and venues from a single dashboard. Each site gets its own
-                resources, opening hours, email templates, and branded booking page while sharing
-                staff, settings, and reporting across locations.
+                The <strong className="text-foreground">Business</strong> plan supports <strong className="text-foreground">up to 3 sites</strong> with
+                multi-site management — run hotels, restaurants, and venues from a single dashboard. Need more?
+                The <strong className="text-foreground">Enterprise</strong> plan offers <strong className="text-foreground">unlimited locations</strong> with
+                dedicated support and API access.
               </p>
               <Link to="/signup">
                 <Button variant="default" size="lg" className="gap-2">
