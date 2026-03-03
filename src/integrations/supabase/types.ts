@@ -578,6 +578,7 @@ export type Database = {
           is_active: boolean
           location: string | null
           name: string
+          site_type: string
           slug: string
           tenant_id: string
           updated_at: string
@@ -589,6 +590,7 @@ export type Database = {
           is_active?: boolean
           location?: string | null
           name: string
+          site_type?: string
           slug: string
           tenant_id: string
           updated_at?: string
@@ -600,6 +602,7 @@ export type Database = {
           is_active?: boolean
           location?: string | null
           name?: string
+          site_type?: string
           slug?: string
           tenant_id?: string
           updated_at?: string
