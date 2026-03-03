@@ -1,0 +1,2 @@
+INSERT INTO resources (tenant_id, name, resource_type, approval_status, description)
+VALUES ('9ac05fbf-0834-44fd-a52a-d030b7074a30', 'Test Pending Room', 'hotel', 'pending', 'Test resource for approval workflow');

@@ -1,0 +1,1 @@
+DELETE FROM resources WHERE name = 'Test Pending Room' AND tenant_id = '9ac05fbf-0834-44fd-a52a-d030b7074a30';
