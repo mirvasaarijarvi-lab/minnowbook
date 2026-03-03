@@ -10,15 +10,48 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { Loader2, Upload, X, ImageIcon, Building2, ArrowRight, MapPin, Mail, Phone, Palette } from "lucide-react";
+import { Loader2, Upload, X, ImageIcon, Building2, ArrowRight, MapPin, Mail, Phone, Palette, RotateCcw } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import DashboardTooltip from "./DashboardTooltip";
 import OpeningHoursSettings from "./OpeningHoursSettings";
 
+const SITE_COLOR_PRESETS = [
+  { name: "Navy & Amber", primary: "#1e3a5f", secondary: "#f5f0e8", accent: "#d4a853" },
+  { name: "Forest & Gold", primary: "#2d5016", secondary: "#f0f4ec", accent: "#c8a951" },
+  { name: "Burgundy & Cream", primary: "#722f37", secondary: "#faf5f0", accent: "#d4a853" },
+  { name: "Slate & Coral", primary: "#334155", secondary: "#f8fafc", accent: "#f97316" },
+  { name: "Indigo & Rose", primary: "#3730a3", secondary: "#f5f3ff", accent: "#e11d48" },
+];
+
+interface SiteSettingsForm {
+  business_name: string;
+  business_email: string;
+  business_phone: string;
+  business_address: string;
+  business_description: string;
+  primary_color: string;
+  secondary_color: string;
+  accent_color: string;
+}
+
+const EMPTY_FORM: SiteSettingsForm = {
+  business_name: "",
+  business_email: "",
+  business_phone: "",
+  business_address: "",
+  business_description: "",
+  primary_color: "",
+  secondary_color: "",
+  accent_color: "",
+};
+
 const SiteSettingsInfo = ({ siteId, tenantId }: { siteId: string; tenantId: string }) => {
   const t = useT();
+  const queryClient = useQueryClient();
 
+  // Site basic info
   const { data: site } = useQuery({
     queryKey: ["site-settings-info", siteId],
     queryFn: async () => {
@@ -33,12 +66,13 @@ const SiteSettingsInfo = ({ siteId, tenantId }: { siteId: string; tenantId: stri
     enabled: !!siteId,
   });
 
+  // Tenant (parent) defaults
   const { data: tenantSettings } = useQuery({
     queryKey: ["tenant-settings-for-site", tenantId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("tenant_settings")
-        .select("business_name, business_email, business_phone, business_address, primary_color, secondary_color, accent_color")
+        .select("business_name, business_email, business_phone, business_address, business_description, primary_color, secondary_color, accent_color")
         .eq("tenant_id", tenantId)
         .maybeSingle();
       if (error) throw error;
@@ -47,94 +81,372 @@ const SiteSettingsInfo = ({ siteId, tenantId }: { siteId: string; tenantId: stri
     enabled: !!tenantId,
   });
 
+  // Site-specific overrides
+  const { data: siteSettings, isLoading: loadingSiteSettings } = useQuery({
+    queryKey: ["site-settings", siteId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("site_settings")
+        .select("*")
+        .eq("site_id", siteId)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!siteId,
+  });
+
+  // Determine if the site has custom overrides
+  const hasOverrides = !!siteSettings && (
+    siteSettings.business_name || siteSettings.business_email || siteSettings.business_phone ||
+    siteSettings.business_address || siteSettings.business_description ||
+    siteSettings.primary_color || siteSettings.secondary_color || siteSettings.accent_color
+  );
+
+  const [customized, setCustomized] = useState(false);
+  const [form, setForm] = useState<SiteSettingsForm>(EMPTY_FORM);
+
+  // Build the effective (merged) values: site override ?? tenant default
+  const effective = {
+    business_name: siteSettings?.business_name || tenantSettings?.business_name || "",
+    business_email: siteSettings?.business_email || tenantSettings?.business_email || "",
+    business_phone: siteSettings?.business_phone || tenantSettings?.business_phone || "",
+    business_address: siteSettings?.business_address || tenantSettings?.business_address || "",
+    business_description: siteSettings?.business_description || tenantSettings?.business_description || "",
+    primary_color: siteSettings?.primary_color || tenantSettings?.primary_color || "#1e3a5f",
+    secondary_color: siteSettings?.secondary_color || tenantSettings?.secondary_color || "#f5f0e8",
+    accent_color: siteSettings?.accent_color || tenantSettings?.accent_color || "#d4a853",
+  };
+
+  // Sync state when data loads
+  useEffect(() => {
+    setCustomized(!!hasOverrides);
+    if (hasOverrides && siteSettings) {
+      setForm({
+        business_name: siteSettings.business_name ?? "",
+        business_email: siteSettings.business_email ?? "",
+        business_phone: siteSettings.business_phone ?? "",
+        business_address: siteSettings.business_address ?? "",
+        business_description: siteSettings.business_description ?? "",
+        primary_color: siteSettings.primary_color ?? "",
+        secondary_color: siteSettings.secondary_color ?? "",
+        accent_color: siteSettings.accent_color ?? "",
+      });
+    } else {
+      // Pre-fill with parent defaults when switching to custom
+      setForm({
+        business_name: tenantSettings?.business_name ?? "",
+        business_email: tenantSettings?.business_email ?? "",
+        business_phone: tenantSettings?.business_phone ?? "",
+        business_address: tenantSettings?.business_address ?? "",
+        business_description: tenantSettings?.business_description ?? "",
+        primary_color: tenantSettings?.primary_color ?? "#1e3a5f",
+        secondary_color: tenantSettings?.secondary_color ?? "#f5f0e8",
+        accent_color: tenantSettings?.accent_color ?? "#d4a853",
+      });
+    }
+  }, [siteSettings, tenantSettings, hasOverrides, siteId]);
+
+  const saveMutation = useMutation({
+    mutationFn: async () => {
+      if (!customized) {
+        // Delete overrides, revert to parent defaults
+        if (siteSettings?.id) {
+          const { error } = await supabase.from("site_settings").delete().eq("id", siteSettings.id);
+          if (error) throw error;
+        }
+        return;
+      }
+      // Build payload: only store non-empty values (empty = inherit)
+      const payload: any = {
+        site_id: siteId,
+        tenant_id: tenantId,
+        business_name: form.business_name || null,
+        business_email: form.business_email || null,
+        business_phone: form.business_phone || null,
+        business_address: form.business_address || null,
+        business_description: form.business_description || null,
+        primary_color: form.primary_color || null,
+        secondary_color: form.secondary_color || null,
+        accent_color: form.accent_color || null,
+      };
+      if (siteSettings?.id) {
+        const { error } = await supabase.from("site_settings").update(payload).eq("id", siteSettings.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from("site_settings").insert(payload);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["site-settings", siteId] });
+      toast.success(t("settings.siteSettingsSaved"));
+    },
+    onError: (err: any) => {
+      toast.error(err?.message || t("settings.saveError"));
+    },
+  });
+
+  const updateField = (key: keyof SiteSettingsForm, value: string) =>
+    setForm((prev) => ({ ...prev, [key]: value }));
+
+  const resetFieldToParent = (key: keyof SiteSettingsForm) => {
+    const parentVal = (tenantSettings as any)?.[key] ?? "";
+    setForm((prev) => ({ ...prev, [key]: parentVal }));
+  };
+
   if (!site) return null;
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center gap-2">
-          <Building2 className="h-5 w-5 text-primary" />
-          <CardTitle className="text-lg font-serif">{site.name}</CardTitle>
-          <Badge variant="outline" className="text-[10px]">{site.site_type}</Badge>
-        </div>
-        {site.location && (
-          <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
-            <MapPin className="h-3.5 w-3.5" /> {site.location}
-          </p>
-        )}
-        {site.description && (
-          <p className="text-sm text-muted-foreground mt-1">{site.description}</p>
-        )}
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Company entity from tenant settings */}
-        {tenantSettings?.business_name && (
-          <div className="space-y-2">
-            <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t("settings.businessDetails")}</Label>
+    <div className="space-y-6">
+      {/* Site header */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Building2 className="h-5 w-5 text-primary" />
+            <CardTitle className="text-lg font-serif">{site.name}</CardTitle>
+            <Badge variant="outline" className="text-[10px]">{site.site_type}</Badge>
+          </div>
+          {site.location && (
+            <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
+              <MapPin className="h-3.5 w-3.5" /> {site.location}
+            </p>
+          )}
+          {site.description && (
+            <p className="text-sm text-muted-foreground mt-1">{site.description}</p>
+          )}
+        </CardHeader>
+      </Card>
+
+      {/* Override toggle */}
+      <Card>
+        <CardContent className="pt-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-foreground">{t("settings.customizeForSite")}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {customized
+                  ? t("settings.siteOverride")
+                  : t("settings.inheritedFromParent")}
+              </p>
+            </div>
+            <Switch checked={customized} onCheckedChange={setCustomized} />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* When NOT customized, show read-only inherited values */}
+      {!customized && (
+        <Card className="border-dashed">
+          <CardContent className="pt-6 space-y-4">
+            <Badge variant="secondary" className="text-xs gap-1.5">
+              <RotateCcw className="h-3 w-3" />
+              {t("settings.inheritedFromParent")}
+            </Badge>
             <div className="grid gap-2 sm:grid-cols-2 text-sm">
-              {tenantSettings.business_name && (
-                <div className="flex items-center gap-2">
-                  <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
-                  <span>{tenantSettings.business_name}</span>
+              {effective.business_name && (
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Building2 className="h-3.5 w-3.5" /> {effective.business_name}
                 </div>
               )}
-              {tenantSettings.business_email && (
-                <div className="flex items-center gap-2">
-                  <Mail className="h-3.5 w-3.5 text-muted-foreground" />
-                  <span>{tenantSettings.business_email}</span>
+              {effective.business_email && (
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Mail className="h-3.5 w-3.5" /> {effective.business_email}
                 </div>
               )}
-              {tenantSettings.business_phone && (
-                <div className="flex items-center gap-2">
-                  <Phone className="h-3.5 w-3.5 text-muted-foreground" />
-                  <span>{tenantSettings.business_phone}</span>
+              {effective.business_phone && (
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Phone className="h-3.5 w-3.5" /> {effective.business_phone}
                 </div>
               )}
-              {tenantSettings.business_address && (
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
-                  <span>{tenantSettings.business_address}</span>
+              {effective.business_address && (
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <MapPin className="h-3.5 w-3.5" /> {effective.business_address}
                 </div>
               )}
             </div>
-          </div>
-        )}
-
-        {/* Brand colors from tenant settings */}
-        {(tenantSettings?.primary_color || tenantSettings?.accent_color) && (
-          <div className="space-y-2">
-            <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-              <Palette className="h-3.5 w-3.5" /> {t("settings.brandColors")}
-            </Label>
-            <div className="flex items-center gap-3">
-              {tenantSettings.primary_color && (
-                <div className="flex items-center gap-1.5">
-                  <span className="h-5 w-5 rounded-full border border-border" style={{ backgroundColor: tenantSettings.primary_color }} />
-                  <span className="text-xs text-muted-foreground font-mono">{tenantSettings.primary_color}</span>
+            <div className="flex items-center gap-3 pt-1">
+              {[effective.primary_color, effective.secondary_color, effective.accent_color].filter(Boolean).map((c) => (
+                <div key={c} className="flex items-center gap-1.5">
+                  <span className="h-5 w-5 rounded-full border border-border" style={{ backgroundColor: c }} />
+                  <span className="text-xs text-muted-foreground font-mono">{c}</span>
                 </div>
-              )}
-              {tenantSettings.secondary_color && (
-                <div className="flex items-center gap-1.5">
-                  <span className="h-5 w-5 rounded-full border border-border" style={{ backgroundColor: tenantSettings.secondary_color }} />
-                  <span className="text-xs text-muted-foreground font-mono">{tenantSettings.secondary_color}</span>
-                </div>
-              )}
-              {tenantSettings.accent_color && (
-                <div className="flex items-center gap-1.5">
-                  <span className="h-5 w-5 rounded-full border border-border" style={{ backgroundColor: tenantSettings.accent_color }} />
-                  <span className="text-xs text-muted-foreground font-mono">{tenantSettings.accent_color}</span>
-                </div>
-              )}
+              ))}
             </div>
-          </div>
-        )}
+          </CardContent>
+        </Card>
+      )}
 
-        {/* Site-specific opening hours */}
-        <div className="pt-2">
-          <OpeningHoursSettings siteId={siteId} />
+      {/* When customized, show editable form */}
+      {customized && (
+        <>
+          {/* Business details */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg font-serif">{t("settings.businessDetails")}</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid gap-4 sm:grid-cols-2">
+                {(["business_name", "business_email", "business_phone", "business_address"] as const).map((key) => {
+                  const labelMap: Record<string, string> = {
+                    business_name: "common.name",
+                    business_email: "common.email",
+                    business_phone: "common.phone",
+                    business_address: "common.address",
+                  };
+                  return (
+                    <div key={key} className="space-y-2">
+                      <Label>{t(labelMap[key] as any)}</Label>
+                      <div className="flex gap-1.5">
+                        <Input
+                          value={form[key]}
+                          onChange={(e) => updateField(key, e.target.value)}
+                          placeholder={(tenantSettings as any)?.[key] ?? ""}
+                        />
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-9 w-9 p-0 shrink-0"
+                          title={t("settings.useParentDefault")}
+                          onClick={() => resetFieldToParent(key)}
+                        >
+                          <RotateCcw className="h-3.5 w-3.5 text-muted-foreground" />
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="space-y-2">
+                <Label>{t("common.description")}</Label>
+                <Textarea
+                  rows={3}
+                  value={form.business_description}
+                  onChange={(e) => updateField("business_description", e.target.value)}
+                  placeholder={tenantSettings?.business_description ?? ""}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Brand colors */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg font-serif flex items-center gap-2">
+                <Palette className="h-4 w-4" /> {t("settings.brandColors")}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Presets */}
+              <div className="space-y-2">
+                <Label>{t("settings.presets")}</Label>
+                <div className="flex flex-wrap gap-2">
+                  {SITE_COLOR_PRESETS.map((preset) => (
+                    <button
+                      key={preset.name}
+                      onClick={() => setForm((prev) => ({ ...prev, primary_color: preset.primary, secondary_color: preset.secondary, accent_color: preset.accent }))}
+                      className="flex items-center gap-2 px-3 py-1.5 rounded-md border border-border hover:bg-secondary/50 transition-colors text-sm"
+                    >
+                      <span className="flex gap-0.5">
+                        <span className="h-4 w-4 rounded-full border border-border" style={{ backgroundColor: preset.primary }} />
+                        <span className="h-4 w-4 rounded-full border border-border" style={{ backgroundColor: preset.accent }} />
+                      </span>
+                      {preset.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-3">
+                {(["primary_color", "secondary_color", "accent_color"] as const).map((key) => {
+                  const labelKey = key === "primary_color" ? "settings.primary" : key === "secondary_color" ? "settings.secondary" : "settings.accent";
+                  return (
+                    <div key={key} className="space-y-2">
+                      <Label>{t(labelKey as any)}</Label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="color"
+                          value={form[key] || (tenantSettings as any)?.[key] || "#000000"}
+                          onChange={(e) => updateField(key, e.target.value)}
+                          className="h-10 w-10 rounded border border-border cursor-pointer"
+                        />
+                        <Input
+                          value={form[key]}
+                          onChange={(e) => updateField(key, e.target.value)}
+                          className="font-mono text-sm"
+                          placeholder={(tenantSettings as any)?.[key] ?? ""}
+                        />
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-9 w-9 p-0 shrink-0"
+                          title={t("settings.useParentDefault")}
+                          onClick={() => resetFieldToParent(key)}
+                        >
+                          <RotateCcw className="h-3.5 w-3.5 text-muted-foreground" />
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Preview */}
+              <div className="space-y-2">
+                <Label>{t("settings.preview")}</Label>
+                <div className="rounded-lg border border-border p-4" style={{ backgroundColor: form.secondary_color || tenantSettings?.secondary_color || "#f5f0e8" }}>
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="h-8 w-8 rounded-full" style={{ backgroundColor: form.primary_color || tenantSettings?.primary_color || "#1e3a5f" }} />
+                    <span className="font-serif font-bold" style={{ color: form.primary_color || tenantSettings?.primary_color || "#1e3a5f" }}>
+                      {form.business_name || effective.business_name || site.name}
+                    </span>
+                  </div>
+                  <div className="flex gap-2">
+                    <button className="px-4 py-2 rounded-md text-sm font-medium text-white" style={{ backgroundColor: form.primary_color || tenantSettings?.primary_color || "#1e3a5f" }}>
+                      {t("settings.primaryBtn")}
+                    </button>
+                    <button className="px-4 py-2 rounded-md text-sm font-medium text-white" style={{ backgroundColor: form.accent_color || tenantSettings?.accent_color || "#d4a853" }}>
+                      {t("settings.accentBtn")}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Save button for site overrides */}
+          <div className="flex justify-end">
+            <Button onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending}>
+              {saveMutation.isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  {t("common.saving")}
+                </>
+              ) : (
+                t("common.save")
+              )}
+            </Button>
+          </div>
+        </>
+      )}
+
+      {/* Revert button when using defaults but overrides existed */}
+      {!customized && hasOverrides && (
+        <div className="flex justify-end">
+          <Button variant="outline" onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending}>
+            {saveMutation.isPending ? (
+              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+            ) : (
+              <RotateCcw className="h-4 w-4 mr-2" />
+            )}
+            {t("settings.useParentDefault")}
+          </Button>
         </div>
-      </CardContent>
-    </Card>
+      )}
+
+      {/* Site-specific opening hours */}
+      <OpeningHoursSettings siteId={siteId} />
+    </div>
   );
 };
 

@@ -680,6 +680,75 @@ export type Database = {
           },
         ]
       }
+      site_settings: {
+        Row: {
+          accent_color: string | null
+          business_address: string | null
+          business_description: string | null
+          business_email: string | null
+          business_name: string | null
+          business_phone: string | null
+          created_at: string
+          hero_image_url: string | null
+          id: string
+          logo_url: string | null
+          primary_color: string | null
+          secondary_color: string | null
+          site_id: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          accent_color?: string | null
+          business_address?: string | null
+          business_description?: string | null
+          business_email?: string | null
+          business_name?: string | null
+          business_phone?: string | null
+          created_at?: string
+          hero_image_url?: string | null
+          id?: string
+          logo_url?: string | null
+          primary_color?: string | null
+          secondary_color?: string | null
+          site_id: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          accent_color?: string | null
+          business_address?: string | null
+          business_description?: string | null
+          business_email?: string | null
+          business_name?: string | null
+          business_phone?: string | null
+          created_at?: string
+          hero_image_url?: string | null
+          id?: string
+          logo_url?: string | null
+          primary_color?: string | null
+          secondary_color?: string | null
+          site_id?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "site_settings_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: true
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_settings_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       site_users: {
         Row: {
           created_at: string
