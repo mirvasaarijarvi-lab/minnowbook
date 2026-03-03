@@ -27,7 +27,9 @@ import {
   ArrowLeft,
   Eye,
   FlaskConical,
+  Percent,
 } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 import { useImpersonation } from "@/contexts/ImpersonationContext";
 
 interface TenantWithStats {
@@ -43,6 +45,9 @@ interface TenantWithStats {
   owner_user_id: string;
   sample_start_date: string | null;
   sample_end_date: string | null;
+  discount_percentage: number | null;
+  discount_reason: string | null;
+  discount_granted_by: string | null;
   userCount: number;
   reservationCount: number;
   resourceCount: number;
@@ -54,7 +59,7 @@ const Superadmin = () => {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [editTenant, setEditTenant] = useState<TenantWithStats | null>(null);
-  const [editForm, setEditForm] = useState({ name: "", tier: "", max_staff_users: 3, sample_start_date: "", sample_end_date: "" });
+  const [editForm, setEditForm] = useState({ name: "", tier: "", max_staff_users: 3, sample_start_date: "", sample_end_date: "", discount_percentage: 0, discount_reason: "" });
   const { startImpersonation } = useImpersonation();
 
   // Check system admin
@@ -119,13 +124,16 @@ const Superadmin = () => {
 
   // Edit tenant
   const editMutation = useMutation({
-    mutationFn: async ({ id, name, tier, max_staff_users, sample_start_date, sample_end_date }: { id: string; name: string; tier: string; max_staff_users: number; sample_start_date: string; sample_end_date: string }) => {
+    mutationFn: async ({ id, name, tier, max_staff_users, sample_start_date, sample_end_date, discount_percentage, discount_reason }: { id: string; name: string; tier: string; max_staff_users: number; sample_start_date: string; sample_end_date: string; discount_percentage: number; discount_reason: string }) => {
       const { error } = await supabase
         .from("tenants")
         .update({
           name, tier, max_staff_users,
           sample_start_date: sample_start_date || null,
           sample_end_date: sample_end_date || null,
+          discount_percentage: discount_percentage || 0,
+          discount_reason: discount_reason || null,
+          discount_granted_by: discount_percentage > 0 ? user!.id : null,
         } as any)
         .eq("id", id);
       if (error) throw error;
@@ -173,6 +181,8 @@ const Superadmin = () => {
       max_staff_users: t.max_staff_users,
       sample_start_date: t.sample_start_date ?? "",
       sample_end_date: t.sample_end_date ?? "",
+      discount_percentage: t.discount_percentage ?? 0,
+      discount_reason: t.discount_reason ?? "",
     });
     setEditTenant(t);
   };
@@ -321,6 +331,12 @@ const Superadmin = () => {
                             Sample: {t.sample_start_date} → {t.sample_end_date}
                           </Badge>
                         )}
+                        {(t.discount_percentage ?? 0) > 0 && (
+                          <Badge variant="outline" className="text-[10px] px-1.5 py-0 gap-1 border-primary/40 text-primary">
+                            <Percent className="h-2.5 w-2.5" />
+                            {t.discount_percentage}% discount
+                          </Badge>
+                        )}
                       </div>
                       <p className="text-sm text-muted-foreground">
                         /{t.slug} · {t.userCount} users · {t.reservationCount} reservations · {t.resourceCount} resources
@@ -433,8 +449,35 @@ const Superadmin = () => {
                 />
               </div>
             </div>
+            <Separator />
+            <div className="space-y-1">
+              <Label className="flex items-center gap-1.5">
+                <Percent className="h-3.5 w-3.5 text-primary" />
+                Platform Discount
+              </Label>
+              <p className="text-xs text-muted-foreground">Grant a subscription discount to this tenant. Only superadmins can set this.</p>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-xs">Discount Percentage (%)</Label>
+              <Input
+                type="number"
+                min={0}
+                max={100}
+                value={editForm.discount_percentage}
+                onChange={(e) => setEditForm((f) => ({ ...f, discount_percentage: parseFloat(e.target.value) || 0 }))}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-xs">Discount Reason</Label>
+              <Textarea
+                placeholder="e.g. Early adopter, partnership deal..."
+                value={editForm.discount_reason}
+                onChange={(e) => setEditForm((f) => ({ ...f, discount_reason: e.target.value }))}
+                className="resize-none"
+                rows={2}
+              />
+            </div>
             <Button
-              className="w-full"
               onClick={() =>
                 editTenant &&
                 editMutation.mutate({
