@@ -13,6 +13,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, ArrowLeft, Check, Crown, Zap, Rocket, UtensilsCrossed, Building2, BedDouble, Palette } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { canSelectMoreTypes, getTierLimits } from "@/lib/tier-limits";
 import { useT } from "@/contexts/I18nContext";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { TranslationKey } from "@/i18n/translations";
@@ -70,7 +71,20 @@ const Onboarding = () => {
   ];
 
   const toggleType = (id: string) => {
-    setSelectedTypes((prev) => prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id]);
+    setSelectedTypes((prev) => {
+      if (prev.includes(id)) return prev.filter((t) => t !== id);
+      if (!canSelectMoreTypes(selectedTier, prev.length)) return prev;
+      return [...prev, id];
+    });
+  };
+
+  // When tier changes, trim selected types if over the new limit
+  const handleTierChange = (tierId: string) => {
+    setSelectedTier(tierId);
+    const { maxReservationTypes } = getTierLimits(tierId);
+    if (maxReservationTypes !== null && selectedTypes.length > maxReservationTypes) {
+      setSelectedTypes((prev) => prev.slice(0, maxReservationTypes));
+    }
   };
 
   const generateSlug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -144,7 +158,7 @@ const Onboarding = () => {
                   const Icon = tier.icon;
                   const selected = selectedTier === tier.id;
                   return (
-                    <Card key={tier.id} className={cn("cursor-pointer transition-all hover:shadow-hover", selected && "ring-2 ring-primary shadow-hover")} onClick={() => setSelectedTier(tier.id)}>
+                    <Card key={tier.id} className={cn("cursor-pointer transition-all hover:shadow-hover", selected && "ring-2 ring-primary shadow-hover")} onClick={() => handleTierChange(tier.id)}>
                       <CardContent className="p-5 space-y-3">
                         <div className="flex items-center gap-2">
                           <div className={cn("p-2 rounded-md", selected ? "bg-primary/10" : "bg-secondary")}>
@@ -175,12 +189,24 @@ const Onboarding = () => {
                 <h1 className="text-2xl font-serif font-bold text-foreground">{t("onboarding.whatDoYouNeed")}</h1>
                 <p className="text-muted-foreground mt-1">{t("onboarding.whatDoYouNeedSubtitle")}</p>
               </div>
+              {(() => {
+                const limits = getTierLimits(selectedTier);
+                const limitLabel = limits.maxReservationTypes === null
+                  ? "Unlimited types"
+                  : `${selectedTypes.length}/${limits.maxReservationTypes} type${limits.maxReservationTypes > 1 ? "s" : ""} selected`;
+                return (
+                  <p className="text-sm text-muted-foreground text-center mb-2">
+                    {limitLabel}
+                  </p>
+                );
+              })()}
               <div className="grid gap-3 sm:grid-cols-3">
                 {reservationTypes.map((type) => {
                   const Icon = type.icon;
                   const selected = selectedTypes.includes(type.id);
+                  const atLimit = !selected && !canSelectMoreTypes(selectedTier, selectedTypes.length);
                   return (
-                    <Card key={type.id} className={cn("cursor-pointer transition-all hover:shadow-hover", selected && "ring-2 ring-primary shadow-hover")} onClick={() => toggleType(type.id)}>
+                    <Card key={type.id} className={cn("cursor-pointer transition-all hover:shadow-hover", selected && "ring-2 ring-primary shadow-hover", atLimit && "opacity-50 cursor-not-allowed")} onClick={() => !atLimit && toggleType(type.id)}>
                       <CardContent className="p-6 text-center space-y-3">
                         <div className={cn("mx-auto p-3 rounded-full w-fit", selected ? "bg-primary/10" : "bg-secondary")}>
                           <Icon className={cn("h-6 w-6", selected ? "text-primary" : "text-muted-foreground")} />

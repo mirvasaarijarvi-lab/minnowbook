@@ -5,6 +5,7 @@ import { useTenant } from "@/hooks/useTenant";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useT } from "@/contexts/I18nContext";
 import { PERM_SITES_MANAGE, PERM_SITES_APPROVE } from "@/lib/permissions";
+import { canCreateSite, getTierLabel } from "@/lib/tier-limits";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ApprovalQueuePanel from "./ApprovalQueuePanel";
@@ -202,6 +203,15 @@ const SitesManagementPanel = () => {
   };
 
   const openCreate = () => {
+    const currentCount = sites?.length ?? 0;
+    if (!canCreateSite(tenant?.tier, currentCount)) {
+      toast({
+        title: "Site limit reached",
+        description: `Your ${getTierLabel(tenant?.tier ?? "basic")} plan allows ${tenant?.tier === "basic" || tenant?.tier === "professional" ? "1 site" : "unlimited sites"}. Upgrade to add more.`,
+        variant: "destructive",
+      });
+      return;
+    }
     resetForm();
     setDialogOpen(true);
   };
