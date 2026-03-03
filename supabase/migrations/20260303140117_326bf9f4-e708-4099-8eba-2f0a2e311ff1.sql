@@ -1,0 +1,1 @@
+UPDATE tenant_settings SET resource_type_names = '{}'::jsonb WHERE tenant_id = '9ac05fbf-0834-44fd-a52a-d030b7074a30';
