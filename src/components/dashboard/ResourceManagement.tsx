@@ -119,6 +119,16 @@ const ResourceManagement = () => {
   const upsertMutation = useMutation({
     mutationFn: async () => {
       if (!tenantId) throw new Error("No tenant");
+
+      // Check per-type resource limit (only for new resources, not edits)
+      if (!editingId) {
+        const { canCreateResourceOfType } = await import("@/lib/tier-limits");
+        if (!canCreateResourceOfType(tenant?.tier, form.resource_type, resources ?? [])) {
+          const tierLabel = tenant?.tier === "professional" ? "Pro" : "Basic";
+          throw new Error(`Your ${tierLabel} plan allows only 1 resource per type. Upgrade to Business for unlimited resources.`);
+        }
+      }
+
       const isAccom = form.resource_type === "hotel" || form.resource_type === "guesthouse";
       const roomPricing = isAccom ? Object.fromEntries(
         Object.entries(form.room_type_pricing).map(([k, v]) => [k, parseFloat(v as string) || 1.0])
