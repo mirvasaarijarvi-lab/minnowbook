@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/hooks/useTenant";
 import { useT } from "@/contexts/I18nContext";
+import { TranslationKey } from "@/i18n/translations";
 import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -14,8 +15,8 @@ import { toast } from "sonner";
 import { Loader2, Clock } from "lucide-react";
 import DashboardTooltip from "./DashboardTooltip";
 
-const DAYS = [
-  "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday",
+const DAY_KEYS: TranslationKey[] = [
+  "days.monday", "days.tuesday", "days.wednesday", "days.thursday", "days.friday", "days.saturday", "days.sunday",
 ];
 // day_of_week: 0=Sunday, 1=Monday ... 6=Saturday
 const DAY_INDEX_MAP = [1, 2, 3, 4, 5, 6, 0]; // display Mon-Sun, map to DB values
@@ -160,7 +161,7 @@ const OpeningHoursSettings = () => {
         <div className="flex items-center gap-2">
           <Clock className="h-5 w-5 text-muted-foreground" />
           <CardTitle className="text-lg font-serif">{t("help.art5Title")}</CardTitle>
-          <DashboardTooltip text="Set default opening hours per reservation type. These are used on the public booking page to determine available time slots. When you create a new site, these defaults are copied automatically." />
+          <DashboardTooltip text={t("openingHours.tooltip")} />
         </div>
         <p className="text-sm text-muted-foreground">{t("help.art5Desc")}</p>
       </CardHeader>
@@ -179,7 +180,7 @@ const OpeningHoursSettings = () => {
 
         <div className="space-y-2">
           {currentHours.map((row, idx) => {
-            const dayName = DAYS[idx];
+            const dayName = t(DAY_KEYS[idx]);
             return (
               <div
                 key={row.day_of_week}

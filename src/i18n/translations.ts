@@ -147,6 +147,14 @@ type TranslationKeys = {
   "booking.specialRequests": string;
   "booking.preferredTime": string;
   "booking.closedDay": string;
+  "days.monday": string;
+  "days.tuesday": string;
+  "days.wednesday": string;
+  "days.thursday": string;
+  "days.friday": string;
+  "days.saturday": string;
+  "days.sunday": string;
+  "openingHours.tooltip": string;
   "booking.pickDate": string;
   "booking.checkOutDate": string;
   "booking.roomType": string;
@@ -1117,6 +1125,14 @@ const en: TranslationKeys = {
   "booking.specialRequests": "Special requests",
   "booking.preferredTime": "Preferred time",
   "booking.closedDay": "Closed on this day.",
+  "days.monday": "Monday",
+  "days.tuesday": "Tuesday",
+  "days.wednesday": "Wednesday",
+  "days.thursday": "Thursday",
+  "days.friday": "Friday",
+  "days.saturday": "Saturday",
+  "days.sunday": "Sunday",
+  "openingHours.tooltip": "Set default opening hours per reservation type. These are used on the public booking page to determine available time slots. When you create a new site, these defaults are copied automatically.",
   "booking.pickDate": "Pick a date",
   "booking.checkOutDate": "Check-out date",
   "booking.roomType": "Room type",
@@ -2070,6 +2086,14 @@ const fi: TranslationKeys = {
   "booking.specialRequests": "Erityistoiveet",
   "booking.preferredTime": "Toivottu aika",
   "booking.closedDay": "Suljettu tänä päivänä.",
+  "days.monday": "Maanantai",
+  "days.tuesday": "Tiistai",
+  "days.wednesday": "Keskiviikko",
+  "days.thursday": "Torstai",
+  "days.friday": "Perjantai",
+  "days.saturday": "Lauantai",
+  "days.sunday": "Sunnuntai",
+  "openingHours.tooltip": "Aseta oletusaukioloajat varaustyypeittäin. Nämä näkyvät julkisella varaussivulla käytettävissä olevina aikoina. Kun luot uuden toimipisteen, nämä oletukset kopioidaan automaattisesti.",
   "booking.pickDate": "Valitse päivämäärä",
   "booking.checkOutDate": "Lähtöpäivä",
   "booking.roomType": "Huonetyyppi",
@@ -3022,6 +3046,14 @@ const sv: TranslationKeys = {
   "booking.specialRequests": "Speciella önskemål",
   "booking.preferredTime": "Önskad tid",
   "booking.closedDay": "Stängt denna dag.",
+  "days.monday": "Måndag",
+  "days.tuesday": "Tisdag",
+  "days.wednesday": "Onsdag",
+  "days.thursday": "Torsdag",
+  "days.friday": "Fredag",
+  "days.saturday": "Lördag",
+  "days.sunday": "Söndag",
+  "openingHours.tooltip": "Ange standardöppettider per bokningstyp. Dessa används på den publika bokningssidan för att bestämma tillgängliga tider. När du skapar en ny plats kopieras dessa standardvärden automatiskt.",
   "booking.pickDate": "Välj datum",
   "booking.checkOutDate": "Utcheckningsdatum",
   "booking.roomType": "Rumstyp",
