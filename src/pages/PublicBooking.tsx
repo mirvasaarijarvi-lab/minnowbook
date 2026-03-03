@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Calendar } from "@/components/ui/calendar";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Loader2, CheckCircle, UtensilsCrossed, Building2, Home, Clock, CalendarDays, CalendarIcon, BedDouble, Coffee, Users, Truck, ShoppingBag, ChefHat, Plug, Droplets, Tag } from "lucide-react";
+import { Loader2, CheckCircle, UtensilsCrossed, Building2, Home, Clock, CalendarDays, CalendarIcon, BedDouble, Coffee, Users, Truck, ShoppingBag, ChefHat, Plug, Droplets, Tag, Mail, Phone, MapPin } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
 import { format, startOfMonth, endOfMonth, addMonths, subMonths, isSameDay } from "date-fns";
@@ -743,8 +743,17 @@ const PublicBookingInner = () => {
     return tenantTypes;
   }, [tenant?.allowed_reservation_types, activeSiteId, allSiteResources]);
 
-  // Display name: show site name if selected, otherwise business name
-  const displayName = site?.name ? `${businessName} — ${site.name}` : businessName;
+  // Display name: prefer site-specific business_name, then site name, then tenant business name
+  const siteBusinessName = siteSettings?.business_name;
+  const displayName = siteBusinessName
+    ? siteBusinessName
+    : site?.name
+      ? `${businessName} — ${site.name}`
+      : businessName;
+  const displayDescription = settings?.business_description ?? null;
+  const displayEmail = settings?.business_email ?? null;
+  const displayPhone = settings?.business_phone ?? null;
+  const displayAddress = settings?.business_address ?? null;
 
   if (loadingTenant) {
     return (
@@ -934,10 +943,32 @@ const PublicBookingInner = () => {
               <h2 className="text-3xl sm:text-4xl font-serif font-bold text-white drop-shadow-md">
                 {t("booking.title")}
               </h2>
-              {settings?.business_description && (
+              {displayDescription && (
                 <p className="mt-2 text-sm text-white/80 max-w-lg">
-                  {settings.business_description}
+                  {displayDescription}
                 </p>
+              )}
+              {(displayEmail || displayPhone || displayAddress) && (
+                <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-xs text-white/70">
+                  {displayPhone && (
+                    <span className="flex items-center gap-1">
+                      <Phone className="h-3 w-3" />
+                      {displayPhone}
+                    </span>
+                  )}
+                  {displayEmail && (
+                    <span className="flex items-center gap-1">
+                      <Mail className="h-3 w-3" />
+                      {displayEmail}
+                    </span>
+                  )}
+                  {displayAddress && (
+                    <span className="flex items-center gap-1">
+                      <MapPin className="h-3 w-3" />
+                      {displayAddress}
+                    </span>
+                  )}
+                </div>
               )}
             </div>
           </div>
@@ -963,10 +994,32 @@ const PublicBookingInner = () => {
             <h2 className="text-2xl sm:text-3xl font-serif font-bold" style={{ color: primaryColor }}>
               {t("booking.title")}
             </h2>
-            {settings?.business_description && (
+            {displayDescription && (
               <p className="mt-1 text-sm" style={{ color: `${primaryColor}99` }}>
-                {settings.business_description}
+                {displayDescription}
               </p>
+            )}
+            {(displayEmail || displayPhone || displayAddress) && (
+              <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-xs text-muted-foreground">
+                {displayPhone && (
+                  <span className="flex items-center gap-1">
+                    <Phone className="h-3 w-3" />
+                    {displayPhone}
+                  </span>
+                )}
+                {displayEmail && (
+                  <span className="flex items-center gap-1">
+                    <Mail className="h-3 w-3" />
+                    {displayEmail}
+                  </span>
+                )}
+                {displayAddress && (
+                  <span className="flex items-center gap-1">
+                    <MapPin className="h-3 w-3" />
+                    {displayAddress}
+                  </span>
+                )}
+              </div>
             )}
           </div>
         )}
