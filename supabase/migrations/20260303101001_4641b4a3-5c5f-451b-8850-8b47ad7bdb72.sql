@@ -1,0 +1,1 @@
+ALTER TABLE public.sites ADD COLUMN site_type text NOT NULL DEFAULT 'venue';

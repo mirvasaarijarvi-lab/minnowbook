@@ -40,8 +40,21 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { toast } from "@/hooks/use-toast";
-import { Plus, MapPin, Pencil, Trash2, Building2 } from "lucide-react";
+import { Plus, MapPin, Pencil, Trash2, Building2, UtensilsCrossed, Hotel, CalendarDays } from "lucide-react";
 import DashboardTooltip from "./DashboardTooltip";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+const SITE_TYPE_OPTIONS = [
+  { value: "hotel", label: "Hotel / Guesthouse", icon: Hotel },
+  { value: "restaurant", label: "Restaurant", icon: UtensilsCrossed },
+  { value: "venue", label: "Event Space", icon: CalendarDays },
+] as const;
 
 interface Site {
   id: string;
@@ -50,6 +63,7 @@ interface Site {
   slug: string;
   location: string | null;
   description: string | null;
+  site_type: string;
   is_active: boolean;
   created_at: string;
 }
@@ -65,6 +79,7 @@ const SitesManagementPanel = () => {
     slug: "",
     location: "",
     description: "",
+    site_type: "venue",
   });
 
   const canManage = can(PERM_SITES_MANAGE);
@@ -124,7 +139,7 @@ const SitesManagementPanel = () => {
   });
 
   const resetForm = () => {
-    setForm({ name: "", slug: "", location: "", description: "" });
+    setForm({ name: "", slug: "", location: "", description: "", site_type: "venue" });
     setEditingSite(null);
   };
 
@@ -140,6 +155,7 @@ const SitesManagementPanel = () => {
       slug: site.slug,
       location: site.location || "",
       description: site.description || "",
+      site_type: site.site_type || "venue",
     });
     setDialogOpen(true);
   };
@@ -152,6 +168,7 @@ const SitesManagementPanel = () => {
         slug: form.slug.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, ""),
         location: form.location || null,
         description: form.description || null,
+        site_type: form.site_type,
       }).select("id").single();
       if (error) throw error;
 
@@ -188,6 +205,7 @@ const SitesManagementPanel = () => {
           slug: form.slug.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, ""),
           location: form.location || null,
           description: form.description || null,
+          site_type: form.site_type,
         })
         .eq("id", editingSite!.id);
       if (error) throw error;
@@ -306,6 +324,27 @@ const SitesManagementPanel = () => {
                       />
                     </div>
                     <div>
+                      <Label>Site Type</Label>
+                      <Select
+                        value={form.site_type}
+                        onValueChange={(val) => setForm({ ...form, site_type: val })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {SITE_TYPE_OPTIONS.map((opt) => (
+                            <SelectItem key={opt.value} value={opt.value}>
+                              <span className="flex items-center gap-2">
+                                <opt.icon className="h-4 w-4" />
+                                {opt.label}
+                              </span>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
                       <Label>Slug</Label>
                       <Input
                         value={form.slug}
@@ -367,6 +406,7 @@ const SitesManagementPanel = () => {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Site Name</TableHead>
+                      <TableHead>Type</TableHead>
                       <TableHead>Slug</TableHead>
                       <TableHead>Location</TableHead>
                       <TableHead className="text-center">Resources</TableHead>
@@ -380,6 +420,19 @@ const SitesManagementPanel = () => {
                     {sites.map((site) => (
                       <TableRow key={site.id}>
                         <TableCell className="font-medium">{site.name}</TableCell>
+                        <TableCell>
+                          {(() => {
+                            const opt = SITE_TYPE_OPTIONS.find((o) => o.value === site.site_type);
+                            if (!opt) return site.site_type;
+                            const Icon = opt.icon;
+                            return (
+                              <span className="flex items-center gap-1.5 text-muted-foreground text-sm">
+                                <Icon className="h-3.5 w-3.5" />
+                                {opt.label}
+                              </span>
+                            );
+                          })()}
+                        </TableCell>
                         <TableCell>
                           <code className="text-xs bg-muted px-1.5 py-0.5 rounded">
                             {site.slug}
