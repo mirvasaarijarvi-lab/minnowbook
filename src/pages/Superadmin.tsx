@@ -411,6 +411,7 @@ const Superadmin = () => {
                   <SelectItem value="basic">Basic</SelectItem>
                   <SelectItem value="professional">Professional</SelectItem>
                   <SelectItem value="business">Business</SelectItem>
+                  <SelectItem value="enterprise">Enterprise</SelectItem>
                 </SelectContent>
               </Select>
             </div>

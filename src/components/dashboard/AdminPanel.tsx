@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/hooks/useTenant";
 import { usePermissions } from "@/hooks/usePermissions";
+import { isMultiSiteTier } from "@/lib/tier-limits";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -85,7 +86,7 @@ const AdminPanel = () => {
     role: "staff",
   });
 
-  const isBusiness = (tenant?.tier === "business" && (isOwner || isAdmin)) || isSystemAdmin;
+  const isBusiness = (isMultiSiteTier(tenant?.tier) && (isOwner || isAdmin)) || isSystemAdmin;
 
   const invokeAdmin = async (body: any) => {
     const { data, error } = await supabase.functions.invoke("admin-users", { body });

@@ -5,6 +5,7 @@ import { useTenant } from "@/hooks/useTenant";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { isMultiSiteTier } from "@/lib/tier-limits";
 import { useT } from "@/contexts/I18nContext";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { TranslationKey } from "@/i18n/translations";
@@ -94,7 +95,7 @@ const DashboardSidebar = ({ currentView, onViewChange, userEmail, onSignOut, mob
           <LanguageSwitcher variant="compact" />
         </div>
 
-        {(tenantTier === "business" || isSystemAdmin) && <SiteSelector />}
+        {(isMultiSiteTier(tenantTier) || isSystemAdmin) && <SiteSelector />}
         <nav data-tour="sidebar-nav" className="flex-1 p-3 space-y-1 overflow-y-auto">
           {visibleItems.map(({ view, labelKey, icon: Icon, tierRequired }) => (
             <Tooltip key={view}>
