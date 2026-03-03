@@ -3,6 +3,7 @@ import Logo from "@/components/Logo";
 import SiteSelector from "./SiteSelector";
 import { useTenant } from "@/hooks/useTenant";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { useT } from "@/contexts/I18nContext";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
@@ -95,20 +96,31 @@ const DashboardSidebar = ({ currentView, onViewChange, userEmail, onSignOut, mob
 
         {(tenantTier === "business" || isSystemAdmin) && <SiteSelector />}
         <nav data-tour="sidebar-nav" className="flex-1 p-3 space-y-1 overflow-y-auto">
-          {visibleItems.map(({ view, labelKey, icon: Icon }) => (
-            <button
-              key={view}
-              onClick={() => handleNavClick(view)}
-              className={cn(
-                "flex items-center gap-3 w-full px-3 py-2.5 rounded-md text-sm font-medium transition-colors",
-                currentView === view
-                  ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                  : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+          {visibleItems.map(({ view, labelKey, icon: Icon, tierRequired }) => (
+            <Tooltip key={view}>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => handleNavClick(view)}
+                  className={cn(
+                    "flex items-center gap-3 w-full px-3 py-2.5 rounded-md text-sm font-medium transition-colors",
+                    currentView === view
+                      ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                      : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+                  )}
+                >
+                  <Icon className="h-4 w-4 shrink-0" />
+                  <span className="truncate">{t(labelKey)}</span>
+                  {tierRequired && (
+                    <Crown className="h-3 w-3 shrink-0 text-accent ml-auto" />
+                  )}
+                </button>
+              </TooltipTrigger>
+              {tierRequired && (
+                <TooltipContent side="right" className="text-xs">
+                  Business
+                </TooltipContent>
               )}
-            >
-              <Icon className="h-4 w-4 shrink-0" />
-              <span className="truncate">{t(labelKey)}</span>
-            </button>
+            </Tooltip>
           ))}
           {isSystemAdmin && (
             <button
