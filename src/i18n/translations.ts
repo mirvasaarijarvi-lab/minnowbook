@@ -130,6 +130,7 @@ type TranslationKeys = {
   "settings.resourceTypeNames": string;
   "settings.resourceTypeNamesDesc": string;
   "settings.resourceTypeName": string;
+  "settings.resourceTypeDescPlaceholder": string;
 
   // Booking (public)
   "booking.title": string;
@@ -942,6 +943,7 @@ const en: TranslationKeys = {
    "settings.resourceTypeNames": "Resource Type Names",
    "settings.resourceTypeNamesDesc": "Give custom display names to your booking types. These names appear on the public booking page.",
    "settings.resourceTypeName": "Display name for {type}",
+   "settings.resourceTypeDescPlaceholder": "Custom description for booking page",
 
    // Booking
   "booking.title": "Make a Reservation",
@@ -1739,6 +1741,7 @@ const fi: TranslationKeys = {
    "settings.resourceTypeNames": "Varauskohteiden nimet",
    "settings.resourceTypeNamesDesc": "Anna omat näyttönimet varauskohteillesi. Nämä nimet näkyvät julkisella varaussivulla.",
    "settings.resourceTypeName": "Näyttönimi: {type}",
+   "settings.resourceTypeDescPlaceholder": "Oma kuvaus varaussivulle",
 
    // Booking
   "booking.title": "Tee varaus",
@@ -2535,6 +2538,7 @@ const sv: TranslationKeys = {
    "settings.resourceTypeNames": "Namn på bokningstyperna",
    "settings.resourceTypeNamesDesc": "Ge egna visningsnamn åt dina bokningstyper. Dessa namn visas på den offentliga bokningssidan.",
    "settings.resourceTypeName": "Visningsnamn för {type}",
+   "settings.resourceTypeDescPlaceholder": "Egen beskrivning för bokningssidan",
 
    // Booking
   "booking.title": "Gör en bokning",
