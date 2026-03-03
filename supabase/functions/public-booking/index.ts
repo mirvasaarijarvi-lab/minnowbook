@@ -85,6 +85,8 @@ const VALID_TYPES = ["restaurant", "venue", "guesthouse", "hotel"];
 const VALID_ROOM_TYPES = ["single", "double", "suite", "dorm"];
 const VALID_EVENT_TYPES = ["wedding", "corporate", "birthday", "conference", "other"];
 const VALID_PRICING_TYPES = ["menu", "fixed_price"];
+const VALID_SUB_TYPES = ["dine_in", "catering", "popup"];
+const VALID_STALL_SIZES = ["small", "medium", "large"];
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -147,13 +149,51 @@ Deno.serve(async (req) => {
 
     let pricing_type: string | null = null;
     let price_eur: number | null = null;
+    let restaurant_sub_type: string | null = null;
+    let delivery_address: string | null = null;
+    let dietary_notes: string | null = null;
+    let equipment_needed = false;
+    let staff_needed = false;
+    let festival_name: string | null = null;
+    let stall_size: string | null = null;
+    let electricity_needed = false;
+    let water_needed = false;
+    let food_permits: string | null = null;
+    let stall_fee: number | null = null;
+
     if (isRestaurant) {
-      pricing_type = validateString(body.pricing_type, "pricing_type", 20);
-      if (pricing_type && !VALID_PRICING_TYPES.includes(pricing_type)) throw new Error("Invalid pricing type");
-      if (pricing_type === "fixed_price" && body.fixed_price) {
-        const fp = parseFloat(String(body.fixed_price));
-        if (isNaN(fp) || fp < 0 || fp > 999999) throw new Error("Invalid price");
-        price_eur = fp;
+      restaurant_sub_type = validateString(body.restaurant_sub_type, "restaurant_sub_type", 20) ?? "dine_in";
+      if (!VALID_SUB_TYPES.includes(restaurant_sub_type)) throw new Error("Invalid restaurant sub-type");
+
+      if (restaurant_sub_type === "dine_in") {
+        pricing_type = validateString(body.pricing_type, "pricing_type", 20);
+        if (pricing_type && !VALID_PRICING_TYPES.includes(pricing_type)) throw new Error("Invalid pricing type");
+        if (pricing_type === "fixed_price" && body.fixed_price) {
+          const fp = parseFloat(String(body.fixed_price));
+          if (isNaN(fp) || fp < 0 || fp > 999999) throw new Error("Invalid price");
+          price_eur = fp;
+        }
+      }
+
+      if (restaurant_sub_type === "catering") {
+        delivery_address = validateString(body.delivery_address, "delivery_address", 200);
+        dietary_notes = validateString(body.dietary_notes, "dietary_notes", 500);
+        equipment_needed = body.equipment_needed === true;
+        staff_needed = body.staff_needed === true;
+      }
+
+      if (restaurant_sub_type === "popup") {
+        festival_name = validateString(body.festival_name, "festival_name", 100);
+        stall_size = validateString(body.stall_size, "stall_size", 20);
+        if (stall_size && !VALID_STALL_SIZES.includes(stall_size)) throw new Error("Invalid stall size");
+        electricity_needed = body.electricity_needed === true;
+        water_needed = body.water_needed === true;
+        food_permits = validateString(body.food_permits, "food_permits", 500);
+        if (body.stall_fee !== undefined && body.stall_fee !== null) {
+          const sf = parseFloat(String(body.stall_fee));
+          if (isNaN(sf) || sf < 0 || sf > 999999) throw new Error("Invalid stall fee");
+          stall_fee = sf;
+        }
       }
     }
 
@@ -202,8 +242,19 @@ Deno.serve(async (req) => {
       insertData.catering_needed = catering_needed;
     }
     if (isRestaurant) {
+      insertData.restaurant_sub_type = restaurant_sub_type;
       insertData.pricing_type = pricing_type;
       insertData.price_eur = price_eur;
+      insertData.delivery_address = delivery_address;
+      insertData.dietary_notes = dietary_notes;
+      insertData.equipment_needed = equipment_needed;
+      insertData.staff_needed = staff_needed;
+      insertData.festival_name = festival_name;
+      insertData.stall_size = stall_size;
+      insertData.electricity_needed = electricity_needed;
+      insertData.water_needed = water_needed;
+      insertData.food_permits = food_permits;
+      insertData.stall_fee = stall_fee;
     }
 
     const { error: insertErr } = await adminClient.from("reservations").insert(insertData);

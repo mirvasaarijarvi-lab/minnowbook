@@ -210,6 +210,28 @@ type TranslationKeys = {
   "booking.pricingMenu": string;
   "booking.pricingFixed": string;
   "booking.fixedPrice": string;
+  "booking.restaurantSubType": string;
+  "booking.subTypeDineIn": string;
+  "booking.subTypeCatering": string;
+  "booking.subTypePopup": string;
+  "booking.subTypeDineInDesc": string;
+  "booking.subTypeCateringDesc": string;
+  "booking.subTypePopupDesc": string;
+  "booking.cateringDetails": string;
+  "booking.deliveryAddress": string;
+  "booking.dietaryNotes": string;
+  "booking.equipmentNeeded": string;
+  "booking.staffNeeded": string;
+  "booking.popupDetails": string;
+  "booking.festivalName": string;
+  "booking.stallSize": string;
+  "booking.stallSizeSmall": string;
+  "booking.stallSizeMedium": string;
+  "booking.stallSizeLarge": string;
+  "booking.electricityNeeded": string;
+  "booking.waterNeeded": string;
+  "booking.foodPermits": string;
+  "booking.stallFee": string;
 
   // Email
   "email.subject": string;
@@ -1201,6 +1223,28 @@ const en: TranslationKeys = {
   "booking.pricingMenu": "According to menu",
   "booking.pricingFixed": "Fixed price",
   "booking.fixedPrice": "Fixed price (€)",
+  "booking.restaurantSubType": "Service type",
+  "booking.subTypeDineIn": "Dine-in",
+  "booking.subTypeCatering": "Catering",
+  "booking.subTypePopup": "Pop-up restaurant",
+  "booking.subTypeDineInDesc": "Reserve a table at the restaurant",
+  "booking.subTypeCateringDesc": "Order catering for your event",
+  "booking.subTypePopupDesc": "Book a stall at a festival or event",
+  "booking.cateringDetails": "Catering details",
+  "booking.deliveryAddress": "Event / delivery address",
+  "booking.dietaryNotes": "Dietary requirements & allergies",
+  "booking.equipmentNeeded": "Serving equipment needed",
+  "booking.staffNeeded": "Serving staff needed",
+  "booking.popupDetails": "Pop-up details",
+  "booking.festivalName": "Festival / event name",
+  "booking.stallSize": "Stall size",
+  "booking.stallSizeSmall": "Small (2×2 m)",
+  "booking.stallSizeMedium": "Medium (3×3 m)",
+  "booking.stallSizeLarge": "Large (4×4 m)",
+  "booking.electricityNeeded": "Electricity connection needed",
+  "booking.waterNeeded": "Water connection needed",
+  "booking.foodPermits": "Food safety permits / licenses",
+  "booking.stallFee": "Stall rental fee (€)",
   "email.subject": "Subject",
   "email.confirmationSubject": "Booking Confirmation",
   "email.confirmationTitle": "Booking Confirmed!",
@@ -2175,6 +2219,28 @@ const fi: TranslationKeys = {
   "booking.pricingMenu": "Listan mukaan",
   "booking.pricingFixed": "Kiinteä hinta",
   "booking.fixedPrice": "Kiinteä hinta (€)",
+  "booking.restaurantSubType": "Palvelutyyppi",
+  "booking.subTypeDineIn": "Ravintolassa",
+  "booking.subTypeCatering": "Catering",
+  "booking.subTypePopup": "Pop-up ravintola",
+  "booking.subTypeDineInDesc": "Varaa pöytä ravintolasta",
+  "booking.subTypeCateringDesc": "Tilaa catering tapahtumaasi",
+  "booking.subTypePopupDesc": "Varaa myyntipaikka festivaalille tai tapahtumaan",
+  "booking.cateringDetails": "Catering-tiedot",
+  "booking.deliveryAddress": "Tapahtuman / toimituksen osoite",
+  "booking.dietaryNotes": "Ruokavaliovaatimukset ja allergiat",
+  "booking.equipmentNeeded": "Tarjoiluvälineet tarvitaan",
+  "booking.staffNeeded": "Tarjoiluhenkilökunta tarvitaan",
+  "booking.popupDetails": "Pop-up-tiedot",
+  "booking.festivalName": "Festivaali / tapahtuman nimi",
+  "booking.stallSize": "Myyntipaikan koko",
+  "booking.stallSizeSmall": "Pieni (2×2 m)",
+  "booking.stallSizeMedium": "Keskikokoinen (3×3 m)",
+  "booking.stallSizeLarge": "Suuri (4×4 m)",
+  "booking.electricityNeeded": "Sähköliitäntä tarvitaan",
+  "booking.waterNeeded": "Vesiliitäntä tarvitaan",
+  "booking.foodPermits": "Elintarvikeluvat / todistukset",
+  "booking.stallFee": "Myyntipaikan vuokra (€)",
   "email.subject": "Aihe",
   "email.confirmationSubject": "Varausvahvistus",
   "email.confirmationTitle": "Varaus vahvistettu!",
@@ -3148,6 +3214,28 @@ const sv: TranslationKeys = {
   "booking.pricingMenu": "Enligt meny",
   "booking.pricingFixed": "Fast pris",
   "booking.fixedPrice": "Fast pris (€)",
+  "booking.restaurantSubType": "Tjänstetyp",
+  "booking.subTypeDineIn": "Äta på plats",
+  "booking.subTypeCatering": "Catering",
+  "booking.subTypePopup": "Pop-up restaurang",
+  "booking.subTypeDineInDesc": "Reservera ett bord på restaurangen",
+  "booking.subTypeCateringDesc": "Beställ catering till ditt evenemang",
+  "booking.subTypePopupDesc": "Boka en plats på en festival eller ett evenemang",
+  "booking.cateringDetails": "Cateringdetaljer",
+  "booking.deliveryAddress": "Evenemangs-/leveransadress",
+  "booking.dietaryNotes": "Kostbehov och allergier",
+  "booking.equipmentNeeded": "Serveringsutrustning behövs",
+  "booking.staffNeeded": "Serveringspersonal behövs",
+  "booking.popupDetails": "Pop-up-detaljer",
+  "booking.festivalName": "Festival-/evenemangsnamn",
+  "booking.stallSize": "Ståndstorlek",
+  "booking.stallSizeSmall": "Liten (2×2 m)",
+  "booking.stallSizeMedium": "Medel (3×3 m)",
+  "booking.stallSizeLarge": "Stor (4×4 m)",
+  "booking.electricityNeeded": "Elanslutning behövs",
+  "booking.waterNeeded": "Vattenanslutning behövs",
+  "booking.foodPermits": "Livsmedelstillstånd / certifikat",
+  "booking.stallFee": "Ståndshyra (€)",
   "email.subject": "Ämne",
   "email.confirmationSubject": "Bokningsbekräftelse",
   "email.confirmationTitle": "Bokning bekräftad!",
