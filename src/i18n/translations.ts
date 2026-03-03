@@ -947,6 +947,32 @@ type TranslationKeys = {
   "sites.typeHotel": string;
   "sites.typeRestaurant": string;
   "sites.typeVenue": string;
+
+  // Approval Queue
+  "approval.colType": string;
+  "approval.colName": string;
+  "approval.colDetail": string;
+  "approval.colSite": string;
+  "approval.colSubmitted": string;
+  "approval.colActions": string;
+  "approval.approve": string;
+  "approval.reject": string;
+  "approval.rejecting": string;
+  "approval.approved": string;
+  "approval.rejected": string;
+  "approval.rejectChange": string;
+  "approval.rejectingLabel": string;
+  "approval.rejectionReason": string;
+  "approval.noItems": string;
+  "approval.noItemsDesc": string;
+  "approval.typeResource": string;
+  "approval.typeBlockedSlot": string;
+  "approval.typeRecurringBlock": string;
+  "approval.typeOpeningHours": string;
+  "approval.typeEmailTemplate": string;
+  "approval.noReason": string;
+  "approval.closed": string;
+  "approval.pendingApproval": string;
 };
 
 export type TranslationKey = keyof TranslationKeys;
@@ -1878,6 +1904,30 @@ const en: TranslationKeys = {
   "sites.typeHotel": "Hotel / Guesthouse",
   "sites.typeRestaurant": "Restaurant",
   "sites.typeVenue": "Event Space",
+  "approval.colType": "Type",
+  "approval.colName": "Name",
+  "approval.colDetail": "Detail",
+  "approval.colSite": "Site",
+  "approval.colSubmitted": "Submitted",
+  "approval.colActions": "Actions",
+  "approval.approve": "Approve",
+  "approval.reject": "Reject",
+  "approval.rejecting": "Rejecting…",
+  "approval.approved": "Approved",
+  "approval.rejected": "Rejected",
+  "approval.rejectChange": "Reject Change",
+  "approval.rejectingLabel": "Rejecting:",
+  "approval.rejectionReason": "Reason for rejection…",
+  "approval.noItems": "No pending approvals",
+  "approval.noItemsDesc": "All changes have been reviewed.",
+  "approval.typeResource": "Resource",
+  "approval.typeBlockedSlot": "Blocked Slot",
+  "approval.typeRecurringBlock": "Recurring Block",
+  "approval.typeOpeningHours": "Opening Hours",
+  "approval.typeEmailTemplate": "Email Template",
+  "approval.noReason": "No reason",
+  "approval.closed": "Closed",
+  "approval.pendingApproval": "Submitted for approval",
 };
 
 const fi: TranslationKeys = {
@@ -2806,6 +2856,30 @@ const fi: TranslationKeys = {
   "sites.typeHotel": "Hotelli / Majatalo",
   "sites.typeRestaurant": "Ravintola",
   "sites.typeVenue": "Tapahtumatila",
+  "approval.colType": "Tyyppi",
+  "approval.colName": "Nimi",
+  "approval.colDetail": "Lisätieto",
+  "approval.colSite": "Toimipiste",
+  "approval.colSubmitted": "Lähetetty",
+  "approval.colActions": "Toiminnot",
+  "approval.approve": "Hyväksy",
+  "approval.reject": "Hylkää",
+  "approval.rejecting": "Hylätään…",
+  "approval.approved": "Hyväksytty",
+  "approval.rejected": "Hylätty",
+  "approval.rejectChange": "Hylkää muutos",
+  "approval.rejectingLabel": "Hylätään:",
+  "approval.rejectionReason": "Hylkäyksen syy…",
+  "approval.noItems": "Ei odottavia hyväksyntöjä",
+  "approval.noItemsDesc": "Kaikki muutokset on käsitelty.",
+  "approval.typeResource": "Resurssi",
+  "approval.typeBlockedSlot": "Estetty aika",
+  "approval.typeRecurringBlock": "Toistuva esto",
+  "approval.typeOpeningHours": "Aukioloajat",
+  "approval.typeEmailTemplate": "Sähköpostipohja",
+  "approval.noReason": "Ei syytä",
+  "approval.closed": "Suljettu",
+  "approval.pendingApproval": "Lähetetty hyväksyttäväksi",
 };
 
 const sv: TranslationKeys = {
@@ -3734,6 +3808,30 @@ const sv: TranslationKeys = {
   "sites.typeHotel": "Hotell / Gästhus",
   "sites.typeRestaurant": "Restaurang",
   "sites.typeVenue": "Eventlokal",
+  "approval.colType": "Typ",
+  "approval.colName": "Namn",
+  "approval.colDetail": "Detalj",
+  "approval.colSite": "Plats",
+  "approval.colSubmitted": "Inskickad",
+  "approval.colActions": "Åtgärder",
+  "approval.approve": "Godkänn",
+  "approval.reject": "Avslå",
+  "approval.rejecting": "Avslår…",
+  "approval.approved": "Godkänd",
+  "approval.rejected": "Avslagen",
+  "approval.rejectChange": "Avslå ändring",
+  "approval.rejectingLabel": "Avslår:",
+  "approval.rejectionReason": "Anledning till avslag…",
+  "approval.noItems": "Inga väntande godkännanden",
+  "approval.noItemsDesc": "Alla ändringar har granskats.",
+  "approval.typeResource": "Resurs",
+  "approval.typeBlockedSlot": "Blockerad tid",
+  "approval.typeRecurringBlock": "Återkommande blockering",
+  "approval.typeOpeningHours": "Öppettider",
+  "approval.typeEmailTemplate": "E-postmall",
+  "approval.noReason": "Ingen anledning",
+  "approval.closed": "Stängd",
+  "approval.pendingApproval": "Inskickad för godkännande",
 };
 
 export const translations: Record<Language, TranslationKeys> = { en, fi, sv };
