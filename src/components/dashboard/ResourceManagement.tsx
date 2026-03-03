@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/hooks/useTenant";
+import { useSiteContext } from "@/hooks/useSiteContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,6 +35,7 @@ const ALLOWED_IMAGE_TYPES = ["image/png", "image/jpeg", "image/webp"];
 
 const ResourceManagement = () => {
   const { tenantId, tenant, isAdmin } = useTenant();
+  const { selectedSiteId } = useSiteContext();
   const { can } = usePermissions();
   const canManage = can(PERM_RESOURCES_MANAGE);
   const queryClient = useQueryClient();
@@ -53,10 +55,12 @@ const ResourceManagement = () => {
   });
 
   const { data: resources, isLoading } = useQuery({
-    queryKey: ["resources", tenantId],
+    queryKey: ["resources", tenantId, selectedSiteId],
     queryFn: async () => {
       if (!tenantId) return [];
-      const { data, error } = await supabase.from("resources").select("*").eq("tenant_id", tenantId).order("resource_type").order("name");
+      let query = supabase.from("resources").select("*").eq("tenant_id", tenantId);
+      if (selectedSiteId) query = query.eq("site_id", selectedSiteId);
+      const { data, error } = await query.order("resource_type").order("name");
       if (error) throw error;
       return data;
     },

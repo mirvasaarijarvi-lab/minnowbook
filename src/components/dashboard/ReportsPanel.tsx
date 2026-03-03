@@ -2,6 +2,7 @@ import { useMemo, useState, useEffect, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/hooks/useTenant";
+import { useSiteContext } from "@/hooks/useSiteContext";
 import { useT, useLanguage } from "@/contexts/I18nContext";
 import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
 import type { TranslationKey } from "@/i18n/translations";
@@ -115,6 +116,7 @@ const ReportsPanel = () => {
   const t = useT();
   const { language } = useLanguage();
   const { tenantId } = useTenant();
+  const { selectedSiteId } = useSiteContext();
   const dateLocale = localeMap[language] || fiFns;
 
   const [period, setPeriod] = useState<Period>("month");
@@ -169,10 +171,10 @@ const ReportsPanel = () => {
   const prevEndStr = format(prevEnd, "yyyy-MM-dd");
 
   const { data: rawReservations = [], isLoading } = useQuery({
-    queryKey: ["reports-reservations", tenantId, startStr, endStr],
+    queryKey: ["reports-reservations", tenantId, selectedSiteId, startStr, endStr],
     queryFn: async () => {
       if (!tenantId) return [];
-      const { data, error } = await supabase
+      let query = supabase
         .from("reservations")
         .select("id, reservation_type, status, date, check_out_date, is_invoiced, is_used, guest_name, guests_count, estimated_guests, price_eur, pricing_details, internal_notes, breakfast_included, breakfast_price_per_person, room_type, pricing_type")
         .eq("tenant_id", tenantId)
@@ -180,6 +182,8 @@ const ReportsPanel = () => {
         .lte("date", endStr)
         .neq("status", "cancelled")
         .order("date", { ascending: true });
+      if (selectedSiteId) query = query.eq("site_id", selectedSiteId);
+      const { data, error } = await query;
       if (error) throw error;
       return (data ?? []) as ReservationRow[];
     },
@@ -187,10 +191,10 @@ const ReportsPanel = () => {
   });
 
   const { data: prevReservations = [] } = useQuery({
-    queryKey: ["reports-reservations-prev", tenantId, prevStartStr, prevEndStr],
+    queryKey: ["reports-reservations-prev", tenantId, selectedSiteId, prevStartStr, prevEndStr],
     queryFn: async () => {
       if (!tenantId) return [];
-      const { data, error } = await supabase
+      let query = supabase
         .from("reservations")
         .select("id, reservation_type, status, date, check_out_date, is_invoiced, is_used, guest_name, guests_count, estimated_guests, price_eur, pricing_details, internal_notes, breakfast_included, breakfast_price_per_person, room_type, pricing_type")
         .eq("tenant_id", tenantId)
@@ -198,6 +202,8 @@ const ReportsPanel = () => {
         .lte("date", prevEndStr)
         .neq("status", "cancelled")
         .order("date", { ascending: true });
+      if (selectedSiteId) query = query.eq("site_id", selectedSiteId);
+      const { data, error } = await query;
       if (error) throw error;
       return (data ?? []) as ReservationRow[];
     },

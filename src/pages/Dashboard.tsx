@@ -3,6 +3,7 @@ import { useNavigate, Navigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useTenant } from "@/hooks/useTenant";
 import { usePermissions } from "@/hooks/usePermissions";
+import { SiteContext } from "@/hooks/useSiteContext";
 import {
   PERM_CALENDAR_VIEW,
   PERM_RESERVATIONS_VIEW,
@@ -116,6 +117,7 @@ const Dashboard = () => {
   const [currentView, setCurrentView] = useState<DashboardView>("overview");
   const [mobileOpen, setMobileOpen] = useState(false);
   const [tourOpen, setTourOpen] = useState(false);
+  const [selectedSiteId, setSelectedSiteId] = useState<string | null>(null);
   const [reservationStatusFilter, setReservationStatusFilter] = useState<string | undefined>();
   const [reservationInvoicedFilter, setReservationInvoicedFilter] = useState<boolean | undefined>();
 
@@ -210,6 +212,7 @@ const Dashboard = () => {
   };
 
   return (
+    <SiteContext.Provider value={{ selectedSiteId, setSelectedSiteId }}>
     <div className="flex min-h-screen bg-background flex-col">
       {isImpersonating && (
         <div className="bg-accent text-accent-foreground px-4 py-2 flex items-center justify-between text-sm font-medium z-50">
@@ -311,6 +314,7 @@ const Dashboard = () => {
       />
       </div>
     </div>
+    </SiteContext.Provider>
   );
 };
 

@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import DashboardTooltip from "./DashboardTooltip";
 import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/hooks/useTenant";
+import { useSiteContext } from "@/hooks/useSiteContext";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -40,6 +41,7 @@ interface ReservationListProps {
 
 const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCheckoutToday }: ReservationListProps) => {
   const { tenantId, tenant } = useTenant();
+  const { selectedSiteId } = useSiteContext();
   const [statusFilter, setStatusFilter] = useState<string>(initialStatusFilter || "all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [dateFilter, setDateFilter] = useState<string>(initialCheckoutToday ? "all" : "all");
@@ -59,10 +61,11 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
   const today = format(new Date(), "yyyy-MM-dd");
 
   const { data: reservations, isLoading } = useQuery({
-    queryKey: ["reservations", tenantId, statusFilter, typeFilter, dateFilter, invoicedFilter, checkoutTodayFilter],
+    queryKey: ["reservations", tenantId, selectedSiteId, statusFilter, typeFilter, dateFilter, invoicedFilter, checkoutTodayFilter],
     queryFn: async () => {
       if (!tenantId) return [];
       let query = supabase.from("reservations").select("*").eq("tenant_id", tenantId).order("date", { ascending: false });
+      if (selectedSiteId) query = query.eq("site_id", selectedSiteId);
       if (statusFilter !== "all") query = query.eq("status", statusFilter);
       if (typeFilter !== "all") query = query.eq("reservation_type", typeFilter);
       if (checkoutTodayFilter) {

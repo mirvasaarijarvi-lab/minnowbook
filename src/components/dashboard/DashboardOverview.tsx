@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/hooks/useTenant";
+import { useSiteContext } from "@/hooks/useSiteContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -36,6 +37,7 @@ interface DashboardOverviewProps {
 
 const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
   const { tenantId, tenant } = useTenant();
+  const { selectedSiteId } = useSiteContext();
   const today = format(new Date(), "yyyy-MM-dd");
   const t = useT();
   const { typeLabel } = useResourceTypeLabel();
@@ -48,9 +50,12 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
 
   // Main stats query
   const { data: stats } = useQuery({
-    queryKey: ["dashboard-stats-full", tenantId, today, weekStart],
+    queryKey: ["dashboard-stats-full", tenantId, selectedSiteId, today, weekStart],
     queryFn: async () => {
       if (!tenantId) return null;
+
+      // Helper to apply site filter
+      const sf = (q: any) => selectedSiteId ? q.eq("site_id", selectedSiteId) : q;
 
       const [
         todayRes,
@@ -65,39 +70,28 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
         checkoutsRes,
         uninvoicedRes,
       ] = await Promise.all([
-        // Today's reservations
-        supabase.from("reservations").select("id", { count: "exact", head: true })
-          .eq("tenant_id", tenantId).eq("date", today).in("status", ["pending", "confirmed"]),
-        // All pending
-        supabase.from("reservations").select("id", { count: "exact", head: true })
-          .eq("tenant_id", tenantId).eq("status", "pending"),
-        // Today's guests
-        supabase.from("reservations").select("guests_count, estimated_guests")
-          .eq("tenant_id", tenantId).eq("date", today).in("status", ["pending", "confirmed"]),
-        // Today checked in
-        supabase.from("reservations").select("id", { count: "exact", head: true })
-          .eq("tenant_id", tenantId).eq("date", today).eq("is_checked_in", true),
-        // Today total confirmed (for arrived X/Y)
-        supabase.from("reservations").select("id", { count: "exact", head: true })
-          .eq("tenant_id", tenantId).eq("date", today).eq("status", "confirmed"),
-        // This week reservations with price
-        supabase.from("reservations").select("id, price_eur, guests_count, estimated_guests, date")
-          .eq("tenant_id", tenantId).gte("date", weekStart).lte("date", weekEnd).in("status", ["pending", "confirmed"]),
-        // Previous week reservations with price
-        supabase.from("reservations").select("id, price_eur, guests_count, estimated_guests")
-          .eq("tenant_id", tenantId).gte("date", prevWeekStart).lte("date", prevWeekEnd).in("status", ["pending", "confirmed"]),
-        // Active resources
-        supabase.from("resources").select("id, capacity", { count: "exact" })
-          .eq("tenant_id", tenantId).eq("is_active", true),
-        // Today by type
-        supabase.from("reservations").select("reservation_type")
-          .eq("tenant_id", tenantId).eq("date", today).in("status", ["pending", "confirmed"]),
-        // Checkouts today
-        supabase.from("reservations").select("id", { count: "exact", head: true })
-          .eq("tenant_id", tenantId).eq("check_out_date", today).in("status", ["pending", "confirmed"]),
-        // Uninvoiced (confirmed, not invoiced, not cancelled)
-        supabase.from("reservations").select("id", { count: "exact", head: true })
-          .eq("tenant_id", tenantId).eq("is_invoiced", false).in("status", ["pending", "confirmed"]),
+        sf(supabase.from("reservations").select("id", { count: "exact", head: true })
+          .eq("tenant_id", tenantId).eq("date", today).in("status", ["pending", "confirmed"])),
+        sf(supabase.from("reservations").select("id", { count: "exact", head: true })
+          .eq("tenant_id", tenantId).eq("status", "pending")),
+        sf(supabase.from("reservations").select("guests_count, estimated_guests")
+          .eq("tenant_id", tenantId).eq("date", today).in("status", ["pending", "confirmed"])),
+        sf(supabase.from("reservations").select("id", { count: "exact", head: true })
+          .eq("tenant_id", tenantId).eq("date", today).eq("is_checked_in", true)),
+        sf(supabase.from("reservations").select("id", { count: "exact", head: true })
+          .eq("tenant_id", tenantId).eq("date", today).eq("status", "confirmed")),
+        sf(supabase.from("reservations").select("id, price_eur, guests_count, estimated_guests, date")
+          .eq("tenant_id", tenantId).gte("date", weekStart).lte("date", weekEnd).in("status", ["pending", "confirmed"])),
+        sf(supabase.from("reservations").select("id, price_eur, guests_count, estimated_guests")
+          .eq("tenant_id", tenantId).gte("date", prevWeekStart).lte("date", prevWeekEnd).in("status", ["pending", "confirmed"])),
+        sf(supabase.from("resources").select("id, capacity", { count: "exact" })
+          .eq("tenant_id", tenantId).eq("is_active", true)),
+        sf(supabase.from("reservations").select("reservation_type")
+          .eq("tenant_id", tenantId).eq("date", today).in("status", ["pending", "confirmed"])),
+        sf(supabase.from("reservations").select("id", { count: "exact", head: true })
+          .eq("tenant_id", tenantId).eq("check_out_date", today).in("status", ["pending", "confirmed"])),
+        sf(supabase.from("reservations").select("id", { count: "exact", head: true })
+          .eq("tenant_id", tenantId).eq("is_invoiced", false).in("status", ["pending", "confirmed"])),
       ]);
 
       const todayGuests = (todayGuestsRes.data ?? []).reduce(
