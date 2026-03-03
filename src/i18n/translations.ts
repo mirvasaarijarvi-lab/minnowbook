@@ -155,6 +155,12 @@ type TranslationKeys = {
   "days.saturday": string;
   "days.sunday": string;
   "openingHours.tooltip": string;
+  "openingHours.siteTooltip": string;
+  "openingHours.siteOverride": string;
+  "openingHours.usingDefaults": string;
+  "openingHours.resetToDefaults": string;
+  "openingHours.resetConfirm": string;
+  "openingHours.resetDone": string;
   "booking.pickDate": string;
   "booking.checkOutDate": string;
   "booking.roomType": string;
@@ -1133,6 +1139,12 @@ const en: TranslationKeys = {
   "days.saturday": "Saturday",
   "days.sunday": "Sunday",
   "openingHours.tooltip": "Set default opening hours per reservation type. These are used on the public booking page to determine available time slots. When you create a new site, these defaults are copied automatically.",
+  "openingHours.siteTooltip": "These opening hours apply only to this site. They override the tenant-level defaults.",
+  "openingHours.siteOverride": "Site-specific hours (overrides defaults)",
+  "openingHours.usingDefaults": "Using tenant defaults. Save to create site-specific overrides.",
+  "openingHours.resetToDefaults": "Reset to defaults",
+  "openingHours.resetConfirm": "This will delete site-specific hours and revert to tenant defaults.",
+  "openingHours.resetDone": "Opening hours reset to tenant defaults",
   "booking.pickDate": "Pick a date",
   "booking.checkOutDate": "Check-out date",
   "booking.roomType": "Room type",
@@ -2094,6 +2106,12 @@ const fi: TranslationKeys = {
   "days.saturday": "Lauantai",
   "days.sunday": "Sunnuntai",
   "openingHours.tooltip": "Aseta oletusaukioloajat varaustyypeittäin. Nämä näkyvät julkisella varaussivulla käytettävissä olevina aikoina. Kun luot uuden toimipisteen, nämä oletukset kopioidaan automaattisesti.",
+  "openingHours.siteTooltip": "Nämä aukioloajat koskevat vain tätä toimipistettä. Ne ohittavat organisaation oletusasetukset.",
+  "openingHours.siteOverride": "Toimipistekohtaiset aukioloajat (ohittaa oletukset)",
+  "openingHours.usingDefaults": "Käytetään organisaation oletusarvoja. Tallenna luodaksesi toimipistekohtaiset aukioloajat.",
+  "openingHours.resetToDefaults": "Palauta oletukset",
+  "openingHours.resetConfirm": "Tämä poistaa toimipistekohtaiset aukioloajat ja palauttaa organisaation oletukset.",
+  "openingHours.resetDone": "Aukioloajat palautettu organisaation oletuksiin",
   "booking.pickDate": "Valitse päivämäärä",
   "booking.checkOutDate": "Lähtöpäivä",
   "booking.roomType": "Huonetyyppi",
@@ -3054,6 +3072,12 @@ const sv: TranslationKeys = {
   "days.saturday": "Lördag",
   "days.sunday": "Söndag",
   "openingHours.tooltip": "Ange standardöppettider per bokningstyp. Dessa används på den publika bokningssidan för att bestämma tillgängliga tider. När du skapar en ny plats kopieras dessa standardvärden automatiskt.",
+  "openingHours.siteTooltip": "Dessa öppettider gäller bara för denna plats. De åsidosätter organisationens standardvärden.",
+  "openingHours.siteOverride": "Platsspecifika öppettider (åsidosätter standard)",
+  "openingHours.usingDefaults": "Använder organisationens standardvärden. Spara för att skapa platsspecifika öppettider.",
+  "openingHours.resetToDefaults": "Återställ till standard",
+  "openingHours.resetConfirm": "Detta raderar platsspecifika öppettider och återgår till organisationens standardvärden.",
+  "openingHours.resetDone": "Öppettider återställda till organisationens standardvärden",
   "booking.pickDate": "Välj datum",
   "booking.checkOutDate": "Utcheckningsdatum",
   "booking.roomType": "Rumstyp",

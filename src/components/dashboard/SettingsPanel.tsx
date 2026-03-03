@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/hooks/useTenant";
 import { useT } from "@/contexts/I18nContext";
+import { useSiteContext } from "@/hooks/useSiteContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,6 +29,7 @@ const ALLOWED_HERO_TYPES = ["image/png", "image/jpeg", "image/webp"];
 
 const SettingsPanel = () => {
   const { tenantId, tenant } = useTenant();
+  const { selectedSiteId } = useSiteContext();
   const t = useT();
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -455,8 +457,13 @@ const SettingsPanel = () => {
         </CardContent>
       </Card>
 
-      {/* Opening Hours */}
+      {/* Opening Hours — tenant defaults */}
       <OpeningHoursSettings />
+
+      {/* Opening Hours — site-specific overrides when a site is selected */}
+      {selectedSiteId && (
+        <OpeningHoursSettings siteId={selectedSiteId} />
+      )}
 
       {/* Resource Type Names & Descriptions */}
       {tenant?.allowed_reservation_types?.length > 0 && (
