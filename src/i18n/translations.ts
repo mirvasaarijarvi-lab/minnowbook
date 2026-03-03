@@ -756,6 +756,26 @@ type TranslationKeys = {
   "aid.errorSubmit": string;
   "aid.successSubmit": string;
   "aid.errorConnect": string;
+  "aid.guideQ1": string;
+  "aid.guideA1": string;
+  "aid.guideQ2": string;
+  "aid.guideA2": string;
+  "aid.guideQ3": string;
+  "aid.guideA3": string;
+  "aid.guideQ4": string;
+  "aid.guideA4": string;
+  "aid.guideQ5": string;
+  "aid.guideA5": string;
+  "aid.guideQ6": string;
+  "aid.guideA6": string;
+  "aid.guideQ7": string;
+  "aid.guideA7": string;
+  "aid.guideQ8": string;
+  "aid.guideA8": string;
+  "aid.guideQ9": string;
+  "aid.guideA9": string;
+  "aid.guideQ10": string;
+  "aid.guideA10": string;
 };
 
 export type TranslationKey = keyof TranslationKeys;
@@ -1496,6 +1516,26 @@ const en: TranslationKeys = {
   "aid.errorSubmit": "Failed to submit request",
   "aid.successSubmit": "Support request submitted",
   "aid.errorConnect": "Sorry, I couldn't connect. Please try again.",
+  "aid.guideQ1": "How do I manage reservations?",
+  "aid.guideA1": "Go to your **Dashboard → Reservations** to view, filter, edit, and manage all bookings. You can confirm or cancel reservations from the action menu on each card.",
+  "aid.guideQ2": "How do I customize my booking page?",
+  "aid.guideA2": "Navigate to **Settings** in your dashboard. Upload your logo, set brand colors, and add a hero image. Your public booking page updates automatically.",
+  "aid.guideQ3": "How do I set up email templates?",
+  "aid.guideA3": "In **Settings → Email Templates**, you can customize both confirmation and cancellation emails. Use the preview tab to see how they'll look to guests.",
+  "aid.guideQ4": "How do I add staff members?",
+  "aid.guideA4": "Go to **Admin → Users** to invite new staff. You can set roles (Owner, Admin, Staff) and approve or remove team members.",
+  "aid.guideQ5": "How do I add or edit resources?",
+  "aid.guideA5": "Go to **Dashboard → Resources** to create rooms, tables, or venues. You can set capacity, pricing, upload up to 5 images, and toggle active/inactive status.",
+  "aid.guideQ6": "How do I set opening hours?",
+  "aid.guideA6": "In **Settings → Opening Hours**, configure open/close times for each day of the week per resource type. Mark days as closed when needed.",
+  "aid.guideQ7": "How do I view reports?",
+  "aid.guideA7": "Navigate to **Dashboard → Reports** to see reservation trends, occupancy rates, and revenue summaries. You can filter by date range and export printable reports.",
+  "aid.guideQ8": "How does pricing work for rooms?",
+  "aid.guideA8": "Set a **base price per night** on each resource, then configure **room type multipliers** (Single 1.0×, Double 1.5×, Suite 2.5×, etc.). The booking page calculates totals automatically.",
+  "aid.guideQ9": "How do I share my booking link?",
+  "aid.guideA9": "Your public booking link is shown on the **Dashboard Overview**. Click **Copy link** to copy it, or open it in a new tab to preview. Share it on your website or social media.",
+  "aid.guideQ10": "How do I block dates or time slots?",
+  "aid.guideA10": "In **Dashboard → Calendar**, click on a date and use the **Block Slot** option to prevent bookings for specific dates, times, or resources.",
 };
 
 const fi: TranslationKeys = {
@@ -2233,6 +2273,26 @@ const fi: TranslationKeys = {
   "aid.errorSubmit": "Pyynnön lähettäminen epäonnistui",
   "aid.successSubmit": "Tukipyyntö lähetetty",
   "aid.errorConnect": "Yhteyttä ei saatu. Yritä uudelleen.",
+  "aid.guideQ1": "Miten hallinnoin varauksia?",
+  "aid.guideA1": "Siirry **Hallintapaneeli → Varaukset** -näkymään tarkistaaksesi, suodattaaksesi, muokataksesi ja hallinnoidaksesi kaikkia varauksia. Voit vahvistaa tai peruuttaa varauksia toimintovalikosta.",
+  "aid.guideQ2": "Miten mukautan varaussivuani?",
+  "aid.guideA2": "Siirry hallintapaneelin **Asetukset**-osioon. Lataa logosi, aseta brändivärit ja lisää hero-kuva. Julkinen varaussivusi päivittyy automaattisesti.",
+  "aid.guideQ3": "Miten määritän sähköpostimallit?",
+  "aid.guideA3": "**Asetukset → Sähköpostimallit** -osiossa voit muokata sekä vahvistus- että peruutussähköposteja. Esikatselu-välilehdeltä näet miltä ne näyttävät vieraille.",
+  "aid.guideQ4": "Miten lisään henkilökuntaa?",
+  "aid.guideA4": "Siirry **Ylläpito → Käyttäjät** kutsuaksesi uusia henkilökunnan jäseniä. Voit asettaa roolit (Omistaja, Ylläpitäjä, Henkilökunta) ja hyväksyä tai poistaa tiimin jäseniä.",
+  "aid.guideQ5": "Miten lisään tai muokkaan resursseja?",
+  "aid.guideA5": "Siirry **Hallintapaneeli → Resurssit** luodaksesi huoneita, pöytiä tai tiloja. Voit asettaa kapasiteetin, hinnoittelun, ladata enintään 5 kuvaa ja vaihtaa aktiivi/ei-aktiivi-tilaa.",
+  "aid.guideQ6": "Miten asetan aukioloajat?",
+  "aid.guideA6": "**Asetukset → Aukioloajat** -osiossa määrität avaamis- ja sulkemisajat jokaiselle viikonpäivälle resurssityypin mukaan. Merkitse päivät suljetuiksi tarvittaessa.",
+  "aid.guideQ7": "Miten tarkastelen raportteja?",
+  "aid.guideA7": "Siirry **Hallintapaneeli → Raportit** nähdäksesi varaustrendejä, käyttöasteita ja tuloyhteenvetoja. Voit suodattaa ajanjakson mukaan ja tulostaa raportteja.",
+  "aid.guideQ8": "Miten huoneiden hinnoittelu toimii?",
+  "aid.guideA8": "Aseta **perushinta per yö** jokaiselle resurssille ja määritä **huonetyyppikertoimet** (Yhden hengen 1.0×, Kahden hengen 1.5×, Sviitti 2.5× jne.). Varaussivu laskee summat automaattisesti.",
+  "aid.guideQ9": "Miten jaan varauslinkkini?",
+  "aid.guideA9": "Julkinen varauslinkkisi näkyy **Hallintapaneelin yleiskatsauksessa**. Klikkaa **Kopioi linkki** kopioidaksesi sen tai avaa se uudessa välilehdessä. Jaa se verkkosivullasi tai sosiaalisessa mediassa.",
+  "aid.guideQ10": "Miten estän päivämääriä tai aikavälejä?",
+  "aid.guideA10": "**Hallintapaneeli → Kalenteri** -näkymässä klikkaa päivämäärää ja käytä **Estä aika** -toimintoa estääksesi varaukset tietyille päiville, ajoille tai resursseille.",
 };
 
 const sv: TranslationKeys = {
@@ -2970,6 +3030,26 @@ const sv: TranslationKeys = {
   "aid.errorSubmit": "Kunde inte skicka ärende",
   "aid.successSubmit": "Supportärende skickat",
   "aid.errorConnect": "Kunde inte ansluta. Försök igen.",
+  "aid.guideQ1": "Hur hanterar jag bokningar?",
+  "aid.guideA1": "Gå till **Instrumentpanel → Bokningar** för att visa, filtrera, redigera och hantera alla bokningar. Du kan bekräfta eller avboka via åtgärdsmenyn på varje kort.",
+  "aid.guideQ2": "Hur anpassar jag min bokningssida?",
+  "aid.guideA2": "Navigera till **Inställningar** i din instrumentpanel. Ladda upp din logotyp, ställ in varumärkesfärger och lägg till en hero-bild. Din publika bokningssida uppdateras automatiskt.",
+  "aid.guideQ3": "Hur konfigurerar jag e-postmallar?",
+  "aid.guideA3": "Under **Inställningar → E-postmallar** kan du anpassa både bekräftelse- och avbokningsmail. Använd förhandsgranskningsfliken för att se hur de ser ut för gästerna.",
+  "aid.guideQ4": "Hur lägger jag till personal?",
+  "aid.guideA4": "Gå till **Admin → Användare** för att bjuda in ny personal. Du kan ange roller (Ägare, Admin, Personal) och godkänna eller ta bort teammedlemmar.",
+  "aid.guideQ5": "Hur lägger jag till eller redigerar resurser?",
+  "aid.guideA5": "Gå till **Instrumentpanel → Resurser** för att skapa rum, bord eller lokaler. Du kan ange kapacitet, prissättning, ladda upp upp till 5 bilder och växla aktiv/inaktiv status.",
+  "aid.guideQ6": "Hur ställer jag in öppettider?",
+  "aid.guideA6": "Under **Inställningar → Öppettider** konfigurerar du öppnings- och stängningstider för varje veckodag per resurstyp. Markera dagar som stängda vid behov.",
+  "aid.guideQ7": "Hur visar jag rapporter?",
+  "aid.guideA7": "Navigera till **Instrumentpanel → Rapporter** för att se bokningstrender, beläggningsgrad och intäktssammanfattningar. Du kan filtrera efter datumintervall och exportera utskrivbara rapporter.",
+  "aid.guideQ8": "Hur fungerar prissättning för rum?",
+  "aid.guideA8": "Ange ett **baspris per natt** för varje resurs och konfigurera **rumstypmultiplikatorer** (Enkelrum 1.0×, Dubbelrum 1.5×, Svit 2.5× osv.). Bokningssidan beräknar summorna automatiskt.",
+  "aid.guideQ9": "Hur delar jag min bokningslänk?",
+  "aid.guideA9": "Din publika bokningslänk visas på **Instrumentpanelens översikt**. Klicka på **Kopiera länk** för att kopiera den eller öppna den i en ny flik. Dela den på din webbplats eller sociala medier.",
+  "aid.guideQ10": "Hur blockerar jag datum eller tider?",
+  "aid.guideA10": "Under **Instrumentpanel → Kalender**, klicka på ett datum och använd **Blockera tid** för att förhindra bokningar för specifika datum, tider eller resurser.",
 };
 
 export const translations: Record<Language, TranslationKeys> = { en, fi, sv };
