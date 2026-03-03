@@ -60,7 +60,22 @@ export function usePermissions() {
     return (permissions as string[]).includes(permission);
   };
 
-  const isSystemAdmin = permissions === "__all__" && !isOwner;
+  // Check system_admins table directly (isOwner may mask it for superadmin role)
+  const { data: sysAdminRecord } = useQuery({
+    queryKey: ["is-system-admin", user?.id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("system_admins")
+        .select("id")
+        .eq("user_id", user!.id)
+        .maybeSingle();
+      return !!data;
+    },
+    enabled: !!user?.id,
+    staleTime: 300_000,
+  });
+
+  const isSystemAdmin = sysAdminRecord === true;
 
   return { can, isLoading, isSystemAdmin };
 }
