@@ -287,6 +287,35 @@ type TranslationKeys = {
   "admin.sending": string;
   "admin.open": string;
   "admin.resolved": string;
+  "admin.permissionCol": string;
+  "admin.permTooltip": string;
+  "admin.deleteRoleTitle": string;
+  "admin.deleteRoleDesc": string;
+  "admin.roleDeleted": string;
+  "admin.roleRenamed": string;
+  "admin.roleKeyHint": string;
+  "admin.clickToRename": string;
+  "admin.catReservations": string;
+  "admin.catResources": string;
+  "admin.catCalendar": string;
+  "admin.catReports": string;
+  "admin.catSettings": string;
+  "admin.catAdmin": string;
+  "admin.catSupport": string;
+  "admin.permViewReservations": string;
+  "admin.permCreateReservations": string;
+  "admin.permEditReservations": string;
+  "admin.permDeleteReservations": string;
+  "admin.permViewResources": string;
+  "admin.permManageResources": string;
+  "admin.permViewCalendar": string;
+  "admin.permViewReports": string;
+  "admin.permViewSettings": string;
+  "admin.permManageSettings": string;
+  "admin.permViewAdmin": string;
+  "admin.permManageAdmin": string;
+  "admin.permViewSupport": string;
+  "admin.permManageSupport": string;
 
   // Hero
   "hero.badge": string;
@@ -1063,6 +1092,35 @@ const en: TranslationKeys = {
   "admin.sending": "Sending...",
   "admin.open": "Open",
   "admin.resolved": "Resolved",
+  "admin.permissionCol": "Permission",
+  "admin.permTooltip": "Define what each role can access. Owner always has full access. Toggle individual permissions for Admin, Staff, and custom roles.",
+  "admin.deleteRoleTitle": "Delete role \"{name}\"?",
+  "admin.deleteRoleDesc": "This will permanently remove this custom role and all its permissions. Users assigned to this role will lose access.",
+  "admin.roleDeleted": "Role deleted",
+  "admin.roleRenamed": "Role renamed",
+  "admin.roleKeyHint": "Unique identifier used internally",
+  "admin.clickToRename": "Click to rename",
+  "admin.catReservations": "Reservations",
+  "admin.catResources": "Resources",
+  "admin.catCalendar": "Calendar",
+  "admin.catReports": "Reports",
+  "admin.catSettings": "Settings",
+  "admin.catAdmin": "Admin",
+  "admin.catSupport": "Support",
+  "admin.permViewReservations": "View reservations",
+  "admin.permCreateReservations": "Create reservations",
+  "admin.permEditReservations": "Edit reservations",
+  "admin.permDeleteReservations": "Delete reservations",
+  "admin.permViewResources": "View resources",
+  "admin.permManageResources": "Manage resources",
+  "admin.permViewCalendar": "View calendar",
+  "admin.permViewReports": "View reports",
+  "admin.permViewSettings": "View settings",
+  "admin.permManageSettings": "Manage settings",
+  "admin.permViewAdmin": "View admin panel",
+  "admin.permManageAdmin": "Manage users & roles",
+  "admin.permViewSupport": "View support requests",
+  "admin.permManageSupport": "Respond to support requests",
 
   // Hero
   "hero.badge": "Now in beta. 30-day free trial",
@@ -1827,6 +1885,35 @@ const fi: TranslationKeys = {
   "admin.sending": "Lähetetään...",
   "admin.open": "Avoin",
   "admin.resolved": "Ratkaistu",
+  "admin.permissionCol": "Oikeus",
+  "admin.permTooltip": "Määritä mitä kukin rooli voi käyttää. Omistajalla on aina täydet oikeudet. Vaihda yksittäisiä oikeuksia Admin-, Staff- ja mukautetuille rooleille.",
+  "admin.deleteRoleTitle": "Poistetaanko rooli \"{name}\"?",
+  "admin.deleteRoleDesc": "Tämä poistaa pysyvästi tämän mukautetun roolin ja kaikki sen oikeudet. Tähän rooliin määritetyt käyttäjät menettävät pääsynsä.",
+  "admin.roleDeleted": "Rooli poistettu",
+  "admin.roleRenamed": "Rooli nimetty uudelleen",
+  "admin.roleKeyHint": "Sisäisesti käytettävä yksilöllinen tunniste",
+  "admin.clickToRename": "Napsauta nimetäksesi uudelleen",
+  "admin.catReservations": "Varaukset",
+  "admin.catResources": "Resurssit",
+  "admin.catCalendar": "Kalenteri",
+  "admin.catReports": "Raportit",
+  "admin.catSettings": "Asetukset",
+  "admin.catAdmin": "Ylläpito",
+  "admin.catSupport": "Tuki",
+  "admin.permViewReservations": "Näytä varaukset",
+  "admin.permCreateReservations": "Luo varauksia",
+  "admin.permEditReservations": "Muokkaa varauksia",
+  "admin.permDeleteReservations": "Poista varauksia",
+  "admin.permViewResources": "Näytä resurssit",
+  "admin.permManageResources": "Hallitse resursseja",
+  "admin.permViewCalendar": "Näytä kalenteri",
+  "admin.permViewReports": "Näytä raportit",
+  "admin.permViewSettings": "Näytä asetukset",
+  "admin.permManageSettings": "Hallitse asetuksia",
+  "admin.permViewAdmin": "Näytä ylläpitopaneeli",
+  "admin.permManageAdmin": "Hallitse käyttäjiä ja rooleja",
+  "admin.permViewSupport": "Näytä tukipyynnöt",
+  "admin.permManageSupport": "Vastaa tukipyyntöihin",
 
   "hero.badge": "Nyt betassa. 30 päivän ilmainen kokeilu",
   "hero.title": "Varaustyökalu niille,",
@@ -2590,6 +2677,35 @@ const sv: TranslationKeys = {
   "admin.sending": "Skickar...",
   "admin.open": "Öppen",
   "admin.resolved": "Löst",
+  "admin.permissionCol": "Behörighet",
+  "admin.permTooltip": "Definiera vad varje roll kan komma åt. Ägaren har alltid full åtkomst. Växla individuella behörigheter för Admin, Personal och anpassade roller.",
+  "admin.deleteRoleTitle": "Ta bort rollen \"{name}\"?",
+  "admin.deleteRoleDesc": "Detta tar permanent bort denna anpassade roll och alla dess behörigheter. Användare som tilldelats denna roll förlorar sin åtkomst.",
+  "admin.roleDeleted": "Roll borttagen",
+  "admin.roleRenamed": "Roll omdöpt",
+  "admin.roleKeyHint": "Unik identifierare som används internt",
+  "admin.clickToRename": "Klicka för att byta namn",
+  "admin.catReservations": "Bokningar",
+  "admin.catResources": "Resurser",
+  "admin.catCalendar": "Kalender",
+  "admin.catReports": "Rapporter",
+  "admin.catSettings": "Inställningar",
+  "admin.catAdmin": "Admin",
+  "admin.catSupport": "Support",
+  "admin.permViewReservations": "Visa bokningar",
+  "admin.permCreateReservations": "Skapa bokningar",
+  "admin.permEditReservations": "Redigera bokningar",
+  "admin.permDeleteReservations": "Ta bort bokningar",
+  "admin.permViewResources": "Visa resurser",
+  "admin.permManageResources": "Hantera resurser",
+  "admin.permViewCalendar": "Visa kalender",
+  "admin.permViewReports": "Visa rapporter",
+  "admin.permViewSettings": "Visa inställningar",
+  "admin.permManageSettings": "Hantera inställningar",
+  "admin.permViewAdmin": "Visa adminpanelen",
+  "admin.permManageAdmin": "Hantera användare och roller",
+  "admin.permViewSupport": "Visa supportförfrågningar",
+  "admin.permManageSupport": "Svara på supportförfrågningar",
 
   "hero.badge": "Nu i beta. 30 dagars gratis provperiod",
   "hero.title": "Bokningsverktyget byggt för",

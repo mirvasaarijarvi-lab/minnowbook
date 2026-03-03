@@ -38,52 +38,52 @@ export const PERM_SUPPORT_MANAGE = "support.manage";
 /** All available permissions grouped by category (for UI) */
 export const PERMISSION_CATEGORIES = [
   {
-    category: "Reservations",
+    category: "admin.catReservations",
     permissions: [
-      { key: PERM_RESERVATIONS_VIEW, label: "View reservations" },
-      { key: PERM_RESERVATIONS_CREATE, label: "Create reservations" },
-      { key: PERM_RESERVATIONS_EDIT, label: "Edit reservations" },
-      { key: PERM_RESERVATIONS_DELETE, label: "Delete reservations" },
+      { key: PERM_RESERVATIONS_VIEW, labelKey: "admin.permViewReservations" },
+      { key: PERM_RESERVATIONS_CREATE, labelKey: "admin.permCreateReservations" },
+      { key: PERM_RESERVATIONS_EDIT, labelKey: "admin.permEditReservations" },
+      { key: PERM_RESERVATIONS_DELETE, labelKey: "admin.permDeleteReservations" },
     ],
   },
   {
-    category: "Resources",
+    category: "admin.catResources",
     permissions: [
-      { key: PERM_RESOURCES_VIEW, label: "View resources" },
-      { key: PERM_RESOURCES_MANAGE, label: "Manage resources" },
+      { key: PERM_RESOURCES_VIEW, labelKey: "admin.permViewResources" },
+      { key: PERM_RESOURCES_MANAGE, labelKey: "admin.permManageResources" },
     ],
   },
   {
-    category: "Calendar",
+    category: "admin.catCalendar",
     permissions: [
-      { key: PERM_CALENDAR_VIEW, label: "View calendar" },
+      { key: PERM_CALENDAR_VIEW, labelKey: "admin.permViewCalendar" },
     ],
   },
   {
-    category: "Reports",
+    category: "admin.catReports",
     permissions: [
-      { key: PERM_REPORTS_VIEW, label: "View reports" },
+      { key: PERM_REPORTS_VIEW, labelKey: "admin.permViewReports" },
     ],
   },
   {
-    category: "Settings",
+    category: "admin.catSettings",
     permissions: [
-      { key: PERM_SETTINGS_VIEW, label: "View settings" },
-      { key: PERM_SETTINGS_MANAGE, label: "Manage settings" },
+      { key: PERM_SETTINGS_VIEW, labelKey: "admin.permViewSettings" },
+      { key: PERM_SETTINGS_MANAGE, labelKey: "admin.permManageSettings" },
     ],
   },
   {
-    category: "Admin",
+    category: "admin.catAdmin",
     permissions: [
-      { key: PERM_ADMIN_VIEW, label: "View admin panel" },
-      { key: PERM_ADMIN_MANAGE, label: "Manage users & roles" },
+      { key: PERM_ADMIN_VIEW, labelKey: "admin.permViewAdmin" },
+      { key: PERM_ADMIN_MANAGE, labelKey: "admin.permManageAdmin" },
     ],
   },
   {
-    category: "Support",
+    category: "admin.catSupport",
     permissions: [
-      { key: PERM_SUPPORT_VIEW, label: "View support requests" },
-      { key: PERM_SUPPORT_MANAGE, label: "Respond to support requests" },
+      { key: PERM_SUPPORT_VIEW, labelKey: "admin.permViewSupport" },
+      { key: PERM_SUPPORT_MANAGE, labelKey: "admin.permManageSupport" },
     ],
   },
 ] as const;
