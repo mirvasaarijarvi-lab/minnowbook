@@ -289,32 +289,40 @@ const SupportChatWidget = ({ businessTier = false }: SupportChatWidgetProps) => 
                   {viewMode === "requests" ? t("aid.yourRequests" as TranslationKey) : t("aid.subtitle" as TranslationKey)}
                 </p>
               </div>
-              {businessTier && (
-                <button
-                  onClick={() => {
-                    setViewMode(viewMode === "chat" ? "requests" : "chat");
-                    setExpandedRequest(null);
-                  }}
-                  className="flex items-center gap-1 text-xs px-2 py-1 rounded-lg bg-primary-foreground/15 hover:bg-primary-foreground/25 text-primary-foreground transition-colors"
-                >
-                  {viewMode === "requests" ? (
-                    <>
-                      <ChevronLeft className="h-3 w-3" />
-                      {t("aid.chat" as TranslationKey)}
-                    </>
-                  ) : (
-                    <>
-                      <Inbox className="h-3 w-3" />
-                      {t("aid.requests" as TranslationKey)}
-                      {unreadCount > 0 && (
-                        <span className="ml-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[9px] font-bold">
-                          {unreadCount}
-                        </span>
-                      )}
-                    </>
-                  )}
-                </button>
-              )}
+              <div className="flex items-center gap-1.5">
+                {businessTier && viewMode === "chat" && (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary-foreground/20 text-primary-foreground border border-primary-foreground/20">
+                    <Clock className="h-2.5 w-2.5" />
+                    24h
+                  </span>
+                )}
+                {businessTier && (
+                  <button
+                    onClick={() => {
+                      setViewMode(viewMode === "chat" ? "requests" : "chat");
+                      setExpandedRequest(null);
+                    }}
+                    className="flex items-center gap-1 text-xs px-2 py-1 rounded-lg bg-primary-foreground/15 hover:bg-primary-foreground/25 text-primary-foreground transition-colors"
+                  >
+                    {viewMode === "requests" ? (
+                      <>
+                        <ChevronLeft className="h-3 w-3" />
+                        {t("aid.chat" as TranslationKey)}
+                      </>
+                    ) : (
+                      <>
+                        <Inbox className="h-3 w-3" />
+                        {t("aid.requests" as TranslationKey)}
+                        {unreadCount > 0 && (
+                          <span className="ml-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[9px] font-bold">
+                            {unreadCount}
+                          </span>
+                        )}
+                      </>
+                    )}
+                  </button>
+                )}
+              </div>
             </div>
           </div>
 
