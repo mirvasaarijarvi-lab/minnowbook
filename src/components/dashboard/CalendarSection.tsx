@@ -9,13 +9,14 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useState, useMemo } from "react";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval } from "date-fns";
+import { fi as fiFns, enUS, sv as svFns, type Locale } from "date-fns/locale";
 import { cn } from "@/lib/utils";
-import { useT } from "@/contexts/I18nContext";
+import { useT, useLanguage } from "@/contexts/I18nContext";
 import { Ban, Clock, RefreshCw, Lock, Unlock } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { usePermissions } from "@/hooks/usePermissions";
 
-const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+const LOCALE_MAP: Record<string, Locale> = { fi: fiFns, sv: svFns, en: enUS };
 
 interface CalendarSectionProps {
   title: string;
@@ -31,6 +32,8 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
   const [blockDialogOpen, setBlockDialogOpen] = useState(false);
   const [blockReason, setBlockReason] = useState("");
   const t = useT();
+  const { language } = useLanguage();
+  const dateFnsLocale = LOCALE_MAP[language] ?? enUS;
   const queryClient = useQueryClient();
   const { can } = usePermissions();
   const isAdmin = can("resources.manage");
@@ -248,7 +251,7 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["calendar-blocked-slots"] });
       queryClient.invalidateQueries({ queryKey: ["blocked-slots"] });
-      toast({ title: isAllBlocked ? "Day unblocked" : "Entire day blocked" });
+      toast({ title: isAllBlocked ? t("dashboard.unblockAll" as any) : t("dashboard.blockDay" as any) });
     },
     onError: (err: any) => {
       toast({ title: "Error", description: err.message, variant: "destructive" });
@@ -257,11 +260,14 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
 
   const isRestaurant = resourceTypes.includes("restaurant") && resourceTypes.length === 1;
 
-  const resourceTypeLabels: Record<string, string> = {
-    hotel: "Hotel",
-    guesthouse: "Guesthouse",
-    restaurant: "Restaurant",
-    venue: "Venue",
+  const getResourceTypeLabel = (key: string) => {
+    const map: Record<string, string> = {
+      hotel: t("dashboard.hotel" as any),
+      guesthouse: t("dashboard.guesthouse" as any),
+      restaurant: t("dashboard.restaurant" as any),
+      venue: t("dashboard.venue" as any),
+    };
+    return map[key] ?? key;
   };
 
   return (
@@ -272,7 +278,7 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
           <CardContent className="p-4">
             <Calendar
               mode="single" selected={selectedDate} onSelect={handleSelect}
-              month={month} onMonthChange={setMonth}
+              month={month} onMonthChange={setMonth} locale={dateFnsLocale}
               className={cn("p-3 pointer-events-auto")}
               modifiers={{
                 hasReservation: (date) => {
@@ -311,7 +317,7 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-lg font-serif">
-                {selectedDate ? format(selectedDate, "EEEE, MMMM d, yyyy") : t("dashboard.selectDate")}
+                {selectedDate ? format(selectedDate, "EEEE, MMMM d, yyyy", { locale: dateFnsLocale }) : t("dashboard.selectDate")}
               </CardTitle>
               {isAdmin && selectedDate && (
                 <Button
@@ -320,8 +326,8 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
                   className="gap-1.5 text-destructive border-destructive/30 hover:bg-destructive/10"
                   onClick={() => setBlockDialogOpen(true)}
                 >
-                  <Ban className="h-4 w-4" />
-                  Block day
+                   <Ban className="h-4 w-4" />
+                   {t("dashboard.blockDay" as any)}
                 </Button>
               )}
             </div>
@@ -330,16 +336,16 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
             {/* Recurring blocks */}
             {selectedDayRecurring.length > 0 && (
               <div className="space-y-2">
-                <p className="text-xs font-medium text-primary uppercase tracking-wide flex items-center gap-1.5">
-                  <RefreshCw className="h-3.5 w-3.5" /> Recurring Blocks
+                 <p className="text-xs font-medium text-primary uppercase tracking-wide flex items-center gap-1.5">
+                   <RefreshCw className="h-3.5 w-3.5" /> {t("dashboard.recurringBlocks" as any)}
                 </p>
                 {selectedDayRecurring.map((block: any) => (
                   <div key={block.id} className="flex items-center justify-between p-3 rounded-md bg-primary/5 border border-dashed border-primary/30">
                     <div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium text-foreground">Every {DAY_NAMES[block.day_of_week]}</span>
+                       <div className="flex items-center gap-2">
+                         <span className="font-medium text-foreground">{t("dashboard.every" as any)} {format(new Date(2024, 0, block.day_of_week === 0 ? 7 : block.day_of_week), "EEEE", { locale: dateFnsLocale })}</span>
                         <Badge variant="secondary" className="text-xs capitalize">
-                          {resourceTypeLabels[block.resource_type] ?? block.resource_type}
+                          {getResourceTypeLabel(block.resource_type)}
                         </Badge>
                         {block.resource?.name && <Badge variant="outline" className="text-xs">{block.resource.name}</Badge>}
                       </div>
@@ -349,8 +355,8 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
                             <Clock className="h-3 w-3" />
                             {block.start_time.slice(0, 5)} – {block.end_time.slice(0, 5)}
                           </span>
-                        ) : "All day"}
-                        {block.reason && `, ${block.reason}`}
+                         ) : t("dashboard.allDay" as any)}
+                         {block.reason && `, ${block.reason}`}
                       </p>
                     </div>
                   </div>
@@ -361,15 +367,15 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
             {/* One-off blocks */}
             {selectedDayBlocks.length > 0 && (
               <div className="space-y-2">
-                <p className="text-xs font-medium text-destructive uppercase tracking-wide flex items-center gap-1.5">
-                  <Ban className="h-3.5 w-3.5" /> Blocked
+                 <p className="text-xs font-medium text-destructive uppercase tracking-wide flex items-center gap-1.5">
+                   <Ban className="h-3.5 w-3.5" /> {t("dashboard.blocked" as any)}
                 </p>
                 {selectedDayBlocks.map((block: any) => (
                   <div key={block.id} className="flex items-center justify-between p-3 rounded-md bg-destructive/10 border border-destructive/20">
                     <div>
                       <div className="flex items-center gap-2">
                         <span className="font-medium text-foreground">
-                          {block.resource?.name ?? (resourceTypeLabels[block.resource_type] ?? block.resource_type)}
+                          {block.resource?.name ?? getResourceTypeLabel(block.resource_type)}
                         </span>
                       </div>
                       <p className="text-sm text-muted-foreground">
@@ -378,8 +384,8 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
                             <Clock className="h-3 w-3" />
                             {block.start_time.slice(0, 5)} – {block.end_time.slice(0, 5)}
                           </span>
-                        ) : "All day"}
-                        {block.reason && ` · ${block.reason}`}
+                         ) : t("dashboard.allDay" as any)}
+                         {block.reason && ` · ${block.reason}`}
                       </p>
                     </div>
                   </div>
@@ -392,8 +398,8 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
               <p className="text-muted-foreground text-sm">{t("dashboard.noReservationsDay")}</p>
             ) : selectedDayReservations.length > 0 ? (
               <div className="space-y-2">
-                {(selectedDayBlocks.length > 0 || selectedDayRecurring.length > 0) && (
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Reservations</p>
+                 {(selectedDayBlocks.length > 0 || selectedDayRecurring.length > 0) && (
+                   <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t("dashboard.reservationsLabel" as any)}</p>
                 )}
                 {selectedDayReservations.map((r) => (
                   <div key={r.id} className="flex items-center justify-between p-3 rounded-md bg-secondary/50 border border-border">
@@ -426,11 +432,11 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
       <Dialog open={blockDialogOpen} onOpenChange={setBlockDialogOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle className="font-serif">
-              Block {title}
-            </DialogTitle>
-            <p className="text-sm text-muted-foreground">
-              {selectedDate && format(selectedDate, "EEEE, MMMM d, yyyy")}
+             <DialogTitle className="font-serif">
+               {t("dashboard.blockTitle" as any)} {title}
+             </DialogTitle>
+             <p className="text-sm text-muted-foreground">
+               {selectedDate && format(selectedDate, "EEEE, MMMM d, yyyy", { locale: dateFnsLocale })}
             </p>
           </DialogHeader>
 
@@ -463,10 +469,10 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
                         onClick={() => toggleResourceBlock.mutate(resource.id)}
                         disabled={toggleResourceBlock.isPending || isAllBlocked}
                       >
-                        {isBlocked ? (
-                          <><Lock className="h-3 w-3" /> Blocked</>
-                        ) : (
-                          <><Unlock className="h-3 w-3" /> Block</>
+                         {isBlocked ? (
+                           <><Lock className="h-3 w-3" /> {t("dashboard.blockedLabel" as any)}</>
+                         ) : (
+                           <><Unlock className="h-3 w-3" /> {t("dashboard.blockLabel" as any)}</>
                         )}
                       </Button>
                     </div>
@@ -477,8 +483,8 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
 
             {/* Reason input */}
             <div>
-              <Input
-                placeholder="Reason for blocking (optional)"
+               <Input
+                 placeholder={t("dashboard.blockReason" as any)}
                 value={blockReason}
                 onChange={(e) => setBlockReason(e.target.value)}
               />
@@ -492,12 +498,12 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
               disabled={blockAllMutation.isPending}
             >
               <Ban className="h-4 w-4" />
-              {isAllBlocked
-                ? `Unblock all`
-                : isRestaurant
-                  ? "Block restaurant for the day"
-                  : `Block all ${title.toLowerCase()}`
-              }
+               {isAllBlocked
+                 ? t("dashboard.unblockAll" as any)
+                 : isRestaurant
+                   ? t("dashboard.blockRestaurantDay" as any)
+                   : `${t("dashboard.blockAllTitle" as any)} ${title.toLowerCase()}`
+               }
             </Button>
           </div>
         </DialogContent>
