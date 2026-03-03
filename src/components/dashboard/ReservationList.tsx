@@ -13,7 +13,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useState } from "react";
 import { format } from "date-fns";
-import { CalendarDays, User, Mail, Phone, MoreVertical, CheckCircle2, XCircle, Pencil, Receipt, PackageCheck, Coffee, Plus, Building2 } from "lucide-react";
+import { CalendarDays, User, Mail, Phone, MoreVertical, CheckCircle2, XCircle, Pencil, Receipt, PackageCheck, Coffee, Plus, Building2, Tag } from "lucide-react";
 import EditReservationDialog from "./EditReservationDialog";
 import ManualReservationDialog from "./ManualReservationDialog";
 import ConfirmationEmailPreview from "@/components/ConfirmationEmailPreview";
@@ -297,6 +297,13 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
                         )}
                         {(r as any).is_checked_in && (
                           <Badge className="text-xs bg-emerald-100 text-emerald-800 border-emerald-200">{t("dashboard.checkedIn" as any)}</Badge>
+                        )}
+                        {r.discount_type && (
+                          <Badge variant="outline" className="text-xs gap-1 bg-purple-50 text-purple-700 border-purple-200">
+                            <Tag className="h-3 w-3" />
+                            {r.discount_type === "percentage" ? `−${r.discount_value}%` : `−€${r.discount_value}`}
+                            {r.discount_reason && <span className="font-normal text-purple-500 ml-0.5">· {r.discount_reason}</span>}
+                          </Badge>
                         )}
                       </div>
                     <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
