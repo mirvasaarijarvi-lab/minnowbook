@@ -4,6 +4,7 @@ import { useTenant } from "@/hooks/useTenant";
 import { useSiteContext } from "@/hooks/useSiteContext";
 import { useT } from "@/contexts/I18nContext";
 import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
+import { usePermissions } from "@/hooks/usePermissions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link2, Copy, ExternalLink, Building2, Home } from "lucide-react";
@@ -43,8 +44,9 @@ const BookingLinksCard = () => {
   const { selectedSiteId } = useSiteContext();
   const t = useT();
   const { typeLabel } = useResourceTypeLabel();
+  const { isSystemAdmin } = usePermissions();
 
-  const isBusiness = tenant?.tier === "business" && (isOwner || isAdmin);
+  const isBusiness = (tenant?.tier === "business" && (isOwner || isAdmin)) || isSystemAdmin;
 
   const { data: sites } = useQuery({
     queryKey: ["booking-links-sites", tenantId],
