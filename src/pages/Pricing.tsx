@@ -32,7 +32,7 @@ const tiers = [
     isPopular: true,
     features: [
       "1 site / location",
-      "All reservation types",
+      "All reservation types (1 resource per type)",
       "Everything in Basic",
       "Custom email templates (HTML editor)",
       "Advanced opening hours & booking rules",
@@ -49,7 +49,7 @@ const tiers = [
     staffUsers: "Unlimited",
     features: [
       "Unlimited sites & locations",
-      "All reservation types",
+      "All reservation types (unlimited resources)",
       "Everything in Pro",
       "Multi-site management dashboard",
       "Unlimited staff accounts",
@@ -135,6 +135,7 @@ const Pricing = () => {
                   ["Free trial", "30 days", "30 days", "30 days"],
                   ["Sites / locations", "1", "1", "Unlimited"],
                   ["Reservation types", "1", "All", "All"],
+                  ["Resources per type", "1", "1", "Unlimited"],
                   ["Staff users", "1–3", "Up to 10", "Unlimited"],
                   ["Custom branding", "✓", "✓", "✓"],
                   ["Branded booking page", "✓", "✓", "✓"],
@@ -146,7 +147,7 @@ const Pricing = () => {
                   ["Analytics & reports", "Basic", "Advanced", "Advanced"],
                   ["Priority support", "—", "✓", "✓"],
                 ].map(([feature, basic, pro, business]) => {
-                  const isHighlight = feature === "Sites / locations" || feature === "Reservation types";
+                  const isHighlight = feature === "Sites / locations" || feature === "Reservation types" || feature === "Resources per type";
                   return (
                   <tr key={feature} className={`border-b border-border/50 ${isHighlight ? "bg-accent/5" : ""}`}>
                     <td className={`py-3 pr-4 ${isHighlight ? "text-foreground font-medium" : "text-foreground/80"}`}>{feature}</td>
