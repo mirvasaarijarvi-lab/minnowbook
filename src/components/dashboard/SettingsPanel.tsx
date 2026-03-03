@@ -539,14 +539,14 @@ const SettingsPanel = () => {
             </div>
             <div className="flex-1">
               <h3 className="font-serif font-bold text-foreground mb-1">
-                Manage multiple locations
+                {t("settings.upsellTitle")}
               </h3>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Upgrade to the Business plan to manage hotels, restaurants, and venues from a single dashboard — each with its own resources, hours, and booking page.
+                {t("settings.upsellDesc")}
               </p>
             </div>
             <Button variant="outline" size="sm" className="gap-1.5 whitespace-nowrap border-accent/40 text-accent hover:bg-accent/10 hover:text-accent">
-              Learn more
+              {t("settings.learnMore")}
               <ArrowRight className="h-3.5 w-3.5" />
             </Button>
           </CardContent>
