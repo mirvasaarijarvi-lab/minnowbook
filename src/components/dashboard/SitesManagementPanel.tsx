@@ -601,14 +601,14 @@ const SitesManagementPanel = () => {
                             <p className="text-xs text-muted-foreground mb-3 ml-10">{site.description}</p>
                           )}
                           {siteResources.length === 0 ? (
-                            <p className="text-xs text-muted-foreground ml-10">{t("sites.noResourcesInSite" as any) || "No resources assigned to this site yet"}</p>
+                            <p className="text-xs text-muted-foreground ml-10">{t("sites.noResourcesInSite")}</p>
                           ) : (
                             <Table>
                               <TableHeader>
                                 <TableRow>
-                                  <TableHead className="text-xs">{t("sites.resourceName" as any) || "Resource"}</TableHead>
-                                  <TableHead className="text-xs">{t("sites.resourceType" as any) || "Type"}</TableHead>
-                                  <TableHead className="text-xs text-center">{t("sites.capacity" as any) || "Capacity"}</TableHead>
+                                  <TableHead className="text-xs">{t("sites.resourceName")}</TableHead>
+                                  <TableHead className="text-xs">{t("sites.resourceType")}</TableHead>
+                                  <TableHead className="text-xs text-center">{t("sites.capacity")}</TableHead>
                                   <TableHead className="text-xs text-center">{t("sites.status")}</TableHead>
                                 </TableRow>
                               </TableHeader>
