@@ -7,6 +7,7 @@ import {
   Printer, ArrowLeft, Home, Calendar, ClipboardList, BarChart3,
   Users, LogIn, Shield, Check, X, Lock, Pencil, Trash2, Search,
   Download, KeyRound, Settings, LifeBuoy, BookOpen, Building2, MapPin,
+  Zap, Crown,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -15,6 +16,10 @@ type GuideContent = {
   subtitle: string;
   printBtn: string;
   back: string;
+  tierOverview: {
+    heading: string;
+    tiers: { name: string; price: string; features: string[] }[];
+  };
   sections: {
     icon: React.ReactNode;
     title: string;
@@ -261,18 +266,17 @@ const MockupSupport = () => (
   <div className="border rounded-lg p-4 bg-muted/30 space-y-3 print:bg-white">
     <div className="flex items-center gap-2 text-xs">
       <LifeBuoy className="h-4 w-4 text-primary" />
-      <span className="font-medium">Support Requests</span>
+      <span className="font-medium">Support</span>
     </div>
-    <div className="space-y-1">
-      {[
-        { subject: "Cannot log in", status: "Open", color: "bg-amber-100 text-amber-700" },
-        { subject: "Feature request", status: "Resolved", color: "bg-green-100 text-green-700" },
-      ].map((r, i) => (
-        <div key={i} className="flex items-center gap-2 text-[10px] p-1.5 rounded bg-background border">
-          <span className="flex-1">{r.subject}</span>
-          <span className={`px-1.5 py-0.5 rounded text-[9px] ${r.color}`}>{r.status}</span>
-        </div>
-      ))}
+    <div className="space-y-2 text-[10px]">
+      <div className="p-2 rounded bg-background border">
+        <div className="font-medium mb-1">All plans: AI Chatbot</div>
+        <div className="text-muted-foreground">MinnowAid (💬) provides instant self-service help, quick guides, and AI-powered answers.</div>
+      </div>
+      <div className="p-2 rounded bg-accent/10 border border-accent/20">
+        <div className="font-medium mb-1 text-accent">Business plan: Priority Support</div>
+        <div className="text-muted-foreground">Submit tickets to admins with guaranteed 24-hour response. Track request status in real time.</div>
+      </div>
     </div>
   </div>
 );
@@ -317,6 +321,7 @@ const MockupMultisite = () => (
           <div>✓ Own resources</div>
           <div>✓ Own email templates</div>
           <div>✓ Site-specific staff</div>
+          <div>✓ Own branding & colors</div>
         </div>
       </div>
     </div>
@@ -336,6 +341,45 @@ const mockupComponents: Record<string, React.ReactNode> = {
   multisite: <MockupMultisite />,
 };
 
+/* ─── Tier Overview Component ─── */
+
+const TierOverviewCard = ({ tierOverview }: { tierOverview: GuideContent["tierOverview"] }) => {
+  const tierIcons = [
+    <Zap className="h-5 w-5" />,
+    <Crown className="h-5 w-5" />,
+    <Building2 className="h-5 w-5" />,
+  ];
+
+  return (
+    <Card className="print:shadow-none print:border print:break-inside-avoid mb-8 print:mb-6 border-primary/20 bg-primary/5">
+      <CardHeader className="pb-3 print:pb-2">
+        <CardTitle className="text-xl font-serif print:text-lg">{tierOverview.heading}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 print:grid-cols-3">
+          {tierOverview.tiers.map((tier, idx) => (
+            <div key={tier.name} className="rounded-xl border bg-card p-4 print:p-3 space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="text-primary print:text-black">{tierIcons[idx]}</span>
+                <h3 className="font-semibold text-sm">{tier.name}</h3>
+                <span className="ml-auto text-xs font-medium text-muted-foreground">{tier.price}</span>
+              </div>
+              <ul className="space-y-1">
+                {tier.features.map((f, fi) => (
+                  <li key={fi} className="flex items-start gap-1.5 text-xs text-foreground/80">
+                    <Check className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5 print:text-black" />
+                    <span>{f}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
 /* ─── Guide Content ─── */
 
 const guideContent: Record<Language, GuideContent> = {
@@ -344,6 +388,48 @@ const guideContent: Record<Language, GuideContent> = {
     subtitle: "MinnowBook – Staff User Manual",
     printBtn: "Print / Save as PDF",
     back: "Back to Dashboard",
+    tierOverview: {
+      heading: "Plans & Feature Access",
+      tiers: [
+        {
+          name: "Basic",
+          price: "€29/mo",
+          features: [
+            "1 reservation type (you choose)",
+            "1 resource per type",
+            "1–3 staff users",
+            "Branded booking page",
+            "Default email templates",
+            "AI chatbot support",
+          ],
+        },
+        {
+          name: "Pro",
+          price: "€59/mo",
+          features: [
+            "All reservation types (1 resource each)",
+            "Up to 10 staff users",
+            "Custom email templates",
+            "Advanced booking rules",
+            "Multi-language booking pages",
+            "Analytics & reports",
+            "AI chatbot support",
+          ],
+        },
+        {
+          name: "Business",
+          price: "€99/mo",
+          features: [
+            "Unlimited sites & resources",
+            "Unlimited staff users",
+            "Multi-site management",
+            "Per-site branding & settings",
+            "Advanced revenue reporting",
+            "Priority support (24h response)",
+          ],
+        },
+      ],
+    },
     sections: [
       {
         icon: <LogIn className="h-6 w-6" />, mockupId: "login",
@@ -366,7 +452,7 @@ const guideContent: Record<Language, GuideContent> = {
           "The weekly revenue chart shows daily revenue breakdown.",
           "Quick info section shows check-outs today and un-invoiced reservations.",
           "Today by type breakdown shows reservations per category.",
-          "Your shareable public booking link is displayed at the bottom.",
+          "Your shareable public booking link is displayed at the bottom (site-specific links available for Business tier).",
         ],
       },
       {
@@ -398,7 +484,7 @@ const guideContent: Record<Language, GuideContent> = {
       },
       {
         icon: <BarChart3 className="h-6 w-6" />, mockupId: "reports",
-        title: "5. Reports",
+        title: "5. Reports (Pro & Business)",
         steps: [
           "Select a time period: Week, Month, Quarter, Half-year, Year, or custom range.",
           "Filter by invoicing status (all, invoiced, not invoiced).",
@@ -408,6 +494,7 @@ const guideContent: Record<Language, GuideContent> = {
           "Print button creates a printer-friendly version.",
           "Compare mode lets you view two periods side by side.",
         ],
+        tip: "Basic plan includes basic analytics. Upgrade to Pro for full reporting features.",
       },
       {
         icon: <Settings className="h-6 w-6" />, mockupId: "resources",
@@ -416,6 +503,7 @@ const guideContent: Record<Language, GuideContent> = {
           "The Resources view shows all venues, rooms, and tables.",
           "Each resource shows: name, type, description, capacity, pricing, and status.",
           "Click '+ Add Resource' to create a new resource.",
+          "Basic & Pro plans: 1 resource per type. Business plan: unlimited resources.",
           "Upload images for each resource — these appear on the public booking page.",
           "Edit or delete resources as needed.",
         ],
@@ -446,10 +534,11 @@ const guideContent: Record<Language, GuideContent> = {
         icon: <LifeBuoy className="h-6 w-6" />, mockupId: "support",
         title: "9. Support",
         steps: [
-          "Submit support requests to your administrator from the Support tab.",
-          "Track your request status: Open, In Progress, Resolved.",
-          "Admins can respond to requests and manage the support board.",
-          "Use MinnowAid (💬) floating chat for quick self-service help anytime.",
+          "All plans include the MinnowAid AI chatbot (💬) — available in the dashboard and as a floating widget.",
+          "Ask questions, browse quick guides, or get AI-powered answers instantly.",
+          "Business plan adds priority support: submit tickets to admins with guaranteed 24-hour response.",
+          "Track your ticket status in real time: Open → In Progress → Resolved.",
+          "Admins can manage all support requests from the Support Board.",
         ],
       },
       {
@@ -457,14 +546,15 @@ const guideContent: Record<Language, GuideContent> = {
         title: "10. Multi-Site Management (Business plan)",
         steps: [
           "Business plan unlocks multi-site management — manage multiple locations from one dashboard.",
-          "Create sites via Settings → Sites: give each a name, slug, type, and location.",
+          "Create sites via Settings → Sites: give each a name, slug, and location.",
           "Use the sidebar site selector to switch between sites or view 'All Sites' for an aggregated view.",
           "Each site can have its own opening hours, resources, email templates, and staff assignments.",
+          "Each site can override branding: custom colors, logo, business info.",
           "Site-specific settings override tenant defaults — use 'Reset to defaults' to revert.",
           "Assign staff to specific sites with distinct roles from the Admin panel.",
-          "The public booking page adapts to show resources for the selected site.",
+          "The public booking page adapts to show resources for the selected site via ?site= parameter.",
         ],
-        tip: "Not on Business plan? You'll see an upgrade prompt in Settings. Contact support for more info.",
+        tip: "Not on Business plan? You'll see an upgrade prompt in Settings.",
       },
     ],
   },
@@ -473,6 +563,48 @@ const guideContent: Record<Language, GuideContent> = {
     subtitle: "MinnowBook – käyttöohjeet henkilökunnalle",
     printBtn: "Tulosta / Tallenna PDF",
     back: "Takaisin hallintapaneeliin",
+    tierOverview: {
+      heading: "Tilaukset ja ominaisuudet",
+      tiers: [
+        {
+          name: "Basic",
+          price: "29 €/kk",
+          features: [
+            "1 varaustyyppi (valitset itse)",
+            "1 resurssi per tyyppi",
+            "1–3 henkilökuntaa",
+            "Brändätty varaussivu",
+            "Oletussähköpostimallit",
+            "AI-chatbot-tuki",
+          ],
+        },
+        {
+          name: "Pro",
+          price: "59 €/kk",
+          features: [
+            "Kaikki varaustyypit (1 resurssi per tyyppi)",
+            "Jopa 10 henkilökuntaa",
+            "Mukautetut sähköpostimallit",
+            "Kehittyneet varaussäännöt",
+            "Monikielinen varaussivu",
+            "Analytiikka ja raportit",
+            "AI-chatbot-tuki",
+          ],
+        },
+        {
+          name: "Business",
+          price: "99 €/kk",
+          features: [
+            "Rajattomat toimipisteet ja resurssit",
+            "Rajaton henkilökunta",
+            "Monitoimipistehallinnointi",
+            "Toimipistekohtainen brändäys",
+            "Kehittyneet tuottoraportit",
+            "Prioriteettituki (24h vasteaika)",
+          ],
+        },
+      ],
+    },
     sections: [
       {
         icon: <LogIn className="h-6 w-6" />, mockupId: "login",
@@ -495,7 +627,7 @@ const guideContent: Record<Language, GuideContent> = {
           "Viikon tuottokehitys -kaavio näyttää päiväkohtaisen tuoton.",
           "Pikatiedot-osio näyttää päivän uloskirjaukset ja laskuttamattomat varaukset.",
           "Tyypeittäin-osio näyttää varaukset kategorioittain.",
-          "Julkinen varauslinkki näkyy sivun alaosassa.",
+          "Julkinen varauslinkki näkyy sivun alaosassa (toimipistekohtaiset linkit Business-tilauksessa).",
         ],
       },
       {
@@ -527,7 +659,7 @@ const guideContent: Record<Language, GuideContent> = {
       },
       {
         icon: <BarChart3 className="h-6 w-6" />, mockupId: "reports",
-        title: "5. Raportit",
+        title: "5. Raportit (Pro & Business)",
         steps: [
           "Valitse aikaväli: Viikko, Kuukausi, Neljännes, Puoli vuotta, Vuosi tai oma aikaväli.",
           "Suodata laskutustilan mukaan (kaikki, laskutettu, ei laskutettu).",
@@ -537,6 +669,7 @@ const guideContent: Record<Language, GuideContent> = {
           "Tulosta-painikkeella voit tulostaa raportin.",
           "Vertailutilassa voit tarkastella kahta ajanjaksoa rinnakkain.",
         ],
+        tip: "Basic-tilauksessa on perusanalytiikka. Päivitä Pro-tilaukseen saadaksesi täydet raportointiominaisuudet.",
       },
       {
         icon: <Settings className="h-6 w-6" />, mockupId: "resources",
@@ -545,6 +678,7 @@ const guideContent: Record<Language, GuideContent> = {
           "Resurssien hallinta -näkymässä näet kaikki tilat, huoneet ja pöydät.",
           "Jokaiselle resurssille näkyy nimi, tyyppi, kuvaus, kapasiteetti, hinta ja tila.",
           "Paina '+ Lisää resurssi' lisätäksesi uuden resurssin.",
+          "Basic & Pro: 1 resurssi per tyyppi. Business: rajattomat resurssit.",
           "Lataa kuvia resurssille — ne näkyvät julkisella varaussivulla.",
           "Muokkaa tai poista resursseja tarpeen mukaan.",
         ],
@@ -575,25 +709,27 @@ const guideContent: Record<Language, GuideContent> = {
         icon: <LifeBuoy className="h-6 w-6" />, mockupId: "support",
         title: "9. Tuki",
         steps: [
-          "Lähetä tukipyyntöjä ylläpitäjälle Tuki-välilehdeltä.",
-          "Seuraa pyyntösi tilaa: Avoin, Käsittelyssä, Ratkaistu.",
-          "Ylläpitäjät voivat vastata pyyntöihin ja hallinnoida tukitaulua.",
-          "Käytä MinnowAid (💬) -chattia nopeaan itsepalveluun milloin tahansa.",
+          "Kaikissa tilauksissa on MinnowAid AI-chatbot (💬) — käytettävissä hallintapaneelissa ja kelluvana widgettinä.",
+          "Kysy kysymyksiä, selaa pikaoppaita tai saa AI-vastauksia välittömästi.",
+          "Business-tilaus lisää prioriteettituen: lähetä tikettejä ylläpitäjille 24 tunnin vasteajalla.",
+          "Seuraa tikettisi tilaa reaaliajassa: Avoin → Käsittelyssä → Ratkaistu.",
+          "Ylläpitäjät voivat hallinnoida kaikkia tukipyyntöjä tukitaululta.",
         ],
       },
       {
         icon: <Building2 className="h-6 w-6" />, mockupId: "multisite",
-        title: "10. Monitoimipistehallinnointi (Business-suunnitelma)",
+        title: "10. Monitoimipistehallinnointi (Business)",
         steps: [
-          "Business-suunnitelma avaa monitoimipistehallinnan — hallinnoi useita toimipisteitä yhdestä hallintapaneelista.",
-          "Luo toimipisteitä Asetukset → Toimipisteet: anna nimi, slug, tyyppi ja sijainti.",
+          "Business-tilaus avaa monitoimipistehallinnan — hallinnoi useita toimipisteitä yhdestä hallintapaneelista.",
+          "Luo toimipisteitä Asetukset → Toimipisteet: anna nimi, slug ja sijainti.",
           "Käytä sivupalkin toimipistevalitsinta vaihtaaksesi toimipisteiden välillä tai valitse 'Kaikki toimipisteet' koostenäkymään.",
           "Jokaisella toimipisteellä voi olla omat aukioloajat, resurssit, sähköpostimallit ja henkilökuntaroolit.",
+          "Jokaisella toimipisteellä voi olla oma brändäys: värit, logo, yritystiedot.",
           "Toimipistekohtaiset asetukset ohittavat organisaation oletukset — paina 'Palauta oletukset' palauttaaksesi.",
           "Määritä henkilökuntaa tiettyihin toimipisteisiin omilla rooleilla Admin-paneelista.",
-          "Julkinen varaussivu mukautuu näyttämään valitun toimipisteen resurssit.",
+          "Julkinen varaussivu mukautuu näyttämään valitun toimipisteen resurssit ?site= -parametrilla.",
         ],
-        tip: "Ei Business-suunnitelmaa? Päivityskehote näkyy Asetuksissa. Ota yhteyttä tukeen saadaksesi lisätietoja.",
+        tip: "Ei Business-tilausta? Päivityskehote näkyy Asetuksissa.",
       },
     ],
   },
@@ -602,6 +738,48 @@ const guideContent: Record<Language, GuideContent> = {
     subtitle: "MinnowBook – bruksanvisning för personalen",
     printBtn: "Skriv ut / Spara som PDF",
     back: "Tillbaka till instrumentpanelen",
+    tierOverview: {
+      heading: "Planer & funktionstillgång",
+      tiers: [
+        {
+          name: "Basic",
+          price: "29 €/mån",
+          features: [
+            "1 bokningstyp (du väljer)",
+            "1 resurs per typ",
+            "1–3 personalanvändare",
+            "Anpassad bokningssida",
+            "Standard e-postmallar",
+            "AI-chatbot-support",
+          ],
+        },
+        {
+          name: "Pro",
+          price: "59 €/mån",
+          features: [
+            "Alla bokningstyper (1 resurs per typ)",
+            "Upp till 10 personal",
+            "Anpassade e-postmallar",
+            "Avancerade bokningsregler",
+            "Flerspråkiga bokningssidor",
+            "Analys & rapporter",
+            "AI-chatbot-support",
+          ],
+        },
+        {
+          name: "Business",
+          price: "99 €/mån",
+          features: [
+            "Obegränsade platser & resurser",
+            "Obegränsad personal",
+            "Hantering av flera platser",
+            "Platsspecifik varumärkning",
+            "Avancerade intäktsrapporter",
+            "Prioritetssupport (24h svarstid)",
+          ],
+        },
+      ],
+    },
     sections: [
       {
         icon: <LogIn className="h-6 w-6" />, mockupId: "login",
@@ -624,7 +802,7 @@ const guideContent: Record<Language, GuideContent> = {
           "Veckans intäktsdiagram visar daglig intäktsfördelning.",
           "Snabbinfo visar dagens utcheckningar och ej fakturerade bokningar.",
           "Per typ visar bokningar per kategori.",
-          "Din publika bokningslänk visas längst ner.",
+          "Din publika bokningslänk visas längst ner (platsspecifika länkar för Business-planen).",
         ],
       },
       {
@@ -656,7 +834,7 @@ const guideContent: Record<Language, GuideContent> = {
       },
       {
         icon: <BarChart3 className="h-6 w-6" />, mockupId: "reports",
-        title: "5. Rapporter",
+        title: "5. Rapporter (Pro & Business)",
         steps: [
           "Välj tidsperiod: Vecka, Månad, Kvartal, Halvår, År eller anpassat intervall.",
           "Filtrera efter faktureringsstatus (alla, fakturerade, ej fakturerade).",
@@ -666,6 +844,7 @@ const guideContent: Record<Language, GuideContent> = {
           "Skriv ut-knappen skapar en utskriftsvänlig version.",
           "Jämförelseläge visar två perioder sida vid sida.",
         ],
+        tip: "Basic-planen har grundläggande analys. Uppgradera till Pro för fullständiga rapportfunktioner.",
       },
       {
         icon: <Settings className="h-6 w-6" />, mockupId: "resources",
@@ -674,6 +853,7 @@ const guideContent: Record<Language, GuideContent> = {
           "Resursvyn visar alla lokaler, rum och bord.",
           "Varje resurs visar: namn, typ, beskrivning, kapacitet, pris och status.",
           "Klicka '+ Lägg till resurs' för att skapa en ny resurs.",
+          "Basic & Pro: 1 resurs per typ. Business: obegränsade resurser.",
           "Ladda upp bilder för varje resurs — de visas på den publika bokningssidan.",
           "Redigera eller ta bort resurser efter behov.",
         ],
@@ -704,25 +884,27 @@ const guideContent: Record<Language, GuideContent> = {
         icon: <LifeBuoy className="h-6 w-6" />, mockupId: "support",
         title: "9. Support",
         steps: [
-          "Skicka supportförfrågningar till administratören från Support-fliken.",
-          "Följ din förfrågan: Öppen, Pågår, Löst.",
-          "Administratörer kan svara och hantera supporttavlan.",
-          "Använd MinnowAid (💬) chattbot för snabb självhjälp när som helst.",
+          "Alla planer inkluderar MinnowAid AI-chattbot (💬) — tillgänglig i instrumentpanelen och som flytande widget.",
+          "Ställ frågor, bläddra snabbguider eller få AI-drivna svar direkt.",
+          "Business-planen lägger till prioritetssupport: skicka ärenden till administratörer med garanterad 24-timmars svarstid.",
+          "Följ ditt ärendes status i realtid: Öppen → Pågår → Löst.",
+          "Administratörer kan hantera alla supportförfrågningar från supporttavlan.",
         ],
       },
       {
         icon: <Building2 className="h-6 w-6" />, mockupId: "multisite",
-        title: "10. Hantering av flera platser (Business-plan)",
+        title: "10. Hantering av flera platser (Business)",
         steps: [
           "Business-planen låser upp hantering av flera platser — hantera flera lokaler från en instrumentpanel.",
-          "Skapa platser via Inställningar → Platser: ange namn, slug, typ och plats.",
+          "Skapa platser via Inställningar → Platser: ange namn, slug och plats.",
           "Använd sidofältets platsväljare för att växla mellan platser eller visa 'Alla platser' för en samlad vy.",
           "Varje plats kan ha egna öppettider, resurser, e-postmallar och personalroller.",
+          "Varje plats kan ha eget varumärke: färger, logotyp, företagsuppgifter.",
           "Platsspecifika inställningar åsidosätter standardinställningar — klicka 'Återställ till standard' för att återgå.",
           "Tilldela personal till specifika platser med distinkta roller från Admin-panelen.",
-          "Den publika bokningssidan anpassas för att visa resurser för den valda platsen.",
+          "Den publika bokningssidan anpassas för att visa resurser för den valda platsen via ?site= parameter.",
         ],
-        tip: "Inte på Business-planen? Du ser en uppgraderingsuppmaning i Inställningar. Kontakta supporten för mer info.",
+        tip: "Inte på Business-planen? Du ser en uppgraderingsuppmaning i Inställningar.",
       },
     ],
   },
@@ -780,6 +962,9 @@ const StaffGuide = () => {
             {new Date().toLocaleDateString(guideLang === "fi" ? "fi-FI" : guideLang === "sv" ? "sv-SE" : "en-GB")}
           </p>
         </div>
+
+        {/* Tier Overview - first page */}
+        <TierOverviewCard tierOverview={content.tierOverview} />
 
         {/* Sections */}
         <div className="space-y-8 print:space-y-6">
