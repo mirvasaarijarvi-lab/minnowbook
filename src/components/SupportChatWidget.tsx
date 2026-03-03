@@ -8,8 +8,10 @@ import { useTenant } from "@/hooks/useTenant";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { fi as fiFns, sv as svFns, enUS, type Locale } from "date-fns/locale";
+import { useT, useLanguage } from "@/contexts/I18nContext";
+import { TranslationKey } from "@/i18n/translations";
 
-// ... keep existing code (Message interface, CHAT_URL, SupportChatWidgetProps, quickGuides)
 interface Message {
   role: "user" | "assistant";
   content: string;
@@ -18,7 +20,6 @@ interface Message {
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/support-chat`;
 
 interface SupportChatWidgetProps {
-  /** If true, user can escalate requests to admin */
   businessTier?: boolean;
 }
 
@@ -37,14 +38,20 @@ const quickGuides = [
 
 type ViewMode = "chat" | "requests";
 
-const statusConfig: Record<string, { icon: React.ElementType; label: string; className: string }> = {
-  open: { icon: Clock, label: "Open", className: "text-amber-600 bg-amber-50" },
-  "in-progress": { icon: Loader2, label: "In Progress", className: "text-blue-600 bg-blue-50" },
-  fixed: { icon: CheckCircle2, label: "Resolved", className: "text-emerald-600 bg-emerald-50" },
-  closed: { icon: AlertCircle, label: "Closed", className: "text-muted-foreground bg-muted" },
-};
+const LOCALE_MAP: Record<string, Locale> = { fi: fiFns, sv: svFns, en: enUS };
 
 const SupportChatWidget = ({ businessTier = false }: SupportChatWidgetProps) => {
+  const t = useT();
+  const { language } = useLanguage();
+  const dateFnsLocale = LOCALE_MAP[language] ?? enUS;
+
+  const statusConfig: Record<string, { icon: React.ElementType; label: string; className: string }> = {
+    open: { icon: Clock, label: t("aid.statusOpen" as TranslationKey), className: "text-amber-600 bg-amber-50" },
+    "in-progress": { icon: Loader2, label: t("aid.statusInProgress" as TranslationKey), className: "text-blue-600 bg-blue-50" },
+    fixed: { icon: CheckCircle2, label: t("aid.statusResolved" as TranslationKey), className: "text-emerald-600 bg-emerald-50" },
+    closed: { icon: AlertCircle, label: t("aid.statusClosed" as TranslationKey), className: "text-muted-foreground bg-muted" },
+  };
+
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -58,7 +65,6 @@ const SupportChatWidget = ({ businessTier = false }: SupportChatWidgetProps) => 
   const { tenantId } = useTenant();
   const queryClient = useQueryClient();
 
-  // Query unread support request responses for Business tier users
   const { data: unreadCount = 0 } = useQuery({
     queryKey: ["unread-support-responses", tenantId],
     queryFn: async () => {
@@ -77,7 +83,6 @@ const SupportChatWidget = ({ businessTier = false }: SupportChatWidgetProps) => 
     refetchInterval: 30000,
   });
 
-  // Query user's support requests
   const { data: supportRequests = [], isLoading: requestsLoading } = useQuery({
     queryKey: ["my-support-requests", tenantId, session?.user?.id],
     queryFn: async () => {
@@ -205,12 +210,12 @@ const SupportChatWidget = ({ businessTier = false }: SupportChatWidgetProps) => 
       console.error("Support chat error:", e);
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: "Sorry, I couldn't connect. Please try again." },
+        { role: "assistant", content: t("aid.errorConnect" as TranslationKey) },
       ]);
     }
 
     setIsLoading(false);
-  }, [messages, session]);
+  }, [messages, session, t]);
 
   const handleSend = () => {
     if (!input.trim()) return;
@@ -222,7 +227,7 @@ const SupportChatWidget = ({ businessTier = false }: SupportChatWidgetProps) => 
   const handleEscalate = async () => {
     if (!escalateSubject.trim() || !input.trim()) return;
     if (!tenantId) {
-      toast.error("Unable to submit request — no tenant found.");
+      toast.error(t("aid.errorNoTenant" as TranslationKey));
       return;
     }
 
@@ -237,16 +242,16 @@ const SupportChatWidget = ({ businessTier = false }: SupportChatWidgetProps) => 
 
       setMessages((prev) => [
         ...prev,
-        { role: "user", content: `📋 **Support Request:** ${escalateSubject.trim()}\n${input.trim()}` },
-        { role: "assistant", content: "Your support request has been submitted! Your admin team will review it and respond soon. You'll see a notification when it's been addressed." },
+        { role: "user", content: `📋 **${t("aid.requestSubmitted" as TranslationKey)}:** ${escalateSubject.trim()}\n${input.trim()}` },
+        { role: "assistant", content: t("aid.requestSubmittedDetail" as TranslationKey) },
       ]);
       setInput("");
       setEscalateSubject("");
       setEscalateMode(false);
       queryClient.invalidateQueries({ queryKey: ["my-support-requests"] });
-      toast.success("Support request submitted");
+      toast.success(t("aid.successSubmit" as TranslationKey));
     } catch (e: any) {
-      toast.error(e.message || "Failed to submit request");
+      toast.error(e.message || t("aid.errorSubmit" as TranslationKey));
     }
   };
 
@@ -266,7 +271,7 @@ const SupportChatWidget = ({ businessTier = false }: SupportChatWidgetProps) => 
             ? "bg-muted text-foreground rotate-0"
             : "bg-accent text-accent-foreground hover:scale-110"
         )}
-        aria-label={open ? "Close support chat" : "Open support chat"}
+        aria-label={open ? "Close MinnowAid" : "Open MinnowAid"}
       >
         {open ? <X className="h-5 w-5" /> : <MessageCircle className="h-5 w-5" />}
         {!open && unreadCount > 0 && (
@@ -284,10 +289,10 @@ const SupportChatWidget = ({ businessTier = false }: SupportChatWidgetProps) => 
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="font-serif font-semibold text-sm">
-                  {viewMode === "requests" ? "My Requests" : "AI Support"}
+                  {viewMode === "requests" ? t("aid.myRequests" as TranslationKey) : t("aid.title" as TranslationKey)}
                 </h3>
                 <p className="text-xs text-primary-foreground/70">
-                  {viewMode === "requests" ? "Your submitted support requests" : "Ask anything about MinnowBook"}
+                  {viewMode === "requests" ? t("aid.yourRequests" as TranslationKey) : t("aid.subtitle" as TranslationKey)}
                 </p>
               </div>
               {businessTier && (
@@ -301,12 +306,12 @@ const SupportChatWidget = ({ businessTier = false }: SupportChatWidgetProps) => 
                   {viewMode === "requests" ? (
                     <>
                       <ChevronLeft className="h-3 w-3" />
-                      Chat
+                      {t("aid.chat" as TranslationKey)}
                     </>
                   ) : (
                     <>
                       <Inbox className="h-3 w-3" />
-                      Requests
+                      {t("aid.requests" as TranslationKey)}
                       {unreadCount > 0 && (
                         <span className="ml-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[9px] font-bold">
                           {unreadCount}
@@ -320,18 +325,17 @@ const SupportChatWidget = ({ businessTier = false }: SupportChatWidgetProps) => 
           </div>
 
           {viewMode === "requests" ? (
-            /* My Requests view */
             <div className="flex-1 overflow-y-auto p-3 space-y-2 min-h-[200px] max-h-[380px]">
               {requestsLoading ? (
                 <div className="flex items-center justify-center py-8 text-muted-foreground">
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  <span className="text-sm">Loading requests...</span>
+                  <span className="text-sm">{t("aid.loadingRequests" as TranslationKey)}</span>
                 </div>
               ) : supportRequests.length === 0 ? (
                 <div className="text-center py-8">
                   <Inbox className="h-8 w-8 mx-auto text-muted-foreground/40 mb-2" />
-                  <p className="text-sm text-muted-foreground">No support requests yet.</p>
-                  <p className="text-xs text-muted-foreground mt-1">Submit one from the chat view.</p>
+                  <p className="text-sm text-muted-foreground">{t("aid.noRequests" as TranslationKey)}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{t("aid.noRequestsHint" as TranslationKey)}</p>
                 </div>
               ) : (
                 supportRequests.map((req: any) => {
@@ -358,27 +362,27 @@ const SupportChatWidget = ({ businessTier = false }: SupportChatWidgetProps) => 
                           </span>
                         </div>
                         <p className="text-xs text-muted-foreground mt-0.5">
-                          {format(new Date(req.created_at), "MMM d, yyyy 'at' h:mm a")}
+                          {format(new Date(req.created_at), "PPP p", { locale: dateFnsLocale })}
                         </p>
 
                         {isExpanded && (
                           <div className="mt-2.5 space-y-2.5">
                             <div className="rounded-lg bg-secondary/40 px-3 py-2">
-                              <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-1">Your message</p>
+                              <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-1">{t("aid.yourMessage" as TranslationKey)}</p>
                               <p className="text-xs text-foreground whitespace-pre-wrap">{req.message}</p>
                             </div>
                             {req.admin_response ? (
                               <div className="rounded-lg bg-accent/10 border border-accent/20 px-3 py-2">
-                                <p className="text-[10px] font-medium text-accent uppercase tracking-wider mb-1">Admin response</p>
+                                <p className="text-[10px] font-medium text-accent uppercase tracking-wider mb-1">{t("aid.adminResponse" as TranslationKey)}</p>
                                 <p className="text-xs text-foreground whitespace-pre-wrap">{req.admin_response}</p>
                                 {req.responded_at && (
                                   <p className="text-[10px] text-muted-foreground mt-1.5">
-                                    {format(new Date(req.responded_at), "MMM d, yyyy 'at' h:mm a")}
+                                    {format(new Date(req.responded_at), "PPP p", { locale: dateFnsLocale })}
                                   </p>
                                 )}
                               </div>
                             ) : (
-                              <p className="text-xs text-muted-foreground italic px-1">Awaiting admin response...</p>
+                              <p className="text-xs text-muted-foreground italic px-1">{t("aid.awaitingResponse" as TranslationKey)}</p>
                             )}
                           </div>
                         )}
@@ -389,20 +393,18 @@ const SupportChatWidget = ({ businessTier = false }: SupportChatWidgetProps) => 
               )}
             </div>
           ) : (
-            /* Chat view */
             <>
               <div ref={scrollRef} className="flex-1 overflow-y-auto p-3 space-y-3 min-h-[200px] max-h-[320px]">
-                {/* Quick guides */}
                 <div className="space-y-2">
                   {messages.length === 0 && (
                     <p className="text-xs text-muted-foreground text-center mb-3">
-                      Ask a question or try a quick guide:
+                      {t("aid.askOrGuide" as TranslationKey)}
                     </p>
                   )}
                   {messages.length > 0 && (
                     <details className="group">
                       <summary className="text-xs text-muted-foreground cursor-pointer hover:text-foreground transition-colors select-none mb-2">
-                        Quick guides ▸
+                        {t("aid.quickGuides" as TranslationKey)}
                       </summary>
                       <div className="space-y-1.5 pb-2 max-h-[180px] overflow-y-auto">
                         {quickGuides.map((g) => (
@@ -449,12 +451,11 @@ const SupportChatWidget = ({ businessTier = false }: SupportChatWidgetProps) => 
                 {isLoading && (
                   <div className="flex items-center gap-2 text-muted-foreground text-xs px-3">
                     <Loader2 className="h-3 w-3 animate-spin" />
-                    Thinking...
+                    {t("aid.thinking" as TranslationKey)}
                   </div>
                 )}
               </div>
 
-              {/* Escalate toggle for Business tier */}
               {businessTier && (
                 <div className="px-3 pt-1">
                   <button
@@ -467,12 +468,11 @@ const SupportChatWidget = ({ businessTier = false }: SupportChatWidgetProps) => 
                     )}
                   >
                     <Flag className="h-3 w-3" />
-                    {escalateMode ? "Cancel request" : "Submit support request"}
+                    {escalateMode ? t("aid.cancelRequest" as TranslationKey) : t("aid.submitRequest" as TranslationKey)}
                   </button>
                 </div>
               )}
 
-              {/* Input */}
               <div className="border-t border-border p-3">
                 {escalateMode ? (
                   <div className="space-y-2">
@@ -480,13 +480,13 @@ const SupportChatWidget = ({ businessTier = false }: SupportChatWidgetProps) => 
                       type="text"
                       value={escalateSubject}
                       onChange={(e) => setEscalateSubject(e.target.value)}
-                      placeholder="Subject (e.g. Feature request)"
+                      placeholder={t("aid.subjectPlaceholder" as TranslationKey)}
                       className="w-full text-sm bg-secondary/30 border border-border rounded-lg px-3 py-2 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
                     />
                     <textarea
                       value={input}
                       onChange={(e) => setInput(e.target.value)}
-                      placeholder="Describe your request or suggestion..."
+                      placeholder={t("aid.messagePlaceholder" as TranslationKey)}
                       rows={3}
                       className="w-full text-sm bg-secondary/30 border border-border rounded-lg px-3 py-2 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring resize-none"
                     />
@@ -497,7 +497,7 @@ const SupportChatWidget = ({ businessTier = false }: SupportChatWidgetProps) => 
                       className="w-full gap-1.5"
                     >
                       <Flag className="h-3.5 w-3.5" />
-                      Submit to Admin
+                      {t("aid.submitToAdmin" as TranslationKey)}
                     </Button>
                   </div>
                 ) : (
@@ -512,7 +512,7 @@ const SupportChatWidget = ({ businessTier = false }: SupportChatWidgetProps) => 
                       type="text"
                       value={input}
                       onChange={(e) => setInput(e.target.value)}
-                      placeholder="Type your question..."
+                      placeholder={t("aid.typePlaceholder" as TranslationKey)}
                       className="flex-1 text-sm bg-secondary/30 border border-border rounded-lg px-3 py-2 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
                       disabled={isLoading}
                     />
