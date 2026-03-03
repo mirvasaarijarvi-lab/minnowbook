@@ -15,6 +15,7 @@ import { toast } from "@/hooks/use-toast";
 import { Plus, Pencil, Trash2, BedDouble, UtensilsCrossed, Building2, Upload, X, Loader2, ExternalLink, Lock } from "lucide-react";
 import { useState, useRef } from "react";
 import { useT } from "@/contexts/I18nContext";
+import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
 import DashboardTooltip from "./DashboardTooltip";
 import ResourceImageGallery from "./ResourceImageGallery";
 import BlockedSlotsPanel from "./BlockedSlotsPanel";
@@ -167,15 +168,7 @@ const ResourceManagement = () => {
     setDialogOpen(true);
   };
 
-  const typeLabel = (type: string) => {
-    const map: Record<string, string> = {
-      restaurant: t("dashboard.restaurant"),
-      venue: t("dashboard.venue"),
-      guesthouse: t("dashboard.guesthouse"),
-      hotel: t("dashboard.hotel"),
-    };
-    return map[type] ?? type;
-  };
+  const { typeLabel } = useResourceTypeLabel();
 
   return (
     <div className="space-y-4">
@@ -244,9 +237,9 @@ const ResourceManagement = () => {
                     <Select value={form.resource_type} onValueChange={(v) => setForm({ ...form, resource_type: v })}>
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="restaurant">{t("dashboard.restaurant")}</SelectItem>
-                        <SelectItem value="venue">{t("dashboard.venue")}</SelectItem>
-                        <SelectItem value="guesthouse">{t("dashboard.guesthouse")}</SelectItem>
+                        <SelectItem value="restaurant">{typeLabel("restaurant")}</SelectItem>
+                        <SelectItem value="venue">{typeLabel("venue")}</SelectItem>
+                        <SelectItem value="guesthouse">{typeLabel("guesthouse")}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
