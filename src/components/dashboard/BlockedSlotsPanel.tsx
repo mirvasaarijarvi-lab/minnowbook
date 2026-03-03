@@ -19,6 +19,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import DashboardTooltip from "./DashboardTooltip";
+import { useT } from "@/contexts/I18nContext";
 import type { DateRange } from "react-day-picker";
 
 interface BlockedSlot {
@@ -37,6 +38,7 @@ interface BlockedSlot {
 const BlockedSlotsPanel = () => {
   const { tenantId } = useTenant();
   const queryClient = useQueryClient();
+  const t = useT();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
   const [useTimeRange, setUseTimeRange] = useState(false);
@@ -55,6 +57,25 @@ const BlockedSlotsPanel = () => {
     resource_id: "",
     reason: "",
   });
+
+  const selectableTypes: Record<string, string> = {
+    hotel: t("blocking.hotelGuesthouse"),
+    restaurant: t("blocking.restaurant"),
+    venue: t("blocking.venueEventSpace"),
+  };
+
+  const resourceTypeLabels: Record<string, string> = {
+    hotel: t("blocking.hotelGuesthouse"),
+    guesthouse: t("blocking.hotelGuesthouse"),
+    restaurant: t("blocking.restaurant"),
+    venue: t("blocking.venueEventSpace"),
+  };
+
+  const resourceNoun = (type: string) => {
+    if (type === "restaurant") return t("blocking.tableArea");
+    if (type === "venue") return t("blocking.eventSpace");
+    return t("blocking.room");
+  };
 
   const { data: resources } = useQuery({
     queryKey: ["resources", tenantId],
@@ -86,14 +107,12 @@ const BlockedSlotsPanel = () => {
     return (resources ?? []).filter((r) => types.includes(r.resource_type));
   }, [resources, form.resource_type]);
 
-  // Resources available for the filter dropdown (based on filterType)
   const filterResources = useMemo(() => {
     if (filterType === "all") return resources ?? [];
     const types = filterType === "hotel" ? ["hotel", "guesthouse"] : [filterType];
     return (resources ?? []).filter((r) => types.includes(r.resource_type));
   }, [resources, filterType]);
 
-  // Filtered blocked slots for display
   const filteredSlots = useMemo(() => {
     if (!blockedSlots) return [];
     return blockedSlots.filter((slot) => {
@@ -109,11 +128,9 @@ const BlockedSlotsPanel = () => {
   const createMutation = useMutation({
     mutationFn: async () => {
       if (!tenantId || !dateRange?.from) throw new Error("Missing required fields");
-
       const from = dateRange.from;
       const to = dateRange.to ?? dateRange.from;
       const days = eachDayOfInterval({ start: from, end: to });
-
       const rows = days.map((day) => ({
         tenant_id: tenantId,
         date: format(day, "yyyy-MM-dd"),
@@ -123,18 +140,17 @@ const BlockedSlotsPanel = () => {
         end_time: useTimeRange && form.end_time ? form.end_time : null,
         reason: form.reason || null,
       }));
-
       const { error } = await supabase.from("blocked_slots").insert(rows);
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["blocked-slots"] });
       setDialogOpen(false);
-      resetForm();
       const count = dateRange?.to
         ? eachDayOfInterval({ start: dateRange.from!, end: dateRange.to }).length
         : 1;
-      toast({ title: `${count} day${count > 1 ? "s" : ""} blocked` });
+      resetForm();
+      toast({ title: t("blocking.daysBlocked").replace("{count}", String(count)) });
     },
     onError: (err: any) => {
       toast({ title: "Error", description: err.message, variant: "destructive" });
@@ -148,7 +164,7 @@ const BlockedSlotsPanel = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["blocked-slots"] });
-      toast({ title: "Block removed" });
+      toast({ title: t("blocking.blockRemoved") });
     },
   });
 
@@ -169,14 +185,13 @@ const BlockedSlotsPanel = () => {
       queryClient.invalidateQueries({ queryKey: ["blocked-slots"] });
       setBulkDeleteOpen(false);
       setBulkDeleteRange(undefined);
-      toast({ title: "Blocks removed" });
+      toast({ title: t("blocking.blocksRemoved") });
     },
     onError: (err: any) => {
       toast({ title: "Error", description: err.message, variant: "destructive" });
     },
   });
 
-  // Count how many existing blocks fall in the bulk delete range
   const bulkDeleteCount = useMemo(() => {
     if (!bulkDeleteRange?.from || !blockedSlots?.length) return 0;
     const from = format(bulkDeleteRange.from, "yyyy-MM-dd");
@@ -191,31 +206,21 @@ const BlockedSlotsPanel = () => {
     setBlockSpecificResource(false);
   };
 
-  const resourceTypeLabels: Record<string, string> = {
-    hotel: "Hotel / Guesthouse",
-    guesthouse: "Hotel / Guesthouse",
-    restaurant: "Restaurant",
-    venue: "Venue / Event Space",
-  };
-
-  // Only these keys appear in dropdowns (guesthouse merged into hotel)
-  const selectableTypes = { hotel: "Hotel / Guesthouse", restaurant: "Restaurant", venue: "Venue / Event Space" };
-
   const dateLabel = useMemo(() => {
-    if (!dateRange?.from) return "Pick a date or range";
+    if (!dateRange?.from) return t("blocking.pickDate");
     if (!dateRange.to || format(dateRange.from, "yyyy-MM-dd") === format(dateRange.to, "yyyy-MM-dd")) {
       return format(dateRange.from, "PPP");
     }
     return `${format(dateRange.from, "MMM d")} – ${format(dateRange.to, "MMM d, yyyy")}`;
-  }, [dateRange]);
+  }, [dateRange, t]);
 
   const bulkDeleteLabel = useMemo(() => {
-    if (!bulkDeleteRange?.from) return "Select date range to clear";
+    if (!bulkDeleteRange?.from) return t("blocking.pickDate");
     if (!bulkDeleteRange.to || format(bulkDeleteRange.from, "yyyy-MM-dd") === format(bulkDeleteRange.to, "yyyy-MM-dd")) {
       return format(bulkDeleteRange.from, "PPP");
     }
     return `${format(bulkDeleteRange.from, "MMM d")} – ${format(bulkDeleteRange.to, "MMM d, yyyy")}`;
-  }, [bulkDeleteRange]);
+  }, [bulkDeleteRange, t]);
 
   return (
     <div className="space-y-4">
@@ -223,25 +228,25 @@ const BlockedSlotsPanel = () => {
         <div className="flex items-center gap-2">
           <h3 className="text-lg font-serif font-bold text-foreground flex items-center gap-2">
             <Ban className="h-5 w-5" />
-            Blocked Dates & Times
+            {t("blocking.title")}
           </h3>
-          <DashboardTooltip text="Block entire resource types or specific resources on chosen dates or date ranges. Optionally restrict to specific hours." />
+          <DashboardTooltip text={t("blocking.tooltip")} />
         </div>
         <div className="flex items-center gap-2">
           {/* Bulk delete */}
           <Dialog open={bulkDeleteOpen} onOpenChange={(open) => { setBulkDeleteOpen(open); if (!open) setBulkDeleteRange(undefined); }}>
             <DialogTrigger asChild>
               <Button size="sm" variant="outline" className="gap-1.5 text-destructive border-destructive/30 hover:bg-destructive/10">
-                <Trash2 className="h-4 w-4" /> Clear Range
+                <Trash2 className="h-4 w-4" /> {t("blocking.clearRange")}
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle className="font-serif">Remove Blocks by Date Range</DialogTitle>
+                <DialogTitle className="font-serif">{t("blocking.removeByRange")}</DialogTitle>
               </DialogHeader>
               <div className="space-y-4 pt-2">
                 <div>
-                  <Label>Date Range</Label>
+                  <Label>{t("blocking.dateRange")}</Label>
                   <Popover open={bulkDatePickerOpen} onOpenChange={setBulkDatePickerOpen}>
                     <PopoverTrigger asChild>
                       <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !bulkDeleteRange?.from && "text-muted-foreground")}>
@@ -250,33 +255,25 @@ const BlockedSlotsPanel = () => {
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="range"
-                        selected={bulkDeleteRange}
-                        onSelect={setBulkDeleteRange}
-                        numberOfMonths={2}
-                        className={cn("p-3 pointer-events-auto")}
-                      />
+                      <Calendar mode="range" selected={bulkDeleteRange} onSelect={setBulkDeleteRange} numberOfMonths={2} className={cn("p-3 pointer-events-auto")} />
                     </PopoverContent>
                   </Popover>
-                  <p className="text-xs text-muted-foreground mt-1">All blocks within this range will be removed.</p>
+                  <p className="text-xs text-muted-foreground mt-1">{t("blocking.rangeHint")}</p>
                 </div>
-
                 {bulkDeleteRange?.from && (
                   <p className="text-sm font-medium">
                     {bulkDeleteCount === 0
-                      ? "No blocks found in this range."
-                      : `${bulkDeleteCount} block${bulkDeleteCount > 1 ? "s" : ""} will be removed.`}
+                      ? t("blocking.noBlocksInRange")
+                      : t("blocking.blocksWillBeRemoved").replace("{count}", String(bulkDeleteCount))}
                   </p>
                 )}
-
                 <Button
                   variant="destructive"
                   className="w-full"
                   onClick={() => bulkDeleteMutation.mutate()}
                   disabled={!bulkDeleteRange?.from || bulkDeleteCount === 0 || bulkDeleteMutation.isPending}
                 >
-                  {bulkDeleteMutation.isPending ? "Removing..." : `Remove ${bulkDeleteCount} block${bulkDeleteCount !== 1 ? "s" : ""}`}
+                  {bulkDeleteMutation.isPending ? t("blocking.removing") : t("blocking.removeCount").replace("{count}", String(bulkDeleteCount))}
                 </Button>
               </div>
             </DialogContent>
@@ -286,17 +283,16 @@ const BlockedSlotsPanel = () => {
           <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) resetForm(); }}>
             <DialogTrigger asChild>
               <Button size="sm" className="gap-1.5">
-                <Plus className="h-4 w-4" /> Add Block
+                <Plus className="h-4 w-4" /> {t("blocking.addBlock")}
               </Button>
             </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle className="font-serif">Block Dates / Times</DialogTitle>
+              <DialogTitle className="font-serif">{t("blocking.blockDates")}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 pt-2">
-              {/* Resource type */}
               <div>
-                <Label>Resource Type</Label>
+                <Label>{t("blocking.resourceType")}</Label>
                 <Select value={form.resource_type} onValueChange={(v) => {
                   const types = v === "hotel" ? ["hotel", "guesthouse"] : [v];
                   const hasMultipleResources = (resources ?? []).filter((r) => types.includes(r.resource_type)).length > 1;
@@ -314,23 +310,22 @@ const BlockedSlotsPanel = () => {
                 </Select>
               </div>
 
-              {/* Specific resource selector */}
               {filteredResources.length > 0 && (
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <Label className="flex items-center gap-1.5">
-                      Block specific {form.resource_type === "restaurant" ? "table/area" : form.resource_type === "venue" ? "event space" : "room"}
+                      {t("blocking.blockSpecific")} {resourceNoun(form.resource_type)}
                     </Label>
                     <Switch checked={blockSpecificResource} onCheckedChange={(checked) => { setBlockSpecificResource(checked); if (!checked) setForm({ ...form, resource_id: "" }); }} />
                   </div>
                   {!blockSpecificResource && (
                     <p className="text-xs text-muted-foreground">
-                      All {filteredResources.length} {form.resource_type === "restaurant" ? "tables/areas" : form.resource_type === "venue" ? "event spaces" : "rooms"} will be blocked.
+                      {t("blocking.allWillBeBlocked").replace("{count}", String(filteredResources.length)).replace("{type}", resourceNoun(form.resource_type))}
                     </p>
                   )}
                   {blockSpecificResource && (
                     <Select value={form.resource_id} onValueChange={(v) => setForm({ ...form, resource_id: v })}>
-                      <SelectTrigger><SelectValue placeholder={`Select ${form.resource_type === "restaurant" ? "table/area" : form.resource_type === "venue" ? "event space" : "room"}...`} /></SelectTrigger>
+                      <SelectTrigger><SelectValue placeholder={t("blocking.selectResource").replace("{type}", resourceNoun(form.resource_type))} /></SelectTrigger>
                       <SelectContent>
                         {filteredResources.map((r) => (
                           <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
@@ -341,9 +336,8 @@ const BlockedSlotsPanel = () => {
                 </div>
               )}
 
-              {/* Date range picker */}
               <div>
-                <Label>Date(s)</Label>
+                <Label>{t("blocking.dates")}</Label>
                 <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
                   <PopoverTrigger asChild>
                     <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !dateRange?.from && "text-muted-foreground")}>
@@ -352,42 +346,20 @@ const BlockedSlotsPanel = () => {
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="range"
-                      selected={dateRange}
-                      onSelect={setDateRange}
-                      numberOfMonths={2}
-                      disabled={(date) => isBefore(date, startOfDay(new Date()))}
-                      className={cn("p-3 pointer-events-auto")}
-                    />
+                    <Calendar mode="range" selected={dateRange} onSelect={setDateRange} numberOfMonths={2} disabled={(date) => isBefore(date, startOfDay(new Date()))} className={cn("p-3 pointer-events-auto")} />
                   </PopoverContent>
                 </Popover>
-                <p className="text-xs text-muted-foreground mt-1">Click once for a single day, or click two dates to select a range.</p>
+                <p className="text-xs text-muted-foreground mt-1">{t("blocking.dateHint")}</p>
               </div>
 
-              {/* Duration: Full day vs Specific hours */}
               <div className="space-y-2">
-                <Label>Duration</Label>
+                <Label>{t("blocking.duration")}</Label>
                 <div className="grid grid-cols-2 gap-2">
-                  <Button
-                    type="button"
-                    variant={!useTimeRange ? "default" : "outline"}
-                    size="sm"
-                    className="gap-1.5"
-                    onClick={() => setUseTimeRange(false)}
-                  >
-                    <Ban className="h-3.5 w-3.5" />
-                    Full day
+                  <Button type="button" variant={!useTimeRange ? "default" : "outline"} size="sm" className="gap-1.5" onClick={() => setUseTimeRange(false)}>
+                    <Ban className="h-3.5 w-3.5" /> {t("blocking.fullDay")}
                   </Button>
-                  <Button
-                    type="button"
-                    variant={useTimeRange ? "default" : "outline"}
-                    size="sm"
-                    className="gap-1.5"
-                    onClick={() => setUseTimeRange(true)}
-                  >
-                    <Clock className="h-3.5 w-3.5" />
-                    Specific hours
+                  <Button type="button" variant={useTimeRange ? "default" : "outline"} size="sm" className="gap-1.5" onClick={() => setUseTimeRange(true)}>
+                    <Clock className="h-3.5 w-3.5" /> {t("blocking.specificHours")}
                   </Button>
                 </div>
               </div>
@@ -395,23 +367,20 @@ const BlockedSlotsPanel = () => {
               {useTimeRange && (
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <Label>Start Time</Label>
+                    <Label>{t("blocking.startTime")}</Label>
                     <Input type="time" value={form.start_time} onChange={(e) => setForm({ ...form, start_time: e.target.value })} />
                   </div>
                   <div>
-                    <Label>End Time</Label>
+                    <Label>{t("blocking.endTime")}</Label>
                     <Input type="time" value={form.end_time} onChange={(e) => setForm({ ...form, end_time: e.target.value })} />
                   </div>
-                  <p className="col-span-2 text-xs text-muted-foreground">
-                    Only the selected hours will be blocked. Bookings outside this window remain available.
-                  </p>
+                  <p className="col-span-2 text-xs text-muted-foreground">{t("blocking.timeHint")}</p>
                 </div>
               )}
 
-              {/* Reason */}
               <div>
-                <Label>Reason (optional)</Label>
-                <Input value={form.reason} onChange={(e) => setForm({ ...form, reason: e.target.value })} placeholder="e.g. Maintenance, Private event..." />
+                <Label>{t("blocking.reason")}</Label>
+                <Input value={form.reason} onChange={(e) => setForm({ ...form, reason: e.target.value })} placeholder={t("blocking.reasonPlaceholder")} />
               </div>
 
               <Button
@@ -419,9 +388,9 @@ const BlockedSlotsPanel = () => {
                 onClick={() => createMutation.mutate()}
                 disabled={!dateRange?.from || createMutation.isPending}
               >
-                {createMutation.isPending ? "Creating..." : dateRange?.to && format(dateRange.from!, "yyyy-MM-dd") !== format(dateRange.to, "yyyy-MM-dd")
-                  ? `Block ${eachDayOfInterval({ start: dateRange.from!, end: dateRange.to }).length} days`
-                  : "Create Block"}
+                {createMutation.isPending ? t("blocking.creating") : dateRange?.to && format(dateRange.from!, "yyyy-MM-dd") !== format(dateRange.to, "yyyy-MM-dd")
+                  ? t("blocking.blockDays").replace("{count}", String(eachDayOfInterval({ start: dateRange.from!, end: dateRange.to }).length))
+                  : t("blocking.createBlock")}
               </Button>
             </div>
           </DialogContent>
@@ -434,14 +403,12 @@ const BlockedSlotsPanel = () => {
         <div className="flex items-center gap-3 flex-wrap">
           <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
             <Filter className="h-4 w-4" />
-            <span>Filter:</span>
+            <span>{t("blocking.filter")}</span>
           </div>
           <Select value={filterType} onValueChange={(v) => { setFilterType(v); setFilterResourceId("all"); }}>
-            <SelectTrigger className="w-[160px] h-8 text-sm">
-              <SelectValue />
-            </SelectTrigger>
+            <SelectTrigger className="w-[160px] h-8 text-sm"><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All types</SelectItem>
+              <SelectItem value="all">{t("blocking.allTypes")}</SelectItem>
               {Object.entries(selectableTypes).map(([key, label]) => (
                 <SelectItem key={key} value={key}>{label}</SelectItem>
               ))}
@@ -449,11 +416,9 @@ const BlockedSlotsPanel = () => {
           </Select>
           {filterResources.length > 0 && (
             <Select value={filterResourceId} onValueChange={setFilterResourceId}>
-              <SelectTrigger className="w-[180px] h-8 text-sm">
-                <SelectValue />
-              </SelectTrigger>
+              <SelectTrigger className="w-[180px] h-8 text-sm"><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All resources</SelectItem>
+                <SelectItem value="all">{t("blocking.allResources")}</SelectItem>
                 {filterResources.map((r) => (
                   <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
                 ))}
@@ -462,24 +427,24 @@ const BlockedSlotsPanel = () => {
           )}
           {(filterType !== "all" || filterResourceId !== "all") && (
             <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={() => { setFilterType("all"); setFilterResourceId("all"); }}>
-              Clear filters
+              {t("blocking.clearFilters")}
             </Button>
           )}
           <span className="text-xs text-muted-foreground ml-auto">
-            {filteredSlots.length} of {blockedSlots?.length ?? 0} block{(blockedSlots?.length ?? 0) !== 1 ? "s" : ""}
+            {filteredSlots.length} / {blockedSlots?.length ?? 0}
           </span>
         </div>
       )}
 
-      {/* List of blocked slots */}
+      {/* List */}
       {isLoading ? (
         <div className="space-y-2">
           {[1, 2].map((i) => <Card key={i} className="animate-pulse"><CardContent className="p-4 h-16" /></Card>)}
         </div>
       ) : !blockedSlots?.length ? (
-        <Card><CardContent className="p-6 text-center text-muted-foreground text-sm">No blocked dates or times configured.</CardContent></Card>
+        <Card><CardContent className="p-6 text-center text-muted-foreground text-sm">{t("blocking.noBlocks")}</CardContent></Card>
       ) : filteredSlots.length === 0 ? (
-        <Card><CardContent className="p-6 text-center text-muted-foreground text-sm">No blocks match the current filter.</CardContent></Card>
+        <Card><CardContent className="p-6 text-center text-muted-foreground text-sm">{t("blocking.noMatch")}</CardContent></Card>
       ) : (
         <div className="space-y-2">
           {filteredSlots.map((slot) => (
@@ -516,18 +481,18 @@ const BlockedSlotsPanel = () => {
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
-                        <AlertDialogTitle>Remove Block</AlertDialogTitle>
+                        <AlertDialogTitle>{t("blocking.removeBlock")}</AlertDialogTitle>
                         <AlertDialogDescription>
-                          This will remove the block for {format(new Date(slot.date + "T00:00:00"), "PPP")}. Bookings will be allowed again.
+                          {t("blocking.removeBlockDesc").replace("{date}", format(new Date(slot.date + "T00:00:00"), "PPP"))}
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
                         <AlertDialogAction
                           className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                           onClick={() => deleteMutation.mutate(slot.id)}
                         >
-                          Remove
+                          {t("blocking.remove")}
                         </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
