@@ -5,6 +5,9 @@ import { useSiteContext } from "@/hooks/useSiteContext";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useT } from "@/contexts/I18nContext";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { ExternalLink, Copy } from "lucide-react";
+import { toast } from "sonner";
 
 const SiteTabs = () => {
   const { tenantId, tenant, isOwner, isAdmin } = useTenant();
@@ -20,7 +23,7 @@ const SiteTabs = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("sites")
-        .select("id, name, is_active")
+        .select("id, name, slug, is_active")
         .eq("tenant_id", tenantId!)
         .eq("is_active", true)
         .order("name");
@@ -36,25 +39,57 @@ const SiteTabs = () => {
 
   const handleChange = (val: string) => {
     setSelectedSiteId(val === "all" ? null : val);
-    setSelectedResourceId(null); // Clear resource filter when switching site tabs
+    setSelectedResourceId(null);
+  };
+
+  const selectedSite = selectedSiteId ? sites?.find((s) => s.id === selectedSiteId) : null;
+  const bookingUrl = selectedSite && tenant?.slug
+    ? `${window.location.origin}/book/${tenant.slug}?site=${selectedSite.slug}`
+    : null;
+
+  const copyLink = () => {
+    if (!bookingUrl) return;
+    navigator.clipboard.writeText(bookingUrl);
+    toast.success(t("dashboard.linkCopied"));
   };
 
   return (
-    <Tabs
-      value={selectedSiteId ?? "all"}
-      onValueChange={handleChange}
-    >
-      <TabsList className="flex-wrap h-auto gap-1">
-        <TabsTrigger value="all" className="text-xs">
-          {t("sites.allSites" as any)}
-        </TabsTrigger>
-        {sites!.map((site) => (
-          <TabsTrigger key={site.id} value={site.id} className="text-xs">
-            {site.name}
+    <div className="flex flex-wrap items-center gap-3">
+      <Tabs
+        value={selectedSiteId ?? "all"}
+        onValueChange={handleChange}
+      >
+        <TabsList className="flex-wrap h-auto gap-1">
+          <TabsTrigger value="all" className="text-xs">
+            {t("sites.allSites" as any)}
           </TabsTrigger>
-        ))}
-      </TabsList>
-    </Tabs>
+          {sites!.map((site) => (
+            <TabsTrigger key={site.id} value={site.id} className="text-xs">
+              {site.name}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
+
+      {bookingUrl && (
+        <div className="flex items-center gap-1">
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-1.5 text-xs h-8"
+            onClick={copyLink}
+          >
+            <Copy className="h-3 w-3" />
+            {t("dashboard.bookingLink")}
+          </Button>
+          <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
+            <a href={bookingUrl} target="_blank" rel="noopener noreferrer">
+              <ExternalLink className="h-3.5 w-3.5" />
+            </a>
+          </Button>
+        </div>
+      )}
+    </div>
   );
 };
 
