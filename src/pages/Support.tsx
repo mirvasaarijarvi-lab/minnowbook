@@ -130,6 +130,7 @@ const articles: GuideArticle[] = [
       "Q: Can I use my own domain? A: Custom domains are on our roadmap.",
       "Q: How do guests receive confirmations? A: Automatically via email when you confirm a booking.",
       "Q: Can I export my data? A: Yes, reports can be exported from the Reports panel.",
+      "Q: What's the difference between AI chatbot and priority support? A: All plans include MinnowAid, our 24/7 AI chatbot. Business plan adds human priority support with a guaranteed 24-hour response.",
     ],
   },
 ];
