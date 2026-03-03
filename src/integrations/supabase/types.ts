@@ -674,6 +674,7 @@ export type Database = {
           id: string
           logo_url: string | null
           primary_color: string | null
+          resource_type_names: Json | null
           secondary_color: string | null
           tenant_id: string
           timezone: string | null
@@ -693,6 +694,7 @@ export type Database = {
           id?: string
           logo_url?: string | null
           primary_color?: string | null
+          resource_type_names?: Json | null
           secondary_color?: string | null
           tenant_id: string
           timezone?: string | null
@@ -712,6 +714,7 @@ export type Database = {
           id?: string
           logo_url?: string | null
           primary_color?: string | null
+          resource_type_names?: Json | null
           secondary_color?: string | null
           tenant_id?: string
           timezone?: string | null

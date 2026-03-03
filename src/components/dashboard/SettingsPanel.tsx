@@ -64,6 +64,7 @@ const SettingsPanel = () => {
 
   const DEFAULT_THRESHOLDS: Record<string, number> = { restaurant: 5, venue: 5, guesthouse: 5, hotel: 5 };
   const [thresholds, setThresholds] = useState<Record<string, number>>(DEFAULT_THRESHOLDS);
+  const [resourceTypeNames, setResourceTypeNames] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (settings) {
@@ -81,6 +82,9 @@ const SettingsPanel = () => {
       });
       if (settings.availability_thresholds && typeof settings.availability_thresholds === "object") {
         setThresholds({ ...DEFAULT_THRESHOLDS, ...(settings.availability_thresholds as Record<string, number>) });
+      }
+      if (settings.resource_type_names && typeof settings.resource_type_names === "object") {
+        setResourceTypeNames(settings.resource_type_names as Record<string, string>);
       }
     }
   }, [settings]);
@@ -184,6 +188,7 @@ const SettingsPanel = () => {
           logo_url: form.logo_url || null,
           hero_image_url: form.hero_image_url || null,
           availability_thresholds: thresholds as any,
+          resource_type_names: resourceTypeNames as any,
         })
         .eq("id", settings.id);
       if (error) throw error;
@@ -443,6 +448,30 @@ const SettingsPanel = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Resource Type Names */}
+      {tenant?.allowed_reservation_types?.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg font-serif">{t("settings.resourceTypeNames")}</CardTitle>
+            <p className="text-sm text-muted-foreground">{t("settings.resourceTypeNamesDesc")}</p>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {(tenant.allowed_reservation_types as string[]).map((type: string) => (
+                <div key={type} className="space-y-2">
+                  <Label className="capitalize">{t(`dashboard.${type}` as any)}</Label>
+                  <Input
+                    value={resourceTypeNames[type] ?? ""}
+                    onChange={(e) => setResourceTypeNames((prev) => ({ ...prev, [type]: e.target.value }))}
+                    placeholder={t(`dashboard.${type}` as any)}
+                  />
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Availability Thresholds */}
       {tenant?.allowed_reservation_types?.length > 0 && (
