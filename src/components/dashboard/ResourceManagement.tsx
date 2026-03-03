@@ -22,6 +22,7 @@ import ResourceImageGallery from "./ResourceImageGallery";
 import BlockedSlotsPanel from "./BlockedSlotsPanel";
 import { usePermissions } from "@/hooks/usePermissions";
 import { PERM_RESOURCES_MANAGE } from "@/lib/permissions";
+import { useAutoApproval } from "@/hooks/useAutoApproval";
 
 const typeIcons: Record<string, React.ElementType> = {
   guesthouse: BedDouble,
@@ -38,6 +39,7 @@ const ResourceManagement = () => {
   const { selectedSiteId } = useSiteContext();
   const { can } = usePermissions();
   const canManage = can(PERM_RESOURCES_MANAGE);
+  const { isPrivileged, getApprovalStatus } = useAutoApproval();
   const queryClient = useQueryClient();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -113,6 +115,7 @@ const ResourceManagement = () => {
         is_active: form.is_active,
         breakfast_price_per_person: form.breakfast_price_per_person ? parseFloat(form.breakfast_price_per_person) : null,
         ...(isAccom && { room_type_pricing: roomPricing }),
+        approval_status: getApprovalStatus(),
       };
       if (editingId) {
         const { error } = await supabase.from("resources").update(payload).eq("id", editingId);
@@ -124,9 +127,11 @@ const ResourceManagement = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["resources", tenantId] });
+      queryClient.invalidateQueries({ queryKey: ["approval-queue-count"] });
       setDialogOpen(false);
       resetForm();
-      toast({ title: editingId ? t("dashboard.resourceUpdated") : t("dashboard.resourceCreated") });
+      const statusMsg = !isPrivileged ? ` (${t("sites.approvals").toLowerCase()})` : "";
+      toast({ title: (editingId ? t("dashboard.resourceUpdated") : t("dashboard.resourceCreated")) + statusMsg });
     },
     onError: (err: any) => {
       toast({ title: "Error", description: err.message, variant: "destructive" });
@@ -168,6 +173,7 @@ const ResourceManagement = () => {
           is_active: source.is_active ?? true,
           breakfast_price_per_person: source.breakfast_price_per_person,
           room_type_pricing: source.room_type_pricing,
+          approval_status: getApprovalStatus(),
         });
       }
       const { error } = await supabase.from("resources").insert(copies);
