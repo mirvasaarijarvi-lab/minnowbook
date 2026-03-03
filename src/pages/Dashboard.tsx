@@ -154,6 +154,11 @@ const Dashboard = () => {
     setTourOpen(false);
   };
 
+  const handleTourClose = () => {
+    localStorage.setItem(TOUR_STORAGE_KEY, "true");
+    setTourOpen(false);
+  };
+
   const handleSignOut = async () => {
     await signOut();
     navigate("/");
@@ -327,7 +332,7 @@ const Dashboard = () => {
       <GuidedTour
         steps={tourSteps}
         isOpen={tourOpen}
-        onClose={() => setTourOpen(false)}
+        onClose={handleTourClose}
         onComplete={handleTourComplete}
         onNavigate={(view) => handleViewChange(view as DashboardView)}
       />
