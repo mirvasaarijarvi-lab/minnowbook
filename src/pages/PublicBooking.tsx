@@ -907,8 +907,7 @@ const PublicBooking = () => {
           )}
 
           {/* Availability + Date/Time side by side */}
-          {form.reservation_type && (
-            <div className="grid gap-6 lg:grid-cols-2">
+          <div className="grid gap-6 lg:grid-cols-2">
               {/* Left: Availability Calendar (read-only) */}
               <AvailabilityCalendar
                 tenantId={tenant.id}
@@ -1007,7 +1006,6 @@ const PublicBooking = () => {
                 </CardContent>
               </Card>
             </div>
-          )}
 
           {/* Type-specific fields: Hotel / Guesthouse */}
           {isAccommodationType && (
@@ -1262,7 +1260,7 @@ const PublicBooking = () => {
             </Card>
           )}
 
-          {form.reservation_type && resources && resources.length > 0 && form.reservation_type !== "restaurant" && (
+          {resources && resources.length > 0 && form.reservation_type && form.reservation_type !== "restaurant" && (
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg font-serif" style={{ color: primaryColor }}>
@@ -1341,7 +1339,6 @@ const PublicBooking = () => {
             </Card>
           )}
 
-          {form.reservation_type && (
           <Card>
             <CardHeader>
               <CardTitle className="text-lg font-serif" style={{ color: primaryColor }}>
@@ -1407,10 +1404,8 @@ const PublicBooking = () => {
               </div>
             </CardContent>
           </Card>
-          )}
 
           {/* Submit */}
-          {form.reservation_type && (
           <Button
             type="submit"
             size="lg"
@@ -1427,7 +1422,6 @@ const PublicBooking = () => {
               t("booking.submit")
             )}
           </Button>
-          )}
         </form>
 
         {/* Footer */}
