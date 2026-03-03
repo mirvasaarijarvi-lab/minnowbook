@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/hooks/useTenant";
 import { useSiteContext } from "@/hooks/useSiteContext";
 import { usePermissions } from "@/hooks/usePermissions";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import SiteTabs from "./SiteTabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -45,26 +45,6 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
   const t = useT();
   const { typeLabel } = useResourceTypeLabel();
   const dateFnsLocale = useDateLocale();
-
-  const isBusinessOwnerAdmin = (tenant?.tier === "business" && (isOwner || isAdmin)) || isSystemAdmin;
-
-  // Fetch sites for tab rendering (business tier owner/admin only)
-  const { data: sites } = useQuery({
-    queryKey: ["overview-sites", tenantId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("sites")
-        .select("id, name")
-        .eq("tenant_id", tenantId!)
-        .eq("is_active", true)
-        .order("name");
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!tenantId && isBusinessOwnerAdmin,
-  });
-
-  const showSiteTabs = isBusinessOwnerAdmin && (sites?.length ?? 0) >= 2;
 
   const weekStart = format(startOfWeek(new Date(), { weekStartsOn: 1 }), "yyyy-MM-dd");
   const weekEnd = format(endOfWeek(new Date(), { weekStartsOn: 1 }), "yyyy-MM-dd");
@@ -236,23 +216,7 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
       </div>
 
       {/* Site tabs for business tier owner/admin */}
-      {showSiteTabs && (
-        <Tabs
-          value={selectedSiteId ?? "all"}
-          onValueChange={(val) => setSelectedSiteId(val === "all" ? null : val)}
-        >
-          <TabsList className="flex-wrap h-auto gap-1">
-            <TabsTrigger value="all" className="text-xs">
-              {t("sites.allSites" as any)}
-            </TabsTrigger>
-            {sites!.map((site) => (
-              <TabsTrigger key={site.id} value={site.id} className="text-xs">
-                {site.name}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </Tabs>
-      )}
+      <SiteTabs />
 
       {/* Row 1: Today stats */}
       <div data-tour="stats-grid" className="grid gap-3 grid-cols-2 lg:grid-cols-4">

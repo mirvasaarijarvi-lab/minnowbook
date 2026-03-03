@@ -18,6 +18,7 @@ import { useState, useRef } from "react";
 import { useT } from "@/contexts/I18nContext";
 import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
 import DashboardTooltip from "./DashboardTooltip";
+import SiteTabs from "./SiteTabs";
 import ResourceImageGallery from "./ResourceImageGallery";
 import BlockedSlotsPanel from "./BlockedSlotsPanel";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -241,6 +242,13 @@ const ResourceManagement = () => {
           </div>
           <p className="text-sm text-muted-foreground">{t("dashboard.resourceManagementDesc")}</p>
         </div>
+        <div>
+          <div className="flex items-center gap-2">
+            <h2 className="text-2xl font-serif font-bold text-foreground">{t("dashboard.resourceManagement")}</h2>
+            <DashboardTooltip text="Add rooms, tables, or venues here. Set capacity, pricing, and upload photos. Toggle resources active/inactive to control booking availability." />
+          </div>
+          <p className="text-sm text-muted-foreground">{t("dashboard.resourceManagementDesc")}</p>
+        </div>
         <div className="flex items-center gap-2">
           {(tenant as any)?.slug && (
             <Button variant="outline" size="sm" className="gap-1.5" asChild>
@@ -366,6 +374,8 @@ const ResourceManagement = () => {
           )}
         </div>
       </div>
+
+      <SiteTabs />
 
       {isLoading ? (
         <Card><CardContent className="p-6"><div className="animate-pulse h-40" /></CardContent></Card>

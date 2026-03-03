@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { usePermissions } from "@/hooks/usePermissions";
 import { PERM_RESERVATIONS_CREATE } from "@/lib/permissions";
 import CalendarSection from "./CalendarSection";
+import SiteTabs from "./SiteTabs";
 
 const SECTIONS = [
   {
@@ -52,6 +53,8 @@ const CalendarView = () => {
           </Button>
         )}
       </div>
+
+      <SiteTabs />
 
       {/* Legend */}
       <div className="flex items-center gap-4 text-xs text-muted-foreground flex-wrap">

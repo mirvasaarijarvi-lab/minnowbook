@@ -18,6 +18,7 @@ import ManualReservationDialog from "./ManualReservationDialog";
 import ConfirmationEmailPreview from "@/components/ConfirmationEmailPreview";
 import { useT } from "@/contexts/I18nContext";
 import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
+import SiteTabs from "./SiteTabs";
 import { toast } from "sonner";
 import { useDateLocale } from "@/hooks/useDateLocale";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -251,6 +252,8 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
           </Badge>
         </div>
       )}
+
+      <SiteTabs />
 
       {isLoading ? (
         <div className="space-y-3">
