@@ -144,7 +144,7 @@ const PermissionsEditor = () => {
       queryClient.invalidateQueries({ queryKey: ["role-definitions", tenantId] });
       queryClient.invalidateQueries({ queryKey: ["role-permissions", tenantId] });
       queryClient.invalidateQueries({ queryKey: ["my-permissions"] });
-      toast({ title: "Role deleted" });
+      toast({ title: t("admin.roleDeleted") });
     },
     onError: (err: any) => {
       toast({ title: "Error", description: err.message, variant: "destructive" });
@@ -166,7 +166,7 @@ const PermissionsEditor = () => {
       queryClient.invalidateQueries({ queryKey: ["role-definitions", tenantId] });
       queryClient.invalidateQueries({ queryKey: ["role-definitions-for-select", tenantId] });
       setEditingRoleKey(null);
-      toast({ title: "Role renamed" });
+      toast({ title: t("admin.roleRenamed") });
     },
     onError: (err: any) => {
       toast({ title: "Error", description: err.message, variant: "destructive" });
@@ -188,7 +188,7 @@ const PermissionsEditor = () => {
           <div className="flex items-center gap-2">
             <ShieldCheck className="h-5 w-5 text-primary" />
             <CardTitle className="font-serif">{t("admin.permissions")}</CardTitle>
-            <DashboardTooltip text="Define what each role can access. Owner always has full access. Toggle individual permissions for Admin, Staff, and custom roles." />
+            <DashboardTooltip text={t("admin.permTooltip")} />
           </div>
           <Dialog open={addRoleOpen} onOpenChange={setAddRoleOpen}>
             <DialogTrigger asChild>
@@ -220,9 +220,9 @@ const PermissionsEditor = () => {
                     placeholder="e.g. manager"
                     className="font-mono text-sm"
                   />
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Unique identifier used internally
-                  </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {t("admin.roleKeyHint")}
+                    </p>
                 </div>
                 <Button
                   className="w-full"
@@ -246,9 +246,9 @@ const PermissionsEditor = () => {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border">
-                  <th className="text-left py-2 pr-4 font-medium text-muted-foreground w-[200px]">
-                    Permission
-                  </th>
+                   <th className="text-left py-2 pr-4 font-medium text-muted-foreground w-[200px]">
+                     {t("admin.permissionCol")}
+                   </th>
                   {editableRoles.map((role) => (
                     <th key={role.role_key} className="text-center py-2 px-3 font-medium min-w-[90px]">
                       <div className="flex flex-col items-center gap-1">
@@ -291,7 +291,7 @@ const PermissionsEditor = () => {
                                 setEditingDisplayName(role.display_name);
                               }
                             }}
-                            title={!role.is_system ? "Click to rename" : undefined}
+                            title={!role.is_system ? t("admin.clickToRename") : undefined}
                           >
                             {role.display_name}
                             {!role.is_system && <Pencil className="h-2.5 w-2.5 ml-1 opacity-50" />}
@@ -306,18 +306,18 @@ const PermissionsEditor = () => {
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                               <AlertDialogHeader>
-                                <AlertDialogTitle>Delete role "{role.display_name}"?</AlertDialogTitle>
+                                <AlertDialogTitle>{t("admin.deleteRoleTitle").replace("{name}", role.display_name)}</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                  This will permanently remove this custom role and all its permissions. Users assigned to this role will lose access.
+                                  {t("admin.deleteRoleDesc")}
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogCancel>{t("admin.cancel")}</AlertDialogCancel>
                                 <AlertDialogAction
                                   onClick={() => deleteRoleMutation.mutate(role.role_key)}
                                   className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                 >
-                                  Delete
+                                  {t("common.delete")}
                                 </AlertDialogAction>
                               </AlertDialogFooter>
                             </AlertDialogContent>
@@ -336,12 +336,12 @@ const PermissionsEditor = () => {
                         colSpan={editableRoles.length + 1}
                         className="pt-4 pb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground"
                       >
-                        {category.category}
+                        {t(category.category as any)}
                       </td>
                     </tr>
                     {category.permissions.map((perm) => (
                       <tr key={perm.key} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
-                        <td className="py-2 pr-4 text-foreground">{perm.label}</td>
+                        <td className="py-2 pr-4 text-foreground">{t(perm.labelKey as any)}</td>
                         {editableRoles.map((role) => {
                           const checked = hasPermission(role.role_key, perm.key);
                           return (
