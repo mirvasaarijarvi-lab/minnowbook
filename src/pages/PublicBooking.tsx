@@ -230,6 +230,9 @@ const PublicBooking = () => {
     }
   }, [searchParams]);
 
+  // Resolve site from ?site= query param
+  const siteSlug = searchParams.get("site");
+
   // Fetch tenant by slug
   const { data: tenant, isLoading: loadingTenant } = useQuery({
     queryKey: ["public-tenant", slug],
@@ -247,8 +250,42 @@ const PublicBooking = () => {
     enabled: !!slug,
   });
 
-  // Fetch tenant settings for branding
-  const { data: settings } = useQuery({
+  // Fetch the site when ?site= param is present
+  const { data: site } = useQuery({
+    queryKey: ["public-site", tenant?.id, siteSlug],
+    queryFn: async () => {
+      if (!tenant?.id || !siteSlug) return null;
+      const { data, error } = await supabase
+        .from("sites")
+        .select("id, name, slug")
+        .eq("tenant_id", tenant.id)
+        .eq("slug", siteSlug)
+        .eq("is_active", true)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!tenant?.id && !!siteSlug,
+  });
+
+  // Fetch site_settings for site-specific branding
+  const { data: siteSettings } = useQuery({
+    queryKey: ["public-site-settings", site?.id],
+    queryFn: async () => {
+      if (!site?.id) return null;
+      const { data, error } = await supabase
+        .from("site_settings")
+        .select("*")
+        .eq("site_id", site.id)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!site?.id,
+  });
+
+  // Fetch tenant settings as fallback branding
+  const { data: tenantSettings } = useQuery({
     queryKey: ["public-tenant-settings", tenant?.id],
     queryFn: async () => {
       if (!tenant?.id) return null;
@@ -262,6 +299,19 @@ const PublicBooking = () => {
     },
     enabled: !!tenant?.id,
   });
+
+  // Merged settings: site_settings overrides tenant_settings
+  const settings = useMemo((): Record<string, any> | null => {
+    if (!tenantSettings) return siteSettings ?? null;
+    if (!siteSettings) return tenantSettings;
+    // Site-level values override tenant-level, but fall back field-by-field
+    return {
+      ...tenantSettings,
+      ...Object.fromEntries(
+        Object.entries(siteSettings).filter(([_, v]) => v != null && v !== "")
+      ),
+    };
+  }, [tenantSettings, siteSettings]);
 
   // Fetch active resources
   const { data: resources } = useQuery({
