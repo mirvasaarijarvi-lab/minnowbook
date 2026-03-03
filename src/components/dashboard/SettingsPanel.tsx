@@ -232,7 +232,7 @@ const SettingsPanel = () => {
   }
 
   return (
-    <div data-tour="settings-panel" className="space-y-6 max-w-3xl">
+    <div data-tour="settings-panel" className="space-y-6 max-w-3xl pb-20">
       <div className="flex items-center gap-2">
         <h2 className="text-2xl font-serif font-bold text-foreground">{t("nav.settings")}</h2>
         <DashboardTooltip text="Customize your branding, business info, colors, and email templates. Changes apply to your public booking page instantly." />
@@ -553,18 +553,20 @@ const SettingsPanel = () => {
         </Card>
       )}
 
-      {/* Save */}
-      <div className="flex justify-end">
-        <Button onClick={() => mutation.mutate()} disabled={mutation.isPending}>
-          {mutation.isPending ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              {t("common.saving")}
-            </>
-          ) : (
-            t("common.save")
-          )}
-        </Button>
+      {/* Save — sticky bar */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-card/95 backdrop-blur-sm py-3 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-3xl mx-auto flex justify-end">
+          <Button onClick={() => mutation.mutate()} disabled={mutation.isPending} size="lg">
+            {mutation.isPending ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                {t("common.saving")}
+              </>
+            ) : (
+              t("common.save")
+            )}
+          </Button>
+        </div>
       </div>
     </div>
   );
