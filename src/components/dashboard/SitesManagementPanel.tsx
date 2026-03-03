@@ -124,14 +124,21 @@ const SitesManagementPanel = () => {
 
   const createMutation = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.from("sites").insert({
+      const { data, error } = await supabase.from("sites").insert({
         tenant_id: tenantId!,
         name: form.name,
         slug: form.slug.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, ""),
         location: form.location || null,
         description: form.description || null,
-      });
+      }).select("id").single();
       if (error) throw error;
+
+      // Copy tenant-level opening hours & email templates to the new site
+      const { error: copyError } = await supabase.rpc("copy_tenant_defaults_to_site", {
+        p_tenant_id: tenantId!,
+        p_site_id: data.id,
+      });
+      if (copyError) console.error("Failed to copy defaults:", copyError);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["sites", tenantId] });
