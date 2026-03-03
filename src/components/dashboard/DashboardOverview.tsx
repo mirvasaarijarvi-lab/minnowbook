@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { format, startOfWeek, endOfWeek, subWeeks } from "date-fns";
 import { useT } from "@/contexts/I18nContext";
+import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
 import DashboardTooltip from "./DashboardTooltip";
 import BookingLinksCard from "./BookingLinksCard";
 import { useMemo } from "react";
@@ -36,6 +37,7 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
   const { tenantId, tenant } = useTenant();
   const today = format(new Date(), "yyyy-MM-dd");
   const t = useT();
+  const { typeLabel } = useResourceTypeLabel();
 
   const weekStart = format(startOfWeek(new Date(), { weekStartsOn: 1 }), "yyyy-MM-dd");
   const weekEnd = format(endOfWeek(new Date(), { weekStartsOn: 1 }), "yyyy-MM-dd");
@@ -168,10 +170,10 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
 
   const allowedTypes = tenant?.allowed_reservation_types ?? [];
   const typeConfig: { key: string; label: string; icon: React.ElementType }[] = [
-    { key: "restaurant", label: t("dashboard.restaurant"), icon: UtensilsCrossed },
-    { key: "venue", label: t("dashboard.venue"), icon: Building2 },
-    { key: "guesthouse", label: t("dashboard.guesthouse"), icon: Home },
-    { key: "hotel", label: t("dashboard.hotel" as any), icon: Home },
+    { key: "restaurant", label: typeLabel("restaurant"), icon: UtensilsCrossed },
+    { key: "venue", label: typeLabel("venue"), icon: Building2 },
+    { key: "guesthouse", label: typeLabel("guesthouse"), icon: Home },
+    { key: "hotel", label: typeLabel("hotel"), icon: Home },
   ].filter((tc) => allowedTypes.includes(tc.key));
 
   const ChangeIndicator = ({ value }: { value: number }) => {

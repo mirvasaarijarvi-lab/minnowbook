@@ -16,6 +16,7 @@ import EditReservationDialog from "./EditReservationDialog";
 import ManualReservationDialog from "./ManualReservationDialog";
 import ConfirmationEmailPreview from "@/components/ConfirmationEmailPreview";
 import { useT } from "@/contexts/I18nContext";
+import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
 import { toast } from "sonner";
 import { usePermissions } from "@/hooks/usePermissions";
 import {
@@ -47,6 +48,7 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
   const [editingReservation, setEditingReservation] = useState<any | null>(null);
   const [newReservationOpen, setNewReservationOpen] = useState(false);
   const t = useT();
+  const { typeLabel } = useResourceTypeLabel();
   const { can } = usePermissions();
   const canCreate = can(PERM_RESERVATIONS_CREATE);
   const canEdit = can(PERM_RESERVATIONS_EDIT);
@@ -199,9 +201,9 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
             <SelectTrigger className="w-[160px]"><SelectValue placeholder={t("common.type")} /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{t("dashboard.allTypes")}</SelectItem>
-              <SelectItem value="restaurant">{t("dashboard.restaurant")}</SelectItem>
-              <SelectItem value="venue">{t("dashboard.venue")}</SelectItem>
-              <SelectItem value="guesthouse">{t("dashboard.guesthouse")}</SelectItem>
+              <SelectItem value="restaurant">{typeLabel("restaurant")}</SelectItem>
+              <SelectItem value="venue">{typeLabel("venue")}</SelectItem>
+              <SelectItem value="guesthouse">{typeLabel("guesthouse")}</SelectItem>
             </SelectContent>
           </Select>
           <Select value={invoicedFilter} onValueChange={setInvoicedFilter}>

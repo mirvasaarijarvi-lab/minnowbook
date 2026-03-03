@@ -18,6 +18,7 @@ import { format } from "date-fns";
 import { fi as fiFns, enUS, sv as svFns, type Locale } from "date-fns/locale";
 import DashboardTooltip from "./DashboardTooltip";
 import { useT, useLanguage } from "@/contexts/I18nContext";
+import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
 
 const LOCALE_MAP: Record<string, Locale> = { fi: fiFns, sv: svFns, en: enUS };
 
@@ -63,17 +64,13 @@ const RecurringBlocksPanel = () => {
 
   const dayAbbreviations = t("blocking.dayNames").split(",");
 
-  const selectableTypes: Record<string, string> = {
-    hotel: t("blocking.hotelGuesthouse"),
-    restaurant: t("blocking.restaurant"),
-    venue: t("blocking.venueEventSpace"),
-  };
+  const { typeLabel: resourceTypeLabel, selectableTypeLabels: selectableTypes } = useResourceTypeLabel();
 
   const resourceTypeLabels: Record<string, string> = {
-    hotel: t("blocking.hotelGuesthouse"),
-    guesthouse: t("blocking.hotelGuesthouse"),
-    restaurant: t("blocking.restaurant"),
-    venue: t("blocking.venueEventSpace"),
+    hotel: selectableTypes["hotel"],
+    guesthouse: selectableTypes["hotel"],
+    restaurant: selectableTypes["restaurant"],
+    venue: selectableTypes["venue"],
   };
 
   const resourceNoun = (type: string) => {

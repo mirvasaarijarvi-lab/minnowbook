@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useT } from "@/contexts/I18nContext";
 import DashboardTooltip from "./DashboardTooltip";
+import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
 import ManualReservationDialog from "./ManualReservationDialog";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -33,6 +34,7 @@ const CalendarView = () => {
   const [newReservationOpen, setNewReservationOpen] = useState(false);
   const [defaultDate, setDefaultDate] = useState<Date | undefined>(new Date());
   const t = useT();
+  const { typeLabel } = useResourceTypeLabel();
   const { can } = usePermissions();
   const canCreate = can(PERM_RESERVATIONS_CREATE);
 
@@ -74,7 +76,7 @@ const CalendarView = () => {
       {SECTIONS.map((section) => (
         <CalendarSection
           key={section.key}
-          title={t(section.labelKey)}
+          title={section.key === "hotel" ? typeLabel("hotel") || typeLabel("guesthouse") : typeLabel(section.key)}
           reservationTypes={section.reservationTypes as unknown as string[]}
           resourceTypes={section.resourceTypes as unknown as string[]}
           onSelectDate={setDefaultDate}

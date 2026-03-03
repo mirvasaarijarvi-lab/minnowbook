@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/hooks/useTenant";
 import { useT, useLanguage } from "@/contexts/I18nContext";
+import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
 import type { TranslationKey } from "@/i18n/translations";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -57,15 +58,15 @@ const localeMap: Record<string, Locale> = { fi: fiFns, en: enUS, sv: svFns };
 type Period = "week" | "month" | "quarter" | "half" | "year" | "custom";
 
 /* ── Chart ─────────────────────────────────────────────── */
-const ReservationChart = ({ reservations, period, start, end, dateLocale, types, t }: {
+const ReservationChart = ({ reservations, period, start, end, dateLocale, types, t, typeLabel }: {
   reservations: ReservationRow[];
   period: Period; start: Date; end: Date; dateLocale: Locale;
-  types: string[]; t: (k: string) => string;
+  types: string[]; t: (k: string) => string; typeLabel: (tp: string) => string;
 }) => {
   const chartData = useMemo(() => {
     const bucket = (items: ReservationRow[]) => {
       const obj: Record<string, number> = {};
-      types.forEach((tp) => { obj[t(`dashboard.${tp === "guesthouse" ? "guesthouse" : tp}`)] = items.filter((r) => r.reservation_type === tp).length; });
+      types.forEach((tp) => { obj[typeLabel(tp)] = items.filter((r) => r.reservation_type === tp).length; });
       return obj;
     };
     if (period === "week" || (period === "custom" && differenceInDays(end, start) <= 14)) {
@@ -100,7 +101,7 @@ const ReservationChart = ({ reservations, period, start, end, dateLocale, types,
             <Tooltip />
             <Legend />
             {types.map((tp, i) => (
-              <Bar key={tp} dataKey={t(`dashboard.${tp === "guesthouse" ? "guesthouse" : tp}`)} stackId="a" fill={colors[i % colors.length]} radius={i === types.length - 1 ? [4, 4, 0, 0] : [0, 0, 0, 0]} />
+              <Bar key={tp} dataKey={typeLabel(tp)} stackId="a" fill={colors[i % colors.length]} radius={i === types.length - 1 ? [4, 4, 0, 0] : [0, 0, 0, 0]} />
             ))}
           </BarChart>
         </ResponsiveContainer>
@@ -507,15 +508,7 @@ const ReportsPanel = () => {
     };
   }, [typeFilteredRaw, effectivePrice]);
 
-  const typeLabel = (tp: string) => {
-    const map: Record<string, string> = {
-      restaurant: t("dashboard.restaurant"),
-      venue: t("dashboard.venue"),
-      guesthouse: t("dashboard.guesthouse"),
-      hotel: t("dashboard.hotel"),
-    };
-    return map[tp] ?? tp;
-  };
+  const { typeLabel } = useResourceTypeLabel();
 
   return (
     <div className="space-y-6 max-w-6xl">
@@ -676,7 +669,7 @@ const ReportsPanel = () => {
                 <CardContent className="pt-5 pb-5">
                   <div className="flex items-start justify-between">
                     <div className="space-y-1">
-                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t("reports.roomRevenue")} ({t("dashboard.guesthouse")})</p>
+                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t("reports.roomRevenue")} ({typeLabel("guesthouse")})</p>
                       <p className="text-3xl font-bold tracking-tight">{fmtEur(accomStats.totalRoomRevenue)} €</p>
                       <p className="text-xs text-muted-foreground">
                         {accomStats.totalNights} {t("reports.nights")} • {t("reports.roomPrice").toLowerCase()}<br />
@@ -708,7 +701,7 @@ const ReportsPanel = () => {
                 <CardContent className="pt-5 pb-5">
                   <div className="flex items-start justify-between">
                     <div className="space-y-1">
-                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t("dashboard.guesthouse")} {t("reports.total").toLowerCase()}</p>
+                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{typeLabel("guesthouse")} {t("reports.total").toLowerCase()}</p>
                       <p className="text-3xl font-bold tracking-tight">{fmtEur(accomStats.totalAccomRevenue)} €</p>
                       <p className="text-xs text-muted-foreground">{t("reports.roomAndBreakfast")}</p>
                     </div>
@@ -791,6 +784,7 @@ const ReportsPanel = () => {
               dateLocale={dateLocale}
               types={allowedTypes}
               t={t}
+              typeLabel={typeLabel}
             />
           )}
 

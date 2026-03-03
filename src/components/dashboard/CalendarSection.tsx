@@ -12,6 +12,7 @@ import { format, startOfMonth, endOfMonth, eachDayOfInterval } from "date-fns";
 import { fi as fiFns, enUS, sv as svFns, type Locale } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { useT, useLanguage } from "@/contexts/I18nContext";
+import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
 import { Ban, Clock, RefreshCw, Lock, Unlock } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -260,15 +261,7 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
 
   const isRestaurant = resourceTypes.includes("restaurant") && resourceTypes.length === 1;
 
-  const getResourceTypeLabel = (key: string) => {
-    const map: Record<string, string> = {
-      hotel: t("dashboard.hotel" as any),
-      guesthouse: t("dashboard.guesthouse" as any),
-      restaurant: t("dashboard.restaurant" as any),
-      venue: t("dashboard.venue" as any),
-    };
-    return map[key] ?? key;
-  };
+  const { typeLabel: getResourceTypeLabel } = useResourceTypeLabel();
 
   return (
     <div className="space-y-2">

@@ -21,6 +21,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils";
 import DashboardTooltip from "./DashboardTooltip";
 import { useT, useLanguage } from "@/contexts/I18nContext";
+import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
 import type { DateRange } from "react-day-picker";
 
 const LOCALE_MAP: Record<string, Locale> = { fi: fiFns, sv: svFns, en: enUS };
@@ -63,17 +64,13 @@ const BlockedSlotsPanel = () => {
     reason: "",
   });
 
-  const selectableTypes: Record<string, string> = {
-    hotel: t("blocking.hotelGuesthouse"),
-    restaurant: t("blocking.restaurant"),
-    venue: t("blocking.venueEventSpace"),
-  };
+  const { typeLabel: resourceTypeLabel, selectableTypeLabels: selectableTypes } = useResourceTypeLabel();
 
   const resourceTypeLabels: Record<string, string> = {
-    hotel: t("blocking.hotelGuesthouse"),
-    guesthouse: t("blocking.hotelGuesthouse"),
-    restaurant: t("blocking.restaurant"),
-    venue: t("blocking.venueEventSpace"),
+    hotel: selectableTypes["hotel"],
+    guesthouse: selectableTypes["hotel"],
+    restaurant: selectableTypes["restaurant"],
+    venue: selectableTypes["venue"],
   };
 
   const resourceNoun = (type: string) => {

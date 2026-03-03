@@ -1,5 +1,6 @@
 import { useTenant } from "@/hooks/useTenant";
 import { useT } from "@/contexts/I18nContext";
+import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link2, Copy, ExternalLink, Building2, Home } from "lucide-react";
@@ -21,6 +22,7 @@ const TYPE_LABEL_KEYS: Record<string, string> = {
 const BookingLinksCard = () => {
   const { tenant } = useTenant();
   const t = useT();
+  const { typeLabel } = useResourceTypeLabel();
 
   if (!tenant?.slug) return null;
 
@@ -51,7 +53,7 @@ const BookingLinksCard = () => {
         {shareableTypes.map((type: string) => {
           const url = `${baseUrl}?type=${type}`;
           const Icon = TYPE_ICONS[type] ?? Link2;
-          const label = t(TYPE_LABEL_KEYS[type] as any) || type;
+          const label = typeLabel(type);
 
           return (
             <div key={type} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
