@@ -480,6 +480,8 @@ type TranslationKeys = {
   "dashboard.quickInfo": string;
   "dashboard.checkoutsToday": string;
   "dashboard.uninvoiced": string;
+  "dashboard.used": string;
+  "dashboard.invoiced": string;
   "dashboard.calendarHotel": string;
   "dashboard.calendarVenue": string;
   "dashboard.calendarRestaurant": string;
@@ -1375,6 +1377,8 @@ const en: TranslationKeys = {
   "dashboard.quickInfo": "Quick info",
   "dashboard.checkoutsToday": "Check-outs today",
   "dashboard.uninvoiced": "Uninvoiced",
+  "dashboard.used": "Used",
+  "dashboard.invoiced": "Invoiced",
   "dashboard.calendarHotel": "Hotel / Guesthouse",
   "dashboard.calendarVenue": "Event Spaces",
   "dashboard.calendarRestaurant": "Restaurant",
@@ -2258,6 +2262,8 @@ const fi: TranslationKeys = {
   "dashboard.quickInfo": "Pikatiedot",
   "dashboard.checkoutsToday": "Uloskirjaukset tänään",
   "dashboard.uninvoiced": "Laskuttamatta",
+  "dashboard.used": "Käytetty",
+  "dashboard.invoiced": "Laskutettu",
   "dashboard.calendarHotel": "Hotelli / Majatalo",
   "dashboard.calendarVenue": "Juhlatilat",
   "dashboard.calendarRestaurant": "Ravintola",
@@ -3141,6 +3147,8 @@ const sv: TranslationKeys = {
   "dashboard.quickInfo": "Snabbinfo",
   "dashboard.checkoutsToday": "Utcheckningar idag",
   "dashboard.uninvoiced": "Ej fakturerade",
+  "dashboard.used": "Använd",
+  "dashboard.invoiced": "Fakturerad",
   "dashboard.calendarHotel": "Hotell / Gästhus",
   "dashboard.calendarVenue": "Festlokaler",
   "dashboard.calendarRestaurant": "Restaurang",
