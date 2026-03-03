@@ -99,6 +99,12 @@ type TranslationKeys = {
   "reports.reservations": string;
   "reports.ofTotal": string;
   "reports.invoicedPercent": string;
+  "reports.discountSummary": string;
+  "reports.totalDiscounts": string;
+  "reports.topCodes": string;
+  "reports.discountToRevenue": string;
+  "reports.discountedBookings": string;
+  "reports.noDiscounts": string;
 
   // Settings
   "settings.businessDetails": string;
@@ -1173,6 +1179,12 @@ const en: TranslationKeys = {
   "reports.reservations": "reservations",
   "reports.ofTotal": "total",
   "reports.invoicedPercent": "invoiced",
+  "reports.discountSummary": "Discount Summary",
+  "reports.totalDiscounts": "Total Discounts Given",
+  "reports.topCodes": "Most Used Codes",
+  "reports.discountToRevenue": "Discount-to-Revenue",
+  "reports.discountedBookings": "discounted bookings",
+  "reports.noDiscounts": "No discounts applied in this period",
 
   // Settings
   "settings.businessDetails": "Business Details",
@@ -2226,6 +2238,12 @@ const fi: TranslationKeys = {
   "reports.reservations": "varausta",
   "reports.ofTotal": "yhteensä",
   "reports.invoicedPercent": "laskutettu",
+  "reports.discountSummary": "Alennusyhteenveto",
+  "reports.totalDiscounts": "Annetut alennukset yhteensä",
+  "reports.topCodes": "Käytetyimmät koodit",
+  "reports.discountToRevenue": "Alennus/liikevaihto",
+  "reports.discountedBookings": "alennettua varausta",
+  "reports.noDiscounts": "Ei alennuksia tällä jaksolla",
 
   // Settings
   "settings.businessDetails": "Yritystiedot",
@@ -3277,6 +3295,12 @@ const sv: TranslationKeys = {
   "reports.reservations": "bokningar",
   "reports.ofTotal": "totalt",
   "reports.invoicedPercent": "fakturerat",
+  "reports.discountSummary": "Rabattsammanfattning",
+  "reports.totalDiscounts": "Totala rabatter",
+  "reports.topCodes": "Mest använda koder",
+  "reports.discountToRevenue": "Rabatt/intäkt",
+  "reports.discountedBookings": "rabatterade bokningar",
+  "reports.noDiscounts": "Inga rabatter under denna period",
 
   // Settings
   "settings.businessDetails": "Företagsinformation",

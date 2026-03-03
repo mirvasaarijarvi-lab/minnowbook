@@ -26,7 +26,7 @@ import { fi as fiFns, enUS, sv as svFns, type Locale } from "date-fns/locale";
 import {
   ChevronLeft, ChevronRight, CheckCircle2, Clock, XCircle,
   CalendarIcon, Download, Printer, Receipt, TrendingUp, TrendingDown,
-  Minus, AlertCircle, Euro, Coffee, BedDouble, GitCompareArrows, Building2,
+  Minus, AlertCircle, Euro, Coffee, BedDouble, GitCompareArrows, Building2, Tag, Percent,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -53,6 +53,10 @@ interface ReservationRow {
   breakfast_price_per_person: number | null;
   room_type: string | null;
   pricing_type: string | null;
+  discount_type: string | null;
+  discount_value: number | null;
+  discount_reason: string | null;
+  original_price_eur: number | null;
 }
 
 const localeMap: Record<string, Locale> = { fi: fiFns, en: enUS, sv: svFns };
@@ -204,7 +208,7 @@ const ReportsPanel = () => {
       if (!tenantId) return [];
       let query = supabase
         .from("reservations")
-        .select("id, reservation_type, status, date, check_out_date, is_invoiced, is_used, guest_name, guests_count, estimated_guests, price_eur, pricing_details, internal_notes, breakfast_included, breakfast_price_per_person, room_type, pricing_type, site_id")
+        .select("id, reservation_type, status, date, check_out_date, is_invoiced, is_used, guest_name, guests_count, estimated_guests, price_eur, pricing_details, internal_notes, breakfast_included, breakfast_price_per_person, room_type, pricing_type, site_id, discount_type, discount_value, discount_reason, original_price_eur")
         .eq("tenant_id", tenantId)
         .gte("date", startStr)
         .lte("date", endStr)
@@ -224,7 +228,7 @@ const ReportsPanel = () => {
       if (!tenantId) return [];
       let query = supabase
         .from("reservations")
-        .select("id, reservation_type, status, date, check_out_date, is_invoiced, is_used, guest_name, guests_count, estimated_guests, price_eur, pricing_details, internal_notes, breakfast_included, breakfast_price_per_person, room_type, pricing_type, site_id")
+        .select("id, reservation_type, status, date, check_out_date, is_invoiced, is_used, guest_name, guests_count, estimated_guests, price_eur, pricing_details, internal_notes, breakfast_included, breakfast_price_per_person, room_type, pricing_type, site_id, discount_type, discount_value, discount_reason, original_price_eur")
         .eq("tenant_id", tenantId)
         .gte("date", prevStartStr)
         .lte("date", prevEndStr)
@@ -542,6 +546,33 @@ const ReportsPanel = () => {
     };
   }, [typeFilteredRaw, effectivePrice]);
 
+  // Discount summary stats
+  const discountStats = useMemo(() => {
+    const discounted = typeFilteredRaw.filter((r) => r.discount_type && r.discount_value);
+    const totalDiscountAmount = discounted.reduce((s, r) => {
+      if (r.discount_type === "percentage") {
+        const base = r.original_price_eur ?? effectivePrice(r);
+        return s + (base * (r.discount_value ?? 0)) / 100;
+      }
+      return s + (r.discount_value ?? 0);
+    }, 0);
+
+    // Count codes by reason
+    const codeMap = new Map<string, number>();
+    discounted.forEach((r) => {
+      const code = r.discount_reason?.replace(/^Promo code:\s*/i, "").trim() || r.discount_type || "Manual";
+      codeMap.set(code, (codeMap.get(code) || 0) + 1);
+    });
+    const topCodes = [...codeMap.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5);
+
+    const totalRevenue = invoicingStats.totalEur;
+    const ratio = totalRevenue > 0 ? (totalDiscountAmount / totalRevenue) * 100 : 0;
+
+    return { count: discounted.length, totalDiscountAmount, topCodes, ratio };
+  }, [typeFilteredRaw, effectivePrice, invoicingStats.totalEur]);
+
   const { typeLabel } = useResourceTypeLabel();
 
   return (
@@ -820,6 +851,58 @@ const ReportsPanel = () => {
                 .replace("{count}", String(accomStats.bfCount))
                 .replace("{nights}", String(accomStats.totalBfNights))
                 .replace("{amount}", `${fmtEur(accomStats.totalBfRevenue)} €`)}</span>
+            </div>
+          )}
+
+          {/* Discount Summary */}
+          {discountStats.count > 0 ? (
+            <Card className="border-purple-200 bg-purple-50/30 dark:bg-purple-950/10 dark:border-purple-800/40">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium flex items-center gap-2">
+                  <Tag className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                  {t("reports.discountSummary")}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                  {/* Total discount amount */}
+                  <div className="space-y-1">
+                    <p className="text-xs text-muted-foreground font-medium">{t("reports.totalDiscounts")}</p>
+                    <p className="text-2xl font-bold">{fmtEur(discountStats.totalDiscountAmount)} €</p>
+                    <p className="text-xs text-muted-foreground">{discountStats.count} {t("reports.discountedBookings")}</p>
+                  </div>
+                  {/* Most used codes */}
+                  <div className="space-y-1">
+                    <p className="text-xs text-muted-foreground font-medium">{t("reports.topCodes")}</p>
+                    <div className="space-y-1">
+                      {discountStats.topCodes.map(([code, count]) => (
+                        <div key={code} className="flex items-center justify-between text-sm">
+                          <Badge variant="outline" className="text-xs bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/30 dark:text-purple-300 dark:border-purple-700">
+                            {code}
+                          </Badge>
+                          <span className="text-muted-foreground text-xs">{count}×</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  {/* Discount-to-revenue ratio */}
+                  <div className="space-y-1">
+                    <p className="text-xs text-muted-foreground font-medium">{t("reports.discountToRevenue")}</p>
+                    <div className="flex items-end gap-2">
+                      <span className="text-2xl font-bold">{discountStats.ratio.toFixed(1)}%</span>
+                      <Percent className="h-4 w-4 text-muted-foreground mb-1" />
+                    </div>
+                    <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
+                      <div className="bg-purple-500 dark:bg-purple-400 h-2 rounded-full transition-all" style={{ width: `${Math.min(discountStats.ratio, 100)}%` }} />
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="rounded-lg border px-4 py-3 text-sm flex items-center gap-2 text-muted-foreground">
+              <Tag className="h-4 w-4 shrink-0" />
+              <span>{t("reports.noDiscounts")}</span>
             </div>
           )}
 
