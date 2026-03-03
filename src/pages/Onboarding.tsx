@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, ArrowLeft, Check, Crown, Zap, Rocket, UtensilsCrossed, Building2, BedDouble, Palette } from "lucide-react";
+import { ArrowRight, ArrowLeft, Check, Crown, Zap, UtensilsCrossed, Building2, BedDouble, Palette } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { canSelectMoreTypes, getTierLimits } from "@/lib/tier-limits";
 import { useT } from "@/contexts/I18nContext";
@@ -62,8 +62,7 @@ const Onboarding = () => {
   const tiers = [
     { id: "basic", nameKey: "tier.basic" as TranslationKey, icon: Zap, price: "€29/mo", descKey: "tier.basicDesc" as TranslationKey, features: ["1 reservation type", "3 staff users", "Email notifications", "Booking page"] },
     { id: "professional", nameKey: "tier.professional" as TranslationKey, icon: Crown, price: "€59/mo", descKey: "tier.professionalDesc" as TranslationKey, features: ["All reservation types", "10 staff users", "Custom branding", "Priority support"] },
-    { id: "business", nameKey: "tier.business" as TranslationKey, icon: Building2, price: "€99/mo", descKey: "tier.businessDesc" as TranslationKey, features: ["Up to 3 sites", "All reservation types", "Unlimited staff", "Multi-site dashboard"] },
-    { id: "enterprise", nameKey: "tier.enterprise" as TranslationKey, icon: Rocket, price: "€199/mo", descKey: "tier.enterpriseDesc" as TranslationKey, features: ["Unlimited sites", "Unlimited types", "Unlimited staff", "API access & dedicated support"] },
+    { id: "business", nameKey: "tier.business" as TranslationKey, icon: Building2, price: "€99/mo", descKey: "tier.businessDesc" as TranslationKey, features: ["Unlimited sites", "All reservation types", "Unlimited staff", "Multi-site dashboard"] },
   ];
 
   const reservationTypes = [
