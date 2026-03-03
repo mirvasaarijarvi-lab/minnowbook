@@ -203,3 +203,38 @@
   outline: 3px solid hsl(var(--accent)) !important;
   outline-offset: 2px !important;
 }
+
+/* ─── Print / PDF styles ─── */
+@media print {
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    font-size: 11pt;
+  }
+
+  @page {
+    margin: 1.5cm;
+    size: A4;
+  }
+
+  /* Hide non-essential UI */
+  .print\\:hidden,
+  nav,
+  footer,
+  .cookie-consent,
+  .accessibility-widget {
+    display: none !important;
+  }
+
+  /* Avoid page breaks inside cards */
+  .print\\:break-inside-avoid {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Force page break before a section if needed */
+  .print\\:break-before-page {
+    break-before: page;
+    page-break-before: always;
+  }
+}
