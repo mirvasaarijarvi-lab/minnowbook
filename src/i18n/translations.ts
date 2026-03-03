@@ -384,6 +384,15 @@ type TranslationKeys = {
   "dashboard.actions": string;
   "dashboard.active": string;
   "dashboard.inactive": string;
+  "dashboard.namePlaceholder": string;
+  "dashboard.descriptionPlaceholder": string;
+  "dashboard.capacityPlaceholder": string;
+  "dashboard.pricePlaceholder": string;
+  "dashboard.breakfastPlaceholder": string;
+  "dashboard.venuePrice": string;
+  "dashboard.roomPrice": string;
+  "dashboard.breakfastPrice": string;
+  "dashboard.pricingHint": string;
   "booking.calculatePrice": string;
 
   // Onboarding
@@ -944,6 +953,15 @@ const en: TranslationKeys = {
   "dashboard.actions": "Actions",
   "dashboard.active": "Active",
   "dashboard.inactive": "Inactive",
+  "dashboard.namePlaceholder": "e.g. Banquet Hall",
+  "dashboard.descriptionPlaceholder": "Short description...",
+  "dashboard.capacityPlaceholder": "e.g. 50",
+  "dashboard.pricePlaceholder": "e.g. 140",
+  "dashboard.breakfastPlaceholder": "e.g. 15",
+  "dashboard.venuePrice": "Space price (€)",
+  "dashboard.roomPrice": "Room price (€/night)",
+  "dashboard.breakfastPrice": "Breakfast price (€/person/morning)",
+  "dashboard.pricingHint": "Default price for new reservations. Individual reservation prices can be adjusted in the reservation details.",
   "booking.calculatePrice": "Calculate Price",
 
   // Onboarding
@@ -1491,6 +1509,15 @@ const fi: TranslationKeys = {
   "dashboard.actions": "Toiminnot",
   "dashboard.active": "Aktiivinen",
   "dashboard.inactive": "Ei aktiivinen",
+  "dashboard.namePlaceholder": "Esim. Juhlasali",
+  "dashboard.descriptionPlaceholder": "Lyhyt kuvaus...",
+  "dashboard.capacityPlaceholder": "esim. 50",
+  "dashboard.pricePlaceholder": "esim. 140",
+  "dashboard.breakfastPlaceholder": "esim. 15",
+  "dashboard.venuePrice": "Tilahinta (€)",
+  "dashboard.roomPrice": "Huonehinta (€/yö)",
+  "dashboard.breakfastPrice": "Aamupalahinta (€/hlö/aamu)",
+  "dashboard.pricingHint": "Oletushinta uusille varauksille. Yksittäisen varauksen hintaa voi muuttaa sisäisissä tiedoissa.",
   "booking.calculatePrice": "Laske hinta",
 
   // Onboarding
@@ -2038,6 +2065,15 @@ const sv: TranslationKeys = {
   "dashboard.actions": "Åtgärder",
   "dashboard.active": "Aktiv",
   "dashboard.inactive": "Inaktiv",
+  "dashboard.namePlaceholder": "T.ex. Festsal",
+  "dashboard.descriptionPlaceholder": "Kort beskrivning...",
+  "dashboard.capacityPlaceholder": "t.ex. 50",
+  "dashboard.pricePlaceholder": "t.ex. 140",
+  "dashboard.breakfastPlaceholder": "t.ex. 15",
+  "dashboard.venuePrice": "Lokalpris (€)",
+  "dashboard.roomPrice": "Rumpris (€/natt)",
+  "dashboard.breakfastPrice": "Frukostpris (€/pers/morgon)",
+  "dashboard.pricingHint": "Standardpris för nya bokningar. Enskilda bokningspriser kan justeras i bokningsdetaljerna.",
   "booking.calculatePrice": "Beräkna pris",
 
   // Onboarding

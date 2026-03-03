@@ -5,7 +5,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -42,7 +44,7 @@ const ResourceManagement = () => {
   const defaultRoomPricing = { single: "1.0", double: "1.5", suite: "2.5", dorm: "0.6" };
   const [form, setForm] = useState({
     name: "", resource_type: "restaurant", capacity: "", price_per_night: "", description: "", image_url: "", breakfast_price_per_person: "",
-    room_type_pricing: { ...defaultRoomPricing },
+    room_type_pricing: { ...defaultRoomPricing }, is_active: true,
   });
 
   const { data: resources, isLoading } = useQuery({
@@ -99,6 +101,7 @@ const ResourceManagement = () => {
         price_per_night: form.price_per_night ? parseFloat(form.price_per_night) : null,
         description: form.description || null,
         image_url: form.image_url || null,
+        is_active: form.is_active,
         breakfast_price_per_person: form.breakfast_price_per_person ? parseFloat(form.breakfast_price_per_person) : null,
         ...(isAccom && { room_type_pricing: roomPricing }),
       };
@@ -142,7 +145,7 @@ const ResourceManagement = () => {
 
   const resetForm = () => {
     setEditingId(null);
-    setForm({ name: "", resource_type: "restaurant", capacity: "", price_per_night: "", description: "", image_url: "", breakfast_price_per_person: "", room_type_pricing: { ...defaultRoomPricing } });
+    setForm({ name: "", resource_type: "restaurant", capacity: "", price_per_night: "", description: "", image_url: "", breakfast_price_per_person: "", room_type_pricing: { ...defaultRoomPricing }, is_active: true });
   };
 
   const openEdit = (r: any) => {
@@ -153,6 +156,7 @@ const ResourceManagement = () => {
       capacity: r.capacity?.toString() ?? "", price_per_night: r.price_per_night?.toString() ?? "",
       description: r.description ?? "", image_url: r.image_url ?? "",
       breakfast_price_per_person: r.breakfast_price_per_person?.toString() ?? "",
+      is_active: r.is_active ?? true,
       room_type_pricing: {
         single: rtp.single?.toString() ?? "1.0",
         double: rtp.double?.toString() ?? "1.5",
@@ -197,38 +201,44 @@ const ResourceManagement = () => {
               <DialogTrigger asChild>
                 <Button size="sm" className="gap-1.5"><Plus className="h-4 w-4" /> {t("dashboard.addResource")}</Button>
               </DialogTrigger>
-              <DialogContent className="max-h-[85vh] overflow-y-auto">
+              <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-md">
                 <DialogHeader>
                   <DialogTitle className="font-serif">{editingId ? t("dashboard.editResource") : t("dashboard.addResource")}</DialogTitle>
                 </DialogHeader>
-                <div className="space-y-4 pt-2">
-                  {/* Image upload */}
-                  <div className="space-y-2">
-                    <Label>{t("dashboard.uploadImage")}</Label>
-                    {form.image_url ? (
-                      <div className="relative">
-                        <img src={form.image_url} alt="" className="w-full h-40 rounded-lg object-cover border border-border" />
-                        <button type="button" onClick={() => setForm((prev) => ({ ...prev, image_url: "" }))} className="absolute top-2 right-2 h-6 w-6 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center">
-                          <X className="h-3.5 w-3.5" />
-                        </button>
-                      </div>
-                    ) : (
-                      <button type="button" onClick={() => imageInputRef.current?.click()} disabled={uploading} className="w-full h-32 rounded-lg border-2 border-dashed border-border flex flex-col items-center justify-center gap-2 bg-secondary/30 hover:bg-secondary/50 transition-colors cursor-pointer">
-                        {uploading ? <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /> : (
-                          <>
-                            <Upload className="h-6 w-6 text-muted-foreground" />
-                            <span className="text-sm text-muted-foreground">PNG, JPG, WebP · max 5 MB</span>
-                          </>
+                <div className="space-y-5 pt-2">
+                  {/* Image upload (only when editing) */}
+                  {editingId && (
+                    <>
+                      <div className="space-y-2">
+                        <Label>{t("dashboard.uploadImage")}</Label>
+                        {form.image_url ? (
+                          <div className="relative">
+                            <img src={form.image_url} alt="" className="w-full h-40 rounded-lg object-cover border border-border" />
+                            <button type="button" onClick={() => setForm((prev) => ({ ...prev, image_url: "" }))} className="absolute top-2 right-2 h-6 w-6 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center">
+                              <X className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                        ) : (
+                          <button type="button" onClick={() => imageInputRef.current?.click()} disabled={uploading} className="w-full h-32 rounded-lg border-2 border-dashed border-border flex flex-col items-center justify-center gap-2 bg-secondary/30 hover:bg-secondary/50 transition-colors cursor-pointer">
+                            {uploading ? <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /> : (
+                              <>
+                                <Upload className="h-6 w-6 text-muted-foreground" />
+                                <span className="text-sm text-muted-foreground">PNG, JPG, WebP · max 5 MB</span>
+                              </>
+                            )}
+                          </button>
                         )}
-                      </button>
-                    )}
-                    <input ref={imageInputRef} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={handleImageUpload} />
-                  </div>
-                  {editingId && tenantId && <ResourceImageGallery resourceId={editingId} tenantId={tenantId} />}
+                        <input ref={imageInputRef} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={handleImageUpload} />
+                      </div>
+                      {tenantId && <ResourceImageGallery resourceId={editingId} tenantId={tenantId} />}
+                    </>
+                  )}
+
                   <div>
-                    <Label>{t("common.name")}</Label>
-                    <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g. Main Dining Room" />
+                    <Label>{t("common.name")} *</Label>
+                    <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder={t("dashboard.namePlaceholder")} />
                   </div>
+
                   <div>
                     <Label>{t("common.type")}</Label>
                     <Select value={form.resource_type} onValueChange={(v) => setForm({ ...form, resource_type: v })}>
@@ -240,51 +250,62 @@ const ResourceManagement = () => {
                       </SelectContent>
                     </Select>
                   </div>
-                  {(() => {
-                    const isAccom = form.resource_type === "hotel" || form.resource_type === "guesthouse";
-                    return (
-                      <div className={`grid gap-3 ${isAccom ? "grid-cols-3" : "grid-cols-2"}`}>
-                        <div>
-                          <Label>{t("dashboard.capacity")}</Label>
-                          <Input type="number" value={form.capacity} onChange={(e) => setForm({ ...form, capacity: e.target.value })} placeholder="e.g. 40" />
-                        </div>
-                        <div>
-                          <Label>{t("common.price")} (€{isAccom ? t("dashboard.perNight") : ""})</Label>
-                          <Input type="number" step="0.01" value={form.price_per_night} onChange={(e) => setForm({ ...form, price_per_night: e.target.value })} placeholder="e.g. 120" />
-                        </div>
-                        {isAccom && (
-                          <div>
-                            <Label>{t("booking.breakfastIncluded" as any)} (€)</Label>
-                            <Input type="number" step="0.01" value={form.breakfast_price_per_person} onChange={(e) => setForm({ ...form, breakfast_price_per_person: e.target.value })} placeholder="e.g. 15" />
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })()}
-                  {(form.resource_type === "hotel" || form.resource_type === "guesthouse") && (
-                    <div className="space-y-2">
-                      <Label className="font-medium">{t("dashboard.roomMultipliers")}</Label>
-                      <p className="text-xs text-muted-foreground">{t("dashboard.roomMultipliersDesc")}</p>
-                      <div className="grid grid-cols-2 gap-3">
-                        {(["single", "double", "suite", "dorm"] as const).map((rt) => {
-                          const roomLabelKey = `dashboard.room${rt.charAt(0).toUpperCase() + rt.slice(1)}` as any;
-                          return (
-                            <div key={rt}>
-                              <Label className="text-xs">{t(roomLabelKey)}</Label>
-                              <Input type="number" step="0.1" min="0" value={form.room_type_pricing[rt]} onChange={(e) => setForm((prev) => ({ ...prev, room_type_pricing: { ...prev.room_type_pricing, [rt]: e.target.value } }))} placeholder="1.0" />
-                            </div>
-                          );
-                        })}
+
+                  <div>
+                    <Label>{t("common.description")}</Label>
+                    <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder={t("dashboard.descriptionPlaceholder")} rows={3} />
+                  </div>
+
+                  <div>
+                    <Label>{t("dashboard.capacity")}</Label>
+                    <Input type="number" value={form.capacity} onChange={(e) => setForm({ ...form, capacity: e.target.value })} placeholder={t("dashboard.capacityPlaceholder")} />
+                  </div>
+
+                  {/* Venue: space price */}
+                  {form.resource_type === "venue" && (
+                    <div>
+                      <Label>{t("dashboard.venuePrice")}</Label>
+                      <div className="relative">
+                        <Input type="number" step="0.01" value={form.price_per_night} onChange={(e) => setForm({ ...form, price_per_night: e.target.value })} placeholder={t("dashboard.pricePlaceholder")} className="pr-8" />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">€</span>
                       </div>
                     </div>
                   )}
-                  <div>
-                    <Label>{t("common.description")}</Label>
-                    <Input value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Short description" />
+
+                  {/* Guesthouse / Hotel: room price + breakfast */}
+                  {(form.resource_type === "hotel" || form.resource_type === "guesthouse") && (
+                    <>
+                      <div>
+                        <Label>{t("dashboard.roomPrice")}</Label>
+                        <div className="relative">
+                          <Input type="number" step="0.01" value={form.price_per_night} onChange={(e) => setForm({ ...form, price_per_night: e.target.value })} placeholder={t("dashboard.pricePlaceholder")} className="pr-8" />
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">€</span>
+                        </div>
+                      </div>
+                      <div>
+                        <Label>{t("dashboard.breakfastPrice")}</Label>
+                        <div className="relative">
+                          <Input type="number" step="0.01" value={form.breakfast_price_per_person} onChange={(e) => setForm({ ...form, breakfast_price_per_person: e.target.value })} placeholder={t("dashboard.breakfastPlaceholder")} className="pr-8" />
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">€</span>
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-1">{t("dashboard.pricingHint")}</p>
+                      </div>
+                    </>
+                  )}
+
+                  {/* Active toggle */}
+                  <div className="flex items-center gap-3">
+                    <Switch checked={form.is_active} onCheckedChange={(checked) => setForm((prev) => ({ ...prev, is_active: checked }))} />
+                    <Label className="mb-0">{t("dashboard.active")}</Label>
                   </div>
-                  <Button className="w-full" onClick={() => upsertMutation.mutate()} disabled={!form.name || upsertMutation.isPending}>
-                    {upsertMutation.isPending ? t("common.saving") : editingId ? t("common.update") : t("common.create")}
-                  </Button>
+
+                  {/* Action buttons */}
+                  <div className="flex justify-end gap-2 pt-2">
+                    <Button variant="outline" onClick={() => { setDialogOpen(false); resetForm(); }}>{t("common.cancel")}</Button>
+                    <Button onClick={() => upsertMutation.mutate()} disabled={!form.name || upsertMutation.isPending}>
+                      {upsertMutation.isPending ? t("common.saving") : editingId ? t("common.update") : t("common.save")}
+                    </Button>
+                  </div>
                 </div>
               </DialogContent>
             </Dialog>
