@@ -8,7 +8,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const SiteTabs = () => {
   const { tenantId, tenant, isOwner, isAdmin } = useTenant();
-  const { selectedSiteId, setSelectedSiteId } = useSiteContext();
+  const { selectedSiteId, setSelectedSiteId, setSelectedResourceId } = useSiteContext();
   const { isSystemAdmin } = usePermissions();
   const t = useT();
 
@@ -34,10 +34,15 @@ const SiteTabs = () => {
 
   if (!showSiteTabs) return null;
 
+  const handleChange = (val: string) => {
+    setSelectedSiteId(val === "all" ? null : val);
+    setSelectedResourceId(null); // Clear resource filter when switching site tabs
+  };
+
   return (
     <Tabs
       value={selectedSiteId ?? "all"}
-      onValueChange={(val) => setSelectedSiteId(val === "all" ? null : val)}
+      onValueChange={handleChange}
     >
       <TabsList className="flex-wrap h-auto gap-1">
         <TabsTrigger value="all" className="text-xs">
