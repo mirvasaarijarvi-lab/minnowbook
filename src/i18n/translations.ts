@@ -915,6 +915,38 @@ type TranslationKeys = {
   "aid.guideA10": string;
   "aid.guideQ11": string;
   "aid.guideA11": string;
+
+  // Sites
+  "sites.title": string;
+  "sites.addSite": string;
+  "sites.editSite": string;
+  "sites.tooltip": string;
+  "sites.allSites": string;
+  "sites.approvals": string;
+  "sites.siteName": string;
+  "sites.siteType": string;
+  "sites.slug": string;
+  "sites.slugHint": string;
+  "sites.location": string;
+  "sites.description": string;
+  "sites.descriptionPlaceholder": string;
+  "sites.createSite": string;
+  "sites.updateSite": string;
+  "sites.siteCreated": string;
+  "sites.siteUpdated": string;
+  "sites.siteDeleted": string;
+  "sites.duplicateSlug": string;
+  "sites.deleteSite": string;
+  "sites.deleteConfirm": string;
+  "sites.noSites": string;
+  "sites.resources": string;
+  "sites.status": string;
+  "sites.actions": string;
+  "sites.active": string;
+  "sites.draft": string;
+  "sites.typeHotel": string;
+  "sites.typeRestaurant": string;
+  "sites.typeVenue": string;
 };
 
 export type TranslationKey = keyof TranslationKeys;
@@ -1815,6 +1847,37 @@ const en: TranslationKeys = {
    "aid.guideA10": "In **Dashboard → Calendar**, click on a date and use the **Block Slot** option to prevent bookings for specific dates, times, or resources.",
    "aid.guideQ11": "How do I manage recurring blocked slots?",
    "aid.guideA11": "Go to **Dashboard → Calendar** and open the **Recurring Blocks** panel. You can create weekly repeating blocks for specific days, time ranges, and resource types (e.g. close the restaurant every Monday). Toggle blocks on/off or delete them anytime — changes apply immediately to the public booking page.",
+  // Sites
+  "sites.title": "Sites",
+  "sites.addSite": "Add Site",
+  "sites.editSite": "Edit Site",
+  "sites.tooltip": "Manage multiple locations or properties under your account. Each site can have its own resources, opening hours, and booking page.",
+  "sites.allSites": "All Sites",
+  "sites.approvals": "Approvals",
+  "sites.siteName": "Site Name",
+  "sites.siteType": "Site Type",
+  "sites.slug": "Slug",
+  "sites.slugHint": "Used in booking URL: /book/",
+  "sites.location": "Location",
+  "sites.description": "Description",
+  "sites.descriptionPlaceholder": "Optional description of this site",
+  "sites.createSite": "Create Site",
+  "sites.updateSite": "Update Site",
+  "sites.siteCreated": "Site created",
+  "sites.siteUpdated": "Site updated",
+  "sites.siteDeleted": "Site deleted",
+  "sites.duplicateSlug": "A site with this slug already exists",
+  "sites.deleteSite": "Delete",
+  "sites.deleteConfirm": "This will permanently remove this site. Resources assigned to it will become unassigned.",
+  "sites.noSites": "No sites yet. Create your first site to manage multiple locations.",
+  "sites.resources": "Resources",
+  "sites.status": "Status",
+  "sites.actions": "Actions",
+  "sites.active": "Active",
+  "sites.draft": "Draft",
+  "sites.typeHotel": "Hotel / Guesthouse",
+  "sites.typeRestaurant": "Restaurant",
+  "sites.typeVenue": "Event Space",
 };
 
 const fi: TranslationKeys = {
@@ -2712,6 +2775,37 @@ const fi: TranslationKeys = {
    "aid.guideA10": "**Hallintapaneeli → Kalenteri** -näkymässä klikkaa päivämäärää ja käytä **Estä aika** -toimintoa estääksesi varaukset tietyille päiville, ajoille tai resursseille.",
    "aid.guideQ11": "Miten hallitsen toistuvia estoja?",
    "aid.guideA11": "Siirry **Hallintapaneeli → Kalenteri** ja avaa **Toistuvat estot** -paneeli. Voit luoda viikoittain toistuvia estoja tietyille päiville, aikaväleille ja resurssityypeille (esim. sulkea ravintolan joka maanantai). Vaihda estoja päälle/pois tai poista ne milloin tahansa — muutokset näkyvät heti julkisella varaussivulla.",
+  // Sites
+  "sites.title": "Toimipisteet",
+  "sites.addSite": "Lisää toimipiste",
+  "sites.editSite": "Muokkaa toimipistettä",
+  "sites.tooltip": "Hallitse useita toimipisteitä tai kiinteistöjä tilisi alla. Jokaisella toimipisteellä voi olla omat resurssit, aukioloajat ja varaussivu.",
+  "sites.allSites": "Kaikki toimipisteet",
+  "sites.approvals": "Hyväksynnät",
+  "sites.siteName": "Toimipisteen nimi",
+  "sites.siteType": "Tyyppi",
+  "sites.slug": "Tunniste",
+  "sites.slugHint": "Käytetään varaus-URL:ssa: /book/",
+  "sites.location": "Sijainti",
+  "sites.description": "Kuvaus",
+  "sites.descriptionPlaceholder": "Valinnainen kuvaus toimipisteestä",
+  "sites.createSite": "Luo toimipiste",
+  "sites.updateSite": "Päivitä toimipiste",
+  "sites.siteCreated": "Toimipiste luotu",
+  "sites.siteUpdated": "Toimipiste päivitetty",
+  "sites.siteDeleted": "Toimipiste poistettu",
+  "sites.duplicateSlug": "Tällä tunnisteella on jo toimipiste",
+  "sites.deleteSite": "Poista",
+  "sites.deleteConfirm": "Tämä poistaa toimipisteen pysyvästi. Siihen liitetyt resurssit jäävät ilman toimipistettä.",
+  "sites.noSites": "Ei toimipisteitä vielä. Luo ensimmäinen toimipiste hallitaksesi useita sijainteja.",
+  "sites.resources": "Resurssit",
+  "sites.status": "Tila",
+  "sites.actions": "Toiminnot",
+  "sites.active": "Aktiivinen",
+  "sites.draft": "Luonnos",
+  "sites.typeHotel": "Hotelli / Majatalo",
+  "sites.typeRestaurant": "Ravintola",
+  "sites.typeVenue": "Tapahtumatila",
 };
 
 const sv: TranslationKeys = {
@@ -3609,6 +3703,37 @@ const sv: TranslationKeys = {
    "aid.guideA10": "Under **Instrumentpanel → Kalender**, klicka på ett datum och använd **Blockera tid** för att förhindra bokningar för specifika datum, tider eller resurser.",
    "aid.guideQ11": "Hur hanterar jag återkommande blockeringar?",
    "aid.guideA11": "Gå till **Instrumentpanel → Kalender** och öppna panelen **Återkommande blockeringar**. Du kan skapa veckovis återkommande blockeringar för specifika dagar, tidsintervall och resurstyper (t.ex. stänga restaurangen varje måndag). Slå av/på eller ta bort blockeringar när som helst — ändringar gäller direkt på den publika bokningssidan.",
+  // Sites
+  "sites.title": "Platser",
+  "sites.addSite": "Lägg till plats",
+  "sites.editSite": "Redigera plats",
+  "sites.tooltip": "Hantera flera platser eller fastigheter under ditt konto. Varje plats kan ha egna resurser, öppettider och bokningssida.",
+  "sites.allSites": "Alla platser",
+  "sites.approvals": "Godkännanden",
+  "sites.siteName": "Platsnamn",
+  "sites.siteType": "Typ",
+  "sites.slug": "Slug",
+  "sites.slugHint": "Används i boknings-URL: /book/",
+  "sites.location": "Plats",
+  "sites.description": "Beskrivning",
+  "sites.descriptionPlaceholder": "Valfri beskrivning av denna plats",
+  "sites.createSite": "Skapa plats",
+  "sites.updateSite": "Uppdatera plats",
+  "sites.siteCreated": "Plats skapad",
+  "sites.siteUpdated": "Plats uppdaterad",
+  "sites.siteDeleted": "Plats borttagen",
+  "sites.duplicateSlug": "En plats med denna slug finns redan",
+  "sites.deleteSite": "Ta bort",
+  "sites.deleteConfirm": "Detta tar bort platsen permanent. Resurser kopplade till den blir otilldelade.",
+  "sites.noSites": "Inga platser ännu. Skapa din första plats för att hantera flera lokaler.",
+  "sites.resources": "Resurser",
+  "sites.status": "Status",
+  "sites.actions": "Åtgärder",
+  "sites.active": "Aktiv",
+  "sites.draft": "Utkast",
+  "sites.typeHotel": "Hotell / Gästhus",
+  "sites.typeRestaurant": "Restaurang",
+  "sites.typeVenue": "Eventlokal",
 };
 
 export const translations: Record<Language, TranslationKeys> = { en, fi, sv };
