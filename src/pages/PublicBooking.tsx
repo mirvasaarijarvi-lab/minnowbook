@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Calendar } from "@/components/ui/calendar";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Loader2, CheckCircle, UtensilsCrossed, Building2, Home, Clock, CalendarDays, CalendarIcon, BedDouble, Coffee, Users } from "lucide-react";
+import { Loader2, CheckCircle, UtensilsCrossed, Building2, Home, Clock, CalendarDays, CalendarIcon, BedDouble, Coffee, Users, Truck, ShoppingBag, ChefHat, Plug, Droplets } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
 import { format, startOfMonth, endOfMonth, addMonths, subMonths, isSameDay } from "date-fns";
@@ -205,6 +205,19 @@ const PublicBooking = () => {
     // Restaurant fields
     pricing_type: "" as "" | "menu" | "fixed_price",
     fixed_price: "",
+    restaurant_sub_type: "dine_in" as "dine_in" | "catering" | "popup",
+    // Catering fields
+    delivery_address: "",
+    dietary_notes: "",
+    equipment_needed: false,
+    staff_needed: false,
+    // Pop-up fields
+    festival_name: "",
+    stall_size: "",
+    electricity_needed: false,
+    water_needed: false,
+    food_permits: "",
+    stall_fee: "",
   });
 
   // Pre-select booking type from URL query param (?type=venue, ?type=guesthouse, etc.)
@@ -496,8 +509,25 @@ const PublicBooking = () => {
         payload.catering_needed = form.catering_needed;
       }
       if (parsed.reservation_type === "restaurant") {
-        payload.pricing_type = form.pricing_type || null;
-        payload.fixed_price = form.pricing_type === "fixed_price" && form.fixed_price ? parseFloat(form.fixed_price) : null;
+        payload.restaurant_sub_type = form.restaurant_sub_type;
+        if (form.restaurant_sub_type === "dine_in") {
+          payload.pricing_type = form.pricing_type || null;
+          payload.fixed_price = form.pricing_type === "fixed_price" && form.fixed_price ? parseFloat(form.fixed_price) : null;
+        }
+        if (form.restaurant_sub_type === "catering") {
+          payload.delivery_address = form.delivery_address || null;
+          payload.dietary_notes = form.dietary_notes || null;
+          payload.equipment_needed = form.equipment_needed;
+          payload.staff_needed = form.staff_needed;
+        }
+        if (form.restaurant_sub_type === "popup") {
+          payload.festival_name = form.festival_name || null;
+          payload.stall_size = form.stall_size || null;
+          payload.electricity_needed = form.electricity_needed;
+          payload.water_needed = form.water_needed;
+          payload.food_permits = form.food_permits || null;
+          payload.stall_fee = form.stall_fee ? parseFloat(form.stall_fee) : null;
+        }
       }
 
       const { data, error } = await supabase.functions.invoke("public-booking", {
@@ -615,7 +645,7 @@ const PublicBooking = () => {
               <p className="text-muted-foreground">{t("booking.confirmationMsg")}</p>
               <Button
                 variant="outline"
-                onClick={() => { setSubmitted(false); setForm({ guest_name: "", guest_email: "", guest_phone: "", guests_count: "", reservation_type: "", start_time: "", special_requests: "", resource_id: "", check_out_date: "", room_type: "", breakfast_included: false, event_type: "", estimated_guests: "", catering_needed: false, pricing_type: "", fixed_price: "" }); setSelectedDate(undefined); }}
+                onClick={() => { setSubmitted(false); setForm({ guest_name: "", guest_email: "", guest_phone: "", guests_count: "", reservation_type: "", start_time: "", special_requests: "", resource_id: "", check_out_date: "", room_type: "", breakfast_included: false, event_type: "", estimated_guests: "", catering_needed: false, pricing_type: "", fixed_price: "", restaurant_sub_type: "dine_in", delivery_address: "", dietary_notes: "", equipment_needed: false, staff_needed: false, festival_name: "", stall_size: "", electricity_needed: false, water_needed: false, food_permits: "", stall_fee: "" }); setSelectedDate(undefined); }}
               >
                 {t("booking.makeAnother")}
               </Button>
@@ -853,6 +883,17 @@ const PublicBooking = () => {
                             estimated_guests: "",
                             catering_needed: false,
                             pricing_type: "",
+                            restaurant_sub_type: "dine_in",
+                            delivery_address: "",
+                            dietary_notes: "",
+                            equipment_needed: false,
+                            staff_needed: false,
+                            festival_name: "",
+                            stall_size: "",
+                            electricity_needed: false,
+                            water_needed: false,
+                            food_permits: "",
+                            stall_fee: "",
                           }));
                           if (errors.reservation_type) setErrors((prev) => ({ ...prev, reservation_type: "" }));
                         }}
@@ -1181,47 +1222,203 @@ const PublicBooking = () => {
             </Card>
           )}
 
-          {/* Type-specific fields: Restaurant pricing */}
+          {/* Type-specific fields: Restaurant */}
           {form.reservation_type === "restaurant" && (
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg font-serif flex items-center gap-2" style={{ color: primaryColor }}>
                   <UtensilsCrossed className="h-5 w-5" />
-                  {t("booking.pricingType" as any)}
+                  {t("booking.restaurantSubType" as any)}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex items-center gap-4">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <Checkbox
-                      checked={form.pricing_type === "menu"}
-                      onCheckedChange={(checked) => {
-                        if (checked) setForm((prev) => ({ ...prev, pricing_type: "menu", fixed_price: "" }));
-                      }}
-                    />
-                    <span className="text-sm">{t("booking.pricingMenu" as any)}</span>
-                  </label>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <Checkbox
-                      checked={form.pricing_type === "fixed_price"}
-                      onCheckedChange={(checked) => {
-                        if (checked) setForm((prev) => ({ ...prev, pricing_type: "fixed_price" }));
-                      }}
-                    />
-                    <span className="text-sm">{t("booking.pricingFixed" as any)}</span>
-                  </label>
+                {/* Sub-type selector */}
+                <div className="grid gap-3 sm:grid-cols-3">
+                  {([
+                    { value: "dine_in", icon: UtensilsCrossed, labelKey: "booking.subTypeDineIn", descKey: "booking.subTypeDineInDesc" },
+                    { value: "catering", icon: Truck, labelKey: "booking.subTypeCatering", descKey: "booking.subTypeCateringDesc" },
+                    { value: "popup", icon: ShoppingBag, labelKey: "booking.subTypePopup", descKey: "booking.subTypePopupDesc" },
+                  ] as const).map(({ value, icon: Icon, labelKey, descKey }) => {
+                    const isSelected = form.restaurant_sub_type === value;
+                    return (
+                      <button
+                        key={value}
+                        type="button"
+                        onClick={() => setForm((prev) => ({ ...prev, restaurant_sub_type: value as any }))}
+                        className="flex flex-col items-center gap-1.5 p-3 rounded-lg border-2 transition-all text-center"
+                        style={{
+                          borderColor: isSelected ? accentColor : "#e5e7eb",
+                          backgroundColor: isSelected ? `${accentColor}10` : "transparent",
+                        }}
+                      >
+                        <Icon className="h-5 w-5" style={{ color: isSelected ? accentColor : primaryColor }} />
+                        <span className="text-sm font-medium" style={{ color: primaryColor }}>{t(labelKey as any)}</span>
+                        <span className="text-xs" style={{ color: `${primaryColor}60` }}>{t(descKey as any)}</span>
+                      </button>
+                    );
+                  })}
                 </div>
-                {form.pricing_type === "fixed_price" && (
-                  <div className="space-y-2">
-                    <Label>{t("booking.fixedPrice" as any)}</Label>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      min={0}
-                      value={form.fixed_price}
-                      onChange={(e) => updateField("fixed_price", e.target.value)}
-                      placeholder={t("booking.fixedPricePlaceholder")}
-                    />
+
+                {/* Dine-in: pricing type */}
+                {form.restaurant_sub_type === "dine_in" && (
+                  <div className="space-y-3 rounded-lg border border-border p-3">
+                    <Label className="font-medium">{t("booking.pricingType" as any)}</Label>
+                    <div className="flex items-center gap-4">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <Checkbox
+                          checked={form.pricing_type === "menu"}
+                          onCheckedChange={(checked) => {
+                            if (checked) setForm((prev) => ({ ...prev, pricing_type: "menu", fixed_price: "" }));
+                          }}
+                        />
+                        <span className="text-sm">{t("booking.pricingMenu" as any)}</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <Checkbox
+                          checked={form.pricing_type === "fixed_price"}
+                          onCheckedChange={(checked) => {
+                            if (checked) setForm((prev) => ({ ...prev, pricing_type: "fixed_price" }));
+                          }}
+                        />
+                        <span className="text-sm">{t("booking.pricingFixed" as any)}</span>
+                      </label>
+                    </div>
+                    {form.pricing_type === "fixed_price" && (
+                      <div className="space-y-2">
+                        <Label>{t("booking.fixedPrice" as any)}</Label>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          min={0}
+                          value={form.fixed_price}
+                          onChange={(e) => updateField("fixed_price", e.target.value)}
+                          placeholder={t("booking.fixedPricePlaceholder")}
+                        />
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Catering fields */}
+                {form.restaurant_sub_type === "catering" && (
+                  <div className="space-y-3 rounded-lg border border-border p-3">
+                    <Label className="font-medium flex items-center gap-1.5">
+                      <ChefHat className="h-4 w-4" />
+                      {t("booking.cateringDetails" as any)}
+                    </Label>
+                    <div className="space-y-2">
+                      <Label>{t("booking.deliveryAddress" as any)}</Label>
+                      <Input
+                        value={form.delivery_address}
+                        onChange={(e) => updateField("delivery_address", e.target.value)}
+                        maxLength={200}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>{t("booking.dietaryNotes" as any)}</Label>
+                      <Textarea
+                        rows={2}
+                        value={form.dietary_notes}
+                        onChange={(e) => updateField("dietary_notes", e.target.value)}
+                        maxLength={500}
+                      />
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-2">
+                        <Checkbox
+                          id="equipment_needed"
+                          checked={form.equipment_needed}
+                          onCheckedChange={(checked) => updateBoolField("equipment_needed", !!checked)}
+                        />
+                        <Label htmlFor="equipment_needed" className="cursor-pointer text-sm">
+                          {t("booking.equipmentNeeded" as any)}
+                        </Label>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Checkbox
+                          id="staff_needed"
+                          checked={form.staff_needed}
+                          onCheckedChange={(checked) => updateBoolField("staff_needed", !!checked)}
+                        />
+                        <Label htmlFor="staff_needed" className="cursor-pointer text-sm">
+                          {t("booking.staffNeeded" as any)}
+                        </Label>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Pop-up fields */}
+                {form.restaurant_sub_type === "popup" && (
+                  <div className="space-y-3 rounded-lg border border-border p-3">
+                    <Label className="font-medium flex items-center gap-1.5">
+                      <ShoppingBag className="h-4 w-4" />
+                      {t("booking.popupDetails" as any)}
+                    </Label>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div className="space-y-2">
+                        <Label>{t("booking.festivalName" as any)}</Label>
+                        <Input
+                          value={form.festival_name}
+                          onChange={(e) => updateField("festival_name", e.target.value)}
+                          maxLength={100}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>{t("booking.stallSize" as any)}</Label>
+                        <Select value={form.stall_size} onValueChange={(v) => updateField("stall_size", v)}>
+                          <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="small">{t("booking.stallSizeSmall" as any)}</SelectItem>
+                            <SelectItem value="medium">{t("booking.stallSizeMedium" as any)}</SelectItem>
+                            <SelectItem value="large">{t("booking.stallSizeLarge" as any)}</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-2">
+                        <Checkbox
+                          id="electricity_needed"
+                          checked={form.electricity_needed}
+                          onCheckedChange={(checked) => updateBoolField("electricity_needed", !!checked)}
+                        />
+                        <Label htmlFor="electricity_needed" className="cursor-pointer text-sm flex items-center gap-1">
+                          <Plug className="h-3.5 w-3.5" />
+                          {t("booking.electricityNeeded" as any)}
+                        </Label>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Checkbox
+                          id="water_needed"
+                          checked={form.water_needed}
+                          onCheckedChange={(checked) => updateBoolField("water_needed", !!checked)}
+                        />
+                        <Label htmlFor="water_needed" className="cursor-pointer text-sm flex items-center gap-1">
+                          <Droplets className="h-3.5 w-3.5" />
+                          {t("booking.waterNeeded" as any)}
+                        </Label>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>{t("booking.foodPermits" as any)}</Label>
+                      <Textarea
+                        rows={2}
+                        value={form.food_permits}
+                        onChange={(e) => updateField("food_permits", e.target.value)}
+                        maxLength={500}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>{t("booking.stallFee" as any)}</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        min={0}
+                        value={form.stall_fee}
+                        onChange={(e) => updateField("stall_fee", e.target.value)}
+                      />
+                    </div>
                   </div>
                 )}
               </CardContent>

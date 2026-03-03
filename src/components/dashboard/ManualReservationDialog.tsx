@@ -63,6 +63,17 @@ const emptyForm = {
   catering_needed: false,
   // Restaurant
   pricing_type: "" as "" | "menu" | "fixed_price",
+  restaurant_sub_type: "dine_in" as "dine_in" | "catering" | "popup",
+  delivery_address: "",
+  dietary_notes: "",
+  equipment_needed: false,
+  staff_needed: false,
+  festival_name: "",
+  stall_size: "",
+  electricity_needed: false,
+  water_needed: false,
+  food_permits: "",
+  stall_fee: "",
 };
 
 const ManualReservationDialog = ({
@@ -148,6 +159,17 @@ const ManualReservationDialog = ({
         ...(form.reservation_type === "restaurant" && {
           pricing_type: form.pricing_type || null,
           price_eur: form.pricing_type === "fixed_price" && form.price_eur ? parseFloat(form.price_eur) : null,
+          restaurant_sub_type: form.restaurant_sub_type,
+          delivery_address: form.delivery_address || null,
+          dietary_notes: form.dietary_notes || null,
+          equipment_needed: form.equipment_needed,
+          staff_needed: form.staff_needed,
+          festival_name: form.festival_name || null,
+          stall_size: form.stall_size || null,
+          electricity_needed: form.electricity_needed,
+          water_needed: form.water_needed,
+          food_permits: form.food_permits || null,
+          stall_fee: form.stall_fee ? parseFloat(form.stall_fee) : null,
         }),
       } as any);
       if (error) throw error;
@@ -373,30 +395,69 @@ const ManualReservationDialog = ({
             </div>
           )}
 
-          {/* Restaurant pricing type */}
+          {/* Restaurant sub-type & fields */}
           {isRestaurantType && (
             <div className="space-y-3 rounded-lg border border-border p-3">
-              <Label>{t("booking.pricingType" as any)}</Label>
-              <div className="flex items-center gap-4">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <Checkbox
-                    checked={form.pricing_type === "menu"}
-                    onCheckedChange={(checked) => {
-                      if (checked) setForm((prev) => ({ ...prev, pricing_type: "menu" as const, price_eur: "" }));
-                    }}
-                  />
-                  <span className="text-sm">{t("booking.pricingMenu" as any)}</span>
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <Checkbox
-                    checked={form.pricing_type === "fixed_price"}
-                    onCheckedChange={(checked) => {
-                      if (checked) setForm((prev) => ({ ...prev, pricing_type: "fixed_price" as const }));
-                    }}
-                  />
-                  <span className="text-sm">{t("booking.pricingFixed" as any)}</span>
-                </label>
-              </div>
+              <Label className="font-medium">{t("booking.restaurantSubType" as any)}</Label>
+              <Select value={form.restaurant_sub_type} onValueChange={(v) => setForm((prev) => ({ ...prev, restaurant_sub_type: v as any }))}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="dine_in">{t("booking.subTypeDineIn" as any)}</SelectItem>
+                  <SelectItem value="catering">{t("booking.subTypeCatering" as any)}</SelectItem>
+                  <SelectItem value="popup">{t("booking.subTypePopup" as any)}</SelectItem>
+                </SelectContent>
+              </Select>
+
+              {form.restaurant_sub_type === "dine_in" && (
+                <>
+                  <Label>{t("booking.pricingType" as any)}</Label>
+                  <div className="flex items-center gap-4">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <Checkbox checked={form.pricing_type === "menu"} onCheckedChange={(checked) => { if (checked) setForm((prev) => ({ ...prev, pricing_type: "menu" as const, price_eur: "" })); }} />
+                      <span className="text-sm">{t("booking.pricingMenu" as any)}</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <Checkbox checked={form.pricing_type === "fixed_price"} onCheckedChange={(checked) => { if (checked) setForm((prev) => ({ ...prev, pricing_type: "fixed_price" as const })); }} />
+                      <span className="text-sm">{t("booking.pricingFixed" as any)}</span>
+                    </label>
+                  </div>
+                </>
+              )}
+
+              {form.restaurant_sub_type === "catering" && (
+                <div className="space-y-2">
+                  <div><Label>{t("booking.deliveryAddress" as any)}</Label><Input value={form.delivery_address} onChange={(e) => updateField("delivery_address", e.target.value)} maxLength={200} /></div>
+                  <div><Label>{t("booking.dietaryNotes" as any)}</Label><Input value={form.dietary_notes} onChange={(e) => updateField("dietary_notes", e.target.value)} maxLength={500} /></div>
+                  <div className="flex gap-4">
+                    <label className="flex items-center gap-2 cursor-pointer text-sm"><Checkbox checked={form.equipment_needed} onCheckedChange={(c) => setForm((p) => ({ ...p, equipment_needed: !!c }))} />{t("booking.equipmentNeeded" as any)}</label>
+                    <label className="flex items-center gap-2 cursor-pointer text-sm"><Checkbox checked={form.staff_needed} onCheckedChange={(c) => setForm((p) => ({ ...p, staff_needed: !!c }))} />{t("booking.staffNeeded" as any)}</label>
+                  </div>
+                </div>
+              )}
+
+              {form.restaurant_sub_type === "popup" && (
+                <div className="space-y-2">
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    <div><Label>{t("booking.festivalName" as any)}</Label><Input value={form.festival_name} onChange={(e) => updateField("festival_name", e.target.value)} maxLength={100} /></div>
+                    <div><Label>{t("booking.stallSize" as any)}</Label>
+                      <Select value={form.stall_size} onValueChange={(v) => updateField("stall_size", v)}>
+                        <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="small">{t("booking.stallSizeSmall" as any)}</SelectItem>
+                          <SelectItem value="medium">{t("booking.stallSizeMedium" as any)}</SelectItem>
+                          <SelectItem value="large">{t("booking.stallSizeLarge" as any)}</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div className="flex gap-4">
+                    <label className="flex items-center gap-2 cursor-pointer text-sm"><Checkbox checked={form.electricity_needed} onCheckedChange={(c) => setForm((p) => ({ ...p, electricity_needed: !!c }))} />{t("booking.electricityNeeded" as any)}</label>
+                    <label className="flex items-center gap-2 cursor-pointer text-sm"><Checkbox checked={form.water_needed} onCheckedChange={(c) => setForm((p) => ({ ...p, water_needed: !!c }))} />{t("booking.waterNeeded" as any)}</label>
+                  </div>
+                  <div><Label>{t("booking.foodPermits" as any)}</Label><Input value={form.food_permits} onChange={(e) => updateField("food_permits", e.target.value)} maxLength={500} /></div>
+                  <div><Label>{t("booking.stallFee" as any)}</Label><Input type="number" step="0.01" min={0} value={form.stall_fee} onChange={(e) => updateField("stall_fee", e.target.value)} /></div>
+                </div>
+              )}
             </div>
           )}
 

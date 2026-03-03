@@ -258,9 +258,15 @@ export type Database = {
           created_at: string | null
           created_by: string | null
           date: string
+          delivery_address: string | null
+          dietary_notes: string | null
+          electricity_needed: boolean | null
           end_time: string | null
+          equipment_needed: boolean | null
           estimated_guests: number | null
           event_type: string | null
+          festival_name: string | null
+          food_permits: string | null
           guest_email: string
           guest_name: string
           guest_phone: string | null
@@ -278,14 +284,19 @@ export type Database = {
           pricing_details: string | null
           pricing_type: string | null
           reservation_type: string
+          restaurant_sub_type: string | null
           room_type: string | null
           site_id: string | null
           special_requests: string | null
+          staff_needed: boolean | null
           staff_notes: string | null
+          stall_fee: number | null
+          stall_size: string | null
           start_time: string | null
           status: string | null
           tenant_id: string
           updated_at: string | null
+          water_needed: boolean | null
         }
         Insert: {
           accommodation_needed?: boolean | null
@@ -299,9 +310,15 @@ export type Database = {
           created_at?: string | null
           created_by?: string | null
           date: string
+          delivery_address?: string | null
+          dietary_notes?: string | null
+          electricity_needed?: boolean | null
           end_time?: string | null
+          equipment_needed?: boolean | null
           estimated_guests?: number | null
           event_type?: string | null
+          festival_name?: string | null
+          food_permits?: string | null
           guest_email: string
           guest_name: string
           guest_phone?: string | null
@@ -319,14 +336,19 @@ export type Database = {
           pricing_details?: string | null
           pricing_type?: string | null
           reservation_type: string
+          restaurant_sub_type?: string | null
           room_type?: string | null
           site_id?: string | null
           special_requests?: string | null
+          staff_needed?: boolean | null
           staff_notes?: string | null
+          stall_fee?: number | null
+          stall_size?: string | null
           start_time?: string | null
           status?: string | null
           tenant_id: string
           updated_at?: string | null
+          water_needed?: boolean | null
         }
         Update: {
           accommodation_needed?: boolean | null
@@ -340,9 +362,15 @@ export type Database = {
           created_at?: string | null
           created_by?: string | null
           date?: string
+          delivery_address?: string | null
+          dietary_notes?: string | null
+          electricity_needed?: boolean | null
           end_time?: string | null
+          equipment_needed?: boolean | null
           estimated_guests?: number | null
           event_type?: string | null
+          festival_name?: string | null
+          food_permits?: string | null
           guest_email?: string
           guest_name?: string
           guest_phone?: string | null
@@ -360,14 +388,19 @@ export type Database = {
           pricing_details?: string | null
           pricing_type?: string | null
           reservation_type?: string
+          restaurant_sub_type?: string | null
           room_type?: string | null
           site_id?: string | null
           special_requests?: string | null
+          staff_needed?: boolean | null
           staff_notes?: string | null
+          stall_fee?: number | null
+          stall_size?: string | null
           start_time?: string | null
           status?: string | null
           tenant_id?: string
           updated_at?: string | null
+          water_needed?: boolean | null
         }
         Relationships: [
           {
