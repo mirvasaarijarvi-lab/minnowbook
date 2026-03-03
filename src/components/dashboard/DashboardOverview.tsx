@@ -29,7 +29,7 @@ import { useMemo } from "react";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip as RechartsTooltip, CartesianGrid } from "recharts";
 
 interface DashboardOverviewProps {
-  onNavigate?: (view: string, filter?: { status?: string }) => void;
+  onNavigate?: (view: string, filter?: { status?: string; invoiced?: boolean }) => void;
 }
 
 const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
@@ -393,12 +393,18 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
               </span>
               <span className="font-semibold text-foreground">{stats?.checkoutsToday ?? 0}</span>
             </div>
-            <div className="flex items-center justify-between text-sm">
+            <div
+              className="flex items-center justify-between text-sm cursor-pointer rounded-md p-1 -m-1 hover:bg-accent/10 transition-colors"
+              onClick={() => onNavigate?.("reservations", { invoiced: false })}
+            >
               <span className="flex items-center gap-2 text-muted-foreground">
                 <Receipt className="h-4 w-4 text-red-500" />
                 {t("dashboard.uninvoiced" as any) !== "dashboard.uninvoiced" ? t("dashboard.uninvoiced" as any) : "Uninvoiced"}
               </span>
-              <span className="font-semibold text-foreground">{stats?.uninvoiced ?? 0}</span>
+              <span className="font-semibold text-foreground flex items-center gap-1">
+                {stats?.uninvoiced ?? 0}
+                <ArrowRight className="h-3 w-3 text-muted-foreground" />
+              </span>
             </div>
           </CardContent>
         </Card>
