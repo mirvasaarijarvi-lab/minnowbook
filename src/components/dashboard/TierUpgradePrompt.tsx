@@ -24,7 +24,7 @@ const upgradeInfo: Record<string, { targetTier: string; features: string[] }> = 
   "basic-sites": {
     targetTier: "business",
     features: [
-      "Unlimited sites & locations",
+      "Up to 3 sites & locations",
       "All reservation types",
       "Unlimited staff users",
       "Multi-site management dashboard",
@@ -33,7 +33,7 @@ const upgradeInfo: Record<string, { targetTier: string; features: string[] }> = 
   "professional-sites": {
     targetTier: "business",
     features: [
-      "Unlimited sites & locations",
+      "Up to 3 sites & locations",
       "Unlimited staff users",
       "Multi-site management dashboard",
       "Advanced reporting",
@@ -45,6 +45,15 @@ const upgradeInfo: Record<string, { targetTier: string; features: string[] }> = 
       "All reservation types already included",
     ],
   },
+  "business-sites": {
+    targetTier: "enterprise",
+    features: [
+      "Unlimited sites & locations",
+      "Dedicated account manager",
+      "Priority support",
+      "Custom integrations & SLA",
+    ],
+  },
 };
 
 const TierUpgradePrompt = ({ open, onOpenChange, currentTier, feature }: TierUpgradePromptProps) => {
@@ -54,9 +63,10 @@ const TierUpgradePrompt = ({ open, onOpenChange, currentTier, feature }: TierUpg
   const targetLabel = getTierLabel(info.targetTier);
 
   const messageMap: Record<string, string> = {
-    "basic-sites": `Your ${currentLabel} plan supports 1 site. Upgrade to ${targetLabel} for unlimited locations.`,
+    "basic-sites": `Your ${currentLabel} plan supports 1 site. Upgrade to ${targetLabel} for up to 3 locations.`,
     "basic-types": `Your ${currentLabel} plan supports 1 reservation type. Upgrade to ${targetLabel} to unlock all types.`,
-    "professional-sites": `Your ${currentLabel} plan supports 1 site. Upgrade to ${targetLabel} for unlimited locations.`,
+    "professional-sites": `Your ${currentLabel} plan supports 1 site. Upgrade to ${targetLabel} for up to 3 locations.`,
+    "business-sites": `Your ${currentLabel} plan supports up to 3 sites. Upgrade to ${targetLabel} for unlimited locations.`,
   };
 
   const message = messageMap[key] ??
