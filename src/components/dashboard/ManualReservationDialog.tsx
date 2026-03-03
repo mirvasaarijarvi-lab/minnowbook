@@ -31,7 +31,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useDateLocale } from "@/hooks/useDateLocale";
 import { toast } from "sonner";
 import { format } from "date-fns";
-import { CalendarIcon, Loader2 } from "lucide-react";
+import { CalendarIcon, Loader2, Tag } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ManualReservationDialogProps {
@@ -74,6 +74,10 @@ const emptyForm = {
   water_needed: false,
   food_permits: "",
   stall_fee: "",
+  // Discount
+  discount_type: "" as "" | "percentage" | "fixed" | "free_nights",
+  discount_value: "",
+  discount_reason: "",
 };
 
 const ManualReservationDialog = ({
@@ -146,6 +150,12 @@ const ManualReservationDialog = ({
         internal_notes: form.internal_notes.trim() || null,
         price_eur: form.price_eur ? parseFloat(form.price_eur) : null,
         status: "confirmed",
+        ...(form.discount_type && form.discount_value ? {
+          discount_type: form.discount_type,
+          discount_value: parseFloat(form.discount_value),
+          discount_reason: form.discount_reason.trim() || null,
+          original_price_eur: form.price_eur ? parseFloat(form.price_eur) : null,
+        } : {}),
         ...(isAccommodation && {
           check_out_date: form.check_out_date || null,
           room_type: form.room_type || null,
@@ -460,6 +470,35 @@ const ManualReservationDialog = ({
               )}
             </div>
           )}
+
+          {/* Discount */}
+          <div className="space-y-3 rounded-lg border border-border p-3">
+            <Label className="font-medium flex items-center gap-1.5">
+              <Tag className="h-3.5 w-3.5 text-accent" />
+              {t("discount.title" as any) || "Discount"}
+            </Label>
+            <div className="grid gap-3 sm:grid-cols-3">
+              <div className="space-y-1.5">
+                <Label className="text-xs">{t("discount.type" as any) || "Type"}</Label>
+                <Select value={form.discount_type} onValueChange={(v) => setForm((prev) => ({ ...prev, discount_type: v as any }))}>
+                  <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="percentage">{t("discount.percentage" as any) || "Percentage (%)"}</SelectItem>
+                    <SelectItem value="fixed">{t("discount.fixed" as any) || "Fixed amount (€)"}</SelectItem>
+                    <SelectItem value="free_nights">{t("discount.freeNights" as any) || "Free nights/meals"}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">{t("discount.value" as any) || "Value"}</Label>
+                <Input type="number" step="0.01" min={0} value={form.discount_value} onChange={(e) => updateField("discount_value", e.target.value)} placeholder={form.discount_type === "percentage" ? "e.g. 10" : form.discount_type === "free_nights" ? "e.g. 1" : "e.g. 20"} />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">{t("discount.reason" as any) || "Reason"}</Label>
+                <Input value={form.discount_reason} onChange={(e) => updateField("discount_reason", e.target.value)} maxLength={200} placeholder={t("discount.reasonPlaceholder" as any) || "e.g. Loyalty customer"} />
+              </div>
+            </div>
+          </div>
 
           {/* Price & notes */}
           <div className="grid gap-3 sm:grid-cols-2">

@@ -217,6 +217,42 @@ Deno.serve(async (req) => {
       throw new Error("This reservation type is not available");
     }
 
+    // Validate promo code if provided
+    const promo_code = validateString(body.promo_code, "promo_code", 50);
+    let discount_type: string | null = null;
+    let discount_value: number | null = null;
+    let discount_code_id: string | null = null;
+
+    if (promo_code) {
+      const { data: code, error: codeErr } = await adminClient
+        .from("discount_codes")
+        .select("*")
+        .eq("tenant_id", tenant_id)
+        .eq("code", promo_code.toUpperCase())
+        .eq("is_active", true)
+        .maybeSingle();
+
+      if (codeErr || !code) throw new Error("Invalid or expired promo code");
+
+      const today = new Date().toISOString().split("T")[0];
+      if (code.valid_from && today < code.valid_from) throw new Error("Promo code is not yet valid");
+      if (code.valid_until && today > code.valid_until) throw new Error("Promo code has expired");
+      if (code.max_uses && code.used_count >= code.max_uses) throw new Error("Promo code has reached its usage limit");
+      if (code.applies_to && code.applies_to.length > 0 && !code.applies_to.includes(reservation_type)) {
+        throw new Error("Promo code does not apply to this reservation type");
+      }
+
+      discount_type = code.discount_type;
+      discount_value = code.discount_value;
+      discount_code_id = code.id;
+
+      // Increment used count
+      await adminClient
+        .from("discount_codes")
+        .update({ used_count: code.used_count + 1 })
+        .eq("id", code.id);
+    }
+
     // Insert reservation
     const insertData: Record<string, unknown> = {
       tenant_id,
@@ -230,6 +266,13 @@ Deno.serve(async (req) => {
       special_requests,
       status: "pending",
     };
+
+    if (discount_type && discount_value) {
+      insertData.discount_type = discount_type;
+      insertData.discount_value = discount_value;
+      insertData.discount_code_id = discount_code_id;
+      insertData.discount_reason = `Promo code: ${promo_code}`;
+    }
 
     if (isAccommodation) {
       insertData.check_out_date = check_out_date;
