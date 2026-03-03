@@ -1148,6 +1148,9 @@ export type Database = {
         Row: {
           allowed_reservation_types: string[]
           created_at: string | null
+          discount_granted_by: string | null
+          discount_percentage: number | null
+          discount_reason: string | null
           id: string
           is_active: boolean | null
           max_staff_users: number
@@ -1165,6 +1168,9 @@ export type Database = {
         Insert: {
           allowed_reservation_types?: string[]
           created_at?: string | null
+          discount_granted_by?: string | null
+          discount_percentage?: number | null
+          discount_reason?: string | null
           id?: string
           is_active?: boolean | null
           max_staff_users?: number
@@ -1182,6 +1188,9 @@ export type Database = {
         Update: {
           allowed_reservation_types?: string[]
           created_at?: string | null
+          discount_granted_by?: string | null
+          discount_percentage?: number | null
+          discount_reason?: string | null
           id?: string
           is_active?: boolean | null
           max_staff_users?: number
