@@ -650,6 +650,7 @@ const SettingsPanel = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tenant-settings"], refetchType: "all" });
+      queryClient.invalidateQueries({ queryKey: ["tenant-settings-resource-names"], refetchType: "all" });
       queryClient.invalidateQueries({ queryKey: ["tenant-settings-business"] });
       toast.success(t("settings.saved"));
     },

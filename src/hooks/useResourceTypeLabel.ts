@@ -13,7 +13,7 @@ export const useResourceTypeLabel = () => {
   const t = useT();
 
   const { data: settings } = useQuery({
-    queryKey: ["tenant-settings", tenantId],
+    queryKey: ["tenant-settings-resource-names", tenantId],
     queryFn: async () => {
       if (!tenantId) return null;
       const { data, error } = await supabase
