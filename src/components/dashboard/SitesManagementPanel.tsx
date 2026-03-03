@@ -44,6 +44,7 @@ import { toast } from "@/hooks/use-toast";
 import { Plus, MapPin, Pencil, Trash2, Building2, UtensilsCrossed, Hotel, CalendarDays, ChevronDown, ChevronRight, Users } from "lucide-react";
 import DashboardTooltip from "./DashboardTooltip";
 import BulkAssignUsersDialog from "./BulkAssignUsersDialog";
+import TierUpgradePrompt from "./TierUpgradePrompt";
 import {
   Select,
   SelectContent,
@@ -117,6 +118,7 @@ const SitesManagementPanel = () => {
   const [editingSite, setEditingSite] = useState<Site | null>(null);
   const [expandedSites, setExpandedSites] = useState<Set<string>>(new Set());
   const [bulkAssignSite, setBulkAssignSite] = useState<{ id: string; name: string } | null>(null);
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
   const [form, setForm] = useState({
     name: "",
     slug: "",
@@ -205,11 +207,7 @@ const SitesManagementPanel = () => {
   const openCreate = () => {
     const currentCount = sites?.length ?? 0;
     if (!canCreateSite(tenant?.tier, currentCount)) {
-      toast({
-        title: "Site limit reached",
-        description: `Your ${getTierLabel(tenant?.tier ?? "basic")} plan allows ${tenant?.tier === "basic" || tenant?.tier === "professional" ? "1 site" : "unlimited sites"}. Upgrade to add more.`,
-        variant: "destructive",
-      });
+      setUpgradeOpen(true);
       return;
     }
     resetForm();
@@ -672,6 +670,12 @@ const SitesManagementPanel = () => {
         onOpenChange={(open) => { if (!open) setBulkAssignSite(null); }}
         siteId={bulkAssignSite?.id ?? ""}
         siteName={bulkAssignSite?.name ?? ""}
+      />
+      <TierUpgradePrompt
+        open={upgradeOpen}
+        onOpenChange={setUpgradeOpen}
+        currentTier={tenant?.tier ?? "basic"}
+        feature="sites"
       />
     </div>
   );
