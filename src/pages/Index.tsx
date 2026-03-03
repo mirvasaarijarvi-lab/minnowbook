@@ -40,7 +40,7 @@ const tiers = [
       "Default email templates",
       "Opening hours configuration",
       "Branded booking page",
-      "Basic reservation management",
+      "AI chatbot support",
     ],
   },
   {
@@ -54,7 +54,7 @@ const tiers = [
       "Everything in Basic",
       "Custom email templates",
       "Advanced opening hours & rules",
-      "Priority support",
+      "AI chatbot support",
       "Detailed analytics",
     ],
   },
@@ -69,7 +69,7 @@ const tiers = [
       "Restaurant, venue & guesthouse",
       "Unlimited staff accounts",
       "Advanced reporting",
-      "Dedicated support",
+      "Priority support (24h response)",
     ],
   },
 ];

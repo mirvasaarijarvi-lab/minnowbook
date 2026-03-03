@@ -114,9 +114,9 @@ const articles: GuideArticle[] = [
     icon: CreditCard,
     category: "Billing",
     content: [
-      "Basic (€29/mo) — 1 type, 1–3 staff, default templates.",
-      "Pro (€79/mo) — 1 type, 10 staff, custom templates, analytics.",
-      "Business (€199/mo) — All types, unlimited staff, dedicated support, AI chat.",
+      "Basic (€29/mo) — 1 type, 1–3 staff, AI chatbot support.",
+      "Pro (€59/mo) — All types, 10 staff, custom templates, AI chatbot support.",
+      "Business (€99/mo) — All types, unlimited staff, priority support with 24h response.",
       "Upgrade or downgrade anytime. Changes take effect next billing cycle.",
     ],
   },
@@ -231,8 +231,8 @@ const Support = () => {
             Still need help?
           </h2>
           <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-            Business plan customers have access to in-app AI support chat directly in the dashboard.
-            For other plans, email us at support@minnowbook.com.
+            All plans include AI chatbot support in the dashboard.
+            Business plan customers get priority support with guaranteed 24-hour response from our team.
           </p>
         </div>
       </section>
