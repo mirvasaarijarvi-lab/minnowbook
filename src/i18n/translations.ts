@@ -482,6 +482,8 @@ type TranslationKeys = {
   "dashboard.uninvoiced": string;
   "dashboard.used": string;
   "dashboard.invoiced": string;
+  "dashboard.total": string;
+  "dashboard.dailySnapshot": string;
   "dashboard.calendarHotel": string;
   "dashboard.calendarVenue": string;
   "dashboard.calendarRestaurant": string;
@@ -1343,8 +1345,8 @@ const en: TranslationKeys = {
   "dashboard.imageUploadError": "Failed to upload image",
   "dashboard.restaurant": "Restaurant",
   "dashboard.venue": "Venue",
-  "dashboard.guesthouse": "Hotel / Gasthaus",
-   "dashboard.hotel": "Hotel / Gasthaus",
+  "dashboard.guesthouse": "Guesthouse",
+   "dashboard.hotel": "Hotel",
    "dashboard.checkoutToday": "Check-outs today",
    "dashboard.editReservation": "Edit Reservation",
   "dashboard.reservationUpdated": "Reservation updated",
@@ -1379,6 +1381,8 @@ const en: TranslationKeys = {
   "dashboard.uninvoiced": "Uninvoiced",
   "dashboard.used": "Used",
   "dashboard.invoiced": "Invoiced",
+  "dashboard.total": "total",
+  "dashboard.dailySnapshot": "Daily snapshot at a glance",
   "dashboard.calendarHotel": "Hotel / Guesthouse",
   "dashboard.calendarVenue": "Event Spaces",
   "dashboard.calendarRestaurant": "Restaurant",
@@ -2228,8 +2232,8 @@ const fi: TranslationKeys = {
   "dashboard.imageUploadError": "Kuvan lataus epäonnistui",
   "dashboard.restaurant": "Ravintola",
   "dashboard.venue": "Tila",
-  "dashboard.guesthouse": "Hotelli / Gasthaus",
-   "dashboard.hotel": "Hotelli / Gasthaus",
+  "dashboard.guesthouse": "Majatalo",
+   "dashboard.hotel": "Hotelli",
    "dashboard.checkoutToday": "Uloskirjaukset tänään",
    "dashboard.editReservation": "Muokkaa varausta",
   "dashboard.reservationUpdated": "Varaus päivitetty",
@@ -2264,6 +2268,8 @@ const fi: TranslationKeys = {
   "dashboard.uninvoiced": "Laskuttamatta",
   "dashboard.used": "Käytetty",
   "dashboard.invoiced": "Laskutettu",
+  "dashboard.total": "yhteensä",
+  "dashboard.dailySnapshot": "Päivittäinen tilannekatsaus",
   "dashboard.calendarHotel": "Hotelli / Majatalo",
   "dashboard.calendarVenue": "Juhlatilat",
   "dashboard.calendarRestaurant": "Ravintola",
@@ -3113,8 +3119,8 @@ const sv: TranslationKeys = {
   "dashboard.imageUploadError": "Kunde inte ladda upp bild",
   "dashboard.restaurant": "Restaurang",
   "dashboard.venue": "Lokal",
-  "dashboard.guesthouse": "Hotell / Gasthaus",
-   "dashboard.hotel": "Hotell / Gasthaus",
+  "dashboard.guesthouse": "Gästhus",
+   "dashboard.hotel": "Hotell",
    "dashboard.checkoutToday": "Utcheckningar idag",
    "dashboard.editReservation": "Redigera bokning",
   "dashboard.reservationUpdated": "Bokning uppdaterad",
@@ -3149,6 +3155,8 @@ const sv: TranslationKeys = {
   "dashboard.uninvoiced": "Ej fakturerade",
   "dashboard.used": "Använd",
   "dashboard.invoiced": "Fakturerad",
+  "dashboard.total": "totalt",
+  "dashboard.dailySnapshot": "Daglig översikt",
   "dashboard.calendarHotel": "Hotell / Gästhus",
   "dashboard.calendarVenue": "Festlokaler",
   "dashboard.calendarRestaurant": "Restaurang",
