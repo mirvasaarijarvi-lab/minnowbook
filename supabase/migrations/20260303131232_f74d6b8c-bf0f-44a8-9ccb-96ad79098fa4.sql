@@ -1,0 +1,1 @@
+DELETE FROM public.reservations WHERE guest_email = 'test-site@example.com' AND guest_name = 'Test Site Booking';

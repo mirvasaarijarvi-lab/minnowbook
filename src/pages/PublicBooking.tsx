@@ -541,6 +541,7 @@ const PublicBooking = () => {
 
       const payload: Record<string, unknown> = {
         tenant_id: tenant.id,
+        site_id: site?.id ?? null,
         guest_name: parsed.guest_name,
         guest_email: parsed.guest_email,
         guest_phone: parsed.guest_phone ?? null,
