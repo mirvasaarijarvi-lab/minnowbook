@@ -1,0 +1,2 @@
+INSERT INTO public.discount_codes (tenant_id, code, discount_type, discount_value, max_uses, used_count, is_active, description)
+VALUES ('9ac05fbf-0834-44fd-a52a-d030b7074a30', 'TEST2USES', 'percentage', 10, 2, 0, true, 'Test code with max 2 uses');
