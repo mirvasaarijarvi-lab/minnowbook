@@ -211,9 +211,9 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
           <Select value={invoicedFilter} onValueChange={setInvoicedFilter}>
             <SelectTrigger className="w-[140px]"><SelectValue placeholder="Invoice status" /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All</SelectItem>
-              <SelectItem value="uninvoiced">Uninvoiced</SelectItem>
-              <SelectItem value="invoiced">Invoiced</SelectItem>
+              <SelectItem value="all">{t("dashboard.allStatuses")}</SelectItem>
+              <SelectItem value="uninvoiced">{t("dashboard.uninvoiced" as any)}</SelectItem>
+              <SelectItem value="invoiced">{t("dashboard.invoiced" as any)}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -265,8 +265,8 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
                     <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                       <span className="font-semibold text-foreground">{r.guest_name}</span>
-                      <Badge variant="outline" className="text-xs capitalize">{r.reservation_type}</Badge>
-                        <Badge className={`text-xs ${statusColors[r.status ?? "pending"] ?? ""}`}>{r.status}</Badge>
+                      <Badge variant="outline" className="text-xs capitalize">{typeLabel(r.reservation_type)}</Badge>
+                        <Badge className={`text-xs ${statusColors[r.status ?? "pending"] ?? ""}`}>{t(`dashboard.${r.status ?? "pending"}` as any)}</Badge>
                         {(r as any).is_checked_in && (
                           <Badge className="text-xs bg-emerald-100 text-emerald-800 border-emerald-200">{t("dashboard.checkedIn" as any)}</Badge>
                         )}
@@ -297,7 +297,7 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
                           }}
                         />
                         <PackageCheck className="h-3.5 w-3.5 text-muted-foreground" />
-                        <span className="text-muted-foreground">Used</span>
+                        <span className="text-muted-foreground">{t("dashboard.used" as any)}</span>
                       </label>
                       <label
                         className="flex items-center gap-1.5 text-xs cursor-pointer select-none"
@@ -310,7 +310,7 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
                           }}
                         />
                         <Receipt className="h-3.5 w-3.5 text-muted-foreground" />
-                        <span className="text-muted-foreground">Invoiced</span>
+                        <span className="text-muted-foreground">{t("dashboard.invoiced" as any)}</span>
                       </label>
                       {r.breakfast_included && (
                         <Badge className="text-xs bg-amber-100 text-amber-800 border-amber-200 gap-1"><Coffee className="h-3 w-3" />{t("reports.breakfast" as any)}</Badge>
