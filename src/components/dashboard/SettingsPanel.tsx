@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Loader2, Upload, X, ImageIcon } from "lucide-react";
+import { Loader2, Upload, X, ImageIcon, Building2, ArrowRight } from "lucide-react";
 import DashboardTooltip from "./DashboardTooltip";
 import OpeningHoursSettings from "./OpeningHoursSettings";
 
@@ -519,6 +519,29 @@ const SettingsPanel = () => {
                 </div>
               ))}
             </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Multisite Upsell for non-business tiers */}
+      {tenant?.tier && tenant.tier !== "business" && (
+        <Card className="border-accent/30 bg-gradient-to-br from-accent/5 via-card to-accent/10">
+          <CardContent className="flex flex-col sm:flex-row items-start sm:items-center gap-4 pt-6">
+            <div className="flex-shrink-0 h-12 w-12 rounded-xl bg-accent/15 flex items-center justify-center">
+              <Building2 className="h-6 w-6 text-accent" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-serif font-bold text-foreground mb-1">
+                Manage multiple locations
+              </h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Upgrade to the Business plan to manage hotels, restaurants, and venues from a single dashboard — each with its own resources, hours, and booking page.
+              </p>
+            </div>
+            <Button variant="outline" size="sm" className="gap-1.5 whitespace-nowrap border-accent/40 text-accent hover:bg-accent/10 hover:text-accent">
+              Learn more
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Button>
           </CardContent>
         </Card>
       )}
