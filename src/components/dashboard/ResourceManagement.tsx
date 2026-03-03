@@ -209,8 +209,10 @@ const ResourceManagement = () => {
   });
 
   const resetForm = () => {
+    const allowedTypes = (tenant as any)?.allowed_reservation_types ?? [];
+    const defaultType = allowedTypes[0] || "restaurant";
     setEditingId(null);
-    setForm({ name: "", resource_type: "restaurant", capacity: "", price_per_night: "", description: "", image_url: "", breakfast_price_per_person: "", room_type_pricing: { ...defaultRoomPricing }, is_active: true });
+    setForm({ name: "", resource_type: defaultType, capacity: "", price_per_night: "", description: "", image_url: "", breakfast_price_per_person: "", room_type_pricing: { ...defaultRoomPricing }, is_active: true });
   };
 
   const openEdit = (r: any) => {
@@ -308,9 +310,26 @@ const ResourceManagement = () => {
                     <Select value={form.resource_type} onValueChange={(v) => setForm({ ...form, resource_type: v })}>
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="restaurant">{typeLabel("restaurant")}</SelectItem>
-                        <SelectItem value="venue">{typeLabel("venue")}</SelectItem>
-                        <SelectItem value="guesthouse">{typeLabel("guesthouse")}</SelectItem>
+                        {(tenant as any)?.allowed_reservation_types?.includes("restaurant") && (
+                          <SelectItem value="restaurant">{typeLabel("restaurant")}</SelectItem>
+                        )}
+                        {(tenant as any)?.allowed_reservation_types?.includes("venue") && (
+                          <SelectItem value="venue">{typeLabel("venue")}</SelectItem>
+                        )}
+                        {(tenant as any)?.allowed_reservation_types?.includes("guesthouse") && (
+                          <SelectItem value="guesthouse">{typeLabel("guesthouse")}</SelectItem>
+                        )}
+                        {(tenant as any)?.allowed_reservation_types?.includes("hotel") && (
+                          <SelectItem value="hotel">{typeLabel("hotel")}</SelectItem>
+                        )}
+                        {/* Fallback if none match (shouldn't happen) */}
+                        {!(tenant as any)?.allowed_reservation_types?.length && (
+                          <>
+                            <SelectItem value="restaurant">{typeLabel("restaurant")}</SelectItem>
+                            <SelectItem value="venue">{typeLabel("venue")}</SelectItem>
+                            <SelectItem value="guesthouse">{typeLabel("guesthouse")}</SelectItem>
+                          </>
+                        )}
                       </SelectContent>
                     </Select>
                   </div>
