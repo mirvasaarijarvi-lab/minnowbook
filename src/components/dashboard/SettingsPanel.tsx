@@ -694,6 +694,8 @@ const SettingsPanel = () => {
         <SiteSettingsInfo siteId={selectedSiteId} tenantId={tenantId!} />
       )}
 
+      {/* Tenant-level settings (only when "All Sites" is selected) */}
+      {!selectedSiteId && (<>
       {/* Logo */}
       <Card>
         <CardHeader>
@@ -1023,6 +1025,7 @@ const SettingsPanel = () => {
           </Button>
         </div>
       </div>
+      </>)}
     </div>
   );
 };
