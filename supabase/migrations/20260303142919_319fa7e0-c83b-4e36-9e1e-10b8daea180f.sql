@@ -1,0 +1,2 @@
+-- Clear sample dates on test tenants to restore normal dashboard access
+UPDATE public.tenants SET sample_start_date = NULL, sample_end_date = NULL WHERE id IN ('9ac05fbf-0834-44fd-a52a-d030b7074a30', 'ecf88bf9-8497-4e16-bee2-bc18dca87d3b');
