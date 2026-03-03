@@ -19,7 +19,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   AlertDialog,
@@ -41,7 +40,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { toast } from "@/hooks/use-toast";
-import { Plus, MapPin, Pencil, Trash2, Building2, UtensilsCrossed, Hotel, CalendarDays } from "lucide-react";
+import { Plus, MapPin, Pencil, Trash2, Building2, UtensilsCrossed, Hotel, CalendarDays, ChevronDown, ChevronRight } from "lucide-react";
 import DashboardTooltip from "./DashboardTooltip";
 import {
   Select,
@@ -50,6 +49,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 interface Site {
   id: string;
@@ -63,31 +67,49 @@ interface Site {
   created_at: string;
 }
 
+interface Resource {
+  id: string;
+  name: string;
+  resource_type: string;
+  site_id: string | null;
+  is_active: boolean | null;
+  capacity: number | null;
+}
+
+const typeIcons: Record<string, React.ElementType> = {
+  hotel: Hotel,
+  guesthouse: Hotel,
+  restaurant: UtensilsCrossed,
+  venue: CalendarDays,
+};
+
+const SITE_TYPE_OPTIONS = [
+  { value: "hotel", label: "Hotel / Guesthouse" },
+  { value: "restaurant", label: "Restaurant" },
+  { value: "venue", label: "Event Space" },
+  { value: "property", label: "Property / Estate" },
+];
+
 const SitesManagementPanel = () => {
   const t = useT();
-  const { tenantId } = useTenant();
+  const { tenantId, tenant } = useTenant();
   const { can } = usePermissions();
 
-  const SITE_TYPE_OPTIONS = [
-    { value: "hotel", label: t("sites.typeHotel"), icon: Hotel },
-    { value: "restaurant", label: t("sites.typeRestaurant"), icon: UtensilsCrossed },
-    { value: "venue", label: t("sites.typeVenue"), icon: CalendarDays },
-  ];
   const queryClient = useQueryClient();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingSite, setEditingSite] = useState<Site | null>(null);
+  const [expandedSites, setExpandedSites] = useState<Set<string>>(new Set());
   const [form, setForm] = useState({
     name: "",
     slug: "",
     location: "",
     description: "",
-    site_type: "venue",
+    site_type: "property",
   });
 
   const canManage = can(PERM_SITES_MANAGE);
   const canApprove = can(PERM_SITES_APPROVE);
 
-  // Pending approval count for badge
   const { data: pendingCount } = useQuery({
     queryKey: ["approval-queue-count", tenantId],
     queryFn: async () => {
@@ -120,28 +142,45 @@ const SitesManagementPanel = () => {
     enabled: !!tenantId,
   });
 
-  // Resource count per site
-  const { data: resourceCounts } = useQuery({
-    queryKey: ["site-resource-counts", tenantId],
+  // All resources for this tenant
+  const { data: resources } = useQuery({
+    queryKey: ["site-resources-all", tenantId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("resources")
-        .select("site_id")
-        .eq("tenant_id", tenantId!);
+        .select("id, name, resource_type, site_id, is_active, capacity")
+        .eq("tenant_id", tenantId!)
+        .order("resource_type, name");
       if (error) throw error;
-      const counts: Record<string, number> = {};
-      (data ?? []).forEach((r: any) => {
-        if (r.site_id) {
-          counts[r.site_id] = (counts[r.site_id] || 0) + 1;
-        }
-      });
-      return counts;
+      return data as Resource[];
     },
     enabled: !!tenantId,
   });
 
+  const getResourcesForSite = (siteId: string) =>
+    (resources ?? []).filter((r) => r.site_id === siteId);
+
+  const getResourceTypeSummary = (siteId: string) => {
+    const siteResources = getResourcesForSite(siteId);
+    const counts: Record<string, number> = {};
+    siteResources.forEach((r) => {
+      const type = r.resource_type;
+      counts[type] = (counts[type] || 0) + 1;
+    });
+    return counts;
+  };
+
+  const toggleExpanded = (siteId: string) => {
+    setExpandedSites((prev) => {
+      const next = new Set(prev);
+      if (next.has(siteId)) next.delete(siteId);
+      else next.add(siteId);
+      return next;
+    });
+  };
+
   const resetForm = () => {
-    setForm({ name: "", slug: "", location: "", description: "", site_type: "venue" });
+    setForm({ name: "", slug: "", location: "", description: "", site_type: "property" });
     setEditingSite(null);
   };
 
@@ -157,7 +196,7 @@ const SitesManagementPanel = () => {
       slug: site.slug,
       location: site.location || "",
       description: site.description || "",
-      site_type: site.site_type || "venue",
+      site_type: site.site_type || "property",
     });
     setDialogOpen(true);
   };
@@ -174,7 +213,6 @@ const SitesManagementPanel = () => {
       }).select("id").single();
       if (error) throw error;
 
-      // Copy tenant-level opening hours & email templates to the new site
       const { error: copyError } = await supabase.rpc("copy_tenant_defaults_to_site", {
         p_tenant_id: tenantId!,
         p_site_id: data.id,
@@ -263,6 +301,25 @@ const SitesManagementPanel = () => {
 
   const isPending = createMutation.isPending || updateMutation.isPending;
 
+  const renderResourceTypeSummary = (siteId: string) => {
+    const counts = getResourceTypeSummary(siteId);
+    const entries = Object.entries(counts);
+    if (!entries.length) return <span className="text-xs text-muted-foreground">—</span>;
+    return (
+      <div className="flex items-center gap-1.5 flex-wrap">
+        {entries.map(([type, count]) => {
+          const Icon = typeIcons[type] ?? Building2;
+          return (
+            <Badge key={type} variant="secondary" className="text-[10px] gap-1 py-0.5 px-1.5">
+              <Icon className="h-3 w-3" />
+              {count} {type}
+            </Badge>
+          );
+        })}
+      </div>
+    );
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-2">
@@ -271,6 +328,13 @@ const SitesManagementPanel = () => {
           <h2 className="text-xl font-serif font-semibold">{t("sites.title")}</h2>
           <DashboardTooltip text={t("sites.tooltip")} />
         </div>
+        {/* Company name header */}
+        {tenant?.name && (
+          <Badge variant="outline" className="text-xs font-normal gap-1.5">
+            <Building2 className="h-3 w-3" />
+            {tenant.name}
+          </Badge>
+        )}
         {canManage && (
           <Button size="sm" className="gap-1.5" onClick={openCreate}>
             <Plus className="h-4 w-4" /> {t("sites.addSite")}
@@ -292,244 +356,268 @@ const SitesManagementPanel = () => {
         </TabsList>
 
         <TabsContent value="sites" className="mt-4">
-          <Card>
-            <CardContent className="pt-4">
-              {/* Create/Edit Dialog */}
-              <Dialog
-                open={dialogOpen}
-                onOpenChange={(open) => {
-                  setDialogOpen(open);
-                  if (!open) resetForm();
-                }}
-              >
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle className="font-serif">
-                      {editingSite ? t("sites.editSite") : t("sites.addSite")}
-                    </DialogTitle>
-                  </DialogHeader>
-                  <div className="space-y-4 pt-2">
-                    <div>
-                      <Label>{t("sites.siteName")}</Label>
-                      <Input
-                        value={form.name}
-                        onChange={(e) => {
-                          setForm({
-                            ...form,
-                            name: e.target.value,
-                            slug: editingSite
-                              ? form.slug
-                              : e.target.value.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, ""),
-                          });
-                        }}
-                        placeholder="e.g. Wiurila Manor"
-                      />
-                    </div>
-                    <div>
-                      <Label>{t("sites.siteType")}</Label>
-                      <Select
-                        value={form.site_type}
-                        onValueChange={(val) => setForm({ ...form, site_type: val })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {SITE_TYPE_OPTIONS.map((opt) => (
-                            <SelectItem key={opt.value} value={opt.value}>
-                              <span className="flex items-center gap-2">
-                                <opt.icon className="h-4 w-4" />
-                                {opt.label}
-                              </span>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Label>{t("sites.slug")}</Label>
-                      <Input
-                        value={form.slug}
-                        onChange={(e) =>
-                          setForm({ ...form, slug: e.target.value })
-                        }
-                        placeholder="e.g. wiurila-manor"
-                        className="font-mono text-sm"
-                      />
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {t("sites.slugHint")}<strong>{form.slug || "..."}</strong>
-                      </p>
-                    </div>
-                    <div>
-                      <Label>{t("sites.location")}</Label>
-                      <Input
-                        value={form.location}
-                        onChange={(e) =>
-                          setForm({ ...form, location: e.target.value })
-                        }
-                        placeholder="e.g. Halikko, Finland"
-                      />
-                    </div>
-                    <div>
-                      <Label>{t("sites.description")}</Label>
-                      <Textarea
-                        value={form.description}
-                        onChange={(e) =>
-                          setForm({ ...form, description: e.target.value })
-                        }
-                        placeholder={t("sites.descriptionPlaceholder")}
-                        rows={3}
-                      />
-                    </div>
-                    <Button
-                      className="w-full"
-                      onClick={handleSubmit}
-                      disabled={!form.name || !form.slug || isPending}
-                    >
-                      {isPending ? t("common.saving") : editingSite ? t("sites.updateSite") : t("sites.createSite")}
-                    </Button>
-                  </div>
-                </DialogContent>
-              </Dialog>
+          {/* Create/Edit Dialog */}
+          <Dialog
+            open={dialogOpen}
+            onOpenChange={(open) => {
+              setDialogOpen(open);
+              if (!open) resetForm();
+            }}
+          >
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle className="font-serif">
+                  {editingSite ? t("sites.editSite") : t("sites.addSite")}
+                </DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 pt-2">
+                <div>
+                  <Label>{t("sites.siteName")}</Label>
+                  <Input
+                    value={form.name}
+                    onChange={(e) => {
+                      setForm({
+                        ...form,
+                        name: e.target.value,
+                        slug: editingSite
+                          ? form.slug
+                          : e.target.value.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, ""),
+                      });
+                    }}
+                    placeholder="e.g. Wiurila Estate"
+                  />
+                </div>
+                <div>
+                  <Label>{t("sites.siteType")}</Label>
+                  <Select
+                    value={form.site_type}
+                    onValueChange={(val) => setForm({ ...form, site_type: val })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {SITE_TYPE_OPTIONS.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>{t("sites.slug")}</Label>
+                  <Input
+                    value={form.slug}
+                    onChange={(e) =>
+                      setForm({ ...form, slug: e.target.value })
+                    }
+                    placeholder="e.g. wiurila-estate"
+                    className="font-mono text-sm"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {t("sites.slugHint")}<strong>{form.slug || "..."}</strong>
+                  </p>
+                </div>
+                <div>
+                  <Label>{t("sites.location")}</Label>
+                  <Input
+                    value={form.location}
+                    onChange={(e) =>
+                      setForm({ ...form, location: e.target.value })
+                    }
+                    placeholder="e.g. Halikko, Finland"
+                  />
+                </div>
+                <div>
+                  <Label>{t("sites.description")}</Label>
+                  <Textarea
+                    value={form.description}
+                    onChange={(e) =>
+                      setForm({ ...form, description: e.target.value })
+                    }
+                    placeholder={t("sites.descriptionPlaceholder")}
+                    rows={3}
+                  />
+                </div>
+                <Button
+                  className="w-full"
+                  onClick={handleSubmit}
+                  disabled={!form.name || !form.slug || isPending}
+                >
+                  {isPending ? t("common.saving") : editingSite ? t("sites.updateSite") : t("sites.createSite")}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
 
-              {isLoading ? (
-                <div className="space-y-3">
-                  {[1, 2].map((i) => (
-                    <div key={i} className="h-12 rounded-md bg-muted animate-pulse" />
-                  ))}
-                </div>
-              ) : !sites?.length ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Building2 className="h-10 w-10 mx-auto mb-3 opacity-40" />
-                  <p className="text-sm">{t("sites.noSites")}</p>
-                </div>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>{t("sites.siteName")}</TableHead>
-                      <TableHead>{t("sites.siteType")}</TableHead>
-                      <TableHead>{t("sites.slug")}</TableHead>
-                      <TableHead>{t("sites.location")}</TableHead>
-                      <TableHead className="text-center">{t("sites.resources")}</TableHead>
-                      <TableHead className="text-center">{t("sites.status")}</TableHead>
-                      {canManage && (
-                        <TableHead className="text-right">{t("sites.actions")}</TableHead>
-                      )}
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {sites.map((site) => (
-                      <TableRow key={site.id}>
-                        <TableCell className="font-medium">{site.name}</TableCell>
-                        <TableCell>
-                          {(() => {
-                            const opt = SITE_TYPE_OPTIONS.find((o) => o.value === site.site_type);
-                            if (!opt) return site.site_type;
-                            const Icon = opt.icon;
-                            return (
-                              <span className="flex items-center gap-1.5 text-muted-foreground text-sm">
-                                <Icon className="h-3.5 w-3.5" />
-                                {opt.label}
-                              </span>
-                            );
-                          })()}
-                        </TableCell>
-                        <TableCell>
-                          <code className="text-xs bg-muted px-1.5 py-0.5 rounded">
-                            {site.slug}
-                          </code>
-                        </TableCell>
-                        <TableCell className="text-muted-foreground">
-                          {site.location ? (
-                            <span className="flex items-center gap-1">
-                              <MapPin className="h-3 w-3" />
-                              {site.location}
-                            </span>
-                          ) : (
-                            "—"
-                          )}
-                        </TableCell>
-                        <TableCell className="text-center">
-                          <Badge variant="secondary" className="text-xs">
-                            {resourceCounts?.[site.id] || 0}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-center">
-                          {canManage ? (
-                            <Switch
-                              checked={site.is_active}
-                              onCheckedChange={(checked) =>
-                                toggleActiveMutation.mutate({
-                                  id: site.id,
-                                  is_active: checked,
-                                })
-                              }
-                            />
-                          ) : (
-                            <Badge
-                              variant="outline"
-                              className={`text-xs ${
-                                site.is_active
-                                  ? "border-emerald-500/30 text-emerald-600 bg-emerald-500/10"
-                                  : "border-yellow-500/30 text-yellow-600 bg-yellow-500/10"
-                              }`}
-                            >
-                              {site.is_active ? t("sites.active") : t("sites.draft")}
-                            </Badge>
-                          )}
-                        </TableCell>
-                        {canManage && (
-                          <TableCell className="text-right">
-                            <div className="flex items-center justify-end gap-1">
-                              <Button
+          {isLoading ? (
+            <div className="space-y-3">
+              {[1, 2].map((i) => (
+                <div key={i} className="h-20 rounded-md bg-muted animate-pulse" />
+              ))}
+            </div>
+          ) : !sites?.length ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <Building2 className="h-10 w-10 mx-auto mb-3 opacity-40" />
+              <p className="text-sm">{t("sites.noSites")}</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {sites.map((site) => {
+                const siteResources = getResourcesForSite(site.id);
+                const isExpanded = expandedSites.has(site.id);
+
+                return (
+                  <Card key={site.id} className="overflow-hidden">
+                    <Collapsible open={isExpanded} onOpenChange={() => toggleExpanded(site.id)}>
+                      <CardHeader className="py-3 px-4">
+                        <div className="flex items-center gap-3 flex-wrap">
+                          <CollapsibleTrigger asChild>
+                            <Button variant="ghost" size="sm" className="h-7 w-7 p-0 shrink-0">
+                              {isExpanded ? (
+                                <ChevronDown className="h-4 w-4" />
+                              ) : (
+                                <ChevronRight className="h-4 w-4" />
+                              )}
+                            </Button>
+                          </CollapsibleTrigger>
+
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <Building2 className="h-4 w-4 text-primary shrink-0" />
+                              <span className="font-serif font-semibold text-sm">{site.name}</span>
+                              {site.location && (
+                                <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                  <MapPin className="h-3 w-3" />
+                                  {site.location}
+                                </span>
+                              )}
+                              <Badge
                                 variant="outline"
-                                size="sm"
-                                className="gap-1 text-xs"
-                                onClick={() => openEdit(site)}
+                                className={`text-[10px] ${
+                                  site.is_active
+                                    ? "border-emerald-500/30 text-emerald-600 bg-emerald-500/10"
+                                    : "border-yellow-500/30 text-yellow-600 bg-yellow-500/10"
+                                }`}
                               >
-                                <Pencil className="h-3 w-3" /> {t("common.edit")}
-                              </Button>
-                              <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="text-destructive hover:text-destructive"
-                                  >
-                                    <Trash2 className="h-4 w-4" />
-                                  </Button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                  <AlertDialogHeader>
-                                    <AlertDialogTitle>
-                                      {t("common.delete")} "{site.name}"?
-                                    </AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                      {t("sites.deleteConfirm")}
-                                    </AlertDialogDescription>
-                                  </AlertDialogHeader>
-                                  <AlertDialogFooter>
-                                    <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
-                                    <AlertDialogAction
-                                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                      onClick={() => deleteMutation.mutate(site.id)}
-                                    >
-                                      {t("common.delete")}
-                                    </AlertDialogAction>
-                                  </AlertDialogFooter>
-                                </AlertDialogContent>
-                              </AlertDialog>
+                                {site.is_active ? t("sites.active") : t("sites.draft")}
+                              </Badge>
                             </div>
-                          </TableCell>
-                        )}
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
-            </CardContent>
-          </Card>
+                            <div className="mt-1">
+                              {renderResourceTypeSummary(site.id)}
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            {canManage && (
+                              <Switch
+                                checked={site.is_active}
+                                onCheckedChange={(checked) =>
+                                  toggleActiveMutation.mutate({ id: site.id, is_active: checked })
+                                }
+                              />
+                            )}
+                            {canManage && (
+                              <>
+                                <Button variant="outline" size="sm" className="gap-1 text-xs h-7" onClick={() => openEdit(site)}>
+                                  <Pencil className="h-3 w-3" />
+                                </Button>
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive h-7 w-7 p-0">
+                                      <Trash2 className="h-3.5 w-3.5" />
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>
+                                        {t("common.delete")} "{site.name}"?
+                                      </AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        {t("sites.deleteConfirm")}
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
+                                      <AlertDialogAction
+                                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                        onClick={() => deleteMutation.mutate(site.id)}
+                                      >
+                                        {t("common.delete")}
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </CardHeader>
+
+                      <CollapsibleContent>
+                        <CardContent className="pt-0 pb-3 px-4">
+                          {site.description && (
+                            <p className="text-xs text-muted-foreground mb-3 ml-10">{site.description}</p>
+                          )}
+                          {siteResources.length === 0 ? (
+                            <p className="text-xs text-muted-foreground ml-10">{t("sites.noResourcesInSite" as any) || "No resources assigned to this site yet"}</p>
+                          ) : (
+                            <Table>
+                              <TableHeader>
+                                <TableRow>
+                                  <TableHead className="text-xs">{t("sites.resourceName" as any) || "Resource"}</TableHead>
+                                  <TableHead className="text-xs">{t("sites.resourceType" as any) || "Type"}</TableHead>
+                                  <TableHead className="text-xs text-center">{t("sites.capacity" as any) || "Capacity"}</TableHead>
+                                  <TableHead className="text-xs text-center">{t("sites.status")}</TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                {siteResources.map((resource) => {
+                                  const Icon = typeIcons[resource.resource_type] ?? Building2;
+                                  return (
+                                    <TableRow key={resource.id}>
+                                      <TableCell className="text-sm font-medium">{resource.name}</TableCell>
+                                      <TableCell>
+                                        <span className="flex items-center gap-1.5 text-muted-foreground text-xs">
+                                          <Icon className="h-3.5 w-3.5" />
+                                          {resource.resource_type}
+                                        </span>
+                                      </TableCell>
+                                      <TableCell className="text-center text-xs text-muted-foreground">
+                                        {resource.capacity ?? "—"}
+                                      </TableCell>
+                                      <TableCell className="text-center">
+                                        <Badge
+                                          variant="outline"
+                                          className={`text-[10px] ${
+                                            resource.is_active
+                                              ? "border-emerald-500/30 text-emerald-600 bg-emerald-500/10"
+                                              : "border-yellow-500/30 text-yellow-600 bg-yellow-500/10"
+                                          }`}
+                                        >
+                                          {resource.is_active ? t("sites.active") : t("sites.draft")}
+                                        </Badge>
+                                      </TableCell>
+                                    </TableRow>
+                                  );
+                                })}
+                              </TableBody>
+                            </Table>
+                          )}
+                          <div className="mt-2 ml-10">
+                            <code className="text-[10px] bg-muted px-1.5 py-0.5 rounded text-muted-foreground">
+                              /{site.slug}
+                            </code>
+                          </div>
+                        </CardContent>
+                      </CollapsibleContent>
+                    </Collapsible>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
         </TabsContent>
 
         <TabsContent value="approvals" className="mt-4">

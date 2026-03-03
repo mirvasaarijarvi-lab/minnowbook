@@ -118,6 +118,7 @@ const Dashboard = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [tourOpen, setTourOpen] = useState(false);
   const [selectedSiteId, setSelectedSiteId] = useState<string | null>(null);
+  const [selectedResourceId, setSelectedResourceId] = useState<string | null>(null);
   const [reservationStatusFilter, setReservationStatusFilter] = useState<string | undefined>();
   const [reservationInvoicedFilter, setReservationInvoicedFilter] = useState<boolean | undefined>();
 
@@ -212,7 +213,7 @@ const Dashboard = () => {
   };
 
   return (
-    <SiteContext.Provider value={{ selectedSiteId, setSelectedSiteId }}>
+    <SiteContext.Provider value={{ selectedSiteId, setSelectedSiteId, selectedResourceId, setSelectedResourceId }}>
     <div className="flex min-h-screen bg-background flex-col">
       {isImpersonating && (
         <div className="bg-accent text-accent-foreground px-4 py-2 flex items-center justify-between text-sm font-medium z-50">
