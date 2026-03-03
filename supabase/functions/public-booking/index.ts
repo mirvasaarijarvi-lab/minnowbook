@@ -253,9 +253,24 @@ Deno.serve(async (req) => {
         .eq("id", code.id);
     }
 
+    // Resolve site_id: accept from body or auto-resolve from reservation_type
+    let site_id: string | null = validateUuid(body.site_id, "site_id", false);
+    if (!site_id) {
+      const { data: matchingSite } = await adminClient
+        .from("resources")
+        .select("site_id")
+        .eq("tenant_id", tenant_id)
+        .eq("resource_type", reservation_type)
+        .not("site_id", "is", null)
+        .limit(1)
+        .maybeSingle();
+      site_id = matchingSite?.site_id ?? null;
+    }
+
     // Insert reservation
     const insertData: Record<string, unknown> = {
       tenant_id,
+      site_id,
       guest_name,
       guest_email,
       guest_phone,
