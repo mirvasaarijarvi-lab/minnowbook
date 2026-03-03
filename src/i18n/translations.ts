@@ -112,6 +112,9 @@ type TranslationKeys = {
   "settings.accentBtn": string;
   "settings.saved": string;
   "settings.saveError": string;
+  "settings.upsellTitle": string;
+  "settings.upsellDesc": string;
+  "settings.learnMore": string;
   "settings.availabilityThresholds": string;
   "settings.availabilityThresholdsDesc": string;
   "settings.fullThreshold": string;
@@ -1096,6 +1099,9 @@ const en: TranslationKeys = {
   "settings.accentBtn": "Accent Button",
   "settings.saved": "Settings saved",
   "settings.saveError": "Failed to save settings",
+  "settings.upsellTitle": "Manage multiple locations",
+  "settings.upsellDesc": "Upgrade to the Business plan to manage hotels, restaurants, and venues from a single dashboard — each with its own resources, hours, and booking page.",
+  "settings.learnMore": "Learn more",
   "settings.availabilityThresholds": "Availability Thresholds",
   "settings.availabilityThresholdsDesc": "Number of reservations before a day shows as 'Full' in the calendar.",
   "settings.fullThreshold": "Full at",
@@ -2063,6 +2069,9 @@ const fi: TranslationKeys = {
   "settings.accentBtn": "Korostuspainike",
   "settings.saved": "Asetukset tallennettu",
   "settings.saveError": "Asetusten tallennus epäonnistui",
+  "settings.upsellTitle": "Hallinnoi useita toimipisteitä",
+  "settings.upsellDesc": "Päivitä Business-suunnitelmaan hallinnoidaksesi hotelleja, ravintoloita ja juhlatiloja yhdestä hallintapaneelista — jokaisella omat resurssit, aukioloajat ja varaussivu.",
+  "settings.learnMore": "Lue lisää",
   "settings.availabilityThresholds": "Saatavuusrajat",
   "settings.availabilityThresholdsDesc": "Varausten määrä, jolloin päivä näytetään kalenterissa 'Täynnä'-tilassa.",
   "settings.fullThreshold": "Täynnä kun",
@@ -3029,6 +3038,9 @@ const sv: TranslationKeys = {
   "settings.accentBtn": "Accentknapp",
   "settings.saved": "Inställningar sparade",
   "settings.saveError": "Kunde inte spara inställningar",
+  "settings.upsellTitle": "Hantera flera platser",
+  "settings.upsellDesc": "Uppgradera till Business-planen för att hantera hotell, restauranger och evenemangslokaler från en enda instrumentpanel — var och en med egna resurser, öppettider och bokningssida.",
+  "settings.learnMore": "Läs mer",
   "settings.availabilityThresholds": "Tillgänglighetsgränser",
   "settings.availabilityThresholdsDesc": "Antal bokningar innan en dag visas som 'Full' i kalendern.",
   "settings.fullThreshold": "Full vid",
