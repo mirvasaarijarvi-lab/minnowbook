@@ -48,6 +48,7 @@ type TranslationKeys = {
   "nav.settings": string;
   "nav.reports": string;
   "nav.support": string;
+  "nav.sites": string;
 
   // Reports
   "reports.total": string;
@@ -321,6 +322,10 @@ type TranslationKeys = {
   "admin.permManageAdmin": string;
   "admin.permViewSupport": string;
   "admin.permManageSupport": string;
+  "admin.catSites": string;
+  "admin.permViewSites": string;
+  "admin.permManageSites": string;
+  "admin.permApproveSites": string;
 
   // Hero
   "hero.badge": string;
@@ -956,6 +961,7 @@ const en: TranslationKeys = {
   "nav.settings": "Settings",
   "nav.reports": "Reports",
   "nav.support": "Support",
+  "nav.sites": "Sites",
 
   "reports.total": "Total",
   "reports.confirmed": "Confirmed",
@@ -1225,6 +1231,10 @@ const en: TranslationKeys = {
   "admin.permManageAdmin": "Manage users & roles",
   "admin.permViewSupport": "View support requests",
   "admin.permManageSupport": "Respond to support requests",
+  "admin.catSites": "Sites",
+  "admin.permViewSites": "View sites",
+  "admin.permManageSites": "Create & edit sites",
+  "admin.permApproveSites": "Approve site changes",
 
   // Hero
   "hero.badge": "Now in beta. 30-day free trial",
@@ -1849,6 +1859,7 @@ const fi: TranslationKeys = {
   "nav.settings": "Asetukset",
   "nav.reports": "Raportit",
   "nav.support": "Tuki",
+  "nav.sites": "Toimipisteet",
 
   "reports.total": "Yhteensä",
   "reports.confirmed": "Vahvistettu",
@@ -2118,6 +2129,10 @@ const fi: TranslationKeys = {
   "admin.permManageAdmin": "Hallitse käyttäjiä ja rooleja",
   "admin.permViewSupport": "Näytä tukipyynnöt",
   "admin.permManageSupport": "Vastaa tukipyyntöihin",
+  "admin.catSites": "Toimipisteet",
+  "admin.permViewSites": "Näytä toimipisteet",
+  "admin.permManageSites": "Luo ja muokkaa toimipisteitä",
+  "admin.permApproveSites": "Hyväksy toimipistemuutokset",
 
   "hero.badge": "Nyt betassa. 30 päivän ilmainen kokeilu",
   "hero.title": "Varaustyökalu niille,",
@@ -2741,6 +2756,7 @@ const sv: TranslationKeys = {
   "nav.settings": "Inställningar",
   "nav.reports": "Rapporter",
   "nav.support": "Support",
+  "nav.sites": "Platser",
 
   "reports.total": "Totalt",
   "reports.confirmed": "Bekräftad",
@@ -3010,6 +3026,10 @@ const sv: TranslationKeys = {
   "admin.permManageAdmin": "Hantera användare och roller",
   "admin.permViewSupport": "Visa supportförfrågningar",
   "admin.permManageSupport": "Svara på supportförfrågningar",
+  "admin.catSites": "Platser",
+  "admin.permViewSites": "Visa platser",
+  "admin.permManageSites": "Skapa och redigera platser",
+  "admin.permApproveSites": "Godkänn platsändringar",
 
   "hero.badge": "Nu i beta. 30 dagars gratis provperiod",
   "hero.title": "Bokningsverktyget byggt för",

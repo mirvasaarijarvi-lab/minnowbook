@@ -35,6 +35,11 @@ export const PERM_ADMIN_MANAGE = "admin.manage";
 export const PERM_SUPPORT_VIEW = "support.view";
 export const PERM_SUPPORT_MANAGE = "support.manage";
 
+// Sites
+export const PERM_SITES_VIEW = "sites.view";
+export const PERM_SITES_MANAGE = "sites.manage";
+export const PERM_SITES_APPROVE = "sites.approve";
+
 /** All available permissions grouped by category (for UI) */
 export const PERMISSION_CATEGORIES = [
   {
@@ -84,6 +89,14 @@ export const PERMISSION_CATEGORIES = [
     permissions: [
       { key: PERM_SUPPORT_VIEW, labelKey: "admin.permViewSupport" },
       { key: PERM_SUPPORT_MANAGE, labelKey: "admin.permManageSupport" },
+    ],
+  },
+  {
+    category: "admin.catSites",
+    permissions: [
+      { key: PERM_SITES_VIEW, labelKey: "admin.permViewSites" },
+      { key: PERM_SITES_MANAGE, labelKey: "admin.permManageSites" },
+      { key: PERM_SITES_APPROVE, labelKey: "admin.permApproveSites" },
     ],
   },
 ] as const;

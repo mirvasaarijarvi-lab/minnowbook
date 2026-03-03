@@ -11,6 +11,7 @@ import {
   PERM_SETTINGS_VIEW,
   PERM_ADMIN_VIEW,
   PERM_SUPPORT_VIEW,
+  PERM_SITES_VIEW,
 } from "@/lib/permissions";
 import { Menu, HelpCircle, ShieldAlert, X, Eye, BookOpen } from "lucide-react";
 import { useImpersonation } from "@/contexts/ImpersonationContext";
@@ -24,6 +25,7 @@ import SettingsPanel from "@/components/dashboard/SettingsPanel";
 import ReportsPanel from "@/components/dashboard/ReportsPanel";
 import AdminPanel from "@/components/dashboard/AdminPanel";
 import DashboardSupportPanel from "@/components/dashboard/DashboardSupportPanel";
+import SitesManagementPanel from "@/components/dashboard/SitesManagementPanel";
 import Logo from "@/components/Logo";
 import SupportChatWidget from "@/components/SupportChatWidget";
 import GuidedTour, { TourStep } from "@/components/dashboard/GuidedTour";
@@ -170,6 +172,7 @@ const Dashboard = () => {
     settings: PERM_SETTINGS_VIEW,
     admin: PERM_ADMIN_VIEW,
     support: PERM_SUPPORT_VIEW,
+    sites: PERM_SITES_VIEW,
   };
 
   const AccessDenied = () => (
@@ -202,6 +205,7 @@ const Dashboard = () => {
     reports: gatedView("reports", <ReportsPanel />),
     settings: gatedView("settings", <SettingsPanel />),
     admin: gatedView("admin", <AdminPanel />),
+    sites: gatedView("sites", <SitesManagementPanel />),
     support: gatedView("support", <DashboardSupportPanel />),
   };
 
