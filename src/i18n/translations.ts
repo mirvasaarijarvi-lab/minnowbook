@@ -87,6 +87,17 @@ type TranslationKeys = {
   "reports.used": string;
   "reports.notUsed": string;
   "reports.roomPrice": string;
+  "reports.subtitle": string;
+  "reports.roomRevenue": string;
+  "reports.breakfastLabel": string;
+  "reports.accommodationTotal": string;
+  "reports.roomAndBreakfast": string;
+  "reports.uninvoicedAlert": string;
+  "reports.breakfastAlert": string;
+  "reports.nights": string;
+  "reports.reservations": string;
+  "reports.ofTotal": string;
+  "reports.invoicedPercent": string;
 
   // Settings
   "settings.businessDetails": string;
@@ -723,6 +734,17 @@ const en: TranslationKeys = {
   "reports.used": "Used",
   "reports.notUsed": "Not used",
   "reports.roomPrice": "Room",
+  "reports.subtitle": "Reservation summary and invoicing overview",
+  "reports.roomRevenue": "Room Revenue",
+  "reports.breakfastLabel": "Breakfast",
+  "reports.accommodationTotal": "Accommodation Total",
+  "reports.roomAndBreakfast": "room + breakfast",
+  "reports.uninvoicedAlert": "{count} uninvoiced out of {total} — {amount} uninvoiced",
+  "reports.breakfastAlert": "{count} reservations, {nights} nights — estimated breakfast revenue {amount}",
+  "reports.nights": "nights",
+  "reports.reservations": "reservations",
+  "reports.ofTotal": "total",
+  "reports.invoicedPercent": "invoiced",
 
   // Settings
   "settings.businessDetails": "Business Details",
@@ -1344,6 +1366,17 @@ const fi: TranslationKeys = {
   "reports.used": "Käytetty",
   "reports.notUsed": "Ei käytetty",
   "reports.roomPrice": "Huone",
+  "reports.subtitle": "Varausten yhteenveto ja laskutuksen seuranta",
+  "reports.roomRevenue": "Huonetulo",
+  "reports.breakfastLabel": "Aamupala",
+  "reports.accommodationTotal": "Yhteensä",
+  "reports.roomAndBreakfast": "huone + aamupala",
+  "reports.uninvoicedAlert": "{count} ei laskutettu kaikista {total} — {amount} ei laskutettu",
+  "reports.breakfastAlert": "{count} varausta, {nights} yötä — arvioitu aamupalatulo {amount}",
+  "reports.nights": "yötä",
+  "reports.reservations": "varausta",
+  "reports.ofTotal": "yhteensä",
+  "reports.invoicedPercent": "laskutettu",
 
   // Settings
   "settings.businessDetails": "Yritystiedot",
@@ -1964,6 +1997,17 @@ const sv: TranslationKeys = {
   "reports.used": "Använd",
   "reports.notUsed": "Ej använd",
   "reports.roomPrice": "Rum",
+  "reports.subtitle": "Bokningsöversikt och faktureringsuppföljning",
+  "reports.roomRevenue": "Rumsintäkt",
+  "reports.breakfastLabel": "Frukost",
+  "reports.accommodationTotal": "Boende totalt",
+  "reports.roomAndBreakfast": "rum + frukost",
+  "reports.uninvoicedAlert": "{count} ej fakturerade av {total} — {amount} ej fakturerat",
+  "reports.breakfastAlert": "{count} bokningar, {nights} nätter — beräknad frukostintäkt {amount}",
+  "reports.nights": "nätter",
+  "reports.reservations": "bokningar",
+  "reports.ofTotal": "totalt",
+  "reports.invoicedPercent": "fakturerat",
 
   // Settings
   "settings.businessDetails": "Företagsinformation",
