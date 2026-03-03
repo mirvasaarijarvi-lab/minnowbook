@@ -216,25 +216,4 @@
     margin: 1.5cm;
     size: A4;
   }
-
-  /* Hide non-essential UI */
-  .print\\:hidden,
-  nav,
-  footer,
-  .cookie-consent,
-  .accessibility-widget {
-    display: none !important;
-  }
-
-  /* Avoid page breaks inside cards */
-  .print\\:break-inside-avoid {
-    break-inside: avoid;
-    page-break-inside: avoid;
-  }
-
-  /* Force page break before a section if needed */
-  .print\\:break-before-page {
-    break-before: page;
-    page-break-before: always;
-  }
 }
