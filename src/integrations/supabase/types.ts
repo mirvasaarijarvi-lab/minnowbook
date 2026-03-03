@@ -976,6 +976,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      copy_tenant_defaults_to_site: {
+        Args: { p_site_id: string; p_tenant_id: string }
+        Returns: undefined
+      }
       create_tenant: {
         Args: {
           p_accent_color?: string
