@@ -46,13 +46,6 @@ import DashboardTooltip from "./DashboardTooltip";
 import BulkAssignUsersDialog from "./BulkAssignUsersDialog";
 import TierUpgradePrompt from "./TierUpgradePrompt";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
@@ -65,7 +58,6 @@ interface Site {
   slug: string;
   location: string | null;
   description: string | null;
-  site_type: string;
   is_active: boolean;
   created_at: string;
 }
@@ -86,12 +78,6 @@ const typeIcons: Record<string, React.ElementType> = {
   venue: CalendarDays,
 };
 
-const SITE_TYPE_OPTIONS = [
-  { value: "hotel", label: "Hotel / Guesthouse" },
-  { value: "restaurant", label: "Restaurant" },
-  { value: "venue", label: "Event Space" },
-  { value: "property", label: "Property / Estate" },
-];
 
 const SitesManagementPanel = () => {
   const t = useT();
@@ -124,7 +110,6 @@ const SitesManagementPanel = () => {
     slug: "",
     location: "",
     description: "",
-    site_type: "property",
   });
 
   const canManage = can(PERM_SITES_MANAGE);
@@ -200,7 +185,7 @@ const SitesManagementPanel = () => {
   };
 
   const resetForm = () => {
-    setForm({ name: "", slug: "", location: "", description: "", site_type: "property" });
+    setForm({ name: "", slug: "", location: "", description: "" });
     setEditingSite(null);
   };
 
@@ -221,7 +206,6 @@ const SitesManagementPanel = () => {
       slug: site.slug,
       location: site.location || "",
       description: site.description || "",
-      site_type: site.site_type || "property",
     });
     setDialogOpen(true);
   };
@@ -234,7 +218,6 @@ const SitesManagementPanel = () => {
         slug: form.slug.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, ""),
         location: form.location || null,
         description: form.description || null,
-        site_type: form.site_type,
       }).select("id").single();
       if (error) throw error;
 
@@ -270,7 +253,6 @@ const SitesManagementPanel = () => {
           slug: form.slug.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, ""),
           location: form.location || null,
           description: form.description || null,
-          site_type: form.site_type,
         })
         .eq("id", editingSite!.id);
       if (error) throw error;
@@ -411,24 +393,6 @@ const SitesManagementPanel = () => {
                     }}
                     placeholder="e.g. Wiurila Estate"
                   />
-                </div>
-                <div>
-                  <Label>{t("sites.siteType")}</Label>
-                  <Select
-                    value={form.site_type}
-                    onValueChange={(val) => setForm({ ...form, site_type: val })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {SITE_TYPE_OPTIONS.map((opt) => (
-                        <SelectItem key={opt.value} value={opt.value}>
-                          {opt.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
                 </div>
                 <div>
                   <Label>{t("sites.slug")}</Label>

@@ -30,7 +30,7 @@ const SiteSelector = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("sites")
-        .select("id, name, is_active, site_type")
+        .select("id, name, is_active")
         .eq("tenant_id", tenantId!)
         .eq("is_active", true)
         .order("name");
