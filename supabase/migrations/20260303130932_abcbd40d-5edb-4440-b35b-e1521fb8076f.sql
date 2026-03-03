@@ -1,0 +1,1 @@
+UPDATE public.tenants SET sample_start_date = '2026-02-01', sample_end_date = '2026-03-04' WHERE id = 'ecf88bf9-8497-4e16-bee2-bc18dca87d3b';
