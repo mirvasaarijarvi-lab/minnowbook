@@ -70,6 +70,13 @@ const AvailabilityCalendar = ({
   const monthStart = format(startOfMonth(calMonth), "yyyy-MM-dd");
   const monthEnd = format(endOfMonth(calMonth), "yyyy-MM-dd");
 
+  // Map public booking types to the reservation_types used in the backend calendar
+  const mappedTypes = useMemo(() => {
+    if (!reservationType) return [];
+    if (reservationType === "hotel" || reservationType === "guesthouse") return ["hotel", "guesthouse"];
+    return [reservationType];
+  }, [reservationType]);
+
   const { data: monthReservations = [] } = useQuery({
     queryKey: ["public-availability", tenantId, monthStart, monthEnd, reservationType],
     queryFn: async () => {
@@ -80,14 +87,14 @@ const AvailabilityCalendar = ({
         .gte("date", monthStart)
         .lte("date", monthEnd)
         .in("status", ["pending", "confirmed"]);
-      if (reservationType) {
-        query = query.eq("reservation_type", reservationType);
+      if (mappedTypes.length > 0) {
+        query = query.in("reservation_type", mappedTypes);
       }
       const { data, error } = await query;
       if (error) throw error;
       return data ?? [];
     },
-    enabled: !!tenantId,
+    enabled: !!tenantId && mappedTypes.length > 0,
   });
 
   // Count reservations per day
@@ -481,7 +488,6 @@ const PublicBooking = () => {
 
       if (isAccommodation) {
         payload.check_out_date = form.check_out_date || null;
-        payload.room_type = form.room_type || null;
         payload.breakfast_included = form.breakfast_included;
       }
       if (isVenue) {
@@ -631,10 +637,7 @@ const PublicBooking = () => {
               nights = Math.max(0, Math.round((checkOut.getTime() - checkIn.getTime()) / 86400000));
             }
 
-            const resourcePricing = (selectedResource as any)?.room_type_pricing ?? { single: 1.0, double: 1.5, suite: 2.5, dorm: 0.6 };
-            const multiplier = form.room_type ? (resourcePricing[form.room_type] ?? 1.0) : 1.0;
-            const adjustedPrice = basePrice ? Math.round(basePrice * multiplier * 100) / 100 : null;
-            const roomTotal = adjustedPrice && nights > 0 ? nights * adjustedPrice : null;
+            const roomTotal = basePrice && nights > 0 ? nights * basePrice : null;
             const breakfastTotal = form.breakfast_included && breakfastPrice ? nights * guestsCount * breakfastPrice : 0;
             const grandTotal = roomTotal !== null ? roomTotal + breakfastTotal : null;
 
@@ -666,7 +669,7 @@ const PublicBooking = () => {
                     {selectedResource && (
                       <div className="flex justify-between">
                         <span>{selectedResource.name}</span>
-                        {adjustedPrice != null && <span>€{adjustedPrice.toFixed(2)} / {t("booking.night" as any)}</span>}
+                        {basePrice != null && <span>€{Number(basePrice).toFixed(2)} / {t("booking.night" as any)}</span>}
                       </div>
                     )}
                     {roomTotal != null && (
@@ -718,9 +721,7 @@ const PublicBooking = () => {
                   const res = resources?.find((r: any) => r.id === form.resource_id);
                   if (!isAcc || !res?.price_per_night || !selectedDate || !form.check_out_date) return null;
                   const n = Math.max(0, Math.round((new Date(form.check_out_date + "T00:00:00").getTime() - new Date(format(selectedDate, "yyyy-MM-dd") + "T00:00:00").getTime()) / 86400000));
-                  const resPricing = (res as any)?.room_type_pricing ?? { single: 1.0, double: 1.5, suite: 2.5, dorm: 0.6 };
-                  const mult = form.room_type ? (resPricing[form.room_type] ?? 1.0) : 1.0;
-                  const roomT = n * Math.round(res.price_per_night * mult * 100) / 100;
+                  const roomT = n * res.price_per_night;
                   const bfT = form.breakfast_included ? n * (form.guests_count ? parseInt(form.guests_count) : 1) * (res.breakfast_price_per_person ?? 15) : 0;
                   return roomT + bfT;
                 })(),
@@ -1013,67 +1014,53 @@ const PublicBooking = () => {
               <CardHeader>
                 <CardTitle className="text-lg font-serif flex items-center gap-2" style={{ color: primaryColor }}>
                   <BedDouble className="h-5 w-5" />
-                  {t("booking.roomType" as any)}
+                  {t("booking.stayDetails" as any)}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label>{t("booking.checkOutDate" as any)} *</Label>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            "w-full justify-start text-left font-normal",
-                            !form.check_out_date && "text-muted-foreground"
-                          )}
-                        >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {form.check_out_date
-                            ? format(new Date(form.check_out_date + "T00:00:00"), "PPP", { locale: dateFnsLocale })
-                            : <span>{t("booking.pickDate")}</span>}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={form.check_out_date ? new Date(form.check_out_date + "T00:00:00") : undefined}
-                          onSelect={(date) => {
-                            if (date) updateField("check_out_date", format(date, "yyyy-MM-dd"));
-                          }}
-                          disabled={(date) =>
-                            !selectedDate || date <= selectedDate
-                          }
-                          initialFocus
-                          className={cn("p-3 pointer-events-auto")}
-                        />
-                      </PopoverContent>
-                    </Popover>
-                    {(() => {
-                      if (!form.check_out_date || !selectedDate) return null;
-                      const checkOut = new Date(form.check_out_date + "T00:00:00");
-                      const nights = Math.max(0, Math.round((checkOut.getTime() - selectedDate.getTime()) / 86400000));
-                      if (nights <= 0) return null;
-                      return (
-                        <p className="text-xs text-muted-foreground">
-                          {nights} {nights === 1 ? t("booking.night" as any) : t("booking.nights" as any)}
-                        </p>
-                      );
-                    })()}
-                  </div>
-                  <div className="space-y-2">
-                    <Label>{t("booking.roomType" as any)}</Label>
-                    <Select value={form.room_type} onValueChange={(v) => updateField("room_type", v)}>
-                      <SelectTrigger><SelectValue placeholder={t("booking.roomType" as any)} /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="single">{t("booking.roomSingle" as any)}</SelectItem>
-                        <SelectItem value="double">{t("booking.roomDouble" as any)}</SelectItem>
-                        <SelectItem value="suite">{t("booking.roomSuite" as any)}</SelectItem>
-                        <SelectItem value="dorm">{t("booking.roomDorm" as any)}</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                <div className="space-y-2">
+                  <Label>{t("booking.checkOutDate" as any)} *</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !form.check_out_date && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {form.check_out_date
+                          ? format(new Date(form.check_out_date + "T00:00:00"), "PPP", { locale: dateFnsLocale })
+                          : <span>{t("booking.pickDate")}</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={form.check_out_date ? new Date(form.check_out_date + "T00:00:00") : undefined}
+                        onSelect={(date) => {
+                          if (date) updateField("check_out_date", format(date, "yyyy-MM-dd"));
+                        }}
+                        disabled={(date) =>
+                          !selectedDate || date <= selectedDate
+                        }
+                        initialFocus
+                        className={cn("p-3 pointer-events-auto")}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  {(() => {
+                    if (!form.check_out_date || !selectedDate) return null;
+                    const checkOut = new Date(form.check_out_date + "T00:00:00");
+                    const nights = Math.max(0, Math.round((checkOut.getTime() - selectedDate.getTime()) / 86400000));
+                    if (nights <= 0) return null;
+                    return (
+                      <p className="text-xs text-muted-foreground">
+                        {nights} {nights === 1 ? t("booking.night" as any) : t("booking.nights" as any)}
+                      </p>
+                    );
+                  })()}
                 </div>
                 <div className="flex items-center gap-2">
                   <Checkbox
@@ -1108,21 +1095,9 @@ const PublicBooking = () => {
                   const breakfastPrice = selectedResource?.breakfast_price_per_person;
                   const guestsCount = form.guests_count ? parseInt(form.guests_count) : 1;
 
-                  // Room type multipliers from resource config
-                  const resourcePricing = (selectedResource as any)?.room_type_pricing ?? { single: 1.0, double: 1.5, suite: 2.5, dorm: 0.6 };
-                  const multiplier = form.room_type ? (resourcePricing[form.room_type] ?? 1.0) : 1.0;
-                  const adjustedPrice = basePrice ? Math.round(basePrice * multiplier * 100) / 100 : null;
-
-                  const roomTotal = adjustedPrice ? nights * adjustedPrice : null;
+                  const roomTotal = basePrice ? nights * basePrice : null;
                   const breakfastTotal = form.breakfast_included && breakfastPrice ? nights * guestsCount * breakfastPrice : 0;
                   const grandTotal = roomTotal !== null ? roomTotal + breakfastTotal : null;
-
-                  const roomTypeLabels: Record<string, string> = {
-                    single: t("booking.roomSingle" as any),
-                    double: t("booking.roomDouble" as any),
-                    suite: t("booking.roomSuite" as any),
-                    dorm: t("booking.roomDorm" as any),
-                  };
 
                   return (
                     <div
@@ -1133,17 +1108,10 @@ const PublicBooking = () => {
                         {t("booking.priceSummary" as any)}
                       </h4>
                       <div className="text-sm space-y-1 text-muted-foreground">
-                        {adjustedPrice != null && (
+                        {basePrice != null && selectedResource && (
                           <div className="flex justify-between">
-                            <span>
-                              {form.room_type ? roomTypeLabels[form.room_type] : selectedResource?.name}
-                              {multiplier !== 1.0 && basePrice && (
-                                <span className="text-xs ml-1 opacity-60">
-                                  (×{multiplier})
-                                </span>
-                              )}
-                            </span>
-                            <span>€{adjustedPrice.toFixed(2)} / {t("booking.night" as any)}</span>
+                            <span>{selectedResource.name}</span>
+                            <span>€{Number(basePrice).toFixed(2)} / {t("booking.night" as any)}</span>
                           </div>
                         )}
                         <div className="flex justify-between">
