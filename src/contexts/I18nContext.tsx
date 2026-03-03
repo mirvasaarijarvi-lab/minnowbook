@@ -7,10 +7,14 @@ interface I18nContextType {
   t: (key: TranslationKey) => string;
 }
 
+// Default t function that actually resolves translations (prevents raw keys flashing)
+const defaultT = (key: TranslationKey): string =>
+  translations.en[key] ?? key;
+
 const I18nContext = createContext<I18nContextType>({
   language: "en",
   setLanguage: () => {},
-  t: (key) => key,
+  t: defaultT,
 });
 
 export const useI18n = () => useContext(I18nContext);
