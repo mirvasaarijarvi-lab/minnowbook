@@ -999,7 +999,7 @@ const PublicBooking = () => {
           </Card>
 
           {/* Type-specific fields: Hotel / Guesthouse */}
-          {isAccommodationType && selectedDate && (
+          {isAccommodationType && (
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg font-serif flex items-center gap-2" style={{ color: primaryColor }}>
