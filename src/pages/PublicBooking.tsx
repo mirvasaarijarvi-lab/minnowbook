@@ -56,8 +56,6 @@ const AvailabilityCalendar = ({
   thresholds,
   reservationType,
   t,
-  onDateSelect,
-  selectedDate: externalSelectedDate,
 }: {
   tenantId: string;
   primaryColor: string;
@@ -65,8 +63,6 @@ const AvailabilityCalendar = ({
   thresholds: Record<string, number>;
   reservationType: string;
   t: (key: string) => string;
-  onDateSelect?: (date: Date) => void;
-  selectedDate?: Date;
 }) => {
   const [calMonth, setCalMonth] = useState(new Date());
 
@@ -132,13 +128,9 @@ const AvailabilityCalendar = ({
       <CardContent>
         <Calendar
           mode="single"
-          selected={externalSelectedDate}
-          onSelect={(date) => {
-            if (date && onDateSelect) onDateSelect(date);
-          }}
           month={calMonth}
           onMonthChange={setCalMonth}
-          disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0)) || getDayStatus(date) === "full"}
+          disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
           className={cn("p-3 pointer-events-auto rounded-md border")}
           modifiers={{
             available: (date) => getDayStatus(date) === "available" && date >= new Date(new Date().setHours(0, 0, 0, 0)),
@@ -912,59 +904,56 @@ const PublicBooking = () => {
             </Card>
           )}
 
-          {/* Availability Calendar - shown after type selection */}
+          {/* Availability + Date/Time side by side */}
           {form.reservation_type && (
-            <AvailabilityCalendar
-              tenantId={tenant.id}
-              primaryColor={primaryColor}
-              accentColor={accentColor}
-              thresholds={(settings?.availability_thresholds as Record<string, number>) ?? { restaurant: 5, venue: 5, guesthouse: 5, hotel: 5 }}
-              reservationType={form.reservation_type}
-              t={t}
-              selectedDate={selectedDate}
-              onDateSelect={(date) => { setSelectedDate(date); updateField("start_time", ""); }}
-            />
-          )}
+            <div className="grid gap-6 lg:grid-cols-2">
+              {/* Left: Availability Calendar (read-only) */}
+              <AvailabilityCalendar
+                tenantId={tenant.id}
+                primaryColor={primaryColor}
+                accentColor={accentColor}
+                thresholds={(settings?.availability_thresholds as Record<string, number>) ?? { restaurant: 5, venue: 5, guesthouse: 5, hotel: 5 }}
+                reservationType={form.reservation_type}
+                t={t}
+              />
 
-          {/* Step 2: Date & Time */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg font-serif" style={{ color: primaryColor }}>
-                {t("booking.selectDateTime")}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-6 lg:grid-cols-[1fr_1fr]">
-                <div className="space-y-2">
-                  <Label>{t("common.date")} *</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-full justify-start text-left font-normal",
-                          !selectedDate && "text-muted-foreground"
-                        )}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {selectedDate
-                          ? format(selectedDate, "EEEE, MMMM d, yyyy")
-                          : <span>{t("booking.pickDate")}</span>}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={selectedDate}
-                        onSelect={(date) => { setSelectedDate(date); updateField("start_time", ""); }}
-                        disabled={isDateDisabled}
-                        initialFocus
-                        className={cn("p-3 pointer-events-auto")}
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-                <div className="space-y-3">
+              {/* Right: Date & Time picker */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg font-serif" style={{ color: primaryColor }}>
+                    {t("booking.selectDateTime")}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label>{t("common.date")} *</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-start text-left font-normal",
+                            !selectedDate && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {selectedDate
+                            ? format(selectedDate, "EEEE, MMMM d, yyyy")
+                            : <span>{t("booking.pickDate")}</span>}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={selectedDate}
+                          onSelect={(date) => { setSelectedDate(date); updateField("start_time", ""); }}
+                          disabled={isDateDisabled}
+                          initialFocus
+                          className={cn("p-3 pointer-events-auto")}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
                   {selectedDate && timeSlots.length > 0 && (
                     <div className="space-y-2">
                       <Label className="flex items-center gap-1">
@@ -975,24 +964,24 @@ const PublicBooking = () => {
                         {timeSlots.map((slot) => {
                           const blocked = selectedDate ? isTimeSlotBlocked(slot, selectedDate) : false;
                           return (
-                          <button
-                            key={slot}
-                            type="button"
-                            onClick={() => !blocked && updateField("start_time", slot)}
-                            disabled={blocked}
-                            className={cn(
-                              "px-3 py-1.5 text-sm rounded-md border transition-all",
-                              blocked && "opacity-40 cursor-not-allowed line-through"
-                            )}
-                            style={{
-                              borderColor: blocked ? "#ef4444" : form.start_time === slot ? accentColor : "#e5e5e5",
-                              backgroundColor: blocked ? "#fef2f2" : form.start_time === slot ? `${accentColor}15` : "transparent",
-                              color: blocked ? "#991b1b" : primaryColor,
-                            }}
-                            title={blocked ? t("booking.blocked") : undefined}
-                          >
-                            {slot}
-                          </button>
+                            <button
+                              key={slot}
+                              type="button"
+                              onClick={() => !blocked && updateField("start_time", slot)}
+                              disabled={blocked}
+                              className={cn(
+                                "px-3 py-1.5 text-sm rounded-md border transition-all",
+                                blocked && "opacity-40 cursor-not-allowed line-through"
+                              )}
+                              style={{
+                                borderColor: blocked ? "#ef4444" : form.start_time === slot ? accentColor : "#e5e5e5",
+                                backgroundColor: blocked ? "#fef2f2" : form.start_time === slot ? `${accentColor}15` : "transparent",
+                                color: blocked ? "#991b1b" : primaryColor,
+                              }}
+                              title={blocked ? t("booking.blocked") : undefined}
+                            >
+                              {slot}
+                            </button>
                           );
                         })}
                       </div>
@@ -1001,23 +990,22 @@ const PublicBooking = () => {
                   {selectedDate && timeSlots.length === 0 && openingHours && openingHours.length > 0 && (
                     <p className="text-sm text-muted-foreground">{t("booking.closedDay")}</p>
                   )}
-                  {/* Manual time if no opening hours configured */}
                   {selectedDate && (!openingHours || openingHours.length === 0) && (
                     <div className="space-y-2">
-                      <Label htmlFor="start_time">{t("booking.preferredTime")}</Label>
+                      <Label htmlFor="start_time_inline">{t("booking.preferredTime")}</Label>
                       <Input
-                        id="start_time"
+                        id="start_time_inline"
                         type="time"
                         value={form.start_time}
                         onChange={(e) => updateField("start_time", e.target.value)}
                       />
                     </div>
                   )}
-                </div>
-              </div>
-              {errors.date && <p className="text-sm text-destructive mt-2">{errors.date}</p>}
-            </CardContent>
-          </Card>
+                  {errors.date && <p className="text-sm text-destructive">{errors.date}</p>}
+                </CardContent>
+              </Card>
+            </div>
+          )}
 
           {/* Type-specific fields: Hotel / Guesthouse */}
           {isAccommodationType && (
