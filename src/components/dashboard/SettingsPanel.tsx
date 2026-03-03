@@ -37,7 +37,7 @@ const SettingsPanel = () => {
   const [uploading, setUploading] = useState(false);
   const [uploadingHero, setUploadingHero] = useState(false);
 
-  const { data: settings, isLoading } = useQuery({
+  const { data: settings, isLoading, dataUpdatedAt } = useQuery({
     queryKey: ["tenant-settings", tenantId],
     queryFn: async () => {
       if (!tenantId) return null;
@@ -94,7 +94,7 @@ const SettingsPanel = () => {
         setResourceTypeDescriptions(settings.resource_type_descriptions as Record<string, string>);
       }
     }
-  }, [settings]);
+  }, [settings, dataUpdatedAt]);
 
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -212,7 +212,8 @@ const SettingsPanel = () => {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["tenant-settings"] });
+      queryClient.invalidateQueries({ queryKey: ["tenant-settings"], refetchType: "all" });
+      queryClient.invalidateQueries({ queryKey: ["tenant-settings-business"] });
       toast.success(t("settings.saved"));
     },
     onError: (error: any) => {
