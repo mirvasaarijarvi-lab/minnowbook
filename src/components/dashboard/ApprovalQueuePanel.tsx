@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/hooks/useTenant";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePermissions } from "@/hooks/usePermissions";
+import { useT } from "@/contexts/I18nContext";
 import { PERM_SITES_APPROVE } from "@/lib/permissions";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -43,12 +44,12 @@ interface PendingItem {
   created_at: string;
 }
 
-const TABLE_LABELS: Record<ApprovalTable, string> = {
-  resources: "Resource",
-  blocked_slots: "Blocked Slot",
-  recurring_blocked_slots: "Recurring Block",
-  tenant_opening_hours: "Opening Hours",
-  tenant_email_templates: "Email Template",
+const TABLE_LABEL_KEYS: Record<ApprovalTable, string> = {
+  resources: "approval.typeResource",
+  blocked_slots: "approval.typeBlockedSlot",
+  recurring_blocked_slots: "approval.typeRecurringBlock",
+  tenant_opening_hours: "approval.typeOpeningHours",
+  tenant_email_templates: "approval.typeEmailTemplate",
 };
 
 const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -57,6 +58,7 @@ const ApprovalQueuePanel = () => {
   const { tenantId } = useTenant();
   const { user } = useAuth();
   const { can } = usePermissions();
+  const t = useT();
   const queryClient = useQueryClient();
   const canApprove = can(PERM_SITES_APPROVE);
 
@@ -104,7 +106,7 @@ const ApprovalQueuePanel = () => {
           id: b.id,
           table: "blocked_slots",
           label: `${b.date} — ${b.resource_type}`,
-          detail: b.reason || "No reason",
+          detail: b.reason || t("approval.noReason"),
           site_name: b.site_id ? siteMap.get(b.site_id) ?? null : null,
           created_at: b.created_at ?? "",
         })
@@ -121,7 +123,7 @@ const ApprovalQueuePanel = () => {
           id: r.id,
           table: "recurring_blocked_slots",
           label: `${DAY_NAMES[r.day_of_week]} — ${r.resource_type}`,
-          detail: r.reason || "No reason",
+          detail: r.reason || t("approval.noReason"),
           site_name: r.site_id ? siteMap.get(r.site_id) ?? null : null,
           created_at: r.created_at ?? "",
         })
@@ -138,7 +140,7 @@ const ApprovalQueuePanel = () => {
           id: h.id,
           table: "tenant_opening_hours",
           label: `${DAY_NAMES[h.day_of_week]} — ${h.resource_type}`,
-          detail: h.is_closed ? "Closed" : `${h.open_time ?? "?"} – ${h.close_time ?? "?"}`,
+          detail: h.is_closed ? t("approval.closed") : `${h.open_time ?? "?"} – ${h.close_time ?? "?"}`,
           site_name: h.site_id ? siteMap.get(h.site_id) ?? null : null,
           created_at: h.created_at ?? "",
         })
@@ -180,10 +182,10 @@ const ApprovalQueuePanel = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["approval-queue", tenantId] });
-      toast({ title: "Approved" });
+      toast({ title: t("approval.approved") });
     },
     onError: (err: any) => {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      toast({ title: t("common.status"), description: err.message, variant: "destructive" });
     },
   });
 
@@ -203,10 +205,10 @@ const ApprovalQueuePanel = () => {
       queryClient.invalidateQueries({ queryKey: ["approval-queue", tenantId] });
       setRejectDialog(null);
       setRejectionReason("");
-      toast({ title: "Rejected" });
+      toast({ title: t("approval.rejected") });
     },
     onError: (err: any) => {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      toast({ title: t("common.status"), description: err.message, variant: "destructive" });
     },
   });
 
@@ -236,8 +238,8 @@ const ApprovalQueuePanel = () => {
       <Card>
         <CardContent className="py-12 text-center text-muted-foreground">
           <CheckCircle2 className="h-10 w-10 mx-auto mb-3 opacity-40" />
-          <p className="text-sm font-medium">No pending approvals</p>
-          <p className="text-xs mt-1">All changes have been reviewed.</p>
+          <p className="text-sm font-medium">{t("approval.noItems")}</p>
+          <p className="text-xs mt-1">{t("approval.noItemsDesc")}</p>
         </CardContent>
       </Card>
     );
@@ -250,12 +252,12 @@ const ApprovalQueuePanel = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Type</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>Detail</TableHead>
-                <TableHead>Site</TableHead>
-                <TableHead>Submitted</TableHead>
-                {canApprove && <TableHead className="text-right">Actions</TableHead>}
+                <TableHead>{t("approval.colType")}</TableHead>
+                <TableHead>{t("approval.colName")}</TableHead>
+                <TableHead>{t("approval.colDetail")}</TableHead>
+                <TableHead>{t("approval.colSite")}</TableHead>
+                <TableHead>{t("approval.colSubmitted")}</TableHead>
+                {canApprove && <TableHead className="text-right">{t("approval.colActions")}</TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -264,7 +266,7 @@ const ApprovalQueuePanel = () => {
                   <TableCell>
                     <Badge variant="outline" className="text-xs whitespace-nowrap">
                       <FileText className="h-3 w-3 mr-1" />
-                      {TABLE_LABELS[item.table]}
+                      {t(TABLE_LABEL_KEYS[item.table] as any)}
                     </Badge>
                   </TableCell>
                   <TableCell className="font-medium">{item.label}</TableCell>
@@ -290,7 +292,7 @@ const ApprovalQueuePanel = () => {
                           disabled={approveMutation.isPending}
                         >
                           <CheckCircle2 className="h-3.5 w-3.5" />
-                          Approve
+                          {t("approval.approve")}
                         </Button>
                         <Button
                           size="sm"
@@ -302,7 +304,7 @@ const ApprovalQueuePanel = () => {
                           }}
                         >
                           <XCircle className="h-3.5 w-3.5" />
-                          Reject
+                          {t("approval.reject")}
                         </Button>
                       </div>
                     </TableCell>
@@ -318,14 +320,14 @@ const ApprovalQueuePanel = () => {
       <Dialog open={!!rejectDialog} onOpenChange={(open) => !open && setRejectDialog(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="font-serif">Reject Change</DialogTitle>
+            <DialogTitle className="font-serif">{t("approval.rejectChange")}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 pt-2">
             <p className="text-sm text-muted-foreground">
-              Rejecting: <strong>{rejectDialog?.label}</strong> ({TABLE_LABELS[rejectDialog?.table ?? "resources"]})
+              {t("approval.rejectingLabel")} <strong>{rejectDialog?.label}</strong> ({t(TABLE_LABEL_KEYS[rejectDialog?.table ?? "resources"] as any)})
             </p>
             <Textarea
-              placeholder="Reason for rejection…"
+              placeholder={t("approval.rejectionReason")}
               value={rejectionReason}
               onChange={(e) => setRejectionReason(e.target.value)}
               rows={3}
@@ -336,7 +338,7 @@ const ApprovalQueuePanel = () => {
               onClick={handleReject}
               disabled={!rejectionReason.trim() || rejectMutation.isPending}
             >
-              {rejectMutation.isPending ? "Rejecting…" : "Reject"}
+              {rejectMutation.isPending ? t("approval.rejecting") : t("approval.reject")}
             </Button>
           </div>
         </DialogContent>
