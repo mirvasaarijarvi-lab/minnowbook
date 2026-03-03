@@ -41,7 +41,7 @@ const CalendarView = () => {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <h2 className="text-2xl font-serif font-bold text-foreground">{t("nav.calendar")}</h2>
-          <DashboardTooltip text="Click a date to see its reservations. Highlighted dates have bookings. Red dates have one-off blocks. Purple dashed dates have recurring blocks." />
+          <DashboardTooltip text={t("dashboard.calendarTooltip" as any)} />
         </div>
         {canCreate && (
           <Button size="sm" className="gap-1.5" onClick={() => setNewReservationOpen(true)}>
@@ -55,19 +55,19 @@ const CalendarView = () => {
       <div className="flex items-center gap-4 text-xs text-muted-foreground flex-wrap">
         <div className="flex items-center gap-1.5">
           <div className="w-3 h-3 rounded-sm bg-accent/20 border border-accent/30" />
-          <span>Has reservations</span>
+          <span>{t("dashboard.legendHasReservations" as any)}</span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-3 h-3 rounded-sm bg-destructive/20 border border-destructive/30" />
-          <span>Blocked</span>
+          <span>{t("dashboard.legendBlocked" as any)}</span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-3 h-3 rounded-sm bg-primary/15 border border-dashed border-primary/40" />
-          <span>Recurring block</span>
+          <span>{t("dashboard.legendRecurring" as any)}</span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-3 h-3 rounded-sm bg-accent/20 border-2 border-destructive/40" />
-          <span>Both</span>
+          <span>{t("dashboard.legendBoth" as any)}</span>
         </div>
       </div>
 
