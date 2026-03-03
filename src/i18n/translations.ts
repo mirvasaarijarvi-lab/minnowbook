@@ -176,6 +176,10 @@ type TranslationKeys = {
   "booking.reservations": string;
   "booking.submitting": string;
   "booking.submitError": string;
+  "booking.dateBlocked": string;
+  "booking.timeBlocked": string;
+  "booking.blocked": string;
+  "booking.fixedPricePlaceholder": string;
   "booking.thankYou": string;
   "booking.confirmationMsg": string;
   "booking.makeAnother": string;
@@ -984,6 +988,10 @@ const en: TranslationKeys = {
   "booking.reservations": "reservations",
   "booking.submitting": "Submitting...",
   "booking.submitError": "Failed to submit reservation. Please try again.",
+  "booking.dateBlocked": "This date is not available for booking.",
+  "booking.timeBlocked": "This time slot is not available for booking.",
+  "booking.blocked": "Blocked",
+  "booking.fixedPricePlaceholder": "e.g. 45.00",
   "booking.thankYou": "Thank you!",
   "booking.confirmationMsg": "Your reservation has been received. We will confirm it shortly via email.",
   "booking.makeAnother": "Make another reservation",
@@ -1777,6 +1785,10 @@ const fi: TranslationKeys = {
   "booking.reservations": "varausta",
   "booking.submitting": "Lähetetään...",
   "booking.submitError": "Varauksen lähetys epäonnistui. Yritä uudelleen.",
+  "booking.dateBlocked": "Tämä päivä ei ole varattavissa.",
+  "booking.timeBlocked": "Tämä aikaväli ei ole varattavissa.",
+  "booking.blocked": "Estetty",
+  "booking.fixedPricePlaceholder": "esim. 45,00",
   "booking.thankYou": "Kiitos!",
   "booking.confirmationMsg": "Varauksesi on vastaanotettu. Vahvistamme sen pian sähköpostitse.",
   "booking.makeAnother": "Tee uusi varaus",
@@ -2569,6 +2581,10 @@ const sv: TranslationKeys = {
   "booking.reservations": "bokningar",
   "booking.submitting": "Skickar...",
   "booking.submitError": "Kunde inte skicka bokningen. Försök igen.",
+  "booking.dateBlocked": "Detta datum är inte tillgängligt för bokning.",
+  "booking.timeBlocked": "Denna tidslucka är inte tillgänglig för bokning.",
+  "booking.blocked": "Blockerad",
+  "booking.fixedPricePlaceholder": "t.ex. 45,00",
   "booking.thankYou": "Tack!",
   "booking.confirmationMsg": "Din bokning har mottagits. Vi bekräftar den inom kort via e-post.",
   "booking.makeAnother": "Gör en ny bokning",

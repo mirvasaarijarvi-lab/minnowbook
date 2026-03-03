@@ -523,11 +523,11 @@ const PublicBooking = () => {
     // Block check: prevent booking on blocked dates/times
     if (selectedDate) {
       if (isDateFullyBlocked(selectedDate)) {
-        toast.error("This date is not available for booking.");
+        toast.error(t("booking.dateBlocked"));
         return;
       }
       if (form.start_time && isTimeSlotBlocked(form.start_time, selectedDate)) {
-        toast.error("This time slot is not available for booking.");
+        toast.error(t("booking.timeBlocked"));
         return;
       }
     }
@@ -979,7 +979,7 @@ const PublicBooking = () => {
                               backgroundColor: blocked ? "#fef2f2" : form.start_time === slot ? `${accentColor}15` : "transparent",
                               color: blocked ? "#991b1b" : primaryColor,
                             }}
-                            title={blocked ? "Blocked" : undefined}
+                            title={blocked ? t("booking.blocked") : undefined}
                           >
                             {slot}
                           </button>
@@ -1254,7 +1254,7 @@ const PublicBooking = () => {
                       min={0}
                       value={form.fixed_price}
                       onChange={(e) => updateField("fixed_price", e.target.value)}
-                      placeholder="e.g. 45.00"
+                      placeholder={t("booking.fixedPricePlaceholder")}
                     />
                   </div>
                 )}
