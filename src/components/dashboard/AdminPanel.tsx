@@ -15,7 +15,8 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
-import { Plus, Key, Trash2, Shield, Users, Building2 } from "lucide-react";
+import { Plus, Key, Trash2, Shield, Users, Building2, ShieldCheck } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import PasswordInput from "@/components/PasswordInput";
 import { useT } from "@/contexts/I18nContext";
 import DashboardTooltip from "./DashboardTooltip";
@@ -69,6 +70,7 @@ const AdminPanel = () => {
   const { tenantId, tenant, isOwner, isAdmin, isSuperadmin } = useTenant();
   const { isSystemAdmin } = usePermissions();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const t = useT();
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
@@ -245,6 +247,18 @@ const AdminPanel = () => {
 
   return (
     <div className="space-y-6">
+      {/* Superadmin link — visible only to system admins */}
+      {isSystemAdmin && (
+        <Button
+          variant="outline"
+          className="gap-2 border-destructive/30 text-destructive hover:bg-destructive/5"
+          onClick={() => navigate("/superadmin")}
+        >
+          <ShieldCheck className="h-4 w-4" />
+          Superadmin Panel
+        </Button>
+      )}
+
       {/* User Management */}
       <Card>
         <CardHeader>
