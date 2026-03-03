@@ -18,6 +18,7 @@ import ConfirmationEmailPreview from "@/components/ConfirmationEmailPreview";
 import { useT } from "@/contexts/I18nContext";
 import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
 import { toast } from "sonner";
+import { useDateLocale } from "@/hooks/useDateLocale";
 import { usePermissions } from "@/hooks/usePermissions";
 import {
   PERM_RESERVATIONS_CREATE,
@@ -48,6 +49,7 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
   const [editingReservation, setEditingReservation] = useState<any | null>(null);
   const [newReservationOpen, setNewReservationOpen] = useState(false);
   const t = useT();
+  const dateFnsLocale = useDateLocale();
   const { typeLabel } = useResourceTypeLabel();
   const { can } = usePermissions();
   const canCreate = can(PERM_RESERVATIONS_CREATE);
@@ -272,8 +274,8 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
                     <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
                       <span className="flex items-center gap-1">
                         <CalendarDays className="h-3.5 w-3.5" />
-                        {format(new Date(r.date), "PPP")}
-                        {r.start_time && ` at ${r.start_time.slice(0, 5)}`}
+                        {format(new Date(r.date), "PPP", { locale: dateFnsLocale })}
+                        {r.start_time && ` ${t("email.at" as any)} ${r.start_time.slice(0, 5)}`}
                       </span>
                       <span className="flex items-center gap-1"><Mail className="h-3.5 w-3.5" />{r.guest_email}</span>
                       {r.guest_phone && <span className="flex items-center gap-1"><Phone className="h-3.5 w-3.5" />{r.guest_phone}</span>}

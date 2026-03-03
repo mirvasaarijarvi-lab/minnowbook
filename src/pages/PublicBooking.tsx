@@ -18,6 +18,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { format, startOfMonth, endOfMonth, addMonths, subMonths, isSameDay } from "date-fns";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
+import { useDateLocale } from "@/hooks/useDateLocale";
 import ResourceCarousel from "@/components/ResourceCarousel";
 import ConfirmationEmailPreview from "@/components/ConfirmationEmailPreview";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
@@ -167,6 +168,7 @@ const PublicBooking = () => {
   const { slug } = useParams<{ slug: string }>();
   const [searchParams] = useSearchParams();
   const t = useT();
+  const dateFnsLocale = useDateLocale();
   const [submitted, setSubmitted] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -938,7 +940,7 @@ const PublicBooking = () => {
                         >
                           <CalendarIcon className="mr-2 h-4 w-4" />
                           {selectedDate
-                            ? format(selectedDate, "EEEE, MMMM d, yyyy")
+                            ? format(selectedDate, "EEEE, MMMM d, yyyy", { locale: dateFnsLocale })
                             : <span>{t("booking.pickDate")}</span>}
                         </Button>
                       </PopoverTrigger>
@@ -1031,7 +1033,7 @@ const PublicBooking = () => {
                         >
                           <CalendarIcon className="mr-2 h-4 w-4" />
                           {form.check_out_date
-                            ? format(new Date(form.check_out_date + "T00:00:00"), "PPP")
+                            ? format(new Date(form.check_out_date + "T00:00:00"), "PPP", { locale: dateFnsLocale })
                             : <span>{t("booking.pickDate")}</span>}
                         </Button>
                       </PopoverTrigger>
