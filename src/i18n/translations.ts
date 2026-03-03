@@ -450,6 +450,19 @@ type TranslationKeys = {
   "dashboard.legendRecurring": string;
   "dashboard.legendBoth": string;
   "dashboard.calendarTooltip": string;
+  "dashboard.blockDay": string;
+  "dashboard.recurringBlocks": string;
+  "dashboard.blocked": string;
+  "dashboard.allDay": string;
+  "dashboard.reservationsLabel": string;
+  "dashboard.every": string;
+  "dashboard.blockTitle": string;
+  "dashboard.blockedLabel": string;
+  "dashboard.blockLabel": string;
+  "dashboard.blockReason": string;
+  "dashboard.unblockAll": string;
+  "dashboard.blockRestaurantDay": string;
+  "dashboard.blockAllTitle": string;
   "dashboard.resourceManagement": string;
   "dashboard.resourceManagementDesc": string;
   "dashboard.actions": string;
@@ -1154,6 +1167,19 @@ const en: TranslationKeys = {
   "dashboard.legendRecurring": "Recurring block",
   "dashboard.legendBoth": "Both",
   "dashboard.calendarTooltip": "Click a date to see its reservations. Highlighted dates have bookings. Red dates have one-off blocks. Purple dashed dates have recurring blocks.",
+  "dashboard.blockDay": "Block day",
+  "dashboard.recurringBlocks": "Recurring Blocks",
+  "dashboard.blocked": "Blocked",
+  "dashboard.allDay": "All day",
+  "dashboard.reservationsLabel": "Reservations",
+  "dashboard.every": "Every",
+  "dashboard.blockTitle": "Block",
+  "dashboard.blockedLabel": "Blocked",
+  "dashboard.blockLabel": "Block",
+  "dashboard.blockReason": "Reason for blocking (optional)",
+  "dashboard.unblockAll": "Unblock all",
+  "dashboard.blockRestaurantDay": "Block restaurant for the day",
+  "dashboard.blockAllTitle": "Block all",
   "dashboard.resourceManagement": "Resource Management",
   "dashboard.resourceManagementDesc": "Manage spaces, rooms and tables",
   "dashboard.actions": "Actions",
@@ -1845,6 +1871,19 @@ const fi: TranslationKeys = {
   "dashboard.legendRecurring": "Toistuva esto",
   "dashboard.legendBoth": "Molemmat",
   "dashboard.calendarTooltip": "Klikkaa päivää nähdäksesi sen varaukset. Korostetut päivät sisältävät varauksia. Punaiset päivät sisältävät yksittäisiä estoja. Violetit katkoviivapäivät sisältävät toistuvia estoja.",
+  "dashboard.blockDay": "Estä päivä",
+  "dashboard.recurringBlocks": "Toistuvat estot",
+  "dashboard.blocked": "Estetty",
+  "dashboard.allDay": "Koko päivä",
+  "dashboard.reservationsLabel": "Varaukset",
+  "dashboard.every": "Joka",
+  "dashboard.blockTitle": "Estä",
+  "dashboard.blockedLabel": "Estetty",
+  "dashboard.blockLabel": "Estä",
+  "dashboard.blockReason": "Eston syy (valinnainen)",
+  "dashboard.unblockAll": "Poista kaikki estot",
+  "dashboard.blockRestaurantDay": "Estä ravintola koko päiväksi",
+  "dashboard.blockAllTitle": "Estä kaikki",
   "dashboard.resourceManagement": "Resurssien hallinta",
   "dashboard.resourceManagementDesc": "Hallitse tiloja, huoneita ja pöytiä",
   "dashboard.actions": "Toiminnot",
@@ -2536,6 +2575,19 @@ const sv: TranslationKeys = {
   "dashboard.legendRecurring": "Återkommande blockering",
   "dashboard.legendBoth": "Båda",
   "dashboard.calendarTooltip": "Klicka på ett datum för att se dess bokningar. Markerade datum har bokningar. Röda datum har engångsblockeringar. Lila streckade datum har återkommande blockeringar.",
+  "dashboard.blockDay": "Blockera dag",
+  "dashboard.recurringBlocks": "Återkommande blockeringar",
+  "dashboard.blocked": "Blockerad",
+  "dashboard.allDay": "Hela dagen",
+  "dashboard.reservationsLabel": "Bokningar",
+  "dashboard.every": "Varje",
+  "dashboard.blockTitle": "Blockera",
+  "dashboard.blockedLabel": "Blockerad",
+  "dashboard.blockLabel": "Blockera",
+  "dashboard.blockReason": "Anledning till blockering (valfritt)",
+  "dashboard.unblockAll": "Avblockera alla",
+  "dashboard.blockRestaurantDay": "Blockera restaurangen för dagen",
+  "dashboard.blockAllTitle": "Blockera alla",
   "dashboard.resourceManagement": "Resurshantering",
   "dashboard.resourceManagementDesc": "Hantera lokaler, rum och bord",
   "dashboard.actions": "Åtgärder",
