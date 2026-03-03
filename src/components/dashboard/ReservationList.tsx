@@ -32,13 +32,15 @@ const statusColors: Record<string, string> = {
 
 interface ReservationListProps {
   initialStatusFilter?: string;
+  initialInvoicedFilter?: boolean;
 }
 
-const ReservationList = ({ initialStatusFilter }: ReservationListProps) => {
+const ReservationList = ({ initialStatusFilter, initialInvoicedFilter }: ReservationListProps) => {
   const { tenantId, tenant } = useTenant();
   const [statusFilter, setStatusFilter] = useState<string>(initialStatusFilter || "all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [dateFilter, setDateFilter] = useState<string>("all");
+  const [invoicedFilter, setInvoicedFilter] = useState<string>(initialInvoicedFilter === false ? "uninvoiced" : "all");
   const [confirmDialog, setConfirmDialog] = useState<{ id: string; action: "confirmed" | "cancelled" } | null>(null);
   const [editingReservation, setEditingReservation] = useState<any | null>(null);
   const [newReservationOpen, setNewReservationOpen] = useState(false);
@@ -51,13 +53,15 @@ const ReservationList = ({ initialStatusFilter }: ReservationListProps) => {
   const today = format(new Date(), "yyyy-MM-dd");
 
   const { data: reservations, isLoading } = useQuery({
-    queryKey: ["reservations", tenantId, statusFilter, typeFilter, dateFilter],
+    queryKey: ["reservations", tenantId, statusFilter, typeFilter, dateFilter, invoicedFilter],
     queryFn: async () => {
       if (!tenantId) return [];
       let query = supabase.from("reservations").select("*").eq("tenant_id", tenantId).order("date", { ascending: false });
       if (statusFilter !== "all") query = query.eq("status", statusFilter);
       if (typeFilter !== "all") query = query.eq("reservation_type", typeFilter);
       if (dateFilter === "today") query = query.eq("date", today);
+      if (invoicedFilter === "uninvoiced") query = query.eq("is_invoiced", false);
+      if (invoicedFilter === "invoiced") query = query.eq("is_invoiced", true);
       const { data, error } = await query.limit(100);
       if (error) throw error;
       return data;
@@ -192,6 +196,14 @@ const ReservationList = ({ initialStatusFilter }: ReservationListProps) => {
               <SelectItem value="restaurant">{t("dashboard.restaurant")}</SelectItem>
               <SelectItem value="venue">{t("dashboard.venue")}</SelectItem>
               <SelectItem value="guesthouse">{t("dashboard.guesthouse")}</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={invoicedFilter} onValueChange={setInvoicedFilter}>
+            <SelectTrigger className="w-[140px]"><SelectValue placeholder="Invoice status" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All</SelectItem>
+              <SelectItem value="uninvoiced">Uninvoiced</SelectItem>
+              <SelectItem value="invoiced">Invoiced</SelectItem>
             </SelectContent>
           </Select>
         </div>
