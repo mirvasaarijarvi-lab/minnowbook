@@ -16,9 +16,9 @@ const upgradeInfo: Record<string, { targetTier: string; features: string[] }> = 
     targetTier: "professional",
     features: [
       "All reservation types (Restaurant, Venue, Guesthouse, Hotel)",
-      "10 staff users",
-      "Custom branding",
-      "AI chatbot support",
+      "Up to 10 staff users",
+      "Custom branding & branded booking page",
+      "Email templates & discount codes",
     ],
   },
   "basic-sites": {
@@ -26,23 +26,24 @@ const upgradeInfo: Record<string, { targetTier: string; features: string[] }> = 
     features: [
       "Unlimited sites & locations",
       "All reservation types",
-      "Unlimited staff users",
+      "Unlimited staff users & resources per type",
       "Multi-site management dashboard",
+      "Priority human support with 24h response",
     ],
   },
   "professional-sites": {
     targetTier: "business",
     features: [
       "Unlimited sites & locations",
-      "Unlimited staff users",
+      "Unlimited staff users & resources per type",
       "Multi-site management dashboard",
-      "Advanced reporting",
+      "Priority human support with 24h response",
     ],
   },
   "professional-types": {
     targetTier: "professional",
     features: [
-      "All reservation types already included",
+      "All reservation types are already included in your plan",
     ],
   },
 };
