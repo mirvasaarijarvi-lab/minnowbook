@@ -44,11 +44,11 @@ const tiers = [
   {
     name: "Business",
     price: 99,
-    description: "Multi-location management for growing hospitality businesses.",
+    description: "Full-featured platform for growing hospitality businesses with multiple locations.",
     reservationTypes: "All types included",
     staffUsers: "Unlimited",
     features: [
-      "Up to 3 sites / locations",
+      "Unlimited sites & locations",
       "All reservation types",
       "Everything in Pro",
       "Multi-site management dashboard",
@@ -56,23 +56,6 @@ const tiers = [
       "Per-site branding & settings",
       "Advanced revenue reporting",
       "Priority support",
-    ],
-  },
-  {
-    name: "Enterprise",
-    price: 199,
-    description: "Full-featured platform for large-scale hospitality operations.",
-    reservationTypes: "All types included",
-    staffUsers: "Unlimited",
-    features: [
-      "Unlimited sites & locations",
-      "All reservation types",
-      "Everything in Business",
-      "Dedicated account manager",
-      "Custom integrations support",
-      "API access",
-      "SLA guarantee",
-      "White-glove onboarding",
     ],
   },
 ];
@@ -88,7 +71,7 @@ const faqs = [
   },
   {
     q: "What reservation types can I choose?",
-    a: "Restaurant (table bookings), Venue (event space inquiries), and Gasthaus/Guesthouse (room reservations). Basic lets you pick one; Pro unlocks all types on a single site; Business adds up to 3 sites; Enterprise offers unlimited locations.",
+    a: "Restaurant (table bookings), Venue (event space inquiries), and Gasthaus/Guesthouse (room reservations). Basic lets you pick one; Pro unlocks all types on a single site; Business adds unlimited sites with full multi-site management.",
   },
   {
     q: "Do I need a credit card to start the trial?",
@@ -144,28 +127,25 @@ const Pricing = () => {
                   <th className="text-center py-4 px-3 font-serif font-semibold text-foreground">Basic</th>
                   <th className="text-center py-4 px-3 font-serif font-semibold text-foreground">Pro</th>
                   <th className="text-center py-4 px-3 font-serif font-semibold text-foreground">Business</th>
-                  <th className="text-center py-4 px-3 font-serif font-semibold text-foreground">Enterprise</th>
                 </tr>
               </thead>
               <tbody>
                 {[
-                  ["Monthly price", "€29", "€59", "€99", "€199"],
-                  ["Free trial", "30 days", "30 days", "30 days", "30 days"],
-                  ["Sites / locations", "1", "1", "Up to 3", "Unlimited"],
-                  ["Reservation types", "1", "All", "All", "All"],
-                  ["Staff users", "1–3", "Up to 10", "Unlimited", "Unlimited"],
-                  ["Custom branding", "✓", "✓", "✓", "✓"],
-                  ["Branded booking page", "✓", "✓", "✓", "✓"],
-                  ["Default email templates", "✓", "✓", "✓", "✓"],
-                  ["Custom email templates", "—", "✓", "✓", "✓"],
-                  ["Advanced booking rules", "—", "✓", "✓", "✓"],
-                  ["Multi-language support", "—", "✓", "✓", "✓"],
-                  ["Multi-site management", "—", "—", "✓", "✓"],
-                  ["Analytics & reports", "Basic", "Advanced", "Advanced", "Advanced"],
-                  ["Priority support", "—", "✓", "✓", "✓"],
-                  ["Dedicated support", "—", "—", "—", "✓"],
-                  ["API access", "—", "—", "—", "✓"],
-                ].map(([feature, basic, pro, business, enterprise]) => {
+                  ["Monthly price", "€29", "€59", "€99"],
+                  ["Free trial", "30 days", "30 days", "30 days"],
+                  ["Sites / locations", "1", "1", "Unlimited"],
+                  ["Reservation types", "1", "All", "All"],
+                  ["Staff users", "1–3", "Up to 10", "Unlimited"],
+                  ["Custom branding", "✓", "✓", "✓"],
+                  ["Branded booking page", "✓", "✓", "✓"],
+                  ["Default email templates", "✓", "✓", "✓"],
+                  ["Custom email templates", "—", "✓", "✓"],
+                  ["Advanced booking rules", "—", "✓", "✓"],
+                  ["Multi-language support", "—", "✓", "✓"],
+                  ["Multi-site management", "—", "—", "✓"],
+                  ["Analytics & reports", "Basic", "Advanced", "Advanced"],
+                  ["Priority support", "—", "✓", "✓"],
+                ].map(([feature, basic, pro, business]) => {
                   const isHighlight = feature === "Sites / locations" || feature === "Reservation types";
                   return (
                   <tr key={feature} className={`border-b border-border/50 ${isHighlight ? "bg-accent/5" : ""}`}>
@@ -173,7 +153,6 @@ const Pricing = () => {
                     <td className="py-3 px-3 text-center text-muted-foreground">{basic}</td>
                     <td className={`py-3 px-3 text-center font-medium ${isHighlight ? "text-accent" : "text-foreground"}`}>{pro}</td>
                     <td className={`py-3 px-3 text-center font-medium ${isHighlight ? "text-accent" : "text-foreground"}`}>{business}</td>
-                    <td className={`py-3 px-3 text-center font-medium ${isHighlight ? "text-accent" : "text-foreground"}`}>{enterprise}</td>
                   </tr>
                   );
                 })}
@@ -195,10 +174,8 @@ const Pricing = () => {
                 Managing multiple locations?
               </h3>
               <p className="text-muted-foreground leading-relaxed mb-4">
-                The <strong className="text-foreground">Business</strong> plan supports <strong className="text-foreground">up to 3 sites</strong> with
-                multi-site management — run hotels, restaurants, and venues from a single dashboard. Need more?
-                The <strong className="text-foreground">Enterprise</strong> plan offers <strong className="text-foreground">unlimited locations</strong> with
-                dedicated support and API access.
+                The <strong className="text-foreground">Business</strong> plan supports <strong className="text-foreground">unlimited sites</strong> with
+                multi-site management — run hotels, restaurants, and venues from a single dashboard.
               </p>
               <Link to="/signup">
                 <Button variant="default" size="lg" className="gap-2">

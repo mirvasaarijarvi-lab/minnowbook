@@ -684,8 +684,6 @@ type TranslationKeys = {
   "tier.professionalDesc": string;
   "tier.business": string;
   "tier.businessDesc": string;
-  "tier.enterprise": string;
-  "tier.enterpriseDesc": string;
 
   // Footer
   "footer.tagline": string;
@@ -1760,8 +1758,6 @@ const en: TranslationKeys = {
   "tier.professionalDesc": "Multiple reservation types, team management.",
   "tier.business": "Business",
   "tier.businessDesc": "Full-featured platform for established businesses.",
-  "tier.enterprise": "Enterprise",
-  "tier.enterpriseDesc": "Unlimited everything for large operations.",
 
   // Footer
   "footer.tagline": "The modern reservation platform for restaurants, venues, and guesthouses.",
@@ -2818,8 +2814,6 @@ const fi: TranslationKeys = {
   "tier.professionalDesc": "Useita varaustyyppejä, tiiminhallinta.",
   "tier.business": "Business",
   "tier.businessDesc": "Täysivarusteinen alusta vakiintuneille yrityksille.",
-  "tier.enterprise": "Enterprise",
-  "tier.enterpriseDesc": "Rajaton kaikessa suurille toiminnoille.",
 
   // Footer
   "footer.tagline": "Moderni varausalusta ravintoloille, tiloille ja majataloille.",
@@ -3875,8 +3869,6 @@ const sv: TranslationKeys = {
   "tier.professionalDesc": "Flera bokningstyper, teamhantering.",
   "tier.business": "Business",
   "tier.businessDesc": "Fullfjädrad plattform för etablerade företag.",
-  "tier.enterprise": "Enterprise",
-  "tier.enterpriseDesc": "Obegränsat allt för stora verksamheter.",
 
   // Footer
   "footer.tagline": "Den moderna bokningsplattformen för restauranger, lokaler och gästhus.",
