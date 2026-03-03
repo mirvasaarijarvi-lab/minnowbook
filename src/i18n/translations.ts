@@ -723,6 +723,39 @@ type TranslationKeys = {
   "resetPassword.success": string;
   "resetPassword.updated": string;
   "resetPassword.redirecting": string;
+
+  // MinnowAid chat widget
+  "aid.title": string;
+  "aid.subtitle": string;
+  "aid.myRequests": string;
+  "aid.yourRequests": string;
+  "aid.askOrGuide": string;
+  "aid.quickGuides": string;
+  "aid.thinking": string;
+  "aid.cancelRequest": string;
+  "aid.submitRequest": string;
+  "aid.subjectPlaceholder": string;
+  "aid.messagePlaceholder": string;
+  "aid.submitToAdmin": string;
+  "aid.typePlaceholder": string;
+  "aid.chat": string;
+  "aid.requests": string;
+  "aid.loadingRequests": string;
+  "aid.noRequests": string;
+  "aid.noRequestsHint": string;
+  "aid.yourMessage": string;
+  "aid.adminResponse": string;
+  "aid.awaitingResponse": string;
+  "aid.requestSubmitted": string;
+  "aid.requestSubmittedDetail": string;
+  "aid.statusOpen": string;
+  "aid.statusInProgress": string;
+  "aid.statusResolved": string;
+  "aid.statusClosed": string;
+  "aid.errorNoTenant": string;
+  "aid.errorSubmit": string;
+  "aid.successSubmit": string;
+  "aid.errorConnect": string;
 };
 
 export type TranslationKey = keyof TranslationKeys;
@@ -1430,6 +1463,39 @@ const en: TranslationKeys = {
   "resetPassword.success": "Password updated successfully!",
   "resetPassword.updated": "Password updated",
   "resetPassword.redirecting": "Redirecting you to login...",
+
+  // MinnowAid
+  "aid.title": "MinnowAid",
+  "aid.subtitle": "Ask anything about MinnowBook",
+  "aid.myRequests": "My Requests",
+  "aid.yourRequests": "Your submitted support requests",
+  "aid.askOrGuide": "Ask a question or try a quick guide:",
+  "aid.quickGuides": "Quick guides ▸",
+  "aid.thinking": "Thinking...",
+  "aid.cancelRequest": "Cancel request",
+  "aid.submitRequest": "Submit support request",
+  "aid.subjectPlaceholder": "Subject (e.g. Feature request)",
+  "aid.messagePlaceholder": "Describe your request or suggestion...",
+  "aid.submitToAdmin": "Submit to Admin",
+  "aid.typePlaceholder": "Type your question...",
+  "aid.chat": "Chat",
+  "aid.requests": "Requests",
+  "aid.loadingRequests": "Loading requests...",
+  "aid.noRequests": "No support requests yet.",
+  "aid.noRequestsHint": "Submit one from the chat view.",
+  "aid.yourMessage": "Your message",
+  "aid.adminResponse": "Admin response",
+  "aid.awaitingResponse": "Awaiting admin response...",
+  "aid.requestSubmitted": "Support Request",
+  "aid.requestSubmittedDetail": "Your support request has been submitted! Your admin team will review it and respond soon. You'll see a notification when it's been addressed.",
+  "aid.statusOpen": "Open",
+  "aid.statusInProgress": "In Progress",
+  "aid.statusResolved": "Resolved",
+  "aid.statusClosed": "Closed",
+  "aid.errorNoTenant": "Unable to submit request — no tenant found.",
+  "aid.errorSubmit": "Failed to submit request",
+  "aid.successSubmit": "Support request submitted",
+  "aid.errorConnect": "Sorry, I couldn't connect. Please try again.",
 };
 
 const fi: TranslationKeys = {
@@ -2134,6 +2200,39 @@ const fi: TranslationKeys = {
   "resetPassword.success": "Salasana päivitetty!",
   "resetPassword.updated": "Salasana päivitetty",
   "resetPassword.redirecting": "Ohjataan kirjautumiseen...",
+
+  // MinnowAid
+  "aid.title": "MinnowAid",
+  "aid.subtitle": "Kysy mitä tahansa MinnowBookista",
+  "aid.myRequests": "Omat pyynnöt",
+  "aid.yourRequests": "Lähettämäsi tukipyynnöt",
+  "aid.askOrGuide": "Esitä kysymys tai kokeile pikaopasta:",
+  "aid.quickGuides": "Pikaoppaat ▸",
+  "aid.thinking": "Mietitään...",
+  "aid.cancelRequest": "Peruuta pyyntö",
+  "aid.submitRequest": "Lähetä tukipyyntö",
+  "aid.subjectPlaceholder": "Aihe (esim. Ominaisuuspyyntö)",
+  "aid.messagePlaceholder": "Kuvaile pyyntösi tai ehdotuksesi...",
+  "aid.submitToAdmin": "Lähetä ylläpidolle",
+  "aid.typePlaceholder": "Kirjoita kysymyksesi...",
+  "aid.chat": "Chat",
+  "aid.requests": "Pyynnöt",
+  "aid.loadingRequests": "Ladataan pyyntöjä...",
+  "aid.noRequests": "Ei tukipyyntöjä vielä.",
+  "aid.noRequestsHint": "Lähetä pyyntö chat-näkymästä.",
+  "aid.yourMessage": "Viestisi",
+  "aid.adminResponse": "Ylläpidon vastaus",
+  "aid.awaitingResponse": "Odotetaan ylläpidon vastausta...",
+  "aid.requestSubmitted": "Tukipyyntö",
+  "aid.requestSubmittedDetail": "Tukipyyntösi on lähetetty! Ylläpitotiimisi käsittelee sen pian. Saat ilmoituksen kun siihen vastataan.",
+  "aid.statusOpen": "Avoin",
+  "aid.statusInProgress": "Käsittelyssä",
+  "aid.statusResolved": "Ratkaistu",
+  "aid.statusClosed": "Suljettu",
+  "aid.errorNoTenant": "Pyyntöä ei voitu lähettää — vuokralaista ei löytynyt.",
+  "aid.errorSubmit": "Pyynnön lähettäminen epäonnistui",
+  "aid.successSubmit": "Tukipyyntö lähetetty",
+  "aid.errorConnect": "Yhteyttä ei saatu. Yritä uudelleen.",
 };
 
 const sv: TranslationKeys = {
@@ -2838,6 +2937,39 @@ const sv: TranslationKeys = {
   "resetPassword.success": "Lösenordet har uppdaterats!",
   "resetPassword.updated": "Lösenord uppdaterat",
   "resetPassword.redirecting": "Omdirigerar till inloggning...",
+
+  // MinnowAid
+  "aid.title": "MinnowAid",
+  "aid.subtitle": "Fråga vad som helst om MinnowBook",
+  "aid.myRequests": "Mina ärenden",
+  "aid.yourRequests": "Dina inskickade supportärenden",
+  "aid.askOrGuide": "Ställ en fråga eller prova en snabbguide:",
+  "aid.quickGuides": "Snabbguider ▸",
+  "aid.thinking": "Tänker...",
+  "aid.cancelRequest": "Avbryt ärende",
+  "aid.submitRequest": "Skicka supportärende",
+  "aid.subjectPlaceholder": "Ämne (t.ex. Funktionsförfrågan)",
+  "aid.messagePlaceholder": "Beskriv ditt ärende eller förslag...",
+  "aid.submitToAdmin": "Skicka till admin",
+  "aid.typePlaceholder": "Skriv din fråga...",
+  "aid.chat": "Chatt",
+  "aid.requests": "Ärenden",
+  "aid.loadingRequests": "Laddar ärenden...",
+  "aid.noRequests": "Inga supportärenden ännu.",
+  "aid.noRequestsHint": "Skicka ett från chattvyn.",
+  "aid.yourMessage": "Ditt meddelande",
+  "aid.adminResponse": "Adminsvar",
+  "aid.awaitingResponse": "Inväntar adminsvar...",
+  "aid.requestSubmitted": "Supportärende",
+  "aid.requestSubmittedDetail": "Ditt supportärende har skickats! Ditt adminteam granskar det snart. Du får en avisering när det har besvarats.",
+  "aid.statusOpen": "Öppet",
+  "aid.statusInProgress": "Pågående",
+  "aid.statusResolved": "Löst",
+  "aid.statusClosed": "Stängt",
+  "aid.errorNoTenant": "Kunde inte skicka ärende — ingen hyresgäst hittades.",
+  "aid.errorSubmit": "Kunde inte skicka ärende",
+  "aid.successSubmit": "Supportärende skickat",
+  "aid.errorConnect": "Kunde inte ansluta. Försök igen.",
 };
 
 export const translations: Record<Language, TranslationKeys> = { en, fi, sv };
