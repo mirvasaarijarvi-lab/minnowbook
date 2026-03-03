@@ -19,8 +19,8 @@ const tiers = [
       "Branded booking page on your subdomain",
       "Default email templates",
       "Opening hours configuration",
-      "Basic reservation management",
       "Calendar & list views",
+      "AI chatbot support",
     ],
   },
   {
