@@ -1,0 +1,1 @@
+UPDATE public.tenants SET sample_end_date = '2026-03-03', sample_start_date = COALESCE(sample_start_date, '2026-02-01') WHERE id = '9ac05fbf-0834-44fd-a52a-d030b7074a30';
