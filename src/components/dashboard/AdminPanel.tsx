@@ -19,7 +19,7 @@ import PasswordInput from "@/components/PasswordInput";
 import { useT } from "@/contexts/I18nContext";
 import DashboardTooltip from "./DashboardTooltip";
 import SupportRequestsBoard from "./SupportRequestsBoard";
-import BookingLinksCard from "./BookingLinksCard";
+
 import LoginHistoryPanel from "./LoginHistoryPanel";
 import AuditLogPanel from "./AuditLogPanel";
 import PermissionsEditor from "./PermissionsEditor";
@@ -501,8 +501,6 @@ const AdminPanel = () => {
       {/* Audit / Change Log */}
       <AuditLogPanel />
 
-      {/* Shareable Booking Links */}
-      <BookingLinksCard />
     </div>
   );
 };
