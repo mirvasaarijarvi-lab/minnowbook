@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 import { canSelectMoreTypes, getTierLimits } from "@/lib/tier-limits";
 import { useT } from "@/contexts/I18nContext";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
+import TierUpgradePrompt from "@/components/dashboard/TierUpgradePrompt";
 import { TranslationKey } from "@/i18n/translations";
 
 const colorPresets = [
@@ -36,6 +37,7 @@ const Onboarding = () => {
   const t = useT();
   const [selectedTier, setSelectedTier] = useState("basic");
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
   const [branding, setBranding] = useState({
     businessName: "", businessEmail: user?.email ?? "", businessPhone: "",
     businessAddress: "", businessDescription: "",
@@ -73,7 +75,10 @@ const Onboarding = () => {
   const toggleType = (id: string) => {
     setSelectedTypes((prev) => {
       if (prev.includes(id)) return prev.filter((t) => t !== id);
-      if (!canSelectMoreTypes(selectedTier, prev.length)) return prev;
+      if (!canSelectMoreTypes(selectedTier, prev.length)) {
+        setUpgradeOpen(true);
+        return prev;
+      }
       return [...prev, id];
     });
   };
@@ -301,6 +306,12 @@ const Onboarding = () => {
           </div>
         </div>
       </main>
+      <TierUpgradePrompt
+        open={upgradeOpen}
+        onOpenChange={setUpgradeOpen}
+        currentTier={selectedTier}
+        feature="types"
+      />
     </div>
   );
 };
