@@ -50,6 +50,7 @@ interface Site {
 }
 
 const roleBadgeColors: Record<string, string> = {
+  superadmin: "bg-destructive/10 text-destructive border-destructive/20",
   owner: "bg-primary/10 text-primary border-primary/20",
   admin: "bg-accent/10 text-accent border-accent/20",
   staff: "bg-muted text-muted-foreground border-border",
@@ -64,7 +65,7 @@ const getRoleLabel = (u: TenantUser, roleDefs: { role_key: string; display_name:
 };
 
 const AdminPanel = () => {
-  const { tenantId, tenant, isOwner, isAdmin } = useTenant();
+  const { tenantId, tenant, isOwner, isAdmin, isSuperadmin } = useTenant();
   const { isSystemAdmin } = usePermissions();
   const queryClient = useQueryClient();
   const t = useT();
@@ -129,7 +130,7 @@ const AdminPanel = () => {
 
   const createMutation = useMutation({
     mutationFn: () => {
-      const isSystemRole = ["owner", "admin", "staff"].includes(newUser.role);
+      const isSystemRole = ["superadmin", "owner", "admin", "staff"].includes(newUser.role);
       return invokeAdmin({
         action: "create",
         email: newUser.email,
@@ -282,6 +283,7 @@ const AdminPanel = () => {
                         <SelectItem value="staff">{t("admin.staff")}</SelectItem>
                         <SelectItem value="admin">{t("admin.adminRole")}</SelectItem>
                         {isOwner && <SelectItem value="owner">{t("admin.owner")}</SelectItem>}
+                        {(isSuperadmin || isSystemAdmin) && <SelectItem value="superadmin">Superadmin</SelectItem>}
                         {(roleDefinitions ?? []).filter((r) => !r.is_system).map((r) => (
                           <SelectItem key={r.role_key} value={r.role_key}>{r.display_name}</SelectItem>
                         ))}
@@ -418,6 +420,7 @@ const AdminPanel = () => {
                             <SelectItem value="staff">{t("admin.staff")}</SelectItem>
                             <SelectItem value="admin">{t("admin.adminRole")}</SelectItem>
                             {isOwner && <SelectItem value="owner">{t("admin.owner")}</SelectItem>}
+                            {(isSuperadmin || isSystemAdmin) && <SelectItem value="superadmin">Superadmin</SelectItem>}
                             {(roleDefinitions ?? []).filter((r) => !r.is_system).map((r) => (
                               <SelectItem key={r.role_key} value={r.role_key}>{r.display_name}</SelectItem>
                             ))}
@@ -490,7 +493,7 @@ const AdminPanel = () => {
       </Card>
 
       {/* Role Permissions Editor */}
-      {isOwner && <PermissionsEditor />}
+      {(isOwner || isSuperadmin) && <PermissionsEditor />}
 
       {/* Support Requests Board */}
       <SupportRequestsBoard />

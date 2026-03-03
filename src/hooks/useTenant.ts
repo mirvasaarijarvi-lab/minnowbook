@@ -49,13 +49,19 @@ export const useTenant = () => {
     };
   }
 
+  const role = tenantUser?.role ?? null;
+  const isSuperadmin = role === "superadmin";
+  const isOwner = role === "owner" || isSuperadmin;
+  const isAdmin = role === "admin" || isOwner;
+
   return {
     tenantUser,
     tenant: tenantUser?.tenants as any,
     tenantId: tenantUser?.tenant_id ?? null,
-    role: tenantUser?.role ?? null,
-    isOwner: tenantUser?.role === "owner",
-    isAdmin: tenantUser?.role === "admin" || tenantUser?.role === "owner",
+    role,
+    isSuperadmin,
+    isOwner,
+    isAdmin,
     loading: loadingTenantUser,
   };
 };

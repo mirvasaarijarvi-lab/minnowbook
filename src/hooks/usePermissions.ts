@@ -18,7 +18,7 @@ export function usePermissions() {
   const { data: permissions, isLoading } = useQuery({
     queryKey: ["my-permissions", user?.id, tenantId],
     queryFn: async () => {
-      if (isOwner) return "__all__"; // Owner has everything
+      if (isOwner) return "__all__"; // Owner and superadmin have everything
 
       // Check system admin
       const { data: sysAdmin } = await supabase

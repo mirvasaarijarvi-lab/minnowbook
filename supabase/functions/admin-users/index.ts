@@ -16,7 +16,7 @@ const MAX_EMAIL_LENGTH = 255;
 const MAX_NAME_LENGTH = 100;
 const MAX_PASSWORD_LENGTH = 128;
 const MIN_PASSWORD_LENGTH = 12;
-const VALID_ROLES = ["owner", "admin", "staff"];
+const VALID_ROLES = ["superadmin", "owner", "admin", "staff"];
 const VALID_SITE_ROLES = ["admin", "staff"];
 
 function validateEmail(email: string): string {
@@ -131,7 +131,7 @@ Deno.serve(async (req) => {
       throw new Error("Insufficient permissions");
     }
 
-    if (!sysAdmin && callerRole && callerRole.role !== "owner" && callerRole.role !== "admin") {
+    if (!sysAdmin && callerRole && callerRole.role !== "owner" && callerRole.role !== "admin" && callerRole.role !== "superadmin") {
       throw new Error("Insufficient permissions");
     }
 
@@ -182,7 +182,7 @@ Deno.serve(async (req) => {
       const role = validateRole(body.role || "staff");
       const customRoleKey = body.customRoleKey ? validateRole(body.customRoleKey) : null;
 
-      const baseRole = (role === "owner" || role === "admin") ? role : "staff";
+      const baseRole = (role === "superadmin" || role === "owner" || role === "admin") ? role : "staff";
 
       const { data: newUser, error: createError } = await adminClient.auth.admin.createUser({
         email,
