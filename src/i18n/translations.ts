@@ -115,6 +115,11 @@ type TranslationKeys = {
   "settings.upsellTitle": string;
   "settings.upsellDesc": string;
   "settings.learnMore": string;
+  "settings.siteOverride": string;
+  "settings.useParentDefault": string;
+  "settings.customizeForSite": string;
+  "settings.inheritedFromParent": string;
+  "settings.siteSettingsSaved": string;
   "settings.availabilityThresholds": string;
   "settings.availabilityThresholdsDesc": string;
   "settings.fullThreshold": string;
@@ -1151,6 +1156,11 @@ const en: TranslationKeys = {
   "settings.upsellTitle": "Manage multiple locations",
   "settings.upsellDesc": "Upgrade to the Business plan to manage hotels, restaurants, and venues from a single dashboard — each with its own resources, hours, and booking page.",
   "settings.learnMore": "Learn more",
+  "settings.siteOverride": "Site Override",
+  "settings.useParentDefault": "Use company default",
+  "settings.customizeForSite": "Customize for this site",
+  "settings.inheritedFromParent": "Inherited from company settings",
+  "settings.siteSettingsSaved": "Site settings saved",
   "settings.availabilityThresholds": "Availability Thresholds",
   "settings.availabilityThresholdsDesc": "Number of reservations before a day shows as 'Full' in the calendar.",
   "settings.fullThreshold": "Full at",
@@ -2168,6 +2178,11 @@ const fi: TranslationKeys = {
   "settings.upsellTitle": "Hallinnoi useita toimipisteitä",
   "settings.upsellDesc": "Päivitä Business-suunnitelmaan hallinnoidaksesi hotelleja, ravintoloita ja juhlatiloja yhdestä hallintapaneelista — jokaisella omat resurssit, aukioloajat ja varaussivu.",
   "settings.learnMore": "Lue lisää",
+  "settings.siteOverride": "Toimipisteen mukautus",
+  "settings.useParentDefault": "Käytä yrityksen oletusarvoja",
+  "settings.customizeForSite": "Mukauta tälle toimipisteelle",
+  "settings.inheritedFromParent": "Peritty yrityksen asetuksista",
+  "settings.siteSettingsSaved": "Toimipisteen asetukset tallennettu",
   "settings.availabilityThresholds": "Saatavuusrajat",
   "settings.availabilityThresholdsDesc": "Varausten määrä, jolloin päivä näytetään kalenterissa 'Täynnä'-tilassa.",
   "settings.fullThreshold": "Täynnä kun",
@@ -3183,6 +3198,11 @@ const sv: TranslationKeys = {
   "settings.upsellTitle": "Hantera flera platser",
   "settings.upsellDesc": "Uppgradera till Business-planen för att hantera hotell, restauranger och evenemangslokaler från en enda instrumentpanel — var och en med egna resurser, öppettider och bokningssida.",
   "settings.learnMore": "Läs mer",
+  "settings.siteOverride": "Platsanpassning",
+  "settings.useParentDefault": "Använd företagets standard",
+  "settings.customizeForSite": "Anpassa för denna plats",
+  "settings.inheritedFromParent": "Ärvd från företagsinställningar",
+  "settings.siteSettingsSaved": "Platsinställningar sparade",
   "settings.availabilityThresholds": "Tillgänglighetsgränser",
   "settings.availabilityThresholdsDesc": "Antal bokningar innan en dag visas som 'Full' i kalendern.",
   "settings.fullThreshold": "Full vid",
