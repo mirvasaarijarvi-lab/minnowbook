@@ -16,7 +16,8 @@ interface TierLimits {
 const TIER_LIMITS: Record<string, TierLimits> = {
   basic: { maxSites: 1, maxReservationTypes: 1, maxResourcesPerType: 1 },
   professional: { maxSites: 1, maxReservationTypes: null, maxResourcesPerType: 1 },
-  business: { maxSites: null, maxReservationTypes: null, maxResourcesPerType: null },
+  business: { maxSites: 3, maxReservationTypes: null, maxResourcesPerType: null },
+  enterprise: { maxSites: null, maxReservationTypes: null, maxResourcesPerType: null },
 };
 
 export function getTierLimits(tier: string | null | undefined): TierLimits {
@@ -63,11 +64,12 @@ export function getTierLabel(tier: string): string {
     case "basic": return "Basic";
     case "professional": return "Pro";
     case "business": return "Business";
+    case "enterprise": return "Enterprise";
     default: return tier;
   }
 }
 
 /** Whether the tier supports multi-site features (business or higher) */
 export function isMultiSiteTier(tier: string | null | undefined): boolean {
-  return tier === "business";
+  return tier === "business" || tier === "enterprise";
 }

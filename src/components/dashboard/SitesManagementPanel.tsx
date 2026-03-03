@@ -5,7 +5,7 @@ import { useTenant } from "@/hooks/useTenant";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useT } from "@/contexts/I18nContext";
 import { PERM_SITES_MANAGE, PERM_SITES_APPROVE } from "@/lib/permissions";
-import { canCreateSite, getTierLabel } from "@/lib/tier-limits";
+import { canCreateSite, getTierLabel, getTierLimits } from "@/lib/tier-limits";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ApprovalQueuePanel from "./ApprovalQueuePanel";
@@ -41,7 +41,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { toast } from "@/hooks/use-toast";
-import { Plus, MapPin, Pencil, Trash2, Building2, UtensilsCrossed, Hotel, CalendarDays, ChevronDown, ChevronRight, Users } from "lucide-react";
+import { Plus, MapPin, Pencil, Trash2, Building2, UtensilsCrossed, Hotel, CalendarDays, ChevronDown, ChevronRight, Users, Crown } from "lucide-react";
 import DashboardTooltip from "./DashboardTooltip";
 import BulkAssignUsersDialog from "./BulkAssignUsersDialog";
 import TierUpgradePrompt from "./TierUpgradePrompt";
@@ -348,6 +348,58 @@ const SitesManagementPanel = () => {
           </Button>
         )}
       </div>
+
+      {/* Site usage indicator */}
+      {(() => {
+        const tier = tenant?.tier ?? "basic";
+        const { maxSites } = getTierLimits(tier);
+        const currentCount = sites?.length ?? 0;
+        const tierLabel = getTierLabel(tier);
+
+        if (maxSites !== null) {
+          const usagePercent = Math.min((currentCount / maxSites) * 100, 100);
+          const isAtLimit = currentCount >= maxSites;
+          return (
+            <Card className="border-border/60">
+              <CardContent className="py-3 px-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="text-[10px]">{tierLabel}</Badge>
+                    <span className="text-xs text-muted-foreground">
+                      {currentCount} / {maxSites} sites used
+                    </span>
+                  </div>
+                  {isAtLimit && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 text-[11px] gap-1 text-accent hover:text-accent"
+                      onClick={() => setUpgradeOpen(true)}
+                    >
+                      <Crown className="h-3 w-3" />
+                      Upgrade
+                    </Button>
+                  )}
+                </div>
+                <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all ${
+                      isAtLimit ? "bg-destructive" : "bg-primary"
+                    }`}
+                    style={{ width: `${usagePercent}%` }}
+                  />
+                </div>
+                {isAtLimit && (
+                  <p className="text-[11px] text-muted-foreground mt-1.5">
+                    You've reached the {tierLabel} limit of {maxSites} site{maxSites > 1 ? "s" : ""}. Upgrade to {getTierLabel(maxSites === 1 ? "business" : "enterprise")} for more.
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          );
+        }
+        return null;
+      })()}
 
       <Tabs defaultValue="sites">
         <TabsList>
