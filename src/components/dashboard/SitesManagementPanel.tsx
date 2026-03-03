@@ -82,7 +82,7 @@ const typeIcons: Record<string, React.ElementType> = {
 const SitesManagementPanel = () => {
   const t = useT();
   const { tenantId, tenant } = useTenant();
-  const { can } = usePermissions();
+  const { can, isSystemAdmin } = usePermissions();
 
   const { data: tenantSettings } = useQuery({
     queryKey: ["tenant-settings-business", tenantId],
@@ -191,7 +191,7 @@ const SitesManagementPanel = () => {
 
   const openCreate = () => {
     const currentCount = sites?.length ?? 0;
-    if (!canCreateSite(tenant?.tier, currentCount)) {
+    if (!isSystemAdmin && !canCreateSite(tenant?.tier, currentCount)) {
       setUpgradeOpen(true);
       return;
     }
