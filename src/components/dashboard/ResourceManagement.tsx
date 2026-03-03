@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/hooks/useTenant";
 import { useSiteContext } from "@/hooks/useSiteContext";
+import { useUserSites } from "@/hooks/useUserSites";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,6 +39,7 @@ const ALLOWED_IMAGE_TYPES = ["image/png", "image/jpeg", "image/webp"];
 const ResourceManagement = () => {
   const { tenantId, tenant, isAdmin } = useTenant();
   const { selectedSiteId } = useSiteContext();
+  const { applySiteFilter, siteIds } = useUserSites();
   const { can } = usePermissions();
   const canManage = can(PERM_RESOURCES_MANAGE);
   const { isPrivileged, getApprovalStatus } = useAutoApproval();
@@ -72,11 +74,11 @@ const ResourceManagement = () => {
   const showSiteColumn = (sites?.length ?? 0) > 0 && !selectedSiteId;
 
   const { data: resources, isLoading } = useQuery({
-    queryKey: ["resources", tenantId, selectedSiteId],
+    queryKey: ["resources", tenantId, selectedSiteId, siteIds],
     queryFn: async () => {
       if (!tenantId) return [];
       let query = supabase.from("resources").select("*").eq("tenant_id", tenantId);
-      if (selectedSiteId) query = query.eq("site_id", selectedSiteId);
+      query = applySiteFilter(query, selectedSiteId);
       const { data, error } = await query.order("resource_type").order("name");
       if (error) throw error;
       return data;
