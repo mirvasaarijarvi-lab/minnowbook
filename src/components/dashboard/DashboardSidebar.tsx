@@ -1,5 +1,6 @@
 import { CalendarDays, List, Settings, LogOut, LayoutDashboard, Menu, X, ShieldCheck, Cog, BarChart3, LifeBuoy, Shield, Building2 } from "lucide-react";
 import Logo from "@/components/Logo";
+import SiteSelector from "./SiteSelector";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useT } from "@/contexts/I18nContext";
@@ -88,6 +89,7 @@ const DashboardSidebar = ({ currentView, onViewChange, userEmail, onSignOut, mob
           <LanguageSwitcher variant="compact" />
         </div>
 
+        <SiteSelector />
         <nav data-tour="sidebar-nav" className="flex-1 p-3 space-y-1 overflow-y-auto">
           {visibleItems.map(({ view, labelKey, icon: Icon }) => (
             <button

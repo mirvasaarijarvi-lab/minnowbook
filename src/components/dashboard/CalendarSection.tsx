@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/hooks/useTenant";
+import { useSiteContext } from "@/hooks/useSiteContext";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -28,6 +29,7 @@ interface CalendarSectionProps {
 
 const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate }: CalendarSectionProps) => {
   const { tenantId } = useTenant();
+  const { selectedSiteId } = useSiteContext();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [month, setMonth] = useState(new Date());
   const [blockDialogOpen, setBlockDialogOpen] = useState(false);
@@ -43,14 +45,16 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
   const monthEnd = format(endOfMonth(month), "yyyy-MM-dd");
 
   const { data: reservations } = useQuery({
-    queryKey: ["calendar-reservations", tenantId, monthStart, monthEnd, reservationTypes],
+    queryKey: ["calendar-reservations", tenantId, selectedSiteId, monthStart, monthEnd, reservationTypes],
     queryFn: async () => {
       if (!tenantId) return [];
-      const { data, error } = await supabase
+      let query = supabase
         .from("reservations").select("*").eq("tenant_id", tenantId)
         .in("reservation_type", reservationTypes)
         .gte("date", monthStart).lte("date", monthEnd)
         .order("start_time", { ascending: true });
+      if (selectedSiteId) query = query.eq("site_id", selectedSiteId);
+      const { data, error } = await query;
       if (error) throw error;
       return data;
     },
@@ -58,16 +62,18 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
   });
 
   const { data: blockedSlots } = useQuery({
-    queryKey: ["calendar-blocked-slots", tenantId, monthStart, monthEnd, resourceTypes],
+    queryKey: ["calendar-blocked-slots", tenantId, selectedSiteId, monthStart, monthEnd, resourceTypes],
     queryFn: async () => {
       if (!tenantId) return [];
-      const { data, error } = await supabase
+      let query = supabase
         .from("blocked_slots")
         .select("*, resource:resources(name)")
         .eq("tenant_id", tenantId)
         .in("resource_type", resourceTypes)
         .gte("date", monthStart).lte("date", monthEnd)
         .order("date");
+      if (selectedSiteId) query = query.eq("site_id", selectedSiteId);
+      const { data, error } = await query;
       if (error) throw error;
       return data ?? [];
     },
@@ -75,16 +81,18 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
   });
 
   const { data: recurringBlocks } = useQuery({
-    queryKey: ["calendar-recurring-blocks", tenantId, resourceTypes],
+    queryKey: ["calendar-recurring-blocks", tenantId, selectedSiteId, resourceTypes],
     queryFn: async () => {
       if (!tenantId) return [];
-      const { data, error } = await supabase
+      let query = supabase
         .from("recurring_blocked_slots")
         .select("*, resource:resources(name)")
         .eq("tenant_id", tenantId)
         .in("resource_type", resourceTypes)
         .eq("is_active", true)
         .order("day_of_week");
+      if (selectedSiteId) query = query.eq("site_id", selectedSiteId);
+      const { data, error } = await query;
       if (error) throw error;
       return data ?? [];
     },
@@ -92,16 +100,18 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
   });
 
   const { data: resources } = useQuery({
-    queryKey: ["resources-for-blocking", tenantId, resourceTypes],
+    queryKey: ["resources-for-blocking", tenantId, selectedSiteId, resourceTypes],
     queryFn: async () => {
       if (!tenantId) return [];
-      const { data, error } = await supabase
+      let query = supabase
         .from("resources")
         .select("id, name, resource_type, capacity")
         .eq("tenant_id", tenantId)
         .in("resource_type", resourceTypes)
         .eq("is_active", true)
         .order("name");
+      if (selectedSiteId) query = query.eq("site_id", selectedSiteId);
+      const { data, error } = await query;
       if (error) throw error;
       return data ?? [];
     },
