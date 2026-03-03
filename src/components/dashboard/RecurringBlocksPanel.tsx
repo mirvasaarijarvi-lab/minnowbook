@@ -14,8 +14,12 @@ import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
 import { Plus, Trash2, RefreshCw, Clock } from "lucide-react";
+import { format } from "date-fns";
+import { fi as fiFns, enUS, sv as svFns, type Locale } from "date-fns/locale";
 import DashboardTooltip from "./DashboardTooltip";
-import { useT } from "@/contexts/I18nContext";
+import { useT, useLanguage } from "@/contexts/I18nContext";
+
+const LOCALE_MAP: Record<string, Locale> = { fi: fiFns, sv: svFns, en: enUS };
 
 interface RecurringBlock {
   id: string;
@@ -31,13 +35,20 @@ interface RecurringBlock {
   resource?: { name: string } | null;
 }
 
-// Full day names for display (English fallback, used with "Every")
-const DAY_NAMES_EN = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+// Get locale-aware day name from day_of_week (0=Sunday)
+const getDayName = (dayOfWeek: number, locale: Locale) => {
+  // Create a date that falls on the given day of week
+  // Jan 7, 2024 is a Sunday (0)
+  const baseDate = new Date(2024, 0, 7 + dayOfWeek);
+  return format(baseDate, "EEEE", { locale });
+};
 
 const RecurringBlocksPanel = () => {
   const { tenantId } = useTenant();
   const queryClient = useQueryClient();
   const t = useT();
+  const { language } = useLanguage();
+  const dateFnsLocale = LOCALE_MAP[language] ?? enUS;
   const [dialogOpen, setDialogOpen] = useState(false);
   const [useTimeRange, setUseTimeRange] = useState(false);
   const [blockSpecificResource, setBlockSpecificResource] = useState(false);
@@ -299,7 +310,7 @@ const RecurringBlocksPanel = () => {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1 flex-wrap">
                       <span className="font-semibold text-foreground">
-                        {t("blocking.every")} {DAY_NAMES_EN[block.day_of_week]}
+                        {t("blocking.every")} {getDayName(block.day_of_week, dateFnsLocale)}
                       </span>
                       {block.start_time && block.end_time && (
                         <Badge variant="outline" className="text-xs">
@@ -336,7 +347,7 @@ const RecurringBlocksPanel = () => {
                         <AlertDialogHeader>
                           <AlertDialogTitle>{t("blocking.removeRecurring")}</AlertDialogTitle>
                           <AlertDialogDescription>
-                            {t("blocking.removeRecurringDesc").replace("{day}", DAY_NAMES_EN[block.day_of_week])}
+                            {t("blocking.removeRecurringDesc").replace("{day}", getDayName(block.day_of_week, dateFnsLocale))}
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
