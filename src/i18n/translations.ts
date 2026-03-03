@@ -365,6 +365,17 @@ type TranslationKeys = {
   "dashboard.newReservation": string;
   "dashboard.createReservation": string;
   "dashboard.reservationCreated": string;
+  "dashboard.guestsToday": string;
+  "dashboard.arrived": string;
+  "dashboard.weekRevenue": string;
+  "dashboard.weekReservations": string;
+  "dashboard.weekGuests": string;
+  "dashboard.utilizationToday": string;
+  "dashboard.weekRevenueChart": string;
+  "dashboard.todayByType": string;
+  "dashboard.quickInfo": string;
+  "dashboard.checkoutsToday": string;
+  "dashboard.uninvoiced": string;
   "booking.calculatePrice": string;
 
   // Onboarding
@@ -906,6 +917,17 @@ const en: TranslationKeys = {
   "dashboard.newReservation": "New Reservation",
   "dashboard.createReservation": "Create Reservation",
   "dashboard.reservationCreated": "Reservation created successfully",
+  "dashboard.guestsToday": "Guests today",
+  "dashboard.arrived": "Arrived",
+  "dashboard.weekRevenue": "Week's revenue",
+  "dashboard.weekReservations": "Week's reservations",
+  "dashboard.weekGuests": "Week's guests",
+  "dashboard.utilizationToday": "Utilization today",
+  "dashboard.weekRevenueChart": "Week's revenue trend",
+  "dashboard.todayByType": "Today by type",
+  "dashboard.quickInfo": "Quick info",
+  "dashboard.checkoutsToday": "Check-outs today",
+  "dashboard.uninvoiced": "Uninvoiced",
   "booking.calculatePrice": "Calculate Price",
 
   // Onboarding
@@ -1434,6 +1456,17 @@ const fi: TranslationKeys = {
   "dashboard.newReservation": "Uusi varaus",
   "dashboard.createReservation": "Luo varaus",
   "dashboard.reservationCreated": "Varaus luotu onnistuneesti",
+  "dashboard.guestsToday": "Vieraita tänään",
+  "dashboard.arrived": "Saapunut",
+  "dashboard.weekRevenue": "Viikon liikevaihto",
+  "dashboard.weekReservations": "Viikon varaukset",
+  "dashboard.weekGuests": "Viikon vieraat",
+  "dashboard.utilizationToday": "Käyttöaste tänään",
+  "dashboard.weekRevenueChart": "Viikon liikevaihdon kehitys",
+  "dashboard.todayByType": "Tänään tyypeittäin",
+  "dashboard.quickInfo": "Pikatiedot",
+  "dashboard.checkoutsToday": "Uloskirjaukset tänään",
+  "dashboard.uninvoiced": "Laskuttamatta",
   "booking.calculatePrice": "Laske hinta",
 
   // Onboarding
@@ -1962,6 +1995,17 @@ const sv: TranslationKeys = {
   "dashboard.newReservation": "Ny bokning",
   "dashboard.createReservation": "Skapa bokning",
   "dashboard.reservationCreated": "Bokningen har skapats",
+  "dashboard.guestsToday": "Gäster idag",
+  "dashboard.arrived": "Anlänt",
+  "dashboard.weekRevenue": "Veckans intäkter",
+  "dashboard.weekReservations": "Veckans bokningar",
+  "dashboard.weekGuests": "Veckans gäster",
+  "dashboard.utilizationToday": "Beläggning idag",
+  "dashboard.weekRevenueChart": "Veckans intäktsutveckling",
+  "dashboard.todayByType": "Idag per typ",
+  "dashboard.quickInfo": "Snabbinfo",
+  "dashboard.checkoutsToday": "Utcheckningar idag",
+  "dashboard.uninvoiced": "Ej fakturerade",
   "booking.calculatePrice": "Beräkna pris",
 
   // Onboarding

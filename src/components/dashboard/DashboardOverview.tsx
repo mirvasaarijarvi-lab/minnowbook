@@ -243,7 +243,7 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
             <Users className="h-5 w-5 mx-auto text-muted-foreground mb-1" />
             <p className="text-3xl font-bold text-foreground">{stats?.todayGuests ?? 0}</p>
             <p className="text-xs text-muted-foreground mt-1">
-              {t("dashboard.guestsToday" as any) !== "dashboard.guestsToday" ? t("dashboard.guestsToday" as any) : "Guests today"}
+              {t("dashboard.guestsToday")}
             </p>
           </CardContent>
         </Card>
@@ -255,7 +255,7 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
               {stats?.checkedIn ?? 0}/{stats?.todayConfirmed ?? 0}
             </p>
             <p className="text-xs text-muted-foreground mt-1">
-              {t("dashboard.arrived" as any) !== "dashboard.arrived" ? t("dashboard.arrived" as any) : "Arrived"}
+              {t("dashboard.arrived")}
             </p>
           </CardContent>
         </Card>
@@ -270,7 +270,7 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
               {(stats?.weekRevenue ?? 0).toFixed(0)} €
             </p>
             <p className="text-xs text-muted-foreground mt-1">
-              {t("dashboard.weekRevenue" as any) !== "dashboard.weekRevenue" ? t("dashboard.weekRevenue" as any) : "Week's revenue"}
+              {t("dashboard.weekRevenue")}
             </p>
             <ChangeIndicator value={revChange} />
           </CardContent>
@@ -281,7 +281,7 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
             <BarChart3 className="h-5 w-5 mx-auto text-muted-foreground mb-1" />
             <p className="text-3xl font-bold text-foreground">{stats?.weekReservations ?? 0}</p>
             <p className="text-xs text-muted-foreground mt-1">
-              {t("dashboard.weekReservations" as any) !== "dashboard.weekReservations" ? t("dashboard.weekReservations" as any) : "Week's reservations"}
+              {t("dashboard.weekReservations")}
             </p>
             <ChangeIndicator value={resChange} />
           </CardContent>
@@ -292,7 +292,7 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
             <Users className="h-5 w-5 mx-auto text-muted-foreground mb-1" />
             <p className="text-3xl font-bold text-foreground">{stats?.weekGuests ?? 0}</p>
             <p className="text-xs text-muted-foreground mt-1">
-              {t("dashboard.weekGuests" as any) !== "dashboard.weekGuests" ? t("dashboard.weekGuests" as any) : "Week's guests"}
+              {t("dashboard.weekGuests")}
             </p>
             <ChangeIndicator value={guestChange} />
           </CardContent>
@@ -303,7 +303,7 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
             <Percent className="h-5 w-5 mx-auto text-muted-foreground mb-1" />
             <p className="text-3xl font-bold text-foreground">{stats?.utilization ?? 0}%</p>
             <p className="text-xs text-muted-foreground mt-1">
-              {t("dashboard.utilizationToday" as any) !== "dashboard.utilizationToday" ? t("dashboard.utilizationToday" as any) : "Utilization today"}
+              {t("dashboard.utilizationToday")}
             </p>
           </CardContent>
         </Card>
@@ -314,7 +314,7 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              {t("dashboard.weekRevenueChart" as any) !== "dashboard.weekRevenueChart" ? t("dashboard.weekRevenueChart" as any) : "Week's revenue trend"}
+              {t("dashboard.weekRevenueChart")}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -359,7 +359,7 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-foreground">
-              {t("dashboard.todayByType" as any) !== "dashboard.todayByType" ? t("dashboard.todayByType" as any) : "Today by type"}
+              {t("dashboard.todayByType")}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
@@ -382,14 +382,14 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-foreground">
-              {t("dashboard.quickInfo" as any) !== "dashboard.quickInfo" ? t("dashboard.quickInfo" as any) : "Quick info"}
+              {t("dashboard.quickInfo")}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
             <div className="flex items-center justify-between text-sm">
               <span className="flex items-center gap-2 text-muted-foreground">
                 <BedDouble className="h-4 w-4" />
-                {t("dashboard.checkoutsToday" as any) !== "dashboard.checkoutsToday" ? t("dashboard.checkoutsToday" as any) : "Check-out today"}
+                {t("dashboard.checkoutsToday")}
               </span>
               <span className="font-semibold text-foreground">{stats?.checkoutsToday ?? 0}</span>
             </div>
@@ -399,7 +399,7 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
             >
               <span className="flex items-center gap-2 text-muted-foreground">
                 <Receipt className="h-4 w-4 text-red-500" />
-                {t("dashboard.uninvoiced" as any) !== "dashboard.uninvoiced" ? t("dashboard.uninvoiced" as any) : "Uninvoiced"}
+                {t("dashboard.uninvoiced")}
               </span>
               <span className="font-semibold text-foreground flex items-center gap-1">
                 {stats?.uninvoiced ?? 0}
