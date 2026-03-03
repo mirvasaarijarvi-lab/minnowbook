@@ -4,7 +4,7 @@
  * Tier mapping:
  *   basic         → 1 site, 1 reservation type
  *   professional  → 1 site, all types (unlimited)
- *   enterprise    → unlimited sites, unlimited types
+ *   business      → unlimited sites, unlimited types
  */
 
 export interface TierLimits {
@@ -15,7 +15,7 @@ export interface TierLimits {
 const TIER_LIMITS: Record<string, TierLimits> = {
   basic: { maxSites: 1, maxReservationTypes: 1 },
   professional: { maxSites: 1, maxReservationTypes: null },
-  enterprise: { maxSites: null, maxReservationTypes: null },
+  business: { maxSites: null, maxReservationTypes: null },
 };
 
 export function getTierLimits(tier: string | null | undefined): TierLimits {
@@ -39,7 +39,6 @@ export function isResourceTypeAllowed(
   resourceType: string,
   allowedTypes: string[]
 ): boolean {
-  // Resource type must be in the tenant's allowed_reservation_types
   return allowedTypes.includes(resourceType);
 }
 
@@ -47,7 +46,7 @@ export function getTierLabel(tier: string): string {
   switch (tier) {
     case "basic": return "Basic";
     case "professional": return "Pro";
-    case "enterprise": return "Business";
+    case "business": return "Business";
     default: return tier;
   }
 }

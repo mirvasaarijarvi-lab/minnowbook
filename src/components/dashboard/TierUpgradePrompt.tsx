@@ -22,7 +22,7 @@ const upgradeInfo: Record<string, { targetTier: string; features: string[] }> = 
     ],
   },
   "basic-sites": {
-    targetTier: "enterprise",
+    targetTier: "business",
     features: [
       "Unlimited sites & locations",
       "Unlimited reservation types",
@@ -31,7 +31,7 @@ const upgradeInfo: Record<string, { targetTier: string; features: string[] }> = 
     ],
   },
   "professional-sites": {
-    targetTier: "enterprise",
+    targetTier: "business",
     features: [
       "Unlimited sites & locations",
       "Unlimited staff users",
