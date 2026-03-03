@@ -1010,6 +1010,8 @@ export type Database = {
           max_staff_users: number
           name: string
           owner_user_id: string
+          sample_end_date: string | null
+          sample_start_date: string | null
           slug: string
           stripe_customer_id: string | null
           stripe_subscription_id: string | null
@@ -1025,6 +1027,8 @@ export type Database = {
           max_staff_users?: number
           name: string
           owner_user_id: string
+          sample_end_date?: string | null
+          sample_start_date?: string | null
           slug: string
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
@@ -1040,6 +1044,8 @@ export type Database = {
           max_staff_users?: number
           name?: string
           owner_user_id?: string
+          sample_end_date?: string | null
+          sample_start_date?: string | null
           slug?: string
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
