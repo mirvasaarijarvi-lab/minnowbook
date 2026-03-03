@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Printer, ArrowLeft, Home, Calendar, ClipboardList, BarChart3,
   Users, LogIn, Shield, Check, X, Lock, Pencil, Trash2, Search,
-  Download, KeyRound, Settings, LifeBuoy, BookOpen,
+  Download, KeyRound, Settings, LifeBuoy, BookOpen, Building2, MapPin,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -277,6 +277,52 @@ const MockupSupport = () => (
   </div>
 );
 
+const MockupMultisite = () => (
+  <div className="border rounded-lg p-4 bg-muted/30 space-y-3 print:bg-white">
+    <div className="flex items-center gap-2 text-xs font-medium">
+      <Building2 className="h-4 w-4 text-primary" />
+      <span>Sites</span>
+      <span className="ml-auto text-[10px] px-2 py-0.5 rounded bg-primary text-primary-foreground">Business</span>
+    </div>
+    <div className="space-y-1">
+      {[
+        { name: "Wiurila Manor", type: "Venue", location: "Halikko", active: true },
+        { name: "Gasthaus Wiurila", type: "Hotel", location: "Halikko", active: true },
+        { name: "Restaurant Sigrid", type: "Restaurant", location: "Salo", active: false },
+      ].map((s, i) => (
+        <div key={i} className="flex items-center gap-2 text-[10px] p-1.5 rounded bg-background border">
+          <Building2 className="h-3 w-3 text-muted-foreground" />
+          <span className="flex-1 font-medium">{s.name}</span>
+          <span className="px-1.5 py-0.5 rounded border text-[9px]">{s.type}</span>
+          <span className="flex items-center gap-0.5 text-muted-foreground"><MapPin className="h-2.5 w-2.5" />{s.location}</span>
+          <span className={`px-1.5 py-0.5 rounded text-[9px] ${s.active ? "bg-green-100 text-green-700" : "bg-muted text-muted-foreground"}`}>
+            {s.active ? "Active" : "Draft"}
+          </span>
+        </div>
+      ))}
+    </div>
+    <div className="flex gap-2 text-[10px]">
+      <div className="flex-1 p-2 rounded bg-background border text-center">
+        <div className="text-muted-foreground">Sidebar</div>
+        <div className="mt-1 flex flex-col gap-0.5">
+          <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[9px]">All Sites</span>
+          <span className="px-1.5 py-0.5 rounded border text-[9px]">Wiurila Manor</span>
+          <span className="px-1.5 py-0.5 rounded border text-[9px]">Gasthaus</span>
+        </div>
+      </div>
+      <div className="flex-1 p-2 rounded bg-background border text-center">
+        <div className="text-muted-foreground">Site settings</div>
+        <div className="mt-1 space-y-0.5 text-[9px] text-left px-1">
+          <div>✓ Own opening hours</div>
+          <div>✓ Own resources</div>
+          <div>✓ Own email templates</div>
+          <div>✓ Site-specific staff</div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
 const mockupComponents: Record<string, React.ReactNode> = {
   login: <MockupLogin />,
   overview: <MockupOverview />,
@@ -287,6 +333,7 @@ const mockupComponents: Record<string, React.ReactNode> = {
   settings: <MockupSettings />,
   admin: <MockupAdmin />,
   support: <MockupSupport />,
+  multisite: <MockupMultisite />,
 };
 
 /* ─── Guide Content ─── */
@@ -405,6 +452,20 @@ const guideContent: Record<Language, GuideContent> = {
           "Use MinnowAid (💬) floating chat for quick self-service help anytime.",
         ],
       },
+      {
+        icon: <Building2 className="h-6 w-6" />, mockupId: "multisite",
+        title: "10. Multi-Site Management (Business plan)",
+        steps: [
+          "Business plan unlocks multi-site management — manage multiple locations from one dashboard.",
+          "Create sites via Settings → Sites: give each a name, slug, type, and location.",
+          "Use the sidebar site selector to switch between sites or view 'All Sites' for an aggregated view.",
+          "Each site can have its own opening hours, resources, email templates, and staff assignments.",
+          "Site-specific settings override tenant defaults — use 'Reset to defaults' to revert.",
+          "Assign staff to specific sites with distinct roles from the Admin panel.",
+          "The public booking page adapts to show resources for the selected site.",
+        ],
+        tip: "Not on Business plan? You'll see an upgrade prompt in Settings. Contact support for more info.",
+      },
     ],
   },
   fi: {
@@ -520,6 +581,20 @@ const guideContent: Record<Language, GuideContent> = {
           "Käytä MinnowAid (💬) -chattia nopeaan itsepalveluun milloin tahansa.",
         ],
       },
+      {
+        icon: <Building2 className="h-6 w-6" />, mockupId: "multisite",
+        title: "10. Monitoimipistehallinnointi (Business-suunnitelma)",
+        steps: [
+          "Business-suunnitelma avaa monitoimipistehallinnan — hallinnoi useita toimipisteitä yhdestä hallintapaneelista.",
+          "Luo toimipisteitä Asetukset → Toimipisteet: anna nimi, slug, tyyppi ja sijainti.",
+          "Käytä sivupalkin toimipistevalitsinta vaihtaaksesi toimipisteiden välillä tai valitse 'Kaikki toimipisteet' koostenäkymään.",
+          "Jokaisella toimipisteellä voi olla omat aukioloajat, resurssit, sähköpostimallit ja henkilökuntaroolit.",
+          "Toimipistekohtaiset asetukset ohittavat organisaation oletukset — paina 'Palauta oletukset' palauttaaksesi.",
+          "Määritä henkilökuntaa tiettyihin toimipisteisiin omilla rooleilla Admin-paneelista.",
+          "Julkinen varaussivu mukautuu näyttämään valitun toimipisteen resurssit.",
+        ],
+        tip: "Ei Business-suunnitelmaa? Päivityskehote näkyy Asetuksissa. Ota yhteyttä tukeen saadaksesi lisätietoja.",
+      },
     ],
   },
   sv: {
@@ -634,6 +709,20 @@ const guideContent: Record<Language, GuideContent> = {
           "Administratörer kan svara och hantera supporttavlan.",
           "Använd MinnowAid (💬) chattbot för snabb självhjälp när som helst.",
         ],
+      },
+      {
+        icon: <Building2 className="h-6 w-6" />, mockupId: "multisite",
+        title: "10. Hantering av flera platser (Business-plan)",
+        steps: [
+          "Business-planen låser upp hantering av flera platser — hantera flera lokaler från en instrumentpanel.",
+          "Skapa platser via Inställningar → Platser: ange namn, slug, typ och plats.",
+          "Använd sidofältets platsväljare för att växla mellan platser eller visa 'Alla platser' för en samlad vy.",
+          "Varje plats kan ha egna öppettider, resurser, e-postmallar och personalroller.",
+          "Platsspecifika inställningar åsidosätter standardinställningar — klicka 'Återställ till standard' för att återgå.",
+          "Tilldela personal till specifika platser med distinkta roller från Admin-panelen.",
+          "Den publika bokningssidan anpassas för att visa resurser för den valda platsen.",
+        ],
+        tip: "Inte på Business-planen? Du ser en uppgraderingsuppmaning i Inställningar. Kontakta supporten för mer info.",
       },
     ],
   },
