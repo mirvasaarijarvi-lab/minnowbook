@@ -114,6 +114,14 @@ const Dashboard = () => {
   const [currentView, setCurrentView] = useState<DashboardView>("overview");
   const [mobileOpen, setMobileOpen] = useState(false);
   const [tourOpen, setTourOpen] = useState(false);
+  const [reservationStatusFilter, setReservationStatusFilter] = useState<string | undefined>();
+
+  const handleOverviewNavigate = (view: string, filter?: { status?: string }) => {
+    if (view === "reservations") {
+      setReservationStatusFilter(filter?.status);
+      setCurrentView("reservations" as DashboardView);
+    }
+  };
 
   // Auto-open tour on first visit
   useEffect(() => {
@@ -173,10 +181,17 @@ const Dashboard = () => {
     return component;
   };
 
+  const handleViewChange = (view: DashboardView) => {
+    if (view !== "reservations") {
+      setReservationStatusFilter(undefined);
+    }
+    setCurrentView(view);
+  };
+
   const viewComponents: Record<DashboardView, React.ReactNode> = {
-    overview: <DashboardOverview />,
+    overview: <DashboardOverview onNavigate={handleOverviewNavigate} />,
     calendar: gatedView("calendar", <CalendarView />),
-    reservations: gatedView("reservations", <ReservationList />),
+    reservations: gatedView("reservations", <ReservationList initialStatusFilter={reservationStatusFilter} />),
     resources: gatedView("resources", <ResourceManagement />),
     reports: gatedView("reports", <ReportsPanel />),
     settings: gatedView("settings", <SettingsPanel />),
@@ -209,7 +224,7 @@ const Dashboard = () => {
       <div className="flex flex-1 min-h-0">
       <DashboardSidebar
         currentView={currentView}
-        onViewChange={setCurrentView}
+        onViewChange={handleViewChange}
         userEmail={user?.email}
         onSignOut={handleSignOut}
         mobileOpen={mobileOpen}
@@ -271,7 +286,7 @@ const Dashboard = () => {
         isOpen={tourOpen}
         onClose={() => setTourOpen(false)}
         onComplete={handleTourComplete}
-        onNavigate={(view) => setCurrentView(view as DashboardView)}
+        onNavigate={(view) => handleViewChange(view as DashboardView)}
       />
       </div>
     </div>

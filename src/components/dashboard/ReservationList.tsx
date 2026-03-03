@@ -30,9 +30,13 @@ const statusColors: Record<string, string> = {
   cancelled: "bg-red-100 text-red-800 border-red-200",
 };
 
-const ReservationList = () => {
+interface ReservationListProps {
+  initialStatusFilter?: string;
+}
+
+const ReservationList = ({ initialStatusFilter }: ReservationListProps) => {
   const { tenantId, tenant } = useTenant();
-  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<string>(initialStatusFilter || "all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [dateFilter, setDateFilter] = useState<string>("all");
   const [confirmDialog, setConfirmDialog] = useState<{ id: string; action: "confirmed" | "cancelled" } | null>(null);

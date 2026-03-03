@@ -9,7 +9,11 @@ import { useT } from "@/contexts/I18nContext";
 import DashboardTooltip from "./DashboardTooltip";
 import BookingLinksCard from "./BookingLinksCard";
 
-const DashboardOverview = () => {
+interface DashboardOverviewProps {
+  onNavigate?: (view: string, filter?: { status?: string }) => void;
+}
+
+const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
   const { tenantId, tenant } = useTenant();
   const today = format(new Date(), "yyyy-MM-dd");
   const t = useT();
@@ -35,10 +39,10 @@ const DashboardOverview = () => {
   });
 
   const cards = [
-    { label: t("dashboard.todaysReservations"), value: stats?.todayCount ?? 0, icon: CalendarDays, color: "text-accent" },
-    { label: t("dashboard.pending"), value: stats?.pendingCount ?? 0, icon: Clock, color: "text-yellow-600" },
-    { label: t("dashboard.confirmed"), value: stats?.confirmedCount ?? 0, icon: CheckCircle, color: "text-green-600" },
-    { label: t("dashboard.activeResources"), value: stats?.resourceCount ?? 0, icon: Users, color: "text-primary" },
+    { label: t("dashboard.todaysReservations"), value: stats?.todayCount ?? 0, icon: CalendarDays, color: "text-accent", clickable: false },
+    { label: t("dashboard.pending"), value: stats?.pendingCount ?? 0, icon: Clock, color: "text-yellow-600", clickable: true, onClick: () => onNavigate?.("reservations", { status: "pending" }) },
+    { label: t("dashboard.confirmed"), value: stats?.confirmedCount ?? 0, icon: CheckCircle, color: "text-green-600", clickable: false },
+    { label: t("dashboard.activeResources"), value: stats?.resourceCount ?? 0, icon: Users, color: "text-primary", clickable: false },
   ];
 
   return (
@@ -61,8 +65,12 @@ const DashboardOverview = () => {
       </div>
 
       <div data-tour="stats-grid" className="grid gap-3 grid-cols-2 lg:grid-cols-4">
-        {cards.map(({ label, value, icon: Icon, color }) => (
-          <Card key={label}>
+        {cards.map(({ label, value, icon: Icon, color, clickable, onClick }) => (
+          <Card
+            key={label}
+            className={clickable && value > 0 ? "cursor-pointer hover:shadow-md transition-shadow hover:ring-1 hover:ring-accent/30" : ""}
+            onClick={clickable && value > 0 ? onClick : undefined}
+          >
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-1">
                 {label}
