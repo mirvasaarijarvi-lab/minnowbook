@@ -215,6 +215,22 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
         </div>
       </div>
 
+      {checkoutTodayFilter && (
+        <div className="flex items-center gap-2">
+          <Badge variant="secondary" className="gap-1.5 px-3 py-1 text-sm">
+            <CalendarDays className="h-3.5 w-3.5" />
+            {t("dashboard.checkoutToday" as any) || "Checkout today"}
+            <button
+              onClick={() => setCheckoutTodayFilter(false)}
+              className="ml-1 rounded-full hover:bg-muted-foreground/20 p-0.5 transition-colors"
+              aria-label="Clear filter"
+            >
+              <XCircle className="h-3.5 w-3.5" />
+            </button>
+          </Badge>
+        </div>
+      )}
+
       {isLoading ? (
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
