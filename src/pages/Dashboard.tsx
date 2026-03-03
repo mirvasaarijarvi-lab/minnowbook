@@ -12,7 +12,7 @@ import {
   PERM_ADMIN_VIEW,
   PERM_SUPPORT_VIEW,
 } from "@/lib/permissions";
-import { Menu, HelpCircle, ShieldAlert, X, Eye } from "lucide-react";
+import { Menu, HelpCircle, ShieldAlert, X, Eye, BookOpen } from "lucide-react";
 import { useImpersonation } from "@/contexts/ImpersonationContext";
 import DashboardSidebar, { DashboardView } from "@/components/dashboard/DashboardSidebar";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
@@ -264,20 +264,31 @@ const Dashboard = () => {
         <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-x-hidden overflow-y-auto">
           <div className="flex items-center justify-between mb-0">
             <div />
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setTourOpen(true)}
-                  className="hidden lg:flex gap-1.5 text-muted-foreground hover:text-foreground"
-                >
-                  <HelpCircle className="h-4 w-4" />
-                  Guided Tour
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Restart the guided tour</TooltipContent>
-            </Tooltip>
+            <div className="hidden lg:flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate("/guide")}
+                className="gap-1.5 text-muted-foreground hover:text-foreground"
+              >
+                <BookOpen className="h-4 w-4" />
+                Quick Guide
+              </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setTourOpen(true)}
+                    className="gap-1.5 text-muted-foreground hover:text-foreground"
+                  >
+                    <HelpCircle className="h-4 w-4" />
+                    Guided Tour
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Restart the guided tour</TooltipContent>
+              </Tooltip>
+            </div>
           </div>
           {viewComponents[currentView]}
         </main>

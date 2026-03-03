@@ -20,6 +20,7 @@ import About from "./pages/About";
 import Privacy from "./pages/Privacy";
 import Accessibility from "./pages/Accessibility";
 import Superadmin from "./pages/Superadmin";
+import StaffGuide from "./pages/StaffGuide";
 import CookieConsent from "./components/CookieConsent";
 import AccessibilityWidget from "./components/AccessibilityWidget";
 import { ImpersonationProvider } from "./contexts/ImpersonationContext";
@@ -86,6 +87,14 @@ const App = () => (
                 }
               />
               <Route path="/book/:slug" element={<PublicBooking />} />
+              <Route
+                path="/guide"
+                element={
+                  <ProtectedRoute>
+                    <StaffGuide />
+                  </ProtectedRoute>
+                }
+              />
               <Route path="*" element={<NotFound />} />
             </Routes>
             <CookieConsent />
