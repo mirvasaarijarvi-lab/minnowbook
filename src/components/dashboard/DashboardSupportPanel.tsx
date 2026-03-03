@@ -288,8 +288,18 @@ const DashboardSupportPanel = () => {
         <div className="xl:col-span-1">
           <div className="rounded-xl border border-border bg-card shadow-sm flex flex-col h-[560px] overflow-hidden sticky top-8">
             <div className="gradient-hero px-4 py-3 text-primary-foreground">
-              <h3 className="font-serif font-semibold text-sm">{t("help.aiTitle" as TranslationKey)}</h3>
-              <p className="text-xs text-primary-foreground/70">{t("help.aiSubtitle" as TranslationKey)}</p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-serif font-semibold text-sm">{t("help.aiTitle" as TranslationKey)}</h3>
+                  <p className="text-xs text-primary-foreground/70">{t("help.aiSubtitle" as TranslationKey)}</p>
+                </div>
+                {businessTier && (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary-foreground/20 text-primary-foreground border border-primary-foreground/20">
+                    <Clock className="h-2.5 w-2.5" />
+                    24h
+                  </span>
+                )}
+              </div>
             </div>
 
             <div ref={scrollRef} className="flex-1 overflow-y-auto p-3 space-y-3">
