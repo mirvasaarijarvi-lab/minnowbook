@@ -379,6 +379,11 @@ type TranslationKeys = {
   "dashboard.calendarHotel": string;
   "dashboard.calendarVenue": string;
   "dashboard.calendarRestaurant": string;
+  "dashboard.resourceManagement": string;
+  "dashboard.resourceManagementDesc": string;
+  "dashboard.actions": string;
+  "dashboard.active": string;
+  "dashboard.inactive": string;
   "booking.calculatePrice": string;
 
   // Onboarding
@@ -934,6 +939,11 @@ const en: TranslationKeys = {
   "dashboard.calendarHotel": "Hotel / Guesthouse",
   "dashboard.calendarVenue": "Event Spaces",
   "dashboard.calendarRestaurant": "Restaurant",
+  "dashboard.resourceManagement": "Resource Management",
+  "dashboard.resourceManagementDesc": "Manage spaces, rooms and tables",
+  "dashboard.actions": "Actions",
+  "dashboard.active": "Active",
+  "dashboard.inactive": "Inactive",
   "booking.calculatePrice": "Calculate Price",
 
   // Onboarding
@@ -1476,6 +1486,11 @@ const fi: TranslationKeys = {
   "dashboard.calendarHotel": "Hotelli / Majatalo",
   "dashboard.calendarVenue": "Juhlatilat",
   "dashboard.calendarRestaurant": "Ravintola",
+  "dashboard.resourceManagement": "Resurssien hallinta",
+  "dashboard.resourceManagementDesc": "Hallitse tiloja, huoneita ja pöytiä",
+  "dashboard.actions": "Toiminnot",
+  "dashboard.active": "Aktiivinen",
+  "dashboard.inactive": "Ei aktiivinen",
   "booking.calculatePrice": "Laske hinta",
 
   // Onboarding
@@ -2018,6 +2033,11 @@ const sv: TranslationKeys = {
   "dashboard.calendarHotel": "Hotell / Gästhus",
   "dashboard.calendarVenue": "Festlokaler",
   "dashboard.calendarRestaurant": "Restaurang",
+  "dashboard.resourceManagement": "Resurshantering",
+  "dashboard.resourceManagementDesc": "Hantera lokaler, rum och bord",
+  "dashboard.actions": "Åtgärder",
+  "dashboard.active": "Aktiv",
+  "dashboard.inactive": "Inaktiv",
   "booking.calculatePrice": "Beräkna pris",
 
   // Onboarding
