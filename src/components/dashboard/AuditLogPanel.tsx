@@ -10,8 +10,9 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ClipboardList, Plus, Pencil, Trash2, User, ChevronDown, ChevronRight, CalendarIcon, X, Loader2, Undo2 } from "lucide-react";
-import { format, formatDistanceToNow, startOfDay, endOfDay } from "date-fns";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ClipboardList, Plus, Pencil, Trash2, CalendarIcon, X, Undo2, ChevronDown, ChevronRight } from "lucide-react";
+import { format, startOfDay, endOfDay } from "date-fns";
 import { cn } from "@/lib/utils";
 import DashboardTooltip from "./DashboardTooltip";
 import { Json } from "@/integrations/supabase/types";
@@ -29,10 +30,10 @@ interface AuditEntry {
   display_name?: string;
 }
 
-const actionConfig: Record<string, { icon: typeof Plus; color: string; label: string }> = {
-  INSERT: { icon: Plus, label: "Created", color: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" },
-  UPDATE: { icon: Pencil, label: "Updated", color: "bg-primary/10 text-primary border-primary/20" },
-  DELETE: { icon: Trash2, label: "Deleted", color: "bg-destructive/10 text-destructive border-destructive/20" },
+const actionBadgeConfig: Record<string, { icon: typeof Plus; color: string; labelKey: string }> = {
+  INSERT: { icon: Plus, labelKey: "admin.created", color: "border-emerald-500/30 text-emerald-600 bg-emerald-500/10" },
+  UPDATE: { icon: Pencil, labelKey: "admin.updated", color: "border-primary/30 text-primary bg-primary/10" },
+  DELETE: { icon: Trash2, labelKey: "admin.deleted", color: "border-destructive/30 text-destructive bg-destructive/10" },
 };
 
 const tableLabels: Record<string, string> = {
@@ -44,50 +45,26 @@ const tableLabels: Record<string, string> = {
   support_requests: "Support Request",
 };
 
-/** Fields to hide from the diff (internal / noisy) */
 const HIDDEN_FIELDS = new Set([
   "id", "tenant_id", "created_at", "updated_at", "created_by",
   "acknowledgment_email_sent_at", "confirmation_email_sent_at", "cancellation_email_sent_at",
 ]);
 
-/** Human-readable field labels */
 const fieldLabels: Record<string, string> = {
-  guest_name: "Guest name",
-  guest_email: "Email",
-  guest_phone: "Phone",
-  guests_count: "Guests",
-  estimated_guests: "Est. guests",
-  date: "Date",
-  start_time: "Start time",
-  end_time: "End time",
-  check_out_date: "Check-out",
-  status: "Status",
-  reservation_type: "Type",
-  room_type: "Room type",
-  price_eur: "Price (EUR)",
-  special_requests: "Special requests",
-  internal_notes: "Internal notes",
-  staff_notes: "Staff notes",
-  is_checked_in: "Checked in",
-  is_used: "Used",
-  is_invoiced: "Invoiced",
-  catering_needed: "Catering",
-  accommodation_needed: "Accommodation",
-  breakfast_included: "Breakfast",
-  breakfast_price_per_person: "Breakfast price/person",
-  pricing_details: "Pricing details",
-  event_type: "Event type",
-  language: "Language",
-  name: "Name",
-  description: "Description",
-  resource_type: "Resource type",
-  capacity: "Capacity",
-  is_active: "Active",
-  image_url: "Image",
-  price_per_night: "Price/night",
+  guest_name: "Guest name", guest_email: "Email", guest_phone: "Phone",
+  guests_count: "Guests", estimated_guests: "Est. guests", date: "Date",
+  start_time: "Start time", end_time: "End time", check_out_date: "Check-out",
+  status: "Status", reservation_type: "Type", room_type: "Room type",
+  price_eur: "Price (EUR)", special_requests: "Special requests",
+  internal_notes: "Internal notes", staff_notes: "Staff notes",
+  is_checked_in: "Checked in", is_used: "Used", is_invoiced: "Invoiced",
+  catering_needed: "Catering", accommodation_needed: "Accommodation",
+  breakfast_included: "Breakfast", breakfast_price_per_person: "Breakfast price/person",
+  pricing_details: "Pricing details", event_type: "Event type", language: "Language",
+  name: "Name", description: "Description", resource_type: "Resource type",
+  capacity: "Capacity", is_active: "Active", image_url: "Image", price_per_night: "Price/night",
 };
 
-/** Compute changed fields between old and new JSONB objects */
 function computeChangedFields(
   oldData: Record<string, unknown> | null,
   newData: Record<string, unknown> | null
@@ -97,10 +74,8 @@ function computeChangedFields(
   const allKeys = new Set([...Object.keys(oldData), ...Object.keys(newData)]);
   for (const key of allKeys) {
     if (HIDDEN_FIELDS.has(key)) continue;
-    const oldVal = oldData[key];
-    const newVal = newData[key];
-    if (JSON.stringify(oldVal) !== JSON.stringify(newVal)) {
-      changes.push({ field: key, from: oldVal, to: newVal });
+    if (JSON.stringify(oldData[key]) !== JSON.stringify(newData[key])) {
+      changes.push({ field: key, from: oldData[key], to: newData[key] });
     }
   }
   return changes;
@@ -113,6 +88,7 @@ function formatValue(val: unknown): string {
 }
 
 const PAGE_SIZE = 25;
+const REVERTABLE_TABLES = new Set(["reservations", "resources", "blocked_slots", "tenant_settings", "tenant_email_templates"]);
 
 const AuditLogPanel = () => {
   const { tenantId } = useTenant();
@@ -129,8 +105,7 @@ const AuditLogPanel = () => {
   const toggleExpand = (id: string) => {
     setExpandedIds((prev) => {
       const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
+      if (next.has(id)) next.delete(id); else next.add(id);
       return next;
     });
   };
@@ -143,9 +118,6 @@ const AuditLogPanel = () => {
     setPage(0);
   }, []);
 
-  /** Tables we support reverting on */
-  const REVERTABLE_TABLES = new Set(["reservations", "resources", "blocked_slots", "tenant_settings", "tenant_email_templates"]);
-
   const canRevert = (entry: AuditEntry): boolean => {
     if (!REVERTABLE_TABLES.has(entry.table_name)) return false;
     if (entry.action === "UPDATE" && entry.old_data) return true;
@@ -157,47 +129,32 @@ const AuditLogPanel = () => {
   const revertMutation = useMutation({
     mutationFn: async (entry: AuditEntry) => {
       const table = entry.table_name as "reservations" | "resources" | "blocked_slots" | "tenant_settings" | "tenant_email_templates";
-
       if (entry.action === "UPDATE" && entry.old_data) {
-        // Restore old values (only changed fields)
         const oldRecord = entry.old_data as Record<string, unknown>;
         const { id: recordId, ...fieldsToRestore } = oldRecord;
-        // Remove fields we shouldn't update
         delete fieldsToRestore.created_at;
         delete fieldsToRestore.tenant_id;
-
-        const { error } = await supabase
-          .from(table)
-          .update(fieldsToRestore as any)
-          .eq("id", recordId as string);
+        const { error } = await supabase.from(table).update(fieldsToRestore as any).eq("id", recordId as string);
         if (error) throw error;
       } else if (entry.action === "INSERT" && entry.new_data) {
-        // Undo creation = delete the record
         const newRecord = entry.new_data as Record<string, unknown>;
-        const { error } = await supabase
-          .from(table)
-          .delete()
-          .eq("id", newRecord.id as string);
+        const { error } = await supabase.from(table).delete().eq("id", newRecord.id as string);
         if (error) throw error;
       } else if (entry.action === "DELETE" && entry.old_data) {
-        // Undo deletion = re-insert the record
         const oldRecord = entry.old_data as Record<string, unknown>;
-        const { error } = await supabase
-          .from(table)
-          .insert(oldRecord as any);
+        const { error } = await supabase.from(table).insert(oldRecord as any);
         if (error) throw error;
       }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["audit-log"] });
-      // Also refresh related data
       queryClient.invalidateQueries({ queryKey: ["reservations"] });
       queryClient.invalidateQueries({ queryKey: ["resources"] });
-      toast({ title: "Change reverted", description: "The record has been restored to its previous state." });
+      toast({ title: t("admin.reverted"), description: t("admin.revertedDesc") });
       setRevertTarget(null);
     },
     onError: (err: any) => {
-      toast({ title: "Revert failed", description: err.message, variant: "destructive" });
+      toast({ title: "Error", description: err.message, variant: "destructive" });
       setRevertTarget(null);
     },
   });
@@ -210,20 +167,11 @@ const AuditLogPanel = () => {
         .select("id, user_id, table_name, action, summary, created_at, old_data, new_data")
         .order("created_at", { ascending: false });
 
-      if (dateFrom) {
-        query = query.gte("created_at", startOfDay(dateFrom).toISOString());
-      }
-      if (dateTo) {
-        query = query.lte("created_at", endOfDay(dateTo).toISOString());
-      }
-      if (selectedAction !== "all") {
-        query = query.eq("action", selectedAction);
-      }
-      if (selectedTable !== "all") {
-        query = query.eq("table_name", selectedTable);
-      }
+      if (dateFrom) query = query.gte("created_at", startOfDay(dateFrom).toISOString());
+      if (dateTo) query = query.lte("created_at", endOfDay(dateTo).toISOString());
+      if (selectedAction !== "all") query = query.eq("action", selectedAction);
+      if (selectedTable !== "all") query = query.eq("table_name", selectedTable);
 
-      // Fetch one extra to know if there's a next page
       query = query.range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
 
       const { data: logs, error } = await query;
@@ -232,13 +180,8 @@ const AuditLogPanel = () => {
       const hasMore = (logs?.length ?? 0) > PAGE_SIZE;
       const trimmedLogs = hasMore ? logs!.slice(0, PAGE_SIZE) : (logs ?? []);
 
-      const { data: tenantUsers } = await supabase
-        .from("tenant_users")
-        .select("user_id, display_name");
-
-      const userMap = new Map(
-        (tenantUsers ?? []).map((u) => [u.user_id, u.display_name])
-      );
+      const { data: tenantUsers } = await supabase.from("tenant_users").select("user_id, display_name");
+      const userMap = new Map((tenantUsers ?? []).map((u) => [u.user_id, u.display_name]));
 
       const entries = trimmedLogs.map((l) => ({
         ...l,
@@ -256,245 +199,218 @@ const AuditLogPanel = () => {
 
   return (
     <>
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between flex-wrap gap-2">
-          <div className="flex items-center gap-2">
-            <ClipboardList className="h-5 w-5 text-primary" />
-            <CardTitle className="font-serif">{t("admin.auditLog")}</CardTitle>
-            <DashboardTooltip text="A chronological record of all changes made by team members — reservations, resources, settings, and more. Click an entry to see field-level details." />
-          </div>
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div className="flex items-center gap-2">
+              <ClipboardList className="h-5 w-5 text-primary" />
+              <CardTitle className="font-serif">{t("admin.auditLog")}</CardTitle>
+              <DashboardTooltip text={t("admin.auditLogDesc")} />
+            </div>
 
-          {/* Filters */}
-          <div className="flex items-center gap-2 flex-wrap">
-            {/* Action filter */}
-            <Select value={selectedAction} onValueChange={(v) => { setSelectedAction(v); setPage(0); }}>
-              <SelectTrigger className={cn("w-[130px] h-8 text-xs", selectedAction !== "all" && "border-primary/50")}>
-                <SelectValue placeholder="All actions" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All actions</SelectItem>
-                <SelectItem value="INSERT">Created</SelectItem>
-                <SelectItem value="UPDATE">Updated</SelectItem>
-                <SelectItem value="DELETE">Deleted</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="flex items-center gap-2 flex-wrap">
+              <Select value={selectedAction} onValueChange={(v) => { setSelectedAction(v); setPage(0); }}>
+                <SelectTrigger className={cn("w-[130px] h-8 text-xs", selectedAction !== "all" && "border-primary/50")}>
+                  <SelectValue placeholder={t("admin.allActions")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">{t("admin.allActions")}</SelectItem>
+                  <SelectItem value="INSERT">{t("admin.created")}</SelectItem>
+                  <SelectItem value="UPDATE">{t("admin.updated")}</SelectItem>
+                  <SelectItem value="DELETE">{t("admin.deleted")}</SelectItem>
+                </SelectContent>
+              </Select>
 
-            {/* Entity/table filter */}
-            <Select value={selectedTable} onValueChange={(v) => { setSelectedTable(v); setPage(0); }}>
-              <SelectTrigger className={cn("w-[140px] h-8 text-xs", selectedTable !== "all" && "border-primary/50")}>
-                <SelectValue placeholder="All entities" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All entities</SelectItem>
-                {Object.entries(tableLabels).map(([key, label]) => (
-                  <SelectItem key={key} value={key}>{label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              <Select value={selectedTable} onValueChange={(v) => { setSelectedTable(v); setPage(0); }}>
+                <SelectTrigger className={cn("w-[140px] h-8 text-xs", selectedTable !== "all" && "border-primary/50")}>
+                  <SelectValue placeholder={t("admin.allEntities")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">{t("admin.allEntities")}</SelectItem>
+                  {Object.entries(tableLabels).map(([key, label]) => (
+                    <SelectItem key={key} value={key}>{label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="outline" size="sm" className={cn("gap-1.5 text-xs", dateFrom && "border-primary/50")}>
-                  <CalendarIcon className="h-3.5 w-3.5" />
-                  {dateFrom ? format(dateFrom, "dd.MM.yyyy") : "From"}
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" size="sm" className={cn("gap-1.5 text-xs", dateFrom && "border-primary/50")}>
+                    <CalendarIcon className="h-3.5 w-3.5" />
+                    {dateFrom ? format(dateFrom, "dd.MM.yyyy") : t("admin.from")}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="end">
+                  <Calendar mode="single" selected={dateFrom} onSelect={(d) => { setDateFrom(d); setPage(0); }} disabled={(d) => (dateTo ? d > dateTo : false)} initialFocus className="p-3 pointer-events-auto" />
+                </PopoverContent>
+              </Popover>
+
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" size="sm" className={cn("gap-1.5 text-xs", dateTo && "border-primary/50")}>
+                    <CalendarIcon className="h-3.5 w-3.5" />
+                    {dateTo ? format(dateTo, "dd.MM.yyyy") : t("admin.to")}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="end">
+                  <Calendar mode="single" selected={dateTo} onSelect={(d) => { setDateTo(d); setPage(0); }} disabled={(d) => (dateFrom ? d < dateFrom : false)} initialFocus className="p-3 pointer-events-auto" />
+                </PopoverContent>
+              </Popover>
+
+              {hasFilters && (
+                <Button variant="ghost" size="sm" onClick={resetFilters} className="gap-1 text-xs text-muted-foreground">
+                  <X className="h-3.5 w-3.5" /> {t("admin.clear")}
                 </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="end">
-                <Calendar
-                  mode="single"
-                  selected={dateFrom}
-                  onSelect={(d) => { setDateFrom(d); setPage(0); }}
-                  disabled={(d) => (dateTo ? d > dateTo : false)}
-                  initialFocus
-                  className={cn("p-3 pointer-events-auto")}
-                />
-              </PopoverContent>
-            </Popover>
-
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="outline" size="sm" className={cn("gap-1.5 text-xs", dateTo && "border-primary/50")}>
-                  <CalendarIcon className="h-3.5 w-3.5" />
-                  {dateTo ? format(dateTo, "dd.MM.yyyy") : "To"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="end">
-                <Calendar
-                  mode="single"
-                  selected={dateTo}
-                  onSelect={(d) => { setDateTo(d); setPage(0); }}
-                  disabled={(d) => (dateFrom ? d < dateFrom : false)}
-                  initialFocus
-                  className={cn("p-3 pointer-events-auto")}
-                />
-              </PopoverContent>
-            </Popover>
-
-            {hasFilters && (
-              <Button variant="ghost" size="sm" onClick={resetFilters} className="gap-1 text-xs text-muted-foreground">
-                <X className="h-3.5 w-3.5" /> Clear
-              </Button>
-            )}
+              )}
+            </div>
           </div>
-        </div>
-      </CardHeader>
-      <CardContent>
-        {isLoading ? (
-          <div className="space-y-3">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-14 rounded-md bg-muted animate-pulse" />
-            ))}
-          </div>
-        ) : !auditLog?.length ? (
-          <p className="text-sm text-muted-foreground text-center py-6">
-            {hasFilters ? "No entries match the selected date range." : t("admin.noAuditLog")}
-          </p>
-        ) : (
-          <>
-            <div className="space-y-2 max-h-[500px] overflow-y-auto">
-              {auditLog.map((entry) => {
-                const config = actionConfig[entry.action] ?? actionConfig.UPDATE;
-                const ActionIcon = config.icon;
-                const entryDate = new Date(entry.created_at);
-                const isExpanded = expandedIds.has(entry.id);
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <div className="space-y-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-10 rounded-md bg-muted animate-pulse" />
+              ))}
+            </div>
+          ) : !auditLog?.length ? (
+            <p className="text-sm text-muted-foreground text-center py-6">
+              {hasFilters ? t("admin.noMatchFilters") : t("admin.noAuditLog")}
+            </p>
+          ) : (
+            <>
+              <div className="max-h-[500px] overflow-y-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-8"></TableHead>
+                      <TableHead>{t("admin.colDate")}</TableHead>
+                      <TableHead>{t("admin.colUserAudit")}</TableHead>
+                      <TableHead>{t("admin.colEntity")}</TableHead>
+                      <TableHead>{t("admin.colAction")}</TableHead>
+                      <TableHead>{t("admin.colSummary")}</TableHead>
+                      <TableHead className="w-20"></TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {auditLog.map((entry) => {
+                      const config = actionBadgeConfig[entry.action] ?? actionBadgeConfig.UPDATE;
+                      const ActionIcon = config.icon;
+                      const entryDate = new Date(entry.created_at);
+                      const isExpanded = expandedIds.has(entry.id);
+                      const changes = entry.action === "UPDATE"
+                        ? computeChangedFields(entry.old_data as Record<string, unknown> | null, entry.new_data as Record<string, unknown> | null)
+                        : [];
+                      const hasDetails = changes.length > 0;
 
-                const changes =
-                  entry.action === "UPDATE"
-                    ? computeChangedFields(
-                        entry.old_data as Record<string, unknown> | null,
-                        entry.new_data as Record<string, unknown> | null
-                      )
-                    : [];
-
-                const hasDetails = changes.length > 0;
-
-                return (
-                  <div
-                    key={entry.id}
-                    className={`rounded-lg border border-border text-sm transition-colors ${hasDetails ? "cursor-pointer hover:bg-muted/30" : ""}`}
-                    onClick={() => hasDetails && toggleExpand(entry.id)}
-                  >
-                    <div className="flex items-start gap-3 p-3">
-                      {hasDetails && (
-                        <span className="shrink-0 mt-1 text-muted-foreground">
-                          {isExpanded ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
-                        </span>
-                      )}
-                      <Badge variant="outline" className={`shrink-0 mt-0.5 ${config.color}`}>
-                        <ActionIcon className="h-3 w-3 mr-1" />
-                        {config.label}
-                      </Badge>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-foreground">
-                          {entry.summary || `${config.label} ${tableLabels[entry.table_name] ?? entry.table_name}`}
-                        </p>
-                        <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
-                          <span className="flex items-center gap-1">
-                            <User className="h-3 w-3" />
-                            {entry.display_name || (entry.user_id ? entry.user_id.slice(0, 8) + "…" : "System")}
-                          </span>
-                          <span>·</span>
-                          <span>{formatDistanceToNow(entryDate, { addSuffix: true })}</span>
-                          <span className="hidden sm:inline">·</span>
-                          <span className="hidden sm:inline text-muted-foreground/60">
-                            {format(entryDate, "dd.MM.yyyy HH:mm")}
-                          </span>
-                          {hasDetails && (
-                            <>
-                              <span>·</span>
-                              <span className="text-primary/70">{changes.length} field{changes.length !== 1 ? "s" : ""} changed</span>
-                            </>
+                      return (
+                        <>
+                          <TableRow
+                            key={entry.id}
+                            className={hasDetails ? "cursor-pointer" : ""}
+                            onClick={() => hasDetails && toggleExpand(entry.id)}
+                          >
+                            <TableCell className="w-8 pr-0">
+                              {hasDetails && (
+                                isExpanded ? <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+                              )}
+                            </TableCell>
+                            <TableCell className="whitespace-nowrap text-muted-foreground">
+                              {format(entryDate, "d.M.yyyy HH:mm")}
+                            </TableCell>
+                            <TableCell className="font-medium">
+                              {entry.display_name || (entry.user_id ? entry.user_id.slice(0, 8) + "…" : "System")}
+                            </TableCell>
+                            <TableCell className="text-muted-foreground">
+                              {tableLabels[entry.table_name] ?? entry.table_name}
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="outline" className={`text-xs gap-1 ${config.color}`}>
+                                <ActionIcon className="h-3 w-3" />
+                                {t(config.labelKey as any)}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-muted-foreground max-w-[200px] truncate">
+                              {entry.summary || `${t(config.labelKey as any)} ${tableLabels[entry.table_name] ?? entry.table_name}`}
+                              {hasDetails && (
+                                <span className="ml-1 text-primary/70 text-xs">
+                                  ({changes.length} {t("admin.fieldsChanged")})
+                                </span>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              {canRevert(entry) && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="gap-1 text-xs text-muted-foreground hover:text-foreground"
+                                  onClick={(e) => { e.stopPropagation(); setRevertTarget(entry); }}
+                                >
+                                  <Undo2 className="h-3.5 w-3.5" />
+                                  {t("admin.revert")}
+                                </Button>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                          {isExpanded && hasDetails && (
+                            <TableRow key={`${entry.id}-details`}>
+                              <TableCell colSpan={7} className="bg-muted/20 px-8 py-3">
+                                <div className="space-y-1.5">
+                                  {changes.map((c) => (
+                                    <div key={c.field} className="flex items-baseline gap-2 text-xs">
+                                      <span className="font-medium text-foreground min-w-[120px]">
+                                        {fieldLabels[c.field] ?? c.field}
+                                      </span>
+                                      <span className="text-destructive/70 line-through">{formatValue(c.from)}</span>
+                                      <span className="text-muted-foreground">→</span>
+                                      <span className="text-emerald-600 font-medium">{formatValue(c.to)}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </TableCell>
+                            </TableRow>
                           )}
-                        </div>
-                      </div>
-                      {canRevert(entry) && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="shrink-0 gap-1 text-xs text-muted-foreground hover:text-foreground"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setRevertTarget(entry);
-                          }}
-                        >
-                          <Undo2 className="h-3.5 w-3.5" />
-                          Revert
-                        </Button>
-                      )}
-                    </div>
-
-                    {isExpanded && hasDetails && (
-                      <div className="border-t border-border bg-muted/20 px-4 py-3 space-y-1.5">
-                        {changes.map((c) => (
-                          <div key={c.field} className="flex items-baseline gap-2 text-xs">
-                            <span className="font-medium text-foreground min-w-[120px]">
-                              {fieldLabels[c.field] ?? c.field}
-                            </span>
-                            <span className="text-destructive/70 line-through">
-                              {formatValue(c.from)}
-                            </span>
-                            <span className="text-muted-foreground">→</span>
-                            <span className="text-emerald-600 font-medium">
-                              {formatValue(c.to)}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Pagination controls */}
-            <div className="flex items-center justify-between mt-4 pt-3 border-t border-border">
-              <p className="text-xs text-muted-foreground">
-                Page {page + 1}{hasFilters ? " (filtered)" : ""}
-              </p>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={page === 0}
-                  onClick={() => setPage((p) => p - 1)}
-                >
-                  Previous
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={!hasMore}
-                  onClick={() => setPage((p) => p + 1)}
-                >
-                  Next
-                </Button>
+                        </>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
               </div>
-            </div>
-          </>
-        )}
-      </CardContent>
-    </Card>
 
-      {/* Revert confirmation dialog */}
+              <div className="flex items-center justify-between mt-4 pt-3 border-t border-border">
+                <p className="text-xs text-muted-foreground">
+                  {t("admin.page")} {page + 1}{hasFilters ? ` (${t("admin.filtered")})` : ""}
+                </p>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" disabled={page === 0} onClick={() => setPage((p) => p - 1)}>
+                    {t("admin.previous")}
+                  </Button>
+                  <Button variant="outline" size="sm" disabled={!hasMore} onClick={() => setPage((p) => p + 1)}>
+                    {t("admin.next")}
+                  </Button>
+                </div>
+              </div>
+            </>
+          )}
+        </CardContent>
+      </Card>
+
       <AlertDialog open={!!revertTarget} onOpenChange={(open) => !open && setRevertTarget(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Revert this change?</AlertDialogTitle>
+            <AlertDialogTitle>{t("admin.revertConfirm")}</AlertDialogTitle>
             <AlertDialogDescription>
-              {revertTarget?.action === "UPDATE" && "This will restore the record to its previous values."}
-              {revertTarget?.action === "INSERT" && "This will delete the record that was created."}
-              {revertTarget?.action === "DELETE" && "This will re-create the record that was deleted."}
-              {" "}This action will be logged in the audit trail.
+              {revertTarget?.action === "UPDATE" && t("admin.revertUpdate")}
+              {revertTarget?.action === "INSERT" && t("admin.revertInsert")}
+              {revertTarget?.action === "DELETE" && t("admin.revertDelete")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t("admin.cancel")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => revertTarget && revertMutation.mutate(revertTarget)}
               disabled={revertMutation.isPending}
             >
-              {revertMutation.isPending ? "Reverting..." : "Revert"}
+              {revertMutation.isPending ? t("admin.reverting") : t("admin.revert")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
