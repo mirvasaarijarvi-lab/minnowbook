@@ -10,9 +10,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Loader2, Clock } from "lucide-react";
+import { Loader2, Clock, RotateCcw, Building2 } from "lucide-react";
 import DashboardTooltip from "./DashboardTooltip";
 
 const DAY_KEYS: TranslationKey[] = [
@@ -28,6 +29,10 @@ interface HourRow {
   is_closed: boolean;
 }
 
+interface OpeningHoursSettingsProps {
+  siteId?: string | null;
+}
+
 const defaultHours = (): HourRow[] =>
   DAY_INDEX_MAP.map((dow) => ({
     day_of_week: dow,
@@ -36,19 +41,42 @@ const defaultHours = (): HourRow[] =>
     is_closed: false,
   }));
 
-const OpeningHoursSettings = () => {
+const OpeningHoursSettings = ({ siteId = null }: OpeningHoursSettingsProps) => {
   const { tenantId, tenant } = useTenant();
   const t = useT();
   const queryClient = useQueryClient();
   const { typeLabel } = useResourceTypeLabel();
   const reservationTypes = (tenant?.allowed_reservation_types as string[]) ?? [];
 
+  const isSiteLevel = !!siteId;
+
   const [activeType, setActiveType] = useState(reservationTypes[0] ?? "restaurant");
   const [hoursByType, setHoursByType] = useState<Record<string, HourRow[]>>({});
   const [dirty, setDirty] = useState(false);
 
-  // Fetch existing tenant-level opening hours (site_id IS NULL)
+  // Fetch hours for the relevant scope (site-level or tenant defaults)
   const { data: existingHours, isLoading } = useQuery({
+    queryKey: ["tenant-opening-hours", tenantId, siteId ?? "defaults"],
+    queryFn: async () => {
+      if (!tenantId) return [];
+      let query = supabase
+        .from("tenant_opening_hours")
+        .select("*")
+        .eq("tenant_id", tenantId);
+      if (siteId) {
+        query = query.eq("site_id", siteId);
+      } else {
+        query = query.is("site_id", null);
+      }
+      const { data, error } = await query;
+      if (error) throw error;
+      return data ?? [];
+    },
+    enabled: !!tenantId,
+  });
+
+  // Also fetch tenant defaults when at site level (for fallback display)
+  const { data: tenantDefaults } = useQuery({
     queryKey: ["tenant-opening-hours-defaults", tenantId],
     queryFn: async () => {
       if (!tenantId) return [];
@@ -60,15 +88,21 @@ const OpeningHoursSettings = () => {
       if (error) throw error;
       return data ?? [];
     },
-    enabled: !!tenantId,
+    enabled: !!tenantId && isSiteLevel,
   });
 
-  // Populate state from DB
+  const hasSiteOverrides = isSiteLevel && (existingHours?.length ?? 0) > 0;
+
+  // Populate state from DB — use site hours if they exist, otherwise fall back to tenant defaults
   useEffect(() => {
-    if (!existingHours) return;
+    const source = (isSiteLevel && existingHours && existingHours.length > 0)
+      ? existingHours
+      : (isSiteLevel ? tenantDefaults : existingHours);
+    if (!source) return;
+
     const map: Record<string, HourRow[]> = {};
     for (const rt of reservationTypes) {
-      const rows = existingHours.filter((h) => h.resource_type === rt);
+      const rows = source.filter((h) => h.resource_type === rt);
       if (rows.length > 0) {
         map[rt] = DAY_INDEX_MAP.map((dow) => {
           const existing = rows.find((r) => r.day_of_week === dow);
@@ -87,7 +121,7 @@ const OpeningHoursSettings = () => {
     }
     setHoursByType(map);
     setDirty(false);
-  }, [existingHours, reservationTypes.join(",")]);
+  }, [existingHours, tenantDefaults, reservationTypes.join(","), isSiteLevel]);
 
   const updateHour = (type: string, dayIdx: number, field: keyof HourRow, value: any) => {
     setHoursByType((prev) => {
@@ -102,19 +136,24 @@ const OpeningHoursSettings = () => {
     mutationFn: async () => {
       if (!tenantId) throw new Error("No tenant");
 
-      // Delete existing tenant-level hours
-      const { error: delError } = await supabase
+      // Delete existing hours for this scope
+      let delQuery = supabase
         .from("tenant_opening_hours")
         .delete()
-        .eq("tenant_id", tenantId)
-        .is("site_id", null);
+        .eq("tenant_id", tenantId);
+      if (siteId) {
+        delQuery = delQuery.eq("site_id", siteId);
+      } else {
+        delQuery = delQuery.is("site_id", null);
+      }
+      const { error: delError } = await delQuery;
       if (delError) throw delError;
 
       // Insert all
       const rows = Object.entries(hoursByType).flatMap(([resourceType, hours]) =>
         hours.map((h) => ({
           tenant_id: tenantId,
-          site_id: null as string | null,
+          site_id: siteId as string | null,
           resource_type: resourceType,
           day_of_week: h.day_of_week,
           open_time: h.open_time,
@@ -132,8 +171,28 @@ const OpeningHoursSettings = () => {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["tenant-opening-hours-defaults"] });
+      queryClient.invalidateQueries({ queryKey: ["tenant-opening-hours"] });
       toast.success(t("settings.saved"));
+      setDirty(false);
+    },
+    onError: () => {
+      toast.error(t("settings.saveError"));
+    },
+  });
+
+  const resetMutation = useMutation({
+    mutationFn: async () => {
+      if (!tenantId || !siteId) throw new Error("No site");
+      const { error } = await supabase
+        .from("tenant_opening_hours")
+        .delete()
+        .eq("tenant_id", tenantId)
+        .eq("site_id", siteId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tenant-opening-hours"] });
+      toast.success(t("openingHours.resetDone"));
       setDirty(false);
     },
     onError: () => {
@@ -161,7 +220,13 @@ const OpeningHoursSettings = () => {
         <div className="flex items-center gap-2">
           <Clock className="h-5 w-5 text-muted-foreground" />
           <CardTitle className="text-lg font-serif">{t("help.art5Title")}</CardTitle>
-          <DashboardTooltip text={t("openingHours.tooltip")} />
+          {isSiteLevel && (
+            <Badge variant="outline" className="gap-1 text-xs">
+              <Building2 className="h-3 w-3" />
+              {hasSiteOverrides ? t("openingHours.siteOverride") : t("openingHours.usingDefaults")}
+            </Badge>
+          )}
+          <DashboardTooltip text={t(isSiteLevel ? "openingHours.siteTooltip" : "openingHours.tooltip")} />
         </div>
         <p className="text-sm text-muted-foreground">{t("help.art5Desc")}</p>
       </CardHeader>
@@ -217,7 +282,25 @@ const OpeningHoursSettings = () => {
           })}
         </div>
 
-        <div className="flex justify-end pt-2">
+        <div className="flex items-center justify-between pt-2">
+          <div>
+            {isSiteLevel && hasSiteOverrides && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1.5 text-xs"
+                onClick={() => {
+                  if (confirm(t("openingHours.resetConfirm"))) {
+                    resetMutation.mutate();
+                  }
+                }}
+                disabled={resetMutation.isPending}
+              >
+                <RotateCcw className="h-3.5 w-3.5" />
+                {t("openingHours.resetToDefaults")}
+              </Button>
+            )}
+          </div>
           <Button
             onClick={() => saveMutation.mutate()}
             disabled={saveMutation.isPending || !dirty}
