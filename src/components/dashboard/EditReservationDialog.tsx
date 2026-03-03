@@ -28,6 +28,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useDateLocale } from "@/hooks/useDateLocale";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -71,6 +72,7 @@ const EditReservationDialog = ({
   onOpenChange,
 }: EditReservationDialogProps) => {
   const t = useT();
+  const dateFnsLocale = useDateLocale();
   const queryClient = useQueryClient();
   const { tenant, tenantId } = useTenant();
 
@@ -318,7 +320,7 @@ const EditReservationDialog = ({
                   <PopoverTrigger asChild>
                     <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !form.date && "text-muted-foreground")}>
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {form.date ? format(new Date(form.date + "T00:00:00"), "PPP") : t("dashboard.selectDate")}
+                      {form.date ? format(new Date(form.date + "T00:00:00"), "PPP", { locale: dateFnsLocale }) : t("dashboard.selectDate")}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
@@ -342,7 +344,7 @@ const EditReservationDialog = ({
                       <PopoverTrigger asChild>
                         <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !form.check_out_date && "text-muted-foreground")}>
                           <CalendarIcon className="mr-2 h-4 w-4" />
-                          {form.check_out_date ? format(new Date(form.check_out_date + "T00:00:00"), "PPP") : "—"}
+                          {form.check_out_date ? format(new Date(form.check_out_date + "T00:00:00"), "PPP", { locale: dateFnsLocale }) : "—"}
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
