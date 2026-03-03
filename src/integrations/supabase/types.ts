@@ -1227,6 +1227,11 @@ export type Database = {
         }
         Returns: string
       }
+      get_tier_max_reservation_types: {
+        Args: { p_tier: string }
+        Returns: number
+      }
+      get_tier_max_sites: { Args: { p_tier: string }; Returns: number }
       get_user_tenant_id: { Args: { p_user_id: string }; Returns: string }
       has_permission: {
         Args: { p_permission: string; p_user_id: string }
