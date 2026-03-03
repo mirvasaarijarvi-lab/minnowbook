@@ -724,11 +724,6 @@ export type Database = {
       }
       sites: {
         Row: {
-          business_address: string | null
-          business_description: string | null
-          business_email: string | null
-          business_name: string | null
-          business_phone: string | null
           created_at: string
           description: string | null
           id: string
@@ -741,11 +736,6 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          business_address?: string | null
-          business_description?: string | null
-          business_email?: string | null
-          business_name?: string | null
-          business_phone?: string | null
           created_at?: string
           description?: string | null
           id?: string
@@ -758,11 +748,6 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          business_address?: string | null
-          business_description?: string | null
-          business_email?: string | null
-          business_name?: string | null
-          business_phone?: string | null
           created_at?: string
           description?: string | null
           id?: string

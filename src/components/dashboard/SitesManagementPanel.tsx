@@ -65,11 +65,6 @@ interface Site {
   site_type: string;
   is_active: boolean;
   created_at: string;
-  business_name: string | null;
-  business_email: string | null;
-  business_phone: string | null;
-  business_address: string | null;
-  business_description: string | null;
 }
 
 interface Resource {
@@ -110,11 +105,6 @@ const SitesManagementPanel = () => {
     location: "",
     description: "",
     site_type: "property",
-    business_name: "",
-    business_email: "",
-    business_phone: "",
-    business_address: "",
-    business_description: "",
   });
 
   const canManage = can(PERM_SITES_MANAGE);
@@ -190,7 +180,7 @@ const SitesManagementPanel = () => {
   };
 
   const resetForm = () => {
-    setForm({ name: "", slug: "", location: "", description: "", site_type: "property", business_name: "", business_email: "", business_phone: "", business_address: "", business_description: "" });
+    setForm({ name: "", slug: "", location: "", description: "", site_type: "property" });
     setEditingSite(null);
   };
 
@@ -207,11 +197,6 @@ const SitesManagementPanel = () => {
       location: site.location || "",
       description: site.description || "",
       site_type: site.site_type || "property",
-      business_name: site.business_name || "",
-      business_email: site.business_email || "",
-      business_phone: site.business_phone || "",
-      business_address: site.business_address || "",
-      business_description: site.business_description || "",
     });
     setDialogOpen(true);
   };
@@ -225,11 +210,6 @@ const SitesManagementPanel = () => {
         location: form.location || null,
         description: form.description || null,
         site_type: form.site_type,
-        business_name: form.business_name || null,
-        business_email: form.business_email || null,
-        business_phone: form.business_phone || null,
-        business_address: form.business_address || null,
-        business_description: form.business_description || null,
       }).select("id").single();
       if (error) throw error;
 
@@ -266,11 +246,6 @@ const SitesManagementPanel = () => {
           location: form.location || null,
           description: form.description || null,
           site_type: form.site_type,
-          business_name: form.business_name || null,
-          business_email: form.business_email || null,
-          business_phone: form.business_phone || null,
-          business_address: form.business_address || null,
-          business_description: form.business_description || null,
         })
         .eq("id", editingSite!.id);
       if (error) throw error;
@@ -466,46 +441,6 @@ const SitesManagementPanel = () => {
                   />
                 </div>
 
-                {/* Company Entity / Business Details */}
-                <div className="border-t pt-4 mt-2 space-y-3">
-                  <Label className="text-sm font-semibold">{t("settings.businessDetails")}</Label>
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <div className="space-y-1">
-                      <Label className="text-xs text-muted-foreground">{t("common.name")}</Label>
-                      <Input
-                        value={form.business_name}
-                        onChange={(e) => setForm({ ...form, business_name: e.target.value })}
-                        placeholder={t("common.name")}
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <Label className="text-xs text-muted-foreground">{t("common.email")}</Label>
-                      <Input
-                        type="email"
-                        value={form.business_email}
-                        onChange={(e) => setForm({ ...form, business_email: e.target.value })}
-                        placeholder={t("common.email")}
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <Label className="text-xs text-muted-foreground">{t("common.phone")}</Label>
-                      <Input
-                        value={form.business_phone}
-                        onChange={(e) => setForm({ ...form, business_phone: e.target.value })}
-                        placeholder={t("common.phone")}
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <Label className="text-xs text-muted-foreground">{t("common.address")}</Label>
-                      <Input
-                        value={form.business_address}
-                        onChange={(e) => setForm({ ...form, business_address: e.target.value })}
-                        placeholder={t("common.address")}
-                      />
-                    </div>
-                  </div>
-                </div>
-
                 <Button
                   className="w-full"
                   onClick={handleSubmit}
@@ -625,18 +560,6 @@ const SitesManagementPanel = () => {
                         <CardContent className="pt-0 pb-3 px-4">
                           {site.description && (
                             <p className="text-xs text-muted-foreground mb-3 ml-10">{site.description}</p>
-                          )}
-                          {/* Company entity info */}
-                          {(site.business_name || site.business_email || site.business_phone || site.business_address) && (
-                            <div className="ml-10 mb-3 p-2.5 rounded-md bg-muted/50 border border-border/50">
-                              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">{t("settings.businessDetails")}</p>
-                              <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
-                                {site.business_name && <span><span className="text-muted-foreground">{t("common.name")}:</span> {site.business_name}</span>}
-                                {site.business_email && <span><span className="text-muted-foreground">{t("common.email")}:</span> {site.business_email}</span>}
-                                {site.business_phone && <span><span className="text-muted-foreground">{t("common.phone")}:</span> {site.business_phone}</span>}
-                                {site.business_address && <span><span className="text-muted-foreground">{t("common.address")}:</span> {site.business_address}</span>}
-                              </div>
-                            </div>
                           )}
                           {siteResources.length === 0 ? (
                             <p className="text-xs text-muted-foreground ml-10">{t("sites.noResourcesInSite" as any) || "No resources assigned to this site yet"}</p>
