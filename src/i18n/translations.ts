@@ -780,6 +780,8 @@ type TranslationKeys = {
   "aid.guideA9": string;
   "aid.guideQ10": string;
   "aid.guideA10": string;
+  "aid.guideQ11": string;
+  "aid.guideA11": string;
 };
 
 export type TranslationKey = keyof TranslationKeys;
@@ -1542,8 +1544,10 @@ const en: TranslationKeys = {
   "aid.guideA8": "Set a **base price per night** on each resource, then configure **room type multipliers** (Single 1.0×, Double 1.5×, Suite 2.5×, etc.). The booking page calculates totals automatically.",
   "aid.guideQ9": "How do I share my booking link?",
   "aid.guideA9": "Your public booking link is shown on the **Dashboard Overview**. Click **Copy link** to copy it, or open it in a new tab to preview. Share it on your website or social media.",
-  "aid.guideQ10": "How do I block dates or time slots?",
-  "aid.guideA10": "In **Dashboard → Calendar**, click on a date and use the **Block Slot** option to prevent bookings for specific dates, times, or resources.",
+   "aid.guideQ10": "How do I block dates or time slots?",
+   "aid.guideA10": "In **Dashboard → Calendar**, click on a date and use the **Block Slot** option to prevent bookings for specific dates, times, or resources.",
+   "aid.guideQ11": "How do I manage recurring blocked slots?",
+   "aid.guideA11": "Go to **Dashboard → Calendar** and open the **Recurring Blocks** panel. You can create weekly repeating blocks for specific days, time ranges, and resource types (e.g. close the restaurant every Monday). Toggle blocks on/off or delete them anytime — changes apply immediately to the public booking page.",
 };
 
 const fi: TranslationKeys = {
@@ -2303,8 +2307,10 @@ const fi: TranslationKeys = {
   "aid.guideA8": "Aseta **perushinta per yö** jokaiselle resurssille ja määritä **huonetyyppikertoimet** (Yhden hengen 1.0×, Kahden hengen 1.5×, Sviitti 2.5× jne.). Varaussivu laskee summat automaattisesti.",
   "aid.guideQ9": "Miten jaan varauslinkkini?",
   "aid.guideA9": "Julkinen varauslinkkisi näkyy **Hallintapaneelin yleiskatsauksessa**. Klikkaa **Kopioi linkki** kopioidaksesi sen tai avaa se uudessa välilehdessä. Jaa se verkkosivullasi tai sosiaalisessa mediassa.",
-  "aid.guideQ10": "Miten estän päivämääriä tai aikavälejä?",
-  "aid.guideA10": "**Hallintapaneeli → Kalenteri** -näkymässä klikkaa päivämäärää ja käytä **Estä aika** -toimintoa estääksesi varaukset tietyille päiville, ajoille tai resursseille.",
+   "aid.guideQ10": "Miten estän päivämääriä tai aikavälejä?",
+   "aid.guideA10": "**Hallintapaneeli → Kalenteri** -näkymässä klikkaa päivämäärää ja käytä **Estä aika** -toimintoa estääksesi varaukset tietyille päiville, ajoille tai resursseille.",
+   "aid.guideQ11": "Miten hallitsen toistuvia estoja?",
+   "aid.guideA11": "Siirry **Hallintapaneeli → Kalenteri** ja avaa **Toistuvat estot** -paneeli. Voit luoda viikoittain toistuvia estoja tietyille päiville, aikaväleille ja resurssityypeille (esim. sulkea ravintolan joka maanantai). Vaihda estoja päälle/pois tai poista ne milloin tahansa — muutokset näkyvät heti julkisella varaussivulla.",
 };
 
 const sv: TranslationKeys = {
@@ -3064,8 +3070,10 @@ const sv: TranslationKeys = {
   "aid.guideA8": "Ange ett **baspris per natt** för varje resurs och konfigurera **rumstypmultiplikatorer** (Enkelrum 1.0×, Dubbelrum 1.5×, Svit 2.5× osv.). Bokningssidan beräknar summorna automatiskt.",
   "aid.guideQ9": "Hur delar jag min bokningslänk?",
   "aid.guideA9": "Din publika bokningslänk visas på **Instrumentpanelens översikt**. Klicka på **Kopiera länk** för att kopiera den eller öppna den i en ny flik. Dela den på din webbplats eller sociala medier.",
-  "aid.guideQ10": "Hur blockerar jag datum eller tider?",
-  "aid.guideA10": "Under **Instrumentpanel → Kalender**, klicka på ett datum och använd **Blockera tid** för att förhindra bokningar för specifika datum, tider eller resurser.",
+   "aid.guideQ10": "Hur blockerar jag datum eller tider?",
+   "aid.guideA10": "Under **Instrumentpanel → Kalender**, klicka på ett datum och använd **Blockera tid** för att förhindra bokningar för specifika datum, tider eller resurser.",
+   "aid.guideQ11": "Hur hanterar jag återkommande blockeringar?",
+   "aid.guideA11": "Gå till **Instrumentpanel → Kalender** och öppna panelen **Återkommande blockeringar**. Du kan skapa veckovis återkommande blockeringar för specifika dagar, tidsintervall och resurstyper (t.ex. stänga restaurangen varje måndag). Slå av/på eller ta bort blockeringar när som helst — ändringar gäller direkt på den publika bokningssidan.",
 };
 
 export const translations: Record<Language, TranslationKeys> = { en, fi, sv };
