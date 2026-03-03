@@ -18,7 +18,7 @@ const upgradeInfo: Record<string, { targetTier: string; features: string[] }> = 
       "All reservation types (Restaurant, Venue, Guesthouse, Hotel)",
       "10 staff users",
       "Custom branding",
-      "Priority support",
+      "AI chatbot support",
     ],
   },
   "basic-sites": {

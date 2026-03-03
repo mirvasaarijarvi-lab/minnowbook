@@ -61,8 +61,8 @@ const Onboarding = () => {
 
   const tiers = [
     { id: "basic", nameKey: "tier.basic" as TranslationKey, icon: Zap, price: "€29/mo", descKey: "tier.basicDesc" as TranslationKey, features: ["1 reservation type", "1 resource per type", "3 staff users", "Booking page"] },
-    { id: "professional", nameKey: "tier.professional" as TranslationKey, icon: Crown, price: "€59/mo", descKey: "tier.professionalDesc" as TranslationKey, features: ["All types (1 resource each)", "10 staff users", "Custom branding", "Priority support"] },
-    { id: "business", nameKey: "tier.business" as TranslationKey, icon: Building2, price: "€99/mo", descKey: "tier.businessDesc" as TranslationKey, features: ["Unlimited sites", "Unlimited resources", "Unlimited staff", "Multi-site dashboard"] },
+    { id: "professional", nameKey: "tier.professional" as TranslationKey, icon: Crown, price: "€59/mo", descKey: "tier.professionalDesc" as TranslationKey, features: ["All types (1 resource each)", "10 staff users", "Custom branding", "AI chatbot support"] },
+    { id: "business", nameKey: "tier.business" as TranslationKey, icon: Building2, price: "€99/mo", descKey: "tier.businessDesc" as TranslationKey, features: ["Unlimited sites", "Unlimited resources", "Unlimited staff", "Priority support (24h)"] },
   ];
 
   const reservationTypes = [

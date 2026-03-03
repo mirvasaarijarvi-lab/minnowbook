@@ -38,7 +38,7 @@ const tiers = [
       "Advanced opening hours & booking rules",
       "Multi-language booking pages",
       "Detailed analytics & reports",
-      "Priority support",
+      "AI chatbot support",
     ],
   },
   {
@@ -55,7 +55,7 @@ const tiers = [
       "Unlimited staff accounts",
       "Per-site branding & settings",
       "Advanced revenue reporting",
-      "Priority support",
+      "Priority support (24h response)",
     ],
   },
 ];
@@ -145,7 +145,7 @@ const Pricing = () => {
                   ["Multi-language support", "—", "✓", "✓"],
                   ["Multi-site management", "—", "—", "✓"],
                   ["Analytics & reports", "Basic", "Advanced", "Advanced"],
-                  ["Priority support", "—", "✓", "✓"],
+                  ["Support", "AI chatbot", "AI chatbot", "Priority (24h)"],
                 ].map(([feature, basic, pro, business]) => {
                   const isHighlight = feature === "Sites / locations" || feature === "Reservation types" || feature === "Resources per type";
                   return (
