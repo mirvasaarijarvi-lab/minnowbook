@@ -33,14 +33,16 @@ const statusColors: Record<string, string> = {
 interface ReservationListProps {
   initialStatusFilter?: string;
   initialInvoicedFilter?: boolean;
+  initialCheckoutToday?: boolean;
 }
 
-const ReservationList = ({ initialStatusFilter, initialInvoicedFilter }: ReservationListProps) => {
+const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCheckoutToday }: ReservationListProps) => {
   const { tenantId, tenant } = useTenant();
   const [statusFilter, setStatusFilter] = useState<string>(initialStatusFilter || "all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
-  const [dateFilter, setDateFilter] = useState<string>("all");
+  const [dateFilter, setDateFilter] = useState<string>(initialCheckoutToday ? "all" : "all");
   const [invoicedFilter, setInvoicedFilter] = useState<string>(initialInvoicedFilter === false ? "uninvoiced" : "all");
+  const [checkoutTodayFilter, setCheckoutTodayFilter] = useState<boolean>(!!initialCheckoutToday);
   const [confirmDialog, setConfirmDialog] = useState<{ id: string; action: "confirmed" | "cancelled" } | null>(null);
   const [editingReservation, setEditingReservation] = useState<any | null>(null);
   const [newReservationOpen, setNewReservationOpen] = useState(false);
@@ -53,13 +55,17 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter }: Reserva
   const today = format(new Date(), "yyyy-MM-dd");
 
   const { data: reservations, isLoading } = useQuery({
-    queryKey: ["reservations", tenantId, statusFilter, typeFilter, dateFilter, invoicedFilter],
+    queryKey: ["reservations", tenantId, statusFilter, typeFilter, dateFilter, invoicedFilter, checkoutTodayFilter],
     queryFn: async () => {
       if (!tenantId) return [];
       let query = supabase.from("reservations").select("*").eq("tenant_id", tenantId).order("date", { ascending: false });
       if (statusFilter !== "all") query = query.eq("status", statusFilter);
       if (typeFilter !== "all") query = query.eq("reservation_type", typeFilter);
-      if (dateFilter === "today") query = query.eq("date", today);
+      if (checkoutTodayFilter) {
+        query = query.eq("check_out_date", today);
+      } else if (dateFilter === "today") {
+        query = query.eq("date", today);
+      }
       if (invoicedFilter === "uninvoiced") query = query.eq("is_invoiced", false);
       if (invoicedFilter === "invoiced") query = query.eq("is_invoiced", true);
       const { data, error } = await query.limit(100);

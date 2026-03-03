@@ -117,10 +117,13 @@ const Dashboard = () => {
   const [reservationStatusFilter, setReservationStatusFilter] = useState<string | undefined>();
   const [reservationInvoicedFilter, setReservationInvoicedFilter] = useState<boolean | undefined>();
 
-  const handleOverviewNavigate = (view: string, filter?: { status?: string; invoiced?: boolean }) => {
+  const [reservationCheckoutTodayFilter, setReservationCheckoutTodayFilter] = useState<boolean | undefined>();
+
+  const handleOverviewNavigate = (view: string, filter?: { status?: string; invoiced?: boolean; checkoutToday?: boolean }) => {
     if (view === "reservations") {
       setReservationStatusFilter(filter?.status);
       setReservationInvoicedFilter(filter?.invoiced);
+      setReservationCheckoutTodayFilter(filter?.checkoutToday);
       setCurrentView("reservations" as DashboardView);
     }
   };
@@ -194,7 +197,7 @@ const Dashboard = () => {
   const viewComponents: Record<DashboardView, React.ReactNode> = {
     overview: <DashboardOverview onNavigate={handleOverviewNavigate} />,
     calendar: gatedView("calendar", <CalendarView />),
-    reservations: gatedView("reservations", <ReservationList initialStatusFilter={reservationStatusFilter} initialInvoicedFilter={reservationInvoicedFilter} />),
+    reservations: gatedView("reservations", <ReservationList initialStatusFilter={reservationStatusFilter} initialInvoicedFilter={reservationInvoicedFilter} initialCheckoutToday={reservationCheckoutTodayFilter} />),
     resources: gatedView("resources", <ResourceManagement />),
     reports: gatedView("reports", <ReportsPanel />),
     settings: gatedView("settings", <SettingsPanel />),
