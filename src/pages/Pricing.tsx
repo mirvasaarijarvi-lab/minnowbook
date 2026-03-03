@@ -3,7 +3,7 @@ import MarketingFooter from "@/components/MarketingFooter";
 import PricingTier from "@/components/PricingTier";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Building2 } from "lucide-react";
 
 const tiers = [
   {
@@ -45,6 +45,7 @@ const tiers = [
     staffUsers: "Unlimited",
     features: [
       "Everything in Pro",
+      "Multi-site management",
       "Restaurant, venue & guesthouse booking",
       "Unlimited staff accounts",
       "Advanced revenue reporting",
@@ -135,6 +136,7 @@ const Pricing = () => {
                   ["Custom email templates", "—", "✓", "✓"],
                   ["Advanced booking rules", "—", "✓", "✓"],
                   ["Multi-language support", "—", "✓", "✓"],
+                  ["Multi-site management", "—", "—", "✓"],
                   ["Analytics & reports", "Basic", "Advanced", "Advanced"],
                   ["Priority support", "—", "✓", "✓"],
                   ["Dedicated support", "—", "—", "✓"],
@@ -148,6 +150,34 @@ const Pricing = () => {
                 ))}
               </tbody>
             </table>
+          </div>
+        </div>
+      </section>
+
+      {/* Multisite Upsell */}
+      <section className="py-16">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto rounded-2xl border border-accent/30 bg-gradient-to-br from-accent/5 via-background to-accent/10 p-8 md:p-12 flex flex-col md:flex-row items-center gap-8">
+            <div className="flex-shrink-0 h-16 w-16 rounded-2xl bg-accent/15 flex items-center justify-center">
+              <Building2 className="h-8 w-8 text-accent" />
+            </div>
+            <div className="flex-1 text-center md:text-left">
+              <h3 className="text-2xl font-serif font-bold text-foreground mb-2">
+                Managing multiple locations?
+              </h3>
+              <p className="text-muted-foreground leading-relaxed mb-4">
+                The <strong className="text-foreground">Business</strong> plan includes <strong className="text-foreground">multi-site management</strong> — run
+                hotels, restaurants, and venues from a single dashboard. Each site gets its own
+                resources, opening hours, email templates, and branded booking page while sharing
+                staff, settings, and reporting across locations.
+              </p>
+              <Link to="/signup">
+                <Button variant="default" size="lg" className="gap-2">
+                  Try Business Free for 30 Days
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </section>
