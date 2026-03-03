@@ -879,10 +879,10 @@ const PublicBooking = () => {
                         </span>
                         <div className="space-y-1">
                           <span
-                            className="text-sm font-semibold capitalize block"
+                            className="text-sm font-semibold block"
                             style={{ color: primaryColor }}
                           >
-                            {t(`dashboard.${type}` as any)}
+                            {(settings?.resource_type_names as Record<string, string>)?.[type] || t(`dashboard.${type}` as any)}
                           </span>
                           {descKey && (
                             <span

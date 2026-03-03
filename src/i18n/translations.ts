@@ -127,6 +127,9 @@ type TranslationKeys = {
   "settings.heroImageHint": string;
   "settings.heroImageUploaded": string;
   "settings.heroImageUploadError": string;
+  "settings.resourceTypeNames": string;
+  "settings.resourceTypeNamesDesc": string;
+  "settings.resourceTypeName": string;
 
   // Booking (public)
   "booking.title": string;
@@ -899,9 +902,12 @@ const en: TranslationKeys = {
   "settings.uploadHeroImage": "Upload hero image",
   "settings.heroImageHint": "Recommended: 1600×600 px. PNG, JPG or WebP. Max 5 MB.",
   "settings.heroImageUploaded": "Hero image uploaded",
-  "settings.heroImageUploadError": "Failed to upload hero image",
+   "settings.heroImageUploadError": "Failed to upload hero image",
+   "settings.resourceTypeNames": "Resource Type Names",
+   "settings.resourceTypeNamesDesc": "Give custom display names to your booking types. These names appear on the public booking page.",
+   "settings.resourceTypeName": "Display name for {type}",
 
-  // Booking
+   // Booking
   "booking.title": "Make a Reservation",
   "booking.selectType": "What would you like to book?",
   "booking.typeDescRestaurant": "Reserve a table for dining",
@@ -1657,9 +1663,12 @@ const fi: TranslationKeys = {
   "settings.uploadHeroImage": "Lataa hero-kuva",
   "settings.heroImageHint": "Suositus: 1600×600 px. PNG, JPG tai WebP. Maks. 5 Mt.",
   "settings.heroImageUploaded": "Hero-kuva ladattu",
-  "settings.heroImageUploadError": "Hero-kuvan lataus epäonnistui",
+   "settings.heroImageUploadError": "Hero-kuvan lataus epäonnistui",
+   "settings.resourceTypeNames": "Varauskohteiden nimet",
+   "settings.resourceTypeNamesDesc": "Anna omat näyttönimet varauskohteillesi. Nämä nimet näkyvät julkisella varaussivulla.",
+   "settings.resourceTypeName": "Näyttönimi: {type}",
 
-  // Booking
+   // Booking
   "booking.title": "Tee varaus",
   "booking.selectType": "Mitä haluat varata?",
   "booking.typeDescRestaurant": "Varaa pöytä ravintolasta",
@@ -2414,9 +2423,12 @@ const sv: TranslationKeys = {
   "settings.uploadHeroImage": "Ladda upp hero-bild",
   "settings.heroImageHint": "Rekommenderat: 1600×600 px. PNG, JPG eller WebP. Max 5 MB.",
   "settings.heroImageUploaded": "Hero-bild uppladdad",
-  "settings.heroImageUploadError": "Kunde inte ladda upp hero-bild",
+   "settings.heroImageUploadError": "Kunde inte ladda upp hero-bild",
+   "settings.resourceTypeNames": "Namn på bokningstyperna",
+   "settings.resourceTypeNamesDesc": "Ge egna visningsnamn åt dina bokningstyper. Dessa namn visas på den offentliga bokningssidan.",
+   "settings.resourceTypeName": "Visningsnamn för {type}",
 
-  // Booking
+   // Booking
   "booking.title": "Gör en bokning",
   "booking.selectType": "Vad vill du boka?",
   "booking.typeDescRestaurant": "Reservera ett bord för middag",
