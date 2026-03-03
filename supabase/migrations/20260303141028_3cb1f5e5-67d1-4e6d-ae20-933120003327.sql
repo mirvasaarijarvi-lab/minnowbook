@@ -1,0 +1,1 @@
+UPDATE public.discount_codes SET used_count = 1 WHERE code = 'TEST2USES' AND tenant_id = '9ac05fbf-0834-44fd-a52a-d030b7074a30';
