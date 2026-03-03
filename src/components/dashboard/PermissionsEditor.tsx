@@ -176,8 +176,8 @@ const PermissionsEditor = () => {
   const hasPermission = (roleKey: string, permission: string) =>
     permissions?.some((p) => p.role_key === roleKey && p.permission === permission) ?? false;
 
-  // Editable roles (not owner — owner has all permissions implicitly)
-  const editableRoles = roles?.filter((r) => r.role_key !== "owner") ?? [];
+  // Editable roles (not owner or superadmin — they have all permissions implicitly)
+  const editableRoles = roles?.filter((r) => r.role_key !== "owner" && r.role_key !== "superadmin") ?? [];
 
   const isLoading = rolesLoading || permsLoading;
 

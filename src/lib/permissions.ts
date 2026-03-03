@@ -2,8 +2,8 @@
  * Permission keys used throughout the application.
  * These map to rows in the role_permissions table.
  *
- * Hierarchy: Owner (all) > Admin > Staff > custom roles
- * Owner bypasses all checks — permissions are only evaluated
+ * Hierarchy: Superadmin (all) > Owner (all) > Admin > Staff > custom roles
+ * Superadmin and Owner bypass all checks — permissions are only evaluated
  * for admin, staff, and custom roles.
  */
 
