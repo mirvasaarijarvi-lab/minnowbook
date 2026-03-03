@@ -405,13 +405,13 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="capitalize text-xs">{r.reservation_type}</Badge>
+                      <Badge variant="outline" className="capitalize text-xs">{getResourceTypeLabel(r.reservation_type)}</Badge>
                       <Badge className={cn(
                         "text-xs",
                         r.status === "confirmed" && "bg-success/20 text-success-foreground border border-success/30",
                         r.status === "pending" && "bg-accent/20 text-accent-foreground border border-accent/30",
                         r.status === "cancelled" && "bg-destructive/20 text-destructive border border-destructive/30",
-                      )}>{r.status}</Badge>
+                      )}>{t(`dashboard.${r.status ?? "pending"}` as any)}</Badge>
                     </div>
                   </div>
                 ))}

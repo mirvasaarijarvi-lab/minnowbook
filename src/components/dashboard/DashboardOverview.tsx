@@ -24,6 +24,7 @@ import {
 import { format, startOfWeek, endOfWeek, subWeeks } from "date-fns";
 import { useT } from "@/contexts/I18nContext";
 import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
+import { useDateLocale } from "@/hooks/useDateLocale";
 import DashboardTooltip from "./DashboardTooltip";
 import BookingLinksCard from "./BookingLinksCard";
 import { useMemo } from "react";
@@ -38,6 +39,7 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
   const today = format(new Date(), "yyyy-MM-dd");
   const t = useT();
   const { typeLabel } = useResourceTypeLabel();
+  const dateFnsLocale = useDateLocale();
 
   const weekStart = format(startOfWeek(new Date(), { weekStartsOn: 1 }), "yyyy-MM-dd");
   const weekEnd = format(endOfWeek(new Date(), { weekStartsOn: 1 }), "yyyy-MM-dd");
@@ -150,7 +152,7 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
         checkoutsToday: checkoutsRes.count ?? 0,
         uninvoiced: uninvoicedRes.count ?? 0,
         chartData: Object.entries(chartData).map(([date, value]) => ({
-          date: format(new Date(date + "T00:00:00"), "EEE"),
+          date,
           value: Math.round(value * 100) / 100,
         })),
       };
@@ -199,11 +201,11 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
           <p className="text-sm text-muted-foreground">
             {t("dashboard.overviewSubtitle" as any) !== "dashboard.overviewSubtitle"
               ? t("dashboard.overviewSubtitle" as any)
-              : "Daily snapshot at a glance"}
+              : t("dashboard.dailySnapshot" as any)}
           </p>
           <p className="text-sm font-medium text-foreground flex items-center gap-1.5 mt-1">
             <CalendarDays className="h-4 w-4" />
-            {format(new Date(), "EEEE, MMMM d, yyyy")}
+            {format(new Date(), "EEEE, MMMM d, yyyy", { locale: dateFnsLocale })}
           </p>
         </div>
         {tenant?.slug && (
@@ -233,7 +235,7 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
           <CardContent className="pt-5 pb-4 text-center relative">
             <Clock className="h-5 w-5 mx-auto text-yellow-600 mb-1" />
             <p className="text-3xl font-bold text-yellow-600">{stats?.pendingCount ?? 0}</p>
-            <p className="text-xs text-muted-foreground mt-1">{t("dashboard.pending")} ({t("dashboard.allStatuses" as any).toLowerCase().includes("all") ? "total" : t("dashboard.allStatuses" as any)})</p>
+            <p className="text-xs text-muted-foreground mt-1">{t("dashboard.pending")} ({t("dashboard.total" as any)})</p>
             {(stats?.pendingCount ?? 0) > 0 && (
               <ArrowRight className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
             )}
@@ -322,7 +324,7 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
           <CardContent>
             <div className="h-48">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={stats.chartData} margin={{ top: 5, right: 5, left: 0, bottom: 0 }}>
+                <AreaChart data={stats.chartData.map(d => ({ ...d, label: format(new Date(d.date + "T00:00:00"), "EEE", { locale: dateFnsLocale }) }))} margin={{ top: 5, right: 5, left: 0, bottom: 0 }}>
                   <defs>
                     <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="hsl(var(--accent))" stopOpacity={0.3} />
@@ -330,7 +332,7 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-                  <XAxis dataKey="date" className="text-xs" tick={{ fontSize: 12 }} />
+                  <XAxis dataKey="label" className="text-xs" tick={{ fontSize: 12 }} />
                   <YAxis className="text-xs" tick={{ fontSize: 12 }} width={50} />
                   <RechartsTooltip
                     contentStyle={{
@@ -339,7 +341,7 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
                       borderRadius: "8px",
                       fontSize: "12px",
                     }}
-                    formatter={(value: number) => [`€${value.toFixed(2)}`, "Revenue"]}
+                    formatter={(value: number) => [`€${value.toFixed(2)}`, t("dashboard.weekRevenue")]}
                   />
                   <Area
                     type="monotone"
