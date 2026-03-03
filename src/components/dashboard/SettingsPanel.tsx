@@ -16,6 +16,7 @@ import { Loader2, Upload, X, ImageIcon, Building2, ArrowRight, MapPin, Mail, Pho
 import { Badge } from "@/components/ui/badge";
 import DashboardTooltip from "./DashboardTooltip";
 import OpeningHoursSettings from "./OpeningHoursSettings";
+import DiscountCodesPanel from "./DiscountCodesPanel";
 
 const SITE_COLOR_PRESETS = [
   { name: "Navy & Amber", primary: "#1e3a5f", secondary: "#f5f0e8", accent: "#d4a853" },
@@ -914,6 +915,9 @@ const SettingsPanel = () => {
 
       {/* Opening Hours — tenant defaults */}
       <OpeningHoursSettings />
+
+      {/* Discount Codes */}
+      <DiscountCodesPanel />
 
 
       {/* Resource Type Names & Descriptions */}
