@@ -26,6 +26,7 @@ import {
   Power,
   ArrowLeft,
   Eye,
+  FlaskConical,
 } from "lucide-react";
 import { useImpersonation } from "@/contexts/ImpersonationContext";
 
@@ -40,6 +41,8 @@ interface TenantWithStats {
   allowed_reservation_types: string[];
   created_at: string | null;
   owner_user_id: string;
+  sample_start_date: string | null;
+  sample_end_date: string | null;
   userCount: number;
   reservationCount: number;
   resourceCount: number;
@@ -51,7 +54,7 @@ const Superadmin = () => {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [editTenant, setEditTenant] = useState<TenantWithStats | null>(null);
-  const [editForm, setEditForm] = useState({ name: "", tier: "", max_staff_users: 3 });
+  const [editForm, setEditForm] = useState({ name: "", tier: "", max_staff_users: 3, sample_start_date: "", sample_end_date: "" });
   const { startImpersonation } = useImpersonation();
 
   // Check system admin
@@ -116,10 +119,14 @@ const Superadmin = () => {
 
   // Edit tenant
   const editMutation = useMutation({
-    mutationFn: async ({ id, name, tier, max_staff_users }: { id: string; name: string; tier: string; max_staff_users: number }) => {
+    mutationFn: async ({ id, name, tier, max_staff_users, sample_start_date, sample_end_date }: { id: string; name: string; tier: string; max_staff_users: number; sample_start_date: string; sample_end_date: string }) => {
       const { error } = await supabase
         .from("tenants")
-        .update({ name, tier, max_staff_users })
+        .update({
+          name, tier, max_staff_users,
+          sample_start_date: sample_start_date || null,
+          sample_end_date: sample_end_date || null,
+        } as any)
         .eq("id", id);
       if (error) throw error;
     },
@@ -160,7 +167,13 @@ const Superadmin = () => {
   const totalResources = (tenants ?? []).reduce((sum, t) => sum + t.resourceCount, 0);
 
   const openEdit = (t: TenantWithStats) => {
-    setEditForm({ name: t.name, tier: t.tier, max_staff_users: t.max_staff_users });
+    setEditForm({
+      name: t.name,
+      tier: t.tier,
+      max_staff_users: t.max_staff_users,
+      sample_start_date: t.sample_start_date ?? "",
+      sample_end_date: t.sample_end_date ?? "",
+    });
     setEditTenant(t);
   };
 
@@ -302,6 +315,12 @@ const Superadmin = () => {
                             {t.subscription_status}
                           </Badge>
                         )}
+                        {t.sample_start_date && t.sample_end_date && (
+                          <Badge variant="outline" className="text-[10px] px-1.5 py-0 gap-1 border-accent/40 text-accent">
+                            <FlaskConical className="h-2.5 w-2.5" />
+                            Sample: {t.sample_start_date} → {t.sample_end_date}
+                          </Badge>
+                        )}
                       </div>
                       <p className="text-sm text-muted-foreground">
                         /{t.slug} · {t.userCount} users · {t.reservationCount} reservations · {t.resourceCount} resources
@@ -387,6 +406,32 @@ const Superadmin = () => {
                 value={editForm.max_staff_users}
                 onChange={(e) => setEditForm((f) => ({ ...f, max_staff_users: parseInt(e.target.value) || 1 }))}
               />
+            </div>
+            <Separator />
+            <div className="space-y-1">
+              <Label className="flex items-center gap-1.5">
+                <FlaskConical className="h-3.5 w-3.5 text-accent" />
+                Free Sample Period
+              </Label>
+              <p className="text-xs text-muted-foreground">Set start and end dates for a free trial. Leave empty to disable.</p>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-xs">Start Date</Label>
+                <Input
+                  type="date"
+                  value={editForm.sample_start_date}
+                  onChange={(e) => setEditForm((f) => ({ ...f, sample_start_date: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">End Date</Label>
+                <Input
+                  type="date"
+                  value={editForm.sample_end_date}
+                  onChange={(e) => setEditForm((f) => ({ ...f, sample_end_date: e.target.value }))}
+                />
+              </div>
             </div>
             <Button
               className="w-full"

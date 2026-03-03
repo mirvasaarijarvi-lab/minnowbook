@@ -30,6 +30,8 @@ import SitesManagementPanel from "@/components/dashboard/SitesManagementPanel";
 import Logo from "@/components/Logo";
 import SupportChatWidget from "@/components/SupportChatWidget";
 import GuidedTour, { TourStep } from "@/components/dashboard/GuidedTour";
+import SamplePeriodBanner from "@/components/dashboard/SamplePeriodBanner";
+import { useSamplePeriod } from "@/hooks/useSamplePeriod";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -113,6 +115,7 @@ const Dashboard = () => {
   const { tenantId, tenant, isAdmin, loading } = useTenant();
   const { can } = usePermissions();
   const { impersonating, isImpersonating, stopImpersonation } = useImpersonation();
+  const samplePeriod = useSamplePeriod();
   const navigate = useNavigate();
   const [currentView, setCurrentView] = useState<DashboardView>("overview");
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -269,7 +272,20 @@ const Dashboard = () => {
           </div>
         </header>
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-x-hidden overflow-y-auto">
+        <SamplePeriodBanner />
+
+        {samplePeriod.isBlocked ? (
+          <div className="flex-1 flex flex-col items-center justify-center p-8 text-center gap-4">
+            <div className="p-4 rounded-full bg-destructive/10">
+              <ShieldAlert className="h-12 w-12 text-destructive" />
+            </div>
+            <h2 className="text-xl font-serif font-semibold text-foreground">Access Blocked</h2>
+            <p className="text-muted-foreground max-w-md">
+              Your free trial has expired. Please contact support to reactivate your account or upgrade to a paid plan.
+            </p>
+          </div>
+        ) : (
+        <main className={`flex-1 p-4 sm:p-6 lg:p-8 overflow-x-hidden overflow-y-auto ${samplePeriod.isReadOnly ? "pointer-events-none opacity-75" : ""}`}>
           <div className="flex items-center justify-between mb-0">
             <div />
             <div className="hidden lg:flex items-center gap-2">
@@ -300,6 +316,7 @@ const Dashboard = () => {
           </div>
           {viewComponents[currentView]}
         </main>
+        )}
       </div>
 
       {currentView !== "support" && (
