@@ -63,38 +63,50 @@ export type Database = {
       }
       blocked_slots: {
         Row: {
+          approval_status: string
+          approved_by: string | null
           created_at: string | null
           created_by: string | null
           date: string
           end_time: string | null
           id: string
           reason: string | null
+          rejection_reason: string | null
           resource_id: string | null
           resource_type: string
+          site_id: string | null
           start_time: string | null
           tenant_id: string
         }
         Insert: {
+          approval_status?: string
+          approved_by?: string | null
           created_at?: string | null
           created_by?: string | null
           date: string
           end_time?: string | null
           id?: string
           reason?: string | null
+          rejection_reason?: string | null
           resource_id?: string | null
           resource_type: string
+          site_id?: string | null
           start_time?: string | null
           tenant_id: string
         }
         Update: {
+          approval_status?: string
+          approved_by?: string | null
           created_at?: string | null
           created_by?: string | null
           date?: string
           end_time?: string | null
           id?: string
           reason?: string | null
+          rejection_reason?: string | null
           resource_id?: string | null
           resource_type?: string
+          site_id?: string | null
           start_time?: string | null
           tenant_id?: string
         }
@@ -104,6 +116,13 @@ export type Database = {
             columns: ["resource_id"]
             isOneToOne: false
             referencedRelation: "resources"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "blocked_slots_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "sites"
             referencedColumns: ["id"]
           },
           {
@@ -152,6 +171,8 @@ export type Database = {
       }
       recurring_blocked_slots: {
         Row: {
+          approval_status: string
+          approved_by: string | null
           created_at: string | null
           created_by: string | null
           day_of_week: number
@@ -159,12 +180,16 @@ export type Database = {
           id: string
           is_active: boolean
           reason: string | null
+          rejection_reason: string | null
           resource_id: string | null
           resource_type: string
+          site_id: string | null
           start_time: string | null
           tenant_id: string
         }
         Insert: {
+          approval_status?: string
+          approved_by?: string | null
           created_at?: string | null
           created_by?: string | null
           day_of_week: number
@@ -172,12 +197,16 @@ export type Database = {
           id?: string
           is_active?: boolean
           reason?: string | null
+          rejection_reason?: string | null
           resource_id?: string | null
           resource_type: string
+          site_id?: string | null
           start_time?: string | null
           tenant_id: string
         }
         Update: {
+          approval_status?: string
+          approved_by?: string | null
           created_at?: string | null
           created_by?: string | null
           day_of_week?: number
@@ -185,8 +214,10 @@ export type Database = {
           id?: string
           is_active?: boolean
           reason?: string | null
+          rejection_reason?: string | null
           resource_id?: string | null
           resource_type?: string
+          site_id?: string | null
           start_time?: string | null
           tenant_id?: string
         }
@@ -196,6 +227,13 @@ export type Database = {
             columns: ["resource_id"]
             isOneToOne: false
             referencedRelation: "resources"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recurring_blocked_slots_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "sites"
             referencedColumns: ["id"]
           },
           {
@@ -241,6 +279,7 @@ export type Database = {
           pricing_type: string | null
           reservation_type: string
           room_type: string | null
+          site_id: string | null
           special_requests: string | null
           staff_notes: string | null
           start_time: string | null
@@ -281,6 +320,7 @@ export type Database = {
           pricing_type?: string | null
           reservation_type: string
           room_type?: string | null
+          site_id?: string | null
           special_requests?: string | null
           staff_notes?: string | null
           start_time?: string | null
@@ -321,6 +361,7 @@ export type Database = {
           pricing_type?: string | null
           reservation_type?: string
           room_type?: string | null
+          site_id?: string | null
           special_requests?: string | null
           staff_notes?: string | null
           start_time?: string | null
@@ -329,6 +370,13 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "reservations_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "reservations_tenant_id_fkey"
             columns: ["tenant_id"]
@@ -382,6 +430,8 @@ export type Database = {
       }
       resources: {
         Row: {
+          approval_status: string
+          approved_by: string | null
           breakfast_price_per_person: number | null
           capacity: number | null
           created_at: string | null
@@ -391,11 +441,15 @@ export type Database = {
           is_active: boolean | null
           name: string
           price_per_night: number | null
+          rejection_reason: string | null
           resource_type: string
           room_type_pricing: Json | null
+          site_id: string | null
           tenant_id: string
         }
         Insert: {
+          approval_status?: string
+          approved_by?: string | null
           breakfast_price_per_person?: number | null
           capacity?: number | null
           created_at?: string | null
@@ -405,11 +459,15 @@ export type Database = {
           is_active?: boolean | null
           name: string
           price_per_night?: number | null
+          rejection_reason?: string | null
           resource_type: string
           room_type_pricing?: Json | null
+          site_id?: string | null
           tenant_id: string
         }
         Update: {
+          approval_status?: string
+          approved_by?: string | null
           breakfast_price_per_person?: number | null
           capacity?: number | null
           created_at?: string | null
@@ -419,11 +477,20 @@ export type Database = {
           is_active?: boolean | null
           name?: string
           price_per_night?: number | null
+          rejection_reason?: string | null
           resource_type?: string
           room_type_pricing?: Json | null
+          site_id?: string | null
           tenant_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "resources_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "resources_tenant_id_fkey"
             columns: ["tenant_id"]
@@ -496,6 +563,50 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "role_permissions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sites: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          location: string | null
+          name: string
+          slug: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          location?: string | null
+          name: string
+          slug: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          location?: string | null
+          name?: string
+          slug?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sites_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
@@ -576,39 +687,58 @@ export type Database = {
       }
       tenant_email_templates: {
         Row: {
+          approval_status: string
+          approved_by: string | null
           body_html: string
           created_at: string | null
           id: string
           is_active: boolean | null
           language: string | null
+          rejection_reason: string | null
+          site_id: string | null
           subject: string
           template_type: string
           tenant_id: string
           updated_at: string | null
         }
         Insert: {
+          approval_status?: string
+          approved_by?: string | null
           body_html: string
           created_at?: string | null
           id?: string
           is_active?: boolean | null
           language?: string | null
+          rejection_reason?: string | null
+          site_id?: string | null
           subject: string
           template_type: string
           tenant_id: string
           updated_at?: string | null
         }
         Update: {
+          approval_status?: string
+          approved_by?: string | null
           body_html?: string
           created_at?: string | null
           id?: string
           is_active?: boolean | null
           language?: string | null
+          rejection_reason?: string | null
+          site_id?: string | null
           subject?: string
           template_type?: string
           tenant_id?: string
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "tenant_email_templates_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "tenant_email_templates_tenant_id_fkey"
             columns: ["tenant_id"]
@@ -620,36 +750,55 @@ export type Database = {
       }
       tenant_opening_hours: {
         Row: {
+          approval_status: string
+          approved_by: string | null
           close_time: string | null
           created_at: string | null
           day_of_week: number
           id: string
           is_closed: boolean | null
           open_time: string | null
+          rejection_reason: string | null
           resource_type: string
+          site_id: string | null
           tenant_id: string
         }
         Insert: {
+          approval_status?: string
+          approved_by?: string | null
           close_time?: string | null
           created_at?: string | null
           day_of_week: number
           id?: string
           is_closed?: boolean | null
           open_time?: string | null
+          rejection_reason?: string | null
           resource_type: string
+          site_id?: string | null
           tenant_id: string
         }
         Update: {
+          approval_status?: string
+          approved_by?: string | null
           close_time?: string | null
           created_at?: string | null
           day_of_week?: number
           id?: string
           is_closed?: boolean | null
           open_time?: string | null
+          rejection_reason?: string | null
           resource_type?: string
+          site_id?: string | null
           tenant_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "tenant_opening_hours_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "tenant_opening_hours_tenant_id_fkey"
             columns: ["tenant_id"]
