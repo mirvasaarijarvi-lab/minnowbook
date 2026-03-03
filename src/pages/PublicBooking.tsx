@@ -54,12 +54,14 @@ const AvailabilityCalendar = ({
   primaryColor,
   accentColor,
   thresholds,
+  reservationType,
   t,
 }: {
   tenantId: string;
   primaryColor: string;
   accentColor: string;
   thresholds: Record<string, number>;
+  reservationType: string;
   t: (key: string) => string;
 }) => {
   const [calMonth, setCalMonth] = useState(new Date());
@@ -68,15 +70,19 @@ const AvailabilityCalendar = ({
   const monthEnd = format(endOfMonth(calMonth), "yyyy-MM-dd");
 
   const { data: monthReservations = [] } = useQuery({
-    queryKey: ["public-availability", tenantId, monthStart, monthEnd],
+    queryKey: ["public-availability", tenantId, monthStart, monthEnd, reservationType],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from("reservations")
-        .select("date, status")
+        .select("date, status, reservation_type")
         .eq("tenant_id", tenantId)
         .gte("date", monthStart)
         .lte("date", monthEnd)
         .in("status", ["pending", "confirmed"]);
+      if (reservationType) {
+        query = query.eq("reservation_type", reservationType);
+      }
+      const { data, error } = await query;
       if (error) throw error;
       return data ?? [];
     },
@@ -94,9 +100,10 @@ const AvailabilityCalendar = ({
 
   // Use the max threshold across all types as the general full limit
   const fullThreshold = useMemo(() => {
+    if (reservationType && thresholds[reservationType]) return thresholds[reservationType];
     const values = Object.values(thresholds);
     return values.length > 0 ? Math.min(...values) : 5;
-  }, [thresholds]);
+  }, [thresholds, reservationType]);
 
   const getDayStatus = useCallback(
     (date: Date): "available" | "busy" | "full" => {
@@ -797,14 +804,6 @@ const PublicBooking = () => {
           </div>
         )}
 
-        {/* Availability Calendar */}
-        <AvailabilityCalendar
-          tenantId={tenant.id}
-          primaryColor={primaryColor}
-          accentColor={accentColor}
-          thresholds={(settings?.availability_thresholds as Record<string, number>) ?? { restaurant: 5, venue: 5, guesthouse: 5, hotel: 5 }}
-          t={t}
-        />
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Honeypot field - hidden from real users, bots will fill it */}
@@ -903,6 +902,18 @@ const PublicBooking = () => {
                 )}
               </CardContent>
             </Card>
+          )}
+
+          {/* Availability Calendar - shown after type selection */}
+          {form.reservation_type && (
+            <AvailabilityCalendar
+              tenantId={tenant.id}
+              primaryColor={primaryColor}
+              accentColor={accentColor}
+              thresholds={(settings?.availability_thresholds as Record<string, number>) ?? { restaurant: 5, venue: 5, guesthouse: 5, hotel: 5 }}
+              reservationType={form.reservation_type}
+              t={t}
+            />
           )}
 
           {/* Step 2: Date & Time */}
