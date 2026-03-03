@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash2, BedDouble, UtensilsCrossed, Building2, Upload, X, Loader2, ExternalLink, Lock } from "lucide-react";
+import { Plus, Pencil, Trash2, BedDouble, UtensilsCrossed, Building2, Upload, X, Loader2, ExternalLink, Lock, Copy } from "lucide-react";
 import { useState, useRef } from "react";
 import { useT } from "@/contexts/I18nContext";
 import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
@@ -42,6 +42,10 @@ const ResourceManagement = () => {
   const [uploading, setUploading] = useState(false);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const t = useT();
+  // Copy dialog state
+  const [copyDialogOpen, setCopyDialogOpen] = useState(false);
+  const [copySource, setCopySource] = useState<any>(null);
+  const [copyCount, setCopyCount] = useState("1");
   const defaultRoomPricing = { single: "1.0", double: "1.5", suite: "2.5", dorm: "0.6" };
   const [form, setForm] = useState({
     name: "", resource_type: "restaurant", capacity: "", price_per_night: "", description: "", image_url: "", breakfast_price_per_person: "",
@@ -142,6 +146,39 @@ const ResourceManagement = () => {
       if (error) throw error;
     },
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["resources", tenantId] }); },
+  });
+
+  const copyMutation = useMutation({
+    mutationFn: async ({ source, count }: { source: any; count: number }) => {
+      if (!tenantId) throw new Error("No tenant");
+      const copies = [];
+      for (let i = 1; i <= count; i++) {
+        copies.push({
+          tenant_id: tenantId,
+          name: `${source.name} (${i})`,
+          resource_type: source.resource_type,
+          capacity: source.capacity,
+          price_per_night: source.price_per_night,
+          description: source.description,
+          image_url: source.image_url,
+          is_active: source.is_active ?? true,
+          breakfast_price_per_person: source.breakfast_price_per_person,
+          room_type_pricing: source.room_type_pricing,
+        });
+      }
+      const { error } = await supabase.from("resources").insert(copies);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["resources", tenantId] });
+      setCopyDialogOpen(false);
+      setCopySource(null);
+      setCopyCount("1");
+      toast({ title: t("dashboard.resourcesCopied" as any) });
+    },
+    onError: (err: any) => {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    },
   });
 
   const resetForm = () => {
@@ -363,6 +400,9 @@ const ResourceManagement = () => {
                             <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(r)}>
                               <Pencil className="h-4 w-4 text-muted-foreground" />
                             </Button>
+                            <Button variant="ghost" size="icon" className="h-8 w-8" title={t("dashboard.copyResource" as any)} onClick={() => { setCopySource(r); setCopyDialogOpen(true); }}>
+                              <Copy className="h-4 w-4 text-muted-foreground" />
+                            </Button>
                             <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => deleteMutation.mutate(r.id)}>
                               <Trash2 className="h-4 w-4" />
                             </Button>
@@ -379,6 +419,33 @@ const ResourceManagement = () => {
       )}
 
       {canManage && <BlockedSlotsPanel />}
+
+      {/* Copy Resource Dialog */}
+      <Dialog open={copyDialogOpen} onOpenChange={(open) => { setCopyDialogOpen(open); if (!open) { setCopySource(null); setCopyCount("1"); } }}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="font-serif">{t("dashboard.copyResource" as any)}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-2">
+            <p className="text-sm text-muted-foreground">
+              {t("dashboard.copyResourceDesc" as any)} <strong>{copySource?.name}</strong>
+            </p>
+            <div>
+              <Label>{t("dashboard.copyCount" as any)}</Label>
+              <Input type="number" min={1} max={50} value={copyCount} onChange={(e) => setCopyCount(e.target.value)} />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setCopyDialogOpen(false)}>{t("common.cancel")}</Button>
+              <Button
+                onClick={() => copySource && copyMutation.mutate({ source: copySource, count: Math.max(1, Math.min(50, parseInt(copyCount) || 1)) })}
+                disabled={copyMutation.isPending}
+              >
+                {copyMutation.isPending ? t("common.saving") : t("dashboard.copyResource" as any)}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

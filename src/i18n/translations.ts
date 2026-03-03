@@ -441,6 +441,11 @@ type TranslationKeys = {
   "dashboard.resourceCreated": string;
   "dashboard.resourceUpdated": string;
   "dashboard.resourceDeleted": string;
+  "dashboard.copyResource": string;
+  "dashboard.copyResourceDesc": string;
+  "dashboard.copyCount": string;
+  "dashboard.resourcesCopied": string;
+  "booking.stayDetails": string;
   "dashboard.uploadImage": string;
   "dashboard.imageUploaded": string;
   "dashboard.imageUploadError": string;
@@ -1340,6 +1345,11 @@ const en: TranslationKeys = {
   "dashboard.resourceCreated": "Resource created",
   "dashboard.resourceUpdated": "Resource updated",
   "dashboard.resourceDeleted": "Resource deleted",
+  "dashboard.copyResource": "Copy resource",
+  "dashboard.copyResourceDesc": "How many copies of this resource do you want to create?",
+  "dashboard.copyCount": "Number of copies",
+  "dashboard.resourcesCopied": "Resources copied",
+  "booking.stayDetails": "Stay details",
   "dashboard.uploadImage": "Upload image",
   "dashboard.imageUploaded": "Image uploaded",
   "dashboard.imageUploadError": "Failed to upload image",
@@ -2227,6 +2237,11 @@ const fi: TranslationKeys = {
   "dashboard.resourceCreated": "Resurssi luotu",
   "dashboard.resourceUpdated": "Resurssi päivitetty",
   "dashboard.resourceDeleted": "Resurssi poistettu",
+  "dashboard.copyResource": "Kopioi resurssi",
+  "dashboard.copyResourceDesc": "Kuinka monta kopiota haluat luoda resurssista?",
+  "dashboard.copyCount": "Kopioiden määrä",
+  "dashboard.resourcesCopied": "Resurssit kopioitu",
+  "booking.stayDetails": "Majoitustiedot",
   "dashboard.uploadImage": "Lataa kuva",
   "dashboard.imageUploaded": "Kuva ladattu",
   "dashboard.imageUploadError": "Kuvan lataus epäonnistui",
@@ -3114,6 +3129,11 @@ const sv: TranslationKeys = {
   "dashboard.resourceCreated": "Resurs skapad",
   "dashboard.resourceUpdated": "Resurs uppdaterad",
   "dashboard.resourceDeleted": "Resurs raderad",
+  "dashboard.copyResource": "Kopiera resurs",
+  "dashboard.copyResourceDesc": "Hur många kopior vill du skapa av denna resurs?",
+  "dashboard.copyCount": "Antal kopior",
+  "dashboard.resourcesCopied": "Resurser kopierade",
+  "booking.stayDetails": "Vistelseinformation",
   "dashboard.uploadImage": "Ladda upp bild",
   "dashboard.imageUploaded": "Bild uppladdad",
   "dashboard.imageUploadError": "Kunde inte ladda upp bild",
