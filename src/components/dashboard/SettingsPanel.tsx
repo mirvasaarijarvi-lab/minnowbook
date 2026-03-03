@@ -4,15 +4,139 @@ import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/hooks/useTenant";
 import { useT } from "@/contexts/I18nContext";
 import { useSiteContext } from "@/hooks/useSiteContext";
+import SiteTabs from "./SiteTabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Loader2, Upload, X, ImageIcon, Building2, ArrowRight } from "lucide-react";
+import { Loader2, Upload, X, ImageIcon, Building2, ArrowRight, MapPin, Mail, Phone, Palette } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import DashboardTooltip from "./DashboardTooltip";
 import OpeningHoursSettings from "./OpeningHoursSettings";
+
+const SiteSettingsInfo = ({ siteId, tenantId }: { siteId: string; tenantId: string }) => {
+  const t = useT();
+
+  const { data: site } = useQuery({
+    queryKey: ["site-settings-info", siteId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("sites")
+        .select("name, slug, location, description, site_type")
+        .eq("id", siteId)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!siteId,
+  });
+
+  const { data: tenantSettings } = useQuery({
+    queryKey: ["tenant-settings-for-site", tenantId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("tenant_settings")
+        .select("business_name, business_email, business_phone, business_address, primary_color, secondary_color, accent_color")
+        .eq("tenant_id", tenantId)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!tenantId,
+  });
+
+  if (!site) return null;
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center gap-2">
+          <Building2 className="h-5 w-5 text-primary" />
+          <CardTitle className="text-lg font-serif">{site.name}</CardTitle>
+          <Badge variant="outline" className="text-[10px]">{site.site_type}</Badge>
+        </div>
+        {site.location && (
+          <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
+            <MapPin className="h-3.5 w-3.5" /> {site.location}
+          </p>
+        )}
+        {site.description && (
+          <p className="text-sm text-muted-foreground mt-1">{site.description}</p>
+        )}
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {/* Company entity from tenant settings */}
+        {tenantSettings?.business_name && (
+          <div className="space-y-2">
+            <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t("settings.businessDetails")}</Label>
+            <div className="grid gap-2 sm:grid-cols-2 text-sm">
+              {tenantSettings.business_name && (
+                <div className="flex items-center gap-2">
+                  <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
+                  <span>{tenantSettings.business_name}</span>
+                </div>
+              )}
+              {tenantSettings.business_email && (
+                <div className="flex items-center gap-2">
+                  <Mail className="h-3.5 w-3.5 text-muted-foreground" />
+                  <span>{tenantSettings.business_email}</span>
+                </div>
+              )}
+              {tenantSettings.business_phone && (
+                <div className="flex items-center gap-2">
+                  <Phone className="h-3.5 w-3.5 text-muted-foreground" />
+                  <span>{tenantSettings.business_phone}</span>
+                </div>
+              )}
+              {tenantSettings.business_address && (
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
+                  <span>{tenantSettings.business_address}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Brand colors from tenant settings */}
+        {(tenantSettings?.primary_color || tenantSettings?.accent_color) && (
+          <div className="space-y-2">
+            <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+              <Palette className="h-3.5 w-3.5" /> {t("settings.brandColors")}
+            </Label>
+            <div className="flex items-center gap-3">
+              {tenantSettings.primary_color && (
+                <div className="flex items-center gap-1.5">
+                  <span className="h-5 w-5 rounded-full border border-border" style={{ backgroundColor: tenantSettings.primary_color }} />
+                  <span className="text-xs text-muted-foreground font-mono">{tenantSettings.primary_color}</span>
+                </div>
+              )}
+              {tenantSettings.secondary_color && (
+                <div className="flex items-center gap-1.5">
+                  <span className="h-5 w-5 rounded-full border border-border" style={{ backgroundColor: tenantSettings.secondary_color }} />
+                  <span className="text-xs text-muted-foreground font-mono">{tenantSettings.secondary_color}</span>
+                </div>
+              )}
+              {tenantSettings.accent_color && (
+                <div className="flex items-center gap-1.5">
+                  <span className="h-5 w-5 rounded-full border border-border" style={{ backgroundColor: tenantSettings.accent_color }} />
+                  <span className="text-xs text-muted-foreground font-mono">{tenantSettings.accent_color}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Site-specific opening hours */}
+        <div className="pt-2">
+          <OpeningHoursSettings siteId={siteId} />
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
 
 const COLOR_PRESETS = [
   { name: "Navy & Amber", primary: "#1e3a5f", secondary: "#f5f0e8", accent: "#d4a853" },
@@ -249,6 +373,14 @@ const SettingsPanel = () => {
         <DashboardTooltip text="Customize your branding, business info, colors, and email templates. Changes apply to your public booking page instantly." />
       </div>
 
+      {/* Site Tabs */}
+      <SiteTabs />
+
+      {/* Site-specific info when a site is selected */}
+      {selectedSiteId && (
+        <SiteSettingsInfo siteId={selectedSiteId} tenantId={tenantId!} />
+      )}
+
       {/* Logo */}
       <Card>
         <CardHeader>
@@ -471,10 +603,6 @@ const SettingsPanel = () => {
       {/* Opening Hours — tenant defaults */}
       <OpeningHoursSettings />
 
-      {/* Opening Hours — site-specific overrides when a site is selected */}
-      {selectedSiteId && (
-        <OpeningHoursSettings siteId={selectedSiteId} />
-      )}
 
       {/* Resource Type Names & Descriptions */}
       {tenant?.allowed_reservation_types?.length > 0 && (
