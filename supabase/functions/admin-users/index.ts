@@ -17,6 +17,7 @@ const MAX_NAME_LENGTH = 100;
 const MAX_PASSWORD_LENGTH = 128;
 const MIN_PASSWORD_LENGTH = 12;
 const VALID_ROLES = ["owner", "admin", "staff"];
+const VALID_SITE_ROLES = ["admin", "staff"];
 
 function validateEmail(email: string): string {
   if (!email || typeof email !== "string") throw new Error("Email is required");
@@ -48,7 +49,6 @@ function validateDisplayName(name: string | undefined | null): string | null {
 
 function validateRole(role: string): string {
   if (!role || typeof role !== "string") throw new Error("Role is required");
-  // Allow system roles and custom role keys (alphanumeric + underscore/hyphen, max 50 chars)
   if (VALID_ROLES.includes(role)) return role;
   if (!/^[a-zA-Z0-9_-]{1,50}$/.test(role)) throw new Error("Invalid role format");
   return role;
@@ -62,8 +62,8 @@ function validateUuid(value: string, fieldName: string): string {
 }
 
 // --- Rate limiting ---
-const RATE_LIMIT_WINDOW_MS = 60_000; // 1 minute
-const RATE_LIMIT_MAX = 30; // max requests per window per IP
+const RATE_LIMIT_WINDOW_MS = 60_000;
+const RATE_LIMIT_MAX = 30;
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
 
 function checkRateLimit(ip: string): boolean {
@@ -77,7 +77,6 @@ function checkRateLimit(ip: string): boolean {
   return entry.count <= RATE_LIMIT_MAX;
 }
 
-// Cleanup stale entries periodically (every 5 min)
 setInterval(() => {
   const now = Date.now();
   for (const [key, val] of rateLimitMap) {
@@ -90,7 +89,6 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  // Rate limit check
   const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
     req.headers.get("cf-connecting-ip") || "unknown";
   if (!checkRateLimit(clientIp)) {
@@ -105,7 +103,6 @@ Deno.serve(async (req) => {
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
-    // Verify calling user is authenticated and is owner/admin
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) throw new Error("Not authenticated");
 
@@ -116,20 +113,34 @@ Deno.serve(async (req) => {
     const { data: { user: callingUser }, error: authError } = await userClient.auth.getUser();
     if (authError || !callingUser) throw new Error("Not authenticated");
 
-    // Check caller is owner or admin
+    // Check caller is owner or admin (or system admin for impersonation)
     const { data: callerRole } = await adminClient
       .from("tenant_users")
       .select("role, tenant_id")
       .eq("user_id", callingUser.id)
       .single();
 
-    if (!callerRole || (callerRole.role !== "owner" && callerRole.role !== "admin")) {
+    // Check system admin status
+    const { data: sysAdmin } = await adminClient
+      .from("system_admins")
+      .select("id")
+      .eq("user_id", callingUser.id)
+      .maybeSingle();
+
+    if (!callerRole && !sysAdmin) {
       throw new Error("Insufficient permissions");
     }
 
-    const tenantId = callerRole.tenant_id;
+    if (!sysAdmin && callerRole && callerRole.role !== "owner" && callerRole.role !== "admin") {
+      throw new Error("Insufficient permissions");
+    }
+
     const body = await req.json();
     const action = body?.action;
+
+    // For system admins impersonating, allow tenantId override
+    const tenantId = (sysAdmin && body.tenantId) ? body.tenantId : callerRole?.tenant_id;
+    if (!tenantId) throw new Error("No tenant context");
 
     if (typeof action !== "string" || !action) {
       throw new Error("Action is required");
@@ -143,13 +154,20 @@ Deno.serve(async (req) => {
         .order("created_at");
       if (error) throw error;
 
-      // Get emails from auth
+      // Get site assignments for all users in this tenant
+      const { data: siteUsers } = await adminClient
+        .from("site_users")
+        .select("id, user_id, site_id, role")
+        .eq("tenant_id", tenantId);
+
+      // Get emails from auth and attach site assignments
       const enriched = [];
       for (const u of users) {
         const { data: { user: authUser } } = await adminClient.auth.admin.getUserById(u.user_id);
         enriched.push({
           ...u,
           email: authUser?.email ?? "unknown",
+          site_assignments: (siteUsers ?? []).filter((su: any) => su.user_id === u.user_id),
         });
       }
       return new Response(JSON.stringify(enriched), {
@@ -164,10 +182,8 @@ Deno.serve(async (req) => {
       const role = validateRole(body.role || "staff");
       const customRoleKey = body.customRoleKey ? validateRole(body.customRoleKey) : null;
 
-      // Determine base role: custom roles use 'staff' as base
       const baseRole = (role === "owner" || role === "admin") ? role : "staff";
 
-      // Create auth user
       const { data: newUser, error: createError } = await adminClient.auth.admin.createUser({
         email,
         password,
@@ -175,7 +191,6 @@ Deno.serve(async (req) => {
       });
       if (createError) throw createError;
 
-      // Add to tenant_users
       const { error: tuError } = await adminClient.from("tenant_users").insert({
         tenant_id: tenantId,
         user_id: newUser.user!.id,
@@ -189,6 +204,18 @@ Deno.serve(async (req) => {
         throw tuError;
       }
 
+      // If site assignments provided, insert them
+      if (Array.isArray(body.siteAssignments) && body.siteAssignments.length > 0) {
+        const siteRows = body.siteAssignments.map((sa: any) => ({
+          tenant_id: tenantId,
+          site_id: validateUuid(sa.siteId, "siteId"),
+          user_id: newUser.user!.id,
+          role: VALID_SITE_ROLES.includes(sa.role) ? sa.role : "staff",
+        }));
+        const { error: suError } = await adminClient.from("site_users").insert(siteRows);
+        if (suError) console.error("Failed to insert site assignments:", suError);
+      }
+
       return new Response(JSON.stringify({ success: true, userId: newUser.user!.id }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -197,9 +224,7 @@ Deno.serve(async (req) => {
     if (action === "update_role") {
       const userId = validateUuid(body.userId, "userId");
       const role = validateRole(body.role);
-      const customRoleKey = body.customRoleKey ? validateRole(body.customRoleKey) : null;
 
-      // System roles (owner, admin, staff) clear customRoleKey
       const isSystemRole = VALID_ROLES.includes(role);
       const baseRole = isSystemRole ? role : "staff";
       const effectiveCustomKey = isSystemRole ? null : role;
@@ -210,6 +235,42 @@ Deno.serve(async (req) => {
         .eq("user_id", userId)
         .eq("tenant_id", tenantId);
       if (error) throw error;
+
+      return new Response(JSON.stringify({ success: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (action === "update_site_assignments") {
+      const userId = validateUuid(body.userId, "userId");
+
+      // Verify user belongs to tenant
+      const { data: tu } = await adminClient
+        .from("tenant_users")
+        .select("id")
+        .eq("user_id", userId)
+        .eq("tenant_id", tenantId)
+        .single();
+      if (!tu) throw new Error("User not in your tenant");
+
+      // Delete existing site assignments for this user in this tenant
+      await adminClient
+        .from("site_users")
+        .delete()
+        .eq("user_id", userId)
+        .eq("tenant_id", tenantId);
+
+      // Insert new assignments
+      if (Array.isArray(body.assignments) && body.assignments.length > 0) {
+        const rows = body.assignments.map((sa: any) => ({
+          tenant_id: tenantId,
+          site_id: validateUuid(sa.siteId, "siteId"),
+          user_id: userId,
+          role: VALID_SITE_ROLES.includes(sa.role) ? sa.role : "staff",
+        }));
+        const { error: insertError } = await adminClient.from("site_users").insert(rows);
+        if (insertError) throw insertError;
+      }
 
       return new Response(JSON.stringify({ success: true }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -241,6 +302,13 @@ Deno.serve(async (req) => {
     if (action === "delete") {
       const userId = validateUuid(body.userId, "userId");
       if (userId === callingUser.id) throw new Error("Cannot delete yourself");
+
+      // Also delete site_users
+      await adminClient
+        .from("site_users")
+        .delete()
+        .eq("user_id", userId)
+        .eq("tenant_id", tenantId);
 
       const { error: tuError } = await adminClient
         .from("tenant_users")
