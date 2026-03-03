@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/hooks/useTenant";
 import { usePermissions } from "@/hooks/usePermissions";
+import { useT } from "@/contexts/I18nContext";
 import { PERM_SITES_MANAGE, PERM_SITES_APPROVE } from "@/lib/permissions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -50,12 +51,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const SITE_TYPE_OPTIONS = [
-  { value: "hotel", label: "Hotel / Guesthouse", icon: Hotel },
-  { value: "restaurant", label: "Restaurant", icon: UtensilsCrossed },
-  { value: "venue", label: "Event Space", icon: CalendarDays },
-] as const;
-
 interface Site {
   id: string;
   tenant_id: string;
@@ -69,8 +64,15 @@ interface Site {
 }
 
 const SitesManagementPanel = () => {
+  const t = useT();
   const { tenantId } = useTenant();
   const { can } = usePermissions();
+
+  const SITE_TYPE_OPTIONS = [
+    { value: "hotel", label: t("sites.typeHotel"), icon: Hotel },
+    { value: "restaurant", label: t("sites.typeRestaurant"), icon: UtensilsCrossed },
+    { value: "venue", label: t("sites.typeVenue"), icon: CalendarDays },
+  ];
   const queryClient = useQueryClient();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingSite, setEditingSite] = useState<Site | null>(null);
@@ -183,13 +185,13 @@ const SitesManagementPanel = () => {
       queryClient.invalidateQueries({ queryKey: ["sites", tenantId] });
       setDialogOpen(false);
       resetForm();
-      toast({ title: "Site created" });
+      toast({ title: t("sites.siteCreated") });
     },
     onError: (err: any) => {
       toast({
         title: "Error",
         description: err.message?.includes("duplicate")
-          ? "A site with this slug already exists"
+          ? t("sites.duplicateSlug")
           : err.message,
         variant: "destructive",
       });
@@ -214,7 +216,7 @@ const SitesManagementPanel = () => {
       queryClient.invalidateQueries({ queryKey: ["sites", tenantId] });
       setDialogOpen(false);
       resetForm();
-      toast({ title: "Site updated" });
+      toast({ title: t("sites.siteUpdated") });
     },
     onError: (err: any) => {
       toast({ title: "Error", description: err.message, variant: "destructive" });
@@ -244,7 +246,7 @@ const SitesManagementPanel = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["sites", tenantId] });
-      toast({ title: "Site deleted" });
+      toast({ title: t("sites.siteDeleted") });
     },
     onError: (err: any) => {
       toast({ title: "Error", description: err.message, variant: "destructive" });
@@ -266,21 +268,21 @@ const SitesManagementPanel = () => {
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-2">
           <Building2 className="h-5 w-5 text-primary" />
-          <h2 className="text-xl font-serif font-semibold">Sites</h2>
-          <DashboardTooltip text="Manage multiple locations or properties under your account. Each site can have its own resources, opening hours, and booking page." />
+          <h2 className="text-xl font-serif font-semibold">{t("sites.title")}</h2>
+          <DashboardTooltip text={t("sites.tooltip")} />
         </div>
         {canManage && (
           <Button size="sm" className="gap-1.5" onClick={openCreate}>
-            <Plus className="h-4 w-4" /> Add Site
+            <Plus className="h-4 w-4" /> {t("sites.addSite")}
           </Button>
         )}
       </div>
 
       <Tabs defaultValue="sites">
         <TabsList>
-          <TabsTrigger value="sites">All Sites</TabsTrigger>
+          <TabsTrigger value="sites">{t("sites.allSites")}</TabsTrigger>
           <TabsTrigger value="approvals" className="gap-1.5">
-            Approvals
+            {t("sites.approvals")}
             {(pendingCount ?? 0) > 0 && (
               <Badge variant="destructive" className="h-5 min-w-[20px] px-1.5 text-[10px]">
                 {pendingCount}
@@ -303,12 +305,12 @@ const SitesManagementPanel = () => {
                 <DialogContent>
                   <DialogHeader>
                     <DialogTitle className="font-serif">
-                      {editingSite ? "Edit Site" : "Add Site"}
+                      {editingSite ? t("sites.editSite") : t("sites.addSite")}
                     </DialogTitle>
                   </DialogHeader>
                   <div className="space-y-4 pt-2">
                     <div>
-                      <Label>Site Name</Label>
+                      <Label>{t("sites.siteName")}</Label>
                       <Input
                         value={form.name}
                         onChange={(e) => {
@@ -324,7 +326,7 @@ const SitesManagementPanel = () => {
                       />
                     </div>
                     <div>
-                      <Label>Site Type</Label>
+                      <Label>{t("sites.siteType")}</Label>
                       <Select
                         value={form.site_type}
                         onValueChange={(val) => setForm({ ...form, site_type: val })}
@@ -345,7 +347,7 @@ const SitesManagementPanel = () => {
                       </Select>
                     </div>
                     <div>
-                      <Label>Slug</Label>
+                      <Label>{t("sites.slug")}</Label>
                       <Input
                         value={form.slug}
                         onChange={(e) =>
@@ -355,11 +357,11 @@ const SitesManagementPanel = () => {
                         className="font-mono text-sm"
                       />
                       <p className="text-xs text-muted-foreground mt-1">
-                        Used in booking URL: /book/<strong>{form.slug || "..."}</strong>
+                        {t("sites.slugHint")}<strong>{form.slug || "..."}</strong>
                       </p>
                     </div>
                     <div>
-                      <Label>Location</Label>
+                      <Label>{t("sites.location")}</Label>
                       <Input
                         value={form.location}
                         onChange={(e) =>
@@ -369,13 +371,13 @@ const SitesManagementPanel = () => {
                       />
                     </div>
                     <div>
-                      <Label>Description</Label>
+                      <Label>{t("sites.description")}</Label>
                       <Textarea
                         value={form.description}
                         onChange={(e) =>
                           setForm({ ...form, description: e.target.value })
                         }
-                        placeholder="Optional description of this site"
+                        placeholder={t("sites.descriptionPlaceholder")}
                         rows={3}
                       />
                     </div>
@@ -384,7 +386,7 @@ const SitesManagementPanel = () => {
                       onClick={handleSubmit}
                       disabled={!form.name || !form.slug || isPending}
                     >
-                      {isPending ? "Saving..." : editingSite ? "Update Site" : "Create Site"}
+                      {isPending ? t("common.saving") : editingSite ? t("sites.updateSite") : t("sites.createSite")}
                     </Button>
                   </div>
                 </DialogContent>
@@ -399,20 +401,20 @@ const SitesManagementPanel = () => {
               ) : !sites?.length ? (
                 <div className="text-center py-8 text-muted-foreground">
                   <Building2 className="h-10 w-10 mx-auto mb-3 opacity-40" />
-                  <p className="text-sm">No sites yet. Create your first site to manage multiple locations.</p>
+                  <p className="text-sm">{t("sites.noSites")}</p>
                 </div>
               ) : (
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Site Name</TableHead>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Slug</TableHead>
-                      <TableHead>Location</TableHead>
-                      <TableHead className="text-center">Resources</TableHead>
-                      <TableHead className="text-center">Status</TableHead>
+                      <TableHead>{t("sites.siteName")}</TableHead>
+                      <TableHead>{t("sites.siteType")}</TableHead>
+                      <TableHead>{t("sites.slug")}</TableHead>
+                      <TableHead>{t("sites.location")}</TableHead>
+                      <TableHead className="text-center">{t("sites.resources")}</TableHead>
+                      <TableHead className="text-center">{t("sites.status")}</TableHead>
                       {canManage && (
-                        <TableHead className="text-right">Actions</TableHead>
+                        <TableHead className="text-right">{t("sites.actions")}</TableHead>
                       )}
                     </TableRow>
                   </TableHeader>
@@ -473,7 +475,7 @@ const SitesManagementPanel = () => {
                                   : "border-yellow-500/30 text-yellow-600 bg-yellow-500/10"
                               }`}
                             >
-                              {site.is_active ? "Active" : "Draft"}
+                              {site.is_active ? t("sites.active") : t("sites.draft")}
                             </Badge>
                           )}
                         </TableCell>
@@ -486,7 +488,7 @@ const SitesManagementPanel = () => {
                                 className="gap-1 text-xs"
                                 onClick={() => openEdit(site)}
                               >
-                                <Pencil className="h-3 w-3" /> Edit
+                                <Pencil className="h-3 w-3" /> {t("common.edit")}
                               </Button>
                               <AlertDialog>
                                 <AlertDialogTrigger asChild>
@@ -501,19 +503,19 @@ const SitesManagementPanel = () => {
                                 <AlertDialogContent>
                                   <AlertDialogHeader>
                                     <AlertDialogTitle>
-                                      Delete "{site.name}"?
+                                      {t("common.delete")} "{site.name}"?
                                     </AlertDialogTitle>
                                     <AlertDialogDescription>
-                                      This will permanently remove this site. Resources assigned to it will become unassigned.
+                                      {t("sites.deleteConfirm")}
                                     </AlertDialogDescription>
                                   </AlertDialogHeader>
                                   <AlertDialogFooter>
-                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
                                     <AlertDialogAction
                                       className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                       onClick={() => deleteMutation.mutate(site.id)}
                                     >
-                                      Delete
+                                      {t("common.delete")}
                                     </AlertDialogAction>
                                   </AlertDialogFooter>
                                 </AlertDialogContent>
