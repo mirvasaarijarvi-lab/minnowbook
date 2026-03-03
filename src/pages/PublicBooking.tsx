@@ -1262,7 +1262,7 @@ const PublicBooking = () => {
             </Card>
           )}
 
-          {resources && resources.length > 0 && form.reservation_type !== "restaurant" && (
+          {form.reservation_type && resources && resources.length > 0 && form.reservation_type !== "restaurant" && (
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg font-serif" style={{ color: primaryColor }}>
@@ -1341,7 +1341,7 @@ const PublicBooking = () => {
             </Card>
           )}
 
-          {/* Step 4: Guest Details */}
+          {form.reservation_type && (
           <Card>
             <CardHeader>
               <CardTitle className="text-lg font-serif" style={{ color: primaryColor }}>
@@ -1407,8 +1407,10 @@ const PublicBooking = () => {
               </div>
             </CardContent>
           </Card>
+          )}
 
           {/* Submit */}
+          {form.reservation_type && (
           <Button
             type="submit"
             size="lg"
@@ -1425,6 +1427,7 @@ const PublicBooking = () => {
               t("booking.submit")
             )}
           </Button>
+          )}
         </form>
 
         {/* Footer */}
