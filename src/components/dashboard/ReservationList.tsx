@@ -200,7 +200,7 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
           {canCreate && (
             <Button size="sm" className="gap-1.5" onClick={() => setNewReservationOpen(true)}>
               <Plus className="h-4 w-4" />
-              {t("dashboard.newReservation" as any)}
+              {t("dashboard.newReservation")}
             </Button>
           )}
           <Button
@@ -208,7 +208,7 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
             size="sm"
             onClick={() => setDateFilter(dateFilter === "today" ? "all" : "today")}
           >
-            {t("dashboard.todayFilter" as any)}
+            {t("dashboard.todayFilter")}
           </Button>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="w-[140px]"><SelectValue placeholder={t("common.status")} /></SelectTrigger>
@@ -232,8 +232,8 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
             <SelectTrigger className="w-[140px]"><SelectValue placeholder="Invoice status" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{t("dashboard.allStatuses")}</SelectItem>
-              <SelectItem value="uninvoiced">{t("dashboard.uninvoiced" as any)}</SelectItem>
-              <SelectItem value="invoiced">{t("dashboard.invoiced" as any)}</SelectItem>
+              <SelectItem value="uninvoiced">{t("dashboard.uninvoiced")}</SelectItem>
+              <SelectItem value="invoiced">{t("dashboard.invoiced")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -243,7 +243,7 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
         <div className="flex items-center gap-2">
           <Badge variant="secondary" className="gap-1.5 px-3 py-1 text-sm">
             <CalendarDays className="h-3.5 w-3.5" />
-            {t("dashboard.checkoutToday" as any) || "Checkout today"}
+            {t("dashboard.checkoutToday")}
             <button
               onClick={() => setCheckoutTodayFilter(false)}
               className="ml-1 rounded-full hover:bg-muted-foreground/20 p-0.5 transition-colors"
@@ -296,7 +296,7 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
                           </Badge>
                         )}
                         {(r as any).is_checked_in && (
-                          <Badge className="text-xs bg-emerald-100 text-emerald-800 border-emerald-200">{t("dashboard.checkedIn" as any)}</Badge>
+                          <Badge className="text-xs bg-emerald-100 text-emerald-800 border-emerald-200">{t("dashboard.checkedIn")}</Badge>
                         )}
                         {r.discount_type && (
                           <Badge variant="outline" className="text-xs gap-1 bg-purple-50 text-purple-700 border-purple-200">
@@ -310,7 +310,7 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
                       <span className="flex items-center gap-1">
                         <CalendarDays className="h-3.5 w-3.5" />
                         {format(new Date(r.date), "PPP", { locale: dateFnsLocale })}
-                        {r.start_time && ` ${t("email.at" as any)} ${r.start_time.slice(0, 5)}`}
+                        {r.start_time && ` ${t("email.at")} ${r.start_time.slice(0, 5)}`}
                       </span>
                       <span className="flex items-center gap-1"><Mail className="h-3.5 w-3.5" />{r.guest_email}</span>
                       {r.guest_phone && <span className="flex items-center gap-1"><Phone className="h-3.5 w-3.5" />{r.guest_phone}</span>}
@@ -332,7 +332,7 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
                           }}
                         />
                         <PackageCheck className="h-3.5 w-3.5 text-muted-foreground" />
-                        <span className="text-muted-foreground">{t("dashboard.used" as any)}</span>
+                        <span className="text-muted-foreground">{t("dashboard.used")}</span>
                       </label>
                       <label
                         className="flex items-center gap-1.5 text-xs cursor-pointer select-none"
@@ -345,10 +345,10 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
                           }}
                         />
                         <Receipt className="h-3.5 w-3.5 text-muted-foreground" />
-                        <span className="text-muted-foreground">{t("dashboard.invoiced" as any)}</span>
+                        <span className="text-muted-foreground">{t("dashboard.invoiced")}</span>
                       </label>
                       {r.breakfast_included && (
-                        <Badge className="text-xs bg-amber-100 text-amber-800 border-amber-200 gap-1"><Coffee className="h-3 w-3" />{t("reports.breakfast" as any)}</Badge>
+                        <Badge className="text-xs bg-amber-100 text-amber-800 border-amber-200 gap-1"><Coffee className="h-3 w-3" />{t("reports.breakfast")}</Badge>
                       )}
                     </div>
                     )}

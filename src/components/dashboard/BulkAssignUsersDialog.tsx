@@ -110,7 +110,7 @@ const BulkAssignUsersDialog = ({
       setSelectedUserIds(new Set());
       toast({
         title: t("admin.siteAssignmentsUpdated"),
-        description: `${data.assigned} ${t("admin.usersAssigned" as any) || "users assigned"}`,
+        description: `${data.assigned} ${t("admin.usersAssigned")}`,
       });
     },
     onError: (err: any) => {
@@ -128,7 +128,7 @@ const BulkAssignUsersDialog = ({
         <DialogHeader>
           <DialogTitle className="font-serif flex items-center gap-2">
             <Users className="h-5 w-5" />
-            {t("sites.assignUsers" as any) || "Assign Users"} — {siteName}
+            {t("sites.assignUsers")} — {siteName}
           </DialogTitle>
         </DialogHeader>
 
@@ -166,7 +166,7 @@ const BulkAssignUsersDialog = ({
                   id="select-all"
                 />
                 <label htmlFor="select-all" className="text-xs font-medium cursor-pointer text-muted-foreground">
-                  {t("common.selectAll" as any) || "Select all"} ({users.length})
+                  {t("common.selectAll")} ({users.length})
                 </label>
               </div>
 
@@ -204,7 +204,7 @@ const BulkAssignUsersDialog = ({
                         </Badge>
                         {isAlready && (
                           <Badge variant="secondary" className="text-[10px]">
-                            {t("sites.alreadyAssigned" as any) || "Assigned"}
+                            {t("sites.alreadyAssigned")}
                           </Badge>
                         )}
                       </div>
@@ -218,7 +218,7 @@ const BulkAssignUsersDialog = ({
           {/* Summary + submit */}
           <div className="flex items-center justify-between pt-2 border-t border-border">
             <span className="text-xs text-muted-foreground">
-              {selectedUserIds.size} {t("sites.usersSelected" as any) || "selected"}
+              {selectedUserIds.size} {t("sites.usersSelected")}
               {newSelections.length > 0 && ` (${newSelections.length} new)`}
             </span>
             <Button
@@ -232,7 +232,7 @@ const BulkAssignUsersDialog = ({
                   {t("common.saving")}
                 </>
               ) : (
-                t("sites.assignUsers" as any) || "Assign Users"
+                t("sites.assignUsers")
               )}
             </Button>
           </div>

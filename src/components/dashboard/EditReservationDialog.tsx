@@ -239,15 +239,15 @@ const EditReservationDialog = ({
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="details" className="gap-1.5">
               <Pencil className="h-3.5 w-3.5" />
-              {t("email.editDetails" as any)}
+              {t("email.editDetails")}
             </TabsTrigger>
             <TabsTrigger value="email" className="gap-1.5">
               <Mail className="h-3.5 w-3.5" />
-              {t("email.confirmationTab" as any)}
+              {t("email.confirmationTab")}
             </TabsTrigger>
             <TabsTrigger value="cancel-email" className="gap-1.5 text-destructive">
               <XCircle className="h-3.5 w-3.5" />
-              {t("email.cancellationTab" as any)}
+              {t("email.cancellationTab")}
             </TabsTrigger>
           </TabsList>
 
@@ -362,16 +362,16 @@ const EditReservationDialog = ({
                     </Popover>
                   </div>
                   <div className="space-y-1.5">
-                    <Label>{t("booking.roomType" as any)}</Label>
+                    <Label>{t("booking.roomType")}</Label>
                     <Select value={form.room_type} onValueChange={(v) => updateField("room_type", v)}>
                       <SelectTrigger>
                         <SelectValue placeholder="—" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="single">{t("booking.roomSingle" as any)}</SelectItem>
-                        <SelectItem value="double">{t("booking.roomDouble" as any)}</SelectItem>
-                        <SelectItem value="suite">{t("booking.roomSuite" as any)}</SelectItem>
-                        <SelectItem value="dorm">{t("booking.roomDorm" as any)}</SelectItem>
+                        <SelectItem value="single">{t("booking.roomSingle")}</SelectItem>
+                        <SelectItem value="double">{t("booking.roomDouble")}</SelectItem>
+                        <SelectItem value="suite">{t("booking.roomSuite")}</SelectItem>
+                        <SelectItem value="dorm">{t("booking.roomDorm")}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -383,7 +383,7 @@ const EditReservationDialog = ({
                     onCheckedChange={(checked) => setForm((prev) => ({ ...prev, breakfast_included: !!checked }))}
                   />
                   <Label htmlFor="edit-breakfast" className="cursor-pointer">
-                    {t("booking.breakfastIncluded" as any)}
+                    {t("booking.breakfastIncluded")}
                   </Label>
                 </div>
               </div>
@@ -393,17 +393,17 @@ const EditReservationDialog = ({
             {isVenueType && (
               <div className="space-y-3 rounded-lg border border-border p-3">
                 <div className="space-y-1.5">
-                  <Label>{t("booking.eventType" as any)}</Label>
+                  <Label>{t("booking.eventType")}</Label>
                   <Select value={form.event_type} onValueChange={(v) => updateField("event_type", v)}>
                     <SelectTrigger>
                       <SelectValue placeholder="—" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="wedding">{t("booking.eventWedding" as any)}</SelectItem>
-                      <SelectItem value="corporate">{t("booking.eventCorporate" as any)}</SelectItem>
-                      <SelectItem value="birthday">{t("booking.eventBirthday" as any)}</SelectItem>
-                      <SelectItem value="conference">{t("booking.eventConference" as any)}</SelectItem>
-                      <SelectItem value="other">{t("booking.eventOther" as any)}</SelectItem>
+                      <SelectItem value="wedding">{t("booking.eventWedding")}</SelectItem>
+                      <SelectItem value="corporate">{t("booking.eventCorporate")}</SelectItem>
+                      <SelectItem value="birthday">{t("booking.eventBirthday")}</SelectItem>
+                      <SelectItem value="conference">{t("booking.eventConference")}</SelectItem>
+                      <SelectItem value="other">{t("booking.eventOther")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -414,7 +414,7 @@ const EditReservationDialog = ({
                     onCheckedChange={(checked) => setForm((prev) => ({ ...prev, catering_needed: !!checked }))}
                   />
                   <Label htmlFor="edit-catering" className="cursor-pointer">
-                    {t("booking.cateringNeeded" as any)}
+                    {t("booking.cateringNeeded")}
                   </Label>
                 </div>
               </div>
@@ -424,26 +424,26 @@ const EditReservationDialog = ({
             <div className="space-y-3 rounded-lg border border-border p-3">
               <Label className="font-medium flex items-center gap-1.5">
                 <Tag className="h-3.5 w-3.5 text-accent" />
-                {t("discount.title" as any) || "Discount"}
+                {t("discount.title")}
               </Label>
               <div className="grid gap-3 sm:grid-cols-3">
                 <div className="space-y-1.5">
-                  <Label className="text-xs">{t("discount.type" as any) || "Type"}</Label>
+                  <Label className="text-xs">{t("discount.type")}</Label>
                   <Select value={form.discount_type} onValueChange={(v) => setForm((prev) => ({ ...prev, discount_type: v as any }))}>
                     <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="percentage">{t("discount.percentage" as any) || "Percentage (%)"}</SelectItem>
-                      <SelectItem value="fixed">{t("discount.fixed" as any) || "Fixed amount (€)"}</SelectItem>
-                      <SelectItem value="free_nights">{t("discount.freeNights" as any) || "Free nights/meals"}</SelectItem>
+                      <SelectItem value="percentage">{t("discount.percentage")}</SelectItem>
+                      <SelectItem value="fixed">{t("discount.fixed")}</SelectItem>
+                      <SelectItem value="free_nights">{t("discount.freeNights")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-xs">{t("discount.value" as any) || "Value"}</Label>
+                  <Label className="text-xs">{t("discount.value")}</Label>
                   <Input type="number" step="0.01" min={0} value={form.discount_value} onChange={(e) => updateField("discount_value", e.target.value)} />
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-xs">{t("discount.reason" as any) || "Reason"}</Label>
+                  <Label className="text-xs">{t("discount.reason")}</Label>
                   <Input value={form.discount_reason} onChange={(e) => updateField("discount_reason", e.target.value)} maxLength={200} />
                 </div>
               </div>
@@ -476,13 +476,13 @@ const EditReservationDialog = ({
           {/* ── Email Preview Tab ── */}
           <TabsContent value="email" className="space-y-4 pt-2">
             <div className="space-y-2">
-              <Label htmlFor="custom-message">{t("email.customMessage" as any)}</Label>
+              <Label htmlFor="custom-message">{t("email.customMessage")}</Label>
               <Textarea
                 id="custom-message"
                 rows={3}
                 value={customMessage}
                 onChange={(e) => setCustomMessage(e.target.value)}
-                placeholder={t("email.customMessagePlaceholder" as any)}
+                placeholder={t("email.customMessagePlaceholder")}
               />
             </div>
 
@@ -519,13 +519,13 @@ const EditReservationDialog = ({
           {/* ── Cancellation Email Tab ── */}
           <TabsContent value="cancel-email" className="space-y-4 pt-2">
             <div className="space-y-2">
-              <Label htmlFor="cancel-custom-message">{t("email.customMessage" as any)}</Label>
+              <Label htmlFor="cancel-custom-message">{t("email.customMessage")}</Label>
               <Textarea
                 id="cancel-custom-message"
                 rows={3}
                 value={cancelCustomMessage}
                 onChange={(e) => setCancelCustomMessage(e.target.value)}
-                placeholder={t("email.customMessagePlaceholder" as any)}
+                placeholder={t("email.customMessagePlaceholder")}
               />
             </div>
 

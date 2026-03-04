@@ -95,10 +95,10 @@ const DiscountCodesPanel = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["discount-codes", tenantId] });
-      toast.success(editingId ? t("discountCodes.updated" as any) : t("discountCodes.created" as any));
+      toast.success(editingId ? t("discountCodes.updated") : t("discountCodes.created"));
       closeDialog();
     },
-    onError: () => toast.error(t("discountCodes.saveError" as any)),
+    onError: () => toast.error(t("discountCodes.saveError")),
   });
 
   const toggleMutation = useMutation({
@@ -116,10 +116,10 @@ const DiscountCodesPanel = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["discount-codes", tenantId] });
-      toast.success(t("discountCodes.deleted" as any));
+      toast.success(t("discountCodes.deleted"));
       setDeleteId(null);
     },
-    onError: () => toast.error(t("discountCodes.deleteError" as any)),
+    onError: () => toast.error(t("discountCodes.deleteError")),
   });
 
   const closeDialog = () => {
@@ -152,12 +152,12 @@ const DiscountCodesPanel = () => {
         <div>
           <CardTitle className="text-lg font-serif flex items-center gap-2">
             <TicketPercent className="h-5 w-5" />
-            {t("discountCodes.title" as any)}
+            {t("discountCodes.title")}
           </CardTitle>
-          <p className="text-sm text-muted-foreground mt-1">{t("discountCodes.description" as any)}</p>
+          <p className="text-sm text-muted-foreground mt-1">{t("discountCodes.description")}</p>
         </div>
         <Button size="sm" onClick={() => { setForm(EMPTY_FORM); setEditingId(null); setDialogOpen(true); }}>
-          <Plus className="h-4 w-4 mr-1" /> {t("discountCodes.add" as any)}
+          <Plus className="h-4 w-4 mr-1" /> {t("discountCodes.add")}
         </Button>
       </CardHeader>
       <CardContent>
@@ -166,19 +166,19 @@ const DiscountCodesPanel = () => {
         ) : !codes?.length ? (
           <div className="text-center py-8 text-muted-foreground">
             <Tag className="h-10 w-10 mx-auto mb-2 opacity-40" />
-            <p>{t("discountCodes.empty" as any)}</p>
+            <p>{t("discountCodes.empty")}</p>
           </div>
         ) : (
           <div className="overflow-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>{t("discountCodes.code" as any)}</TableHead>
-                  <TableHead>{t("discountCodes.discountCol" as any)}</TableHead>
-                  <TableHead>{t("discountCodes.uses" as any)}</TableHead>
-                  <TableHead>{t("discountCodes.validity" as any)}</TableHead>
-                  <TableHead>{t("common.status")}</TableHead>
-                  <TableHead className="text-right">{t("discountCodes.actions" as any)}</TableHead>
+                   <TableHead>{t("discountCodes.code")}</TableHead>
+                   <TableHead>{t("discountCodes.discountCol")}</TableHead>
+                   <TableHead>{t("discountCodes.uses")}</TableHead>
+                   <TableHead>{t("discountCodes.validity")}</TableHead>
+                   <TableHead>{t("common.status")}</TableHead>
+                   <TableHead className="text-right">{t("discountCodes.actions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -197,9 +197,9 @@ const DiscountCodesPanel = () => {
                       {c.valid_from && c.valid_until
                         ? `${c.valid_from} – ${c.valid_until}`
                         : c.valid_from
-                        ? `${t("discountCodes.from" as any)} ${c.valid_from}`
+                        ? `${t("discountCodes.from")} ${c.valid_from}`
                         : c.valid_until
-                        ? `${t("discountCodes.until" as any)} ${c.valid_until}`
+                        ? `${t("discountCodes.until")} ${c.valid_until}`
                         : "—"}
                     </TableCell>
                     <TableCell>
@@ -209,7 +209,7 @@ const DiscountCodesPanel = () => {
                           onCheckedChange={(v) => toggleMutation.mutate({ id: c.id, active: v })}
                         />
                         <Badge variant={c.is_active ? "default" : "secondary"}>
-                          {c.is_active ? t("discountCodes.active" as any) : t("discountCodes.inactive" as any)}
+                          {c.is_active ? t("discountCodes.active") : t("discountCodes.inactive")}
                         </Badge>
                       </div>
                     </TableCell>
@@ -235,12 +235,12 @@ const DiscountCodesPanel = () => {
       <Dialog open={dialogOpen} onOpenChange={(o) => { if (!o) closeDialog(); }}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>{editingId ? t("discountCodes.editTitle" as any) : t("discountCodes.addTitle" as any)}</DialogTitle>
-            <DialogDescription>{t("discountCodes.formDesc" as any)}</DialogDescription>
+            <DialogTitle>{editingId ? t("discountCodes.editTitle") : t("discountCodes.addTitle")}</DialogTitle>
+            <DialogDescription>{t("discountCodes.formDesc")}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>{t("discountCodes.code" as any)}</Label>
+              <Label>{t("discountCodes.code")}</Label>
               <Input
                 value={form.code}
                 onChange={(e) => setForm((f) => ({ ...f, code: e.target.value }))}
@@ -260,17 +260,17 @@ const DiscountCodesPanel = () => {
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label>{t("discountCodes.discountType" as any)}</Label>
+                <Label>{t("discountCodes.discountType")}</Label>
                 <Select value={form.discount_type} onValueChange={(v) => setForm((f) => ({ ...f, discount_type: v }))}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="percentage">{t("discount.percentage" as any)}</SelectItem>
-                    <SelectItem value="fixed">{t("discount.fixed" as any)}</SelectItem>
+                    <SelectItem value="percentage">{t("discount.percentage")}</SelectItem>
+                    <SelectItem value="fixed">{t("discount.fixed")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>{t("discountCodes.value" as any)}</Label>
+                <Label>{t("discountCodes.value")}</Label>
                 <Input
                   type="number"
                   min={0}
@@ -281,17 +281,17 @@ const DiscountCodesPanel = () => {
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label>{t("discountCodes.maxUses" as any)}</Label>
+                <Label>{t("discountCodes.maxUses")}</Label>
                 <Input
                   type="number"
                   min={0}
-                  placeholder={t("discountCodes.unlimited" as any)}
+                  placeholder={t("discountCodes.unlimited")}
                   value={form.max_uses ?? ""}
                   onChange={(e) => setForm((f) => ({ ...f, max_uses: e.target.value ? parseInt(e.target.value) : null }))}
                 />
               </div>
               <div className="space-y-2">
-                <Label>{t("discountCodes.minPrice" as any)}</Label>
+                <Label>{t("discountCodes.minPrice")}</Label>
                 <Input
                   type="number"
                   min={0}
@@ -304,17 +304,17 @@ const DiscountCodesPanel = () => {
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label>{t("discountCodes.validFrom" as any)}</Label>
+                <Label>{t("discountCodes.validFrom")}</Label>
                 <Input type="date" value={form.valid_from} onChange={(e) => setForm((f) => ({ ...f, valid_from: e.target.value }))} />
               </div>
               <div className="space-y-2">
-                <Label>{t("discountCodes.validUntil" as any)}</Label>
+                <Label>{t("discountCodes.validUntil")}</Label>
                 <Input type="date" value={form.valid_until} onChange={(e) => setForm((f) => ({ ...f, valid_until: e.target.value }))} />
               </div>
             </div>
             <div className="flex items-center gap-3">
               <Switch checked={form.is_active} onCheckedChange={(v) => setForm((f) => ({ ...f, is_active: v }))} />
-              <Label>{t("discountCodes.activeLabel" as any)}</Label>
+              <Label>{t("discountCodes.activeLabel")}</Label>
             </div>
           </div>
           <DialogFooter>
@@ -331,8 +331,8 @@ const DiscountCodesPanel = () => {
       <AlertDialog open={!!deleteId} onOpenChange={(o) => { if (!o) setDeleteId(null); }}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{t("discountCodes.deleteTitle" as any)}</AlertDialogTitle>
-            <AlertDialogDescription>{t("discountCodes.deleteConfirm" as any)}</AlertDialogDescription>
+            <AlertDialogTitle>{t("discountCodes.deleteTitle")}</AlertDialogTitle>
+            <AlertDialogDescription>{t("discountCodes.deleteConfirm")}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
