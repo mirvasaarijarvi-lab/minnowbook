@@ -264,7 +264,7 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["calendar-blocked-slots"] });
       queryClient.invalidateQueries({ queryKey: ["blocked-slots"] });
-      toast({ title: isAllBlocked ? t("dashboard.unblockAll" as any) : t("dashboard.blockDay" as any) });
+      toast({ title: isAllBlocked ? t("dashboard.unblockAll") : t("dashboard.blockDay") });
     },
     onError: (err: any) => {
       toast({ title: "Error", description: err.message, variant: "destructive" });
@@ -332,7 +332,7 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
                   onClick={() => setBlockDialogOpen(true)}
                 >
                    <Ban className="h-4 w-4" />
-                   {t("dashboard.blockDay" as any)}
+                   {t("dashboard.blockDay")}
                 </Button>
               )}
             </div>
@@ -342,13 +342,13 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
             {selectedDayRecurring.length > 0 && (
               <div className="space-y-2">
                  <p className="text-xs font-medium text-primary uppercase tracking-wide flex items-center gap-1.5">
-                   <RefreshCw className="h-3.5 w-3.5" /> {t("dashboard.recurringBlocks" as any)}
+                   <RefreshCw className="h-3.5 w-3.5" /> {t("dashboard.recurringBlocks")}
                 </p>
                 {selectedDayRecurring.map((block: any) => (
                   <div key={block.id} className="flex items-center justify-between p-3 rounded-md bg-primary/5 border border-dashed border-primary/30">
                     <div>
                        <div className="flex items-center gap-2">
-                         <span className="font-medium text-foreground">{t("dashboard.every" as any)} {format(new Date(2024, 0, block.day_of_week === 0 ? 7 : block.day_of_week), "EEEE", { locale: dateFnsLocale })}</span>
+                         <span className="font-medium text-foreground">{t("dashboard.every")} {format(new Date(2024, 0, block.day_of_week === 0 ? 7 : block.day_of_week), "EEEE", { locale: dateFnsLocale })}</span>
                         <Badge variant="secondary" className="text-xs capitalize">
                           {getResourceTypeLabel(block.resource_type)}
                         </Badge>
@@ -360,7 +360,7 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
                             <Clock className="h-3 w-3" />
                             {block.start_time.slice(0, 5)} – {block.end_time.slice(0, 5)}
                           </span>
-                         ) : t("dashboard.allDay" as any)}
+                         ) : t("dashboard.allDay")}
                          {block.reason && `, ${block.reason}`}
                       </p>
                     </div>
@@ -373,7 +373,7 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
             {selectedDayBlocks.length > 0 && (
               <div className="space-y-2">
                  <p className="text-xs font-medium text-destructive uppercase tracking-wide flex items-center gap-1.5">
-                   <Ban className="h-3.5 w-3.5" /> {t("dashboard.blocked" as any)}
+                   <Ban className="h-3.5 w-3.5" /> {t("dashboard.blocked")}
                 </p>
                 {selectedDayBlocks.map((block: any) => (
                   <div key={block.id} className="flex items-center justify-between p-3 rounded-md bg-destructive/10 border border-destructive/20">
@@ -389,7 +389,7 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
                             <Clock className="h-3 w-3" />
                             {block.start_time.slice(0, 5)} – {block.end_time.slice(0, 5)}
                           </span>
-                         ) : t("dashboard.allDay" as any)}
+                         ) : t("dashboard.allDay")}
                          {block.reason && ` · ${block.reason}`}
                       </p>
                     </div>
@@ -404,7 +404,7 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
             ) : selectedDayReservations.length > 0 ? (
               <div className="space-y-2">
                  {(selectedDayBlocks.length > 0 || selectedDayRecurring.length > 0) && (
-                   <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t("dashboard.reservationsLabel" as any)}</p>
+                   <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t("dashboard.reservationsLabel")}</p>
                 )}
                 {selectedDayReservations.map((r) => (
                   <div key={r.id} className="flex items-center justify-between p-3 rounded-md bg-secondary/50 border border-border">
@@ -438,7 +438,7 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
         <DialogContent className="max-w-md">
           <DialogHeader>
              <DialogTitle className="font-serif">
-               {t("dashboard.blockTitle" as any)} {title}
+               {t("dashboard.blockTitle")} {title}
              </DialogTitle>
              <p className="text-sm text-muted-foreground">
                {selectedDate && format(selectedDate, "EEEE, MMMM d, yyyy", { locale: dateFnsLocale })}
@@ -475,9 +475,9 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
                         disabled={toggleResourceBlock.isPending || isAllBlocked}
                       >
                          {isBlocked ? (
-                           <><Lock className="h-3 w-3" /> {t("dashboard.blockedLabel" as any)}</>
+                           <><Lock className="h-3 w-3" /> {t("dashboard.blockedLabel")}</>
                          ) : (
-                           <><Unlock className="h-3 w-3" /> {t("dashboard.blockLabel" as any)}</>
+                           <><Unlock className="h-3 w-3" /> {t("dashboard.blockLabel")}</>
                         )}
                       </Button>
                     </div>
@@ -489,7 +489,7 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
             {/* Reason input */}
             <div>
                <Input
-                 placeholder={t("dashboard.blockReason" as any)}
+                 placeholder={t("dashboard.blockReason")}
                 value={blockReason}
                 onChange={(e) => setBlockReason(e.target.value)}
               />
@@ -504,10 +504,10 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
             >
               <Ban className="h-4 w-4" />
                {isAllBlocked
-                 ? t("dashboard.unblockAll" as any)
+                 ? t("dashboard.unblockAll")
                  : isRestaurant
-                   ? t("dashboard.blockRestaurantDay" as any)
-                   : `${t("dashboard.blockAllTitle" as any)} ${title.toLowerCase()}`
+                   ? t("dashboard.blockRestaurantDay")
+                   : `${t("dashboard.blockAllTitle")} ${title.toLowerCase()}`
                }
             </Button>
           </div>

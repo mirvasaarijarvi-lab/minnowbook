@@ -205,7 +205,7 @@ const ManualReservationDialog = ({
       queryClient.invalidateQueries({ queryKey: ["reservations"] });
       queryClient.invalidateQueries({ queryKey: ["calendar-reservations"] });
       queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
-      toast.success(t("dashboard.reservationCreated" as any));
+      toast.success(t("dashboard.reservationCreated"));
       onOpenChange(false);
     },
     onError: (err: any) => {
@@ -249,7 +249,7 @@ const ManualReservationDialog = ({
       <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="font-serif">
-            {t("dashboard.newReservation" as any)}
+            {t("dashboard.newReservation")}
           </DialogTitle>
         </DialogHeader>
 
@@ -363,14 +363,14 @@ const ManualReservationDialog = ({
                   </Popover>
                 </div>
                 <div className="space-y-1.5">
-                  <Label>{t("booking.roomType" as any)}</Label>
+                  <Label>{t("booking.roomType")}</Label>
                   <Select value={form.room_type} onValueChange={(v) => updateField("room_type", v)}>
                     <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="single">{t("booking.roomSingle" as any)}</SelectItem>
-                      <SelectItem value="double">{t("booking.roomDouble" as any)}</SelectItem>
-                      <SelectItem value="suite">{t("booking.roomSuite" as any)}</SelectItem>
-                      <SelectItem value="dorm">{t("booking.roomDorm" as any)}</SelectItem>
+                      <SelectItem value="single">{t("booking.roomSingle")}</SelectItem>
+                      <SelectItem value="double">{t("booking.roomDouble")}</SelectItem>
+                      <SelectItem value="suite">{t("booking.roomSuite")}</SelectItem>
+                      <SelectItem value="dorm">{t("booking.roomDorm")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -382,12 +382,12 @@ const ManualReservationDialog = ({
                   onCheckedChange={(checked) => setForm((prev) => ({ ...prev, breakfast_included: !!checked }))}
                 />
                 <Label htmlFor="new-breakfast" className="cursor-pointer">
-                  {t("booking.breakfastIncluded" as any)}
+                  {t("booking.breakfastIncluded")}
                 </Label>
               </div>
               {selectedResource?.price_per_night && (
                 <Button type="button" variant="outline" size="sm" onClick={computePrice}>
-                  {t("booking.calculatePrice" as any)}
+                  {t("booking.calculatePrice")}
                 </Button>
               )}
             </div>
@@ -397,15 +397,15 @@ const ManualReservationDialog = ({
           {isVenueType && (
             <div className="space-y-3 rounded-lg border border-border p-3">
               <div className="space-y-1.5">
-                <Label>{t("booking.eventType" as any)}</Label>
+                <Label>{t("booking.eventType")}</Label>
                 <Select value={form.event_type} onValueChange={(v) => updateField("event_type", v)}>
                   <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="wedding">{t("booking.eventWedding" as any)}</SelectItem>
-                    <SelectItem value="corporate">{t("booking.eventCorporate" as any)}</SelectItem>
-                    <SelectItem value="birthday">{t("booking.eventBirthday" as any)}</SelectItem>
-                    <SelectItem value="conference">{t("booking.eventConference" as any)}</SelectItem>
-                    <SelectItem value="other">{t("booking.eventOther" as any)}</SelectItem>
+                    <SelectItem value="wedding">{t("booking.eventWedding")}</SelectItem>
+                    <SelectItem value="corporate">{t("booking.eventCorporate")}</SelectItem>
+                    <SelectItem value="birthday">{t("booking.eventBirthday")}</SelectItem>
+                    <SelectItem value="conference">{t("booking.eventConference")}</SelectItem>
+                    <SelectItem value="other">{t("booking.eventOther")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -416,7 +416,7 @@ const ManualReservationDialog = ({
                   onCheckedChange={(checked) => setForm((prev) => ({ ...prev, catering_needed: !!checked }))}
                 />
                 <Label htmlFor="new-catering" className="cursor-pointer">
-                  {t("booking.cateringNeeded" as any)}
+                  {t("booking.cateringNeeded")}
                 </Label>
               </div>
             </div>
@@ -425,27 +425,27 @@ const ManualReservationDialog = ({
           {/* Restaurant sub-type & fields */}
           {isRestaurantType && (
             <div className="space-y-3 rounded-lg border border-border p-3">
-              <Label className="font-medium">{t("booking.restaurantSubType" as any)}</Label>
+              <Label className="font-medium">{t("booking.restaurantSubType")}</Label>
               <Select value={form.restaurant_sub_type} onValueChange={(v) => setForm((prev) => ({ ...prev, restaurant_sub_type: v as any }))}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="dine_in">{t("booking.subTypeDineIn" as any)}</SelectItem>
-                  <SelectItem value="catering">{t("booking.subTypeCatering" as any)}</SelectItem>
-                  <SelectItem value="popup">{t("booking.subTypePopup" as any)}</SelectItem>
+                  <SelectItem value="dine_in">{t("booking.subTypeDineIn")}</SelectItem>
+                  <SelectItem value="catering">{t("booking.subTypeCatering")}</SelectItem>
+                  <SelectItem value="popup">{t("booking.subTypePopup")}</SelectItem>
                 </SelectContent>
               </Select>
 
               {form.restaurant_sub_type === "dine_in" && (
                 <>
-                  <Label>{t("booking.pricingType" as any)}</Label>
+                  <Label>{t("booking.pricingType")}</Label>
                   <div className="flex items-center gap-4">
                     <label className="flex items-center gap-2 cursor-pointer">
                       <Checkbox checked={form.pricing_type === "menu"} onCheckedChange={(checked) => { if (checked) setForm((prev) => ({ ...prev, pricing_type: "menu" as const, price_eur: "" })); }} />
-                      <span className="text-sm">{t("booking.pricingMenu" as any)}</span>
+                      <span className="text-sm">{t("booking.pricingMenu")}</span>
                     </label>
                     <label className="flex items-center gap-2 cursor-pointer">
                       <Checkbox checked={form.pricing_type === "fixed_price"} onCheckedChange={(checked) => { if (checked) setForm((prev) => ({ ...prev, pricing_type: "fixed_price" as const })); }} />
-                      <span className="text-sm">{t("booking.pricingFixed" as any)}</span>
+                      <span className="text-sm">{t("booking.pricingFixed")}</span>
                     </label>
                   </div>
                 </>
@@ -453,11 +453,11 @@ const ManualReservationDialog = ({
 
               {form.restaurant_sub_type === "catering" && (
                 <div className="space-y-2">
-                  <div><Label>{t("booking.deliveryAddress" as any)}</Label><Input value={form.delivery_address} onChange={(e) => updateField("delivery_address", e.target.value)} maxLength={200} /></div>
-                  <div><Label>{t("booking.dietaryNotes" as any)}</Label><Input value={form.dietary_notes} onChange={(e) => updateField("dietary_notes", e.target.value)} maxLength={500} /></div>
+                  <div><Label>{t("booking.deliveryAddress")}</Label><Input value={form.delivery_address} onChange={(e) => updateField("delivery_address", e.target.value)} maxLength={200} /></div>
+                  <div><Label>{t("booking.dietaryNotes")}</Label><Input value={form.dietary_notes} onChange={(e) => updateField("dietary_notes", e.target.value)} maxLength={500} /></div>
                   <div className="flex gap-4">
-                    <label className="flex items-center gap-2 cursor-pointer text-sm"><Checkbox checked={form.equipment_needed} onCheckedChange={(c) => setForm((p) => ({ ...p, equipment_needed: !!c }))} />{t("booking.equipmentNeeded" as any)}</label>
-                    <label className="flex items-center gap-2 cursor-pointer text-sm"><Checkbox checked={form.staff_needed} onCheckedChange={(c) => setForm((p) => ({ ...p, staff_needed: !!c }))} />{t("booking.staffNeeded" as any)}</label>
+                    <label className="flex items-center gap-2 cursor-pointer text-sm"><Checkbox checked={form.equipment_needed} onCheckedChange={(c) => setForm((p) => ({ ...p, equipment_needed: !!c }))} />{t("booking.equipmentNeeded")}</label>
+                    <label className="flex items-center gap-2 cursor-pointer text-sm"><Checkbox checked={form.staff_needed} onCheckedChange={(c) => setForm((p) => ({ ...p, staff_needed: !!c }))} />{t("booking.staffNeeded")}</label>
                   </div>
                 </div>
               )}
@@ -465,24 +465,24 @@ const ManualReservationDialog = ({
               {form.restaurant_sub_type === "popup" && (
                 <div className="space-y-2">
                   <div className="grid gap-2 sm:grid-cols-2">
-                    <div><Label>{t("booking.festivalName" as any)}</Label><Input value={form.festival_name} onChange={(e) => updateField("festival_name", e.target.value)} maxLength={100} /></div>
-                    <div><Label>{t("booking.stallSize" as any)}</Label>
+                    <div><Label>{t("booking.festivalName")}</Label><Input value={form.festival_name} onChange={(e) => updateField("festival_name", e.target.value)} maxLength={100} /></div>
+                    <div><Label>{t("booking.stallSize")}</Label>
                       <Select value={form.stall_size} onValueChange={(v) => updateField("stall_size", v)}>
                         <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="small">{t("booking.stallSizeSmall" as any)}</SelectItem>
-                          <SelectItem value="medium">{t("booking.stallSizeMedium" as any)}</SelectItem>
-                          <SelectItem value="large">{t("booking.stallSizeLarge" as any)}</SelectItem>
+                          <SelectItem value="small">{t("booking.stallSizeSmall")}</SelectItem>
+                          <SelectItem value="medium">{t("booking.stallSizeMedium")}</SelectItem>
+                          <SelectItem value="large">{t("booking.stallSizeLarge")}</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                   </div>
                   <div className="flex gap-4">
-                    <label className="flex items-center gap-2 cursor-pointer text-sm"><Checkbox checked={form.electricity_needed} onCheckedChange={(c) => setForm((p) => ({ ...p, electricity_needed: !!c }))} />{t("booking.electricityNeeded" as any)}</label>
-                    <label className="flex items-center gap-2 cursor-pointer text-sm"><Checkbox checked={form.water_needed} onCheckedChange={(c) => setForm((p) => ({ ...p, water_needed: !!c }))} />{t("booking.waterNeeded" as any)}</label>
+                    <label className="flex items-center gap-2 cursor-pointer text-sm"><Checkbox checked={form.electricity_needed} onCheckedChange={(c) => setForm((p) => ({ ...p, electricity_needed: !!c }))} />{t("booking.electricityNeeded")}</label>
+                    <label className="flex items-center gap-2 cursor-pointer text-sm"><Checkbox checked={form.water_needed} onCheckedChange={(c) => setForm((p) => ({ ...p, water_needed: !!c }))} />{t("booking.waterNeeded")}</label>
                   </div>
-                  <div><Label>{t("booking.foodPermits" as any)}</Label><Input value={form.food_permits} onChange={(e) => updateField("food_permits", e.target.value)} maxLength={500} /></div>
-                  <div><Label>{t("booking.stallFee" as any)}</Label><Input type="number" step="0.01" min={0} value={form.stall_fee} onChange={(e) => updateField("stall_fee", e.target.value)} /></div>
+                  <div><Label>{t("booking.foodPermits")}</Label><Input value={form.food_permits} onChange={(e) => updateField("food_permits", e.target.value)} maxLength={500} /></div>
+                  <div><Label>{t("booking.stallFee")}</Label><Input type="number" step="0.01" min={0} value={form.stall_fee} onChange={(e) => updateField("stall_fee", e.target.value)} /></div>
                 </div>
               )}
             </div>
@@ -492,27 +492,27 @@ const ManualReservationDialog = ({
           <div className="space-y-3 rounded-lg border border-border p-3">
             <Label className="font-medium flex items-center gap-1.5">
               <Tag className="h-3.5 w-3.5 text-accent" />
-              {t("discount.title" as any) || "Discount"}
+              {t("discount.title")}
             </Label>
             <div className="grid gap-3 sm:grid-cols-3">
               <div className="space-y-1.5">
-                <Label className="text-xs">{t("discount.type" as any) || "Type"}</Label>
+                <Label className="text-xs">{t("discount.type")}</Label>
                 <Select value={form.discount_type} onValueChange={(v) => setForm((prev) => ({ ...prev, discount_type: v as any }))}>
                   <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="percentage">{t("discount.percentage" as any) || "Percentage (%)"}</SelectItem>
-                    <SelectItem value="fixed">{t("discount.fixed" as any) || "Fixed amount (€)"}</SelectItem>
-                    <SelectItem value="free_nights">{t("discount.freeNights" as any) || "Free nights/meals"}</SelectItem>
+                    <SelectItem value="percentage">{t("discount.percentage")}</SelectItem>
+                    <SelectItem value="fixed">{t("discount.fixed")}</SelectItem>
+                    <SelectItem value="free_nights">{t("discount.freeNights")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-1.5">
-                <Label className="text-xs">{t("discount.value" as any) || "Value"}</Label>
+                <Label className="text-xs">{t("discount.value")}</Label>
                 <Input type="number" step="0.01" min={0} value={form.discount_value} onChange={(e) => updateField("discount_value", e.target.value)} placeholder={form.discount_type === "percentage" ? "e.g. 10" : form.discount_type === "free_nights" ? "e.g. 1" : "e.g. 20"} />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-xs">{t("discount.reason" as any) || "Reason"}</Label>
-                <Input value={form.discount_reason} onChange={(e) => updateField("discount_reason", e.target.value)} maxLength={200} placeholder={t("discount.reasonPlaceholder" as any) || "e.g. Loyalty customer"} />
+                  <Label className="text-xs">{t("discount.reason")}</Label>
+                  <Input value={form.discount_reason} onChange={(e) => updateField("discount_reason", e.target.value)} maxLength={200} placeholder={t("discount.reasonPlaceholder")} />
               </div>
             </div>
           </div>
@@ -524,13 +524,13 @@ const ManualReservationDialog = ({
               <Input type="number" step="0.01" min={0} value={form.price_eur} onChange={(e) => updateField("price_eur", e.target.value)} />
             </div>
             <div className="space-y-1.5">
-              <Label>{t("booking.specialRequests" as any)}</Label>
+              <Label>{t("booking.specialRequests")}</Label>
               <Input value={form.special_requests} onChange={(e) => updateField("special_requests", e.target.value)} maxLength={1000} />
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <Label>{t("dashboard.internalNotes" as any)}</Label>
+            <Label>{t("dashboard.internalNotes")}</Label>
             <Textarea value={form.internal_notes} onChange={(e) => updateField("internal_notes", e.target.value)} rows={2} maxLength={2000} />
           </div>
         </div>
@@ -541,7 +541,7 @@ const ManualReservationDialog = ({
           </Button>
           <Button onClick={() => createMutation.mutate()} disabled={!isValid || createMutation.isPending}>
             {createMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-            {t("dashboard.createReservation" as any)}
+            {t("dashboard.createReservation")}
           </Button>
         </DialogFooter>
       </DialogContent>

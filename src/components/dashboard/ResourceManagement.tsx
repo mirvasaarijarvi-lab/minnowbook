@@ -118,7 +118,7 @@ const ResourceManagement = () => {
     const first = openDays[0];
     const allSame = openDays.every((h: any) => h.open_time?.slice(0, 5) === first.open_time?.slice(0, 5) && h.close_time?.slice(0, 5) === first.close_time?.slice(0, 5));
     if (allSame) return `${first.open_time?.slice(0, 5)} – ${first.close_time?.slice(0, 5)}`;
-    return t("resourceHours.perDay" as any);
+    return t("resourceHours.perDay");
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -246,7 +246,7 @@ const ResourceManagement = () => {
       setCopyDialogOpen(false);
       setCopySource(null);
       setCopyCount("1");
-      toast({ title: t("dashboard.resourcesCopied" as any) });
+      toast({ title: t("dashboard.resourcesCopied") });
     },
     onError: (err: any) => {
       toast({ title: "Error", description: err.message, variant: "destructive" });
@@ -426,11 +426,11 @@ const ResourceManagement = () => {
                       <ResourceOpeningHoursEditor resourceId={editingId} tenantId={tenantId} />
                     ) : (
                       <div className="rounded-lg border border-border p-3 space-y-1">
-                        <Label className="flex items-center gap-1.5 font-medium text-sm">
-                          <Clock className="h-4 w-4 text-muted-foreground" />
-                          {t("resourceHours.title" as any)}
-                        </Label>
-                        <p className="text-xs text-muted-foreground">{t("resourceHours.saveFirst" as any)}</p>
+                         <Label className="flex items-center gap-1.5 font-medium text-sm">
+                           <Clock className="h-4 w-4 text-muted-foreground" />
+                           {t("resourceHours.title")}
+                         </Label>
+                         <p className="text-xs text-muted-foreground">{t("resourceHours.saveFirst")}</p>
                       </div>
                     )
                   )}
@@ -468,7 +468,7 @@ const ResourceManagement = () => {
                   <TableHead>{t("common.description")}</TableHead>
                   <TableHead className="text-center">{t("dashboard.capacity")}</TableHead>
                   <TableHead className="text-right">{t("common.price")}</TableHead>
-                  <TableHead>{t("resourceHours.title" as any)}</TableHead>
+                  <TableHead>{t("resourceHours.title")}</TableHead>
                   <TableHead className="text-center">{t("common.status")}</TableHead>
                   {canManage && <TableHead className="text-right">{t("dashboard.actions")}</TableHead>}
                 </TableRow>
@@ -531,7 +531,7 @@ const ResourceManagement = () => {
                             <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(r)}>
                               <Pencil className="h-4 w-4 text-muted-foreground" />
                             </Button>
-                            <Button variant="ghost" size="icon" className="h-8 w-8" title={t("dashboard.copyResource" as any)} onClick={() => { setCopySource(r); setCopyDialogOpen(true); }}>
+                            <Button variant="ghost" size="icon" className="h-8 w-8" title={t("dashboard.copyResource")} onClick={() => { setCopySource(r); setCopyDialogOpen(true); }}>
                               <Copy className="h-4 w-4 text-muted-foreground" />
                             </Button>
                             <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => deleteMutation.mutate(r.id)}>
@@ -555,14 +555,14 @@ const ResourceManagement = () => {
       <Dialog open={copyDialogOpen} onOpenChange={(open) => { setCopyDialogOpen(open); if (!open) { setCopySource(null); setCopyCount("1"); } }}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle className="font-serif">{t("dashboard.copyResource" as any)}</DialogTitle>
+            <DialogTitle className="font-serif">{t("dashboard.copyResource")}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 pt-2">
             <p className="text-sm text-muted-foreground">
-              {t("dashboard.copyResourceDesc" as any)} <strong>{copySource?.name}</strong>
+              {t("dashboard.copyResourceDesc")} <strong>{copySource?.name}</strong>
             </p>
             <div>
-              <Label>{t("dashboard.copyCount" as any)}</Label>
+              <Label>{t("dashboard.copyCount")}</Label>
               <Input type="number" min={1} max={50} value={copyCount} onChange={(e) => setCopyCount(e.target.value)} />
             </div>
             <div className="flex justify-end gap-2">
@@ -571,7 +571,7 @@ const ResourceManagement = () => {
                 onClick={() => copySource && copyMutation.mutate({ source: copySource, count: Math.max(1, Math.min(50, parseInt(copyCount) || 1)) })}
                 disabled={copyMutation.isPending}
               >
-                {copyMutation.isPending ? t("common.saving") : t("dashboard.copyResource" as any)}
+                {copyMutation.isPending ? t("common.saving") : t("dashboard.copyResource")}
               </Button>
             </div>
           </div>
