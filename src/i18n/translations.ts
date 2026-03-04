@@ -721,6 +721,9 @@ type TranslationKeys = {
   "pricing.businessF4": string;
   "pricing.sitesLocations": string;
   "pricing.resourcesPerType": string;
+  "pricing.operationTypes": string;
+  "pricing.onePerResType": string;
+  "pricing.responseTime24h": string;
   "pricing.customBranding": string;
   "pricing.brandedBooking": string;
   "pricing.defaultTemplates": string;
@@ -2312,6 +2315,9 @@ const en: TranslationKeys = {
   "pricing.businessF4": "Support (24h response)",
   "pricing.sitesLocations": "Sites / locations",
   "pricing.resourcesPerType": "Resources per type",
+  "pricing.operationTypes": "Operation types",
+  "pricing.onePerResType": "1 per res.type",
+  "pricing.responseTime24h": "Response time 24h",
   "pricing.customBranding": "Custom branding",
   "pricing.brandedBooking": "Branded booking page",
   "pricing.defaultTemplates": "Default email templates",
@@ -3503,6 +3509,9 @@ const fi: TranslationKeys = {
   "pricing.businessF4": "Tuki (24h vastaus)",
   "pricing.sitesLocations": "Toimipisteet",
   "pricing.resourcesPerType": "Resurssit per tyyppi",
+  "pricing.operationTypes": "Toimintatyypit",
+  "pricing.onePerResType": "1 per varaustyyppi",
+  "pricing.responseTime24h": "Vastausaika 24h",
   "pricing.customBranding": "Oma brändäys",
   "pricing.brandedBooking": "Brändätty varaussivu",
   "pricing.defaultTemplates": "Oletussähköpostipohjat",
@@ -4694,6 +4703,9 @@ const sv: TranslationKeys = {
   "pricing.businessF4": "Support (24h svar)",
   "pricing.sitesLocations": "Platser",
   "pricing.resourcesPerType": "Resurser per typ",
+  "pricing.operationTypes": "Verksamhetstyper",
+  "pricing.onePerResType": "1 per bok.typ",
+  "pricing.responseTime24h": "Svarstid 24h",
   "pricing.customBranding": "Egen varumärkesprofil",
   "pricing.brandedBooking": "Varumärkt bokningssida",
   "pricing.defaultTemplates": "Standard e-postmallar",
