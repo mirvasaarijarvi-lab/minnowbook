@@ -18,33 +18,29 @@ const Pricing = () => {
       staffUsers: t("pricing.basicStaff" as any),
       features: [
         t("pricing.basicF1" as any), t("pricing.basicF2" as any), t("pricing.basicF3" as any),
-        t("pricing.basicF4" as any), t("pricing.basicF5" as any), t("pricing.basicF6" as any),
-        t("pricing.basicF7" as any), t("pricing.basicF8" as any),
+        t("pricing.basicF4" as any), t("pricing.basicF5" as any),
       ],
     },
     {
       name: t("pricing.proName" as any),
-      price: 59,
+      price: 79,
       description: t("pricing.proDesc" as any),
       reservationTypes: t("pricing.proTypes" as any),
       staffUsers: t("pricing.proStaff" as any),
       isPopular: true,
       features: [
         t("pricing.proF1" as any), t("pricing.proF2" as any), t("pricing.proF3" as any),
-        t("pricing.proF4" as any), t("pricing.proF5" as any), t("pricing.proF6" as any),
-        t("pricing.proF7" as any), t("pricing.proF8" as any),
       ],
     },
     {
       name: t("pricing.businessName" as any),
-      price: 99,
+      price: 199,
       description: t("pricing.businessDesc" as any),
       reservationTypes: t("pricing.businessTypes" as any),
       staffUsers: t("pricing.businessStaff" as any),
       features: [
         t("pricing.businessF1" as any), t("pricing.businessF2" as any), t("pricing.businessF3" as any),
-        t("pricing.businessF4" as any), t("pricing.businessF5" as any), t("pricing.businessF6" as any),
-        t("pricing.businessF7" as any), t("pricing.businessF8" as any),
+        t("pricing.businessF4" as any),
       ],
     },
   ];
@@ -59,10 +55,10 @@ const Pricing = () => {
   ];
 
   const comparisonRows = [
-    [t("pricing.monthlyPrice" as any), "€29", "€59", "€99"],
+    [t("pricing.monthlyPrice" as any), "€29", "€79", "€199"],
     [t("pricing.freeTrial" as any), t("pricing.days30" as any), t("pricing.days30" as any), t("pricing.days30" as any)],
     [t("pricing.sitesLocations" as any), "1", "1", t("pricing.unlimited" as any)],
-    [t("pricing.reservationTypes" as any), "1", t("pricing.all" as any), t("pricing.all" as any)],
+    [t("pricing.reservationTypes" as any), "1", t("pricing.proTypes" as any), t("pricing.businessTypes" as any)],
     [t("pricing.resourcesPerType" as any), "1", "1", t("pricing.unlimited" as any)],
     [t("pricing.staffUsers" as any), "1–3", t("pricing.proStaff" as any), t("pricing.unlimited" as any)],
     [t("pricing.customBranding" as any), "✓", "✓", "✓"],
@@ -73,7 +69,7 @@ const Pricing = () => {
     [t("pricing.multiLanguage" as any), "—", "✓", "✓"],
     [t("pricing.multisiteManagement" as any), "—", "—", "✓"],
     [t("pricing.analyticsReports" as any), t("pricing.basic" as any), t("pricing.advanced" as any), t("pricing.advanced" as any)],
-    [t("pricing.supportLevel" as any), "AI chatbot", "AI chatbot", t("pricing.businessF8" as any)],
+    [t("pricing.supportLevel" as any), "AI chatbot", "AI chatbot", t("pricing.businessF4" as any)],
   ];
 
   const highlightFeatures = [t("pricing.sitesLocations" as any), t("pricing.reservationTypes" as any), t("pricing.resourcesPerType" as any)];
@@ -97,7 +93,7 @@ const Pricing = () => {
       {/* Tiers */}
       <section className="pb-20">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {tiers.map((tier, i) => (
               <PricingTier key={tier.name} {...tier} delay={i * 100} />
             ))}
