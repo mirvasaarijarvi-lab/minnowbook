@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Loader2, Mail, Lock, Eye, EyeOff, RotateCcw, Info } from "lucide-react";
+import { Loader2, Mail, Lock, Eye, EyeOff, RotateCcw, Info, MapPin, Trash2 } from "lucide-react";
 import DashboardTooltip from "./DashboardTooltip";
 import DOMPurify from "dompurify";
 
@@ -85,22 +85,48 @@ const VARIABLES = [
   { key: "{{business_name}}", desc: "Your business name" },
 ];
 
-const EmailTemplateEditor = () => {
+interface EmailTemplateEditorProps {
+  siteId?: string | null;
+}
+
+const EmailTemplateEditor = ({ siteId = null }: EmailTemplateEditorProps) => {
   const t = useT();
   const { tenantId, tenant } = useTenant();
   const queryClient = useQueryClient();
 
   const tier = tenant?.tier || "basic";
   const isBasic = tier === "basic";
+  const isSiteLevel = !!siteId;
 
   const [selectedType, setSelectedType] = useState<TemplateType>("confirmation");
   const [selectedLang, setSelectedLang] = useState<Language>("en");
   const [form, setForm] = useState<TemplateForm>({ subject: "", body_html: "", is_active: true });
   const [showPreview, setShowPreview] = useState(false);
 
-  // Fetch all templates for this tenant
+  // Fetch templates scoped to this level (tenant or site)
   const { data: templates, isLoading } = useQuery({
-    queryKey: ["email-templates", tenantId],
+    queryKey: ["email-templates", tenantId, siteId ?? "tenant"],
+    queryFn: async () => {
+      if (!tenantId) return [];
+      let query = supabase
+        .from("tenant_email_templates")
+        .select("*")
+        .eq("tenant_id", tenantId);
+      if (siteId) {
+        query = query.eq("site_id", siteId);
+      } else {
+        query = query.is("site_id", null);
+      }
+      const { data, error } = await query;
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!tenantId,
+  });
+
+  // Also fetch tenant-level templates as fallback when editing site overrides
+  const { data: tenantTemplates } = useQuery({
+    queryKey: ["email-templates", tenantId, "tenant"],
     queryFn: async () => {
       if (!tenantId) return [];
       const { data, error } = await supabase
@@ -111,13 +137,20 @@ const EmailTemplateEditor = () => {
       if (error) throw error;
       return data || [];
     },
-    enabled: !!tenantId,
+    enabled: !!tenantId && isSiteLevel,
   });
 
-  // Find current template
+  // Find current template at this level
   const currentTemplate = templates?.find(
     (tmpl) => tmpl.template_type === selectedType && tmpl.language === selectedLang
   );
+
+  // Find tenant-level fallback when on site level
+  const tenantFallback = isSiteLevel
+    ? tenantTemplates?.find((tmpl) => tmpl.template_type === selectedType && tmpl.language === selectedLang)
+    : null;
+
+  const hasOverride = isSiteLevel && !!currentTemplate;
 
   // Sync form when selection changes
   useEffect(() => {
@@ -127,11 +160,17 @@ const EmailTemplateEditor = () => {
         body_html: currentTemplate.body_html,
         is_active: currentTemplate.is_active ?? true,
       });
+    } else if (tenantFallback) {
+      setForm({
+        subject: tenantFallback.subject,
+        body_html: tenantFallback.body_html,
+        is_active: tenantFallback.is_active ?? true,
+      });
     } else {
       const defaults = DEFAULT_TEMPLATES[selectedType][selectedLang];
       setForm({ subject: defaults.subject, body_html: defaults.body_html, is_active: true });
     }
-  }, [currentTemplate, selectedType, selectedLang]);
+  }, [currentTemplate, tenantFallback, selectedType, selectedLang]);
 
   const saveMutation = useMutation({
     mutationFn: async () => {
@@ -143,7 +182,7 @@ const EmailTemplateEditor = () => {
         subject: form.subject,
         body_html: form.body_html,
         is_active: form.is_active,
-        site_id: null,
+        site_id: siteId ?? null,
       };
       if (currentTemplate) {
         const { error } = await supabase
@@ -161,6 +200,25 @@ const EmailTemplateEditor = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["email-templates", tenantId] });
       toast.success(t("emailTemplates.saved"));
+    },
+    onError: (err: any) => {
+      toast.error(err?.message || t("emailTemplates.saveError"));
+    },
+  });
+
+  // Delete site override to revert to tenant defaults
+  const deleteOverrideMutation = useMutation({
+    mutationFn: async () => {
+      if (!currentTemplate) throw new Error("No override to remove");
+      const { error } = await supabase
+        .from("tenant_email_templates")
+        .delete()
+        .eq("id", currentTemplate.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["email-templates", tenantId] });
+      toast.success(t("emailTemplates.overrideRemoved"));
     },
     onError: (err: any) => {
       toast.error(err?.message || t("emailTemplates.saveError"));
@@ -204,14 +262,29 @@ const EmailTemplateEditor = () => {
             <CardTitle className="text-lg font-serif">{t("emailTemplates.title")}</CardTitle>
             <DashboardTooltip text={t("emailTemplates.tooltip")} />
           </div>
-          {isBasic && (
-            <Badge variant="secondary" className="gap-1.5 text-xs">
-              <Lock className="h-3 w-3" />
-              {t("emailTemplates.proRequired")}
-            </Badge>
-          )}
+          <div className="flex items-center gap-2">
+            {isSiteLevel && hasOverride && (
+              <Badge variant="default" className="text-xs gap-1">
+                <MapPin className="h-3 w-3" />
+                {t("emailTemplates.siteOverride")}
+              </Badge>
+            )}
+            {isSiteLevel && !hasOverride && (
+              <Badge variant="outline" className="text-xs">
+                {t("emailTemplates.usingTenantDefault")}
+              </Badge>
+            )}
+            {isBasic && (
+              <Badge variant="secondary" className="gap-1.5 text-xs">
+                <Lock className="h-3 w-3" />
+                {t("emailTemplates.proRequired")}
+              </Badge>
+            )}
+          </div>
         </div>
-        <p className="text-sm text-muted-foreground">{t("emailTemplates.description")}</p>
+        <p className="text-sm text-muted-foreground">
+          {isSiteLevel ? t("emailTemplates.siteDescription") : t("emailTemplates.description")}
+        </p>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Template type tabs */}
@@ -325,16 +398,30 @@ const EmailTemplateEditor = () => {
 
             {/* Actions */}
             <div className="flex items-center justify-between pt-2 border-t border-border">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="gap-1.5"
-                onClick={resetToDefault}
-                disabled={isBasic}
-              >
-                <RotateCcw className="h-3.5 w-3.5" />
-                {t("emailTemplates.resetDefault")}
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="gap-1.5"
+                  onClick={resetToDefault}
+                  disabled={isBasic}
+                >
+                  <RotateCcw className="h-3.5 w-3.5" />
+                  {t("emailTemplates.resetDefault")}
+                </Button>
+                {isSiteLevel && hasOverride && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="gap-1.5 text-destructive hover:text-destructive"
+                    onClick={() => deleteOverrideMutation.mutate()}
+                    disabled={deleteOverrideMutation.isPending}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                    {t("emailTemplates.revertToDefault")}
+                  </Button>
+                )}
+              </div>
               <Button
                 onClick={() => saveMutation.mutate()}
                 disabled={isBasic || saveMutation.isPending}

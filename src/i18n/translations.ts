@@ -1254,6 +1254,11 @@ type TranslationKeys = {
   "emailTemplates.active": string;
   "emailTemplates.inactive": string;
   "emailTemplates.upgradeHint": string;
+  "emailTemplates.overrideRemoved": string;
+  "emailTemplates.siteOverride": string;
+  "emailTemplates.usingTenantDefault": string;
+  "emailTemplates.revertToDefault": string;
+  "emailTemplates.siteDescription": string;
 };
 
 export type TranslationKey = keyof TranslationKeys;
@@ -2357,6 +2362,11 @@ const en: TranslationKeys = {
   "emailTemplates.active": "Active",
   "emailTemplates.inactive": "Inactive",
   "emailTemplates.upgradeHint": "Upgrade to Professional or Business to customize email templates.",
+  "emailTemplates.overrideRemoved": "Site override removed, using tenant defaults",
+  "emailTemplates.siteOverride": "Site override",
+  "emailTemplates.usingTenantDefault": "Using tenant default",
+  "emailTemplates.revertToDefault": "Remove site override",
+  "emailTemplates.siteDescription": "Customize email templates for this site. Changes here override the tenant-level defaults.",
 
   // Pricing page
   "pricing.heroTitle": "Simple and transparent pricing",
@@ -3586,6 +3596,11 @@ const fi: TranslationKeys = {
   "emailTemplates.active": "Aktiivinen",
   "emailTemplates.inactive": "Ei aktiivinen",
   "emailTemplates.upgradeHint": "Päivitä Professional- tai Business-tasolle mukauttaaksesi sähköpostimalleja.",
+  "emailTemplates.overrideRemoved": "Sivustokohtainen muokkaus poistettu, käytetään oletusmallia",
+  "emailTemplates.siteOverride": "Sivustokohtainen",
+  "emailTemplates.usingTenantDefault": "Käytetään oletusmallia",
+  "emailTemplates.revertToDefault": "Poista sivustokohtainen muokkaus",
+  "emailTemplates.siteDescription": "Mukauta sähköpostimalleja tälle sivustolle. Muutokset ohittavat oletusmallit.",
 
   // Pricing page
   "pricing.heroTitle": "Yksinkertainen ja läpinäkyvä hinnoittelu",
@@ -4815,6 +4830,11 @@ const sv: TranslationKeys = {
   "emailTemplates.active": "Aktiv",
   "emailTemplates.inactive": "Inaktiv",
   "emailTemplates.upgradeHint": "Uppgradera till Professional eller Business för att anpassa e-postmallar.",
+  "emailTemplates.overrideRemoved": "Platsspecifik ändring borttagen, använder standardmall",
+  "emailTemplates.siteOverride": "Platsspecifik",
+  "emailTemplates.usingTenantDefault": "Använder standardmall",
+  "emailTemplates.revertToDefault": "Ta bort platsspecifik ändring",
+  "emailTemplates.siteDescription": "Anpassa e-postmallar för denna plats. Ändringar här åsidosätter standardmallarna.",
 
   // Pricing page
   "pricing.heroTitle": "Enkel och transparent prissättning",
