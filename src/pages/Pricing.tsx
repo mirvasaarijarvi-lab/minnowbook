@@ -55,24 +55,22 @@ const Pricing = () => {
   ];
 
   const comparisonRows = [
-    [t("pricing.monthlyPrice" as any), "€29", "€79", "€199"],
+    [t("pricing.monthlyPrice" as any), "€29", "€59", "€99"],
     [t("pricing.freeTrial" as any), t("pricing.days30" as any), t("pricing.days30" as any), t("pricing.days30" as any)],
     [t("pricing.sitesLocations" as any), "1", "1", t("pricing.unlimited" as any)],
-    [t("pricing.reservationTypes" as any), "1", t("pricing.proTypes" as any), t("pricing.businessTypes" as any)],
-    [t("pricing.resourcesPerType" as any), "1", "1", t("pricing.unlimited" as any)],
+    [t("pricing.reservationTypes" as any), "1", t("pricing.all" as any), t("pricing.all" as any)],
+    [t("pricing.operationTypes" as any), "1", t("pricing.onePerResType" as any), t("pricing.unlimited" as any)],
     [t("pricing.staffUsers" as any), "1–3", t("pricing.proStaff" as any), t("pricing.unlimited" as any)],
-    [t("pricing.customBranding" as any), "✓", "✓", "✓"],
     [t("pricing.brandedBooking" as any), "✓", "✓", "✓"],
     [t("pricing.defaultTemplates" as any), "✓", "✓", "✓"],
     [t("pricing.customTemplates" as any), "—", "✓", "✓"],
-    [t("pricing.advancedRules" as any), "—", "✓", "✓"],
-    [t("pricing.multiLanguage" as any), "—", "✓", "✓"],
+    [t("pricing.multiLanguage" as any), "✓", "✓", "✓"],
     [t("pricing.multisiteManagement" as any), "—", "—", "✓"],
     [t("pricing.analyticsReports" as any), t("pricing.basic" as any), t("pricing.advanced" as any), t("pricing.advanced" as any)],
-    [t("pricing.supportLevel" as any), "AI chatbot", "AI chatbot", t("pricing.businessF4" as any)],
+    [t("pricing.supportLevel" as any), "AI chatbot", "AI chatbot", t("pricing.responseTime24h" as any)],
   ];
 
-  const highlightFeatures = [t("pricing.sitesLocations" as any), t("pricing.reservationTypes" as any), t("pricing.resourcesPerType" as any)];
+  const highlightFeatures = [t("pricing.sitesLocations" as any), t("pricing.reservationTypes" as any), t("pricing.operationTypes" as any)];
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
