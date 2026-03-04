@@ -300,6 +300,7 @@ type TranslationKeys = {
   "admin.roleCreated": string;
   "admin.userManagement": string;
   "admin.userManagementDesc": string;
+  "admin.staffLimitReached": string;
   "admin.approvedUsers": string;
   "admin.colName": string;
   "admin.colEmail": string;
@@ -1518,6 +1519,7 @@ const en: TranslationKeys = {
   "admin.roleCreated": "Role created",
   "admin.userManagement": "User Management",
   "admin.userManagementDesc": "Manage team members, assign roles, and control access.",
+  "admin.staffLimitReached": "Staff user limit reached. Upgrade your plan to add more users.",
   "admin.approvedUsers": "Approved Users",
   "admin.colName": "Name",
   "admin.colEmail": "Email",
@@ -2719,6 +2721,7 @@ const fi: TranslationKeys = {
   "admin.roleCreated": "Rooli luotu",
   "admin.userManagement": "Käyttäjähallinta",
   "admin.userManagementDesc": "Hallitse tiimin jäseniä, rooleja ja käyttöoikeuksia.",
+  "admin.staffLimitReached": "Henkilökunnan käyttäjäraja saavutettu. Päivitä sopimustasi lisätäksesi käyttäjiä.",
   "admin.approvedUsers": "Hyväksytyt käyttäjät",
   "admin.colName": "Nimi",
   "admin.colEmail": "Sähköposti",
@@ -3918,6 +3921,7 @@ const sv: TranslationKeys = {
   "admin.roleCreated": "Roll skapad",
   "admin.userManagement": "Användarhantering",
   "admin.userManagementDesc": "Hantera teammedlemmar, tilldela roller och kontrollera åtkomst.",
+  "admin.staffLimitReached": "Personalanvändargränsen har nåtts. Uppgradera din plan för att lägga till fler användare.",
   "admin.approvedUsers": "Godkända användare",
   "admin.colName": "Namn",
   "admin.colEmail": "E-post",

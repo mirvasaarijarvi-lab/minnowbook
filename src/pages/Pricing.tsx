@@ -59,6 +59,7 @@ const Pricing = () => {
     [t("pricing.sitesLocations"), "1", "1", t("pricing.unlimited")],
     [t("pricing.reservationTypes"), "1", t("pricing.all"), t("pricing.all")],
     [t("pricing.operationTypes"), "1", t("pricing.onePerResType"), t("pricing.unlimited")],
+    [t("pricing.resourcesPerType"), "1", "1", t("pricing.unlimited")],
     [t("pricing.staffUsers"), "1–3", t("pricing.proStaff"), t("pricing.unlimited")],
     [t("pricing.brandedBooking"), "✓", "✓", "✓"],
     [t("pricing.defaultTemplates"), "✓", "✓", "✓"],
@@ -69,7 +70,7 @@ const Pricing = () => {
     [t("pricing.supportLevel"), "AI chatbot", "AI chatbot", t("pricing.responseTime24h")],
   ];
 
-  const highlightFeatures = [t("pricing.sitesLocations"), t("pricing.reservationTypes"), t("pricing.operationTypes")];
+  const highlightFeatures = [t("pricing.sitesLocations"), t("pricing.reservationTypes"), t("pricing.operationTypes"), t("pricing.resourcesPerType")];
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
