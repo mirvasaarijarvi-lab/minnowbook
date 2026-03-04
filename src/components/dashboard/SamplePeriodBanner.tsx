@@ -1,5 +1,5 @@
 import { useSamplePeriod, SampleStatus } from "@/hooks/useSamplePeriod";
-import { useT } from "@/contexts/I18nContext";
+import { useT, useTDynamic } from "@/contexts/I18nContext";
 import { AlertTriangle, Clock, Lock, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -35,6 +35,7 @@ const bannerConfig: Partial<Record<SampleStatus, BannerConfig>> = {
 const SamplePeriodBanner = () => {
   const { status, daysRemaining, daysOverdue } = useSamplePeriod();
   const t = useT();
+  const tDynamic = useTDynamic();
 
   const config = bannerConfig[status];
   if (!config) return null;
@@ -53,7 +54,7 @@ const SamplePeriodBanner = () => {
       ? String(Math.max(0, 10 - (daysOverdue ?? 0)))
       : String(daysRemaining ?? 0);
 
-  const message = t(key as any).replace("{days}", daysValue);
+  const message = tDynamic(key).replace("{days}", daysValue);
 
   return (
     <div className={cn("mx-4 sm:mx-6 lg:mx-8 mt-4 px-4 py-3 rounded-lg border flex items-center gap-3 text-sm font-medium", config.className)}>

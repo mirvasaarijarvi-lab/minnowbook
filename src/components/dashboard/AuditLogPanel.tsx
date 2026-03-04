@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/hooks/useTenant";
-import { useT } from "@/contexts/I18nContext";
+import { useT, useTDynamic } from "@/contexts/I18nContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -93,6 +93,7 @@ const REVERTABLE_TABLES = new Set(["reservations", "resources", "blocked_slots",
 const AuditLogPanel = () => {
   const { tenantId } = useTenant();
   const t = useT();
+  const tDynamic = useTDynamic();
   const queryClient = useQueryClient();
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const [dateFrom, setDateFrom] = useState<Date | undefined>(undefined);
@@ -326,11 +327,11 @@ const AuditLogPanel = () => {
                             <TableCell>
                               <Badge variant="outline" className={`text-xs gap-1 ${config.color}`}>
                                 <ActionIcon className="h-3 w-3" />
-                                {t(config.labelKey as any)}
+                                {tDynamic(config.labelKey)}
                               </Badge>
                             </TableCell>
                             <TableCell className="text-muted-foreground max-w-[200px] truncate">
-                              {entry.summary || `${t(config.labelKey as any)} ${tableLabels[entry.table_name] ?? entry.table_name}`}
+                              {entry.summary || `${tDynamic(config.labelKey)} ${tableLabels[entry.table_name] ?? entry.table_name}`}
                               {hasDetails && (
                                 <span className="ml-1 text-primary/70 text-xs">
                                   ({changes.length} {t("admin.fieldsChanged")})

@@ -17,7 +17,7 @@ import { CalendarDays, User, Mail, Phone, MoreVertical, CheckCircle2, XCircle, P
 import EditReservationDialog from "./EditReservationDialog";
 import ManualReservationDialog from "./ManualReservationDialog";
 import ConfirmationEmailPreview from "@/components/ConfirmationEmailPreview";
-import { useT } from "@/contexts/I18nContext";
+import { useT, useTDynamic } from "@/contexts/I18nContext";
 import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
 import SiteTabs from "./SiteTabs";
 import { toast } from "sonner";
@@ -54,6 +54,7 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
   const [editingReservation, setEditingReservation] = useState<any | null>(null);
   const [newReservationOpen, setNewReservationOpen] = useState(false);
   const t = useT();
+  const tDynamic = useTDynamic();
   const dateFnsLocale = useDateLocale();
   const { typeLabel } = useResourceTypeLabel();
   const { can } = usePermissions();
@@ -288,7 +289,7 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
                     <div className="flex items-center gap-2 mb-1">
                       <span className="font-semibold text-foreground">{r.guest_name}</span>
                       <Badge variant="outline" className="text-xs capitalize">{typeLabel(r.reservation_type)}</Badge>
-                        <Badge className={`text-xs ${statusColors[r.status ?? "pending"] ?? ""}`}>{t(`dashboard.${r.status ?? "pending"}` as any)}</Badge>
+                        <Badge className={`text-xs ${statusColors[r.status ?? "pending"] ?? ""}`}>{tDynamic(`dashboard.${r.status ?? "pending"}`)}</Badge>
                         {showSiteLabel && r.site_id && siteMap[r.site_id] && (
                           <Badge variant="outline" className="text-xs font-normal gap-1">
                             <Building2 className="h-3 w-3" />

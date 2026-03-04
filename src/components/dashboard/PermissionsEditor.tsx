@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/hooks/useTenant";
-import { useT } from "@/contexts/I18nContext";
+import { useT, useTDynamic } from "@/contexts/I18nContext";
 import { PERMISSION_CATEGORIES } from "@/lib/permissions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -33,6 +33,7 @@ interface RolePermission {
 const PermissionsEditor = () => {
   const { tenantId } = useTenant();
   const t = useT();
+  const tDynamic = useTDynamic();
   const queryClient = useQueryClient();
   const [addRoleOpen, setAddRoleOpen] = useState(false);
   const [newRoleName, setNewRoleName] = useState("");
@@ -336,12 +337,12 @@ const PermissionsEditor = () => {
                         colSpan={editableRoles.length + 1}
                         className="pt-4 pb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground"
                       >
-                        {t(category.category as any)}
+                        {tDynamic(category.category)}
                       </td>
                     </tr>
                     {category.permissions.map((perm) => (
                       <tr key={perm.key} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
-                        <td className="py-2 pr-4 text-foreground">{t(perm.labelKey as any)}</td>
+                        <td className="py-2 pr-4 text-foreground">{tDynamic(perm.labelKey)}</td>
                         {editableRoles.map((role) => {
                           const checked = hasPermission(role.role_key, perm.key);
                           return (
