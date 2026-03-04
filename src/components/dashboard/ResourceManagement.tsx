@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash2, BedDouble, UtensilsCrossed, Building2, Upload, X, Loader2, ExternalLink, Lock, Copy } from "lucide-react";
+import { Plus, Pencil, Trash2, BedDouble, UtensilsCrossed, Building2, Upload, X, Loader2, ExternalLink, Lock, Copy, Clock } from "lucide-react";
 import { useState, useRef } from "react";
 import { useT } from "@/contexts/I18nContext";
 import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
@@ -22,6 +22,7 @@ import DashboardTooltip from "./DashboardTooltip";
 import SiteTabs from "./SiteTabs";
 import ResourceImageGallery from "./ResourceImageGallery";
 import BlockedSlotsPanel from "./BlockedSlotsPanel";
+import ResourceOpeningHoursEditor from "./ResourceOpeningHoursEditor";
 import { usePermissions } from "@/hooks/usePermissions";
 import { PERM_RESOURCES_MANAGE } from "@/lib/permissions";
 import { useAutoApproval } from "@/hooks/useAutoApproval";
@@ -85,6 +86,40 @@ const ResourceManagement = () => {
     },
     enabled: !!tenantId,
   });
+
+  // Fetch resource opening hours for restaurant resources
+  const restaurantIds = resources?.filter((r: any) => r.resource_type === "restaurant").map((r: any) => r.id) ?? [];
+  const { data: allResourceHours } = useQuery({
+    queryKey: ["resource-opening-hours-all", tenantId, restaurantIds],
+    queryFn: async () => {
+      if (restaurantIds.length === 0) return [];
+      const { data, error } = await (supabase as any)
+        .from("resource_opening_hours")
+        .select("resource_id, day_of_week, open_time, close_time, is_closed")
+        .in("resource_id", restaurantIds);
+      if (error) throw error;
+      return data ?? [];
+    },
+    enabled: restaurantIds.length > 0,
+  });
+
+  // Group hours by resource id
+  const hoursByResource: Record<string, any[]> = {};
+  (allResourceHours ?? []).forEach((h: any) => {
+    if (!hoursByResource[h.resource_id]) hoursByResource[h.resource_id] = [];
+    hoursByResource[h.resource_id].push(h);
+  });
+
+  const formatResourceHours = (resourceId: string) => {
+    const hours = hoursByResource[resourceId];
+    if (!hours || hours.length === 0) return null;
+    const openDays = hours.filter((h: any) => !h.is_closed);
+    if (openDays.length === 0) return t("booking.closedDay");
+    const first = openDays[0];
+    const allSame = openDays.every((h: any) => h.open_time?.slice(0, 5) === first.open_time?.slice(0, 5) && h.close_time?.slice(0, 5) === first.close_time?.slice(0, 5));
+    if (allSame) return `${first.open_time?.slice(0, 5)} – ${first.close_time?.slice(0, 5)}`;
+    return t("resourceHours.perDay" as any);
+  };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -392,6 +427,11 @@ const ResourceManagement = () => {
                     <Label className="mb-0">{t("dashboard.active")}</Label>
                   </div>
 
+                  {/* Opening hours for restaurant resources */}
+                  {editingId && form.resource_type === "restaurant" && tenantId && (
+                    <ResourceOpeningHoursEditor resourceId={editingId} tenantId={tenantId} />
+                  )}
+
                   {/* Action buttons */}
                   <div className="flex justify-end gap-2 pt-2">
                     <Button variant="outline" onClick={() => { setDialogOpen(false); resetForm(); }}>{t("common.cancel")}</Button>
@@ -450,7 +490,15 @@ const ResourceManagement = () => {
                           )}
                         </TableCell>
                       )}
-                      <TableCell className="text-muted-foreground max-w-[260px] truncate">{r.description ?? "–"}</TableCell>
+                      <TableCell className="text-muted-foreground max-w-[260px]">
+                        <div className="truncate">{r.description ?? "–"}</div>
+                        {r.resource_type === "restaurant" && formatResourceHours(r.id) && (
+                          <div className="flex items-center gap-1 text-xs mt-0.5">
+                            <Clock className="h-3 w-3" />
+                            <span>{formatResourceHours(r.id)}</span>
+                          </div>
+                        )}
+                      </TableCell>
                       <TableCell className="text-center">{r.capacity ?? "–"}</TableCell>
                       <TableCell className="text-right">
                         {r.price_per_night != null ? `${Number(r.price_per_night).toFixed(0)} €` : "–"}

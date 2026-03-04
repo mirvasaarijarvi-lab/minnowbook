@@ -427,6 +427,32 @@ const PublicBookingInner = () => {
     enabled: !!tenant?.id && !!form.reservation_type,
   });
 
+  // Fetch resource-level opening hours for restaurant resources
+  const restaurantResourceIds = resources?.filter((r: any) => r.resource_type === "restaurant").map((r: any) => r.id) ?? [];
+  const { data: resourceOpeningHours } = useQuery({
+    queryKey: ["public-resource-opening-hours", restaurantResourceIds],
+    queryFn: async () => {
+      if (restaurantResourceIds.length === 0) return [];
+      const { data, error } = await (supabase as any)
+        .from("resource_opening_hours")
+        .select("resource_id, day_of_week, open_time, close_time, is_closed")
+        .in("resource_id", restaurantResourceIds);
+      if (error) throw error;
+      return data ?? [];
+    },
+    enabled: restaurantResourceIds.length > 0,
+  });
+
+  // Group resource hours by resource_id
+  const resourceHoursByResource = useMemo(() => {
+    const map: Record<string, any[]> = {};
+    (resourceOpeningHours ?? []).forEach((h: any) => {
+      if (!map[h.resource_id]) map[h.resource_id] = [];
+      map[h.resource_id].push(h);
+    });
+    return map;
+  }, [resourceOpeningHours]);
+
   // Fetch blocked slots — filter by site
   const { data: blockedSlots } = useQuery({
     queryKey: ["public-blocked-slots", tenant?.id, activeSiteId],
@@ -1609,6 +1635,57 @@ const PublicBookingInner = () => {
                     </div>
                   </div>
                 )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Restaurant resource opening hours display */}
+          {form.reservation_type === "restaurant" && resources && resources.length > 0 && Object.keys(resourceHoursByResource).length > 0 && (
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg font-serif flex items-center gap-2" style={{ color: primaryColor }}>
+                  <Clock className="h-5 w-5" />
+                  {t("resourceHours.openingHoursLabel" as any)}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {resources.filter((r: any) => resourceHoursByResource[r.id]?.length > 0).map((res: any) => {
+                    const hours = resourceHoursByResource[res.id] ?? [];
+                    const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+                    const sortedHours = [1, 2, 3, 4, 5, 6, 0].map((dow) => {
+                      const h = hours.find((x: any) => x.day_of_week === dow);
+                      return { dow, ...h };
+                    });
+                    const openDays = sortedHours.filter((h) => h.open_time && !h.is_closed);
+                    const allSame = openDays.length > 0 && openDays.every((h) => h.open_time?.slice(0, 5) === openDays[0].open_time?.slice(0, 5) && h.close_time?.slice(0, 5) === openDays[0].close_time?.slice(0, 5));
+
+                    return (
+                      <div key={res.id} className="rounded-lg border p-3" style={{ borderColor: `${accentColor}30` }}>
+                        <p className="font-semibold text-sm mb-2" style={{ color: primaryColor }}>{res.name}</p>
+                        {allSame ? (
+                          <div className="text-sm text-muted-foreground">
+                            <span>{openDays[0].open_time?.slice(0, 5)} – {openDays[0].close_time?.slice(0, 5)}</span>
+                            {sortedHours.some((h) => h.is_closed) && (
+                              <div className="mt-1 text-xs">
+                                {sortedHours.filter((h) => h.is_closed).map((h) => dayNames[h.dow]).join(", ")}: {t("booking.closedDay")}
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="grid grid-cols-2 gap-x-4 gap-y-0.5 text-xs text-muted-foreground">
+                            {sortedHours.map((h) => (
+                              <div key={h.dow} className="flex justify-between">
+                                <span>{dayNames[h.dow]}</span>
+                                <span>{h.is_closed ? t("booking.closedDay") : h.open_time ? `${h.open_time.slice(0, 5)}–${h.close_time?.slice(0, 5)}` : "–"}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
               </CardContent>
             </Card>
           )}
