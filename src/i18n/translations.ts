@@ -175,6 +175,14 @@ type TranslationKeys = {
   "openingHours.resetToDefaults": string;
   "openingHours.resetConfirm": string;
   "openingHours.resetDone": string;
+  "resourceHours.title": string;
+  "resourceHours.sameEveryDay": string;
+  "resourceHours.perDay": string;
+  "resourceHours.openTime": string;
+  "resourceHours.closeTime": string;
+  "resourceHours.sameEveryDayDesc": string;
+  "resourceHours.removeHours": string;
+  "resourceHours.openingHoursLabel": string;
   "booking.pickDate": string;
   "booking.checkOutDate": string;
   "booking.roomType": string;
@@ -1253,6 +1261,14 @@ const en: TranslationKeys = {
   "openingHours.resetToDefaults": "Reset to defaults",
   "openingHours.resetConfirm": "This will delete site-specific hours and revert to tenant defaults.",
   "openingHours.resetDone": "Opening hours reset to tenant defaults",
+  "resourceHours.title": "Opening hours",
+  "resourceHours.sameEveryDay": "Same every day",
+  "resourceHours.perDay": "Per day",
+  "resourceHours.openTime": "Opens",
+  "resourceHours.closeTime": "Closes",
+  "resourceHours.sameEveryDayDesc": "Same hours apply to all open days. Toggle individual days closed below.",
+  "resourceHours.removeHours": "Remove hours",
+  "resourceHours.openingHoursLabel": "Hours",
   "booking.pickDate": "Pick a date",
   "booking.checkOutDate": "Check-out date",
   "booking.roomType": "Room type",
@@ -2310,6 +2326,14 @@ const fi: TranslationKeys = {
   "openingHours.resetToDefaults": "Palauta oletukset",
   "openingHours.resetConfirm": "Tämä poistaa toimipistekohtaiset aukioloajat ja palauttaa organisaation oletukset.",
   "openingHours.resetDone": "Aukioloajat palautettu organisaation oletuksiin",
+  "resourceHours.title": "Aukioloajat",
+  "resourceHours.sameEveryDay": "Sama joka päivä",
+  "resourceHours.perDay": "Päiväkohtainen",
+  "resourceHours.openTime": "Avautuu",
+  "resourceHours.closeTime": "Sulkeutuu",
+  "resourceHours.sameEveryDayDesc": "Samat ajat kaikille avoimille päiville. Voit sulkea yksittäisiä päiviä alla.",
+  "resourceHours.removeHours": "Poista aukioloajat",
+  "resourceHours.openingHoursLabel": "Aukioloajat",
   "booking.pickDate": "Valitse päivämäärä",
   "booking.checkOutDate": "Lähtöpäivä",
   "booking.roomType": "Huonetyyppi",
@@ -3365,6 +3389,14 @@ const sv: TranslationKeys = {
   "openingHours.resetToDefaults": "Återställ till standard",
   "openingHours.resetConfirm": "Detta raderar platsspecifika öppettider och återgår till organisationens standardvärden.",
   "openingHours.resetDone": "Öppettider återställda till organisationens standardvärden",
+  "resourceHours.title": "Öppettider",
+  "resourceHours.sameEveryDay": "Samma varje dag",
+  "resourceHours.perDay": "Per dag",
+  "resourceHours.openTime": "Öppnar",
+  "resourceHours.closeTime": "Stänger",
+  "resourceHours.sameEveryDayDesc": "Samma tider gäller alla öppna dagar. Stäng enskilda dagar nedan.",
+  "resourceHours.removeHours": "Ta bort öppettider",
+  "resourceHours.openingHoursLabel": "Öppettider",
   "booking.pickDate": "Välj datum",
   "booking.checkOutDate": "Utcheckningsdatum",
   "booking.roomType": "Rumstyp",
