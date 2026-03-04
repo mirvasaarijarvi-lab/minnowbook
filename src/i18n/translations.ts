@@ -559,6 +559,14 @@ type TranslationKeys = {
   "dashboard.quickInfo": string;
   "dashboard.checkoutsToday": string;
   "dashboard.uninvoiced": string;
+  "autoReminder.title": string;
+  "autoReminder.tooltip": string;
+  "autoReminder.hourly": string;
+  "autoReminder.nextRun": string;
+  "autoReminder.active": string;
+  "autoReminder.recentLog": string;
+  "autoReminder.sent7d": string;
+  "autoReminder.noRecent": string;
   "dashboard.used": string;
   "dashboard.invoiced": string;
   "dashboard.total": string;
@@ -1812,6 +1820,14 @@ const en: TranslationKeys = {
   "dashboard.quickInfo": "Quick info",
   "dashboard.checkoutsToday": "Check-outs today",
   "dashboard.uninvoiced": "Uninvoiced",
+  "autoReminder.title": "Auto Reminders",
+  "autoReminder.tooltip": "Reminder emails are automatically sent 24 hours before each confirmed reservation.",
+  "autoReminder.hourly": "Hourly",
+  "autoReminder.nextRun": "Next batch",
+  "autoReminder.active": "Active",
+  "autoReminder.recentLog": "Recently sent",
+  "autoReminder.sent7d": "in last 7 days",
+  "autoReminder.noRecent": "No reminders sent in the last 7 days.",
   "dashboard.used": "Used",
   "dashboard.invoiced": "Invoiced",
   "dashboard.total": "total",
@@ -3047,6 +3063,14 @@ const fi: TranslationKeys = {
   "dashboard.quickInfo": "Pikatiedot",
   "dashboard.checkoutsToday": "Uloskirjaukset tänään",
   "dashboard.uninvoiced": "Laskuttamatta",
+  "autoReminder.title": "Automaattimuistutukset",
+  "autoReminder.tooltip": "Muistutussähköpostit lähetetään automaattisesti 24 tuntia ennen vahvistettua varausta.",
+  "autoReminder.hourly": "Tunneittain",
+  "autoReminder.nextRun": "Seuraava erä",
+  "autoReminder.active": "Aktiivinen",
+  "autoReminder.recentLog": "Viimeksi lähetetyt",
+  "autoReminder.sent7d": "viim. 7 päivänä",
+  "autoReminder.noRecent": "Ei muistutuksia viimeisen 7 päivän aikana.",
   "dashboard.used": "Käytetty",
   "dashboard.invoiced": "Laskutettu",
   "dashboard.total": "yhteensä",
@@ -4281,6 +4305,14 @@ const sv: TranslationKeys = {
   "dashboard.quickInfo": "Snabbinfo",
   "dashboard.checkoutsToday": "Utcheckningar idag",
   "dashboard.uninvoiced": "Ej fakturerade",
+  "autoReminder.title": "Automatiska påminnelser",
+  "autoReminder.tooltip": "Påminnelsemejl skickas automatiskt 24 timmar före varje bekräftad bokning.",
+  "autoReminder.hourly": "Varje timme",
+  "autoReminder.nextRun": "Nästa batch",
+  "autoReminder.active": "Aktiv",
+  "autoReminder.recentLog": "Nyligen skickade",
+  "autoReminder.sent7d": "senaste 7 dagarna",
+  "autoReminder.noRecent": "Inga påminnelser skickade de senaste 7 dagarna.",
   "dashboard.used": "Använd",
   "dashboard.invoiced": "Fakturerad",
   "dashboard.total": "totalt",
