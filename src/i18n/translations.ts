@@ -750,8 +750,6 @@ type TranslationKeys = {
   "pricing.faqA4": string;
   "pricing.faqQ5": string;
   "pricing.faqA5": string;
-  "pricing.faqQ6": string;
-  "pricing.faqA6": string;
 
   // Support page
   "support.heroTitle": string;
@@ -2335,17 +2333,15 @@ const en: TranslationKeys = {
   "pricing.multiLocationDesc": "The Business plan supports unlimited sites with multi-site management. Run your hotels, restaurants, and venues from a single dashboard.",
   "pricing.tryBusinessFree": "Try Business Free for 30 Days",
   "pricing.faqQ1": "What happens after the 30-day trial?",
-  "pricing.faqA1": "Your trial converts to a paid subscription. You can cancel anytime before the trial ends, no charge.",
+  "pricing.faqA1": "You get a message notifying you about your trial converting to a paid subscription. You can cancel anytime before the trial ends, no charge. If you do not cancel, the subscription starts. If you cancel after subscription has started, you will be invoiced for the first billing cycle, which is 30 days.",
   "pricing.faqQ2": "Can I change my plan later?",
   "pricing.faqA2": "Yes! You can upgrade or downgrade your plan at any time. Changes take effect at the start of your next billing cycle.",
   "pricing.faqQ3": "What reservation types can I choose?",
-  "pricing.faqA3": "Restaurant (table bookings), Venue (event space inquiries), and Gasthaus/Guesthouse (room reservations). Basic lets you pick one; Pro unlocks all types on a single site; Business adds unlimited sites with full multi-site management.",
-  "pricing.faqQ4": "Do I need a credit card to start the trial?",
-  "pricing.faqA4": "No credit card is required to start your free trial. You'll only be asked for payment details when the trial ends.",
-  "pricing.faqQ5": "Can I use my own domain?",
-  "pricing.faqA5": "Each business gets a branded subdomain (e.g., yourbusiness.minnowbook.com). Custom domain support is on our roadmap.",
-  "pricing.faqQ6": "What's the difference between AI chatbot support and priority support?",
-  "pricing.faqA6": "All plans include MinnowAid, our AI chatbot that can answer questions, help troubleshoot issues, and guide you through features instantly — available 24/7 in your dashboard. The Business plan adds priority support: you can escalate any conversation to our team and receive a guaranteed response within 24 hours.",
+  "pricing.faqA3": "Restaurant (table bookings), Venue (event space inquiries), and Gasthaus/Guesthouse (room reservations). Basic lets you pick one. Pro unlocks all types, one per type, on a single site. Business adds unlimited sites.",
+  "pricing.faqQ4": "Can I use my own domain?",
+  "pricing.faqA4": "Each business gets a branded subdomain (e.g., yourbusiness.minnowbook.com). Custom domain support is on our roadmap and will be then offered with an enterprise pricing.",
+  "pricing.faqQ5": "What's the difference between AI chatbot support and 24-hour response support?",
+  "pricing.faqA5": "All plans include MinnowAid, our AI chatbot that can answer questions, help troubleshoot issues, and guide you through features instantly. The chatbot is available 24/7 in your dashboard. The Business plan adds 24-hour response support: you can escalate any conversation to our team on the platform via the chatbot and receive a guaranteed response within 24 hours.",
 
   // Support page
   "support.heroTitle": "How can we help?",
@@ -3529,17 +3525,15 @@ const fi: TranslationKeys = {
   "pricing.multiLocationDesc": "Business-paketti tukee rajatonta määrää toimipisteitä ja usean toimipisteen hallintaa. Hallitse hotellejasi, ravintoloitasi ja muita tapahtumapaikkojasi yhdessä näkymässä.",
   "pricing.tryBusinessFree": "Kokeile Businessia ilmaiseksi 30 päivää",
   "pricing.faqQ1": "Mitä tapahtuu 30 päivän kokeilun jälkeen?",
-  "pricing.faqA1": "Kokeilusi muuttuu maksulliseksi tilaukseksi. Voit peruuttaa milloin tahansa ennen kokeilun päättymistä ilman veloitusta.",
+  "pricing.faqA1": "Saat viestin, jossa kerrotaan kokeilusi muuttuvan maksulliseksi tilaukseksi. Voit peruuttaa milloin tahansa ennen kokeilun päättymistä ilman veloitusta. Jos et peruuta, tilaus alkaa. Jos peruutat tilauksen alkamisen jälkeen, sinulta laskutetaan ensimmäinen laskutusjakso, joka on 30 päivää.",
   "pricing.faqQ2": "Voinko vaihtaa suunnitelmaa myöhemmin?",
   "pricing.faqA2": "Kyllä! Voit päivittää tai alentaa suunnitelmasi milloin tahansa. Muutokset tulevat voimaan seuraavan laskutusjakson alussa.",
   "pricing.faqQ3": "Mitä varaustyyppejä voin valita?",
-  "pricing.faqA3": "Ravintola (pöytävaraukset), Tila (tilakatsaukset) ja Majatalo (huonevaraukset). Basic antaa valita yhden; Pro avaa kaikki tyypit yhdellä toimipisteellä; Business lisää rajattomat toimipisteet täydellä monitoimipistehallinnalla.",
-  "pricing.faqQ4": "Tarvitsenko luottokortin kokeilun aloittamiseen?",
-  "pricing.faqA4": "Ei luottokorttia tarvita ilmaisen kokeilun aloittamiseen. Maksutietoja kysytään vasta kokeilun päättyessä.",
-  "pricing.faqQ5": "Voinko käyttää omaa domainia?",
-  "pricing.faqA5": "Jokaiselle yritykselle tulee brändätty alidomain (esim. yrityksesi.minnowbook.com). Oman domainin tuki on tiekartalla.",
-  "pricing.faqQ6": "Mikä ero on AI-chatbot-tuella ja prioriteettituella?",
-  "pricing.faqA6": "Kaikki suunnitelmat sisältävät MinnowAid-tekoälychatbotin, joka vastaa kysymyksiin, auttaa vianmäärityksessä ja opastaa ominaisuuksissa — käytettävissä 24/7 hallintapaneelissa. Business-suunnitelma lisää prioriteettituen: voit eskaloida keskustelun tiimiimme ja saada taatun vastauksen 24 tunnin sisällä.",
+  "pricing.faqA3": "Ravintola (pöytävaraukset), Tila (tilakatsaukset) ja Majatalo (huonevaraukset). Basic antaa valita yhden. Pro avaa kaikki tyypit, yhden kutakin, yhdellä toimipisteellä. Business lisää rajattomat toimipisteet.",
+  "pricing.faqQ4": "Voinko käyttää omaa domainia?",
+  "pricing.faqA4": "Jokaiselle yritykselle tulee brändätty alidomain (esim. yrityksesi.minnowbook.com). Oman domainin tuki on tiekartalla ja tarjotaan enterprise-hinnoittelulla.",
+  "pricing.faqQ5": "Mikä ero on AI-chatbot-tuella ja 24 tunnin vasteajatuella?",
+  "pricing.faqA5": "Kaikki suunnitelmat sisältävät MinnowAid-tekoälychatbotin, joka vastaa kysymyksiin, auttaa vianmäärityksessä ja opastaa ominaisuuksissa. Chatbot on käytettävissä 24/7 hallintapaneelissa. Business-suunnitelma lisää 24 tunnin vasteajatuen: voit eskaloida keskustelun tiimiimme alustan kautta chatbotin avulla ja saada taatun vastauksen 24 tunnin sisällä.",
 
   // Support page
   "support.heroTitle": "Miten voimme auttaa?",
@@ -4723,17 +4717,15 @@ const sv: TranslationKeys = {
   "pricing.multiLocationDesc": "Företagsplanen stöder obegränsat antal platser med hantering av flera platser. Styr dina hotell, restauranger och lokaler från en enda instrumentpanel.",
   "pricing.tryBusinessFree": "Prova Företag gratis i 30 dagar",
   "pricing.faqQ1": "Vad händer efter 30 dagars provperiod?",
-  "pricing.faqA1": "Din provperiod övergår till en betald prenumeration. Du kan avbryta när som helst innan provperioden slutar, utan kostnad.",
+  "pricing.faqA1": "Du får ett meddelande om att din provperiod övergår till en betald prenumeration. Du kan avbryta när som helst innan provperioden slutar, utan kostnad. Om du inte avbryter startar prenumerationen. Om du avbryter efter att prenumerationen har startat faktureras du för den första faktureringsperioden, som är 30 dagar.",
   "pricing.faqQ2": "Kan jag ändra plan senare?",
   "pricing.faqA2": "Ja! Du kan uppgradera eller nedgradera din plan när som helst. Ändringar träder i kraft vid början av nästa faktureringsperiod.",
   "pricing.faqQ3": "Vilka bokningstyper kan jag välja?",
-  "pricing.faqA3": "Restaurang (bordsreservationer), Lokal (lokalförfrågningar) och Gästhus (rumsreservationer). Basic låter dig välja en; Pro låser upp alla typer på en plats; Business lägger till obegränsade platser med fullständig multisite-hantering.",
-  "pricing.faqQ4": "Behöver jag ett kreditkort för att starta provperioden?",
-  "pricing.faqA4": "Inget kreditkort krävs för att starta din gratis provperiod. Du ombeds om betalningsuppgifter först när provperioden slutar.",
-  "pricing.faqQ5": "Kan jag använda min egen domän?",
-  "pricing.faqA5": "Varje företag får en varumärkt subdomän (t.ex. dittforetag.minnowbook.com). Stöd för egna domäner finns på vår roadmap.",
-  "pricing.faqQ6": "Vad är skillnaden mellan AI-chatbot-support och prioriterad support?",
-  "pricing.faqA6": "Alla planer inkluderar MinnowAid, vår AI-chatbot som kan svara på frågor, hjälpa till med felsökning och guida dig genom funktioner — tillgänglig 24/7 i din instrumentpanel. Business-planen lägger till prioriterad support: du kan eskalera varje konversation till vårt team och få ett garanterat svar inom 24 timmar.",
+  "pricing.faqA3": "Restaurang (bordsreservationer), Lokal (lokalförfrågningar) och Gästhus (rumsreservationer). Basic låter dig välja en. Pro låser upp alla typer, en av varje, på en plats. Business lägger till obegränsade platser.",
+  "pricing.faqQ4": "Kan jag använda min egen domän?",
+  "pricing.faqA4": "Varje företag får en varumärkt subdomän (t.ex. dittforetag.minnowbook.com). Stöd för egna domäner finns på vår roadmap och kommer att erbjudas med enterprise-prissättning.",
+  "pricing.faqQ5": "Vad är skillnaden mellan AI-chatbot-support och 24-timmarssupport?",
+  "pricing.faqA5": "Alla planer inkluderar MinnowAid, vår AI-chatbot som kan svara på frågor, hjälpa till med felsökning och guida dig genom funktioner. Chatboten är tillgänglig 24/7 i din instrumentpanel. Business-planen lägger till 24-timmarssupport: du kan eskalera varje konversation till vårt team på plattformen via chatboten och få ett garanterat svar inom 24 timmar.",
 
   // Support page
   "support.heroTitle": "Hur kan vi hjälpa?",

@@ -51,7 +51,6 @@ const Pricing = () => {
     { q: t("pricing.faqQ3" as any), a: t("pricing.faqA3" as any) },
     { q: t("pricing.faqQ4" as any), a: t("pricing.faqA4" as any) },
     { q: t("pricing.faqQ5" as any), a: t("pricing.faqA5" as any) },
-    { q: t("pricing.faqQ6" as any), a: t("pricing.faqA6" as any) },
   ];
 
   const comparisonRows = [
@@ -180,9 +179,12 @@ const Pricing = () => {
       {/* CTA */}
       <section className="py-20 gradient-hero">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-serif font-bold text-primary-foreground mb-4">
+          <h2 className="text-3xl font-serif font-bold text-primary-foreground mb-2">
             {t("pricing.ctaTitle")}
           </h2>
+          <p className="text-primary-foreground/70 text-lg mb-8 max-w-xl mx-auto">
+            {t("pricing.ctaSubtitle")}
+          </p>
           <Link to="/signup">
             <Button variant="hero" size="xl">
               {t("common.getStartedFree")}
