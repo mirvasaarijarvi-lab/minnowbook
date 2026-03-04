@@ -68,7 +68,7 @@ const ConfirmationEmailPreview = ({
       restaurant: t("dashboard.restaurant"),
       venue: t("dashboard.venue"),
       guesthouse: t("dashboard.guesthouse"),
-      hotel: t("dashboard.hotel" as any),
+      hotel: t("dashboard.hotel"),
     };
     return map[reservation.reservation_type] || reservation.reservation_type;
   }, [reservation.reservation_type, t]);
@@ -76,10 +76,10 @@ const ConfirmationEmailPreview = ({
   const roomTypeLabel = useMemo(() => {
     if (!reservation.room_type) return null;
     const map: Record<string, string> = {
-      single: t("booking.roomSingle" as any),
-      double: t("booking.roomDouble" as any),
-      suite: t("booking.roomSuite" as any),
-      dorm: t("booking.roomDorm" as any),
+      single: t("booking.roomSingle"),
+      double: t("booking.roomDouble"),
+      suite: t("booking.roomSuite"),
+      dorm: t("booking.roomDorm"),
     };
     return map[reservation.room_type] || reservation.room_type;
   }, [reservation.room_type, t]);
@@ -87,11 +87,11 @@ const ConfirmationEmailPreview = ({
   const eventTypeLabel = useMemo(() => {
     if (!reservation.event_type) return null;
     const map: Record<string, string> = {
-      wedding: t("booking.eventWedding" as any),
-      corporate: t("booking.eventCorporate" as any),
-      birthday: t("booking.eventBirthday" as any),
-      conference: t("booking.eventConference" as any),
-      other: t("booking.eventOther" as any),
+      wedding: t("booking.eventWedding"),
+      corporate: t("booking.eventCorporate"),
+      birthday: t("booking.eventBirthday"),
+      conference: t("booking.eventConference"),
+      other: t("booking.eventOther"),
     };
     return map[reservation.event_type] || reservation.event_type;
   }, [reservation.event_type, t]);
@@ -121,22 +121,22 @@ const ConfirmationEmailPreview = ({
   }, [reservation.date, reservation.check_out_date]);
 
   const defaultSubject = isCancellation
-    ? `${t("email.cancellationSubject" as any)} — ${businessName}`
-    : `${t("email.confirmationSubject" as any)} — ${businessName}`;
+    ? `${t("email.cancellationSubject")} — ${businessName}`
+    : `${t("email.confirmationSubject")} — ${businessName}`;
 
   const subject = customSubject || defaultSubject;
 
   const title = isCancellation
-    ? t("email.cancellationTitle" as any)
-    : t("email.confirmationTitle" as any);
+    ? t("email.cancellationTitle")
+    : t("email.confirmationTitle");
 
   const bodyText = isCancellation
-    ? t("email.cancellationBody" as any)
-    : t("email.confirmationBody" as any);
+    ? t("email.cancellationBody")
+    : t("email.confirmationBody");
 
   const footerText = isCancellation
-    ? t("email.cancellationFooter" as any)
-    : t("email.confirmationFooter" as any);
+    ? t("email.cancellationFooter")
+    : t("email.confirmationFooter");
 
   const headerBgColor = isCancellation ? "#7f1d1d" : primaryColor;
   const titleColor = isCancellation ? "#991b1b" : primaryColor;
@@ -146,29 +146,29 @@ const ConfirmationEmailPreview = ({
 
   const detailRows: { label: string; value: string }[] = [
     { label: t("common.type"), value: typeLabel },
-    { label: t("common.date"), value: formattedDate + (reservation.start_time ? ` ${t("email.at" as any)} ${reservation.start_time.slice(0, 5)}` : "") },
+    { label: t("common.date"), value: formattedDate + (reservation.start_time ? ` ${t("email.at")} ${reservation.start_time.slice(0, 5)}` : "") },
   ];
 
   if (isAccommodation && formattedCheckOut) {
-    detailRows.push({ label: t("booking.checkOutDate" as any), value: formattedCheckOut });
+    detailRows.push({ label: t("booking.checkOutDate"), value: formattedCheckOut });
     if (nights > 0) {
       detailRows.push({
-        label: t("email.duration" as any),
-        value: `${nights} ${nights === 1 ? t("booking.night" as any) : t("booking.nights" as any)}`,
+        label: t("email.duration"),
+        value: `${nights} ${nights === 1 ? t("booking.night") : t("booking.nights")}`,
       });
     }
   }
 
   if (roomTypeLabel) {
-    detailRows.push({ label: t("booking.roomType" as any), value: roomTypeLabel });
+    detailRows.push({ label: t("booking.roomType"), value: roomTypeLabel });
   }
 
   if (isAccommodation && reservation.breakfast_included) {
-    detailRows.push({ label: t("booking.breakfastIncluded" as any), value: "✓" });
+    detailRows.push({ label: t("booking.breakfastIncluded"), value: "✓" });
   }
 
   if (isVenue && eventTypeLabel) {
-    detailRows.push({ label: t("booking.eventType" as any), value: eventTypeLabel });
+    detailRows.push({ label: t("booking.eventType"), value: eventTypeLabel });
   }
 
   if (reservation.guests_count) {
@@ -176,11 +176,11 @@ const ConfirmationEmailPreview = ({
   }
 
   if (isVenue && reservation.estimated_guests) {
-    detailRows.push({ label: t("booking.estimatedGuests" as any), value: String(reservation.estimated_guests) });
+    detailRows.push({ label: t("booking.estimatedGuests"), value: String(reservation.estimated_guests) });
   }
 
   if (isVenue && reservation.catering_needed) {
-    detailRows.push({ label: t("booking.cateringNeeded" as any), value: "✓" });
+    detailRows.push({ label: t("booking.cateringNeeded"), value: "✓" });
   }
 
   if (reservation.price_eur != null) {
@@ -188,7 +188,7 @@ const ConfirmationEmailPreview = ({
   }
 
   if (reservation.special_requests) {
-    detailRows.push({ label: t("booking.specialRequests" as any), value: reservation.special_requests });
+    detailRows.push({ label: t("booking.specialRequests"), value: reservation.special_requests });
   }
 
   return (
@@ -196,7 +196,7 @@ const ConfirmationEmailPreview = ({
       {/* Subject line */}
       <div className="rounded-md border border-border bg-muted/30 px-3 py-2">
         <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-          {t("email.subject" as any)}
+          {t("email.subject")}
         </span>
         <p className="text-sm font-medium text-foreground mt-0.5">{subject}</p>
       </div>
@@ -242,7 +242,7 @@ const ConfirmationEmailPreview = ({
               {title}
             </h3>
             <p className="text-sm text-gray-600">
-              {t("email.greeting" as any)}{" "}
+              {t("email.greeting")}{" "}
               <strong>{reservation.guest_name}</strong>,
             </p>
           </div>

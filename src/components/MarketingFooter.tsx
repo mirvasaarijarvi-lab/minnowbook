@@ -41,7 +41,7 @@ const MarketingFooter = () => {
             <ul className="space-y-2.5">
               <li>
                 <Link to="/about" className="text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors">
-                  {t("nav.about" as any)}
+                  {t("nav.about")}
                 </Link>
               </li>
               <li>
@@ -64,7 +64,7 @@ const MarketingFooter = () => {
               </li>
               <li>
                 <Link to="/accessibility" className="text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors">
-                  {t("nav.accessibility" as any)}
+                  {t("nav.accessibility")}
                 </Link>
               </li>
             </ul>

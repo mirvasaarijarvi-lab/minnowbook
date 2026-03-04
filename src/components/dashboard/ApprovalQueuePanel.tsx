@@ -4,6 +4,7 @@ import { useTenant } from "@/hooks/useTenant";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useT } from "@/contexts/I18nContext";
+import type { TranslationKey } from "@/i18n/translations";
 import { PERM_SITES_APPROVE } from "@/lib/permissions";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -44,7 +45,7 @@ interface PendingItem {
   created_at: string;
 }
 
-const TABLE_LABEL_KEYS: Record<ApprovalTable, string> = {
+const TABLE_LABEL_KEYS: Record<ApprovalTable, TranslationKey> = {
   resources: "approval.typeResource",
   blocked_slots: "approval.typeBlockedSlot",
   recurring_blocked_slots: "approval.typeRecurringBlock",
@@ -266,7 +267,7 @@ const ApprovalQueuePanel = () => {
                   <TableCell>
                     <Badge variant="outline" className="text-xs whitespace-nowrap">
                       <FileText className="h-3 w-3 mr-1" />
-                      {t(TABLE_LABEL_KEYS[item.table] as any)}
+                      {t(TABLE_LABEL_KEYS[item.table])}
                     </Badge>
                   </TableCell>
                   <TableCell className="font-medium">{item.label}</TableCell>
@@ -324,7 +325,7 @@ const ApprovalQueuePanel = () => {
           </DialogHeader>
           <div className="space-y-4 pt-2">
             <p className="text-sm text-muted-foreground">
-              {t("approval.rejectingLabel")} <strong>{rejectDialog?.label}</strong> ({t(TABLE_LABEL_KEYS[rejectDialog?.table ?? "resources"] as any)})
+              {t("approval.rejectingLabel")} <strong>{rejectDialog?.label}</strong> ({t(TABLE_LABEL_KEYS[rejectDialog?.table ?? "resources"])})
             </p>
             <Textarea
               placeholder={t("approval.rejectionReason")}
