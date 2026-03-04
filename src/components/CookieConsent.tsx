@@ -33,17 +33,17 @@ const CookieConsent = forwardRef<HTMLDivElement>(function CookieConsent(_props, 
       <div className="bg-card border border-border rounded-xl shadow-lg p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4">
         <Shield className="h-5 w-5 text-accent shrink-0 mt-0.5 sm:mt-0" />
         <p className="text-sm text-muted-foreground leading-relaxed flex-1">
-          {t("cookie.message" as any)}{" "}
+          {t("cookie.message")}{" "}
           <Link to="/privacy" className="text-accent hover:underline font-medium">
-            {t("cookie.privacyPolicy" as any)}
+            {t("cookie.privacyPolicy")}
           </Link>
         </p>
         <div className="flex items-center gap-2 shrink-0">
           <Button variant="outline" size="sm" onClick={handleReject}>
-            {t("cookie.reject" as any)}
+            {t("cookie.reject")}
           </Button>
           <Button size="sm" onClick={handleAccept}>
-            {t("cookie.accept" as any)}
+            {t("cookie.accept")}
           </Button>
         </div>
       </div>
