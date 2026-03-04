@@ -2,6 +2,9 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useImpersonation } from "@/contexts/ImpersonationContext";
+import type { Tables } from "@/integrations/supabase/types";
+
+type Tenant = Tables<"tenants">;
 
 export const useTenant = () => {
   const { user } = useAuth();
@@ -54,9 +57,13 @@ export const useTenant = () => {
   const isOwner = role === "owner" || isSuperadmin;
   const isAdmin = role === "admin" || isOwner;
 
+  const tenant: Tenant | null = tenantUser?.tenants
+    ? (tenantUser.tenants as unknown as Tenant)
+    : null;
+
   return {
     tenantUser,
-    tenant: tenantUser?.tenants as any,
+    tenant,
     tenantId: tenantUser?.tenant_id ?? null,
     role,
     isSuperadmin,

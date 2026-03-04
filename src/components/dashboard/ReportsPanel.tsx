@@ -126,7 +126,7 @@ const ReportsPanel = () => {
   const { selectedSiteId } = useSiteContext();
   const { applySiteFilter, siteIds } = useUserSites();
   const dateLocale = localeMap[language] || fiFns;
-  const isBasicTier = (tenantData as any)?.tier === "basic";
+  const isBasicTier = tenantData?.tier === "basic";
 
   const [period, setPeriod] = useState<Period>("month");
   const [referenceDate, setReferenceDate] = useState(new Date());
