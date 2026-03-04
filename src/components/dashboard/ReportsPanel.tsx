@@ -351,7 +351,7 @@ const ReportsPanel = () => {
 
   /* ── CSV Export ──────────────────────────────────────── */
   const handleExportCSV = () => {
-    const headers = [t("common.date"), t("reports.guest"), t("common.type"), t("common.guests"), t("common.status"), t("reports.used" as any), t("reports.breakfast" as any), t("reports.invoiced"), `${t("common.price")} (EUR)`, `${t("reports.totalPrice" as any)} (EUR)`, t("reports.notes")];
+    const headers = [t("common.date"), t("reports.guest"), t("common.type"), t("common.guests"), t("common.status"), t("reports.used"), t("reports.breakfast"), t("reports.invoiced"), `${t("common.price")} (EUR)`, `${t("reports.totalPrice")} (EUR)`, t("reports.notes")];
     const rows = reservations.map((r) => {
       const bfPrice = calcBreakfastPrice(r);
       const roomPrice = calcRoomPrice(r);
@@ -361,7 +361,7 @@ const ReportsPanel = () => {
       if (isAccommodation(r)) {
         priceStr = roomPrice.toFixed(2);
         totalStr = bfPrice > 0
-          ? `${roomPrice.toFixed(2)} + ${t("reports.breakfast" as any)}: ${bfPrice.toFixed(2)} = ${total.toFixed(2)}`
+          ? `${roomPrice.toFixed(2)} + ${t("reports.breakfast")}: ${bfPrice.toFixed(2)} = ${total.toFixed(2)}`
           : total.toFixed(2);
       } else {
         priceStr = total > 0 ? total.toFixed(2) : "-";
@@ -413,7 +413,7 @@ const ReportsPanel = () => {
       const priceCell = isAccommodation(r) ? fmtEur(roomPrice) : (total > 0 ? fmtEur(total) : "—");
       let totalCell: string;
       if (isAccommodation(r) && bfPrice > 0 && total > 0) {
-        totalCell = `<span style="white-space:nowrap">${fmtEur(roomPrice)}</span><br><span style="font-size:0.7rem;color:#666">+ ${t("reports.breakfast" as any)}: ${fmtEur(bfPrice)}</span><br><strong>${fmtEur(total)}</strong>`;
+        totalCell = `<span style="white-space:nowrap">${fmtEur(roomPrice)}</span><br><span style="font-size:0.7rem;color:#666">+ ${t("reports.breakfast")}: ${fmtEur(bfPrice)}</span><br><strong>${fmtEur(total)}</strong>`;
       } else {
         totalCell = total > 0 ? fmtEur(total) : "—";
       }
@@ -460,7 +460,7 @@ const ReportsPanel = () => {
 
       <h2>${t("reports.details")}</h2>
       <table>
-        <thead><tr><th>${t("common.date")}</th><th>${t("reports.guest")}</th><th>${t("common.type")}</th><th>${t("common.guests")}</th><th>${t("common.status")}</th><th>${t("reports.used" as any)}</th><th>${t("reports.breakfast" as any)}</th><th>${t("reports.invoiced")}</th><th>${t("common.price")} (€)</th><th>${t("reports.totalPrice" as any)} (€)</th></tr></thead>
+        <thead><tr><th>${t("common.date")}</th><th>${t("reports.guest")}</th><th>${t("common.type")}</th><th>${t("common.guests")}</th><th>${t("common.status")}</th><th>${t("reports.used")}</th><th>${t("reports.breakfast")}</th><th>${t("reports.invoiced")}</th><th>${t("common.price")} (€)</th><th>${t("reports.totalPrice")} (€)</th></tr></thead>
         <tbody>${tableRows}</tbody>
         <tfoot><tr><td colspan="9" style="text-align:right">${t("reports.grandTotal")}</td><td style="text-align:right">${fmtEur(grandTotal)}</td></tr></tfoot>
       </table>

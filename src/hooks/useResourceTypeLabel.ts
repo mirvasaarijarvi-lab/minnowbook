@@ -33,7 +33,7 @@ export const useResourceTypeLabel = () => {
     restaurant: t("dashboard.restaurant"),
     venue: t("dashboard.venue"),
     guesthouse: t("dashboard.guesthouse"),
-    hotel: t("dashboard.hotel" as any),
+    hotel: t("dashboard.hotel"),
   };
 
   /** Returns the custom name if set, otherwise the translated default */
