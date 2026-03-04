@@ -14,27 +14,14 @@ interface ImpersonationContextType {
 
 const ImpersonationContext = createContext<ImpersonationContextType | null>(null);
 
-const STORAGE_KEY = "minnowbook-impersonation";
-
-function loadFromStorage(): ImpersonationState {
-  try {
-    const raw = sessionStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw);
-  } catch {}
-  return { tenantId: null, tenantName: null };
-}
-
 export function ImpersonationProvider({ children }: { children: ReactNode }) {
-  const [impersonating, setImpersonating] = useState<ImpersonationState>(loadFromStorage);
+  const [impersonating, setImpersonating] = useState<ImpersonationState>({ tenantId: null, tenantName: null });
 
   const startImpersonation = useCallback((tenantId: string, tenantName: string) => {
-    const state = { tenantId, tenantName };
-    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    setImpersonating(state);
+    setImpersonating({ tenantId, tenantName });
   }, []);
 
   const stopImpersonation = useCallback(() => {
-    sessionStorage.removeItem(STORAGE_KEY);
     setImpersonating({ tenantId: null, tenantName: null });
   }, []);
 
