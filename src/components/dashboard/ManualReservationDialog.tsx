@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useT } from "@/contexts/I18nContext";
+import { useT, useTDynamic } from "@/contexts/I18nContext";
 import { useSiteContext } from "@/hooks/useSiteContext";
 import { useTenant } from "@/hooks/useTenant";
 import {
@@ -88,6 +88,7 @@ const ManualReservationDialog = ({
   defaultDate,
 }: ManualReservationDialogProps) => {
   const t = useT();
+  const tDynamic = useTDynamic();
   const dateFnsLocale = useDateLocale();
   const queryClient = useQueryClient();
   const { tenant, tenantId } = useTenant();
@@ -271,7 +272,7 @@ const ManualReservationDialog = ({
                 <SelectContent>
                   {allowedTypes.map((type) => (
                     <SelectItem key={type} value={type}>
-                      {t(`dashboard.${type}` as any)}
+                      {tDynamic(`dashboard.${type}`)}
                     </SelectItem>
                   ))}
                 </SelectContent>

@@ -2,7 +2,7 @@ import { useState, useMemo, useCallback, useEffect } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useT } from "@/contexts/I18nContext";
+import { useT, useTDynamic } from "@/contexts/I18nContext";
 import type { TranslationKey } from "@/i18n/translations";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -200,6 +200,7 @@ const PublicBookingInner = () => {
   const { slug } = useParams<{ slug: string }>();
   const [searchParams] = useSearchParams();
   const t = useT();
+  const tDynamic = useTDynamic();
   const dateFnsLocale = useDateLocale();
   const [submitted, setSubmitted] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
@@ -1140,7 +1141,7 @@ const PublicBookingInner = () => {
                             className="text-sm font-semibold block"
                             style={{ color: primaryColor }}
                           >
-                            {(settings?.resource_type_names as Record<string, string>)?.[type] || t(`dashboard.${type}` as any)}
+                            {(settings?.resource_type_names as Record<string, string>)?.[type] || tDynamic(`dashboard.${type}`)}
                           </span>
                           {((settings?.resource_type_descriptions as Record<string, string>)?.[type] || (descKey && t(descKey))) && (
                             <span

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/hooks/useTenant";
-import { useT } from "@/contexts/I18nContext";
+import { useT, useTDynamic } from "@/contexts/I18nContext";
 import { useSiteContext } from "@/hooks/useSiteContext";
 import SiteTabs from "./SiteTabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -50,6 +50,7 @@ const EMPTY_FORM: SiteSettingsForm = {
 
 const SiteSettingsInfo = ({ siteId, tenantId }: { siteId: string; tenantId: string }) => {
   const t = useT();
+  const tDynamic = useTDynamic();
   const queryClient = useQueryClient();
 
   // Site basic info
@@ -297,7 +298,7 @@ const SiteSettingsInfo = ({ siteId, tenantId }: { siteId: string; tenantId: stri
                   };
                   return (
                     <div key={key} className="space-y-2">
-                      <Label>{t(labelMap[key] as any)}</Label>
+                      <Label>{tDynamic(labelMap[key])}</Label>
                       <div className="flex gap-1.5">
                         <Input
                           value={form[key]}
@@ -363,7 +364,7 @@ const SiteSettingsInfo = ({ siteId, tenantId }: { siteId: string; tenantId: stri
                   const labelKey = key === "primary_color" ? "settings.primary" : key === "secondary_color" ? "settings.secondary" : "settings.accent";
                   return (
                     <div key={key} className="space-y-2">
-                      <Label>{t(labelKey as any)}</Label>
+                      <Label>{tDynamic(labelKey)}</Label>
                       <div className="flex items-center gap-2">
                         <input
                           type="color"
@@ -468,6 +469,7 @@ const SettingsPanel = () => {
   const { tenantId, tenant } = useTenant();
   const { selectedSiteId } = useSiteContext();
   const t = useT();
+  const tDynamic = useTDynamic();
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const heroInputRef = useRef<HTMLInputElement>(null);
@@ -933,14 +935,14 @@ const SettingsPanel = () => {
           <CardContent className="space-y-6">
             {(tenant.allowed_reservation_types as string[]).map((type: string) => (
               <div key={type} className="space-y-3">
-                <Label className="capitalize font-semibold">{t(`dashboard.${type}` as any)}</Label>
+                <Label className="capitalize font-semibold">{tDynamic(`dashboard.${type}`)}</Label>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div className="space-y-1">
                     <Label className="text-xs text-muted-foreground">{t("common.name")}</Label>
                     <Input
                       value={resourceTypeNames[type] ?? ""}
                       onChange={(e) => setResourceTypeNames((prev) => ({ ...prev, [type]: e.target.value }))}
-                      placeholder={t(`dashboard.${type}` as any)}
+                      placeholder={tDynamic(`dashboard.${type}`)}
                     />
                   </div>
                   <div className="space-y-1">
@@ -969,7 +971,7 @@ const SettingsPanel = () => {
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {(tenant.allowed_reservation_types as string[]).map((type: string) => (
                 <div key={type} className="space-y-2">
-                  <Label className="capitalize">{t(`dashboard.${type}` as any)}</Label>
+                  <Label className="capitalize">{tDynamic(`dashboard.${type}`)}</Label>
                   <div className="flex items-center gap-2">
                     <Input
                       type="number"

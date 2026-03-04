@@ -13,7 +13,7 @@ import { useState, useMemo } from "react";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval } from "date-fns";
 import { fi as fiFns, enUS, sv as svFns, type Locale } from "date-fns/locale";
 import { cn } from "@/lib/utils";
-import { useT, useLanguage } from "@/contexts/I18nContext";
+import { useT, useTDynamic, useLanguage } from "@/contexts/I18nContext";
 import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
 import { Ban, Clock, RefreshCw, Lock, Unlock } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
@@ -37,6 +37,7 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
   const [blockDialogOpen, setBlockDialogOpen] = useState(false);
   const [blockReason, setBlockReason] = useState("");
   const t = useT();
+  const tDynamic = useTDynamic();
   const { language } = useLanguage();
   const dateFnsLocale = LOCALE_MAP[language] ?? enUS;
   const queryClient = useQueryClient();
@@ -423,7 +424,7 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
                         r.status === "confirmed" && "bg-success/20 text-success-foreground border border-success/30",
                         r.status === "pending" && "bg-accent/20 text-accent-foreground border border-accent/30",
                         r.status === "cancelled" && "bg-destructive/20 text-destructive border border-destructive/30",
-                      )}>{t(`dashboard.${r.status ?? "pending"}` as any)}</Badge>
+                      )}>{tDynamic(`dashboard.${r.status ?? "pending"}`)}</Badge>
                     </div>
                   </div>
                 ))}
