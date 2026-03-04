@@ -22,112 +22,112 @@ const Support = () => {
 
   const articles = useMemo(() => [
     {
-      title: t("support.gettingStarted" as any),
-      description: t("support.gettingStartedDesc" as any),
+      title: t("support.gettingStarted"),
+      description: t("support.gettingStartedDesc"),
       icon: BookOpen,
-      category: t("support.catBasics" as any),
+      category: t("support.catBasics"),
       content: [
-        t("support.gettingStartedC1" as any),
-        t("support.gettingStartedC2" as any),
-        t("support.gettingStartedC3" as any),
-        t("support.gettingStartedC4" as any),
+        t("support.gettingStartedC1"),
+        t("support.gettingStartedC2"),
+        t("support.gettingStartedC3"),
+        t("support.gettingStartedC4"),
       ],
     },
     {
-      title: t("support.managingRes" as any),
-      description: t("support.managingResDesc" as any),
+      title: t("support.managingRes"),
+      description: t("support.managingResDesc"),
       icon: CalendarDays,
-      category: t("support.catReservations" as any),
+      category: t("support.catReservations"),
       content: [
-        t("support.managingResC1" as any),
-        t("support.managingResC2" as any),
-        t("support.managingResC3" as any),
-        t("support.managingResC4" as any),
+        t("support.managingResC1"),
+        t("support.managingResC2"),
+        t("support.managingResC3"),
+        t("support.managingResC4"),
       ],
     },
     {
-      title: t("support.emailTemplates" as any),
-      description: t("support.emailTemplatesDesc" as any),
+      title: t("support.emailTemplates"),
+      description: t("support.emailTemplatesDesc"),
       icon: Mail,
-      category: t("support.catCommunication" as any),
+      category: t("support.catCommunication"),
       content: [
-        t("support.emailTemplatesC1" as any),
-        t("support.emailTemplatesC2" as any),
-        t("support.emailTemplatesC3" as any),
-        t("support.emailTemplatesC4" as any),
+        t("support.emailTemplatesC1"),
+        t("support.emailTemplatesC2"),
+        t("support.emailTemplatesC3"),
+        t("support.emailTemplatesC4"),
       ],
     },
     {
-      title: t("support.brandingTitle" as any),
-      description: t("support.brandingDesc" as any),
+      title: t("support.brandingTitle"),
+      description: t("support.brandingDesc"),
       icon: Palette,
-      category: t("support.catCustomization" as any),
+      category: t("support.catCustomization"),
       content: [
-        t("support.brandingC1" as any),
-        t("support.brandingC2" as any),
-        t("support.brandingC3" as any),
-        t("support.brandingC4" as any),
+        t("support.brandingC1"),
+        t("support.brandingC2"),
+        t("support.brandingC3"),
+        t("support.brandingC4"),
       ],
     },
     {
-      title: t("support.openingHoursTitle" as any),
-      description: t("support.openingHoursDesc" as any),
+      title: t("support.openingHoursTitle"),
+      description: t("support.openingHoursDesc"),
       icon: Clock,
-      category: t("support.catConfiguration" as any),
+      category: t("support.catConfiguration"),
       content: [
-        t("support.openingHoursC1" as any),
-        t("support.openingHoursC2" as any),
-        t("support.openingHoursC3" as any),
-        t("support.openingHoursC4" as any),
+        t("support.openingHoursC1"),
+        t("support.openingHoursC2"),
+        t("support.openingHoursC3"),
+        t("support.openingHoursC4"),
       ],
     },
     {
-      title: t("support.resourcesTitle" as any),
-      description: t("support.resourcesDesc" as any),
+      title: t("support.resourcesTitle"),
+      description: t("support.resourcesDesc"),
       icon: Settings,
-      category: t("support.catConfiguration" as any),
+      category: t("support.catConfiguration"),
       content: [
-        t("support.resourcesC1" as any),
-        t("support.resourcesC2" as any),
-        t("support.resourcesC3" as any),
-        t("support.resourcesC4" as any),
+        t("support.resourcesC1"),
+        t("support.resourcesC2"),
+        t("support.resourcesC3"),
+        t("support.resourcesC4"),
       ],
     },
     {
-      title: t("support.staffTitle" as any),
-      description: t("support.staffDesc" as any),
+      title: t("support.staffTitle"),
+      description: t("support.staffDesc"),
       icon: Users,
-      category: t("support.catTeam" as any),
+      category: t("support.catTeam"),
       content: [
-        t("support.staffC1" as any),
-        t("support.staffC2" as any),
-        t("support.staffC3" as any),
-        t("support.staffC4" as any),
+        t("support.staffC1"),
+        t("support.staffC2"),
+        t("support.staffC3"),
+        t("support.staffC4"),
       ],
     },
     {
-      title: t("support.billingTitle" as any),
-      description: t("support.billingDesc" as any),
+      title: t("support.billingTitle"),
+      description: t("support.billingDesc"),
       icon: CreditCard,
-      category: t("support.catBilling" as any),
+      category: t("support.catBilling"),
       content: [
-        t("support.billingC1" as any),
-        t("support.billingC2" as any),
-        t("support.billingC3" as any),
-        t("support.billingC4" as any),
+        t("support.billingC1"),
+        t("support.billingC2"),
+        t("support.billingC3"),
+        t("support.billingC4"),
       ],
     },
     {
-      title: t("support.faqTitle" as any),
-      description: t("support.faqDesc" as any),
+      title: t("support.faqTitle"),
+      description: t("support.faqDesc"),
       icon: HelpCircle,
-      category: t("support.catFaq" as any),
+      category: t("support.catFaq"),
       content: [
-        t("support.faqC1" as any),
-        t("support.faqC2" as any),
-        t("support.faqC3" as any),
-        t("support.faqC4" as any),
-        t("support.faqC5" as any),
+        t("support.faqC1"),
+        t("support.faqC2"),
+        t("support.faqC3"),
+        t("support.faqC4"),
+        t("support.faqC5"),
       ],
     },
   ], [t]);
@@ -152,15 +152,15 @@ const Support = () => {
       <section className="py-16 md:py-24 gradient-hero">
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-4xl md:text-5xl font-serif font-bold text-primary-foreground mb-4">
-            {t("support.heroTitle" as any)}
+            {t("support.heroTitle")}
           </h1>
           <p className="text-lg text-primary-foreground/70 max-w-xl mx-auto mb-8">
-            {t("support.heroSubtitle" as any)}
+            {t("support.heroSubtitle")}
           </p>
           <div className="max-w-md mx-auto relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder={t("support.searchPlaceholder" as any)}
+              placeholder={t("support.searchPlaceholder")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-10 bg-card border-border"
@@ -174,7 +174,7 @@ const Support = () => {
         <div className="container mx-auto px-4">
           {filtered.length === 0 ? (
             <p className="text-center text-muted-foreground text-lg">
-              {t("support.noResults" as any)}
+              {t("support.noResults")}
             </p>
           ) : (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto">
@@ -223,10 +223,10 @@ const Support = () => {
       <section className="py-16 bg-secondary/50">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-2xl font-serif font-bold text-foreground mb-3">
-            {t("support.stillNeedHelp" as any)}
+            {t("support.stillNeedHelp")}
           </h2>
           <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-            {t("support.stillNeedHelpDesc" as any)}
+            {t("support.stillNeedHelpDesc")}
           </p>
         </div>
       </section>

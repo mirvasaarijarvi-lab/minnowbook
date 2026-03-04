@@ -75,7 +75,7 @@ const SiteSelector = () => {
       const site = visibleSites.find((s) => s.id === selectedSiteId);
       return site?.name ?? "Site";
     }
-    return t("sites.allSites" as any) || "All sites";
+    return t("sites.allSites") || "All sites";
   };
 
   const handleSelectAll = () => {
@@ -125,7 +125,7 @@ const SiteSelector = () => {
                     : "text-foreground/80 hover:bg-muted"
                 )}
               >
-                {t("sites.allSites" as any) || "All sites"}
+                {t("sites.allSites") || "All sites"}
               </button>
             )}
 

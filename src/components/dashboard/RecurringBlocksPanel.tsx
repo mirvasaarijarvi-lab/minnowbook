@@ -139,7 +139,7 @@ const RecurringBlocksPanel = () => {
       queryClient.invalidateQueries({ queryKey: ["approval-queue-count"] });
       setDialogOpen(false);
       resetForm();
-      const statusMsg = !isPrivileged ? ` (${t("blocking.pendingApproval" as any)})` : "";
+      const statusMsg = !isPrivileged ? ` (${t("blocking.pendingApproval")})` : "";
       toast({ title: t("blocking.recurringCreated") + statusMsg });
     },
     onError: (err: any) => {

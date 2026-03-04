@@ -555,6 +555,8 @@ type TranslationKeys = {
   "dashboard.invoiced": string;
   "dashboard.total": string;
   "dashboard.dailySnapshot": string;
+  "dashboard.overviewSubtitle": string;
+  "blocking.pendingApproval": string;
   "dashboard.calendarHotel": string;
   "dashboard.calendarVenue": string;
   "dashboard.calendarRestaurant": string;
@@ -1766,6 +1768,8 @@ const en: TranslationKeys = {
   "dashboard.invoiced": "Invoiced",
   "dashboard.total": "total",
   "dashboard.dailySnapshot": "Daily snapshot at a glance",
+  "dashboard.overviewSubtitle": "Daily snapshot at a glance",
+  "blocking.pendingApproval": "pending approval",
   "dashboard.calendarHotel": "Hotel / Guesthouse",
   "dashboard.calendarVenue": "Event Spaces",
   "dashboard.calendarRestaurant": "Restaurant",
@@ -2959,6 +2963,8 @@ const fi: TranslationKeys = {
   "dashboard.invoiced": "Laskutettu",
   "dashboard.total": "yhteensä",
   "dashboard.dailySnapshot": "Päivittäinen tilannekatsaus",
+  "dashboard.overviewSubtitle": "Päivittäinen tilannekatsaus",
+  "blocking.pendingApproval": "odottaa hyväksyntää",
   "dashboard.calendarHotel": "Hotelli / Majatalo",
   "dashboard.calendarVenue": "Juhlatilat",
   "dashboard.calendarRestaurant": "Ravintola",
@@ -4151,6 +4157,8 @@ const sv: TranslationKeys = {
   "dashboard.invoiced": "Fakturerad",
   "dashboard.total": "totalt",
   "dashboard.dailySnapshot": "Daglig översikt",
+  "dashboard.overviewSubtitle": "Daglig översikt",
+  "blocking.pendingApproval": "väntar på godkännande",
   "dashboard.calendarHotel": "Hotell / Gästhus",
   "dashboard.calendarVenue": "Festlokaler",
   "dashboard.calendarRestaurant": "Restaurang",

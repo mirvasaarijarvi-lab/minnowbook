@@ -41,44 +41,44 @@ const Accessibility = () => {
 
       <main className="max-w-3xl mx-auto px-6 py-16 flex-1">
         <h1 className="text-3xl sm:text-4xl font-serif font-bold text-foreground mb-2">
-          {t("a11y.title" as any)}
+          {t("a11y.title")}
         </h1>
         <p className="text-sm text-muted-foreground mb-10">
-          {t("a11y.lastUpdated" as any)} {dateStr}
+          {t("a11y.lastUpdated")} {dateStr}
         </p>
 
         <div className="space-y-8">
-          <Section title={t("a11y.s1Title" as any)}>
-            <p className="text-muted-foreground leading-relaxed mt-2">{t("a11y.s1P1" as any)}</p>
+          <Section title={t("a11y.s1Title")}>
+            <p className="text-muted-foreground leading-relaxed mt-2">{t("a11y.s1P1")}</p>
           </Section>
 
-          <Section title={t("a11y.s2Title" as any)}>
-            <p className="text-muted-foreground leading-relaxed mt-2">{t("a11y.s2P1" as any)}</p>
+          <Section title={t("a11y.s2Title")}>
+            <p className="text-muted-foreground leading-relaxed mt-2">{t("a11y.s2P1")}</p>
             <ul className="list-disc pl-6 text-muted-foreground space-y-1 mt-2">
-              <li>{t("a11y.s2Item1" as any)}</li>
-              <li>{t("a11y.s2Item2" as any)}</li>
-              <li>{t("a11y.s2Item3" as any)}</li>
-              <li>{t("a11y.s2Item4" as any)}</li>
-              <li>{t("a11y.s2Item5" as any)}</li>
-              <li>{t("a11y.s2Item6" as any)}</li>
+              <li>{t("a11y.s2Item1")}</li>
+              <li>{t("a11y.s2Item2")}</li>
+              <li>{t("a11y.s2Item3")}</li>
+              <li>{t("a11y.s2Item4")}</li>
+              <li>{t("a11y.s2Item5")}</li>
+              <li>{t("a11y.s2Item6")}</li>
             </ul>
           </Section>
 
-          <Section title={t("a11y.s3Title" as any)}>
-            <p className="text-muted-foreground leading-relaxed mt-2">{t("a11y.s3P1" as any)}</p>
+          <Section title={t("a11y.s3Title")}>
+            <p className="text-muted-foreground leading-relaxed mt-2">{t("a11y.s3P1")}</p>
             <ul className="list-disc pl-6 text-muted-foreground space-y-1 mt-2">
-              <li>{t("a11y.s3Item1" as any)}</li>
-              <li>{t("a11y.s3Item2" as any)}</li>
-              <li>{t("a11y.s3Item3" as any)}</li>
+              <li>{t("a11y.s3Item1")}</li>
+              <li>{t("a11y.s3Item2")}</li>
+              <li>{t("a11y.s3Item3")}</li>
             </ul>
           </Section>
 
-          <Section title={t("a11y.s4Title" as any)}>
-            <p className="text-muted-foreground leading-relaxed mt-2">{t("a11y.s4P1" as any)}</p>
+          <Section title={t("a11y.s4Title")}>
+            <p className="text-muted-foreground leading-relaxed mt-2">{t("a11y.s4P1")}</p>
           </Section>
 
-          <Section title={t("a11y.s5Title" as any)}>
-            <p className="text-muted-foreground leading-relaxed mt-2">{t("a11y.s5P1" as any)}</p>
+          <Section title={t("a11y.s5Title")}>
+            <p className="text-muted-foreground leading-relaxed mt-2">{t("a11y.s5P1")}</p>
           </Section>
         </div>
       </main>
