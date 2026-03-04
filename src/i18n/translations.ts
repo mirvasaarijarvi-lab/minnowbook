@@ -694,7 +694,149 @@ type TranslationKeys = {
   "tier.business": string;
   "tier.businessDesc": string;
 
-  // Footer
+  // Pricing page
+  "pricing.heroTitle": string;
+  "pricing.heroSubtitle": string;
+  "pricing.basicName": string;
+  "pricing.basicDesc": string;
+  "pricing.basicTypes": string;
+  "pricing.basicStaff": string;
+  "pricing.proName": string;
+  "pricing.proDesc": string;
+  "pricing.proTypes": string;
+  "pricing.proStaff": string;
+  "pricing.businessName": string;
+  "pricing.businessDesc": string;
+  "pricing.businessTypes": string;
+  "pricing.businessStaff": string;
+  "pricing.basicF1": string;
+  "pricing.basicF2": string;
+  "pricing.basicF3": string;
+  "pricing.basicF4": string;
+  "pricing.basicF5": string;
+  "pricing.basicF6": string;
+  "pricing.basicF7": string;
+  "pricing.basicF8": string;
+  "pricing.proF1": string;
+  "pricing.proF2": string;
+  "pricing.proF3": string;
+  "pricing.proF4": string;
+  "pricing.proF5": string;
+  "pricing.proF6": string;
+  "pricing.proF7": string;
+  "pricing.proF8": string;
+  "pricing.businessF1": string;
+  "pricing.businessF2": string;
+  "pricing.businessF3": string;
+  "pricing.businessF4": string;
+  "pricing.businessF5": string;
+  "pricing.businessF6": string;
+  "pricing.businessF7": string;
+  "pricing.businessF8": string;
+  "pricing.sitesLocations": string;
+  "pricing.resourcesPerType": string;
+  "pricing.customBranding": string;
+  "pricing.brandedBooking": string;
+  "pricing.defaultTemplates": string;
+  "pricing.customTemplates": string;
+  "pricing.advancedRules": string;
+  "pricing.multiLanguage": string;
+  "pricing.multisiteManagement": string;
+  "pricing.analyticsReports": string;
+  "pricing.supportLevel": string;
+  "pricing.basic": string;
+  "pricing.advanced": string;
+  "pricing.unlimited": string;
+  "pricing.all": string;
+  "pricing.multiLocationTitle": string;
+  "pricing.multiLocationDesc": string;
+  "pricing.tryBusinessFree": string;
+  "pricing.faqQ1": string;
+  "pricing.faqA1": string;
+  "pricing.faqQ2": string;
+  "pricing.faqA2": string;
+  "pricing.faqQ3": string;
+  "pricing.faqA3": string;
+  "pricing.faqQ4": string;
+  "pricing.faqA4": string;
+  "pricing.faqQ5": string;
+  "pricing.faqA5": string;
+  "pricing.faqQ6": string;
+  "pricing.faqA6": string;
+  "pricing.noCreditCard": string;
+  "pricing.setupMinutes": string;
+
+  // Support page
+  "support.heroTitle": string;
+  "support.heroSubtitle": string;
+  "support.searchPlaceholder": string;
+  "support.noResults": string;
+  "support.stillNeedHelp": string;
+  "support.stillNeedHelpDesc": string;
+  "support.gettingStarted": string;
+  "support.gettingStartedDesc": string;
+  "support.gettingStartedC1": string;
+  "support.gettingStartedC2": string;
+  "support.gettingStartedC3": string;
+  "support.gettingStartedC4": string;
+  "support.managingRes": string;
+  "support.managingResDesc": string;
+  "support.managingResC1": string;
+  "support.managingResC2": string;
+  "support.managingResC3": string;
+  "support.managingResC4": string;
+  "support.emailTemplates": string;
+  "support.emailTemplatesDesc": string;
+  "support.emailTemplatesC1": string;
+  "support.emailTemplatesC2": string;
+  "support.emailTemplatesC3": string;
+  "support.emailTemplatesC4": string;
+  "support.brandingTitle": string;
+  "support.brandingDesc": string;
+  "support.brandingC1": string;
+  "support.brandingC2": string;
+  "support.brandingC3": string;
+  "support.brandingC4": string;
+  "support.openingHoursTitle": string;
+  "support.openingHoursDesc": string;
+  "support.openingHoursC1": string;
+  "support.openingHoursC2": string;
+  "support.openingHoursC3": string;
+  "support.openingHoursC4": string;
+  "support.resourcesTitle": string;
+  "support.resourcesDesc": string;
+  "support.resourcesC1": string;
+  "support.resourcesC2": string;
+  "support.resourcesC3": string;
+  "support.resourcesC4": string;
+  "support.staffTitle": string;
+  "support.staffDesc": string;
+  "support.staffC1": string;
+  "support.staffC2": string;
+  "support.staffC3": string;
+  "support.staffC4": string;
+  "support.billingTitle": string;
+  "support.billingDesc": string;
+  "support.billingC1": string;
+  "support.billingC2": string;
+  "support.billingC3": string;
+  "support.billingC4": string;
+  "support.faqTitle": string;
+  "support.faqDesc": string;
+  "support.faqC1": string;
+  "support.faqC2": string;
+  "support.faqC3": string;
+  "support.faqC4": string;
+  "support.faqC5": string;
+  "support.catBasics": string;
+  "support.catReservations": string;
+  "support.catCommunication": string;
+  "support.catCustomization": string;
+  "support.catConfiguration": string;
+  "support.catTeam": string;
+  "support.catBilling": string;
+  "support.catFaq": string;
+
   "footer.tagline": string;
   "footer.product": string;
   "footer.company": string;
@@ -2158,6 +2300,149 @@ const en: TranslationKeys = {
   "approval.noReason": "No reason",
   "approval.closed": "Closed",
   "approval.pendingApproval": "Submitted for approval",
+
+  // Pricing page
+  "pricing.heroTitle": "Plans for every stage of growth",
+  "pricing.heroSubtitle": "Start with a 30-day free trial on any plan. No credit card required. Scale up as your business grows.",
+  "pricing.basicName": "Basic",
+  "pricing.basicDesc": "Perfect for small businesses just getting started with online reservations.",
+  "pricing.basicTypes": "1 type (you choose)",
+  "pricing.basicStaff": "1–3",
+  "pricing.proName": "Pro",
+  "pricing.proDesc": "For growing businesses that need all service types under one roof.",
+  "pricing.proTypes": "All types included",
+  "pricing.proStaff": "Up to 10",
+  "pricing.businessName": "Business",
+  "pricing.businessDesc": "Full-featured platform for growing hospitality businesses with multiple locations.",
+  "pricing.businessTypes": "All types included",
+  "pricing.businessStaff": "Unlimited",
+  "pricing.basicF1": "1 site / location",
+  "pricing.basicF2": "1 reservation type (you choose)",
+  "pricing.basicF3": "Custom branding (logo, colors, images)",
+  "pricing.basicF4": "Branded booking page on your subdomain",
+  "pricing.basicF5": "Default email templates",
+  "pricing.basicF6": "Opening hours configuration",
+  "pricing.basicF7": "Calendar & list views",
+  "pricing.basicF8": "AI chatbot support",
+  "pricing.proF1": "1 site / location",
+  "pricing.proF2": "All reservation types (1 resource per type)",
+  "pricing.proF3": "Everything in Basic",
+  "pricing.proF4": "Custom email templates (HTML editor)",
+  "pricing.proF5": "Advanced opening hours & booking rules",
+  "pricing.proF6": "Multi-language booking pages",
+  "pricing.proF7": "Detailed analytics & reports",
+  "pricing.proF8": "AI chatbot support",
+  "pricing.businessF1": "Unlimited sites & locations",
+  "pricing.businessF2": "All reservation types (unlimited resources)",
+  "pricing.businessF3": "Everything in Pro",
+  "pricing.businessF4": "Multi-site management dashboard",
+  "pricing.businessF5": "Unlimited staff accounts",
+  "pricing.businessF6": "Per-site branding & settings",
+  "pricing.businessF7": "Advanced revenue reporting",
+  "pricing.businessF8": "Priority support (24h response)",
+  "pricing.sitesLocations": "Sites / locations",
+  "pricing.resourcesPerType": "Resources per type",
+  "pricing.customBranding": "Custom branding",
+  "pricing.brandedBooking": "Branded booking page",
+  "pricing.defaultTemplates": "Default email templates",
+  "pricing.customTemplates": "Custom email templates",
+  "pricing.advancedRules": "Advanced booking rules",
+  "pricing.multiLanguage": "Multi-language support",
+  "pricing.multisiteManagement": "Multi-site management",
+  "pricing.analyticsReports": "Analytics & reports",
+  "pricing.supportLevel": "Support",
+  "pricing.basic": "Basic",
+  "pricing.advanced": "Advanced",
+  "pricing.unlimited": "Unlimited",
+  "pricing.all": "All",
+  "pricing.multiLocationTitle": "Managing multiple locations?",
+  "pricing.multiLocationDesc": "The Business plan supports unlimited sites with multi-site management — run hotels, restaurants, and venues from a single dashboard.",
+  "pricing.tryBusinessFree": "Try Business Free for 30 Days",
+  "pricing.faqQ1": "What happens after the 30-day trial?",
+  "pricing.faqA1": "Your trial converts to a paid subscription. You can cancel anytime before the trial ends, no charge.",
+  "pricing.faqQ2": "Can I change my plan later?",
+  "pricing.faqA2": "Yes! You can upgrade or downgrade your plan at any time. Changes take effect at the start of your next billing cycle.",
+  "pricing.faqQ3": "What reservation types can I choose?",
+  "pricing.faqA3": "Restaurant (table bookings), Venue (event space inquiries), and Gasthaus/Guesthouse (room reservations). Basic lets you pick one; Pro unlocks all types on a single site; Business adds unlimited sites with full multi-site management.",
+  "pricing.faqQ4": "Do I need a credit card to start the trial?",
+  "pricing.faqA4": "No credit card is required to start your free trial. You'll only be asked for payment details when the trial ends.",
+  "pricing.faqQ5": "Can I use my own domain?",
+  "pricing.faqA5": "Each business gets a branded subdomain (e.g., yourbusiness.minnowbook.com). Custom domain support is on our roadmap.",
+  "pricing.faqQ6": "What's the difference between AI chatbot support and priority support?",
+  "pricing.faqA6": "All plans include MinnowAid, our AI chatbot that can answer questions, help troubleshoot issues, and guide you through features instantly — available 24/7 in your dashboard. The Business plan adds priority support: you can escalate any conversation to our team and receive a guaranteed response within 24 hours.",
+  "pricing.noCreditCard": "No credit card required. Set up in minutes.",
+  "pricing.setupMinutes": "Set up in minutes.",
+
+  // Support page
+  "support.heroTitle": "How can we help?",
+  "support.heroSubtitle": "Browse guides, FAQs, and tips to get the most out of MinnowBook.",
+  "support.searchPlaceholder": "Search for help...",
+  "support.noResults": "No results found. Try a different search term.",
+  "support.stillNeedHelp": "Still need help?",
+  "support.stillNeedHelpDesc": "All plans include AI chatbot support in the dashboard. Business plan customers get priority support with guaranteed 24-hour response from our team.",
+  "support.gettingStarted": "Getting Started",
+  "support.gettingStartedDesc": "Set up your account and create your first booking page in minutes.",
+  "support.gettingStartedC1": "Sign up for a free 30-day trial — no credit card needed.",
+  "support.gettingStartedC2": "Complete the onboarding wizard to name your business and choose your reservation types.",
+  "support.gettingStartedC3": "Customize your branding (logo, colors) in Settings.",
+  "support.gettingStartedC4": "Share your booking link with customers!",
+  "support.managingRes": "Managing Reservations",
+  "support.managingResDesc": "View, edit, confirm, and cancel reservations from your dashboard.",
+  "support.managingResC1": "Use the Calendar view for a visual overview of upcoming bookings.",
+  "support.managingResC2": "Switch to the List view to filter by status, type, or date range.",
+  "support.managingResC3": "Click any reservation to edit details, add notes, or change status.",
+  "support.managingResC4": "Confirmation and cancellation emails are sent automatically.",
+  "support.emailTemplates": "Email Templates",
+  "support.emailTemplatesDesc": "Customize confirmation and cancellation emails sent to guests.",
+  "support.emailTemplatesC1": "Go to Settings → Email Templates to customize your emails.",
+  "support.emailTemplatesC2": "Preview how emails look before sending using the built-in preview.",
+  "support.emailTemplatesC3": "Add custom messages per reservation when confirming or cancelling.",
+  "support.emailTemplatesC4": "Emails support multi-language content (EN, FI, SV).",
+  "support.brandingTitle": "Branding & Booking Page",
+  "support.brandingDesc": "Customize your public booking page with your brand identity.",
+  "support.brandingC1": "Upload your logo and set primary/accent colors in Settings.",
+  "support.brandingC2": "Add a hero image for your booking page header.",
+  "support.brandingC3": "Your booking page is available at /book/your-slug.",
+  "support.brandingC4": "Business description appears on the booking page for guests.",
+  "support.openingHoursTitle": "Opening Hours",
+  "support.openingHoursDesc": "Configure when your business accepts bookings for each type.",
+  "support.openingHoursC1": "Set opening hours per reservation type (restaurant, venue, hotel).",
+  "support.openingHoursC2": "Mark specific days as closed.",
+  "support.openingHoursC3": "Opening hours determine available time slots on the booking page.",
+  "support.openingHoursC4": "Use blocked slots to temporarily close specific dates.",
+  "support.resourcesTitle": "Resources & Rooms",
+  "support.resourcesDesc": "Manage rooms, tables, and event spaces that can be booked.",
+  "support.resourcesC1": "Add resources in the Resources section of your dashboard.",
+  "support.resourcesC2": "Set capacity, pricing, and descriptions for each resource.",
+  "support.resourcesC3": "Upload photos to showcase your spaces on the booking page.",
+  "support.resourcesC4": "Deactivate resources to temporarily hide them from bookings.",
+  "support.staffTitle": "Staff & User Management",
+  "support.staffDesc": "Invite team members and manage roles and permissions.",
+  "support.staffC1": "Owners can invite staff via the Admin panel.",
+  "support.staffC2": "Roles: Owner (full access), Admin (manage resources), Staff (view reservations).",
+  "support.staffC3": "Approve or remove team members at any time.",
+  "support.staffC4": "Each plan has a staff user limit — upgrade to add more.",
+  "support.billingTitle": "Plans & Billing",
+  "support.billingDesc": "Understand pricing tiers and manage your subscription.",
+  "support.billingC1": "Basic (€29/mo) — 1 type, 1–3 staff, AI chatbot support.",
+  "support.billingC2": "Pro (€59/mo) — All types, 10 staff, custom templates, AI chatbot support.",
+  "support.billingC3": "Business (€99/mo) — All types, unlimited staff, priority support with 24h response.",
+  "support.billingC4": "Upgrade or downgrade anytime. Changes take effect next billing cycle.",
+  "support.faqTitle": "Frequently Asked Questions",
+  "support.faqDesc": "Answers to the most common questions about MinnowBook.",
+  "support.faqC1": "Q: Do I need a credit card for the trial? A: No!",
+  "support.faqC2": "Q: Can I use my own domain? A: Custom domains are on our roadmap.",
+  "support.faqC3": "Q: How do guests receive confirmations? A: Automatically via email when you confirm a booking.",
+  "support.faqC4": "Q: Can I export my data? A: Yes, reports can be exported from the Reports panel.",
+  "support.faqC5": "Q: What's the difference between AI chatbot and priority support? A: All plans include MinnowAid, our 24/7 AI chatbot. Business plan adds human priority support with a guaranteed 24-hour response.",
+  "support.catBasics": "Basics",
+  "support.catReservations": "Reservations",
+  "support.catCommunication": "Communication",
+  "support.catCustomization": "Customization",
+  "support.catConfiguration": "Configuration",
+  "support.catTeam": "Team",
+  "support.catBilling": "Billing",
+  "support.catFaq": "FAQ",
 };
 
 const fi: TranslationKeys = {
@@ -2541,44 +2826,44 @@ const fi: TranslationKeys = {
   "admin.permApproveSites": "Hyväksy toimipistemuutokset",
 
   "hero.badge": "Nyt betassa. 30 päivän ilmainen kokeilu",
-  "hero.title": "Varaustyökalu niille,",
-  "hero.titleHighlight": "jotka hoitavat kaiken",
-  "hero.subtitle": "Hallitse ravintolavarauksia, tilakyselyitä ja majoitusvarauksia yhdestä tyylikkäästä hallintapaneelista. Brändätyt varaussivut, automaattiset sähköpostit ja tiiminhallinta mukana.",
+  "hero.title": "Työkalu, joka on rakennettu",
+  "hero.titleHighlight": "majoitusvarausten hallintaan",
+  "hero.subtitle": "Hallitse ravintolavarauksia, tilakyselyitä ja hotelli- tai majatalovarauksia yhdestä tyylikkäästä hallintapaneelista.",
   "hero.viewPricing": "Katso hinnoittelu",
   "hero.noCreditCard": "Ei luottokorttia tarvita",
   "hero.cancelAnytime": "Peruuta milloin tahansa",
 
   // Features
   "features.title": "Kaikki mitä tarvitset varausten hallintaan",
-  "features.subtitle": "Täydellinen työkalupakki ravintola-alan yrityksille, varaussivuista tiiminhallintaan.",
-  "features.smartReservations": "Älykkäät varaukset",
-  "features.smartReservationsDesc": "Hallitse ravintolavarauksia, tilakyselyitä ja majoituksia yhdestä hallintapaneelista.",
+  "features.subtitle": "Täydellinen työkalupakki majoitusalan yrityksille.",
+  "features.smartReservations": "Varaukset",
+  "features.smartReservationsDesc": "Kerää ja hallitse kaikki varaustyypit yhdessä paikassa.",
   "features.customBranding": "Oma brändäys",
   "features.customBrandingDesc": "Oma logosi, omat värisi, omat kuvasi. Jokainen varaussivu vastaa brändi-identiteettiäsi.",
-  "features.teamManagement": "Tiiminhallinta",
+  "features.teamManagement": "Käyttäjähallinta",
   "features.teamManagementDesc": "Kutsu henkilökuntaa, määritä rooleja ja hallitse käyttöoikeuksia helposti.",
-  "features.brandedPages": "Brändätyt varaussivut",
-  "features.brandedPagesDesc": "Tarjoa asiakkaille viimeistelty varauskokemus omalla alidomainillasi.",
-  "features.reportsInsights": "Raportit ja analytiikka",
+  "features.brandedPages": "Varaustyypit",
+  "features.brandedPagesDesc": "Hotelli/majatalo, ravintola ja tapahtumatilat.",
+  "features.reportsInsights": "Raportit",
   "features.reportsInsightsDesc": "Seuraa varaustrendejä, käyttöasteita ja liikevaihtoa yhdellä silmäyksellä.",
   "features.automatedEmails": "Automaattiset sähköpostit",
   "features.automatedEmailsDesc": "Lähetä vahvistus-, muistutus- ja peruutussähköpostit automaattisesti.",
 
   // How it works
-  "howItWorks.title": "Käyttövalmis minuuteissa",
+  "howItWorks.title": "Käyttövalmis nopeasti ja helposti",
   "howItWorks.subtitle": "Kolme yksinkertaista vaihetta verkkovarausten vastaanottamiseen.",
   "howItWorks.step1Title": "Rekisteröidy ja valitse suunnitelma",
-  "howItWorks.step1Desc": "Luo tilisi sekunneissa ja aloita 30 päivän ilmainen kokeilu.",
+  "howItWorks.step1Desc": "Luo tilisi ja aloita 30 päivän ilmainen kokeilu.",
   "howItWorks.step2Title": "Määritä yrityksesi",
-  "howItWorks.step2Desc": "Lataa brändäyksesi, lisää resurssit ja määritä aukioloajat.",
+  "howItWorks.step2Desc": "Lataa brändäyksesi, lisää toimipisteet ja toiminnot, määritä aukioloajat, hinnoittelu, kapasiteetti ja paljon muuta.",
   "howItWorks.step3Title": "Jaa varauslinkkisi",
   "howItWorks.step3Desc": "Lähetä mukautettu varaussivusi asiakkaille ja ala vastaanottaa varauksia.",
 
   // Pricing
-  "pricing.title": "Suunnitelmat jokaiseen kasvuvaiheeseen",
-  "pricing.subtitle": "Aloita 30 päivän ilmaisella kokeilulla millä tahansa suunnitelmalla. Ei luottokorttia tarvita. Skaalaa ylöspäin yrityksesi kasvaessa.",
+  "pricing.title": "Suunnitelmat kaikkiin tarpeisiin",
+  "pricing.subtitle": "Aloita 30 päivän ilmaisella kokeilulla millä tahansa suunnitelmalla. Skaalaa ylöspäin yrityksesi kasvaessa.",
   "pricing.simpleTitle": "Yksinkertainen, läpinäkyvä hinnoittelu",
-  "pricing.simpleSubtitle": "Aloita 30 päivän ilmaisella kokeilulla. Ei luottokorttia tarvita. Päivitä tai peruuta milloin tahansa.",
+  "pricing.simpleSubtitle": "Aloita 30 päivän ilmaisella kokeilulla. Päivitä tai peruuta milloin tahansa.",
   "pricing.comparePlans": "Vertaa suunnitelmia yksityiskohtaisesti",
   "pricing.faq": "Usein kysytyt kysymykset",
   "pricing.feature": "Ominaisuus",
@@ -2591,11 +2876,11 @@ const fi: TranslationKeys = {
   "pricing.perMonth": "/kk",
   "pricing.mostPopular": "Suosituin",
   "pricing.ctaTitle": "Aloita ilmainen kokeilusi tänään",
-  "pricing.ctaSubtitle": "Ei luottokorttia tarvita. Käyttövalmis minuuteissa.",
+  "pricing.ctaSubtitle": "Käyttövalmis nopeasti ja helposti.",
 
   // CTA
   "cta.title": "Valmis modernisoimaan varauksesi?",
-  "cta.subtitle": "Liity ravintola-alan yrityksiin, jotka jo käyttävät MinnowBookia varausten sujuvoittamiseen.",
+  "cta.subtitle": "Liity majoitusalan yrityksiin, jotka jo käyttävät MinnowBookia varausten sujuvoittamiseen.",
 
   // Login
   "login.title": "Kirjaudu tilillesi",
@@ -2834,13 +3119,13 @@ const fi: TranslationKeys = {
   "onboarding.hotelDesc": "Hotelli- ja majatalohuoneet.",
   // Tiers
   "tier.basic": "Basic",
-  "tier.basicDesc": "Täydellinen pienille yrityksille, jotka ovat vasta aloittamassa.",
+  "tier.basicDesc": "Täydellinen pienelle hotellille, ravintolalle tai tapahtumatilalle.",
   "tier.pro": "Pro",
-  "tier.proDesc": "Kasvaville yrityksille, jotka tarvitsevat enemmän hallintaa.",
+  "tier.proDesc": "Yrityksille, jotka tarjoavat hotellin, ravintolan ja tapahtumatilan yhdessä toimipisteessä.",
   "tier.professional": "Professional",
   "tier.professionalDesc": "Useita varaustyyppejä, tiiminhallinta.",
   "tier.business": "Business",
-  "tier.businessDesc": "Täysivarusteinen alusta vakiintuneille yrityksille.",
+  "tier.businessDesc": "Täysivarusteinen alusta monitoimipiste- ja monitoimintoyrityksille.",
 
   // Footer
   "footer.tagline": "Moderni varausalusta ravintoloille, tiloille ja majataloille.",
@@ -2859,33 +3144,33 @@ const fi: TranslationKeys = {
 
   "about.heroBadge": "Tarinamme",
   "about.heroTitle": "Huolella rakennettu varausjärjestelmä",
-  "about.heroSubtitle": "Autamme ravintola-alan yrityksiä hallitsemaan varauksiaan vaivattomasti — jotta he voivat keskittyä luomaan unohtumattomia vieraskokemuksia.",
+  "about.heroSubtitle": "Autamme majoitusalan yrityksiä hallitsemaan varauksiaan vaivattomasti — jotta he voivat keskittyä luomaan unohtumattomia vieraskokemuksia.",
   "about.missionBadge": "Missiomme",
-  "about.missionTitle": "Varausten hallinta yksinkertaiseksi ja tyylikkääksi",
-  "about.missionP1": "Pienet ravintola-alan yritykset ansaitsevat samat tehokkaat työkalut kuin suuret ketjut. Siksi loimme MinnowBookin.",
-  "about.missionP2": "Alustamme yhdistää varaukset, brändäyksen, tiimin hallinnan ja raportoinnin yhteen työkaluun.",
+  "about.missionTitle": "Varausten hallinta yksinkertaiseksi ja helpoksi",
+  "about.missionP1": "Pienet majoitusalan yritykset ansaitsevat käytännöllisiä ja informatiivisia työkaluja toimiakseen tehokkaammin. Siksi loimme MinnowBookin.",
+  "about.missionP2": "Alustamme yhdistää varaukset, brändäyksen ja raportoinnin yhteen työkaluun — poistaen hajallaan olevat muistivihot ja unohtuneet varaukset.",
   "about.point1Title": "Nopeutta ilman kompromisseja",
-  "about.point1Desc": "Saat brändätyn varaussivun käyttöön minuuteissa.",
+  "about.point1Desc": "Saat brändätyn varaussivun käyttöön päivässä tai kahdessa, ei viikoissa.",
   "about.point2Title": "Tietoon perustuvat päätökset",
-  "about.point2Desc": "Seuraa varaustrendejä, käyttöastetta ja liikevaihtoa.",
+  "about.point2Desc": "Seuraa varauksia, käyttöastetta ja liikevaihtoa yhdellä silmäyksellä.",
   "about.point3Title": "Rakennettu tiimeille",
   "about.point3Desc": "Roolipohjainen pääsy ja monihenkilöstötuki sisäänrakennettuna.",
   "about.valuesTitle": "Perusarvomme",
-  "about.valuesSubtitle": "Nämä periaatteet ohjaavat jokaista päätöstämme.",
+  "about.valuesSubtitle": "Näillä periaatteilla ohjaamme jokaista arkipäivän päätöstä — tuotesuunnittelusta asiakastukeen.",
   "about.valuePrecision": "Tarkkuus",
-  "about.valuePrecisionDesc": "Jokainen yksityiskohta on tärkeä — varaussivuista saatavuuskalentereihin.",
+  "about.valuePrecisionDesc": "Jokainen yksityiskohta on tärkeä — pikselintarkoista varaussivuista oikeisiin saatavuuskalentereihin.",
   "about.valueInnovation": "Innovaatio",
-  "about.valueInnovationDesc": "Kehitämme alustaamme jatkuvasti uusimman teknologian avulla.",
+  "about.valueInnovationDesc": "Kehitämme alustaamme jatkuvasti. Kaipaamme käyttäjäpalautetta tehdäksemme alustasta entistä paremman.",
   "about.valueCollaboration": "Yhteistyö",
-  "about.valueCollaborationDesc": "Työskentelemme tiiviisti yritysten kanssa ymmärtääksemme todelliset tarpeet.",
+  "about.valueCollaborationDesc": "Työskentelemme tiiviisti majoitusalan yritysten kanssa ymmärtääksemme todelliset tarpeet.",
   "about.valueTrust": "Luottamus",
-  "about.valueTrustDesc": "Tietosi ovat turvassa. Noudatamme GDPR-standardeja.",
+  "about.valueTrustDesc": "Tietosi ovat turvassa. Noudatamme GDPR-standardeja ja parhaita turvallisuuskäytäntöjä.",
   "about.valuePassion": "Intohimo",
-  "about.valuePassionDesc": "Meillä on intohimo auttaa pieniä yrityksiä menestymään.",
+  "about.valuePassionDesc": "Meillä on intohimo auttaa pieniä yrityksiä menestymään majoitusalalla.",
   "about.valueGlobal": "Saavutettavuus",
   "about.valueGlobalDesc": "Alustamme on monikielinen ja suunniteltu kaikille saavutettavaksi.",
   "about.ctaTitle": "Valmis yksinkertaistamaan varauksiasi?",
-  "about.ctaSubtitle": "Liity yrityksiin, jotka jo käyttävät MinnowBookia varausten hallintaan.",
+  "about.ctaSubtitle": "Liity majoitusalan yrityksiin, jotka jo käyttävät MinnowBookia varausten hallintaan.",
 
   "privacy.title": "Tietosuojakäytäntö",
   "privacy.lastUpdated": "Päivitetty viimeksi:",
@@ -3222,6 +3507,149 @@ const fi: TranslationKeys = {
   "approval.noReason": "Ei syytä",
   "approval.closed": "Suljettu",
   "approval.pendingApproval": "Lähetetty hyväksyttäväksi",
+
+  // Pricing page
+  "pricing.heroTitle": "Suunnitelmat jokaiseen kasvuvaiheeseen",
+  "pricing.heroSubtitle": "Aloita 30 päivän ilmaisella kokeilulla millä tahansa suunnitelmalla. Ei luottokorttia tarvita. Skaalaa ylöspäin yrityksesi kasvaessa.",
+  "pricing.basicName": "Basic",
+  "pricing.basicDesc": "Täydellinen pienyrityksille, jotka aloittavat verkkovarausten käyttöönoton.",
+  "pricing.basicTypes": "1 tyyppi (sinä valitset)",
+  "pricing.basicStaff": "1–3",
+  "pricing.proName": "Pro",
+  "pricing.proDesc": "Kasvaville yrityksille, jotka tarvitsevat kaikki palvelutyypit saman katon alla.",
+  "pricing.proTypes": "Kaikki tyypit mukana",
+  "pricing.proStaff": "Enintään 10",
+  "pricing.businessName": "Business",
+  "pricing.businessDesc": "Täysivarusteinen alusta kasvavalle majoitusliiketoiminnalle useissa toimipisteissä.",
+  "pricing.businessTypes": "Kaikki tyypit mukana",
+  "pricing.businessStaff": "Rajaton",
+  "pricing.basicF1": "1 toimipiste",
+  "pricing.basicF2": "1 varaustyyppi (sinä valitset)",
+  "pricing.basicF3": "Oma brändäys (logo, värit, kuvat)",
+  "pricing.basicF4": "Brändätty varaussivu alidomainillasi",
+  "pricing.basicF5": "Oletussähköpostipohjat",
+  "pricing.basicF6": "Aukioloaikojen määritys",
+  "pricing.basicF7": "Kalenteri- ja listanäkymät",
+  "pricing.basicF8": "AI-chatbot-tuki",
+  "pricing.proF1": "1 toimipiste",
+  "pricing.proF2": "Kaikki varaustyypit (1 resurssi/tyyppi)",
+  "pricing.proF3": "Kaikki Basic-ominaisuudet",
+  "pricing.proF4": "Mukautetut sähköpostipohjat (HTML-editori)",
+  "pricing.proF5": "Edistyneet aukioloajat ja varaussäännöt",
+  "pricing.proF6": "Monikieliset varaussivut",
+  "pricing.proF7": "Yksityiskohtaiset analytiikka ja raportit",
+  "pricing.proF8": "AI-chatbot-tuki",
+  "pricing.businessF1": "Rajattomat toimipisteet",
+  "pricing.businessF2": "Kaikki varaustyypit (rajattomat resurssit)",
+  "pricing.businessF3": "Kaikki Pro-ominaisuudet",
+  "pricing.businessF4": "Monitoimipisteinen hallintapaneeli",
+  "pricing.businessF5": "Rajattomat henkilökuntatilit",
+  "pricing.businessF6": "Toimipistekohtainen brändäys ja asetukset",
+  "pricing.businessF7": "Edistynyt tuloraportointi",
+  "pricing.businessF8": "Prioriteettituki (24h vastaus)",
+  "pricing.sitesLocations": "Toimipisteet",
+  "pricing.resourcesPerType": "Resurssit per tyyppi",
+  "pricing.customBranding": "Oma brändäys",
+  "pricing.brandedBooking": "Brändätty varaussivu",
+  "pricing.defaultTemplates": "Oletussähköpostipohjat",
+  "pricing.customTemplates": "Mukautetut sähköpostipohjat",
+  "pricing.advancedRules": "Edistyneet varaussäännöt",
+  "pricing.multiLanguage": "Monikielisyys",
+  "pricing.multisiteManagement": "Monitoimipistehallinta",
+  "pricing.analyticsReports": "Analytiikka ja raportit",
+  "pricing.supportLevel": "Tuki",
+  "pricing.basic": "Perus",
+  "pricing.advanced": "Edistynyt",
+  "pricing.unlimited": "Rajaton",
+  "pricing.all": "Kaikki",
+  "pricing.multiLocationTitle": "Hallitsetko useita toimipisteitä?",
+  "pricing.multiLocationDesc": "Business-suunnitelma tukee rajattomia toimipisteitä monitoimipistehallinnalla — hallitse hotelleja, ravintoloita ja juhlatiloja yhdestä hallintapaneelista.",
+  "pricing.tryBusinessFree": "Kokeile Business-pakettia ilmaiseksi 30 päivää",
+  "pricing.faqQ1": "Mitä tapahtuu 30 päivän kokeilun jälkeen?",
+  "pricing.faqA1": "Kokeilusi muuttuu maksulliseksi tilaukseksi. Voit peruuttaa milloin tahansa ennen kokeilun päättymistä ilman veloitusta.",
+  "pricing.faqQ2": "Voinko vaihtaa suunnitelmaa myöhemmin?",
+  "pricing.faqA2": "Kyllä! Voit päivittää tai alentaa suunnitelmasi milloin tahansa. Muutokset tulevat voimaan seuraavan laskutusjakson alussa.",
+  "pricing.faqQ3": "Mitä varaustyyppejä voin valita?",
+  "pricing.faqA3": "Ravintola (pöytävaraukset), Tila (tilakatsaukset) ja Majatalo (huonevaraukset). Basic antaa valita yhden; Pro avaa kaikki tyypit yhdellä toimipisteellä; Business lisää rajattomat toimipisteet täydellä monitoimipistehallinnalla.",
+  "pricing.faqQ4": "Tarvitsenko luottokortin kokeilun aloittamiseen?",
+  "pricing.faqA4": "Ei luottokorttia tarvita ilmaisen kokeilun aloittamiseen. Maksutietoja kysytään vasta kokeilun päättyessä.",
+  "pricing.faqQ5": "Voinko käyttää omaa domainia?",
+  "pricing.faqA5": "Jokaiselle yritykselle tulee brändätty alidomain (esim. yrityksesi.minnowbook.com). Oman domainin tuki on tiekartalla.",
+  "pricing.faqQ6": "Mikä ero on AI-chatbot-tuella ja prioriteettituella?",
+  "pricing.faqA6": "Kaikki suunnitelmat sisältävät MinnowAid-tekoälychatbotin, joka vastaa kysymyksiin, auttaa vianmäärityksessä ja opastaa ominaisuuksissa — käytettävissä 24/7 hallintapaneelissa. Business-suunnitelma lisää prioriteettituen: voit eskaloida keskustelun tiimiimme ja saada taatun vastauksen 24 tunnin sisällä.",
+  "pricing.noCreditCard": "Ei luottokorttia tarvita. Käyttövalmis minuuteissa.",
+  "pricing.setupMinutes": "Käyttövalmis minuuteissa.",
+
+  // Support page
+  "support.heroTitle": "Miten voimme auttaa?",
+  "support.heroSubtitle": "Selaa oppaita, UKK:ta ja vinkkejä MinnowBookin tehokkaaseen käyttöön.",
+  "support.searchPlaceholder": "Etsi apua...",
+  "support.noResults": "Ei tuloksia. Kokeile toista hakusanaa.",
+  "support.stillNeedHelp": "Tarvitsetko vielä apua?",
+  "support.stillNeedHelpDesc": "Kaikki suunnitelmat sisältävät AI-chatbot-tuen hallintapaneelissa. Business-asiakkaat saavat prioriteettitukea tiimiimme taatulla 24 tunnin vasteajalla.",
+  "support.gettingStarted": "Aloittaminen",
+  "support.gettingStartedDesc": "Luo tilisi ja perusta ensimmäinen varaussivusi minuuteissa.",
+  "support.gettingStartedC1": "Rekisteröidy ilmaiseen 30 päivän kokeiluun — luottokorttia ei tarvita.",
+  "support.gettingStartedC2": "Täytä onboarding-velho nimetäksesi yrityksesi ja valitaksesi varaustyyppisi.",
+  "support.gettingStartedC3": "Mukauta brändäyksesi (logo, värit) Asetuksissa.",
+  "support.gettingStartedC4": "Jaa varauslinkkisi asiakkaille!",
+  "support.managingRes": "Varausten hallinta",
+  "support.managingResDesc": "Näytä, muokkaa, vahvista ja peruuta varauksia hallintapaneelista.",
+  "support.managingResC1": "Käytä kalenterinäkymää visuaaliseen yleiskatsaukseen tulevista varauksista.",
+  "support.managingResC2": "Vaihda listanäkymään suodattaaksesi tilan, tyypin tai päivämäärän mukaan.",
+  "support.managingResC3": "Napsauta mitä tahansa varausta muokataksesi tietoja, lisätäksesi muistiinpanoja tai vaihtaaksesi tilaa.",
+  "support.managingResC4": "Vahvistus- ja peruutussähköpostit lähetetään automaattisesti.",
+  "support.emailTemplates": "Sähköpostipohjat",
+  "support.emailTemplatesDesc": "Mukauta vieraille lähetettäviä vahvistus- ja peruutussähköposteja.",
+  "support.emailTemplatesC1": "Siirry kohtaan Asetukset → Sähköpostipohjat muokataksesi sähköposteja.",
+  "support.emailTemplatesC2": "Esikatsele sähköpostien ulkoasua sisäänrakennetulla esikatselulla ennen lähettämistä.",
+  "support.emailTemplatesC3": "Lisää mukautettu viesti varausta vahvistaessasi tai peruuttaessasi.",
+  "support.emailTemplatesC4": "Sähköpostit tukevat monikielistä sisältöä (EN, FI, SV).",
+  "support.brandingTitle": "Brändäys ja varaussivu",
+  "support.brandingDesc": "Mukauta julkinen varaussivusi brändi-identiteettisi mukaan.",
+  "support.brandingC1": "Lataa logo ja aseta pää-/korostusvärit Asetuksissa.",
+  "support.brandingC2": "Lisää hero-kuva varaussivun otsikkoon.",
+  "support.brandingC3": "Varaussivusi löytyy osoitteesta /book/tunnisteesi.",
+  "support.brandingC4": "Yrityskuvaus näkyy varaussivulla vieraille.",
+  "support.openingHoursTitle": "Aukioloajat",
+  "support.openingHoursDesc": "Määritä milloin yrityksesi ottaa varauksia vastaan kullekin tyypille.",
+  "support.openingHoursC1": "Aseta aukioloajat varaustyyppien mukaan (ravintola, tila, hotelli).",
+  "support.openingHoursC2": "Merkitse tietyt päivät suljetuiksi.",
+  "support.openingHoursC3": "Aukioloajat määrittävät käytettävissä olevat aikaslotit varaussivulla.",
+  "support.openingHoursC4": "Käytä estettyjä aikoja sulkeaksesi tilapäisesti tietyt päivät.",
+  "support.resourcesTitle": "Resurssit ja huoneet",
+  "support.resourcesDesc": "Hallitse huoneita, pöytiä ja tiloja, joita voi varata.",
+  "support.resourcesC1": "Lisää resursseja hallintapaneelin Resurssit-osiossa.",
+  "support.resourcesC2": "Aseta kapasiteetti, hinnoittelu ja kuvaukset kullekin resurssille.",
+  "support.resourcesC3": "Lataa valokuvia esitelläksesi tilojasi varaussivulla.",
+  "support.resourcesC4": "Poista resursseja käytöstä piilottaaksesi ne tilapäisesti varauksista.",
+  "support.staffTitle": "Henkilökunta ja käyttäjähallinta",
+  "support.staffDesc": "Kutsu tiimin jäseniä ja hallitse rooleja ja käyttöoikeuksia.",
+  "support.staffC1": "Omistajat voivat kutsua henkilökuntaa Hallinta-paneelin kautta.",
+  "support.staffC2": "Roolit: Omistaja (täydet oikeudet), Ylläpitäjä (hallitse resursseja), Henkilökunta (näytä varaukset).",
+  "support.staffC3": "Hyväksy tai poista tiimin jäseniä milloin tahansa.",
+  "support.staffC4": "Jokaisella suunnitelmalla on henkilökunnan rajamäärä — päivitä saadaksesi lisää.",
+  "support.billingTitle": "Suunnitelmat ja laskutus",
+  "support.billingDesc": "Ymmärrä hinnoittelutasot ja hallitse tilaustasi.",
+  "support.billingC1": "Basic (29 €/kk) — 1 tyyppi, 1–3 henkilökuntaa, AI-chatbot-tuki.",
+  "support.billingC2": "Pro (59 €/kk) — Kaikki tyypit, 10 henkilökuntaa, mukautetut pohjat, AI-chatbot-tuki.",
+  "support.billingC3": "Business (99 €/kk) — Kaikki tyypit, rajaton henkilökunta, prioriteettituki 24h vasteajalla.",
+  "support.billingC4": "Päivitä tai alenna milloin tahansa. Muutokset tulevat voimaan seuraavalla laskutusjaksolla.",
+  "support.faqTitle": "Usein kysytyt kysymykset",
+  "support.faqDesc": "Vastauksia yleisimpiin MinnowBook-kysymyksiin.",
+  "support.faqC1": "K: Tarvitsenko luottokortin kokeiluun? V: Ei!",
+  "support.faqC2": "K: Voinko käyttää omaa domainia? V: Omat domainit ovat tiekartalla.",
+  "support.faqC3": "K: Miten vieraat saavat vahvistuksen? V: Automaattisesti sähköpostilla kun vahvistat varauksen.",
+  "support.faqC4": "K: Voinko viedä tietojani? V: Kyllä, raportit voidaan viedä Raportit-paneelista.",
+  "support.faqC5": "K: Mikä ero on AI-chatbotilla ja prioriteettituella? V: Kaikki suunnitelmat sisältävät MinnowAid-tekoälychatbotin 24/7. Business-paketti lisää ihmisprioriteetin ja taatun 24h vastauksen.",
+  "support.catBasics": "Perusteet",
+  "support.catReservations": "Varaukset",
+  "support.catCommunication": "Viestintä",
+  "support.catCustomization": "Mukauttaminen",
+  "support.catConfiguration": "Asetukset",
+  "support.catTeam": "Tiimi",
+  "support.catBilling": "Laskutus",
+  "support.catFaq": "UKK",
 };
 
 const sv: TranslationKeys = {
@@ -3605,44 +4033,44 @@ const sv: TranslationKeys = {
   "admin.permApproveSites": "Godkänn platsändringar",
 
   "hero.badge": "Nu i beta. 30 dagars gratis provperiod",
-  "hero.title": "Bokningsverktyget byggt för",
-  "hero.titleHighlight": "dem som gör allt",
-  "hero.subtitle": "Hantera restaurangbokningar, lokalförfrågningar och gästhusreservationer från en elegant instrumentpanel. Varumärkta bokningssidor, automatiska e-postmeddelanden och teamhantering ingår.",
+  "hero.title": "Verktyget byggt för att hantera",
+  "hero.titleHighlight": "hotellbokningar",
+  "hero.subtitle": "Hantera restaurangbokningar, lokalförfrågningar och hotell- eller gästhusreservationer från en elegant instrumentpanel.",
   "hero.viewPricing": "Se priser",
   "hero.noCreditCard": "Inget kreditkort krävs",
   "hero.cancelAnytime": "Avbryt när som helst",
 
   // Features
-  "features.title": "Allt du behöver för att hantera bokningar",
-  "features.subtitle": "En komplett verktygslåda för besöksnäringsföretag, från bokningssidor till teamhantering.",
-  "features.smartReservations": "Smarta bokningar",
-  "features.smartReservationsDesc": "Hantera restaurangbokningar, lokalförfrågningar och gästhusvistelser från en instrumentpanel.",
+  "features.title": "Allt du behöver för att hantera dina bokningar",
+  "features.subtitle": "En komplett verktygslåda för besöksnäringsföretag.",
+  "features.smartReservations": "Bokningar",
+  "features.smartReservationsDesc": "Samla och hantera alla bokningstyper på ett ställe.",
   "features.customBranding": "Egen varumärkesprofil",
   "features.customBrandingDesc": "Din logotyp, dina färger, dina bilder. Varje bokningssida matchar din varumärkesidentitet.",
-  "features.teamManagement": "Teamhantering",
+  "features.teamManagement": "Användarhantering",
   "features.teamManagementDesc": "Bjud in personal, tilldela roller och hantera behörigheter enkelt.",
-  "features.brandedPages": "Varumärkta bokningssidor",
-  "features.brandedPagesDesc": "Ge kunderna en polerad bokningsupplevelse på din egen subdomän.",
-  "features.reportsInsights": "Rapporter och insikter",
+  "features.brandedPages": "Bokningstyper",
+  "features.brandedPagesDesc": "Hotell/gästhus, restaurang och evenemangslokaler.",
+  "features.reportsInsights": "Rapporter",
   "features.reportsInsightsDesc": "Följ bokningstrender, beläggningsgrad och intäkter med ett ögonkast.",
   "features.automatedEmails": "Automatiska e-postmeddelanden",
   "features.automatedEmailsDesc": "Skicka bekräftelse-, påminnelse- och avbokningsmeddelanden automatiskt.",
 
   // How it works
-  "howItWorks.title": "Igång på minuter",
+  "howItWorks.title": "Igång snabbt och enkelt",
   "howItWorks.subtitle": "Tre enkla steg för att börja ta emot onlinebokningar.",
   "howItWorks.step1Title": "Registrera dig och välj plan",
-  "howItWorks.step1Desc": "Skapa ditt konto på sekunder och starta din 30 dagars gratis provperiod.",
+  "howItWorks.step1Desc": "Skapa ditt konto och starta din 30 dagars gratis provperiod.",
   "howItWorks.step2Title": "Konfigurera ditt företag",
-  "howItWorks.step2Desc": "Ladda upp din varumärkesprofil, lägg till resurser och konfigurera öppettider.",
+  "howItWorks.step2Desc": "Ladda upp din varumärkesprofil, lägg till platser och verksamheter, konfigurera öppettider, prissättning, kapacitet och mycket mer.",
   "howItWorks.step3Title": "Dela din bokningslänk",
   "howItWorks.step3Desc": "Skicka din anpassade bokningssida till kunder och börja ta emot bokningar.",
 
   // Pricing
-  "pricing.title": "Planer för varje tillväxtfas",
-  "pricing.subtitle": "Börja med en 30 dagars gratis provperiod på valfri plan. Inget kreditkort krävs. Skala upp när ditt företag växer.",
+  "pricing.title": "Planer för alla behov",
+  "pricing.subtitle": "Börja med en 30 dagars gratis provperiod på valfri plan. Skala upp när ditt företag växer.",
   "pricing.simpleTitle": "Enkel, transparent prissättning",
-  "pricing.simpleSubtitle": "Börja med en 30 dagars gratis provperiod. Inget kreditkort krävs. Uppgradera eller avbryt när som helst.",
+  "pricing.simpleSubtitle": "Börja med en 30 dagars gratis provperiod. Uppgradera eller avbryt när som helst.",
   "pricing.comparePlans": "Jämför planer i detalj",
   "pricing.faq": "Vanliga frågor",
   "pricing.feature": "Funktion",
@@ -3655,7 +4083,7 @@ const sv: TranslationKeys = {
   "pricing.perMonth": "/mån",
   "pricing.mostPopular": "Mest populär",
   "pricing.ctaTitle": "Starta din gratis provperiod idag",
-  "pricing.ctaSubtitle": "Inget kreditkort krävs. Igång på minuter.",
+  "pricing.ctaSubtitle": "Igång snabbt och enkelt.",
 
   // CTA
   "cta.title": "Redo att modernisera dina bokningar?",
@@ -3898,13 +4326,13 @@ const sv: TranslationKeys = {
   "onboarding.hotelDesc": "Hotell- och gästhusrump.",
   // Tiers
   "tier.basic": "Basic",
-  "tier.basicDesc": "Perfekt för småföretag som precis har börjat.",
+  "tier.basicDesc": "Perfekt för ett litet hotell, restaurang eller evenemangslokal.",
   "tier.pro": "Pro",
-  "tier.proDesc": "För växande företag som behöver mer kontroll.",
+  "tier.proDesc": "För företag som erbjuder hotell, restaurang och evenemangslokal på en plats.",
   "tier.professional": "Professional",
   "tier.professionalDesc": "Flera bokningstyper, teamhantering.",
   "tier.business": "Business",
-  "tier.businessDesc": "Fullfjädrad plattform för etablerade företag.",
+  "tier.businessDesc": "Fullfjädrad plattform för multisite- och multiverksamhetsföretag.",
 
   // Footer
   "footer.tagline": "Den moderna bokningsplattformen för restauranger, lokaler och gästhus.",
@@ -3925,31 +4353,31 @@ const sv: TranslationKeys = {
   "about.heroTitle": "Bokningsplattformen byggd med omsorg",
   "about.heroSubtitle": "Vi hjälper hotell- och restaurangföretag att hantera sina bokningar enkelt — så de kan fokusera på att skapa minnesvärda gästupplevelser.",
   "about.missionBadge": "Vårt uppdrag",
-  "about.missionTitle": "Göra bokningshantering enkel och elegant",
-  "about.missionP1": "Små hotell- och restaurangföretag förtjänar samma kraftfulla verktyg som stora kedjor. Därför skapade vi MinnowBook.",
-  "about.missionP2": "Vår plattform samlar bokningar, varumärkeshantering, teamhantering och rapportering på ett ställe.",
+  "about.missionTitle": "Göra bokningshantering enkel och smidig",
+  "about.missionP1": "Små besöksnäringsföretag förtjänar praktiska och informativa verktyg för att arbeta mer effektivt. Vi startade MinnowBook för att göra det möjligt.",
+  "about.missionP2": "Vår plattform samlar bokningar, varumärkeshantering och rapportering i ett enhetligt arbetsutrymme — och eliminerar utspridda anteckningsböcker och missade bokningar.",
   "about.point1Title": "Snabbhet utan kompromisser",
-  "about.point1Desc": "Få din varumärkta bokningssida live på minuter.",
+  "about.point1Desc": "Få din varumärkta bokningssida live på en dag eller två, inte veckor.",
   "about.point2Title": "Datadrivna insikter",
-  "about.point2Desc": "Följ bokningstrender, beläggning och intäkter.",
+  "about.point2Desc": "Följ bokningar, beläggning och intäkter med ett ögonkast.",
   "about.point3Title": "Byggt för team",
   "about.point3Desc": "Rollbaserad åtkomst och stöd för flera medarbetare.",
   "about.valuesTitle": "Våra kärnvärden",
-  "about.valuesSubtitle": "Dessa principer vägleder varje beslut vi tar.",
+  "about.valuesSubtitle": "Dessa principer vägleder varje vardagligt beslut vi tar, från produktdesign till kundsupport.",
   "about.valuePrecision": "Precision",
-  "about.valuePrecisionDesc": "Varje detalj spelar roll — från bokningssidor till tillgänglighetskalendrar.",
+  "about.valuePrecisionDesc": "Varje detalj spelar roll — från pixelperfekta bokningssidor till korrekta tillgänglighetskalendrar.",
   "about.valueInnovation": "Innovation",
-  "about.valueInnovationDesc": "Vi förbättrar ständigt vår plattform med den senaste tekniken.",
+  "about.valueInnovationDesc": "Vi förbättrar ständigt vår plattform. Vi längtar efter användarfeedback för att göra plattformen ännu bättre.",
   "about.valueCollaboration": "Samarbete",
-  "about.valueCollaborationDesc": "Vi arbetar nära företag för att förstå deras verkliga behov.",
+  "about.valueCollaborationDesc": "Vi arbetar nära besöksnäringsföretag för att förstå deras verkliga behov.",
   "about.valueTrust": "Förtroende",
-  "about.valueTrustDesc": "Din data är säker. Vi följer GDPR-standarder.",
+  "about.valueTrustDesc": "Din data är säker. Vi följer GDPR-standarder och bästa säkerhetspraxis.",
   "about.valuePassion": "Passion",
-  "about.valuePassionDesc": "Vi brinner för att hjälpa småföretag att lyckas.",
+  "about.valuePassionDesc": "Vi brinner för att hjälpa småföretag att lyckas inom besöksnäringen.",
   "about.valueGlobal": "Tillgänglighet",
   "about.valueGlobalDesc": "Vår plattform är flerspråkig och designad för att vara tillgänglig för alla.",
   "about.ctaTitle": "Redo att förenkla dina bokningar?",
-  "about.ctaSubtitle": "Gå med bland företag som redan använder MinnowBook.",
+  "about.ctaSubtitle": "Gå med bland besöksnäringsföretag som redan använder MinnowBook.",
 
   "privacy.title": "Integritetspolicy",
   "privacy.lastUpdated": "Senast uppdaterad:",
@@ -4286,6 +4714,149 @@ const sv: TranslationKeys = {
   "approval.noReason": "Ingen anledning",
   "approval.closed": "Stängd",
   "approval.pendingApproval": "Inskickad för godkännande",
+
+  // Pricing page
+  "pricing.heroTitle": "Planer för varje tillväxtfas",
+  "pricing.heroSubtitle": "Börja med en 30 dagars gratis provperiod på valfri plan. Inget kreditkort krävs. Skala upp när ditt företag växer.",
+  "pricing.basicName": "Basic",
+  "pricing.basicDesc": "Perfekt för småföretag som precis börjat med onlinebokningar.",
+  "pricing.basicTypes": "1 typ (du väljer)",
+  "pricing.basicStaff": "1–3",
+  "pricing.proName": "Pro",
+  "pricing.proDesc": "För växande företag som behöver alla tjänstetyper under ett tak.",
+  "pricing.proTypes": "Alla typer ingår",
+  "pricing.proStaff": "Upp till 10",
+  "pricing.businessName": "Business",
+  "pricing.businessDesc": "Fullfjädrad plattform för växande besöksnäringsföretag med flera platser.",
+  "pricing.businessTypes": "Alla typer ingår",
+  "pricing.businessStaff": "Obegränsat",
+  "pricing.basicF1": "1 plats",
+  "pricing.basicF2": "1 bokningstyp (du väljer)",
+  "pricing.basicF3": "Egen varumärkesprofil (logotyp, färger, bilder)",
+  "pricing.basicF4": "Varumärkt bokningssida på din subdomän",
+  "pricing.basicF5": "Standard e-postmallar",
+  "pricing.basicF6": "Konfiguration av öppettider",
+  "pricing.basicF7": "Kalender- och listvyer",
+  "pricing.basicF8": "AI-chatbot-support",
+  "pricing.proF1": "1 plats",
+  "pricing.proF2": "Alla bokningstyper (1 resurs per typ)",
+  "pricing.proF3": "Allt i Basic",
+  "pricing.proF4": "Anpassade e-postmallar (HTML-editor)",
+  "pricing.proF5": "Avancerade öppettider och bokningsregler",
+  "pricing.proF6": "Flerspråkiga bokningssidor",
+  "pricing.proF7": "Detaljerad analys och rapporter",
+  "pricing.proF8": "AI-chatbot-support",
+  "pricing.businessF1": "Obegränsade platser",
+  "pricing.businessF2": "Alla bokningstyper (obegränsade resurser)",
+  "pricing.businessF3": "Allt i Pro",
+  "pricing.businessF4": "Multisite-hanteringspanel",
+  "pricing.businessF5": "Obegränsade personalkonton",
+  "pricing.businessF6": "Platsspecifik varumärkesprofil och inställningar",
+  "pricing.businessF7": "Avancerad intäktsrapportering",
+  "pricing.businessF8": "Prioriterad support (24h svar)",
+  "pricing.sitesLocations": "Platser",
+  "pricing.resourcesPerType": "Resurser per typ",
+  "pricing.customBranding": "Egen varumärkesprofil",
+  "pricing.brandedBooking": "Varumärkt bokningssida",
+  "pricing.defaultTemplates": "Standard e-postmallar",
+  "pricing.customTemplates": "Anpassade e-postmallar",
+  "pricing.advancedRules": "Avancerade bokningsregler",
+  "pricing.multiLanguage": "Flerspråkigt stöd",
+  "pricing.multisiteManagement": "Multisite-hantering",
+  "pricing.analyticsReports": "Analys och rapporter",
+  "pricing.supportLevel": "Support",
+  "pricing.basic": "Grund",
+  "pricing.advanced": "Avancerad",
+  "pricing.unlimited": "Obegränsat",
+  "pricing.all": "Alla",
+  "pricing.multiLocationTitle": "Hanterar du flera platser?",
+  "pricing.multiLocationDesc": "Business-planen stöder obegränsade platser med multisite-hantering — kör hotell, restauranger och lokaler från en enda instrumentpanel.",
+  "pricing.tryBusinessFree": "Prova Business gratis i 30 dagar",
+  "pricing.faqQ1": "Vad händer efter 30 dagars provperiod?",
+  "pricing.faqA1": "Din provperiod övergår till en betald prenumeration. Du kan avbryta när som helst innan provperioden slutar, utan kostnad.",
+  "pricing.faqQ2": "Kan jag ändra plan senare?",
+  "pricing.faqA2": "Ja! Du kan uppgradera eller nedgradera din plan när som helst. Ändringar träder i kraft vid början av nästa faktureringsperiod.",
+  "pricing.faqQ3": "Vilka bokningstyper kan jag välja?",
+  "pricing.faqA3": "Restaurang (bordsreservationer), Lokal (lokalförfrågningar) och Gästhus (rumsreservationer). Basic låter dig välja en; Pro låser upp alla typer på en plats; Business lägger till obegränsade platser med fullständig multisite-hantering.",
+  "pricing.faqQ4": "Behöver jag ett kreditkort för att starta provperioden?",
+  "pricing.faqA4": "Inget kreditkort krävs för att starta din gratis provperiod. Du ombeds om betalningsuppgifter först när provperioden slutar.",
+  "pricing.faqQ5": "Kan jag använda min egen domän?",
+  "pricing.faqA5": "Varje företag får en varumärkt subdomän (t.ex. dittforetag.minnowbook.com). Stöd för egna domäner finns på vår roadmap.",
+  "pricing.faqQ6": "Vad är skillnaden mellan AI-chatbot-support och prioriterad support?",
+  "pricing.faqA6": "Alla planer inkluderar MinnowAid, vår AI-chatbot som kan svara på frågor, hjälpa till med felsökning och guida dig genom funktioner — tillgänglig 24/7 i din instrumentpanel. Business-planen lägger till prioriterad support: du kan eskalera varje konversation till vårt team och få ett garanterat svar inom 24 timmar.",
+  "pricing.noCreditCard": "Inget kreditkort krävs. Igång på minuter.",
+  "pricing.setupMinutes": "Igång på minuter.",
+
+  // Support page
+  "support.heroTitle": "Hur kan vi hjälpa?",
+  "support.heroSubtitle": "Bläddra bland guider, vanliga frågor och tips för att få ut det mesta av MinnowBook.",
+  "support.searchPlaceholder": "Sök efter hjälp...",
+  "support.noResults": "Inga resultat hittades. Prova ett annat sökord.",
+  "support.stillNeedHelp": "Behöver du fortfarande hjälp?",
+  "support.stillNeedHelpDesc": "Alla planer inkluderar AI-chatbot-support i instrumentpanelen. Business-kunder får prioriterad support med garanterat 24-timmarssvar från vårt team.",
+  "support.gettingStarted": "Kom igång",
+  "support.gettingStartedDesc": "Skapa ditt konto och skapa din första bokningssida på minuter.",
+  "support.gettingStartedC1": "Registrera dig för en gratis 30 dagars provperiod — inget kreditkort behövs.",
+  "support.gettingStartedC2": "Slutför onboarding-guiden för att namnge ditt företag och välja bokningstyper.",
+  "support.gettingStartedC3": "Anpassa din varumärkesprofil (logotyp, färger) i Inställningar.",
+  "support.gettingStartedC4": "Dela din bokningslänk med kunder!",
+  "support.managingRes": "Hantera bokningar",
+  "support.managingResDesc": "Visa, redigera, bekräfta och avboka bokningar från din instrumentpanel.",
+  "support.managingResC1": "Använd kalendervyn för en visuell översikt av kommande bokningar.",
+  "support.managingResC2": "Byt till listvyn för att filtrera efter status, typ eller datumintervall.",
+  "support.managingResC3": "Klicka på valfri bokning för att redigera detaljer, lägga till anteckningar eller ändra status.",
+  "support.managingResC4": "Bekräftelse- och avbokningsmeddelanden skickas automatiskt.",
+  "support.emailTemplates": "E-postmallar",
+  "support.emailTemplatesDesc": "Anpassa bekräftelse- och avbokningsmeddelanden till gäster.",
+  "support.emailTemplatesC1": "Gå till Inställningar → E-postmallar för att anpassa dina e-postmeddelanden.",
+  "support.emailTemplatesC2": "Förhandsgranska hur e-postmeddelanden ser ut innan du skickar med den inbyggda förhandsgranskningen.",
+  "support.emailTemplatesC3": "Lägg till anpassade meddelanden per bokning vid bekräftelse eller avbokning.",
+  "support.emailTemplatesC4": "E-postmeddelanden stöder flerspråkigt innehåll (EN, FI, SV).",
+  "support.brandingTitle": "Varumärkesprofil och bokningssida",
+  "support.brandingDesc": "Anpassa din offentliga bokningssida med din varumärkesidentitet.",
+  "support.brandingC1": "Ladda upp din logotyp och ställ in primära/accentfärger i Inställningar.",
+  "support.brandingC2": "Lägg till en hjältebild för bokningssidans rubrik.",
+  "support.brandingC3": "Din bokningssida finns på /book/din-slug.",
+  "support.brandingC4": "Företagsbeskrivningen visas på bokningssidan för gäster.",
+  "support.openingHoursTitle": "Öppettider",
+  "support.openingHoursDesc": "Konfigurera när ditt företag tar emot bokningar för varje typ.",
+  "support.openingHoursC1": "Ställ in öppettider per bokningstyp (restaurang, lokal, hotell).",
+  "support.openingHoursC2": "Markera specifika dagar som stängda.",
+  "support.openingHoursC3": "Öppettider bestämmer tillgängliga tidsintervall på bokningssidan.",
+  "support.openingHoursC4": "Använd blockerade tider för att tillfälligt stänga specifika datum.",
+  "support.resourcesTitle": "Resurser och rum",
+  "support.resourcesDesc": "Hantera rum, bord och evenemangslokaler som kan bokas.",
+  "support.resourcesC1": "Lägg till resurser i Resurser-sektionen i din instrumentpanel.",
+  "support.resourcesC2": "Ställ in kapacitet, prissättning och beskrivningar för varje resurs.",
+  "support.resourcesC3": "Ladda upp foton för att visa dina utrymmen på bokningssidan.",
+  "support.resourcesC4": "Inaktivera resurser för att tillfälligt dölja dem från bokningar.",
+  "support.staffTitle": "Personal och användarhantering",
+  "support.staffDesc": "Bjud in teammedlemmar och hantera roller och behörigheter.",
+  "support.staffC1": "Ägare kan bjuda in personal via Adminpanelen.",
+  "support.staffC2": "Roller: Ägare (full åtkomst), Admin (hantera resurser), Personal (visa bokningar).",
+  "support.staffC3": "Godkänn eller ta bort teammedlemmar när som helst.",
+  "support.staffC4": "Varje plan har en gräns för personalanvändare — uppgradera för att lägga till fler.",
+  "support.billingTitle": "Planer och fakturering",
+  "support.billingDesc": "Förstå prisnivåer och hantera din prenumeration.",
+  "support.billingC1": "Basic (29 €/mån) — 1 typ, 1–3 personal, AI-chatbot-support.",
+  "support.billingC2": "Pro (59 €/mån) — Alla typer, 10 personal, anpassade mallar, AI-chatbot-support.",
+  "support.billingC3": "Business (99 €/mån) — Alla typer, obegränsad personal, prioriterad support med 24h svar.",
+  "support.billingC4": "Uppgradera eller nedgradera när som helst. Ändringar träder i kraft nästa faktureringsperiod.",
+  "support.faqTitle": "Vanliga frågor",
+  "support.faqDesc": "Svar på de vanligaste frågorna om MinnowBook.",
+  "support.faqC1": "F: Behöver jag ett kreditkort för provperioden? S: Nej!",
+  "support.faqC2": "F: Kan jag använda min egen domän? S: Egna domäner finns på vår roadmap.",
+  "support.faqC3": "F: Hur får gäster bekräftelser? S: Automatiskt via e-post när du bekräftar en bokning.",
+  "support.faqC4": "F: Kan jag exportera mina data? S: Ja, rapporter kan exporteras från Rapporter-panelen.",
+  "support.faqC5": "F: Vad är skillnaden mellan AI-chatbot och prioriterad support? S: Alla planer inkluderar MinnowAid, vår 24/7 AI-chatbot. Business-planen lägger till mänsklig prioriterad support med garanterat 24-timmarssvar.",
+  "support.catBasics": "Grunder",
+  "support.catReservations": "Bokningar",
+  "support.catCommunication": "Kommunikation",
+  "support.catCustomization": "Anpassning",
+  "support.catConfiguration": "Konfiguration",
+  "support.catTeam": "Team",
+  "support.catBilling": "Fakturering",
+  "support.catFaq": "Vanliga frågor",
 };
 
 export const translations: Record<Language, TranslationKeys> = { en, fi, sv };

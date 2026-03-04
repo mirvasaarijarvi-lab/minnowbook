@@ -4,90 +4,80 @@ import PricingTier from "@/components/PricingTier";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { ArrowRight, Building2 } from "lucide-react";
-
-const tiers = [
-  {
-    name: "Basic",
-    price: 29,
-    description: "Perfect for small businesses just getting started with online reservations.",
-    reservationTypes: "1 type (you choose)",
-    staffUsers: "1–3",
-    features: [
-      "1 site / location",
-      "1 reservation type (you choose)",
-      "Custom branding (logo, colors, images)",
-      "Branded booking page on your subdomain",
-      "Default email templates",
-      "Opening hours configuration",
-      "Calendar & list views",
-      "AI chatbot support",
-    ],
-  },
-  {
-    name: "Pro",
-    price: 59,
-    description: "For growing businesses that need all service types under one roof.",
-    reservationTypes: "All types included",
-    staffUsers: "Up to 10",
-    isPopular: true,
-    features: [
-      "1 site / location",
-      "All reservation types (1 resource per type)",
-      "Everything in Basic",
-      "Custom email templates (HTML editor)",
-      "Advanced opening hours & booking rules",
-      "Multi-language booking pages",
-      "Detailed analytics & reports",
-      "AI chatbot support",
-    ],
-  },
-  {
-    name: "Business",
-    price: 99,
-    description: "Full-featured platform for growing hospitality businesses with multiple locations.",
-    reservationTypes: "All types included",
-    staffUsers: "Unlimited",
-    features: [
-      "Unlimited sites & locations",
-      "All reservation types (unlimited resources)",
-      "Everything in Pro",
-      "Multi-site management dashboard",
-      "Unlimited staff accounts",
-      "Per-site branding & settings",
-      "Advanced revenue reporting",
-      "Priority support (24h response)",
-    ],
-  },
-];
-
-const faqs = [
-  {
-    q: "What happens after the 30-day trial?",
-    a: "Your trial converts to a paid subscription. You can cancel anytime before the trial ends, no charge.",
-  },
-  {
-    q: "Can I change my plan later?",
-    a: "Yes! You can upgrade or downgrade your plan at any time. Changes take effect at the start of your next billing cycle.",
-  },
-  {
-    q: "What reservation types can I choose?",
-    a: "Restaurant (table bookings), Venue (event space inquiries), and Gasthaus/Guesthouse (room reservations). Basic lets you pick one; Pro unlocks all types on a single site; Business adds unlimited sites with full multi-site management.",
-  },
-  {
-    q: "Do I need a credit card to start the trial?",
-    a: "No credit card is required to start your free trial. You'll only be asked for payment details when the trial ends.",
-  },
-  {
-    q: "Can I use my own domain?",
-    a: "Each business gets a branded subdomain (e.g., yourbusiness.minnowbook.com). Custom domain support is on our roadmap.",
-  },
-  {
-    q: "What's the difference between AI chatbot support and priority support?",
-    a: "All plans include MinnowAid, our AI chatbot that can answer questions, help troubleshoot issues, and guide you through features instantly — available 24/7 in your dashboard. The Business plan adds priority support: you can escalate any conversation to our team and receive a guaranteed response within 24 hours.",
-  },
-];
+import { useT } from "@/contexts/I18nContext";
 
 const Pricing = () => {
+  const t = useT();
+
+  const tiers = [
+    {
+      name: t("pricing.basicName" as any),
+      price: 29,
+      description: t("pricing.basicDesc" as any),
+      reservationTypes: t("pricing.basicTypes" as any),
+      staffUsers: t("pricing.basicStaff" as any),
+      features: [
+        t("pricing.basicF1" as any), t("pricing.basicF2" as any), t("pricing.basicF3" as any),
+        t("pricing.basicF4" as any), t("pricing.basicF5" as any), t("pricing.basicF6" as any),
+        t("pricing.basicF7" as any), t("pricing.basicF8" as any),
+      ],
+    },
+    {
+      name: t("pricing.proName" as any),
+      price: 59,
+      description: t("pricing.proDesc" as any),
+      reservationTypes: t("pricing.proTypes" as any),
+      staffUsers: t("pricing.proStaff" as any),
+      isPopular: true,
+      features: [
+        t("pricing.proF1" as any), t("pricing.proF2" as any), t("pricing.proF3" as any),
+        t("pricing.proF4" as any), t("pricing.proF5" as any), t("pricing.proF6" as any),
+        t("pricing.proF7" as any), t("pricing.proF8" as any),
+      ],
+    },
+    {
+      name: t("pricing.businessName" as any),
+      price: 99,
+      description: t("pricing.businessDesc" as any),
+      reservationTypes: t("pricing.businessTypes" as any),
+      staffUsers: t("pricing.businessStaff" as any),
+      features: [
+        t("pricing.businessF1" as any), t("pricing.businessF2" as any), t("pricing.businessF3" as any),
+        t("pricing.businessF4" as any), t("pricing.businessF5" as any), t("pricing.businessF6" as any),
+        t("pricing.businessF7" as any), t("pricing.businessF8" as any),
+      ],
+    },
+  ];
+
+  const faqs = [
+    { q: t("pricing.faqQ1" as any), a: t("pricing.faqA1" as any) },
+    { q: t("pricing.faqQ2" as any), a: t("pricing.faqA2" as any) },
+    { q: t("pricing.faqQ3" as any), a: t("pricing.faqA3" as any) },
+    { q: t("pricing.faqQ4" as any), a: t("pricing.faqA4" as any) },
+    { q: t("pricing.faqQ5" as any), a: t("pricing.faqA5" as any) },
+    { q: t("pricing.faqQ6" as any), a: t("pricing.faqA6" as any) },
+  ];
+
+  const comparisonRows = [
+    [t("pricing.monthlyPrice" as any), "€29", "€59", "€99"],
+    [t("pricing.freeTrial" as any), t("pricing.days30" as any), t("pricing.days30" as any), t("pricing.days30" as any)],
+    [t("pricing.sitesLocations" as any), "1", "1", t("pricing.unlimited" as any)],
+    [t("pricing.reservationTypes" as any), "1", t("pricing.all" as any), t("pricing.all" as any)],
+    [t("pricing.resourcesPerType" as any), "1", "1", t("pricing.unlimited" as any)],
+    [t("pricing.staffUsers" as any), "1–3", t("pricing.proStaff" as any), t("pricing.unlimited" as any)],
+    [t("pricing.customBranding" as any), "✓", "✓", "✓"],
+    [t("pricing.brandedBooking" as any), "✓", "✓", "✓"],
+    [t("pricing.defaultTemplates" as any), "✓", "✓", "✓"],
+    [t("pricing.customTemplates" as any), "—", "✓", "✓"],
+    [t("pricing.advancedRules" as any), "—", "✓", "✓"],
+    [t("pricing.multiLanguage" as any), "—", "✓", "✓"],
+    [t("pricing.multisiteManagement" as any), "—", "—", "✓"],
+    [t("pricing.analyticsReports" as any), t("pricing.basic" as any), t("pricing.advanced" as any), t("pricing.advanced" as any)],
+    [t("pricing.supportLevel" as any), "AI chatbot", "AI chatbot", t("pricing.businessF8" as any)],
+  ];
+
+  const highlightFeatures = [t("pricing.sitesLocations" as any), t("pricing.reservationTypes" as any), t("pricing.resourcesPerType" as any)];
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <MarketingHeader />
@@ -96,11 +86,10 @@ const Pricing = () => {
       <section className="py-20 md:py-28">
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-4xl md:text-5xl font-serif font-bold text-foreground mb-4">
-            Plans for every stage of growth
+            {t("pricing.heroTitle" as any)}
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Start with a 30-day free trial on any plan. No credit card required.
-            Scale up as your business grows.
+            {t("pricing.heroSubtitle" as any)}
           </p>
         </div>
       </section>
@@ -120,45 +109,29 @@ const Pricing = () => {
       <section className="py-20 bg-secondary/50">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-serif font-bold text-foreground text-center mb-12">
-            Compare plans in detail
+            {t("pricing.comparePlans" as any)}
           </h2>
 
           <div className="max-w-4xl mx-auto overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border">
-                  <th className="text-left py-4 pr-4 font-sans font-semibold text-muted-foreground">Feature</th>
+                  <th className="text-left py-4 pr-4 font-sans font-semibold text-muted-foreground">{t("pricing.feature" as any)}</th>
                   <th className="text-center py-4 px-3 font-serif font-semibold text-foreground">Basic</th>
                   <th className="text-center py-4 px-3 font-serif font-semibold text-foreground">Pro</th>
                   <th className="text-center py-4 px-3 font-serif font-semibold text-foreground">Business</th>
                 </tr>
               </thead>
               <tbody>
-                {[
-                  ["Monthly price", "€29", "€59", "€99"],
-                  ["Free trial", "30 days", "30 days", "30 days"],
-                  ["Sites / locations", "1", "1", "Unlimited"],
-                  ["Reservation types", "1", "All", "All"],
-                  ["Resources per type", "1", "1", "Unlimited"],
-                  ["Staff users", "1–3", "Up to 10", "Unlimited"],
-                  ["Custom branding", "✓", "✓", "✓"],
-                  ["Branded booking page", "✓", "✓", "✓"],
-                  ["Default email templates", "✓", "✓", "✓"],
-                  ["Custom email templates", "—", "✓", "✓"],
-                  ["Advanced booking rules", "—", "✓", "✓"],
-                  ["Multi-language support", "—", "✓", "✓"],
-                  ["Multi-site management", "—", "—", "✓"],
-                  ["Analytics & reports", "Basic", "Advanced", "Advanced"],
-                  ["Support", "AI chatbot", "AI chatbot", "Priority (24h)"],
-                ].map(([feature, basic, pro, business]) => {
-                  const isHighlight = feature === "Sites / locations" || feature === "Reservation types" || feature === "Resources per type";
+                {comparisonRows.map(([feature, basic, pro, business]) => {
+                  const isHighlight = highlightFeatures.includes(feature);
                   return (
-                  <tr key={feature} className={`border-b border-border/50 ${isHighlight ? "bg-accent/5" : ""}`}>
-                    <td className={`py-3 pr-4 ${isHighlight ? "text-foreground font-medium" : "text-foreground/80"}`}>{feature}</td>
-                    <td className="py-3 px-3 text-center text-muted-foreground">{basic}</td>
-                    <td className={`py-3 px-3 text-center font-medium ${isHighlight ? "text-accent" : "text-foreground"}`}>{pro}</td>
-                    <td className={`py-3 px-3 text-center font-medium ${isHighlight ? "text-accent" : "text-foreground"}`}>{business}</td>
-                  </tr>
+                    <tr key={feature} className={`border-b border-border/50 ${isHighlight ? "bg-accent/5" : ""}`}>
+                      <td className={`py-3 pr-4 ${isHighlight ? "text-foreground font-medium" : "text-foreground/80"}`}>{feature}</td>
+                      <td className="py-3 px-3 text-center text-muted-foreground">{basic}</td>
+                      <td className={`py-3 px-3 text-center font-medium ${isHighlight ? "text-accent" : "text-foreground"}`}>{pro}</td>
+                      <td className={`py-3 px-3 text-center font-medium ${isHighlight ? "text-accent" : "text-foreground"}`}>{business}</td>
+                    </tr>
                   );
                 })}
               </tbody>
@@ -176,15 +149,14 @@ const Pricing = () => {
             </div>
             <div className="flex-1 text-center md:text-left">
               <h3 className="text-2xl font-serif font-bold text-foreground mb-2">
-                Managing multiple locations?
+                {t("pricing.multiLocationTitle" as any)}
               </h3>
               <p className="text-muted-foreground leading-relaxed mb-4">
-                The <strong className="text-foreground">Business</strong> plan supports <strong className="text-foreground">unlimited sites</strong> with
-                multi-site management — run hotels, restaurants, and venues from a single dashboard.
+                {t("pricing.multiLocationDesc" as any)}
               </p>
               <Link to="/signup">
                 <Button variant="default" size="lg" className="gap-2">
-                  Try Business Free for 30 Days
+                  {t("pricing.tryBusinessFree" as any)}
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
@@ -197,7 +169,7 @@ const Pricing = () => {
       <section className="py-20">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-serif font-bold text-foreground text-center mb-12">
-            Frequently asked questions
+            {t("pricing.faq" as any)}
           </h2>
 
           <div className="max-w-2xl mx-auto space-y-6">
@@ -215,14 +187,14 @@ const Pricing = () => {
       <section className="py-20 gradient-hero">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl font-serif font-bold text-primary-foreground mb-4">
-            Start your free trial today
+            {t("pricing.ctaTitle")}
           </h2>
           <p className="text-primary-foreground/70 text-lg mb-8 max-w-xl mx-auto">
-            No credit card required. Set up in minutes.
+            {t("pricing.noCreditCard" as any)}
           </p>
           <Link to="/signup">
             <Button variant="hero" size="xl">
-              Get Started Free
+              {t("common.getStartedFree")}
               <ArrowRight className="h-4 w-4" />
             </Button>
           </Link>
