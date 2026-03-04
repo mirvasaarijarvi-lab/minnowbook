@@ -320,19 +320,39 @@ Deno.serve(async (req) => {
     const lang = reservation.language || settings?.default_language || "en";
     const t = getT(emailType, lang);
 
-    // Check for custom template
-    const { data: customTemplates } = await adminClient
-      .from("tenant_email_templates")
-      .select("*")
-      .eq("tenant_id", tenantId)
-      .eq("template_type", emailType)
-      .eq("is_active", true)
-      .is("site_id", null);
+    // Check for custom template — site-specific first, then tenant-level fallback
+    let customTemplate: any = null;
 
-    const customTemplate =
-      customTemplates?.find((tmpl: any) => tmpl.language === lang) ||
-      customTemplates?.find((tmpl: any) => tmpl.language === "en") ||
-      customTemplates?.[0];
+    if (reservation.site_id) {
+      const { data: siteTemplates } = await adminClient
+        .from("tenant_email_templates")
+        .select("*")
+        .eq("tenant_id", tenantId)
+        .eq("template_type", emailType)
+        .eq("is_active", true)
+        .eq("site_id", reservation.site_id);
+
+      customTemplate =
+        siteTemplates?.find((tmpl: any) => tmpl.language === lang) ||
+        siteTemplates?.find((tmpl: any) => tmpl.language === "en") ||
+        siteTemplates?.[0] || null;
+    }
+
+    // Fallback to tenant-level template
+    if (!customTemplate) {
+      const { data: tenantTemplates } = await adminClient
+        .from("tenant_email_templates")
+        .select("*")
+        .eq("tenant_id", tenantId)
+        .eq("template_type", emailType)
+        .eq("is_active", true)
+        .is("site_id", null);
+
+      customTemplate =
+        tenantTemplates?.find((tmpl: any) => tmpl.language === lang) ||
+        tenantTemplates?.find((tmpl: any) => tmpl.language === "en") ||
+        tenantTemplates?.[0] || null;
+    }
 
     let subject: string;
     let customBody: string | undefined;

@@ -216,20 +216,28 @@ Deno.serve(async (req) => {
     const settingsMap = new Map<string, any>();
     (allSettings || []).forEach((s: any) => settingsMap.set(s.tenant_id, s));
 
-    // Fetch custom reminder templates
+    // Fetch custom reminder templates (tenant-level)
     const { data: customTemplates } = await adminClient
       .from("tenant_email_templates")
       .select("*")
       .in("tenant_id", tenantIds)
       .eq("template_type", "reminder")
-      .eq("is_active", true)
-      .is("site_id", null);
+      .eq("is_active", true);
 
-    const templateMap = new Map<string, any[]>();
+    // Separate into site-level and tenant-level templates
+    const siteTemplateMap = new Map<string, any[]>(); // keyed by `${tenant_id}:${site_id}`
+    const templateMap = new Map<string, any[]>(); // keyed by tenant_id (site_id IS NULL)
     (customTemplates || []).forEach((tmpl: any) => {
-      const list = templateMap.get(tmpl.tenant_id) || [];
-      list.push(tmpl);
-      templateMap.set(tmpl.tenant_id, list);
+      if (tmpl.site_id) {
+        const key = `${tmpl.tenant_id}:${tmpl.site_id}`;
+        const list = siteTemplateMap.get(key) || [];
+        list.push(tmpl);
+        siteTemplateMap.set(key, list);
+      } else {
+        const list = templateMap.get(tmpl.tenant_id) || [];
+        list.push(tmpl);
+        templateMap.set(tmpl.tenant_id, list);
+      }
     });
 
     let sentCount = 0;
@@ -255,12 +263,23 @@ Deno.serve(async (req) => {
         const lang = reservation.language || settings?.default_language || "en";
         const t = getT(lang);
 
-        // Check for custom template
-        const templates = templateMap.get(reservation.tenant_id) || [];
-        const customTemplate =
-          templates.find((tmpl: any) => tmpl.language === lang) ||
-          templates.find((tmpl: any) => tmpl.language === "en") ||
-          templates[0];
+        // Check for site-specific template first, then tenant-level fallback
+        let customTemplate: any = null;
+        if (reservation.site_id) {
+          const siteKey = `${reservation.tenant_id}:${reservation.site_id}`;
+          const siteTemplates = siteTemplateMap.get(siteKey) || [];
+          customTemplate =
+            siteTemplates.find((tmpl: any) => tmpl.language === lang) ||
+            siteTemplates.find((tmpl: any) => tmpl.language === "en") ||
+            siteTemplates[0] || null;
+        }
+        if (!customTemplate) {
+          const tenantTemplates = templateMap.get(reservation.tenant_id) || [];
+          customTemplate =
+            tenantTemplates.find((tmpl: any) => tmpl.language === lang) ||
+            tenantTemplates.find((tmpl: any) => tmpl.language === "en") ||
+            tenantTemplates[0] || null;
+        }
 
         let subject = `${t.subject} — ${business.business_name}`;
         let customBody: string | undefined;

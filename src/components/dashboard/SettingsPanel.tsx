@@ -695,7 +695,13 @@ const SettingsPanel = () => {
 
       {/* Site-specific info when a site is selected */}
       {selectedSiteId && (
-        <SiteSettingsInfo siteId={selectedSiteId} tenantId={tenantId!} />
+        <>
+          <SiteSettingsInfo siteId={selectedSiteId} tenantId={tenantId!} />
+          {/* Site-level email template overrides (Business tier only) */}
+          {tenant?.tier === "business" && (
+            <EmailTemplateEditor siteId={selectedSiteId} />
+          )}
+        </>
       )}
 
       {/* Tenant-level settings (only when "All Sites" is selected) */}
@@ -919,7 +925,7 @@ const SettingsPanel = () => {
         </CardContent>
       </Card>
 
-      {/* Email Templates */}
+      {/* Email Templates — tenant level */}
       <EmailTemplateEditor />
 
       {/* Opening Hours — tenant defaults */}
