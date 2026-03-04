@@ -54,7 +54,7 @@ const Pricing = () => {
   ];
 
   const comparisonRows = [
-    [t("pricing.monthlyPrice" as any), "€29", "€59", "€99"],
+    [t("pricing.monthlyPrice" as any), "€29", "€79", "€199"],
     [t("pricing.freeTrial" as any), t("pricing.days30" as any), t("pricing.days30" as any), t("pricing.days30" as any)],
     [t("pricing.sitesLocations" as any), "1", "1", t("pricing.unlimited" as any)],
     [t("pricing.reservationTypes" as any), "1", t("pricing.all" as any), t("pricing.all" as any)],
