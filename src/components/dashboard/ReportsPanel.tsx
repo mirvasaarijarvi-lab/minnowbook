@@ -12,6 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import { Tooltip as UiTooltip, TooltipContent as UiTooltipContent, TooltipTrigger as UiTooltipTrigger } from "@/components/ui/tooltip";
 import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
@@ -27,6 +28,7 @@ import {
   ChevronLeft, ChevronRight, CheckCircle2, Clock, XCircle,
   CalendarIcon, Download, Printer, Receipt, TrendingUp, TrendingDown,
   Minus, AlertCircle, Euro, Coffee, BedDouble, GitCompareArrows, Building2, Tag, Percent,
+  Lock as LockIcon,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -120,10 +122,11 @@ const ReservationChart = ({ reservations, period, start, end, dateLocale, types,
 const ReportsPanel = () => {
   const t = useT();
   const { language } = useLanguage();
-  const { tenantId } = useTenant();
+  const { tenantId, tenant: tenantData } = useTenant();
   const { selectedSiteId } = useSiteContext();
   const { applySiteFilter, siteIds } = useUserSites();
   const dateLocale = localeMap[language] || fiFns;
+  const isBasicTier = (tenantData as any)?.tier === "basic";
 
   const [period, setPeriod] = useState<Period>("month");
   const [referenceDate, setReferenceDate] = useState(new Date());
@@ -473,8 +476,8 @@ const ReportsPanel = () => {
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       const ctrl = e.ctrlKey || e.metaKey;
-      if (ctrl && !e.shiftKey && e.key.toLowerCase() === "e") { e.preventDefault(); if (reservations.length > 0) handleExportCSV(); }
-      if (ctrl && e.shiftKey && e.key.toLowerCase() === "p") { e.preventDefault(); if (reservations.length > 0) handlePrint(); }
+      if (ctrl && !e.shiftKey && e.key.toLowerCase() === "e") { e.preventDefault(); if (reservations.length > 0 && !isBasicTier) handleExportCSV(); }
+      if (ctrl && e.shiftKey && e.key.toLowerCase() === "p") { e.preventDefault(); if (reservations.length > 0 && !isBasicTier) handlePrint(); }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
@@ -670,12 +673,28 @@ const ReportsPanel = () => {
             <Separator orientation="vertical" className="h-6 hidden sm:block" />
           </>
         )}
-        <Button variant="outline" size="sm" onClick={handleExportCSV} disabled={reservations.length === 0} className="gap-1.5">
-          <Download className="h-4 w-4" /><span className="hidden sm:inline">{t("reports.exportCsv")}</span><span className="sm:hidden">CSV</span>
-        </Button>
-        <Button variant="outline" size="sm" onClick={handlePrint} disabled={reservations.length === 0} className="gap-1.5">
-          <Printer className="h-4 w-4" />{t("reports.print")}
-        </Button>
+        <UiTooltip>
+          <UiTooltipTrigger asChild>
+            <span>
+              <Button variant="outline" size="sm" onClick={handleExportCSV} disabled={reservations.length === 0 || isBasicTier} className="gap-1.5">
+                <Download className="h-4 w-4" /><span className="hidden sm:inline">{t("reports.exportCsv")}</span><span className="sm:hidden">CSV</span>
+                {isBasicTier && <LockIcon className="h-3 w-3 ml-0.5 text-muted-foreground" />}
+              </Button>
+            </span>
+          </UiTooltipTrigger>
+          {isBasicTier && <UiTooltipContent>Pro+</UiTooltipContent>}
+        </UiTooltip>
+        <UiTooltip>
+          <UiTooltipTrigger asChild>
+            <span>
+              <Button variant="outline" size="sm" onClick={handlePrint} disabled={reservations.length === 0 || isBasicTier} className="gap-1.5">
+                <Printer className="h-4 w-4" />{t("reports.print")}
+                {isBasicTier && <LockIcon className="h-3 w-3 ml-0.5 text-muted-foreground" />}
+              </Button>
+            </span>
+          </UiTooltipTrigger>
+          {isBasicTier && <UiTooltipContent>Pro+</UiTooltipContent>}
+        </UiTooltip>
         <Separator orientation="vertical" className="h-6" />
         <div className="flex items-center gap-1.5">
           <Switch id="compare-mode" checked={compareMode} onCheckedChange={setCompareMode} />
