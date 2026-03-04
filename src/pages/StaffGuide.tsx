@@ -484,17 +484,16 @@ const guideContent: Record<Language, GuideContent> = {
       },
       {
         icon: <BarChart3 className="h-6 w-6" />, mockupId: "reports",
-        title: "5. Reports (Pro & Business)",
+        title: "5. Reports",
         steps: [
           "Select a time period: Week, Month, Quarter, Half-year, Year, or custom range.",
           "Filter by invoicing status (all, invoiced, not invoiced).",
           "KPIs: invoiced, not invoiced, total, room revenue, breakfast revenue.",
           "Reservation counts are broken down by type.",
-          "Export CSV button downloads data as a spreadsheet.",
-          "Print button creates a printer-friendly version.",
           "Compare mode lets you view two periods side by side.",
+          "Pro & Business: Export CSV and Print report features are available.",
         ],
-        tip: "Basic plan includes basic analytics. Upgrade to Pro for full reporting features.",
+        tip: "All plans can view reports. CSV export and printing require Pro or Business.",
       },
       {
         icon: <Settings className="h-6 w-6" />, mockupId: "resources",
@@ -662,17 +661,16 @@ const guideContent: Record<Language, GuideContent> = {
       },
       {
         icon: <BarChart3 className="h-6 w-6" />, mockupId: "reports",
-        title: "5. Raportit (Pro & Business)",
+        title: "5. Raportit",
         steps: [
           "Valitse aikaväli: Viikko, Kuukausi, Neljännes, Puoli vuotta, Vuosi tai oma aikaväli.",
           "Suodata laskutustilan mukaan (kaikki, laskutettu, ei laskutettu).",
           "Tunnusluvut: laskutettu, ei laskutettu, yhteensä, huonetulo, aamupalatulo.",
           "Varausmäärät eriteltynä tyypeittäin.",
-          "Vie CSV -painikkeella saat tiedot laskentataulukkoon.",
-          "Tulosta-painikkeella voit tulostaa raportin.",
           "Vertailutilassa voit tarkastella kahta ajanjaksoa rinnakkain.",
+          "Pro & Business: CSV-vienti ja tulostus ovat käytettävissä.",
         ],
-        tip: "Basic-tilauksessa on perusanalytiikka. Päivitä Pro-tilaukseen saadaksesi täydet raportointiominaisuudet.",
+        tip: "Kaikki tilaukset voivat tarkastella raportteja. CSV-vienti ja tulostus vaativat Pro- tai Business-tilauksen.",
       },
       {
         icon: <Settings className="h-6 w-6" />, mockupId: "resources",
@@ -840,17 +838,16 @@ const guideContent: Record<Language, GuideContent> = {
       },
       {
         icon: <BarChart3 className="h-6 w-6" />, mockupId: "reports",
-        title: "5. Rapporter (Pro & Business)",
+        title: "5. Rapporter",
         steps: [
           "Välj tidsperiod: Vecka, Månad, Kvartal, Halvår, År eller anpassat intervall.",
           "Filtrera efter faktureringsstatus (alla, fakturerade, ej fakturerade).",
           "Nyckeltal: fakturerat, ej fakturerat, totalt, rumsintäkter, frukostintäkter.",
           "Bokningsantal per typ.",
-          "Exportera CSV-knappen laddar ner data som kalkylblad.",
-          "Skriv ut-knappen skapar en utskriftsvänlig version.",
           "Jämförelseläge visar två perioder sida vid sida.",
+          "Pro & Business: CSV-export och utskrift är tillgängliga.",
         ],
-        tip: "Basic-planen har grundläggande analys. Uppgradera till Pro för fullständiga rapportfunktioner.",
+        tip: "Alla planer kan visa rapporter. CSV-export och utskrift kräver Pro eller Business.",
       },
       {
         icon: <Settings className="h-6 w-6" />, mockupId: "resources",
