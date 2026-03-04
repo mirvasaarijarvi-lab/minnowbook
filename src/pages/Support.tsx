@@ -200,7 +200,7 @@ const Support = () => {
                     </summary>
                     <div className="px-6 pb-6 pt-0 animate-fade-in">
                       <ul className="space-y-2 ml-14">
-                        {article.content.map((item, i) => (
+                        {article.content.filter(Boolean).map((item, i) => (
                           <li
                             key={i}
                             className="text-sm text-foreground/80 leading-relaxed flex items-start gap-2"
