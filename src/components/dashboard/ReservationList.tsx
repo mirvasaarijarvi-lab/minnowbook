@@ -13,7 +13,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useState } from "react";
 import { format } from "date-fns";
-import { CalendarDays, User, Mail, Phone, MoreVertical, CheckCircle2, XCircle, Pencil, Receipt, PackageCheck, Coffee, Plus, Building2, Tag } from "lucide-react";
+import { CalendarDays, User, Mail, Phone, MoreVertical, CheckCircle2, XCircle, Pencil, Receipt, PackageCheck, Coffee, Plus, Building2, Tag, Bell } from "lucide-react";
 import EditReservationDialog from "./EditReservationDialog";
 import ManualReservationDialog from "./ManualReservationDialog";
 import ConfirmationEmailPreview from "@/components/ConfirmationEmailPreview";
@@ -51,6 +51,7 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
   const [invoicedFilter, setInvoicedFilter] = useState<string>(initialInvoicedFilter === false ? "uninvoiced" : "all");
   const [checkoutTodayFilter, setCheckoutTodayFilter] = useState<boolean>(!!initialCheckoutToday);
   const [confirmDialog, setConfirmDialog] = useState<{ id: string; action: "confirmed" | "cancelled" } | null>(null);
+  const [reminderDialog, setReminderDialog] = useState<string | null>(null);
   const [editingReservation, setEditingReservation] = useState<any | null>(null);
   const [newReservationOpen, setNewReservationOpen] = useState(false);
   const t = useT();
@@ -190,6 +191,24 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
     updateStatus.mutate({ id: confirmDialog.id, status: confirmDialog.action });
   };
 
+  const sendReminder = useMutation({
+    mutationFn: async (reservationId: string) => {
+      const { data, error } = await supabase.functions.invoke("send-reminder", {
+        body: { reservationId },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["reservations"] });
+      toast.success(t("dashboard.reminderSent"));
+      setReminderDialog(null);
+    },
+    onError: (err: any) => {
+      toast.error(err?.message || t("dashboard.reminderError"));
+    },
+  });
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between flex-wrap gap-2" data-tour="reservations-filters">
@@ -299,6 +318,12 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
                         {(r as any).is_checked_in && (
                           <Badge className="text-xs bg-emerald-100 text-emerald-800 border-emerald-200">{t("dashboard.checkedIn")}</Badge>
                         )}
+                        {(r as any).reminder_email_sent_at && (
+                          <Badge variant="outline" className="text-xs gap-1 bg-blue-50 text-blue-700 border-blue-200">
+                            <Bell className="h-3 w-3" />
+                            {t("dashboard.reminderSentAt")}
+                          </Badge>
+                        )}
                         {r.discount_type && (
                           <Badge variant="outline" className="text-xs gap-1 bg-purple-50 text-purple-700 border-purple-200">
                             <Tag className="h-3 w-3" />
@@ -381,6 +406,12 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
                              {t("dashboard.confirmReservation")}
                            </DropdownMenuItem>
                          )}
+                         {canEdit && r.status !== "cancelled" && (
+                           <DropdownMenuItem onClick={() => setReminderDialog(r.id)} className="gap-2">
+                             <Bell className="h-4 w-4" />
+                             {t("dashboard.sendReminder")}
+                           </DropdownMenuItem>
+                         )}
                          {canDelete && r.status !== "cancelled" && (
                            <DropdownMenuItem onClick={() => setConfirmDialog({ id: r.id, action: "cancelled" })} className="gap-2 text-destructive focus:text-destructive">
                              <XCircle className="h-4 w-4" />
@@ -451,6 +482,26 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
               disabled={updateStatus.isPending}
             >
               {confirmDialog?.action === "confirmed" ? t("dashboard.confirmReservation") : t("dashboard.cancelReservation")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reminder dialog */}
+      <Dialog open={!!reminderDialog} onOpenChange={(open) => !open && setReminderDialog(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("dashboard.sendReminder")}</DialogTitle>
+            <DialogDescription>{t("dashboard.sendReminderMsg")}</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setReminderDialog(null)}>{t("common.cancel")}</Button>
+            <Button
+              onClick={() => reminderDialog && sendReminder.mutate(reminderDialog)}
+              disabled={sendReminder.isPending}
+            >
+              <Bell className="h-4 w-4 mr-1.5" />
+              {t("dashboard.sendReminder")}
             </Button>
           </DialogFooter>
         </DialogContent>

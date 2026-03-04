@@ -1,0 +1,1 @@
+ALTER TABLE public.reservations ADD COLUMN IF NOT EXISTS reminder_email_sent_at timestamptz DEFAULT NULL;

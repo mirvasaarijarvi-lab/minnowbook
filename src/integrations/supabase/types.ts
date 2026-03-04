@@ -350,6 +350,7 @@ export type Database = {
           price_eur: number | null
           pricing_details: string | null
           pricing_type: string | null
+          reminder_email_sent_at: string | null
           reservation_type: string
           restaurant_sub_type: string | null
           room_type: string | null
@@ -407,6 +408,7 @@ export type Database = {
           price_eur?: number | null
           pricing_details?: string | null
           pricing_type?: string | null
+          reminder_email_sent_at?: string | null
           reservation_type: string
           restaurant_sub_type?: string | null
           room_type?: string | null
@@ -464,6 +466,7 @@ export type Database = {
           price_eur?: number | null
           pricing_details?: string | null
           pricing_type?: string | null
+          reminder_email_sent_at?: string | null
           reservation_type?: string
           restaurant_sub_type?: string | null
           room_type?: string | null

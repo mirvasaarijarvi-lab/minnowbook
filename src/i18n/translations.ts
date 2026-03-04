@@ -485,6 +485,11 @@ type TranslationKeys = {
   "dashboard.confirmed": string;
   "dashboard.cancelled": string;
   "dashboard.checkedIn": string;
+  "dashboard.sendReminder": string;
+  "dashboard.reminderSent": string;
+  "dashboard.reminderSentAt": string;
+  "dashboard.reminderError": string;
+  "dashboard.sendReminderMsg": string;
   "dashboard.notCheckedIn": string;
   "dashboard.todayFilter": string;
   "dashboard.activeResources": string;
@@ -1704,6 +1709,11 @@ const en: TranslationKeys = {
   "dashboard.confirmed": "Confirmed",
   "dashboard.cancelled": "Cancelled",
   "dashboard.checkedIn": "Checked in",
+  "dashboard.sendReminder": "Send reminder",
+  "dashboard.reminderSent": "Reminder sent",
+  "dashboard.reminderSentAt": "Reminder sent",
+  "dashboard.reminderError": "Failed to send reminder",
+  "dashboard.sendReminderMsg": "Send a reminder email to the guest about this reservation?",
   "dashboard.notCheckedIn": "Not checked in",
   "dashboard.todayFilter": "Today",
   "dashboard.activeResources": "Active Resources",
@@ -2905,6 +2915,11 @@ const fi: TranslationKeys = {
   "dashboard.confirmed": "Vahvistettu",
   "dashboard.cancelled": "Peruutettu",
   "dashboard.checkedIn": "Kirjautunut",
+  "dashboard.sendReminder": "Lähetä muistutus",
+  "dashboard.reminderSent": "Muistutus lähetetty",
+  "dashboard.reminderSentAt": "Muistutus lähetetty",
+  "dashboard.reminderError": "Muistutuksen lähetys epäonnistui",
+  "dashboard.sendReminderMsg": "Lähetä muistutussähköposti vieraalle tästä varauksesta?",
   "dashboard.notCheckedIn": "Ei kirjautunut",
   "dashboard.todayFilter": "Tänään",
   "dashboard.activeResources": "Aktiiviset resurssit",
@@ -4105,6 +4120,11 @@ const sv: TranslationKeys = {
   "dashboard.confirmed": "Bekräftad",
   "dashboard.cancelled": "Avbokad",
   "dashboard.checkedIn": "Incheckad",
+  "dashboard.sendReminder": "Skicka påminnelse",
+  "dashboard.reminderSent": "Påminnelse skickad",
+  "dashboard.reminderSentAt": "Påminnelse skickad",
+  "dashboard.reminderError": "Kunde inte skicka påminnelse",
+  "dashboard.sendReminderMsg": "Skicka ett påminnelsemail till gästen om denna bokning?",
   "dashboard.notCheckedIn": "Ej incheckad",
   "dashboard.todayFilter": "Idag",
   "dashboard.activeResources": "Aktiva resurser",
