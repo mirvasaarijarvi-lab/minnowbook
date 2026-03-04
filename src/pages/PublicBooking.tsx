@@ -3,6 +3,7 @@ import { useParams, useSearchParams } from "react-router-dom";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useT } from "@/contexts/I18nContext";
+import type { TranslationKey } from "@/i18n/translations";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -43,7 +44,7 @@ const typeIcons: Record<string, React.ElementType> = {
   hotel: Home,
 };
 
-const typeDescKeys: Record<string, string> = {
+const typeDescKeys: Record<string, TranslationKey> = {
   restaurant: "booking.typeDescRestaurant",
   venue: "booking.typeDescVenue",
   guesthouse: "booking.typeDescGuesthouse",
@@ -846,7 +847,7 @@ const PublicBookingInner = () => {
               <Card>
                 <CardContent className="pt-6 space-y-3">
                   <h3 className="text-sm font-semibold" style={{ color: primaryColor }}>
-                    {t("booking.priceSummary" as any)}
+                    {t("booking.priceSummary")}
                   </h3>
                   <div className="text-sm space-y-2 text-muted-foreground">
                     <div className="flex justify-between">
@@ -856,13 +857,13 @@ const PublicBookingInner = () => {
                     {isAccommodation && form.check_out_date && (
                       <>
                         <div className="flex justify-between">
-                          <span>{t("booking.checkOutDate" as any)}</span>
+                          <span>{t("booking.checkOutDate")}</span>
                           <span>{format(new Date(form.check_out_date + "T00:00:00"), "d.M.yyyy")}</span>
                         </div>
                         {nights > 0 && (
                           <div className="flex justify-between">
-                            <span>{t("email.duration" as any)}</span>
-                            <span>{nights} {nights === 1 ? t("booking.night" as any) : t("booking.nights" as any)}</span>
+                            <span>{t("email.duration")}</span>
+                            <span>{nights} {nights === 1 ? t("booking.night") : t("booking.nights")}</span>
                           </div>
                         )}
                       </>
@@ -870,24 +871,24 @@ const PublicBookingInner = () => {
                     {selectedResource && (
                       <div className="flex justify-between">
                         <span>{selectedResource.name}</span>
-                        {basePrice != null && <span>€{Number(basePrice).toFixed(2)} / {t("booking.night" as any)}</span>}
+                        {basePrice != null && <span>€{Number(basePrice).toFixed(2)} / {t("booking.night")}</span>}
                       </div>
                     )}
                     {roomTotal != null && (
                       <div className="flex justify-between">
-                        <span>{t("reports.roomPrice" as any)}</span>
+                        <span>{t("reports.roomPrice")}</span>
                         <span>€{roomTotal.toFixed(2)}</span>
                       </div>
                     )}
                     {form.breakfast_included && breakfastTotal > 0 && (
                       <div className="flex justify-between">
-                        <span>{t("booking.breakfastIncluded" as any)} ({guestsCount} × {nights} × €{breakfastPrice})</span>
+                        <span>{t("booking.breakfastIncluded")} ({guestsCount} × {nights} × €{breakfastPrice})</span>
                         <span>€{breakfastTotal.toFixed(2)}</span>
                       </div>
                     )}
                     {grandTotal != null && (
                       <div className="flex justify-between font-semibold pt-2 border-t" style={{ borderColor: `${accentColor}30`, color: primaryColor }}>
-                        <span>{t("booking.estimatedTotal" as any)}</span>
+                        <span>{t("booking.estimatedTotal")}</span>
                         <span>€{grandTotal.toFixed(2)}</span>
                       </div>
                     )}
@@ -900,7 +901,7 @@ const PublicBookingInner = () => {
           {/* Email preview for guest */}
           <div className="space-y-2">
             <h3 className="text-sm font-medium text-muted-foreground">
-              {t("booking.whatGuestReceives" as any)}
+              {t("booking.whatGuestReceives")}
             </h3>
             <ConfirmationEmailPreview
               reservation={{
@@ -1141,12 +1142,12 @@ const PublicBookingInner = () => {
                           >
                             {(settings?.resource_type_names as Record<string, string>)?.[type] || t(`dashboard.${type}` as any)}
                           </span>
-                          {((settings?.resource_type_descriptions as Record<string, string>)?.[type] || (descKey && t(descKey as any))) && (
+                          {((settings?.resource_type_descriptions as Record<string, string>)?.[type] || (descKey && t(descKey))) && (
                             <span
                               className="text-xs block leading-relaxed"
                               style={{ color: `${primaryColor}80` }}
                             >
-                              {(settings?.resource_type_descriptions as Record<string, string>)?.[type] || t(descKey as any)}
+                              {(settings?.resource_type_descriptions as Record<string, string>)?.[type] || (descKey ? t(descKey) : "")}
                             </span>
                           )}
                         </div>
@@ -1269,12 +1270,12 @@ const PublicBookingInner = () => {
               <CardHeader>
                 <CardTitle className="text-lg font-serif flex items-center gap-2" style={{ color: primaryColor }}>
                   <BedDouble className="h-5 w-5" />
-                  {t("booking.stayDetails" as any)}
+                  {t("booking.stayDetails")}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label>{t("booking.checkOutDate" as any)} *</Label>
+                  <Label>{t("booking.checkOutDate")} *</Label>
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button
@@ -1312,7 +1313,7 @@ const PublicBookingInner = () => {
                     if (nights <= 0) return null;
                     return (
                       <p className="text-xs text-muted-foreground">
-                        {nights} {nights === 1 ? t("booking.night" as any) : t("booking.nights" as any)}
+                        {nights} {nights === 1 ? t("booking.night") : t("booking.nights")}
                       </p>
                     );
                   })()}
@@ -1325,7 +1326,7 @@ const PublicBookingInner = () => {
                   />
                   <Label htmlFor="breakfast_included" className="flex items-center gap-1.5 cursor-pointer">
                     <Coffee className="h-4 w-4" />
-                    {t("booking.breakfastIncluded" as any)}
+                    {t("booking.breakfastIncluded")}
                     {(() => {
                       const selectedResource = resources?.find((r: any) => r.id === form.resource_id);
                       const bfPrice = selectedResource?.breakfast_price_per_person ?? 15;
@@ -1360,36 +1361,36 @@ const PublicBookingInner = () => {
                       style={{ backgroundColor: `${accentColor}08`, borderColor: `${accentColor}30` }}
                     >
                       <h4 className="text-sm font-semibold flex items-center gap-1.5" style={{ color: primaryColor }}>
-                        {t("booking.priceSummary" as any)}
+                        {t("booking.priceSummary")}
                       </h4>
                       <div className="text-sm space-y-1 text-muted-foreground">
                         {basePrice != null && selectedResource && (
                           <div className="flex justify-between">
                             <span>{selectedResource.name}</span>
-                            <span>€{Number(basePrice).toFixed(2)} / {t("booking.night" as any)}</span>
+                            <span>€{Number(basePrice).toFixed(2)} / {t("booking.night")}</span>
                           </div>
                         )}
                         <div className="flex justify-between">
-                          <span>{nights} {nights === 1 ? t("booking.night" as any) : t("booking.nights" as any)}</span>
+                          <span>{nights} {nights === 1 ? t("booking.night") : t("booking.nights")}</span>
                           {roomTotal != null && (
                             <span>€{roomTotal.toFixed(2)}</span>
                           )}
                         </div>
                         {form.breakfast_included && breakfastPrice != null && (
                           <div className="flex justify-between">
-                            <span>{t("booking.breakfastIncluded" as any)} ({guestsCount} × {nights} × €{breakfastPrice})</span>
+                            <span>{t("booking.breakfastIncluded")} ({guestsCount} × {nights} × €{breakfastPrice})</span>
                             <span>€{breakfastTotal.toFixed(2)}</span>
                           </div>
                         )}
                       </div>
                       {grandTotal != null ? (
                         <div className="flex justify-between font-semibold text-sm pt-2 border-t" style={{ borderColor: `${accentColor}30`, color: primaryColor }}>
-                          <span>{t("booking.estimatedTotal" as any)}</span>
+                          <span>{t("booking.estimatedTotal")}</span>
                           <span>€{grandTotal.toFixed(2)}</span>
                         </div>
                       ) : (
                         <p className="text-xs text-muted-foreground italic">
-                          {t("booking.selectRoomForPrice" as any)}
+                          {t("booking.selectRoomForPrice")}
                         </p>
                       )}
                     </div>
@@ -1405,20 +1406,20 @@ const PublicBookingInner = () => {
               <CardHeader>
                 <CardTitle className="text-lg font-serif flex items-center gap-2" style={{ color: primaryColor }}>
                   <Users className="h-5 w-5" />
-                  {t("booking.eventType" as any)}
+                  {t("booking.eventType")}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                    <Label>{t("booking.eventType" as any)}</Label>
+                    <Label>{t("booking.eventType")}</Label>
                     <Select value={form.event_type} onValueChange={(v) => updateField("event_type", v)}>
-                      <SelectTrigger><SelectValue placeholder={t("booking.eventType" as any)} /></SelectTrigger>
+                      <SelectTrigger><SelectValue placeholder={t("booking.eventType")} /></SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="wedding">{t("booking.eventWedding" as any)}</SelectItem>
-                        <SelectItem value="corporate">{t("booking.eventCorporate" as any)}</SelectItem>
-                        <SelectItem value="birthday">{t("booking.eventBirthday" as any)}</SelectItem>
-                        <SelectItem value="conference">{t("booking.eventConference" as any)}</SelectItem>
-                        <SelectItem value="other">{t("booking.eventOther" as any)}</SelectItem>
+                        <SelectItem value="wedding">{t("booking.eventWedding")}</SelectItem>
+                        <SelectItem value="corporate">{t("booking.eventCorporate")}</SelectItem>
+                        <SelectItem value="birthday">{t("booking.eventBirthday")}</SelectItem>
+                        <SelectItem value="conference">{t("booking.eventConference")}</SelectItem>
+                        <SelectItem value="other">{t("booking.eventOther")}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -1429,7 +1430,7 @@ const PublicBookingInner = () => {
                     onCheckedChange={(checked) => updateBoolField("catering_needed", !!checked)}
                   />
                   <Label htmlFor="catering_needed" className="cursor-pointer">
-                    {t("booking.cateringNeeded" as any)}
+                    {t("booking.cateringNeeded")}
                   </Label>
                 </div>
               </CardContent>
@@ -1442,7 +1443,7 @@ const PublicBookingInner = () => {
               <CardHeader>
                 <CardTitle className="text-lg font-serif flex items-center gap-2" style={{ color: primaryColor }}>
                   <UtensilsCrossed className="h-5 w-5" />
-                  {t("booking.restaurantSubType" as any)}
+                  {t("booking.restaurantSubType")}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -1466,8 +1467,8 @@ const PublicBookingInner = () => {
                         }}
                       >
                         <Icon className="h-5 w-5" style={{ color: isSelected ? accentColor : primaryColor }} />
-                        <span className="text-sm font-medium" style={{ color: primaryColor }}>{t(labelKey as any)}</span>
-                        <span className="text-xs" style={{ color: `${primaryColor}60` }}>{t(descKey as any)}</span>
+                        <span className="text-sm font-medium" style={{ color: primaryColor }}>{t(labelKey)}</span>
+                        <span className="text-xs" style={{ color: `${primaryColor}60` }}>{t(descKey)}</span>
                       </button>
                     );
                   })}
@@ -1476,7 +1477,7 @@ const PublicBookingInner = () => {
                 {/* Dine-in: pricing type */}
                 {form.restaurant_sub_type === "dine_in" && (
                   <div className="space-y-3 rounded-lg border border-border p-3">
-                    <Label className="font-medium">{t("booking.pricingType" as any)}</Label>
+                    <Label className="font-medium">{t("booking.pricingType")}</Label>
                     <div className="flex items-center gap-4">
                       <label className="flex items-center gap-2 cursor-pointer">
                         <Checkbox
@@ -1485,7 +1486,7 @@ const PublicBookingInner = () => {
                             if (checked) setForm((prev) => ({ ...prev, pricing_type: "menu", fixed_price: "" }));
                           }}
                         />
-                        <span className="text-sm">{t("booking.pricingMenu" as any)}</span>
+                        <span className="text-sm">{t("booking.pricingMenu")}</span>
                       </label>
                       <label className="flex items-center gap-2 cursor-pointer">
                         <Checkbox
@@ -1494,12 +1495,12 @@ const PublicBookingInner = () => {
                             if (checked) setForm((prev) => ({ ...prev, pricing_type: "fixed_price" }));
                           }}
                         />
-                        <span className="text-sm">{t("booking.pricingFixed" as any)}</span>
+                        <span className="text-sm">{t("booking.pricingFixed")}</span>
                       </label>
                     </div>
                     {form.pricing_type === "fixed_price" && (
                       <div className="space-y-2">
-                        <Label>{t("booking.fixedPrice" as any)}</Label>
+                        <Label>{t("booking.fixedPrice")}</Label>
                         <Input
                           type="number"
                           step="0.01"
@@ -1518,10 +1519,10 @@ const PublicBookingInner = () => {
                   <div className="space-y-3 rounded-lg border border-border p-3">
                     <Label className="font-medium flex items-center gap-1.5">
                       <ChefHat className="h-4 w-4" />
-                      {t("booking.cateringDetails" as any)}
+                      {t("booking.cateringDetails")}
                     </Label>
                     <div className="space-y-2">
-                      <Label>{t("booking.deliveryAddress" as any)}</Label>
+                      <Label>{t("booking.deliveryAddress")}</Label>
                       <Input
                         value={form.delivery_address}
                         onChange={(e) => updateField("delivery_address", e.target.value)}
@@ -1529,7 +1530,7 @@ const PublicBookingInner = () => {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>{t("booking.dietaryNotes" as any)}</Label>
+                      <Label>{t("booking.dietaryNotes")}</Label>
                       <Textarea
                         rows={2}
                         value={form.dietary_notes}
@@ -1545,7 +1546,7 @@ const PublicBookingInner = () => {
                           onCheckedChange={(checked) => updateBoolField("equipment_needed", !!checked)}
                         />
                         <Label htmlFor="equipment_needed" className="cursor-pointer text-sm">
-                          {t("booking.equipmentNeeded" as any)}
+                          {t("booking.equipmentNeeded")}
                         </Label>
                       </div>
                       <div className="flex items-center gap-2">
@@ -1555,7 +1556,7 @@ const PublicBookingInner = () => {
                           onCheckedChange={(checked) => updateBoolField("staff_needed", !!checked)}
                         />
                         <Label htmlFor="staff_needed" className="cursor-pointer text-sm">
-                          {t("booking.staffNeeded" as any)}
+                          {t("booking.staffNeeded")}
                         </Label>
                       </div>
                     </div>
@@ -1567,11 +1568,11 @@ const PublicBookingInner = () => {
                   <div className="space-y-3 rounded-lg border border-border p-3">
                     <Label className="font-medium flex items-center gap-1.5">
                       <ShoppingBag className="h-4 w-4" />
-                      {t("booking.popupDetails" as any)}
+                      {t("booking.popupDetails")}
                     </Label>
                     <div className="grid gap-3 sm:grid-cols-2">
                       <div className="space-y-2">
-                        <Label>{t("booking.festivalName" as any)}</Label>
+                        <Label>{t("booking.festivalName")}</Label>
                         <Input
                           value={form.festival_name}
                           onChange={(e) => updateField("festival_name", e.target.value)}
@@ -1579,13 +1580,13 @@ const PublicBookingInner = () => {
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label>{t("booking.stallSize" as any)}</Label>
+                        <Label>{t("booking.stallSize")}</Label>
                         <Select value={form.stall_size} onValueChange={(v) => updateField("stall_size", v)}>
                           <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="small">{t("booking.stallSizeSmall" as any)}</SelectItem>
-                            <SelectItem value="medium">{t("booking.stallSizeMedium" as any)}</SelectItem>
-                            <SelectItem value="large">{t("booking.stallSizeLarge" as any)}</SelectItem>
+                            <SelectItem value="small">{t("booking.stallSizeSmall")}</SelectItem>
+                            <SelectItem value="medium">{t("booking.stallSizeMedium")}</SelectItem>
+                            <SelectItem value="large">{t("booking.stallSizeLarge")}</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -1599,7 +1600,7 @@ const PublicBookingInner = () => {
                         />
                         <Label htmlFor="electricity_needed" className="cursor-pointer text-sm flex items-center gap-1">
                           <Plug className="h-3.5 w-3.5" />
-                          {t("booking.electricityNeeded" as any)}
+                          {t("booking.electricityNeeded")}
                         </Label>
                       </div>
                       <div className="flex items-center gap-2">
@@ -1610,12 +1611,12 @@ const PublicBookingInner = () => {
                         />
                         <Label htmlFor="water_needed" className="cursor-pointer text-sm flex items-center gap-1">
                           <Droplets className="h-3.5 w-3.5" />
-                          {t("booking.waterNeeded" as any)}
+                          {t("booking.waterNeeded")}
                         </Label>
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <Label>{t("booking.foodPermits" as any)}</Label>
+                      <Label>{t("booking.foodPermits")}</Label>
                       <Textarea
                         rows={2}
                         value={form.food_permits}
@@ -1624,7 +1625,7 @@ const PublicBookingInner = () => {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>{t("booking.stallFee" as any)}</Label>
+                      <Label>{t("booking.stallFee")}</Label>
                       <Input
                         type="number"
                         step="0.01"
@@ -1645,7 +1646,7 @@ const PublicBookingInner = () => {
               <CardHeader className="pb-2">
                 <CardTitle className="text-lg font-serif flex items-center gap-2" style={{ color: primaryColor }}>
                   <Clock className="h-5 w-5" />
-                  {t("resourceHours.openingHoursLabel" as any)}
+                  {t("resourceHours.openingHoursLabel")}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -1833,7 +1834,7 @@ const PublicBookingInner = () => {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="promo_code">{t("discount.promoCode" as any) || "Promo Code"}</Label>
+                <Label htmlFor="promo_code">{t("discount.promoCode")}</Label>
                 <div className="relative">
                   <Tag className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -1842,7 +1843,7 @@ const PublicBookingInner = () => {
                     onChange={(e) => updateField("promo_code", e.target.value.toUpperCase())}
                     maxLength={50}
                     className="pl-9 uppercase"
-                    placeholder={t("discount.promoCodePlaceholder" as any) || "Enter code if you have one"}
+                    placeholder={t("discount.promoCodePlaceholder")}
                   />
                 </div>
               </div>
