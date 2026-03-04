@@ -118,12 +118,25 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
 
   const updateStatus = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
+      const reservation = reservations?.find((r) => r.id === id);
       const { error } = await supabase
         .from("reservations")
         .update({ status, updated_at: new Date().toISOString() })
         .eq("id", id)
         .eq("tenant_id", tenantId!);
       if (error) throw error;
+
+      // Send confirmation or cancellation email (fire-and-forget, don't block status change)
+      if (reservation && !reservation.no_email_confirm && status === "confirmed") {
+        supabase.functions.invoke("send-reminder", {
+          body: { reservationId: id, emailType: "confirmation" },
+        }).catch((err) => console.error("Failed to send confirmation email:", err));
+      }
+      if (reservation && !reservation.no_email_cancel && status === "cancelled") {
+        supabase.functions.invoke("send-reminder", {
+          body: { reservationId: id, emailType: "cancellation" },
+        }).catch((err) => console.error("Failed to send cancellation email:", err));
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["reservations"] });
@@ -194,7 +207,7 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
   const sendReminder = useMutation({
     mutationFn: async (reservationId: string) => {
       const { data, error } = await supabase.functions.invoke("send-reminder", {
-        body: { reservationId },
+        body: { reservationId, emailType: "reminder" },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
