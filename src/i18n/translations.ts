@@ -182,6 +182,7 @@ type TranslationKeys = {
   "resourceHours.closeTime": string;
   "resourceHours.sameEveryDayDesc": string;
   "resourceHours.removeHours": string;
+  "resourceHours.saveFirst": string;
   "resourceHours.openingHoursLabel": string;
   "booking.pickDate": string;
   "booking.checkOutDate": string;
@@ -1268,6 +1269,7 @@ const en: TranslationKeys = {
   "resourceHours.closeTime": "Closes",
   "resourceHours.sameEveryDayDesc": "Same hours apply to all open days. Toggle individual days closed below.",
   "resourceHours.removeHours": "Remove hours",
+  "resourceHours.saveFirst": "Save the resource first, then edit it to set opening hours.",
   "resourceHours.openingHoursLabel": "Hours",
   "booking.pickDate": "Pick a date",
   "booking.checkOutDate": "Check-out date",
@@ -2333,6 +2335,7 @@ const fi: TranslationKeys = {
   "resourceHours.closeTime": "Sulkeutuu",
   "resourceHours.sameEveryDayDesc": "Samat ajat kaikille avoimille päiville. Voit sulkea yksittäisiä päiviä alla.",
   "resourceHours.removeHours": "Poista aukioloajat",
+  "resourceHours.saveFirst": "Tallenna resurssi ensin, sitten voit muokata aukioloaikoja.",
   "resourceHours.openingHoursLabel": "Aukioloajat",
   "booking.pickDate": "Valitse päivämäärä",
   "booking.checkOutDate": "Lähtöpäivä",
@@ -3396,6 +3399,7 @@ const sv: TranslationKeys = {
   "resourceHours.closeTime": "Stänger",
   "resourceHours.sameEveryDayDesc": "Samma tider gäller alla öppna dagar. Stäng enskilda dagar nedan.",
   "resourceHours.removeHours": "Ta bort öppettider",
+  "resourceHours.saveFirst": "Spara resursen först, redigera sedan för att ställa in öppettider.",
   "resourceHours.openingHoursLabel": "Öppettider",
   "booking.pickDate": "Välj datum",
   "booking.checkOutDate": "Utcheckningsdatum",

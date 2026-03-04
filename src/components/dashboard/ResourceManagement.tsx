@@ -291,13 +291,6 @@ const ResourceManagement = () => {
           </div>
           <p className="text-sm text-muted-foreground">{t("dashboard.resourceManagementDesc")}</p>
         </div>
-        <div>
-          <div className="flex items-center gap-2">
-            <h2 className="text-2xl font-serif font-bold text-foreground">{t("dashboard.resourceManagement")}</h2>
-            <DashboardTooltip text="Add rooms, tables, or venues here. Set capacity, pricing, and upload photos. Toggle resources active/inactive to control booking availability." />
-          </div>
-          <p className="text-sm text-muted-foreground">{t("dashboard.resourceManagementDesc")}</p>
-        </div>
         <div className="flex items-center gap-2">
           {(tenant as any)?.slug && (
             <Button variant="outline" size="sm" className="gap-1.5" asChild>
@@ -428,8 +421,18 @@ const ResourceManagement = () => {
                   </div>
 
                   {/* Opening hours for restaurant resources */}
-                  {editingId && form.resource_type === "restaurant" && tenantId && (
-                    <ResourceOpeningHoursEditor resourceId={editingId} tenantId={tenantId} />
+                  {form.resource_type === "restaurant" && tenantId && (
+                    editingId ? (
+                      <ResourceOpeningHoursEditor resourceId={editingId} tenantId={tenantId} />
+                    ) : (
+                      <div className="rounded-lg border border-border p-3 space-y-1">
+                        <Label className="flex items-center gap-1.5 font-medium text-sm">
+                          <Clock className="h-4 w-4 text-muted-foreground" />
+                          {t("resourceHours.title" as any)}
+                        </Label>
+                        <p className="text-xs text-muted-foreground">{t("resourceHours.saveFirst" as any)}</p>
+                      </div>
+                    )
                   )}
 
                   {/* Action buttons */}
@@ -465,6 +468,7 @@ const ResourceManagement = () => {
                   <TableHead>{t("common.description")}</TableHead>
                   <TableHead className="text-center">{t("dashboard.capacity")}</TableHead>
                   <TableHead className="text-right">{t("common.price")}</TableHead>
+                  <TableHead>{t("resourceHours.title" as any)}</TableHead>
                   <TableHead className="text-center">{t("common.status")}</TableHead>
                   {canManage && <TableHead className="text-right">{t("dashboard.actions")}</TableHead>}
                 </TableRow>
@@ -492,16 +496,20 @@ const ResourceManagement = () => {
                       )}
                       <TableCell className="text-muted-foreground max-w-[260px]">
                         <div className="truncate">{r.description ?? "–"}</div>
-                        {r.resource_type === "restaurant" && formatResourceHours(r.id) && (
-                          <div className="flex items-center gap-1 text-xs mt-0.5">
-                            <Clock className="h-3 w-3" />
-                            <span>{formatResourceHours(r.id)}</span>
-                          </div>
-                        )}
                       </TableCell>
                       <TableCell className="text-center">{r.capacity ?? "–"}</TableCell>
                       <TableCell className="text-right">
                         {r.price_per_night != null ? `${Number(r.price_per_night).toFixed(0)} €` : "–"}
+                      </TableCell>
+                      <TableCell>
+                        {r.resource_type === "restaurant" && formatResourceHours(r.id) ? (
+                          <div className="flex items-center gap-1 text-xs">
+                            <Clock className="h-3 w-3 text-muted-foreground" />
+                            <span>{formatResourceHours(r.id)}</span>
+                          </div>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">–</span>
+                        )}
                       </TableCell>
                       <TableCell className="text-center">
                         <Badge variant={isActive ? "default" : "secondary"} className={isActive ? "bg-primary/15 text-primary border-primary/30 hover:bg-primary/20" : ""}>
