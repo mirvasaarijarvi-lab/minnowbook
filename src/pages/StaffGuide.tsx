@@ -405,7 +405,7 @@ const guideContent: Record<Language, GuideContent> = {
         },
         {
           name: "Pro",
-          price: "€59/mo",
+          price: "€79/mo",
           features: [
             "All reservation types (1 resource each)",
             "Up to 10 staff users",
@@ -418,7 +418,7 @@ const guideContent: Record<Language, GuideContent> = {
         },
         {
           name: "Business",
-          price: "€99/mo",
+          price: "€199/mo",
           features: [
             "Unlimited sites & resources",
             "Unlimited staff users",
@@ -583,7 +583,7 @@ const guideContent: Record<Language, GuideContent> = {
         },
         {
           name: "Pro",
-          price: "59 €/kk",
+          price: "79 €/kk",
           features: [
             "Kaikki varaustyypit (1 resurssi per tyyppi)",
             "Jopa 10 henkilökuntaa",
@@ -596,7 +596,7 @@ const guideContent: Record<Language, GuideContent> = {
         },
         {
           name: "Business",
-          price: "99 €/kk",
+          price: "199 €/kk",
           features: [
             "Rajattomat toimipisteet ja resurssit",
             "Rajaton henkilökunta",
@@ -761,7 +761,7 @@ const guideContent: Record<Language, GuideContent> = {
         },
         {
           name: "Pro",
-          price: "59 €/mån",
+          price: "79 €/mån",
           features: [
             "Alla bokningstyper (1 resurs per typ)",
             "Upp till 10 personal",
@@ -774,7 +774,7 @@ const guideContent: Record<Language, GuideContent> = {
         },
         {
           name: "Business",
-          price: "99 €/mån",
+          price: "199 €/mån",
           features: [
             "Obegränsade platser & resurser",
             "Obegränsad personal",
