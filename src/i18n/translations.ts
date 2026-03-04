@@ -2818,14 +2818,14 @@ const fi: TranslationKeys = {
   "features.automatedEmailsDesc": "Lähetä vahvistus-, muistutus- ja peruutussähköpostit automaattisesti.",
 
   // How it works
-  "howItWorks.title": "Käyttövalmis nopeasti ja helposti",
-  "howItWorks.subtitle": "Kolme yksinkertaista vaihetta verkkovarausten vastaanottamiseen.",
-  "howItWorks.step1Title": "Rekisteröidy ja valitse suunnitelma",
-  "howItWorks.step1Desc": "Luo tilisi ja aloita 30 päivän ilmainen kokeilu.",
-  "howItWorks.step2Title": "Määritä yrityksesi",
-  "howItWorks.step2Desc": "Lataa brändäyksesi, lisää toimipisteet ja toiminnot, määritä aukioloajat, hinnoittelu, kapasiteetti ja paljon muuta.",
+  "howItWorks.title": "Käyttöönotto on helppoa ja nopeaa",
+  "howItWorks.subtitle": "Kolme helppoa askelta ja voit alkaa vastaanottamaan verkkovarauksia.",
+  "howItWorks.step1Title": "Rekisteröidy ja valitse yrityksellesi sopiva palvelupaketti",
+  "howItWorks.step1Desc": "Luo tili ja aloita 30 päivän ilmainen kokeilujakso.",
+  "howItWorks.step2Title": "Luo yrityksesi alustalle",
+  "howItWorks.step2Desc": "Lataa brändisi, lisää toimipisteesi ja toimintasi sekä määritä aukioloajat, hinnoittelu, käyttöaste ja paljon muuta.",
   "howItWorks.step3Title": "Jaa varauslinkkisi",
-  "howItWorks.step3Desc": "Lähetä mukautettu varaussivusi asiakkaille ja ala vastaanottaa varauksia.",
+  "howItWorks.step3Desc": "Lähetä yrityksellesi räätälöity varaussivu asiakkaille ja aloita varausten vastaanottaminen.",
 
   // Pricing
   "pricing.title": "Yksinkertainen ja läpinäkyvä hinnoittelu",
@@ -4010,14 +4010,14 @@ const sv: TranslationKeys = {
   "features.automatedEmailsDesc": "Skicka bekräftelse-, påminnelse- och avbokningsmejl automatiskt.",
 
   // How it works
-  "howItWorks.title": "Igång snabbt och enkelt",
+  "howItWorks.title": "Igång på några minuter",
   "howItWorks.subtitle": "Tre enkla steg för att börja ta emot onlinebokningar.",
-  "howItWorks.step1Title": "Registrera dig och välj plan",
-  "howItWorks.step1Desc": "Skapa ditt konto och starta din 30 dagars gratis provperiod.",
-  "howItWorks.step2Title": "Konfigurera ditt företag",
-  "howItWorks.step2Desc": "Ladda upp din varumärkesprofil, lägg till platser och verksamheter, konfigurera öppettider, prissättning, kapacitet och mycket mer.",
+  "howItWorks.step1Title": "Registrera ditt företag och välj ditt mjukvaruplan",
+  "howItWorks.step1Desc": "Skapa ditt konto och börja din 30-dagars gratis provperiod.",
+  "howItWorks.step2Title": "Ställ in ditt företag",
+  "howItWorks.step2Desc": "Ladda upp ditt varumärke, lägg till din(a) anläggning(ar) och verksamhet, och konfigurera öppettider, priser, beläggningskapacitet och mycket mer.",
   "howItWorks.step3Title": "Dela din bokningslänk",
-  "howItWorks.step3Desc": "Skicka din anpassade bokningssida till kunder och börja ta emot bokningar.",
+  "howItWorks.step3Desc": "Skicka din bokningssida till kunder och börja ta emot bokningar.",
 
   // Pricing
   "pricing.title": "Enkel och transparent prissättning",
