@@ -28,48 +28,45 @@ const stepKeys: { step: string; titleKey: TranslationKey; descKey: TranslationKe
   { step: "03", titleKey: "howItWorks.step3Title", descKey: "howItWorks.step3Desc" },
 ];
 
-const tiers = [
+const tierKeys = [
   {
-    nameKey: "tier.basic" as TranslationKey,
+    nameKey: "pricing.basicName" as TranslationKey,
     price: 29,
-    descriptionKey: "tier.basicDesc" as TranslationKey,
-    reservationTypes: "1 type",
-    staffUsers: "1–3",
-    features: [
-      "Custom branding (logo, colors, images)",
-      "Default email templates",
-      "Opening hours configuration",
-      "Branded booking page",
-      "AI chatbot support",
+    descriptionKey: "pricing.basicDesc" as TranslationKey,
+    reservationTypesKey: "pricing.basicTypes" as TranslationKey,
+    staffUsersKey: "pricing.basicStaff" as TranslationKey,
+    featureKeys: [
+      "pricing.basicF1" as TranslationKey,
+      "pricing.basicF2" as TranslationKey,
+      "pricing.basicF3" as TranslationKey,
+      "pricing.basicF4" as TranslationKey,
+      "pricing.basicF5" as TranslationKey,
     ],
   },
   {
-    nameKey: "tier.pro" as TranslationKey,
+    nameKey: "pricing.proName" as TranslationKey,
     price: 79,
-    descriptionKey: "tier.proDesc" as TranslationKey,
-    reservationTypes: "1 type",
-    staffUsers: "Up to 10",
+    descriptionKey: "pricing.proDesc" as TranslationKey,
+    reservationTypesKey: "pricing.proTypes" as TranslationKey,
+    staffUsersKey: "pricing.proStaff" as TranslationKey,
     isPopular: true,
-    features: [
-      "Everything in Basic",
-      "Custom email templates",
-      "Advanced opening hours & rules",
-      "AI chatbot support",
-      "Detailed analytics",
+    featureKeys: [
+      "pricing.proF1" as TranslationKey,
+      "pricing.proF2" as TranslationKey,
+      "pricing.proF3" as TranslationKey,
     ],
   },
   {
-    nameKey: "tier.business" as TranslationKey,
+    nameKey: "pricing.businessName" as TranslationKey,
     price: 199,
-    descriptionKey: "tier.businessDesc" as TranslationKey,
-    reservationTypes: "All 3 types",
-    staffUsers: "Unlimited",
-    features: [
-      "Everything in Pro",
-      "Restaurant, venue & guesthouse",
-      "Unlimited staff accounts",
-      "Advanced reporting",
-      "Priority support (24h response)",
+    descriptionKey: "pricing.businessDesc" as TranslationKey,
+    reservationTypesKey: "pricing.businessTypes" as TranslationKey,
+    staffUsersKey: "pricing.businessStaff" as TranslationKey,
+    featureKeys: [
+      "pricing.businessF1" as TranslationKey,
+      "pricing.businessF2" as TranslationKey,
+      "pricing.businessF3" as TranslationKey,
+      "pricing.businessF4" as TranslationKey,
     ],
   },
 ];
@@ -168,8 +165,8 @@ const Index = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {tiers.map((tier, i) => (
-              <PricingTier key={tier.nameKey} name={t(tier.nameKey)} description={t(tier.descriptionKey)} price={tier.price} reservationTypes={tier.reservationTypes} staffUsers={tier.staffUsers} features={tier.features} isPopular={tier.isPopular} delay={i * 100} />
+            {tierKeys.map((tier, i) => (
+              <PricingTier key={tier.nameKey} name={t(tier.nameKey)} description={t(tier.descriptionKey)} price={tier.price} reservationTypes={t(tier.reservationTypesKey)} staffUsers={t(tier.staffUsersKey)} features={tier.featureKeys.map(k => t(k))} isPopular={tier.isPopular} delay={i * 100} />
             ))}
           </div>
         </div>
