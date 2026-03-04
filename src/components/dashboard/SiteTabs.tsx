@@ -62,7 +62,7 @@ const SiteTabs = () => {
       >
         <TabsList className="flex-wrap h-auto gap-1">
           <TabsTrigger value="all" className="text-xs">
-            {t("sites.allSites" as any)}
+            {t("sites.allSites")}
           </TabsTrigger>
           {sites!.map((site) => (
             <TabsTrigger key={site.id} value={site.id} className="text-xs">

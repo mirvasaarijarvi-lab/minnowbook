@@ -381,7 +381,7 @@ const AdminPanel = () => {
                   onClick={saveSiteAssignments}
                   disabled={updateSiteAssignmentsMutation.isPending}
                 >
-                  {updateSiteAssignmentsMutation.isPending ? t("common.saving") : (t("common.save" as any) || "Save")}
+                  {updateSiteAssignmentsMutation.isPending ? t("common.saving") : t("common.save")}
                 </Button>
               </div>
             </DialogContent>

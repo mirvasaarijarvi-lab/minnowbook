@@ -36,6 +36,7 @@ type TranslationKeys = {
   "common.guests": string;
   "common.date": string;
   "common.noResults": string;
+  "common.selectAll": string;
 
   // Nav
   "nav.home": string;
@@ -308,6 +309,7 @@ type TranslationKeys = {
   "admin.colSites": string;
   "admin.siteAssignments": string;
   "admin.siteAssignmentsUpdated": string;
+  "admin.usersAssigned": string;
   "admin.noSitesAvailable": string;
   "admin.statusApproved": string;
   "admin.statusPending": string;
@@ -1141,6 +1143,9 @@ type TranslationKeys = {
   "sites.resourceType": string;
   "sites.capacity": string;
   "sites.noResourcesInSite": string;
+  "sites.assignUsers": string;
+  "sites.alreadyAssigned": string;
+  "sites.usersSelected": string;
 
   // Sample period
   "sample.warningWeek": string;
@@ -1253,6 +1258,7 @@ const en: TranslationKeys = {
   "common.guests": "guests",
   "common.date": "Date",
   "common.noResults": "No results found.",
+  "common.selectAll": "Select all",
 
   // Nav
   "nav.home": "Home",
@@ -1521,6 +1527,7 @@ const en: TranslationKeys = {
   "admin.colSites": "Sites",
   "admin.siteAssignments": "Site Assignments",
   "admin.siteAssignmentsUpdated": "Site assignments updated",
+  "admin.usersAssigned": "users assigned",
   "admin.noSitesAvailable": "No active sites available",
   "admin.statusApproved": "Approved",
   "admin.statusPending": "Pending",
@@ -2215,6 +2222,9 @@ const en: TranslationKeys = {
   "sites.resourceType": "Resource Type",
   "sites.capacity": "Capacity",
   "sites.noResourcesInSite": "No resources in this site yet.",
+  "sites.assignUsers": "Assign Users",
+  "sites.alreadyAssigned": "Assigned",
+  "sites.usersSelected": "selected",
   // Sample period
   "sample.warningWeek": "Your free trial ends in {days} days. Contact support to upgrade.",
   "sample.warningDay": "Your free trial expires today! Contact support to continue.",
@@ -2449,6 +2459,7 @@ const fi: TranslationKeys = {
   "common.guests": "vierasta",
   "common.date": "Päivämäärä",
   "common.noResults": "Ei tuloksia.",
+  "common.selectAll": "Valitse kaikki",
 
   // Nav
   "nav.home": "Etusivu",
@@ -2717,6 +2728,7 @@ const fi: TranslationKeys = {
   "admin.colSites": "Toimipisteet",
   "admin.siteAssignments": "Toimipisteiden käyttöoikeudet",
   "admin.siteAssignmentsUpdated": "Toimipisteiden käyttöoikeudet päivitetty",
+  "admin.usersAssigned": "käyttäjää osoitettu",
   "admin.noSitesAvailable": "Ei aktiivisia toimipisteitä",
   "admin.statusApproved": "Hyväksytty",
   "admin.statusPending": "Odottaa",
@@ -3410,6 +3422,9 @@ const fi: TranslationKeys = {
   "sites.resourceType": "Resurssityyppi",
   "sites.capacity": "Kapasiteetti",
   "sites.noResourcesInSite": "Tässä toimipisteessä ei ole vielä resursseja.",
+  "sites.assignUsers": "Osoita käyttäjiä",
+  "sites.alreadyAssigned": "Osoitettu",
+  "sites.usersSelected": "valittu",
   // Sample period
   "sample.warningWeek": "Ilmainen kokeilujaksosi päättyy {days} päivän kuluttua. Ota yhteyttä tukeen päivittääksesi.",
   "sample.warningDay": "Ilmainen kokeilujaksosi päättyy tänään! Ota yhteyttä tukeen jatkaaksesi.",
@@ -3643,6 +3658,7 @@ const sv: TranslationKeys = {
   "common.guests": "gäster",
   "common.date": "Datum",
   "common.noResults": "Inga resultat hittades.",
+  "common.selectAll": "Välj alla",
 
   // Nav
   "nav.home": "Hem",
@@ -3911,6 +3927,7 @@ const sv: TranslationKeys = {
   "admin.colSites": "Platser",
   "admin.siteAssignments": "Platstilldelningar",
   "admin.siteAssignmentsUpdated": "Platstilldelningar uppdaterade",
+  "admin.usersAssigned": "användare tilldelade",
   "admin.noSitesAvailable": "Inga aktiva platser tillgängliga",
   "admin.statusApproved": "Godkänd",
   "admin.statusPending": "Väntar",
@@ -4604,6 +4621,9 @@ const sv: TranslationKeys = {
   "sites.resourceType": "Resurstyp",
   "sites.capacity": "Kapacitet",
   "sites.noResourcesInSite": "Inga resurser på denna plats ännu.",
+  "sites.assignUsers": "Tilldela användare",
+  "sites.alreadyAssigned": "Tilldelad",
+  "sites.usersSelected": "valda",
   // Sample period
   "sample.warningWeek": "Din gratis provperiod slutar om {days} dagar. Kontakta support för att uppgradera.",
   "sample.warningDay": "Din gratis provperiod löper ut idag! Kontakta support för att fortsätta.",
