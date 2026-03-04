@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { Loader2, Upload, X, ImageIcon, Building2, ArrowRight, MapPin, Mail, Phone, Palette, RotateCcw } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import DashboardTooltip from "./DashboardTooltip";
+import EmailTemplateEditor from "./EmailTemplateEditor";
 import OpeningHoursSettings from "./OpeningHoursSettings";
 import DiscountCodesPanel from "./DiscountCodesPanel";
 
@@ -917,6 +918,9 @@ const SettingsPanel = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Email Templates */}
+      <EmailTemplateEditor />
 
       {/* Opening Hours — tenant defaults */}
       <OpeningHoursSettings />

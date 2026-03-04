@@ -1230,6 +1230,30 @@ type TranslationKeys = {
   "approval.noReason": string;
   "approval.closed": string;
   "approval.pendingApproval": string;
+
+  // Email Template Editor
+  "emailTemplates.title": string;
+  "emailTemplates.tooltip": string;
+  "emailTemplates.description": string;
+  "emailTemplates.proRequired": string;
+  "emailTemplates.confirmation": string;
+  "emailTemplates.reminder": string;
+  "emailTemplates.cancellation": string;
+  "emailTemplates.language": string;
+  "emailTemplates.subject": string;
+  "emailTemplates.body": string;
+  "emailTemplates.showPreview": string;
+  "emailTemplates.hidePreview": string;
+  "emailTemplates.previewLabel": string;
+  "emailTemplates.availableVars": string;
+  "emailTemplates.activeToggle": string;
+  "emailTemplates.activeToggleDesc": string;
+  "emailTemplates.resetDefault": string;
+  "emailTemplates.saved": string;
+  "emailTemplates.saveError": string;
+  "emailTemplates.active": string;
+  "emailTemplates.inactive": string;
+  "emailTemplates.upgradeHint": string;
 };
 
 export type TranslationKey = keyof TranslationKeys;
@@ -2309,6 +2333,30 @@ const en: TranslationKeys = {
   "approval.noReason": "No reason",
   "approval.closed": "Closed",
   "approval.pendingApproval": "Submitted for approval",
+
+  // Email Template Editor
+  "emailTemplates.title": "Email Templates",
+  "emailTemplates.tooltip": "Customize the subject and body of confirmation, reminder, and cancellation emails sent to guests.",
+  "emailTemplates.description": "Customize the emails sent to guests for confirmations, reminders, and cancellations.",
+  "emailTemplates.proRequired": "Pro+ required",
+  "emailTemplates.confirmation": "Confirmation",
+  "emailTemplates.reminder": "Reminder",
+  "emailTemplates.cancellation": "Cancellation",
+  "emailTemplates.language": "Language",
+  "emailTemplates.subject": "Subject line",
+  "emailTemplates.body": "Email body (HTML)",
+  "emailTemplates.showPreview": "Show preview",
+  "emailTemplates.hidePreview": "Hide preview",
+  "emailTemplates.previewLabel": "Preview with sample data",
+  "emailTemplates.availableVars": "Available variables",
+  "emailTemplates.activeToggle": "Enable this template",
+  "emailTemplates.activeToggleDesc": "When disabled, the system default will be used instead.",
+  "emailTemplates.resetDefault": "Reset to default",
+  "emailTemplates.saved": "Email template saved",
+  "emailTemplates.saveError": "Failed to save template",
+  "emailTemplates.active": "Active",
+  "emailTemplates.inactive": "Inactive",
+  "emailTemplates.upgradeHint": "Upgrade to Professional or Business to customize email templates.",
 
   // Pricing page
   "pricing.heroTitle": "Simple and transparent pricing",
@@ -3515,6 +3563,30 @@ const fi: TranslationKeys = {
   "approval.closed": "Suljettu",
   "approval.pendingApproval": "Lähetetty hyväksyttäväksi",
 
+  // Email Template Editor
+  "emailTemplates.title": "Sähköpostimallit",
+  "emailTemplates.tooltip": "Mukauta vieraille lähetettävien vahvistus-, muistutus- ja peruutussähköpostien aihetta ja sisältöä.",
+  "emailTemplates.description": "Mukauta vieraille lähetettäviä vahvistus-, muistutus- ja peruutussähköposteja.",
+  "emailTemplates.proRequired": "Pro+ vaaditaan",
+  "emailTemplates.confirmation": "Vahvistus",
+  "emailTemplates.reminder": "Muistutus",
+  "emailTemplates.cancellation": "Peruutus",
+  "emailTemplates.language": "Kieli",
+  "emailTemplates.subject": "Aiherivi",
+  "emailTemplates.body": "Sähköpostin sisältö (HTML)",
+  "emailTemplates.showPreview": "Näytä esikatselu",
+  "emailTemplates.hidePreview": "Piilota esikatselu",
+  "emailTemplates.previewLabel": "Esikatselu esimerkkitiedoilla",
+  "emailTemplates.availableVars": "Käytettävissä olevat muuttujat",
+  "emailTemplates.activeToggle": "Ota tämä malli käyttöön",
+  "emailTemplates.activeToggleDesc": "Kun poistettu käytöstä, käytetään järjestelmän oletusmallia.",
+  "emailTemplates.resetDefault": "Palauta oletukseksi",
+  "emailTemplates.saved": "Sähköpostimalli tallennettu",
+  "emailTemplates.saveError": "Mallin tallennus epäonnistui",
+  "emailTemplates.active": "Aktiivinen",
+  "emailTemplates.inactive": "Ei aktiivinen",
+  "emailTemplates.upgradeHint": "Päivitä Professional- tai Business-tasolle mukauttaaksesi sähköpostimalleja.",
+
   // Pricing page
   "pricing.heroTitle": "Yksinkertainen ja läpinäkyvä hinnoittelu",
   "pricing.heroSubtitle": "Aloita 30 päivän ilmaisella kokeilujaksolla. Korota seuraavaan tasoon tai peruuta milloin tahansa.",
@@ -4719,6 +4791,30 @@ const sv: TranslationKeys = {
   "approval.noReason": "Ingen anledning",
   "approval.closed": "Stängd",
   "approval.pendingApproval": "Inskickad för godkännande",
+
+  // Email Template Editor
+  "emailTemplates.title": "E-postmallar",
+  "emailTemplates.tooltip": "Anpassa ämnesrad och innehåll för bekräftelse-, påminnelse- och avbokningsmejl som skickas till gäster.",
+  "emailTemplates.description": "Anpassa mejlen som skickas till gäster vid bekräftelser, påminnelser och avbokningar.",
+  "emailTemplates.proRequired": "Pro+ krävs",
+  "emailTemplates.confirmation": "Bekräftelse",
+  "emailTemplates.reminder": "Påminnelse",
+  "emailTemplates.cancellation": "Avbokning",
+  "emailTemplates.language": "Språk",
+  "emailTemplates.subject": "Ämnesrad",
+  "emailTemplates.body": "Mejlinnehåll (HTML)",
+  "emailTemplates.showPreview": "Visa förhandsgranskning",
+  "emailTemplates.hidePreview": "Dölj förhandsgranskning",
+  "emailTemplates.previewLabel": "Förhandsgranskning med exempeldata",
+  "emailTemplates.availableVars": "Tillgängliga variabler",
+  "emailTemplates.activeToggle": "Aktivera denna mall",
+  "emailTemplates.activeToggleDesc": "När avaktiverad används systemets standardmall istället.",
+  "emailTemplates.resetDefault": "Återställ till standard",
+  "emailTemplates.saved": "E-postmall sparad",
+  "emailTemplates.saveError": "Kunde inte spara mallen",
+  "emailTemplates.active": "Aktiv",
+  "emailTemplates.inactive": "Inaktiv",
+  "emailTemplates.upgradeHint": "Uppgradera till Professional eller Business för att anpassa e-postmallar.",
 
   // Pricing page
   "pricing.heroTitle": "Enkel och transparent prissättning",
