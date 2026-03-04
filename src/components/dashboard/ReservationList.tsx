@@ -13,7 +13,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useState } from "react";
 import { format } from "date-fns";
-import { CalendarDays, User, Mail, Phone, MoreVertical, CheckCircle2, XCircle, Pencil, Receipt, PackageCheck, Coffee, Plus, Building2, Tag, Bell } from "lucide-react";
+import { CalendarDays, User, Mail, Phone, MoreVertical, CheckCircle2, XCircle, Pencil, Receipt, PackageCheck, Coffee, Plus, Building2, Tag, Bell, MailCheck, MailX } from "lucide-react";
 import EditReservationDialog from "./EditReservationDialog";
 import ManualReservationDialog from "./ManualReservationDialog";
 import ConfirmationEmailPreview from "@/components/ConfirmationEmailPreview";
@@ -335,6 +335,18 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
                           <Badge variant="outline" className="text-xs gap-1 bg-blue-50 text-blue-700 border-blue-200">
                             <Bell className="h-3 w-3" />
                             {t("dashboard.reminderSentAt")}
+                          </Badge>
+                        )}
+                        {(r as any).confirmation_email_sent_at && (
+                          <Badge variant="outline" className="text-xs gap-1 bg-green-50 text-green-700 border-green-200">
+                            <MailCheck className="h-3 w-3" />
+                            {t("dashboard.confirmationSentAt")}
+                          </Badge>
+                        )}
+                        {(r as any).cancellation_email_sent_at && (
+                          <Badge variant="outline" className="text-xs gap-1 bg-red-50 text-red-700 border-red-200">
+                            <MailX className="h-3 w-3" />
+                            {t("dashboard.cancellationSentAt")}
                           </Badge>
                         )}
                         {r.discount_type && (
