@@ -30,6 +30,7 @@ import { useT } from "@/contexts/I18nContext";
 import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
 import { useDateLocale } from "@/hooks/useDateLocale";
 import DashboardTooltip from "./DashboardTooltip";
+import AutoReminderStatus from "./AutoReminderStatus";
 
 import { useMemo } from "react";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip as RechartsTooltip, CartesianGrid } from "recharts";
@@ -421,6 +422,9 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Auto Reminder Status */}
+      {(isOwner || isAdmin) && <AutoReminderStatus />}
     </div>
   );
 };
