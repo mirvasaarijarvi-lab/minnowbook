@@ -10,12 +10,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
-import { Plus, Key, Trash2, Shield, Users, Building2, ShieldCheck } from "lucide-react";
+import { Plus, Key, Trash2, Shield, Users, Building2, ShieldCheck, Lock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import PasswordInput from "@/components/PasswordInput";
 import { useT } from "@/contexts/I18nContext";
@@ -205,6 +206,8 @@ const AdminPanel = () => {
   });
 
   const userList = (users as TenantUser[]) ?? [];
+  const maxStaff = tenant?.max_staff_users ?? 3;
+  const isAtStaffLimit = !isSystemAdmin && userList.length >= maxStaff;
 
   const openSiteDialog = (user: TenantUser) => {
     setSelectedUserId(user.user_id);
@@ -269,11 +272,24 @@ const AdminPanel = () => {
               <DashboardTooltip text={t("admin.userManagementDesc")} />
             </div>
             <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
-              <DialogTrigger asChild>
-                <Button size="sm" className="gap-1.5">
-                  <Plus className="h-4 w-4" /> {t("admin.addUser")}
-                </Button>
-              </DialogTrigger>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span>
+                    <DialogTrigger asChild>
+                      <Button size="sm" className="gap-1.5" disabled={isAtStaffLimit}>
+                        {isAtStaffLimit ? (
+                          <><Lock className="h-4 w-4" /> {t("admin.addUser")} ({userList.length}/{maxStaff})</>
+                        ) : (
+                          <><Plus className="h-4 w-4" /> {t("admin.addUser")} ({userList.length}/{isSystemAdmin ? "∞" : maxStaff})</>
+                        )}
+                      </Button>
+                    </DialogTrigger>
+                  </span>
+                </TooltipTrigger>
+                {isAtStaffLimit && (
+                  <TooltipContent>{t("admin.staffLimitReached")}</TooltipContent>
+                )}
+              </Tooltip>
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle className="font-serif">{t("admin.addUser")}</DialogTitle>
