@@ -396,8 +396,6 @@ type TranslationKeys = {
   "hero.titleHighlight": string;
   "hero.subtitle": string;
   "hero.viewPricing": string;
-  "hero.noCreditCard": string;
-  "hero.cancelAnytime": string;
 
   // Features
   "features.title": string;
@@ -763,8 +761,6 @@ type TranslationKeys = {
   "pricing.faqA5": string;
   "pricing.faqQ6": string;
   "pricing.faqA6": string;
-  "pricing.noCreditCard": string;
-  "pricing.setupMinutes": string;
 
   // Support page
   "support.heroTitle": string;
@@ -1622,8 +1618,6 @@ const en: TranslationKeys = {
   "hero.titleHighlight": "hospitality reservations",
   "hero.subtitle": "Manage restaurant bookings, venue inquiries, and hotel or guesthouse reservations all from one elegant dashboard.",
   "hero.viewPricing": "View Pricing",
-  "hero.noCreditCard": "No credit card required",
-  "hero.cancelAnytime": "Cancel anytime",
 
   // Features
   "features.title": "Everything you need to manage your reservations",
@@ -2370,8 +2364,6 @@ const en: TranslationKeys = {
   "pricing.faqA5": "Each business gets a branded subdomain (e.g., yourbusiness.minnowbook.com). Custom domain support is on our roadmap.",
   "pricing.faqQ6": "What's the difference between AI chatbot support and priority support?",
   "pricing.faqA6": "All plans include MinnowAid, our AI chatbot that can answer questions, help troubleshoot issues, and guide you through features instantly — available 24/7 in your dashboard. The Business plan adds priority support: you can escalate any conversation to our team and receive a guaranteed response within 24 hours.",
-  "pricing.noCreditCard": "No credit card required. Set up in minutes.",
-  "pricing.setupMinutes": "Set up in minutes.",
 
   // Support page
   "support.heroTitle": "How can we help?",
@@ -2830,8 +2822,6 @@ const fi: TranslationKeys = {
   "hero.titleHighlight": "majoitusvarausten hallintaan",
   "hero.subtitle": "Hallitse ravintolavarauksia, tilakyselyitä ja hotelli- tai majatalovarauksia yhdestä tyylikkäästä hallintapaneelista.",
   "hero.viewPricing": "Katso hinnoittelu",
-  "hero.noCreditCard": "Ei luottokorttia tarvita",
-  "hero.cancelAnytime": "Peruuta milloin tahansa",
 
   // Features
   "features.title": "Kaikki mitä tarvitset varausten hallintaan",
@@ -3577,8 +3567,6 @@ const fi: TranslationKeys = {
   "pricing.faqA5": "Jokaiselle yritykselle tulee brändätty alidomain (esim. yrityksesi.minnowbook.com). Oman domainin tuki on tiekartalla.",
   "pricing.faqQ6": "Mikä ero on AI-chatbot-tuella ja prioriteettituella?",
   "pricing.faqA6": "Kaikki suunnitelmat sisältävät MinnowAid-tekoälychatbotin, joka vastaa kysymyksiin, auttaa vianmäärityksessä ja opastaa ominaisuuksissa — käytettävissä 24/7 hallintapaneelissa. Business-suunnitelma lisää prioriteettituen: voit eskaloida keskustelun tiimiimme ja saada taatun vastauksen 24 tunnin sisällä.",
-  "pricing.noCreditCard": "Ei luottokorttia tarvita. Käyttövalmis minuuteissa.",
-  "pricing.setupMinutes": "Käyttövalmis minuuteissa.",
 
   // Support page
   "support.heroTitle": "Miten voimme auttaa?",
@@ -4037,8 +4025,6 @@ const sv: TranslationKeys = {
   "hero.titleHighlight": "hotellbokningar",
   "hero.subtitle": "Hantera restaurangbokningar, lokalförfrågningar och hotell- eller gästhusreservationer från en elegant instrumentpanel.",
   "hero.viewPricing": "Se priser",
-  "hero.noCreditCard": "Inget kreditkort krävs",
-  "hero.cancelAnytime": "Avbryt när som helst",
 
   // Features
   "features.title": "Allt du behöver för att hantera dina bokningar",
@@ -4784,8 +4770,6 @@ const sv: TranslationKeys = {
   "pricing.faqA5": "Varje företag får en varumärkt subdomän (t.ex. dittforetag.minnowbook.com). Stöd för egna domäner finns på vår roadmap.",
   "pricing.faqQ6": "Vad är skillnaden mellan AI-chatbot-support och prioriterad support?",
   "pricing.faqA6": "Alla planer inkluderar MinnowAid, vår AI-chatbot som kan svara på frågor, hjälpa till med felsökning och guida dig genom funktioner — tillgänglig 24/7 i din instrumentpanel. Business-planen lägger till prioriterad support: du kan eskalera varje konversation till vårt team och få ett garanterat svar inom 24 timmar.",
-  "pricing.noCreditCard": "Inget kreditkort krävs. Igång på minuter.",
-  "pricing.setupMinutes": "Igång på minuter.",
 
   // Support page
   "support.heroTitle": "Hur kan vi hjälpa?",

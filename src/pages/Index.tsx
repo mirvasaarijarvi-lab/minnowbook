@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   CalendarCheck, Palette, Users, Globe, BarChart3, Mail,
-  ArrowRight, CheckCircle2,
+  ArrowRight,
 } from "lucide-react";
 import MarketingHeader from "@/components/MarketingHeader";
 import MarketingFooter from "@/components/MarketingFooter";
@@ -111,16 +111,6 @@ const Index = () => {
               </Link>
             </div>
 
-            <div className="mt-10 flex items-center justify-center gap-6 text-white/60 text-sm opacity-0 animate-fade-in" style={{ animationDelay: "500ms" }}>
-              <div className="flex items-center gap-1.5">
-                <CheckCircle2 className="h-4 w-4" />
-                <span>{t("hero.noCreditCard")}</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <CheckCircle2 className="h-4 w-4" />
-                <span>{t("hero.cancelAnytime")}</span>
-              </div>
-            </div>
           </div>
         </div>
       </section>

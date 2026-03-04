@@ -189,9 +189,6 @@ const Pricing = () => {
           <h2 className="text-3xl font-serif font-bold text-primary-foreground mb-4">
             {t("pricing.ctaTitle")}
           </h2>
-          <p className="text-primary-foreground/70 text-lg mb-8 max-w-xl mx-auto">
-            {t("pricing.noCreditCard" as any)}
-          </p>
           <Link to="/signup">
             <Button variant="hero" size="xl">
               {t("common.getStartedFree")}
