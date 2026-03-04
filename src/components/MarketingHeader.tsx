@@ -26,9 +26,9 @@ const MarketingHeader = () => {
 
           <nav className="hidden md:flex items-center gap-6">
             <Link to="/" className={navLinkClass("/")}>{t("nav.home")}</Link>
-            <Link to="/about" className={navLinkClass("/about")}>{t("nav.about" as any)}</Link>
+            <Link to="/about" className={navLinkClass("/about")}>{t("nav.about")}</Link>
             <Link to="/pricing" className={navLinkClass("/pricing")}>{t("nav.pricing")}</Link>
-            <Link to="/support" className={navLinkClass("/support")}>Support</Link>
+            <Link to="/support" className={navLinkClass("/support")}>{t("nav.support")}</Link>
           </nav>
 
           <div className="hidden md:flex items-center gap-3">
@@ -55,9 +55,9 @@ const MarketingHeader = () => {
         <div className="md:hidden border-t border-border/50 bg-card/95 backdrop-blur-lg animate-fade-in">
           <div className="container mx-auto px-4 py-4 flex flex-col gap-3">
             <Link to="/" className={navLinkClass("/")} onClick={() => setMobileOpen(false)}>{t("nav.home")}</Link>
-            <Link to="/about" className={navLinkClass("/about")} onClick={() => setMobileOpen(false)}>{t("nav.about" as any)}</Link>
+            <Link to="/about" className={navLinkClass("/about")} onClick={() => setMobileOpen(false)}>{t("nav.about")}</Link>
             <Link to="/pricing" className={navLinkClass("/pricing")} onClick={() => setMobileOpen(false)}>{t("nav.pricing")}</Link>
-            <Link to="/support" className={navLinkClass("/support")} onClick={() => setMobileOpen(false)}>Support</Link>
+            <Link to="/support" className={navLinkClass("/support")} onClick={() => setMobileOpen(false)}>{t("nav.support")}</Link>
             <LanguageSwitcher variant="compact" className="py-2" />
             <div className="border-t border-border/50 pt-3 flex flex-col gap-2">
               <Link to="/login" onClick={() => setMobileOpen(false)}>
