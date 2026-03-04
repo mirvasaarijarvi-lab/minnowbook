@@ -488,6 +488,8 @@ type TranslationKeys = {
   "dashboard.sendReminder": string;
   "dashboard.reminderSent": string;
   "dashboard.reminderSentAt": string;
+  "dashboard.confirmationSentAt": string;
+  "dashboard.cancellationSentAt": string;
   "dashboard.reminderError": string;
   "dashboard.sendReminderMsg": string;
   "dashboard.notCheckedIn": string;
@@ -1749,6 +1751,8 @@ const en: TranslationKeys = {
   "dashboard.sendReminder": "Send reminder",
   "dashboard.reminderSent": "Reminder sent",
   "dashboard.reminderSentAt": "Reminder sent",
+  "dashboard.confirmationSentAt": "Confirmation sent",
+  "dashboard.cancellationSentAt": "Cancellation sent",
   "dashboard.reminderError": "Failed to send reminder",
   "dashboard.sendReminderMsg": "Send a reminder email to the guest about this reservation?",
   "dashboard.notCheckedIn": "Not checked in",
@@ -2992,6 +2996,8 @@ const fi: TranslationKeys = {
   "dashboard.sendReminder": "Lähetä muistutus",
   "dashboard.reminderSent": "Muistutus lähetetty",
   "dashboard.reminderSentAt": "Muistutus lähetetty",
+  "dashboard.confirmationSentAt": "Vahvistus lähetetty",
+  "dashboard.cancellationSentAt": "Peruutus lähetetty",
   "dashboard.reminderError": "Muistutuksen lähetys epäonnistui",
   "dashboard.sendReminderMsg": "Lähetä muistutussähköposti vieraalle tästä varauksesta?",
   "dashboard.notCheckedIn": "Ei kirjautunut",
@@ -4234,6 +4240,8 @@ const sv: TranslationKeys = {
   "dashboard.sendReminder": "Skicka påminnelse",
   "dashboard.reminderSent": "Påminnelse skickad",
   "dashboard.reminderSentAt": "Påminnelse skickad",
+  "dashboard.confirmationSentAt": "Bekräftelse skickad",
+  "dashboard.cancellationSentAt": "Avbokning skickad",
   "dashboard.reminderError": "Kunde inte skicka påminnelse",
   "dashboard.sendReminderMsg": "Skicka ett påminnelsemail till gästen om denna bokning?",
   "dashboard.notCheckedIn": "Ej incheckad",
