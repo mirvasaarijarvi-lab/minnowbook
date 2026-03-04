@@ -56,6 +56,9 @@ interface Reservation {
   event_type?: string | null;
   estimated_guests?: number | null;
   catering_needed?: boolean | null;
+  discount_type?: string | null;
+  discount_value?: number | null;
+  discount_reason?: string | null;
 }
 
 interface EditReservationDialogProps {
@@ -160,9 +163,9 @@ const EditReservationDialog = ({
         event_type: reservation.event_type ?? "",
         estimated_guests: reservation.estimated_guests?.toString() ?? "",
         catering_needed: reservation.catering_needed ?? false,
-        discount_type: (reservation as any).discount_type ?? "",
-        discount_value: (reservation as any).discount_value?.toString() ?? "",
-        discount_reason: (reservation as any).discount_reason ?? "",
+        discount_type: (reservation.discount_type ?? "") as "" | "percentage" | "fixed" | "free_nights",
+        discount_value: reservation.discount_value?.toString() ?? "",
+        discount_reason: reservation.discount_reason ?? "",
       });
       setSelectedResourceId("");
       setCustomMessage("");
@@ -194,13 +197,13 @@ const EditReservationDialog = ({
           room_type: form.room_type || null,
           breakfast_included: form.breakfast_included,
           event_type: form.event_type || null,
-          estimated_guests: form.guests_count ? parseInt(form.guests_count) : null,
+          estimated_guests: form.estimated_guests ? parseInt(form.estimated_guests) : null,
           catering_needed: form.catering_needed,
           discount_type: form.discount_type || null,
           discount_value: form.discount_value ? parseFloat(form.discount_value) : null,
           discount_reason: form.discount_reason.trim() || null,
           updated_at: new Date().toISOString(),
-        } as any)
+        })
         .eq("id", reservation.id)
         .eq("tenant_id", reservation.tenant_id);
       if (error) throw error;
@@ -430,7 +433,7 @@ const EditReservationDialog = ({
               <div className="grid gap-3 sm:grid-cols-3">
                 <div className="space-y-1.5">
                   <Label className="text-xs">{t("discount.type")}</Label>
-                  <Select value={form.discount_type} onValueChange={(v) => setForm((prev) => ({ ...prev, discount_type: v as any }))}>
+                  <Select value={form.discount_type} onValueChange={(v) => setForm((prev) => ({ ...prev, discount_type: v as "" | "percentage" | "fixed" | "free_nights" }))}>
                     <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="percentage">{t("discount.percentage")}</SelectItem>

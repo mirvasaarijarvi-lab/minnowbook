@@ -435,7 +435,7 @@ const PublicBookingInner = () => {
     queryKey: ["public-resource-opening-hours", restaurantResourceIds],
     queryFn: async () => {
       if (restaurantResourceIds.length === 0) return [];
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("resource_opening_hours")
         .select("resource_id, day_of_week, open_time, close_time, is_closed")
         .in("resource_id", restaurantResourceIds);
