@@ -150,7 +150,7 @@ const ResourceOpeningHoursEditor = ({ resourceId, tenantId }: ResourceOpeningHou
       <div className="flex items-center justify-between">
         <Label className="flex items-center gap-1.5 font-medium text-sm">
           <Clock className="h-4 w-4 text-muted-foreground" />
-          {t("resourceHours.title" as any)}
+          {t("resourceHours.title")}
         </Label>
         <Switch
           checked={enabled}
@@ -169,14 +169,14 @@ const ResourceOpeningHoursEditor = ({ resourceId, tenantId }: ResourceOpeningHou
               className="cursor-pointer text-xs"
               onClick={() => { setSameEveryDay(true); setDirty(true); }}
             >
-              {t("resourceHours.sameEveryDay" as any)}
+              {t("resourceHours.sameEveryDay")}
             </Badge>
             <Badge
               variant={!sameEveryDay ? "default" : "outline"}
               className="cursor-pointer text-xs"
               onClick={() => { setSameEveryDay(false); setDirty(true); }}
             >
-              {t("resourceHours.perDay" as any)}
+              {t("resourceHours.perDay")}
             </Badge>
           </div>
 
@@ -184,7 +184,7 @@ const ResourceOpeningHoursEditor = ({ resourceId, tenantId }: ResourceOpeningHou
             <div className="space-y-2">
               <div className="grid grid-cols-[1fr_1fr] gap-2">
                 <div>
-                  <Label className="text-xs text-muted-foreground">{t("resourceHours.openTime" as any)}</Label>
+                  <Label className="text-xs text-muted-foreground">{t("resourceHours.openTime")}</Label>
                   <Input
                     type="time"
                     value={hours[0]?.open_time ?? "09:00"}
@@ -193,7 +193,7 @@ const ResourceOpeningHoursEditor = ({ resourceId, tenantId }: ResourceOpeningHou
                   />
                 </div>
                 <div>
-                  <Label className="text-xs text-muted-foreground">{t("resourceHours.closeTime" as any)}</Label>
+                  <Label className="text-xs text-muted-foreground">{t("resourceHours.closeTime")}</Label>
                   <Input
                     type="time"
                     value={hours[0]?.close_time ?? "22:00"}
@@ -202,7 +202,7 @@ const ResourceOpeningHoursEditor = ({ resourceId, tenantId }: ResourceOpeningHou
                   />
                 </div>
               </div>
-              <p className="text-xs text-muted-foreground">{t("resourceHours.sameEveryDayDesc" as any)}</p>
+              <p className="text-xs text-muted-foreground">{t("resourceHours.sameEveryDayDesc")}</p>
               {/* Per-day closed toggles */}
               <div className="space-y-1 pt-1">
                 {hours.map((row, idx) => (
@@ -284,7 +284,7 @@ const ResourceOpeningHoursEditor = ({ resourceId, tenantId }: ResourceOpeningHou
             onClick={() => saveMutation.mutate()}
             disabled={saveMutation.isPending}
           >
-            {t("resourceHours.removeHours" as any)}
+            {t("resourceHours.removeHours")}
           </Button>
         </div>
       )}

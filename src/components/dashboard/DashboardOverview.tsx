@@ -195,12 +195,12 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
       <div className="flex items-start justify-between gap-4">
         <div>
           <h2 className="text-2xl font-serif font-bold text-foreground">
-            {t("dashboard.welcome" as any)}
+            {t("dashboard.welcome")}
           </h2>
           <p className="text-sm text-muted-foreground">
-            {t("dashboard.overviewSubtitle" as any) !== "dashboard.overviewSubtitle"
-              ? t("dashboard.overviewSubtitle" as any)
-              : t("dashboard.dailySnapshot" as any)}
+            {t("dashboard.overviewSubtitle") !== "dashboard.overviewSubtitle"
+              ? t("dashboard.overviewSubtitle")
+              : t("dashboard.dailySnapshot")}
           </p>
           <p className="text-sm font-medium text-foreground flex items-center gap-1.5 mt-1">
             <CalendarDays className="h-4 w-4" />
@@ -237,7 +237,7 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
           <CardContent className="pt-5 pb-4 text-center relative">
             <Clock className="h-5 w-5 mx-auto text-yellow-600 mb-1" />
             <p className="text-3xl font-bold text-yellow-600">{stats?.pendingCount ?? 0}</p>
-            <p className="text-xs text-muted-foreground mt-1">{t("dashboard.pending")} ({t("dashboard.total" as any)})</p>
+            <p className="text-xs text-muted-foreground mt-1">{t("dashboard.pending")} ({t("dashboard.total")})</p>
             {(stats?.pendingCount ?? 0) > 0 && (
               <ArrowRight className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
             )}

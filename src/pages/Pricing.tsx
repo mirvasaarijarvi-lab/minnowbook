@@ -11,65 +11,65 @@ const Pricing = () => {
 
   const tiers = [
     {
-      name: t("pricing.basicName" as any),
+      name: t("pricing.basicName"),
       price: 29,
-      description: t("pricing.basicDesc" as any),
-      reservationTypes: t("pricing.basicTypes" as any),
-      staffUsers: t("pricing.basicStaff" as any),
+      description: t("pricing.basicDesc"),
+      reservationTypes: t("pricing.basicTypes"),
+      staffUsers: t("pricing.basicStaff"),
       features: [
-        t("pricing.basicF1" as any), t("pricing.basicF2" as any), t("pricing.basicF3" as any),
-        t("pricing.basicF4" as any), t("pricing.basicF5" as any),
+        t("pricing.basicF1"), t("pricing.basicF2"), t("pricing.basicF3"),
+        t("pricing.basicF4"), t("pricing.basicF5"),
       ],
     },
     {
-      name: t("pricing.proName" as any),
+      name: t("pricing.proName"),
       price: 79,
-      description: t("pricing.proDesc" as any),
-      reservationTypes: t("pricing.proTypes" as any),
-      staffUsers: t("pricing.proStaff" as any),
+      description: t("pricing.proDesc"),
+      reservationTypes: t("pricing.proTypes"),
+      staffUsers: t("pricing.proStaff"),
       isPopular: true,
       features: [
-        t("pricing.proF1" as any), t("pricing.proF2" as any), t("pricing.proF3" as any),
+        t("pricing.proF1"), t("pricing.proF2"), t("pricing.proF3"),
       ],
     },
     {
-      name: t("pricing.businessName" as any),
+      name: t("pricing.businessName"),
       price: 199,
-      description: t("pricing.businessDesc" as any),
-      reservationTypes: t("pricing.businessTypes" as any),
-      staffUsers: t("pricing.businessStaff" as any),
+      description: t("pricing.businessDesc"),
+      reservationTypes: t("pricing.businessTypes"),
+      staffUsers: t("pricing.businessStaff"),
       features: [
-        t("pricing.businessF1" as any), t("pricing.businessF2" as any), t("pricing.businessF3" as any),
-        t("pricing.businessF4" as any),
+        t("pricing.businessF1"), t("pricing.businessF2"), t("pricing.businessF3"),
+        t("pricing.businessF4"),
       ],
     },
   ];
 
   const faqs = [
-    { q: t("pricing.faqQ1" as any), a: t("pricing.faqA1" as any) },
-    { q: t("pricing.faqQ2" as any), a: t("pricing.faqA2" as any) },
-    { q: t("pricing.faqQ3" as any), a: t("pricing.faqA3" as any) },
-    { q: t("pricing.faqQ4" as any), a: t("pricing.faqA4" as any) },
-    { q: t("pricing.faqQ5" as any), a: t("pricing.faqA5" as any) },
+    { q: t("pricing.faqQ1"), a: t("pricing.faqA1") },
+    { q: t("pricing.faqQ2"), a: t("pricing.faqA2") },
+    { q: t("pricing.faqQ3"), a: t("pricing.faqA3") },
+    { q: t("pricing.faqQ4"), a: t("pricing.faqA4") },
+    { q: t("pricing.faqQ5"), a: t("pricing.faqA5") },
   ];
 
   const comparisonRows = [
-    [t("pricing.monthlyPrice" as any), "€29", "€79", "€199"],
-    [t("pricing.freeTrial" as any), t("pricing.days30" as any), t("pricing.days30" as any), t("pricing.days30" as any)],
-    [t("pricing.sitesLocations" as any), "1", "1", t("pricing.unlimited" as any)],
-    [t("pricing.reservationTypes" as any), "1", t("pricing.all" as any), t("pricing.all" as any)],
-    [t("pricing.operationTypes" as any), "1", t("pricing.onePerResType" as any), t("pricing.unlimited" as any)],
-    [t("pricing.staffUsers" as any), "1–3", t("pricing.proStaff" as any), t("pricing.unlimited" as any)],
-    [t("pricing.brandedBooking" as any), "✓", "✓", "✓"],
-    [t("pricing.defaultTemplates" as any), "✓", "✓", "✓"],
-    [t("pricing.customTemplates" as any), "—", "✓", "✓"],
-    [t("pricing.multiLanguage" as any), "✓", "✓", "✓"],
-    [t("pricing.multisiteManagement" as any), "—", "—", "✓"],
-    [t("pricing.analyticsReports" as any), t("pricing.basic" as any), t("pricing.advanced" as any), t("pricing.advanced" as any)],
-    [t("pricing.supportLevel" as any), "AI chatbot", "AI chatbot", t("pricing.responseTime24h" as any)],
+    [t("pricing.monthlyPrice"), "€29", "€79", "€199"],
+    [t("pricing.freeTrial"), t("pricing.days30"), t("pricing.days30"), t("pricing.days30")],
+    [t("pricing.sitesLocations"), "1", "1", t("pricing.unlimited")],
+    [t("pricing.reservationTypes"), "1", t("pricing.all"), t("pricing.all")],
+    [t("pricing.operationTypes"), "1", t("pricing.onePerResType"), t("pricing.unlimited")],
+    [t("pricing.staffUsers"), "1–3", t("pricing.proStaff"), t("pricing.unlimited")],
+    [t("pricing.brandedBooking"), "✓", "✓", "✓"],
+    [t("pricing.defaultTemplates"), "✓", "✓", "✓"],
+    [t("pricing.customTemplates"), "—", "✓", "✓"],
+    [t("pricing.multiLanguage"), "✓", "✓", "✓"],
+    [t("pricing.multisiteManagement"), "—", "—", "✓"],
+    [t("pricing.analyticsReports"), t("pricing.basic"), t("pricing.advanced"), t("pricing.advanced")],
+    [t("pricing.supportLevel"), "AI chatbot", "AI chatbot", t("pricing.responseTime24h")],
   ];
 
-  const highlightFeatures = [t("pricing.sitesLocations" as any), t("pricing.reservationTypes" as any), t("pricing.operationTypes" as any)];
+  const highlightFeatures = [t("pricing.sitesLocations"), t("pricing.reservationTypes"), t("pricing.operationTypes")];
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -79,10 +79,10 @@ const Pricing = () => {
       <section className="py-20 md:py-28">
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-4xl md:text-5xl font-serif font-bold text-foreground mb-4">
-            {t("pricing.heroTitle" as any)}
+            {t("pricing.heroTitle")}
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            {t("pricing.heroSubtitle" as any)}
+            {t("pricing.heroSubtitle")}
           </p>
         </div>
       </section>
@@ -102,14 +102,14 @@ const Pricing = () => {
       <section className="py-20 bg-secondary/50">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-serif font-bold text-foreground text-center mb-12">
-            {t("pricing.comparePlans" as any)}
+            {t("pricing.comparePlans")}
           </h2>
 
           <div className="max-w-4xl mx-auto overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border">
-                  <th className="text-left py-4 pr-4 font-sans font-semibold text-muted-foreground">{t("pricing.feature" as any)}</th>
+                  <th className="text-left py-4 pr-4 font-sans font-semibold text-muted-foreground">{t("pricing.feature")}</th>
                   <th className="text-center py-4 px-3 font-serif font-semibold text-foreground">Basic</th>
                   <th className="text-center py-4 px-3 font-serif font-semibold text-foreground">Pro</th>
                   <th className="text-center py-4 px-3 font-serif font-semibold text-foreground">Business</th>
@@ -142,14 +142,14 @@ const Pricing = () => {
             </div>
             <div className="flex-1 text-center md:text-left">
               <h3 className="text-2xl font-serif font-bold text-foreground mb-2">
-                {t("pricing.multiLocationTitle" as any)}
+                {t("pricing.multiLocationTitle")}
               </h3>
               <p className="text-muted-foreground leading-relaxed mb-4">
-                {t("pricing.multiLocationDesc" as any)}
+                {t("pricing.multiLocationDesc")}
               </p>
               <Link to="/signup">
                 <Button variant="default" size="lg" className="gap-2">
-                  {t("pricing.tryBusinessFree" as any)}
+                  {t("pricing.tryBusinessFree")}
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
@@ -162,7 +162,7 @@ const Pricing = () => {
       <section className="py-20">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-serif font-bold text-foreground text-center mb-12">
-            {t("pricing.faq" as any)}
+            {t("pricing.faq")}
           </h2>
 
           <div className="max-w-2xl mx-auto space-y-6">

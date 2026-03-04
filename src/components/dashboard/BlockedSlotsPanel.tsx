@@ -156,7 +156,7 @@ const BlockedSlotsPanel = () => {
         ? eachDayOfInterval({ start: dateRange.from!, end: dateRange.to }).length
         : 1;
       resetForm();
-      const statusMsg = !isPrivileged ? ` (${t("blocking.pendingApproval" as any)})` : "";
+      const statusMsg = !isPrivileged ? ` (${t("blocking.pendingApproval")})` : "";
       toast({ title: t("blocking.daysBlocked").replace("{count}", String(count)) + statusMsg });
     },
     onError: (err: any) => {

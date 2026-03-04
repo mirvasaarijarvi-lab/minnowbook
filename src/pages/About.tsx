@@ -9,14 +9,21 @@ import {
 import MarketingHeader from "@/components/MarketingHeader";
 import MarketingFooter from "@/components/MarketingFooter";
 import { useT } from "@/contexts/I18nContext";
+import { TranslationKey } from "@/i18n/translations";
 
-const values = [
+const values: { icon: React.ElementType; titleKey: TranslationKey; descKey: TranslationKey }[] = [
   { icon: Target, titleKey: "about.valuePrecision", descKey: "about.valuePrecisionDesc" },
   { icon: Lightbulb, titleKey: "about.valueInnovation", descKey: "about.valueInnovationDesc" },
   { icon: Users, titleKey: "about.valueCollaboration", descKey: "about.valueCollaborationDesc" },
   { icon: Shield, titleKey: "about.valueTrust", descKey: "about.valueTrustDesc" },
   { icon: Heart, titleKey: "about.valuePassion", descKey: "about.valuePassionDesc" },
   { icon: Globe, titleKey: "about.valueGlobal", descKey: "about.valueGlobalDesc" },
+];
+
+const points: { icon: React.ElementType; titleKey: TranslationKey; descKey: TranslationKey }[] = [
+  { icon: Zap, titleKey: "about.point1Title", descKey: "about.point1Desc" },
+  { icon: TrendingUp, titleKey: "about.point2Title", descKey: "about.point2Desc" },
+  { icon: Users, titleKey: "about.point3Title", descKey: "about.point3Desc" },
 ];
 
 const About = () => {
@@ -36,13 +43,13 @@ const About = () => {
         <div className="max-w-4xl mx-auto px-6 text-center relative z-10">
           <Badge variant="outline" className="mb-6 text-xs">
             <Heart className="h-3 w-3 mr-1.5" />
-            {t("about.heroBadge" as any)}
+            {t("about.heroBadge")}
           </Badge>
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-foreground leading-tight">
-            {t("about.heroTitle" as any)}
+            {t("about.heroTitle")}
           </h1>
           <p className="mt-6 text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            {t("about.heroSubtitle" as any)}
+            {t("about.heroSubtitle")}
           </p>
         </div>
       </section>
@@ -54,31 +61,27 @@ const About = () => {
             <div>
               <Badge variant="outline" className="mb-4 text-xs">
                 <Target className="h-3 w-3 mr-1.5" />
-                {t("about.missionBadge" as any)}
+                {t("about.missionBadge")}
               </Badge>
               <h2 className="text-3xl font-serif font-bold text-foreground">
-                {t("about.missionTitle" as any)}
+                {t("about.missionTitle")}
               </h2>
               <p className="mt-4 text-muted-foreground leading-relaxed">
-                {t("about.missionP1" as any)}
+                {t("about.missionP1")}
               </p>
               <p className="mt-3 text-muted-foreground leading-relaxed">
-                {t("about.missionP2" as any)}
+                {t("about.missionP2")}
               </p>
             </div>
             <div className="bg-card border border-border rounded-2xl p-8 space-y-6">
-              {[
-                { icon: Zap, titleKey: "about.point1Title", descKey: "about.point1Desc" },
-                { icon: TrendingUp, titleKey: "about.point2Title", descKey: "about.point2Desc" },
-                { icon: Users, titleKey: "about.point3Title", descKey: "about.point3Desc" },
-              ].map((p) => (
+              {points.map((p) => (
                 <div key={p.titleKey} className="flex items-start gap-4">
                   <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center shrink-0">
                     <p.icon className="h-5 w-5 text-accent" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-foreground">{t(p.titleKey as any)}</h3>
-                    <p className="text-sm text-muted-foreground mt-1">{t(p.descKey as any)}</p>
+                    <h3 className="font-semibold text-foreground">{t(p.titleKey)}</h3>
+                    <p className="text-sm text-muted-foreground mt-1">{t(p.descKey)}</p>
                   </div>
                 </div>
               ))}
@@ -92,10 +95,10 @@ const About = () => {
         <div className="max-w-5xl mx-auto px-6">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-serif font-bold text-foreground">
-              {t("about.valuesTitle" as any)}
+              {t("about.valuesTitle")}
             </h2>
             <p className="mt-3 text-muted-foreground max-w-xl mx-auto">
-              {t("about.valuesSubtitle" as any)}
+              {t("about.valuesSubtitle")}
             </p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -106,8 +109,8 @@ const About = () => {
                   <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center mb-4">
                     <Icon className="h-5 w-5 text-accent" />
                   </div>
-                  <h3 className="font-semibold text-foreground mb-2">{t(v.titleKey as any)}</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{t(v.descKey as any)}</p>
+                  <h3 className="font-semibold text-foreground mb-2">{t(v.titleKey)}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{t(v.descKey)}</p>
                 </div>
               );
             })}
@@ -119,10 +122,10 @@ const About = () => {
       <section className="py-24 bg-secondary/50">
         <div className="max-w-3xl mx-auto px-6 text-center">
           <h2 className="text-3xl font-serif font-bold text-foreground">
-            {t("about.ctaTitle" as any)}
+            {t("about.ctaTitle")}
           </h2>
           <p className="mt-4 text-muted-foreground max-w-xl mx-auto">
-            {t("about.ctaSubtitle" as any)}
+            {t("about.ctaSubtitle")}
           </p>
           <div className="mt-8 flex items-center justify-center gap-4">
             <Link to="/signup">
