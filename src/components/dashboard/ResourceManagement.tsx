@@ -41,7 +41,7 @@ const ResourceManagement = () => {
   const { tenantId, tenant, isAdmin } = useTenant();
   const { selectedSiteId } = useSiteContext();
   const { applySiteFilter, siteIds } = useUserSites();
-  const { can } = usePermissions();
+  const { can, isSystemAdmin } = usePermissions();
   const canManage = can(PERM_RESOURCES_MANAGE);
   const { isPrivileged, getApprovalStatus } = useAutoApproval();
   const queryClient = useQueryClient();
@@ -155,8 +155,8 @@ const ResourceManagement = () => {
     mutationFn: async () => {
       if (!tenantId) throw new Error("No tenant");
 
-      // Check per-type resource limit (only for new resources, not edits)
-      if (!editingId) {
+      // Check per-type resource limit (only for new resources, not edits; system admins bypass)
+      if (!editingId && !isSystemAdmin) {
         const { canCreateResourceOfType } = await import("@/lib/tier-limits");
         if (!canCreateResourceOfType(tenant?.tier, form.resource_type, resources ?? [])) {
           const tierLabel = tenant?.tier === "professional" ? "Pro" : "Basic";

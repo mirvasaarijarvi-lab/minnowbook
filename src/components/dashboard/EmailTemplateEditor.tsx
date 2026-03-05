@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/hooks/useTenant";
+import { usePermissions } from "@/hooks/usePermissions";
 import { useT } from "@/contexts/I18nContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -93,9 +94,10 @@ const EmailTemplateEditor = ({ siteId = null }: EmailTemplateEditorProps) => {
   const t = useT();
   const { tenantId, tenant } = useTenant();
   const queryClient = useQueryClient();
+  const { isSystemAdmin } = usePermissions();
 
   const tier = tenant?.tier || "basic";
-  const isBasic = tier === "basic";
+  const isBasic = tier === "basic" && !isSystemAdmin;
   const isSiteLevel = !!siteId;
 
   const [selectedType, setSelectedType] = useState<TemplateType>("confirmation");
