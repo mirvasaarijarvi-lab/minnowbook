@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/hooks/useTenant";
 import { useSiteContext } from "@/hooks/useSiteContext";
 import { useUserSites } from "@/hooks/useUserSites";
-import { usePermissions } from "@/hooks/usePermissions";
+import { useTierGate } from "@/hooks/useTierGate";
 import { useT, useLanguage } from "@/contexts/I18nContext";
 import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
 import type { TranslationKey } from "@/i18n/translations";
@@ -126,9 +126,9 @@ const ReportsPanel = () => {
   const { tenantId, tenant: tenantData } = useTenant();
   const { selectedSiteId } = useSiteContext();
   const { applySiteFilter, siteIds } = useUserSites();
-  const { isSystemAdmin } = usePermissions();
+  const { isGated } = useTierGate();
   const dateLocale = localeMap[language] || fiFns;
-  const isBasicTier = tenantData?.tier === "basic" && !isSystemAdmin;
+  const isBasicTier = isGated("basic");
 
   const [period, setPeriod] = useState<Period>("month");
   const [referenceDate, setReferenceDate] = useState(new Date());

@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/hooks/useTenant";
 import { useSiteContext } from "@/hooks/useSiteContext";
 import { useUserSites } from "@/hooks/useUserSites";
-import { usePermissions } from "@/hooks/usePermissions";
+import { useTierGate } from "@/hooks/useTierGate";
 import SiteTabs from "./SiteTabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -43,7 +43,7 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
   const { tenantId, tenant, isOwner, isAdmin } = useTenant();
   const { selectedSiteId, setSelectedSiteId } = useSiteContext();
   const { applySiteFilter, siteIds } = useUserSites();
-  const { isSystemAdmin } = usePermissions();
+  const { isSystemAdmin } = useTierGate();
   const today = format(new Date(), "yyyy-MM-dd");
   const t = useT();
   const { typeLabel } = useResourceTypeLabel();

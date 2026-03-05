@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/hooks/useTenant";
 import { usePermissions } from "@/hooks/usePermissions";
-import { isMultiSiteTier } from "@/lib/tier-limits";
+import { useTierGate } from "@/hooks/useTierGate";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -70,6 +70,7 @@ const getRoleLabel = (u: TenantUser, roleDefs: { role_key: string; display_name:
 const AdminPanel = () => {
   const { tenantId, tenant, isOwner, isAdmin, isSuperadmin } = useTenant();
   const { isSystemAdmin } = usePermissions();
+  const { hasMultiSiteAccess } = useTierGate();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const t = useT();
@@ -89,7 +90,7 @@ const AdminPanel = () => {
     role: "staff",
   });
 
-  const isBusiness = (isMultiSiteTier(tenant?.tier) && (isOwner || isAdmin)) || isSystemAdmin;
+  const isBusiness = hasMultiSiteAccess;
 
   const invokeAdmin = async (body: any) => {
     const { data, error } = await supabase.functions.invoke("admin-users", { body });

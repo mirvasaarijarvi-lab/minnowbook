@@ -24,6 +24,7 @@ import ResourceImageGallery from "./ResourceImageGallery";
 import BlockedSlotsPanel from "./BlockedSlotsPanel";
 import ResourceOpeningHoursEditor from "./ResourceOpeningHoursEditor";
 import { usePermissions } from "@/hooks/usePermissions";
+import { useTierGate } from "@/hooks/useTierGate";
 import { PERM_RESOURCES_MANAGE } from "@/lib/permissions";
 import { useAutoApproval } from "@/hooks/useAutoApproval";
 
@@ -41,7 +42,8 @@ const ResourceManagement = () => {
   const { tenantId, tenant, isAdmin } = useTenant();
   const { selectedSiteId } = useSiteContext();
   const { applySiteFilter, siteIds } = useUserSites();
-  const { can, isSystemAdmin } = usePermissions();
+  const { can } = usePermissions();
+  const { canCreateResourceCheck } = useTierGate();
   const canManage = can(PERM_RESOURCES_MANAGE);
   const { isPrivileged, getApprovalStatus } = useAutoApproval();
   const queryClient = useQueryClient();
@@ -155,13 +157,10 @@ const ResourceManagement = () => {
     mutationFn: async () => {
       if (!tenantId) throw new Error("No tenant");
 
-      // Check per-type resource limit (only for new resources, not edits; system admins bypass)
-      if (!editingId && !isSystemAdmin) {
-        const { canCreateResourceOfType } = await import("@/lib/tier-limits");
-        if (!canCreateResourceOfType(tenant?.tier, form.resource_type, resources ?? [])) {
-          const tierLabel = tenant?.tier === "professional" ? "Pro" : "Basic";
-          throw new Error(`Your ${tierLabel} plan allows only 1 resource per type. Upgrade to Business for unlimited resources.`);
-        }
+      // Check per-type resource limit (superadmin bypass handled by useTierGate)
+      if (!editingId && !canCreateResourceCheck(form.resource_type, resources ?? [])) {
+        const tierLabel = tenant?.tier === "professional" ? "Pro" : "Basic";
+        throw new Error(`Your ${tierLabel} plan allows only 1 resource per type. Upgrade to Business for unlimited resources.`);
       }
 
       const isAccom = form.resource_type === "hotel" || form.resource_type === "guesthouse";

@@ -3,9 +3,10 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/hooks/useTenant";
 import { usePermissions } from "@/hooks/usePermissions";
+import { useTierGate } from "@/hooks/useTierGate";
 import { useT } from "@/contexts/I18nContext";
 import { PERM_SITES_MANAGE, PERM_SITES_APPROVE } from "@/lib/permissions";
-import { canCreateSite, getTierLabel } from "@/lib/tier-limits";
+import { getTierLabel } from "@/lib/tier-limits";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ApprovalQueuePanel from "./ApprovalQueuePanel";
@@ -83,6 +84,7 @@ const SitesManagementPanel = () => {
   const t = useT();
   const { tenantId, tenant } = useTenant();
   const { can, isSystemAdmin } = usePermissions();
+  const { canCreateSiteCheck } = useTierGate();
 
   const { data: tenantSettings } = useQuery({
     queryKey: ["tenant-settings-business", tenantId],
@@ -191,7 +193,7 @@ const SitesManagementPanel = () => {
 
   const openCreate = () => {
     const currentCount = sites?.length ?? 0;
-    if (!isSystemAdmin && !canCreateSite(tenant?.tier, currentCount)) {
+    if (!canCreateSiteCheck(currentCount)) {
       setUpgradeOpen(true);
       return;
     }
