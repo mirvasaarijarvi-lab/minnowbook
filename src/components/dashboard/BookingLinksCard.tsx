@@ -4,8 +4,7 @@ import { useTenant } from "@/hooks/useTenant";
 import { useSiteContext } from "@/hooks/useSiteContext";
 import { useT } from "@/contexts/I18nContext";
 import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
-import { usePermissions } from "@/hooks/usePermissions";
-import { isMultiSiteTier } from "@/lib/tier-limits";
+import { useTierGate } from "@/hooks/useTierGate";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link2, Copy, ExternalLink, Building2, Home } from "lucide-react";
@@ -45,9 +44,9 @@ const BookingLinksCard = () => {
   const { selectedSiteId } = useSiteContext();
   const t = useT();
   const { typeLabel } = useResourceTypeLabel();
-  const { isSystemAdmin } = usePermissions();
+  const { hasMultiSiteAccess } = useTierGate();
 
-  const isBusiness = (isMultiSiteTier(tenant?.tier) && (isOwner || isAdmin)) || isSystemAdmin;
+  const isBusiness = hasMultiSiteAccess;
 
   const { data: sites } = useQuery({
     queryKey: ["booking-links-sites", tenantId],

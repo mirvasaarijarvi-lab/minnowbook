@@ -2,8 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/hooks/useTenant";
 import { useSiteContext } from "@/hooks/useSiteContext";
-import { usePermissions } from "@/hooks/usePermissions";
-import { isMultiSiteTier } from "@/lib/tier-limits";
+import { useTierGate } from "@/hooks/useTierGate";
 import { useT } from "@/contexts/I18nContext";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -13,11 +12,10 @@ import { toast } from "sonner";
 const SiteTabs = () => {
   const { tenantId, tenant, isOwner, isAdmin } = useTenant();
   const { selectedSiteId, setSelectedSiteId, setSelectedResourceId } = useSiteContext();
-  const { isSystemAdmin } = usePermissions();
+  const { hasMultiSiteAccess } = useTierGate();
   const t = useT();
 
-  const isBusinessOwnerAdmin =
-    (isMultiSiteTier(tenant?.tier) && (isOwner || isAdmin)) || isSystemAdmin;
+  const isBusinessOwnerAdmin = hasMultiSiteAccess;
 
   const { data: sites } = useQuery({
     queryKey: ["site-tabs", tenantId],

@@ -2,10 +2,10 @@ import { CalendarDays, List, Settings, LogOut, LayoutDashboard, Menu, X, ShieldC
 import Logo from "@/components/Logo";
 import SiteSelector from "./SiteSelector";
 import { useTenant } from "@/hooks/useTenant";
+import { useTierGate } from "@/hooks/useTierGate";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { isMultiSiteTier } from "@/lib/tier-limits";
 import { useT } from "@/contexts/I18nContext";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { TranslationKey } from "@/i18n/translations";
@@ -50,12 +50,12 @@ const DashboardSidebar = ({ currentView, onViewChange, userEmail, onSignOut, mob
   const t = useT();
   const { can, isSystemAdmin } = usePermissions();
   const { tenant } = useTenant();
+  const { isMultiSite, effectiveTier } = useTierGate();
   const navigate = useNavigate();
-  const tenantTier = tenant?.tier ?? "basic";
   const visibleItems = navItems.filter((item) => {
     if (item.adminOnly && !isAdminUser) return false;
     if (item.permission && !can(item.permission)) return false;
-    if (item.tierRequired && tenantTier !== item.tierRequired && !isSystemAdmin) return false;
+    if (item.tierRequired && effectiveTier !== item.tierRequired) return false;
     return true;
   });
 
@@ -95,7 +95,7 @@ const DashboardSidebar = ({ currentView, onViewChange, userEmail, onSignOut, mob
           <LanguageSwitcher variant="compact" />
         </div>
 
-        {(isMultiSiteTier(tenantTier) || isSystemAdmin) && <SiteSelector />}
+        {(isMultiSite) && <SiteSelector />}
         <nav data-tour="sidebar-nav" className="flex-1 p-3 space-y-1 overflow-y-auto">
           {visibleItems.map(({ view, labelKey, icon: Icon, tierRequired }) => (
             <Tooltip key={view}>
