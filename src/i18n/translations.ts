@@ -230,6 +230,7 @@ type TranslationKeys = {
   "booking.pricingType": string;
   "booking.pricingMenu": string;
   "booking.pricingFixed": string;
+  "booking.pricingQuote": string;
   "booking.fixedPrice": string;
   "booking.restaurantSubType": string;
   "booking.subTypeDineIn": string;
@@ -1496,6 +1497,7 @@ const en: TranslationKeys = {
   "booking.pricingType": "Pricing",
   "booking.pricingMenu": "According to menu",
   "booking.pricingFixed": "Fixed price",
+  "booking.pricingQuote": "Ask for a quote",
   "booking.fixedPrice": "Fixed price (€)",
   "booking.restaurantSubType": "Service type",
   "booking.subTypeDineIn": "Dine-in",
@@ -2742,6 +2744,7 @@ const fi: TranslationKeys = {
   "booking.pricingType": "Hinnoittelu",
   "booking.pricingMenu": "Listan mukaan",
   "booking.pricingFixed": "Kiinteä hinta",
+  "booking.pricingQuote": "Pyydä tarjous",
   "booking.fixedPrice": "Kiinteä hinta (€)",
   "booking.restaurantSubType": "Palvelutyyppi",
   "booking.subTypeDineIn": "Ravintolassa",
@@ -3986,6 +3989,7 @@ const sv: TranslationKeys = {
   "booking.pricingType": "Prissättning",
   "booking.pricingMenu": "Enligt meny",
   "booking.pricingFixed": "Fast pris",
+  "booking.pricingQuote": "Begär en offert",
   "booking.fixedPrice": "Fast pris (€)",
   "booking.restaurantSubType": "Tjänstetyp",
   "booking.subTypeDineIn": "Äta på plats",
