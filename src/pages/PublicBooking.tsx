@@ -1493,25 +1493,12 @@ const PublicBookingInner = () => {
                         <Checkbox
                           checked={form.pricing_type === "fixed_price"}
                           onCheckedChange={(checked) => {
-                            if (checked) setForm((prev) => ({ ...prev, pricing_type: "fixed_price" }));
+                            if (checked) setForm((prev) => ({ ...prev, pricing_type: "fixed_price", fixed_price: "" }));
                           }}
                         />
-                        <span className="text-sm">{t("booking.pricingFixed")}</span>
+                        <span className="text-sm">{t("booking.pricingQuote")}</span>
                       </label>
                     </div>
-                    {form.pricing_type === "fixed_price" && (
-                      <div className="space-y-2">
-                        <Label>{t("booking.fixedPrice")}</Label>
-                        <Input
-                          type="number"
-                          step="0.01"
-                          min={0}
-                          value={form.fixed_price}
-                          onChange={(e) => updateField("fixed_price", e.target.value)}
-                          placeholder={t("booking.fixedPricePlaceholder")}
-                        />
-                      </div>
-                    )}
                   </div>
                 )}
 
