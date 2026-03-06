@@ -593,6 +593,7 @@ export type Database = {
         Row: {
           approval_status: string
           approved_by: string | null
+          bed_configuration: Json | null
           breakfast_price_per_person: number | null
           capacity: number | null
           created_at: string | null
@@ -604,6 +605,8 @@ export type Database = {
           price_per_night: number | null
           rejection_reason: string | null
           resource_type: string
+          room_description: string | null
+          room_type: string | null
           room_type_pricing: Json | null
           site_id: string | null
           tenant_id: string
@@ -611,6 +614,7 @@ export type Database = {
         Insert: {
           approval_status?: string
           approved_by?: string | null
+          bed_configuration?: Json | null
           breakfast_price_per_person?: number | null
           capacity?: number | null
           created_at?: string | null
@@ -622,6 +626,8 @@ export type Database = {
           price_per_night?: number | null
           rejection_reason?: string | null
           resource_type: string
+          room_description?: string | null
+          room_type?: string | null
           room_type_pricing?: Json | null
           site_id?: string | null
           tenant_id: string
@@ -629,6 +635,7 @@ export type Database = {
         Update: {
           approval_status?: string
           approved_by?: string | null
+          bed_configuration?: Json | null
           breakfast_price_per_person?: number | null
           capacity?: number | null
           created_at?: string | null
@@ -640,6 +647,8 @@ export type Database = {
           price_per_night?: number | null
           rejection_reason?: string | null
           resource_type?: string
+          room_description?: string | null
+          room_type?: string | null
           room_type_pricing?: Json | null
           site_id?: string | null
           tenant_id?: string

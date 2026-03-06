@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash2, BedDouble, UtensilsCrossed, Building2, Upload, X, Loader2, ExternalLink, Lock, Copy, Clock } from "lucide-react";
+import { Plus, Pencil, Trash2, BedDouble, UtensilsCrossed, Building2, Upload, X, Loader2, ExternalLink, Lock, Copy, Clock, PlusCircle, MinusCircle } from "lucide-react";
 import { useState, useRef } from "react";
 import { useT } from "@/contexts/I18nContext";
 import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
@@ -38,6 +38,12 @@ const typeIcons: Record<string, React.ElementType> = {
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = ["image/png", "image/jpeg", "image/webp"];
 
+const ROOM_TYPES = ["single", "double", "twin", "double_double", "triple", "quad", "studio", "suite", "connecting", "entire"] as const;
+const BED_TYPES = ["twin_single", "bunk", "queen", "king", "california_king", "murphy", "sofa", "trundle"] as const;
+const FREE_TEXT_ROOM_TYPES = ["suite", "connecting", "entire"];
+
+type BedEntry = { type: string; count: number };
+
 const ResourceManagement = () => {
   const { tenantId, tenant, isAdmin } = useTenant();
   const { selectedSiteId } = useSiteContext();
@@ -56,10 +62,22 @@ const ResourceManagement = () => {
   const [copyDialogOpen, setCopyDialogOpen] = useState(false);
   const [copySource, setCopySource] = useState<any>(null);
   const [copyCount, setCopyCount] = useState("1");
+  // Bulk add state
+  const [bulkDialogOpen, setBulkDialogOpen] = useState(false);
+  const [bulkRoomType, setBulkRoomType] = useState<string>("single");
+  const [bulkQuantity, setBulkQuantity] = useState("1");
+  const [bulkBeds, setBulkBeds] = useState<BedEntry[]>([{ type: "twin_single", count: 1 }]);
+  const [bulkDescription, setBulkDescription] = useState("");
+  const [bulkPrice, setBulkPrice] = useState("");
+  const [bulkBreakfastPrice, setBulkBreakfastPrice] = useState("");
+  const [bulkCapacity, setBulkCapacity] = useState("");
+
   const defaultRoomPricing = { single: "1.0", double: "1.5", suite: "2.5", dorm: "0.6" };
+  const [beds, setBeds] = useState<BedEntry[]>([]);
   const [form, setForm] = useState({
     name: "", resource_type: "restaurant", capacity: "", price_per_night: "", description: "", image_url: "", breakfast_price_per_person: "",
     room_type_pricing: { ...defaultRoomPricing }, is_active: true,
+    room_type: "" as string, room_description: "",
   });
 
   const { data: sites } = useQuery({
@@ -167,6 +185,9 @@ const ResourceManagement = () => {
       const roomPricing = isAccom ? Object.fromEntries(
         Object.entries(form.room_type_pricing).map(([k, v]) => [k, parseFloat(v as string) || 1.0])
       ) : undefined;
+      const bedConfig = isAccom && beds.length > 0
+        ? Object.fromEntries(beds.map((b) => [b.type, b.count]))
+        : null;
       const payload: any = {
         tenant_id: tenantId, name: form.name, resource_type: form.resource_type,
         capacity: form.capacity ? parseInt(form.capacity) : null,
@@ -176,6 +197,9 @@ const ResourceManagement = () => {
         is_active: form.is_active,
         breakfast_price_per_person: form.breakfast_price_per_person ? parseFloat(form.breakfast_price_per_person) : null,
         ...(isAccom && { room_type_pricing: roomPricing }),
+        room_type: isAccom ? (form.room_type || null) : null,
+        bed_configuration: isAccom ? bedConfig : null,
+        room_description: isAccom && FREE_TEXT_ROOM_TYPES.includes(form.room_type) ? (form.room_description || null) : null,
         approval_status: getApprovalStatus(),
       };
       if (editingId) {
@@ -252,22 +276,75 @@ const ResourceManagement = () => {
     },
   });
 
+  // Bulk add rooms mutation
+  const bulkAddMutation = useMutation({
+    mutationFn: async () => {
+      if (!tenantId) throw new Error("No tenant");
+      const qty = Math.max(1, Math.min(50, parseInt(bulkQuantity) || 1));
+      const isAccom = true; // bulk add is only for hotel/guesthouse
+      const roomType = bulkRoomType;
+      const bedConfig = bulkBeds.length > 0 ? Object.fromEntries(bulkBeds.map((b) => [b.type, b.count])) : null;
+      const roomTypeLabel = t(`dashboard.roomType.${roomType}` as any);
+      const resType = (tenant as any)?.allowed_reservation_types?.includes("hotel") ? "hotel" : "guesthouse";
+
+      const copies = [];
+      for (let i = 1; i <= qty; i++) {
+        copies.push({
+          tenant_id: tenantId,
+          name: `${roomTypeLabel} ${i}`,
+          resource_type: resType,
+          capacity: bulkCapacity ? parseInt(bulkCapacity) : null,
+          price_per_night: bulkPrice ? parseFloat(bulkPrice) : null,
+          breakfast_price_per_person: bulkBreakfastPrice ? parseFloat(bulkBreakfastPrice) : null,
+          is_active: true,
+          room_type: roomType,
+          bed_configuration: bedConfig,
+          room_description: FREE_TEXT_ROOM_TYPES.includes(roomType) ? (bulkDescription || null) : null,
+          description: !FREE_TEXT_ROOM_TYPES.includes(roomType) ? (bulkDescription || null) : null,
+          approval_status: getApprovalStatus(),
+        });
+      }
+      const { error } = await supabase.from("resources").insert(copies as any);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["resources", tenantId] });
+      setBulkDialogOpen(false);
+      setBulkRoomType("single");
+      setBulkQuantity("1");
+      setBulkBeds([{ type: "twin_single", count: 1 }]);
+      setBulkDescription("");
+      setBulkPrice("");
+      setBulkBreakfastPrice("");
+      setBulkCapacity("");
+      toast({ title: t("dashboard.bulkAdded") });
+    },
+    onError: (err: any) => {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    },
+  });
+
   const resetForm = () => {
     const allowedTypes = (tenant as any)?.allowed_reservation_types ?? [];
     const defaultType = allowedTypes[0] || "restaurant";
     setEditingId(null);
-    setForm({ name: "", resource_type: defaultType, capacity: "", price_per_night: "", description: "", image_url: "", breakfast_price_per_person: "", room_type_pricing: { ...defaultRoomPricing }, is_active: true });
+    setBeds([]);
+    setForm({ name: "", resource_type: defaultType, capacity: "", price_per_night: "", description: "", image_url: "", breakfast_price_per_person: "", room_type_pricing: { ...defaultRoomPricing }, is_active: true, room_type: "", room_description: "" });
   };
 
   const openEdit = (r: any) => {
     setEditingId(r.id);
     const rtp = r.room_type_pricing ?? {};
+    const bedConfig = r.bed_configuration as Record<string, number> | null;
+    setBeds(bedConfig ? Object.entries(bedConfig).map(([type, count]) => ({ type, count: count as number })) : []);
     setForm({
       name: r.name, resource_type: r.resource_type,
       capacity: r.capacity?.toString() ?? "", price_per_night: r.price_per_night?.toString() ?? "",
       description: r.description ?? "", image_url: r.image_url ?? "",
       breakfast_price_per_person: r.breakfast_price_per_person?.toString() ?? "",
       is_active: r.is_active ?? true,
+      room_type: r.room_type ?? "",
+      room_description: r.room_description ?? "",
       room_type_pricing: {
         single: rtp.single?.toString() ?? "1.0",
         double: rtp.double?.toString() ?? "1.5",
@@ -297,6 +374,11 @@ const ResourceManagement = () => {
                 <ExternalLink className="h-4 w-4" />
                 {t("dashboard.bookingLink")}
               </a>
+            </Button>
+          )}
+          {canManage && ((tenant as any)?.allowed_reservation_types?.includes("hotel") || (tenant as any)?.allowed_reservation_types?.includes("guesthouse")) && (
+            <Button size="sm" variant="outline" className="gap-1.5" onClick={() => setBulkDialogOpen(true)}>
+              <Plus className="h-4 w-4" /> {t("dashboard.addModeBulk")}
             </Button>
           )}
           {canManage && (
@@ -392,9 +474,76 @@ const ResourceManagement = () => {
                     </div>
                   )}
 
-                  {/* Guesthouse / Hotel: room price + breakfast */}
+                  {/* Guesthouse / Hotel: room type, bed config, prices */}
                   {(form.resource_type === "hotel" || form.resource_type === "guesthouse") && (
                     <>
+                      {/* Room type dropdown */}
+                      <div>
+                        <Label>{t("dashboard.roomTypeLabel")}</Label>
+                        <Select value={form.room_type} onValueChange={(v) => setForm({ ...form, room_type: v })}>
+                          <SelectTrigger><SelectValue placeholder={t("booking.selectRoomType")} /></SelectTrigger>
+                          <SelectContent>
+                            {ROOM_TYPES.map((rt) => (
+                              <SelectItem key={rt} value={rt}>{t(`dashboard.roomType.${rt}` as any)}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      {/* Bed configuration (only for non-free-text room types) */}
+                      {form.room_type && !FREE_TEXT_ROOM_TYPES.includes(form.room_type) && (
+                        <div className="space-y-2 rounded-lg border border-border p-3">
+                          <Label className="font-medium">{t("dashboard.bedConfiguration")}</Label>
+                          {beds.map((bed, i) => (
+                            <div key={i} className="flex items-center gap-2">
+                              <Select value={bed.type} onValueChange={(v) => {
+                                const next = [...beds];
+                                next[i] = { ...next[i], type: v };
+                                setBeds(next);
+                              }}>
+                                <SelectTrigger className="flex-1"><SelectValue /></SelectTrigger>
+                                <SelectContent>
+                                  {BED_TYPES.map((bt) => (
+                                    <SelectItem key={bt} value={bt}>{t(`dashboard.bedType.${bt}` as any)}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <Input
+                                type="number"
+                                min={1}
+                                max={20}
+                                className="w-20"
+                                value={bed.count}
+                                onChange={(e) => {
+                                  const next = [...beds];
+                                  next[i] = { ...next[i], count: Math.max(1, parseInt(e.target.value) || 1) };
+                                  setBeds(next);
+                                }}
+                              />
+                              <Button type="button" variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => setBeds(beds.filter((_, j) => j !== i))}>
+                                <MinusCircle className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          ))}
+                          <Button type="button" variant="outline" size="sm" className="gap-1" onClick={() => setBeds([...beds, { type: "twin_single", count: 1 }])}>
+                            <PlusCircle className="h-3.5 w-3.5" /> {t("dashboard.addBed")}
+                          </Button>
+                        </div>
+                      )}
+
+                      {/* Free text description for suite/connecting/entire */}
+                      {form.room_type && FREE_TEXT_ROOM_TYPES.includes(form.room_type) && (
+                        <div>
+                          <Label>{t("dashboard.roomDescription")}</Label>
+                          <Textarea
+                            value={form.room_description}
+                            onChange={(e) => setForm({ ...form, room_description: e.target.value })}
+                            placeholder={t("dashboard.roomDescPlaceholder")}
+                            rows={3}
+                          />
+                        </div>
+                      )}
+
                       <div>
                         <Label>{t("dashboard.roomPrice")}</Label>
                         <div className="relative">
@@ -482,7 +631,12 @@ const ResourceManagement = () => {
                       <TableCell>
                         <Icon className="h-5 w-5 text-muted-foreground" />
                       </TableCell>
-                      <TableCell className="font-medium">{r.name}</TableCell>
+                      <TableCell className="font-medium">
+                        {r.name}
+                        {(r.resource_type === "hotel" || r.resource_type === "guesthouse") && r.room_type && (
+                          <div className="text-xs text-muted-foreground font-normal">{t(`dashboard.roomType.${r.room_type}` as any)}</div>
+                        )}
+                      </TableCell>
                       <TableCell>{typeLabel(r.resource_type)}</TableCell>
                       {showSiteColumn && (
                         <TableCell>
@@ -571,6 +725,119 @@ const ResourceManagement = () => {
                 disabled={copyMutation.isPending}
               >
                 {copyMutation.isPending ? t("common.saving") : t("dashboard.copyResource")}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Bulk Add Rooms Dialog */}
+      <Dialog open={bulkDialogOpen} onOpenChange={(open) => { setBulkDialogOpen(open); if (!open) { setBulkRoomType("single"); setBulkQuantity("1"); setBulkBeds([{ type: "twin_single", count: 1 }]); setBulkDescription(""); setBulkPrice(""); setBulkBreakfastPrice(""); setBulkCapacity(""); } }}>
+        <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-serif">{t("dashboard.addModeBulk")}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-2">
+            <div>
+              <Label>{t("dashboard.bulkRoomType")} *</Label>
+              <Select value={bulkRoomType} onValueChange={(v) => setBulkRoomType(v)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {ROOM_TYPES.map((rt) => (
+                    <SelectItem key={rt} value={rt}>{t(`dashboard.roomType.${rt}` as any)}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label>{t("dashboard.bulkQuantity")} *</Label>
+              <Input type="number" min={1} max={50} value={bulkQuantity} onChange={(e) => setBulkQuantity(e.target.value)} />
+            </div>
+
+            {/* Bed configuration for non-free-text room types */}
+            {!FREE_TEXT_ROOM_TYPES.includes(bulkRoomType) && (
+              <div className="space-y-2 rounded-lg border border-border p-3">
+                <Label className="font-medium">{t("dashboard.bedConfiguration")}</Label>
+                {bulkBeds.map((bed, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <Select value={bed.type} onValueChange={(v) => {
+                      const next = [...bulkBeds];
+                      next[i] = { ...next[i], type: v };
+                      setBulkBeds(next);
+                    }}>
+                      <SelectTrigger className="flex-1"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {BED_TYPES.map((bt) => (
+                          <SelectItem key={bt} value={bt}>{t(`dashboard.bedType.${bt}` as any)}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Input
+                      type="number"
+                      min={1}
+                      max={20}
+                      className="w-20"
+                      value={bed.count}
+                      onChange={(e) => {
+                        const next = [...bulkBeds];
+                        next[i] = { ...next[i], count: Math.max(1, parseInt(e.target.value) || 1) };
+                        setBulkBeds(next);
+                      }}
+                    />
+                    <Button type="button" variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => setBulkBeds(bulkBeds.filter((_, j) => j !== i))}>
+                      <MinusCircle className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+                <Button type="button" variant="outline" size="sm" className="gap-1" onClick={() => setBulkBeds([...bulkBeds, { type: "twin_single", count: 1 }])}>
+                  <PlusCircle className="h-3.5 w-3.5" /> {t("dashboard.addBed")}
+                </Button>
+              </div>
+            )}
+
+            {/* Free text for suite/connecting/entire */}
+            {FREE_TEXT_ROOM_TYPES.includes(bulkRoomType) && (
+              <div>
+                <Label>{t("dashboard.roomDescription")}</Label>
+                <Textarea
+                  value={bulkDescription}
+                  onChange={(e) => setBulkDescription(e.target.value)}
+                  placeholder={t("dashboard.roomDescPlaceholder")}
+                  rows={3}
+                />
+              </div>
+            )}
+
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div>
+                <Label>{t("dashboard.roomPrice")}</Label>
+                <div className="relative">
+                  <Input type="number" step="0.01" value={bulkPrice} onChange={(e) => setBulkPrice(e.target.value)} placeholder={t("dashboard.pricePlaceholder")} className="pr-8" />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">€</span>
+                </div>
+              </div>
+              <div>
+                <Label>{t("dashboard.capacity")}</Label>
+                <Input type="number" value={bulkCapacity} onChange={(e) => setBulkCapacity(e.target.value)} placeholder={t("dashboard.capacityPlaceholder")} />
+              </div>
+            </div>
+
+            <div>
+              <Label>{t("dashboard.breakfastPrice")}</Label>
+              <div className="relative">
+                <Input type="number" step="0.01" value={bulkBreakfastPrice} onChange={(e) => setBulkBreakfastPrice(e.target.value)} placeholder={t("dashboard.breakfastPlaceholder")} className="pr-8" />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">€</span>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2">
+              <Button variant="outline" onClick={() => setBulkDialogOpen(false)}>{t("common.cancel")}</Button>
+              <Button
+                onClick={() => bulkAddMutation.mutate()}
+                disabled={bulkAddMutation.isPending || !bulkRoomType}
+              >
+                {bulkAddMutation.isPending ? t("common.saving") : t("dashboard.bulkAdd")}
               </Button>
             </div>
           </div>
