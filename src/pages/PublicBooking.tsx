@@ -29,7 +29,7 @@ const bookingSchema = z.object({
   guest_name: z.string().trim().min(1, "Name is required").max(100),
   guest_email: z.string().trim().email("Invalid email").max(255),
   guest_phone: z.string().trim().max(30).optional(),
-  guests_count: z.number().int().min(1).max(500).optional(),
+  guests_count: z.number().int().min(1, "Number of guests is required").max(500),
   reservation_type: z.string().min(1, "Type is required"),
   date: z.string().min(1, "Date is required"),
   start_time: z.string().optional(),
@@ -618,7 +618,7 @@ const PublicBookingInner = () => {
         guest_name: form.guest_name,
         guest_email: form.guest_email,
         guest_phone: form.guest_phone || undefined,
-        guests_count: form.guests_count ? parseInt(form.guests_count) : undefined,
+        guests_count: form.guests_count ? parseInt(form.guests_count) : 0,
         reservation_type: form.reservation_type,
         date: selectedDate ? format(selectedDate, "yyyy-MM-dd") : "",
         start_time: form.start_time || undefined,
@@ -627,6 +627,11 @@ const PublicBookingInner = () => {
       });
 
       const isAccommodation = form.reservation_type === "hotel" || form.reservation_type === "guesthouse";
+
+      // Validate check-out date for accommodation
+      if (isAccommodation && !form.check_out_date) {
+        throw new Error("Check-out date is required for accommodation bookings");
+      }
       const isVenue = form.reservation_type === "venue";
 
       const payload: Record<string, unknown> = {
@@ -723,12 +728,20 @@ const PublicBookingInner = () => {
         guest_name: form.guest_name,
         guest_email: form.guest_email,
         guest_phone: form.guest_phone || undefined,
-        guests_count: form.guests_count ? parseInt(form.guests_count) : undefined,
+        guests_count: form.guests_count ? parseInt(form.guests_count) : 0,
         reservation_type: form.reservation_type,
         date: selectedDate ? format(selectedDate, "yyyy-MM-dd") : "",
         start_time: form.start_time || undefined,
         special_requests: form.special_requests || undefined,
       });
+
+      // Additional validation for accommodation
+      const isAccomType = form.reservation_type === "hotel" || form.reservation_type === "guesthouse";
+      if (isAccomType && !form.check_out_date) {
+        setErrors((prev) => ({ ...prev, check_out_date: "Check-out date is required" }));
+        return;
+      }
+
       submitMutation.mutate();
     } catch (err) {
       if (err instanceof z.ZodError) {
@@ -1307,6 +1320,7 @@ const PublicBookingInner = () => {
                       />
                     </PopoverContent>
                   </Popover>
+                  {errors.check_out_date && <p className="text-sm text-destructive">{errors.check_out_date}</p>}
                   {(() => {
                     if (!form.check_out_date || !selectedDate) return null;
                     const checkOut = new Date(form.check_out_date + "T00:00:00");
@@ -1800,7 +1814,7 @@ const PublicBookingInner = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="guests_count">{t("booking.guestCount")}</Label>
+                  <Label htmlFor="guests_count">{t("booking.guestCount")} *</Label>
                   <Input
                     id="guests_count"
                     type="number"
@@ -1808,7 +1822,9 @@ const PublicBookingInner = () => {
                     max={500}
                     value={form.guests_count}
                     onChange={(e) => updateField("guests_count", e.target.value)}
+                    required
                   />
+                  {errors.guests_count && <p className="text-sm text-destructive">{errors.guests_count}</p>}
                 </div>
               </div>
               <div className="space-y-2">
@@ -1844,7 +1860,7 @@ const PublicBookingInner = () => {
             size="lg"
             className="w-full text-white font-medium"
             style={{ backgroundColor: accentColor }}
-            disabled={submitMutation.isPending || !selectedDate || !form.reservation_type}
+            disabled={submitMutation.isPending || !selectedDate || !form.reservation_type || !form.guests_count || (isAccommodationType && !form.check_out_date)}
           >
             {submitMutation.isPending ? (
               <>
