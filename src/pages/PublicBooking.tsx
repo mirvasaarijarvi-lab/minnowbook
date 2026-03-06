@@ -649,6 +649,7 @@ const PublicBookingInner = () => {
 
       if (isAccommodation) {
         payload.check_out_date = form.check_out_date || null;
+        payload.room_type = form.room_type || null;
         payload.breakfast_included = form.breakfast_included;
       }
       if (isVenue) {
@@ -1693,7 +1694,122 @@ const PublicBookingInner = () => {
             </Card>
           )}
 
-          {resources && resources.length > 0 && form.reservation_type && form.reservation_type !== "restaurant" && (
+          {/* Room type selection for hotel/guesthouse */}
+          {isAccommodationType && resources && resources.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg font-serif flex items-center gap-2" style={{ color: primaryColor }}>
+                  <BedDouble className="h-5 w-5" />
+                  {t("booking.roomTypeLabel")} *
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {(() => {
+                  // Get unique room types from resources
+                  const roomTypesAvailable = [...new Set(
+                    resources
+                      .filter((r: any) => r.room_type)
+                      .map((r: any) => r.room_type as string)
+                  )];
+                  if (roomTypesAvailable.length === 0) {
+                    // Fallback: show resources as before if no room types configured
+                    return (
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        {resources.map((res: any) => {
+                          const isSelected = form.resource_id === res.id;
+                          const Icon = typeIcons[res.resource_type] ?? Building2;
+                          const hasImages = res.image_url || (imagesByResource[res.id]?.length > 0);
+                          return (
+                            <button
+                              key={res.id}
+                              type="button"
+                              onClick={() => updateField("resource_id", isSelected ? "" : res.id)}
+                              className="group relative text-left rounded-xl border-2 transition-all duration-300 overflow-hidden hover:scale-105 hover:shadow-lg hover:-translate-y-0.5"
+                              style={{
+                                borderColor: isSelected ? accentColor : "#e5e7eb",
+                                backgroundColor: isSelected ? `${accentColor}10` : "transparent",
+                                boxShadow: isSelected ? `0 0 0 1px ${accentColor}40, 0 4px 12px ${accentColor}15` : undefined,
+                              }}
+                            >
+                              {isSelected && <span className="absolute top-2.5 right-2.5 h-2 w-2 rounded-full z-10" style={{ backgroundColor: accentColor }} />}
+                              {hasImages && <ResourceCarousel images={imagesByResource[res.id] ?? []} mainImage={res.image_url} alt={res.name} className="w-full h-28 object-cover" />}
+                              <div className="p-4 flex gap-3">
+                                <span className="flex items-center justify-center h-10 w-10 rounded-full shrink-0" style={{ backgroundColor: isSelected ? `${accentColor}20` : `${primaryColor}10` }}>
+                                  <Icon className="h-5 w-5" style={{ color: isSelected ? accentColor : primaryColor }} />
+                                </span>
+                                <div className="min-w-0 space-y-1">
+                                  <p className="font-semibold text-sm" style={{ color: primaryColor }}>{res.name}</p>
+                                  {res.description && <p className="text-xs leading-relaxed" style={{ color: `${primaryColor}80` }}>{res.description}</p>}
+                                  <div className="flex flex-wrap gap-1.5 mt-1.5">
+                                    {res.capacity && <Badge variant="outline" className="text-xs"><Users className="h-3 w-3 mr-1" />{res.capacity} {t("common.guests")}</Badge>}
+                                    {res.price_per_night != null && <Badge variant="outline" className="text-xs">€{Number(res.price_per_night).toFixed(0)}{t("dashboard.perNight")}</Badge>}
+                                  </div>
+                                </div>
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    );
+                  }
+
+                  // Room type cards
+                  const ROOM_TYPE_LABELS: Record<string, string> = {
+                    single: t("dashboard.roomType.single" as any),
+                    double: t("dashboard.roomType.double" as any),
+                    twin: t("dashboard.roomType.twin" as any),
+                    double_double: t("dashboard.roomType.double_double" as any),
+                    triple: t("dashboard.roomType.triple" as any),
+                    quad: t("dashboard.roomType.quad" as any),
+                    studio: t("dashboard.roomType.studio" as any),
+                    suite: t("dashboard.roomType.suite" as any),
+                    connecting: t("dashboard.roomType.connecting" as any),
+                    entire: t("dashboard.roomType.entire" as any),
+                  };
+
+                  return (
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      {roomTypesAvailable.map((rt) => {
+                        const isSelected = form.room_type === rt;
+                        // Get first resource of this type for pricing info
+                        const sampleRes = resources.find((r: any) => r.room_type === rt);
+                        return (
+                          <button
+                            key={rt}
+                            type="button"
+                            onClick={() => updateField("room_type", isSelected ? "" : rt)}
+                            className="text-left rounded-xl border-2 p-4 transition-all duration-300 hover:scale-105 hover:shadow-lg"
+                            style={{
+                              borderColor: isSelected ? accentColor : "#e5e7eb",
+                              backgroundColor: isSelected ? `${accentColor}10` : "transparent",
+                              boxShadow: isSelected ? `0 0 0 1px ${accentColor}40, 0 4px 12px ${accentColor}15` : undefined,
+                            }}
+                          >
+                            {isSelected && <span className="float-right h-2 w-2 rounded-full" style={{ backgroundColor: accentColor }} />}
+                            <p className="font-semibold text-sm" style={{ color: primaryColor }}>{ROOM_TYPE_LABELS[rt] ?? rt}</p>
+                            {sampleRes?.description && (
+                              <p className="text-xs mt-1" style={{ color: `${primaryColor}70` }}>{sampleRes.description}</p>
+                            )}
+                            {sampleRes?.room_description && (
+                              <p className="text-xs mt-1 italic" style={{ color: `${primaryColor}60` }}>{sampleRes.room_description}</p>
+                            )}
+                            <div className="flex flex-wrap gap-1.5 mt-2">
+                              {sampleRes?.capacity && <Badge variant="outline" className="text-xs"><Users className="h-3 w-3 mr-1" />{sampleRes.capacity} {t("common.guests")}</Badge>}
+                              {sampleRes?.price_per_night != null && <Badge variant="outline" className="text-xs">€{Number(sampleRes.price_per_night).toFixed(0)}{t("dashboard.perNight")}</Badge>}
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  );
+                })()}
+                {errors.room_type && <p className="text-sm text-destructive">{errors.room_type}</p>}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Resource selection for venue (non-accommodation, non-restaurant) */}
+          {resources && resources.length > 0 && form.reservation_type && form.reservation_type !== "restaurant" && !isAccommodationType && (
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg font-serif" style={{ color: primaryColor }}>
@@ -1718,49 +1834,18 @@ const PublicBookingInner = () => {
                           boxShadow: isSelected ? `0 0 0 1px ${accentColor}40, 0 4px 12px ${accentColor}15` : undefined,
                         }}
                       >
-                        {isSelected && (
-                          <span
-                            className="absolute top-2.5 right-2.5 h-2 w-2 rounded-full z-10"
-                            style={{ backgroundColor: accentColor }}
-                          />
-                        )}
-                        {hasImages && (
-                          <ResourceCarousel
-                            images={imagesByResource[res.id] ?? []}
-                            mainImage={res.image_url}
-                            alt={res.name}
-                            className="w-full h-28 object-cover"
-                          />
-                        )}
+                        {isSelected && <span className="absolute top-2.5 right-2.5 h-2 w-2 rounded-full z-10" style={{ backgroundColor: accentColor }} />}
+                        {hasImages && <ResourceCarousel images={imagesByResource[res.id] ?? []} mainImage={res.image_url} alt={res.name} className="w-full h-28 object-cover" />}
                         <div className="p-4 flex gap-3">
-                          <span
-                            className="flex items-center justify-center h-10 w-10 rounded-full shrink-0 transition-colors duration-200"
-                            style={{
-                              backgroundColor: isSelected ? `${accentColor}20` : `${primaryColor}10`,
-                            }}
-                          >
-                            <Icon
-                              className="h-5 w-5 transition-colors duration-200"
-                              style={{ color: isSelected ? accentColor : primaryColor }}
-                            />
+                          <span className="flex items-center justify-center h-10 w-10 rounded-full shrink-0 transition-colors duration-200" style={{ backgroundColor: isSelected ? `${accentColor}20` : `${primaryColor}10` }}>
+                            <Icon className="h-5 w-5 transition-colors duration-200" style={{ color: isSelected ? accentColor : primaryColor }} />
                           </span>
                           <div className="min-w-0 space-y-1">
                             <p className="font-semibold text-sm" style={{ color: primaryColor }}>{res.name}</p>
-                            {res.description && (
-                              <p className="text-xs leading-relaxed" style={{ color: `${primaryColor}80` }}>{res.description}</p>
-                            )}
+                            {res.description && <p className="text-xs leading-relaxed" style={{ color: `${primaryColor}80` }}>{res.description}</p>}
                             <div className="flex flex-wrap gap-1.5 mt-1.5">
-                              {res.capacity && (
-                                <Badge variant="outline" className="text-xs">
-                                  <Users className="h-3 w-3 mr-1" />
-                                  {res.capacity} {t("common.guests")}
-                                </Badge>
-                              )}
-                              {res.price_per_night != null && (
-                                <Badge variant="outline" className="text-xs">
-                                  €{Number(res.price_per_night).toFixed(0)}{t("dashboard.perNight")}
-                                </Badge>
-                              )}
+                              {res.capacity && <Badge variant="outline" className="text-xs"><Users className="h-3 w-3 mr-1" />{res.capacity} {t("common.guests")}</Badge>}
+                              {res.price_per_night != null && <Badge variant="outline" className="text-xs">€{Number(res.price_per_night).toFixed(0)}{t("dashboard.perNight")}</Badge>}
                             </div>
                           </div>
                         </div>

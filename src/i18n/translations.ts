@@ -611,6 +611,40 @@ type TranslationKeys = {
   "dashboard.roomPrice": string;
   "dashboard.breakfastPrice": string;
   "dashboard.pricingHint": string;
+  "dashboard.roomTypeLabel": string;
+  "dashboard.bedConfiguration": string;
+  "dashboard.roomDescription": string;
+  "dashboard.roomDescPlaceholder": string;
+  "dashboard.addMode": string;
+  "dashboard.addModeIndividual": string;
+  "dashboard.addModeBulk": string;
+  "dashboard.bulkRoomType": string;
+  "dashboard.bulkQuantity": string;
+  "dashboard.bulkAdd": string;
+  "dashboard.bulkAdded": string;
+  "dashboard.bedType": string;
+  "dashboard.bedCount": string;
+  "dashboard.addBed": string;
+  "dashboard.roomType.single": string;
+  "dashboard.roomType.double": string;
+  "dashboard.roomType.twin": string;
+  "dashboard.roomType.double_double": string;
+  "dashboard.roomType.triple": string;
+  "dashboard.roomType.quad": string;
+  "dashboard.roomType.studio": string;
+  "dashboard.roomType.suite": string;
+  "dashboard.roomType.connecting": string;
+  "dashboard.roomType.entire": string;
+  "dashboard.bedType.twin_single": string;
+  "dashboard.bedType.bunk": string;
+  "dashboard.bedType.queen": string;
+  "dashboard.bedType.king": string;
+  "dashboard.bedType.california_king": string;
+  "dashboard.bedType.murphy": string;
+  "dashboard.bedType.sofa": string;
+  "dashboard.bedType.trundle": string;
+  "booking.selectRoomType": string;
+  "booking.roomTypeLabel": string;
   "blocking.title": string;
   "blocking.tooltip": string;
   "blocking.addBlock": string;
@@ -1875,6 +1909,40 @@ const en: TranslationKeys = {
   "dashboard.roomPrice": "Room price (€/night)",
   "dashboard.breakfastPrice": "Breakfast price (€/person/morning)",
   "dashboard.pricingHint": "Default price for new reservations. Individual reservation prices can be adjusted in the reservation details.",
+  "dashboard.roomTypeLabel": "Room type",
+  "dashboard.bedConfiguration": "Bed configuration",
+  "dashboard.roomDescription": "Room description",
+  "dashboard.roomDescPlaceholder": "Describe the rooms, number of beds, layout...",
+  "dashboard.addMode": "Add mode",
+  "dashboard.addModeIndividual": "Add one room",
+  "dashboard.addModeBulk": "Add multiple by type",
+  "dashboard.bulkRoomType": "Room type",
+  "dashboard.bulkQuantity": "Quantity",
+  "dashboard.bulkAdd": "Add rooms",
+  "dashboard.bulkAdded": "Rooms added",
+  "dashboard.bedType": "Bed type",
+  "dashboard.bedCount": "Count",
+  "dashboard.addBed": "Add bed",
+  "dashboard.roomType.single": "Single Room",
+  "dashboard.roomType.double": "Double Room",
+  "dashboard.roomType.twin": "Twin Room",
+  "dashboard.roomType.double_double": "Double Double Room",
+  "dashboard.roomType.triple": "Triple Room",
+  "dashboard.roomType.quad": "Quad Room",
+  "dashboard.roomType.studio": "Studio Room",
+  "dashboard.roomType.suite": "Suite",
+  "dashboard.roomType.connecting": "Connecting Rooms",
+  "dashboard.roomType.entire": "Entire Property",
+  "dashboard.bedType.twin_single": "Twin / Single",
+  "dashboard.bedType.bunk": "Bunk Bed",
+  "dashboard.bedType.queen": "Queen",
+  "dashboard.bedType.king": "King",
+  "dashboard.bedType.california_king": "California King",
+  "dashboard.bedType.murphy": "Murphy Bed",
+  "dashboard.bedType.sofa": "Sofa Bed",
+  "dashboard.bedType.trundle": "Trundle Bed",
+  "booking.selectRoomType": "Select room type",
+  "booking.roomTypeLabel": "Room type",
   "blocking.title": "Blocked Dates & Times",
   "blocking.tooltip": "Block entire resource types or specific resources on chosen dates or date ranges. Optionally restrict to specific hours.",
   "blocking.addBlock": "Add Block",
@@ -3121,6 +3189,40 @@ const fi: TranslationKeys = {
   "dashboard.roomPrice": "Huonehinta (€/yö)",
   "dashboard.breakfastPrice": "Aamupalahinta (€/hlö/aamu)",
   "dashboard.pricingHint": "Oletushinta uusille varauksille. Yksittäisen varauksen hintaa voi muuttaa sisäisissä tiedoissa.",
+  "dashboard.roomTypeLabel": "Huonetyyppi",
+  "dashboard.bedConfiguration": "Sänkyjen kokoonpano",
+  "dashboard.roomDescription": "Huoneen kuvaus",
+  "dashboard.roomDescPlaceholder": "Kuvaile huoneita, sänkyjen määrä, pohjaratkaisu...",
+  "dashboard.addMode": "Lisäystapa",
+  "dashboard.addModeIndividual": "Lisää yksi huone",
+  "dashboard.addModeBulk": "Lisää useita tyypeittäin",
+  "dashboard.bulkRoomType": "Huonetyyppi",
+  "dashboard.bulkQuantity": "Määrä",
+  "dashboard.bulkAdd": "Lisää huoneet",
+  "dashboard.bulkAdded": "Huoneet lisätty",
+  "dashboard.bedType": "Sänkytyyppi",
+  "dashboard.bedCount": "Määrä",
+  "dashboard.addBed": "Lisää sänky",
+  "dashboard.roomType.single": "Yhden hengen huone",
+  "dashboard.roomType.double": "Kahden hengen huone",
+  "dashboard.roomType.twin": "Twin-huone",
+  "dashboard.roomType.double_double": "Double Double -huone",
+  "dashboard.roomType.triple": "Kolmen hengen huone",
+  "dashboard.roomType.quad": "Neljän hengen huone",
+  "dashboard.roomType.studio": "Studio-huone",
+  "dashboard.roomType.suite": "Sviitti",
+  "dashboard.roomType.connecting": "Yhdistettävät huoneet",
+  "dashboard.roomType.entire": "Koko kohde",
+  "dashboard.bedType.twin_single": "Kapea / yhden hengen sänky",
+  "dashboard.bedType.bunk": "Kerrossänky",
+  "dashboard.bedType.queen": "Queen-sänky",
+  "dashboard.bedType.king": "King-sänky",
+  "dashboard.bedType.california_king": "California King",
+  "dashboard.bedType.murphy": "Seinäsänky",
+  "dashboard.bedType.sofa": "Vuodesohva",
+  "dashboard.bedType.trundle": "Alasänky",
+  "booking.selectRoomType": "Valitse huonetyyppi",
+  "booking.roomTypeLabel": "Huonetyyppi",
   "blocking.title": "Estetyt päivät ja ajat",
   "blocking.tooltip": "Estä kokonaisia resurssityyppejä tai yksittäisiä resursseja valituille päiville tai ajanjaksoille. Voit rajata myös tiettyihin tunteihin.",
   "blocking.addBlock": "Lisää esto",
@@ -4366,6 +4468,40 @@ const sv: TranslationKeys = {
   "dashboard.roomPrice": "Rumpris (€/natt)",
   "dashboard.breakfastPrice": "Frukostpris (€/pers/morgon)",
   "dashboard.pricingHint": "Standardpris för nya bokningar. Enskilda bokningspriser kan justeras i bokningsdetaljerna.",
+  "dashboard.roomTypeLabel": "Rumstyp",
+  "dashboard.bedConfiguration": "Sängkonfiguration",
+  "dashboard.roomDescription": "Rumsbeskrivning",
+  "dashboard.roomDescPlaceholder": "Beskriv rummen, antal sängar, planlösning...",
+  "dashboard.addMode": "Lägga till-läge",
+  "dashboard.addModeIndividual": "Lägg till ett rum",
+  "dashboard.addModeBulk": "Lägg till flera per typ",
+  "dashboard.bulkRoomType": "Rumstyp",
+  "dashboard.bulkQuantity": "Antal",
+  "dashboard.bulkAdd": "Lägg till rum",
+  "dashboard.bulkAdded": "Rum tillagda",
+  "dashboard.bedType": "Sängtyp",
+  "dashboard.bedCount": "Antal",
+  "dashboard.addBed": "Lägg till säng",
+  "dashboard.roomType.single": "Enkelrum",
+  "dashboard.roomType.double": "Dubbelrum",
+  "dashboard.roomType.twin": "Twinrum",
+  "dashboard.roomType.double_double": "Dubbelt dubbelrum",
+  "dashboard.roomType.triple": "Trippelrum",
+  "dashboard.roomType.quad": "Quadrum",
+  "dashboard.roomType.studio": "Studiorum",
+  "dashboard.roomType.suite": "Svit",
+  "dashboard.roomType.connecting": "Kommunicerande rum",
+  "dashboard.roomType.entire": "Hela fastigheten",
+  "dashboard.bedType.twin_single": "Twin / Enkelsäng",
+  "dashboard.bedType.bunk": "Våningssäng",
+  "dashboard.bedType.queen": "Queen-säng",
+  "dashboard.bedType.king": "King-säng",
+  "dashboard.bedType.california_king": "California King",
+  "dashboard.bedType.murphy": "Väggbädd",
+  "dashboard.bedType.sofa": "Bäddsoffa",
+  "dashboard.bedType.trundle": "Utdragssäng",
+  "booking.selectRoomType": "Välj rumstyp",
+  "booking.roomTypeLabel": "Rumstyp",
   "blocking.title": "Blockerade dagar & tider",
   "blocking.tooltip": "Blockera hela resurstyper eller specifika resurser på valda datum eller datumintervall. Valfritt begränsa till specifika timmar.",
   "blocking.addBlock": "Lägg till blockering",
