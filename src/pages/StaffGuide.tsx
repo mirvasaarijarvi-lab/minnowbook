@@ -791,8 +791,20 @@ const guideContent: Record<Language, GuideContent> = {
         ],
       },
       {
+        icon: <UserCircle className="h-6 w-6" />, mockupId: "profile",
+        title: "10. Profiiliasetukset",
+        steps: [
+          "Paina 'Profiili' sivupalkissa avataksesi henkilökohtaiset asetukset.",
+          "Lataa profiilikuva (JPG, PNG tai WebP, max 2 MB) — se näkyy nimesi vieressä.",
+          "Vie hiiri avatarin päälle ja paina ✕ poistaaksesi nykyisen kuvan.",
+          "Muokkaa näyttönimeäsi — tämä on miten muut tiimin jäsenet näkevät sinut.",
+          "Sähköpostisi näkyy tiedoksi, mutta sitä ei voi muuttaa täältä.",
+          "Paina 'Tallenna muutokset' ottaaksesi päivitykset käyttöön.",
+        ],
+      },
+      {
         icon: <Building2 className="h-6 w-6" />, mockupId: "multisite",
-        title: "10. Monitoimipistehallinnointi (Business)",
+        title: "11. Monitoimipistehallinnointi (Business)",
         steps: [
           "Business-tilaus avaa monitoimipistehallinnan — hallinnoi useita toimipisteitä yhdestä hallintapaneelista.",
           "Luo toimipisteitä Asetukset → Toimipisteet: anna nimi, slug ja sijainti.",
