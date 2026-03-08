@@ -1493,7 +1493,8 @@ const PublicBookingInner = () => {
                         <span className="text-xs" style={{ color: `${primaryColor}60` }}>{t(descKey)}</span>
                       </button>
                     );
-                  })}
+                  });
+                  })()}
                 </div>
 
                 {/* Dine-in: pricing type */}
