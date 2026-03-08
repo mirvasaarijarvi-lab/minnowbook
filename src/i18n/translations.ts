@@ -1372,6 +1372,7 @@ const en: TranslationKeys = {
   "nav.reports": "Reports",
   "nav.support": "Support",
   "nav.sites": "Sites",
+  "nav.profile": "Profile",
 
   "reports.total": "Total",
   "reports.confirmed": "Confirmed",
