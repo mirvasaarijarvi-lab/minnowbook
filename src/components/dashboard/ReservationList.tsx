@@ -30,9 +30,9 @@ import {
 } from "@/lib/permissions";
 
 const statusColors: Record<string, string> = {
-  pending: "bg-yellow-100 text-yellow-800 border-yellow-200",
-  confirmed: "bg-green-100 text-green-800 border-green-200",
-  cancelled: "bg-red-100 text-red-800 border-red-200",
+  pending: "bg-warning/10 text-warning-foreground border-warning/20",
+  confirmed: "bg-success/10 text-success-foreground border-success/20",
+  cancelled: "bg-destructive/10 text-destructive border-destructive/20",
 };
 
 interface ReservationListProps {
