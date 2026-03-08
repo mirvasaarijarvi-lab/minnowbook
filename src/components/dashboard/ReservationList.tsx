@@ -338,7 +338,7 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
                           </Badge>
                         )}
                         {(r as any).confirmation_email_sent_at && (
-                          <Badge variant="outline" className="text-xs gap-1 bg-green-50 text-green-700 border-green-200">
+                          <Badge variant="outline" className="text-xs gap-1 bg-success/10 text-success border-success/20">
                             <MailCheck className="h-3 w-3" />
                             {t("dashboard.confirmationSentAt")}
                           </Badge>
