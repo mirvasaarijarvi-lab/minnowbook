@@ -877,7 +877,7 @@ const ReportsPanel = () => {
 
           {/* Discount Summary */}
           {discountStats.count > 0 ? (
-            <Card className="border-purple-200 bg-purple-50/30 dark:bg-purple-950/10 dark:border-purple-800/40">
+            <Card className="border-primary/20 bg-primary/5">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium flex items-center gap-2">
                   <Tag className="h-4 w-4 text-purple-600 dark:text-purple-400" />
