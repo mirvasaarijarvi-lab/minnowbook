@@ -67,7 +67,7 @@ export function usePermissions() {
       const { data, error } = await supabase.rpc("is_system_admin", {
         p_user_id: user!.id,
       });
-      console.log("[usePermissions] is_system_admin RPC result:", data, "error:", error);
+      if (error) console.error("[usePermissions] is_system_admin RPC error:", error);
       return data === true;
     },
     enabled: !!user?.id,
