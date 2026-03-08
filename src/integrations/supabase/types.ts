@@ -59,6 +59,13 @@ export type Database = {
             referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "audit_log_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       blocked_slots: {
@@ -132,6 +139,13 @@ export type Database = {
             referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "blocked_slots_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       discount_codes: {
@@ -194,6 +208,13 @@ export type Database = {
             referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "discount_codes_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       login_history: {
@@ -227,6 +248,13 @@ export type Database = {
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "login_history_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants_public"
             referencedColumns: ["id"]
           },
         ]
@@ -275,6 +303,13 @@ export type Database = {
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants_public"
             referencedColumns: ["id"]
           },
         ]
@@ -351,6 +386,13 @@ export type Database = {
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recurring_blocked_slots_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants_public"
             referencedColumns: ["id"]
           },
         ]
@@ -545,6 +587,13 @@ export type Database = {
             referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "reservations_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       resource_images: {
@@ -585,6 +634,13 @@ export type Database = {
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "resource_images_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants_public"
             referencedColumns: ["id"]
           },
         ]
@@ -633,6 +689,13 @@ export type Database = {
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "resource_opening_hours_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants_public"
             referencedColumns: ["id"]
           },
         ]
@@ -722,6 +785,13 @@ export type Database = {
             referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "resources_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       role_definitions: {
@@ -760,6 +830,13 @@ export type Database = {
             referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "role_definitions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       role_permissions: {
@@ -790,6 +867,13 @@ export type Database = {
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "role_permissions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants_public"
             referencedColumns: ["id"]
           },
         ]
@@ -861,6 +945,13 @@ export type Database = {
             referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "site_settings_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       site_users: {
@@ -901,6 +992,13 @@ export type Database = {
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_users_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants_public"
             referencedColumns: ["id"]
           },
         ]
@@ -945,6 +1043,13 @@ export type Database = {
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sites_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants_public"
             referencedColumns: ["id"]
           },
         ]
@@ -995,6 +1100,13 @@ export type Database = {
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_requests_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants_public"
             referencedColumns: ["id"]
           },
         ]
@@ -1081,6 +1193,13 @@ export type Database = {
             referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "tenant_email_templates_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       tenant_opening_hours: {
@@ -1139,6 +1258,13 @@ export type Database = {
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tenant_opening_hours_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants_public"
             referencedColumns: ["id"]
           },
         ]
@@ -1215,6 +1341,13 @@ export type Database = {
             referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "tenant_settings_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: true
+            referencedRelation: "tenants_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       tenant_users: {
@@ -1254,6 +1387,13 @@ export type Database = {
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tenant_users_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants_public"
             referencedColumns: ["id"]
           },
         ]
@@ -1323,7 +1463,166 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      site_settings_public: {
+        Row: {
+          accent_color: string | null
+          business_description: string | null
+          business_name: string | null
+          created_at: string | null
+          hero_image_url: string | null
+          id: string | null
+          logo_url: string | null
+          primary_color: string | null
+          secondary_color: string | null
+          site_id: string | null
+          tenant_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          accent_color?: string | null
+          business_description?: string | null
+          business_name?: string | null
+          created_at?: string | null
+          hero_image_url?: string | null
+          id?: string | null
+          logo_url?: string | null
+          primary_color?: string | null
+          secondary_color?: string | null
+          site_id?: string | null
+          tenant_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          accent_color?: string | null
+          business_description?: string | null
+          business_name?: string | null
+          created_at?: string | null
+          hero_image_url?: string | null
+          id?: string | null
+          logo_url?: string | null
+          primary_color?: string | null
+          secondary_color?: string | null
+          site_id?: string | null
+          tenant_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "site_settings_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: true
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_settings_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_settings_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tenant_settings_public: {
+        Row: {
+          accent_color: string | null
+          business_description: string | null
+          business_name: string | null
+          created_at: string | null
+          default_language: string | null
+          hero_image_url: string | null
+          id: string | null
+          logo_url: string | null
+          primary_color: string | null
+          resource_type_descriptions: Json | null
+          resource_type_names: Json | null
+          secondary_color: string | null
+          tenant_id: string | null
+          timezone: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          accent_color?: string | null
+          business_description?: string | null
+          business_name?: string | null
+          created_at?: string | null
+          default_language?: string | null
+          hero_image_url?: string | null
+          id?: string | null
+          logo_url?: string | null
+          primary_color?: string | null
+          resource_type_descriptions?: Json | null
+          resource_type_names?: Json | null
+          secondary_color?: string | null
+          tenant_id?: string | null
+          timezone?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          accent_color?: string | null
+          business_description?: string | null
+          business_name?: string | null
+          created_at?: string | null
+          default_language?: string | null
+          hero_image_url?: string | null
+          id?: string | null
+          logo_url?: string | null
+          primary_color?: string | null
+          resource_type_descriptions?: Json | null
+          resource_type_names?: Json | null
+          secondary_color?: string | null
+          tenant_id?: string | null
+          timezone?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_settings_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: true
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tenant_settings_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: true
+            referencedRelation: "tenants_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tenants_public: {
+        Row: {
+          allowed_reservation_types: string[] | null
+          id: string | null
+          is_active: boolean | null
+          name: string | null
+          slug: string | null
+        }
+        Insert: {
+          allowed_reservation_types?: string[] | null
+          id?: string | null
+          is_active?: boolean | null
+          name?: string | null
+          slug?: string | null
+        }
+        Update: {
+          allowed_reservation_types?: string[] | null
+          id?: string | null
+          is_active?: boolean | null
+          name?: string | null
+          slug?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       copy_tenant_defaults_to_site: {
@@ -1357,13 +1656,22 @@ export type Database = {
         Args: { p_permission: string; p_user_id: string }
         Returns: boolean
       }
-      has_tenant_role: {
-        Args: {
-          p_role: Database["public"]["Enums"]["app_role"]
-          p_user_id: string
-        }
-        Returns: boolean
-      }
+      has_tenant_role:
+        | {
+            Args: {
+              p_role: Database["public"]["Enums"]["app_role"]
+              p_user_id: string
+            }
+            Returns: boolean
+          }
+        | {
+            Args: {
+              p_role: Database["public"]["Enums"]["app_role"]
+              p_tenant_id: string
+              p_user_id: string
+            }
+            Returns: boolean
+          }
       is_system_admin: { Args: { p_user_id: string }; Returns: boolean }
       seed_tenant_roles_and_permissions: {
         Args: { p_tenant_id: string }
