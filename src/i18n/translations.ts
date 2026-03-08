@@ -501,6 +501,8 @@ type TranslationKeys = {
   "dashboard.activeResources": string;
   "dashboard.bookingLink": string;
   "dashboard.bookingLinkDesc": string;
+  "dashboard.allServices": string;
+  "dashboard.byServiceType": string;
   "dashboard.copyLink": string;
   "dashboard.linkCopied": string;
   "dashboard.noReservations": string;
