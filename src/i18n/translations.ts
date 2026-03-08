@@ -3099,6 +3099,7 @@ const fi: TranslationKeys = {
   "dashboard.bookingLinkDesc": "Jaa tämä linkki asiakkaillesi, jotta he voivat tehdä varauksia.",
   "dashboard.allServices": "Kaikki palvelut",
   "dashboard.byServiceType": "Palvelutyypin mukaan",
+  "dashboard.byLocation": "Sijainnin mukaan",
   "dashboard.copyLink": "Kopioi linkki",
   "dashboard.linkCopied": "Linkki kopioitu leikepöydälle!",
   "dashboard.noReservations": "Ei varauksia.",
