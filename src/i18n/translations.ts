@@ -3095,6 +3095,8 @@ const fi: TranslationKeys = {
   "dashboard.activeResources": "Aktiiviset resurssit",
   "dashboard.bookingLink": "Varauslinkki",
   "dashboard.bookingLinkDesc": "Jaa tämä linkki asiakkaillesi, jotta he voivat tehdä varauksia.",
+  "dashboard.allServices": "Kaikki palvelut",
+  "dashboard.byServiceType": "Palvelutyypin mukaan",
   "dashboard.copyLink": "Kopioi linkki",
   "dashboard.linkCopied": "Linkki kopioitu leikepöydälle!",
   "dashboard.noReservations": "Ei varauksia.",
