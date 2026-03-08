@@ -201,6 +201,8 @@ const ResourceManagement = () => {
         room_type: isAccom ? (form.room_type || null) : null,
         bed_configuration: isAccom ? bedConfig : null,
         room_description: isAccom && FREE_TEXT_ROOM_TYPES.includes(form.room_type) ? (form.room_description || null) : null,
+        offers_catering: form.resource_type === "restaurant" ? form.offers_catering : false,
+        offers_popup: form.resource_type === "restaurant" ? form.offers_popup : false,
         approval_status: getApprovalStatus(),
       };
       if (editingId) {
