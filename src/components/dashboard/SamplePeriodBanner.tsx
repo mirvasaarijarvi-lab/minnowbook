@@ -33,7 +33,7 @@ const bannerConfig: Partial<Record<SampleStatus, BannerConfig>> = {
 };
 
 const SamplePeriodBanner = () => {
-  const { status, daysRemaining, daysOverdue } = useSamplePeriod();
+  const { status, daysRemaining, daysOverdue, isBypassedByAdmin } = useSamplePeriod();
   const t = useT();
   const tDynamic = useTDynamic();
 
@@ -60,6 +60,11 @@ const SamplePeriodBanner = () => {
     <div className={cn("mx-4 sm:mx-6 lg:mx-8 mt-4 px-4 py-3 rounded-lg border flex items-center gap-3 text-sm font-medium", config.className)}>
       <Icon className="h-4 w-4 shrink-0" />
       <span>{message}</span>
+      {isBypassedByAdmin && (
+        <span className="ml-auto text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-semibold">
+          Admin bypass active
+        </span>
+      )}
     </div>
   );
 };
