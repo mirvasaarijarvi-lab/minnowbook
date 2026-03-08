@@ -503,6 +503,7 @@ type TranslationKeys = {
   "dashboard.bookingLinkDesc": string;
   "dashboard.allServices": string;
   "dashboard.byServiceType": string;
+  "dashboard.byLocation": string;
   "dashboard.copyLink": string;
   "dashboard.linkCopied": string;
   "dashboard.noReservations": string;
