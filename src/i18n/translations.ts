@@ -587,6 +587,10 @@ type TranslationKeys = {
   "dashboard.total": string;
   "dashboard.dailySnapshot": string;
   "dashboard.overviewSubtitle": string;
+  "alerts.pendingAction": string;
+  "alerts.uninvoicedAction": string;
+  "alerts.checkoutsAction": string;
+  "alerts.shortcuts": string;
   "blocking.pendingApproval": string;
   "dashboard.calendarHotel": string;
   "dashboard.calendarVenue": string;
