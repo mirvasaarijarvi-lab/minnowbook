@@ -16,6 +16,7 @@ import {
 } from "@/lib/permissions";
 import { isMultiSiteTier } from "@/lib/tier-limits";
 import { Menu, HelpCircle, ShieldAlert, X, Eye, BookOpen } from "lucide-react";
+import NotificationBell from "@/components/dashboard/NotificationBell";
 import { useImpersonation } from "@/contexts/ImpersonationContext";
 import DashboardSidebar, { DashboardView } from "@/components/dashboard/DashboardSidebar";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
