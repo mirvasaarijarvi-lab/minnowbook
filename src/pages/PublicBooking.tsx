@@ -1893,6 +1893,7 @@ const PublicBookingInner = () => {
                               <p className="text-xs mt-1 italic" style={{ color: `${primaryColor}60` }}>{sampleRes.room_description}</p>
                             )}
                             <div className="flex flex-wrap gap-1.5 mt-2">
+                              {showSiteBadges && sampleRes?.site_id && siteNameMap[sampleRes.site_id] && <Badge variant="secondary" className="text-xs"><MapPin className="h-3 w-3 mr-1" />{siteNameMap[sampleRes.site_id]}</Badge>}
                               {sampleRes?.capacity && <Badge variant="outline" className="text-xs"><Users className="h-3 w-3 mr-1" />{sampleRes.capacity} {t("common.guests")}</Badge>}
                               {sampleRes?.price_per_night != null && <Badge variant="outline" className="text-xs">€{Number(sampleRes.price_per_night).toFixed(0)}{t("dashboard.perNight")}</Badge>}
                             </div>
