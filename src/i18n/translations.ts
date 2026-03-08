@@ -503,6 +503,7 @@ type TranslationKeys = {
   "dashboard.bookingLinkDesc": string;
   "dashboard.allServices": string;
   "dashboard.byServiceType": string;
+  "dashboard.byLocation": string;
   "dashboard.copyLink": string;
   "dashboard.linkCopied": string;
   "dashboard.noReservations": string;
@@ -1809,6 +1810,7 @@ const en: TranslationKeys = {
   "dashboard.bookingLinkDesc": "Share this link with your customers so they can make reservations.",
   "dashboard.allServices": "All services",
   "dashboard.byServiceType": "By service type",
+  "dashboard.byLocation": "By location",
   "dashboard.copyLink": "Copy link",
   "dashboard.linkCopied": "Link copied to clipboard!",
   "dashboard.noReservations": "No reservations found.",
@@ -3097,6 +3099,7 @@ const fi: TranslationKeys = {
   "dashboard.bookingLinkDesc": "Jaa tämä linkki asiakkaillesi, jotta he voivat tehdä varauksia.",
   "dashboard.allServices": "Kaikki palvelut",
   "dashboard.byServiceType": "Palvelutyypin mukaan",
+  "dashboard.byLocation": "Sijainnin mukaan",
   "dashboard.copyLink": "Kopioi linkki",
   "dashboard.linkCopied": "Linkki kopioitu leikepöydälle!",
   "dashboard.noReservations": "Ei varauksia.",
@@ -4384,6 +4387,7 @@ const sv: TranslationKeys = {
   "dashboard.bookingLinkDesc": "Dela denna länk med dina kunder så att de kan boka.",
   "dashboard.allServices": "Alla tjänster",
   "dashboard.byServiceType": "Per tjänstetyp",
+  "dashboard.byLocation": "Per plats",
   "dashboard.copyLink": "Kopiera länk",
   "dashboard.linkCopied": "Länken kopierad!",
   "dashboard.noReservations": "Inga bokningar hittades.",

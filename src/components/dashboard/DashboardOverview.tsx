@@ -6,6 +6,7 @@ import { useUserSites } from "@/hooks/useUserSites";
 import { useTierGate } from "@/hooks/useTierGate";
 import SiteTabs from "./SiteTabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import {
   CalendarDays,
@@ -31,6 +32,7 @@ import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
 import { useDateLocale } from "@/hooks/useDateLocale";
 import DashboardTooltip from "./DashboardTooltip";
 import AutoReminderStatus from "./AutoReminderStatus";
+import BookingLinksCard from "./BookingLinksCard";
 
 import { useMemo } from "react";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip as RechartsTooltip, CartesianGrid } from "recharts";
@@ -209,12 +211,17 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
           </p>
         </div>
         {tenant?.slug && (
-          <Button variant="outline" size="sm" className="gap-1.5 shrink-0" asChild>
-            <a href={`/book/${tenant.slug}`} target="_blank" rel="noopener noreferrer">
-              <ExternalLink className="h-3.5 w-3.5" />
-              {t("dashboard.bookingLink")}
-            </a>
-          </Button>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="sm" className="gap-1.5 shrink-0">
+                <ExternalLink className="h-3.5 w-3.5" />
+                {t("dashboard.bookingLink")}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[500px] max-h-[70vh] overflow-y-auto p-0" align="end" sideOffset={8}>
+              <BookingLinksCard />
+            </PopoverContent>
+          </Popover>
         )}
       </div>
 

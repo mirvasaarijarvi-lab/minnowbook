@@ -7,7 +7,7 @@ import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
 import { useTierGate } from "@/hooks/useTierGate";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Link2, Copy, ExternalLink, Building2, Home } from "lucide-react";
+import { Link2, Copy, ExternalLink, Building2, Home, UtensilsCrossed } from "lucide-react";
 import { toast } from "sonner";
 import DashboardTooltip from "./DashboardTooltip";
 
@@ -15,6 +15,7 @@ const TYPE_ICONS: Record<string, React.ElementType> = {
   venue: Building2,
   guesthouse: Home,
   hotel: Home,
+  restaurant: UtensilsCrossed,
 };
 
 const LinkRow = ({ url, icon: Icon, copyLink }: { url: string; icon: React.ElementType; copyLink: (u: string) => void }) => (
@@ -67,7 +68,7 @@ const BookingLinksCard = () => {
 
   const baseUrl = `${window.location.origin}/book/${tenant.slug}`;
   const allowedTypes: string[] = tenant.allowed_reservation_types ?? [];
-  const shareableTypes = allowedTypes.filter((type: string) => type !== "restaurant");
+  const shareableTypes = allowedTypes;
 
   const copyLink = (url: string) => {
     navigator.clipboard.writeText(url);
@@ -117,22 +118,18 @@ const BookingLinksCard = () => {
         )}
 
         {/* Per-site links for business tier */}
-        {showSiteLinks && sites!.map((site) => (
-          <div key={site.id} className="space-y-2 pt-3 border-t border-border/50">
-            <div className="flex items-center gap-2">
-              <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
-              <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{site.name}</span>
+        {showSiteLinks && (
+          <div className="space-y-3 pt-3 border-t border-border/50">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                {t("dashboard.byLocation")}
+              </span>
             </div>
-            {/* All services at this site */}
-            <LinkRow url={`${baseUrl}?site=${site.slug}`} icon={Link2} copyLink={copyLink} />
-            {/* Per-type at this site */}
-            {shareableTypes.map((type: string) => {
-              const url = `${baseUrl}?type=${type}&site=${site.slug}`;
-              const Icon = TYPE_ICONS[type] ?? Link2;
-              return <LinkRow key={`${site.id}-${type}`} url={url} icon={Icon} copyLink={copyLink} />;
-            })}
+            {sites!.map((site) => (
+              <LinkRow key={site.id} url={`${baseUrl}?site=${site.slug}`} icon={Building2} copyLink={copyLink} />
+            ))}
           </div>
-        ))}
+        )}
       </CardContent>
     </Card>
   );
