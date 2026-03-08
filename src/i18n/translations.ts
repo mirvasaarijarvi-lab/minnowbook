@@ -601,6 +601,9 @@ type TranslationKeys = {
   "dashboard.resourceManagementDesc": string;
   "dashboard.actions": string;
   "dashboard.active": string;
+  "dashboard.serviceOptions": string;
+  "dashboard.offersCatering": string;
+  "dashboard.offersPopup": string;
   "dashboard.inactive": string;
   "dashboard.namePlaceholder": string;
   "dashboard.descriptionPlaceholder": string;
@@ -1899,6 +1902,9 @@ const en: TranslationKeys = {
   "dashboard.resourceManagementDesc": "Manage spaces, rooms and tables",
   "dashboard.actions": "Actions",
   "dashboard.active": "Active",
+  "dashboard.serviceOptions": "Additional services",
+  "dashboard.offersCatering": "Offer catering services",
+  "dashboard.offersPopup": "Offer pop-up restaurant at events",
   "dashboard.inactive": "Inactive",
   "dashboard.namePlaceholder": "e.g. Banquet Hall",
   "dashboard.descriptionPlaceholder": "Short description...",
@@ -3179,6 +3185,9 @@ const fi: TranslationKeys = {
   "dashboard.resourceManagementDesc": "Hallitse tiloja, huoneita ja pöytiä",
   "dashboard.actions": "Toiminnot",
   "dashboard.active": "Aktiivinen",
+  "dashboard.serviceOptions": "Lisäpalvelut",
+  "dashboard.offersCatering": "Tarjoa catering-palveluita",
+  "dashboard.offersPopup": "Tarjoa pop-up ravintolaa tapahtumiin",
   "dashboard.inactive": "Ei aktiivinen",
   "dashboard.namePlaceholder": "Esim. Juhlasali",
   "dashboard.descriptionPlaceholder": "Lyhyt kuvaus...",
@@ -4458,6 +4467,9 @@ const sv: TranslationKeys = {
   "dashboard.resourceManagementDesc": "Hantera lokaler, rum och bord",
   "dashboard.actions": "Åtgärder",
   "dashboard.active": "Aktiv",
+  "dashboard.serviceOptions": "Tilläggstjänster",
+  "dashboard.offersCatering": "Erbjud cateringtjänster",
+  "dashboard.offersPopup": "Erbjud pop-up restaurang vid evenemang",
   "dashboard.inactive": "Inaktiv",
   "dashboard.namePlaceholder": "T.ex. Festsal",
   "dashboard.descriptionPlaceholder": "Kort beskrivning...",

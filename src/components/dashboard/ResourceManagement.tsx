@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -78,6 +79,7 @@ const ResourceManagement = () => {
     name: "", resource_type: "restaurant", capacity: "", price_per_night: "", description: "", image_url: "", breakfast_price_per_person: "",
     room_type_pricing: { ...defaultRoomPricing }, is_active: true,
     room_type: "" as string, room_description: "",
+    offers_catering: false, offers_popup: false,
   });
 
   const { data: sites } = useQuery({
@@ -200,6 +202,8 @@ const ResourceManagement = () => {
         room_type: isAccom ? (form.room_type || null) : null,
         bed_configuration: isAccom ? bedConfig : null,
         room_description: isAccom && FREE_TEXT_ROOM_TYPES.includes(form.room_type) ? (form.room_description || null) : null,
+        offers_catering: form.resource_type === "restaurant" ? form.offers_catering : false,
+        offers_popup: form.resource_type === "restaurant" ? form.offers_popup : false,
         approval_status: getApprovalStatus(),
       };
       if (editingId) {
@@ -329,7 +333,7 @@ const ResourceManagement = () => {
     const defaultType = allowedTypes[0] || "restaurant";
     setEditingId(null);
     setBeds([]);
-    setForm({ name: "", resource_type: defaultType, capacity: "", price_per_night: "", description: "", image_url: "", breakfast_price_per_person: "", room_type_pricing: { ...defaultRoomPricing }, is_active: true, room_type: "", room_description: "" });
+    setForm({ name: "", resource_type: defaultType, capacity: "", price_per_night: "", description: "", image_url: "", breakfast_price_per_person: "", room_type_pricing: { ...defaultRoomPricing }, is_active: true, room_type: "", room_description: "", offers_catering: false, offers_popup: false });
   };
 
   const openEdit = (r: any) => {
@@ -345,6 +349,8 @@ const ResourceManagement = () => {
       is_active: r.is_active ?? true,
       room_type: r.room_type ?? "",
       room_description: r.room_description ?? "",
+      offers_catering: r.offers_catering ?? false,
+      offers_popup: r.offers_popup ?? false,
       room_type_pricing: {
         single: rtp.single?.toString() ?? "1.0",
         double: rtp.double?.toString() ?? "1.5",
@@ -567,6 +573,21 @@ const ResourceManagement = () => {
                     <Switch checked={form.is_active} onCheckedChange={(checked) => setForm((prev) => ({ ...prev, is_active: checked }))} />
                     <Label className="mb-0">{t("dashboard.active")}</Label>
                   </div>
+
+                  {/* Restaurant service options */}
+                  {form.resource_type === "restaurant" && (
+                    <div className="space-y-3 rounded-lg border border-border p-3">
+                      <Label className="font-medium text-sm">{t("dashboard.serviceOptions")}</Label>
+                      <div className="flex items-center gap-3">
+                        <Checkbox checked={form.offers_catering} onCheckedChange={(checked) => setForm((prev) => ({ ...prev, offers_catering: !!checked }))} />
+                        <Label className="mb-0 text-sm">{t("dashboard.offersCatering")}</Label>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <Checkbox checked={form.offers_popup} onCheckedChange={(checked) => setForm((prev) => ({ ...prev, offers_popup: !!checked }))} />
+                        <Label className="mb-0 text-sm">{t("dashboard.offersPopup")}</Label>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Opening hours for restaurant resources */}
                   {form.resource_type === "restaurant" && tenantId && (
