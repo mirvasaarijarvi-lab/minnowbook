@@ -1943,6 +1943,7 @@ const PublicBookingInner = () => {
                             <p className="font-semibold text-sm" style={{ color: primaryColor }}>{res.name}</p>
                             {res.description && <p className="text-xs leading-relaxed" style={{ color: `${primaryColor}80` }}>{res.description}</p>}
                             <div className="flex flex-wrap gap-1.5 mt-1.5">
+                              {showSiteBadges && res.site_id && siteNameMap[res.site_id] && <Badge variant="secondary" className="text-xs"><MapPin className="h-3 w-3 mr-1" />{siteNameMap[res.site_id]}</Badge>}
                               {res.capacity && <Badge variant="outline" className="text-xs"><Users className="h-3 w-3 mr-1" />{res.capacity} {t("common.guests")}</Badge>}
                               {res.price_per_night != null && <Badge variant="outline" className="text-xs">€{Number(res.price_per_night).toFixed(0)}{t("dashboard.perNight")}</Badge>}
                             </div>
