@@ -121,7 +121,7 @@ const MockupCalendar = () => (
       ))}
     </div>
     <div className="flex gap-3 text-[10px] justify-center text-muted-foreground">
-      <span className="flex items-center gap-1"><Check className="h-3 w-3 text-green-600" /> Available</span>
+      <span className="flex items-center gap-1"><Check className="h-3 w-3 text-success" /> Available</span>
       <span className="flex items-center gap-1"><X className="h-3 w-3 text-destructive" /> Full</span>
       <span className="flex items-center gap-1"><Lock className="h-3 w-3" /> Blocked</span>
     </div>
