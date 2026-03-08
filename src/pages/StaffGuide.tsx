@@ -448,11 +448,14 @@ const guideContent: Record<Language, GuideContent> = {
         title: "2. Dashboard Overview",
         steps: [
           "The Overview tab shows today's summary: reservations, pending bookings, guests, and arrivals.",
+          "🔔 Notification bell (top-right): Alerts you when reservations are marked as 'Used' or 'Invoiced'. Unread count shown as a badge.",
+          "⚠️ Action Alerts: Clickable banners highlight items needing attention — pending confirmations, uninvoiced reservations, and today's check-outs. Click to jump straight to the filtered view.",
           "Weekly KPIs: revenue, reservation count, guest count, and utilization rate.",
           "The weekly revenue chart shows daily revenue breakdown.",
           "Quick info section shows check-outs today and un-invoiced reservations.",
           "Today by type breakdown shows reservations per category.",
           "Your shareable public booking link is displayed at the bottom (site-specific links available for Business tier).",
+          "⌨️ Keyboard shortcuts: Press Alt+1 through Alt+8 to quickly jump between sidebar sections (Overview, Calendar, Reservations, etc.).",
         ],
       },
       {
