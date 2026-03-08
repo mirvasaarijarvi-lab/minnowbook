@@ -996,8 +996,20 @@ const guideContent: Record<Language, GuideContent> = {
         ],
       },
       {
+        icon: <UserCircle className="h-6 w-6" />, mockupId: "profile",
+        title: "10. Profilinställningar",
+        steps: [
+          "Klicka 'Profil' i sidofältet för att öppna dina personliga inställningar.",
+          "Ladda upp ett profilfoto (JPG, PNG eller WebP, max 2 MB) — det visas bredvid ditt namn.",
+          "Håll muspekaren över din avatar och klicka ✕ för att ta bort det aktuella fotot.",
+          "Redigera ditt visningsnamn — så ser andra teammedlemmar dig.",
+          "Din e-post visas som referens men kan inte ändras här.",
+          "Klicka 'Spara ändringar' för att tillämpa dina uppdateringar.",
+        ],
+      },
+      {
         icon: <Building2 className="h-6 w-6" />, mockupId: "multisite",
-        title: "10. Hantering av flera platser (Business)",
+        title: "11. Hantering av flera platser (Business)",
         steps: [
           "Business-planen låser upp hantering av flera platser — hantera flera lokaler från en instrumentpanel.",
           "Skapa platser via Inställningar → Platser: ange namn, slug och plats.",
