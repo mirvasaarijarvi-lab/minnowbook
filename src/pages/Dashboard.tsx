@@ -19,6 +19,7 @@ import { Menu, HelpCircle, ShieldAlert, X, Eye, BookOpen } from "lucide-react";
 import NotificationBell from "@/components/dashboard/NotificationBell";
 import { useImpersonation } from "@/contexts/ImpersonationContext";
 import DashboardSidebar, { DashboardView } from "@/components/dashboard/DashboardSidebar";
+import useKeyboardShortcuts from "@/components/dashboard/useKeyboardShortcuts";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import DashboardOverview from "@/components/dashboard/DashboardOverview";
 import CalendarView from "@/components/dashboard/CalendarView";
