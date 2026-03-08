@@ -331,12 +331,12 @@ const PublicBookingInner = () => {
     queryFn: async () => {
       if (!effectiveSiteId) return null;
       const { data, error } = await supabase
-        .from("site_settings")
+        .from("site_settings_public" as any)
         .select("*")
         .eq("site_id", effectiveSiteId)
         .maybeSingle();
       if (error) throw error;
-      return data;
+      return data as any;
     },
     enabled: !!effectiveSiteId,
   });
