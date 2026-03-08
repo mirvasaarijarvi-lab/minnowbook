@@ -344,7 +344,7 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
                           </Badge>
                         )}
                         {(r as any).cancellation_email_sent_at && (
-                          <Badge variant="outline" className="text-xs gap-1 bg-red-50 text-red-700 border-red-200">
+                          <Badge variant="outline" className="text-xs gap-1 bg-destructive/10 text-destructive border-destructive/20">
                             <MailX className="h-3 w-3" />
                             {t("dashboard.cancellationSentAt")}
                           </Badge>
