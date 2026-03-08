@@ -281,7 +281,7 @@ const PublicBookingInner = () => {
         .eq("is_active", true)
         .maybeSingle();
       if (error) throw error;
-      return data as PublicTenant | null;
+      return data as unknown as PublicTenant | null;
     },
     enabled: !!slug,
   });
