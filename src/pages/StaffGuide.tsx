@@ -299,7 +299,7 @@ const MockupMultisite = () => (
           <span className="flex-1 font-medium">{s.name}</span>
           <span className="px-1.5 py-0.5 rounded border text-[9px]">{s.type}</span>
           <span className="flex items-center gap-0.5 text-muted-foreground"><MapPin className="h-2.5 w-2.5" />{s.location}</span>
-          <span className={`px-1.5 py-0.5 rounded text-[9px] ${s.active ? "bg-green-100 text-green-700" : "bg-muted text-muted-foreground"}`}>
+          <span className={`px-1.5 py-0.5 rounded text-[9px] ${s.active ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"}`}>
             {s.active ? "Active" : "Draft"}
           </span>
         </div>
