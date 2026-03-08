@@ -586,8 +586,20 @@ const guideContent: Record<Language, GuideContent> = {
         ],
       },
       {
+        icon: <UserCircle className="h-6 w-6" />, mockupId: "profile",
+        title: "10. Profile Settings",
+        steps: [
+          "Click 'Profile' in the sidebar to open your personal settings.",
+          "Upload a profile photo (JPG, PNG, or WebP, max 2 MB) — it appears next to your name.",
+          "Hover over your avatar and click ✕ to remove the current photo.",
+          "Edit your Display Name — this is how other team members see you.",
+          "Your email is shown for reference but cannot be changed here.",
+          "Click 'Save Changes' to apply your updates.",
+        ],
+      },
+      {
         icon: <Building2 className="h-6 w-6" />, mockupId: "multisite",
-        title: "10. Multi-Site Management (Business plan)",
+        title: "11. Multi-Site Management (Business plan)",
         steps: [
           "Business plan unlocks multi-site management — manage multiple locations from one dashboard.",
           "Create sites via Settings → Sites: give each a name, slug, and location.",
