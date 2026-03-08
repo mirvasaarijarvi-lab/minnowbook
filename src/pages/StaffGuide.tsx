@@ -834,11 +834,14 @@ const guideContent: Record<Language, GuideContent> = {
         title: "2. Instrumentpanelens översikt",
         steps: [
           "Översiktsfliken visar dagens sammanfattning: bokningar, väntande, gäster och ankomster.",
+          "🔔 Aviseringsklocka (uppe till höger): Meddelar dig när bokningar markeras som 'Använd' eller 'Fakturerad'. Oläst antal visas som märke.",
+          "⚠️ Åtgärdsvarningar: Klickbara banners markerar objekt som kräver uppmärksamhet — väntande bekräftelser, ej fakturerade bokningar och dagens utcheckningar. Klicka för att hoppa direkt till den filtrerade vyn.",
           "Veckans nyckeltal: intäkter, antal bokningar, antal gäster och beläggningsgrad.",
           "Veckans intäktsdiagram visar daglig intäktsfördelning.",
           "Snabbinfo visar dagens utcheckningar och ej fakturerade bokningar.",
           "Per typ visar bokningar per kategori.",
           "Din publika bokningslänk visas längst ner (platsspecifika länkar för Business-planen).",
+          "⌨️ Tangentbordsgenvägar: Tryck Alt+1 till Alt+8 för att snabbt hoppa mellan sidofältets sektioner (Översikt, Kalender, Bokningar osv.).",
         ],
       },
       {
