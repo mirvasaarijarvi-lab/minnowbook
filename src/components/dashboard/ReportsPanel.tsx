@@ -880,7 +880,7 @@ const ReportsPanel = () => {
             <Card className="border-primary/20 bg-primary/5">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium flex items-center gap-2">
-                  <Tag className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                  <Tag className="h-4 w-4 text-primary" />
                   {t("reports.discountSummary")}
                 </CardTitle>
               </CardHeader>
