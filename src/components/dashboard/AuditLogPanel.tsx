@@ -363,7 +363,7 @@ const AuditLogPanel = () => {
                                       </span>
                                       <span className="text-destructive/70 line-through">{formatValue(c.from)}</span>
                                       <span className="text-muted-foreground">→</span>
-                                      <span className="text-emerald-600 font-medium">{formatValue(c.to)}</span>
+                                      <span className="text-success font-medium">{formatValue(c.to)}</span>
                                     </div>
                                   ))}
                                 </div>
