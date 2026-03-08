@@ -347,12 +347,12 @@ const PublicBookingInner = () => {
     queryFn: async () => {
       if (!tenant?.id) return null;
       const { data, error } = await supabase
-        .from("tenant_settings")
+        .from("tenant_settings_public" as any)
         .select("*")
         .eq("tenant_id", tenant.id)
         .maybeSingle();
       if (error) throw error;
-      return data;
+      return data as any;
     },
     enabled: !!tenant?.id,
   });
