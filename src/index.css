@@ -40,6 +40,12 @@
     --success: 69 90% 59%;
     --success-foreground: 315 17% 9%;
 
+    --warning: 45 93% 47%;
+    --warning-foreground: 35 80% 16%;
+
+    --info: 210 65% 50%;
+    --info-foreground: 210 60% 15%;
+
     --border: 37 48% 85%;
     --input: 37 48% 85%;
     --ring: 13 100% 59%;
