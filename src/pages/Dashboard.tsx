@@ -117,6 +117,7 @@ const Dashboard = () => {
   const { user, signOut } = useAuth();
   const { tenantId, tenant, isAdmin, loading } = useTenant();
   const { can } = usePermissions();
+  const { isMultiSite, effectiveTier } = useTierGate();
   const { impersonating, isImpersonating, stopImpersonation } = useImpersonation();
   const samplePeriod = useSamplePeriod();
   const navigate = useNavigate();
