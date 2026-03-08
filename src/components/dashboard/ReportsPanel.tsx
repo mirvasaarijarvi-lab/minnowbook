@@ -492,7 +492,7 @@ const ReportsPanel = () => {
     if (diff === 0) return <span className="inline-flex items-center gap-0.5 text-xs text-muted-foreground"><Minus className="h-3 w-3" /> 0%</span>;
     const pos = diff > 0;
     return (
-      <span className={`inline-flex items-center gap-0.5 text-xs font-medium ${pos ? "text-green-600" : "text-red-600"}`}>
+      <span className={`inline-flex items-center gap-0.5 text-xs font-medium ${pos ? "text-success" : "text-destructive"}`}>
         {pos ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
         {pos ? "+" : ""}{pct}%
         {isCurrency && <span className="text-[10px] opacity-70 ml-0.5">({pos ? "+" : ""}{diff.toLocaleString("fi-FI", { maximumFractionDigits: 0 })} €)</span>}
