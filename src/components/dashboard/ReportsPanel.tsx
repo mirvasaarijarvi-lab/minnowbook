@@ -914,7 +914,7 @@ const ReportsPanel = () => {
                       <Percent className="h-4 w-4 text-muted-foreground mb-1" />
                     </div>
                     <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
-                      <div className="bg-purple-500 dark:bg-purple-400 h-2 rounded-full transition-all" style={{ width: `${Math.min(discountStats.ratio, 100)}%` }} />
+                      <div className="bg-primary h-2 rounded-full transition-all" style={{ width: `${Math.min(discountStats.ratio, 100)}%` }} />
                     </div>
                   </div>
                 </div>
