@@ -350,10 +350,10 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
                           </Badge>
                         )}
                         {r.discount_type && (
-                          <Badge variant="outline" className="text-xs gap-1 bg-purple-50 text-purple-700 border-purple-200">
+                          <Badge variant="outline" className="text-xs gap-1 bg-primary/10 text-primary border-primary/20">
                             <Tag className="h-3 w-3" />
                             {r.discount_type === "percentage" ? `−${r.discount_value}%` : `−€${r.discount_value}`}
-                            {r.discount_reason && <span className="font-normal text-purple-500 ml-0.5">· {r.discount_reason}</span>}
+                            {r.discount_reason && <span className="font-normal text-primary/70 ml-0.5">· {r.discount_reason}</span>}
                           </Badge>
                         )}
                       </div>
