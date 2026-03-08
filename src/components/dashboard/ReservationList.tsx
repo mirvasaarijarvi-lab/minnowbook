@@ -318,7 +318,7 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
                     />
                     )}
                     <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
+                    <div className="flex flex-wrap items-center gap-1.5 mb-1">
                       <span className="font-semibold text-foreground">{r.guest_name}</span>
                       <Badge variant="outline" className="text-xs capitalize">{typeLabel(r.reservation_type)}</Badge>
                         <Badge className={`text-xs ${statusColors[r.status ?? "pending"] ?? ""}`}>{tDynamic(`dashboard.${r.status ?? "pending"}`)}</Badge>
