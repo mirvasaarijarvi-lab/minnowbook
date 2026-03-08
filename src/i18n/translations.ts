@@ -1807,6 +1807,8 @@ const en: TranslationKeys = {
   "dashboard.activeResources": "Active Resources",
   "dashboard.bookingLink": "Booking Link",
   "dashboard.bookingLinkDesc": "Share this link with your customers so they can make reservations.",
+  "dashboard.allServices": "All services",
+  "dashboard.byServiceType": "By service type",
   "dashboard.copyLink": "Copy link",
   "dashboard.linkCopied": "Link copied to clipboard!",
   "dashboard.noReservations": "No reservations found.",
