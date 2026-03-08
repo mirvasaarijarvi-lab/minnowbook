@@ -2673,6 +2673,7 @@ const fi: TranslationKeys = {
   "nav.reports": "Raportit",
   "nav.support": "Tuki",
   "nav.sites": "Toimipisteet",
+  "nav.profile": "Profiili",
 
   "reports.total": "Yhteensä",
   "reports.confirmed": "Vahvistettu",
