@@ -145,9 +145,9 @@ const MockupReservations = () => (
     </div>
     <div className="space-y-1">
       {[
-        { date: "03.03", guest: "John D.", type: "Hotel", status: "Confirmed", statusColor: "bg-green-100 text-green-700", used: true, invoiced: false },
-        { date: "03.03", guest: "Lisa K.", type: "Restaurant", status: "Confirmed", statusColor: "bg-green-100 text-green-700", used: true, invoiced: true },
-        { date: "03.03", guest: "Karl P.", type: "Venue", status: "Pending", statusColor: "bg-amber-100 text-amber-700", used: false, invoiced: false },
+        { date: "03.03", guest: "John D.", type: "Hotel", status: "Confirmed", statusColor: "bg-success/10 text-success", used: true, invoiced: false },
+        { date: "03.03", guest: "Lisa K.", type: "Restaurant", status: "Confirmed", statusColor: "bg-success/10 text-success", used: true, invoiced: true },
+        { date: "03.03", guest: "Karl P.", type: "Venue", status: "Pending", statusColor: "bg-warning/10 text-warning", used: false, invoiced: false },
       ].map((r, i) => (
         <div key={i} className="grid grid-cols-[3rem_1fr_4rem_4.5rem_1.5rem_1.5rem_1rem] gap-1 items-center text-[10px] p-2 rounded bg-background border">
           <span className="text-muted-foreground">{r.date}</span>
