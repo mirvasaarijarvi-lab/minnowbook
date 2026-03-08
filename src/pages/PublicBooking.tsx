@@ -25,6 +25,15 @@ import ConfirmationEmailPreview from "@/components/ConfirmationEmailPreview";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import React from "react";
 
+// Types for public views (not in auto-generated types)
+interface PublicTenant {
+  id: string;
+  name: string;
+  slug: string;
+  is_active: boolean;
+  allowed_reservation_types: string[];
+}
+
 const bookingSchema = z.object({
   guest_name: z.string().trim().min(1, "Name is required").max(100),
   guest_email: z.string().trim().email("Invalid email").max(255),
