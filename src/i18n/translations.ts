@@ -1458,6 +1458,9 @@ const en: TranslationKeys = {
    // Booking
   "booking.title": "Make a Reservation",
   "booking.selectType": "What would you like to book?",
+  "booking.selectLocation": "Choose a location",
+  "booking.allLocations": "All locations",
+  "booking.atSite": "at",
   "booking.typeDescRestaurant": "Reserve a table for dining",
   "booking.typeDescVenue": "Book a space for your event",
   "booking.typeDescGuesthouse": "Book a room for your stay",
