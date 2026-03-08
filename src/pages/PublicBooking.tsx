@@ -266,7 +266,7 @@ const PublicBookingInner = () => {
     queryFn: async () => {
       if (!slug) return null;
       const { data, error } = await supabase
-        .from("tenants")
+        .from("tenants_public" as any)
         .select("*")
         .eq("slug", slug)
         .eq("is_active", true)
