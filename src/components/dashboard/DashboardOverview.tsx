@@ -427,7 +427,7 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
               onClick={() => onNavigate?.("reservations", { invoiced: false })}
             >
               <span className="flex items-center gap-2 text-muted-foreground">
-                <Receipt className="h-4 w-4 text-red-500" />
+                <Receipt className="h-4 w-4 text-destructive" />
                 {t("dashboard.uninvoiced")}
               </span>
               <span className="font-semibold text-foreground flex items-center gap-1">

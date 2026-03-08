@@ -987,7 +987,7 @@ const ReportsPanel = () => {
                           </TableCell>
                           <TableCell>
                             {r.breakfast_included
-                              ? <Badge className="bg-amber-100 text-amber-800 border-amber-200 gap-1"><Coffee className="h-3.5 w-3.5" />{t("reports.breakfast")}</Badge>
+                              ? <Badge className="bg-warning/10 text-warning-foreground border-warning/20 gap-1"><Coffee className="h-3.5 w-3.5" />{t("reports.breakfast")}</Badge>
                               : <span className="text-muted-foreground">—</span>
                             }
                           </TableCell>

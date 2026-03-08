@@ -138,7 +138,7 @@ const PasswordInput = ({
                     style={{ width: `${score}%` }}
                   />
                 </div>
-                <p className={cn("text-xs font-medium", level === "weak" ? "text-destructive" : level === "fair" ? "text-orange-500" : level === "strong" ? "text-primary" : "text-emerald-500")}>
+                <p className={cn("text-xs font-medium", level === "weak" ? "text-destructive" : level === "fair" ? "text-accent" : level === "strong" ? "text-primary" : "text-success")}>
                   {t(config.label)}
                 </p>
               </div>

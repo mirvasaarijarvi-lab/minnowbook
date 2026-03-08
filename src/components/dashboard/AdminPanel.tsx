@@ -503,7 +503,7 @@ const AdminPanel = () => {
                         </TableCell>
                       )}
                       <TableCell>
-                        <Badge variant="outline" className={`text-xs ${u.is_approved ? "border-emerald-500/30 text-emerald-600 bg-emerald-500/10" : "border-yellow-500/30 text-yellow-600 bg-yellow-500/10"}`}>
+                        <Badge variant="outline" className={`text-xs ${u.is_approved ? "border-success/30 text-success bg-success/10" : "border-warning/30 text-warning bg-warning/10"}`}>
                           {u.is_approved ? t("admin.statusApproved") : t("admin.statusPending")}
                         </Badge>
                       </TableCell>

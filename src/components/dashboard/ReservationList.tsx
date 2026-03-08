@@ -399,7 +399,7 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
                         <span className="text-muted-foreground">{t("dashboard.invoiced")}</span>
                       </label>
                       {r.breakfast_included && (
-                        <Badge className="text-xs bg-amber-100 text-amber-800 border-amber-200 gap-1"><Coffee className="h-3 w-3" />{t("reports.breakfast")}</Badge>
+                        <Badge className="text-xs bg-warning/10 text-warning-foreground border-warning/20 gap-1"><Coffee className="h-3 w-3" />{t("reports.breakfast")}</Badge>
                       )}
                     </div>
                     )}
