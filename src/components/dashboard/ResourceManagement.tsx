@@ -348,6 +348,8 @@ const ResourceManagement = () => {
       is_active: r.is_active ?? true,
       room_type: r.room_type ?? "",
       room_description: r.room_description ?? "",
+      offers_catering: r.offers_catering ?? false,
+      offers_popup: r.offers_popup ?? false,
       room_type_pricing: {
         single: rtp.single?.toString() ?? "1.0",
         double: rtp.double?.toString() ?? "1.5",
