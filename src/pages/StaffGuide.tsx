@@ -251,7 +251,7 @@ const MockupAdmin = () => (
         <div key={i} className="flex items-center gap-2 text-[10px] p-1.5 rounded bg-background border">
           <span className="flex-1 font-medium">{u.name}</span>
           <span className="px-1.5 py-0.5 rounded border text-[9px]">{u.role}</span>
-          <span className={`px-1.5 py-0.5 rounded text-[9px] ${u.approved ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"}`}>
+          <span className={`px-1.5 py-0.5 rounded text-[9px] ${u.approved ? "bg-success/10 text-success" : "bg-warning/10 text-warning"}`}>
             {u.approved ? "Approved" : "Pending"}
           </span>
           <KeyRound className="h-3 w-3 text-muted-foreground" />
