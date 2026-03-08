@@ -68,7 +68,7 @@ const BookingLinksCard = () => {
 
   const baseUrl = `${window.location.origin}/book/${tenant.slug}`;
   const allowedTypes: string[] = tenant.allowed_reservation_types ?? [];
-  const shareableTypes = allowedTypes.filter((type: string) => type !== "restaurant");
+  const shareableTypes = allowedTypes;
 
   const copyLink = (url: string) => {
     navigator.clipboard.writeText(url);
