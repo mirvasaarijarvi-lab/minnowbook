@@ -328,6 +328,31 @@ const MockupMultisite = () => (
   </div>
 );
 
+const MockupProfile = () => (
+  <div className="border rounded-lg p-4 bg-muted/30 space-y-3 print:bg-white max-w-xs mx-auto">
+    <div className="flex items-center gap-2 text-xs font-medium">
+      <UserCircle className="h-4 w-4 text-primary" />
+      <span>Profile Settings</span>
+    </div>
+    <div className="flex items-center gap-3">
+      <div className="h-14 w-14 rounded-full bg-primary/10 border-2 border-border flex items-center justify-center text-sm font-bold text-primary">JD</div>
+      <div className="space-y-1">
+        <div className="h-6 rounded border bg-background px-2 flex items-center text-[10px]">
+          <Upload className="h-2.5 w-2.5 mr-1 text-muted-foreground" /> Upload photo
+        </div>
+        <div className="text-[9px] text-muted-foreground">JPG, PNG or WebP. Max 2MB.</div>
+      </div>
+    </div>
+    <div className="space-y-1.5 text-[10px]">
+      <div className="text-muted-foreground">Display Name</div>
+      <div className="h-7 rounded border bg-background px-2 flex items-center">John Doe</div>
+      <div className="text-muted-foreground mt-1">Email</div>
+      <div className="h-7 rounded border bg-muted px-2 flex items-center text-muted-foreground">john@example.com</div>
+    </div>
+    <div className="h-7 rounded bg-primary flex items-center justify-center text-[10px] text-primary-foreground font-medium">Save Changes</div>
+  </div>
+);
+
 const mockupComponents: Record<string, React.ReactNode> = {
   login: <MockupLogin />,
   overview: <MockupOverview />,
@@ -339,6 +364,7 @@ const mockupComponents: Record<string, React.ReactNode> = {
   admin: <MockupAdmin />,
   support: <MockupSupport />,
   multisite: <MockupMultisite />,
+  profile: <MockupProfile />,
 };
 
 /* ─── Tier Overview Component ─── */
