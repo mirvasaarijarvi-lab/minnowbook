@@ -213,15 +213,6 @@ const Dashboard = () => {
     return component;
   };
 
-  const handleViewChange = (view: DashboardView) => {
-    if (view !== "reservations") {
-      setReservationStatusFilter(undefined);
-      setReservationInvoicedFilter(undefined);
-    }
-    setCurrentView(view);
-  };
-
-  useKeyboardShortcuts({ onViewChange: handleViewChange });
 
   const viewComponents: Record<DashboardView, React.ReactNode> = {
     overview: <DashboardOverview onNavigate={handleOverviewNavigate} />,
