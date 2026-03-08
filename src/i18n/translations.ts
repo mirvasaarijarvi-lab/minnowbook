@@ -3972,6 +3972,7 @@ const sv: TranslationKeys = {
   "nav.reports": "Rapporter",
   "nav.support": "Support",
   "nav.sites": "Platser",
+  "nav.profile": "Profil",
 
   "reports.total": "Totalt",
   "reports.confirmed": "Bekräftad",
