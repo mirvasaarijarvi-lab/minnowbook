@@ -151,6 +151,9 @@ type TranslationKeys = {
   // Booking (public)
   "booking.title": string;
   "booking.selectType": string;
+  "booking.selectLocation": string;
+  "booking.allLocations": string;
+  "booking.atSite": string;
   "booking.typeDescRestaurant": string;
   "booking.typeDescVenue": string;
   "booking.typeDescGuesthouse": string;
