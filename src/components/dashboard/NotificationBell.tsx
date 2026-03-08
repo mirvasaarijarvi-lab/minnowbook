@@ -74,8 +74,6 @@ const NotificationBell = () => {
         return <Receipt className="h-4 w-4 text-accent shrink-0" />;
       default:
         return <Bell className="h-4 w-4 text-muted-foreground shrink-0" />;
-      default:
-        return <Bell className="h-4 w-4 text-muted-foreground shrink-0" />;
     }
   };
 
