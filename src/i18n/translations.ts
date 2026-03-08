@@ -2854,7 +2854,7 @@ const fi: TranslationKeys = {
   "booking.electricityNeeded": "Sähköliitäntä tarvitaan",
   "booking.waterNeeded": "Vesiliitäntä tarvitaan",
   "booking.foodPermits": "Elintarvikeluvat / todistukset",
-  "booking.stallFee": "Myyntipaikan vuokra (€)",
+  "booking.stallFee": "Pystytysmaksu (€)",
   "email.subject": "Aihe",
   "email.confirmationSubject": "Varausvahvistus",
   "email.confirmationTitle": "Varaus vahvistettu!",
