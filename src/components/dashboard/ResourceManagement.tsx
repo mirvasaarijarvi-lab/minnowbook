@@ -332,7 +332,7 @@ const ResourceManagement = () => {
     const defaultType = allowedTypes[0] || "restaurant";
     setEditingId(null);
     setBeds([]);
-    setForm({ name: "", resource_type: defaultType, capacity: "", price_per_night: "", description: "", image_url: "", breakfast_price_per_person: "", room_type_pricing: { ...defaultRoomPricing }, is_active: true, room_type: "", room_description: "" });
+    setForm({ name: "", resource_type: defaultType, capacity: "", price_per_night: "", description: "", image_url: "", breakfast_price_per_person: "", room_type_pricing: { ...defaultRoomPricing }, is_active: true, room_type: "", room_description: "", offers_catering: false, offers_popup: false });
   };
 
   const openEdit = (r: any) => {
