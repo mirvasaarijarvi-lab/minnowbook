@@ -94,7 +94,25 @@ const AdminPanel = () => {
 
   const invokeAdmin = async (body: any) => {
     const { data, error } = await supabase.functions.invoke("admin-users", { body });
-    if (error) throw error;
+    if (error) {
+      // Try to extract the actual error message from the response context
+      if (data?.error) throw new Error(data.error);
+      // FunctionsHttpError contains the response body with the real message
+      if (error.context?.body) {
+        try {
+          const reader = error.context.body.getReader?.();
+          if (reader) {
+            const { value } = await reader.read();
+            const text = new TextDecoder().decode(value);
+            const parsed = JSON.parse(text);
+            if (parsed?.error) throw new Error(parsed.error);
+          }
+        } catch (parseErr: any) {
+          if (parseErr?.message && parseErr.message !== error.message) throw parseErr;
+        }
+      }
+      throw error;
+    }
     if (data?.error) throw new Error(data.error);
     return data;
   };
