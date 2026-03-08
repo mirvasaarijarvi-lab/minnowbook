@@ -297,6 +297,7 @@ const Dashboard = () => {
           <div className="flex items-center justify-between mb-0">
             <div />
             <div className="hidden lg:flex items-center gap-2">
+              <NotificationBell />
               <Button
                 variant="ghost"
                 size="sm"
