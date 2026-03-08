@@ -57,32 +57,32 @@ const ActionAlertsBanner = ({ pendingCount, uninvoicedCount, checkoutsToday, onN
             className={cn(
               "w-full flex items-center gap-3 px-4 py-3 rounded-lg border text-left transition-all hover:shadow-md group",
               alert.type === "warning"
-                ? "bg-yellow-50 border-yellow-200 dark:bg-yellow-950/30 dark:border-yellow-800"
-                : "bg-blue-50 border-blue-200 dark:bg-blue-950/30 dark:border-blue-800"
+                ? "bg-warning/10 border-warning/30"
+                : "bg-info/10 border-info/30"
             )}
           >
             <div className={cn(
               "flex items-center justify-center h-8 w-8 rounded-full shrink-0",
               alert.type === "warning"
-                ? "bg-yellow-100 dark:bg-yellow-900/50"
-                : "bg-blue-100 dark:bg-blue-900/50"
+                ? "bg-warning/20"
+                : "bg-info/20"
             )}>
               <Icon className={cn(
                 "h-4 w-4",
-                alert.type === "warning" ? "text-yellow-600" : "text-blue-600"
+                alert.type === "warning" ? "text-warning" : "text-info"
               )} />
             </div>
             <div className="flex-1 min-w-0">
               <p className={cn(
                 "text-sm font-medium",
-                alert.type === "warning" ? "text-yellow-800 dark:text-yellow-200" : "text-blue-800 dark:text-blue-200"
+                alert.type === "warning" ? "text-warning-foreground" : "text-info-foreground"
               )}>
                 {alert.count} {alert.label}
               </p>
             </div>
             <ArrowRight className={cn(
               "h-4 w-4 shrink-0 transition-transform group-hover:translate-x-1",
-              alert.type === "warning" ? "text-yellow-500" : "text-blue-500"
+              alert.type === "warning" ? "text-warning" : "text-info"
             )} />
           </button>
         );
