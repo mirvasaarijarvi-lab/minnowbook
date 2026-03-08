@@ -22,7 +22,7 @@ import {
   PERM_SITES_VIEW,
 } from "@/lib/permissions";
 
-export type DashboardView = "overview" | "calendar" | "reservations" | "resources" | "reports" | "settings" | "admin" | "support" | "sites";
+export type DashboardView = "overview" | "calendar" | "reservations" | "resources" | "reports" | "settings" | "admin" | "support" | "sites" | "profile";
 
 interface DashboardSidebarProps {
   currentView: DashboardView;
