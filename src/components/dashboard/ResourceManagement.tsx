@@ -78,6 +78,7 @@ const ResourceManagement = () => {
     name: "", resource_type: "restaurant", capacity: "", price_per_night: "", description: "", image_url: "", breakfast_price_per_person: "",
     room_type_pricing: { ...defaultRoomPricing }, is_active: true,
     room_type: "" as string, room_description: "",
+    offers_catering: false, offers_popup: false,
   });
 
   const { data: sites } = useQuery({
