@@ -69,9 +69,11 @@ const NotificationBell = () => {
   const getIcon = (type: string) => {
     switch (type) {
       case "reservation_used":
-        return <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" />;
+        return <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />;
       case "reservation_invoiced":
-        return <Receipt className="h-4 w-4 text-blue-500 shrink-0" />;
+        return <Receipt className="h-4 w-4 text-accent shrink-0" />;
+      default:
+        return <Bell className="h-4 w-4 text-muted-foreground shrink-0" />;
       default:
         return <Bell className="h-4 w-4 text-muted-foreground shrink-0" />;
     }
