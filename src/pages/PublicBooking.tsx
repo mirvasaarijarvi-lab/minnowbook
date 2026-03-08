@@ -1465,11 +1465,17 @@ const PublicBookingInner = () => {
               <CardContent className="space-y-4">
                 {/* Sub-type selector */}
                 <div className="grid gap-3 sm:grid-cols-3">
-                  {([
-                    { value: "dine_in", icon: UtensilsCrossed, labelKey: "booking.subTypeDineIn", descKey: "booking.subTypeDineInDesc" },
-                    { value: "catering", icon: Truck, labelKey: "booking.subTypeCatering", descKey: "booking.subTypeCateringDesc" },
-                    { value: "popup", icon: ShoppingBag, labelKey: "booking.subTypePopup", descKey: "booking.subTypePopupDesc" },
-                  ] as const).map(({ value, icon: Icon, labelKey, descKey }) => {
+                  {(() => {
+                    // Check if any restaurant resource offers catering/popup
+                    const restaurantResources = resources ?? [];
+                    const anyCatering = restaurantResources.some((r: any) => r.offers_catering);
+                    const anyPopup = restaurantResources.some((r: any) => r.offers_popup);
+                    const allSubTypes = [
+                      { value: "dine_in", icon: UtensilsCrossed, labelKey: "booking.subTypeDineIn", descKey: "booking.subTypeDineInDesc" },
+                      ...(anyCatering ? [{ value: "catering", icon: Truck, labelKey: "booking.subTypeCatering", descKey: "booking.subTypeCateringDesc" }] : []),
+                      ...(anyPopup ? [{ value: "popup", icon: ShoppingBag, labelKey: "booking.subTypePopup", descKey: "booking.subTypePopupDesc" }] : []),
+                    ] as const;
+                    return allSubTypes.map(({ value, icon: Icon, labelKey, descKey }) => {
                     const isSelected = form.restaurant_sub_type === value;
                     return (
                       <button
