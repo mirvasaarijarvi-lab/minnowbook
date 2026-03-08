@@ -31,7 +31,7 @@ interface AuditEntry {
 }
 
 const actionBadgeConfig: Record<string, { icon: typeof Plus; color: string; labelKey: string }> = {
-  INSERT: { icon: Plus, labelKey: "admin.created", color: "border-emerald-500/30 text-emerald-600 bg-emerald-500/10" },
+  INSERT: { icon: Plus, labelKey: "admin.created", color: "border-success/30 text-success bg-success/10" },
   UPDATE: { icon: Pencil, labelKey: "admin.updated", color: "border-primary/30 text-primary bg-primary/10" },
   DELETE: { icon: Trash2, labelKey: "admin.deleted", color: "border-destructive/30 text-destructive bg-destructive/10" },
 };
