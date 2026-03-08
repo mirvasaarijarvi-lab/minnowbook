@@ -186,7 +186,7 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
     const isPositive = value > 0;
     const Icon = isPositive ? TrendingUp : TrendingDown;
     return (
-      <span className={`flex items-center gap-0.5 text-xs font-medium ${isPositive ? "text-green-600" : "text-red-500"}`}>
+      <span className={`flex items-center gap-0.5 text-xs font-medium ${isPositive ? "text-success" : "text-destructive"}`}>
         <Icon className="h-3 w-3" />
         {isPositive ? "+" : ""}{value}%
       </span>
