@@ -576,6 +576,12 @@ type TranslationKeys = {
   "autoReminder.recentLog": string;
   "autoReminder.sent7d": string;
   "autoReminder.noRecent": string;
+  "notifications.title": string;
+  "notifications.empty": string;
+  "notifications.markAllRead": string;
+  "notifications.markRead": string;
+  "notifications.used": string;
+  "notifications.invoiced": string;
   "dashboard.used": string;
   "dashboard.invoiced": string;
   "dashboard.total": string;
@@ -1883,6 +1889,12 @@ const en: TranslationKeys = {
   "autoReminder.recentLog": "Recently sent",
   "autoReminder.sent7d": "in last 7 days",
   "autoReminder.noRecent": "No reminders sent in the last 7 days.",
+  "notifications.title": "Notifications",
+  "notifications.empty": "No notifications yet.",
+  "notifications.markAllRead": "Mark all read",
+  "notifications.markRead": "Mark as read",
+  "notifications.used": "Reservation marked as used",
+  "notifications.invoiced": "Reservation marked as invoiced",
   "dashboard.used": "Used",
   "dashboard.invoiced": "Invoiced",
   "dashboard.total": "total",
@@ -3172,6 +3184,12 @@ const fi: TranslationKeys = {
   "autoReminder.recentLog": "Viimeksi lähetetyt",
   "autoReminder.sent7d": "viim. 7 päivänä",
   "autoReminder.noRecent": "Ei muistutuksia viimeisen 7 päivän aikana.",
+  "notifications.title": "Ilmoitukset",
+  "notifications.empty": "Ei ilmoituksia vielä.",
+  "notifications.markAllRead": "Merkitse kaikki luetuksi",
+  "notifications.markRead": "Merkitse luetuksi",
+  "notifications.used": "Varaus merkitty käytetyksi",
+  "notifications.invoiced": "Varaus merkitty laskutetuksi",
   "dashboard.used": "Käytetty",
   "dashboard.invoiced": "Laskutettu",
   "dashboard.total": "yhteensä",
@@ -4460,6 +4478,12 @@ const sv: TranslationKeys = {
   "autoReminder.recentLog": "Nyligen skickade",
   "autoReminder.sent7d": "senaste 7 dagarna",
   "autoReminder.noRecent": "Inga påminnelser skickade de senaste 7 dagarna.",
+  "notifications.title": "Aviseringar",
+  "notifications.empty": "Inga aviseringar ännu.",
+  "notifications.markAllRead": "Markera alla som lästa",
+  "notifications.markRead": "Markera som läst",
+  "notifications.used": "Bokning markerad som använd",
+  "notifications.invoiced": "Bokning markerad som fakturerad",
   "dashboard.used": "Använd",
   "dashboard.invoiced": "Fakturerad",
   "dashboard.total": "totalt",
