@@ -258,6 +258,7 @@ const PublicBookingInner = () => {
 
   // Resolve site from ?site= query param
   const siteSlug = searchParams.get("site");
+  const [pickedSiteId, setPickedSiteId] = useState<string | null>(null);
 
   // Fetch tenant by slug
   const { data: tenant, isLoading: loadingTenant } = useQuery({
