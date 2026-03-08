@@ -898,7 +898,7 @@ const ReportsPanel = () => {
                     <div className="space-y-1">
                       {discountStats.topCodes.map(([code, count]) => (
                         <div key={code} className="flex items-center justify-between text-sm">
-                          <Badge variant="outline" className="text-xs bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/30 dark:text-purple-300 dark:border-purple-700">
+                          <Badge variant="outline" className="text-xs bg-primary/10 text-primary border-primary/20">
                             {code}
                           </Badge>
                           <span className="text-muted-foreground text-xs">{count}×</span>
