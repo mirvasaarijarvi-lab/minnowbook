@@ -95,6 +95,12 @@
     --success: 69 90% 59%;
     --success-foreground: 315 17% 9%;
 
+    --warning: 45 93% 52%;
+    --warning-foreground: 45 90% 90%;
+
+    --info: 210 65% 55%;
+    --info-foreground: 210 60% 90%;
+
     --border: 315 17% 20%;
     --input: 315 17% 20%;
     --ring: 13 100% 59%;
