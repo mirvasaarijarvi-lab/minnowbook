@@ -1810,6 +1810,7 @@ const en: TranslationKeys = {
   "dashboard.bookingLinkDesc": "Share this link with your customers so they can make reservations.",
   "dashboard.allServices": "All services",
   "dashboard.byServiceType": "By service type",
+  "dashboard.byLocation": "By location",
   "dashboard.copyLink": "Copy link",
   "dashboard.linkCopied": "Link copied to clipboard!",
   "dashboard.noReservations": "No reservations found.",
