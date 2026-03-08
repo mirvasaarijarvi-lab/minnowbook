@@ -33,7 +33,7 @@ const bannerConfig: Partial<Record<SampleStatus, BannerConfig>> = {
 };
 
 const SamplePeriodBanner = () => {
-  const { status, daysRemaining, daysOverdue } = useSamplePeriod();
+  const { status, daysRemaining, daysOverdue, isBypassedByAdmin } = useSamplePeriod();
   const t = useT();
   const tDynamic = useTDynamic();
 
