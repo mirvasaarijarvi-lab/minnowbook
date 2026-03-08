@@ -1352,6 +1352,7 @@ export type Database = {
       }
       tenant_users: {
         Row: {
+          avatar_url: string | null
           created_at: string | null
           custom_role_key: string | null
           display_name: string | null
@@ -1362,6 +1363,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          avatar_url?: string | null
           created_at?: string | null
           custom_role_key?: string | null
           display_name?: string | null
@@ -1372,6 +1374,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          avatar_url?: string | null
           created_at?: string | null
           custom_role_key?: string | null
           display_name?: string | null
