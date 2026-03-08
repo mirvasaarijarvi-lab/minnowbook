@@ -106,8 +106,8 @@ const Pricing = () => {
             {t("pricing.comparePlans")}
           </h2>
 
-          <div className="max-w-4xl mx-auto overflow-x-auto">
-            <table className="w-full text-sm">
+          <div className="max-w-4xl mx-auto overflow-x-auto -mx-4 px-4">
+            <table className="w-full text-sm min-w-[600px]">
               <thead>
                 <tr className="border-b border-border">
                   <th className="text-left py-4 pr-4 font-sans font-semibold text-muted-foreground">{t("pricing.feature")}</th>
