@@ -263,6 +263,7 @@ const Dashboard = () => {
           </button>
           <Logo variant="color" size="sm" showText={false} />
           <div className="flex items-center gap-1">
+            <NotificationBell />
             <LanguageSwitcher variant="compact" />
             <Tooltip>
               <TooltipTrigger asChild>
