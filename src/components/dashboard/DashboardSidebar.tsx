@@ -1,4 +1,4 @@
-import { CalendarDays, List, Settings, LogOut, LayoutDashboard, Menu, X, ShieldCheck, Cog, BarChart3, LifeBuoy, Shield, Building2, Crown } from "lucide-react";
+import { CalendarDays, List, Settings, LogOut, LayoutDashboard, Menu, X, ShieldCheck, Cog, BarChart3, LifeBuoy, Shield, Building2, Crown, UserCircle } from "lucide-react";
 import Logo from "@/components/Logo";
 import SiteSelector from "./SiteSelector";
 import { useTenant } from "@/hooks/useTenant";
