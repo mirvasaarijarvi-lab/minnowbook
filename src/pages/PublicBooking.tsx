@@ -295,20 +295,41 @@ const PublicBookingInner = () => {
     enabled: !!tenant?.id && !!siteSlug,
   });
 
-  // Fetch site_settings for site-specific branding
-  const { data: siteSettings } = useQuery({
-    queryKey: ["public-site-settings", site?.id],
+  // Fetch ALL active sites for the tenant (for site picker)
+  const { data: allSites } = useQuery({
+    queryKey: ["public-all-sites", tenant?.id],
     queryFn: async () => {
-      if (!site?.id) return null;
+      if (!tenant?.id) return [];
+      const { data, error } = await supabase
+        .from("sites")
+        .select("id, name, slug, location, is_active")
+        .eq("tenant_id", tenant.id)
+        .eq("is_active", true)
+        .order("name");
+      if (error) throw error;
+      return data ?? [];
+    },
+    enabled: !!tenant?.id,
+  });
+
+  const hasMultipleSites = (allSites?.length ?? 0) > 1;
+  const siteLockedByUrl = !!siteSlug; // If URL has ?site=, lock to that site
+
+  // Fetch site_settings for site-specific branding
+  const effectiveSiteId = siteLockedByUrl ? site?.id : pickedSiteId;
+  const { data: siteSettings } = useQuery({
+    queryKey: ["public-site-settings", effectiveSiteId],
+    queryFn: async () => {
+      if (!effectiveSiteId) return null;
       const { data, error } = await supabase
         .from("site_settings")
         .select("*")
-        .eq("site_id", site.id)
+        .eq("site_id", effectiveSiteId)
         .maybeSingle();
       if (error) throw error;
       return data;
     },
-    enabled: !!site?.id,
+    enabled: !!effectiveSiteId,
   });
 
   // Fetch tenant settings as fallback branding
@@ -331,7 +352,6 @@ const PublicBookingInner = () => {
   const settings = useMemo((): Record<string, any> | null => {
     if (!tenantSettings) return siteSettings ?? null;
     if (!siteSettings) return tenantSettings;
-    // Site-level values override tenant-level, but fall back field-by-field
     return {
       ...tenantSettings,
       ...Object.fromEntries(
@@ -341,7 +361,7 @@ const PublicBookingInner = () => {
   }, [tenantSettings, siteSettings]);
 
   // The resolved site ID for filtering queries
-  const activeSiteId = site?.id ?? null;
+  const activeSiteId = siteLockedByUrl ? (site?.id ?? null) : pickedSiteId;
 
   // Fetch active resources — filter by site when site is selected
   const { data: resources } = useQuery({
