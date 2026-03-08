@@ -258,6 +258,7 @@ const PublicBookingInner = () => {
 
   // Resolve site from ?site= query param
   const siteSlug = searchParams.get("site");
+  const [pickedSiteId, setPickedSiteId] = useState<string | null>(null);
 
   // Fetch tenant by slug
   const { data: tenant, isLoading: loadingTenant } = useQuery({
@@ -294,20 +295,41 @@ const PublicBookingInner = () => {
     enabled: !!tenant?.id && !!siteSlug,
   });
 
-  // Fetch site_settings for site-specific branding
-  const { data: siteSettings } = useQuery({
-    queryKey: ["public-site-settings", site?.id],
+  // Fetch ALL active sites for the tenant (for site picker)
+  const { data: allSites } = useQuery({
+    queryKey: ["public-all-sites", tenant?.id],
     queryFn: async () => {
-      if (!site?.id) return null;
+      if (!tenant?.id) return [];
+      const { data, error } = await supabase
+        .from("sites")
+        .select("id, name, slug, location, is_active")
+        .eq("tenant_id", tenant.id)
+        .eq("is_active", true)
+        .order("name");
+      if (error) throw error;
+      return data ?? [];
+    },
+    enabled: !!tenant?.id,
+  });
+
+  const hasMultipleSites = (allSites?.length ?? 0) > 1;
+  const siteLockedByUrl = !!siteSlug; // If URL has ?site=, lock to that site
+
+  // Fetch site_settings for site-specific branding
+  const effectiveSiteId = siteLockedByUrl ? site?.id : pickedSiteId;
+  const { data: siteSettings } = useQuery({
+    queryKey: ["public-site-settings", effectiveSiteId],
+    queryFn: async () => {
+      if (!effectiveSiteId) return null;
       const { data, error } = await supabase
         .from("site_settings")
         .select("*")
-        .eq("site_id", site.id)
+        .eq("site_id", effectiveSiteId)
         .maybeSingle();
       if (error) throw error;
       return data;
     },
-    enabled: !!site?.id,
+    enabled: !!effectiveSiteId,
   });
 
   // Fetch tenant settings as fallback branding
@@ -330,7 +352,6 @@ const PublicBookingInner = () => {
   const settings = useMemo((): Record<string, any> | null => {
     if (!tenantSettings) return siteSettings ?? null;
     if (!siteSettings) return tenantSettings;
-    // Site-level values override tenant-level, but fall back field-by-field
     return {
       ...tenantSettings,
       ...Object.fromEntries(
@@ -340,7 +361,7 @@ const PublicBookingInner = () => {
   }, [tenantSettings, siteSettings]);
 
   // The resolved site ID for filtering queries
-  const activeSiteId = site?.id ?? null;
+  const activeSiteId = siteLockedByUrl ? (site?.id ?? null) : pickedSiteId;
 
   // Fetch active resources — filter by site when site is selected
   const { data: resources } = useQuery({
@@ -785,7 +806,14 @@ const PublicBookingInner = () => {
     return tenantTypes;
   }, [tenant?.allowed_reservation_types, activeSiteId, allSiteResources]);
 
-  // Display name: prefer site-specific business_name, then site name, then tenant business name
+  // Helper: resolve site name from site_id
+  const siteNameMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    (allSites ?? []).forEach((s) => { map[s.id] = s.name; });
+    return map;
+  }, [allSites]);
+  const showSiteBadges = hasMultipleSites && !activeSiteId;
+
   const siteBusinessName = siteSettings?.business_name;
   const displayName = siteBusinessName
     ? siteBusinessName
@@ -1081,6 +1109,70 @@ const PublicBookingInner = () => {
               onChange={(e) => setHoneypot(e.target.value)}
             />
           </div>
+
+          {/* Site picker — shown when multiple sites exist and not locked by URL */}
+          {hasMultipleSites && !siteLockedByUrl && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg font-serif flex items-center gap-2" style={{ color: primaryColor }}>
+                  <MapPin className="h-5 w-5" />
+                  {t("booking.selectLocation")}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {/* All locations option */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPickedSiteId(null);
+                      setForm((prev) => ({ ...prev, resource_id: "" }));
+                    }}
+                    className="group relative flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-300 text-center hover:scale-105 hover:shadow-lg"
+                    style={{
+                      borderColor: !pickedSiteId ? accentColor : "#e5e7eb",
+                      backgroundColor: !pickedSiteId ? `${accentColor}10` : "transparent",
+                      boxShadow: !pickedSiteId ? `0 0 0 1px ${accentColor}40, 0 4px 12px ${accentColor}15` : undefined,
+                    }}
+                  >
+                    {!pickedSiteId && <span className="absolute top-2.5 right-2.5 h-2 w-2 rounded-full" style={{ backgroundColor: accentColor }} />}
+                    <span className="flex items-center justify-center h-10 w-10 rounded-full" style={{ backgroundColor: !pickedSiteId ? `${accentColor}20` : `${primaryColor}10` }}>
+                      <Building2 className="h-5 w-5" style={{ color: !pickedSiteId ? accentColor : primaryColor }} />
+                    </span>
+                    <span className="text-sm font-semibold" style={{ color: primaryColor }}>{t("booking.allLocations")}</span>
+                  </button>
+
+                  {allSites?.map((s) => {
+                    const isSelected = pickedSiteId === s.id;
+                    return (
+                      <button
+                        key={s.id}
+                        type="button"
+                        onClick={() => {
+                          setPickedSiteId(s.id);
+                          setForm((prev) => ({ ...prev, resource_id: "" }));
+                        }}
+                        className="group relative flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-300 text-center hover:scale-105 hover:shadow-lg"
+                        style={{
+                          borderColor: isSelected ? accentColor : "#e5e7eb",
+                          backgroundColor: isSelected ? `${accentColor}10` : "transparent",
+                          boxShadow: isSelected ? `0 0 0 1px ${accentColor}40, 0 4px 12px ${accentColor}15` : undefined,
+                        }}
+                      >
+                        {isSelected && <span className="absolute top-2.5 right-2.5 h-2 w-2 rounded-full" style={{ backgroundColor: accentColor }} />}
+                        <span className="flex items-center justify-center h-10 w-10 rounded-full" style={{ backgroundColor: isSelected ? `${accentColor}20` : `${primaryColor}10` }}>
+                          <MapPin className="h-5 w-5" style={{ color: isSelected ? accentColor : primaryColor }} />
+                        </span>
+                        <span className="text-sm font-semibold" style={{ color: primaryColor }}>{s.name}</span>
+                        {s.location && <span className="text-xs" style={{ color: `${primaryColor}60` }}>{s.location}</span>}
+                      </button>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Step 1: Type Selection */}
           {allowedTypes.length > 0 && (
             <Card>
@@ -1801,6 +1893,7 @@ const PublicBookingInner = () => {
                               <p className="text-xs mt-1 italic" style={{ color: `${primaryColor}60` }}>{sampleRes.room_description}</p>
                             )}
                             <div className="flex flex-wrap gap-1.5 mt-2">
+                              {showSiteBadges && sampleRes?.site_id && siteNameMap[sampleRes.site_id] && <Badge variant="secondary" className="text-xs"><MapPin className="h-3 w-3 mr-1" />{siteNameMap[sampleRes.site_id]}</Badge>}
                               {sampleRes?.capacity && <Badge variant="outline" className="text-xs"><Users className="h-3 w-3 mr-1" />{sampleRes.capacity} {t("common.guests")}</Badge>}
                               {sampleRes?.price_per_night != null && <Badge variant="outline" className="text-xs">€{Number(sampleRes.price_per_night).toFixed(0)}{t("dashboard.perNight")}</Badge>}
                             </div>
@@ -1851,6 +1944,7 @@ const PublicBookingInner = () => {
                             <p className="font-semibold text-sm" style={{ color: primaryColor }}>{res.name}</p>
                             {res.description && <p className="text-xs leading-relaxed" style={{ color: `${primaryColor}80` }}>{res.description}</p>}
                             <div className="flex flex-wrap gap-1.5 mt-1.5">
+                              {showSiteBadges && res.site_id && siteNameMap[res.site_id] && <Badge variant="secondary" className="text-xs"><MapPin className="h-3 w-3 mr-1" />{siteNameMap[res.site_id]}</Badge>}
                               {res.capacity && <Badge variant="outline" className="text-xs"><Users className="h-3 w-3 mr-1" />{res.capacity} {t("common.guests")}</Badge>}
                               {res.price_per_night != null && <Badge variant="outline" className="text-xs">€{Number(res.price_per_night).toFixed(0)}{t("dashboard.perNight")}</Badge>}
                             </div>

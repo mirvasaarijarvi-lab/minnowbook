@@ -151,6 +151,9 @@ type TranslationKeys = {
   // Booking (public)
   "booking.title": string;
   "booking.selectType": string;
+  "booking.selectLocation": string;
+  "booking.allLocations": string;
+  "booking.atSite": string;
   "booking.typeDescRestaurant": string;
   "booking.typeDescVenue": string;
   "booking.typeDescGuesthouse": string;
@@ -498,6 +501,8 @@ type TranslationKeys = {
   "dashboard.activeResources": string;
   "dashboard.bookingLink": string;
   "dashboard.bookingLinkDesc": string;
+  "dashboard.allServices": string;
+  "dashboard.byServiceType": string;
   "dashboard.copyLink": string;
   "dashboard.linkCopied": string;
   "dashboard.noReservations": string;
@@ -1455,6 +1460,9 @@ const en: TranslationKeys = {
    // Booking
   "booking.title": "Make a Reservation",
   "booking.selectType": "What would you like to book?",
+  "booking.selectLocation": "Choose a location",
+  "booking.allLocations": "All locations",
+  "booking.atSite": "at",
   "booking.typeDescRestaurant": "Reserve a table for dining",
   "booking.typeDescVenue": "Book a space for your event",
   "booking.typeDescGuesthouse": "Book a room for your stay",
@@ -1799,6 +1807,8 @@ const en: TranslationKeys = {
   "dashboard.activeResources": "Active Resources",
   "dashboard.bookingLink": "Booking Link",
   "dashboard.bookingLinkDesc": "Share this link with your customers so they can make reservations.",
+  "dashboard.allServices": "All services",
+  "dashboard.byServiceType": "By service type",
   "dashboard.copyLink": "Copy link",
   "dashboard.linkCopied": "Link copied to clipboard!",
   "dashboard.noReservations": "No reservations found.",
@@ -2739,6 +2749,9 @@ const fi: TranslationKeys = {
    // Booking
   "booking.title": "Tee varaus",
   "booking.selectType": "Mitä haluat varata?",
+  "booking.selectLocation": "Valitse toimipiste",
+  "booking.allLocations": "Kaikki toimipisteet",
+  "booking.atSite": "",
   "booking.typeDescRestaurant": "Varaa pöytä ravintolasta",
   "booking.typeDescVenue": "Varaa tila tapahtumallesi",
   "booking.typeDescGuesthouse": "Varaa huone yöpymiseen",
@@ -3082,6 +3095,8 @@ const fi: TranslationKeys = {
   "dashboard.activeResources": "Aktiiviset resurssit",
   "dashboard.bookingLink": "Varauslinkki",
   "dashboard.bookingLinkDesc": "Jaa tämä linkki asiakkaillesi, jotta he voivat tehdä varauksia.",
+  "dashboard.allServices": "Kaikki palvelut",
+  "dashboard.byServiceType": "Palvelutyypin mukaan",
   "dashboard.copyLink": "Kopioi linkki",
   "dashboard.linkCopied": "Linkki kopioitu leikepöydälle!",
   "dashboard.noReservations": "Ei varauksia.",
@@ -4021,6 +4036,9 @@ const sv: TranslationKeys = {
    // Booking
   "booking.title": "Gör en bokning",
   "booking.selectType": "Vad vill du boka?",
+  "booking.selectLocation": "Välj plats",
+  "booking.allLocations": "Alla platser",
+  "booking.atSite": "på",
   "booking.typeDescRestaurant": "Reservera ett bord för middag",
   "booking.typeDescVenue": "Boka en lokal för ditt evenemang",
   "booking.typeDescGuesthouse": "Boka ett rum för din vistelse",
@@ -4364,6 +4382,8 @@ const sv: TranslationKeys = {
   "dashboard.activeResources": "Aktiva resurser",
   "dashboard.bookingLink": "Bokningslänk",
   "dashboard.bookingLinkDesc": "Dela denna länk med dina kunder så att de kan boka.",
+  "dashboard.allServices": "Alla tjänster",
+  "dashboard.byServiceType": "Per tjänstetyp",
   "dashboard.copyLink": "Kopiera länk",
   "dashboard.linkCopied": "Länken kopierad!",
   "dashboard.noReservations": "Inga bokningar hittades.",

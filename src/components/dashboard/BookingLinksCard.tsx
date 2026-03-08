@@ -69,8 +69,6 @@ const BookingLinksCard = () => {
   const allowedTypes: string[] = tenant.allowed_reservation_types ?? [];
   const shareableTypes = allowedTypes.filter((type: string) => type !== "restaurant");
 
-  if (shareableTypes.length === 0) return null;
-
   const copyLink = (url: string) => {
     navigator.clipboard.writeText(url);
     toast.success(t("dashboard.linkCopied"));
@@ -90,14 +88,33 @@ const BookingLinksCard = () => {
       <CardContent className="space-y-4">
         <p className="text-sm text-muted-foreground">{t("dashboard.bookingLinkDesc")}</p>
 
-        {/* Main tenant links */}
-        <div className="space-y-3" data-tour="booking-link">
-          {shareableTypes.map((type: string) => {
-            const url = `${baseUrl}?type=${type}`;
-            const Icon = TYPE_ICONS[type] ?? Link2;
-            return <LinkRow key={type} url={url} icon={Icon} copyLink={copyLink} />;
-          })}
-        </div>
+        {/* Main booking page link (all services, all sites) */}
+        {allowedTypes.length > 0 && (
+          <div className="space-y-3" data-tour="booking-link">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                {t("dashboard.allServices")}
+              </span>
+            </div>
+            <LinkRow url={baseUrl} icon={Link2} copyLink={copyLink} />
+          </div>
+        )}
+
+        {/* Per-type links (across all sites) */}
+        {shareableTypes.length > 0 && (
+          <div className="space-y-3 pt-3 border-t border-border/50">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                {t("dashboard.byServiceType")}
+              </span>
+            </div>
+            {shareableTypes.map((type: string) => {
+              const url = `${baseUrl}?type=${type}`;
+              const Icon = TYPE_ICONS[type] ?? Link2;
+              return <LinkRow key={type} url={url} icon={Icon} copyLink={copyLink} />;
+            })}
+          </div>
+        )}
 
         {/* Per-site links for business tier */}
         {showSiteLinks && sites!.map((site) => (
@@ -106,6 +123,9 @@ const BookingLinksCard = () => {
               <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
               <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{site.name}</span>
             </div>
+            {/* All services at this site */}
+            <LinkRow url={`${baseUrl}?site=${site.slug}`} icon={Link2} copyLink={copyLink} />
+            {/* Per-type at this site */}
             {shareableTypes.map((type: string) => {
               const url = `${baseUrl}?type=${type}&site=${site.slug}`;
               const Icon = TYPE_ICONS[type] ?? Link2;
