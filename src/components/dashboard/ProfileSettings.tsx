@@ -120,7 +120,7 @@ const ProfileSettings = () => {
   }
 
   return (
-    <div className="max-w-lg">
+    <div className="max-w-lg" data-tour="profile-panel">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
