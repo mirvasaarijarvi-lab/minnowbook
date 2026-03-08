@@ -1,4 +1,4 @@
-import { AlertTriangle, Clock, Receipt, BedDouble, ArrowRight } from "lucide-react";
+import { Clock, Receipt, BedDouble, ArrowRight } from "lucide-react";
 import { useT } from "@/contexts/I18nContext";
 import { cn } from "@/lib/utils";
 
