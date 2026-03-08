@@ -252,8 +252,8 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
           onClick={stats?.pendingCount ? () => onNavigate?.("reservations", { status: "pending" }) : undefined}
         >
           <CardContent className="pt-5 pb-4 text-center relative">
-            <Clock className="h-5 w-5 mx-auto text-yellow-600 mb-1" />
-            <p className="text-3xl font-bold text-yellow-600">{stats?.pendingCount ?? 0}</p>
+            <Clock className="h-5 w-5 mx-auto text-warning mb-1" />
+            <p className="text-3xl font-bold text-warning">{stats?.pendingCount ?? 0}</p>
             <p className="text-xs text-muted-foreground mt-1">{t("dashboard.pending")} ({t("dashboard.total")})</p>
             {(stats?.pendingCount ?? 0) > 0 && (
               <ArrowRight className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
