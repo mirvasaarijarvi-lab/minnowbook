@@ -273,7 +273,7 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
 
         <Card>
           <CardContent className="pt-5 pb-4 text-center">
-            <CheckCircle className="h-5 w-5 mx-auto text-green-600 mb-1" />
+            <CheckCircle className="h-5 w-5 mx-auto text-success mb-1" />
             <p className="text-3xl font-bold text-foreground">
               {stats?.checkedIn ?? 0}/{stats?.todayConfirmed ?? 0}
             </p>
