@@ -23,7 +23,7 @@ import { useTenant } from "@/hooks/useTenant";
 import { toast } from "sonner";
 import { useT } from "@/contexts/I18nContext";
 import { TranslationKey } from "@/i18n/translations";
-import { isMultiSiteTier } from "@/lib/tier-limits";
+import { useTierGate } from "@/hooks/useTierGate";
 
 interface GuideArticle {
   titleKey: string;
@@ -64,7 +64,7 @@ const DashboardSupportPanel = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const { session } = useAuth();
   const { tenantId, tenant } = useTenant();
-  const businessTier = isMultiSiteTier(tenant?.tier);
+  const { isMultiSite: businessTier } = useTierGate();
 
   const filtered = useMemo(() => {
     if (!search.trim()) return articleDefs;

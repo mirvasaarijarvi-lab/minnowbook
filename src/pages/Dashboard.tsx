@@ -14,7 +14,7 @@ import {
   PERM_SUPPORT_VIEW,
   PERM_SITES_VIEW,
 } from "@/lib/permissions";
-import { isMultiSiteTier } from "@/lib/tier-limits";
+import { useTierGate } from "@/hooks/useTierGate";
 import { Menu, HelpCircle, ShieldAlert, X, Eye, BookOpen } from "lucide-react";
 import NotificationBell from "@/components/dashboard/NotificationBell";
 import { useImpersonation } from "@/contexts/ImpersonationContext";
@@ -117,6 +117,7 @@ const Dashboard = () => {
   const { user, signOut } = useAuth();
   const { tenantId, tenant, isAdmin, loading } = useTenant();
   const { can } = usePermissions();
+  const { isMultiSite, effectiveTier } = useTierGate();
   const { impersonating, isImpersonating, stopImpersonation } = useImpersonation();
   const samplePeriod = useSamplePeriod();
   const navigate = useNavigate();
@@ -334,7 +335,7 @@ const Dashboard = () => {
       </div>
 
       {currentView !== "support" && (
-        <SupportChatWidget businessTier={isMultiSiteTier(tenant?.tier)} />
+        <SupportChatWidget businessTier={effectiveTier === "business"} />
       )}
 
       <GuidedTour

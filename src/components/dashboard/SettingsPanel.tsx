@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/hooks/useTenant";
+import { useTierGate } from "@/hooks/useTierGate";
 import { useT, useTDynamic } from "@/contexts/I18nContext";
 import { useSiteContext } from "@/hooks/useSiteContext";
 import SiteTabs from "./SiteTabs";
@@ -468,6 +469,7 @@ const ALLOWED_HERO_TYPES = ["image/png", "image/jpeg", "image/webp"];
 
 const SettingsPanel = () => {
   const { tenantId, tenant } = useTenant();
+  const { isMultiSite } = useTierGate();
   const { selectedSiteId } = useSiteContext();
   const t = useT();
   const tDynamic = useTDynamic();
@@ -697,8 +699,8 @@ const SettingsPanel = () => {
       {selectedSiteId && (
         <>
           <SiteSettingsInfo siteId={selectedSiteId} tenantId={tenantId!} />
-          {/* Site-level email template overrides (Business tier only) */}
-          {tenant?.tier === "business" && (
+          {/* Site-level email template overrides (Business tier only, superadmin bypasses) */}
+          {isMultiSite && (
             <EmailTemplateEditor siteId={selectedSiteId} />
           )}
         </>
@@ -1000,8 +1002,8 @@ const SettingsPanel = () => {
         </Card>
       )}
 
-      {/* Multisite Upsell for non-business tiers */}
-      {tenant?.tier && tenant.tier !== "business" && (
+      {/* Multisite Upsell for non-business tiers (hidden for superadmins) */}
+      {!isMultiSite && tenant?.tier && (
         <Card className="border-accent/30 bg-gradient-to-br from-accent/5 via-card to-accent/10">
           <CardContent className="flex flex-col sm:flex-row items-start sm:items-center gap-4 pt-6">
             <div className="flex-shrink-0 h-12 w-12 rounded-xl bg-accent/15 flex items-center justify-center">
