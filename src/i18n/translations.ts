@@ -50,6 +50,7 @@ type TranslationKeys = {
   "nav.reports": string;
   "nav.support": string;
   "nav.sites": string;
+  "nav.profile": string;
 
   // Reports
   "reports.total": string;
