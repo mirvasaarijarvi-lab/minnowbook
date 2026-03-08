@@ -205,7 +205,7 @@ const MockupResources = () => (
           <span className="font-medium">{r.name}</span>
           <span>{r.type}</span>
           <span>{r.cap}</span>
-          <span className="px-1.5 py-0.5 rounded bg-green-100 text-green-700 text-[9px] w-fit">Active</span>
+          <span className="px-1.5 py-0.5 rounded bg-success/10 text-success text-[9px] w-fit">Active</span>
           <span className="flex gap-1">
             <Pencil className="h-3 w-3 text-muted-foreground" />
             <Trash2 className="h-3 w-3 text-muted-foreground" />
