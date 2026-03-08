@@ -587,6 +587,10 @@ type TranslationKeys = {
   "dashboard.total": string;
   "dashboard.dailySnapshot": string;
   "dashboard.overviewSubtitle": string;
+  "alerts.pendingAction": string;
+  "alerts.uninvoicedAction": string;
+  "alerts.checkoutsAction": string;
+  "alerts.shortcuts": string;
   "blocking.pendingApproval": string;
   "dashboard.calendarHotel": string;
   "dashboard.calendarVenue": string;
@@ -1900,6 +1904,10 @@ const en: TranslationKeys = {
   "dashboard.total": "total",
   "dashboard.dailySnapshot": "Daily snapshot at a glance",
   "dashboard.overviewSubtitle": "Daily snapshot at a glance",
+  "alerts.pendingAction": "reservations need confirmation",
+  "alerts.uninvoicedAction": "reservations not yet invoiced",
+  "alerts.checkoutsAction": "check-outs today",
+  "alerts.shortcuts": "Keyboard shortcuts: Alt+1–8 for navigation",
   "blocking.pendingApproval": "pending approval",
   "dashboard.calendarHotel": "Hotel / Guesthouse",
   "dashboard.calendarVenue": "Event Spaces",
@@ -3195,6 +3203,10 @@ const fi: TranslationKeys = {
   "dashboard.total": "yhteensä",
   "dashboard.dailySnapshot": "Päivittäinen tilannekatsaus",
   "dashboard.overviewSubtitle": "Päivittäinen tilannekatsaus",
+  "alerts.pendingAction": "varausta odottaa vahvistusta",
+  "alerts.uninvoicedAction": "varausta laskuttamatta",
+  "alerts.checkoutsAction": "uloskirjausta tänään",
+  "alerts.shortcuts": "Pikanäppäimet: Alt+1–8 navigointiin",
   "blocking.pendingApproval": "odottaa hyväksyntää",
   "dashboard.calendarHotel": "Hotelli / Majatalo",
   "dashboard.calendarVenue": "Juhlatilat",
@@ -4489,6 +4501,10 @@ const sv: TranslationKeys = {
   "dashboard.total": "totalt",
   "dashboard.dailySnapshot": "Daglig översikt",
   "dashboard.overviewSubtitle": "Daglig översikt",
+  "alerts.pendingAction": "bokningar väntar på bekräftelse",
+  "alerts.uninvoicedAction": "bokningar ej fakturerade",
+  "alerts.checkoutsAction": "utcheckningar idag",
+  "alerts.shortcuts": "Tangentbordsgenvägar: Alt+1–8 för navigering",
   "blocking.pendingApproval": "väntar på godkännande",
   "dashboard.calendarHotel": "Hotell / Gästhus",
   "dashboard.calendarVenue": "Festlokaler",

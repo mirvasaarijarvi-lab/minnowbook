@@ -97,7 +97,7 @@ const DashboardSidebar = ({ currentView, onViewChange, userEmail, onSignOut, mob
 
         {(isMultiSite) && <SiteSelector />}
         <nav data-tour="sidebar-nav" className="flex-1 p-3 space-y-1 overflow-y-auto">
-          {visibleItems.map(({ view, labelKey, icon: Icon, tierRequired }) => (
+          {visibleItems.map(({ view, labelKey, icon: Icon, tierRequired }, index) => (
             <Tooltip key={view}>
               <TooltipTrigger asChild>
                 <button
@@ -116,11 +116,9 @@ const DashboardSidebar = ({ currentView, onViewChange, userEmail, onSignOut, mob
                   )}
                 </button>
               </TooltipTrigger>
-              {tierRequired && (
-                <TooltipContent side="right" className="text-xs">
-                  Business
-                </TooltipContent>
-              )}
+              <TooltipContent side="right" className="text-xs">
+                {tierRequired ? "Business" : `Alt+${index + 1}`}
+              </TooltipContent>
             </Tooltip>
           ))}
           {isSystemAdmin && (

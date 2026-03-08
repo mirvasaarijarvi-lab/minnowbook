@@ -1,6 +1,6 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate, Navigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useTenant } from "@/hooks/useTenant";
 import { usePermissions } from "@/hooks/usePermissions";
 import { SiteContext } from "@/hooks/useSiteContext";
@@ -19,6 +19,7 @@ import { Menu, HelpCircle, ShieldAlert, X, Eye, BookOpen } from "lucide-react";
 import NotificationBell from "@/components/dashboard/NotificationBell";
 import { useImpersonation } from "@/contexts/ImpersonationContext";
 import DashboardSidebar, { DashboardView } from "@/components/dashboard/DashboardSidebar";
+import useKeyboardShortcuts from "@/components/dashboard/useKeyboardShortcuts";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import DashboardOverview from "@/components/dashboard/DashboardOverview";
 import CalendarView from "@/components/dashboard/CalendarView";
@@ -129,6 +130,16 @@ const Dashboard = () => {
 
   const [reservationCheckoutTodayFilter, setReservationCheckoutTodayFilter] = useState<boolean | undefined>();
 
+  const handleViewChange = useCallback((view: DashboardView) => {
+    if (view !== "reservations") {
+      setReservationStatusFilter(undefined);
+      setReservationInvoicedFilter(undefined);
+    }
+    setCurrentView(view);
+  }, []);
+
+  useKeyboardShortcuts({ onViewChange: handleViewChange });
+
   const handleOverviewNavigate = (view: string, filter?: { status?: string; invoiced?: boolean; checkoutToday?: boolean }) => {
     if (view === "reservations") {
       setReservationStatusFilter(filter?.status);
@@ -202,13 +213,6 @@ const Dashboard = () => {
     return component;
   };
 
-  const handleViewChange = (view: DashboardView) => {
-    if (view !== "reservations") {
-      setReservationStatusFilter(undefined);
-      setReservationInvoicedFilter(undefined);
-    }
-    setCurrentView(view);
-  };
 
   const viewComponents: Record<DashboardView, React.ReactNode> = {
     overview: <DashboardOverview onNavigate={handleOverviewNavigate} />,
