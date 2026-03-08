@@ -112,6 +112,13 @@ const tourSteps: TourStep[] = [
     placement: "top",
     view: "settings",
   },
+  {
+    target: "[data-tour='profile-panel']",
+    title: "Profile",
+    content: "Update your display name and upload a profile photo so your team can identify you easily.",
+    placement: "top",
+    view: "profile",
+  },
 ];
 
 const Dashboard = () => {
