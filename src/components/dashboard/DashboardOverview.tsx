@@ -211,12 +211,17 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
           </p>
         </div>
         {tenant?.slug && (
-          <Button variant="outline" size="sm" className="gap-1.5 shrink-0" asChild>
-            <a href={`/book/${tenant.slug}`} target="_blank" rel="noopener noreferrer">
-              <ExternalLink className="h-3.5 w-3.5" />
-              {t("dashboard.bookingLink")}
-            </a>
-          </Button>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="sm" className="gap-1.5 shrink-0">
+                <ExternalLink className="h-3.5 w-3.5" />
+                {t("dashboard.bookingLink")}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[480px] p-0" align="end">
+              <BookingLinksCard />
+            </PopoverContent>
+          </Popover>
         )}
       </div>
 
