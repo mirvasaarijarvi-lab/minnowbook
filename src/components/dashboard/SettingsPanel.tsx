@@ -698,8 +698,8 @@ const SettingsPanel = () => {
       {selectedSiteId && (
         <>
           <SiteSettingsInfo siteId={selectedSiteId} tenantId={tenantId!} />
-          {/* Site-level email template overrides (Business tier only) */}
-          {tenant?.tier === "business" && (
+          {/* Site-level email template overrides (Business tier only, superadmin bypasses) */}
+          {isMultiSite && (
             <EmailTemplateEditor siteId={selectedSiteId} />
           )}
         </>
