@@ -138,10 +138,10 @@ const MockupReservations = () => (
     </div>
     <div className="flex gap-1 text-[10px] flex-wrap">
       <span className="px-2 py-1 rounded bg-primary text-primary-foreground">All 23</span>
-      <span className="px-2 py-1 rounded border text-amber-600">Pending 8</span>
-      <span className="px-2 py-1 rounded border text-green-600">Confirmed 12</span>
+      <span className="px-2 py-1 rounded border text-warning">Pending 8</span>
+      <span className="px-2 py-1 rounded border text-success">Confirmed 12</span>
       <span className="px-2 py-1 rounded border text-destructive">Cancelled 3</span>
-      <span className="ml-auto px-2 py-1 rounded border bg-blue-50 text-blue-700 font-medium">📅 Today</span>
+      <span className="ml-auto px-2 py-1 rounded border bg-info/10 text-info font-medium">📅 Today</span>
     </div>
     <div className="space-y-1">
       {[
