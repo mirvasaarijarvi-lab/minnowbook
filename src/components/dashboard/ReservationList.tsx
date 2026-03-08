@@ -30,9 +30,9 @@ import {
 } from "@/lib/permissions";
 
 const statusColors: Record<string, string> = {
-  pending: "bg-yellow-100 text-yellow-800 border-yellow-200",
-  confirmed: "bg-green-100 text-green-800 border-green-200",
-  cancelled: "bg-red-100 text-red-800 border-red-200",
+  pending: "bg-warning/10 text-warning-foreground border-warning/20",
+  confirmed: "bg-success/10 text-success-foreground border-success/20",
+  cancelled: "bg-destructive/10 text-destructive border-destructive/20",
 };
 
 interface ReservationListProps {
@@ -329,31 +329,31 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
                           </Badge>
                         )}
                         {(r as any).is_checked_in && (
-                          <Badge className="text-xs bg-emerald-100 text-emerald-800 border-emerald-200">{t("dashboard.checkedIn")}</Badge>
+                          <Badge className="text-xs bg-success/10 text-success border-success/20">{t("dashboard.checkedIn")}</Badge>
                         )}
                         {(r as any).reminder_email_sent_at && (
-                          <Badge variant="outline" className="text-xs gap-1 bg-blue-50 text-blue-700 border-blue-200">
+                          <Badge variant="outline" className="text-xs gap-1 bg-info/10 text-info border-info/20">
                             <Bell className="h-3 w-3" />
                             {t("dashboard.reminderSentAt")}
                           </Badge>
                         )}
                         {(r as any).confirmation_email_sent_at && (
-                          <Badge variant="outline" className="text-xs gap-1 bg-green-50 text-green-700 border-green-200">
+                          <Badge variant="outline" className="text-xs gap-1 bg-success/10 text-success border-success/20">
                             <MailCheck className="h-3 w-3" />
                             {t("dashboard.confirmationSentAt")}
                           </Badge>
                         )}
                         {(r as any).cancellation_email_sent_at && (
-                          <Badge variant="outline" className="text-xs gap-1 bg-red-50 text-red-700 border-red-200">
+                          <Badge variant="outline" className="text-xs gap-1 bg-destructive/10 text-destructive border-destructive/20">
                             <MailX className="h-3 w-3" />
                             {t("dashboard.cancellationSentAt")}
                           </Badge>
                         )}
                         {r.discount_type && (
-                          <Badge variant="outline" className="text-xs gap-1 bg-purple-50 text-purple-700 border-purple-200">
+                          <Badge variant="outline" className="text-xs gap-1 bg-primary/10 text-primary border-primary/20">
                             <Tag className="h-3 w-3" />
                             {r.discount_type === "percentage" ? `−${r.discount_value}%` : `−€${r.discount_value}`}
-                            {r.discount_reason && <span className="font-normal text-purple-500 ml-0.5">· {r.discount_reason}</span>}
+                            {r.discount_reason && <span className="font-normal text-primary/70 ml-0.5">· {r.discount_reason}</span>}
                           </Badge>
                         )}
                       </div>
@@ -399,7 +399,7 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
                         <span className="text-muted-foreground">{t("dashboard.invoiced")}</span>
                       </label>
                       {r.breakfast_included && (
-                        <Badge className="text-xs bg-amber-100 text-amber-800 border-amber-200 gap-1"><Coffee className="h-3 w-3" />{t("reports.breakfast")}</Badge>
+                        <Badge className="text-xs bg-warning/10 text-warning-foreground border-warning/20 gap-1"><Coffee className="h-3 w-3" />{t("reports.breakfast")}</Badge>
                       )}
                     </div>
                     )}

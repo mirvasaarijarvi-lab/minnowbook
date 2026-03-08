@@ -186,7 +186,7 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
     const isPositive = value > 0;
     const Icon = isPositive ? TrendingUp : TrendingDown;
     return (
-      <span className={`flex items-center gap-0.5 text-xs font-medium ${isPositive ? "text-green-600" : "text-red-500"}`}>
+      <span className={`flex items-center gap-0.5 text-xs font-medium ${isPositive ? "text-success" : "text-destructive"}`}>
         <Icon className="h-3 w-3" />
         {isPositive ? "+" : ""}{value}%
       </span>
@@ -252,8 +252,8 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
           onClick={stats?.pendingCount ? () => onNavigate?.("reservations", { status: "pending" }) : undefined}
         >
           <CardContent className="pt-5 pb-4 text-center relative">
-            <Clock className="h-5 w-5 mx-auto text-yellow-600 mb-1" />
-            <p className="text-3xl font-bold text-yellow-600">{stats?.pendingCount ?? 0}</p>
+            <Clock className="h-5 w-5 mx-auto text-warning mb-1" />
+            <p className="text-3xl font-bold text-warning">{stats?.pendingCount ?? 0}</p>
             <p className="text-xs text-muted-foreground mt-1">{t("dashboard.pending")} ({t("dashboard.total")})</p>
             {(stats?.pendingCount ?? 0) > 0 && (
               <ArrowRight className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
@@ -273,7 +273,7 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
 
         <Card>
           <CardContent className="pt-5 pb-4 text-center">
-            <CheckCircle className="h-5 w-5 mx-auto text-green-600 mb-1" />
+            <CheckCircle className="h-5 w-5 mx-auto text-success mb-1" />
             <p className="text-3xl font-bold text-foreground">
               {stats?.checkedIn ?? 0}/{stats?.todayConfirmed ?? 0}
             </p>
@@ -427,7 +427,7 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
               onClick={() => onNavigate?.("reservations", { invoiced: false })}
             >
               <span className="flex items-center gap-2 text-muted-foreground">
-                <Receipt className="h-4 w-4 text-red-500" />
+                <Receipt className="h-4 w-4 text-destructive" />
                 {t("dashboard.uninvoiced")}
               </span>
               <span className="font-semibold text-foreground flex items-center gap-1">

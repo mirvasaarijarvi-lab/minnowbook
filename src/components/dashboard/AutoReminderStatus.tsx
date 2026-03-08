@@ -85,8 +85,8 @@ const AutoReminderStatus = () => {
           </div>
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <span className="relative flex h-2.5 w-2.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500" />
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75" />
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-success" />
             </span>
             {t("autoReminder.active")}
           </div>
@@ -117,7 +117,7 @@ const AutoReminderStatus = () => {
                   className="flex items-center justify-between rounded-md border border-border px-3 py-2 text-sm"
                 >
                   <div className="flex items-center gap-2 min-w-0">
-                    <CheckCircle2 className="h-3.5 w-3.5 text-green-500 shrink-0" />
+                    <CheckCircle2 className="h-3.5 w-3.5 text-success shrink-0" />
                     <div className="min-w-0">
                       <p className="font-medium text-foreground truncate">{r.guest_name}</p>
                       <p className="text-xs text-muted-foreground truncate">

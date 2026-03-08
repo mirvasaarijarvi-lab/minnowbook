@@ -492,7 +492,7 @@ const ReportsPanel = () => {
     if (diff === 0) return <span className="inline-flex items-center gap-0.5 text-xs text-muted-foreground"><Minus className="h-3 w-3" /> 0%</span>;
     const pos = diff > 0;
     return (
-      <span className={`inline-flex items-center gap-0.5 text-xs font-medium ${pos ? "text-green-600" : "text-red-600"}`}>
+      <span className={`inline-flex items-center gap-0.5 text-xs font-medium ${pos ? "text-success" : "text-destructive"}`}>
         {pos ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
         {pos ? "+" : ""}{pct}%
         {isCurrency && <span className="text-[10px] opacity-70 ml-0.5">({pos ? "+" : ""}{diff.toLocaleString("fi-FI", { maximumFractionDigits: 0 })} €)</span>}
@@ -877,10 +877,10 @@ const ReportsPanel = () => {
 
           {/* Discount Summary */}
           {discountStats.count > 0 ? (
-            <Card className="border-purple-200 bg-purple-50/30 dark:bg-purple-950/10 dark:border-purple-800/40">
+            <Card className="border-primary/20 bg-primary/5">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium flex items-center gap-2">
-                  <Tag className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                  <Tag className="h-4 w-4 text-primary" />
                   {t("reports.discountSummary")}
                 </CardTitle>
               </CardHeader>
@@ -898,7 +898,7 @@ const ReportsPanel = () => {
                     <div className="space-y-1">
                       {discountStats.topCodes.map(([code, count]) => (
                         <div key={code} className="flex items-center justify-between text-sm">
-                          <Badge variant="outline" className="text-xs bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/30 dark:text-purple-300 dark:border-purple-700">
+                          <Badge variant="outline" className="text-xs bg-primary/10 text-primary border-primary/20">
                             {code}
                           </Badge>
                           <span className="text-muted-foreground text-xs">{count}×</span>
@@ -914,7 +914,7 @@ const ReportsPanel = () => {
                       <Percent className="h-4 w-4 text-muted-foreground mb-1" />
                     </div>
                     <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
-                      <div className="bg-purple-500 dark:bg-purple-400 h-2 rounded-full transition-all" style={{ width: `${Math.min(discountStats.ratio, 100)}%` }} />
+                      <div className="bg-primary h-2 rounded-full transition-all" style={{ width: `${Math.min(discountStats.ratio, 100)}%` }} />
                     </div>
                   </div>
                 </div>
@@ -987,7 +987,7 @@ const ReportsPanel = () => {
                           </TableCell>
                           <TableCell>
                             {r.breakfast_included
-                              ? <Badge className="bg-amber-100 text-amber-800 border-amber-200 gap-1"><Coffee className="h-3.5 w-3.5" />{t("reports.breakfast")}</Badge>
+                              ? <Badge className="bg-warning/10 text-warning-foreground border-warning/20 gap-1"><Coffee className="h-3.5 w-3.5" />{t("reports.breakfast")}</Badge>
                               : <span className="text-muted-foreground">—</span>
                             }
                           </TableCell>

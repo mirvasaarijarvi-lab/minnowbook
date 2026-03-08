@@ -35,9 +35,9 @@ const SupportChatWidget = ({ businessTier = false }: SupportChatWidgetProps) => 
   const dateFnsLocale = LOCALE_MAP[language] ?? enUS;
 
   const statusConfig: Record<string, { icon: React.ElementType; label: string; className: string }> = {
-    open: { icon: Clock, label: t("aid.statusOpen" as TranslationKey), className: "text-amber-600 bg-amber-50" },
-    "in-progress": { icon: Loader2, label: t("aid.statusInProgress" as TranslationKey), className: "text-blue-600 bg-blue-50" },
-    fixed: { icon: CheckCircle2, label: t("aid.statusResolved" as TranslationKey), className: "text-emerald-600 bg-emerald-50" },
+    open: { icon: Clock, label: t("aid.statusOpen" as TranslationKey), className: "text-warning bg-warning/10" },
+    "in-progress": { icon: Loader2, label: t("aid.statusInProgress" as TranslationKey), className: "text-info bg-info/10" },
+    fixed: { icon: CheckCircle2, label: t("aid.statusResolved" as TranslationKey), className: "text-success bg-success/10" },
     closed: { icon: AlertCircle, label: t("aid.statusClosed" as TranslationKey), className: "text-muted-foreground bg-muted" },
   };
 

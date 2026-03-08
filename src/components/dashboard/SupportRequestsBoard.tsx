@@ -176,7 +176,7 @@ const RequestCard = ({ request, onSelect, t }: { request: SupportRequest; onSele
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1">
           <span className="font-semibold text-sm text-foreground truncate">{request.subject}</span>
-          <Badge variant="outline" className={`text-xs shrink-0 ${isOpen ? "border-yellow-500/30 text-yellow-600 bg-yellow-500/10" : "border-emerald-500/30 text-emerald-600 bg-emerald-500/10"}`}>
+          <Badge variant="outline" className={`text-xs shrink-0 ${isOpen ? "border-warning/30 text-warning bg-warning/10" : "border-success/30 text-success bg-success/10"}`}>
             {isOpen ? <Clock className="h-3 w-3 mr-1" /> : <CheckCircle className="h-3 w-3 mr-1" />}
             {isOpen ? t("admin.open") : t("admin.resolved")}
           </Badge>

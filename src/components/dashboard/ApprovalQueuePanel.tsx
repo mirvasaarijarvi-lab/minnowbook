@@ -288,7 +288,7 @@ const ApprovalQueuePanel = () => {
                         <Button
                           size="sm"
                           variant="outline"
-                          className="gap-1 text-xs text-emerald-600 border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700"
+                          className="gap-1 text-xs text-success border-success/20 hover:bg-success/10 hover:text-success"
                           onClick={() => approveMutation.mutate(item)}
                           disabled={approveMutation.isPending}
                         >

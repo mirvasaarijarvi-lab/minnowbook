@@ -490,8 +490,8 @@ const SitesManagementPanel = () => {
                                 variant="outline"
                                 className={`text-[10px] ${
                                   site.is_active
-                                    ? "border-emerald-500/30 text-emerald-600 bg-emerald-500/10"
-                                    : "border-yellow-500/30 text-yellow-600 bg-yellow-500/10"
+                                    ? "border-success/30 text-success bg-success/10"
+                                    : "border-warning/30 text-warning bg-warning/10"
                                 }`}
                               >
                                 {site.is_active ? t("sites.active") : t("sites.draft")}
@@ -597,10 +597,10 @@ const SitesManagementPanel = () => {
                                       <TableCell className="text-center">
                                         <Badge
                                           variant="outline"
-                                          className={`text-[10px] ${
+                                           className={`text-[10px] ${
                                             resource.is_active
-                                              ? "border-emerald-500/30 text-emerald-600 bg-emerald-500/10"
-                                              : "border-yellow-500/30 text-yellow-600 bg-yellow-500/10"
+                                              ? "border-success/30 text-success bg-success/10"
+                                              : "border-warning/30 text-warning bg-warning/10"
                                           }`}
                                         >
                                           {resource.is_active ? t("sites.active") : t("sites.draft")}

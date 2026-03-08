@@ -74,7 +74,7 @@ const MockupOverview = () => (
         <div key={kpi.label} className="text-center p-2 rounded bg-background border">
           <div className="font-bold text-sm">{kpi.value}</div>
           <div className="text-[10px] text-muted-foreground">{kpi.label}</div>
-          {kpi.trend && <div className="text-[10px] text-green-600">{kpi.trend}</div>}
+          {kpi.trend && <div className="text-[10px] text-success">{kpi.trend}</div>}
         </div>
       ))}
     </div>
@@ -109,7 +109,7 @@ const MockupCalendar = () => (
             <div key={ri} className={`text-[9px] px-1 py-0.5 rounded flex items-center gap-1 ${
               ri === 1 && day === 2 ? "bg-destructive/10 text-destructive" :
               ri === 2 && day === 5 ? "bg-muted text-muted-foreground" :
-              "bg-green-50 text-green-700"
+              "bg-success/10 text-success"
             }`}>
               {ri === 1 && day === 2 ? <X className="h-2 w-2" /> :
                ri === 2 && day === 5 ? <Lock className="h-2 w-2" /> :
@@ -121,7 +121,7 @@ const MockupCalendar = () => (
       ))}
     </div>
     <div className="flex gap-3 text-[10px] justify-center text-muted-foreground">
-      <span className="flex items-center gap-1"><Check className="h-3 w-3 text-green-600" /> Available</span>
+      <span className="flex items-center gap-1"><Check className="h-3 w-3 text-success" /> Available</span>
       <span className="flex items-center gap-1"><X className="h-3 w-3 text-destructive" /> Full</span>
       <span className="flex items-center gap-1"><Lock className="h-3 w-3" /> Blocked</span>
     </div>
@@ -138,16 +138,16 @@ const MockupReservations = () => (
     </div>
     <div className="flex gap-1 text-[10px] flex-wrap">
       <span className="px-2 py-1 rounded bg-primary text-primary-foreground">All 23</span>
-      <span className="px-2 py-1 rounded border text-amber-600">Pending 8</span>
-      <span className="px-2 py-1 rounded border text-green-600">Confirmed 12</span>
+      <span className="px-2 py-1 rounded border text-warning">Pending 8</span>
+      <span className="px-2 py-1 rounded border text-success">Confirmed 12</span>
       <span className="px-2 py-1 rounded border text-destructive">Cancelled 3</span>
-      <span className="ml-auto px-2 py-1 rounded border bg-blue-50 text-blue-700 font-medium">📅 Today</span>
+      <span className="ml-auto px-2 py-1 rounded border bg-info/10 text-info font-medium">📅 Today</span>
     </div>
     <div className="space-y-1">
       {[
-        { date: "03.03", guest: "John D.", type: "Hotel", status: "Confirmed", statusColor: "bg-green-100 text-green-700", used: true, invoiced: false },
-        { date: "03.03", guest: "Lisa K.", type: "Restaurant", status: "Confirmed", statusColor: "bg-green-100 text-green-700", used: true, invoiced: true },
-        { date: "03.03", guest: "Karl P.", type: "Venue", status: "Pending", statusColor: "bg-amber-100 text-amber-700", used: false, invoiced: false },
+        { date: "03.03", guest: "John D.", type: "Hotel", status: "Confirmed", statusColor: "bg-success/10 text-success", used: true, invoiced: false },
+        { date: "03.03", guest: "Lisa K.", type: "Restaurant", status: "Confirmed", statusColor: "bg-success/10 text-success", used: true, invoiced: true },
+        { date: "03.03", guest: "Karl P.", type: "Venue", status: "Pending", statusColor: "bg-warning/10 text-warning", used: false, invoiced: false },
       ].map((r, i) => (
         <div key={i} className="grid grid-cols-[3rem_1fr_4rem_4.5rem_1.5rem_1.5rem_1rem] gap-1 items-center text-[10px] p-2 rounded bg-background border">
           <span className="text-muted-foreground">{r.date}</span>
@@ -178,7 +178,7 @@ const MockupReports = () => (
     <div className="grid grid-cols-3 gap-2">
       {[
         { label: "INVOICED", value: "1 200 €", color: "text-foreground" },
-        { label: "NOT INVOICED", value: "3 800 €", color: "text-amber-600" },
+        { label: "NOT INVOICED", value: "3 800 €", color: "text-warning" },
         { label: "TOTAL", value: "5 000 €", color: "text-foreground" },
       ].map((kpi) => (
         <div key={kpi.label} className="p-2 rounded bg-background border text-center">
@@ -205,7 +205,7 @@ const MockupResources = () => (
           <span className="font-medium">{r.name}</span>
           <span>{r.type}</span>
           <span>{r.cap}</span>
-          <span className="px-1.5 py-0.5 rounded bg-green-100 text-green-700 text-[9px] w-fit">Active</span>
+          <span className="px-1.5 py-0.5 rounded bg-success/10 text-success text-[9px] w-fit">Active</span>
           <span className="flex gap-1">
             <Pencil className="h-3 w-3 text-muted-foreground" />
             <Trash2 className="h-3 w-3 text-muted-foreground" />
@@ -251,7 +251,7 @@ const MockupAdmin = () => (
         <div key={i} className="flex items-center gap-2 text-[10px] p-1.5 rounded bg-background border">
           <span className="flex-1 font-medium">{u.name}</span>
           <span className="px-1.5 py-0.5 rounded border text-[9px]">{u.role}</span>
-          <span className={`px-1.5 py-0.5 rounded text-[9px] ${u.approved ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"}`}>
+          <span className={`px-1.5 py-0.5 rounded text-[9px] ${u.approved ? "bg-success/10 text-success" : "bg-warning/10 text-warning"}`}>
             {u.approved ? "Approved" : "Pending"}
           </span>
           <KeyRound className="h-3 w-3 text-muted-foreground" />
@@ -299,7 +299,7 @@ const MockupMultisite = () => (
           <span className="flex-1 font-medium">{s.name}</span>
           <span className="px-1.5 py-0.5 rounded border text-[9px]">{s.type}</span>
           <span className="flex items-center gap-0.5 text-muted-foreground"><MapPin className="h-2.5 w-2.5" />{s.location}</span>
-          <span className={`px-1.5 py-0.5 rounded text-[9px] ${s.active ? "bg-green-100 text-green-700" : "bg-muted text-muted-foreground"}`}>
+          <span className={`px-1.5 py-0.5 rounded text-[9px] ${s.active ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"}`}>
             {s.active ? "Active" : "Draft"}
           </span>
         </div>
