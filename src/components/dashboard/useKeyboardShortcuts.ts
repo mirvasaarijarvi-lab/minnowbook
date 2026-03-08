@@ -12,20 +12,19 @@ interface UseKeyboardShortcutsProps {
  * Alt+N opens notifications (handled elsewhere via bell click).
  */
 const useKeyboardShortcuts = ({ onViewChange }: UseKeyboardShortcutsProps) => {
-  const viewMap: Record<string, DashboardView> = {
-    "1": "overview",
-    "2": "calendar",
-    "3": "reservations",
-    "4": "resources",
-    "5": "reports",
-    "6": "settings",
-    "7": "admin",
-    "8": "support",
-  };
+  useEffect(() => {
+    const viewMap: Record<string, DashboardView> = {
+      "1": "overview",
+      "2": "calendar",
+      "3": "reservations",
+      "4": "resources",
+      "5": "reports",
+      "6": "settings",
+      "7": "admin",
+      "8": "support",
+    };
 
-  const handleKeyDown = useCallback(
-    (e: KeyboardEvent) => {
-      // Don't intercept when typing in inputs
+    const handleKeyDown = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement;
       if (
         target.tagName === "INPUT" ||
@@ -40,14 +39,11 @@ const useKeyboardShortcuts = ({ onViewChange }: UseKeyboardShortcutsProps) => {
         e.preventDefault();
         onViewChange(viewMap[e.key]);
       }
-    },
-    [onViewChange]
-  );
+    };
 
-  useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handleKeyDown]);
+  }, [onViewChange]);
 };
 
 export default useKeyboardShortcuts;

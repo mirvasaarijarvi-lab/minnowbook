@@ -134,6 +134,7 @@ const Dashboard = () => {
     if (view !== "reservations") {
       setReservationStatusFilter(undefined);
       setReservationInvoicedFilter(undefined);
+      setReservationCheckoutTodayFilter(undefined);
     }
     setCurrentView(view);
   }, []);
