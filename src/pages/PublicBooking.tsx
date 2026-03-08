@@ -1555,39 +1555,41 @@ const PublicBookingInner = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {/* Sub-type selector */}
-                <div className="grid gap-3 sm:grid-cols-3">
-                  {(() => {
-                    // Check if any restaurant resource offers catering/popup
+                {/* Sub-type selector — only show when catering or popup is available */}
+                {(() => {
                     const restaurantResources = resources ?? [];
                     const anyCatering = restaurantResources.some((r: any) => r.offers_catering);
                     const anyPopup = restaurantResources.some((r: any) => r.offers_popup);
+                    if (!anyCatering && !anyPopup) return null;
                     const allSubTypes = [
                       { value: "dine_in", icon: UtensilsCrossed, labelKey: "booking.subTypeDineIn", descKey: "booking.subTypeDineInDesc" },
                       ...(anyCatering ? [{ value: "catering", icon: Truck, labelKey: "booking.subTypeCatering", descKey: "booking.subTypeCateringDesc" }] : []),
                       ...(anyPopup ? [{ value: "popup", icon: ShoppingBag, labelKey: "booking.subTypePopup", descKey: "booking.subTypePopupDesc" }] : []),
                     ] as const;
-                    return allSubTypes.map(({ value, icon: Icon, labelKey, descKey }) => {
-                    const isSelected = form.restaurant_sub_type === value;
                     return (
-                      <button
-                        key={value}
-                        type="button"
-                        onClick={() => setForm((prev) => ({ ...prev, restaurant_sub_type: value as any }))}
-                        className="flex flex-col items-center gap-1.5 p-3 rounded-lg border-2 transition-all text-center"
-                        style={{
-                          borderColor: isSelected ? accentColor : "#e5e7eb",
-                          backgroundColor: isSelected ? `${accentColor}10` : "transparent",
-                        }}
-                      >
-                        <Icon className="h-5 w-5" style={{ color: isSelected ? accentColor : primaryColor }} />
-                        <span className="text-sm font-medium" style={{ color: primaryColor }}>{tDynamic(labelKey)}</span>
-                        <span className="text-xs" style={{ color: `${primaryColor}60` }}>{tDynamic(descKey)}</span>
-                      </button>
+                      <div className="grid gap-3 sm:grid-cols-3">
+                        {allSubTypes.map(({ value, icon: Icon, labelKey, descKey }) => {
+                          const isSelected = form.restaurant_sub_type === value;
+                          return (
+                            <button
+                              key={value}
+                              type="button"
+                              onClick={() => setForm((prev) => ({ ...prev, restaurant_sub_type: value as any }))}
+                              className="flex flex-col items-center gap-1.5 p-3 rounded-lg border-2 transition-all text-center"
+                              style={{
+                                borderColor: isSelected ? accentColor : "#e5e7eb",
+                                backgroundColor: isSelected ? `${accentColor}10` : "transparent",
+                              }}
+                            >
+                              <Icon className="h-5 w-5" style={{ color: isSelected ? accentColor : primaryColor }} />
+                              <span className="text-sm font-medium" style={{ color: primaryColor }}>{tDynamic(labelKey)}</span>
+                              <span className="text-xs" style={{ color: `${primaryColor}60` }}>{tDynamic(descKey)}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
                     );
-                  });
-                  })()}
-                </div>
+                })()}
 
                 {/* Dine-in: pricing type */}
                 {form.restaurant_sub_type === "dine_in" && (
