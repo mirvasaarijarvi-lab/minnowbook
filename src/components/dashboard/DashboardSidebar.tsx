@@ -44,6 +44,7 @@ const navItems: { view: DashboardView; labelKey: TranslationKey; icon: React.Ele
   { view: "admin", labelKey: "nav.admin", icon: ShieldCheck, adminOnly: true, permission: PERM_ADMIN_VIEW },
   { view: "sites", labelKey: "nav.sites" as TranslationKey, icon: Building2, permission: PERM_SITES_VIEW, tierRequired: "business" },
   { view: "support", labelKey: "nav.support", icon: LifeBuoy, permission: PERM_SUPPORT_VIEW },
+  { view: "profile", labelKey: "nav.profile" as TranslationKey, icon: UserCircle },
 ];
 
 const DashboardSidebar = ({ currentView, onViewChange, userEmail, onSignOut, mobileOpen, onMobileToggle, isAdmin: isAdminUser }: DashboardSidebarProps) => {
