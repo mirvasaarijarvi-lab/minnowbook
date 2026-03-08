@@ -226,6 +226,7 @@ const Dashboard = () => {
     admin: gatedView("admin", <AdminPanel />),
     sites: gatedView("sites", <SitesManagementPanel />),
     support: gatedView("support", <DashboardSupportPanel />),
+    profile: <ProfileSettings />,
   };
 
   return (
