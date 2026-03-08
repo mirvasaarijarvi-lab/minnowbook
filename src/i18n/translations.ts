@@ -1539,7 +1539,7 @@ const en: TranslationKeys = {
   "booking.subTypePopup": "Pop-up restaurant",
   "booking.subTypeDineInDesc": "Reserve a table at the restaurant",
   "booking.subTypeCateringDesc": "Order catering for your event",
-  "booking.subTypePopupDesc": "Book a stall at a festival or event",
+  "booking.subTypePopupDesc": "Have us serve food at your event or festival",
   "booking.cateringDetails": "Catering details",
   "booking.deliveryAddress": "Event / delivery address",
   "booking.dietaryNotes": "Dietary requirements & allergies",
