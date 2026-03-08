@@ -229,6 +229,14 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
       {/* Site tabs for business tier owner/admin */}
       <SiteTabs />
 
+      {/* Action-required alerts */}
+      <ActionAlertsBanner
+        pendingCount={stats?.pendingCount ?? 0}
+        uninvoicedCount={stats?.uninvoiced ?? 0}
+        checkoutsToday={stats?.checkoutsToday ?? 0}
+        onNavigate={onNavigate}
+      />
+
       {/* Row 1: Today stats */}
       <div data-tour="stats-grid" className="grid gap-3 grid-cols-2 lg:grid-cols-4">
         <Card>
