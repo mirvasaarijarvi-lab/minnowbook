@@ -1102,6 +1102,70 @@ const PublicBookingInner = () => {
               onChange={(e) => setHoneypot(e.target.value)}
             />
           </div>
+
+          {/* Site picker — shown when multiple sites exist and not locked by URL */}
+          {hasMultipleSites && !siteLockedByUrl && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg font-serif flex items-center gap-2" style={{ color: primaryColor }}>
+                  <MapPin className="h-5 w-5" />
+                  {t("booking.selectLocation")}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {/* All locations option */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPickedSiteId(null);
+                      setForm((prev) => ({ ...prev, resource_id: "" }));
+                    }}
+                    className="group relative flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-300 text-center hover:scale-105 hover:shadow-lg"
+                    style={{
+                      borderColor: !pickedSiteId ? accentColor : "#e5e7eb",
+                      backgroundColor: !pickedSiteId ? `${accentColor}10` : "transparent",
+                      boxShadow: !pickedSiteId ? `0 0 0 1px ${accentColor}40, 0 4px 12px ${accentColor}15` : undefined,
+                    }}
+                  >
+                    {!pickedSiteId && <span className="absolute top-2.5 right-2.5 h-2 w-2 rounded-full" style={{ backgroundColor: accentColor }} />}
+                    <span className="flex items-center justify-center h-10 w-10 rounded-full" style={{ backgroundColor: !pickedSiteId ? `${accentColor}20` : `${primaryColor}10` }}>
+                      <Building2 className="h-5 w-5" style={{ color: !pickedSiteId ? accentColor : primaryColor }} />
+                    </span>
+                    <span className="text-sm font-semibold" style={{ color: primaryColor }}>{t("booking.allLocations")}</span>
+                  </button>
+
+                  {allSites?.map((s) => {
+                    const isSelected = pickedSiteId === s.id;
+                    return (
+                      <button
+                        key={s.id}
+                        type="button"
+                        onClick={() => {
+                          setPickedSiteId(s.id);
+                          setForm((prev) => ({ ...prev, resource_id: "" }));
+                        }}
+                        className="group relative flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-300 text-center hover:scale-105 hover:shadow-lg"
+                        style={{
+                          borderColor: isSelected ? accentColor : "#e5e7eb",
+                          backgroundColor: isSelected ? `${accentColor}10` : "transparent",
+                          boxShadow: isSelected ? `0 0 0 1px ${accentColor}40, 0 4px 12px ${accentColor}15` : undefined,
+                        }}
+                      >
+                        {isSelected && <span className="absolute top-2.5 right-2.5 h-2 w-2 rounded-full" style={{ backgroundColor: accentColor }} />}
+                        <span className="flex items-center justify-center h-10 w-10 rounded-full" style={{ backgroundColor: isSelected ? `${accentColor}20` : `${primaryColor}10` }}>
+                          <MapPin className="h-5 w-5" style={{ color: isSelected ? accentColor : primaryColor }} />
+                        </span>
+                        <span className="text-sm font-semibold" style={{ color: primaryColor }}>{s.name}</span>
+                        {s.location && <span className="text-xs" style={{ color: `${primaryColor}60` }}>{s.location}</span>}
+                      </button>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Step 1: Type Selection */}
           {allowedTypes.length > 0 && (
             <Card>
