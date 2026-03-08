@@ -23,7 +23,7 @@ import { useTenant } from "@/hooks/useTenant";
 import { toast } from "sonner";
 import { useT } from "@/contexts/I18nContext";
 import { TranslationKey } from "@/i18n/translations";
-import { isMultiSiteTier } from "@/lib/tier-limits";
+import { useTierGate } from "@/hooks/useTierGate";
 
 interface GuideArticle {
   titleKey: string;
