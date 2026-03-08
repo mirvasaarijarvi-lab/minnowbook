@@ -329,7 +329,7 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
                           </Badge>
                         )}
                         {(r as any).is_checked_in && (
-                          <Badge className="text-xs bg-emerald-100 text-emerald-800 border-emerald-200">{t("dashboard.checkedIn")}</Badge>
+                          <Badge className="text-xs bg-success/10 text-success border-success/20">{t("dashboard.checkedIn")}</Badge>
                         )}
                         {(r as any).reminder_email_sent_at && (
                           <Badge variant="outline" className="text-xs gap-1 bg-blue-50 text-blue-700 border-blue-200">
