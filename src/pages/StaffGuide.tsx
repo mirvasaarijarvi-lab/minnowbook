@@ -7,7 +7,7 @@ import {
   Printer, ArrowLeft, Home, Calendar, ClipboardList, BarChart3,
   Users, LogIn, Shield, Check, X, Lock, Pencil, Trash2, Search,
   Download, KeyRound, Settings, LifeBuoy, BookOpen, Building2, MapPin,
-  Zap, Crown, Bell, Keyboard,
+  Zap, Crown, Bell, Keyboard, UserCircle, Upload,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -328,6 +328,31 @@ const MockupMultisite = () => (
   </div>
 );
 
+const MockupProfile = () => (
+  <div className="border rounded-lg p-4 bg-muted/30 space-y-3 print:bg-white max-w-xs mx-auto">
+    <div className="flex items-center gap-2 text-xs font-medium">
+      <UserCircle className="h-4 w-4 text-primary" />
+      <span>Profile Settings</span>
+    </div>
+    <div className="flex items-center gap-3">
+      <div className="h-14 w-14 rounded-full bg-primary/10 border-2 border-border flex items-center justify-center text-sm font-bold text-primary">JD</div>
+      <div className="space-y-1">
+        <div className="h-6 rounded border bg-background px-2 flex items-center text-[10px]">
+          <Upload className="h-2.5 w-2.5 mr-1 text-muted-foreground" /> Upload photo
+        </div>
+        <div className="text-[9px] text-muted-foreground">JPG, PNG or WebP. Max 2MB.</div>
+      </div>
+    </div>
+    <div className="space-y-1.5 text-[10px]">
+      <div className="text-muted-foreground">Display Name</div>
+      <div className="h-7 rounded border bg-background px-2 flex items-center">John Doe</div>
+      <div className="text-muted-foreground mt-1">Email</div>
+      <div className="h-7 rounded border bg-muted px-2 flex items-center text-muted-foreground">john@example.com</div>
+    </div>
+    <div className="h-7 rounded bg-primary flex items-center justify-center text-[10px] text-primary-foreground font-medium">Save Changes</div>
+  </div>
+);
+
 const mockupComponents: Record<string, React.ReactNode> = {
   login: <MockupLogin />,
   overview: <MockupOverview />,
@@ -339,6 +364,7 @@ const mockupComponents: Record<string, React.ReactNode> = {
   admin: <MockupAdmin />,
   support: <MockupSupport />,
   multisite: <MockupMultisite />,
+  profile: <MockupProfile />,
 };
 
 /* ─── Tier Overview Component ─── */
@@ -560,8 +586,20 @@ const guideContent: Record<Language, GuideContent> = {
         ],
       },
       {
+        icon: <UserCircle className="h-6 w-6" />, mockupId: "profile",
+        title: "10. Profile Settings",
+        steps: [
+          "Click 'Profile' in the sidebar to open your personal settings.",
+          "Upload a profile photo (JPG, PNG, or WebP, max 2 MB) — it appears next to your name.",
+          "Hover over your avatar and click ✕ to remove the current photo.",
+          "Edit your Display Name — this is how other team members see you.",
+          "Your email is shown for reference but cannot be changed here.",
+          "Click 'Save Changes' to apply your updates.",
+        ],
+      },
+      {
         icon: <Building2 className="h-6 w-6" />, mockupId: "multisite",
-        title: "10. Multi-Site Management (Business plan)",
+        title: "11. Multi-Site Management (Business plan)",
         steps: [
           "Business plan unlocks multi-site management — manage multiple locations from one dashboard.",
           "Create sites via Settings → Sites: give each a name, slug, and location.",
@@ -753,8 +791,20 @@ const guideContent: Record<Language, GuideContent> = {
         ],
       },
       {
+        icon: <UserCircle className="h-6 w-6" />, mockupId: "profile",
+        title: "10. Profiiliasetukset",
+        steps: [
+          "Paina 'Profiili' sivupalkissa avataksesi henkilökohtaiset asetukset.",
+          "Lataa profiilikuva (JPG, PNG tai WebP, max 2 MB) — se näkyy nimesi vieressä.",
+          "Vie hiiri avatarin päälle ja paina ✕ poistaaksesi nykyisen kuvan.",
+          "Muokkaa näyttönimeäsi — tämä on miten muut tiimin jäsenet näkevät sinut.",
+          "Sähköpostisi näkyy tiedoksi, mutta sitä ei voi muuttaa täältä.",
+          "Paina 'Tallenna muutokset' ottaaksesi päivitykset käyttöön.",
+        ],
+      },
+      {
         icon: <Building2 className="h-6 w-6" />, mockupId: "multisite",
-        title: "10. Monitoimipistehallinnointi (Business)",
+        title: "11. Monitoimipistehallinnointi (Business)",
         steps: [
           "Business-tilaus avaa monitoimipistehallinnan — hallinnoi useita toimipisteitä yhdestä hallintapaneelista.",
           "Luo toimipisteitä Asetukset → Toimipisteet: anna nimi, slug ja sijainti.",
@@ -946,8 +996,20 @@ const guideContent: Record<Language, GuideContent> = {
         ],
       },
       {
+        icon: <UserCircle className="h-6 w-6" />, mockupId: "profile",
+        title: "10. Profilinställningar",
+        steps: [
+          "Klicka 'Profil' i sidofältet för att öppna dina personliga inställningar.",
+          "Ladda upp ett profilfoto (JPG, PNG eller WebP, max 2 MB) — det visas bredvid ditt namn.",
+          "Håll muspekaren över din avatar och klicka ✕ för att ta bort det aktuella fotot.",
+          "Redigera ditt visningsnamn — så ser andra teammedlemmar dig.",
+          "Din e-post visas som referens men kan inte ändras här.",
+          "Klicka 'Spara ändringar' för att tillämpa dina uppdateringar.",
+        ],
+      },
+      {
         icon: <Building2 className="h-6 w-6" />, mockupId: "multisite",
-        title: "10. Hantering av flera platser (Business)",
+        title: "11. Hantering av flera platser (Business)",
         steps: [
           "Business-planen låser upp hantering av flera platser — hantera flera lokaler från en instrumentpanel.",
           "Skapa platser via Inställningar → Platser: ange namn, slug och plats.",
