@@ -4141,7 +4141,7 @@ const sv: TranslationKeys = {
   "booking.electricityNeeded": "Elanslutning behövs",
   "booking.waterNeeded": "Vattenanslutning behövs",
   "booking.foodPermits": "Livsmedelstillstånd / certifikat",
-  "booking.stallFee": "Ståndshyra (€)",
+  "booking.stallFee": "Uppställningsavgift (€)",
   "email.subject": "Ämne",
   "email.confirmationSubject": "Bokningsbekräftelse",
   "email.confirmationTitle": "Bokning bekräftad!",
