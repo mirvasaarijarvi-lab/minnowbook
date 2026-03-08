@@ -178,7 +178,7 @@ const MockupReports = () => (
     <div className="grid grid-cols-3 gap-2">
       {[
         { label: "INVOICED", value: "1 200 €", color: "text-foreground" },
-        { label: "NOT INVOICED", value: "3 800 €", color: "text-amber-600" },
+        { label: "NOT INVOICED", value: "3 800 €", color: "text-warning" },
         { label: "TOTAL", value: "5 000 €", color: "text-foreground" },
       ].map((kpi) => (
         <div key={kpi.label} className="p-2 rounded bg-background border text-center">
