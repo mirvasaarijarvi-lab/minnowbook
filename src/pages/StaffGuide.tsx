@@ -74,7 +74,7 @@ const MockupOverview = () => (
         <div key={kpi.label} className="text-center p-2 rounded bg-background border">
           <div className="font-bold text-sm">{kpi.value}</div>
           <div className="text-[10px] text-muted-foreground">{kpi.label}</div>
-          {kpi.trend && <div className="text-[10px] text-green-600">{kpi.trend}</div>}
+          {kpi.trend && <div className="text-[10px] text-success">{kpi.trend}</div>}
         </div>
       ))}
     </div>
