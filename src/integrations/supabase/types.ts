@@ -602,6 +602,8 @@ export type Database = {
           image_url: string | null
           is_active: boolean | null
           name: string
+          offers_catering: boolean
+          offers_popup: boolean
           price_per_night: number | null
           rejection_reason: string | null
           resource_type: string
@@ -623,6 +625,8 @@ export type Database = {
           image_url?: string | null
           is_active?: boolean | null
           name: string
+          offers_catering?: boolean
+          offers_popup?: boolean
           price_per_night?: number | null
           rejection_reason?: string | null
           resource_type: string
@@ -644,6 +648,8 @@ export type Database = {
           image_url?: string | null
           is_active?: boolean | null
           name?: string
+          offers_catering?: boolean
+          offers_popup?: boolean
           price_per_night?: number | null
           rejection_reason?: string | null
           resource_type?: string
