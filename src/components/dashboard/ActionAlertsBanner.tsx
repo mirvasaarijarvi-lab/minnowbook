@@ -22,21 +22,21 @@ const ActionAlertsBanner = ({ pendingCount, uninvoicedCount, checkoutsToday, onN
 
   const alerts: ActionAlert[] = [
     {
-      type: "warning",
+      type: "warning" as const,
       icon: Clock,
       label: t("alerts.pendingAction"),
       count: pendingCount,
       onClick: () => onNavigate?.("reservations", { status: "pending" }),
     },
     {
-      type: "warning",
+      type: "warning" as const,
       icon: Receipt,
       label: t("alerts.uninvoicedAction"),
       count: uninvoicedCount,
       onClick: () => onNavigate?.("reservations", { invoiced: false }),
     },
     {
-      type: "info",
+      type: "info" as const,
       icon: BedDouble,
       label: t("alerts.checkoutsAction"),
       count: checkoutsToday,
