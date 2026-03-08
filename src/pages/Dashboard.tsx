@@ -130,6 +130,16 @@ const Dashboard = () => {
 
   const [reservationCheckoutTodayFilter, setReservationCheckoutTodayFilter] = useState<boolean | undefined>();
 
+  const handleViewChange = useCallback((view: DashboardView) => {
+    if (view !== "reservations") {
+      setReservationStatusFilter(undefined);
+      setReservationInvoicedFilter(undefined);
+    }
+    setCurrentView(view);
+  }, []);
+
+  useKeyboardShortcuts({ onViewChange: handleViewChange });
+
   const handleOverviewNavigate = (view: string, filter?: { status?: string; invoiced?: boolean; checkoutToday?: boolean }) => {
     if (view === "reservations") {
       setReservationStatusFilter(filter?.status);
