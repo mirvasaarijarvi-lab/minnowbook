@@ -1489,8 +1489,8 @@ const PublicBookingInner = () => {
                         }}
                       >
                         <Icon className="h-5 w-5" style={{ color: isSelected ? accentColor : primaryColor }} />
-                        <span className="text-sm font-medium" style={{ color: primaryColor }}>{t(labelKey)}</span>
-                        <span className="text-xs" style={{ color: `${primaryColor}60` }}>{t(descKey)}</span>
+                        <span className="text-sm font-medium" style={{ color: primaryColor }}>{tDynamic(labelKey)}</span>
+                        <span className="text-xs" style={{ color: `${primaryColor}60` }}>{tDynamic(descKey)}</span>
                       </button>
                     );
                   });
