@@ -25,6 +25,15 @@ import ConfirmationEmailPreview from "@/components/ConfirmationEmailPreview";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import React from "react";
 
+// Types for public views (not in auto-generated types)
+interface PublicTenant {
+  id: string;
+  name: string;
+  slug: string;
+  is_active: boolean;
+  allowed_reservation_types: string[];
+}
+
 const bookingSchema = z.object({
   guest_name: z.string().trim().min(1, "Name is required").max(100),
   guest_email: z.string().trim().email("Invalid email").max(255),
@@ -263,16 +272,16 @@ const PublicBookingInner = () => {
   // Fetch tenant by slug
   const { data: tenant, isLoading: loadingTenant } = useQuery({
     queryKey: ["public-tenant", slug],
-    queryFn: async () => {
+    queryFn: async (): Promise<PublicTenant | null> => {
       if (!slug) return null;
       const { data, error } = await supabase
-        .from("tenants")
+        .from("tenants_public" as any)
         .select("*")
         .eq("slug", slug)
         .eq("is_active", true)
         .maybeSingle();
       if (error) throw error;
-      return data;
+      return data as unknown as PublicTenant | null;
     },
     enabled: !!slug,
   });
@@ -322,12 +331,12 @@ const PublicBookingInner = () => {
     queryFn: async () => {
       if (!effectiveSiteId) return null;
       const { data, error } = await supabase
-        .from("site_settings")
+        .from("site_settings_public" as any)
         .select("*")
         .eq("site_id", effectiveSiteId)
         .maybeSingle();
       if (error) throw error;
-      return data;
+      return data as any;
     },
     enabled: !!effectiveSiteId,
   });
@@ -338,12 +347,12 @@ const PublicBookingInner = () => {
     queryFn: async () => {
       if (!tenant?.id) return null;
       const { data, error } = await supabase
-        .from("tenant_settings")
+        .from("tenant_settings_public" as any)
         .select("*")
         .eq("tenant_id", tenant.id)
         .maybeSingle();
       if (error) throw error;
-      return data;
+      return data as any;
     },
     enabled: !!tenant?.id,
   });
