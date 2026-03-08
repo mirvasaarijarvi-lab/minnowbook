@@ -272,7 +272,7 @@ const PublicBookingInner = () => {
   // Fetch tenant by slug
   const { data: tenant, isLoading: loadingTenant } = useQuery({
     queryKey: ["public-tenant", slug],
-    queryFn: async () => {
+    queryFn: async (): Promise<PublicTenant | null> => {
       if (!slug) return null;
       const { data, error } = await supabase
         .from("tenants_public" as any)
@@ -281,7 +281,7 @@ const PublicBookingInner = () => {
         .eq("is_active", true)
         .maybeSingle();
       if (error) throw error;
-      return data;
+      return data as PublicTenant | null;
     },
     enabled: !!slug,
   });
