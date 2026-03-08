@@ -32,6 +32,7 @@ import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
 import { useDateLocale } from "@/hooks/useDateLocale";
 import DashboardTooltip from "./DashboardTooltip";
 import AutoReminderStatus from "./AutoReminderStatus";
+import BookingLinksCard from "./BookingLinksCard";
 
 import { useMemo } from "react";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip as RechartsTooltip, CartesianGrid } from "recharts";
