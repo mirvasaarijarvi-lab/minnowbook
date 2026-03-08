@@ -31,9 +31,9 @@ function getPasswordStrength(password: string): { level: StrengthLevel; score: n
 
 const strengthConfig: Record<StrengthLevel, { label: TranslationKey; color: string }> = {
   weak: { label: "password.strengthWeak", color: "bg-destructive" },
-  fair: { label: "password.strengthFair", color: "bg-orange-500" },
+  fair: { label: "password.strengthFair", color: "bg-accent" },
   strong: { label: "password.strengthStrong", color: "bg-primary" },
-  veryStrong: { label: "password.strengthVeryStrong", color: "bg-emerald-500" },
+  veryStrong: { label: "password.strengthVeryStrong", color: "bg-success" },
 };
 
 interface PasswordInputProps {
