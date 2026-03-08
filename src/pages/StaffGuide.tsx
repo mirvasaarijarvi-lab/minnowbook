@@ -641,11 +641,14 @@ const guideContent: Record<Language, GuideContent> = {
         title: "2. Hallintapaneelin yleiskatsaus",
         steps: [
           "Yleiskatsaus-välilehti näyttää päivän yhteenvedon: varaukset, odottavat, vieraat ja saapuneet.",
+          "🔔 Ilmoituskello (oikeassa yläkulmassa): Ilmoittaa kun varauksia merkitään 'Käytetty' tai 'Laskutettu'. Lukemattomien määrä näkyy merkkinä.",
+          "⚠️ Toimintahälytykset: Klikattavat bannerit korostavat huomiota vaativia kohteita — odottavat vahvistukset, laskuttamattomat varaukset ja päivän uloskirjaukset. Klikkaa siirtyäksesi suoraan suodatettuun näkymään.",
           "Viikon tunnusluvut: tuotto, varausmäärä, vierasmäärä ja käyttöaste.",
           "Viikon tuottokehitys -kaavio näyttää päiväkohtaisen tuoton.",
           "Pikatiedot-osio näyttää päivän uloskirjaukset ja laskuttamattomat varaukset.",
           "Tyypeittäin-osio näyttää varaukset kategorioittain.",
           "Julkinen varauslinkki näkyy sivun alaosassa (toimipistekohtaiset linkit Business-tilauksessa).",
+          "⌨️ Pikanäppäimet: Paina Alt+1 – Alt+8 siirtyäksesi nopeasti sivupalkin osioiden välillä (Yleiskatsaus, Kalenteri, Varaukset jne.).",
         ],
       },
       {
