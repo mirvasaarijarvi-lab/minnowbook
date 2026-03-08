@@ -576,6 +576,12 @@ type TranslationKeys = {
   "autoReminder.recentLog": string;
   "autoReminder.sent7d": string;
   "autoReminder.noRecent": string;
+  "notifications.title": string;
+  "notifications.empty": string;
+  "notifications.markAllRead": string;
+  "notifications.markRead": string;
+  "notifications.used": string;
+  "notifications.invoiced": string;
   "dashboard.used": string;
   "dashboard.invoiced": string;
   "dashboard.total": string;
