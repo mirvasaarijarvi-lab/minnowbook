@@ -7,7 +7,7 @@ import {
   Printer, ArrowLeft, Home, Calendar, ClipboardList, BarChart3,
   Users, LogIn, Shield, Check, X, Lock, Pencil, Trash2, Search,
   Download, KeyRound, Settings, LifeBuoy, BookOpen, Building2, MapPin,
-  Zap, Crown,
+  Zap, Crown, Bell, Keyboard,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -448,11 +448,14 @@ const guideContent: Record<Language, GuideContent> = {
         title: "2. Dashboard Overview",
         steps: [
           "The Overview tab shows today's summary: reservations, pending bookings, guests, and arrivals.",
+          "🔔 Notification bell (top-right): Alerts you when reservations are marked as 'Used' or 'Invoiced'. Unread count shown as a badge.",
+          "⚠️ Action Alerts: Clickable banners highlight items needing attention — pending confirmations, uninvoiced reservations, and today's check-outs. Click to jump straight to the filtered view.",
           "Weekly KPIs: revenue, reservation count, guest count, and utilization rate.",
           "The weekly revenue chart shows daily revenue breakdown.",
           "Quick info section shows check-outs today and un-invoiced reservations.",
           "Today by type breakdown shows reservations per category.",
           "Your shareable public booking link is displayed at the bottom (site-specific links available for Business tier).",
+          "⌨️ Keyboard shortcuts: Press Alt+1 through Alt+8 to quickly jump between sidebar sections (Overview, Calendar, Reservations, etc.).",
         ],
       },
       {
@@ -638,11 +641,14 @@ const guideContent: Record<Language, GuideContent> = {
         title: "2. Hallintapaneelin yleiskatsaus",
         steps: [
           "Yleiskatsaus-välilehti näyttää päivän yhteenvedon: varaukset, odottavat, vieraat ja saapuneet.",
+          "🔔 Ilmoituskello (oikeassa yläkulmassa): Ilmoittaa kun varauksia merkitään 'Käytetty' tai 'Laskutettu'. Lukemattomien määrä näkyy merkkinä.",
+          "⚠️ Toimintahälytykset: Klikattavat bannerit korostavat huomiota vaativia kohteita — odottavat vahvistukset, laskuttamattomat varaukset ja päivän uloskirjaukset. Klikkaa siirtyäksesi suoraan suodatettuun näkymään.",
           "Viikon tunnusluvut: tuotto, varausmäärä, vierasmäärä ja käyttöaste.",
           "Viikon tuottokehitys -kaavio näyttää päiväkohtaisen tuoton.",
           "Pikatiedot-osio näyttää päivän uloskirjaukset ja laskuttamattomat varaukset.",
           "Tyypeittäin-osio näyttää varaukset kategorioittain.",
           "Julkinen varauslinkki näkyy sivun alaosassa (toimipistekohtaiset linkit Business-tilauksessa).",
+          "⌨️ Pikanäppäimet: Paina Alt+1 – Alt+8 siirtyäksesi nopeasti sivupalkin osioiden välillä (Yleiskatsaus, Kalenteri, Varaukset jne.).",
         ],
       },
       {
@@ -828,11 +834,14 @@ const guideContent: Record<Language, GuideContent> = {
         title: "2. Instrumentpanelens översikt",
         steps: [
           "Översiktsfliken visar dagens sammanfattning: bokningar, väntande, gäster och ankomster.",
+          "🔔 Aviseringsklocka (uppe till höger): Meddelar dig när bokningar markeras som 'Använd' eller 'Fakturerad'. Oläst antal visas som märke.",
+          "⚠️ Åtgärdsvarningar: Klickbara banners markerar objekt som kräver uppmärksamhet — väntande bekräftelser, ej fakturerade bokningar och dagens utcheckningar. Klicka för att hoppa direkt till den filtrerade vyn.",
           "Veckans nyckeltal: intäkter, antal bokningar, antal gäster och beläggningsgrad.",
           "Veckans intäktsdiagram visar daglig intäktsfördelning.",
           "Snabbinfo visar dagens utcheckningar och ej fakturerade bokningar.",
           "Per typ visar bokningar per kategori.",
           "Din publika bokningslänk visas längst ner (platsspecifika länkar för Business-planen).",
+          "⌨️ Tangentbordsgenvägar: Tryck Alt+1 till Alt+8 för att snabbt hoppa mellan sidofältets sektioner (Översikt, Kalender, Bokningar osv.).",
         ],
       },
       {
