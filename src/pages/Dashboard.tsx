@@ -211,6 +211,8 @@ const Dashboard = () => {
     setCurrentView(view);
   };
 
+  useKeyboardShortcuts({ onViewChange: handleViewChange });
+
   const viewComponents: Record<DashboardView, React.ReactNode> = {
     overview: <DashboardOverview onNavigate={handleOverviewNavigate} />,
     calendar: gatedView("calendar", <CalendarView />),
