@@ -1001,8 +1001,8 @@ const SettingsPanel = () => {
         </Card>
       )}
 
-      {/* Multisite Upsell for non-business tiers */}
-      {tenant?.tier && tenant.tier !== "business" && (
+      {/* Multisite Upsell for non-business tiers (hidden for superadmins) */}
+      {!isMultiSite && tenant?.tier && (
         <Card className="border-accent/30 bg-gradient-to-br from-accent/5 via-card to-accent/10">
           <CardContent className="flex flex-col sm:flex-row items-start sm:items-center gap-4 pt-6">
             <div className="flex-shrink-0 h-12 w-12 rounded-xl bg-accent/15 flex items-center justify-center">

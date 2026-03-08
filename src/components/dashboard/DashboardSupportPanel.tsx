@@ -64,7 +64,7 @@ const DashboardSupportPanel = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const { session } = useAuth();
   const { tenantId, tenant } = useTenant();
-  const businessTier = isMultiSiteTier(tenant?.tier);
+  const { isMultiSite: businessTier } = useTierGate();
 
   const filtered = useMemo(() => {
     if (!search.trim()) return articleDefs;
