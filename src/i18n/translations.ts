@@ -4030,6 +4030,9 @@ const sv: TranslationKeys = {
    // Booking
   "booking.title": "Gör en bokning",
   "booking.selectType": "Vad vill du boka?",
+  "booking.selectLocation": "Välj plats",
+  "booking.allLocations": "Alla platser",
+  "booking.atSite": "på",
   "booking.typeDescRestaurant": "Reservera ett bord för middag",
   "booking.typeDescVenue": "Boka en lokal för ditt evenemang",
   "booking.typeDescGuesthouse": "Boka ett rum för din vistelse",
