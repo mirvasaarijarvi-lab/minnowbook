@@ -1565,7 +1565,7 @@ const en: TranslationKeys = {
   "booking.electricityNeeded": "Electricity connection needed",
   "booking.waterNeeded": "Water connection needed",
   "booking.foodPermits": "Food safety permits / licenses",
-  "booking.stallFee": "Stall rental fee (€)",
+  "booking.stallFee": "Setup fee (€)",
   "email.subject": "Subject",
   "email.confirmationSubject": "Booking Confirmation",
   "email.confirmationTitle": "Booking Confirmed!",
