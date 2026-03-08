@@ -218,7 +218,7 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
                 {t("dashboard.bookingLink")}
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-[500px] max-h-[70vh] overflow-y-auto p-0" align="end" sideOffset={8}>
+            <PopoverContent className="w-[min(500px,calc(100vw-2rem))] max-h-[70vh] overflow-y-auto p-0" align="end" sideOffset={8}>
               <BookingLinksCard />
             </PopoverContent>
           </Popover>
