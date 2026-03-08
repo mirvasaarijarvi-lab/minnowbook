@@ -334,7 +334,7 @@ const Dashboard = () => {
       </div>
 
       {currentView !== "support" && (
-        <SupportChatWidget businessTier={isMultiSiteTier(tenant?.tier)} />
+        <SupportChatWidget businessTier={effectiveTier === "business"} />
       )}
 
       <GuidedTour

@@ -469,6 +469,7 @@ const ALLOWED_HERO_TYPES = ["image/png", "image/jpeg", "image/webp"];
 
 const SettingsPanel = () => {
   const { tenantId, tenant } = useTenant();
+  const { isMultiSite } = useTierGate();
   const { selectedSiteId } = useSiteContext();
   const t = useT();
   const tDynamic = useTDynamic();
