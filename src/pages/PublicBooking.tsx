@@ -806,7 +806,14 @@ const PublicBookingInner = () => {
     return tenantTypes;
   }, [tenant?.allowed_reservation_types, activeSiteId, allSiteResources]);
 
-  // Display name: prefer site-specific business_name, then site name, then tenant business name
+  // Helper: resolve site name from site_id
+  const siteNameMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    (allSites ?? []).forEach((s) => { map[s.id] = s.name; });
+    return map;
+  }, [allSites]);
+  const showSiteBadges = hasMultipleSites && !activeSiteId;
+
   const siteBusinessName = siteSettings?.business_name;
   const displayName = siteBusinessName
     ? siteBusinessName
