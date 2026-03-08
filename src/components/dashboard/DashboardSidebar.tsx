@@ -1,4 +1,4 @@
-import { CalendarDays, List, Settings, LogOut, LayoutDashboard, Menu, X, ShieldCheck, Cog, BarChart3, LifeBuoy, Shield, Building2, Crown } from "lucide-react";
+import { CalendarDays, List, Settings, LogOut, LayoutDashboard, Menu, X, ShieldCheck, Cog, BarChart3, LifeBuoy, Shield, Building2, Crown, UserCircle } from "lucide-react";
 import Logo from "@/components/Logo";
 import SiteSelector from "./SiteSelector";
 import { useTenant } from "@/hooks/useTenant";
@@ -22,7 +22,7 @@ import {
   PERM_SITES_VIEW,
 } from "@/lib/permissions";
 
-export type DashboardView = "overview" | "calendar" | "reservations" | "resources" | "reports" | "settings" | "admin" | "support" | "sites";
+export type DashboardView = "overview" | "calendar" | "reservations" | "resources" | "reports" | "settings" | "admin" | "support" | "sites" | "profile";
 
 interface DashboardSidebarProps {
   currentView: DashboardView;
@@ -44,6 +44,7 @@ const navItems: { view: DashboardView; labelKey: TranslationKey; icon: React.Ele
   { view: "admin", labelKey: "nav.admin", icon: ShieldCheck, adminOnly: true, permission: PERM_ADMIN_VIEW },
   { view: "sites", labelKey: "nav.sites" as TranslationKey, icon: Building2, permission: PERM_SITES_VIEW, tierRequired: "business" },
   { view: "support", labelKey: "nav.support", icon: LifeBuoy, permission: PERM_SUPPORT_VIEW },
+  { view: "profile", labelKey: "nav.profile" as TranslationKey, icon: UserCircle },
 ];
 
 const DashboardSidebar = ({ currentView, onViewChange, userEmail, onSignOut, mobileOpen, onMobileToggle, isAdmin: isAdminUser }: DashboardSidebarProps) => {

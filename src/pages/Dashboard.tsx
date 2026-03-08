@@ -32,6 +32,7 @@ import DashboardSupportPanel from "@/components/dashboard/DashboardSupportPanel"
 import SitesManagementPanel from "@/components/dashboard/SitesManagementPanel";
 import Logo from "@/components/Logo";
 import SupportChatWidget from "@/components/SupportChatWidget";
+import ProfileSettings from "@/components/dashboard/ProfileSettings";
 import GuidedTour, { TourStep } from "@/components/dashboard/GuidedTour";
 import SamplePeriodBanner from "@/components/dashboard/SamplePeriodBanner";
 import { useSamplePeriod } from "@/hooks/useSamplePeriod";
@@ -226,6 +227,7 @@ const Dashboard = () => {
     admin: gatedView("admin", <AdminPanel />),
     sites: gatedView("sites", <SitesManagementPanel />),
     support: gatedView("support", <DashboardSupportPanel />),
+    profile: <ProfileSettings />,
   };
 
   return (

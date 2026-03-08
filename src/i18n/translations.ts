@@ -50,6 +50,7 @@ type TranslationKeys = {
   "nav.reports": string;
   "nav.support": string;
   "nav.sites": string;
+  "nav.profile": string;
 
   // Reports
   "reports.total": string;
@@ -1371,6 +1372,7 @@ const en: TranslationKeys = {
   "nav.reports": "Reports",
   "nav.support": "Support",
   "nav.sites": "Sites",
+  "nav.profile": "Profile",
 
   "reports.total": "Total",
   "reports.confirmed": "Confirmed",
@@ -2671,6 +2673,7 @@ const fi: TranslationKeys = {
   "nav.reports": "Raportit",
   "nav.support": "Tuki",
   "nav.sites": "Toimipisteet",
+  "nav.profile": "Profiili",
 
   "reports.total": "Yhteensä",
   "reports.confirmed": "Vahvistettu",
@@ -3969,6 +3972,7 @@ const sv: TranslationKeys = {
   "nav.reports": "Rapporter",
   "nav.support": "Support",
   "nav.sites": "Platser",
+  "nav.profile": "Profil",
 
   "reports.total": "Totalt",
   "reports.confirmed": "Bekräftad",
