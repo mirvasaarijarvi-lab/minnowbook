@@ -2745,6 +2745,9 @@ const fi: TranslationKeys = {
    // Booking
   "booking.title": "Tee varaus",
   "booking.selectType": "Mitä haluat varata?",
+  "booking.selectLocation": "Valitse toimipiste",
+  "booking.allLocations": "Kaikki toimipisteet",
+  "booking.atSite": "",
   "booking.typeDescRestaurant": "Varaa pöytä ravintolasta",
   "booking.typeDescVenue": "Varaa tila tapahtumallesi",
   "booking.typeDescGuesthouse": "Varaa huone yöpymiseen",
