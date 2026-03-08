@@ -4382,6 +4382,8 @@ const sv: TranslationKeys = {
   "dashboard.activeResources": "Aktiva resurser",
   "dashboard.bookingLink": "Bokningslänk",
   "dashboard.bookingLinkDesc": "Dela denna länk med dina kunder så att de kan boka.",
+  "dashboard.allServices": "Alla tjänster",
+  "dashboard.byServiceType": "Per tjänstetyp",
   "dashboard.copyLink": "Kopiera länk",
   "dashboard.linkCopied": "Länken kopierad!",
   "dashboard.noReservations": "Inga bokningar hittades.",
