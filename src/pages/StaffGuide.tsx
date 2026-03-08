@@ -109,7 +109,7 @@ const MockupCalendar = () => (
             <div key={ri} className={`text-[9px] px-1 py-0.5 rounded flex items-center gap-1 ${
               ri === 1 && day === 2 ? "bg-destructive/10 text-destructive" :
               ri === 2 && day === 5 ? "bg-muted text-muted-foreground" :
-              "bg-green-50 text-green-700"
+              "bg-success/10 text-success"
             }`}>
               {ri === 1 && day === 2 ? <X className="h-2 w-2" /> :
                ri === 2 && day === 5 ? <Lock className="h-2 w-2" /> :
