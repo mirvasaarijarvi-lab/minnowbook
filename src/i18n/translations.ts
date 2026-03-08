@@ -601,6 +601,9 @@ type TranslationKeys = {
   "dashboard.resourceManagementDesc": string;
   "dashboard.actions": string;
   "dashboard.active": string;
+  "dashboard.serviceOptions": string;
+  "dashboard.offersCatering": string;
+  "dashboard.offersPopup": string;
   "dashboard.inactive": string;
   "dashboard.namePlaceholder": string;
   "dashboard.descriptionPlaceholder": string;
