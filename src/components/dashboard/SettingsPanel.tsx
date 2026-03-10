@@ -491,7 +491,7 @@ const SubscriptionCard = ({ tenant }: { tenant: any }) => {
       <CardHeader>
         <CardTitle className="text-lg font-serif flex items-center gap-2">
           <CreditCard className="h-4 w-4" />
-          {t("settings.subscription") || "Subscription"}
+          {"Subscription"}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
