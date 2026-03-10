@@ -101,11 +101,16 @@ const PricingTier = ({
         ))}
       </ul>
 
-      <Link to="/signup">
-        <Button variant={isPopular ? "hero" : "default"} size="lg" className="w-full">
-          {t("common.startFreeTrial")}
-        </Button>
-      </Link>
+      <Button
+        variant={isPopular ? "hero" : "default"}
+        size="lg"
+        className="w-full"
+        onClick={handleSubscribe}
+        disabled={loading}
+      >
+        {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+        {t("common.startFreeTrial")}
+      </Button>
     </div>
   );
 };
