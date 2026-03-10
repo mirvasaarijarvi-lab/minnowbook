@@ -10,12 +10,14 @@ import { toast } from "sonner";
 import { useT } from "@/contexts/I18nContext";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import PasswordInput from "@/components/PasswordInput";
+import MfaVerify from "@/components/MfaVerify";
 
 const Login = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [mfaFactorId, setMfaFactorId] = useState<string | null>(null);
   const t = useT();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -23,8 +25,18 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
+
+      // Check if MFA is required
+      const { data: factorsData } = await supabase.auth.mfa.listFactors();
+      const verifiedFactor = factorsData?.totp?.find((f: any) => f.status === "verified");
+
+      if (verifiedFactor) {
+        setMfaFactorId(verifiedFactor.id);
+        return;
+      }
+
       toast.success(t("login.welcomeBack") + "!");
       navigate("/dashboard");
     } catch (error: any) {
@@ -33,6 +45,22 @@ const Login = () => {
       setLoading(false);
     }
   };
+
+  if (mfaFactorId) {
+    return (
+      <MfaVerify
+        factorId={mfaFactorId}
+        onSuccess={() => {
+          toast.success(t("login.welcomeBack") + "!");
+          navigate("/dashboard");
+        }}
+        onCancel={async () => {
+          await supabase.auth.signOut();
+          setMfaFactorId(null);
+        }}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background flex">

@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
 import { Loader2, Upload, X, User } from "lucide-react";
+import TwoFactorSettings from "./TwoFactorSettings";
 
 const ProfileSettings = () => {
   const { user } = useAuth();
@@ -204,6 +205,8 @@ const ProfileSettings = () => {
           </Button>
         </CardContent>
       </Card>
+
+      <TwoFactorSettings />
     </div>
   );
 };
