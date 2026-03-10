@@ -1002,6 +1002,9 @@ const SettingsPanel = () => {
         </Card>
       )}
 
+      {/* Subscription Management */}
+      <SubscriptionCard tenant={tenant} />
+
       {/* Multisite Upsell for non-business tiers (hidden for superadmins) */}
       {!isMultiSite && tenant?.tier && (
         <Card className="border-accent/30 bg-gradient-to-br from-accent/5 via-card to-accent/10">
