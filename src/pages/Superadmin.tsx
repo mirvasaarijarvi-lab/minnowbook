@@ -28,6 +28,8 @@ import {
   Eye,
   FlaskConical,
   Percent,
+  CreditCard,
+  Copy,
 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { useImpersonation } from "@/contexts/ImpersonationContext";
@@ -39,6 +41,8 @@ interface TenantWithStats {
   tier: string;
   is_active: boolean;
   subscription_status: string | null;
+  stripe_customer_id: string | null;
+  stripe_subscription_id: string | null;
   max_staff_users: number;
   allowed_reservation_types: string[];
   created_at: string | null;
@@ -341,6 +345,43 @@ const Superadmin = () => {
                       <p className="text-sm text-muted-foreground">
                         /{t.slug} · {t.userCount} users · {t.reservationCount} reservations · {t.resourceCount} resources
                       </p>
+                      {(t.stripe_customer_id || t.stripe_subscription_id) && (
+                        <div className="flex items-center gap-3 mt-1">
+                          <CreditCard className="h-3 w-3 text-muted-foreground shrink-0" />
+                          {t.stripe_customer_id && (
+                            <button
+                              onClick={() => {
+                                navigator.clipboard.writeText(t.stripe_customer_id!);
+                                toast({ title: "Copied", description: "Stripe Customer ID copied" });
+                              }}
+                              className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 font-mono"
+                              title="Click to copy"
+                            >
+                              {t.stripe_customer_id}
+                              <Copy className="h-2.5 w-2.5" />
+                            </button>
+                          )}
+                          {t.stripe_subscription_id && (
+                            <button
+                              onClick={() => {
+                                navigator.clipboard.writeText(t.stripe_subscription_id!);
+                                toast({ title: "Copied", description: "Stripe Subscription ID copied" });
+                              }}
+                              className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 font-mono"
+                              title="Click to copy"
+                            >
+                              {t.stripe_subscription_id}
+                              <Copy className="h-2.5 w-2.5" />
+                            </button>
+                          )}
+                        </div>
+                      )}
+                      {!t.stripe_customer_id && !t.stripe_subscription_id && (
+                        <p className="text-xs text-muted-foreground/60 mt-1 flex items-center gap-1">
+                          <CreditCard className="h-3 w-3" />
+                          No Stripe subscription
+                        </p>
+                      )}
                       {t.created_at && (
                         <p className="text-xs text-muted-foreground mt-0.5">
                           Created {new Date(t.created_at).toLocaleDateString()}
