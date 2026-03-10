@@ -516,7 +516,7 @@ const SubscriptionCard = ({ tenant }: { tenant: any }) => {
           </Button>
           <Button variant="ghost" size="sm" asChild>
             <a href="/pricing" target="_blank" rel="noopener noreferrer" className="gap-1.5">
-              {t("settings.viewPlans") || "View Plans"}
+              {"View Plans"}
               <ArrowRight className="h-3.5 w-3.5" />
             </a>
           </Button>
