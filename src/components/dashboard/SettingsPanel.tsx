@@ -512,7 +512,7 @@ const SubscriptionCard = ({ tenant }: { tenant: any }) => {
         <div className="flex gap-2">
           <Button variant="outline" size="sm" className="gap-1.5" onClick={handleManage} disabled={loading}>
             {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ExternalLink className="h-3.5 w-3.5" />}
-            {t("settings.manageSubscription") || "Manage Subscription"}
+            {"Manage Subscription"}
           </Button>
           <Button variant="ghost" size="sm" asChild>
             <a href="/pricing" target="_blank" rel="noopener noreferrer" className="gap-1.5">
