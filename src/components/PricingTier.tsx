@@ -1,8 +1,11 @@
-import { Check } from "lucide-react";
+import { useState } from "react";
+import { Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
 import { useT } from "@/contexts/I18nContext";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface PricingTierProps {
   name: string;
@@ -13,13 +16,39 @@ interface PricingTierProps {
   staffUsers: string;
   isPopular?: boolean;
   delay?: number;
+  priceId?: string;
 }
 
 const PricingTier = ({
   name, price, description, features, reservationTypes, staffUsers,
-  isPopular = false, delay = 0,
+  isPopular = false, delay = 0, priceId,
 }: PricingTierProps) => {
   const t = useT();
+  const [loading, setLoading] = useState(false);
+
+  const handleSubscribe = async () => {
+    if (!priceId) return;
+    setLoading(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        // Not logged in — redirect to signup
+        window.location.href = "/signup";
+        return;
+      }
+      const { data, error } = await supabase.functions.invoke("create-checkout", {
+        body: { priceId },
+      });
+      if (error) throw error;
+      if (data?.url) {
+        window.open(data.url, "_blank");
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Failed to start checkout");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div
@@ -72,11 +101,16 @@ const PricingTier = ({
         ))}
       </ul>
 
-      <Link to="/signup">
-        <Button variant={isPopular ? "hero" : "default"} size="lg" className="w-full">
-          {t("common.startFreeTrial")}
-        </Button>
-      </Link>
+      <Button
+        variant={isPopular ? "hero" : "default"}
+        size="lg"
+        className="w-full"
+        onClick={handleSubscribe}
+        disabled={loading}
+      >
+        {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+        {t("common.startFreeTrial")}
+      </Button>
     </div>
   );
 };

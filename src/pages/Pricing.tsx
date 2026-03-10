@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { ArrowRight, Building2 } from "lucide-react";
 import { useT } from "@/contexts/I18nContext";
+import { STRIPE_TIERS } from "@/lib/stripe-tiers";
 
 const Pricing = () => {
   const t = useT();
@@ -16,6 +17,7 @@ const Pricing = () => {
       description: t("pricing.basicDesc"),
       reservationTypes: t("pricing.basicTypes"),
       staffUsers: t("pricing.basicStaff"),
+      priceId: STRIPE_TIERS.basic.price_id,
       features: [
         t("pricing.basicF1"), t("pricing.basicF2"), t("pricing.basicF3"),
         t("pricing.basicF4"), t("pricing.basicF5"),
@@ -28,6 +30,7 @@ const Pricing = () => {
       reservationTypes: t("pricing.proTypes"),
       staffUsers: t("pricing.proStaff"),
       isPopular: true,
+      priceId: STRIPE_TIERS.professional.price_id,
       features: [
         t("pricing.proF1"), t("pricing.proF2"), t("pricing.proF3"),
       ],
@@ -38,6 +41,7 @@ const Pricing = () => {
       description: t("pricing.businessDesc"),
       reservationTypes: t("pricing.businessTypes"),
       staffUsers: t("pricing.businessStaff"),
+      priceId: STRIPE_TIERS.business.price_id,
       features: [
         t("pricing.businessF1"), t("pricing.businessF2"), t("pricing.businessF3"),
         t("pricing.businessF4"),
