@@ -124,7 +124,7 @@ const PricingTier = ({
 
       {loading && (
         <p className="text-xs text-accent text-center mt-3 animate-pulse font-medium">
-          {name} — {t("pricing.selectedPlan") ?? "Opening checkout…"}
+          {name} — Opening checkout…
         </p>
       )}
     </div>
