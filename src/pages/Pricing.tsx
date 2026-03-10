@@ -41,6 +41,7 @@ const Pricing = () => {
       description: t("pricing.businessDesc"),
       reservationTypes: t("pricing.businessTypes"),
       staffUsers: t("pricing.businessStaff"),
+      priceId: STRIPE_TIERS.business.price_id,
       features: [
         t("pricing.businessF1"), t("pricing.businessF2"), t("pricing.businessF3"),
         t("pricing.businessF4"),
