@@ -13,7 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { Loader2, Upload, X, ImageIcon, Building2, ArrowRight, MapPin, Mail, Phone, Palette, RotateCcw } from "lucide-react";
+import { Loader2, Upload, X, ImageIcon, Building2, ArrowRight, MapPin, Mail, Phone, Palette, RotateCcw, CreditCard, Crown, ExternalLink } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import DashboardTooltip from "./DashboardTooltip";
 import EmailTemplateEditor from "./EmailTemplateEditor";
@@ -461,6 +461,70 @@ const COLOR_PRESETS = [
   { name: "Slate & Coral", primary: "#334155", secondary: "#f8fafc", accent: "#f97316" },
   { name: "Indigo & Rose", primary: "#3730a3", secondary: "#f5f3ff", accent: "#e11d48" },
 ];
+
+const SubscriptionCard = ({ tenant }: { tenant: any }) => {
+  const t = useT();
+  const [loading, setLoading] = useState(false);
+
+  const tierLabel = tenant?.tier === "professional" ? "Pro" : tenant?.tier === "business" ? "Business" : "Basic";
+  const statusLabel = tenant?.subscription_status === "trialing" ? "Trial" : tenant?.subscription_status === "active" ? "Active" : tenant?.subscription_status ?? "—";
+
+  const handleManage = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("customer-portal");
+      if (error) throw error;
+      if (data?.url) {
+        window.open(data.url, "_blank");
+      } else {
+        toast.error("No subscription found. Subscribe from the pricing page first.");
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Failed to open subscription portal");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-lg font-serif flex items-center gap-2">
+          <CreditCard className="h-4 w-4" />
+          {"Subscription"}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl bg-accent/10 flex items-center justify-center">
+              <Crown className="h-5 w-5 text-accent" />
+            </div>
+            <div>
+              <p className="font-medium text-foreground">{tierLabel}</p>
+              <p className="text-xs text-muted-foreground capitalize">{statusLabel}</p>
+            </div>
+          </div>
+          <Badge variant={tenant?.subscription_status === "active" ? "default" : "secondary"} className="text-xs">
+            {statusLabel}
+          </Badge>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" className="gap-1.5" onClick={handleManage} disabled={loading}>
+            {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ExternalLink className="h-3.5 w-3.5" />}
+            {"Manage Subscription"}
+          </Button>
+          <Button variant="ghost" size="sm" asChild>
+            <a href="/pricing" target="_blank" rel="noopener noreferrer" className="gap-1.5">
+              {"View Plans"}
+              <ArrowRight className="h-3.5 w-3.5" />
+            </a>
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
 
 const MAX_LOGO_SIZE = 2 * 1024 * 1024; // 2MB
 const MAX_HERO_SIZE = 5 * 1024 * 1024; // 5MB
@@ -1001,6 +1065,9 @@ const SettingsPanel = () => {
           </CardContent>
         </Card>
       )}
+
+      {/* Subscription Management */}
+      <SubscriptionCard tenant={tenant} />
 
       {/* Multisite Upsell for non-business tiers (hidden for superadmins) */}
       {!isMultiSite && tenant?.tier && (
