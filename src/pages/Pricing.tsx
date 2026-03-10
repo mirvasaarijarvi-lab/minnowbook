@@ -30,6 +30,7 @@ const Pricing = () => {
       reservationTypes: t("pricing.proTypes"),
       staffUsers: t("pricing.proStaff"),
       isPopular: true,
+      priceId: STRIPE_TIERS.professional.price_id,
       features: [
         t("pricing.proF1"), t("pricing.proF2"), t("pricing.proF3"),
       ],
