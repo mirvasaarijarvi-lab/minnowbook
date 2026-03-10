@@ -54,7 +54,11 @@ const PricingTier = ({
     <div
       className={cn(
         "relative flex flex-col rounded-2xl border p-8 transition-all duration-300 hover:shadow-hover",
-        isPopular ? "border-accent shadow-hero scale-[1.02] bg-card" : "border-border shadow-card bg-card"
+        loading
+          ? "border-accent ring-2 ring-accent/40 shadow-hero scale-[1.02] bg-accent/5"
+          : isPopular
+            ? "border-accent shadow-hero scale-[1.02] bg-card"
+            : "border-border shadow-card bg-card"
       )}
       style={{ animationDelay: `${delay}ms` }}
     >
