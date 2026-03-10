@@ -108,13 +108,25 @@ const PricingTier = ({
       <Button
         variant={isPopular ? "hero" : "default"}
         size="lg"
-        className="w-full"
+        className={cn("w-full", loading && "opacity-90")}
         onClick={handleSubscribe}
         disabled={loading}
       >
-        {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-        {t("common.startFreeTrial")}
+        {loading ? (
+          <>
+            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+            {t("pricing.redirecting") ?? "Redirecting to checkout…"}
+          </>
+        ) : (
+          t("common.startFreeTrial")
+        )}
       </Button>
+
+      {loading && (
+        <p className="text-xs text-accent text-center mt-3 animate-pulse font-medium">
+          {name} — {t("pricing.selectedPlan") ?? "Opening checkout…"}
+        </p>
+      )}
     </div>
   );
 };
