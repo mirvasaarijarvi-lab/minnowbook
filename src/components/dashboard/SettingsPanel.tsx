@@ -473,14 +473,43 @@ const SubscriptionCard = ({ tenant }: { tenant: any }) => {
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("customer-portal");
-      if (error) throw error;
+      if (error) {
+        // Parse the error body for a friendly message
+        const errorBody = typeof error === "object" && "message" in error ? error.message : String(error);
+        if (errorBody.includes("No Stripe customer")) {
+          toast.info("No active subscription yet. Choose a plan to get started!", {
+            action: {
+              label: "View Plans",
+              onClick: () => window.open("/pricing", "_blank"),
+            },
+          });
+        } else {
+          toast.error(errorBody || "Failed to open subscription portal");
+        }
+        return;
+      }
       if (data?.url) {
         window.open(data.url, "_blank");
       } else {
-        toast.error("No subscription found. Subscribe from the pricing page first.");
+        toast.info("No active subscription yet. Choose a plan to get started!", {
+          action: {
+            label: "View Plans",
+            onClick: () => window.open("/pricing", "_blank"),
+          },
+        });
       }
     } catch (err: any) {
-      toast.error(err.message || "Failed to open subscription portal");
+      const msg = err?.message || String(err);
+      if (msg.includes("No Stripe customer") || msg.includes("non-2xx")) {
+        toast.info("No active subscription yet. Choose a plan to get started!", {
+          action: {
+            label: "View Plans",
+            onClick: () => window.open("/pricing", "_blank"),
+          },
+        });
+      } else {
+        toast.error(msg || "Failed to open subscription portal");
+      }
     } finally {
       setLoading(false);
     }
