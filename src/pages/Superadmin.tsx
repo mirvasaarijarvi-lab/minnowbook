@@ -39,6 +39,8 @@ interface TenantWithStats {
   tier: string;
   is_active: boolean;
   subscription_status: string | null;
+  stripe_customer_id: string | null;
+  stripe_subscription_id: string | null;
   max_staff_users: number;
   allowed_reservation_types: string[];
   created_at: string | null;
