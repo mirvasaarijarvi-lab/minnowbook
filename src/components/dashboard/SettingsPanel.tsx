@@ -13,7 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { Loader2, Upload, X, ImageIcon, Building2, ArrowRight, MapPin, Mail, Phone, Palette, RotateCcw } from "lucide-react";
+import { Loader2, Upload, X, ImageIcon, Building2, ArrowRight, MapPin, Mail, Phone, Palette, RotateCcw, CreditCard, Crown, ExternalLink } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import DashboardTooltip from "./DashboardTooltip";
 import EmailTemplateEditor from "./EmailTemplateEditor";
