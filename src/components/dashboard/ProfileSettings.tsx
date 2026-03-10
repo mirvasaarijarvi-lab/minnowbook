@@ -205,6 +205,8 @@ const ProfileSettings = () => {
           </Button>
         </CardContent>
       </Card>
+
+      <TwoFactorSettings />
     </div>
   );
 };
