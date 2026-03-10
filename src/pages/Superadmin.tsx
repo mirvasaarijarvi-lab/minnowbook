@@ -28,6 +28,8 @@ import {
   Eye,
   FlaskConical,
   Percent,
+  CreditCard,
+  Copy,
 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { useImpersonation } from "@/contexts/ImpersonationContext";
