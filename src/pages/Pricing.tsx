@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { ArrowRight, Building2 } from "lucide-react";
 import { useT } from "@/contexts/I18nContext";
+import { STRIPE_TIERS } from "@/lib/stripe-tiers";
 
 const Pricing = () => {
   const t = useT();
