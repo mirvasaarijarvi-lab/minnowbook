@@ -54,7 +54,11 @@ const PricingTier = ({
     <div
       className={cn(
         "relative flex flex-col rounded-2xl border p-8 transition-all duration-300 hover:shadow-hover",
-        isPopular ? "border-accent shadow-hero scale-[1.02] bg-card" : "border-border shadow-card bg-card"
+        loading
+          ? "border-accent ring-2 ring-accent/40 shadow-hero scale-[1.02] bg-accent/5"
+          : isPopular
+            ? "border-accent shadow-hero scale-[1.02] bg-card"
+            : "border-border shadow-card bg-card"
       )}
       style={{ animationDelay: `${delay}ms` }}
     >
@@ -104,13 +108,25 @@ const PricingTier = ({
       <Button
         variant={isPopular ? "hero" : "default"}
         size="lg"
-        className="w-full"
+        className={cn("w-full", loading && "opacity-90")}
         onClick={handleSubscribe}
         disabled={loading}
       >
-        {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-        {t("common.startFreeTrial")}
+        {loading ? (
+          <>
+            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+            {"Redirecting to checkout…"}
+          </>
+        ) : (
+          t("common.startFreeTrial")
+        )}
       </Button>
+
+      {loading && (
+        <p className="text-xs text-accent text-center mt-3 animate-pulse font-medium">
+          {name} — Opening checkout…
+        </p>
+      )}
     </div>
   );
 };
