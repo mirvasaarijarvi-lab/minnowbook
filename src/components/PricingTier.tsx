@@ -21,9 +21,34 @@ interface PricingTierProps {
 
 const PricingTier = ({
   name, price, description, features, reservationTypes, staffUsers,
-  isPopular = false, delay = 0,
+  isPopular = false, delay = 0, priceId,
 }: PricingTierProps) => {
   const t = useT();
+  const [loading, setLoading] = useState(false);
+
+  const handleSubscribe = async () => {
+    if (!priceId) return;
+    setLoading(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        // Not logged in — redirect to signup
+        window.location.href = "/signup";
+        return;
+      }
+      const { data, error } = await supabase.functions.invoke("create-checkout", {
+        body: { priceId },
+      });
+      if (error) throw error;
+      if (data?.url) {
+        window.open(data.url, "_blank");
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Failed to start checkout");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div
