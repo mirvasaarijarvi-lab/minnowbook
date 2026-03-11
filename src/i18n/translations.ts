@@ -2127,7 +2127,7 @@ const en: TranslationKeys = {
   "about.valueGlobal": "Accessibility",
   "about.valueGlobalDesc": "Our platform is multilingual and designed to be accessible to everyone.",
   "about.ctaTitle": "Ready to simplify your reservations?",
-  "about.ctaSubtitle": "Join hospitality businesses already using MinnowBook to streamline your bookings.",
+  "about.ctaSubtitle": "Join hospitality businesses already using MimoBook to streamline your bookings.",
 
   "privacy.title": "Privacy Policy",
   "privacy.lastUpdated": "Last updated:",
