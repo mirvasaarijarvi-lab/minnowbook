@@ -43,7 +43,7 @@ export const I18nProvider = ({ children }: { children: ReactNode }) => {
 
   const setLanguage = useCallback((lang: Language) => {
     setLanguageState(lang);
-    localStorage.setItem("minnowbook-lang", lang);
+    localStorage.setItem("mimobook-lang", lang);
   }, []);
 
   const t = useCallback(

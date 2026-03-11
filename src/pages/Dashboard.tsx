@@ -39,7 +39,7 @@ import { useSamplePeriod } from "@/hooks/useSamplePeriod";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
-const TOUR_STORAGE_KEY = "minnowbook-tour-completed";
+const TOUR_STORAGE_KEY = "mimobook-tour-completed";
 
 const tourSteps: TourStep[] = [
   {

@@ -73,7 +73,7 @@ const MarketingFooter = () => {
 
         <div className="border-t border-primary-foreground/10 mt-10 pt-6 text-center">
           <p className="text-xs text-primary-foreground/40">
-            © {new Date().getFullYear()} MinnowBook. {t("footer.allRightsReserved")}
+            © {new Date().getFullYear()} MimoBook. {t("footer.allRightsReserved")}
           </p>
         </div>
       </div>
