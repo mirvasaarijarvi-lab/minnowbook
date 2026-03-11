@@ -3434,7 +3434,7 @@ const fi: TranslationKeys = {
   "privacy.s1Title": "1. Johdanto",
   "privacy.s1P1": "Tämä tietosuojakäytäntö selittää, miten MimoBook kerää, käyttää ja suojaa henkilötietojasi. Noudatamme EU:n yleistä tietosuoja-asetusta (GDPR).",
   "privacy.s2Title": "2. Rekisterinpitäjä",
-  "privacy.s2P1": "MinnowBook on henkilötietojen rekisterinpitäjä. Tietosuojakyselyissä ota yhteyttä tukisivumme kautta.",
+  "privacy.s2P1": "MimoBook on henkilötietojen rekisterinpitäjä. Tietosuojakyselyissä ota yhteyttä tukisivumme kautta.",
   "privacy.s3Title": "3. Kerättävät tiedot",
   "privacy.s3P1": "Keräämme seuraavat henkilötietoluokat:",
   "privacy.s3Item1": "Tilitiedot: nimi, sähköposti, salasana (tiivistetty)",
