@@ -36,7 +36,9 @@ serve(async (req) => {
     logStep("User authenticated", { userId: user.id, email: user.email });
 
     const { priceId } = await req.json();
-    if (!priceId) throw new Error("priceId is required");
+    if (!priceId || typeof priceId !== "string") throw new Error("priceId is required");
+    // Validate priceId format (Stripe price IDs start with "price_")
+    if (!/^price_[a-zA-Z0-9]+$/.test(priceId)) throw new Error("Invalid priceId format");
     logStep("Price ID received", { priceId });
 
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {

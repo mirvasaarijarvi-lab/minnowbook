@@ -213,7 +213,7 @@ function buildEmailHtml(reservation: any, business: any, lang: string, emailType
   }
 
   const customMsgHtml = customMessage
-    ? `<div style="margin:16px 0;padding:12px 16px;background-color:#f5f0fa;border-left:4px solid ${primaryColor};border-radius:4px;font-size:14px;color:#3F1F5C;font-family:'Inter',Arial,sans-serif">${customMessage}</div>`
+    ? `<div style="margin:16px 0;padding:12px 16px;background-color:#f5f0fa;border-left:4px solid ${escapeHtml(primaryColor)};border-radius:4px;font-size:14px;color:#3F1F5C;font-family:'Inter',Arial,sans-serif">${escapeHtml(customMessage)}</div>`
     : "";
 
   return `<!DOCTYPE html>
