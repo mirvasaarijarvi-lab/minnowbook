@@ -5211,7 +5211,7 @@ const sv: TranslationKeys = {
   "support.billingC3": "Business (199 €/mån): Alla reserveringstyper och obegränsat antal, obegränsat antal anställda, prioriterad support med 24 timmars svar.",
   "support.billingC4": "Uppgradera eller nedgradera när som helst. Ändringarna träder i kraft nästa faktureringscykel.",
   "support.faqTitle": "Vanliga frågor",
-  "support.faqDesc": "Svar på de vanligaste frågorna om MimoBook.",
+  "support.faqDesc": "Svar på de vanligaste frågorna om MimmoBook.",
   "support.faqC1": "F: Kan jag använda min egen domän? S: Anpassade domäner finns på vår färdplan.",
   "support.faqC2": "F: Hur får gäster bekräftelser? S: Automatiskt via e-post när du bekräftar en bokning.",
   "support.faqC3": "F: Kan jag exportera mina data? S: Ja, rapporter kan exporteras från rapportpanelen.",
