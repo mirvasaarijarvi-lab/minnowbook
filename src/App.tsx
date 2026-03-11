@@ -30,7 +30,6 @@ import UseCases from "./pages/UseCases";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import CookieConsent from "./components/CookieConsent";
-import CookieConsent from "./components/CookieConsent";
 import AccessibilityWidget from "./components/AccessibilityWidget";
 import { ImpersonationProvider } from "./contexts/ImpersonationContext";
 import { toast } from "sonner";
