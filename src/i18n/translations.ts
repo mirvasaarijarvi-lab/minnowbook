@@ -4726,7 +4726,7 @@ const sv: TranslationKeys = {
   "about.valueGlobal": "Tillgänglighet",
   "about.valueGlobalDesc": "Vår plattform är flerspråkig och utformad för att vara tillgänglig för alla.",
   "about.ctaTitle": "Redo att förenkla dina bokningar?",
-  "about.ctaSubtitle": "Gå med i de hotell- och restaurangföretag som redan använder MimoBook för att effektivisera dina bokningar.",
+  "about.ctaSubtitle": "Gå med i de hotell- och restaurangföretag som redan använder MimmoBook för att effektivisera dina bokningar.",
 
   "privacy.title": "Integritetspolicy",
   "privacy.lastUpdated": "Senast uppdaterad:",
