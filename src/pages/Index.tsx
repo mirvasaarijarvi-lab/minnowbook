@@ -151,6 +151,24 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Video Section */}
+      <section className="py-16 md:py-24">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto">
+            <div className="relative w-full rounded-2xl overflow-hidden shadow-hover border border-border" style={{ paddingBottom: "56.25%" }}>
+              <iframe
+                className="absolute inset-0 w-full h-full"
+                src="https://www.youtube.com/embed/s7FPy19a5uY"
+                title="MimmoBook – Reservation Management for Hospitality"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                loading="lazy"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* How It Works */}
       <section className="py-20 bg-secondary/50">
         <div className="container mx-auto px-4">
