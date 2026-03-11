@@ -2304,9 +2304,9 @@ const en: TranslationKeys = {
   "help.guide5Q": "How do I add or edit resources?",
   "help.guide5A": "Go to **Dashboard → Resources** to create rooms, tables, or venues. You can set capacity, pricing, upload up to 5 images, and toggle active/inactive status.",
 
-  // MinnowAid
-  "aid.title": "MinnowAid",
-  "aid.subtitle": "Ask anything about MinnowBook",
+  // MimoAid
+  "aid.title": "MimoAid",
+  "aid.subtitle": "Ask anything about MimoBook",
   "aid.myRequests": "My Requests",
   "aid.yourRequests": "Your submitted support requests",
   "aid.askOrGuide": "Ask a question or try a quick guide:",
