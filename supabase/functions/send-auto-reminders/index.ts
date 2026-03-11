@@ -93,7 +93,7 @@ function buildEmailHtml(reservation: any, business: any, lang: string, customBod
       .replace(/\{\{business_name\}\}/g, escapeHtml(businessName));
   } else {
     bodyContent = `
-      <p style="color:#63516E;font-size:15px;font-family:'Inter',Arial,sans-serif;line-height:1.6">${t.greeting} <strong style="color:#1E1519">${reservation.guest_name}</strong>,</p>
+      <p style="color:#63516E;font-size:15px;font-family:'Inter',Arial,sans-serif;line-height:1.6">${t.greeting} <strong style="color:#1E1519">${escapeHtml(reservation.guest_name)}</strong>,</p>
       <p style="color:#63516E;font-size:15px;font-family:'Inter',Arial,sans-serif;line-height:1.6">${t.body}</p>`;
   }
 
