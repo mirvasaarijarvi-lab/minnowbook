@@ -3432,7 +3432,7 @@ const fi: TranslationKeys = {
   "privacy.title": "Tietosuojakäytäntö",
   "privacy.lastUpdated": "Päivitetty viimeksi:",
   "privacy.s1Title": "1. Johdanto",
-  "privacy.s1P1": "Tämä tietosuojakäytäntö selittää, miten MinnowBook kerää, käyttää ja suojaa henkilötietojasi. Noudatamme EU:n yleistä tietosuoja-asetusta (GDPR).",
+  "privacy.s1P1": "Tämä tietosuojakäytäntö selittää, miten MimoBook kerää, käyttää ja suojaa henkilötietojasi. Noudatamme EU:n yleistä tietosuoja-asetusta (GDPR).",
   "privacy.s2Title": "2. Rekisterinpitäjä",
   "privacy.s2P1": "MinnowBook on henkilötietojen rekisterinpitäjä. Tietosuojakyselyissä ota yhteyttä tukisivumme kautta.",
   "privacy.s3Title": "3. Kerättävät tiedot",
