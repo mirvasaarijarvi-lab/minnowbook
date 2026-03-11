@@ -1,3 +1,4 @@
+import SEOHead, { faqSchema, breadcrumbSchema } from "@/components/SEOHead";
 import MarketingHeader from "@/components/MarketingHeader";
 import MarketingFooter from "@/components/MarketingFooter";
 import PricingTier from "@/components/PricingTier";
