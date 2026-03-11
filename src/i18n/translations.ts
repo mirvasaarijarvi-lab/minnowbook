@@ -5896,7 +5896,7 @@ const sv: TranslationKeys = {
   "blog.catInsights": "Insikter",
   "blog.catGuides": "Guider",
   "blog.post1Title": "5 bokningsutmaningar som små besöksnäringsföretag möter",
-  "blog.post1Excerpt": "Från uteblivanden till dubbelbokningar — små restauranger, lokaler och gästhus möter unika utmaningar. Här är de och hur man löser dem.",
+  "blog.post1Excerpt": "Från uteblivanden till dubbelbokningar, små restauranger, lokaler och gästhus möter unika utmaningar. Här är de och hur man löser dem.",
   "blog.post1C1": "Små besöksnäringsföretag — restauranger med en handfull bord, boutiquelokaler, familjedrivna gästhus — möter bokningsutmaningar som större verksamheter löser med dedikerad personal och företagsprogramvara. Men för ett företag med 5–30 platser är dessa lösningar överdimensionerade.",
   "blog.post1C2": "Den första utmaningen är uteblivanden. När ett bord för fyra inte dyker upp på en restaurang med 20 platser, försvinner 20% av kapaciteten. Automatiska påminnelsemeddelanden 24 timmar före en bokning kan minska uteblivandena med 30–50%.",
   "blog.post1C3": "Den andra utmaningen är dubbelbokningar. När bokningar kommer via telefon, e-post, Instagram-meddelanden och walk-ins, är det lätt att boka samma bord eller rum dubbelt. Ett centraliserat bokningssystem med realtidstillgänglighet eliminerar detta helt.",
