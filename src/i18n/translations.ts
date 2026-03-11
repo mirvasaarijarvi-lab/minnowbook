@@ -5637,7 +5637,7 @@ const sv: TranslationKeys = {
   "pricing.basicName": "Basic",
   "pricing.basicDesc": "Perfekt för ett enskilt hotell, en restaurang eller en eventlokal.",
   "pricing.basicTypes": "1 typ",
-  "pricing.basicStaff": "1–3",
+  "pricing.basicStaff": "1 till 3",
   "pricing.proName": "Pro",
   "pricing.proDesc": "För företag som erbjuder hotell-, restaurang- och evenemangstjänster på ett ställe.",
   "pricing.proTypes": "Alla 3 typer, 1 av varje (kan inte byta till t.ex. två restauranger och ett hotell)",
