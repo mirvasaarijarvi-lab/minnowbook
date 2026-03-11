@@ -33,7 +33,7 @@ export const useLanguage = () => {
 
 export const I18nProvider = ({ children }: { children: ReactNode }) => {
   const [language, setLanguageState] = useState<Language>(() => {
-    const saved = localStorage.getItem("minnowbook-lang");
+    const saved = localStorage.getItem("mimobook-lang") || localStorage.getItem("minnowbook-lang");
     if (saved === "fi" || saved === "sv" || saved === "en") return saved;
     const browserLang = navigator.language.slice(0, 2);
     if (browserLang === "fi") return "fi";
