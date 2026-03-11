@@ -821,7 +821,7 @@ const guideContent: Record<Language, GuideContent> = {
   },
   sv: {
     title: "Personalens snabbguide",
-    subtitle: "MinnowBook – bruksanvisning för personalen",
+    subtitle: "MimoBook – bruksanvisning för personalen",
     printBtn: "Skriv ut / Spara som PDF",
     back: "Tillbaka till instrumentpanelen",
     tierOverview: {
