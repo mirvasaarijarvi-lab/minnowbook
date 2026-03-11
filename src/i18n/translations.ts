@@ -235,6 +235,11 @@ type TranslationKeys = {
   "booking.pricingMenu": string;
   "booking.pricingFixed": string;
   "booking.pricingQuote": string;
+  "booking.pricingQuoteDesc": string;
+  "booking.pricingReserveTable": string;
+  "booking.pricingReserveTableDesc": string;
+  "booking.pricingSetMenu": string;
+  "booking.pricingSetMenuDesc": string;
   "booking.fixedPrice": string;
   "booking.restaurantSubType": string;
   "booking.subTypeDineIn": string;
