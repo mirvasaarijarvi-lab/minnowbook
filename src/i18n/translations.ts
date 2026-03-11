@@ -4267,7 +4267,7 @@ const fi: TranslationKeys = {
   "support.staffC4": "Paketeissa on henkilöstökäyttäjän ja varaustyypin rajoitukset, päivitä lisätäksesi lisää.",
   "support.billingTitle": "Tilaukset ja laskutus",
   "support.billingDesc": "Hinnoitteluportaat ja tilausten hallinnointi.",
-  "support.billingC1": "Basic (29 €/kk): 1 varaustyyppi, 1–3 työntekijäkäyttäjää, tekoälychatbot-tuki.",
+  "support.billingC1": "Basic (29 €/kk): 1 varaustyyppi, 1 to 3 työntekijäkäyttäjää, tekoälychatbot-tuki.",
   "support.billingC2": "Pro (79 €/kk): Kaikki varaustyypit (yksi per tyyppi), jopa 10 työntekijäkäyttäjää, tekoälychatbot-tuki.",
   "support.billingC3": "Business (199 €/kk): Kaikki varaustyypit ja rajoittamaton määrä, rajoittamaton määrä työntekijäkäyttäjiä, prioriteettituki 24 tunnin vasteajalla.",
   "support.billingC4": "Voit päivittää tai alentaa tilausta milloin tahansa. Muutokset tulevat voimaan seuraavalla laskutuskaudella.",
