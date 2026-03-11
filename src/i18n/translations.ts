@@ -3901,7 +3901,7 @@ const fi: TranslationKeys = {
   "help.requestSubmittedDetail": "Tukipyyntösi on lähetetty! Ylläpitotiimi tarkistaa sen ja vastaa pian.",
   "help.art1Title": "Aloittaminen",
   "help.art1Desc": "Luo tili ja ensimmäinen varaussivu muutamassa minuutissa.",
-  "help.art1C1": "Rekisteröidy 30 päivän ilmaiseen kokeiluun — luottokorttia ei tarvita.",
+  "help.art1C1": "Rekisteröidy 30 päivän ilmaiseen kokeiluun. Luottokorttia ei tarvita.",
   "help.art1C2": "Täytä ohjattu asennus nimetäksesi yrityksesi ja valitaksesi varaustyypit.",
   "help.art1C3": "Mukauta brändi (logo, värit) Asetuksissa.",
   "help.art1C4": "Jaa varauslinkki asiakkaillesi!",
