@@ -4762,7 +4762,7 @@ const sv: TranslationKeys = {
   "a11y.title": "Tillgänglighetsredogörelse",
   "a11y.lastUpdated": "Senast uppdaterad:",
   "a11y.s1Title": "1. Vårt åtagande",
-  "a11y.s1P1": "MimoBook är engagerat i att säkerställa digital tillgänglighet för alla. Vi förbättrar ständigt användarupplevelsen och tillämpar relevanta tillgänglighetsstandarder.",
+  "a11y.s1P1": "MimmoBook är engagerat i att säkerställa digital tillgänglighet för alla. Vi förbättrar ständigt användarupplevelsen och tillämpar relevanta tillgänglighetsstandarder.",
   "a11y.s2Title": "2. Tillgänglighetsfunktioner",
   "a11y.s2P1": "Vår plattform inkluderar följande tillgänglighetsfunktioner:",
   "a11y.s2Item1": "Justerbar teckenstorlek (80%–150%)",
