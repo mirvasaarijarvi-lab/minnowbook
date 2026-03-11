@@ -2542,7 +2542,7 @@ const en: TranslationKeys = {
    "aid.guideQ10": "How do I block dates or time slots?",
    "aid.guideA10": "In **Dashboard → Calendar**, click on a date and use the **Block Slot** option to prevent bookings for specific dates, times, or resources.",
    "aid.guideQ11": "How do I manage recurring blocked slots?",
-   "aid.guideA11": "Go to **Dashboard → Calendar** and open the **Recurring Blocks** panel. You can create weekly repeating blocks for specific days, time ranges, and resource types (e.g. close the restaurant every Monday). Toggle blocks on/off or delete them anytime — changes apply immediately to the public booking page.",
+   "aid.guideA11": "Go to **Dashboard → Calendar** and open the **Recurring Blocks** panel. You can create weekly repeating blocks for specific days, time ranges, and resource types (e.g. close the restaurant every Monday). Toggle blocks on/off or delete them anytime. Changes apply immediately to the public booking page.",
   // Sites
   "sites.title": "Sites",
   "sites.addSite": "Add Site",
