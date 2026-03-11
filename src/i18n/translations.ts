@@ -2613,7 +2613,7 @@ const en: TranslationKeys = {
   "support.billingC3": "Business (€199/mo): All types and unlimited number, unlimited number staff users, priority support with 24h response.",
   "support.billingC4": "Upgrade or downgrade anytime. Changes take effect next billing cycle.",
   "support.faqTitle": "Frequently Asked Questions",
-  "support.faqDesc": "Answers to the most common questions about MimoBook.",
+  "support.faqDesc": "Answers to the most common questions about MimmoBook.",
   "support.faqC1": "Q: Can I use my own domain? A: Custom domains are on our roadmap.",
   "support.faqC2": "Q: How do guests receive confirmations? A: Automatically via email when you confirm a booking.",
   "support.faqC3": "Q: Can I export my data? A: Yes, reports can be exported from the Reports panel.",
