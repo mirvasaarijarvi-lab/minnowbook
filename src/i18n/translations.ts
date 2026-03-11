@@ -5215,7 +5215,7 @@ const sv: TranslationKeys = {
   "support.faqC1": "F: Kan jag använda min egen domän? S: Anpassade domäner finns på vår färdplan.",
   "support.faqC2": "F: Hur får gäster bekräftelser? S: Automatiskt via e-post när du bekräftar en bokning.",
   "support.faqC3": "F: Kan jag exportera mina data? S: Ja, rapporter kan exporteras från rapportpanelen.",
-  "support.faqC4": "F: Vad är skillnaden mellan AI-chatbot och prioriterad support? A: Alla planer inkluderar MinnowAid, vår AI-chatbot som är öppen dygnet runt. Affärsplanen lägger till möjlighet för supportförfrågningar som ställs på plattformen med garanterat 24-timmarssvar.",
+  "support.faqC4": "F: Vad är skillnaden mellan AI-chatbot och prioriterad support? A: Alla planer inkluderar MimoAid, vår AI-chatbot som är öppen dygnet runt. Affärsplanen lägger till möjlighet för supportförfrågningar som ställs på plattformen med garanterat 24-timmarssvar.",
   "support.faqC5": "",
   "support.catBasics": "Grunder",
   "support.catReservations": "Bokningar",
