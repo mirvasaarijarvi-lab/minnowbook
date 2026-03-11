@@ -83,14 +83,14 @@ function buildEmailHtml(reservation: any, business: any, lang: string, customBod
   let bodyContent: string;
   if (customBody) {
     bodyContent = customBody
-      .replace(/\{\{guest_name\}\}/g, reservation.guest_name)
-      .replace(/\{\{guest_email\}\}/g, reservation.guest_email)
-      .replace(/\{\{date\}\}/g, reservation.date)
-      .replace(/\{\{start_time\}\}/g, reservation.start_time?.slice(0, 5) || "")
-      .replace(/\{\{reservation_type\}\}/g, reservation.reservation_type)
-      .replace(/\{\{guests_count\}\}/g, String(reservation.guests_count || ""))
-      .replace(/\{\{price_eur\}\}/g, reservation.price_eur != null ? Number(reservation.price_eur).toFixed(2) : "")
-      .replace(/\{\{business_name\}\}/g, businessName);
+      .replace(/\{\{guest_name\}\}/g, escapeHtml(reservation.guest_name))
+      .replace(/\{\{guest_email\}\}/g, escapeHtml(reservation.guest_email))
+      .replace(/\{\{date\}\}/g, escapeHtml(reservation.date))
+      .replace(/\{\{start_time\}\}/g, escapeHtml(reservation.start_time?.slice(0, 5) || ""))
+      .replace(/\{\{reservation_type\}\}/g, escapeHtml(reservation.reservation_type))
+      .replace(/\{\{guests_count\}\}/g, escapeHtml(String(reservation.guests_count || "")))
+      .replace(/\{\{price_eur\}\}/g, escapeHtml(reservation.price_eur != null ? Number(reservation.price_eur).toFixed(2) : ""))
+      .replace(/\{\{business_name\}\}/g, escapeHtml(businessName));
   } else {
     bodyContent = `
       <p style="color:#63516E;font-size:15px;font-family:'Inter',Arial,sans-serif;line-height:1.6">${t.greeting} <strong style="color:#1E1519">${reservation.guest_name}</strong>,</p>
