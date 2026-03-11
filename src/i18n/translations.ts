@@ -2559,7 +2559,7 @@ const en: TranslationKeys = {
 
   // Support page
   "support.heroTitle": "How can we help?",
-  "support.heroSubtitle": "Browse guides, FAQs, and tips to get the most out of MimoBook.",
+  "support.heroSubtitle": "Browse guides, FAQs, and tips to get the most out of MimmoBook.",
   "support.searchPlaceholder": "Search for help...",
   "support.noResults": "No results found. Try a different search term.",
   "support.stillNeedHelp": "Still need help?",
