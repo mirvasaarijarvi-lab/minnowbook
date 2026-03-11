@@ -4887,7 +4887,7 @@ const sv: TranslationKeys = {
   "help.art8C3": "Business (199 €/mån) — Alla typer, obegränsad personal, prioritetssupport med 24h svarstid.",
   "help.art8C4": "Uppgradera eller nedgradera när som helst. Ändringar börjar gälla nästa faktureringsperiod.",
   "help.art9Title": "Vanliga frågor",
-  "help.art9Desc": "Svar på de vanligaste frågorna om MimoBook.",
+  "help.art9Desc": "Svar på de vanligaste frågorna om MimmoBook.",
   "help.art9C1": "F: Behöver jag ett kreditkort för provperioden? S: Nej!",
   "help.art9C2": "F: Kan jag använda min egen domän? S: Egna domäner finns på vår roadmap.",
   "help.art9C3": "F: Hur får gäster bekräftelser? S: Automatiskt via mejl när du bekräftar en bokning.",
