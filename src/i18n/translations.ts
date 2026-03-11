@@ -5414,7 +5414,7 @@ const sv: TranslationKeys = {
   "help.art7C1": "Ägare kan bjuda in personal via Adminpanelen.",
   "help.art7C2": "Roller: Ägare (full åtkomst), Admin (hantera resurser), Personal (visa bokningar).",
   "help.art7C3": "Godkänn eller ta bort teammedlemmar när som helst.",
-  "help.art7C4": "Varje plan har en personalgräns — uppgradera för att lägga till fler.",
+  "help.art7C4": "Varje plan har en personalgräns. Uppgradera för att lägga till fler.",
   "help.art8Title": "Planer & Fakturering",
   "help.art8Desc": "Förstå prisnivåer och hantera din prenumeration.",
   "help.art8C1": "Basic (29 €/mån) — 1 typ, 1–3 personal, AI-chatbot-support.",
