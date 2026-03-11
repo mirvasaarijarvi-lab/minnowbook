@@ -1601,36 +1601,49 @@ const PublicBookingInner = () => {
                 })()}
 
                 {/* Dine-in: service type selection */}
-                {form.restaurant_sub_type === "dine_in" && (
-                  <div className="space-y-3 rounded-lg border border-border p-3">
-                    <Label className="font-medium">{t("booking.pricingType")}</Label>
-                    <div className="grid gap-3 sm:grid-cols-3">
-                      {([
-                        { value: "menu" as const, icon: UtensilsCrossed, labelKey: "booking.pricingReserveTable", descKey: "booking.pricingReserveTableDesc" },
-                        { value: "quote" as const, icon: Mail, labelKey: "booking.pricingQuote", descKey: "booking.pricingQuoteDesc" },
-                        { value: "fixed_price" as const, icon: Tag, labelKey: "booking.pricingSetMenu", descKey: "booking.pricingSetMenuDesc" },
-                      ]).map(({ value, icon: Icon, labelKey, descKey }) => {
-                        const isSelected = form.pricing_type === value;
-                        return (
-                          <button
-                            key={value}
-                            type="button"
-                            onClick={() => setForm((prev) => ({ ...prev, pricing_type: value, fixed_price: "" }))}
-                            className="flex flex-col items-center gap-1.5 p-3 rounded-lg border-2 transition-all text-center"
-                            style={{
-                              borderColor: isSelected ? accentColor : "#e5e7eb",
-                              backgroundColor: isSelected ? `${accentColor}10` : "transparent",
-                            }}
-                          >
-                            <Icon className="h-5 w-5" style={{ color: isSelected ? accentColor : primaryColor }} />
-                            <span className="text-sm font-medium" style={{ color: primaryColor }}>{tDynamic(labelKey)}</span>
-                            <span className="text-xs" style={{ color: `${primaryColor}60` }}>{tDynamic(descKey)}</span>
-                          </button>
-                        );
-                      })}
+                {form.restaurant_sub_type === "dine_in" && (() => {
+                  const restaurantResources = resources ?? [];
+                  const anyTable = restaurantResources.some((r: any) => r.offers_table_reservation !== false);
+                  const anyQuote = restaurantResources.some((r: any) => r.offers_quote !== false);
+                  const anySetMenu = restaurantResources.some((r: any) => r.offers_set_menu !== false);
+                  const allOptions = [
+                    ...(anyTable ? [{ value: "menu" as const, icon: UtensilsCrossed, labelKey: "booking.pricingReserveTable", descKey: "booking.pricingReserveTableDesc" }] : []),
+                    ...(anyQuote ? [{ value: "quote" as const, icon: Mail, labelKey: "booking.pricingQuote", descKey: "booking.pricingQuoteDesc" }] : []),
+                    ...(anySetMenu ? [{ value: "fixed_price" as const, icon: Tag, labelKey: "booking.pricingSetMenu", descKey: "booking.pricingSetMenuDesc" }] : []),
+                  ];
+                  if (allOptions.length === 0) return null;
+                  // Auto-select if only one option
+                  if (allOptions.length === 1 && form.pricing_type !== allOptions[0].value) {
+                    setTimeout(() => setForm((prev) => ({ ...prev, pricing_type: allOptions[0].value, fixed_price: "" })), 0);
+                  }
+                  if (allOptions.length === 1) return null;
+                  return (
+                    <div className="space-y-3 rounded-lg border border-border p-3">
+                      <Label className="font-medium">{t("booking.pricingType")}</Label>
+                      <div className={cn("grid gap-3", allOptions.length === 3 ? "sm:grid-cols-3" : allOptions.length === 2 ? "sm:grid-cols-2" : "")}>
+                        {allOptions.map(({ value, icon: Icon, labelKey, descKey }) => {
+                          const isSelected = form.pricing_type === value;
+                          return (
+                            <button
+                              key={value}
+                              type="button"
+                              onClick={() => setForm((prev) => ({ ...prev, pricing_type: value, fixed_price: "" }))}
+                              className="flex flex-col items-center gap-1.5 p-3 rounded-lg border-2 transition-all text-center"
+                              style={{
+                                borderColor: isSelected ? accentColor : "#e5e7eb",
+                                backgroundColor: isSelected ? `${accentColor}10` : "transparent",
+                              }}
+                            >
+                              <Icon className="h-5 w-5" style={{ color: isSelected ? accentColor : primaryColor }} />
+                              <span className="text-sm font-medium" style={{ color: primaryColor }}>{tDynamic(labelKey)}</span>
+                              <span className="text-xs" style={{ color: `${primaryColor}60` }}>{tDynamic(descKey)}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  );
+                })()}
 
                 {/* Catering fields */}
                 {form.restaurant_sub_type === "catering" && (
