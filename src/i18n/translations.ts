@@ -2163,7 +2163,7 @@ const en: TranslationKeys = {
   "a11y.title": "Accessibility Statement",
   "a11y.lastUpdated": "Last updated:",
   "a11y.s1Title": "1. Our Commitment",
-  "a11y.s1P1": "MinnowBook is committed to ensuring digital accessibility for people of all abilities. We continually improve the user experience for everyone and apply relevant accessibility standards.",
+  "a11y.s1P1": "MimoBook is committed to ensuring digital accessibility for people of all abilities. We continually improve the user experience for everyone and apply relevant accessibility standards.",
   "a11y.s2Title": "2. Accessibility Features",
   "a11y.s2P1": "Our platform includes the following accessibility features:",
   "a11y.s2Item1": "Adjustable font size (80%–150%)",
