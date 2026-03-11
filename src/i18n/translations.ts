@@ -1334,6 +1334,171 @@ type TranslationKeys = {
   "emailTemplates.usingTenantDefault": string;
   "emailTemplates.revertToDefault": string;
   "emailTemplates.siteDescription": string;
+
+  // What Is MimmoBook
+  "whatIs.badge": string;
+  "whatIs.heroTitle": string;
+  "whatIs.heroSubtitle": string;
+  "whatIs.seeFeatures": string;
+  "whatIs.definitionTitle": string;
+  "whatIs.definitionP1": string;
+  "whatIs.definitionP2": string;
+  "whatIs.definitionP3": string;
+  "whatIs.whoTitle": string;
+  "whatIs.whoSubtitle": string;
+  "whatIs.whoRestaurants": string;
+  "whatIs.whoRestaurantsDesc": string;
+  "whatIs.whoVenues": string;
+  "whatIs.whoVenuesDesc": string;
+  "whatIs.whoHotels": string;
+  "whatIs.whoHotelsDesc": string;
+  "whatIs.whoGuesthouses": string;
+  "whatIs.whoGuesthousesDesc": string;
+  "whatIs.howTitle": string;
+  "whatIs.howSubtitle": string;
+  "whatIs.howStep1": string;
+  "whatIs.howStep1Desc": string;
+  "whatIs.howStep2": string;
+  "whatIs.howStep2Desc": string;
+  "whatIs.howStep3": string;
+  "whatIs.howStep3Desc": string;
+  "whatIs.howStep4": string;
+  "whatIs.howStep4Desc": string;
+  "whatIs.keyFeaturesTitle": string;
+  "whatIs.feat1": string;
+  "whatIs.feat1Desc": string;
+  "whatIs.feat2": string;
+  "whatIs.feat2Desc": string;
+  "whatIs.feat3": string;
+  "whatIs.feat3Desc": string;
+  "whatIs.feat4": string;
+  "whatIs.feat4Desc": string;
+  "whatIs.feat5": string;
+  "whatIs.feat5Desc": string;
+  "whatIs.feat6": string;
+  "whatIs.feat6Desc": string;
+  "whatIs.allFeatures": string;
+  "whatIs.ctaTitle": string;
+  "whatIs.ctaSubtitle": string;
+
+  // Features Page
+  "featuresPage.badge": string;
+  "featuresPage.heroTitle": string;
+  "featuresPage.heroSubtitle": string;
+  "featuresPage.ctaTitle": string;
+  "featuresPage.ctaSubtitle": string;
+  "featuresPage.comparePlans": string;
+  "features.catReservations": string;
+  "features.catBranding": string;
+  "features.catManagement": string;
+  "features.catComms": string;
+  "features.f1Title": string;
+  "features.f1Desc": string;
+  "features.f2Title": string;
+  "features.f2Desc": string;
+  "features.f3Title": string;
+  "features.f3Desc": string;
+  "features.f4Title": string;
+  "features.f4Desc": string;
+  "features.f5Title": string;
+  "features.f5Desc": string;
+  "features.f6Title": string;
+  "features.f6Desc": string;
+  "features.f7Title": string;
+  "features.f7Desc": string;
+  "features.f8Title": string;
+  "features.f8Desc": string;
+  "features.f9Title": string;
+  "features.f9Desc": string;
+  "features.f10Title": string;
+  "features.f10Desc": string;
+  "features.f11Title": string;
+  "features.f11Desc": string;
+  "features.f12Title": string;
+  "features.f12Desc": string;
+  "features.f13Title": string;
+  "features.f13Desc": string;
+  "features.f14Title": string;
+  "features.f14Desc": string;
+  "features.f15Title": string;
+  "features.f15Desc": string;
+  "features.f16Title": string;
+  "features.f16Desc": string;
+
+  // Use Cases
+  "useCases.badge": string;
+  "useCases.heroTitle": string;
+  "useCases.heroSubtitle": string;
+  "useCases.challengesLabel": string;
+  "useCases.solutionLabel": string;
+  "useCases.restaurant": string;
+  "useCases.restaurantDesc": string;
+  "useCases.restaurantChallenges": string;
+  "useCases.restaurantSolution": string;
+  "useCases.venue": string;
+  "useCases.venueDesc": string;
+  "useCases.venueChallenges": string;
+  "useCases.venueSolution": string;
+  "useCases.hotel": string;
+  "useCases.hotelDesc": string;
+  "useCases.hotelChallenges": string;
+  "useCases.hotelSolution": string;
+  "useCases.guesthouse": string;
+  "useCases.guesthouseDesc": string;
+  "useCases.guesthouseChallenges": string;
+  "useCases.guesthouseSolution": string;
+  "useCases.catering": string;
+  "useCases.cateringDesc": string;
+  "useCases.cateringChallenges": string;
+  "useCases.cateringSolution": string;
+  "useCases.popup": string;
+  "useCases.popupDesc": string;
+  "useCases.popupChallenges": string;
+  "useCases.popupSolution": string;
+  "useCases.ctaTitle": string;
+  "useCases.ctaSubtitle": string;
+
+  // Blog
+  "blog.badge": string;
+  "blog.heroTitle": string;
+  "blog.heroSubtitle": string;
+  "blog.readMore": string;
+  "blog.backToBlog": string;
+  "blog.postCta": string;
+  "blog.ctaTitle": string;
+  "blog.ctaSubtitle": string;
+  "blog.catInsights": string;
+  "blog.catGuides": string;
+  "blog.post1Title": string;
+  "blog.post1Excerpt": string;
+  "blog.post1C1": string;
+  "blog.post1C2": string;
+  "blog.post1C3": string;
+  "blog.post1C4": string;
+  "blog.post1C5": string;
+  "blog.post2Title": string;
+  "blog.post2Excerpt": string;
+  "blog.post2C1": string;
+  "blog.post2C2": string;
+  "blog.post2C3": string;
+  "blog.post2C4": string;
+  "blog.post3Title": string;
+  "blog.post3Excerpt": string;
+  "blog.post3C1": string;
+  "blog.post3C2": string;
+  "blog.post3C3": string;
+  "blog.post4Title": string;
+  "blog.post4Excerpt": string;
+  "blog.post4C1": string;
+  "blog.post4C2": string;
+  "blog.post4C3": string;
+  "blog.post4C4": string;
+
+  // Nav new pages
+  "nav.features": string;
+  "nav.useCases": string;
+  "nav.blog": string;
+  "nav.whatIs": string;
 };
 
 export type TranslationKey = keyof TranslationKeys;
@@ -2647,6 +2812,171 @@ const en: TranslationKeys = {
   "support.catTeam": "Team",
   "support.catBilling": "Billing",
   "support.catFaq": "FAQ",
+
+  // What Is MimmoBook
+  "whatIs.badge": "About the Platform",
+  "whatIs.heroTitle": "What Is MimmoBook?",
+  "whatIs.heroSubtitle": "MimmoBook is a cloud-based reservation management platform built for restaurants, venues, hotels and guesthouses. One tool to manage all your bookings.",
+  "whatIs.seeFeatures": "See all features",
+  "whatIs.definitionTitle": "MimmoBook: Reservation Management for Hospitality",
+  "whatIs.definitionP1": "MimmoBook is a software-as-a-service (SaaS) platform that helps hospitality businesses manage reservations online. Whether you run a restaurant, event venue, hotel, or guesthouse, MimmoBook gives you a centralized dashboard to handle bookings, communicate with guests, and track your business performance.",
+  "whatIs.definitionP2": "Unlike generic booking tools, MimmoBook is designed specifically for hospitality. It supports multiple reservation types — table bookings, room reservations, venue hire, catering orders, and popup events — all from a single account. Each business gets a branded booking page that matches their identity.",
+  "whatIs.definitionP3": "MimmoBook is available in English, Finnish, and Swedish, making it ideal for businesses operating in the Nordics and internationally. The platform scales from single-location restaurants to multi-site hospitality groups.",
+  "whatIs.whoTitle": "Who Is MimmoBook For?",
+  "whatIs.whoSubtitle": "MimmoBook serves hospitality businesses of all sizes across four main categories.",
+  "whatIs.whoRestaurants": "Restaurants",
+  "whatIs.whoRestaurantsDesc": "Manage table reservations, set menus, and guest preferences. Handle walk-ins and online bookings from one dashboard.",
+  "whatIs.whoVenues": "Event Venues",
+  "whatIs.whoVenuesDesc": "Coordinate space bookings, equipment needs, catering requests, and event scheduling with automated confirmations.",
+  "whatIs.whoHotels": "Hotels",
+  "whatIs.whoHotelsDesc": "Manage room reservations, check-in/check-out, breakfast options, and room-type pricing across your property.",
+  "whatIs.whoGuesthouses": "Guesthouses",
+  "whatIs.whoGuesthousesDesc": "Streamline guest stays with simple room booking, availability management, and personalized communication.",
+  "whatIs.howTitle": "How Does MimmoBook Work?",
+  "whatIs.howSubtitle": "Get started in four simple steps.",
+  "whatIs.howStep1": "Sign Up",
+  "whatIs.howStep1Desc": "Create your account and start a 30-day free trial. No credit card required.",
+  "whatIs.howStep2": "Configure",
+  "whatIs.howStep2Desc": "Set up your business profile, reservation types, opening hours, and branding.",
+  "whatIs.howStep3": "Share",
+  "whatIs.howStep3Desc": "Share your branded booking page with guests via your website, social media, or email.",
+  "whatIs.howStep4": "Manage",
+  "whatIs.howStep4Desc": "Handle all reservations from your dashboard with automated emails, reports, and team tools.",
+  "whatIs.keyFeaturesTitle": "Key Features",
+  "whatIs.feat1": "Smart Reservations",
+  "whatIs.feat1Desc": "Accept and manage bookings for restaurants, venues, hotels, and guesthouses from one platform.",
+  "whatIs.feat2": "Custom Branding",
+  "whatIs.feat2Desc": "Your booking page reflects your brand with custom colors, logo, and hero images.",
+  "whatIs.feat3": "Team Management",
+  "whatIs.feat3Desc": "Invite staff, assign roles, and control permissions for your entire team.",
+  "whatIs.feat4": "Multilingual Support",
+  "whatIs.feat4Desc": "Dashboard and booking pages available in English, Finnish, and Swedish.",
+  "whatIs.feat5": "Reports & Analytics",
+  "whatIs.feat5Desc": "Track revenue, occupancy, and booking trends with exportable reports.",
+  "whatIs.feat6": "Automated Emails",
+  "whatIs.feat6Desc": "Confirmation, reminder, and cancellation emails sent automatically to guests.",
+  "whatIs.allFeatures": "View all features",
+  "whatIs.ctaTitle": "Ready to Simplify Your Reservations?",
+  "whatIs.ctaSubtitle": "Start your 30-day free trial today. No credit card required.",
+
+  // Features Page
+  "featuresPage.badge": "Platform Features",
+  "featuresPage.heroTitle": "Everything You Need to Manage Reservations",
+  "featuresPage.heroSubtitle": "From booking pages to reports, MimmoBook provides a complete toolkit for hospitality reservation management.",
+  "featuresPage.ctaTitle": "Start Managing Reservations Today",
+  "featuresPage.ctaSubtitle": "Try all features free for 30 days. No credit card required.",
+  "featuresPage.comparePlans": "Compare plans",
+  "features.catReservations": "Reservation Management",
+  "features.catBranding": "Branding & Booking Pages",
+  "features.catManagement": "Team & Business Management",
+  "features.catComms": "Communication & Reporting",
+  "features.f1Title": "Multi-Type Reservations",
+  "features.f1Desc": "Support table bookings, room reservations, venue hire, catering orders, and popup events from one account.",
+  "features.f2Title": "Opening Hours & Availability",
+  "features.f2Desc": "Configure opening hours per reservation type with blocked slots and recurring closures.",
+  "features.f3Title": "Automated Reminders",
+  "features.f3Desc": "Guests receive automatic reminder emails before their reservation to reduce no-shows.",
+  "features.f4Title": "Discount Codes",
+  "features.f4Desc": "Create percentage or fixed-amount discount codes with usage limits and date restrictions.",
+  "features.f5Title": "Branded Booking Pages",
+  "features.f5Desc": "Your public booking page displays your logo, colors, hero image, and business description.",
+  "features.f6Title": "Custom Domain Ready",
+  "features.f6Desc": "Each business gets a unique booking URL. Share it on your website, social media, or print materials.",
+  "features.f7Title": "Multilingual (EN/FI/SV)",
+  "features.f7Desc": "Dashboard and booking pages are fully translated in English, Finnish, and Swedish.",
+  "features.f8Title": "Mobile Responsive",
+  "features.f8Desc": "The booking page and dashboard work perfectly on phones, tablets, and desktops.",
+  "features.f9Title": "Team Roles & Permissions",
+  "features.f9Desc": "Invite staff as owners, admins, or team members with granular permission control.",
+  "features.f10Title": "Resource Management",
+  "features.f10Desc": "Create and manage rooms, tables, event spaces, and other bookable resources with photos and descriptions.",
+  "features.f11Title": "Multi-Site Support",
+  "features.f11Desc": "Manage multiple locations from one account with per-site branding, staff, and reporting.",
+  "features.f12Title": "Approval Workflows",
+  "features.f12Desc": "Review and approve reservations, resource changes, and blocked slots before they go live.",
+  "features.f13Title": "Email Templates",
+  "features.f13Desc": "Customize confirmation, reminder, and cancellation emails per reservation type and language.",
+  "features.f14Title": "Custom Email Templates",
+  "features.f14Desc": "Business plan users can fully customize email HTML with their branding and messaging.",
+  "features.f15Title": "Reports & Analytics",
+  "features.f15Desc": "Revenue reports, booking trends, occupancy rates, and CSV exports for accounting.",
+  "features.f16Title": "Invoicing Tracking",
+  "features.f16Desc": "Mark reservations as invoiced and track uninvoiced revenue across all reservation types.",
+
+  // Use Cases
+  "useCases.badge": "Use Cases",
+  "useCases.heroTitle": "Built for Every Type of Hospitality Business",
+  "useCases.heroSubtitle": "See how MimmoBook solves booking challenges for restaurants, venues, hotels, guesthouses, caterers, and popup events.",
+  "useCases.challengesLabel": "Common Challenges",
+  "useCases.solutionLabel": "How MimmoBook Helps",
+  "useCases.restaurant": "Restaurant Reservations",
+  "useCases.restaurantDesc": "Restaurants need to manage table bookings, walk-ins, set menus, and special dietary requirements while keeping track of guest preferences and no-show rates.",
+  "useCases.restaurantChallenges": "Phone-based booking is time-consuming and error-prone. Peak hours create bottlenecks. No-shows waste capacity. Manual tracking misses guest preferences and special requests.",
+  "useCases.restaurantSolution": "MimmoBook provides a branded online booking page where guests self-serve. Automated confirmations and reminders reduce no-shows. All guest data, dietary notes, and preferences are stored in one place.",
+  "useCases.venue": "Venue & Event Bookings",
+  "useCases.venueDesc": "Event venues need to coordinate space availability, equipment, catering, and staffing while managing multiple bookings and client communications.",
+  "useCases.venueChallenges": "Double-bookings when using email or phone. Complex logistics across multiple spaces. Scattered communication with clients. Difficulty tracking revenue per event type.",
+  "useCases.venueSolution": "MimmoBook's resource management prevents double-bookings. Each venue space has its own availability calendar. Automated emails keep clients informed. Reports show revenue by event type.",
+  "useCases.hotel": "Hotel Room Reservations",
+  "useCases.hotelDesc": "Hotels need to manage room availability, check-in/check-out, room types, pricing tiers, and breakfast options while providing a professional booking experience.",
+  "useCases.hotelChallenges": "Managing room inventory across room types. Tracking check-in/check-out manually. Coordinating breakfast options and pricing. Providing a professional booking experience without expensive systems.",
+  "useCases.hotelSolution": "MimmoBook supports room-type pricing, bed configurations, breakfast options, and check-in/check-out tracking. The branded booking page gives guests a professional reservation experience.",
+  "useCases.guesthouse": "Guesthouse Bookings",
+  "useCases.guesthouseDesc": "Guesthouses and B&Bs need a simple system to manage guest stays, availability, and communication without the complexity of enterprise hotel software.",
+  "useCases.guesthouseChallenges": "Enterprise hotel systems are too complex and expensive. Spreadsheets and phone bookings miss reservations. No automated guest communication. Difficult to show availability online.",
+  "useCases.guesthouseSolution": "MimmoBook offers a simple, affordable booking system sized for guesthouses. Guests book directly through your branded page. Automated emails handle confirmations and reminders.",
+  "useCases.catering": "Catering Orders",
+  "useCases.cateringDesc": "Catering businesses need to manage delivery details, menu selections, dietary requirements, and event-specific logistics for every order.",
+  "useCases.cateringChallenges": "Order details get lost in email chains. Dietary requirements are missed. No centralized view of upcoming orders. Manual coordination wastes time.",
+  "useCases.cateringSolution": "MimmoBook captures all catering details in structured booking forms. Delivery addresses, dietary notes, and guest counts are stored per order. The dashboard shows all upcoming catering events.",
+  "useCases.popup": "Popup Events & Markets",
+  "useCases.popupDesc": "Popup event organizers need to manage vendor applications, stall assignments, and event logistics across temporary locations.",
+  "useCases.popupChallenges": "Vendor management is chaotic via email. Stall assignments are tracked manually. No centralized view of vendor details and requirements. Fee tracking is inconsistent.",
+  "useCases.popupSolution": "MimmoBook's popup reservation type captures stall size, fees, equipment needs, and vendor details. Organizers see all applications in one dashboard with approval workflows.",
+  "useCases.ctaTitle": "Find Your Use Case?",
+  "useCases.ctaSubtitle": "Start your free 30-day trial and set up your first booking page in minutes.",
+
+  // Blog
+  "blog.badge": "Blog",
+  "blog.heroTitle": "Hospitality Insights & Guides",
+  "blog.heroSubtitle": "Tips, best practices, and insights for hospitality businesses managing reservations.",
+  "blog.readMore": "Read more",
+  "blog.backToBlog": "Back to Blog",
+  "blog.postCta": "Ready to streamline your reservations?",
+  "blog.ctaTitle": "Stay Up to Date",
+  "blog.ctaSubtitle": "Try MimmoBook free for 30 days and see how it transforms your booking management.",
+  "blog.catInsights": "Insights",
+  "blog.catGuides": "Guides",
+  "blog.post1Title": "5 Reservation Challenges Small Hospitality Businesses Face",
+  "blog.post1Excerpt": "From no-shows to double bookings, small restaurants, venues and guesthouses face unique challenges. Here's what they are and how to solve them.",
+  "blog.post1C1": "Small hospitality businesses — restaurants with a handful of tables, boutique venues, family-run guesthouses — face reservation challenges that larger operations solve with dedicated staff and enterprise software. But for a business with 5–30 covers or a few rooms, those solutions are overkill.",
+  "blog.post1C2": "The first challenge is no-shows. When a four-top doesn't show up at a 20-seat restaurant, that's 20% of capacity gone. Unlike large hotels that absorb no-shows in volume, small businesses feel every empty seat. Automated reminder emails sent 24 hours before a reservation can cut no-show rates by 30–50%.",
+  "blog.post1C3": "The second challenge is double bookings. When reservations come in via phone, email, Instagram DMs, and walk-ins, it's easy to book the same table or room twice. A centralized booking system with real-time availability eliminates this entirely.",
+  "blog.post1C4": "Third, guest communication is inconsistent. Some guests get a confirmation email, others don't. Some get reminders, some are forgotten. Automated email flows ensure every guest receives the same professional experience regardless of how busy the staff is.",
+  "blog.post1C5": "Fourth, tracking revenue is manual and error-prone. Small businesses often use spreadsheets or paper to track bookings and payments, making it hard to know actual occupancy rates, average booking values, or seasonal trends. A booking system with built-in reporting solves this. Fifth, online visibility suffers. Without a professional booking page, potential guests can't easily find availability or make reservations — they move on to competitors who offer online booking.",
+  "blog.post2Title": "Why Spreadsheets Fail for Booking Management",
+  "blog.post2Excerpt": "Spreadsheets are flexible but they create problems when used for reservation management. Here's why dedicated software is worth the switch.",
+  "blog.post2C1": "Spreadsheets are the default tool for many small businesses. They're free, flexible, and familiar. But when used for reservation management, they create problems that grow worse over time.",
+  "blog.post2C2": "The biggest issue is that spreadsheets are not real-time. When two staff members update the same sheet, conflicts happen. When a guest books by phone while someone else is editing the document, data gets lost. There's no live availability view, so staff must manually check before confirming each booking.",
+  "blog.post2C3": "Spreadsheets also can't send emails. Every confirmation, reminder, and cancellation must be handled manually. This takes time, introduces errors, and creates an inconsistent guest experience. A dedicated booking system automates all guest communication.",
+  "blog.post2C4": "Finally, spreadsheets don't provide analytics. You can't easily see occupancy rates, booking trends, or revenue by reservation type without building complex formulas. Booking software generates these reports automatically, helping you make data-driven decisions about staffing, pricing, and marketing.",
+  "blog.post3Title": "Why Branded Booking Pages Matter for Your Business",
+  "blog.post3Excerpt": "A generic booking form tells guests nothing about your brand. A branded booking page builds trust and increases conversions.",
+  "blog.post3C1": "When a guest visits your booking page, it's often their first interaction with your business online. If that page is a generic form with no branding, it sends the wrong message. It looks unprofessional and doesn't build confidence.",
+  "blog.post3C2": "A branded booking page — with your logo, colors, hero image, and business description — creates a professional first impression. Guests immediately know they're in the right place. It builds trust before they even make a reservation. Studies show that branded booking experiences have 20–40% higher conversion rates than generic forms.",
+  "blog.post3C3": "MimmoBook lets every business customize their booking page with their own branding. Upload your logo, set your brand colors, add a hero image, and write a description. The result is a booking experience that feels like an extension of your website — not a third-party tool.",
+  "blog.post4Title": "Managing Reservations Across Multiple Locations",
+  "blog.post4Excerpt": "Multi-site hospitality businesses need centralized tools. Here's how to manage bookings across locations without losing control.",
+  "blog.post4C1": "Running multiple hospitality locations — whether it's a restaurant group, a chain of guesthouses, or venues in different cities — multiplies the complexity of reservation management. Each location has its own availability, staff, branding, and guest base.",
+  "blog.post4C2": "The challenge is maintaining consistency while respecting each location's unique needs. A centralized system lets you manage all locations from one dashboard while keeping separate booking pages, staff permissions, and reports per site.",
+  "blog.post4C3": "MimmoBook's multi-site feature is designed for this. Each site gets its own branded booking page, its own staff assignments, and its own reporting. But owners and admins can switch between sites from a single account, compare performance, and manage settings centrally.",
+  "blog.post4C4": "The key benefit is visibility. Instead of logging into separate systems or checking multiple spreadsheets, you see all your locations in one place. Reservation trends, revenue comparisons, and staffing needs become clear at a glance.",
+
+  // Nav new pages
+  "nav.features": "Features",
+  "nav.useCases": "Use Cases",
+  "nav.blog": "Blog",
+  "nav.whatIs": "What Is MimmoBook?",
 };
 
 const fi: TranslationKeys = {
@@ -3956,6 +4286,171 @@ const fi: TranslationKeys = {
   "support.catTeam": "Tiimi",
   "support.catBilling": "Laskutus",
   "support.catFaq": "UKK",
+
+  // What Is MimmoBook
+  "whatIs.badge": "Tietoa alustasta",
+  "whatIs.heroTitle": "Mikä on MimmoBook?",
+  "whatIs.heroSubtitle": "MimmoBook on pilvipohjainen varausten hallintajärjestelmä ravintoloille, tapahtumapaikoille, hotelleille ja majataloille. Yksi työkalu kaikkien varaustesi hallintaan.",
+  "whatIs.seeFeatures": "Katso kaikki ominaisuudet",
+  "whatIs.definitionTitle": "MimmoBook: Varausten hallinta ravintola-alalle",
+  "whatIs.definitionP1": "MimmoBook on SaaS-alusta, joka auttaa majoitus- ja ravintola-alan yrityksiä hallitsemaan varauksia verkossa. Riippumatta siitä, pyöritätkö ravintolaa, tapahtuma­paikkaa, hotellia tai majataloa, MimmoBook tarjoaa keskitetyn hallintapaneelin varausten, vierasviestinnän ja liiketoiminnan seurantaan.",
+  "whatIs.definitionP2": "Toisin kuin yleiset varaustyökalut, MimmoBook on suunniteltu nimenomaan ravintola-alalle. Se tukee useita varaustyyppejä — pöytävarauksia, huonevarauksia, tilavuokrausta, catering-tilauksia ja popup-tapahtumia — kaikki yhdellä tilillä. Jokainen yritys saa brändätyn varaussivun.",
+  "whatIs.definitionP3": "MimmoBook on saatavilla englanniksi, suomeksi ja ruotsiksi, mikä tekee siitä ihanteellisen Pohjoismaissa ja kansainvälisesti toimiville yrityksille. Alusta skaalautuu yksittäisestä ravintolasta usean toimipisteen ravintola-alan konserniin.",
+  "whatIs.whoTitle": "Kenelle MimmoBook on tarkoitettu?",
+  "whatIs.whoSubtitle": "MimmoBook palvelee kaikenkokoisia ravintola-alan yrityksiä neljässä pääkategoriassa.",
+  "whatIs.whoRestaurants": "Ravintolat",
+  "whatIs.whoRestaurantsDesc": "Hallitse pöytävarauksia, set-menuja ja vierastoiveita. Käsittele walk-in- ja verkkovaraukset yhdestä hallintapaneelista.",
+  "whatIs.whoVenues": "Tapahtumapaikat",
+  "whatIs.whoVenuesDesc": "Koordinoi tilavarauksia, laitetarpeita, catering-pyyntöjä ja tapahtuma-aikatauluja automaattisilla vahvistuksilla.",
+  "whatIs.whoHotels": "Hotellit",
+  "whatIs.whoHotelsDesc": "Hallitse huonevarauksia, sisään-/uloskirjautumista, aamiaisvaihtoehtoja ja huonetyyppihinnoittelua.",
+  "whatIs.whoGuesthouses": "Majatalot",
+  "whatIs.whoGuesthousesDesc": "Yksinkertaista vierasmajoitusta helppokäyttöisellä huonevarauksella, saatavuuden hallinnalla ja henkilökohtaisella viestinnällä.",
+  "whatIs.howTitle": "Miten MimmoBook toimii?",
+  "whatIs.howSubtitle": "Aloita neljässä yksinkertaisessa vaiheessa.",
+  "whatIs.howStep1": "Rekisteröidy",
+  "whatIs.howStep1Desc": "Luo tili ja aloita 30 päivän ilmainen kokeilu. Luottokorttia ei tarvita.",
+  "whatIs.howStep2": "Määritä asetukset",
+  "whatIs.howStep2Desc": "Aseta yritysprofiilisi, varaustyypit, aukioloajat ja brändäys.",
+  "whatIs.howStep3": "Jaa",
+  "whatIs.howStep3Desc": "Jaa brändätty varaussivusi vieraille verkkosivusi, sosiaalisen median tai sähköpostin kautta.",
+  "whatIs.howStep4": "Hallitse",
+  "whatIs.howStep4Desc": "Käsittele kaikki varaukset hallintapaneelista automaattisilla sähköposteilla, raporteilla ja tiimivälineillä.",
+  "whatIs.keyFeaturesTitle": "Keskeiset ominaisuudet",
+  "whatIs.feat1": "Älykkäät varaukset",
+  "whatIs.feat1Desc": "Vastaanota ja hallitse varauksia ravintoloille, tiloille, hotelleille ja majataloille yhdellä alustalla.",
+  "whatIs.feat2": "Oma brändäys",
+  "whatIs.feat2Desc": "Varaussivusi heijastaa brändiäsi mukautetuilla väreillä, logolla ja kuvilla.",
+  "whatIs.feat3": "Tiiminhallinta",
+  "whatIs.feat3Desc": "Kutsu henkilökuntaa, määritä rooleja ja hallitse käyttöoikeuksia koko tiimillesi.",
+  "whatIs.feat4": "Monikielinen tuki",
+  "whatIs.feat4Desc": "Hallintapaneeli ja varaussivut saatavilla englanniksi, suomeksi ja ruotsiksi.",
+  "whatIs.feat5": "Raportit ja analytiikka",
+  "whatIs.feat5Desc": "Seuraa liikevaihtoa, käyttöastetta ja varaustrendejä vietävillä raporteilla.",
+  "whatIs.feat6": "Automaattiset sähköpostit",
+  "whatIs.feat6Desc": "Vahvistus-, muistutus- ja peruutussähköpostit lähetetään automaattisesti vieraille.",
+  "whatIs.allFeatures": "Katso kaikki ominaisuudet",
+  "whatIs.ctaTitle": "Valmiina yksinkertaistamaan varauksesi?",
+  "whatIs.ctaSubtitle": "Aloita 30 päivän ilmainen kokeilu tänään. Luottokorttia ei tarvita.",
+
+  // Features Page
+  "featuresPage.badge": "Alustan ominaisuudet",
+  "featuresPage.heroTitle": "Kaikki mitä tarvitset varausten hallintaan",
+  "featuresPage.heroSubtitle": "Varaussivuista raportteihin — MimmoBook tarjoaa täydellisen työkalupakin ravintola-alan varausten hallintaan.",
+  "featuresPage.ctaTitle": "Aloita varausten hallinta tänään",
+  "featuresPage.ctaSubtitle": "Kokeile kaikkia ominaisuuksia ilmaiseksi 30 päivää. Luottokorttia ei tarvita.",
+  "featuresPage.comparePlans": "Vertaa paketteja",
+  "features.catReservations": "Varausten hallinta",
+  "features.catBranding": "Brändäys ja varaussivut",
+  "features.catManagement": "Tiimi- ja liiketoiminnan hallinta",
+  "features.catComms": "Viestintä ja raportointi",
+  "features.f1Title": "Monityyppiset varaukset",
+  "features.f1Desc": "Tuki pöytävarauksille, huonevarauksille, tilavuokraukselle, catering-tilauksille ja popup-tapahtumille yhdellä tilillä.",
+  "features.f2Title": "Aukioloajat ja saatavuus",
+  "features.f2Desc": "Määritä aukioloajat varaustyyppien mukaan estettävillä aikaväleillä ja toistuvilla sulkemisilla.",
+  "features.f3Title": "Automaattiset muistutukset",
+  "features.f3Desc": "Vieraat saavat automaattisen muistutussähköpostin ennen varaustaan no-show-tapausten vähentämiseksi.",
+  "features.f4Title": "Alennuskoodit",
+  "features.f4Desc": "Luo prosentti- tai euromääräisiä alennuskoodeja käyttörajoilla ja päivämäärärajoituksilla.",
+  "features.f5Title": "Brändätyt varaussivut",
+  "features.f5Desc": "Julkinen varaussivusi näyttää logosi, värisi, pääkuvasi ja yrityskuvauksen.",
+  "features.f6Title": "Oma verkkotunnus -valmis",
+  "features.f6Desc": "Jokainen yritys saa yksilöllisen varaus-URL:n. Jaa se verkkosivullasi, sosiaalisessa mediassa tai painomateriaaleissa.",
+  "features.f7Title": "Monikielinen (EN/FI/SV)",
+  "features.f7Desc": "Hallintapaneeli ja varaussivut ovat täysin käännetty englanniksi, suomeksi ja ruotsiksi.",
+  "features.f8Title": "Mobiiliresponsiivinen",
+  "features.f8Desc": "Varaussivu ja hallintapaneeli toimivat täydellisesti puhelimilla, tableteilla ja pöytäkoneilla.",
+  "features.f9Title": "Tiimiroolit ja oikeudet",
+  "features.f9Desc": "Kutsu henkilökuntaa omistajiksi, ylläpitäjiksi tai tiimin jäseniksi tarkalla oikeuksien hallinnalla.",
+  "features.f10Title": "Resurssien hallinta",
+  "features.f10Desc": "Luo ja hallitse huoneita, pöytiä, tapahtumatiloja ja muita varattavia resursseja kuvilla ja kuvauksilla.",
+  "features.f11Title": "Usean toimipisteen tuki",
+  "features.f11Desc": "Hallitse useita toimipisteitä yhdellä tilillä omalla brändäyksellä, henkilökunnalla ja raportoinnilla per toimipiste.",
+  "features.f12Title": "Hyväksyntätyönkulut",
+  "features.f12Desc": "Tarkista ja hyväksy varaukset, resurssimuutokset ja estetyt aikavälit ennen niiden julkaisemista.",
+  "features.f13Title": "Sähköpostimallit",
+  "features.f13Desc": "Mukauta vahvistus-, muistutus- ja peruutussähköpostit varaustyypin ja kielen mukaan.",
+  "features.f14Title": "Mukautetut sähköpostimallit",
+  "features.f14Desc": "Business-paketin käyttäjät voivat täysin mukauttaa sähköpostien HTML:n omalla brändäyksellään.",
+  "features.f15Title": "Raportit ja analytiikka",
+  "features.f15Desc": "Liikevaihtoraportit, varaustrendit, käyttöasteet ja CSV-viennit kirjanpitoon.",
+  "features.f16Title": "Laskutuksen seuranta",
+  "features.f16Desc": "Merkitse varaukset laskutetuiksi ja seuraa laskuttamatonta liikevaihtoa kaikissa varaustyypeissä.",
+
+  // Use Cases
+  "useCases.badge": "Käyttökohteet",
+  "useCases.heroTitle": "Rakennettu kaikenlaisille ravintola-alan yrityksille",
+  "useCases.heroSubtitle": "Katso miten MimmoBook ratkaisee varaushaasteet ravintoloille, tiloille, hotelleille, majataloille, cateringille ja popup-tapahtumille.",
+  "useCases.challengesLabel": "Yleiset haasteet",
+  "useCases.solutionLabel": "Miten MimmoBook auttaa",
+  "useCases.restaurant": "Ravintolavaraukset",
+  "useCases.restaurantDesc": "Ravintoloiden on hallittava pöytävarauksia, walk-in-asiakkaita, set-menuja ja erityisruokavaliovaatimuksia samalla kun ne seuraavat asiakastoiveita ja no-show-lukuja.",
+  "useCases.restaurantChallenges": "Puhelinvaraus on aikaa vievää ja virhealtista. Ruuhka-ajat luovat pullonkauloja. No-showt hukkaavat kapasiteettia. Manuaalinen seuranta menettää asiakastoiveet.",
+  "useCases.restaurantSolution": "MimmoBook tarjoaa brändätyn verkkovaraussivun, jossa vieraat palvelevat itseään. Automaattiset vahvistukset ja muistutukset vähentävät no-show-tapauksia. Kaikki asiakastiedot ja toiveet ovat yhdessä paikassa.",
+  "useCases.venue": "Tila- ja tapahtumavaraukset",
+  "useCases.venueDesc": "Tapahtumapaikkojen on koordinoitava tilojen saatavuutta, laitteita, cateringia ja henkilökuntaa samalla kun ne hallitsevat useita varauksia.",
+  "useCases.venueChallenges": "Tuplavaraukset sähköposti- tai puhelinvarausten yhteydessä. Monimutkaiset logistiikkaketjut useiden tilojen välillä. Hajanainen asiakasviestintä. Vaikeus seurata liikevaihtoa tapahtumatyypeittäin.",
+  "useCases.venueSolution": "MimmoBookin resurssien hallinta estää tuplavaraukset. Jokaisella tilalla on oma saatavuuskalenteri. Automaattiset sähköpostit pitävät asiakkaat ajan tasalla.",
+  "useCases.hotel": "Hotellihuonevaraukset",
+  "useCases.hotelDesc": "Hotellien on hallittava huoneiden saatavuutta, sisään-/uloskirjautumista, huonetyyppejä, hinnoittelutasoja ja aamiaisvaihtoehtoja.",
+  "useCases.hotelChallenges": "Huoneinventaarion hallinta huonetyypeittäin. Manuaalinen sisään-/uloskirjautumisen seuranta. Aamiaisvaihtoehtojen ja hinnoittelun koordinointi. Ammattimaisen varauskokemus ilman kalliita järjestelmiä.",
+  "useCases.hotelSolution": "MimmoBook tukee huonetyyppihinnoittelua, vuodekokoonpanoja, aamiaisvaihtoehtoja ja sisään-/uloskirjautumisen seurantaa. Brändätty varaussivu tarjoaa vieraille ammattimaisen varauskokemuksen.",
+  "useCases.guesthouse": "Majatalovaraukset",
+  "useCases.guesthouseDesc": "Majatalot ja B&B:t tarvitsevat yksinkertaisen järjestelmän vierasmajoituksen, saatavuuden ja viestinnän hallintaan ilman yritysohjelmistojen monimutkaisuutta.",
+  "useCases.guesthouseChallenges": "Yrityshotellijärjestelmät ovat liian monimutkaisia ja kalliita. Taulukot ja puhelinvaraukset menettävät varauksia. Ei automatisoitua vierasviestintää. Saatavuuden näyttäminen verkossa on vaikeaa.",
+  "useCases.guesthouseSolution": "MimmoBook tarjoaa yksinkertaisen, edullisen varausjärjestelmän majataloille sopivana. Vieraat varaavat suoraan brändätyn sivun kautta. Automaattiset sähköpostit hoitavat vahvistukset ja muistutukset.",
+  "useCases.catering": "Catering-tilaukset",
+  "useCases.cateringDesc": "Catering-yritysten on hallittava toimitustietoja, menuvalintoja, erityisruokavaliovaatimuksia ja tapahtumakohtaista logistiikkaa jokaisessa tilauksessa.",
+  "useCases.cateringChallenges": "Tilaustiedot hukkuvat sähköpostiketjuihin. Erityisruokavaliovaatimukset jäävät huomaamatta. Ei keskitettyä näkymää tuleviin tilauksiin. Manuaalinen koordinointi hukkaa aikaa.",
+  "useCases.cateringSolution": "MimmoBook tallentaa kaikki catering-tiedot rakenteellisiin varauslomakkeisiin. Toimitusosoitteet, ruokavaliotiedot ja vierasmäärät tallennetaan tilauskohtaisesti.",
+  "useCases.popup": "Popup-tapahtumat ja markkinat",
+  "useCases.popupDesc": "Popup-tapahtumien järjestäjien on hallittava myyjähakemuksia, kojujen jakoa ja tapahtumien logistiikkaa tilapäisissä paikoissa.",
+  "useCases.popupChallenges": "Myyjähallinta sähköpostilla on kaoottista. Kojujen jako tehdään manuaalisesti. Ei keskitettyä näkymää myyjätietoihin. Maksuseuranta on epäjohdonmukaista.",
+  "useCases.popupSolution": "MimmoBookin popup-varaustyyppi tallentaa kojun koon, maksut, laitetarpeet ja myyjätiedot. Järjestäjät näkevät kaikki hakemukset yhdessä hallintapaneelissa hyväksyntätyönkulujen kanssa.",
+  "useCases.ctaTitle": "Löysitkö käyttökohteesi?",
+  "useCases.ctaSubtitle": "Aloita ilmainen 30 päivän kokeilu ja luo ensimmäinen varaussivusi minuuteissa.",
+
+  // Blog
+  "blog.badge": "Blogi",
+  "blog.heroTitle": "Ravintola-alan oivalluksia ja oppaita",
+  "blog.heroSubtitle": "Vinkkejä, parhaita käytäntöjä ja oivalluksia ravintola-alan yrityksille varausten hallinnasta.",
+  "blog.readMore": "Lue lisää",
+  "blog.backToBlog": "Takaisin blogiin",
+  "blog.postCta": "Valmiina tehostamaan varaustenhallintaa?",
+  "blog.ctaTitle": "Pysy ajan tasalla",
+  "blog.ctaSubtitle": "Kokeile MimmoBookia ilmaiseksi 30 päivää ja katso miten se muuttaa varaustenhallintasi.",
+  "blog.catInsights": "Oivallukset",
+  "blog.catGuides": "Oppaat",
+  "blog.post1Title": "5 varaushaastetta, joita pienet ravintola-alan yritykset kohtaavat",
+  "blog.post1Excerpt": "No-show-tapauksista tuplavaraukuksiin — pienet ravintolat, tilat ja majatalot kohtaavat ainutlaatuisia haasteita. Tässä ne ja niiden ratkaisut.",
+  "blog.post1C1": "Pienet ravintola-alan yritykset — ravintolat muutamalla pöydällä, boutique-tilat, perhemajatalot — kohtaavat varaushaast­eita, jotka suuremmat toimijat ratkaisevat omistautuneella henkilökunnalla ja yritysohjelmistoilla. Mutta yritykselle, jossa on 5–30 asiakaspaikkaa tai muutama huone, nämä ratkaisut ovat ylimitoitettuja.",
+  "blog.post1C2": "Ensimmäinen haaste on no-showt. Kun neljän hengen pöytä ei saavu 20-paikkaisessa ravintolassa, se on 20 % kapasiteetista hukassa. Automaattiset muistutussähköpostit 24 tuntia ennen varausta voivat vähentää no-show-lukuja 30–50 %.",
+  "blog.post1C3": "Toinen haaste on tuplavaraukset. Kun varauksia tulee puhelimitse, sähköpostitse, Instagram-viesteillä ja walk-ineina, on helppoa varata sama pöytä tai huone kahdesti. Keskitetty varausjärjestelmä reaaliaikaisella saatavuudella poistaa tämän ongelman kokonaan.",
+  "blog.post1C4": "Kolmanneksi vierasviestintä on epäjohdonmukaista. Jotkut vieraat saavat vahvistussähköpostin, toiset eivät. Automaattiset sähköpostivirrat varmistavat, että jokainen vieras saa saman ammattimaisen kokemuksen.",
+  "blog.post1C5": "Neljänneksi liikevaihdon seuranta on manuaalista ja virhealtista. Pienet yritykset käyttävät usein taulukoita tai paperia varausten seuraamiseen. Varausjärjestelmä sisäänrakennetuilla raporteilla ratkaisee tämän. Viidenneksi verkkonäkyvyys kärsii — ilman ammattimaista varaussivua potentiaaliset vieraat eivät löydä saatavuutta helposti.",
+  "blog.post2Title": "Miksi taulukot eivät toimi varaustenhallinnassa",
+  "blog.post2Excerpt": "Taulukot ovat joustavia, mutta ne luovat ongelmia varaustenhallinnassa. Tässä miksi omistettu ohjelmisto kannattaa.",
+  "blog.post2C1": "Taulukot ovat monien pienyritysten oletustyökalu. Ne ovat ilmaisia, joustavia ja tuttuja. Mutta varaustenhallinnassa ne luovat ongelmia, jotka pahenevat ajan myötä.",
+  "blog.post2C2": "Suurin ongelma on, etteivät taulukot ole reaaliaikaisia. Kun kaksi henkilökunnan jäsentä päivittää samaa taulukkoa, syntyy ristiriitoja. Ei ole live-saatavuusnäkymää, joten henkilökunnan on tarkistettava manuaalisesti ennen jokaista vahvistusta.",
+  "blog.post2C3": "Taulukot eivät myöskään voi lähettää sähköposteja. Jokainen vahvistus, muistutus ja peruutus on hoidettava manuaalisesti. Omistettu varausjärjestelmä automatisoi kaiken vierasviestinnän.",
+  "blog.post2C4": "Lopuksi taulukot eivät tarjoa analytiikkaa. Et voi helposti nähdä käyttöasteita, varaustrendejä tai liikevaihtoa varaustyypeittäin ilman monimutkaisia kaavoja. Varausohjelmisto tuottaa nämä raportit automaattisesti.",
+  "blog.post3Title": "Miksi brändätyt varaussivut ovat tärkeitä yrityksellesi",
+  "blog.post3Excerpt": "Geneerinen varauslomake ei kerro vieraille mitään brändistäsi. Brändätty varaussivu rakentaa luottamusta ja lisää konversioita.",
+  "blog.post3C1": "Kun vieras vierailee varaussivullasi, se on usein heidän ensimmäinen vuorovaikutuksensa yrityksesi kanssa verkossa. Jos sivu on geneerinen lomake ilman brändäystä, se lähettää väärän viestin.",
+  "blog.post3C2": "Brändätty varaussivu — logollasi, väreillä, pääkuvalla ja yrityskuvauksella — luo ammattimaisen ensivaikutelman. Tutkimukset osoittavat, että brändätyt varauskokemukset tuottavat 20–40 % korkeampia konversioasteita.",
+  "blog.post3C3": "MimmoBook antaa jokaisen yrityksen mukauttaa varaussivunsa omalla brändäyksellään. Lataa logosi, aseta brändivärisi, lisää pääkuva ja kirjoita kuvaus. Tulos on varauskokemus, joka tuntuu verkkosivusi jatkeelta.",
+  "blog.post4Title": "Varausten hallinta useissa toimipisteissä",
+  "blog.post4Excerpt": "Usean toimipisteen ravintola-alan yritykset tarvitsevat keskitettyjä työkaluja. Näin hallitset varauksia eri paikoissa menettämättä hallintaa.",
+  "blog.post4C1": "Useiden ravintola-alan toimipisteiden pyörittäminen — olipa kyseessä ravintolaketju, majataloryhmä tai tilat eri kaupungeissa — moninkertaistaa varaushallinnon monimutkaisuuden.",
+  "blog.post4C2": "Haasteena on johdonmukaisuuden ylläpitäminen samalla kun kunnioitetaan jokaisen toimipisteen ainutlaatuisia tarpeita. Keskitetty järjestelmä mahdollistaa kaikkien toimipisteiden hallinnan yhdestä hallintapaneelista.",
+  "blog.post4C3": "MimmoBookin usean toimipisteen ominaisuus on suunniteltu juuri tähän. Jokainen toimipiste saa oman brändätyn varaussivun, henkilökuntamäärityksensä ja raportointinsa.",
+  "blog.post4C4": "Tärkein hyöty on näkyvyys. Sen sijaan, että kirjautuisit erillisiin järjestelmiin tai tarkistaisit useita taulukoita, näet kaikki toimipisteesi yhdessä paikassa.",
+
+  // Nav new pages
+  "nav.features": "Ominaisuudet",
+  "nav.useCases": "Käyttökohteet",
+  "nav.blog": "Blogi",
+  "nav.whatIs": "Mikä on MimmoBook?",
 };
 
 const sv: TranslationKeys = {
@@ -5265,6 +5760,171 @@ const sv: TranslationKeys = {
   "support.catTeam": "Team",
   "support.catBilling": "Fakturering",
   "support.catFaq": "Vanliga frågor",
+
+  // What Is MimmoBook
+  "whatIs.badge": "Om plattformen",
+  "whatIs.heroTitle": "Vad är MimmoBook?",
+  "whatIs.heroSubtitle": "MimmoBook är en molnbaserad bokningshanteringsplattform byggd för restauranger, eventlokaler, hotell och gästhus. Ett verktyg för att hantera alla dina bokningar.",
+  "whatIs.seeFeatures": "Se alla funktioner",
+  "whatIs.definitionTitle": "MimmoBook: Bokningshantering för besöksnäringen",
+  "whatIs.definitionP1": "MimmoBook är en SaaS-plattform som hjälper besöksnäringsföretag att hantera bokningar online. Oavsett om du driver en restaurang, eventlokal, hotell eller gästhus ger MimmoBook dig en centraliserad instrumentpanel för att hantera bokningar, kommunicera med gäster och spåra affärsprestanda.",
+  "whatIs.definitionP2": "Till skillnad från generiska bokningsverktyg är MimmoBook designat specifikt för besöksnäringen. Det stöder flera bokningstyper — bordsreserveringar, rumsreserveringar, lokalhyra, cateringbeställningar och popup-evenemang — allt från ett enda konto. Varje företag får en varumärkesanpassad bokningssida.",
+  "whatIs.definitionP3": "MimmoBook finns tillgängligt på engelska, finska och svenska, vilket gör det idealiskt för företag som verkar i Norden och internationellt. Plattformen skalas från enskilda restauranger till besöksnäringsgrupper med flera platser.",
+  "whatIs.whoTitle": "Vem är MimmoBook till för?",
+  "whatIs.whoSubtitle": "MimmoBook betjänar besöksnäringsföretag i alla storlekar inom fyra huvudkategorier.",
+  "whatIs.whoRestaurants": "Restauranger",
+  "whatIs.whoRestaurantsDesc": "Hantera bordsreserveringar, set-menyer och gästpreferenser. Hantera walk-ins och onlinebokningar från en instrumentpanel.",
+  "whatIs.whoVenues": "Eventlokaler",
+  "whatIs.whoVenuesDesc": "Samordna lokal­bokningar, utrustningsbehov, cateringförfrågningar och evenemangsscheman med automatiska bekräftelser.",
+  "whatIs.whoHotels": "Hotell",
+  "whatIs.whoHotelsDesc": "Hantera rumsreserveringar, in-/utcheckning, frukost­alternativ och rumstyps­prissättning för din fastighet.",
+  "whatIs.whoGuesthouses": "Gästhus",
+  "whatIs.whoGuesthousesDesc": "Förenkla gästboende med enkel rumsbokning, tillgänglighetshantering och personlig kommunikation.",
+  "whatIs.howTitle": "Hur fungerar MimmoBook?",
+  "whatIs.howSubtitle": "Kom igång på fyra enkla steg.",
+  "whatIs.howStep1": "Registrera dig",
+  "whatIs.howStep1Desc": "Skapa ditt konto och starta en 30-dagars gratis provperiod. Inget kreditkort behövs.",
+  "whatIs.howStep2": "Konfigurera",
+  "whatIs.howStep2Desc": "Ställ in din företagsprofil, bokningstyper, öppettider och varumärkesanpassning.",
+  "whatIs.howStep3": "Dela",
+  "whatIs.howStep3Desc": "Dela din varumärkes­anpassade bokningssida med gäster via din webbplats, sociala medier eller e-post.",
+  "whatIs.howStep4": "Hantera",
+  "whatIs.howStep4Desc": "Hantera alla bokningar från din instrumentpanel med automatiserade e-postmeddelanden, rapporter och teamverktyg.",
+  "whatIs.keyFeaturesTitle": "Nyckelfunktioner",
+  "whatIs.feat1": "Smarta bokningar",
+  "whatIs.feat1Desc": "Ta emot och hantera bokningar för restauranger, lokaler, hotell och gästhus från en plattform.",
+  "whatIs.feat2": "Anpassat varumärke",
+  "whatIs.feat2Desc": "Din bokningssida speglar ditt varumärke med anpassade färger, logotyp och bilder.",
+  "whatIs.feat3": "Teamhantering",
+  "whatIs.feat3Desc": "Bjud in personal, tilldela roller och kontrollera behörigheter för hela ditt team.",
+  "whatIs.feat4": "Flerspråkigt stöd",
+  "whatIs.feat4Desc": "Instrumentpanel och bokningssidor tillgängliga på engelska, finska och svenska.",
+  "whatIs.feat5": "Rapporter och analys",
+  "whatIs.feat5Desc": "Följ intäkter, beläggning och bokningstrender med exporterbara rapporter.",
+  "whatIs.feat6": "Automatiserade e-postmeddelanden",
+  "whatIs.feat6Desc": "Bekräftelse-, påminnelse- och avbokningsmeddelanden skickas automatiskt till gäster.",
+  "whatIs.allFeatures": "Visa alla funktioner",
+  "whatIs.ctaTitle": "Redo att förenkla dina bokningar?",
+  "whatIs.ctaSubtitle": "Starta din 30-dagars gratis provperiod idag. Inget kreditkort behövs.",
+
+  // Features Page
+  "featuresPage.badge": "Plattformens funktioner",
+  "featuresPage.heroTitle": "Allt du behöver för att hantera bokningar",
+  "featuresPage.heroSubtitle": "Från bokningssidor till rapporter — MimmoBook ger dig en komplett verktygslåda för bokningshantering inom besöksnäringen.",
+  "featuresPage.ctaTitle": "Börja hantera bokningar idag",
+  "featuresPage.ctaSubtitle": "Testa alla funktioner gratis i 30 dagar. Inget kreditkort behövs.",
+  "featuresPage.comparePlans": "Jämför planer",
+  "features.catReservations": "Bokningshantering",
+  "features.catBranding": "Varumärke och bokningssidor",
+  "features.catManagement": "Team- och verksamhetshantering",
+  "features.catComms": "Kommunikation och rapportering",
+  "features.f1Title": "Flertyps­bokningar",
+  "features.f1Desc": "Stöd för bordsreserveringar, rumsreserveringar, lokalhyra, cateringbeställningar och popup-evenemang från ett konto.",
+  "features.f2Title": "Öppettider och tillgänglighet",
+  "features.f2Desc": "Konfigurera öppettider per bokningstyp med blockerade tidsluckor och återkommande stängningar.",
+  "features.f3Title": "Automatiska påminnelser",
+  "features.f3Desc": "Gäster får automatiska påminnelsemeddelanden före sin bokning för att minska uteblivanden.",
+  "features.f4Title": "Rabattkoder",
+  "features.f4Desc": "Skapa procent- eller beloppsrabattkoder med användningsgränser och datumbegränsningar.",
+  "features.f5Title": "Varumärkesanpassade bokningssidor",
+  "features.f5Desc": "Din publika bokningssida visar din logotyp, färger, huvudbild och företagsbeskrivning.",
+  "features.f6Title": "Redo för egen domän",
+  "features.f6Desc": "Varje företag får en unik boknings-URL. Dela den på din webbplats, sociala medier eller tryckt material.",
+  "features.f7Title": "Flerspråkigt (EN/FI/SV)",
+  "features.f7Desc": "Instrumentpanel och bokningssidor är helt översatta till engelska, finska och svenska.",
+  "features.f8Title": "Mobilanpassad",
+  "features.f8Desc": "Bokningssidan och instrumentpanelen fungerar perfekt på telefoner, surfplattor och datorer.",
+  "features.f9Title": "Teamroller och behörigheter",
+  "features.f9Desc": "Bjud in personal som ägare, administratörer eller teammedlemmar med detaljerad behörighetskontroll.",
+  "features.f10Title": "Resurshantering",
+  "features.f10Desc": "Skapa och hantera rum, bord, eventlokaler och andra bokningsbara resurser med foton och beskrivningar.",
+  "features.f11Title": "Stöd för flera platser",
+  "features.f11Desc": "Hantera flera platser från ett konto med varumärkesanpassning, personal och rapportering per plats.",
+  "features.f12Title": "Godkännandeflöden",
+  "features.f12Desc": "Granska och godkänn bokningar, resursändringar och blockerade tidsluckor innan de publiceras.",
+  "features.f13Title": "E-postmallar",
+  "features.f13Desc": "Anpassa bekräftelse-, påminnelse- och avbokningsmeddelanden per bokningstyp och språk.",
+  "features.f14Title": "Anpassade e-postmallar",
+  "features.f14Desc": "Business-kunder kan helt anpassa e-postens HTML med sitt eget varumärke och budskap.",
+  "features.f15Title": "Rapporter och analys",
+  "features.f15Desc": "Intäktsrapporter, bokningstrender, beläggningsgrader och CSV-exporter för bokföring.",
+  "features.f16Title": "Faktureringsuppföljning",
+  "features.f16Desc": "Markera bokningar som fakturerade och spåra ofakturerade intäkter för alla bokningstyper.",
+
+  // Use Cases
+  "useCases.badge": "Användningsfall",
+  "useCases.heroTitle": "Byggd för alla typer av besöksnäringsföretag",
+  "useCases.heroSubtitle": "Se hur MimmoBook löser bokningsutmaningar för restauranger, lokaler, hotell, gästhus, cateringföretag och popup-evenemang.",
+  "useCases.challengesLabel": "Vanliga utmaningar",
+  "useCases.solutionLabel": "Hur MimmoBook hjälper",
+  "useCases.restaurant": "Restaurangbokningar",
+  "useCases.restaurantDesc": "Restauranger behöver hantera bordsreserveringar, walk-ins, set-menyer och specialkost samtidigt som de spårar gästpreferenser och uteblivanden.",
+  "useCases.restaurantChallenges": "Telefonbokning är tidskrävande och felbenägen. Rusningstider skapar flaskhalsar. Uteblivanden slösar kapacitet. Manuell spårning missar gästpreferenser.",
+  "useCases.restaurantSolution": "MimmoBook erbjuder en varumärkesanpassad online-bokningssida där gäster bokar själva. Automatiska bekräftelser och påminnelser minskar uteblivanden. Alla gästdata och preferenser lagras på ett ställe.",
+  "useCases.venue": "Lokal- och evenemangsbokningar",
+  "useCases.venueDesc": "Eventlokaler behöver samordna utrymmestillgänglighet, utrustning, catering och personal medan de hanterar flera bokningar och klientkommunikation.",
+  "useCases.venueChallenges": "Dubbelbokningar vid e-post- eller telefonbokning. Komplex logistik för flera utrymmen. Splittrad kommunikation med klienter. Svårt att spåra intäkter per evenemangstyp.",
+  "useCases.venueSolution": "MimmoBooks resurshantering förhindrar dubbelbokningar. Varje lokal har sin egen tillgänglighetskalender. Automatiserade e-postmeddelanden håller klienterna informerade.",
+  "useCases.hotel": "Hotellrumsbokningar",
+  "useCases.hotelDesc": "Hotell behöver hantera rumstillgänglighet, in-/utcheckning, rumstyper, prisnivåer och frukost­alternativ.",
+  "useCases.hotelChallenges": "Hantering av rumsinventarie per rumstyp. Manuell in-/utcheckningsspårning. Samordning av frukost­alternativ och prissättning. Professionell bokningsupplevelse utan dyra system.",
+  "useCases.hotelSolution": "MimmoBook stöder rumstyps­prissättning, sängkonfigurationer, frukost­alternativ och in-/utchecknings­spårning. Den varumärkesanpassade bokningssidan ger gästerna en professionell bokningsupplevelse.",
+  "useCases.guesthouse": "Gästhusbokningar",
+  "useCases.guesthouseDesc": "Gästhus och B&B behöver ett enkelt system för att hantera gästvistelser, tillgänglighet och kommunikation utan företags­programvarans komplexitet.",
+  "useCases.guesthouseChallenges": "Företagshotellsystem är för komplexa och dyra. Kalkylblad och telefonbokningar missar reserveringar. Ingen automatiserad gästkommunikation. Svårt att visa tillgänglighet online.",
+  "useCases.guesthouseSolution": "MimmoBook erbjuder ett enkelt, prisvärt bokningssystem dimensionerat för gästhus. Gäster bokar direkt via din varumärkesanpassade sida. Automatiserade e-postmeddelanden hanterar bekräftelser och påminnelser.",
+  "useCases.catering": "Cateringbeställningar",
+  "useCases.cateringDesc": "Cateringföretag behöver hantera leveransdetaljer, menyval, specialkost och evenemangsspecifik logistik för varje beställning.",
+  "useCases.cateringChallenges": "Beställningsdetaljer försvinner i e-postkedjor. Specialkost missas. Ingen centraliserad vy över kommande beställningar. Manuell samordning slösar tid.",
+  "useCases.cateringSolution": "MimmoBook samlar alla cateringdetaljer i strukturerade bokningsformulär. Leveransadresser, kostinformation och gästantal lagras per beställning.",
+  "useCases.popup": "Popup-evenemang och marknader",
+  "useCases.popupDesc": "Popup-arrangemang behöver hantera leverantörsansökningar, ståndstilldelning och evenemangslogistik på tillfälliga platser.",
+  "useCases.popupChallenges": "Leverantörshantering via e-post är kaotisk. Ståndstilldelning spåras manuellt. Ingen centraliserad vy över leverantörsdetaljer. Avgiftsspårning är inkonsekvent.",
+  "useCases.popupSolution": "MimmoBooks popup-bokningstyp samlar ståndstorlek, avgifter, utrustningsbehov och leverantörsdetaljer. Arrangörer ser alla ansökningar i en instrumentpanel med godkännandeflöden.",
+  "useCases.ctaTitle": "Hittade du ditt användningsfall?",
+  "useCases.ctaSubtitle": "Starta din 30-dagars gratis provperiod och skapa din första bokningssida på minuter.",
+
+  // Blog
+  "blog.badge": "Blogg",
+  "blog.heroTitle": "Insikter och guider för besöksnäringen",
+  "blog.heroSubtitle": "Tips, bästa praxis och insikter för besöksnäringsföretag som hanterar bokningar.",
+  "blog.readMore": "Läs mer",
+  "blog.backToBlog": "Tillbaka till bloggen",
+  "blog.postCta": "Redo att effektivisera dina bokningar?",
+  "blog.ctaTitle": "Håll dig uppdaterad",
+  "blog.ctaSubtitle": "Testa MimmoBook gratis i 30 dagar och se hur det förändrar din bokningshantering.",
+  "blog.catInsights": "Insikter",
+  "blog.catGuides": "Guider",
+  "blog.post1Title": "5 bokningsutmaningar som små besöksnäringsföretag möter",
+  "blog.post1Excerpt": "Från uteblivanden till dubbelbokningar — små restauranger, lokaler och gästhus möter unika utmaningar. Här är de och hur man löser dem.",
+  "blog.post1C1": "Små besöksnäringsföretag — restauranger med en handfull bord, boutiquelokaler, familjedrivna gästhus — möter bokningsutmaningar som större verksamheter löser med dedikerad personal och företagsprogramvara. Men för ett företag med 5–30 platser är dessa lösningar överdimensionerade.",
+  "blog.post1C2": "Den första utmaningen är uteblivanden. När ett bord för fyra inte dyker upp på en restaurang med 20 platser, försvinner 20% av kapaciteten. Automatiska påminnelsemeddelanden 24 timmar före en bokning kan minska uteblivandena med 30–50%.",
+  "blog.post1C3": "Den andra utmaningen är dubbelbokningar. När bokningar kommer via telefon, e-post, Instagram-meddelanden och walk-ins, är det lätt att boka samma bord eller rum dubbelt. Ett centraliserat bokningssystem med realtidstillgänglighet eliminerar detta helt.",
+  "blog.post1C4": "För det tredje är gästkommunikationen inkonsekvent. Vissa gäster får bekräftelsemeddelande, andra inte. Automatiserade e-postflöden säkerställer att varje gäst får samma professionella upplevelse.",
+  "blog.post1C5": "För det fjärde är intäktsspårning manuell och felbenägen. Små företag använder ofta kalkylblad eller papper för att spåra bokningar. Ett bokningssystem med inbyggd rapportering löser detta. För det femte lider onlinesynligheten — utan en professionell bokningssida kan potentiella gäster inte enkelt hitta tillgänglighet.",
+  "blog.post2Title": "Varför kalkylblad inte fungerar för bokningshantering",
+  "blog.post2Excerpt": "Kalkylblad är flexibla men skapar problem för bokningshantering. Här är varför dedikerad programvara är värd bytet.",
+  "blog.post2C1": "Kalkylblad är standardverktyget för många småföretag. De är gratis, flexibla och välkända. Men för bokningshantering skapar de problem som förvärras med tiden.",
+  "blog.post2C2": "Det största problemet är att kalkylblad inte är realtid. När två medarbetare uppdaterar samma ark uppstår konflikter. Det finns ingen live-tillgänglighetsvy, så personalen måste kontrollera manuellt före varje bekräftelse.",
+  "blog.post2C3": "Kalkylblad kan inte heller skicka e-post. Varje bekräftelse, påminnelse och avbokning måste hanteras manuellt. Ett dedikerat bokningssystem automatiserar all gästkommunikation.",
+  "blog.post2C4": "Slutligen erbjuder kalkylblad ingen analys. Du kan inte enkelt se beläggningsgrader, bokningstrender eller intäkter per bokningstyp utan komplexa formler. Bokningsprogramvara genererar dessa rapporter automatiskt.",
+  "blog.post3Title": "Varför varumärkesanpassade bokningssidor är viktiga för ditt företag",
+  "blog.post3Excerpt": "Ett generiskt bokningsformulär berättar inget om ditt varumärke. En varumärkesanpassad bokningssida bygger förtroende och ökar konverteringar.",
+  "blog.post3C1": "När en gäst besöker din bokningssida är det ofta deras första interaktion med ditt företag online. Om sidan är ett generiskt formulär utan varumärkesanpassning skickar det fel budskap.",
+  "blog.post3C2": "En varumärkesanpassad bokningssida — med din logotyp, färger, huvudbild och företagsbeskrivning — skapar ett professionellt första intryck. Studier visar att varumärkesanpassade bokningsupplevelser har 20–40% högre konverteringsgrad.",
+  "blog.post3C3": "MimmoBook låter varje företag anpassa sin bokningssida med sitt eget varumärke. Ladda upp din logotyp, ställ in dina färger, lägg till en huvudbild och skriv en beskrivning. Resultatet är en bokningsupplevelse som känns som en förlängning av din webbplats.",
+  "blog.post4Title": "Hantera bokningar på flera platser",
+  "blog.post4Excerpt": "Besöksnäringsföretag med flera platser behöver centraliserade verktyg. Så hanterar du bokningar på flera platser utan att tappa kontrollen.",
+  "blog.post4C1": "Att driva flera besöksnäringsplatser — restauranggrupp, gästhuskedja eller lokaler i olika städer — mångdubblar bokningshanteringens komplexitet.",
+  "blog.post4C2": "Utmaningen är att upprätthålla konsekvens samtidigt som man respekterar varje plats unika behov. Ett centraliserat system låter dig hantera alla platser från en instrumentpanel med separata bokningssidor, personalbehörigheter och rapporter per plats.",
+  "blog.post4C3": "MimmoBooks funktion för flera platser är designad för detta. Varje plats får sin egen varumärkesanpassade bokningssida, personaluppdrag och rapportering.",
+  "blog.post4C4": "Den viktigaste fördelen är synlighet. Istället för att logga in på separata system eller kontrollera flera kalkylblad ser du alla dina platser på ett ställe.",
+
+  // Nav new pages
+  "nav.features": "Funktioner",
+  "nav.useCases": "Användningsfall",
+  "nav.blog": "Blogg",
+  "nav.whatIs": "Vad är MimmoBook?",
 };
 
 export const translations: Record<Language, TranslationKeys> = { en, fi, sv };

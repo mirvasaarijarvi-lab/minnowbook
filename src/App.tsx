@@ -24,6 +24,11 @@ import Privacy from "./pages/Privacy";
 import Accessibility from "./pages/Accessibility";
 import Superadmin from "./pages/Superadmin";
 import StaffGuide from "./pages/StaffGuide";
+import WhatIsMimmobook from "./pages/WhatIsMimmobook";
+import Features from "./pages/Features";
+import UseCases from "./pages/UseCases";
+import Blog from "./pages/Blog";
+import BlogPost from "./pages/BlogPost";
 import CookieConsent from "./components/CookieConsent";
 import AccessibilityWidget from "./components/AccessibilityWidget";
 import { ImpersonationProvider } from "./contexts/ImpersonationContext";
@@ -104,6 +109,11 @@ const App = () => (
               <Route path="/about" element={<About />} />
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/accessibility" element={<Accessibility />} />
+              <Route path="/what-is-mimmobook" element={<WhatIsMimmobook />} />
+              <Route path="/features" element={<Features />} />
+              <Route path="/use-cases" element={<UseCases />} />
+              <Route path="/blog" element={<Blog />} />
+              <Route path="/blog/:slug" element={<BlogPost />} />
               <Route path="/signup" element={<Signup />} />
               <Route path="/login" element={<Login />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
