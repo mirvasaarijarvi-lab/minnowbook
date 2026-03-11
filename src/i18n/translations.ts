@@ -5157,7 +5157,7 @@ const sv: TranslationKeys = {
 
   // Support page
   "support.heroTitle": "Hur kan vi hjälpa till?",
-  "support.heroSubtitle": "Bläddra bland guider, vanliga frågor och svar och tips för att få ut det mesta av MimoBook.",
+  "support.heroSubtitle": "Bläddra bland guider, vanliga frågor och svar och tips för att få ut det mesta av MimmoBook.",
   "support.searchPlaceholder": "Sök efter hjälp...",
   "support.noResults": "Inga resultat hittades. Prova ett annat sökord.",
   "support.stillNeedHelp": "Behöver du fortfarande hjälp?",
