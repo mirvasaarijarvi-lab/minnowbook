@@ -5911,7 +5911,7 @@ const sv: TranslationKeys = {
   "blog.post3Title": "Varför varumärkesanpassade bokningssidor är viktiga för ditt företag",
   "blog.post3Excerpt": "Ett generiskt bokningsformulär berättar inget om ditt varumärke. En varumärkesanpassad bokningssida bygger förtroende och ökar konverteringar.",
   "blog.post3C1": "När en gäst besöker din bokningssida är det ofta deras första interaktion med ditt företag online. Om sidan är ett generiskt formulär utan varumärkesanpassning skickar det fel budskap.",
-  "blog.post3C2": "En varumärkesanpassad bokningssida — med din logotyp, färger, huvudbild och företagsbeskrivning — skapar ett professionellt första intryck. Studier visar att varumärkesanpassade bokningsupplevelser har 20–40% högre konverteringsgrad.",
+  "blog.post3C2": "En varumärkesanpassad bokningssida, med din logotyp, färger, huvudbild och företagsbeskrivning, skapar ett professionellt första intryck. Studier visar att varumärkesanpassade bokningsupplevelser har 20 till 40% högre konverteringsgrad.",
   "blog.post3C3": "MimmoBook låter varje företag anpassa sin bokningssida med sitt eget varumärke. Ladda upp din logotyp, ställ in dina färger, lägg till en huvudbild och skriv en beskrivning. Resultatet är en bokningsupplevelse som känns som en förlängning av din webbplats.",
   "blog.post4Title": "Hantera bokningar på flera platser",
   "blog.post4Excerpt": "Besöksnäringsföretag med flera platser behöver centraliserade verktyg. Så hanterar du bokningar på flera platser utan att tappa kontrollen.",
