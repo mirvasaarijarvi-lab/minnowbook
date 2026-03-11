@@ -3940,7 +3940,7 @@ const fi: TranslationKeys = {
   "help.art7C1": "Omistajat voivat kutsua henkilöstöä Hallinta-paneelista.",
   "help.art7C2": "Roolit: Omistaja (täysi pääsy), Admin (resurssien hallinta), Henkilöstö (varausten tarkastelu).",
   "help.art7C3": "Hyväksy tai poista tiimin jäseniä milloin tahansa.",
-  "help.art7C4": "Jokaisella tilauksella on henkilöstöraja — päivitä lisätäksesi.",
+  "help.art7C4": "Jokaisella tilauksella on henkilöstöraja. Päivitä lisätäksesi.",
   "help.art8Title": "Tilaukset ja laskutus",
   "help.art8Desc": "Tutustu hinnoittelutasoihin ja hallinnoi tilaustasi.",
   "help.art8C1": "Basic (29 €/kk) — 1 tyyppi, 1–3 henkilöä, AI-chatbot-tuki.",
