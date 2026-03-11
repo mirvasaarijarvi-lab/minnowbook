@@ -411,7 +411,7 @@ const TierOverviewCard = ({ tierOverview }: { tierOverview: GuideContent["tierOv
 const guideContent: Record<Language, GuideContent> = {
   en: {
     title: "Staff Quick Guide",
-    subtitle: "MimoBook – Staff User Manual",
+    subtitle: "MimmoBook – Staff User Manual",
     printBtn: "Print / Save as PDF",
     back: "Back to Dashboard",
     tierOverview: {
