@@ -5235,7 +5235,7 @@ const sv: TranslationKeys = {
 
   "about.heroBadge": "Vår berättelse",
   "about.heroTitle": "Bokningsplattformen byggd med omsorg",
-  "about.heroSubtitle": "Vi hjälper hotell- och restaurangföretag att hantera sina bokningar enkelt — så de kan fokusera på att skapa minnesvärda gästupplevelser.",
+  "about.heroSubtitle": "Vi hjälper hotell- och restaurangföretag att hantera sina bokningar enkelt, så de kan fokusera på att skapa minnesvärda gästupplevelser.",
   "about.missionBadge": "Vårt uppdrag",
   "about.missionTitle": "Göra bokningshantering enkel och smidig",
   "about.missionP1": "Små besöksnäringsföretag förtjänar praktiska och informativa verktyg för att arbeta mer effektivt. Vi startade MimmoBook för att göra det möjligt.",
