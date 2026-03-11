@@ -3588,7 +3588,7 @@ const fi: TranslationKeys = {
   "help.art8C3": "Business (199 €/kk) — Kaikki tyypit, rajaton henkilöstö, prioriteettituki 24h vasteajalla.",
   "help.art8C4": "Päivitä tai alenna milloin tahansa. Muutokset astuvat voimaan seuraavalla laskutuskaudella.",
   "help.art9Title": "Usein kysytyt kysymykset",
-  "help.art9Desc": "Vastauksia yleisimpiin kysymyksiin MimoBookista.",
+  "help.art9Desc": "Vastauksia yleisimpiin kysymyksiin MimmoBookista.",
   "help.art9C1": "K: Tarvitsenko luottokortin kokeiluun? V: Ei!",
   "help.art9C2": "K: Voinko käyttää omaa verkkotunnusta? V: Omat verkkotunnukset ovat suunnitelmissa.",
   "help.art9C3": "K: Miten vieraat saavat vahvistuksen? V: Automaattisesti sähköpostitse vahvistuksen yhteydessä.",
