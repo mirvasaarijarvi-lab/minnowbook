@@ -2288,7 +2288,7 @@ const en: TranslationKeys = {
   "help.art8C3": "Business (€199/mo) — All types, unlimited staff, priority support with 24h response.",
   "help.art8C4": "Upgrade or downgrade anytime. Changes take effect next billing cycle.",
   "help.art9Title": "Frequently Asked Questions",
-  "help.art9Desc": "Answers to the most common questions about MimoBook.",
+  "help.art9Desc": "Answers to the most common questions about MimmoBook.",
   "help.art9C1": "Q: Do I need a credit card for the trial? A: No!",
   "help.art9C2": "Q: Can I use my own domain? A: Custom domains are on our roadmap.",
   "help.art9C3": "Q: How do guests receive confirmations? A: Automatically via email when you confirm a booking.",
