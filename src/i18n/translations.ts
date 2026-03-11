@@ -2963,7 +2963,7 @@ const en: TranslationKeys = {
   "blog.post3Title": "Why Branded Booking Pages Matter for Your Business",
   "blog.post3Excerpt": "A generic booking form tells guests nothing about your brand. A branded booking page builds trust and increases conversions.",
   "blog.post3C1": "When a guest visits your booking page, it's often their first interaction with your business online. If that page is a generic form with no branding, it sends the wrong message. It looks unprofessional and doesn't build confidence.",
-  "blog.post3C2": "A branded booking page — with your logo, colors, hero image, and business description — creates a professional first impression. Guests immediately know they're in the right place. It builds trust before they even make a reservation. Studies show that branded booking experiences have 20–40% higher conversion rates than generic forms.",
+  "blog.post3C2": "A branded booking page with your logo, colors, hero image, and business description creates a professional first impression. Guests immediately know they're in the right place. It builds trust before they even make a reservation. Studies show that branded booking experiences have 20 to 40% higher conversion rates than generic forms.",
   "blog.post3C3": "MimmoBook lets every business customize their booking page with their own branding. Upload your logo, set your brand colors, add a hero image, and write a description. The result is a booking experience that feels like an extension of your website — not a third-party tool.",
   "blog.post4Title": "Managing Reservations Across Multiple Locations",
   "blog.post4Excerpt": "Multi-site hospitality businesses need centralized tools. Here's how to manage bookings across locations without losing control.",
