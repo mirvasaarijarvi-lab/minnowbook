@@ -32,7 +32,7 @@ const Logo = ({ variant = "color", size = "md", showText = true, className = "" 
     <div className={`flex items-center gap-2.5 ${className}`}>
       <img
         src={logoSrc[variant]}
-        alt="MimoBook logo"
+        alt="MimmoBook logo"
         className={`${sizeClasses[size]} rounded-lg object-contain`}
       />
       {showText && (
