@@ -3761,7 +3761,7 @@ const fi: TranslationKeys = {
 
   "about.heroBadge": "Tarinamme",
   "about.heroTitle": "Huolella rakennettu varausjärjestelmä",
-  "about.heroSubtitle": "Autamme majoitusalan yrityksiä hallitsemaan varauksiaan vaivattomasti — jotta he voivat keskittyä luomaan unohtumattomia vieraskokemuksia.",
+  "about.heroSubtitle": "Autamme majoitusalan yrityksiä hallitsemaan varauksiaan vaivattomasti, jotta he voivat keskittyä luomaan unohtumattomia vieraskokemuksia.",
   "about.missionBadge": "Missiomme",
   "about.missionTitle": "Varausten hallinta yksinkertaiseksi ja helpoksi",
   "about.missionP1": "Pienet majoitusalan yritykset ansaitsevat käytännöllisiä ja informatiivisia työkaluja toimiakseen tehokkaammin. Siksi loimme MimmoBookin.",
