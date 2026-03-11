@@ -3404,7 +3404,7 @@ const fi: TranslationKeys = {
   "about.heroSubtitle": "Autamme majoitusalan yrityksiä hallitsemaan varauksiaan vaivattomasti — jotta he voivat keskittyä luomaan unohtumattomia vieraskokemuksia.",
   "about.missionBadge": "Missiomme",
   "about.missionTitle": "Varausten hallinta yksinkertaiseksi ja helpoksi",
-  "about.missionP1": "Pienet majoitusalan yritykset ansaitsevat käytännöllisiä ja informatiivisia työkaluja toimiakseen tehokkaammin. Siksi loimme MinnowBookin.",
+  "about.missionP1": "Pienet majoitusalan yritykset ansaitsevat käytännöllisiä ja informatiivisia työkaluja toimiakseen tehokkaammin. Siksi loimme MimoBookin.",
   "about.missionP2": "Alustamme yhdistää varaukset, brändäyksen ja raportoinnin yhteen työkaluun — poistaen hajallaan olevat muistivihot ja unohtuneet varaukset.",
   "about.point1Title": "Nopeutta ilman kompromisseja",
   "about.point1Desc": "Saat brändätyn varaussivun käyttöön päivässä tai kahdessa, ei viikoissa.",
