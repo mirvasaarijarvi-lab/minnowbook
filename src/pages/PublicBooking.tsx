@@ -238,7 +238,7 @@ const PublicBookingInner = () => {
     estimated_guests: "",
     catering_needed: false,
     // Restaurant fields
-    pricing_type: "" as "" | "menu" | "fixed_price",
+    pricing_type: "" as "" | "menu" | "fixed_price" | "quote",
     fixed_price: "",
     restaurant_sub_type: "dine_in" as "dine_in" | "catering" | "popup",
     // Catering fields
