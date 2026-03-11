@@ -80,6 +80,7 @@ const ResourceManagement = () => {
     room_type_pricing: { ...defaultRoomPricing }, is_active: true,
     room_type: "" as string, room_description: "",
     offers_catering: false, offers_popup: false,
+    offers_table_reservation: true, offers_quote: true, offers_set_menu: true,
   });
 
   const { data: sites } = useQuery({
