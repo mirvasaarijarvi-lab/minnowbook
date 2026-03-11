@@ -1617,7 +1617,7 @@ const en: TranslationKeys = {
   "settings.saved": "Settings saved",
   "settings.saveError": "Failed to save settings",
   "settings.upsellTitle": "Manage multiple locations",
-  "settings.upsellDesc": "Upgrade to the Business plan to manage hotels, restaurants, and venues from a single dashboard — each with its own resources, hours, and booking page.",
+  "settings.upsellDesc": "Upgrade to the Business plan to manage hotels, restaurants, and venues from a single dashboard, each with its own resources, hours, and booking page.",
   "settings.learnMore": "Learn more",
   "settings.siteOverride": "Site Override",
   "settings.useParentDefault": "Use company default",
