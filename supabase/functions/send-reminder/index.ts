@@ -9,6 +9,8 @@ const corsHeaders = {
   "Referrer-Policy": "strict-origin-when-cross-origin",
 };
 
+const SENDER_DOMAIN = "notify.mimmobook.com";
+
 // --- Rate limiting ---
 const RATE_LIMIT_WINDOW_MS = 60_000;
 const RATE_LIMIT_MAX = 20;
@@ -34,6 +36,32 @@ setInterval(() => {
 
 // --- Translations per email type ---
 const translations: Record<string, Record<string, Record<string, string>>> = {
+  acknowledgment: {
+    en: {
+      subject: "We received your booking request",
+      title: "Booking Received",
+      greeting: "Dear",
+      body: "Thank you for your booking request. We will review it and get back to you shortly.",
+      footer: "You will receive a confirmation email once your booking is approved. If you have questions, please contact us.",
+      icon: "📩",
+    },
+    fi: {
+      subject: "Olemme vastaanottaneet varauspyyntösi",
+      title: "Varaus vastaanotettu",
+      greeting: "Hyvä",
+      body: "Kiitos varauspyynnöstäsi. Käsittelemme sen ja palaamme asiaan pian.",
+      footer: "Saat vahvistusviestin, kun varauksesi on hyväksytty. Ota yhteyttä, jos sinulla on kysyttävää.",
+      icon: "📩",
+    },
+    sv: {
+      subject: "Vi har mottagit din bokningsförfrågan",
+      title: "Bokning mottagen",
+      greeting: "Kära",
+      body: "Tack för din bokningsförfrågan. Vi kommer att granska den och återkomma inom kort.",
+      footer: "Du får ett bekräftelsemeddelande när din bokning har godkänts. Kontakta oss om du har frågor.",
+      icon: "📩",
+    },
+  },
   confirmation: {
     en: {
       subject: "Your reservation has been confirmed",
@@ -143,9 +171,9 @@ function replaceVars(text: string, reservation: any, businessName: string): stri
 function buildEmailHtml(reservation: any, business: any, lang: string, emailType: string, customBody?: string, customMessage?: string): string {
   const t = getT(emailType, lang);
   const dl = getDL(lang);
-  const primaryColor = business.primary_color || "#1e3a5f";
-  const accentColor = business.accent_color || "#d4a853";
+  const primaryColor = business.primary_color || "#3F1F5C";
   const businessName = business.business_name || "Business";
+  const logoUrl = business.logo_url || "https://lsgznskkxadplwnxplhd.supabase.co/storage/v1/object/public/tenant-assets/email-assets%2Flogo-color.png";
 
   const rows: { label: string; value: string }[] = [];
   rows.push({ label: dl.type, value: reservation.reservation_type });
@@ -159,9 +187,9 @@ function buildEmailHtml(reservation: any, business: any, lang: string, emailType
   const detailsHtml = rows
     .map(
       (r, i) =>
-        `<tr style="background-color:${i % 2 === 0 ? "#f9fafb" : "#ffffff"}">
-          <td style="padding:10px 16px;font-weight:600;color:#374151;border-right:1px solid #e5e7eb;width:40%">${r.label}</td>
-          <td style="padding:10px 16px;color:#111827">${r.value}</td>
+        `<tr style="background-color:${i % 2 === 0 ? "#faf8f5" : "#ffffff"}">
+          <td style="padding:10px 16px;font-weight:600;color:#1E1519;border-right:1px solid #e8e0d8;width:40%;font-family:'Inter',Arial,sans-serif;font-size:14px">${r.label}</td>
+          <td style="padding:10px 16px;color:#63516E;font-family:'Inter',Arial,sans-serif;font-size:14px">${r.value}</td>
         </tr>`
     )
     .join("");
@@ -171,43 +199,40 @@ function buildEmailHtml(reservation: any, business: any, lang: string, emailType
     bodyContent = replaceVars(customBody, reservation, businessName);
   } else {
     bodyContent = `
-      <p style="color:#4b5563;font-size:14px">${t.greeting} <strong>${reservation.guest_name}</strong>,</p>
-      <p style="color:#4b5563;font-size:14px">${t.body}</p>`;
+      <p style="color:#63516E;font-size:15px;font-family:'Inter',Arial,sans-serif;line-height:1.6">${t.greeting} <strong style="color:#1E1519">${reservation.guest_name}</strong>,</p>
+      <p style="color:#63516E;font-size:15px;font-family:'Inter',Arial,sans-serif;line-height:1.6">${t.body}</p>`;
   }
 
-  // Add custom per-reservation message if provided
   const customMsgHtml = customMessage
-    ? `<div style="margin:16px 0;padding:12px 16px;background-color:#f0f9ff;border-left:4px solid ${primaryColor};border-radius:4px;font-size:14px;color:#1e3a5f">${customMessage}</div>`
+    ? `<div style="margin:16px 0;padding:12px 16px;background-color:#f5f0fa;border-left:4px solid ${primaryColor};border-radius:4px;font-size:14px;color:#3F1F5C;font-family:'Inter',Arial,sans-serif">${customMessage}</div>`
     : "";
 
   return `<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;padding:0;background-color:#f3f4f6;font-family:Arial,sans-serif">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f3f4f6;padding:32px 0">
+<body style="margin:0;padding:0;background-color:#ffffff;font-family:'Inter',Arial,sans-serif">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#ffffff;padding:32px 0">
     <tr><td align="center">
-      <table width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.1)">
-        <tr><td style="background-color:${primaryColor};padding:24px;text-align:center">
-          ${business.logo_url ? `<img src="${business.logo_url}" alt="" style="height:40px;width:40px;border-radius:50%;border:2px solid rgba(255,255,255,0.3);margin-bottom:8px">` : ""}
-          <h2 style="margin:0;color:#ffffff;font-size:18px;font-family:Georgia,serif">${businessName}</h2>
+      <table width="480" cellpadding="0" cellspacing="0" style="background-color:#ffffff">
+        <tr><td style="text-align:center;padding:32px 32px 24px">
+          <img src="${logoUrl}" alt="${businessName}" style="height:48px;width:auto;margin-bottom:24px">
         </td></tr>
-        <tr><td style="padding:32px">
+        <tr><td style="padding:0 32px 32px">
           <div style="text-align:center;margin-bottom:24px">
-            <div style="display:inline-block;width:48px;height:48px;line-height:48px;border-radius:50%;background-color:${accentColor}20;font-size:24px;text-align:center">${t.icon}</div>
-            <h3 style="color:${primaryColor};font-size:20px;font-family:Georgia,serif;margin:12px 0 0">${t.title}</h3>
+            <div style="display:inline-block;width:48px;height:48px;line-height:48px;border-radius:50%;background-color:#f5f0fa;font-size:24px;text-align:center">${t.icon}</div>
+            <h1 style="color:#1E1519;font-size:24px;font-family:'Playfair Display',Georgia,serif;font-weight:700;margin:12px 0 0">${t.title}</h1>
           </div>
           ${bodyContent}
           ${customMsgHtml}
-          <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e5e7eb;border-radius:6px;overflow:hidden;margin:16px 0;font-size:14px">
+          <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e8e0d8;border-radius:10px;overflow:hidden;margin:20px 0;font-size:14px">
             ${detailsHtml}
           </table>
-          ${!customBody ? `<p style="color:#4b5563;font-size:14px">${t.footer}</p>` : ""}
+          ${!customBody ? `<p style="color:#63516E;font-size:14px;font-family:'Inter',Arial,sans-serif;line-height:1.6">${t.footer}</p>` : ""}
         </td></tr>
-        <tr><td style="background-color:#f9fafb;padding:16px;text-align:center;font-size:12px;color:#6b7280;border-top:1px solid #e5e7eb">
-          <p style="margin:4px 0;font-weight:600">${businessName}</p>
+        <tr><td style="padding:24px 32px;text-align:center;font-size:12px;color:#999;border-top:1px solid #e8e0d8;font-family:'Inter',Arial,sans-serif">
+          <p style="margin:4px 0;font-weight:600;color:#63516E">${businessName}</p>
           ${business.business_address ? `<p style="margin:4px 0">${business.business_address}</p>` : ""}
           ${business.business_phone ? `<p style="margin:4px 0">${business.business_phone}</p>` : ""}
-          ${business.business_email ? `<p style="margin:4px 0">${business.business_email}</p>` : ""}
         </td></tr>
       </table>
     </td></tr>
@@ -235,12 +260,6 @@ Deno.serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const resendApiKey = Deno.env.get("RESEND_API_KEY");
-
-    if (!resendApiKey) {
-      throw new Error("Email service not configured. Please add RESEND_API_KEY.");
-    }
-
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
     // Authenticate caller
@@ -271,15 +290,15 @@ Deno.serve(async (req) => {
 
     const body = await req.json();
     const reservationId = body.reservationId;
-    const emailType: string = body.emailType || "reminder"; // "confirmation" | "reminder" | "cancellation"
+    const emailType: string = body.emailType || "reminder";
     const customMessage: string | undefined = body.customMessage;
 
     if (!reservationId || typeof reservationId !== "string") throw new Error("reservationId is required");
     if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(reservationId)) {
       throw new Error("Invalid reservationId format");
     }
-    if (!["confirmation", "reminder", "cancellation"].includes(emailType)) {
-      throw new Error("Invalid emailType. Must be confirmation, reminder, or cancellation.");
+    if (!["acknowledgment", "confirmation", "reminder", "cancellation"].includes(emailType)) {
+      throw new Error("Invalid emailType. Must be acknowledgment, confirmation, reminder, or cancellation.");
     }
 
     const tenantId = (sysAdmin && body.tenantId) ? body.tenantId : callerRole?.tenant_id;
@@ -312,15 +331,15 @@ Deno.serve(async (req) => {
       business_email: settings?.business_email || "",
       business_phone: settings?.business_phone || "",
       business_address: settings?.business_address || "",
-      primary_color: settings?.primary_color || "#1e3a5f",
-      accent_color: settings?.accent_color || "#d4a853",
+      primary_color: settings?.primary_color || "#3F1F5C",
+      accent_color: settings?.accent_color || "#FF5733",
       logo_url: settings?.logo_url || "",
     };
 
     const lang = reservation.language || settings?.default_language || "en";
     const t = getT(emailType, lang);
 
-    // Check for custom template — site-specific first, then tenant-level fallback
+    // Check for custom template
     let customTemplate: any = null;
 
     if (reservation.site_id) {
@@ -338,7 +357,6 @@ Deno.serve(async (req) => {
         siteTemplates?.[0] || null;
     }
 
-    // Fallback to tenant-level template
     if (!customTemplate) {
       const { data: tenantTemplates } = await adminClient
         .from("tenant_email_templates")
@@ -365,32 +383,31 @@ Deno.serve(async (req) => {
     }
 
     const html = buildEmailHtml(reservation, business, lang, emailType, customBody, customMessage);
-    const fromEmail = business.business_email || "noreply@example.com";
-    const fromName = business.business_name || "Reservations";
+    const fromName = business.business_name || "Mimmobook";
 
-    // Send via Resend
-    const resendResponse = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${resendApiKey}`,
-      },
-      body: JSON.stringify({
-        from: `${fromName} <${fromEmail}>`,
-        to: [reservation.guest_email],
+    // Enqueue via transactional email queue
+    const { error: enqueueError } = await adminClient.rpc("enqueue_email", {
+      queue_name: "transactional_emails",
+      payload: {
+        to: reservation.guest_email,
+        from: `${fromName} <noreply@${SENDER_DOMAIN}>`,
+        sender_domain: SENDER_DOMAIN,
         subject,
         html,
-      }),
+        purpose: "transactional",
+        label: `booking_${emailType}`,
+        queued_at: new Date().toISOString(),
+      },
     });
 
-    if (!resendResponse.ok) {
-      const errorBody = await resendResponse.text();
-      console.error("Resend error:", errorBody);
-      throw new Error("Failed to send email");
+    if (enqueueError) {
+      console.error("Failed to enqueue email:", enqueueError);
+      throw new Error("Failed to queue email for sending");
     }
 
     // Update the appropriate sent_at timestamp
     const timestampField =
+      emailType === "acknowledgment" ? "acknowledgment_email_sent_at" :
       emailType === "confirmation" ? "confirmation_email_sent_at" :
       emailType === "cancellation" ? "cancellation_email_sent_at" :
       "reminder_email_sent_at";
