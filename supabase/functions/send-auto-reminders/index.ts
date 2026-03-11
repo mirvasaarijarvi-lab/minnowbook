@@ -3,7 +3,10 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
+    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+  "X-Content-Type-Options": "nosniff",
+  "X-Frame-Options": "DENY",
+  "Referrer-Policy": "strict-origin-when-cross-origin",
 };
 
 const SENDER_DOMAIN = "notify.mimmobook.com";
@@ -39,6 +42,15 @@ const translations: Record<string, Record<string, string>> = {
   },
 };
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 function getT(lang: string) {
   return translations[lang] || translations.en;
 }
@@ -50,11 +62,11 @@ function buildEmailHtml(reservation: any, business: any, lang: string, customBod
   const logoUrl = business.logo_url || "https://lsgznskkxadplwnxplhd.supabase.co/storage/v1/object/public/tenant-assets/email-assets%2Flogo-color.png";
 
   const rows: { label: string; value: string }[] = [];
-  rows.push({ label: t.type, value: reservation.reservation_type });
-  rows.push({ label: t.date, value: reservation.date + (reservation.start_time ? ` ${t.at} ${reservation.start_time.slice(0, 5)}` : "") });
-  if (reservation.check_out_date) rows.push({ label: t.checkOut, value: reservation.check_out_date });
-  if (reservation.room_type) rows.push({ label: t.roomType, value: reservation.room_type });
-  if (reservation.event_type) rows.push({ label: t.eventType, value: reservation.event_type });
+  rows.push({ label: t.type, value: escapeHtml(reservation.reservation_type) });
+  rows.push({ label: t.date, value: escapeHtml(reservation.date + (reservation.start_time ? ` ${t.at} ${reservation.start_time.slice(0, 5)}` : "")) });
+  if (reservation.check_out_date) rows.push({ label: t.checkOut, value: escapeHtml(reservation.check_out_date) });
+  if (reservation.room_type) rows.push({ label: t.roomType, value: escapeHtml(reservation.room_type) });
+  if (reservation.event_type) rows.push({ label: t.eventType, value: escapeHtml(reservation.event_type) });
   if (reservation.guests_count) rows.push({ label: t.guests, value: String(reservation.guests_count) });
   if (reservation.price_eur != null) rows.push({ label: t.price, value: `€${Number(reservation.price_eur).toFixed(2)}` });
 
@@ -71,17 +83,17 @@ function buildEmailHtml(reservation: any, business: any, lang: string, customBod
   let bodyContent: string;
   if (customBody) {
     bodyContent = customBody
-      .replace(/\{\{guest_name\}\}/g, reservation.guest_name)
-      .replace(/\{\{guest_email\}\}/g, reservation.guest_email)
-      .replace(/\{\{date\}\}/g, reservation.date)
-      .replace(/\{\{start_time\}\}/g, reservation.start_time?.slice(0, 5) || "")
-      .replace(/\{\{reservation_type\}\}/g, reservation.reservation_type)
-      .replace(/\{\{guests_count\}\}/g, String(reservation.guests_count || ""))
-      .replace(/\{\{price_eur\}\}/g, reservation.price_eur != null ? Number(reservation.price_eur).toFixed(2) : "")
-      .replace(/\{\{business_name\}\}/g, businessName);
+      .replace(/\{\{guest_name\}\}/g, escapeHtml(reservation.guest_name))
+      .replace(/\{\{guest_email\}\}/g, escapeHtml(reservation.guest_email))
+      .replace(/\{\{date\}\}/g, escapeHtml(reservation.date))
+      .replace(/\{\{start_time\}\}/g, escapeHtml(reservation.start_time?.slice(0, 5) || ""))
+      .replace(/\{\{reservation_type\}\}/g, escapeHtml(reservation.reservation_type))
+      .replace(/\{\{guests_count\}\}/g, escapeHtml(String(reservation.guests_count || "")))
+      .replace(/\{\{price_eur\}\}/g, escapeHtml(reservation.price_eur != null ? Number(reservation.price_eur).toFixed(2) : ""))
+      .replace(/\{\{business_name\}\}/g, escapeHtml(businessName));
   } else {
     bodyContent = `
-      <p style="color:#63516E;font-size:15px;font-family:'Inter',Arial,sans-serif;line-height:1.6">${t.greeting} <strong style="color:#1E1519">${reservation.guest_name}</strong>,</p>
+      <p style="color:#63516E;font-size:15px;font-family:'Inter',Arial,sans-serif;line-height:1.6">${t.greeting} <strong style="color:#1E1519">${escapeHtml(reservation.guest_name)}</strong>,</p>
       <p style="color:#63516E;font-size:15px;font-family:'Inter',Arial,sans-serif;line-height:1.6">${t.body}</p>`;
   }
 
