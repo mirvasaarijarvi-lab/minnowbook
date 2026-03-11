@@ -3427,7 +3427,7 @@ const fi: TranslationKeys = {
   "about.valueGlobal": "Saavutettavuus",
   "about.valueGlobalDesc": "Alustamme on monikielinen ja suunniteltu kaikkien saavutettavaksi.",
   "about.ctaTitle": "Oletko valmis yksinkertaistamaan varauksiasi?",
-  "about.ctaSubtitle": "Liity hotelli- ja ravintola-alan yritysten joukkoon, jotka jo käyttävät MinnowBookia, virtaviivaistaksesi varauksiasi.",
+  "about.ctaSubtitle": "Liity hotelli- ja ravintola-alan yritysten joukkoon, jotka jo käyttävät MimoBookia, virtaviivaistaksesi varauksiasi.",
 
   "privacy.title": "Tietosuojakäytäntö",
   "privacy.lastUpdated": "Päivitetty viimeksi:",
