@@ -110,6 +110,11 @@ const App = () => (
               <Route path="/about" element={<About />} />
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/accessibility" element={<Accessibility />} />
+              <Route path="/what-is-mimmobook" element={<WhatIsMimmobook />} />
+              <Route path="/features" element={<Features />} />
+              <Route path="/use-cases" element={<UseCases />} />
+              <Route path="/blog" element={<Blog />} />
+              <Route path="/blog/:slug" element={<BlogPost />} />
               <Route path="/signup" element={<Signup />} />
               <Route path="/login" element={<Login />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
