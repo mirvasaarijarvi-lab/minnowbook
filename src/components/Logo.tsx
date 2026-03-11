@@ -37,7 +37,7 @@ const Logo = ({ variant = "color", size = "md", showText = true, className = "" 
       />
       {showText && (
         <span className={`${textSizeClasses[size]} font-serif font-semibold`}>
-          Minnow<span className="text-gradient">Book</span>
+          Mimo<span className="text-gradient">Book</span>
         </span>
       )}
     </div>
