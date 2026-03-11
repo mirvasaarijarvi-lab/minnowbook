@@ -5810,7 +5810,7 @@ const sv: TranslationKeys = {
   // Features Page
   "featuresPage.badge": "Plattformens funktioner",
   "featuresPage.heroTitle": "Allt du behöver för att hantera bokningar",
-  "featuresPage.heroSubtitle": "Från bokningssidor till rapporter — MimmoBook ger dig en komplett verktygslåda för bokningshantering inom besöksnäringen.",
+  "featuresPage.heroSubtitle": "Från bokningssidor till rapporter, MimmoBook ger dig en komplett verktygslåda för bokningshantering inom besöksnäringen.",
   "featuresPage.ctaTitle": "Börja hantera bokningar idag",
   "featuresPage.ctaSubtitle": "Testa alla funktioner gratis i 30 dagar. Inget kreditkort behövs.",
   "featuresPage.comparePlans": "Jämför planer",
