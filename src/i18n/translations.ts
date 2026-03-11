@@ -5768,7 +5768,7 @@ const sv: TranslationKeys = {
   "whatIs.seeFeatures": "Se alla funktioner",
   "whatIs.definitionTitle": "MimmoBook: Bokningshantering för besöksnäringen",
   "whatIs.definitionP1": "MimmoBook är en SaaS-plattform som hjälper besöksnäringsföretag att hantera bokningar online. Oavsett om du driver en restaurang, eventlokal, hotell eller gästhus ger MimmoBook dig en centraliserad instrumentpanel för att hantera bokningar, kommunicera med gäster och spåra affärsprestanda.",
-  "whatIs.definitionP2": "Till skillnad från generiska bokningsverktyg är MimmoBook designat specifikt för besöksnäringen. Det stöder flera bokningstyper — bordsreserveringar, rumsreserveringar, lokalhyra, cateringbeställningar och popup-evenemang — allt från ett enda konto. Varje företag får en varumärkesanpassad bokningssida.",
+  "whatIs.definitionP2": "Till skillnad från generiska bokningsverktyg är MimmoBook designat specifikt för besöksnäringen. Det stöder flera bokningstyper, inklusive bordsreserveringar, rumsreserveringar, lokalhyra, cateringbeställningar och popup-evenemang, allt från ett enda konto. Varje företag får en varumärkesanpassad bokningssida.",
   "whatIs.definitionP3": "MimmoBook finns tillgängligt på engelska, finska och svenska, vilket gör det idealiskt för företag som verkar i Norden och internationellt. Plattformen skalas från enskilda restauranger till besöksnäringsgrupper med flera platser.",
   "whatIs.whoTitle": "Vem är MimmoBook till för?",
   "whatIs.whoSubtitle": "MimmoBook betjänar besöksnäringsföretag i alla storlekar inom fyra huvudkategorier.",
