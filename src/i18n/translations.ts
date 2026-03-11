@@ -4903,9 +4903,9 @@ const sv: TranslationKeys = {
   "help.guide5Q": "Hur lägger jag till eller redigerar resurser?",
   "help.guide5A": "Gå till **Instrumentpanel → Resurser** för att skapa rum, bord eller lokaler.",
 
-  // MinnowAid
-  "aid.title": "MinnowAid",
-  "aid.subtitle": "Fråga vad som helst om MinnowBook",
+  // MimoAid
+  "aid.title": "MimoAid",
+  "aid.subtitle": "Fråga vad som helst om MimoBook",
   "aid.myRequests": "Mina ärenden",
   "aid.yourRequests": "Dina inskickade supportärenden",
   "aid.askOrGuide": "Ställ en fråga eller prova en snabbguide:",
