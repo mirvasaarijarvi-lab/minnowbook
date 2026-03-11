@@ -2090,7 +2090,7 @@ const en: TranslationKeys = {
   "alerts.pendingAction": "reservations need confirmation",
   "alerts.uninvoicedAction": "reservations not yet invoiced",
   "alerts.checkoutsAction": "check-outs today",
-  "alerts.shortcuts": "Keyboard shortcuts: Alt+1–8 for navigation",
+  "alerts.shortcuts": "Keyboard shortcuts: Alt+1 to 8 for navigation",
   "blocking.pendingApproval": "pending approval",
   "dashboard.calendarHotel": "Hotel / Guesthouse",
   "dashboard.calendarVenue": "Event Spaces",
