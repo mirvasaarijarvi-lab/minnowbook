@@ -2465,7 +2465,7 @@ const en: TranslationKeys = {
   "help.art7C1": "Owners can invite staff via the Admin panel.",
   "help.art7C2": "Roles: Owner (full access), Admin (manage resources), Staff (view reservations).",
   "help.art7C3": "Approve or remove team members at any time.",
-  "help.art7C4": "Each plan has a staff user limit — upgrade to add more.",
+  "help.art7C4": "Each plan has a staff user limit. Upgrade to add more.",
   "help.art8Title": "Plans & Billing",
   "help.art8Desc": "Understand pricing tiers and manage your subscription.",
   "help.art8C1": "Basic (€29/mo) — 1 type, 1–3 staff, AI chatbot support.",
