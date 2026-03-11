@@ -3765,7 +3765,7 @@ const fi: TranslationKeys = {
   "about.missionBadge": "Missiomme",
   "about.missionTitle": "Varausten hallinta yksinkertaiseksi ja helpoksi",
   "about.missionP1": "Pienet majoitusalan yritykset ansaitsevat käytännöllisiä ja informatiivisia työkaluja toimiakseen tehokkaammin. Siksi loimme MimmoBookin.",
-  "about.missionP2": "Alustamme yhdistää varaukset, brändäyksen ja raportoinnin yhteen työkaluun — poistaen hajallaan olevat muistivihot ja unohtuneet varaukset.",
+  "about.missionP2": "Alustamme yhdistää varaukset, brändäyksen ja raportoinnin yhteen työkaluun, poistaen hajallaan olevat muistivihot ja unohtuneet varaukset.",
   "about.point1Title": "Nopeutta ilman kompromisseja",
   "about.point1Desc": "Saat brändätyn varaussivun käyttöön päivässä tai kahdessa, ei viikoissa.",
   "about.point2Title": "Tietoon perustuvat päätökset",
