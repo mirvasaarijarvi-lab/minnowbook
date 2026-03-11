@@ -3565,7 +3565,7 @@ const fi: TranslationKeys = {
   "alerts.pendingAction": "varausta odottaa vahvistusta",
   "alerts.uninvoicedAction": "varausta laskuttamatta",
   "alerts.checkoutsAction": "uloskirjausta tänään",
-  "alerts.shortcuts": "Pikanäppäimet: Alt+1–8 navigointiin",
+  "alerts.shortcuts": "Pikanäppäimet: Alt+1 to 8 navigointiin",
   "blocking.pendingApproval": "odottaa hyväksyntää",
   "dashboard.calendarHotel": "Hotelli / Majatalo",
   "dashboard.calendarVenue": "Juhlatilat",
