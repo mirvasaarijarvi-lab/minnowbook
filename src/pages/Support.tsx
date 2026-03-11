@@ -1,3 +1,4 @@
+import SEOHead, { breadcrumbSchema } from "@/components/SEOHead";
 import MarketingHeader from "@/components/MarketingHeader";
 import MarketingFooter from "@/components/MarketingFooter";
 import { Input } from "@/components/ui/input";
