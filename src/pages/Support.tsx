@@ -1,3 +1,4 @@
+import SEOHead, { breadcrumbSchema } from "@/components/SEOHead";
 import MarketingHeader from "@/components/MarketingHeader";
 import MarketingFooter from "@/components/MarketingFooter";
 import { Input } from "@/components/ui/input";
@@ -146,6 +147,15 @@ const Support = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
+      <SEOHead
+        title="MimmoBook Support – Help Center & Knowledge Base"
+        description="Find answers to common questions about MimmoBook reservation management. Browse help articles on setup, bookings, email templates, team management and billing."
+        path="/support"
+        jsonLd={breadcrumbSchema([
+          { name: "Home", url: "https://mimmobook.com/" },
+          { name: "Support", url: "https://mimmobook.com/support" },
+        ])}
+      />
       <MarketingHeader />
 
       {/* Hero */}

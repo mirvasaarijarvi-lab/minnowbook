@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import SEOHead, { breadcrumbSchema } from "@/components/SEOHead";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
@@ -28,6 +29,15 @@ const Privacy = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
+      <SEOHead
+        title="Privacy Policy – MimmoBook"
+        description="Read MimmoBook's privacy policy. Learn how we collect, use and protect your data in compliance with GDPR and applicable data protection regulations."
+        path="/privacy"
+        jsonLd={breadcrumbSchema([
+          { name: "Home", url: "https://mimmobook.com/" },
+          { name: "Privacy Policy", url: "https://mimmobook.com/privacy" },
+        ])}
+      />
       <nav className="sticky top-0 z-50 border-b border-border bg-card/80 backdrop-blur-lg">
         <div className="max-w-4xl mx-auto flex items-center justify-between px-6 py-4">
           <Link to="/"><Logo variant="color" size="sm" /></Link>

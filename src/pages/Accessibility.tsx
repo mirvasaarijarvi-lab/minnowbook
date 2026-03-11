@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import SEOHead, { breadcrumbSchema } from "@/components/SEOHead";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
@@ -28,6 +29,15 @@ const Accessibility = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
+      <SEOHead
+        title="Accessibility Statement – MimmoBook"
+        description="MimmoBook's accessibility commitment. Learn about our WCAG compliance, keyboard navigation, screen reader support, and accessibility features."
+        path="/accessibility"
+        jsonLd={breadcrumbSchema([
+          { name: "Home", url: "https://mimmobook.com/" },
+          { name: "Accessibility", url: "https://mimmobook.com/accessibility" },
+        ])}
+      />
       <nav className="sticky top-0 z-50 border-b border-border bg-card/80 backdrop-blur-lg">
         <div className="max-w-4xl mx-auto flex items-center justify-between px-6 py-4">
           <Link to="/"><Logo variant="color" size="sm" /></Link>
