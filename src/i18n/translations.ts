@@ -4336,7 +4336,7 @@ const fi: TranslationKeys = {
   // Features Page
   "featuresPage.badge": "Alustan ominaisuudet",
   "featuresPage.heroTitle": "Kaikki mitä tarvitset varausten hallintaan",
-  "featuresPage.heroSubtitle": "Varaussivuista raportteihin — MimmoBook tarjoaa täydellisen työkalupakin ravintola-alan varausten hallintaan.",
+  "featuresPage.heroSubtitle": "Varaussivuista raportteihin, MimmoBook tarjoaa täydellisen työkalupakin ravintola-alan varausten hallintaan.",
   "featuresPage.ctaTitle": "Aloita varausten hallinta tänään",
   "featuresPage.ctaSubtitle": "Kokeile kaikkia ominaisuuksia ilmaiseksi 30 päivää. Luottokorttia ei tarvita.",
   "featuresPage.comparePlans": "Vertaa paketteja",
