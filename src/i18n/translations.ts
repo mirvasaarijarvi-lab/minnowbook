@@ -4199,6 +4199,7 @@ const sv: TranslationKeys = {
   "booking.subTypeDineInDesc": "Reservera ett bord på restaurangen",
   "booking.subTypeCateringDesc": "Beställ catering till ditt evenemang",
   "booking.subTypePopupDesc": "Behöver du matservering på ditt evenemang? Vi kommer gärna!",
+  "booking.cateringQuoteDesc": "Berätta om ditt evenemang så tar vi fram en skräddarsydd offert åt dig.",
   "booking.cateringDetails": "Cateringdetaljer",
   "booking.deliveryAddress": "Evenemangs-/leveransadress",
   "booking.dietaryNotes": "Kostrestriktioner och allergier",
