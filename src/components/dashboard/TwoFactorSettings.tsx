@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, forwardRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { ShieldCheck, ShieldOff, Loader2, Copy } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
-const TwoFactorSettings = () => {
+const TwoFactorSettings = forwardRef<HTMLDivElement>((_, ref) => {
   const [factors, setFactors] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [enrolling, setEnrolling] = useState(false);
@@ -95,6 +95,10 @@ const TwoFactorSettings = () => {
         factorId: verifiedFactor.id,
       });
       if (error) throw error;
+
+      // Refresh session so AAL level updates correctly
+      await supabase.auth.refreshSession();
+
       toast.success("Two-factor authentication disabled.");
       loadFactors();
     } catch (error: any) {
@@ -123,7 +127,7 @@ const TwoFactorSettings = () => {
 
   if (loading) {
     return (
-      <Card>
+      <Card className="mt-6" ref={ref}>
         <CardContent className="flex items-center justify-center py-8">
           <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
         </CardContent>
@@ -132,15 +136,17 @@ const TwoFactorSettings = () => {
   }
 
   return (
-    <Card>
+    <Card className="mt-6" ref={ref}>
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
           <ShieldCheck className="h-5 w-5" />
           Two-Factor Authentication
           {verifiedFactor && (
-            <Badge variant="default" className="ml-auto text-xs">
-              Enabled
-            </Badge>
+            <span className="ml-auto">
+              <Badge variant="default" className="text-xs">
+                Enabled
+              </Badge>
+            </span>
           )}
         </CardTitle>
       </CardHeader>
@@ -238,6 +244,8 @@ const TwoFactorSettings = () => {
       </CardContent>
     </Card>
   );
-};
+});
+
+TwoFactorSettings.displayName = "TwoFactorSettings";
 
 export default TwoFactorSettings;
