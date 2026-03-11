@@ -355,6 +355,9 @@ const ResourceManagement = () => {
       room_description: r.room_description ?? "",
       offers_catering: r.offers_catering ?? false,
       offers_popup: r.offers_popup ?? false,
+      offers_table_reservation: (r as any).offers_table_reservation ?? true,
+      offers_quote: (r as any).offers_quote ?? true,
+      offers_set_menu: (r as any).offers_set_menu ?? true,
       room_type_pricing: {
         single: rtp.single?.toString() ?? "1.0",
         double: rtp.double?.toString() ?? "1.5",
