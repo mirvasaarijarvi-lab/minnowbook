@@ -79,6 +79,22 @@ const Pricing = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
+      <SEOHead
+        title="MimmoBook Pricing – Plans from €29/month"
+        description="Compare MimmoBook plans: Basic €29/mo, Professional €79/mo, Enterprise €149/mo. All include 30-day free trial, branded booking pages and automated emails."
+        path="/pricing"
+        jsonLd={[
+          faqSchema([
+            { question: "How much does MimmoBook cost?", answer: "MimmoBook offers three plans: Basic at €29/month for small businesses, Professional at €79/month for growing teams, and Enterprise at €149/month for multi-site operations." },
+            { question: "Is there a free trial?", answer: "Yes, all MimmoBook plans include a 30-day free trial with full access to features." },
+            { question: "Can I change plans later?", answer: "Yes, you can upgrade or downgrade your plan at any time from the dashboard." },
+          ]),
+          breadcrumbSchema([
+            { name: "Home", url: "https://mimmobook.com/" },
+            { name: "Pricing", url: "https://mimmobook.com/pricing" },
+          ]),
+        ]}
+      />
       <MarketingHeader />
 
       {/* Hero */}
