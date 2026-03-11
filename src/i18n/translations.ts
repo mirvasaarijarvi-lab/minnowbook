@@ -4441,7 +4441,7 @@ const fi: TranslationKeys = {
   "blog.post3C3": "MimmoBook antaa jokaisen yrityksen mukauttaa varaussivunsa omalla brändäyksellään. Lataa logosi, aseta brändivärisi, lisää pääkuva ja kirjoita kuvaus. Tulos on varauskokemus, joka tuntuu verkkosivusi jatkeelta.",
   "blog.post4Title": "Varausten hallinta useissa toimipisteissä",
   "blog.post4Excerpt": "Usean toimipisteen ravintola-alan yritykset tarvitsevat keskitettyjä työkaluja. Näin hallitset varauksia eri paikoissa menettämättä hallintaa.",
-  "blog.post4C1": "Useiden ravintola-alan toimipisteiden pyörittäminen — olipa kyseessä ravintolaketju, majataloryhmä tai tilat eri kaupungeissa — moninkertaistaa varaushallinnon monimutkaisuuden.",
+  "blog.post4C1": "Useiden ravintola-alan toimipisteiden pyörittäminen, olipa kyseessä ravintolaketju, majataloryhmä tai tilat eri kaupungeissa, moninkertaistaa varaushallinnon monimutkaisuuden.",
   "blog.post4C2": "Haasteena on johdonmukaisuuden ylläpitäminen samalla kun kunnioitetaan jokaisen toimipisteen ainutlaatuisia tarpeita. Keskitetty järjestelmä mahdollistaa kaikkien toimipisteiden hallinnan yhdestä hallintapaneelista.",
   "blog.post4C3": "MimmoBookin usean toimipisteen ominaisuus on suunniteltu juuri tähän. Jokainen toimipiste saa oman brändätyn varaussivun, henkilökuntamäärityksensä ja raportointinsa.",
   "blog.post4C4": "Tärkein hyöty on näkyvyys. Sen sijaan, että kirjautuisit erillisiin järjestelmiin tai tarkistaisit useita taulukoita, näet kaikki toimipisteesi yhdessä paikassa.",
