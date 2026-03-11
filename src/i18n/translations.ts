@@ -3912,7 +3912,7 @@ const fi: TranslationKeys = {
   "support.billingC3": "Business (199 €/kk): Kaikki varaustyypit ja rajoittamaton määrä, rajoittamaton määrä työntekijäkäyttäjiä, prioriteettituki 24 tunnin vasteajalla.",
   "support.billingC4": "Voit päivittää tai alentaa tilausta milloin tahansa. Muutokset tulevat voimaan seuraavalla laskutuskaudella.",
   "support.faqTitle": "Usein kysytyt kysymykset",
-  "support.faqDesc": "Vastauksia yleisimpiin MinnowBookia koskeviin kysymyksiin.",
+  "support.faqDesc": "Vastauksia yleisimpiin MimoBookia koskeviin kysymyksiin.",
   "support.faqC1": "K: Voinko käyttää omaa verkkotunnustani? V: Mukautetut verkkotunnukset ovat jatkokehityssuunnitelmassamme.",
   "support.faqC2": "K: Miten vieraat saavat vahvistukset? V: Automaattisesti sähköpostitse, kun vahvistat varauksen.",
   "support.faqC3": "K: Voinko tulostaa tietoni? V: Kyllä, raportit voi tulostaa Raportit-paneelista.",
