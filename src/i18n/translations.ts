@@ -4437,7 +4437,7 @@ const fi: TranslationKeys = {
   "blog.post3Title": "Miksi brändätyt varaussivut ovat tärkeitä yrityksellesi",
   "blog.post3Excerpt": "Geneerinen varauslomake ei kerro vieraille mitään brändistäsi. Brändätty varaussivu rakentaa luottamusta ja lisää konversioita.",
   "blog.post3C1": "Kun vieras vierailee varaussivullasi, se on usein heidän ensimmäinen vuorovaikutuksensa yrityksesi kanssa verkossa. Jos sivu on geneerinen lomake ilman brändäystä, se lähettää väärän viestin.",
-  "blog.post3C2": "Brändätty varaussivu — logollasi, väreillä, pääkuvalla ja yrityskuvauksella — luo ammattimaisen ensivaikutelman. Tutkimukset osoittavat, että brändätyt varauskokemukset tuottavat 20–40 % korkeampia konversioasteita.",
+  "blog.post3C2": "Brändätty varaussivu, logollasi, väreillä, pääkuvalla ja yrityskuvauksella, luo ammattimaisen ensivaikutelman. Tutkimukset osoittavat, että brändätyt varauskokemukset tuottavat 20 to 40 % korkeampia konversioasteita.",
   "blog.post3C3": "MimmoBook antaa jokaisen yrityksen mukauttaa varaussivunsa omalla brändäyksellään. Lataa logosi, aseta brändivärisi, lisää pääkuva ja kirjoita kuvaus. Tulos on varauskokemus, joka tuntuu verkkosivusi jatkeelta.",
   "blog.post4Title": "Varausten hallinta useissa toimipisteissä",
   "blog.post4Excerpt": "Usean toimipisteen ravintola-alan yritykset tarvitsevat keskitettyjä työkaluja. Näin hallitset varauksia eri paikoissa menettämättä hallintaa.",
