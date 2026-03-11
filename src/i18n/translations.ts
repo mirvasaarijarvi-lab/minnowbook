@@ -5367,7 +5367,7 @@ const sv: TranslationKeys = {
   "help.describePlaceholder": "Beskriv din förfrågan...",
   "help.submitToAdmin": "Skicka till admin",
   "help.typePlaceholder": "Skriv din fråga...",
-  "help.errorNoTenant": "Kan inte skicka förfrågan — ingen klient hittades.",
+  "help.errorNoTenant": "Kan inte skicka förfrågan. Ingen klient hittades.",
   "help.errorSubmit": "Kunde inte skicka förfrågan",
   "help.successSubmit": "Supportärende skickat",
   "help.errorConnect": "Kunde inte ansluta. Försök igen.",
