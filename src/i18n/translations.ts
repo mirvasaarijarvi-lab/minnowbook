@@ -3093,7 +3093,7 @@ const fi: TranslationKeys = {
   "settings.saved": "Asetukset tallennettu",
   "settings.saveError": "Asetusten tallennus epäonnistui",
   "settings.upsellTitle": "Hallinnoi useita toimipisteitä",
-  "settings.upsellDesc": "Päivitä Business-suunnitelmaan hallinnoidaksesi hotelleja, ravintoloita ja juhlatiloja yhdestä hallintapaneelista — jokaisella omat resurssit, aukioloajat ja varaussivu.",
+  "settings.upsellDesc": "Päivitä Business-suunnitelmaan hallinnoidaksesi hotelleja, ravintoloita ja juhlatiloja yhdestä hallintapaneelista. Jokaisella on omat resurssit, aukioloajat ja varaussivu.",
   "settings.learnMore": "Lue lisää",
   "settings.siteOverride": "Toimipisteen mukautus",
   "settings.useParentDefault": "Käytä yrityksen oletusarvoja",
