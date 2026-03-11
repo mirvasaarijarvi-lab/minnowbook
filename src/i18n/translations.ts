@@ -3860,7 +3860,7 @@ const fi: TranslationKeys = {
   "password.lowercase": "Yksi pieni kirjain",
   "password.number": "Yksi numero",
   "password.checking": "Tarkistetaan vuotaneita salasanoja…",
-  "password.breached": "Tämä salasana on löytynyt tietovuodoista — valitse toinen",
+  "password.breached": "Tämä salasana on löytynyt tietovuodoista. Valitse toinen.",
   "password.safe": "Salasanaa ei löytynyt tunnetuista vuodoista",
   "password.strengthWeak": "Heikko",
   "password.strengthFair": "Kohtalainen",
