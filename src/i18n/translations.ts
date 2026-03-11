@@ -2385,7 +2385,7 @@ const en: TranslationKeys = {
   "password.lowercase": "One lowercase letter",
   "password.number": "One number",
   "password.checking": "Checking for leaked passwords…",
-  "password.breached": "This password has been found in data breaches — choose a different one",
+  "password.breached": "This password has been found in data breaches. Choose a different one",
   "password.safe": "Password not found in known breaches",
   "password.strengthWeak": "Weak",
   "password.strengthFair": "Fair",
