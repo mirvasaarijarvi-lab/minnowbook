@@ -2553,9 +2553,9 @@ const en: TranslationKeys = {
   "pricing.faqQ3": "What reservation types can I choose?",
   "pricing.faqA3": "Restaurant (table bookings), Venue (event space inquiries), and Gasthaus/Guesthouse (room reservations). Basic lets you pick one. Pro unlocks all types, one per type, on a single site. Business adds unlimited sites.",
   "pricing.faqQ4": "Can I use my own domain?",
-  "pricing.faqA4": "Each business gets a branded subdomain (e.g., yourbusiness.minnowbook.com). Custom domain support is on our roadmap and will be then offered with an enterprise pricing.",
+  "pricing.faqA4": "Each business gets a branded subdomain (e.g., yourbusiness.mimobook.com). Custom domain support is on our roadmap and will be then offered with an enterprise pricing.",
   "pricing.faqQ5": "What's the difference between AI chatbot support and 24-hour response support?",
-  "pricing.faqA5": "All plans include MinnowAid, our AI chatbot that can answer questions, help troubleshoot issues, and guide you through features instantly. The chatbot is available 24/7 in your dashboard. The Business plan adds 24-hour response support: you can escalate any conversation to our team on the platform via the chatbot and receive a guaranteed response within 24 hours.",
+  "pricing.faqA5": "All plans include MimoAid, our AI chatbot that can answer questions, help troubleshoot issues, and guide you through features instantly. The chatbot is available 24/7 in your dashboard. The Business plan adds 24-hour response support: you can escalate any conversation to our team on the platform via the chatbot and receive a guaranteed response within 24 hours.",
 
   // Support page
   "support.heroTitle": "How can we help?",
