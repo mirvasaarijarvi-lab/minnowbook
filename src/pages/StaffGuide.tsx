@@ -271,7 +271,7 @@ const MockupSupport = () => (
     <div className="space-y-2 text-[10px]">
       <div className="p-2 rounded bg-background border">
         <div className="font-medium mb-1">All plans: AI Chatbot</div>
-        <div className="text-muted-foreground">MimoAid (💬) provides instant self-service help, quick guides, and AI-powered answers.</div>
+        <div className="text-muted-foreground">MimmoAid (💬) provides instant self-service help, quick guides, and AI-powered answers.</div>
       </div>
       <div className="p-2 rounded bg-accent/10 border border-accent/20">
         <div className="font-medium mb-1 text-accent">Business plan: Priority Support</div>
