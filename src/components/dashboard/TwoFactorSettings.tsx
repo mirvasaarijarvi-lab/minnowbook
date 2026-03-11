@@ -42,7 +42,8 @@ const TwoFactorSettings = () => {
     try {
       const { data, error } = await supabase.auth.mfa.enroll({
         factorType: "totp",
-        friendlyName: "Authenticator App",
+        friendlyName: "MimmoBook",
+        issuer: "MimmoBook",
       });
       if (error) throw error;
 
