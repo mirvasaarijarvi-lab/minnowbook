@@ -4703,7 +4703,7 @@ const sv: TranslationKeys = {
   "about.heroSubtitle": "Vi hjälper hotell- och restaurangföretag att hantera sina bokningar enkelt — så de kan fokusera på att skapa minnesvärda gästupplevelser.",
   "about.missionBadge": "Vårt uppdrag",
   "about.missionTitle": "Göra bokningshantering enkel och smidig",
-  "about.missionP1": "Små besöksnäringsföretag förtjänar praktiska och informativa verktyg för att arbeta mer effektivt. Vi startade MinnowBook för att göra det möjligt.",
+  "about.missionP1": "Små besöksnäringsföretag förtjänar praktiska och informativa verktyg för att arbeta mer effektivt. Vi startade MimoBook för att göra det möjligt.",
   "about.missionP2": "Vår plattform samlar bokningar, varumärkeshantering och rapportering i ett enhetligt arbetsutrymme — och eliminerar utspridda anteckningsböcker och missade bokningar.",
   "about.point1Title": "Snabbhet utan kompromisser",
   "about.point1Desc": "Få din varumärkta bokningssida live på en dag eller två, inte veckor.",
