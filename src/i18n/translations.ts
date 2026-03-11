@@ -5239,7 +5239,7 @@ const sv: TranslationKeys = {
   "about.missionBadge": "Vårt uppdrag",
   "about.missionTitle": "Göra bokningshantering enkel och smidig",
   "about.missionP1": "Små besöksnäringsföretag förtjänar praktiska och informativa verktyg för att arbeta mer effektivt. Vi startade MimmoBook för att göra det möjligt.",
-  "about.missionP2": "Vår plattform samlar bokningar, varumärkeshantering och rapportering i ett enhetligt arbetsutrymme — och eliminerar utspridda anteckningsböcker och missade bokningar.",
+  "about.missionP2": "Vår plattform samlar bokningar, varumärkeshantering och rapportering i ett enhetligt arbetsutrymme och eliminerar utspridda anteckningsböcker och missade bokningar.",
   "about.point1Title": "Snabbhet utan kompromisser",
   "about.point1Desc": "Få din varumärkta bokningssida live på en dag eller två, inte veckor.",
   "about.point2Title": "Datadrivna insikter",
