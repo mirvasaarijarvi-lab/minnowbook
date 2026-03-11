@@ -2517,7 +2517,7 @@ const en: TranslationKeys = {
   "aid.statusInProgress": "In Progress",
   "aid.statusResolved": "Resolved",
   "aid.statusClosed": "Closed",
-  "aid.errorNoTenant": "Unable to submit request — no tenant found.",
+  "aid.errorNoTenant": "Unable to submit request. No tenant found.",
   "aid.errorSubmit": "Failed to submit request",
   "aid.successSubmit": "Support request submitted",
   "aid.errorConnect": "Sorry, I couldn't connect. Please try again.",
