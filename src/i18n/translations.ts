@@ -3070,7 +3070,7 @@ const fi: TranslationKeys = {
 
   // CTA
   "cta.title": "Valmis modernisoimaan varauksesi?",
-  "cta.subtitle": "Liity majoitusalan yrityksiin, jotka jo käyttävät MimoBookia varausten sujuvoittamiseen.",
+  "cta.subtitle": "Liity majoitusalan yrityksiin, jotka jo käyttävät MimmoBookia varausten sujuvoittamiseen.",
 
   // Login
   "login.title": "Kirjaudu tilillesi",
