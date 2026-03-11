@@ -2426,7 +2426,7 @@ const en: TranslationKeys = {
   "help.requestSubmittedDetail": "Your support request has been submitted! Your admin team will review it and respond soon.",
   "help.art1Title": "Getting Started",
   "help.art1Desc": "Set up your account and create your first booking page in minutes.",
-  "help.art1C1": "Sign up for a free 30-day trial — no credit card needed.",
+  "help.art1C1": "Sign up for a free 30-day trial. No credit card needed.",
   "help.art1C2": "Complete the onboarding wizard to name your business and choose your reservation types.",
   "help.art1C3": "Customize your branding (logo, colors) in Settings.",
   "help.art1C4": "Share your booking link with customers!",
