@@ -626,6 +626,10 @@ type TranslationKeys = {
   "dashboard.serviceOptions": string;
   "dashboard.offersCatering": string;
   "dashboard.offersPopup": string;
+  "dashboard.dineInOptions": string;
+  "dashboard.offersTableReservation": string;
+  "dashboard.offersQuote": string;
+  "dashboard.offersSetMenu": string;
   "dashboard.inactive": string;
   "dashboard.namePlaceholder": string;
   "dashboard.descriptionPlaceholder": string;
