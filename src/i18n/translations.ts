@@ -2820,7 +2820,7 @@ const en: TranslationKeys = {
   "whatIs.seeFeatures": "See all features",
   "whatIs.definitionTitle": "MimmoBook: Reservation Management for Hospitality",
   "whatIs.definitionP1": "MimmoBook is a software-as-a-service (SaaS) platform that helps hospitality businesses manage reservations online. Whether you run a restaurant, event venue, hotel, or guesthouse, MimmoBook gives you a centralized dashboard to handle bookings, communicate with guests, and track your business performance.",
-  "whatIs.definitionP2": "Unlike generic booking tools, MimmoBook is designed specifically for hospitality. It supports multiple reservation types — table bookings, room reservations, venue hire, catering orders, and popup events — all from a single account. Each business gets a branded booking page that matches their identity.",
+  "whatIs.definitionP2": "Unlike generic booking tools, MimmoBook is designed specifically for hospitality. It supports multiple reservation types, including table bookings, room reservations, venue hire, catering orders, and popup events, all from a single account. Each business gets a branded booking page that matches their identity.",
   "whatIs.definitionP3": "MimmoBook is available in English, Finnish, and Swedish, making it ideal for businesses operating in the Nordics and internationally. The platform scales from single-location restaurants to multi-site hospitality groups.",
   "whatIs.whoTitle": "Who Is MimmoBook For?",
   "whatIs.whoSubtitle": "MimmoBook serves hospitality businesses of all sizes across four main categories.",
