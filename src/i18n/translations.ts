@@ -2793,7 +2793,7 @@ const en: TranslationKeys = {
   "support.staffC4": "The plans have a staff user and a reservation type limits, upgrade to add more.",
   "support.billingTitle": "Plans & Billing",
   "support.billingDesc": "Understand pricing tiers and manage your subscription.",
-  "support.billingC1": "Basic (€29/mo): 1 type, 1–3 staff users, AI chatbot support.",
+  "support.billingC1": "Basic (€29/mo): 1 type, 1 to 3 staff users, AI chatbot support.",
   "support.billingC2": "Pro (€79/mo): All types (one per type), up to 10 staff users, AI chatbot support.",
   "support.billingC3": "Business (€199/mo): All types and unlimited number, unlimited number staff users, priority support with 24h response.",
   "support.billingC4": "Upgrade or downgrade anytime. Changes take effect next billing cycle.",
