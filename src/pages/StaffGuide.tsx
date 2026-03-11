@@ -783,7 +783,7 @@ const guideContent: Record<Language, GuideContent> = {
         icon: <LifeBuoy className="h-6 w-6" />, mockupId: "support",
         title: "9. Tuki",
         steps: [
-          "Kaikissa tilauksissa on MinnowAid AI-chatbot (💬) — käytettävissä hallintapaneelissa ja kelluvana widgettinä.",
+          "Kaikissa tilauksissa on MimoAid AI-chatbot (💬) — käytettävissä hallintapaneelissa ja kelluvana widgettinä.",
           "Kysy kysymyksiä, selaa pikaoppaita tai saa AI-vastauksia välittömästi.",
           "Business-tilaus lisää prioriteettituen: lähetä tikettejä ylläpitäjille 24 tunnin vasteajalla.",
           "Seuraa tikettisi tilaa reaaliajassa: Avoin → Käsittelyssä → Ratkaistu.",
