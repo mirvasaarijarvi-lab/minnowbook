@@ -12,6 +12,7 @@ import heroBg from "@/assets/hero-bg.png";
 import ctaBg from "@/assets/cta-bg.png";
 import { useT } from "@/contexts/I18nContext";
 import { TranslationKey } from "@/i18n/translations";
+import SEOHead, { organizationSchema, softwareSchema, faqSchema } from "@/components/SEOHead";
 
 const featureKeys: { icon: React.ElementType; titleKey: TranslationKey; descKey: TranslationKey }[] = [
   { icon: CalendarCheck, titleKey: "features.smartReservations", descKey: "features.smartReservationsDesc" },
@@ -76,6 +77,22 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
+      <SEOHead
+        title="MimmoBook – Reservation Management for Hospitality"
+        description="Cloud-based reservation management for restaurants, venues, hotels and guesthouses. Multi-site support, branded booking pages, automated emails and real-time reporting."
+        path="/"
+        jsonLd={[
+          organizationSchema,
+          softwareSchema,
+          faqSchema([
+            { question: "What is MimmoBook?", answer: "MimmoBook is a cloud-based SaaS reservation management platform designed for restaurants, venues, hotels, and guesthouses. It provides branded booking pages, automated email confirmations, team management, and real-time reporting." },
+            { question: "Who is MimmoBook for?", answer: "MimmoBook is built for hospitality businesses including restaurants, event venues, hotels, guesthouses, and catering services that need to manage reservations online." },
+            { question: "How much does MimmoBook cost?", answer: "MimmoBook offers three plans: Basic at €29/month, Professional at €79/month, and Enterprise at €149/month. All plans include a 30-day free trial." },
+            { question: "Does MimmoBook support multiple locations?", answer: "Yes, the Enterprise plan supports unlimited sites and locations with centralized management, per-site branding, and independent booking pages." },
+            { question: "What languages does MimmoBook support?", answer: "MimmoBook supports English, Finnish, and Swedish for both the management dashboard and public booking pages." },
+          ]),
+        ]}
+      />
       <MarketingHeader />
 
       {/* Hero Section */}

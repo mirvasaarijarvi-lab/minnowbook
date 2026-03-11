@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import SEOHead, { breadcrumbSchema } from "@/components/SEOHead";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -35,6 +36,15 @@ const About = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
+      <SEOHead
+        title="About MimmoBook – Our Mission & Values"
+        description="Learn about MimmoBook, the reservation management platform built for hospitality. Our mission is to simplify bookings for restaurants, venues, hotels and guesthouses."
+        path="/about"
+        jsonLd={breadcrumbSchema([
+          { name: "Home", url: "https://mimmobook.com/" },
+          { name: "About", url: "https://mimmobook.com/about" },
+        ])}
+      />
       <MarketingHeader />
 
       {/* Hero */}
