@@ -3858,7 +3858,7 @@ const fi: TranslationKeys = {
 
   // Support page
   "support.heroTitle": "Kuinka voimme auttaa?",
-  "support.heroSubtitle": "Selaa oppaita, usein kysyttyjä kysymyksiä ja vinkkejä saadaksesi kaiken irti MinnowBookista.",
+  "support.heroSubtitle": "Selaa oppaita, usein kysyttyjä kysymyksiä ja vinkkejä saadaksesi kaiken irti MimoBookista.",
   "support.searchPlaceholder": "Hae apua...",
   "support.noResults": "Ei tuloksia. Kokeile toista hakusanaa.",
   "support.stillNeedHelp": "Tarvitsetko vielä apua?",
