@@ -62,9 +62,9 @@ function buildEmailHtml(reservation: any, business: any, lang: string, customBod
   const logoUrl = business.logo_url || "https://lsgznskkxadplwnxplhd.supabase.co/storage/v1/object/public/tenant-assets/email-assets%2Flogo-color.png";
 
   const rows: { label: string; value: string }[] = [];
-  rows.push({ label: t.type, value: reservation.reservation_type });
-  rows.push({ label: t.date, value: reservation.date + (reservation.start_time ? ` ${t.at} ${reservation.start_time.slice(0, 5)}` : "") });
-  if (reservation.check_out_date) rows.push({ label: t.checkOut, value: reservation.check_out_date });
+  rows.push({ label: t.type, value: escapeHtml(reservation.reservation_type) });
+  rows.push({ label: t.date, value: escapeHtml(reservation.date + (reservation.start_time ? ` ${t.at} ${reservation.start_time.slice(0, 5)}` : "")) });
+  if (reservation.check_out_date) rows.push({ label: t.checkOut, value: escapeHtml(reservation.check_out_date) });
   if (reservation.room_type) rows.push({ label: t.roomType, value: reservation.room_type });
   if (reservation.event_type) rows.push({ label: t.eventType, value: reservation.event_type });
   if (reservation.guests_count) rows.push({ label: t.guests, value: String(reservation.guests_count) });
