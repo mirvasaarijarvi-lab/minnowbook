@@ -5039,7 +5039,7 @@ const sv: TranslationKeys = {
   "alerts.pendingAction": "bokningar väntar på bekräftelse",
   "alerts.uninvoicedAction": "bokningar ej fakturerade",
   "alerts.checkoutsAction": "utcheckningar idag",
-  "alerts.shortcuts": "Tangentbordsgenvägar: Alt+1–8 för navigering",
+  "alerts.shortcuts": "Tangentbordsgenvägar: Alt+1 till 8 för navigering",
   "blocking.pendingApproval": "väntar på godkännande",
   "dashboard.calendarHotel": "Hotell / Gästhus",
   "dashboard.calendarVenue": "Festlokaler",
