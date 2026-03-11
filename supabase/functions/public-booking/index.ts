@@ -84,7 +84,7 @@ function validateUuid(val: unknown, field: string, required = false): string | n
 const VALID_TYPES = ["restaurant", "venue", "guesthouse", "hotel"];
 const VALID_ROOM_TYPES = ["single", "double", "suite", "dorm"];
 const VALID_EVENT_TYPES = ["wedding", "corporate", "birthday", "conference", "other"];
-const VALID_PRICING_TYPES = ["menu", "fixed_price"];
+const VALID_PRICING_TYPES = ["menu", "fixed_price", "quote"];
 const VALID_SUB_TYPES = ["dine_in", "catering", "popup"];
 const VALID_STALL_SIZES = ["small", "medium", "large"];
 
