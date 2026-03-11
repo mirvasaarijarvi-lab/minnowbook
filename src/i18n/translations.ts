@@ -235,6 +235,11 @@ type TranslationKeys = {
   "booking.pricingMenu": string;
   "booking.pricingFixed": string;
   "booking.pricingQuote": string;
+  "booking.pricingQuoteDesc": string;
+  "booking.pricingReserveTable": string;
+  "booking.pricingReserveTableDesc": string;
+  "booking.pricingSetMenu": string;
+  "booking.pricingSetMenuDesc": string;
   "booking.fixedPrice": string;
   "booking.restaurantSubType": string;
   "booking.subTypeDineIn": string;
@@ -1556,6 +1561,11 @@ const en: TranslationKeys = {
   "booking.pricingMenu": "According to menu",
   "booking.pricingFixed": "Fixed price",
   "booking.pricingQuote": "Ask for a quote",
+  "booking.pricingQuoteDesc": "Get a custom price for your event",
+  "booking.pricingReserveTable": "Reserve a table",
+  "booking.pricingReserveTableDesc": "Book a table and order from the menu",
+  "booking.pricingSetMenu": "Set menu",
+  "booking.pricingSetMenuDesc": "Pre-arranged menu with a fixed price",
   "booking.fixedPrice": "Fixed price (€)",
   "booking.restaurantSubType": "Service type",
   "booking.subTypeDineIn": "Dine-in",
@@ -2857,6 +2867,11 @@ const fi: TranslationKeys = {
   "booking.pricingMenu": "Listan mukaan",
   "booking.pricingFixed": "Kiinteä hinta",
   "booking.pricingQuote": "Pyydä tarjous",
+  "booking.pricingQuoteDesc": "Pyydä räätälöity hinta tapahtumaasi",
+  "booking.pricingReserveTable": "Varaa pöytä",
+  "booking.pricingReserveTableDesc": "Varaa pöytä ja tilaa listalta",
+  "booking.pricingSetMenu": "Valmis menu",
+  "booking.pricingSetMenuDesc": "Ennalta sovittu menu kiinteään hintaan",
   "booking.fixedPrice": "Kiinteä hinta (€)",
   "booking.restaurantSubType": "Palvelutyyppi",
   "booking.subTypeDineIn": "Ravintolassa",
@@ -4156,6 +4171,11 @@ const sv: TranslationKeys = {
   "booking.pricingMenu": "Enligt meny",
   "booking.pricingFixed": "Fast pris",
   "booking.pricingQuote": "Begär en offert",
+  "booking.pricingQuoteDesc": "Få ett anpassat pris för ditt evenemang",
+  "booking.pricingReserveTable": "Reservera bord",
+  "booking.pricingReserveTableDesc": "Boka bord och beställ från menyn",
+  "booking.pricingSetMenu": "Fast meny",
+  "booking.pricingSetMenuDesc": "Förarrangerad meny till fast pris",
   "booking.fixedPrice": "Fast pris (€)",
   "booking.restaurantSubType": "Tjänstetyp",
   "booking.subTypeDineIn": "Äta på plats",

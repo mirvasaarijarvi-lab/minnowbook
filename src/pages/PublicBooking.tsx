@@ -238,7 +238,7 @@ const PublicBookingInner = () => {
     estimated_guests: "",
     catering_needed: false,
     // Restaurant fields
-    pricing_type: "" as "" | "menu" | "fixed_price",
+    pricing_type: "" as "" | "menu" | "fixed_price" | "quote",
     fixed_price: "",
     restaurant_sub_type: "dine_in" as "dine_in" | "catering" | "popup",
     // Catering fields
@@ -1600,29 +1600,34 @@ const PublicBookingInner = () => {
                     );
                 })()}
 
-                {/* Dine-in: pricing type */}
+                {/* Dine-in: service type selection */}
                 {form.restaurant_sub_type === "dine_in" && (
                   <div className="space-y-3 rounded-lg border border-border p-3">
                     <Label className="font-medium">{t("booking.pricingType")}</Label>
-                    <div className="flex items-center gap-4">
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <Checkbox
-                          checked={form.pricing_type === "menu"}
-                          onCheckedChange={(checked) => {
-                            if (checked) setForm((prev) => ({ ...prev, pricing_type: "menu", fixed_price: "" }));
-                          }}
-                        />
-                        <span className="text-sm">{t("booking.pricingMenu")}</span>
-                      </label>
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <Checkbox
-                          checked={form.pricing_type === "fixed_price"}
-                          onCheckedChange={(checked) => {
-                            if (checked) setForm((prev) => ({ ...prev, pricing_type: "fixed_price", fixed_price: "" }));
-                          }}
-                        />
-                        <span className="text-sm">{t("booking.pricingQuote")}</span>
-                      </label>
+                    <div className="grid gap-3 sm:grid-cols-3">
+                      {([
+                        { value: "menu" as const, icon: UtensilsCrossed, labelKey: "booking.pricingReserveTable", descKey: "booking.pricingReserveTableDesc" },
+                        { value: "quote" as const, icon: Mail, labelKey: "booking.pricingQuote", descKey: "booking.pricingQuoteDesc" },
+                        { value: "fixed_price" as const, icon: Tag, labelKey: "booking.pricingSetMenu", descKey: "booking.pricingSetMenuDesc" },
+                      ]).map(({ value, icon: Icon, labelKey, descKey }) => {
+                        const isSelected = form.pricing_type === value;
+                        return (
+                          <button
+                            key={value}
+                            type="button"
+                            onClick={() => setForm((prev) => ({ ...prev, pricing_type: value, fixed_price: "" }))}
+                            className="flex flex-col items-center gap-1.5 p-3 rounded-lg border-2 transition-all text-center"
+                            style={{
+                              borderColor: isSelected ? accentColor : "#e5e7eb",
+                              backgroundColor: isSelected ? `${accentColor}10` : "transparent",
+                            }}
+                          >
+                            <Icon className="h-5 w-5" style={{ color: isSelected ? accentColor : primaryColor }} />
+                            <span className="text-sm font-medium" style={{ color: primaryColor }}>{tDynamic(labelKey)}</span>
+                            <span className="text-xs" style={{ color: `${primaryColor}60` }}>{tDynamic(descKey)}</span>
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
                 )}
