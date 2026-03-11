@@ -616,7 +616,7 @@ const guideContent: Record<Language, GuideContent> = {
   },
   fi: {
     title: "Henkilökunnan pikaopas",
-    subtitle: "MimoBook – käyttöohjeet henkilökunnalle",
+    subtitle: "MimmoBook – käyttöohjeet henkilökunnalle",
     printBtn: "Tulosta / Tallenna PDF",
     back: "Takaisin hallintapaneeliin",
     tierOverview: {
