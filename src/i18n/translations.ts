@@ -5466,7 +5466,7 @@ const sv: TranslationKeys = {
   "aid.statusInProgress": "Pågående",
   "aid.statusResolved": "Löst",
   "aid.statusClosed": "Stängt",
-  "aid.errorNoTenant": "Kunde inte skicka ärende — ingen hyresgäst hittades.",
+  "aid.errorNoTenant": "Kunde inte skicka ärende. Ingen hyresgäst hittades.",
   "aid.errorSubmit": "Kunde inte skicka ärende",
   "aid.successSubmit": "Supportärende skickat",
   "aid.errorConnect": "Kunde inte ansluta. Försök igen.",
