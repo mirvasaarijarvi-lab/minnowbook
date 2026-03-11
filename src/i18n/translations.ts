@@ -4017,7 +4017,7 @@ const fi: TranslationKeys = {
    "aid.guideQ10": "Miten estän päivämääriä tai aikavälejä?",
    "aid.guideA10": "**Hallintapaneeli → Kalenteri** -näkymässä klikkaa päivämäärää ja käytä **Estä aika** -toimintoa estääksesi varaukset tietyille päiville, ajoille tai resursseille.",
    "aid.guideQ11": "Miten hallitsen toistuvia estoja?",
-   "aid.guideA11": "Siirry **Hallintapaneeli → Kalenteri** ja avaa **Toistuvat estot** -paneeli. Voit luoda viikoittain toistuvia estoja tietyille päiville, aikaväleille ja resurssityypeille (esim. sulkea ravintolan joka maanantai). Vaihda estoja päälle/pois tai poista ne milloin tahansa — muutokset näkyvät heti julkisella varaussivulla.",
+   "aid.guideA11": "Siirry **Hallintapaneeli → Kalenteri** ja avaa **Toistuvat estot** -paneeli. Voit luoda viikoittain toistuvia estoja tietyille päiville, aikaväleille ja resurssityypeille (esim. sulkea ravintolan joka maanantai). Vaihda estoja päälle/pois tai poista ne milloin tahansa. Muutokset näkyvät heti julkisella varaussivulla.",
   // Sites
   "sites.title": "Toimipisteet",
   "sites.addSite": "Lisää toimipiste",
