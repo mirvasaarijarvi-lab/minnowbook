@@ -4369,7 +4369,7 @@ const sv: TranslationKeys = {
 
   // CTA
   "cta.title": "Redo att modernisera dina bokningar?",
-  "cta.subtitle": "Gå med besöksnäringsföretag som redan använder MimoBook för att effektivisera sina bokningar.",
+  "cta.subtitle": "Gå med besöksnäringsföretag som redan använder MimmoBook för att effektivisera sina bokningar.",
 
   // Login
   "login.title": "Logga in på ditt konto",
