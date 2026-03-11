@@ -2890,6 +2890,7 @@ const fi: TranslationKeys = {
   "booking.subTypeDineInDesc": "Varaa pöytä ravintolasta",
   "booking.subTypeCateringDesc": "Tilaa catering tapahtumaasi",
   "booking.subTypePopupDesc": "Tarvitsetko ruokatarjoilua tapahtumaasi? Tulemme mielellämme!",
+  "booking.cateringQuoteDesc": "Kerro tapahtumastasi, niin laadimme sinulle räätälöidyn tarjouksen.",
   "booking.cateringDetails": "Catering-tiedot",
   "booking.deliveryAddress": "Tapahtuman / toimituksen osoite",
   "booking.dietaryNotes": "Ruokavaliot ja allergiat",
