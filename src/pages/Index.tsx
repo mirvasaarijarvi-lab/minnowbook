@@ -12,6 +12,7 @@ import heroBg from "@/assets/hero-bg.png";
 import ctaBg from "@/assets/cta-bg.png";
 import { useT } from "@/contexts/I18nContext";
 import { TranslationKey } from "@/i18n/translations";
+import SEOHead, { organizationSchema, softwareSchema, faqSchema } from "@/components/SEOHead";
 
 const featureKeys: { icon: React.ElementType; titleKey: TranslationKey; descKey: TranslationKey }[] = [
   { icon: CalendarCheck, titleKey: "features.smartReservations", descKey: "features.smartReservationsDesc" },
