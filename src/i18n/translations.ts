@@ -4567,7 +4567,7 @@ const sv: TranslationKeys = {
   "settings.saved": "Inställningar sparade",
   "settings.saveError": "Kunde inte spara inställningar",
   "settings.upsellTitle": "Hantera flera platser",
-  "settings.upsellDesc": "Uppgradera till Business-planen för att hantera hotell, restauranger och evenemangslokaler från en enda instrumentpanel — var och en med egna resurser, öppettider och bokningssida.",
+  "settings.upsellDesc": "Uppgradera till Business-planen för att hantera hotell, restauranger och evenemangslokaler från en enda instrumentpanel. Var och en med egna resurser, öppettider och bokningssida.",
   "settings.learnMore": "Läs mer",
   "settings.siteOverride": "Platsanpassning",
   "settings.useParentDefault": "Använd företagets standard",
