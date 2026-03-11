@@ -5334,7 +5334,7 @@ const sv: TranslationKeys = {
   "password.lowercase": "En liten bokstav",
   "password.number": "En siffra",
   "password.checking": "Kontrollerar läckta lösenord…",
-  "password.breached": "Detta lösenord har hittats i dataintrång — välj ett annat",
+  "password.breached": "Detta lösenord har hittats i dataintrång. Välj ett annat.",
   "password.safe": "Lösenordet hittades inte i kända intrång",
   "password.strengthWeak": "Svagt",
   "password.strengthFair": "Godtagbart",
