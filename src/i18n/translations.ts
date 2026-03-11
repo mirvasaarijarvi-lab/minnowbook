@@ -3826,7 +3826,7 @@ const fi: TranslationKeys = {
   "a11y.s1P1": "MimmoBook on sitoutunut varmistamaan digitaalisen saavutettavuuden kaikille. Parannamme jatkuvasti käyttökokemusta ja noudatamme saavutettavuusstandardeja.",
   "a11y.s2Title": "2. Saavutettavuusominaisuudet",
   "a11y.s2P1": "Alustamme sisältää seuraavat saavutettavuusominaisuudet:",
-  "a11y.s2Item1": "Säädettävä fonttikoko (80%–150%)",
+  "a11y.s2Item1": "Säädettävä fonttikoko (80% to 150%)",
   "a11y.s2Item2": "Korkean kontrastin tila",
   "a11y.s2Item3": "Lukihäiriöystävällinen fontti",
   "a11y.s2Item4": "Vähennetyn liikkeen tila",
