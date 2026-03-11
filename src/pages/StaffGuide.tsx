@@ -578,7 +578,7 @@ const guideContent: Record<Language, GuideContent> = {
         icon: <LifeBuoy className="h-6 w-6" />, mockupId: "support",
         title: "9. Support",
         steps: [
-          "All plans include the MinnowAid AI chatbot (💬) — available in the dashboard and as a floating widget.",
+          "All plans include the MimoAid AI chatbot (💬) — available in the dashboard and as a floating widget.",
           "Ask questions, browse quick guides, or get AI-powered answers instantly.",
           "Business plan adds priority support: submit tickets to admins with guaranteed 24-hour response.",
           "Track your ticket status in real time: Open → In Progress → Resolved.",
