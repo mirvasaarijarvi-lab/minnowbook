@@ -248,6 +248,7 @@ type TranslationKeys = {
   "booking.subTypeDineInDesc": string;
   "booking.subTypeCateringDesc": string;
   "booking.subTypePopupDesc": string;
+  "booking.cateringQuoteDesc": string;
   "booking.cateringDetails": string;
   "booking.deliveryAddress": string;
   "booking.dietaryNotes": string;
