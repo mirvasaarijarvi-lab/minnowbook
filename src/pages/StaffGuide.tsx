@@ -988,7 +988,7 @@ const guideContent: Record<Language, GuideContent> = {
         icon: <LifeBuoy className="h-6 w-6" />, mockupId: "support",
         title: "9. Support",
         steps: [
-          "Alla planer inkluderar MimoAid AI-chattbot (💬) — tillgänglig i instrumentpanelen och som flytande widget.",
+          "Alla planer inkluderar MimmoAid AI-chattbot (💬) — tillgänglig i instrumentpanelen och som flytande widget.",
           "Ställ frågor, bläddra snabbguider eller få AI-drivna svar direkt.",
           "Business-planen lägger till prioritetssupport: skicka ärenden till administratörer med garanterad 24-timmars svarstid.",
           "Följ ditt ärendes status i realtid: Öppen → Pågår → Löst.",
