@@ -5375,7 +5375,7 @@ const sv: TranslationKeys = {
   "help.requestSubmittedDetail": "Ditt supportärende har skickats! Adminteamet granskar det och svarar snart.",
   "help.art1Title": "Komma igång",
   "help.art1Desc": "Skapa ditt konto och din första bokningssida på några minuter.",
-  "help.art1C1": "Registrera dig för en gratis 30-dagars provperiod — inget kreditkort behövs.",
+  "help.art1C1": "Registrera dig för en gratis 30-dagars provperiod. Inget kreditkort behövs.",
   "help.art1C2": "Slutför installationsguiden för att namnge ditt företag och välja bokningstyper.",
   "help.art1C3": "Anpassa ditt varumärke (logotyp, färger) i Inställningar.",
   "help.art1C4": "Dela din bokningslänk med kunderna!",
