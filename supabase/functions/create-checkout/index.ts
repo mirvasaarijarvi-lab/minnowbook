@@ -51,7 +51,7 @@ serve(async (req) => {
       logStep("Existing customer found", { customerId });
     }
 
-    const origin = req.headers.get("origin") || "https://minnowbook.lovable.app";
+    const origin = req.headers.get("origin") || "https://mimobook.lovable.app";
 
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
