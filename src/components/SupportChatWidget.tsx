@@ -265,7 +265,7 @@ const SupportChatWidget = ({ businessTier = false }: SupportChatWidgetProps) => 
             ? "bg-muted text-foreground rotate-0"
             : "bg-accent text-accent-foreground hover:scale-110"
         )}
-        aria-label={open ? "Close MimoAid" : "Open MimoAid"}
+        aria-label={open ? "Close MimmoAid" : "Open MimmoAid"}
       >
         {open ? <X className="h-5 w-5" /> : <MessageCircle className="h-5 w-5" />}
         {!open && unreadCount > 0 && (

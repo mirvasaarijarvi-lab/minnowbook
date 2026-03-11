@@ -32,12 +32,12 @@ const Logo = ({ variant = "color", size = "md", showText = true, className = "" 
     <div className={`flex items-center gap-2.5 ${className}`}>
       <img
         src={logoSrc[variant]}
-        alt="MimoBook logo"
+        alt="MimmoBook logo"
         className={`${sizeClasses[size]} rounded-lg object-contain`}
       />
       {showText && (
         <span className={`${textSizeClasses[size]} font-serif font-semibold`}>
-          Mimo<span className="text-gradient">Book</span>
+          Mimmo<span className="text-gradient">Book</span>
         </span>
       )}
     </div>

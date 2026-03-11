@@ -271,7 +271,7 @@ const MockupSupport = () => (
     <div className="space-y-2 text-[10px]">
       <div className="p-2 rounded bg-background border">
         <div className="font-medium mb-1">All plans: AI Chatbot</div>
-        <div className="text-muted-foreground">MimoAid (💬) provides instant self-service help, quick guides, and AI-powered answers.</div>
+        <div className="text-muted-foreground">MimmoAid (💬) provides instant self-service help, quick guides, and AI-powered answers.</div>
       </div>
       <div className="p-2 rounded bg-accent/10 border border-accent/20">
         <div className="font-medium mb-1 text-accent">Business plan: Priority Support</div>
@@ -411,7 +411,7 @@ const TierOverviewCard = ({ tierOverview }: { tierOverview: GuideContent["tierOv
 const guideContent: Record<Language, GuideContent> = {
   en: {
     title: "Staff Quick Guide",
-    subtitle: "MimoBook – Staff User Manual",
+    subtitle: "MimmoBook – Staff User Manual",
     printBtn: "Print / Save as PDF",
     back: "Back to Dashboard",
     tierOverview: {
@@ -578,7 +578,7 @@ const guideContent: Record<Language, GuideContent> = {
         icon: <LifeBuoy className="h-6 w-6" />, mockupId: "support",
         title: "9. Support",
         steps: [
-          "All plans include the MimoAid AI chatbot (💬) — available in the dashboard and as a floating widget.",
+          "All plans include the MimmoAid AI chatbot (💬) — available in the dashboard and as a floating widget.",
           "Ask questions, browse quick guides, or get AI-powered answers instantly.",
           "Business plan adds priority support: submit tickets to admins with guaranteed 24-hour response.",
           "Track your ticket status in real time: Open → In Progress → Resolved.",
@@ -616,7 +616,7 @@ const guideContent: Record<Language, GuideContent> = {
   },
   fi: {
     title: "Henkilökunnan pikaopas",
-    subtitle: "MimoBook – käyttöohjeet henkilökunnalle",
+    subtitle: "MimmoBook – käyttöohjeet henkilökunnalle",
     printBtn: "Tulosta / Tallenna PDF",
     back: "Takaisin hallintapaneeliin",
     tierOverview: {
@@ -783,7 +783,7 @@ const guideContent: Record<Language, GuideContent> = {
         icon: <LifeBuoy className="h-6 w-6" />, mockupId: "support",
         title: "9. Tuki",
         steps: [
-          "Kaikissa tilauksissa on MimoAid AI-chatbot (💬) — käytettävissä hallintapaneelissa ja kelluvana widgettinä.",
+          "Kaikissa tilauksissa on MimmoAid AI-chatbot (💬) — käytettävissä hallintapaneelissa ja kelluvana widgettinä.",
           "Kysy kysymyksiä, selaa pikaoppaita tai saa AI-vastauksia välittömästi.",
           "Business-tilaus lisää prioriteettituen: lähetä tikettejä ylläpitäjille 24 tunnin vasteajalla.",
           "Seuraa tikettisi tilaa reaaliajassa: Avoin → Käsittelyssä → Ratkaistu.",
@@ -821,7 +821,7 @@ const guideContent: Record<Language, GuideContent> = {
   },
   sv: {
     title: "Personalens snabbguide",
-    subtitle: "MimoBook – bruksanvisning för personalen",
+    subtitle: "MimmoBook – bruksanvisning för personalen",
     printBtn: "Skriv ut / Spara som PDF",
     back: "Tillbaka till instrumentpanelen",
     tierOverview: {
@@ -988,7 +988,7 @@ const guideContent: Record<Language, GuideContent> = {
         icon: <LifeBuoy className="h-6 w-6" />, mockupId: "support",
         title: "9. Support",
         steps: [
-          "Alla planer inkluderar MimoAid AI-chattbot (💬) — tillgänglig i instrumentpanelen och som flytande widget.",
+          "Alla planer inkluderar MimmoAid AI-chattbot (💬) — tillgänglig i instrumentpanelen och som flytande widget.",
           "Ställ frågor, bläddra snabbguider eller få AI-drivna svar direkt.",
           "Business-planen lägger till prioritetssupport: skicka ärenden till administratörer med garanterad 24-timmars svarstid.",
           "Följ ditt ärendes status i realtid: Öppen → Pågår → Löst.",
@@ -1123,7 +1123,7 @@ const StaffGuide = () => {
 
         {/* Footer for print */}
         <div className="hidden print:block mt-8 pt-4 border-t text-center text-xs text-gray-500">
-          MimoBook – {content.title} – {new Date().toLocaleDateString(guideLang === "fi" ? "fi-FI" : guideLang === "sv" ? "sv-SE" : "en-GB")}
+          MimmoBook – {content.title} – {new Date().toLocaleDateString(guideLang === "fi" ? "fi-FI" : guideLang === "sv" ? "sv-SE" : "en-GB")}
         </div>
       </main>
     </div>

@@ -143,7 +143,7 @@ serve(async (req) => {
           messages: [
             {
               role: "system",
-              content: `You are MimoBook's friendly support assistant embedded in the dashboard. You help hospitality business owners with:
+              content: `You are MimmoBook's friendly support assistant embedded in the dashboard. You help hospitality business owners with:
 - Managing reservations (creating, editing, cancelling)
 - Setting up their booking page (branding, opening hours, resources)
 - Understanding email templates and notifications
