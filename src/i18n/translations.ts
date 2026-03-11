@@ -3852,9 +3852,9 @@ const fi: TranslationKeys = {
   "pricing.faqQ3": "Mitä varaustyyppejä voin valita?",
   "pricing.faqA3": "Ravintola (pöytävaraukset), Tila (tilakatsaukset) ja Majatalo (huonevaraukset). Basic antaa valita yhden. Pro avaa kaikki tyypit, yhden kutakin, yhdellä toimipisteellä. Business lisää rajattomat toimipisteet.",
   "pricing.faqQ4": "Voinko käyttää omaa domainia?",
-  "pricing.faqA4": "Jokaiselle yritykselle tulee brändätty alidomain (esim. yrityksesi.mimobook.com). Oman domainin tuki on tiekartalla ja tarjotaan enterprise-hinnoittelulla.",
+  "pricing.faqA4": "Jokaiselle yritykselle tulee brändätty alidomain (esim. yrityksesi.mimmobook.com). Oman domainin tuki on tiekartalla ja tarjotaan enterprise-hinnoittelulla.",
   "pricing.faqQ5": "Mikä ero on AI-chatbot-tuella ja 24 tunnin vasteajatuella?",
-  "pricing.faqA5": "Kaikki suunnitelmat sisältävät MimoAid-tekoälychatbotin, joka vastaa kysymyksiin, auttaa vianmäärityksessä ja opastaa ominaisuuksissa. Chatbot on käytettävissä 24/7 hallintapaneelissa. Business-suunnitelma lisää 24 tunnin vasteajatuen: voit eskaloida keskustelun tiimiimme alustan kautta chatbotin avulla ja saada taatun vastauksen 24 tunnin sisällä.",
+  "pricing.faqA5": "Kaikki suunnitelmat sisältävät MimmoAid-tekoälychatbotin, joka vastaa kysymyksiin, auttaa vianmäärityksessä ja opastaa ominaisuuksissa. Chatbot on käytettävissä 24/7 hallintapaneelissa. Business-suunnitelma lisää 24 tunnin vasteajatuen: voit eskaloida keskustelun tiimiimme alustan kautta chatbotin avulla ja saada taatun vastauksen 24 tunnin sisällä.",
 
   // Support page
   "support.heroTitle": "Kuinka voimme auttaa?",
