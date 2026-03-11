@@ -80,6 +80,7 @@ const ResourceManagement = () => {
     room_type_pricing: { ...defaultRoomPricing }, is_active: true,
     room_type: "" as string, room_description: "",
     offers_catering: false, offers_popup: false,
+    offers_table_reservation: true, offers_quote: true, offers_set_menu: true,
   });
 
   const { data: sites } = useQuery({
@@ -204,6 +205,9 @@ const ResourceManagement = () => {
         room_description: isAccom && FREE_TEXT_ROOM_TYPES.includes(form.room_type) ? (form.room_description || null) : null,
         offers_catering: form.resource_type === "restaurant" ? form.offers_catering : false,
         offers_popup: form.resource_type === "restaurant" ? form.offers_popup : false,
+        offers_table_reservation: form.resource_type === "restaurant" ? form.offers_table_reservation : true,
+        offers_quote: form.resource_type === "restaurant" ? form.offers_quote : true,
+        offers_set_menu: form.resource_type === "restaurant" ? form.offers_set_menu : true,
         approval_status: getApprovalStatus(),
       };
       if (editingId) {
@@ -333,7 +337,7 @@ const ResourceManagement = () => {
     const defaultType = allowedTypes[0] || "restaurant";
     setEditingId(null);
     setBeds([]);
-    setForm({ name: "", resource_type: defaultType, capacity: "", price_per_night: "", description: "", image_url: "", breakfast_price_per_person: "", room_type_pricing: { ...defaultRoomPricing }, is_active: true, room_type: "", room_description: "", offers_catering: false, offers_popup: false });
+    setForm({ name: "", resource_type: defaultType, capacity: "", price_per_night: "", description: "", image_url: "", breakfast_price_per_person: "", room_type_pricing: { ...defaultRoomPricing }, is_active: true, room_type: "", room_description: "", offers_catering: false, offers_popup: false, offers_table_reservation: true, offers_quote: true, offers_set_menu: true });
   };
 
   const openEdit = (r: any) => {
@@ -351,6 +355,9 @@ const ResourceManagement = () => {
       room_description: r.room_description ?? "",
       offers_catering: r.offers_catering ?? false,
       offers_popup: r.offers_popup ?? false,
+      offers_table_reservation: (r as any).offers_table_reservation ?? true,
+      offers_quote: (r as any).offers_quote ?? true,
+      offers_set_menu: (r as any).offers_set_menu ?? true,
       room_type_pricing: {
         single: rtp.single?.toString() ?? "1.0",
         double: rtp.double?.toString() ?? "1.5",
@@ -575,6 +582,25 @@ const ResourceManagement = () => {
                   </div>
 
                   {/* Restaurant service options */}
+                  {form.resource_type === "restaurant" && (
+                    <div className="space-y-3 rounded-lg border border-border p-3">
+                      <Label className="font-medium text-sm">{t("dashboard.dineInOptions")}</Label>
+                      <div className="flex items-center gap-3">
+                        <Checkbox checked={form.offers_table_reservation} onCheckedChange={(checked) => setForm((prev) => ({ ...prev, offers_table_reservation: !!checked }))} />
+                        <Label className="mb-0 text-sm">{t("dashboard.offersTableReservation")}</Label>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <Checkbox checked={form.offers_quote} onCheckedChange={(checked) => setForm((prev) => ({ ...prev, offers_quote: !!checked }))} />
+                        <Label className="mb-0 text-sm">{t("dashboard.offersQuote")}</Label>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <Checkbox checked={form.offers_set_menu} onCheckedChange={(checked) => setForm((prev) => ({ ...prev, offers_set_menu: !!checked }))} />
+                        <Label className="mb-0 text-sm">{t("dashboard.offersSetMenu")}</Label>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Restaurant additional services */}
                   {form.resource_type === "restaurant" && (
                     <div className="space-y-3 rounded-lg border border-border p-3">
                       <Label className="font-medium text-sm">{t("dashboard.serviceOptions")}</Label>

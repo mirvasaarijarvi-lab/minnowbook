@@ -802,6 +802,9 @@ export type Database = {
           name: string
           offers_catering: boolean
           offers_popup: boolean
+          offers_quote: boolean
+          offers_set_menu: boolean
+          offers_table_reservation: boolean
           price_per_night: number | null
           rejection_reason: string | null
           resource_type: string
@@ -825,6 +828,9 @@ export type Database = {
           name: string
           offers_catering?: boolean
           offers_popup?: boolean
+          offers_quote?: boolean
+          offers_set_menu?: boolean
+          offers_table_reservation?: boolean
           price_per_night?: number | null
           rejection_reason?: string | null
           resource_type: string
@@ -848,6 +854,9 @@ export type Database = {
           name?: string
           offers_catering?: boolean
           offers_popup?: boolean
+          offers_quote?: boolean
+          offers_set_menu?: boolean
+          offers_table_reservation?: boolean
           price_per_night?: number | null
           rejection_reason?: string | null
           resource_type?: string

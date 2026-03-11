@@ -626,6 +626,10 @@ type TranslationKeys = {
   "dashboard.serviceOptions": string;
   "dashboard.offersCatering": string;
   "dashboard.offersPopup": string;
+  "dashboard.dineInOptions": string;
+  "dashboard.offersTableReservation": string;
+  "dashboard.offersQuote": string;
+  "dashboard.offersSetMenu": string;
   "dashboard.inactive": string;
   "dashboard.namePlaceholder": string;
   "dashboard.descriptionPlaceholder": string;
@@ -1949,6 +1953,10 @@ const en: TranslationKeys = {
   "dashboard.serviceOptions": "Additional services",
   "dashboard.offersCatering": "Offer catering services",
   "dashboard.offersPopup": "Offer pop-up restaurant at events",
+  "dashboard.dineInOptions": "Dine-in booking options",
+  "dashboard.offersTableReservation": "Reserve a table (order from menu)",
+  "dashboard.offersQuote": "Ask for a quote (custom pricing)",
+  "dashboard.offersSetMenu": "Set menu (fixed price)",
   "dashboard.inactive": "Inactive",
   "dashboard.namePlaceholder": "e.g. Banquet Hall",
   "dashboard.descriptionPlaceholder": "Short description...",
@@ -3254,6 +3262,10 @@ const fi: TranslationKeys = {
   "dashboard.serviceOptions": "Lisäpalvelut",
   "dashboard.offersCatering": "Tarjoa catering-palveluita",
   "dashboard.offersPopup": "Tarjoa pop-up ravintolaa tapahtumiin",
+  "dashboard.dineInOptions": "Ravintolassa syömisen varausvaihtoehdot",
+  "dashboard.offersTableReservation": "Varaa pöytä (tilaus listalta)",
+  "dashboard.offersQuote": "Pyydä tarjous (räätälöity hinta)",
+  "dashboard.offersSetMenu": "Valmis menu (kiinteä hinta)",
   "dashboard.inactive": "Ei aktiivinen",
   "dashboard.namePlaceholder": "Esim. Juhlasali",
   "dashboard.descriptionPlaceholder": "Lyhyt kuvaus...",
@@ -4558,6 +4570,10 @@ const sv: TranslationKeys = {
   "dashboard.serviceOptions": "Tilläggstjänster",
   "dashboard.offersCatering": "Erbjud cateringtjänster",
   "dashboard.offersPopup": "Erbjud pop-up restaurang vid evenemang",
+  "dashboard.dineInOptions": "Bokningsalternativ för restaurang",
+  "dashboard.offersTableReservation": "Reservera bord (beställ från menyn)",
+  "dashboard.offersQuote": "Begär en offert (anpassad prissättning)",
+  "dashboard.offersSetMenu": "Fast meny (fast pris)",
   "dashboard.inactive": "Inaktiv",
   "dashboard.namePlaceholder": "T.ex. Festsal",
   "dashboard.descriptionPlaceholder": "Kort beskrivning...",
