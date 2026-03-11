@@ -315,8 +315,118 @@ Deno.serve(async (req) => {
       insertData.stall_fee = stall_fee;
     }
 
-    const { error: insertErr } = await adminClient.from("reservations").insert(insertData);
+    const { data: insertedRes, error: insertErr } = await adminClient
+      .from("reservations")
+      .insert(insertData)
+      .select("id")
+      .single();
     if (insertErr) throw new Error("Failed to create reservation");
+
+    // Send acknowledgment email via transactional queue (fire-and-forget)
+    try {
+      // Fetch tenant settings for branding
+      const { data: settings } = await adminClient
+        .from("tenant_settings")
+        .select("business_name, primary_color, logo_url, default_language")
+        .eq("tenant_id", tenant_id)
+        .maybeSingle();
+
+      const businessName = settings?.business_name || tenant.name || "Mimmobook";
+      const lang = body.language || settings?.default_language || "en";
+      const logoUrl = settings?.logo_url || "https://lsgznskkxadplwnxplhd.supabase.co/storage/v1/object/public/tenant-assets/email-assets%2Flogo-color.png";
+
+      const ackTranslations: Record<string, { subject: string; title: string; greeting: string; body: string; footer: string }> = {
+        en: {
+          subject: `We received your booking request — ${businessName}`,
+          title: "Booking Received",
+          greeting: "Dear",
+          body: "Thank you for your booking request. We will review it and get back to you shortly.",
+          footer: "You will receive a confirmation email once your booking is approved.",
+        },
+        fi: {
+          subject: `Olemme vastaanottaneet varauspyyntösi — ${businessName}`,
+          title: "Varaus vastaanotettu",
+          greeting: "Hyvä",
+          body: "Kiitos varauspyynnöstäsi. Käsittelemme sen ja palaamme asiaan pian.",
+          footer: "Saat vahvistusviestin, kun varauksesi on hyväksytty.",
+        },
+        sv: {
+          subject: `Vi har mottagit din bokningsförfrågan — ${businessName}`,
+          title: "Bokning mottagen",
+          greeting: "Kära",
+          body: "Tack för din bokningsförfrågan. Vi kommer att granska den och återkomma inom kort.",
+          footer: "Du får ett bekräftelsemeddelande när din bokning har godkänts.",
+        },
+      };
+
+      const t = ackTranslations[lang] || ackTranslations.en;
+      const dlLabels: Record<string, Record<string, string>> = {
+        en: { type: "Type", date: "Date", time: "Time", guests: "Guests" },
+        fi: { type: "Tyyppi", date: "Päivämäärä", time: "Aika", guests: "Vieraat" },
+        sv: { type: "Typ", date: "Datum", time: "Tid", guests: "Gäster" },
+      };
+      const dl = dlLabels[lang] || dlLabels.en;
+
+      const rows: string[] = [];
+      rows.push(`<tr style="background-color:#faf8f5"><td style="padding:10px 16px;font-weight:600;color:#1E1519;border-right:1px solid #e8e0d8;width:40%;font-family:'Inter',Arial,sans-serif;font-size:14px">${dl.type}</td><td style="padding:10px 16px;color:#63516E;font-family:'Inter',Arial,sans-serif;font-size:14px">${reservation_type}</td></tr>`);
+      rows.push(`<tr style="background-color:#ffffff"><td style="padding:10px 16px;font-weight:600;color:#1E1519;border-right:1px solid #e8e0d8;width:40%;font-family:'Inter',Arial,sans-serif;font-size:14px">${dl.date}</td><td style="padding:10px 16px;color:#63516E;font-family:'Inter',Arial,sans-serif;font-size:14px">${date}${start_time ? ` ${start_time.slice(0, 5)}` : ""}</td></tr>`);
+      if (guests_count) {
+        rows.push(`<tr style="background-color:#faf8f5"><td style="padding:10px 16px;font-weight:600;color:#1E1519;border-right:1px solid #e8e0d8;width:40%;font-family:'Inter',Arial,sans-serif;font-size:14px">${dl.guests}</td><td style="padding:10px 16px;color:#63516E;font-family:'Inter',Arial,sans-serif;font-size:14px">${guests_count}</td></tr>`);
+      }
+
+      const ackHtml = `<!DOCTYPE html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background-color:#ffffff;font-family:'Inter',Arial,sans-serif">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#ffffff;padding:32px 0">
+    <tr><td align="center">
+      <table width="480" cellpadding="0" cellspacing="0">
+        <tr><td style="text-align:center;padding:32px 32px 24px">
+          <img src="${logoUrl}" alt="${businessName}" style="height:48px;width:auto;margin-bottom:24px">
+        </td></tr>
+        <tr><td style="padding:0 32px 32px">
+          <div style="text-align:center;margin-bottom:24px">
+            <div style="display:inline-block;width:48px;height:48px;line-height:48px;border-radius:50%;background-color:#f5f0fa;font-size:24px;text-align:center">📩</div>
+            <h1 style="color:#1E1519;font-size:24px;font-family:'Playfair Display',Georgia,serif;font-weight:700;margin:12px 0 0">${t.title}</h1>
+          </div>
+          <p style="color:#63516E;font-size:15px;font-family:'Inter',Arial,sans-serif;line-height:1.6">${t.greeting} <strong style="color:#1E1519">${guest_name}</strong>,</p>
+          <p style="color:#63516E;font-size:15px;font-family:'Inter',Arial,sans-serif;line-height:1.6">${t.body}</p>
+          <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e8e0d8;border-radius:10px;overflow:hidden;margin:20px 0;font-size:14px">
+            ${rows.join("")}
+          </table>
+          <p style="color:#63516E;font-size:14px;font-family:'Inter',Arial,sans-serif;line-height:1.6">${t.footer}</p>
+        </td></tr>
+        <tr><td style="padding:24px 32px;text-align:center;font-size:12px;color:#999;border-top:1px solid #e8e0d8;font-family:'Inter',Arial,sans-serif">
+          <p style="margin:4px 0;font-weight:600;color:#63516E">${businessName}</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body></html>`;
+
+      const SENDER_DOMAIN = "notify.mimmobook.com";
+      await adminClient.rpc("enqueue_email", {
+        queue_name: "transactional_emails",
+        payload: {
+          to: guest_email,
+          from: `${businessName} <noreply@${SENDER_DOMAIN}>`,
+          sender_domain: SENDER_DOMAIN,
+          subject: t.subject,
+          html: ackHtml,
+          purpose: "transactional",
+          label: "booking_acknowledgment",
+          queued_at: new Date().toISOString(),
+        },
+      });
+
+      // Mark ack email as sent
+      await adminClient
+        .from("reservations")
+        .update({ acknowledgment_email_sent_at: new Date().toISOString() })
+        .eq("id", insertedRes.id);
+    } catch (ackErr) {
+      // Non-critical: don't fail the booking if ack email fails
+      console.error("Failed to enqueue acknowledgment email:", ackErr);
+    }
 
     return new Response(JSON.stringify({ success: true }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
