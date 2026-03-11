@@ -3463,7 +3463,7 @@ const fi: TranslationKeys = {
   "a11y.title": "Saavutettavuusseloste",
   "a11y.lastUpdated": "Päivitetty viimeksi:",
   "a11y.s1Title": "1. Sitoumuksemme",
-  "a11y.s1P1": "MinnowBook on sitoutunut varmistamaan digitaalisen saavutettavuuden kaikille. Parannamme jatkuvasti käyttökokemusta ja noudatamme saavutettavuusstandardeja.",
+  "a11y.s1P1": "MimoBook on sitoutunut varmistamaan digitaalisen saavutettavuuden kaikille. Parannamme jatkuvasti käyttökokemusta ja noudatamme saavutettavuusstandardeja.",
   "a11y.s2Title": "2. Saavutettavuusominaisuudet",
   "a11y.s2P1": "Alustamme sisältää seuraavat saavutettavuusominaisuudet:",
   "a11y.s2Item1": "Säädettävä fonttikoko (80%–150%)",
