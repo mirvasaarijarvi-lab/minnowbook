@@ -5915,7 +5915,7 @@ const sv: TranslationKeys = {
   "blog.post3C3": "MimmoBook låter varje företag anpassa sin bokningssida med sitt eget varumärke. Ladda upp din logotyp, ställ in dina färger, lägg till en huvudbild och skriv en beskrivning. Resultatet är en bokningsupplevelse som känns som en förlängning av din webbplats.",
   "blog.post4Title": "Hantera bokningar på flera platser",
   "blog.post4Excerpt": "Besöksnäringsföretag med flera platser behöver centraliserade verktyg. Så hanterar du bokningar på flera platser utan att tappa kontrollen.",
-  "blog.post4C1": "Att driva flera besöksnäringsplatser — restauranggrupp, gästhuskedja eller lokaler i olika städer — mångdubblar bokningshanteringens komplexitet.",
+  "blog.post4C1": "Att driva flera besöksnäringsplatser, till exempel en restauranggrupp, gästhuskedja eller lokaler i olika städer, mångdubblar bokningshanteringens komplexitet.",
   "blog.post4C2": "Utmaningen är att upprätthålla konsekvens samtidigt som man respekterar varje plats unika behov. Ett centraliserat system låter dig hantera alla platser från en instrumentpanel med separata bokningssidor, personalbehörigheter och rapporter per plats.",
   "blog.post4C3": "MimmoBooks funktion för flera platser är designad för detta. Varje plats får sin egen varumärkesanpassade bokningssida, personaluppdrag och rapportering.",
   "blog.post4C4": "Den viktigaste fördelen är synlighet. Istället för att logga in på separata system eller kontrollera flera kalkylblad ser du alla dina platser på ett ställe.",
