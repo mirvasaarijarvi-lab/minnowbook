@@ -2418,7 +2418,7 @@ const en: TranslationKeys = {
   "help.describePlaceholder": "Describe your request...",
   "help.submitToAdmin": "Submit to Admin",
   "help.typePlaceholder": "Type your question...",
-  "help.errorNoTenant": "Unable to submit request — no tenant found.",
+  "help.errorNoTenant": "Unable to submit request. No tenant found.",
   "help.errorSubmit": "Failed to submit request",
   "help.successSubmit": "Support request submitted",
   "help.errorConnect": "Sorry, I couldn't connect. Please try again.",
