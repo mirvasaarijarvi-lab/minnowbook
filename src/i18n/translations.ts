@@ -2104,7 +2104,7 @@ const en: TranslationKeys = {
   "about.heroSubtitle": "We help hospitality businesses manage their bookings effortlessly, so they can focus on creating memorable guest experiences.",
   "about.missionBadge": "Our Mission",
   "about.missionTitle": "Making reservation management simple and easy",
-  "about.missionP1": "Small hospitality businesses deserve practical and informative tools to operate more efficiently. We started MimoBook to make that happen.",
+  "about.missionP1": "Small hospitality businesses deserve practical and informative tools to operate more efficiently. We started MimmoBook to make that happen.",
   "about.missionP2": "Our platform brings reservations, branding, and reporting into one unified workspace eliminating the scattered notebooks and missed bookings.",
   "about.point1Title": "Speed without compromise",
   "about.point1Desc": "Get your branded booking page live in a day or two, not weeks.",
