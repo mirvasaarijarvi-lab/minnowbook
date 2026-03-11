@@ -5491,7 +5491,7 @@ const sv: TranslationKeys = {
    "aid.guideQ10": "Hur blockerar jag datum eller tider?",
    "aid.guideA10": "Under **Instrumentpanel → Kalender**, klicka på ett datum och använd **Blockera tid** för att förhindra bokningar för specifika datum, tider eller resurser.",
    "aid.guideQ11": "Hur hanterar jag återkommande blockeringar?",
-   "aid.guideA11": "Gå till **Instrumentpanel → Kalender** och öppna panelen **Återkommande blockeringar**. Du kan skapa veckovis återkommande blockeringar för specifika dagar, tidsintervall och resurstyper (t.ex. stänga restaurangen varje måndag). Slå av/på eller ta bort blockeringar när som helst — ändringar gäller direkt på den publika bokningssidan.",
+   "aid.guideA11": "Gå till **Instrumentpanel → Kalender** och öppna panelen **Återkommande blockeringar**. Du kan skapa veckovis återkommande blockeringar för specifika dagar, tidsintervall och resurstyper (t.ex. stänga restaurangen varje måndag). Slå av/på eller ta bort blockeringar när som helst. Ändringar gäller direkt på den publika bokningssidan.",
   // Sites
   "sites.title": "Platser",
   "sites.addSite": "Lägg till plats",
