@@ -2689,7 +2689,7 @@ const en: TranslationKeys = {
   "pricing.basicName": "Basic",
   "pricing.basicDesc": "Perfect for a single hotel, restaurant or event venue.",
   "pricing.basicTypes": "1 type",
-  "pricing.basicStaff": "1–3",
+  "pricing.basicStaff": "1 to 3",
   "pricing.proName": "Pro",
   "pricing.proDesc": "For businesses offering hotel, restaurant and event venue services in one place.",
   "pricing.proTypes": "All 3 types, 1 of each (e.g. cannot switch to two restaurants and one hotel)",
