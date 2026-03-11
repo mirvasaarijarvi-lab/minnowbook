@@ -4163,7 +4163,7 @@ const fi: TranslationKeys = {
   "pricing.basicName": "Perustaso",
   "pricing.basicDesc": "Täydellinen yhdelle hotellille, ravintolalle tai tapahtumapaikalle.",
   "pricing.basicTypes": "1 tyyppi",
-  "pricing.basicStaff": "1–3",
+  "pricing.basicStaff": "1 to 3",
   "pricing.proName": "Protaso",
   "pricing.proDesc": "Yrityksille, jotka tarjoavat hotelli-, ravintola- ja tapahtumatilapalvelun yhdessä paikassa.",
   "pricing.proTypes": "Käytössä kaikki 3 tyyppiä, 1 kutakin (ei voi vaihtaa esim. kahteen ravintolaan ja yhteen hotelliin)",
