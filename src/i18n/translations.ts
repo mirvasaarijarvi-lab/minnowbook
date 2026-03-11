@@ -4294,7 +4294,7 @@ const fi: TranslationKeys = {
   "whatIs.seeFeatures": "Katso kaikki ominaisuudet",
   "whatIs.definitionTitle": "MimmoBook: Varausten hallinta ravintola-alalle",
   "whatIs.definitionP1": "MimmoBook on SaaS-alusta, joka auttaa majoitus- ja ravintola-alan yrityksiä hallitsemaan varauksia verkossa. Riippumatta siitä, pyöritätkö ravintolaa, tapahtuma­paikkaa, hotellia tai majataloa, MimmoBook tarjoaa keskitetyn hallintapaneelin varausten, vierasviestinnän ja liiketoiminnan seurantaan.",
-  "whatIs.definitionP2": "Toisin kuin yleiset varaustyökalut, MimmoBook on suunniteltu nimenomaan ravintola-alalle. Se tukee useita varaustyyppejä — pöytävarauksia, huonevarauksia, tilavuokrausta, catering-tilauksia ja popup-tapahtumia — kaikki yhdellä tilillä. Jokainen yritys saa brändätyn varaussivun.",
+  "whatIs.definitionP2": "Toisin kuin yleiset varaustyökalut, MimmoBook on suunniteltu nimenomaan ravintola-alalle. Se tukee useita varaustyyppejä, kuten pöytävarauksia, huonevarauksia, tilavuokrausta, catering-tilauksia ja popup-tapahtumia, kaikki yhdellä tilillä. Jokainen yritys saa brändätyn varaussivun.",
   "whatIs.definitionP3": "MimmoBook on saatavilla englanniksi, suomeksi ja ruotsiksi, mikä tekee siitä ihanteellisen Pohjoismaissa ja kansainvälisesti toimiville yrityksille. Alusta skaalautuu yksittäisestä ravintolasta usean toimipisteen ravintola-alan konserniin.",
   "whatIs.whoTitle": "Kenelle MimmoBook on tarkoitettu?",
   "whatIs.whoSubtitle": "MimmoBook palvelee kaikenkokoisia ravintola-alan yrityksiä neljässä pääkategoriassa.",
