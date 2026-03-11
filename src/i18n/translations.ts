@@ -248,6 +248,7 @@ type TranslationKeys = {
   "booking.subTypeDineInDesc": string;
   "booking.subTypeCateringDesc": string;
   "booking.subTypePopupDesc": string;
+  "booking.cateringQuoteDesc": string;
   "booking.cateringDetails": string;
   "booking.deliveryAddress": string;
   "booking.dietaryNotes": string;
@@ -1578,6 +1579,7 @@ const en: TranslationKeys = {
   "booking.subTypeDineInDesc": "Reserve a table at the restaurant",
   "booking.subTypeCateringDesc": "Order catering for your event",
   "booking.subTypePopupDesc": "Have us serve food at your event or festival",
+  "booking.cateringQuoteDesc": "Tell us about your event and we'll prepare a custom quote for you.",
   "booking.cateringDetails": "Catering details",
   "booking.deliveryAddress": "Event / delivery address",
   "booking.dietaryNotes": "Dietary requirements & allergies",
@@ -2888,6 +2890,7 @@ const fi: TranslationKeys = {
   "booking.subTypeDineInDesc": "Varaa pöytä ravintolasta",
   "booking.subTypeCateringDesc": "Tilaa catering tapahtumaasi",
   "booking.subTypePopupDesc": "Tarvitsetko ruokatarjoilua tapahtumaasi? Tulemme mielellämme!",
+  "booking.cateringQuoteDesc": "Kerro tapahtumastasi, niin laadimme sinulle räätälöidyn tarjouksen.",
   "booking.cateringDetails": "Catering-tiedot",
   "booking.deliveryAddress": "Tapahtuman / toimituksen osoite",
   "booking.dietaryNotes": "Ruokavaliot ja allergiat",
@@ -4196,6 +4199,7 @@ const sv: TranslationKeys = {
   "booking.subTypeDineInDesc": "Reservera ett bord på restaurangen",
   "booking.subTypeCateringDesc": "Beställ catering till ditt evenemang",
   "booking.subTypePopupDesc": "Behöver du matservering på ditt evenemang? Vi kommer gärna!",
+  "booking.cateringQuoteDesc": "Berätta om ditt evenemang så tar vi fram en skräddarsydd offert åt dig.",
   "booking.cateringDetails": "Cateringdetaljer",
   "booking.deliveryAddress": "Evenemangs-/leveransadress",
   "booking.dietaryNotes": "Kostrestriktioner och allergier",

@@ -1556,6 +1556,7 @@ const PublicBookingInner = () => {
 
           {/* Type-specific fields: Restaurant */}
           {form.reservation_type === "restaurant" && (
+            <>
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg font-serif flex items-center gap-2" style={{ color: primaryColor }}>
@@ -1564,21 +1565,19 @@ const PublicBookingInner = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {/* Sub-type selector — only show when catering or popup is available */}
+                {/* Pop-up sub-type selector — only show when popup is available */}
                 {(() => {
                     const restaurantResources = resources ?? [];
-                    const anyCatering = restaurantResources.some((r: any) => r.offers_catering);
                     const anyPopup = restaurantResources.some((r: any) => r.offers_popup);
-                    if (!anyCatering && !anyPopup) return null;
+                    if (!anyPopup) return null;
                     const allSubTypes = [
                       { value: "dine_in", icon: UtensilsCrossed, labelKey: "booking.subTypeDineIn", descKey: "booking.subTypeDineInDesc" },
-                      ...(anyCatering ? [{ value: "catering", icon: Truck, labelKey: "booking.subTypeCatering", descKey: "booking.subTypeCateringDesc" }] : []),
                       ...(anyPopup ? [{ value: "popup", icon: ShoppingBag, labelKey: "booking.subTypePopup", descKey: "booking.subTypePopupDesc" }] : []),
                     ] as const;
                     return (
-                      <div className="grid gap-3 sm:grid-cols-3">
+                      <div className="grid gap-3 sm:grid-cols-2">
                         {allSubTypes.map(({ value, icon: Icon, labelKey, descKey }) => {
-                          const isSelected = form.restaurant_sub_type === value;
+                          const isSelected = form.restaurant_sub_type === value && form.restaurant_sub_type !== "catering";
                           return (
                             <button
                               key={value}
@@ -1644,55 +1643,6 @@ const PublicBookingInner = () => {
                     </div>
                   );
                 })()}
-
-                {/* Catering fields */}
-                {form.restaurant_sub_type === "catering" && (
-                  <div className="space-y-3 rounded-lg border border-border p-3">
-                    <Label className="font-medium flex items-center gap-1.5">
-                      <ChefHat className="h-4 w-4" />
-                      {t("booking.cateringDetails")}
-                    </Label>
-                    <div className="space-y-2">
-                      <Label>{t("booking.deliveryAddress")}</Label>
-                      <Input
-                        value={form.delivery_address}
-                        onChange={(e) => updateField("delivery_address", e.target.value)}
-                        maxLength={200}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>{t("booking.dietaryNotes")}</Label>
-                      <Textarea
-                        rows={2}
-                        value={form.dietary_notes}
-                        onChange={(e) => updateField("dietary_notes", e.target.value)}
-                        maxLength={500}
-                      />
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-2">
-                        <Checkbox
-                          id="equipment_needed"
-                          checked={form.equipment_needed}
-                          onCheckedChange={(checked) => updateBoolField("equipment_needed", !!checked)}
-                        />
-                        <Label htmlFor="equipment_needed" className="cursor-pointer text-sm">
-                          {t("booking.equipmentNeeded")}
-                        </Label>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Checkbox
-                          id="staff_needed"
-                          checked={form.staff_needed}
-                          onCheckedChange={(checked) => updateBoolField("staff_needed", !!checked)}
-                        />
-                        <Label htmlFor="staff_needed" className="cursor-pointer text-sm">
-                          {t("booking.staffNeeded")}
-                        </Label>
-                      </div>
-                    </div>
-                  </div>
-                )}
 
                 {/* Pop-up fields */}
                 {form.restaurant_sub_type === "popup" && (
@@ -1769,6 +1719,79 @@ const PublicBookingInner = () => {
                 )}
               </CardContent>
             </Card>
+
+            {/* Catering — separate card */}
+            {(() => {
+              const restaurantResources = resources ?? [];
+              const anyCatering = restaurantResources.some((r: any) => r.offers_catering);
+              if (!anyCatering) return null;
+              const isCatering = form.restaurant_sub_type === "catering";
+              return (
+                <Card
+                  className="cursor-pointer transition-all"
+                  style={{
+                    borderColor: isCatering ? accentColor : undefined,
+                    borderWidth: isCatering ? 2 : undefined,
+                    backgroundColor: isCatering ? `${accentColor}08` : undefined,
+                  }}
+                  onClick={() => setForm((prev) => ({ ...prev, restaurant_sub_type: "catering", pricing_type: "" }))}
+                >
+                  <CardHeader>
+                    <CardTitle className="text-lg font-serif flex items-center gap-2" style={{ color: isCatering ? accentColor : primaryColor }}>
+                      <Truck className="h-5 w-5" />
+                      {t("booking.subTypeCatering")}
+                    </CardTitle>
+                    <p className="text-sm" style={{ color: `${primaryColor}99` }}>
+                      {t("booking.cateringQuoteDesc")}
+                    </p>
+                  </CardHeader>
+                  {isCatering && (
+                    <CardContent className="space-y-3" onClick={(e) => e.stopPropagation()}>
+                      <div className="space-y-2">
+                        <Label>{t("booking.deliveryAddress")}</Label>
+                        <Input
+                          value={form.delivery_address}
+                          onChange={(e) => updateField("delivery_address", e.target.value)}
+                          maxLength={200}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>{t("booking.dietaryNotes")}</Label>
+                        <Textarea
+                          rows={2}
+                          value={form.dietary_notes}
+                          onChange={(e) => updateField("dietary_notes", e.target.value)}
+                          maxLength={500}
+                        />
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2">
+                          <Checkbox
+                            id="equipment_needed"
+                            checked={form.equipment_needed}
+                            onCheckedChange={(checked) => updateBoolField("equipment_needed", !!checked)}
+                          />
+                          <Label htmlFor="equipment_needed" className="cursor-pointer text-sm">
+                            {t("booking.equipmentNeeded")}
+                          </Label>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Checkbox
+                            id="staff_needed"
+                            checked={form.staff_needed}
+                            onCheckedChange={(checked) => updateBoolField("staff_needed", !!checked)}
+                          />
+                          <Label htmlFor="staff_needed" className="cursor-pointer text-sm">
+                            {t("booking.staffNeeded")}
+                          </Label>
+                        </div>
+                      </div>
+                    </CardContent>
+                  )}
+                </Card>
+              );
+            })()}
+            </>
           )}
 
           {/* Restaurant resource opening hours display */}
