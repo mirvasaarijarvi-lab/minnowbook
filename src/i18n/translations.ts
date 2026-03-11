@@ -2351,7 +2351,7 @@ const en: TranslationKeys = {
   "a11y.s1P1": "MimmoBook is committed to ensuring digital accessibility for people of all abilities. We continually improve the user experience for everyone and apply relevant accessibility standards.",
   "a11y.s2Title": "2. Accessibility Features",
   "a11y.s2P1": "Our platform includes the following accessibility features:",
-  "a11y.s2Item1": "Adjustable font size (80%–150%)",
+  "a11y.s2Item1": "Adjustable font size (80% to 150%)",
   "a11y.s2Item2": "High contrast mode for improved readability",
   "a11y.s2Item3": "Dyslexia-friendly font option",
   "a11y.s2Item4": "Reduced motion mode to minimize animations",
