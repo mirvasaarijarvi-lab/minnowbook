@@ -2180,7 +2180,7 @@ const en: TranslationKeys = {
   "a11y.s4Title": "4. Known Limitations",
   "a11y.s4P1": "While we strive for full accessibility, some third-party components or dynamically loaded content may not yet meet all WCAG 2.1 AA criteria. We are actively working to address these.",
   "a11y.s5Title": "5. Feedback",
-  "a11y.s5P1": "We welcome your feedback on the accessibility of MinnowBook. Please contact us through the Support page if you encounter any barriers or have suggestions for improvement.",
+  "a11y.s5P1": "We welcome your feedback on the accessibility of MimoBook. Please contact us through the Support page if you encounter any barriers or have suggestions for improvement.",
   "a11y.widgetTitle": "Accessibility",
   "a11y.fontSize": "Font size",
   "a11y.highContrast": "High contrast",
