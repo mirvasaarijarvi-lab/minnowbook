@@ -3604,9 +3604,9 @@ const fi: TranslationKeys = {
   "help.guide5Q": "Miten lisään tai muokkaan resursseja?",
   "help.guide5A": "Siirry kohtaan **Hallintapaneeli → Resurssit** luodaksesi huoneita, pöytiä tai tiloja.",
 
-  // MinnowAid
-  "aid.title": "MinnowAid",
-  "aid.subtitle": "Kysy mitä tahansa MinnowBookista",
+  // MimoAid
+  "aid.title": "MimoAid",
+  "aid.subtitle": "Kysy mitä tahansa MimoBookista",
   "aid.myRequests": "Omat pyynnöt",
   "aid.yourRequests": "Lähettämäsi tukipyynnöt",
   "aid.askOrGuide": "Esitä kysymys tai kokeile pikaopasta:",
