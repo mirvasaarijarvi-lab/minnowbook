@@ -5741,7 +5741,7 @@ const sv: TranslationKeys = {
   "support.staffC4": "Planer har en begränsning för personalanvändare och reservationstyper. Uppgradera för att lägga till fler.",
   "support.billingTitle": "Planer och fakturering",
   "support.billingDesc": "Förstå prisnivåer och hantera din prenumeration.",
-  "support.billingC1": "Basic (29 €/mån): 1 reserveringstyp, 1–3 anställda, AI-chatbotsupport.",
+  "support.billingC1": "Basic (29 €/mån): 1 reserveringstyp, 1 till 3 anställda, AI-chatbotsupport.",
   "support.billingC2": "Pro (79 €/mån): Alla reserveringstyper (en per typ), upp till 10 anställda, AI-chatbotsupport.",
   "support.billingC3": "Business (199 €/mån): Alla reserveringstyper och obegränsat antal, obegränsat antal anställda, prioriterad support med 24 timmars svar.",
   "support.billingC4": "Uppgradera eller nedgradera när som helst. Ändringarna träder i kraft nästa faktureringscykel.",
