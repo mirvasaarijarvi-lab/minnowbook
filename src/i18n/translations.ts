@@ -2617,7 +2617,7 @@ const en: TranslationKeys = {
   "support.faqC1": "Q: Can I use my own domain? A: Custom domains are on our roadmap.",
   "support.faqC2": "Q: How do guests receive confirmations? A: Automatically via email when you confirm a booking.",
   "support.faqC3": "Q: Can I export my data? A: Yes, reports can be exported from the Reports panel.",
-  "support.faqC4": "Q: What's the difference between AI chatbot and priority support? A: All plans include MinnowAid, our 24/7 AI chatbot. Business plan adds support requests asked on the platform with a guaranteed 24-hour response.",
+  "support.faqC4": "Q: What's the difference between AI chatbot and priority support? A: All plans include MimoAid, our 24/7 AI chatbot. Business plan adds support requests asked on the platform with a guaranteed 24-hour response.",
   "support.faqC5": "",
   "support.catBasics": "Basics",
   "support.catReservations": "Reservations",
