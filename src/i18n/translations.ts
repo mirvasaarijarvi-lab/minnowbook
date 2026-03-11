@@ -3893,7 +3893,7 @@ const fi: TranslationKeys = {
   "help.describePlaceholder": "Kuvaile pyyntösi...",
   "help.submitToAdmin": "Lähetä ylläpidolle",
   "help.typePlaceholder": "Kirjoita kysymyksesi...",
-  "help.errorNoTenant": "Pyyntöä ei voi lähettää — vuokralaista ei löydy.",
+  "help.errorNoTenant": "Pyyntöä ei voi lähettää. Vuokralaista ei löydy.",
   "help.errorSubmit": "Pyynnön lähettäminen epäonnistui",
   "help.successSubmit": "Tukipyyntö lähetetty",
   "help.errorConnect": "Yhteys ei onnistunut. Yritä uudelleen.",
