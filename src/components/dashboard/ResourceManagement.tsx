@@ -584,6 +584,25 @@ const ResourceManagement = () => {
                   {/* Restaurant service options */}
                   {form.resource_type === "restaurant" && (
                     <div className="space-y-3 rounded-lg border border-border p-3">
+                      <Label className="font-medium text-sm">{t("dashboard.dineInOptions")}</Label>
+                      <div className="flex items-center gap-3">
+                        <Checkbox checked={form.offers_table_reservation} onCheckedChange={(checked) => setForm((prev) => ({ ...prev, offers_table_reservation: !!checked }))} />
+                        <Label className="mb-0 text-sm">{t("dashboard.offersTableReservation")}</Label>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <Checkbox checked={form.offers_quote} onCheckedChange={(checked) => setForm((prev) => ({ ...prev, offers_quote: !!checked }))} />
+                        <Label className="mb-0 text-sm">{t("dashboard.offersQuote")}</Label>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <Checkbox checked={form.offers_set_menu} onCheckedChange={(checked) => setForm((prev) => ({ ...prev, offers_set_menu: !!checked }))} />
+                        <Label className="mb-0 text-sm">{t("dashboard.offersSetMenu")}</Label>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Restaurant additional services */}
+                  {form.resource_type === "restaurant" && (
+                    <div className="space-y-3 rounded-lg border border-border p-3">
                       <Label className="font-medium text-sm">{t("dashboard.serviceOptions")}</Label>
                       <div className="flex items-center gap-3">
                         <Checkbox checked={form.offers_catering} onCheckedChange={(checked) => setForm((prev) => ({ ...prev, offers_catering: !!checked }))} />
