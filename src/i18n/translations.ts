@@ -3916,7 +3916,7 @@ const fi: TranslationKeys = {
   "support.faqC1": "K: Voinko käyttää omaa verkkotunnustani? V: Mukautetut verkkotunnukset ovat jatkokehityssuunnitelmassamme.",
   "support.faqC2": "K: Miten vieraat saavat vahvistukset? V: Automaattisesti sähköpostitse, kun vahvistat varauksen.",
   "support.faqC3": "K: Voinko tulostaa tietoni? V: Kyllä, raportit voi tulostaa Raportit-paneelista.",
-  "support.faqC4": "K: Mitä eroa on tekoälychatbotilla ja prioriteettituella? A: Kaikkiin paketteihin sisältyy MinnowAid, 24/7 toimiva tekoälychatbottimme. Liiketoimintapakettiin lisätään alustalla esitettyihin tukipyyntöihin vuorokauden vastaustakuu.",
+  "support.faqC4": "K: Mitä eroa on tekoälychatbotilla ja prioriteettituella? A: Kaikkiin paketteihin sisältyy MimoAid, 24/7 toimiva tekoälychatbottimme. Liiketoimintapakettiin lisätään alustalla esitettyihin tukipyyntöihin vuorokauden vastaustakuu.",
   "support.faqC5": "",
   "support.catBasics": "Perusteet",
   "support.catReservations": "Varaukset",
