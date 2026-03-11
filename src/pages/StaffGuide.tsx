@@ -1123,7 +1123,7 @@ const StaffGuide = () => {
 
         {/* Footer for print */}
         <div className="hidden print:block mt-8 pt-4 border-t text-center text-xs text-gray-500">
-          MimoBook – {content.title} – {new Date().toLocaleDateString(guideLang === "fi" ? "fi-FI" : guideLang === "sv" ? "sv-SE" : "en-GB")}
+          MimmoBook – {content.title} – {new Date().toLocaleDateString(guideLang === "fi" ? "fi-FI" : guideLang === "sv" ? "sv-SE" : "en-GB")}
         </div>
       </main>
     </div>
