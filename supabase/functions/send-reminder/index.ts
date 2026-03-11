@@ -156,16 +156,25 @@ function getDL(lang: string) {
   return detailLabels[lang] || detailLabels.en;
 }
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 function replaceVars(text: string, reservation: any, businessName: string): string {
   return text
-    .replace(/\{\{guest_name\}\}/g, reservation.guest_name || "")
-    .replace(/\{\{guest_email\}\}/g, reservation.guest_email || "")
-    .replace(/\{\{date\}\}/g, reservation.date || "")
-    .replace(/\{\{start_time\}\}/g, reservation.start_time?.slice(0, 5) || "")
-    .replace(/\{\{reservation_type\}\}/g, reservation.reservation_type || "")
-    .replace(/\{\{guests_count\}\}/g, String(reservation.guests_count || ""))
-    .replace(/\{\{price_eur\}\}/g, reservation.price_eur != null ? Number(reservation.price_eur).toFixed(2) : "")
-    .replace(/\{\{business_name\}\}/g, businessName);
+    .replace(/\{\{guest_name\}\}/g, escapeHtml(reservation.guest_name || ""))
+    .replace(/\{\{guest_email\}\}/g, escapeHtml(reservation.guest_email || ""))
+    .replace(/\{\{date\}\}/g, escapeHtml(reservation.date || ""))
+    .replace(/\{\{start_time\}\}/g, escapeHtml(reservation.start_time?.slice(0, 5) || ""))
+    .replace(/\{\{reservation_type\}\}/g, escapeHtml(reservation.reservation_type || ""))
+    .replace(/\{\{guests_count\}\}/g, escapeHtml(String(reservation.guests_count || "")))
+    .replace(/\{\{price_eur\}\}/g, escapeHtml(reservation.price_eur != null ? Number(reservation.price_eur).toFixed(2) : ""))
+    .replace(/\{\{business_name\}\}/g, escapeHtml(businessName));
 }
 
 function buildEmailHtml(reservation: any, business: any, lang: string, emailType: string, customBody?: string, customMessage?: string): string {
