@@ -3462,6 +3462,9 @@ const fi: TranslationKeys = {
   "signup.creatingAccount": "Luodaan tiliä...",
   "signup.alreadyHaveAccount": "Onko sinulla jo tili?",
   "signup.accountCreated": "Tili luotu! Tarkista sähköpostisi ja vahvista tilisi ennen kirjautumista.",
+  "signup.orContinueWith": "Tai rekisteröidy palvelulla",
+  "signup.continueGoogle": "Rekisteröidy Googlella",
+  "signup.continueApple": "Rekisteröidy Applella",
 
   // Forgot password
   "forgot.title": "Nollaa salasanasi",
