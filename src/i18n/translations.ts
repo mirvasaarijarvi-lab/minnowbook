@@ -4922,6 +4922,9 @@ const sv: TranslationKeys = {
   "login.forgotPassword": "Glömt lösenord?",
   "login.noAccount": "Har du inget konto?",
   "login.loggingIn": "Loggar in...",
+  "login.orContinueWith": "Eller fortsätt med",
+  "login.continueGoogle": "Fortsätt med Google",
+  "login.continueApple": "Fortsätt med Apple",
 
   // Signup
   "signup.title": "Skapa ditt konto",
