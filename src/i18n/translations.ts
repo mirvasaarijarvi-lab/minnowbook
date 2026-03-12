@@ -3445,6 +3445,9 @@ const fi: TranslationKeys = {
   "login.forgotPassword": "Unohditko salasanan?",
   "login.noAccount": "Eikö sinulla ole tiliä?",
   "login.loggingIn": "Kirjaudutaan...",
+  "login.orContinueWith": "Tai jatka palvelulla",
+  "login.continueGoogle": "Jatka Googlella",
+  "login.continueApple": "Jatka Applella",
 
   // Signup
   "signup.title": "Luo tilisi",
