@@ -4942,6 +4942,9 @@ const sv: TranslationKeys = {
   "signup.creatingAccount": "Skapar konto...",
   "signup.alreadyHaveAccount": "Har du redan ett konto?",
   "signup.accountCreated": "Konto skapat! Kontrollera din e-post för att verifiera kontot innan du loggar in.",
+  "signup.orContinueWith": "Eller registrera med",
+  "signup.continueGoogle": "Registrera med Google",
+  "signup.continueApple": "Registrera med Apple",
 
   // Forgot password
   "forgot.title": "Återställ ditt lösenord",
