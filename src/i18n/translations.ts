@@ -468,6 +468,9 @@ type TranslationKeys = {
   "login.forgotPassword": string;
   "login.noAccount": string;
   "login.loggingIn": string;
+  "login.orContinueWith": string;
+  "login.continueGoogle": string;
+  "login.continueApple": string;
 
   // Signup
   "signup.title": string;
@@ -479,6 +482,9 @@ type TranslationKeys = {
   "signup.creatingAccount": string;
   "signup.alreadyHaveAccount": string;
   "signup.accountCreated": string;
+  "signup.orContinueWith": string;
+  "signup.continueGoogle": string;
+  "signup.continueApple": string;
 
   // Forgot password
   "forgot.title": string;
@@ -1961,6 +1967,9 @@ const en: TranslationKeys = {
   "login.forgotPassword": "Forgot password?",
   "login.noAccount": "Don't have an account?",
   "login.loggingIn": "Logging in...",
+  "login.orContinueWith": "Or continue with",
+  "login.continueGoogle": "Continue with Google",
+  "login.continueApple": "Continue with Apple",
 
   // Signup
   "signup.title": "Create your account",
@@ -1972,6 +1981,9 @@ const en: TranslationKeys = {
   "signup.creatingAccount": "Creating account...",
   "signup.alreadyHaveAccount": "Already have an account?",
   "signup.accountCreated": "Account created! Please check your email to verify your account before logging in.",
+  "signup.orContinueWith": "Or sign up with",
+  "signup.continueGoogle": "Sign up with Google",
+  "signup.continueApple": "Sign up with Apple",
 
   // Forgot password
   "forgot.title": "Reset your password",
@@ -3436,6 +3448,9 @@ const fi: TranslationKeys = {
   "login.forgotPassword": "Unohditko salasanan?",
   "login.noAccount": "Eikö sinulla ole tiliä?",
   "login.loggingIn": "Kirjaudutaan...",
+  "login.orContinueWith": "Tai jatka palvelulla",
+  "login.continueGoogle": "Jatka Googlella",
+  "login.continueApple": "Jatka Applella",
 
   // Signup
   "signup.title": "Luo tilisi",
@@ -3447,6 +3462,9 @@ const fi: TranslationKeys = {
   "signup.creatingAccount": "Luodaan tiliä...",
   "signup.alreadyHaveAccount": "Onko sinulla jo tili?",
   "signup.accountCreated": "Tili luotu! Tarkista sähköpostisi ja vahvista tilisi ennen kirjautumista.",
+  "signup.orContinueWith": "Tai rekisteröidy palvelulla",
+  "signup.continueGoogle": "Rekisteröidy Googlella",
+  "signup.continueApple": "Rekisteröidy Applella",
 
   // Forgot password
   "forgot.title": "Nollaa salasanasi",
@@ -4910,6 +4928,9 @@ const sv: TranslationKeys = {
   "login.forgotPassword": "Glömt lösenord?",
   "login.noAccount": "Har du inget konto?",
   "login.loggingIn": "Loggar in...",
+  "login.orContinueWith": "Eller fortsätt med",
+  "login.continueGoogle": "Fortsätt med Google",
+  "login.continueApple": "Fortsätt med Apple",
 
   // Signup
   "signup.title": "Skapa ditt konto",
@@ -4921,6 +4942,9 @@ const sv: TranslationKeys = {
   "signup.creatingAccount": "Skapar konto...",
   "signup.alreadyHaveAccount": "Har du redan ett konto?",
   "signup.accountCreated": "Konto skapat! Kontrollera din e-post för att verifiera kontot innan du loggar in.",
+  "signup.orContinueWith": "Eller registrera med",
+  "signup.continueGoogle": "Registrera med Google",
+  "signup.continueApple": "Registrera med Apple",
 
   // Forgot password
   "forgot.title": "Återställ ditt lösenord",
