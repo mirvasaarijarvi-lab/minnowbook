@@ -468,6 +468,9 @@ type TranslationKeys = {
   "login.forgotPassword": string;
   "login.noAccount": string;
   "login.loggingIn": string;
+  "login.orContinueWith": string;
+  "login.continueGoogle": string;
+  "login.continueApple": string;
 
   // Signup
   "signup.title": string;
