@@ -1981,6 +1981,9 @@ const en: TranslationKeys = {
   "signup.creatingAccount": "Creating account...",
   "signup.alreadyHaveAccount": "Already have an account?",
   "signup.accountCreated": "Account created! Please check your email to verify your account before logging in.",
+  "signup.orContinueWith": "Or sign up with",
+  "signup.continueGoogle": "Sign up with Google",
+  "signup.continueApple": "Sign up with Apple",
 
   // Forgot password
   "forgot.title": "Reset your password",
