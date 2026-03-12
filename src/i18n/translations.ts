@@ -1967,6 +1967,9 @@ const en: TranslationKeys = {
   "login.forgotPassword": "Forgot password?",
   "login.noAccount": "Don't have an account?",
   "login.loggingIn": "Logging in...",
+  "login.orContinueWith": "Or continue with",
+  "login.continueGoogle": "Continue with Google",
+  "login.continueApple": "Continue with Apple",
 
   // Signup
   "signup.title": "Create your account",
