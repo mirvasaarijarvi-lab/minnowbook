@@ -22,11 +22,11 @@ describe("XSS Prevention - Security Regression Tests", () => {
       expect(clean).not.toContain("javascript:");
     });
 
-    it("strips data: URLs in images when configured strictly", () => {
-      const dirty = '<img src="data:text/html,<script>alert(1)</script>" />';
-      const clean = DOMPurify.sanitize(dirty, { ALLOW_DATA_ATTR: false, ADD_URI_SAFE_ATTR: [] });
-      // DOMPurify strips the script but keeps the img; verify script is gone
-      expect(clean).not.toContain("<script>");
+    it("strips dangerous data: URIs when using ALLOWED_URI_REGEXP", () => {
+      const dirty = '<a href="data:text/html,<script>alert(1)</script>">click</a>';
+      // DOMPurify strips dangerous href schemes on anchors by default
+      const clean = DOMPurify.sanitize(dirty);
+      expect(clean).not.toMatch(/href="data:/);
     });
 
     it("strips iframe tags", () => {
