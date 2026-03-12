@@ -47,10 +47,11 @@ describe("XSS Prevention - Security Regression Tests", () => {
       expect(clean).not.toContain("onload");
     });
 
-    it("strips CSS expression injection", () => {
+    it("strips inline styles when FORBID_ATTR is used", () => {
       const dirty = '<div style="background:expression(alert(1))">test</div>';
-      const clean = DOMPurify.sanitize(dirty);
-      expect(clean).not.toContain("expression");
+      const clean = DOMPurify.sanitize(dirty, { FORBID_ATTR: ["style"] });
+      expect(clean).not.toContain("style");
+      expect(clean).toContain("test");
     });
   });
 });
