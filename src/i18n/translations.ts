@@ -482,6 +482,9 @@ type TranslationKeys = {
   "signup.creatingAccount": string;
   "signup.alreadyHaveAccount": string;
   "signup.accountCreated": string;
+  "signup.orContinueWith": string;
+  "signup.continueGoogle": string;
+  "signup.continueApple": string;
 
   // Forgot password
   "forgot.title": string;
