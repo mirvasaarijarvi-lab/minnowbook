@@ -84,7 +84,7 @@ const Signup = () => {
         </div>
       </div>
 
-      <div className="flex-1 flex items-center justify-center p-8">
+      <div className="flex-1 flex items-start sm:items-center justify-center px-5 py-6 sm:p-8 overflow-y-auto">
         <div className="w-full max-w-md">
           <div className="flex items-center justify-between mb-8">
             <div className="lg:hidden">

@@ -96,7 +96,7 @@ const Index = () => {
       <MarketingHeader />
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden py-24 md:py-32">
+      <section className="relative overflow-hidden py-16 sm:py-24 md:py-32">
         <div className="absolute inset-0">
           <img src={heroBg} alt="" className="w-full h-full object-cover" aria-hidden="true" />
           <div className="absolute inset-0 bg-gradient-to-b from-primary/60 via-primary/30 to-primary/60" />

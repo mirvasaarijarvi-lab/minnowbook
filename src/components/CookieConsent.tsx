@@ -30,15 +30,17 @@ const CookieConsent = forwardRef<HTMLDivElement>(function CookieConsent(_props, 
 
   return (
     <div ref={ref} className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] w-[calc(100%-2rem)] max-w-xl animate-fade-up">
-      <div className="bg-card border border-border rounded-xl shadow-lg p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4">
-        <Shield className="h-5 w-5 text-accent shrink-0 mt-0.5 sm:mt-0" />
-        <p className="text-sm text-muted-foreground leading-relaxed flex-1">
-          {t("cookie.message")}{" "}
-          <Link to="/privacy" className="text-accent hover:underline font-medium">
-            {t("cookie.privacyPolicy")}
-          </Link>
-        </p>
-        <div className="flex items-center gap-2 shrink-0">
+      <div className="bg-card border border-border rounded-xl shadow-lg p-4 sm:p-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+        <div className="flex items-start gap-3 flex-1 min-w-0">
+          <Shield className="h-5 w-5 text-accent shrink-0 mt-0.5" />
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            {t("cookie.message")}{" "}
+            <Link to="/privacy" className="text-accent hover:underline font-medium">
+              {t("cookie.privacyPolicy")}
+            </Link>
+          </p>
+        </div>
+        <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
           <Button variant="outline" size="sm" onClick={handleReject}>
             {t("cookie.reject")}
           </Button>
