@@ -1046,6 +1046,18 @@ const guideContent: Record<Language, GuideContent> = {
         ],
         tip: "Inte på Business-planen? Du ser en uppgraderingsuppmaning i Inställningar.",
       },
+      {
+        icon: <Archive className="h-6 w-6" />, mockupId: "archive",
+        title: "12. Automatisk arkivering",
+        steps: [
+          "Bokningar som är markerade som både 'Använd' och 'Fakturerad' arkiveras automatiskt efter 30 dagar.",
+          "Arkiverade bokningar flyttas till ett separat arkiv och tas bort från den aktiva bokningslistan.",
+          "Du kan fortfarande visa arkiverade bokningar — alla ursprungliga detaljer bevaras.",
+          "Arkiverade poster raderas permanent efter 400 dagar för att hålla lagringen ren.",
+          "Arkiveringsprocessen körs automatiskt varje natt — ingen manuell åtgärd behövs.",
+        ],
+        tip: "Se till att markera bokningar som både 'Använd' och 'Fakturerad' innan de kvalificerar för arkivering.",
+      },
     ],
   },
 };
