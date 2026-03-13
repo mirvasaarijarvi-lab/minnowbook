@@ -7,7 +7,7 @@ import {
   Printer, ArrowLeft, Home, Calendar, ClipboardList, BarChart3,
   Users, LogIn, Shield, Check, X, Lock, Pencil, Trash2, Search,
   Download, KeyRound, Settings, LifeBuoy, BookOpen, Building2, MapPin,
-  Zap, Crown, Bell, Keyboard, UserCircle, Upload,
+  Zap, Crown, Bell, Keyboard, UserCircle, Upload, Archive,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -612,6 +612,18 @@ const guideContent: Record<Language, GuideContent> = {
         ],
         tip: "Not on Business plan? You'll see an upgrade prompt in Settings.",
       },
+      {
+        icon: <Archive className="h-6 w-6" />, mockupId: "archive",
+        title: "12. Automatic Archiving",
+        steps: [
+          "Reservations that are both marked as 'Used' and 'Invoiced' are automatically archived after 30 days.",
+          "Archived reservations are moved to a separate archive and removed from the active reservation list.",
+          "You can still view archived reservations — they retain all original details for reference.",
+          "Archived items are permanently deleted after 400 days to keep storage clean.",
+          "The archiving process runs automatically every night — no manual action is needed.",
+        ],
+        tip: "Make sure to mark reservations as both 'Used' and 'Invoiced' before they qualify for archiving.",
+      },
     ],
   },
   fi: {
@@ -817,6 +829,18 @@ const guideContent: Record<Language, GuideContent> = {
         ],
         tip: "Ei Business-tilausta? Päivityskehote näkyy Asetuksissa.",
       },
+      {
+        icon: <Archive className="h-6 w-6" />, mockupId: "archive",
+        title: "12. Automaattinen arkistointi",
+        steps: [
+          "Varaukset, jotka on merkitty sekä 'Käytetty' että 'Laskutettu', arkistoidaan automaattisesti 30 päivän jälkeen.",
+          "Arkistoidut varaukset siirretään erilliseen arkistoon ja poistetaan aktiivisesta varauslistasta.",
+          "Voit silti tarkastella arkistoituja varauksia — kaikki alkuperäiset tiedot säilyvät.",
+          "Arkistoidut kohteet poistetaan pysyvästi 400 päivän jälkeen tallennustilan säästämiseksi.",
+          "Arkistointiprosessi suoritetaan automaattisesti joka yö — manuaalisia toimenpiteitä ei tarvita.",
+        ],
+        tip: "Varmista, että varaukset on merkitty sekä 'Käytetty' että 'Laskutettu' ennen kuin ne siirtyvät arkistoon.",
+      },
     ],
   },
   sv: {
@@ -1021,6 +1045,18 @@ const guideContent: Record<Language, GuideContent> = {
           "Den publika bokningssidan anpassas för att visa resurser för den valda platsen via ?site= parameter.",
         ],
         tip: "Inte på Business-planen? Du ser en uppgraderingsuppmaning i Inställningar.",
+      },
+      {
+        icon: <Archive className="h-6 w-6" />, mockupId: "archive",
+        title: "12. Automatisk arkivering",
+        steps: [
+          "Bokningar som är markerade som både 'Använd' och 'Fakturerad' arkiveras automatiskt efter 30 dagar.",
+          "Arkiverade bokningar flyttas till ett separat arkiv och tas bort från den aktiva bokningslistan.",
+          "Du kan fortfarande visa arkiverade bokningar — alla ursprungliga detaljer bevaras.",
+          "Arkiverade poster raderas permanent efter 400 dagar för att hålla lagringen ren.",
+          "Arkiveringsprocessen körs automatiskt varje natt — ingen manuell åtgärd behövs.",
+        ],
+        tip: "Se till att markera bokningar som både 'Använd' och 'Fakturerad' innan de kvalificerar för arkivering.",
       },
     ],
   },
