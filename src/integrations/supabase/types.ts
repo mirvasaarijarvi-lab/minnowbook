@@ -14,6 +14,211 @@ export type Database = {
   }
   public: {
     Tables: {
+      archived_reservations: {
+        Row: {
+          accommodation_needed: boolean | null
+          acknowledgment_email_sent_at: string | null
+          archived_at: string
+          breakfast_included: boolean | null
+          breakfast_price_per_person: number | null
+          cancellation_email_sent_at: string | null
+          catering_needed: boolean | null
+          check_out_date: string | null
+          confirmation_email_sent_at: string | null
+          created_at: string | null
+          created_by: string | null
+          date: string
+          delivery_address: string | null
+          dietary_notes: string | null
+          discount_code_id: string | null
+          discount_reason: string | null
+          discount_type: string | null
+          discount_value: number | null
+          electricity_needed: boolean | null
+          end_time: string | null
+          equipment_needed: boolean | null
+          estimated_guests: number | null
+          event_type: string | null
+          festival_name: string | null
+          food_permits: string | null
+          guest_email: string
+          guest_name: string
+          guest_phone: string | null
+          guests_count: number | null
+          id: string
+          internal_notes: string | null
+          is_checked_in: boolean | null
+          is_invoiced: boolean | null
+          is_used: boolean | null
+          language: string | null
+          no_email_ack: boolean | null
+          no_email_cancel: boolean | null
+          no_email_confirm: boolean | null
+          original_price_eur: number | null
+          original_reservation_id: string
+          price_eur: number | null
+          pricing_details: string | null
+          pricing_type: string | null
+          reminder_email_sent_at: string | null
+          reservation_type: string
+          restaurant_sub_type: string | null
+          room_type: string | null
+          site_id: string | null
+          special_requests: string | null
+          staff_needed: boolean | null
+          staff_notes: string | null
+          stall_fee: number | null
+          stall_size: string | null
+          start_time: string | null
+          status: string | null
+          tenant_id: string
+          updated_at: string | null
+          water_needed: boolean | null
+        }
+        Insert: {
+          accommodation_needed?: boolean | null
+          acknowledgment_email_sent_at?: string | null
+          archived_at?: string
+          breakfast_included?: boolean | null
+          breakfast_price_per_person?: number | null
+          cancellation_email_sent_at?: string | null
+          catering_needed?: boolean | null
+          check_out_date?: string | null
+          confirmation_email_sent_at?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          date: string
+          delivery_address?: string | null
+          dietary_notes?: string | null
+          discount_code_id?: string | null
+          discount_reason?: string | null
+          discount_type?: string | null
+          discount_value?: number | null
+          electricity_needed?: boolean | null
+          end_time?: string | null
+          equipment_needed?: boolean | null
+          estimated_guests?: number | null
+          event_type?: string | null
+          festival_name?: string | null
+          food_permits?: string | null
+          guest_email: string
+          guest_name: string
+          guest_phone?: string | null
+          guests_count?: number | null
+          id?: string
+          internal_notes?: string | null
+          is_checked_in?: boolean | null
+          is_invoiced?: boolean | null
+          is_used?: boolean | null
+          language?: string | null
+          no_email_ack?: boolean | null
+          no_email_cancel?: boolean | null
+          no_email_confirm?: boolean | null
+          original_price_eur?: number | null
+          original_reservation_id: string
+          price_eur?: number | null
+          pricing_details?: string | null
+          pricing_type?: string | null
+          reminder_email_sent_at?: string | null
+          reservation_type: string
+          restaurant_sub_type?: string | null
+          room_type?: string | null
+          site_id?: string | null
+          special_requests?: string | null
+          staff_needed?: boolean | null
+          staff_notes?: string | null
+          stall_fee?: number | null
+          stall_size?: string | null
+          start_time?: string | null
+          status?: string | null
+          tenant_id: string
+          updated_at?: string | null
+          water_needed?: boolean | null
+        }
+        Update: {
+          accommodation_needed?: boolean | null
+          acknowledgment_email_sent_at?: string | null
+          archived_at?: string
+          breakfast_included?: boolean | null
+          breakfast_price_per_person?: number | null
+          cancellation_email_sent_at?: string | null
+          catering_needed?: boolean | null
+          check_out_date?: string | null
+          confirmation_email_sent_at?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          date?: string
+          delivery_address?: string | null
+          dietary_notes?: string | null
+          discount_code_id?: string | null
+          discount_reason?: string | null
+          discount_type?: string | null
+          discount_value?: number | null
+          electricity_needed?: boolean | null
+          end_time?: string | null
+          equipment_needed?: boolean | null
+          estimated_guests?: number | null
+          event_type?: string | null
+          festival_name?: string | null
+          food_permits?: string | null
+          guest_email?: string
+          guest_name?: string
+          guest_phone?: string | null
+          guests_count?: number | null
+          id?: string
+          internal_notes?: string | null
+          is_checked_in?: boolean | null
+          is_invoiced?: boolean | null
+          is_used?: boolean | null
+          language?: string | null
+          no_email_ack?: boolean | null
+          no_email_cancel?: boolean | null
+          no_email_confirm?: boolean | null
+          original_price_eur?: number | null
+          original_reservation_id?: string
+          price_eur?: number | null
+          pricing_details?: string | null
+          pricing_type?: string | null
+          reminder_email_sent_at?: string | null
+          reservation_type?: string
+          restaurant_sub_type?: string | null
+          room_type?: string | null
+          site_id?: string | null
+          special_requests?: string | null
+          staff_needed?: boolean | null
+          staff_notes?: string | null
+          stall_fee?: number | null
+          stall_size?: string | null
+          start_time?: string | null
+          status?: string | null
+          tenant_id?: string
+          updated_at?: string | null
+          water_needed?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "archived_reservations_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "archived_reservations_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "archived_reservations_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_log: {
         Row: {
           action: string
