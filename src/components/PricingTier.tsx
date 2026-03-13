@@ -53,11 +53,11 @@ const PricingTier = ({
   return (
     <div
       className={cn(
-        "relative flex flex-col rounded-2xl border p-8 transition-all duration-300 hover:shadow-hover",
+        "relative flex flex-col rounded-2xl border p-6 sm:p-8 transition-all duration-300 hover:shadow-hover",
         loading
-          ? "border-accent ring-2 ring-accent/40 shadow-hero scale-[1.02] bg-accent/5"
+          ? "border-accent ring-2 ring-accent/40 shadow-hero md:scale-[1.02] bg-accent/5"
           : isPopular
-            ? "border-accent shadow-hero scale-[1.02] bg-card"
+            ? "border-accent shadow-hero md:scale-[1.02] bg-card"
             : "border-border shadow-card bg-card"
       )}
       style={{ animationDelay: `${delay}ms` }}

@@ -71,7 +71,7 @@ const MarketingFooter = () => {
           </div>
         </div>
 
-        <div className="border-t border-primary-foreground/10 mt-10 pt-6 text-center">
+        <div className="border-t border-primary-foreground/10 mt-10 pt-6 pb-16 sm:pb-0 text-center">
           <p className="text-xs text-primary-foreground/40">
             © {new Date().getFullYear()} MimmoBook. {t("footer.allRightsReserved")}
           </p>
