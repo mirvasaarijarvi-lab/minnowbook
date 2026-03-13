@@ -829,6 +829,18 @@ const guideContent: Record<Language, GuideContent> = {
         ],
         tip: "Ei Business-tilausta? Päivityskehote näkyy Asetuksissa.",
       },
+      {
+        icon: <Archive className="h-6 w-6" />, mockupId: "archive",
+        title: "12. Automaattinen arkistointi",
+        steps: [
+          "Varaukset, jotka on merkitty sekä 'Käytetty' että 'Laskutettu', arkistoidaan automaattisesti 30 päivän jälkeen.",
+          "Arkistoidut varaukset siirretään erilliseen arkistoon ja poistetaan aktiivisesta varauslistasta.",
+          "Voit silti tarkastella arkistoituja varauksia — kaikki alkuperäiset tiedot säilyvät.",
+          "Arkistoidut kohteet poistetaan pysyvästi 400 päivän jälkeen tallennustilan säästämiseksi.",
+          "Arkistointiprosessi suoritetaan automaattisesti joka yö — manuaalisia toimenpiteitä ei tarvita.",
+        ],
+        tip: "Varmista, että varaukset on merkitty sekä 'Käytetty' että 'Laskutettu' ennen kuin ne siirtyvät arkistoon.",
+      },
     ],
   },
   sv: {
