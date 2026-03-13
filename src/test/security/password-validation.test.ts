@@ -1,5 +1,14 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, afterEach, vi } from "vitest";
 import { validatePasswordSync, checkPasswordBreach, MIN_LENGTH } from "@/lib/password-validation";
+
+async function sha1Hex(input: string): Promise<string> {
+  const data = new TextEncoder().encode(input);
+  const hashBuffer = await crypto.subtle.digest("SHA-1", data);
+  return Array.from(new Uint8Array(hashBuffer))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("")
+    .toUpperCase();
+}
 
 describe("Password Validation - Security Regression Tests", () => {
   describe("validatePasswordSync", () => {
@@ -52,7 +61,19 @@ describe("Password Validation - Security Regression Tests", () => {
   });
 
   describe("checkPasswordBreach (k-anonymity)", () => {
+    const originalFetch = globalThis.fetch;
+
+    afterEach(() => {
+      globalThis.fetch = originalFetch;
+      vi.restoreAllMocks();
+    });
+
     it("returns breach info object with correct shape", async () => {
+      globalThis.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        text: async () => "",
+      } as Response);
+
       const result = await checkPasswordBreach("test-password-12345");
       expect(result).toHaveProperty("isBreached");
       expect(result).toHaveProperty("count");
@@ -61,15 +82,31 @@ describe("Password Validation - Security Regression Tests", () => {
     });
 
     it("detects commonly breached password 'password'", async () => {
+      const hash = await sha1Hex("password");
+      const suffix = hash.slice(5);
+
+      globalThis.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        text: async () => `${suffix}:99999\nABCDEF1234567890:1`,
+      } as Response);
+
       const result = await checkPasswordBreach("password");
       expect(result.isBreached).toBe(true);
       expect(result.count).toBeGreaterThan(0);
     });
 
     it("only sends 5-char SHA-1 prefix (k-anonymity guarantee)", async () => {
-      // Verify the function works without exposing the full hash
-      const result = await checkPasswordBreach("UniqueP@ss_" + Date.now());
-      expect(result).toHaveProperty("isBreached");
+      const fetchMock = vi.fn().mockResolvedValue({
+        ok: true,
+        text: async () => "",
+      } as Response);
+      globalThis.fetch = fetchMock;
+
+      await checkPasswordBreach("UniqueP@ss_Regression");
+
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      const requestedUrl = String(fetchMock.mock.calls[0][0]);
+      expect(requestedUrl).toMatch(/^https:\/\/api\.pwnedpasswords\.com\/range\/[A-F0-9]{5}$/);
     });
   });
 });
