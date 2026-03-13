@@ -3,7 +3,10 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
+    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+  "X-Content-Type-Options": "nosniff",
+  "X-Frame-Options": "DENY",
+  "Referrer-Policy": "strict-origin-when-cross-origin",
 };
 
 Deno.serve(async (req) => {
@@ -12,10 +15,51 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-    );
+    // Authorize: only service_role (cron) or authenticated system admins
+    const authHeader = req.headers.get("Authorization");
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+
+    // Check if caller is using the service role key (cron job)
+    const isServiceRole = authHeader === `Bearer ${serviceRoleKey}`;
+
+    if (!isServiceRole) {
+      // Check if caller is an authenticated system admin
+      if (!authHeader) {
+        return new Response(
+          JSON.stringify({ error: "Not authorized" }),
+          { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      const userClient = createClient(supabaseUrl, anonKey, {
+        global: { headers: { Authorization: authHeader } },
+      });
+      const { data: { user }, error: authError } = await userClient.auth.getUser();
+      if (authError || !user) {
+        return new Response(
+          JSON.stringify({ error: "Not authorized" }),
+          { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      const adminClient = createClient(supabaseUrl, serviceRoleKey);
+      const { data: sysAdmin } = await adminClient
+        .from("system_admins")
+        .select("id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (!sysAdmin) {
+        return new Response(
+          JSON.stringify({ error: "Insufficient permissions" }),
+          { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
+
+    const supabase = createClient(supabaseUrl, serviceRoleKey);
 
     const now = new Date();
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
@@ -58,11 +102,10 @@ Deno.serve(async (req) => {
     const archiveRecords = toArchive.map((r) => ({
       ...r,
       original_reservation_id: r.id,
-      id: undefined, // let the archive table generate its own id
+      id: undefined,
       archived_at: now.toISOString(),
     }));
 
-    // Remove undefined id fields and let DB generate them
     const cleanRecords = archiveRecords.map(({ id, ...rest }) => rest);
 
     const { error: insertError } = await supabase
@@ -73,10 +116,9 @@ Deno.serve(async (req) => {
       throw new Error(`Archive insert error: ${insertError.message}`);
     }
 
-    // Step 4: Delete originals
+    // Step 4: Delete originals in batches
     const idsToDelete = toArchive.map((r) => r.id);
 
-    // Delete in batches of 100 to avoid query size limits
     for (let i = 0; i < idsToDelete.length; i += 100) {
       const batch = idsToDelete.slice(i, i + 100);
       const { error: deleteError } = await supabase
