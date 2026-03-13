@@ -612,6 +612,18 @@ const guideContent: Record<Language, GuideContent> = {
         ],
         tip: "Not on Business plan? You'll see an upgrade prompt in Settings.",
       },
+      {
+        icon: <Archive className="h-6 w-6" />, mockupId: "archive",
+        title: "12. Automatic Archiving",
+        steps: [
+          "Reservations that are both marked as 'Used' and 'Invoiced' are automatically archived after 30 days.",
+          "Archived reservations are moved to a separate archive and removed from the active reservation list.",
+          "You can still view archived reservations — they retain all original details for reference.",
+          "Archived items are permanently deleted after 400 days to keep storage clean.",
+          "The archiving process runs automatically every night — no manual action is needed.",
+        ],
+        tip: "Make sure to mark reservations as both 'Used' and 'Invoiced' before they qualify for archiving.",
+      },
     ],
   },
   fi: {
