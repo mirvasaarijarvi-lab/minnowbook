@@ -13,3 +13,5 @@ project_id = "lsgznskkxadplwnxplhd"
     verify_jwt = false
   [functions.support-chat]
     verify_jwt = false
+  [functions.archive-reservations]
+    verify_jwt = false
