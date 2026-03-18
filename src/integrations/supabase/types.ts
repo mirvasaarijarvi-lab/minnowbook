@@ -14,6 +14,121 @@ export type Database = {
   }
   public: {
     Tables: {
+      access_code_redemptions: {
+        Row: {
+          access_code_id: string
+          granted_tier: string
+          granted_until: string
+          id: string
+          is_active: boolean
+          redeemed_at: string
+          redeemed_by: string
+          revoked_at: string | null
+          tenant_id: string
+        }
+        Insert: {
+          access_code_id: string
+          granted_tier: string
+          granted_until: string
+          id?: string
+          is_active?: boolean
+          redeemed_at?: string
+          redeemed_by: string
+          revoked_at?: string | null
+          tenant_id: string
+        }
+        Update: {
+          access_code_id?: string
+          granted_tier?: string
+          granted_until?: string
+          id?: string
+          is_active?: boolean
+          redeemed_at?: string
+          redeemed_by?: string
+          revoked_at?: string | null
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "access_code_redemptions_access_code_id_fkey"
+            columns: ["access_code_id"]
+            isOneToOne: false
+            referencedRelation: "access_codes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "access_code_redemptions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "access_code_redemptions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      access_codes: {
+        Row: {
+          code: string
+          created_at: string
+          created_by: string
+          description: string | null
+          duration_days: number
+          id: string
+          is_active: boolean
+          is_revoked: boolean
+          max_uses: number | null
+          revoked_at: string | null
+          revoked_reason: string | null
+          tier: string
+          updated_at: string
+          used_count: number
+          valid_from: string | null
+          valid_until: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          created_by: string
+          description?: string | null
+          duration_days?: number
+          id?: string
+          is_active?: boolean
+          is_revoked?: boolean
+          max_uses?: number | null
+          revoked_at?: string | null
+          revoked_reason?: string | null
+          tier?: string
+          updated_at?: string
+          used_count?: number
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          duration_days?: number
+          id?: string
+          is_active?: boolean
+          is_revoked?: boolean
+          max_uses?: number | null
+          revoked_at?: string | null
+          revoked_reason?: string | null
+          tier?: string
+          updated_at?: string
+          used_count?: number
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Relationships: []
+      }
       archived_reservations: {
         Row: {
           accommodation_needed: boolean | null
