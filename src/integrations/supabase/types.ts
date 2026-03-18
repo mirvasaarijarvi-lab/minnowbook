@@ -388,6 +388,51 @@ export type Database = {
           },
         ]
       }
+      beta_feedback: {
+        Row: {
+          comment: string | null
+          created_at: string
+          id: string
+          page_context: string | null
+          rating: number
+          tenant_id: string
+          user_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          page_context?: string | null
+          rating: number
+          tenant_id: string
+          user_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          page_context?: string | null
+          rating?: number
+          tenant_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "beta_feedback_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "beta_feedback_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       blocked_slots: {
         Row: {
           approval_status: string
