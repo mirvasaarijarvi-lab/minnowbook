@@ -79,7 +79,7 @@ Deno.serve(async (req) => {
       throw new Error("This access code has reached its maximum number of uses");
     }
 
-    // Check if this tenant already redeemed this code
+    // Check if this user already redeemed this code for their tenant
     const { data: existing } = await adminClient
       .from("access_code_redemptions")
       .select("id")
