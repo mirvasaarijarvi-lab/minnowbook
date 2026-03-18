@@ -427,6 +427,9 @@ const Superadmin = () => {
             )}
           </CardContent>
         </Card>
+
+        {/* Access Codes */}
+        <AccessCodesPanel />
       </main>
 
       {/* Edit dialog */}
