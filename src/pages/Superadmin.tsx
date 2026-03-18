@@ -431,6 +431,9 @@ const Superadmin = () => {
 
         {/* Access Codes */}
         <AccessCodesPanel />
+
+        {/* Beta Feedback */}
+        <BetaFeedbackPanel />
       </main>
 
       {/* Edit dialog */}

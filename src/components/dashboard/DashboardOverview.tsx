@@ -442,6 +442,9 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
 
       {/* Auto Reminder Status */}
       {(isOwner || isAdmin) && <AutoReminderStatus />}
+
+      {/* Beta Feedback Card */}
+      <BetaFeedbackCard />
     </div>
   );
 };
