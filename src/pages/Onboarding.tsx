@@ -289,6 +289,21 @@ const Onboarding = () => {
             </div>
           )}
 
+          {/* Access code redemption - shown on branding step */}
+          {step === 2 && (
+            <Card className="mt-4">
+              <CardContent className="pt-6">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Zap className="h-4 w-4 text-accent" />
+                    <p className="text-sm font-medium text-foreground">Have a beta access code?</p>
+                  </div>
+                  <p className="text-xs text-muted-foreground">You can redeem it after creating your workspace in Settings.</p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           <div className="flex justify-between mt-8">
             <Button variant="outline" onClick={() => setStep((s) => s - 1)} disabled={step === 0} className="gap-1.5">
               <ArrowLeft className="h-4 w-4" /> {t("common.back")}
