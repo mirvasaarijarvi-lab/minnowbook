@@ -33,6 +33,7 @@ import {
 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { useImpersonation } from "@/contexts/ImpersonationContext";
+import AccessCodesPanel from "@/components/dashboard/AccessCodesPanel";
 
 interface TenantWithStats {
   id: string;
