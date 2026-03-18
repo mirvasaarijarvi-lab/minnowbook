@@ -257,10 +257,19 @@ const AccessCodesPanel = () => {
                         {codeRedemptions.map((r: any) => (
                           <div key={r.id} className="text-xs text-muted-foreground flex items-center gap-2 pl-2">
                             <span className="font-medium text-foreground">{r.tenants?.name ?? "Unknown"}</span>
-                            <span>→ {r.granted_tier} until {r.granted_until}</span>
+                            <span>to {r.granted_tier} until {r.granted_until}</span>
                             {!r.is_active && <Badge variant="destructive" className="text-[9px] h-4">Revoked</Badge>}
                           </div>
                         ))}
+                      </div>
+                    )}
+                    {!ac.is_revoked && ac.is_active && (
+                      <div className="pt-2 border-t border-border mt-2">
+                        <BetaInviteEmailPreview
+                          code={ac.code}
+                          tierLabel={ac.tier === "professional" ? "Professional" : ac.tier === "business" ? "Business" : "Basic"}
+                          durationDays={ac.duration_days}
+                        />
                       </div>
                     )}
                   </div>
