@@ -21,6 +21,13 @@ const BetaInviteEmailPreview = ({
   const [showPreview, setShowPreview] = useState(false);
   const [recipientName, setRecipientName] = useState("there");
 
+  // Escape user input to prevent XSS when rendering in dangerouslySetInnerHTML
+  const safeName = useMemo(() => {
+    const div = document.createElement("div");
+    div.textContent = recipientName;
+    return div.innerHTML;
+  }, [recipientName]);
+
   const guideUrl = `${window.location.origin}/beta-guide`;
 
   const emailSubject = "You are invited to test MimmoBook";
