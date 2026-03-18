@@ -170,7 +170,7 @@ The MimmoBook Team`;
           <div className="mt-4 border border-border rounded-lg overflow-hidden">
             <div
               className="bg-white"
-              dangerouslySetInnerHTML={{ __html: htmlEmail }}
+              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(htmlEmail) }}
             />
           </div>
         )}
