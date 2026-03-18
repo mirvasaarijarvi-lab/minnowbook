@@ -29,6 +29,7 @@ import Features from "./pages/Features";
 import UseCases from "./pages/UseCases";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
+import BetaGuide from "./pages/BetaGuide";
 import CookieConsent from "./components/CookieConsent";
 import AccessibilityWidget from "./components/AccessibilityWidget";
 import { ImpersonationProvider } from "./contexts/ImpersonationContext";
