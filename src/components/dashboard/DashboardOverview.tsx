@@ -34,6 +34,7 @@ import DashboardTooltip from "./DashboardTooltip";
 import AutoReminderStatus from "./AutoReminderStatus";
 import BookingLinksCard from "./BookingLinksCard";
 import ActionAlertsBanner from "./ActionAlertsBanner";
+import BetaFeedbackCard from "./BetaFeedbackCard";
 
 import { useMemo } from "react";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip as RechartsTooltip, CartesianGrid } from "recharts";
@@ -441,6 +442,9 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
 
       {/* Auto Reminder Status */}
       {(isOwner || isAdmin) && <AutoReminderStatus />}
+
+      {/* Beta Feedback Card */}
+      <BetaFeedbackCard />
     </div>
   );
 };
