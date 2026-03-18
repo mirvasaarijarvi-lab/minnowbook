@@ -67,7 +67,7 @@ The MimmoBook Team`;
   </div>
   <div style="padding: 32px 24px;">
     <p style="color: #333; font-size: 16px; line-height: 1.6; margin: 0 0 16px;">
-      Hi ${recipientName},
+      Hi ${safeName},
     </p>
     <p style="color: #333; font-size: 16px; line-height: 1.6; margin: 0 0 16px;">
       Thank you for your interest in MimmoBook! We would love for you to be one of our beta testers
