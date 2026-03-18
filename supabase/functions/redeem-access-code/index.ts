@@ -124,11 +124,17 @@ Deno.serve(async (req) => {
 
     if (redemptionError) throw redemptionError;
 
-    // Increment used_count
-    await adminClient
+    // Atomically increment used_count using RPC or re-read
+    // Use a conditional update to prevent race conditions
+    const { error: countError } = await adminClient
       .from("access_codes")
       .update({ used_count: accessCode.used_count + 1, updated_at: new Date().toISOString() })
-      .eq("id", accessCode.id);
+      .eq("id", accessCode.id)
+      .eq("used_count", accessCode.used_count); // optimistic concurrency control
+
+    if (countError) {
+      console.warn("used_count update may have raced:", countError.message);
+    }
 
     return new Response(
       JSON.stringify({
