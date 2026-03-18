@@ -13,8 +13,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Separator } from "@/components/ui/separator";
 import { toast } from "@/hooks/use-toast";
 import {
-  Ticket, Plus, Copy, Ban, Trash2, Users, Calendar, Clock, Shield,
+  Ticket, Plus, Copy, Ban, Trash2, Users, Calendar, Clock, Shield, Mail,
 } from "lucide-react";
+import BetaInviteEmailPreview from "./BetaInviteEmailPreview";
 
 interface AccessCode {
   id: string;
