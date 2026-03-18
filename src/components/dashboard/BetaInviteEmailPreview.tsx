@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
 import { Copy, Mail, Eye, EyeOff } from "lucide-react";
+import DOMPurify from "dompurify";
 
 interface BetaInviteEmailPreviewProps {
   code?: string;
