@@ -34,6 +34,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useImpersonation } from "@/contexts/ImpersonationContext";
 import AccessCodesPanel from "@/components/dashboard/AccessCodesPanel";
+import BetaFeedbackPanel from "@/components/dashboard/BetaFeedbackPanel";
 
 interface TenantWithStats {
   id: string;
