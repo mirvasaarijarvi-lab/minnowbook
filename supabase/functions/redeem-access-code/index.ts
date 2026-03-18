@@ -117,7 +117,7 @@ Deno.serve(async (req) => {
       .insert({
         access_code_id: accessCode.id,
         tenant_id: tenantUser.tenant_id,
-        redeemed_by: user.id,
+        redeemed_by: userId,
         granted_tier: accessCode.tier,
         granted_until: grantedUntilStr,
       });
