@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
 import { Copy, Mail, Eye, EyeOff } from "lucide-react";
+import DOMPurify from "dompurify";
 
 interface BetaInviteEmailPreviewProps {
   code?: string;
@@ -19,6 +20,13 @@ const BetaInviteEmailPreview = ({
 }: BetaInviteEmailPreviewProps) => {
   const [showPreview, setShowPreview] = useState(false);
   const [recipientName, setRecipientName] = useState("there");
+
+  // Escape user input to prevent XSS when rendering in dangerouslySetInnerHTML
+  const safeName = useMemo(() => {
+    const div = document.createElement("div");
+    div.textContent = recipientName;
+    return div.innerHTML;
+  }, [recipientName]);
 
   const guideUrl = `${window.location.origin}/beta-guide`;
 
@@ -59,7 +67,7 @@ The MimmoBook Team`;
   </div>
   <div style="padding: 32px 24px;">
     <p style="color: #333; font-size: 16px; line-height: 1.6; margin: 0 0 16px;">
-      Hi ${recipientName},
+      Hi ${safeName},
     </p>
     <p style="color: #333; font-size: 16px; line-height: 1.6; margin: 0 0 16px;">
       Thank you for your interest in MimmoBook! We would love for you to be one of our beta testers
@@ -162,7 +170,7 @@ The MimmoBook Team`;
           <div className="mt-4 border border-border rounded-lg overflow-hidden">
             <div
               className="bg-white"
-              dangerouslySetInnerHTML={{ __html: htmlEmail }}
+              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(htmlEmail) }}
             />
           </div>
         )}

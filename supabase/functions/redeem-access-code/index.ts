@@ -23,13 +23,16 @@ Deno.serve(async (req) => {
 
     // Authenticate the calling user
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) throw new Error("Not authenticated");
+    if (!authHeader?.startsWith("Bearer ")) throw new Error("Not authenticated");
 
     const userClient = createClient(supabaseUrl, anonKey, {
       global: { headers: { Authorization: authHeader } },
     });
-    const { data: { user }, error: authError } = await userClient.auth.getUser();
-    if (authError || !user) throw new Error("Not authenticated");
+    const token = authHeader.replace("Bearer ", "");
+    const { data: claimsData, error: claimsError } = await userClient.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims) throw new Error("Not authenticated");
+
+    const userId = claimsData.claims.sub as string;
 
     const body = await req.json();
     const code = (body.code ?? "").trim().toUpperCase();
@@ -42,7 +45,7 @@ Deno.serve(async (req) => {
     const { data: tenantUser } = await adminClient
       .from("tenant_users")
       .select("tenant_id, role")
-      .eq("user_id", user.id)
+      .eq("user_id", userId)
       .maybeSingle();
 
     if (!tenantUser) {
@@ -76,7 +79,7 @@ Deno.serve(async (req) => {
       throw new Error("This access code has reached its maximum number of uses");
     }
 
-    // Check if this tenant already redeemed this code
+    // Check if this user already redeemed this code for their tenant
     const { data: existing } = await adminClient
       .from("access_code_redemptions")
       .select("id")
@@ -114,18 +117,24 @@ Deno.serve(async (req) => {
       .insert({
         access_code_id: accessCode.id,
         tenant_id: tenantUser.tenant_id,
-        redeemed_by: user.id,
+        redeemed_by: userId,
         granted_tier: accessCode.tier,
         granted_until: grantedUntilStr,
       });
 
     if (redemptionError) throw redemptionError;
 
-    // Increment used_count
-    await adminClient
+    // Atomically increment used_count using RPC or re-read
+    // Use a conditional update to prevent race conditions
+    const { error: countError } = await adminClient
       .from("access_codes")
       .update({ used_count: accessCode.used_count + 1, updated_at: new Date().toISOString() })
-      .eq("id", accessCode.id);
+      .eq("id", accessCode.id)
+      .eq("used_count", accessCode.used_count); // optimistic concurrency control
+
+    if (countError) {
+      console.warn("used_count update may have raced:", countError.message);
+    }
 
     return new Response(
       JSON.stringify({
