@@ -15,3 +15,5 @@ project_id = "lsgznskkxadplwnxplhd"
     verify_jwt = false
   [functions.archive-reservations]
     verify_jwt = false
+  [functions.redeem-access-code]
+    verify_jwt = false
