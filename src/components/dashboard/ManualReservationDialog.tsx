@@ -207,6 +207,7 @@ const ManualReservationDialog = ({
       queryClient.invalidateQueries({ queryKey: ["reservations"] });
       queryClient.invalidateQueries({ queryKey: ["calendar-reservations"] });
       queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
+      gtm.reservationCreated(form.reservation_type);
       toast.success(t("dashboard.reservationCreated"));
       onOpenChange(false);
     },
