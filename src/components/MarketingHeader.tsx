@@ -25,7 +25,7 @@ const MarketingHeader = () => {
           </Link>
 
           <nav className="hidden md:flex items-center gap-6">
-            <Link to="/" className={navLinkClass("/")}>{t("nav.home")}</Link>
+            
             <Link to="/what-is-mimmobook" className={navLinkClass("/what-is-mimmobook")}>{t("nav.whatIs")}</Link>
             <Link to="/features" className={navLinkClass("/features")}>{t("nav.features")}</Link>
             <Link to="/use-cases" className={navLinkClass("/use-cases")}>{t("nav.useCases")}</Link>
