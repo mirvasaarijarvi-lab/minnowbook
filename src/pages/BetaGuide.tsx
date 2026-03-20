@@ -22,13 +22,13 @@ const steps = [
     icon: Rocket,
     title: "Set up your workspace",
     description:
-      "After signing in, you will be guided through a quick onboarding flow. Choose any plan for now, select your reservation types, and add your business details.",
+      "After signing in, you will be guided through a quick onboarding flow. Choose any plan for now, select your reservation types, and add your business details. You must complete this step before you can redeem your access code.",
   },
   {
     icon: Ticket,
     title: "Redeem your access code",
     description:
-      'Once your workspace is ready, go to Settings in your dashboard. You will find a "Have an access code?" card near the bottom. Enter the code we sent you and click Redeem.',
+      'Important: You must finish onboarding and set up your workspace first — the code will not work without it. Once your workspace is ready, go to Settings in your dashboard. You will find a "Have an access code?" card near the bottom. Enter the code we sent you and click Redeem.',
   },
   {
     icon: Sparkles,
