@@ -471,6 +471,11 @@ type TranslationKeys = {
   "login.orContinueWith": string;
   "login.continueGoogle": string;
   "login.continueApple": string;
+  "login.haveCode": string;
+  "login.codePlaceholder": string;
+  "login.codeHint": string;
+  "login.codeRedeemed": string;
+  "login.codeRedeemFailed": string;
 
   // Signup
   "signup.title": string;
