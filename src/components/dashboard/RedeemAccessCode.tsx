@@ -61,7 +61,10 @@ const RedeemAccessCode = () => {
           Have an access code?
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-3">
+        <p className="text-xs text-muted-foreground leading-relaxed">
+          Make sure you have completed onboarding and set up your workspace before redeeming. The code will not work without a workspace.
+        </p>
         <div className="flex gap-2">
           <Input
             placeholder="Enter code (e.g. BETA-ABCD1234)"
