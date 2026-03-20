@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { gtm } from "@/lib/gtm";
 import { useT, useTDynamic } from "@/contexts/I18nContext";
 import { useSiteContext } from "@/hooks/useSiteContext";
 import { useTenant } from "@/hooks/useTenant";
@@ -206,6 +207,7 @@ const ManualReservationDialog = ({
       queryClient.invalidateQueries({ queryKey: ["reservations"] });
       queryClient.invalidateQueries({ queryKey: ["calendar-reservations"] });
       queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
+      gtm.reservationCreated(form.reservation_type);
       toast.success(t("dashboard.reservationCreated"));
       onOpenChange(false);
     },

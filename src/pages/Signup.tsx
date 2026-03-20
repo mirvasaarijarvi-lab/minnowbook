@@ -7,6 +7,7 @@ import { ArrowRight } from "lucide-react";
 import Logo from "@/components/Logo";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
+import { gtm } from "@/lib/gtm";
 import { toast } from "sonner";
 import { useT } from "@/contexts/I18nContext";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
@@ -51,6 +52,7 @@ const Signup = () => {
 
       if (authError) throw authError;
 
+      gtm.signUp("email");
       toast.success(t("signup.accountCreated"));
       navigate("/login");
     } catch (error: any) {
@@ -67,6 +69,7 @@ const Signup = () => {
         redirect_uri: window.location.origin,
       });
       if (error) throw error;
+      gtm.signUp(provider);
     } catch (error: any) {
       toast.error(error.message || `Failed to sign up with ${provider}`);
     } finally {

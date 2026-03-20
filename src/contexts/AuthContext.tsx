@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, useRef, useCallback, ReactNode } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { gtm } from "@/lib/gtm";
 
 interface SubscriptionInfo {
   subscribed: boolean;
@@ -74,6 +75,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setLoading(false);
 
         if (event === "SIGNED_IN" && session?.user) {
+          gtm.login();
           // Record login event
           setTimeout(async () => {
             try {
