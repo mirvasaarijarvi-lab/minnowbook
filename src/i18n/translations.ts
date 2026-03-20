@@ -1975,6 +1975,11 @@ const en: TranslationKeys = {
   "login.orContinueWith": "Or continue with",
   "login.continueGoogle": "Continue with Google",
   "login.continueApple": "Continue with Apple",
+  "login.haveCode": "Have a code?",
+  "login.codePlaceholder": "Enter access or discount code",
+  "login.codeHint": "Beta, access, or discount code — it will be applied after you sign in.",
+  "login.codeRedeemed": "Code redeemed successfully!",
+  "login.codeRedeemFailed": "Code could not be redeemed. You can try again from your dashboard.",
 
   // Signup
   "signup.title": "Create your account",
