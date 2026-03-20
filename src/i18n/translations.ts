@@ -4946,6 +4946,11 @@ const sv: TranslationKeys = {
   "login.orContinueWith": "Eller fortsätt med",
   "login.continueGoogle": "Fortsätt med Google",
   "login.continueApple": "Fortsätt med Apple",
+  "login.haveCode": "Har du en kod?",
+  "login.codePlaceholder": "Ange åtkomst- eller rabattkod",
+  "login.codeHint": "Beta-, åtkomst- eller rabattkod — den tillämpas efter inloggning.",
+  "login.codeRedeemed": "Koden har lösts in!",
+  "login.codeRedeemFailed": "Koden kunde inte lösas in. Du kan försöka igen från instrumentpanelen.",
 
   // Signup
   "signup.title": "Skapa ditt konto",
