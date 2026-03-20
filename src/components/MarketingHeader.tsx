@@ -20,12 +20,11 @@ const MarketingHeader = () => {
     <header className="sticky top-0 z-50 border-b border-border/50 bg-card/80 backdrop-blur-lg">
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
-          <Link to="/">
+          <Link to="/" className="shrink-0">
             <Logo variant="color" size="sm" />
           </Link>
 
-          <nav className="hidden md:flex items-center gap-6">
-            
+          <nav className="hidden lg:flex items-center gap-4 xl:gap-6">
             <Link to="/what-is-mimmobook" className={navLinkClass("/what-is-mimmobook")}>{t("nav.whatIs")}</Link>
             <Link to="/features" className={navLinkClass("/features")}>{t("nav.features")}</Link>
             <Link to="/use-cases" className={navLinkClass("/use-cases")}>{t("nav.useCases")}</Link>
@@ -34,7 +33,7 @@ const MarketingHeader = () => {
             <Link to="/support" className={navLinkClass("/support")}>{t("nav.support")}</Link>
           </nav>
 
-          <div className="hidden md:flex items-center gap-3">
+          <div className="hidden lg:flex items-center gap-2 xl:gap-3">
             <LanguageSwitcher variant="compact" />
             <Link to="/login">
               <Button variant="ghost" size="sm">{t("common.logIn")}</Button>
@@ -45,7 +44,7 @@ const MarketingHeader = () => {
           </div>
 
           <button
-            className="md:hidden p-2 text-foreground"
+            className="lg:hidden p-2 text-foreground"
             onClick={() => setMobileOpen(!mobileOpen)}
             aria-label={mobileOpen ? "Close menu" : "Open menu"}
           >
@@ -55,7 +54,7 @@ const MarketingHeader = () => {
       </div>
 
       {mobileOpen && (
-        <div className="md:hidden border-t border-border/50 bg-card/95 backdrop-blur-lg animate-fade-in">
+        <div className="lg:hidden border-t border-border/50 bg-card/95 backdrop-blur-lg animate-fade-in">
           <div className="container mx-auto px-4 py-4 flex flex-col gap-3">
             <Link to="/" className={navLinkClass("/")} onClick={() => setMobileOpen(false)}>{t("nav.home")}</Link>
             <Link to="/what-is-mimmobook" className={navLinkClass("/what-is-mimmobook")} onClick={() => setMobileOpen(false)}>{t("nav.whatIs")}</Link>
