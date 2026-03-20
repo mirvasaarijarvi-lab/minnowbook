@@ -3461,6 +3461,11 @@ const fi: TranslationKeys = {
   "login.orContinueWith": "Tai jatka palvelulla",
   "login.continueGoogle": "Jatka Googlella",
   "login.continueApple": "Jatka Applella",
+  "login.haveCode": "Onko sinulla koodi?",
+  "login.codePlaceholder": "Syötä pääsy- tai alennuskoodi",
+  "login.codeHint": "Beta-, pääsy- tai alennuskoodi — se käytetään kirjautumisen jälkeen.",
+  "login.codeRedeemed": "Koodi lunastettu onnistuneesti!",
+  "login.codeRedeemFailed": "Koodia ei voitu lunastaa. Voit yrittää uudelleen hallintapaneelista.",
 
   // Signup
   "signup.title": "Luo tilisi",
