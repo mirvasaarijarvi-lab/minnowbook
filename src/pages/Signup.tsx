@@ -52,6 +52,7 @@ const Signup = () => {
 
       if (authError) throw authError;
 
+      gtm.signUp("email");
       toast.success(t("signup.accountCreated"));
       navigate("/login");
     } catch (error: any) {
