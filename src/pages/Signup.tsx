@@ -54,6 +54,7 @@ const Signup = () => {
 
       gtm.signUp("email");
       toast.success(t("signup.accountCreated"));
+      // Preserve any pending code so it survives the redirect to login
       navigate("/login");
     } catch (error: any) {
       toast.error(error.message || "Failed to create account");

@@ -471,6 +471,11 @@ type TranslationKeys = {
   "login.orContinueWith": string;
   "login.continueGoogle": string;
   "login.continueApple": string;
+  "login.haveCode": string;
+  "login.codePlaceholder": string;
+  "login.codeHint": string;
+  "login.codeRedeemed": string;
+  "login.codeRedeemFailed": string;
 
   // Signup
   "signup.title": string;
@@ -1970,6 +1975,11 @@ const en: TranslationKeys = {
   "login.orContinueWith": "Or continue with",
   "login.continueGoogle": "Continue with Google",
   "login.continueApple": "Continue with Apple",
+  "login.haveCode": "Have a code?",
+  "login.codePlaceholder": "Enter access or discount code",
+  "login.codeHint": "Beta, access, or discount code — it will be applied after you sign in.",
+  "login.codeRedeemed": "Code redeemed successfully!",
+  "login.codeRedeemFailed": "Code could not be redeemed. You can try again from your dashboard.",
 
   // Signup
   "signup.title": "Create your account",
@@ -3451,6 +3461,11 @@ const fi: TranslationKeys = {
   "login.orContinueWith": "Tai jatka palvelulla",
   "login.continueGoogle": "Jatka Googlella",
   "login.continueApple": "Jatka Applella",
+  "login.haveCode": "Onko sinulla koodi?",
+  "login.codePlaceholder": "Syötä pääsy- tai alennuskoodi",
+  "login.codeHint": "Beta-, pääsy- tai alennuskoodi — se käytetään kirjautumisen jälkeen.",
+  "login.codeRedeemed": "Koodi lunastettu onnistuneesti!",
+  "login.codeRedeemFailed": "Koodia ei voitu lunastaa. Voit yrittää uudelleen hallintapaneelista.",
 
   // Signup
   "signup.title": "Luo tilisi",
@@ -4931,6 +4946,11 @@ const sv: TranslationKeys = {
   "login.orContinueWith": "Eller fortsätt med",
   "login.continueGoogle": "Fortsätt med Google",
   "login.continueApple": "Fortsätt med Apple",
+  "login.haveCode": "Har du en kod?",
+  "login.codePlaceholder": "Ange åtkomst- eller rabattkod",
+  "login.codeHint": "Beta-, åtkomst- eller rabattkod — den tillämpas efter inloggning.",
+  "login.codeRedeemed": "Koden har lösts in!",
+  "login.codeRedeemFailed": "Koden kunde inte lösas in. Du kan försöka igen från instrumentpanelen.",
 
   // Signup
   "signup.title": "Skapa ditt konto",

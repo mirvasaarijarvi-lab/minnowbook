@@ -1,9 +1,9 @@
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ChevronDown } from "lucide-react";
 import Logo from "@/components/Logo";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
@@ -12,6 +12,28 @@ import { useT } from "@/contexts/I18nContext";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import PasswordInput from "@/components/PasswordInput";
 import MfaVerify from "@/components/MfaVerify";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+
+const PENDING_CODE_KEY = "mimmobook_pending_code";
+
+const redeemPendingCode = async (t: (key: string) => string) => {
+  const code = localStorage.getItem(PENDING_CODE_KEY);
+  if (!code) return;
+  localStorage.removeItem(PENDING_CODE_KEY);
+
+  try {
+    const { data, error } = await supabase.functions.invoke("redeem-access-code", {
+      body: { code },
+    });
+    if (error || data?.error) {
+      toast.error(t("login.codeRedeemFailed"));
+    } else {
+      toast.success(t("login.codeRedeemed"));
+    }
+  } catch {
+    toast.error(t("login.codeRedeemFailed"));
+  }
+};
 
 const Login = () => {
   const navigate = useNavigate();
@@ -20,11 +42,21 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [mfaFactorId, setMfaFactorId] = useState<string | null>(null);
+  const [pendingCode, setPendingCode] = useState("");
+  const [codeOpen, setCodeOpen] = useState(false);
   const t = useT();
+
+  const savePendingCode = () => {
+    const trimmed = pendingCode.trim().toUpperCase();
+    if (trimmed) {
+      localStorage.setItem(PENDING_CODE_KEY, trimmed);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    savePendingCode();
 
     try {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
@@ -38,6 +70,7 @@ const Login = () => {
         return;
       }
 
+      await redeemPendingCode(t);
       toast.success(t("login.welcomeBack") + "!");
       navigate("/dashboard");
     } catch (error: any) {
@@ -49,6 +82,7 @@ const Login = () => {
 
   const handleOAuthLogin = async (provider: "google" | "apple") => {
     setOauthLoading(provider);
+    savePendingCode();
     try {
       const { error } = await lovable.auth.signInWithOAuth(provider, {
         redirect_uri: window.location.origin,
@@ -65,7 +99,8 @@ const Login = () => {
     return (
       <MfaVerify
         factorId={mfaFactorId}
-        onSuccess={() => {
+        onSuccess={async () => {
+          await redeemPendingCode(t);
           toast.success(t("login.welcomeBack") + "!");
           navigate("/dashboard");
         }}
@@ -100,14 +135,7 @@ const Login = () => {
           <p className="text-muted-foreground mb-8">{t("login.subtitle")}</p>
 
           <div className="space-y-3 mb-6">
-            <Button
-              type="button"
-              variant="outline"
-              size="lg"
-              className="w-full"
-              onClick={() => handleOAuthLogin("google")}
-              disabled={!!oauthLoading}
-            >
+            <Button type="button" variant="outline" size="lg" className="w-full" onClick={() => handleOAuthLogin("google")} disabled={!!oauthLoading}>
               <svg className="h-5 w-5 mr-2" viewBox="0 0 24 24">
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
                 <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
@@ -116,14 +144,7 @@ const Login = () => {
               </svg>
               {oauthLoading === "google" ? "..." : t("login.continueGoogle")}
             </Button>
-            <Button
-              type="button"
-              variant="outline"
-              size="lg"
-              className="w-full"
-              onClick={() => handleOAuthLogin("apple")}
-              disabled={!!oauthLoading}
-            >
+            <Button type="button" variant="outline" size="lg" className="w-full" onClick={() => handleOAuthLogin("apple")} disabled={!!oauthLoading}>
               <svg className="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
               </svg>
@@ -150,12 +171,7 @@ const Login = () => {
                 <Label htmlFor="password">{t("common.password")}</Label>
                 <Link to="/forgot-password" className="text-xs text-accent hover:underline">{t("login.forgotPassword")}</Link>
               </div>
-              <PasswordInput
-                id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                showRequirements={false}
-              />
+              <PasswordInput id="password" value={password} onChange={(e) => setPassword(e.target.value)} showRequirements={false} />
             </div>
 
             <Button type="submit" variant="hero" size="lg" className="w-full" disabled={loading}>
@@ -163,6 +179,23 @@ const Login = () => {
               <ArrowRight className="h-4 w-4" />
             </Button>
           </form>
+
+          <Collapsible open={codeOpen} onOpenChange={setCodeOpen} className="mt-4">
+            <CollapsibleTrigger className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mx-auto w-fit">
+              {t("login.haveCode")}
+              <ChevronDown className={`h-3.5 w-3.5 transition-transform ${codeOpen ? "rotate-180" : ""}`} />
+            </CollapsibleTrigger>
+            <CollapsibleContent className="mt-3 space-y-2">
+              <Input
+                placeholder={t("login.codePlaceholder")}
+                value={pendingCode}
+                onChange={(e) => setPendingCode(e.target.value)}
+                className="text-center uppercase tracking-wider"
+                maxLength={50}
+              />
+              <p className="text-xs text-muted-foreground text-center">{t("login.codeHint")}</p>
+            </CollapsibleContent>
+          </Collapsible>
 
           <p className="mt-6 text-center text-sm text-muted-foreground">
             {t("login.noAccount")}{" "}
