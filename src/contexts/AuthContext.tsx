@@ -75,6 +75,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setLoading(false);
 
         if (event === "SIGNED_IN" && session?.user) {
+          gtm.login();
           // Record login event
           setTimeout(async () => {
             try {

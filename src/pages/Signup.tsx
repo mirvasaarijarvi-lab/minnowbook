@@ -69,6 +69,7 @@ const Signup = () => {
         redirect_uri: window.location.origin,
       });
       if (error) throw error;
+      gtm.signUp(provider);
     } catch (error: any) {
       toast.error(error.message || `Failed to sign up with ${provider}`);
     } finally {
