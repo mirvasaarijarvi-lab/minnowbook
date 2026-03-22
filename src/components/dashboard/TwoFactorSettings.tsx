@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { toast } from "sonner";
-import { ShieldCheck, ShieldOff, Loader2, Copy } from "lucide-react";
+import { ShieldCheck, ShieldOff, Loader2, Copy, KeyRound, RefreshCw, Download } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 const TwoFactorSettings = forwardRef<HTMLDivElement>((_, ref) => {
@@ -17,6 +17,11 @@ const TwoFactorSettings = forwardRef<HTMLDivElement>((_, ref) => {
   const [verifyCode, setVerifyCode] = useState("");
   const [verifying, setVerifying] = useState(false);
   const [unenrolling, setUnenrolling] = useState(false);
+
+  // Recovery code state
+  const [recoveryCodes, setRecoveryCodes] = useState<string[] | null>(null);
+  const [recoveryCount, setRecoveryCount] = useState<number | null>(null);
+  const [generatingCodes, setGeneratingCodes] = useState(false);
 
   const loadFactors = async () => {
     setLoading(true);
@@ -31,11 +36,26 @@ const TwoFactorSettings = forwardRef<HTMLDivElement>((_, ref) => {
     }
   };
 
+  const loadRecoveryCount = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke("mfa-recovery", {
+        body: { action: "count" },
+      });
+      if (!error && data) setRecoveryCount(data.remaining ?? 0);
+    } catch {
+      // ignore
+    }
+  };
+
   useEffect(() => {
     loadFactors();
   }, []);
 
   const verifiedFactor = factors.find((f) => f.status === "verified");
+
+  useEffect(() => {
+    if (verifiedFactor) loadRecoveryCount();
+  }, [verifiedFactor]);
 
   const handleEnroll = async () => {
     setEnrolling(true);
@@ -46,7 +66,6 @@ const TwoFactorSettings = forwardRef<HTMLDivElement>((_, ref) => {
         issuer: "MimmoBook",
       });
       if (error) throw error;
-
       setQrCode(data.totp.qr_code);
       setSecret(data.totp.secret);
       setFactorId(data.id);
@@ -79,11 +98,32 @@ const TwoFactorSettings = forwardRef<HTMLDivElement>((_, ref) => {
       setFactorId(null);
       setVerifyCode("");
       loadFactors();
+
+      // Auto-generate recovery codes after enrollment
+      await generateRecoveryCodes();
     } catch (error: any) {
       toast.error(error.message || "Invalid code. Please try again.");
       setVerifyCode("");
     } finally {
       setVerifying(false);
+    }
+  };
+
+  const generateRecoveryCodes = async () => {
+    setGeneratingCodes(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("mfa-recovery", {
+        body: { action: "generate" },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setRecoveryCodes(data.codes);
+      setRecoveryCount(data.codes.length);
+      toast.success("Recovery codes generated. Save them now!");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to generate recovery codes");
+    } finally {
+      setGeneratingCodes(false);
     }
   };
 
@@ -95,11 +135,10 @@ const TwoFactorSettings = forwardRef<HTMLDivElement>((_, ref) => {
         factorId: verifiedFactor.id,
       });
       if (error) throw error;
-
-      // Refresh session so AAL level updates correctly
       await supabase.auth.refreshSession();
-
       toast.success("Two-factor authentication disabled.");
+      setRecoveryCodes(null);
+      setRecoveryCount(null);
       loadFactors();
     } catch (error: any) {
       toast.error(error.message || "Failed to disable 2FA");
@@ -113,6 +152,34 @@ const TwoFactorSettings = forwardRef<HTMLDivElement>((_, ref) => {
       navigator.clipboard.writeText(secret);
       toast.success("Secret copied to clipboard");
     }
+  };
+
+  const handleCopyCodes = () => {
+    if (recoveryCodes) {
+      navigator.clipboard.writeText(recoveryCodes.join("\n"));
+      toast.success("Recovery codes copied to clipboard");
+    }
+  };
+
+  const handleDownloadCodes = () => {
+    if (!recoveryCodes) return;
+    const text = [
+      "MimmoBook Recovery Codes",
+      "========================",
+      "Keep these codes in a safe place.",
+      "Each code can only be used once.",
+      "",
+      ...recoveryCodes.map((c, i) => `${i + 1}. ${c}`),
+      "",
+      `Generated: ${new Date().toISOString()}`,
+    ].join("\n");
+    const blob = new Blob([text], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "mimmobook-recovery-codes.txt";
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   const cancelEnrollment = async () => {
@@ -143,9 +210,7 @@ const TwoFactorSettings = forwardRef<HTMLDivElement>((_, ref) => {
           Two-Factor Authentication
           {verifiedFactor && (
             <span className="ml-auto">
-              <Badge variant="default" className="text-xs">
-                Enabled
-              </Badge>
+              <Badge variant="default" className="text-xs">Enabled</Badge>
             </span>
           )}
         </CardTitle>
@@ -153,11 +218,74 @@ const TwoFactorSettings = forwardRef<HTMLDivElement>((_, ref) => {
       <CardContent className="space-y-4">
         {/* Already enrolled */}
         {verifiedFactor && !qrCode && (
-          <div className="space-y-3">
+          <div className="space-y-4">
             <p className="text-sm text-muted-foreground">
               Your account is protected with an authenticator app. You'll be asked
               for a code each time you log in.
             </p>
+
+            {/* Recovery codes section */}
+            <div className="rounded-lg border border-border p-4 space-y-3">
+              <div className="flex items-center gap-2">
+                <KeyRound className="h-4 w-4 text-primary" />
+                <span className="text-sm font-medium">Recovery Codes</span>
+                {recoveryCount !== null && (
+                  <Badge variant={recoveryCount <= 2 ? "destructive" : "secondary"} className="text-xs ml-auto">
+                    {recoveryCount} remaining
+                  </Badge>
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Use a recovery code to sign in if you lose access to your authenticator app.
+                Each code can only be used once.
+              </p>
+
+              {/* Show generated codes */}
+              {recoveryCodes && (
+                <div className="space-y-2">
+                  <div className="grid grid-cols-2 gap-1.5 p-3 bg-muted rounded-md">
+                    {recoveryCodes.map((code) => (
+                      <code key={code} className="text-xs font-mono text-center py-1">
+                        {code}
+                      </code>
+                    ))}
+                  </div>
+                  <p className="text-xs text-destructive font-medium">
+                    ⚠ Save these codes now. You won't be able to see them again.
+                  </p>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" onClick={handleCopyCodes} className="gap-1.5 text-xs">
+                      <Copy className="h-3.5 w-3.5" /> Copy
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={handleDownloadCodes} className="gap-1.5 text-xs">
+                      <Download className="h-3.5 w-3.5" /> Download
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => setRecoveryCodes(null)} className="text-xs ml-auto">
+                      Done
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* Regenerate button (when codes are hidden) */}
+              {!recoveryCodes && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={generateRecoveryCodes}
+                  disabled={generatingCodes}
+                  className="gap-1.5 text-xs"
+                >
+                  {generatingCodes ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <RefreshCw className="h-3.5 w-3.5" />
+                  )}
+                  {recoveryCount === 0 ? "Generate Codes" : "Regenerate Codes"}
+                </Button>
+              )}
+            </div>
+
             <Button
               variant="destructive"
               size="sm"
