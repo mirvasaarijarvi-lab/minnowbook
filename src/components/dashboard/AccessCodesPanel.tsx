@@ -280,6 +280,8 @@ const AccessCodesPanel = () => {
         </CardContent>
       </Card>
 
+      <BetaInviteEmailPreview />
+
       {/* Create dialog */}
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
         <DialogContent className="sm:max-w-md">
