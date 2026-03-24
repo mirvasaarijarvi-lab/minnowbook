@@ -231,6 +231,11 @@ Deno.serve(async (req) => {
       const userId = validateUuid(body.userId, "userId");
       const role = validateRole(body.role);
 
+      // Only superadmins and system admins can grant admin+ roles
+      if (PRIVILEGED_ROLES.includes(role) && !sysAdmin && callerRole?.role !== "superadmin") {
+        throw new Error("Only superadmins can grant admin access or above");
+      }
+
       const isSystemRole = VALID_ROLES.includes(role);
       const baseRole = isSystemRole ? role : "staff";
       const effectiveCustomKey = isSystemRole ? null : role;
