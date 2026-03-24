@@ -17,6 +17,7 @@ const MAX_NAME_LENGTH = 100;
 const MAX_PASSWORD_LENGTH = 128;
 const MIN_PASSWORD_LENGTH = 12;
 const VALID_ROLES = ["superadmin", "owner", "admin", "staff"];
+const PRIVILEGED_ROLES = ["superadmin", "owner", "admin"];
 const VALID_SITE_ROLES = ["admin", "staff"];
 
 function validateEmail(email: string): string {
