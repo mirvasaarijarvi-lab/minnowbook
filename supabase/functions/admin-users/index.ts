@@ -17,6 +17,7 @@ const MAX_NAME_LENGTH = 100;
 const MAX_PASSWORD_LENGTH = 128;
 const MIN_PASSWORD_LENGTH = 12;
 const VALID_ROLES = ["superadmin", "owner", "admin", "staff"];
+const PRIVILEGED_ROLES = ["superadmin", "owner", "admin"];
 const VALID_SITE_ROLES = ["admin", "staff"];
 
 function validateEmail(email: string): string {
@@ -182,6 +183,11 @@ Deno.serve(async (req) => {
       const role = validateRole(body.role || "staff");
       const customRoleKey = body.customRoleKey ? validateRole(body.customRoleKey) : null;
 
+      // Only superadmins and system admins can grant admin+ roles
+      if (PRIVILEGED_ROLES.includes(role) && !sysAdmin && callerRole?.role !== "superadmin") {
+        throw new Error("Only superadmins can grant admin access or above");
+      }
+
       const baseRole = (role === "superadmin" || role === "owner" || role === "admin") ? role : "staff";
 
       const { data: newUser, error: createError } = await adminClient.auth.admin.createUser({
@@ -224,6 +230,11 @@ Deno.serve(async (req) => {
     if (action === "update_role") {
       const userId = validateUuid(body.userId, "userId");
       const role = validateRole(body.role);
+
+      // Only superadmins and system admins can grant admin+ roles
+      if (PRIVILEGED_ROLES.includes(role) && !sysAdmin && callerRole?.role !== "superadmin") {
+        throw new Error("Only superadmins can grant admin access or above");
+      }
 
       const isSystemRole = VALID_ROLES.includes(role);
       const baseRole = isSystemRole ? role : "staff";
