@@ -183,6 +183,11 @@ Deno.serve(async (req) => {
       const role = validateRole(body.role || "staff");
       const customRoleKey = body.customRoleKey ? validateRole(body.customRoleKey) : null;
 
+      // Only superadmins and system admins can grant admin+ roles
+      if (PRIVILEGED_ROLES.includes(role) && !sysAdmin && callerRole?.role !== "superadmin") {
+        throw new Error("Only superadmins can grant admin access or above");
+      }
+
       const baseRole = (role === "superadmin" || role === "owner" || role === "admin") ? role : "staff";
 
       const { data: newUser, error: createError } = await adminClient.auth.admin.createUser({
