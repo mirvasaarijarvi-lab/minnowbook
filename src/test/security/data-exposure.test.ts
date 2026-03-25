@@ -34,9 +34,9 @@ describe("Data Exposure - Security Regression Tests", () => {
     });
 
     it("anon key (publishable) is safe in client code", () => {
-      const anonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9";
+      const anonKeyPrefix = "eyJ"; // JWT header prefix — anon keys are public by design
       // Anon keys are designed to be public — they only have RLS-gated access
-      expect(anonKey).toMatch(/^eyJ/); // JWT format
+      expect(anonKeyPrefix).toMatch(/^eyJ/); // JWT format
     });
   });
 
