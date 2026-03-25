@@ -157,7 +157,8 @@ const ResourceManagement = () => {
     }
     setUploading(true);
     try {
-      const ext = file.name.split(".").pop();
+      const { sanitizeFileExtension } = await import("@/lib/sanitize-path");
+      const ext = sanitizeFileExtension(file.name.split(".").pop());
       const fileName = `resource-${Date.now()}.${ext}`;
       const filePath = `${tenantId}/resources/${fileName}`;
       const { error: uploadError } = await supabase.storage.from("tenant-assets").upload(filePath, file, { upsert: true });
