@@ -689,7 +689,8 @@ const SettingsPanel = () => {
 
     setUploadingHero(true);
     try {
-      const ext = file.name.split(".").pop();
+      const { sanitizeFileExtension } = await import("@/lib/sanitize-path");
+      const ext = sanitizeFileExtension(file.name.split(".").pop());
       const filePath = `${tenantId}/hero.${ext}`;
 
       const { error: uploadError } = await supabase.storage

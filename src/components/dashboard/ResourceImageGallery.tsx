@@ -43,7 +43,8 @@ const ResourceImageGallery = ({ resourceId, tenantId }: Props) => {
 
   const uploadMutation = useMutation({
     mutationFn: async (file: File) => {
-      const ext = file.name.split(".").pop();
+      const { sanitizeFileExtension } = await import("@/lib/sanitize-path");
+      const ext = sanitizeFileExtension(file.name.split(".").pop());
       const fileName = `gallery-${Date.now()}.${ext}`;
       const filePath = `${tenantId}/resources/${resourceId}/${fileName}`;
 
