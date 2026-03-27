@@ -226,6 +226,93 @@ const BetaFeedbackPanel = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Email Send Log */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0">
+          <div className="flex items-center gap-2">
+            <Mail className="h-5 w-5 text-accent" />
+            <CardTitle className="text-xl font-serif">Email Send Log</CardTitle>
+          </div>
+          <Select value={emailStatusFilter} onValueChange={setEmailStatusFilter}>
+            <SelectTrigger className="w-36">
+              <SelectValue placeholder="Filter" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All statuses</SelectItem>
+              <SelectItem value="sent">Sent</SelectItem>
+              <SelectItem value="pending">Pending</SelectItem>
+              <SelectItem value="failed">Failed</SelectItem>
+              <SelectItem value="dlq">Dead Letter</SelectItem>
+              <SelectItem value="suppressed">Suppressed</SelectItem>
+            </SelectContent>
+          </Select>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Email stats */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="text-center p-3 rounded-lg bg-secondary/50">
+              <Mail className="h-4 w-4 mx-auto text-muted-foreground mb-1" />
+              <p className="text-2xl font-bold text-foreground">{emailStats.total}</p>
+              <p className="text-xs text-muted-foreground">Total Emails</p>
+            </div>
+            <div className="text-center p-3 rounded-lg bg-secondary/50">
+              <CheckCircle2 className="h-4 w-4 mx-auto text-green-600 mb-1" />
+              <p className="text-2xl font-bold text-foreground">{emailStats.sent}</p>
+              <p className="text-xs text-muted-foreground">Sent</p>
+            </div>
+            <div className="text-center p-3 rounded-lg bg-secondary/50">
+              <Clock className="h-4 w-4 mx-auto text-yellow-600 mb-1" />
+              <p className="text-2xl font-bold text-foreground">{emailStats.pending}</p>
+              <p className="text-xs text-muted-foreground">Pending</p>
+            </div>
+            <div className="text-center p-3 rounded-lg bg-secondary/50">
+              <XCircle className="h-4 w-4 mx-auto text-destructive mb-1" />
+              <p className="text-2xl font-bold text-foreground">{emailStats.failed}</p>
+              <p className="text-xs text-muted-foreground">Failed</p>
+            </div>
+          </div>
+
+          {/* Email log list */}
+          {emailLoading ? (
+            <div className="flex justify-center py-8">
+              <div className="animate-spin h-6 w-6 border-4 border-accent border-t-transparent rounded-full" />
+            </div>
+          ) : filteredEmails.length === 0 ? (
+            <p className="text-center py-8 text-muted-foreground">No emails found.</p>
+          ) : (
+            <div className="space-y-2 max-h-[500px] overflow-y-auto pr-1">
+              {filteredEmails.map((e: any) => {
+                const cfg = statusConfig[e.status] || statusConfig.pending;
+                const StatusIcon = cfg.icon;
+                return (
+                  <div key={e.id} className="p-3 rounded-lg border border-border bg-card flex items-start justify-between gap-3">
+                    <div className="flex-1 min-w-0 space-y-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <Badge className={`text-[10px] ${cfg.color} border-0`}>
+                          <StatusIcon className="h-3 w-3 mr-1" />
+                          {cfg.label}
+                        </Badge>
+                        <Badge variant="outline" className="text-[10px]">
+                          {e.template_name}
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-foreground truncate">{e.recipient_email}</p>
+                      {e.error_message && (
+                        <p className="text-[11px] text-destructive">{e.error_message}</p>
+                      )}
+                    </div>
+                    <span className="text-[10px] text-muted-foreground whitespace-nowrap flex items-center gap-1">
+                      <Calendar className="h-3 w-3" />
+                      {format(new Date(e.created_at), "MMM d, HH:mm")}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 };
