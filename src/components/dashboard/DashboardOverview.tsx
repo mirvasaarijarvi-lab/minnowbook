@@ -35,6 +35,7 @@ import AutoReminderStatus from "./AutoReminderStatus";
 import BookingLinksCard from "./BookingLinksCard";
 import ActionAlertsBanner from "./ActionAlertsBanner";
 import BetaFeedbackCard from "./BetaFeedbackCard";
+import EmailFailureAlert from "./EmailFailureAlert";
 
 import { useMemo } from "react";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip as RechartsTooltip, CartesianGrid } from "recharts";
