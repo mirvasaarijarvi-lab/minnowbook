@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MessageSquareHeart, Star, TrendingUp, Users, Calendar } from "lucide-react";
+import { MessageSquareHeart, Star, TrendingUp, Users, Calendar, Mail, CheckCircle2, XCircle, Clock, AlertTriangle } from "lucide-react";
 import { format } from "date-fns";
 
 const ratingEmojis: Record<number, string> = {
