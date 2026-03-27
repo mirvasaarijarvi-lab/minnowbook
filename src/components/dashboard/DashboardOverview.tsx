@@ -231,6 +231,9 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
       {/* Site tabs for business tier owner/admin */}
       <SiteTabs />
 
+      {/* Email failure monitoring (superadmin only) */}
+      <EmailFailureAlert />
+
       {/* Action-required alerts */}
       <ActionAlertsBanner
         pendingCount={stats?.pendingCount ?? 0}
