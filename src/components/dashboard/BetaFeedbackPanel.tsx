@@ -23,8 +23,18 @@ const ratingLabels: Record<number, string> = {
   5: "Amazing",
 };
 
+const statusConfig: Record<string, { color: string; icon: typeof CheckCircle2; label: string }> = {
+  sent: { color: "text-green-600 bg-green-100 dark:bg-green-900/30", icon: CheckCircle2, label: "Sent" },
+  pending: { color: "text-yellow-600 bg-yellow-100 dark:bg-yellow-900/30", icon: Clock, label: "Pending" },
+  failed: { color: "text-destructive bg-red-100 dark:bg-red-900/30", icon: XCircle, label: "Failed" },
+  dlq: { color: "text-destructive bg-red-100 dark:bg-red-900/30", icon: XCircle, label: "Dead Letter" },
+  suppressed: { color: "text-orange-600 bg-orange-100 dark:bg-orange-900/30", icon: AlertTriangle, label: "Suppressed" },
+  bounced: { color: "text-orange-600 bg-orange-100 dark:bg-orange-900/30", icon: AlertTriangle, label: "Bounced" },
+};
+
 const BetaFeedbackPanel = () => {
   const [ratingFilter, setRatingFilter] = useState<string>("all");
+  const [emailStatusFilter, setEmailStatusFilter] = useState<string>("all");
 
   const { data: feedback, isLoading } = useQuery({
     queryKey: ["beta-feedback-all"],
