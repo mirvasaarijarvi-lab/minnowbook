@@ -49,6 +49,43 @@ const BetaFeedbackPanel = () => {
     },
   });
 
+  // Email send log query
+  const { data: emailLogs, isLoading: emailLoading } = useQuery({
+    queryKey: ["email-send-log-superadmin"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("email_send_log")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(200);
+      if (error) throw error;
+      return data as any[];
+    },
+  });
+
+  // Deduplicate by message_id, keep latest
+  const deduped = (() => {
+    const map = new Map<string, any>();
+    (emailLogs ?? []).forEach((e: any) => {
+      const key = e.message_id || e.id;
+      if (!map.has(key) || new Date(e.created_at) > new Date(map.get(key).created_at)) {
+        map.set(key, e);
+      }
+    });
+    return Array.from(map.values());
+  })();
+
+  const filteredEmails = deduped.filter(
+    (e: any) => emailStatusFilter === "all" || e.status === emailStatusFilter
+  );
+
+  const emailStats = {
+    total: deduped.length,
+    sent: deduped.filter((e: any) => e.status === "sent").length,
+    pending: deduped.filter((e: any) => e.status === "pending").length,
+    failed: deduped.filter((e: any) => ["failed", "dlq"].includes(e.status)).length,
+  };
+
   const items = (feedback ?? []).filter(
     (f: any) => ratingFilter === "all" || f.rating === parseInt(ratingFilter)
   );
