@@ -244,45 +244,45 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
 
       {/* Row 1: Today stats */}
       <div data-tour="stats-grid" className="grid gap-3 grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardContent className="pt-5 pb-4 text-center">
+        <Card className="min-w-0">
+          <CardContent className="pt-5 pb-4 text-center px-3">
             <CalendarDays className="h-5 w-5 mx-auto text-muted-foreground mb-1" />
-            <p className="text-3xl font-bold text-foreground">{stats?.todayCount ?? 0}</p>
-            <p className="text-xs text-muted-foreground mt-1">{t("dashboard.todaysReservations")}</p>
+            <p className="text-2xl sm:text-3xl font-bold text-foreground truncate">{stats?.todayCount ?? 0}</p>
+            <p className="text-[11px] sm:text-xs text-muted-foreground mt-1 leading-tight">{t("dashboard.todaysReservations")}</p>
           </CardContent>
         </Card>
 
         <Card
-          className={stats?.pendingCount ? "cursor-pointer hover:shadow-md transition-shadow hover:ring-1 hover:ring-accent/30" : ""}
+          className={`min-w-0 ${stats?.pendingCount ? "cursor-pointer hover:shadow-md transition-shadow hover:ring-1 hover:ring-accent/30" : ""}`}
           onClick={stats?.pendingCount ? () => onNavigate?.("reservations", { status: "pending" }) : undefined}
         >
-          <CardContent className="pt-5 pb-4 text-center relative">
+          <CardContent className="pt-5 pb-4 text-center relative px-3">
             <Clock className="h-5 w-5 mx-auto text-warning mb-1" />
-            <p className="text-3xl font-bold text-warning">{stats?.pendingCount ?? 0}</p>
-            <p className="text-xs text-muted-foreground mt-1">{t("dashboard.pending")} ({t("dashboard.total")})</p>
+            <p className="text-2xl sm:text-3xl font-bold text-warning truncate">{stats?.pendingCount ?? 0}</p>
+            <p className="text-[11px] sm:text-xs text-muted-foreground mt-1 leading-tight">{t("dashboard.pending")} ({t("dashboard.total")})</p>
             {(stats?.pendingCount ?? 0) > 0 && (
-              <ArrowRight className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <ArrowRight className="h-4 w-4 absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
             )}
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="pt-5 pb-4 text-center">
+        <Card className="min-w-0">
+          <CardContent className="pt-5 pb-4 text-center px-3">
             <Users className="h-5 w-5 mx-auto text-muted-foreground mb-1" />
-            <p className="text-3xl font-bold text-foreground">{stats?.todayGuests ?? 0}</p>
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="text-2xl sm:text-3xl font-bold text-foreground truncate">{stats?.todayGuests ?? 0}</p>
+            <p className="text-[11px] sm:text-xs text-muted-foreground mt-1 leading-tight">
               {t("dashboard.guestsToday")}
             </p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="pt-5 pb-4 text-center">
+        <Card className="min-w-0">
+          <CardContent className="pt-5 pb-4 text-center px-3">
             <CheckCircle className="h-5 w-5 mx-auto text-success mb-1" />
-            <p className="text-3xl font-bold text-foreground">
+            <p className="text-2xl sm:text-3xl font-bold text-foreground truncate">
               {stats?.checkedIn ?? 0}/{stats?.todayConfirmed ?? 0}
             </p>
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="text-[11px] sm:text-xs text-muted-foreground mt-1 leading-tight">
               {t("dashboard.arrived")}
             </p>
           </CardContent>
