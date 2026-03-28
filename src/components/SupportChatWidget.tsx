@@ -260,7 +260,7 @@ const SupportChatWidget = ({ businessTier = false }: SupportChatWidgetProps) => 
       <button
         onClick={() => setOpen(!open)}
         className={cn(
-          "fixed bottom-6 right-6 z-50 flex items-center justify-center h-14 w-14 rounded-full shadow-hero transition-all duration-300",
+          "fixed bottom-6 right-4 sm:right-6 z-50 flex items-center justify-center h-14 w-14 rounded-full shadow-hero transition-all duration-300",
           open
             ? "bg-muted text-foreground rotate-0"
             : "bg-accent text-accent-foreground hover:scale-110"

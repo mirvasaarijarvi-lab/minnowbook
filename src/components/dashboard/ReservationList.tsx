@@ -357,15 +357,15 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
                           </Badge>
                         )}
                       </div>
-                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
                       <span className="flex items-center gap-1">
-                        <CalendarDays className="h-3.5 w-3.5" />
+                        <CalendarDays className="h-3.5 w-3.5 shrink-0" />
                         {format(new Date(r.date), "PPP", { locale: dateFnsLocale })}
                         {r.start_time && ` ${t("email.at")} ${r.start_time.slice(0, 5)}`}
                       </span>
-                      <span className="flex items-center gap-1"><Mail className="h-3.5 w-3.5" />{r.guest_email}</span>
-                      {r.guest_phone && <span className="flex items-center gap-1"><Phone className="h-3.5 w-3.5" />{r.guest_phone}</span>}
-                      {r.guests_count && <span className="flex items-center gap-1"><User className="h-3.5 w-3.5" />{r.guests_count} {t("common.guests")}</span>}
+                      <span className="flex items-center gap-1 min-w-0"><Mail className="h-3.5 w-3.5 shrink-0" /><span className="truncate">{r.guest_email}</span></span>
+                      {r.guest_phone && <span className="flex items-center gap-1"><Phone className="h-3.5 w-3.5 shrink-0" />{r.guest_phone}</span>}
+                      {r.guests_count && <span className="flex items-center gap-1"><User className="h-3.5 w-3.5 shrink-0" />{r.guests_count} {t("common.guests")}</span>}
                       
                     </div>
 
