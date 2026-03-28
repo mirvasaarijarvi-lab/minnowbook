@@ -244,7 +244,7 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
             {t("dashboard.todayFilter")}
           </Button>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-[140px]"><SelectValue placeholder={t("common.status")} /></SelectTrigger>
+            <SelectTrigger className="w-full sm:w-[140px]"><SelectValue placeholder={t("common.status")} /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{t("dashboard.allStatuses")}</SelectItem>
               <SelectItem value="pending">{t("dashboard.pending")}</SelectItem>
@@ -253,7 +253,7 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
             </SelectContent>
           </Select>
           <Select value={typeFilter} onValueChange={setTypeFilter}>
-            <SelectTrigger className="w-[160px]"><SelectValue placeholder={t("common.type")} /></SelectTrigger>
+            <SelectTrigger className="w-full sm:w-[160px]"><SelectValue placeholder={t("common.type")} /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{t("dashboard.allTypes")}</SelectItem>
               <SelectItem value="restaurant">{typeLabel("restaurant")}</SelectItem>
@@ -262,7 +262,7 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
             </SelectContent>
           </Select>
           <Select value={invoicedFilter} onValueChange={setInvoicedFilter}>
-            <SelectTrigger className="w-[140px]"><SelectValue placeholder="Invoice status" /></SelectTrigger>
+            <SelectTrigger className="w-full sm:w-[140px]"><SelectValue placeholder="Invoice status" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{t("dashboard.allStatuses")}</SelectItem>
               <SelectItem value="uninvoiced">{t("dashboard.uninvoiced")}</SelectItem>
@@ -306,7 +306,7 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
               className="hover:shadow-hover transition-shadow"
             >
               <CardContent className="p-4">
-                <div className="flex items-start justify-between gap-4">
+                <div className="flex items-start justify-between gap-2 sm:gap-4">
                   <div className="flex items-start gap-3">
                     {canEdit && (
                     <Checkbox
@@ -357,15 +357,15 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
                           </Badge>
                         )}
                       </div>
-                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
                       <span className="flex items-center gap-1">
-                        <CalendarDays className="h-3.5 w-3.5" />
+                        <CalendarDays className="h-3.5 w-3.5 shrink-0" />
                         {format(new Date(r.date), "PPP", { locale: dateFnsLocale })}
                         {r.start_time && ` ${t("email.at")} ${r.start_time.slice(0, 5)}`}
                       </span>
-                      <span className="flex items-center gap-1"><Mail className="h-3.5 w-3.5" />{r.guest_email}</span>
-                      {r.guest_phone && <span className="flex items-center gap-1"><Phone className="h-3.5 w-3.5" />{r.guest_phone}</span>}
-                      {r.guests_count && <span className="flex items-center gap-1"><User className="h-3.5 w-3.5" />{r.guests_count} {t("common.guests")}</span>}
+                      <span className="flex items-center gap-1 min-w-0"><Mail className="h-3.5 w-3.5 shrink-0" /><span className="truncate">{r.guest_email}</span></span>
+                      {r.guest_phone && <span className="flex items-center gap-1"><Phone className="h-3.5 w-3.5 shrink-0" />{r.guest_phone}</span>}
+                      {r.guests_count && <span className="flex items-center gap-1"><User className="h-3.5 w-3.5 shrink-0" />{r.guests_count} {t("common.guests")}</span>}
                       
                     </div>
 
