@@ -291,46 +291,46 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
 
       {/* Row 2: Weekly stats */}
       <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardContent className="pt-5 pb-4 text-center">
+        <Card className="min-w-0">
+          <CardContent className="pt-5 pb-4 text-center px-3">
             <Euro className="h-5 w-5 mx-auto text-muted-foreground mb-1" />
-            <p className="text-3xl font-bold text-foreground">
+            <p className="text-2xl sm:text-3xl font-bold text-foreground truncate">
               {(stats?.weekRevenue ?? 0).toFixed(0)} €
             </p>
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="text-[11px] sm:text-xs text-muted-foreground mt-1 leading-tight">
               {t("dashboard.weekRevenue")}
             </p>
             <ChangeIndicator value={revChange} />
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="pt-5 pb-4 text-center">
+        <Card className="min-w-0">
+          <CardContent className="pt-5 pb-4 text-center px-3">
             <BarChart3 className="h-5 w-5 mx-auto text-muted-foreground mb-1" />
-            <p className="text-3xl font-bold text-foreground">{stats?.weekReservations ?? 0}</p>
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="text-2xl sm:text-3xl font-bold text-foreground truncate">{stats?.weekReservations ?? 0}</p>
+            <p className="text-[11px] sm:text-xs text-muted-foreground mt-1 leading-tight">
               {t("dashboard.weekReservations")}
             </p>
             <ChangeIndicator value={resChange} />
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="pt-5 pb-4 text-center">
+        <Card className="min-w-0">
+          <CardContent className="pt-5 pb-4 text-center px-3">
             <Users className="h-5 w-5 mx-auto text-muted-foreground mb-1" />
-            <p className="text-3xl font-bold text-foreground">{stats?.weekGuests ?? 0}</p>
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="text-2xl sm:text-3xl font-bold text-foreground truncate">{stats?.weekGuests ?? 0}</p>
+            <p className="text-[11px] sm:text-xs text-muted-foreground mt-1 leading-tight">
               {t("dashboard.weekGuests")}
             </p>
             <ChangeIndicator value={guestChange} />
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="pt-5 pb-4 text-center">
+        <Card className="min-w-0">
+          <CardContent className="pt-5 pb-4 text-center px-3">
             <Percent className="h-5 w-5 mx-auto text-muted-foreground mb-1" />
-            <p className="text-3xl font-bold text-foreground">{stats?.utilization ?? 0}%</p>
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="text-2xl sm:text-3xl font-bold text-foreground truncate">{stats?.utilization ?? 0}%</p>
+            <p className="text-[11px] sm:text-xs text-muted-foreground mt-1 leading-tight">
               {t("dashboard.utilizationToday")}
             </p>
           </CardContent>
