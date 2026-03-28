@@ -52,15 +52,15 @@ const EmailFailureAlert = () => {
         )}
       </div>
       {latestError && (
-        <div className="text-xs text-muted-foreground space-y-0.5">
-          <p>
+        <div className="text-xs text-muted-foreground space-y-0.5 min-w-0">
+          <p className="truncate">
             <Mail className="inline h-3 w-3 mr-1" />
-            Latest: <span className="font-mono">{latestError.recipient_email}</span>
+            Latest: <span className="font-mono break-all">{latestError.recipient_email}</span>
             {" · "}
             <span className="italic">{latestError.template_name}</span>
           </p>
           {latestError.error_message && (
-            <p className="text-destructive/80 truncate max-w-xl">
+            <p className="text-destructive/80 truncate">
               Error: {latestError.error_message}
             </p>
           )}

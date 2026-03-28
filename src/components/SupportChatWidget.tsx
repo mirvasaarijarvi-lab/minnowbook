@@ -277,7 +277,7 @@ const SupportChatWidget = ({ businessTier = false }: SupportChatWidgetProps) => 
 
       {/* Chat panel */}
       {open && (
-        <div className="fixed bottom-24 right-6 z-50 w-[360px] max-h-[520px] rounded-2xl border border-border bg-card shadow-hero flex flex-col overflow-hidden animate-scale-in">
+        <div className="fixed bottom-24 right-4 left-4 sm:left-auto sm:right-6 z-50 sm:w-[360px] max-h-[520px] rounded-2xl border border-border bg-card shadow-hero flex flex-col overflow-hidden animate-scale-in">
           {/* Header */}
           <div className="gradient-hero px-4 py-3 text-primary-foreground">
             <div className="flex items-center justify-between">

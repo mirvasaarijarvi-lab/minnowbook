@@ -306,7 +306,7 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
               className="hover:shadow-hover transition-shadow"
             >
               <CardContent className="p-4">
-                <div className="flex items-start justify-between gap-4">
+                <div className="flex items-start justify-between gap-2 sm:gap-4">
                   <div className="flex items-start gap-3">
                     {canEdit && (
                     <Checkbox
