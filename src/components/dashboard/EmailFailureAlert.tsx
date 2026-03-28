@@ -32,7 +32,7 @@ const EmailFailureAlert = () => {
   const latestError = failureStats[0];
 
   return (
-    <div className="rounded-lg border border-destructive/50 bg-destructive/5 p-4 space-y-2">
+    <div className="rounded-lg border border-destructive/50 bg-destructive/5 p-3 sm:p-4 space-y-2 overflow-hidden">
       <div className="flex items-center gap-2">
         <AlertTriangle className="h-5 w-5 text-destructive shrink-0" />
         <h3 className="font-semibold text-destructive text-sm">

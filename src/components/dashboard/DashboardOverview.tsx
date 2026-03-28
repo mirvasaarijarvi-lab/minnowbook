@@ -198,9 +198,9 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-serif font-bold text-foreground">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <h2 className="text-xl sm:text-2xl font-serif font-bold text-foreground truncate">
             {t("dashboard.welcome")}
           </h2>
           <p className="text-sm text-muted-foreground">
@@ -209,8 +209,8 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
               : t("dashboard.dailySnapshot")}
           </p>
           <p className="text-sm font-medium text-foreground flex items-center gap-1.5 mt-1">
-            <CalendarDays className="h-4 w-4" />
-            {format(new Date(), "EEEE, MMMM d, yyyy", { locale: dateFnsLocale })}
+            <CalendarDays className="h-4 w-4 shrink-0" />
+            <span className="truncate">{format(new Date(), "EEEE, MMMM d, yyyy", { locale: dateFnsLocale })}</span>
           </p>
         </div>
         {tenant?.slug && (
@@ -218,7 +218,8 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
             <PopoverTrigger asChild>
               <Button variant="outline" size="sm" className="gap-1.5 shrink-0">
                 <ExternalLink className="h-3.5 w-3.5" />
-                {t("dashboard.bookingLink")}
+                <span className="hidden sm:inline">{t("dashboard.bookingLink")}</span>
+                <span className="sm:hidden">{t("dashboard.bookingLink").split(" ")[0]}</span>
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-[min(500px,calc(100vw-2rem))] max-h-[70vh] overflow-y-auto p-0" align="end" sideOffset={8}>
