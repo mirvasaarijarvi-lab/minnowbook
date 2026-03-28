@@ -244,7 +244,7 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
             {t("dashboard.todayFilter")}
           </Button>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-[140px]"><SelectValue placeholder={t("common.status")} /></SelectTrigger>
+            <SelectTrigger className="w-full sm:w-[140px]"><SelectValue placeholder={t("common.status")} /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{t("dashboard.allStatuses")}</SelectItem>
               <SelectItem value="pending">{t("dashboard.pending")}</SelectItem>
@@ -253,7 +253,7 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
             </SelectContent>
           </Select>
           <Select value={typeFilter} onValueChange={setTypeFilter}>
-            <SelectTrigger className="w-[160px]"><SelectValue placeholder={t("common.type")} /></SelectTrigger>
+            <SelectTrigger className="w-full sm:w-[160px]"><SelectValue placeholder={t("common.type")} /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{t("dashboard.allTypes")}</SelectItem>
               <SelectItem value="restaurant">{typeLabel("restaurant")}</SelectItem>
@@ -262,7 +262,7 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
             </SelectContent>
           </Select>
           <Select value={invoicedFilter} onValueChange={setInvoicedFilter}>
-            <SelectTrigger className="w-[140px]"><SelectValue placeholder="Invoice status" /></SelectTrigger>
+            <SelectTrigger className="w-full sm:w-[140px]"><SelectValue placeholder="Invoice status" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{t("dashboard.allStatuses")}</SelectItem>
               <SelectItem value="uninvoiced">{t("dashboard.uninvoiced")}</SelectItem>
