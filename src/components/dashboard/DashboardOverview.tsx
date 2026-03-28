@@ -198,9 +198,9 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-serif font-bold text-foreground">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <h2 className="text-xl sm:text-2xl font-serif font-bold text-foreground truncate">
             {t("dashboard.welcome")}
           </h2>
           <p className="text-sm text-muted-foreground">
@@ -209,8 +209,8 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
               : t("dashboard.dailySnapshot")}
           </p>
           <p className="text-sm font-medium text-foreground flex items-center gap-1.5 mt-1">
-            <CalendarDays className="h-4 w-4" />
-            {format(new Date(), "EEEE, MMMM d, yyyy", { locale: dateFnsLocale })}
+            <CalendarDays className="h-4 w-4 shrink-0" />
+            <span className="truncate">{format(new Date(), "EEEE, MMMM d, yyyy", { locale: dateFnsLocale })}</span>
           </p>
         </div>
         {tenant?.slug && (
@@ -218,7 +218,8 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
             <PopoverTrigger asChild>
               <Button variant="outline" size="sm" className="gap-1.5 shrink-0">
                 <ExternalLink className="h-3.5 w-3.5" />
-                {t("dashboard.bookingLink")}
+                <span className="hidden sm:inline">{t("dashboard.bookingLink")}</span>
+                <span className="sm:hidden">{t("dashboard.bookingLink").split(" ")[0]}</span>
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-[min(500px,calc(100vw-2rem))] max-h-[70vh] overflow-y-auto p-0" align="end" sideOffset={8}>
@@ -244,45 +245,45 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
 
       {/* Row 1: Today stats */}
       <div data-tour="stats-grid" className="grid gap-3 grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardContent className="pt-5 pb-4 text-center">
+        <Card className="min-w-0">
+          <CardContent className="pt-5 pb-4 text-center px-3">
             <CalendarDays className="h-5 w-5 mx-auto text-muted-foreground mb-1" />
-            <p className="text-3xl font-bold text-foreground">{stats?.todayCount ?? 0}</p>
-            <p className="text-xs text-muted-foreground mt-1">{t("dashboard.todaysReservations")}</p>
+            <p className="text-2xl sm:text-3xl font-bold text-foreground truncate">{stats?.todayCount ?? 0}</p>
+            <p className="text-[11px] sm:text-xs text-muted-foreground mt-1 leading-tight">{t("dashboard.todaysReservations")}</p>
           </CardContent>
         </Card>
 
         <Card
-          className={stats?.pendingCount ? "cursor-pointer hover:shadow-md transition-shadow hover:ring-1 hover:ring-accent/30" : ""}
+          className={`min-w-0 ${stats?.pendingCount ? "cursor-pointer hover:shadow-md transition-shadow hover:ring-1 hover:ring-accent/30" : ""}`}
           onClick={stats?.pendingCount ? () => onNavigate?.("reservations", { status: "pending" }) : undefined}
         >
-          <CardContent className="pt-5 pb-4 text-center relative">
+          <CardContent className="pt-5 pb-4 text-center relative px-3">
             <Clock className="h-5 w-5 mx-auto text-warning mb-1" />
-            <p className="text-3xl font-bold text-warning">{stats?.pendingCount ?? 0}</p>
-            <p className="text-xs text-muted-foreground mt-1">{t("dashboard.pending")} ({t("dashboard.total")})</p>
+            <p className="text-2xl sm:text-3xl font-bold text-warning truncate">{stats?.pendingCount ?? 0}</p>
+            <p className="text-[11px] sm:text-xs text-muted-foreground mt-1 leading-tight">{t("dashboard.pending")} ({t("dashboard.total")})</p>
             {(stats?.pendingCount ?? 0) > 0 && (
-              <ArrowRight className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <ArrowRight className="h-4 w-4 absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
             )}
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="pt-5 pb-4 text-center">
+        <Card className="min-w-0">
+          <CardContent className="pt-5 pb-4 text-center px-3">
             <Users className="h-5 w-5 mx-auto text-muted-foreground mb-1" />
-            <p className="text-3xl font-bold text-foreground">{stats?.todayGuests ?? 0}</p>
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="text-2xl sm:text-3xl font-bold text-foreground truncate">{stats?.todayGuests ?? 0}</p>
+            <p className="text-[11px] sm:text-xs text-muted-foreground mt-1 leading-tight">
               {t("dashboard.guestsToday")}
             </p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="pt-5 pb-4 text-center">
+        <Card className="min-w-0">
+          <CardContent className="pt-5 pb-4 text-center px-3">
             <CheckCircle className="h-5 w-5 mx-auto text-success mb-1" />
-            <p className="text-3xl font-bold text-foreground">
+            <p className="text-2xl sm:text-3xl font-bold text-foreground truncate">
               {stats?.checkedIn ?? 0}/{stats?.todayConfirmed ?? 0}
             </p>
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="text-[11px] sm:text-xs text-muted-foreground mt-1 leading-tight">
               {t("dashboard.arrived")}
             </p>
           </CardContent>
@@ -291,46 +292,46 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
 
       {/* Row 2: Weekly stats */}
       <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardContent className="pt-5 pb-4 text-center">
+        <Card className="min-w-0">
+          <CardContent className="pt-5 pb-4 text-center px-3">
             <Euro className="h-5 w-5 mx-auto text-muted-foreground mb-1" />
-            <p className="text-3xl font-bold text-foreground">
+            <p className="text-2xl sm:text-3xl font-bold text-foreground truncate">
               {(stats?.weekRevenue ?? 0).toFixed(0)} €
             </p>
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="text-[11px] sm:text-xs text-muted-foreground mt-1 leading-tight">
               {t("dashboard.weekRevenue")}
             </p>
             <ChangeIndicator value={revChange} />
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="pt-5 pb-4 text-center">
+        <Card className="min-w-0">
+          <CardContent className="pt-5 pb-4 text-center px-3">
             <BarChart3 className="h-5 w-5 mx-auto text-muted-foreground mb-1" />
-            <p className="text-3xl font-bold text-foreground">{stats?.weekReservations ?? 0}</p>
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="text-2xl sm:text-3xl font-bold text-foreground truncate">{stats?.weekReservations ?? 0}</p>
+            <p className="text-[11px] sm:text-xs text-muted-foreground mt-1 leading-tight">
               {t("dashboard.weekReservations")}
             </p>
             <ChangeIndicator value={resChange} />
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="pt-5 pb-4 text-center">
+        <Card className="min-w-0">
+          <CardContent className="pt-5 pb-4 text-center px-3">
             <Users className="h-5 w-5 mx-auto text-muted-foreground mb-1" />
-            <p className="text-3xl font-bold text-foreground">{stats?.weekGuests ?? 0}</p>
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="text-2xl sm:text-3xl font-bold text-foreground truncate">{stats?.weekGuests ?? 0}</p>
+            <p className="text-[11px] sm:text-xs text-muted-foreground mt-1 leading-tight">
               {t("dashboard.weekGuests")}
             </p>
             <ChangeIndicator value={guestChange} />
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="pt-5 pb-4 text-center">
+        <Card className="min-w-0">
+          <CardContent className="pt-5 pb-4 text-center px-3">
             <Percent className="h-5 w-5 mx-auto text-muted-foreground mb-1" />
-            <p className="text-3xl font-bold text-foreground">{stats?.utilization ?? 0}%</p>
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="text-2xl sm:text-3xl font-bold text-foreground truncate">{stats?.utilization ?? 0}%</p>
+            <p className="text-[11px] sm:text-xs text-muted-foreground mt-1 leading-tight">
               {t("dashboard.utilizationToday")}
             </p>
           </CardContent>
@@ -382,7 +383,7 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
       )}
 
       {/* Today by type + Quick info */}
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid gap-3 grid-cols-1 sm:grid-cols-2">
         {/* Today by type */}
         <Card>
           <CardHeader className="pb-2">
