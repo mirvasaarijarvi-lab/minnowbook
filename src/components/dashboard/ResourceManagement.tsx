@@ -312,7 +312,7 @@ const ResourceManagement = () => {
           room_description: FREE_TEXT_ROOM_TYPES.includes(roomType) ? (bulkDescription || null) : null,
           description: !FREE_TEXT_ROOM_TYPES.includes(roomType) ? (bulkDescription || null) : null,
           approval_status: getApprovalStatus(),
-        });
+          site_id: selectedSiteId || null,
       }
       const { error } = await supabase.from("resources").insert(copies as any);
       if (error) throw error;
