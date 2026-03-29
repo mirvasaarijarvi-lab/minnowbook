@@ -226,7 +226,7 @@ const BlockedSlotsPanel = () => {
     if (!bulkDeleteRange.to || format(bulkDeleteRange.from, "yyyy-MM-dd") === format(bulkDeleteRange.to, "yyyy-MM-dd")) {
       return format(bulkDeleteRange.from, "PPP", { locale: dateFnsLocale });
     }
-    return `${format(bulkDeleteRange.from, "MMM d", { locale: dateFnsLocale })} – ${format(bulkDeleteRange.to, "MMM d, yyyy", { locale: dateFnsLocale })}`;
+    return `${format(bulkDeleteRange.from, "MMM d", { locale: dateFnsLocale })} to ${format(bulkDeleteRange.to, "MMM d, yyyy", { locale: dateFnsLocale })}`;
   }, [bulkDeleteRange, t]);
 
   return (
