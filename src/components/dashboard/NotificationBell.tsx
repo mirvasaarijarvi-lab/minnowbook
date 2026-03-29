@@ -114,7 +114,7 @@ const NotificationBell = () => {
           </div>
         </div>
 
-        <ScrollArea className="max-h-80">
+        <div className="max-h-80 overflow-y-auto">
           {notifications.length === 0 ? (
             <div className="py-8 text-center text-sm text-muted-foreground">
               {t("notifications.empty")}
