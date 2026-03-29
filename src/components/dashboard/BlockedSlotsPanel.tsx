@@ -218,7 +218,7 @@ const BlockedSlotsPanel = () => {
     if (!dateRange.to || format(dateRange.from, "yyyy-MM-dd") === format(dateRange.to, "yyyy-MM-dd")) {
       return format(dateRange.from, "PPP", { locale: dateFnsLocale });
     }
-    return `${format(dateRange.from, "MMM d", { locale: dateFnsLocale })} – ${format(dateRange.to, "MMM d, yyyy", { locale: dateFnsLocale })}`;
+    return `${format(dateRange.from, "MMM d", { locale: dateFnsLocale })} to ${format(dateRange.to, "MMM d, yyyy", { locale: dateFnsLocale })}`;
   }, [dateRange, t]);
 
   const bulkDeleteLabel = useMemo(() => {
