@@ -269,7 +269,7 @@ const ResourceManagement = () => {
           breakfast_price_per_person: source.breakfast_price_per_person,
           room_type_pricing: source.room_type_pricing,
           approval_status: getApprovalStatus(),
-        });
+          site_id: selectedSiteId || source.site_id || null,
       }
       const { error } = await supabase.from("resources").insert(copies);
       if (error) throw error;
