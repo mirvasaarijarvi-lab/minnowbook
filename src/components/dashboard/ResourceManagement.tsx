@@ -479,17 +479,17 @@ const ResourceManagement = () => {
                   {/* Site (instance) selector */}
                   {(sites?.length ?? 0) > 0 && (
                     <div>
-                      <Label>{t("dashboard.site") || "Site"}</Label>
+                      <Label>Site</Label>
                       <Select value={form.site_id || "__none__"} onValueChange={(v) => setForm({ ...form, site_id: v === "__none__" ? "" : v })}>
                         <SelectTrigger><SelectValue placeholder="No site" /></SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="__none__">— {t("dashboard.noSite") || "No site"} —</SelectItem>
+                          <SelectItem value="__none__">— No site —</SelectItem>
                           {(sites ?? []).map((s) => (
                             <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
-                      <p className="text-xs text-muted-foreground mt-1">{t("dashboard.siteHint") || "Assign this resource to a site/location"}</p>
+                      <p className="text-xs text-muted-foreground mt-1">Assign this resource to a site/location</p>
                     </div>
                   )}
 
