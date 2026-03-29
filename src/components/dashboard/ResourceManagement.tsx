@@ -315,6 +315,7 @@ const ResourceManagement = () => {
           approval_status: getApprovalStatus(),
           site_id: selectedSiteId || null,
         });
+      }
       const { error } = await supabase.from("resources").insert(copies as any);
       if (error) throw error;
     },
