@@ -493,7 +493,7 @@ const ResourceManagement = () => {
                     </div>
                   )}
 
-
+                  <div>
                     <Label>{t("common.description")}</Label>
                     <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder={t("dashboard.descriptionPlaceholder")} rows={3} />
                   </div>
