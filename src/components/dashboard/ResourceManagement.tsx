@@ -212,7 +212,7 @@ const ResourceManagement = () => {
         offers_quote: form.resource_type === "restaurant" ? form.offers_quote : true,
         offers_set_menu: form.resource_type === "restaurant" ? form.offers_set_menu : true,
         approval_status: getApprovalStatus(),
-        site_id: editingId ? (selectedSiteId || editingSiteId || null) : (selectedSiteId || null),
+        site_id: form.site_id || null,
       };
       if (editingId) {
         const { error } = await supabase.from("resources").update(payload).eq("id", editingId);
