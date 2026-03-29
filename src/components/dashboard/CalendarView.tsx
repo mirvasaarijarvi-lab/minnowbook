@@ -41,13 +41,13 @@ const CalendarView = () => {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <h2 className="text-2xl font-serif font-bold text-foreground">{t("nav.calendar")}</h2>
+          <h2 className="text-xl sm:text-2xl font-serif font-bold text-foreground">{t("nav.calendar")}</h2>
           <DashboardTooltip text={t("dashboard.calendarTooltip")} />
         </div>
         {canCreate && (
-          <Button size="sm" className="gap-1.5" onClick={() => setNewReservationOpen(true)}>
+          <Button size="sm" className="gap-1.5 shrink-0" onClick={() => setNewReservationOpen(true)}>
             <Plus className="h-4 w-4" />
             {t("dashboard.newReservation")}
           </Button>

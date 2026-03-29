@@ -224,9 +224,9 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between flex-wrap gap-2" data-tour="reservations-filters">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2" data-tour="reservations-filters">
         <div className="flex items-center gap-2">
-          <h2 className="text-2xl font-serif font-bold text-foreground">{t("nav.reservations")}</h2>
+          <h2 className="text-xl sm:text-2xl font-serif font-bold text-foreground">{t("nav.reservations")}</h2>
           <DashboardTooltip text="View, filter, and manage all reservations. Use status and type filters to narrow results. Click a reservation to edit details, confirm, cancel, or check in guests." />
         </div>
         <div className="flex gap-2 flex-wrap">

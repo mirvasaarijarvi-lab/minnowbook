@@ -218,7 +218,7 @@ const BlockedSlotsPanel = () => {
     if (!dateRange.to || format(dateRange.from, "yyyy-MM-dd") === format(dateRange.to, "yyyy-MM-dd")) {
       return format(dateRange.from, "PPP", { locale: dateFnsLocale });
     }
-    return `${format(dateRange.from, "MMM d", { locale: dateFnsLocale })} – ${format(dateRange.to, "MMM d, yyyy", { locale: dateFnsLocale })}`;
+    return `${format(dateRange.from, "MMM d", { locale: dateFnsLocale })} to ${format(dateRange.to, "MMM d, yyyy", { locale: dateFnsLocale })}`;
   }, [dateRange, t]);
 
   const bulkDeleteLabel = useMemo(() => {
@@ -226,24 +226,24 @@ const BlockedSlotsPanel = () => {
     if (!bulkDeleteRange.to || format(bulkDeleteRange.from, "yyyy-MM-dd") === format(bulkDeleteRange.to, "yyyy-MM-dd")) {
       return format(bulkDeleteRange.from, "PPP", { locale: dateFnsLocale });
     }
-    return `${format(bulkDeleteRange.from, "MMM d", { locale: dateFnsLocale })} – ${format(bulkDeleteRange.to, "MMM d, yyyy", { locale: dateFnsLocale })}`;
+    return `${format(bulkDeleteRange.from, "MMM d", { locale: dateFnsLocale })} to ${format(bulkDeleteRange.to, "MMM d, yyyy", { locale: dateFnsLocale })}`;
   }, [bulkDeleteRange, t]);
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <h3 className="text-lg font-serif font-bold text-foreground flex items-center gap-2">
-            <Ban className="h-5 w-5" />
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <h3 className="text-lg font-serif font-bold text-foreground flex items-center gap-2 whitespace-nowrap">
+            <Ban className="h-5 w-5 shrink-0" />
             {t("blocking.title")}
           </h3>
           <DashboardTooltip text={t("blocking.tooltip")} />
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           {/* Bulk delete */}
           <Dialog open={bulkDeleteOpen} onOpenChange={(open) => { setBulkDeleteOpen(open); if (!open) setBulkDeleteRange(undefined); }}>
             <DialogTrigger asChild>
-              <Button size="sm" variant="outline" className="gap-1.5 text-destructive border-destructive/30 hover:bg-destructive/10">
+              <Button size="sm" variant="outline" className="gap-1.5 text-destructive border-destructive/30 hover:bg-destructive/10 text-xs sm:text-sm">
                 <Trash2 className="h-4 w-4" /> {t("blocking.clearRange")}
               </Button>
             </DialogTrigger>
@@ -413,7 +413,7 @@ const BlockedSlotsPanel = () => {
             <span>{t("blocking.filter")}</span>
           </div>
           <Select value={filterType} onValueChange={(v) => { setFilterType(v); setFilterResourceId("all"); }}>
-            <SelectTrigger className="w-[160px] h-8 text-sm"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="w-full sm:w-[160px] h-8 text-sm"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{t("blocking.allTypes")}</SelectItem>
               {Object.entries(selectableTypes).map(([key, label]) => (
@@ -423,7 +423,7 @@ const BlockedSlotsPanel = () => {
           </Select>
           {filterResources.length > 0 && (
             <Select value={filterResourceId} onValueChange={setFilterResourceId}>
-              <SelectTrigger className="w-[180px] h-8 text-sm"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="w-full sm:w-[180px] h-8 text-sm"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">{t("blocking.allResources")}</SelectItem>
                 {filterResources.map((r) => (
@@ -466,7 +466,7 @@ const BlockedSlotsPanel = () => {
                       {slot.start_time && slot.end_time && (
                         <Badge variant="outline" className="text-xs">
                           <Clock className="h-3 w-3 mr-1" />
-                          {slot.start_time.slice(0, 5)} – {slot.end_time.slice(0, 5)}
+                          {slot.start_time.slice(0, 5)} to {slot.end_time.slice(0, 5)}
                         </Badge>
                       )}
                       <Badge variant="secondary" className="text-xs capitalize">
