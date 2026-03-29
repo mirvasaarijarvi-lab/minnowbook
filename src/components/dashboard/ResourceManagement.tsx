@@ -347,6 +347,7 @@ const ResourceManagement = () => {
 
   const openEdit = (r: any) => {
     setEditingId(r.id);
+    setEditingSiteId(r.site_id || null);
     const rtp = r.room_type_pricing ?? {};
     const bedConfig = r.bed_configuration as Record<string, number> | null;
     setBeds(bedConfig ? Object.entries(bedConfig).map(([type, count]) => ({ type, count: count as number })) : []);
