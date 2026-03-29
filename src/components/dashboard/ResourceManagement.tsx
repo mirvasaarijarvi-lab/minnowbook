@@ -210,6 +210,7 @@ const ResourceManagement = () => {
         offers_quote: form.resource_type === "restaurant" ? form.offers_quote : true,
         offers_set_menu: form.resource_type === "restaurant" ? form.offers_set_menu : true,
         approval_status: getApprovalStatus(),
+        site_id: selectedSiteId || null,
       };
       if (editingId) {
         const { error } = await supabase.from("resources").update(payload).eq("id", editingId);
@@ -268,6 +269,7 @@ const ResourceManagement = () => {
           breakfast_price_per_person: source.breakfast_price_per_person,
           room_type_pricing: source.room_type_pricing,
           approval_status: getApprovalStatus(),
+          site_id: selectedSiteId || source.site_id || null,
         });
       }
       const { error } = await supabase.from("resources").insert(copies);
@@ -311,6 +313,7 @@ const ResourceManagement = () => {
           room_description: FREE_TEXT_ROOM_TYPES.includes(roomType) ? (bulkDescription || null) : null,
           description: !FREE_TEXT_ROOM_TYPES.includes(roomType) ? (bulkDescription || null) : null,
           approval_status: getApprovalStatus(),
+          site_id: selectedSiteId || null,
         });
       }
       const { error } = await supabase.from("resources").insert(copies as any);
