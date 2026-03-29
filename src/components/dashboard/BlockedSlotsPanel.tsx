@@ -231,19 +231,19 @@ const BlockedSlotsPanel = () => {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <h3 className="text-lg font-serif font-bold text-foreground flex items-center gap-2">
-            <Ban className="h-5 w-5" />
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <h3 className="text-lg font-serif font-bold text-foreground flex items-center gap-2 whitespace-nowrap">
+            <Ban className="h-5 w-5 shrink-0" />
             {t("blocking.title")}
           </h3>
           <DashboardTooltip text={t("blocking.tooltip")} />
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           {/* Bulk delete */}
           <Dialog open={bulkDeleteOpen} onOpenChange={(open) => { setBulkDeleteOpen(open); if (!open) setBulkDeleteRange(undefined); }}>
             <DialogTrigger asChild>
-              <Button size="sm" variant="outline" className="gap-1.5 text-destructive border-destructive/30 hover:bg-destructive/10">
+              <Button size="sm" variant="outline" className="gap-1.5 text-destructive border-destructive/30 hover:bg-destructive/10 text-xs sm:text-sm">
                 <Trash2 className="h-4 w-4" /> {t("blocking.clearRange")}
               </Button>
             </DialogTrigger>
