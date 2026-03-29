@@ -466,7 +466,7 @@ const BlockedSlotsPanel = () => {
                       {slot.start_time && slot.end_time && (
                         <Badge variant="outline" className="text-xs">
                           <Clock className="h-3 w-3 mr-1" />
-                          {slot.start_time.slice(0, 5)} – {slot.end_time.slice(0, 5)}
+                          {slot.start_time.slice(0, 5)} to {slot.end_time.slice(0, 5)}
                         </Badge>
                       )}
                       <Badge variant="secondary" className="text-xs capitalize">
