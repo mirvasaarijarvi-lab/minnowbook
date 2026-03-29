@@ -2412,6 +2412,14 @@ export type Database = {
         Returns: number
       }
       get_tier_max_sites: { Args: { p_tier: string }; Returns: number }
+      get_unconfirmed_users: {
+        Args: { since_date: string }
+        Returns: {
+          created_at: string
+          email: string
+          id: string
+        }[]
+      }
       get_user_tenant_id: { Args: { p_user_id: string }; Returns: string }
       has_permission: {
         Args: { p_permission: string; p_user_id: string }
