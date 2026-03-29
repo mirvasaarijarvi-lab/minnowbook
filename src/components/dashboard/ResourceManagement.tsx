@@ -56,6 +56,7 @@ const ResourceManagement = () => {
   const queryClient = useQueryClient();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingSiteId, setEditingSiteId] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const t = useT();
@@ -210,7 +211,7 @@ const ResourceManagement = () => {
         offers_quote: form.resource_type === "restaurant" ? form.offers_quote : true,
         offers_set_menu: form.resource_type === "restaurant" ? form.offers_set_menu : true,
         approval_status: getApprovalStatus(),
-        site_id: selectedSiteId || null,
+        site_id: editingId ? (selectedSiteId || editingSiteId || null) : (selectedSiteId || null),
       };
       if (editingId) {
         const { error } = await supabase.from("resources").update(payload).eq("id", editingId);
@@ -340,12 +341,14 @@ const ResourceManagement = () => {
     const allowedTypes = (tenant as any)?.allowed_reservation_types ?? [];
     const defaultType = allowedTypes[0] || "restaurant";
     setEditingId(null);
+    setEditingSiteId(null);
     setBeds([]);
     setForm({ name: "", resource_type: defaultType, capacity: "", price_per_night: "", description: "", image_url: "", breakfast_price_per_person: "", room_type_pricing: { ...defaultRoomPricing }, is_active: true, room_type: "", room_description: "", offers_catering: false, offers_popup: false, offers_table_reservation: true, offers_quote: true, offers_set_menu: true });
   };
 
   const openEdit = (r: any) => {
     setEditingId(r.id);
+    setEditingSiteId(r.site_id || null);
     const rtp = r.room_type_pricing ?? {};
     const bedConfig = r.bed_configuration as Record<string, number> | null;
     setBeds(bedConfig ? Object.entries(bedConfig).map(([type, count]) => ({ type, count: count as number })) : []);
