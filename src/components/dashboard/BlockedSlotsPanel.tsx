@@ -413,7 +413,7 @@ const BlockedSlotsPanel = () => {
             <span>{t("blocking.filter")}</span>
           </div>
           <Select value={filterType} onValueChange={(v) => { setFilterType(v); setFilterResourceId("all"); }}>
-            <SelectTrigger className="w-[160px] h-8 text-sm"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="w-full sm:w-[160px] h-8 text-sm"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{t("blocking.allTypes")}</SelectItem>
               {Object.entries(selectableTypes).map(([key, label]) => (
