@@ -373,26 +373,27 @@ const ResourceManagement = () => {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between flex-wrap gap-2" data-tour="resources-header">
-        <div>
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3" data-tour="resources-header">
+        <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <h2 className="text-2xl font-serif font-bold text-foreground">{t("dashboard.resourceManagement")}</h2>
+            <h2 className="text-xl sm:text-2xl font-serif font-bold text-foreground">{t("dashboard.resourceManagement")}</h2>
             <DashboardTooltip text="Add rooms, tables, or venues here. Set capacity, pricing, and upload photos. Toggle resources active/inactive to control booking availability." />
           </div>
           <p className="text-sm text-muted-foreground">{t("dashboard.resourceManagementDesc")}</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0 flex-wrap">
           {(tenant as any)?.slug && (
             <Button variant="outline" size="sm" className="gap-1.5" asChild>
               <a href={`/book/${(tenant as any).slug}`} target="_blank" rel="noopener noreferrer">
                 <ExternalLink className="h-4 w-4" />
-                {t("dashboard.bookingLink")}
+                <span className="hidden sm:inline">{t("dashboard.bookingLink")}</span>
+                <span className="sm:hidden">Link</span>
               </a>
             </Button>
           )}
           {canManage && ((tenant as any)?.allowed_reservation_types?.includes("hotel") || (tenant as any)?.allowed_reservation_types?.includes("guesthouse")) && (
             <Button size="sm" variant="outline" className="gap-1.5" onClick={() => setBulkDialogOpen(true)}>
-              <Plus className="h-4 w-4" /> {t("dashboard.addModeBulk")}
+              <Plus className="h-4 w-4" /> <span className="hidden sm:inline">{t("dashboard.addModeBulk")}</span><span className="sm:hidden">Bulk</span>
             </Button>
           )}
           {canManage && (

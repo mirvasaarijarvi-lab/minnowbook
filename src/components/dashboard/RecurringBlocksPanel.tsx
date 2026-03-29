@@ -177,17 +177,17 @@ const RecurringBlocksPanel = () => {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <h3 className="text-lg font-serif font-bold text-foreground flex items-center gap-2">
-            <RefreshCw className="h-5 w-5" />
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <h3 className="text-lg font-serif font-bold text-foreground flex items-center gap-2 whitespace-nowrap">
+            <RefreshCw className="h-5 w-5 shrink-0" />
             {t("blocking.recurringTitle")}
           </h3>
           <DashboardTooltip text={t("blocking.recurringTooltip")} />
         </div>
         <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) resetForm(); }}>
           <DialogTrigger asChild>
-            <Button size="sm" className="gap-1.5">
+            <Button size="sm" className="gap-1.5 shrink-0">
               <Plus className="h-4 w-4" /> {t("blocking.addRecurring")}
             </Button>
           </DialogTrigger>

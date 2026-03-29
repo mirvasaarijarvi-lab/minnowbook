@@ -423,7 +423,7 @@ const BlockedSlotsPanel = () => {
           </Select>
           {filterResources.length > 0 && (
             <Select value={filterResourceId} onValueChange={setFilterResourceId}>
-              <SelectTrigger className="w-[180px] h-8 text-sm"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="w-full sm:w-[180px] h-8 text-sm"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">{t("blocking.allResources")}</SelectItem>
                 {filterResources.map((r) => (
