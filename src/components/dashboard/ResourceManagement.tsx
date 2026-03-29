@@ -82,6 +82,7 @@ const ResourceManagement = () => {
     room_type: "" as string, room_description: "",
     offers_catering: false, offers_popup: false,
     offers_table_reservation: true, offers_quote: true, offers_set_menu: true,
+    site_id: "" as string,
   });
 
   const { data: sites } = useQuery({
