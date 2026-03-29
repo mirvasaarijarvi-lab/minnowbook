@@ -344,7 +344,7 @@ const ResourceManagement = () => {
     setEditingId(null);
     setEditingSiteId(null);
     setBeds([]);
-    setForm({ name: "", resource_type: defaultType, capacity: "", price_per_night: "", description: "", image_url: "", breakfast_price_per_person: "", room_type_pricing: { ...defaultRoomPricing }, is_active: true, room_type: "", room_description: "", offers_catering: false, offers_popup: false, offers_table_reservation: true, offers_quote: true, offers_set_menu: true });
+    setForm({ name: "", resource_type: defaultType, capacity: "", price_per_night: "", description: "", image_url: "", breakfast_price_per_person: "", room_type_pricing: { ...defaultRoomPricing }, is_active: true, room_type: "", room_description: "", offers_catering: false, offers_popup: false, offers_table_reservation: true, offers_quote: true, offers_set_menu: true, site_id: selectedSiteId || "" });
   };
 
   const openEdit = (r: any) => {
