@@ -82,6 +82,7 @@ const ResourceManagement = () => {
     room_type: "" as string, room_description: "",
     offers_catering: false, offers_popup: false,
     offers_table_reservation: true, offers_quote: true, offers_set_menu: true,
+    site_id: "" as string,
   });
 
   const { data: sites } = useQuery({
@@ -211,7 +212,7 @@ const ResourceManagement = () => {
         offers_quote: form.resource_type === "restaurant" ? form.offers_quote : true,
         offers_set_menu: form.resource_type === "restaurant" ? form.offers_set_menu : true,
         approval_status: getApprovalStatus(),
-        site_id: editingId ? (selectedSiteId || editingSiteId || null) : (selectedSiteId || null),
+        site_id: form.site_id || null,
       };
       if (editingId) {
         const { error } = await supabase.from("resources").update(payload).eq("id", editingId);
@@ -343,7 +344,7 @@ const ResourceManagement = () => {
     setEditingId(null);
     setEditingSiteId(null);
     setBeds([]);
-    setForm({ name: "", resource_type: defaultType, capacity: "", price_per_night: "", description: "", image_url: "", breakfast_price_per_person: "", room_type_pricing: { ...defaultRoomPricing }, is_active: true, room_type: "", room_description: "", offers_catering: false, offers_popup: false, offers_table_reservation: true, offers_quote: true, offers_set_menu: true });
+    setForm({ name: "", resource_type: defaultType, capacity: "", price_per_night: "", description: "", image_url: "", breakfast_price_per_person: "", room_type_pricing: { ...defaultRoomPricing }, is_active: true, room_type: "", room_description: "", offers_catering: false, offers_popup: false, offers_table_reservation: true, offers_quote: true, offers_set_menu: true, site_id: selectedSiteId || "" });
   };
 
   const openEdit = (r: any) => {
@@ -365,6 +366,7 @@ const ResourceManagement = () => {
       offers_table_reservation: (r as any).offers_table_reservation ?? true,
       offers_quote: (r as any).offers_quote ?? true,
       offers_set_menu: (r as any).offers_set_menu ?? true,
+      site_id: r.site_id || "",
       room_type_pricing: {
         single: rtp.single?.toString() ?? "1.0",
         double: rtp.double?.toString() ?? "1.5",
@@ -473,6 +475,23 @@ const ResourceManagement = () => {
                       </SelectContent>
                     </Select>
                   </div>
+
+                  {/* Site (instance) selector */}
+                  {(sites?.length ?? 0) > 0 && (
+                    <div>
+                      <Label>Site</Label>
+                      <Select value={form.site_id || "__none__"} onValueChange={(v) => setForm({ ...form, site_id: v === "__none__" ? "" : v })}>
+                        <SelectTrigger><SelectValue placeholder="No site" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="__none__">— No site —</SelectItem>
+                          {(sites ?? []).map((s) => (
+                            <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <p className="text-xs text-muted-foreground mt-1">Assign this resource to a site/location</p>
+                    </div>
+                  )}
 
                   <div>
                     <Label>{t("common.description")}</Label>
