@@ -543,6 +543,9 @@ const AdminPanel = () => {
         </CardContent>
       </Card>
 
+      {/* System Health Check */}
+      <HealthCheckPanel />
+
       {/* Role Permissions Editor */}
       {(isOwner || isSuperadmin) && <PermissionsEditor />}
 
