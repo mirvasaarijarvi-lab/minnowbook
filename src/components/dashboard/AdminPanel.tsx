@@ -26,6 +26,7 @@ import SupportRequestsBoard from "./SupportRequestsBoard";
 import LoginHistoryPanel from "./LoginHistoryPanel";
 import AuditLogPanel from "./AuditLogPanel";
 import PermissionsEditor from "./PermissionsEditor";
+import HealthCheckPanel from "./HealthCheckPanel";
 
 interface SiteAssignment {
   id?: string;
@@ -541,6 +542,9 @@ const AdminPanel = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* System Health Check */}
+      <HealthCheckPanel />
 
       {/* Role Permissions Editor */}
       {(isOwner || isSuperadmin) && <PermissionsEditor />}
