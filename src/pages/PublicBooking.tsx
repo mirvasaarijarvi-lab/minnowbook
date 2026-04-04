@@ -23,6 +23,8 @@ import { useDateLocale } from "@/hooks/useDateLocale";
 import ResourceCarousel from "@/components/ResourceCarousel";
 import ConfirmationEmailPreview from "@/components/ConfirmationEmailPreview";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
+import PublicReviews from "@/components/public/PublicReviews";
+import WaitlistButton from "@/components/public/WaitlistButton";
 import React from "react";
 
 // Types for public views (not in auto-generated types)
