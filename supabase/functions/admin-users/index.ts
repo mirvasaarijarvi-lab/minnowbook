@@ -222,6 +222,40 @@ Deno.serve(async (req) => {
         if (suError) console.error("Failed to insert site assignments:", suError);
       }
 
+      // Notify tenant admins about the new user (fire-and-forget)
+      try {
+        const { data: tenantData } = await adminClient
+          .from("tenants")
+          .select("name")
+          .eq("id", tenantId)
+          .single();
+
+        // Get admin/owner users to notify
+        const { data: adminUsers } = await adminClient
+          .from("tenant_users")
+          .select("user_id")
+          .eq("tenant_id", tenantId)
+          .in("role", ["owner", "admin"]);
+
+        if (adminUsers && adminUsers.length > 0) {
+          for (const au of adminUsers) {
+            if (au.user_id === callerId) continue; // Don't notify the person who created the user
+            const { data: auUser } = await adminClient.auth.admin.getUserById(au.user_id);
+            if (auUser?.user?.email) {
+              await adminClient.from("notifications").insert({
+                tenant_id: tenantId,
+                type: "new_staff_registered",
+                title: "New team member added",
+                message: `${displayName || email} has been added to ${tenantData?.name || "your team"} as ${role}.`,
+              });
+              break; // One notification is enough for the whole team
+            }
+          }
+        }
+      } catch (e) {
+        console.error("Non-critical: failed to notify about new user:", e);
+      }
+
       return new Response(JSON.stringify({ success: true, userId: newUser.user!.id }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
