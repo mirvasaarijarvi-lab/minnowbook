@@ -548,6 +548,36 @@ export type Database = {
           },
         ]
       }
+      booking_tokens: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          is_revoked: boolean
+          reservation_id: string
+          tenant_id: string
+          token: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          is_revoked?: boolean
+          reservation_id: string
+          tenant_id: string
+          token: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          is_revoked?: boolean
+          reservation_id?: string
+          tenant_id?: string
+          token?: string
+        }
+        Relationships: []
+      }
       discount_codes: {
         Row: {
           applies_to: string[] | null
@@ -708,6 +738,48 @@ export type Database = {
           id?: string
           token?: string
           used_at?: string | null
+        }
+        Relationships: []
+      }
+      guest_reviews: {
+        Row: {
+          comment: string | null
+          created_at: string
+          guest_email: string
+          guest_name: string
+          id: string
+          is_published: boolean
+          rating: number
+          reservation_id: string | null
+          review_token: string | null
+          site_id: string | null
+          tenant_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          guest_email: string
+          guest_name: string
+          id?: string
+          is_published?: boolean
+          rating: number
+          reservation_id?: string | null
+          review_token?: string | null
+          site_id?: string | null
+          tenant_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          guest_email?: string
+          guest_name?: string
+          id?: string
+          is_published?: boolean
+          rating?: number
+          reservation_id?: string | null
+          review_token?: string | null
+          site_id?: string | null
+          tenant_id?: string
         }
         Relationships: []
       }
@@ -2134,6 +2206,48 @@ export type Database = {
           subscription_status?: string | null
           tier?: string
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      waitlist: {
+        Row: {
+          created_at: string
+          guest_email: string
+          guest_name: string
+          guest_phone: string | null
+          id: string
+          notified_at: string | null
+          preferred_date: string
+          resource_type: string
+          site_id: string | null
+          status: string
+          tenant_id: string
+        }
+        Insert: {
+          created_at?: string
+          guest_email: string
+          guest_name: string
+          guest_phone?: string | null
+          id?: string
+          notified_at?: string | null
+          preferred_date: string
+          resource_type: string
+          site_id?: string | null
+          status?: string
+          tenant_id: string
+        }
+        Update: {
+          created_at?: string
+          guest_email?: string
+          guest_name?: string
+          guest_phone?: string | null
+          id?: string
+          notified_at?: string | null
+          preferred_date?: string
+          resource_type?: string
+          site_id?: string | null
+          status?: string
+          tenant_id?: string
         }
         Relationships: []
       }
