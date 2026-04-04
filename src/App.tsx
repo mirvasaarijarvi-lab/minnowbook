@@ -148,6 +148,7 @@ const App = () => (
                 }
               />
               <Route path="/book/:slug" element={<PublicBooking />} />
+              <Route path="/my-booking/:token" element={<GuestPortal />} />
               <Route
                 path="/guide"
                 element={
