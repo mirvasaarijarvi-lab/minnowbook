@@ -35,6 +35,22 @@ const redeemPendingCode = async (t: (key: string) => string) => {
   }
 };
 
+const MAX_ATTEMPTS = 5;
+const LOCKOUT_SECONDS = 60;
+const ATTEMPT_STORAGE_KEY = "mimmobook_login_attempts";
+
+const getAttemptState = () => {
+  try {
+    const raw = localStorage.getItem(ATTEMPT_STORAGE_KEY);
+    if (!raw) return { count: 0, lockedUntil: 0 };
+    return JSON.parse(raw);
+  } catch { return { count: 0, lockedUntil: 0 }; }
+};
+
+const setAttemptState = (count: number, lockedUntil: number) => {
+  localStorage.setItem(ATTEMPT_STORAGE_KEY, JSON.stringify({ count, lockedUntil }));
+};
+
 const Login = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -44,7 +60,23 @@ const Login = () => {
   const [mfaFactorId, setMfaFactorId] = useState<string | null>(null);
   const [pendingCode, setPendingCode] = useState("");
   const [codeOpen, setCodeOpen] = useState(false);
+  const [lockoutRemaining, setLockoutRemaining] = useState(0);
   const t = useT();
+
+  // Rate limit countdown timer
+  useEffect(() => {
+    const state = getAttemptState();
+    const remaining = Math.max(0, Math.ceil((state.lockedUntil - Date.now()) / 1000));
+    if (remaining > 0) {
+      setLockoutRemaining(remaining);
+      const interval = setInterval(() => {
+        const r = Math.max(0, Math.ceil((state.lockedUntil - Date.now()) / 1000));
+        setLockoutRemaining(r);
+        if (r <= 0) clearInterval(interval);
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+  }, []);
 
   const savePendingCode = () => {
     const trimmed = pendingCode.trim().toUpperCase();
