@@ -2113,6 +2113,14 @@ const PublicBookingInner = () => {
           </Button>
         </form>
 
+        {/* Guest Reviews */}
+        <PublicReviews
+          tenantId={tenant.id}
+          siteId={activeSiteId}
+          primaryColor={primaryColor}
+          accentColor={accentColor}
+        />
+
         {/* Footer */}
         <footer className="text-center py-6 text-xs text-muted-foreground">
           {businessName && <p>{businessName}</p>}

@@ -431,6 +431,9 @@ const Superadmin = () => {
           </CardContent>
         </Card>
 
+        {/* Stripe Revenue Dashboard */}
+        <StripeRevenuePanel />
+
         {/* Access Codes */}
         <AccessCodesPanel />
 
