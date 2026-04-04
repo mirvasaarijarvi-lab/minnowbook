@@ -451,6 +451,9 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
 
       {/* Beta Feedback Card */}
       <BetaFeedbackCard />
+
+      {/* Onboarding Checklist */}
+      <OnboardingChecklist onNavigate={(view) => onNavigate?.(view)} />
     </div>
   );
 };
