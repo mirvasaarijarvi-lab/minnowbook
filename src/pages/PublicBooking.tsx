@@ -1364,7 +1364,18 @@ const PublicBookingInner = () => {
                     </div>
                   )}
                   {selectedDate && timeSlots.length === 0 && openingHours && openingHours.length > 0 && (
-                    <p className="text-sm text-muted-foreground">{t("booking.closedDay")}</p>
+                    <div className="space-y-2">
+                      <p className="text-sm text-muted-foreground">{t("booking.closedDay")}</p>
+                      {form.reservation_type && (
+                        <WaitlistButton
+                          tenantId={tenant.id}
+                          siteId={activeSiteId}
+                          date={format(selectedDate, "yyyy-MM-dd")}
+                          reservationType={form.reservation_type}
+                          accentColor={accentColor}
+                        />
+                      )}
+                    </div>
                   )}
                   {selectedDate && (!openingHours || openingHours.length === 0) && (
                     <div className="space-y-2">
