@@ -233,8 +233,14 @@ const Login = () => {
               <PasswordInput id="password" value={password} onChange={(e) => setPassword(e.target.value)} showRequirements={false} />
             </div>
 
-            <Button type="submit" variant="hero" size="lg" className="w-full" disabled={loading}>
-              {loading ? t("login.loggingIn") : t("common.logIn")}
+            {lockoutRemaining > 0 && (
+              <p className="text-sm text-destructive text-center">
+                Too many attempts. Try again in {lockoutRemaining}s
+              </p>
+            )}
+
+            <Button type="submit" variant="hero" size="lg" className="w-full" disabled={loading || lockoutRemaining > 0}>
+              {lockoutRemaining > 0 ? `Wait ${lockoutRemaining}s` : loading ? t("login.loggingIn") : t("common.logIn")}
               <ArrowRight className="h-4 w-4" />
             </Button>
           </form>
