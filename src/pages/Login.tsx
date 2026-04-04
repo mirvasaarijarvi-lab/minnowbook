@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,6 +35,22 @@ const redeemPendingCode = async (t: (key: string) => string) => {
   }
 };
 
+const MAX_ATTEMPTS = 5;
+const LOCKOUT_SECONDS = 60;
+const ATTEMPT_STORAGE_KEY = "mimmobook_login_attempts";
+
+const getAttemptState = () => {
+  try {
+    const raw = localStorage.getItem(ATTEMPT_STORAGE_KEY);
+    if (!raw) return { count: 0, lockedUntil: 0 };
+    return JSON.parse(raw);
+  } catch { return { count: 0, lockedUntil: 0 }; }
+};
+
+const setAttemptState = (count: number, lockedUntil: number) => {
+  localStorage.setItem(ATTEMPT_STORAGE_KEY, JSON.stringify({ count, lockedUntil }));
+};
+
 const Login = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -44,7 +60,23 @@ const Login = () => {
   const [mfaFactorId, setMfaFactorId] = useState<string | null>(null);
   const [pendingCode, setPendingCode] = useState("");
   const [codeOpen, setCodeOpen] = useState(false);
+  const [lockoutRemaining, setLockoutRemaining] = useState(0);
   const t = useT();
+
+  // Rate limit countdown timer
+  useEffect(() => {
+    const state = getAttemptState();
+    const remaining = Math.max(0, Math.ceil((state.lockedUntil - Date.now()) / 1000));
+    if (remaining > 0) {
+      setLockoutRemaining(remaining);
+      const interval = setInterval(() => {
+        const r = Math.max(0, Math.ceil((state.lockedUntil - Date.now()) / 1000));
+        setLockoutRemaining(r);
+        if (r <= 0) clearInterval(interval);
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+  }, []);
 
   const savePendingCode = () => {
     const trimmed = pendingCode.trim().toUpperCase();
@@ -55,12 +87,39 @@ const Login = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Rate limiting check
+    const state = getAttemptState();
+    if (state.lockedUntil > Date.now()) {
+      const r = Math.ceil((state.lockedUntil - Date.now()) / 1000);
+      toast.error(`Too many attempts. Try again in ${r}s`);
+      return;
+    }
+
     setLoading(true);
     savePendingCode();
 
     try {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) throw error;
+      if (error) {
+        // Increment failed attempts
+        const newCount = state.count + 1;
+        if (newCount >= MAX_ATTEMPTS) {
+          setAttemptState(newCount, Date.now() + LOCKOUT_SECONDS * 1000);
+          setLockoutRemaining(LOCKOUT_SECONDS);
+          const interval = setInterval(() => {
+            const r = Math.max(0, Math.ceil((Date.now() + LOCKOUT_SECONDS * 1000 - Date.now()) / 1000));
+            setLockoutRemaining(r);
+            if (r <= 0) clearInterval(interval);
+          }, 1000);
+        } else {
+          setAttemptState(newCount, 0);
+        }
+        throw error;
+      }
+
+      // Reset on success
+      setAttemptState(0, 0);
 
       const { data: factorsData } = await supabase.auth.mfa.listFactors();
       const verifiedFactor = factorsData?.totp?.find((f: any) => f.status === "verified");
@@ -174,8 +233,14 @@ const Login = () => {
               <PasswordInput id="password" value={password} onChange={(e) => setPassword(e.target.value)} showRequirements={false} />
             </div>
 
-            <Button type="submit" variant="hero" size="lg" className="w-full" disabled={loading}>
-              {loading ? t("login.loggingIn") : t("common.logIn")}
+            {lockoutRemaining > 0 && (
+              <p className="text-sm text-destructive text-center">
+                Too many attempts. Try again in {lockoutRemaining}s
+              </p>
+            )}
+
+            <Button type="submit" variant="hero" size="lg" className="w-full" disabled={loading || lockoutRemaining > 0}>
+              {lockoutRemaining > 0 ? `Wait ${lockoutRemaining}s` : loading ? t("login.loggingIn") : t("common.logIn")}
               <ArrowRight className="h-4 w-4" />
             </Button>
           </form>

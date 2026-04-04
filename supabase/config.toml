@@ -19,3 +19,5 @@ project_id = "lsgznskkxadplwnxplhd"
     verify_jwt = false
   [functions.resend-confirmation]
     verify_jwt = false
+  [functions.ical-feed]
+    verify_jwt = false

@@ -36,6 +36,7 @@ import BookingLinksCard from "./BookingLinksCard";
 import ActionAlertsBanner from "./ActionAlertsBanner";
 import BetaFeedbackCard from "./BetaFeedbackCard";
 import EmailFailureAlert from "./EmailFailureAlert";
+import OnboardingChecklist from "./OnboardingChecklist";
 
 import { useMemo } from "react";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip as RechartsTooltip, CartesianGrid } from "recharts";
@@ -450,6 +451,9 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
 
       {/* Beta Feedback Card */}
       <BetaFeedbackCard />
+
+      {/* Onboarding Checklist */}
+      <OnboardingChecklist onNavigate={(view) => onNavigate?.(view)} />
     </div>
   );
 };

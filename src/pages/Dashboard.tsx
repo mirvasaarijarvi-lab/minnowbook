@@ -35,6 +35,10 @@ import SupportChatWidget from "@/components/SupportChatWidget";
 import ProfileSettings from "@/components/dashboard/ProfileSettings";
 import GuidedTour, { TourStep } from "@/components/dashboard/GuidedTour";
 import SamplePeriodBanner from "@/components/dashboard/SamplePeriodBanner";
+import OnboardingChecklist from "@/components/dashboard/OnboardingChecklist";
+import QuickActionsFAB from "@/components/dashboard/QuickActionsFAB";
+import KeyboardShortcutsModal from "@/components/dashboard/KeyboardShortcutsModal";
+import ThemeToggle from "@/components/ThemeToggle";
 import { useSamplePeriod } from "@/hooks/useSamplePeriod";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -132,6 +136,7 @@ const Dashboard = () => {
   const [currentView, setCurrentView] = useState<DashboardView>("overview");
   const [mobileOpen, setMobileOpen] = useState(false);
   const [tourOpen, setTourOpen] = useState(false);
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [selectedSiteId, setSelectedSiteId] = useState<string | null>(null);
   const [selectedResourceId, setSelectedResourceId] = useState<string | null>(null);
   const [reservationStatusFilter, setReservationStatusFilter] = useState<string | undefined>();
@@ -149,6 +154,20 @@ const Dashboard = () => {
   }, []);
 
   useKeyboardShortcuts({ onViewChange: handleViewChange });
+
+  // "?" shortcut to open keyboard shortcuts modal
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) return;
+      if (e.key === "?" && !e.ctrlKey && !e.altKey && !e.metaKey) {
+        e.preventDefault();
+        setShortcutsOpen(true);
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []);
 
   const handleOverviewNavigate = (view: string, filter?: { status?: string; invoiced?: boolean; checkoutToday?: boolean }) => {
     if (view === "reservations") {
@@ -312,6 +331,7 @@ const Dashboard = () => {
           <div className="flex items-center justify-between mb-0">
             <div />
             <div className="hidden lg:flex items-center gap-2">
+              <ThemeToggle />
               <NotificationBell />
               <Button
                 variant="ghost"
@@ -346,6 +366,10 @@ const Dashboard = () => {
       {currentView !== "support" && (
         <SupportChatWidget businessTier={effectiveTier === "business"} />
       )}
+
+      <QuickActionsFAB onNavigate={handleViewChange} />
+
+      <KeyboardShortcutsModal open={shortcutsOpen} onOpenChange={setShortcutsOpen} />
 
       <GuidedTour
         steps={tourSteps}

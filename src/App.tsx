@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { I18nProvider } from "@/contexts/I18nContext";
+import { ThemeProvider } from "next-themes";
 import { supabase } from "@/integrations/supabase/client";
 import MfaVerify from "@/components/MfaVerify";
 import Index from "./pages/Index";
@@ -17,6 +18,7 @@ import ResetPassword from "./pages/ResetPassword";
 import Dashboard from "./pages/Dashboard";
 import Onboarding from "./pages/Onboarding";
 import PublicBooking from "./pages/PublicBooking";
+import GuestPortal from "./pages/GuestPortal";
 import NotFound from "./pages/NotFound";
 import Support from "./pages/Support";
 import About from "./pages/About";
@@ -96,6 +98,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
+    <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
     <I18nProvider>
       <AuthProvider>
         <ImpersonationProvider>
@@ -145,6 +148,7 @@ const App = () => (
                 }
               />
               <Route path="/book/:slug" element={<PublicBooking />} />
+              <Route path="/my-booking/:token" element={<GuestPortal />} />
               <Route
                 path="/guide"
                 element={
@@ -162,6 +166,7 @@ const App = () => (
         </ImpersonationProvider>
       </AuthProvider>
     </I18nProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 
