@@ -239,7 +239,7 @@ Deno.serve(async (req) => {
 
         if (adminUsers && adminUsers.length > 0) {
           for (const au of adminUsers) {
-            if (au.user_id === callerId) continue; // Don't notify the person who created the user
+            if (au.user_id === callingUser.id) continue; // Don't notify the person who created the user
             const { data: auUser } = await adminClient.auth.admin.getUserById(au.user_id);
             if (auUser?.user?.email) {
               await adminClient.from("notifications").insert({
