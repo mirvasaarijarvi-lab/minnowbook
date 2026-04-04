@@ -87,12 +87,39 @@ const Login = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Rate limiting check
+    const state = getAttemptState();
+    if (state.lockedUntil > Date.now()) {
+      const r = Math.ceil((state.lockedUntil - Date.now()) / 1000);
+      toast.error(`Too many attempts. Try again in ${r}s`);
+      return;
+    }
+
     setLoading(true);
     savePendingCode();
 
     try {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) throw error;
+      if (error) {
+        // Increment failed attempts
+        const newCount = state.count + 1;
+        if (newCount >= MAX_ATTEMPTS) {
+          setAttemptState(newCount, Date.now() + LOCKOUT_SECONDS * 1000);
+          setLockoutRemaining(LOCKOUT_SECONDS);
+          const interval = setInterval(() => {
+            const r = Math.max(0, Math.ceil((Date.now() + LOCKOUT_SECONDS * 1000 - Date.now()) / 1000));
+            setLockoutRemaining(r);
+            if (r <= 0) clearInterval(interval);
+          }, 1000);
+        } else {
+          setAttemptState(newCount, 0);
+        }
+        throw error;
+      }
+
+      // Reset on success
+      setAttemptState(0, 0);
 
       const { data: factorsData } = await supabase.auth.mfa.listFactors();
       const verifiedFactor = factorsData?.totp?.find((f: any) => f.status === "verified");
