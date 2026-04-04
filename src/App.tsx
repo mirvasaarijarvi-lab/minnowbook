@@ -166,6 +166,7 @@ const App = () => (
         </ImpersonationProvider>
       </AuthProvider>
     </I18nProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 
