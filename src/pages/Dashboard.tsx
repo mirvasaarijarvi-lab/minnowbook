@@ -367,6 +367,10 @@ const Dashboard = () => {
         <SupportChatWidget businessTier={effectiveTier === "business"} />
       )}
 
+      <QuickActionsFAB onNavigate={handleViewChange} />
+
+      <KeyboardShortcutsModal open={shortcutsOpen} onOpenChange={setShortcutsOpen} />
+
       <GuidedTour
         steps={tourSteps}
         isOpen={tourOpen}
