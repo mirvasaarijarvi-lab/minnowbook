@@ -36,6 +36,7 @@ import { useImpersonation } from "@/contexts/ImpersonationContext";
 import AccessCodesPanel from "@/components/dashboard/AccessCodesPanel";
 import BetaFeedbackPanel from "@/components/dashboard/BetaFeedbackPanel";
 import SuperadminLoginHistory from "@/components/dashboard/SuperadminLoginHistory";
+import StripeRevenuePanel from "@/components/dashboard/StripeRevenuePanel";
 
 interface TenantWithStats {
   id: string;
