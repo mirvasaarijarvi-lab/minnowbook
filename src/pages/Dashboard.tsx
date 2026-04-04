@@ -136,6 +136,7 @@ const Dashboard = () => {
   const [currentView, setCurrentView] = useState<DashboardView>("overview");
   const [mobileOpen, setMobileOpen] = useState(false);
   const [tourOpen, setTourOpen] = useState(false);
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [selectedSiteId, setSelectedSiteId] = useState<string | null>(null);
   const [selectedResourceId, setSelectedResourceId] = useState<string | null>(null);
   const [reservationStatusFilter, setReservationStatusFilter] = useState<string | undefined>();
