@@ -234,6 +234,17 @@ const SupportChatWidget = ({ businessTier = false }: SupportChatWidgetProps) => 
       });
       if (error) throw error;
 
+      // Notify admin via email about escalation (fire-and-forget)
+      supabase.functions.invoke("send-reminder", {
+        body: {
+          type: "escalation_notification",
+          tenant_id: tenantId,
+          subject: escalateSubject.trim(),
+          message: input.trim(),
+          user_email: session?.user?.email,
+        },
+      }).catch(() => {});
+
       setMessages((prev) => [
         ...prev,
         { role: "user", content: `📋 **${t("aid.requestSubmitted" as TranslationKey)}:** ${escalateSubject.trim()}\n${input.trim()}` },

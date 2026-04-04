@@ -23,6 +23,8 @@ import { useDateLocale } from "@/hooks/useDateLocale";
 import ResourceCarousel from "@/components/ResourceCarousel";
 import ConfirmationEmailPreview from "@/components/ConfirmationEmailPreview";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
+import PublicReviews from "@/components/public/PublicReviews";
+import WaitlistButton from "@/components/public/WaitlistButton";
 import React from "react";
 
 // Types for public views (not in auto-generated types)
@@ -1362,7 +1364,18 @@ const PublicBookingInner = () => {
                     </div>
                   )}
                   {selectedDate && timeSlots.length === 0 && openingHours && openingHours.length > 0 && (
-                    <p className="text-sm text-muted-foreground">{t("booking.closedDay")}</p>
+                    <div className="space-y-2">
+                      <p className="text-sm text-muted-foreground">{t("booking.closedDay")}</p>
+                      {form.reservation_type && (
+                        <WaitlistButton
+                          tenantId={tenant.id}
+                          siteId={activeSiteId}
+                          date={format(selectedDate, "yyyy-MM-dd")}
+                          reservationType={form.reservation_type}
+                          accentColor={accentColor}
+                        />
+                      )}
+                    </div>
                   )}
                   {selectedDate && (!openingHours || openingHours.length === 0) && (
                     <div className="space-y-2">
@@ -2110,6 +2123,14 @@ const PublicBookingInner = () => {
             )}
           </Button>
         </form>
+
+        {/* Guest Reviews */}
+        <PublicReviews
+          tenantId={tenant.id}
+          siteId={activeSiteId}
+          primaryColor={primaryColor}
+          accentColor={accentColor}
+        />
 
         {/* Footer */}
         <footer className="text-center py-6 text-xs text-muted-foreground">
