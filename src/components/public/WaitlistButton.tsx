@@ -29,8 +29,8 @@ const WaitlistButton = ({ tenantId, siteId, date, reservationType, accentColor }
       const { error } = await supabase.from("waitlist").insert({
         tenant_id: tenantId,
         site_id: siteId,
-        date,
-        reservation_type: reservationType,
+        preferred_date: date,
+        resource_type: reservationType,
         guest_email: email.trim(),
         guest_name: name.trim(),
       });
