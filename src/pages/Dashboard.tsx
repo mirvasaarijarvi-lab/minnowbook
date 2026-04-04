@@ -155,6 +155,20 @@ const Dashboard = () => {
 
   useKeyboardShortcuts({ onViewChange: handleViewChange });
 
+  // "?" shortcut to open keyboard shortcuts modal
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) return;
+      if (e.key === "?" && !e.ctrlKey && !e.altKey && !e.metaKey) {
+        e.preventDefault();
+        setShortcutsOpen(true);
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []);
+
   const handleOverviewNavigate = (view: string, filter?: { status?: string; invoiced?: boolean; checkoutToday?: boolean }) => {
     if (view === "reservations") {
       setReservationStatusFilter(filter?.status);
