@@ -1,15 +1,55 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+// --- CORS with origin allowlist ---
+const ALLOWED_ORIGINS = [
+  "https://minnowbook.lovable.app",
+  /^https:\/\/.*\.lovable\.app$/,
+];
+
+const SECURITY_HEADERS = {
   "X-Content-Type-Options": "nosniff",
   "X-Frame-Options": "DENY",
   "X-XSS-Protection": "1; mode=block",
   "Referrer-Policy": "strict-origin-when-cross-origin",
   "Content-Security-Policy": "default-src 'none'; frame-ancestors 'none'",
 };
+
+function getCorsHeaders(req: Request): Record<string, string> {
+  const origin = req.headers.get("Origin") || "";
+  const allowed = ALLOWED_ORIGINS.some((o) =>
+    typeof o === "string" ? o === origin : o.test(origin)
+  );
+  return {
+    "Access-Control-Allow-Origin": allowed ? origin : ALLOWED_ORIGINS[0] as string,
+    "Access-Control-Allow-Headers":
+      "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+    ...SECURITY_HEADERS,
+  };
+}
+
+// --- Safe error messages (prevent schema leakage) ---
+const SAFE_ERRORS = new Set([
+  "Not authenticated",
+  "Insufficient permissions",
+  "No tenant context",
+  "Action is required",
+  "Unknown action",
+  "Cannot delete yourself",
+  "User not in your tenant",
+  "Site not found in your tenant",
+  "No valid users found in your tenant",
+  "userIds array is required",
+  "Cannot assign more than 100 users at once",
+  "Only superadmins can grant admin access or above",
+]);
+
+function sanitizeError(msg: string): string {
+  if (SAFE_ERRORS.has(msg)) return msg;
+  // Allow validation errors from our own validators
+  if (/^(Email|Password|Display name|Role|Invalid).{0,80}$/.test(msg)) return msg;
+  console.error("[admin-users] Internal error:", msg);
+  return "An unexpected error occurred. Please try again.";
+}
 
 // --- Input validation helpers ---
 const MAX_EMAIL_LENGTH = 255;
@@ -86,6 +126,8 @@ setInterval(() => {
 }, 300_000);
 
 Deno.serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
+
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -105,27 +147,32 @@ Deno.serve(async (req) => {
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) throw new Error("Not authenticated");
+    if (!authHeader?.startsWith("Bearer ")) throw new Error("Not authenticated");
 
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
     const userClient = createClient(supabaseUrl, anonKey, {
       global: { headers: { Authorization: authHeader } },
     });
-    const { data: { user: callingUser }, error: authError } = await userClient.auth.getUser();
-    if (authError || !callingUser) throw new Error("Not authenticated");
+
+    // Use getClaims() for fast local JWT verification instead of network round-trip
+    const token = authHeader.replace("Bearer ", "");
+    const { data: claimsData, error: claimsError } = await userClient.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims) throw new Error("Not authenticated");
+    const callingUserId = claimsData.claims.sub as string;
+    if (!callingUserId) throw new Error("Not authenticated");
 
     // Check caller is owner or admin (or system admin for impersonation)
     const { data: callerRole } = await adminClient
       .from("tenant_users")
       .select("role, tenant_id")
-      .eq("user_id", callingUser.id)
+      .eq("user_id", callingUserId)
       .single();
 
     // Check system admin status
     const { data: sysAdmin } = await adminClient
       .from("system_admins")
       .select("id")
-      .eq("user_id", callingUser.id)
+      .eq("user_id", callingUserId)
       .maybeSingle();
 
     if (!callerRole && !sysAdmin) {
@@ -239,7 +286,7 @@ Deno.serve(async (req) => {
 
         if (adminUsers && adminUsers.length > 0) {
           for (const au of adminUsers) {
-            if (au.user_id === callingUser.id) continue; // Don't notify the person who created the user
+            if (au.user_id === callingUserId) continue; // Don't notify the person who created the user
             const { data: auUser } = await adminClient.auth.admin.getUserById(au.user_id);
             if (auUser?.user?.email) {
               await adminClient.from("notifications").insert({
@@ -408,7 +455,7 @@ Deno.serve(async (req) => {
 
     if (action === "delete") {
       const userId = validateUuid(body.userId, "userId");
-      if (userId === callingUser.id) throw new Error("Cannot delete yourself");
+      if (userId === callingUserId) throw new Error("Cannot delete yourself");
 
       // Also delete site_users
       await adminClient
@@ -431,8 +478,13 @@ Deno.serve(async (req) => {
 
     throw new Error("Unknown action");
   } catch (error: any) {
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 400,
+    const safeMessage = sanitizeError(error.message || "Unknown error");
+    const status = safeMessage === "Not authenticated" ? 401
+      : safeMessage === "Insufficient permissions" ? 403
+      : safeMessage.includes("Too many") ? 429
+      : 400;
+    return new Response(JSON.stringify({ error: safeMessage }), {
+      status,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
