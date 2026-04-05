@@ -188,7 +188,7 @@ Deno.serve(async (req) => {
         if (stall_size && !VALID_STALL_SIZES.includes(stall_size)) throw new Error("Invalid stall size");
         electricity_needed = body.electricity_needed === true;
         water_needed = body.water_needed === true;
-        food_permits = validateString(body.food_permits, "food_permits", 500);
+        food_permits = validateString(body.food_permits, "food_permits", 300);
         if (body.stall_fee !== undefined && body.stall_fee !== null) {
           const sf = parseFloat(String(body.stall_fee));
           if (isNaN(sf) || sf < 0 || sf > 999999) throw new Error("Invalid stall fee");
