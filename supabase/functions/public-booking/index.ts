@@ -106,6 +106,15 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Reject oversized request bodies (50KB max)
+    const contentLength = parseInt(req.headers.get("content-length") || "0", 10);
+    if (contentLength > 50 * 1024) {
+      return new Response(JSON.stringify({ error: "Request too large" }), {
+        status: 413,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const body = await req.json();
 
     // Validate all inputs server-side
