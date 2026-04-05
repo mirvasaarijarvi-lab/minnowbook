@@ -126,6 +126,8 @@ setInterval(() => {
 }, 300_000);
 
 Deno.serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
+
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -145,14 +147,19 @@ Deno.serve(async (req) => {
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) throw new Error("Not authenticated");
+    if (!authHeader?.startsWith("Bearer ")) throw new Error("Not authenticated");
 
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
     const userClient = createClient(supabaseUrl, anonKey, {
       global: { headers: { Authorization: authHeader } },
     });
-    const { data: { user: callingUser }, error: authError } = await userClient.auth.getUser();
-    if (authError || !callingUser) throw new Error("Not authenticated");
+
+    // Use getClaims() for fast local JWT verification instead of network round-trip
+    const token = authHeader.replace("Bearer ", "");
+    const { data: claimsData, error: claimsError } = await userClient.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims) throw new Error("Not authenticated");
+    const callingUserId = claimsData.claims.sub as string;
+    if (!callingUserId) throw new Error("Not authenticated");
 
     // Check caller is owner or admin (or system admin for impersonation)
     const { data: callerRole } = await adminClient
