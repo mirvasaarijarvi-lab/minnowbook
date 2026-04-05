@@ -2253,6 +2253,36 @@ export type Database = {
       }
     }
     Views: {
+      guest_reviews_public: {
+        Row: {
+          comment: string | null
+          created_at: string | null
+          guest_name: string | null
+          id: string | null
+          rating: number | null
+          site_id: string | null
+          tenant_id: string | null
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string | null
+          guest_name?: string | null
+          id?: string | null
+          rating?: number | null
+          site_id?: string | null
+          tenant_id?: string | null
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string | null
+          guest_name?: string | null
+          id?: string | null
+          rating?: number | null
+          site_id?: string | null
+          tenant_id?: string | null
+        }
+        Relationships: []
+      }
       site_settings_public: {
         Row: {
           accent_color: string | null
@@ -2492,6 +2522,7 @@ export type Database = {
       }
     }
     Functions: {
+      cleanup_old_audit_logs: { Args: never; Returns: undefined }
       copy_tenant_defaults_to_site: {
         Args: { p_site_id: string; p_tenant_id: string }
         Returns: undefined
@@ -2556,6 +2587,18 @@ export type Database = {
             Returns: boolean
           }
       is_system_admin: { Args: { p_user_id: string }; Returns: boolean }
+      lookup_booking_token: {
+        Args: { p_token: string }
+        Returns: {
+          created_at: string
+          expires_at: string
+          id: string
+          is_revoked: boolean
+          reservation_id: string
+          tenant_id: string
+          token: string
+        }[]
+      }
       move_to_dlq: {
         Args: {
           dlq_name: string
