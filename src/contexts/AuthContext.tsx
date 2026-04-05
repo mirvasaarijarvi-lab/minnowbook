@@ -3,6 +3,9 @@ import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { gtm } from "@/lib/gtm";
 
+// --- Session idle timeout (30 minutes) ---
+const IDLE_TIMEOUT_MS = 30 * 60 * 1000;
+
 interface SubscriptionInfo {
   subscribed: boolean;
   tier: string | null;
@@ -43,6 +46,30 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [subscription, setSubscription] = useState<SubscriptionInfo>(defaultSubscription);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // --- Idle timeout: sign out after 30 min of inactivity ---
+  const resetIdleTimer = useCallback(() => {
+    if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+    idleTimerRef.current = setTimeout(async () => {
+      const { data: { session: s } } = await supabase.auth.getSession();
+      if (s) {
+        console.info("[AuthContext] Session idle timeout — signing out");
+        await supabase.auth.signOut();
+      }
+    }, IDLE_TIMEOUT_MS);
+  }, []);
+
+  useEffect(() => {
+    const events = ["mousedown", "keydown", "touchstart", "scroll"];
+    const handler = () => resetIdleTimer();
+    events.forEach((e) => window.addEventListener(e, handler, { passive: true }));
+    resetIdleTimer();
+    return () => {
+      events.forEach((e) => window.removeEventListener(e, handler));
+      if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+    };
+  }, [resetIdleTimer]);
 
   const checkSubscription = useCallback(async () => {
     try {

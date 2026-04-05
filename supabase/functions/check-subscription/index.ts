@@ -21,6 +21,7 @@ function getCorsHeaders(req: Request): Record<string, string> {
     "X-Frame-Options": "DENY",
     "X-XSS-Protection": "1; mode=block",
     "Referrer-Policy": "strict-origin-when-cross-origin",
+    "Cache-Control": "no-store, no-cache, must-revalidate",
   };
 }
 
@@ -50,6 +51,16 @@ serve(async (req) => {
   );
 
   try {
+    // Reject oversized request bodies (50KB max)
+    const MAX_BODY_SIZE = 50 * 1024;
+    const contentLength = parseInt(req.headers.get("content-length") || "0", 10);
+    if (contentLength > MAX_BODY_SIZE) {
+      return new Response(JSON.stringify({ error: "Request too large" }), {
+        status: 413,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     logStep("Function started");
 
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");

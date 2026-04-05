@@ -106,6 +106,15 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Reject oversized request bodies (50KB max)
+    const contentLength = parseInt(req.headers.get("content-length") || "0", 10);
+    if (contentLength > 50 * 1024) {
+      return new Response(JSON.stringify({ error: "Request too large" }), {
+        status: 413,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const body = await req.json();
 
     // Validate all inputs server-side
@@ -117,7 +126,7 @@ Deno.serve(async (req) => {
     const date = validateDate(body.date, "date");
     if (!date) throw new Error("date is required");
     const start_time = validateTime(body.start_time, "start_time");
-    const special_requests = validateString(body.special_requests, "special_requests", 1000);
+    const special_requests = validateString(body.special_requests, "special_requests", 500);
 
     const reservation_type = validateString(body.reservation_type, "reservation_type", 20, true)!;
     if (!VALID_TYPES.includes(reservation_type)) throw new Error("Invalid reservation type");
@@ -177,7 +186,7 @@ Deno.serve(async (req) => {
 
       if (restaurant_sub_type === "catering") {
         delivery_address = validateString(body.delivery_address, "delivery_address", 200);
-        dietary_notes = validateString(body.dietary_notes, "dietary_notes", 500);
+        dietary_notes = validateString(body.dietary_notes, "dietary_notes", 300);
         equipment_needed = body.equipment_needed === true;
         staff_needed = body.staff_needed === true;
       }
@@ -188,7 +197,7 @@ Deno.serve(async (req) => {
         if (stall_size && !VALID_STALL_SIZES.includes(stall_size)) throw new Error("Invalid stall size");
         electricity_needed = body.electricity_needed === true;
         water_needed = body.water_needed === true;
-        food_permits = validateString(body.food_permits, "food_permits", 500);
+        food_permits = validateString(body.food_permits, "food_permits", 300);
         if (body.stall_fee !== undefined && body.stall_fee !== null) {
           const sf = parseFloat(String(body.stall_fee));
           if (isNaN(sf) || sf < 0 || sf > 999999) throw new Error("Invalid stall fee");
