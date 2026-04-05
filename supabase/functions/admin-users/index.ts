@@ -1,15 +1,55 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+// --- CORS with origin allowlist ---
+const ALLOWED_ORIGINS = [
+  "https://minnowbook.lovable.app",
+  /^https:\/\/.*\.lovable\.app$/,
+];
+
+const SECURITY_HEADERS = {
   "X-Content-Type-Options": "nosniff",
   "X-Frame-Options": "DENY",
   "X-XSS-Protection": "1; mode=block",
   "Referrer-Policy": "strict-origin-when-cross-origin",
   "Content-Security-Policy": "default-src 'none'; frame-ancestors 'none'",
 };
+
+function getCorsHeaders(req: Request): Record<string, string> {
+  const origin = req.headers.get("Origin") || "";
+  const allowed = ALLOWED_ORIGINS.some((o) =>
+    typeof o === "string" ? o === origin : o.test(origin)
+  );
+  return {
+    "Access-Control-Allow-Origin": allowed ? origin : ALLOWED_ORIGINS[0] as string,
+    "Access-Control-Allow-Headers":
+      "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+    ...SECURITY_HEADERS,
+  };
+}
+
+// --- Safe error messages (prevent schema leakage) ---
+const SAFE_ERRORS = new Set([
+  "Not authenticated",
+  "Insufficient permissions",
+  "No tenant context",
+  "Action is required",
+  "Unknown action",
+  "Cannot delete yourself",
+  "User not in your tenant",
+  "Site not found in your tenant",
+  "No valid users found in your tenant",
+  "userIds array is required",
+  "Cannot assign more than 100 users at once",
+  "Only superadmins can grant admin access or above",
+]);
+
+function sanitizeError(msg: string): string {
+  if (SAFE_ERRORS.has(msg)) return msg;
+  // Allow validation errors from our own validators
+  if (/^(Email|Password|Display name|Role|Invalid).{0,80}$/.test(msg)) return msg;
+  console.error("[admin-users] Internal error:", msg);
+  return "An unexpected error occurred. Please try again.";
+}
 
 // --- Input validation helpers ---
 const MAX_EMAIL_LENGTH = 255;
