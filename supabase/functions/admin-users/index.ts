@@ -478,8 +478,13 @@ Deno.serve(async (req) => {
 
     throw new Error("Unknown action");
   } catch (error: any) {
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 400,
+    const safeMessage = sanitizeError(error.message || "Unknown error");
+    const status = safeMessage === "Not authenticated" ? 401
+      : safeMessage === "Insufficient permissions" ? 403
+      : safeMessage.includes("Too many") ? 429
+      : 400;
+    return new Response(JSON.stringify({ error: safeMessage }), {
+      status,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
