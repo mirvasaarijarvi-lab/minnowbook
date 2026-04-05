@@ -18,9 +18,10 @@ const PublicReviews = ({ tenantId, siteId, primaryColor, accentColor }: PublicRe
     queryKey: ["public-reviews", tenantId, siteId],
     queryFn: async () => {
       let query = supabase
-        .from("guest_reviews_public" as any)
+        .from("guest_reviews")
         .select("id, guest_name, rating, comment, created_at")
         .eq("tenant_id", tenantId)
+        .eq("is_published", true)
         .order("created_at", { ascending: false })
         .limit(6);
       if (siteId) {
