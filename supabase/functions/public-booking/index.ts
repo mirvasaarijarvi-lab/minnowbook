@@ -117,7 +117,7 @@ Deno.serve(async (req) => {
     const date = validateDate(body.date, "date");
     if (!date) throw new Error("date is required");
     const start_time = validateTime(body.start_time, "start_time");
-    const special_requests = validateString(body.special_requests, "special_requests", 1000);
+    const special_requests = validateString(body.special_requests, "special_requests", 500);
 
     const reservation_type = validateString(body.reservation_type, "reservation_type", 20, true)!;
     if (!VALID_TYPES.includes(reservation_type)) throw new Error("Invalid reservation type");
