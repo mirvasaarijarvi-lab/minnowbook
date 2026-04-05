@@ -177,7 +177,7 @@ Deno.serve(async (req) => {
 
       if (restaurant_sub_type === "catering") {
         delivery_address = validateString(body.delivery_address, "delivery_address", 200);
-        dietary_notes = validateString(body.dietary_notes, "dietary_notes", 500);
+        dietary_notes = validateString(body.dietary_notes, "dietary_notes", 300);
         equipment_needed = body.equipment_needed === true;
         staff_needed = body.staff_needed === true;
       }
