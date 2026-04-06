@@ -873,12 +873,49 @@ const PublicBookingInner = () => {
                 <Mail className="h-4 w-4 mt-0.5 shrink-0" />
                 <p>{t("booking.checkSpam")}</p>
               </div>
-              <Button
-                variant="outline"
-                onClick={() => { setSubmitted(false); setForm({ guest_name: "", guest_email: "", guest_phone: "", guests_count: "", reservation_type: "", start_time: "", special_requests: "", resource_id: "", check_out_date: "", room_type: "", breakfast_included: false, event_type: "", estimated_guests: "", catering_needed: false, pricing_type: "", fixed_price: "", restaurant_sub_type: "dine_in", delivery_address: "", dietary_notes: "", equipment_needed: false, staff_needed: false, festival_name: "", stall_size: "", electricity_needed: false, water_needed: false, food_permits: "", stall_fee: "", promo_code: "" }); setSelectedDate(undefined); }}
-              >
-                {t("booking.makeAnother")}
-              </Button>
+              <div className="flex flex-col sm:flex-row gap-2 justify-center">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    const escIcal = (s: string) => s.replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\n/g, "\\n");
+                    const dateStr = selectedDate ? format(selectedDate, "yyyyMMdd") : "";
+                    const timeStr = form.start_time ? form.start_time.replace(/:/g, "") + "00" : "";
+                    const dtStart = timeStr ? `${dateStr}T${timeStr}` : dateStr;
+                    let dtEnd = dtStart;
+                    if (form.check_out_date) {
+                      dtEnd = form.check_out_date.replace(/-/g, "");
+                    }
+                    const summary = escIcal(`${displayName} — ${form.reservation_type}`);
+                    const desc = escIcal([
+                      form.guest_name,
+                      form.guests_count ? `${form.guests_count} guests` : "",
+                      form.special_requests || "",
+                    ].filter(Boolean).join("\\n"));
+                    const lines = [
+                      "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//MimmoBook//Booking//EN",
+                      "BEGIN:VEVENT",
+                      `DTSTART:${dtStart}`, `DTEND:${dtEnd}`,
+                      `SUMMARY:${summary}`, `DESCRIPTION:${desc}`,
+                      "END:VEVENT", "END:VCALENDAR",
+                    ];
+                    const blob = new Blob([lines.join("\r\n")], { type: "text/calendar" });
+                    const a = document.createElement("a");
+                    a.href = URL.createObjectURL(blob);
+                    a.download = "reservation.ics";
+                    a.click();
+                    URL.revokeObjectURL(a.href);
+                  }}
+                >
+                  <CalendarPlus className="h-4 w-4 mr-1" />
+                  {t("booking.addToCalendar")}
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => { setSubmitted(false); setForm({ guest_name: "", guest_email: "", guest_phone: "", guests_count: "", reservation_type: "", start_time: "", special_requests: "", resource_id: "", check_out_date: "", room_type: "", breakfast_included: false, event_type: "", estimated_guests: "", catering_needed: false, pricing_type: "", fixed_price: "", restaurant_sub_type: "dine_in", delivery_address: "", dietary_notes: "", equipment_needed: false, staff_needed: false, festival_name: "", stall_size: "", electricity_needed: false, water_needed: false, food_permits: "", stall_fee: "", promo_code: "" }); setSelectedDate(undefined); }}
+                >
+                  {t("booking.makeAnother")}
+                </Button>
+              </div>
             </CardContent>
           </Card>
 
