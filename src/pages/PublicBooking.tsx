@@ -868,7 +868,7 @@ const PublicBookingInner = () => {
               <h2 className="text-2xl font-serif font-bold" style={{ color: primaryColor }}>
                 {t("booking.thankYou")}
               </h2>
-              <p className="text-muted-foreground">{t("booking.confirmationMsg")}</p>
+              <p className="text-muted-foreground">{t("booking.confirmationMsg").replace("{name}", displayName)}</p>
               <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-800 text-left">
                 <Mail className="h-4 w-4 mt-0.5 shrink-0" />
                 <p>{t("booking.checkSpam")}</p>
