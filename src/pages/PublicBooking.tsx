@@ -869,6 +869,10 @@ const PublicBookingInner = () => {
                 {t("booking.thankYou")}
               </h2>
               <p className="text-muted-foreground">{t("booking.confirmationMsg")}</p>
+              <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-800 text-left">
+                <Mail className="h-4 w-4 mt-0.5 shrink-0" />
+                <p>{t("booking.checkSpam")}</p>
+              </div>
               <Button
                 variant="outline"
                 onClick={() => { setSubmitted(false); setForm({ guest_name: "", guest_email: "", guest_phone: "", guests_count: "", reservation_type: "", start_time: "", special_requests: "", resource_id: "", check_out_date: "", room_type: "", breakfast_included: false, event_type: "", estimated_guests: "", catering_needed: false, pricing_type: "", fixed_price: "", restaurant_sub_type: "dine_in", delivery_address: "", dietary_notes: "", equipment_needed: false, staff_needed: false, festival_name: "", stall_size: "", electricity_needed: false, water_needed: false, food_permits: "", stall_fee: "", promo_code: "" }); setSelectedDate(undefined); }}
