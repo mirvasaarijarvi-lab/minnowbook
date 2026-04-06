@@ -228,6 +228,7 @@ type TranslationKeys = {
   "booking.confirmationMsg": string;
   "booking.checkSpam": string;
   "booking.makeAnother": string;
+  "booking.addToCalendar": string;
   "booking.notFound": string;
   "booking.notFoundDesc": string;
   "booking.emailPreviewTitle": string;
@@ -1736,6 +1737,7 @@ const en: TranslationKeys = {
   "booking.confirmationMsg": "Your reservation has been received. You will receive a confirmation email from {name}.",
   "booking.checkSpam": "If you don't see the email in your inbox, please check your spam or junk folder.",
   "booking.makeAnother": "Make another reservation",
+  "booking.addToCalendar": "Add to calendar",
   "booking.notFound": "Business not found",
   "booking.notFoundDesc": "The booking page you're looking for doesn't exist.",
   "booking.emailPreviewTitle": "Confirmation email preview",
@@ -3224,6 +3226,7 @@ const fi: TranslationKeys = {
   "booking.confirmationMsg": "Varauksesi on vastaanotettu. Saat vahvistusviestin lähettäjältä {name}.",
   "booking.checkSpam": "Jos et näe sähköpostia saapuneissa, tarkista roskaposti- tai roskapostikansio.",
   "booking.makeAnother": "Tee uusi varaus",
+  "booking.addToCalendar": "Lisää kalenteriin",
   "booking.notFound": "Yritystä ei löytynyt",
   "booking.notFoundDesc": "Etsimääsi varaussivua ei ole olemassa.",
   "booking.emailPreviewTitle": "Vahvistussähköpostin esikatselu",
@@ -4710,6 +4713,7 @@ const sv: TranslationKeys = {
   "booking.confirmationMsg": "Din bokning har mottagits. Du kommer att få ett bekräftelsemail från {name}.",
   "booking.checkSpam": "Om du inte ser e-postmeddelandet i din inkorg, kontrollera din skräppost- eller skräppostmapp.",
   "booking.makeAnother": "Gör en ny bokning",
+  "booking.addToCalendar": "Lägg till i kalender",
   "booking.notFound": "Företag hittades inte",
   "booking.notFoundDesc": "Bokningssidan du letar efter finns inte.",
   "booking.emailPreviewTitle": "Förhandsgranskning av bekräftelsemail",
