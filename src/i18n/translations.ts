@@ -228,6 +228,7 @@ type TranslationKeys = {
   "booking.confirmationMsg": string;
   "booking.checkSpam": string;
   "booking.makeAnother": string;
+  "booking.addToCalendar": string;
   "booking.notFound": string;
   "booking.notFoundDesc": string;
   "booking.emailPreviewTitle": string;
