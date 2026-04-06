@@ -428,7 +428,18 @@ Deno.serve(async (req) => {
         }
       }
 
-      const ackMessageId = `ack-${insertedRes.id}-${Date.now()}@${SENDER_DOMAIN}`;
+      // Generate or reuse unsubscribe token for the recipient
+      const unsubToken = crypto.randomUUID();
+      await adminClient
+        .from("email_unsubscribe_tokens")
+        .upsert({ email: guest_email, token: unsubToken }, { onConflict: "email", ignoreDuplicates: true });
+      const { data: tokenRow } = await adminClient
+        .from("email_unsubscribe_tokens")
+        .select("token")
+        .eq("email", guest_email)
+        .maybeSingle();
+
+      const ackIdempotencyKey = `ack-${insertedRes.id}`;
       const enqueuePayload: Record<string, any> = {
         to: guest_email,
         from: `${businessName} <noreply@${SENDER_DOMAIN}>`,
@@ -437,7 +448,9 @@ Deno.serve(async (req) => {
         html: ackHtml,
         purpose: "transactional",
         label: "booking_acknowledgment",
-        message_id: ackMessageId,
+        message_id: ackIdempotencyKey,
+        idempotency_key: ackIdempotencyKey,
+        unsubscribe_token: tokenRow?.token || unsubToken,
         queued_at: new Date().toISOString(),
       };
       if (replyToEmail) {
