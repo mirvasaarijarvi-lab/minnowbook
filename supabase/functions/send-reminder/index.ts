@@ -435,6 +435,17 @@ Deno.serve(async (req) => {
     }
 
     // Enqueue via transactional email queue
+    // Generate or reuse unsubscribe token
+    const unsubToken = crypto.randomUUID();
+    await adminClient
+      .from("email_unsubscribe_tokens")
+      .upsert({ email: reservation.guest_email, token: unsubToken }, { onConflict: "email", ignoreDuplicates: true });
+    const { data: tokenRow } = await adminClient
+      .from("email_unsubscribe_tokens")
+      .select("token")
+      .eq("email", reservation.guest_email)
+      .maybeSingle();
+
     const reminderIdempotencyKey = `${emailType}-${reservationId}`;
     const enqueuePayload: Record<string, any> = {
       to: reservation.guest_email,
@@ -446,6 +457,7 @@ Deno.serve(async (req) => {
       label: `booking_${emailType}`,
       message_id: reminderIdempotencyKey,
       idempotency_key: reminderIdempotencyKey,
+      unsubscribe_token: tokenRow?.token || unsubToken,
       queued_at: new Date().toISOString(),
     };
     if (replyToEmail) {
