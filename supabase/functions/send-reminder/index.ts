@@ -435,7 +435,7 @@ Deno.serve(async (req) => {
     }
 
     // Enqueue via transactional email queue
-    const messageId = `${emailType}-${reservationId}-${Date.now()}@${SENDER_DOMAIN}`;
+    const reminderIdempotencyKey = `${emailType}-${reservationId}`;
     const enqueuePayload: Record<string, any> = {
       to: reservation.guest_email,
       from: `${fromName} <noreply@${SENDER_DOMAIN}>`,
@@ -444,7 +444,8 @@ Deno.serve(async (req) => {
       html,
       purpose: "transactional",
       label: `booking_${emailType}`,
-      message_id: messageId,
+      message_id: reminderIdempotencyKey,
+      idempotency_key: reminderIdempotencyKey,
       queued_at: new Date().toISOString(),
     };
     if (replyToEmail) {

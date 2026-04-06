@@ -428,7 +428,7 @@ Deno.serve(async (req) => {
         }
       }
 
-      const ackMessageId = `ack-${insertedRes.id}-${Date.now()}@${SENDER_DOMAIN}`;
+      const ackIdempotencyKey = `ack-${insertedRes.id}`;
       const enqueuePayload: Record<string, any> = {
         to: guest_email,
         from: `${businessName} <noreply@${SENDER_DOMAIN}>`,
@@ -437,7 +437,8 @@ Deno.serve(async (req) => {
         html: ackHtml,
         purpose: "transactional",
         label: "booking_acknowledgment",
-        message_id: ackMessageId,
+        message_id: ackIdempotencyKey,
+        idempotency_key: ackIdempotencyKey,
         queued_at: new Date().toISOString(),
       };
       if (replyToEmail) {
