@@ -226,6 +226,7 @@ type TranslationKeys = {
   "booking.fixedPricePlaceholder": string;
   "booking.thankYou": string;
   "booking.confirmationMsg": string;
+  "booking.checkSpam": string;
   "booking.makeAnother": string;
   "booking.notFound": string;
   "booking.notFoundDesc": string;
@@ -1733,6 +1734,7 @@ const en: TranslationKeys = {
   "booking.fixedPricePlaceholder": "e.g. 45.00",
   "booking.thankYou": "Thank you!",
   "booking.confirmationMsg": "Your reservation has been received. We will confirm it shortly via email.",
+  "booking.checkSpam": "If you don't see the email in your inbox, please check your spam or junk folder.",
   "booking.makeAnother": "Make another reservation",
   "booking.notFound": "Business not found",
   "booking.notFoundDesc": "The booking page you're looking for doesn't exist.",
@@ -3220,6 +3222,7 @@ const fi: TranslationKeys = {
   "booking.fixedPricePlaceholder": "esim. 45,00",
   "booking.thankYou": "Kiitos!",
   "booking.confirmationMsg": "Varauksesi on vastaanotettu. Vahvistamme sen pian sähköpostitse.",
+  "booking.checkSpam": "Jos et näe sähköpostia saapuneissa, tarkista roskaposti- tai roskapostikansio.",
   "booking.makeAnother": "Tee uusi varaus",
   "booking.notFound": "Yritystä ei löytynyt",
   "booking.notFoundDesc": "Etsimääsi varaussivua ei ole olemassa.",
@@ -4705,6 +4708,7 @@ const sv: TranslationKeys = {
   "booking.fixedPricePlaceholder": "t.ex. 45,00",
   "booking.thankYou": "Tack!",
   "booking.confirmationMsg": "Din bokning har mottagits. Vi bekräftar den inom kort via e-post.",
+  "booking.checkSpam": "Om du inte ser e-postmeddelandet i din inkorg, kontrollera din skräppost- eller skräppostmapp.",
   "booking.makeAnother": "Gör en ny bokning",
   "booking.notFound": "Företag hittades inte",
   "booking.notFoundDesc": "Bokningssidan du letar efter finns inte.",
