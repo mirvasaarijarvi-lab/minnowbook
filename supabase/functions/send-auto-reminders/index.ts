@@ -255,19 +255,38 @@ Deno.serve(async (req) => {
         const html = buildEmailHtml(reservation, business, lang, customBody);
         const fromName = business.business_name || "Mimmobook";
 
+        // Determine reply-to: site-level overrides tenant-level
+        let replyToEmail = business.business_email || undefined;
+        if (reservation.site_id) {
+          const { data: siteSettings } = await adminClient
+            .from("site_settings")
+            .select("business_email")
+            .eq("site_id", reservation.site_id)
+            .eq("tenant_id", reservation.tenant_id)
+            .maybeSingle();
+          if (siteSettings?.business_email) {
+            replyToEmail = siteSettings.business_email;
+          }
+        }
+
         // Enqueue via transactional email queue
+        const enqueuePayload: Record<string, any> = {
+          to: reservation.guest_email,
+          from: `${fromName} <noreply@${SENDER_DOMAIN}>`,
+          sender_domain: SENDER_DOMAIN,
+          subject,
+          html,
+          purpose: "transactional",
+          label: "booking_reminder",
+          queued_at: new Date().toISOString(),
+        };
+        if (replyToEmail) {
+          enqueuePayload.reply_to = replyToEmail;
+        }
+
         const { error: enqueueError } = await adminClient.rpc("enqueue_email", {
           queue_name: "transactional_emails",
-          payload: {
-            to: reservation.guest_email,
-            from: `${fromName} <noreply@${SENDER_DOMAIN}>`,
-            sender_domain: SENDER_DOMAIN,
-            subject,
-            html,
-            purpose: "transactional",
-            label: "booking_reminder",
-            queued_at: new Date().toISOString(),
-          },
+          payload: enqueuePayload,
         });
 
         if (enqueueError) {
