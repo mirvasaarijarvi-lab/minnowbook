@@ -406,6 +406,7 @@ Deno.serve(async (req) => {
             ${rows.join("")}
           </table>
           <p style="color:#63516E;font-size:14px;font-family:'Inter',Arial,sans-serif;line-height:1.6">${t.footer}</p>
+          <p style="color:#1E1519;font-size:15px;font-family:'Inter',Arial,sans-serif;line-height:1.6;margin-top:24px">${t.regards}<br><strong>${businessName}</strong></p>
         </td></tr>
         <tr><td style="padding:24px 32px;text-align:center;font-size:12px;color:#999;border-top:1px solid #e8e0d8;font-family:'Inter',Arial,sans-serif">
           <p style="margin:4px 0;font-weight:600;color:#63516E">${businessName}</p>
