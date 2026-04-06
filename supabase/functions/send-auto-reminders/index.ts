@@ -270,6 +270,7 @@ Deno.serve(async (req) => {
         }
 
         // Enqueue via transactional email queue
+        const autoMessageId = `reminder-${reservation.id}-${Date.now()}@${SENDER_DOMAIN}`;
         const enqueuePayload: Record<string, any> = {
           to: reservation.guest_email,
           from: `${fromName} <noreply@${SENDER_DOMAIN}>`,
@@ -278,6 +279,7 @@ Deno.serve(async (req) => {
           html,
           purpose: "transactional",
           label: "booking_reminder",
+          message_id: autoMessageId,
           queued_at: new Date().toISOString(),
         };
         if (replyToEmail) {

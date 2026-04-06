@@ -164,6 +164,25 @@ Deno.serve(async (req) => {
       }
 
       try {
+        // Auto-generate plain-text fallback from HTML if not provided
+        const textContent = payload.text || (payload.html
+          ? payload.html
+              .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+              .replace(/<br\s*\/?>/gi, '\n')
+              .replace(/<\/p>/gi, '\n\n')
+              .replace(/<\/tr>/gi, '\n')
+              .replace(/<\/h[1-6]>/gi, '\n\n')
+              .replace(/<[^>]+>/g, '')
+              .replace(/&nbsp;/g, ' ')
+              .replace(/&amp;/g, '&')
+              .replace(/&lt;/g, '<')
+              .replace(/&gt;/g, '>')
+              .replace(/&quot;/g, '"')
+              .replace(/&#039;/g, "'")
+              .replace(/\n{3,}/g, '\n\n')
+              .trim()
+          : undefined)
+
         await sendLovableEmail(
           {
             run_id: payload.run_id,
@@ -172,7 +191,7 @@ Deno.serve(async (req) => {
             sender_domain: payload.sender_domain,
             subject: payload.subject,
             html: payload.html,
-            text: payload.text,
+            text: textContent,
             purpose: payload.purpose,
             label: payload.label,
             external_id: payload.external_id,
@@ -180,9 +199,6 @@ Deno.serve(async (req) => {
             unsubscribe_token: payload.unsubscribe_token,
             reply_to: payload.reply_to,
           },
-          // sendUrl is optional — when LOVABLE_SEND_URL is not set, the library
-          // falls back to the default Lovable API endpoint (https://api.lovable.dev).
-          // Set LOVABLE_SEND_URL as a Supabase secret to override (e.g. for local dev).
           { apiKey, sendUrl: Deno.env.get('LOVABLE_SEND_URL') }
         )
 
