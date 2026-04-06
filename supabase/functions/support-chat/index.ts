@@ -198,13 +198,18 @@ serve(async (req) => {
 - Guest-facing booking form with resource selection, date/time pickers
 - Automatic confirmation, acknowledgment, and cancellation emails
 - Discount code redemption during booking
+- Spam folder notice displayed to guests after booking submission
 
 ### Email System
+- **Sender identity**: Emails are sent showing the tenant's Business Name as the sender — guests see your business name, not "MimmoBook"
+- **Reply-to address**: Set via the Business Email field in Settings (or per-site in Site Settings) — guest replies go directly to your inbox
 - Automated emails: confirmation, acknowledgment, cancellation, reminders
-- Customizable email templates per tenant
+- Customizable email templates per tenant (Pro & Business plans)
+- Email deliverability: SPF, DKIM authentication, List-Unsubscribe headers for spam protection
 - Email delivery monitoring with failure alerts in admin dashboard
 - Email queue processing with retry logic and dead-letter handling
 - Per-reservation email suppression (no_email_confirm, no_email_ack, no_email_cancel)
+- Unsubscribe token management for compliance
 
 ### Staff & Permissions
 - Role hierarchy: Superadmin > Owner > Admin > Staff > custom roles
@@ -214,6 +219,7 @@ serve(async (req) => {
 - Login history tracking per user
 - Two-factor authentication (MFA) with recovery codes
 - User impersonation for superadmins
+- Admin email notifications when new staff members sign up
 
 ### Reporting & Analytics
 - Dashboard overview with stat cards: today's reservations, week total, pending confirmations, revenue
@@ -224,13 +230,25 @@ serve(async (req) => {
 
 ### Settings
 - Tenant-level settings: business info, branding, opening hours
+- **Business Name**: Controls sender name on all guest emails
+- **Business Email**: Sets reply-to address so guests can respond directly to you
+- For multi-site (Business plan): each site can override business name and reply-to email in Site Settings
 - Notification preferences and email template customization
 - Booking page customization (colors, logo, description)
 - Access codes for beta testers and promotional access
 
+### Security
+- CORS origin allowlisting on all backend functions
+- Content Security Policy (CSP) headers
+- Rate limiting on all public endpoints (booking, support chat, authentication)
+- Request body size limits to prevent abuse
+- Input validation and sanitization on all form submissions
+- Secure password policies with minimum requirements
+- Audit logging of all data changes
+
 ### Billing & Tiers
 - Three tiers: Basic, Pro, Business
-- Tier-based feature gating (e.g., multi-site on Pro+, priority support on Business)
+- Tier-based feature gating (e.g., multi-site on Business, priority support on Business)
 - Access code redemption for tier upgrades
 - Stripe integration for checkout and customer portal
 - Sample/trial period management
@@ -241,6 +259,7 @@ serve(async (req) => {
 - Business tier: ticket escalation to admin with 24h response guarantee
 - Support request tracking with status (open, in-progress, fixed, closed)
 - Admin support board for managing and responding to tickets
+- Email notifications to admins on ticket escalation
 
 ### Notifications
 - In-app notification bell for reservation status changes
