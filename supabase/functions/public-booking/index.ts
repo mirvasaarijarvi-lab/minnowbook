@@ -336,7 +336,7 @@ Deno.serve(async (req) => {
       // Fetch tenant settings for branding
       const { data: settings } = await adminClient
         .from("tenant_settings")
-        .select("business_name, primary_color, logo_url, default_language")
+        .select("business_name, business_email, primary_color, logo_url, default_language")
         .eq("tenant_id", tenant_id)
         .maybeSingle();
 
@@ -413,18 +413,38 @@ Deno.serve(async (req) => {
 </body></html>`;
 
       const SENDER_DOMAIN = "notify.mimmobook.com";
+
+      // Determine reply-to: site-level overrides tenant-level
+      let replyToEmail = settings?.business_email || undefined;
+      if (site_id) {
+        const { data: siteSettings } = await adminClient
+          .from("site_settings")
+          .select("business_email")
+          .eq("site_id", site_id)
+          .eq("tenant_id", tenant_id)
+          .maybeSingle();
+        if (siteSettings?.business_email) {
+          replyToEmail = siteSettings.business_email;
+        }
+      }
+
+      const enqueuePayload: Record<string, any> = {
+        to: guest_email,
+        from: `${businessName} <noreply@${SENDER_DOMAIN}>`,
+        sender_domain: SENDER_DOMAIN,
+        subject: t.subject,
+        html: ackHtml,
+        purpose: "transactional",
+        label: "booking_acknowledgment",
+        queued_at: new Date().toISOString(),
+      };
+      if (replyToEmail) {
+        enqueuePayload.reply_to = replyToEmail;
+      }
+
       await adminClient.rpc("enqueue_email", {
         queue_name: "transactional_emails",
-        payload: {
-          to: guest_email,
-          from: `${businessName} <noreply@${SENDER_DOMAIN}>`,
-          sender_domain: SENDER_DOMAIN,
-          subject: t.subject,
-          html: ackHtml,
-          purpose: "transactional",
-          label: "booking_acknowledgment",
-          queued_at: new Date().toISOString(),
-        },
+        payload: enqueuePayload,
       });
 
       // Mark ack email as sent
