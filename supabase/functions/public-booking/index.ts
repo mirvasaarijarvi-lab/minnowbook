@@ -214,7 +214,7 @@ Deno.serve(async (req) => {
     // Verify tenant exists and is active
     const { data: tenant, error: tenantErr } = await adminClient
       .from("tenants")
-      .select("id, is_active, allowed_reservation_types")
+      .select("id, name, is_active, allowed_reservation_types")
       .eq("id", tenant_id)
       .single();
     if (tenantErr || !tenant) throw new Error("Tenant not found");
