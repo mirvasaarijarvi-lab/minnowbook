@@ -503,19 +503,19 @@ const ReportsPanel = () => {
   const StatCard = ({ title, total, confirmed, pending, icon, prevTotal }: {
     title: string; total: number; confirmed: number; pending: number; icon: React.ReactNode; prevTotal?: number;
   }) => (
-    <Card>
-      <CardContent className="pt-5 pb-4">
+    <Card className="min-w-0">
+      <CardContent className="pt-5 pb-4 px-3 sm:px-6">
         <div className="flex items-center gap-2 mb-1">
           {icon}
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{title}</p>
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide truncate">{title}</p>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-3xl font-bold">{total}</span>
+          <span className="text-2xl sm:text-3xl font-bold">{total}</span>
           <DeltaBadge current={total} previous={prevTotal} />
         </div>
-        <div className="flex gap-3 text-sm mt-1">
-          <span className="flex items-center gap-1 text-muted-foreground"><CheckCircle2 className="h-3.5 w-3.5 text-primary" />{confirmed} {t("reports.confirmed")}</span>
-          <span className="flex items-center gap-1 text-muted-foreground"><Clock className="h-3.5 w-3.5" />{pending} {t("reports.pending")}</span>
+        <div className="flex flex-col xs:flex-row gap-1 xs:gap-3 text-sm mt-1">
+          <span className="flex items-center gap-1 text-muted-foreground truncate"><CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-primary" />{confirmed} {t("reports.confirmed")}</span>
+          <span className="flex items-center gap-1 text-muted-foreground truncate"><Clock className="h-3.5 w-3.5 shrink-0" />{pending} {t("reports.pending")}</span>
         </div>
       </CardContent>
     </Card>
@@ -628,7 +628,7 @@ const ReportsPanel = () => {
         )}
 
         <Select value={invoicedFilter} onValueChange={(v) => setInvoicedFilter(v as typeof invoicedFilter)}>
-          <SelectTrigger className="w-[180px]"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="w-full sm:w-[180px]"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">{t("reports.filter.all")} ({t("reports.invoicing").toLowerCase()})</SelectItem>
             <SelectItem value="invoiced">{t("reports.invoiced")}</SelectItem>
@@ -638,7 +638,7 @@ const ReportsPanel = () => {
 
         {allowedTypes.length > 1 && (
           <Select value={typeFilter} onValueChange={setTypeFilter}>
-            <SelectTrigger className="w-[180px]"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="w-full sm:w-[180px]"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{t("reports.filter.all")} ({t("reports.invoicing").toLowerCase()})</SelectItem>
               {allowedTypes.map((tp) => (
@@ -814,7 +814,7 @@ const ReportsPanel = () => {
           )}
 
           {/* Reservation count cards */}
-          <div className={cn("grid grid-cols-2 gap-4", `lg:grid-cols-${Math.min(Object.keys(stats).length, 4)}`)}>
+          <div className={cn("grid grid-cols-2 gap-3 sm:gap-4", Object.keys(stats).length >= 4 ? "lg:grid-cols-4" : Object.keys(stats).length >= 3 ? "lg:grid-cols-3" : "lg:grid-cols-2")}>
             {Object.entries(stats).map(([key, s]) => (
               <StatCard
                 key={key}
@@ -831,7 +831,7 @@ const ReportsPanel = () => {
               <CardTitle className="text-sm font-medium flex items-center gap-2"><Receipt className="h-4 w-4" />{t("reports.invoicing")}</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className={cn("grid gap-4", `grid-cols-2 sm:grid-cols-${Math.min(1 + allowedTypes.length, 4)}`)}>
+              <div className={cn("grid gap-3 sm:gap-4 grid-cols-2", (1 + allowedTypes.length) >= 4 ? "sm:grid-cols-4" : (1 + allowedTypes.length) >= 3 ? "sm:grid-cols-3" : "sm:grid-cols-2")}>
                 {[
                   { label: t("reports.total"), data: { invoiced: invoicingStats.invoiced, total: invoicingStats.total, invoicedEur: invoicingStats.invoicedEur, totalEur: invoicingStats.totalEur } },
                   ...allowedTypes.map((tp) => ({ label: typeLabel(tp), data: invoicingStats[tp] || { invoiced: 0, total: 0, invoicedEur: 0, totalEur: 0 } })),
