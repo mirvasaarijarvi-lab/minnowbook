@@ -628,7 +628,7 @@ const ReportsPanel = () => {
         )}
 
         <Select value={invoicedFilter} onValueChange={(v) => setInvoicedFilter(v as typeof invoicedFilter)}>
-          <SelectTrigger className="w-[180px]"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="w-full sm:w-[180px]"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">{t("reports.filter.all")} ({t("reports.invoicing").toLowerCase()})</SelectItem>
             <SelectItem value="invoiced">{t("reports.invoiced")}</SelectItem>
@@ -638,7 +638,7 @@ const ReportsPanel = () => {
 
         {allowedTypes.length > 1 && (
           <Select value={typeFilter} onValueChange={setTypeFilter}>
-            <SelectTrigger className="w-[180px]"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="w-full sm:w-[180px]"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{t("reports.filter.all")} ({t("reports.invoicing").toLowerCase()})</SelectItem>
               {allowedTypes.map((tp) => (
