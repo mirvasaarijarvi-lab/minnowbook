@@ -103,6 +103,7 @@
     "yaml": ">=2.8.3",
     "minimatch": ">=3.1.4",
     "brace-expansion": ">=1.1.13",
-    "@tootallnate/once": ">=3.0.1"
+    "@tootallnate/once": ">=3.0.1",
+    "ajv": ">=6.14.0"
   }
 }
