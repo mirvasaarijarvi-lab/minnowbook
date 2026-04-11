@@ -647,9 +647,10 @@ const SettingsPanel = () => {
 
     setUploading(true);
     try {
-      const { sanitizeFileExtension } = await import("@/lib/sanitize-path");
+      const { sanitizeFileExtension, sanitizePathSegment } = await import("@/lib/sanitize-path");
       const ext = sanitizeFileExtension(file.name.split(".").pop());
-      const filePath = `${tenantId}/logo.${ext}`;
+      const safeTenant = sanitizePathSegment(tenantId!);
+      const filePath = `${safeTenant}/logo.${ext}`;
 
       const { error: uploadError } = await supabase.storage
         .from("tenant-assets")
@@ -690,9 +691,10 @@ const SettingsPanel = () => {
 
     setUploadingHero(true);
     try {
-      const { sanitizeFileExtension } = await import("@/lib/sanitize-path");
+      const { sanitizeFileExtension, sanitizePathSegment } = await import("@/lib/sanitize-path");
       const ext = sanitizeFileExtension(file.name.split(".").pop());
-      const filePath = `${tenantId}/hero.${ext}`;
+      const safeTenant = sanitizePathSegment(tenantId!);
+      const filePath = `${safeTenant}/hero.${ext}`;
 
       const { error: uploadError } = await supabase.storage
         .from("tenant-assets")

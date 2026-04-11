@@ -43,10 +43,12 @@ const ResourceImageGallery = ({ resourceId, tenantId }: Props) => {
 
   const uploadMutation = useMutation({
     mutationFn: async (file: File) => {
-      const { sanitizeFileExtension } = await import("@/lib/sanitize-path");
+      const { sanitizeFileExtension, sanitizePathSegment } = await import("@/lib/sanitize-path");
       const ext = sanitizeFileExtension(file.name.split(".").pop());
       const fileName = `gallery-${Date.now()}.${ext}`;
-      const filePath = `${tenantId}/resources/${resourceId}/${fileName}`;
+      const safeTenant = sanitizePathSegment(tenantId);
+      const safeResource = sanitizePathSegment(resourceId);
+      const filePath = `${safeTenant}/resources/${safeResource}/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
         .from("tenant-assets")

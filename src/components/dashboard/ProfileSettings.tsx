@@ -77,9 +77,11 @@ const ProfileSettings = () => {
 
     setUploading(true);
     try {
-      const { sanitizeFileExtension } = await import("@/lib/sanitize-path");
+      const { sanitizeFileExtension, sanitizePathSegment } = await import("@/lib/sanitize-path");
       const ext = sanitizeFileExtension(file.name.split(".").pop());
-      const path = `${tenantId}/avatars/${user.id}.${ext}`;
+      const safeTenant = sanitizePathSegment(tenantId!);
+      const safeUser = sanitizePathSegment(user.id);
+      const path = `${safeTenant}/avatars/${safeUser}.${ext}`;
 
       const { error: uploadError } = await supabase.storage
         .from("tenant-assets")
