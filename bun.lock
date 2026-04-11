@@ -90,6 +90,7 @@
     "@tootallnate/once": ">=3.0.1",
     "ajv": ">=6.14.0",
     "brace-expansion": ">=1.1.13",
+    "browserslist": ">=4.24.4",
     "dompurify": ">=3.3.3",
     "glob": ">=10.5.0",
     "js-yaml": ">=4.1.1",
