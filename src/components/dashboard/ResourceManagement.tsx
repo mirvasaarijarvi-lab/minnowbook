@@ -159,10 +159,11 @@ const ResourceManagement = () => {
     }
     setUploading(true);
     try {
-      const { sanitizeFileExtension } = await import("@/lib/sanitize-path");
+      const { sanitizeFileExtension, sanitizePathSegment } = await import("@/lib/sanitize-path");
       const ext = sanitizeFileExtension(file.name.split(".").pop());
       const fileName = `resource-${Date.now()}.${ext}`;
-      const filePath = `${tenantId}/resources/${fileName}`;
+      const safeTenant = sanitizePathSegment(tenantId!);
+      const filePath = `${safeTenant}/resources/${fileName}`;
       const { error: uploadError } = await supabase.storage.from("tenant-assets").upload(filePath, file, { upsert: true });
       if (uploadError) throw uploadError;
       const { data: urlData } = supabase.storage.from("tenant-assets").getPublicUrl(filePath);
