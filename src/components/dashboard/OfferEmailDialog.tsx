@@ -1,4 +1,5 @@
-import { useState, useEffect, forwardRef } from "react";
+import { useState, forwardRef } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useT } from "@/contexts/I18nContext";
 import { useUpdateOffer, type Offer } from "@/hooks/useOffers";
 import { useTenant } from "@/hooks/useTenant";
@@ -10,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
+import type { TenantBranding } from "@/lib/offerPdf";
 
 interface Props {
   offer: Offer;
