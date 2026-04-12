@@ -34,6 +34,7 @@ import Logo from "@/components/Logo";
 import SupportChatWidget from "@/components/SupportChatWidget";
 import ProfileSettings from "@/components/dashboard/ProfileSettings";
 import GuidedTour, { TourStep } from "@/components/dashboard/GuidedTour";
+import OffersManager from "@/components/dashboard/OffersManager";
 import SamplePeriodBanner from "@/components/dashboard/SamplePeriodBanner";
 import OnboardingChecklist from "@/components/dashboard/OnboardingChecklist";
 import QuickActionsFAB from "@/components/dashboard/QuickActionsFAB";
@@ -248,6 +249,7 @@ const Dashboard = () => {
     calendar: gatedView("calendar", <CalendarView />),
     reservations: gatedView("reservations", <ReservationList initialStatusFilter={reservationStatusFilter} initialInvoicedFilter={reservationInvoicedFilter} initialCheckoutToday={reservationCheckoutTodayFilter} />),
     resources: gatedView("resources", <ResourceManagement />),
+    offers: gatedView("reservations", <OffersManager />),
     reports: gatedView("reports", <ReportsPanel />),
     settings: gatedView("settings", <SettingsPanel />),
     admin: gatedView("admin", <AdminPanel />),
