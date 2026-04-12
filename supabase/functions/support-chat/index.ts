@@ -253,16 +253,12 @@ serve(async (req) => {
 - Stripe integration for checkout and customer portal
 - Sample/trial period management
 
-### Offers & Cross-Reservations (all tiers)
-- Create professional offers/proposals for guests with event details, menu, and linked reservations
-- Generate branded PDF offers with tenant logo, contact info, and discreet MimmoBook watermark
-- Send offer PDFs directly to guests via email
-- Track offer lifecycle: Draft → Sent → Accepted → Rejected → Archived
-- Link multiple reservations across resource types to a single offer (e.g. dinner + room + event space)
+### Offers & Cross-Reservations
+- Offers (event proposals, branded PDFs, email delivery) are available on ALL tiers
+- Cross-reservations (linking reservations across different resource types) require Pro or Business tier
+- Basic tier only supports 1 reservation type, so cross-reservation linking is not applicable there
 - When marking a linked reservation as "Used", the system prompts to mark all other linked reservations as used too
 - Same for "Invoiced" — mark one linked reservation as invoiced and mark all linked ones together
-- Cross-reservation linking ensures billing and usage consistency across spaces
-- Available on ALL tiers (Basic, Pro, Business)
 
 ### Support System
 - AI chat assistant (you!) available to all authenticated users
