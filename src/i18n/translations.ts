@@ -836,7 +836,8 @@ type TranslationKeys = {
   "pricing.multiLanguage": string;
   "pricing.multisiteManagement": string;
   "pricing.analyticsReports": string;
-  "pricing.offersCrossRes": string;
+  "pricing.offers": string;
+  "pricing.crossReservations": string;
   "pricing.supportLevel": string;
   "pricing.basic": string;
   "pricing.advanced": string;
@@ -2822,7 +2823,8 @@ const en: TranslationKeys = {
   "pricing.multiLanguage": "Multi-language support",
   "pricing.multisiteManagement": "Multi-site management",
   "pricing.analyticsReports": "Analytics & reports",
-  "pricing.offersCrossRes": "Offers & cross-reservations",
+  "pricing.offers": "Offers (event proposals & PDF)",
+  "pricing.crossReservations": "Cross-reservations",
   "pricing.supportLevel": "Support",
   "pricing.basic": "Basic",
   "pricing.advanced": "Advanced",
@@ -4376,7 +4378,8 @@ const fi: TranslationKeys = {
   "pricing.multiLanguage": "Monikieliset sivut",
   "pricing.multisiteManagement": "Usean toimipaikan hallinta",
   "pricing.analyticsReports": "Aalytiikka ja raportit",
-  "pricing.offersCrossRes": "Tarjoukset ja ristiinvaraukset",
+  "pricing.offers": "Tarjoukset (tapahtumaehdotukset ja PDF)",
+  "pricing.crossReservations": "Ristiinvaraukset",
   "pricing.supportLevel": "Tuki",
   "pricing.basic": "Perus",
   "pricing.advanced": "Edistyneet",
@@ -5930,7 +5933,8 @@ const sv: TranslationKeys = {
   "pricing.multiLanguage": "Flerspråkiga sidor",
   "pricing.multisiteManagement": "Hantering av flera platser",
   "pricing.analyticsReports": "Analys och rapporter",
-  "pricing.offersCrossRes": "Offerter och korsreservationer",
+  "pricing.offers": "Offerter (eventförslag och PDF)",
+  "pricing.crossReservations": "Korsreservationer",
   "pricing.supportLevel": "Stöd",
   "pricing.basic": "Basic",
   "pricing.advanced": "Avancerat",
