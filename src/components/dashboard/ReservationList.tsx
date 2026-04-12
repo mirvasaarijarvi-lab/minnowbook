@@ -710,6 +710,7 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
       </Dialog>
 
 
+      <EditReservationDialog
         reservation={editingReservation}
         open={!!editingReservation}
         onOpenChange={(open) => !open && setEditingReservation(null)}
