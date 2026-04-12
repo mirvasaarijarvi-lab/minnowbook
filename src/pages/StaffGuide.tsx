@@ -7,7 +7,7 @@ import {
   Printer, ArrowLeft, Home, Calendar, ClipboardList, BarChart3,
   Users, LogIn, Shield, Check, X, Lock, Pencil, Trash2, Search,
   Download, KeyRound, Settings, LifeBuoy, BookOpen, Building2, MapPin,
-  Zap, Crown, Bell, Keyboard, UserCircle, Upload, Archive,
+  Zap, Crown, Bell, Keyboard, UserCircle, Upload, Archive, FileOutput, Link2,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
