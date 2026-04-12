@@ -7,7 +7,7 @@ import {
   Printer, ArrowLeft, Home, Calendar, ClipboardList, BarChart3,
   Users, LogIn, Shield, Check, X, Lock, Pencil, Trash2, Search,
   Download, KeyRound, Settings, LifeBuoy, BookOpen, Building2, MapPin,
-  Zap, Crown, Bell, Keyboard, UserCircle, Upload, Archive,
+  Zap, Crown, Bell, Keyboard, UserCircle, Upload, Archive, FileOutput, Link2,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -353,6 +353,30 @@ const MockupProfile = () => (
   </div>
 );
 
+const MockupOffers = () => (
+  <div className="border rounded-lg p-4 bg-muted/30 space-y-3 print:bg-white">
+    <div className="flex items-center justify-between">
+      <div className="text-xs font-medium flex items-center gap-1"><FileOutput className="h-3.5 w-3.5 text-primary" /> Offers</div>
+      <div className="h-6 px-2 rounded bg-primary flex items-center text-[10px] text-primary-foreground">+ New Offer</div>
+    </div>
+    <div className="space-y-1.5">
+      {[
+        { guest: "Maria S.", date: "15 May", status: "Draft", linked: 2 },
+        { guest: "John D.", date: "22 May", status: "Sent", linked: 3 },
+      ].map((o) => (
+        <div key={o.guest} className="flex items-center justify-between p-2 rounded border bg-background text-[10px]">
+          <div><span className="font-medium">{o.guest}</span> · {o.date}</div>
+          <div className="flex items-center gap-2">
+            <span className="flex items-center gap-0.5"><Link2 className="h-2.5 w-2.5" />{o.linked}</span>
+            <span className={`px-1.5 py-0.5 rounded ${o.status === "Sent" ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"}`}>{o.status}</span>
+          </div>
+        </div>
+      ))}
+    </div>
+    <div className="text-[9px] text-muted-foreground text-center">Mark linked reservations as used / invoiced together</div>
+  </div>
+);
+
 const mockupComponents: Record<string, React.ReactNode> = {
   login: <MockupLogin />,
   overview: <MockupOverview />,
@@ -365,6 +389,7 @@ const mockupComponents: Record<string, React.ReactNode> = {
   support: <MockupSupport />,
   multisite: <MockupMultisite />,
   profile: <MockupProfile />,
+  offers: <MockupOffers />,
 };
 
 /* ─── Tier Overview Component ─── */
@@ -629,6 +654,22 @@ const guideContent: Record<Language, GuideContent> = {
         ],
         tip: "Make sure to mark reservations as both 'Used' and 'Invoiced' before they qualify for archiving.",
       },
+      {
+        icon: <FileOutput className="h-6 w-6" />, mockupId: "offers",
+        title: "13. Offers & Cross-Reservations",
+        steps: [
+          "Navigate to 'Offers' in the sidebar to manage proposals for guests.",
+          "Click '+ New Offer' to create an offer: fill in guest details, event date, space, and menu.",
+          "Link existing reservations to the offer — select from your current bookings across all resource types.",
+          "Generate a branded PDF of the offer and send it directly to the guest via email.",
+          "The PDF includes your tenant logo, contact information, and a discreet MimmoBook watermark.",
+          "Track offer status: Draft → Sent → Accepted → Rejected → Archived.",
+          "When you mark a linked reservation as 'Used', you'll be prompted to mark all other linked reservations as used too.",
+          "The same applies to 'Invoiced' — mark one linked reservation as invoiced and you can mark them all at once.",
+          "This cross-reservation linking ensures consistent tracking across spaces (e.g. a dinner + room + event space booked together).",
+        ],
+        tip: "Offers & cross-reservations are available on all plans — Basic, Pro, and Business.",
+      },
     ],
   },
   fi: {
@@ -851,6 +892,22 @@ const guideContent: Record<Language, GuideContent> = {
         ],
         tip: "Varmista, että varaukset on merkitty sekä 'Käytetty' että 'Laskutettu' ennen kuin ne siirtyvät arkistoon.",
       },
+      {
+        icon: <FileOutput className="h-6 w-6" />, mockupId: "offers",
+        title: "13. Tarjoukset ja ristiinvaraukset",
+        steps: [
+          "Siirry 'Tarjoukset'-osioon sivupalkissa hallinnoidaksesi ehdotuksia vieraille.",
+          "Paina '+ Uusi tarjous' luodaksesi tarjouksen: täytä vieraan tiedot, tapahtumapäivä, tila ja menu.",
+          "Yhdistä olemassa olevia varauksia tarjoukseen — valitse nykyisistä varauksista kaikista resurssityypeistä.",
+          "Luo brändätty PDF tarjouksesta ja lähetä se suoraan vieraalle sähköpostilla.",
+          "PDF sisältää logosi, yhteystiedot ja hienovaraisen MimmoBook-vesileiman.",
+          "Seuraa tarjouksen tilaa: Luonnos → Lähetetty → Hyväksytty → Hylätty → Arkistoitu.",
+          "Kun merkitset yhdistetyn varauksen 'Käytetyksi', sinua kehotetaan merkitsemään myös kaikki muut yhdistetyt varaukset käytetyiksi.",
+          "Sama koskee 'Laskutettu'-tilaa — merkitse yksi yhdistetty varaus laskutetuksi ja voit merkitä ne kaikki kerralla.",
+          "Ristiinvarausten yhdistäminen varmistaa johdonmukaisen seurannan tilojen välillä (esim. illallinen + huone + tapahtumatila varattu yhdessä).",
+        ],
+        tip: "Tarjoukset ja ristiinvaraukset ovat käytettävissä kaikissa tilauksissa — Basic, Pro ja Business.",
+      },
     ],
   },
   sv: {
@@ -1072,6 +1129,22 @@ const guideContent: Record<Language, GuideContent> = {
           "Arkiveringsprocessen körs automatiskt varje natt — ingen manuell åtgärd behövs.",
         ],
         tip: "Se till att markera bokningar som både 'Använd' och 'Fakturerad' innan de kvalificerar för arkivering.",
+      },
+      {
+        icon: <FileOutput className="h-6 w-6" />, mockupId: "offers",
+        title: "13. Erbjudanden och korsbokningar",
+        steps: [
+          "Navigera till 'Erbjudanden' i sidofältet för att hantera förslag till gäster.",
+          "Klicka '+ Nytt erbjudande' för att skapa ett erbjudande: fyll i gästuppgifter, eventdatum, utrymme och meny.",
+          "Länka befintliga bokningar till erbjudandet — välj bland dina nuvarande bokningar från alla resurstyper.",
+          "Generera en varumärkesanpassad PDF av erbjudandet och skicka den direkt till gästen via e-post.",
+          "PDF:en innehåller din logotyp, kontaktinformation och en diskret MimmoBook-vattenstämpel.",
+          "Spåra erbjudandets status: Utkast → Skickat → Accepterat → Avvisat → Arkiverat.",
+          "När du markerar en länkad bokning som 'Använd' uppmanas du att markera alla andra länkade bokningar som använda också.",
+          "Samma sak gäller 'Fakturerad' — markera en länkad bokning som fakturerad och du kan markera alla på en gång.",
+          "Korsbokningslänkning säkerställer konsekvent spårning mellan utrymmen (t.ex. middag + rum + eventlokal bokade tillsammans).",
+        ],
+        tip: "Erbjudanden och korsbokningar är tillgängliga på alla planer — Basic, Pro och Business.",
       },
     ],
   },
