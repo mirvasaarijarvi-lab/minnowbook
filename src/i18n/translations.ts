@@ -3000,6 +3000,12 @@ const en: TranslationKeys = {
   "features.f15Desc": "Revenue reports, booking trends, occupancy rates, and CSV exports for accounting.",
   "features.f16Title": "Invoicing Tracking",
   "features.f16Desc": "Mark reservations as invoiced and track uninvoiced revenue across all reservation types.",
+  "features.f17Title": "Offers & Proposals",
+  "features.f17Desc": "Create professional offers with PDF generation and send them directly to guests via email.",
+  "features.f18Title": "Cross-Reservations",
+  "features.f18Desc": "Link reservations across spaces and services. Mark linked bookings as used or invoiced together.",
+  "features.offersAndCross": "Offers & Cross-Reservations",
+  "features.offersAndCrossDesc": "Create offers, generate branded PDFs, and link reservations across spaces — manage everything together.",
 
   // Use Cases
   "useCases.badge": "Use Cases",
@@ -4547,6 +4553,12 @@ const fi: TranslationKeys = {
   "features.f15Desc": "Liikevaihtoraportit, varaustrendit, käyttöasteet ja CSV-viennit kirjanpitoon.",
   "features.f16Title": "Laskutuksen seuranta",
   "features.f16Desc": "Merkitse varaukset laskutetuiksi ja seuraa laskuttamatonta liikevaihtoa kaikissa varaustyypeissä.",
+  "features.f17Title": "Tarjoukset ja ehdotukset",
+  "features.f17Desc": "Luo ammattimaisia tarjouksia PDF-muodossa ja lähetä ne suoraan vieraille sähköpostilla.",
+  "features.f18Title": "Ristiinvaraukset",
+  "features.f18Desc": "Yhdistä varauksia eri tilojen ja palvelujen välillä. Merkitse yhdistetyt varaukset käytetyiksi tai laskutetuiksi yhdessä.",
+  "features.offersAndCross": "Tarjoukset ja ristiinvaraukset",
+  "features.offersAndCrossDesc": "Luo tarjouksia, generoi brändätyt PDF:t ja yhdistä varauksia tilojen välillä — hallitse kaikkea yhdessä.",
 
   // Use Cases
   "useCases.badge": "Käyttökohteet",
@@ -6094,6 +6106,12 @@ const sv: TranslationKeys = {
   "features.f15Desc": "Intäktsrapporter, bokningstrender, beläggningsgrader och CSV-exporter för bokföring.",
   "features.f16Title": "Faktureringsuppföljning",
   "features.f16Desc": "Markera bokningar som fakturerade och spåra ofakturerade intäkter för alla bokningstyper.",
+  "features.f17Title": "Erbjudanden och förslag",
+  "features.f17Desc": "Skapa professionella erbjudanden med PDF-generering och skicka dem direkt till gäster via e-post.",
+  "features.f18Title": "Korsbokningar",
+  "features.f18Desc": "Länka bokningar mellan utrymmen och tjänster. Markera länkade bokningar som använda eller fakturerade tillsammans.",
+  "features.offersAndCross": "Erbjudanden och korsbokningar",
+  "features.offersAndCrossDesc": "Skapa erbjudanden, generera varumärkesanpassade PDF:er och länka bokningar mellan utrymmen — hantera allt tillsammans.",
 
   // Use Cases
   "useCases.badge": "Användningsfall",
