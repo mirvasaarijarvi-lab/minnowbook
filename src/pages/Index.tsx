@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   CalendarCheck, Palette, Users, Globe, BarChart3, Mail,
-  ArrowRight,
+  ArrowRight, Link2,
 } from "lucide-react";
 import MarketingHeader from "@/components/MarketingHeader";
 import MarketingFooter from "@/components/MarketingFooter";
@@ -21,6 +21,7 @@ const featureKeys: { icon: React.ElementType; titleKey: TranslationKey; descKey:
   { icon: Globe, titleKey: "features.brandedPages", descKey: "features.brandedPagesDesc" },
   { icon: BarChart3, titleKey: "features.reportsInsights", descKey: "features.reportsInsightsDesc" },
   { icon: Mail, titleKey: "features.automatedEmails", descKey: "features.automatedEmailsDesc" },
+  { icon: Link2, titleKey: "features.offersAndCross", descKey: "features.offersAndCrossDesc" },
 ];
 
 const stepKeys: { step: string; titleKey: TranslationKey; descKey: TranslationKey }[] = [

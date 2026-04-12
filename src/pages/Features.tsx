@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import {
   ArrowRight, CalendarCheck, Palette, Users, Globe, BarChart3, Mail,
   Shield, Clock, Smartphone, Languages, CreditCard, Settings,
-  Bell, Tag, Layers, Building2, FileText,
+  Bell, Tag, Layers, Building2, FileText, Link2, FileOutput,
 } from "lucide-react";
 import MarketingHeader from "@/components/MarketingHeader";
 import MarketingFooter from "@/components/MarketingFooter";
@@ -46,6 +46,8 @@ const featureGroups = [
       { icon: FileText, titleKey: "features.f14Title" as const, descKey: "features.f14Desc" as const },
       { icon: BarChart3, titleKey: "features.f15Title" as const, descKey: "features.f15Desc" as const },
       { icon: CreditCard, titleKey: "features.f16Title" as const, descKey: "features.f16Desc" as const },
+      { icon: FileOutput, titleKey: "features.f17Title" as const, descKey: "features.f17Desc" as const },
+      { icon: Link2, titleKey: "features.f18Title" as const, descKey: "features.f18Desc" as const },
     ],
   },
 ];
