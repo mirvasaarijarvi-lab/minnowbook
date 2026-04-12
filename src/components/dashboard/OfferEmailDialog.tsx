@@ -34,11 +34,36 @@ function blobToBase64(blob: Blob): Promise<string> {
 const OfferEmailDialog = forwardRef<HTMLDivElement, Props>(({ offer, open, onOpenChange }, ref) => {
   const t = useT();
   const updateOffer = useUpdateOffer();
-  const { tenant } = useTenant();
+  const { tenant, tenantId } = useTenant();
   const businessName = (tenant as any)?.name || "MimmoBook";
 
-  const defaultSubject = `Offer – ${businessName}`;
-  const defaultBody = `Dear ${offer.guest_name},\n\nPlease find attached the offer for your event. We kindly ask you to review the details and confirm if the offer is accepted.\n\nBest regards,\n${businessName}`;
+  // Fetch tenant settings for logo & contact info
+  const { data: tenantSettings } = useQuery({
+    queryKey: ["tenant-settings-branding", tenantId],
+    queryFn: async () => {
+      if (!tenantId) return null;
+      const { data } = await supabase
+        .from("tenant_settings")
+        .select("logo_url, business_name, business_email, business_phone, business_address, primary_color")
+        .eq("tenant_id", tenantId)
+        .maybeSingle();
+      return data;
+    },
+    enabled: !!tenantId,
+  });
+
+  const branding: TenantBranding = {
+    logoUrl: tenantSettings?.logo_url,
+    businessName: tenantSettings?.business_name || businessName,
+    businessEmail: tenantSettings?.business_email,
+    businessPhone: tenantSettings?.business_phone,
+    businessAddress: tenantSettings?.business_address,
+    primaryColor: tenantSettings?.primary_color,
+  };
+
+  const effectiveName = branding.businessName || businessName;
+  const defaultSubject = `Offer – ${effectiveName}`;
+  const defaultBody = `Dear ${offer.guest_name},\n\nPlease find attached the offer for your event. We kindly ask you to review the details and confirm if the offer is accepted.\n\nBest regards,\n${effectiveName}`;
 
   const [subject, setSubject] = useState(defaultSubject);
   const [body, setBody] = useState(defaultBody);
@@ -56,7 +81,7 @@ const OfferEmailDialog = forwardRef<HTMLDivElement, Props>(({ offer, open, onOpe
     try {
       // Generate PDF client-side
       const { generateOfferPdf } = await import("@/lib/offerPdf");
-      const pdfBlob = await generateOfferPdf(offer, offer.language || "en", businessName);
+      const pdfBlob = await generateOfferPdf(offer, offer.language || "en", effectiveName, branding);
       const pdfBase64 = await blobToBase64(pdfBlob);
 
       const { data, error } = await supabase.functions.invoke("send-offer-email", {
