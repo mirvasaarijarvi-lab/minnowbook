@@ -54,6 +54,7 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
   const [reminderDialog, setReminderDialog] = useState<string | null>(null);
   const [editingReservation, setEditingReservation] = useState<any | null>(null);
   const [newReservationOpen, setNewReservationOpen] = useState(false);
+  const [linkedUsedPrompt, setLinkedUsedPrompt] = useState<{ reservationId: string; linkedIds: string[]; linkedNames: string[] } | null>(null);
   const t = useT();
   const tDynamic = useTDynamic();
   const dateFnsLocale = useDateLocale();
