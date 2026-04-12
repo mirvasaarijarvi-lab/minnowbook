@@ -35,7 +35,6 @@ const Pricing = () => {
       features: [
         t("pricing.proF1"), t("pricing.proF2"), t("pricing.proF3"),
         t("pricing.offers"), t("pricing.crossReservations"),
-        t("pricing.proF4"),
       ],
     },
     {

@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useT, useTDynamic } from "@/contexts/I18nContext";
 import { useTenant } from "@/hooks/useTenant";
+import { useTierGate } from "@/hooks/useTierGate";
 import {
   Dialog,
   DialogContent,
