@@ -595,7 +595,33 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
         </DialogContent>
       </Dialog>
 
-      {/* Edit dialog */}
+      {/* Linked used prompt dialog */}
+      <Dialog open={!!linkedUsedPrompt} onOpenChange={(open) => !open && setLinkedUsedPrompt(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("dashboard.markLinkedUsed")}</DialogTitle>
+            <DialogDescription>{t("dashboard.markLinkedUsedMsg")}</DialogDescription>
+          </DialogHeader>
+          {linkedUsedPrompt && (
+            <ul className="text-sm space-y-1 pl-4 list-disc text-muted-foreground">
+              {linkedUsedPrompt.linkedNames.map((name, i) => (
+                <li key={i}>{name}</li>
+              ))}
+            </ul>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setLinkedUsedPrompt(null)}>{t("common.cancel")}</Button>
+            <Button
+              onClick={() => linkedUsedPrompt && markLinkedUsed.mutate(linkedUsedPrompt.linkedIds)}
+              disabled={markLinkedUsed.isPending}
+            >
+              <PackageCheck className="h-4 w-4 mr-1.5" />
+              {t("dashboard.markAll")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <EditReservationDialog
         reservation={editingReservation}
         open={!!editingReservation}
