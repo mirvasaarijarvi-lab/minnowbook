@@ -21,3 +21,5 @@ project_id = "lsgznskkxadplwnxplhd"
     verify_jwt = false
   [functions.ical-feed]
     verify_jwt = false
+  [functions.send-offer-email]
+    verify_jwt = false
