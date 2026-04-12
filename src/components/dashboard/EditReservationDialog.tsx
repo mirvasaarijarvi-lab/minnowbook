@@ -81,6 +81,8 @@ const EditReservationDialog = ({
   const dateFnsLocale = useDateLocale();
   const queryClient = useQueryClient();
   const { tenant, tenantId } = useTenant();
+  const { isGated } = useTierGate();
+  const canCrossReserve = !isGated("basic");
 
   const [activeTab, setActiveTab] = useState("details");
   const [customMessage, setCustomMessage] = useState("");
