@@ -508,6 +508,31 @@ const EditReservationDialog = ({
               <Label htmlFor="edit-staff-notes">{t("dashboard.staffNotes")}</Label>
               <Textarea id="edit-staff-notes" rows={2} value={form.staff_notes} onChange={(e) => updateField("staff_notes", e.target.value)} maxLength={1000} />
             </div>
+
+            {/* Cross-reservation linking */}
+            {linkedOffer && linkedReservations.length > 0 && (
+              <div className="space-y-2 rounded-lg border border-border p-3">
+                <Label className="font-medium flex items-center gap-1.5">
+                  <Link2 className="h-3.5 w-3.5 text-accent" />
+                  {t("offers.linkedReservations")}
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  {t("offers.crossBookingTitle")} – {linkedOffer.guest_name} ({linkedOffer.event_date})
+                </p>
+                <div className="space-y-1">
+                  {linkedReservations.map((lr) => (
+                    <div key={lr.id} className="flex items-center justify-between text-sm px-2 py-1.5 rounded bg-muted/50">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="font-medium truncate">{lr.guest_name}</span>
+                        <Badge variant="outline" className="text-[10px]">{lr.reservation_type}</Badge>
+                        <span className="text-xs text-muted-foreground">{lr.date}</span>
+                        {lr.is_used && <Badge variant="secondary" className="text-[10px]">{t("dashboard.used")}</Badge>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </TabsContent>
 
           {/* ── Email Preview Tab ── */}
