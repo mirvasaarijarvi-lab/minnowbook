@@ -16,7 +16,7 @@ export const useTenant = () => {
       if (!user?.id) return null;
       const { data, error } = await supabase
         .from("tenant_users")
-        .select("*, tenants(*)")
+        .select("*, tenants_safe(*)")
         .eq("user_id", user.id)
         .maybeSingle();
       if (error) throw error;
@@ -30,7 +30,7 @@ export const useTenant = () => {
     queryKey: ["impersonated-tenant", impersonating.tenantId],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("tenants")
+        .from("tenants_safe")
         .select("*")
         .eq("id", impersonating.tenantId!)
         .single();
@@ -57,8 +57,8 @@ export const useTenant = () => {
   const isOwner = role === "owner" || isSuperadmin;
   const isAdmin = role === "admin" || isOwner;
 
-  const tenant: Tenant | null = tenantUser?.tenants
-    ? (tenantUser.tenants as unknown as Tenant)
+  const tenant: Tenant | null = tenantUser?.tenants_safe
+    ? (tenantUser.tenants_safe as unknown as Tenant)
     : null;
 
   return {
