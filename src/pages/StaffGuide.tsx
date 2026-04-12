@@ -910,6 +910,7 @@ const guideContent: Record<Language, GuideContent> = {
       },
     ],
   },
+  sv: {
     title: "Personalens snabbguide",
     subtitle: "MimmoBook – bruksanvisning för personalen",
     printBtn: "Skriv ut / Spara som PDF",
