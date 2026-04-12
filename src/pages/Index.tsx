@@ -159,9 +159,10 @@ const Index = () => {
             <div className="relative w-full rounded-2xl overflow-hidden shadow-hover border border-border" style={{ paddingBottom: "56.25%" }}>
               <iframe
                 className="absolute inset-0 w-full h-full"
-                src="https://www.youtube-nocookie.com/embed/FCEVmh_W8FU?origin=https://mimmobook.com&rel=0"
+                src={`https://www.youtube-nocookie.com/embed/FCEVmh_W8FU?origin=${encodeURIComponent(window.location.origin)}&rel=0`}
                 title="MimmoBook – Reservation Management for Hospitality"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                referrerPolicy="strict-origin-when-cross-origin"
                 allowFullScreen
                 loading="lazy"
               />
