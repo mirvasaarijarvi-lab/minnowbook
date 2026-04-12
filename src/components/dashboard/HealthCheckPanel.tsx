@@ -47,7 +47,7 @@ const HealthCheckPanel = () => {
       // 1. Database connectivity
       const dbStart = performance.now();
       try {
-        const { error } = await supabase.from("tenants").select("id").limit(1);
+        const { error } = await supabase.from("tenants_safe").select("id").limit(1);
         const latency = Math.round(performance.now() - dbStart);
         if (error) {
           results.push({ name: "Database", status: "error", message: error.message, latency });

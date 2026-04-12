@@ -169,7 +169,7 @@ const ReportsPanel = () => {
     queryKey: ["tenant-for-reports", tenantId],
     queryFn: async () => {
       if (!tenantId) return null;
-      const { data } = await supabase.from("tenants").select("allowed_reservation_types").eq("id", tenantId).single();
+      const { data } = await supabase.from("tenants_safe").select("allowed_reservation_types").eq("id", tenantId).single();
       return data;
     },
     enabled: !!tenantId,
