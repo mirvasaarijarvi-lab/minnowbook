@@ -1,0 +1,26 @@
+name: Edge Function Tests
+
+on:
+  workflow_dispatch:
+
+jobs:
+  edge-tests:
+    name: Deno Edge Function Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v1.x
+
+      - name: Run edge function tests
+        run: |
+          for test_file in $(find supabase/functions -name '*_test.ts' -o -name '*.test.ts' 2>/dev/null); do
+            echo "Running $test_file"
+            deno test --allow-net --allow-env --allow-read "$test_file"
+          done
+          echo "Edge function tests completed"
