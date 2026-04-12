@@ -607,6 +607,9 @@ type TranslationKeys = {
   "dashboard.markLinkedUsed": string;
   "dashboard.markLinkedUsedMsg": string;
   "dashboard.markAll": string;
+  "dashboard.markLinkedInvoiced": string;
+  "dashboard.markLinkedInvoicedMsg": string;
+  "dashboard.markAllInvoiced": string;
   "dashboard.total": string;
   "dashboard.dailySnapshot": string;
   "dashboard.overviewSubtitle": string;
