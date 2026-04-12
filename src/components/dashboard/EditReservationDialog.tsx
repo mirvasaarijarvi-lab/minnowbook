@@ -514,7 +514,7 @@ const EditReservationDialog = ({
             </div>
 
             {/* Cross-reservation linking */}
-            {linkedOffer && linkedReservations.length > 0 && (
+            {canCrossReserve && linkedOffer && linkedReservations.length > 0 && (
               <div className="space-y-2 rounded-lg border border-border p-3">
                 <Label className="font-medium flex items-center gap-1.5">
                   <Link2 className="h-3.5 w-3.5 text-accent" />
