@@ -183,6 +183,68 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
     },
   });
 
+  const markLinkedUsed = useMutation({
+    mutationFn: async (ids: string[]) => {
+      const { error } = await supabase
+        .from("reservations")
+        .update({ is_used: true, updated_at: new Date().toISOString() } as any)
+        .in("id", ids)
+        .eq("tenant_id", tenantId!);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["reservations"] });
+      toast.success(t("dashboard.used"));
+      setLinkedUsedPrompt(null);
+    },
+    onError: () => {
+      toast.error("Error updating used status");
+    },
+  });
+
+  const handleToggleUsed = async (id: string, checked: boolean) => {
+    // Always toggle the current reservation first
+    toggleUsed.mutate({ id, checked });
+
+    // If marking as used, check for linked reservations via offers
+    if (checked && tenantId) {
+      const { data: offers } = await supabase
+        .from("offers")
+        .select("reservation_ids")
+        .eq("tenant_id", tenantId)
+        .contains("reservation_ids", [id]);
+
+      if (offers && offers.length > 0) {
+        const allLinkedIds = new Set<string>();
+        offers.forEach((offer) => {
+          const ids = (offer.reservation_ids as string[]) || [];
+          ids.forEach((rid) => {
+            if (rid !== id) allLinkedIds.add(rid);
+          });
+        });
+
+        if (allLinkedIds.size > 0) {
+          // Check which linked reservations are not yet marked as used
+          const linkedIdsArray = Array.from(allLinkedIds);
+          const { data: linkedReservations } = await supabase
+            .from("reservations")
+            .select("id, guest_name, reservation_type, is_used")
+            .in("id", linkedIdsArray)
+            .eq("tenant_id", tenantId);
+
+          const unmarked = (linkedReservations || []).filter((r) => !r.is_used);
+          if (unmarked.length > 0) {
+            setLinkedUsedPrompt({
+              reservationId: id,
+              linkedIds: unmarked.map((r) => r.id),
+              linkedNames: unmarked.map((r) => `${r.guest_name} (${r.reservation_type})`),
+            });
+          }
+        }
+      }
+    }
+  };
+
   const toggleInvoiced = useMutation({
     mutationFn: async ({ id, checked }: { id: string; checked: boolean }) => {
       const { error } = await supabase
