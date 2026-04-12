@@ -1443,8 +1443,14 @@ type TranslationKeys = {
   "features.f15Desc": string;
   "features.f16Title": string;
   "features.f16Desc": string;
+  "features.f17Title": string;
+  "features.f17Desc": string;
+  "features.f18Title": string;
+  "features.f18Desc": string;
+  "features.offersAndCross": string;
+  "features.offersAndCrossDesc": string;
 
-  // Use Cases
+
   "useCases.badge": string;
   "useCases.heroTitle": string;
   "useCases.heroSubtitle": string;
