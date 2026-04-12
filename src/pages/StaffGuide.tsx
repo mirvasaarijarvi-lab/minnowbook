@@ -353,6 +353,30 @@ const MockupProfile = () => (
   </div>
 );
 
+const MockupOffers = () => (
+  <div className="border rounded-lg p-4 bg-muted/30 space-y-3 print:bg-white">
+    <div className="flex items-center justify-between">
+      <div className="text-xs font-medium flex items-center gap-1"><FileOutput className="h-3.5 w-3.5 text-primary" /> Offers</div>
+      <div className="h-6 px-2 rounded bg-primary flex items-center text-[10px] text-primary-foreground">+ New Offer</div>
+    </div>
+    <div className="space-y-1.5">
+      {[
+        { guest: "Maria S.", date: "15 May", status: "Draft", linked: 2 },
+        { guest: "John D.", date: "22 May", status: "Sent", linked: 3 },
+      ].map((o) => (
+        <div key={o.guest} className="flex items-center justify-between p-2 rounded border bg-background text-[10px]">
+          <div><span className="font-medium">{o.guest}</span> · {o.date}</div>
+          <div className="flex items-center gap-2">
+            <span className="flex items-center gap-0.5"><Link2 className="h-2.5 w-2.5" />{o.linked}</span>
+            <span className={`px-1.5 py-0.5 rounded ${o.status === "Sent" ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"}`}>{o.status}</span>
+          </div>
+        </div>
+      ))}
+    </div>
+    <div className="text-[9px] text-muted-foreground text-center">Mark linked reservations as used / invoiced together</div>
+  </div>
+);
+
 const mockupComponents: Record<string, React.ReactNode> = {
   login: <MockupLogin />,
   overview: <MockupOverview />,
@@ -365,6 +389,7 @@ const mockupComponents: Record<string, React.ReactNode> = {
   support: <MockupSupport />,
   multisite: <MockupMultisite />,
   profile: <MockupProfile />,
+  offers: <MockupOffers />,
 };
 
 /* ─── Tier Overview Component ─── */
