@@ -57,8 +57,8 @@ export const useTenant = () => {
   const isOwner = role === "owner" || isSuperadmin;
   const isAdmin = role === "admin" || isOwner;
 
-  const tenant: Tenant | null = tenantUser?.tenants
-    ? (tenantUser.tenants as unknown as Tenant)
+  const tenant: Tenant | null = tenantUser?.tenants_safe
+    ? (tenantUser.tenants_safe as unknown as Tenant)
     : null;
 
   return {
