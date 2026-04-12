@@ -34,6 +34,7 @@ const Pricing = () => {
       priceId: STRIPE_TIERS.professional.price_id,
       features: [
         t("pricing.proF1"), t("pricing.proF2"), t("pricing.proF3"),
+        t("pricing.offersCrossRes"),
       ],
     },
     {
@@ -71,6 +72,7 @@ const Pricing = () => {
     [t("pricing.customTemplates"), "—", "✓", "✓"],
     [t("pricing.multiLanguage"), "✓", "✓", "✓"],
     [t("pricing.multisiteManagement"), "—", "—", "✓"],
+    [t("pricing.offersCrossRes"), "✓", "✓", "✓"],
     [t("pricing.analyticsReports"), t("pricing.basic"), t("pricing.advanced"), t("pricing.advanced")],
     [t("pricing.supportLevel"), "AI chatbot", "AI chatbot", t("pricing.responseTime24h")],
   ];
