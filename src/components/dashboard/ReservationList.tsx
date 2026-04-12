@@ -682,7 +682,34 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
         </DialogContent>
       </Dialog>
 
-      <EditReservationDialog
+      {/* Linked invoiced prompt dialog */}
+      <Dialog open={!!linkedInvoicedPrompt} onOpenChange={(open) => !open && setLinkedInvoicedPrompt(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("dashboard.markLinkedInvoiced")}</DialogTitle>
+            <DialogDescription>{t("dashboard.markLinkedInvoicedMsg")}</DialogDescription>
+          </DialogHeader>
+          {linkedInvoicedPrompt && (
+            <ul className="text-sm space-y-1 pl-4 list-disc text-muted-foreground">
+              {linkedInvoicedPrompt.linkedNames.map((name, i) => (
+                <li key={i}>{name}</li>
+              ))}
+            </ul>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setLinkedInvoicedPrompt(null)}>{t("common.cancel")}</Button>
+            <Button
+              onClick={() => linkedInvoicedPrompt && markLinkedInvoiced.mutate(linkedInvoicedPrompt.linkedIds)}
+              disabled={markLinkedInvoiced.isPending}
+            >
+              <Receipt className="h-4 w-4 mr-1.5" />
+              {t("dashboard.markAllInvoiced")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+
         reservation={editingReservation}
         open={!!editingReservation}
         onOpenChange={(open) => !open && setEditingReservation(null)}
