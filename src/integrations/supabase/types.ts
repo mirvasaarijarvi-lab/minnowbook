@@ -921,6 +921,112 @@ export type Database = {
           },
         ]
       }
+      offers: {
+        Row: {
+          archived_at: string | null
+          created_at: string
+          created_by: string | null
+          end_time: string | null
+          event_date: string
+          event_space: string
+          event_type: string | null
+          guest_email: string
+          guest_name: string
+          guest_phone: string
+          guests_count: number
+          id: string
+          invoicing_details: string | null
+          language: string
+          last_send_provider_id: string | null
+          last_sent_at: string | null
+          linked_reservations: Json | null
+          menu: string | null
+          reservation_ids: string[] | null
+          special_requests: string | null
+          start_time: string
+          status: string
+          tenant_id: string
+          updated_at: string
+          validity_date: string | null
+        }
+        Insert: {
+          archived_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          end_time?: string | null
+          event_date: string
+          event_space?: string
+          event_type?: string | null
+          guest_email: string
+          guest_name: string
+          guest_phone: string
+          guests_count: number
+          id?: string
+          invoicing_details?: string | null
+          language?: string
+          last_send_provider_id?: string | null
+          last_sent_at?: string | null
+          linked_reservations?: Json | null
+          menu?: string | null
+          reservation_ids?: string[] | null
+          special_requests?: string | null
+          start_time: string
+          status?: string
+          tenant_id: string
+          updated_at?: string
+          validity_date?: string | null
+        }
+        Update: {
+          archived_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          end_time?: string | null
+          event_date?: string
+          event_space?: string
+          event_type?: string | null
+          guest_email?: string
+          guest_name?: string
+          guest_phone?: string
+          guests_count?: number
+          id?: string
+          invoicing_details?: string | null
+          language?: string
+          last_send_provider_id?: string | null
+          last_sent_at?: string | null
+          linked_reservations?: Json | null
+          menu?: string | null
+          reservation_ids?: string[] | null
+          special_requests?: string | null
+          start_time?: string
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+          validity_date?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "offers_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "offers_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "offers_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants_safe"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       recurring_blocked_slots: {
         Row: {
           approval_status: string
