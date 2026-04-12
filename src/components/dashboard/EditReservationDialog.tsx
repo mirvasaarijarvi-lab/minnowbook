@@ -35,6 +35,7 @@ import { format } from "date-fns";
 import { CalendarIcon, Loader2, Mail, Pencil, XCircle, Tag, Link2, Unlink } from "lucide-react";
 import { cn } from "@/lib/utils";
 import ConfirmationEmailPreview from "@/components/ConfirmationEmailPreview";
+import { Badge } from "@/components/ui/badge";
 
 interface Reservation {
   id: string;
