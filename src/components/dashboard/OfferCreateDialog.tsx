@@ -3,6 +3,7 @@ import { useT } from "@/contexts/I18nContext";
 import { useCreateOffer, useUpdateOffer, type Offer, type LinkedReservation } from "@/hooks/useOffers";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTenant } from "@/hooks/useTenant";
+import { useTierGate } from "@/hooks/useTierGate";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,7 +37,9 @@ const OfferCreateDialog = ({ open, onOpenChange, editOffer }: Props) => {
   const t = useT();
   const { user } = useAuth();
   const { tenantId, tenant } = useTenant();
+  const { isGated } = useTierGate();
   const dateLocale = useDateLocale();
+  const canCrossReserve = !isGated("basic");
   const createOffer = useCreateOffer();
   const updateOffer = useUpdateOffer();
   const isEditing = !!editOffer;
@@ -290,8 +293,8 @@ const OfferCreateDialog = ({ open, onOpenChange, editOffer }: Props) => {
             </div>
           </div>
 
-          {/* Linked reservations (dynamic from resource types) */}
-          {resourceTypes.length > 0 && (
+          {/* Linked reservations (dynamic from resource types) — Pro+ only */}
+          {canCrossReserve && resourceTypes.length > 0 && (
             <div className="space-y-2">
               <Label className="text-sm font-semibold">{t("offers.linkedReservations")}</Label>
               <div className="grid grid-cols-2 gap-2">
@@ -306,7 +309,7 @@ const OfferCreateDialog = ({ open, onOpenChange, editOffer }: Props) => {
           )}
 
           {/* Linked reservation details */}
-          {enabledLinked.map((key) => (
+          {canCrossReserve && enabledLinked.map((key) => (
             <div key={key} className="border rounded-lg p-4 space-y-3 bg-muted/30">
               <h4 className="font-medium text-sm">{typeLabels[key] || key}</h4>
               <div className="space-y-1.5">
