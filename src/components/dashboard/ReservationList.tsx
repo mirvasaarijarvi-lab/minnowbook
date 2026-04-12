@@ -515,7 +515,7 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
                         <Checkbox
                           checked={r.is_invoiced ?? false}
                           onCheckedChange={(checked) => {
-                            toggleInvoiced.mutate({ id: r.id, checked: !!checked });
+                            handleToggleInvoiced(r.id, !!checked);
                           }}
                         />
                         <Receipt className="h-3.5 w-3.5 text-muted-foreground" />
