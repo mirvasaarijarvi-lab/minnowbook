@@ -654,6 +654,22 @@ const guideContent: Record<Language, GuideContent> = {
         ],
         tip: "Make sure to mark reservations as both 'Used' and 'Invoiced' before they qualify for archiving.",
       },
+      {
+        icon: <FileOutput className="h-6 w-6" />, mockupId: "offers",
+        title: "13. Offers & Cross-Reservations",
+        steps: [
+          "Navigate to 'Offers' in the sidebar to manage proposals for guests.",
+          "Click '+ New Offer' to create an offer: fill in guest details, event date, space, and menu.",
+          "Link existing reservations to the offer — select from your current bookings across all resource types.",
+          "Generate a branded PDF of the offer and send it directly to the guest via email.",
+          "The PDF includes your tenant logo, contact information, and a discreet MimmoBook watermark.",
+          "Track offer status: Draft → Sent → Accepted → Rejected → Archived.",
+          "When you mark a linked reservation as 'Used', you'll be prompted to mark all other linked reservations as used too.",
+          "The same applies to 'Invoiced' — mark one linked reservation as invoiced and you can mark them all at once.",
+          "This cross-reservation linking ensures consistent tracking across spaces (e.g. a dinner + room + event space booked together).",
+        ],
+        tip: "Offers & cross-reservations are available on all plans — Basic, Pro, and Business.",
+      },
     ],
   },
   fi: {
