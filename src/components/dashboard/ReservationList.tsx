@@ -442,7 +442,7 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
                         <Checkbox
                           checked={(r as any).is_used ?? false}
                           onCheckedChange={(checked) => {
-                            toggleUsed.mutate({ id: r.id, checked: !!checked });
+                            handleToggleUsed(r.id, !!checked);
                           }}
                         />
                         <PackageCheck className="h-3.5 w-3.5 text-muted-foreground" />
