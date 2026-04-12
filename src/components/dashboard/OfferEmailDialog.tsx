@@ -37,7 +37,6 @@ const OfferEmailDialog = forwardRef<HTMLDivElement, Props>(({ offer, open, onOpe
   const { tenant, tenantId } = useTenant();
   const businessName = (tenant as any)?.name || "MimmoBook";
 
-  // Fetch tenant settings for logo & contact info
   const { data: tenantSettings } = useQuery({
     queryKey: ["tenant-settings-branding", tenantId],
     queryFn: async () => {
@@ -63,7 +62,7 @@ const OfferEmailDialog = forwardRef<HTMLDivElement, Props>(({ offer, open, onOpe
 
   const effectiveName = branding.businessName || businessName;
   const defaultSubject = `Offer – ${effectiveName}`;
-  const defaultBody = `Dear ${offer.guest_name},\n\nPlease find attached the offer for your event. We kindly ask you to review the details and confirm if the offer is accepted.\n\nBest regards,\n${effectiveName}`;
+  const defaultBody = `Dear ${offer.guest_name},\n\nPlease use the PDF download link in this email to review your offer details and confirm whether you would like to proceed.\n\nBest regards,\n${effectiveName}`;
 
   const [subject, setSubject] = useState(defaultSubject);
   const [body, setBody] = useState(defaultBody);
@@ -79,7 +78,6 @@ const OfferEmailDialog = forwardRef<HTMLDivElement, Props>(({ offer, open, onOpe
   const handleSend = async () => {
     setSending(true);
     try {
-      // Generate PDF client-side
       const { generateOfferPdf } = await import("@/lib/offerPdf");
       const pdfBlob = await generateOfferPdf(offer, offer.language || "en", effectiveName, branding);
       const pdfBase64 = await blobToBase64(pdfBlob);
@@ -88,7 +86,6 @@ const OfferEmailDialog = forwardRef<HTMLDivElement, Props>(({ offer, open, onOpe
         body: {
           to: offer.guest_email,
           subject,
-          htmlBody: body.replace(/\n/g, "<br/>"),
           textBody: body,
           pdfBase64,
           pdfFilename: `Offer_${offer.guest_name.replace(/\s+/g, "_")}_${offer.event_date}.pdf`,
