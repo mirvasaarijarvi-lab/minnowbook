@@ -32,7 +32,7 @@ import { useDateLocale } from "@/hooks/useDateLocale";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { format } from "date-fns";
-import { CalendarIcon, Loader2, Mail, Pencil, XCircle, Tag } from "lucide-react";
+import { CalendarIcon, Loader2, Mail, Pencil, XCircle, Tag, Link2, Unlink } from "lucide-react";
 import { cn } from "@/lib/utils";
 import ConfirmationEmailPreview from "@/components/ConfirmationEmailPreview";
 
@@ -108,6 +108,39 @@ const EditReservationDialog = ({
   });
 
   const [selectedResourceId, setSelectedResourceId] = useState<string>("");
+
+  // Cross-reservation: find linked offer
+  const { data: linkedOffer } = useQuery({
+    queryKey: ["linked-offer", reservation?.id],
+    queryFn: async () => {
+      if (!reservation?.id || !tenantId) return null;
+      const { data, error } = await supabase
+        .from("offers")
+        .select("id, guest_name, event_date, reservation_ids")
+        .eq("tenant_id", tenantId)
+        .contains("reservation_ids", [reservation.id])
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!reservation?.id && !!tenantId,
+  });
+
+  // Fetch sibling reservations from the same offer
+  const siblingIds = (linkedOffer?.reservation_ids as string[] | null)?.filter((id) => id !== reservation?.id) ?? [];
+  const { data: linkedReservations = [] } = useQuery({
+    queryKey: ["linked-reservations", siblingIds],
+    queryFn: async () => {
+      if (!siblingIds.length) return [];
+      const { data, error } = await supabase
+        .from("reservations")
+        .select("id, guest_name, reservation_type, date, status, is_used")
+        .in("id", siblingIds);
+      if (error) throw error;
+      return data ?? [];
+    },
+    enabled: siblingIds.length > 0,
+  });
 
   // Fetch tenant settings for email preview branding
   const { data: settings } = useQuery({
