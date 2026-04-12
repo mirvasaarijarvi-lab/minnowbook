@@ -2365,6 +2365,7 @@ export type Database = {
           created_at: string | null
           guest_name: string | null
           id: string | null
+          is_published: boolean | null
           rating: number | null
           site_id: string | null
           tenant_id: string | null
@@ -2374,6 +2375,7 @@ export type Database = {
           created_at?: string | null
           guest_name?: string | null
           id?: string | null
+          is_published?: boolean | null
           rating?: number | null
           site_id?: string | null
           tenant_id?: string | null
@@ -2383,6 +2385,7 @@ export type Database = {
           created_at?: string | null
           guest_name?: string | null
           id?: string | null
+          is_published?: boolean | null
           rating?: number | null
           site_id?: string | null
           tenant_id?: string | null
