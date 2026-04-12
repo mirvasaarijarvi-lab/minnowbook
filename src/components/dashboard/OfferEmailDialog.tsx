@@ -92,6 +92,8 @@ const OfferEmailDialog = forwardRef<HTMLDivElement, Props>(({ offer, open, onOpe
           textBody: body,
           pdfBase64,
           pdfFilename: `Offer_${offer.guest_name.replace(/\s+/g, "_")}_${offer.event_date}.pdf`,
+          businessName: effectiveName,
+          businessEmail: branding.businessEmail || undefined,
         },
       });
 
