@@ -607,6 +607,9 @@ type TranslationKeys = {
   "dashboard.markLinkedUsed": string;
   "dashboard.markLinkedUsedMsg": string;
   "dashboard.markAll": string;
+  "dashboard.markLinkedInvoiced": string;
+  "dashboard.markLinkedInvoicedMsg": string;
+  "dashboard.markAllInvoiced": string;
   "dashboard.total": string;
   "dashboard.dailySnapshot": string;
   "dashboard.overviewSubtitle": string;
@@ -2170,6 +2173,9 @@ const en: TranslationKeys = {
   "dashboard.markLinkedUsed": "Mark linked reservations used?",
   "dashboard.markLinkedUsedMsg": "This reservation is linked to an offer with other reservations. Would you like to mark them all as used?",
   "dashboard.markAll": "Mark all used",
+  "dashboard.markLinkedInvoiced": "Mark linked reservations as invoiced?",
+  "dashboard.markLinkedInvoicedMsg": "This reservation is linked to an offer with other reservations. Would you like to mark them all as invoiced?",
+  "dashboard.markAllInvoiced": "Mark all invoiced",
   "dashboard.total": "total",
   "dashboard.dailySnapshot": "Daily snapshot at a glance",
   "dashboard.overviewSubtitle": "Daily snapshot at a glance",
@@ -3715,6 +3721,9 @@ const fi: TranslationKeys = {
   "dashboard.markLinkedUsed": "Merkitäänkö linkitetyt varaukset käytetyiksi?",
   "dashboard.markLinkedUsedMsg": "Tämä varaus on linkitetty tarjoukseen, jossa on muita varauksia. Haluatko merkitä ne kaikki käytetyiksi?",
   "dashboard.markAll": "Merkitse kaikki käytetyiksi",
+  "dashboard.markLinkedInvoiced": "Merkitäänkö linkitetyt varaukset laskutetuiksi?",
+  "dashboard.markLinkedInvoicedMsg": "Tämä varaus on linkitetty tarjoukseen, jossa on muita varauksia. Haluatko merkitä ne kaikki laskutetuiksi?",
+  "dashboard.markAllInvoiced": "Merkitse kaikki laskutetuiksi",
   "dashboard.total": "yhteensä",
   "dashboard.dailySnapshot": "Päivittäinen tilannekatsaus",
   "dashboard.overviewSubtitle": "Päivittäinen tilannekatsaus",
@@ -5259,6 +5268,9 @@ const sv: TranslationKeys = {
   "dashboard.markLinkedUsed": "Markera länkade bokningar som använda?",
   "dashboard.markLinkedUsedMsg": "Denna bokning är länkad till ett erbjudande med andra bokningar. Vill du markera alla som använda?",
   "dashboard.markAll": "Markera alla använda",
+  "dashboard.markLinkedInvoiced": "Markera länkade bokningar som fakturerade?",
+  "dashboard.markLinkedInvoicedMsg": "Denna bokning är länkad till ett erbjudande med andra bokningar. Vill du markera alla som fakturerade?",
+  "dashboard.markAllInvoiced": "Markera alla fakturerade",
   "dashboard.total": "totalt",
   "dashboard.dailySnapshot": "Daglig översikt",
   "dashboard.overviewSubtitle": "Daglig översikt",
