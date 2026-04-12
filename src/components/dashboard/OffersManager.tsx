@@ -203,7 +203,7 @@ const OffersManager = () => {
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-medium text-sm">{offer.guest_name}</span>
                         <Badge variant={statusColor(offer.status)} className="text-[10px]">
-                          {t(`offers.status${offer.status.charAt(0).toUpperCase() + offer.status.slice(1)}`)}
+                          {t(`offers.status${offer.status.charAt(0).toUpperCase() + offer.status.slice(1)}` as any)}
                         </Badge>
                         {isArchived && (
                           <Badge variant="outline" className="text-[10px]">{t("offers.archived")}</Badge>
