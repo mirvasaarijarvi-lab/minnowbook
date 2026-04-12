@@ -1130,6 +1130,22 @@ const guideContent: Record<Language, GuideContent> = {
         ],
         tip: "Se till att markera bokningar som både 'Använd' och 'Fakturerad' innan de kvalificerar för arkivering.",
       },
+      {
+        icon: <FileOutput className="h-6 w-6" />, mockupId: "offers",
+        title: "13. Erbjudanden och korsbokningar",
+        steps: [
+          "Navigera till 'Erbjudanden' i sidofältet för att hantera förslag till gäster.",
+          "Klicka '+ Nytt erbjudande' för att skapa ett erbjudande: fyll i gästuppgifter, eventdatum, utrymme och meny.",
+          "Länka befintliga bokningar till erbjudandet — välj bland dina nuvarande bokningar från alla resurstyper.",
+          "Generera en varumärkesanpassad PDF av erbjudandet och skicka den direkt till gästen via e-post.",
+          "PDF:en innehåller din logotyp, kontaktinformation och en diskret MimmoBook-vattenstämpel.",
+          "Spåra erbjudandets status: Utkast → Skickat → Accepterat → Avvisat → Arkiverat.",
+          "När du markerar en länkad bokning som 'Använd' uppmanas du att markera alla andra länkade bokningar som använda också.",
+          "Samma sak gäller 'Fakturerad' — markera en länkad bokning som fakturerad och du kan markera alla på en gång.",
+          "Korsbokningslänkning säkerställer konsekvent spårning mellan utrymmen (t.ex. middag + rum + eventlokal bokade tillsammans).",
+        ],
+        tip: "Erbjudanden och korsbokningar är tillgängliga på alla planer — Basic, Pro och Business.",
+      },
     ],
   },
 };
