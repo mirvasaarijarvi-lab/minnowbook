@@ -4,8 +4,8 @@ const corsHeaders = {
 };
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const SENDER_DOMAIN = "notify.mimopaus.com";
-const FROM_DOMAIN = "mimopaus.com";
+const SENDER_DOMAIN = "notify.mimmobook.com";
+const FROM_DOMAIN = "mimmobook.com";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
