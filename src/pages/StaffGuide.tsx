@@ -668,7 +668,7 @@ const guideContent: Record<Language, GuideContent> = {
           "The same applies to 'Invoiced' — mark one linked reservation as invoiced and you can mark them all at once.",
           "This cross-reservation linking ensures consistent tracking across spaces (e.g. a dinner + room + event space booked together).",
         ],
-        tip: "Offers & cross-reservations are available on all plans — Basic, Pro, and Business.",
+        tip: "Offers are available on all plans. Cross-reservations (linking across types) require Pro or Business.",
       },
     ],
   },

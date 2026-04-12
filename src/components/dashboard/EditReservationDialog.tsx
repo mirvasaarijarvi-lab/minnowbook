@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useT, useTDynamic } from "@/contexts/I18nContext";
 import { useTenant } from "@/hooks/useTenant";
+import { useTierGate } from "@/hooks/useTierGate";
 import {
   Dialog,
   DialogContent,
@@ -80,6 +81,8 @@ const EditReservationDialog = ({
   const dateFnsLocale = useDateLocale();
   const queryClient = useQueryClient();
   const { tenant, tenantId } = useTenant();
+  const { isGated } = useTierGate();
+  const canCrossReserve = !isGated("basic");
 
   const [activeTab, setActiveTab] = useState("details");
   const [customMessage, setCustomMessage] = useState("");
@@ -511,7 +514,7 @@ const EditReservationDialog = ({
             </div>
 
             {/* Cross-reservation linking */}
-            {linkedOffer && linkedReservations.length > 0 && (
+            {canCrossReserve && linkedOffer && linkedReservations.length > 0 && (
               <div className="space-y-2 rounded-lg border border-border p-3">
                 <Label className="font-medium flex items-center gap-1.5">
                   <Link2 className="h-3.5 w-3.5 text-accent" />
