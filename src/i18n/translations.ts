@@ -604,6 +604,9 @@ type TranslationKeys = {
   "notifications.invoiced": string;
   "dashboard.used": string;
   "dashboard.invoiced": string;
+  "dashboard.markLinkedUsed": string;
+  "dashboard.markLinkedUsedMsg": string;
+  "dashboard.markAll": string;
   "dashboard.total": string;
   "dashboard.dailySnapshot": string;
   "dashboard.overviewSubtitle": string;
