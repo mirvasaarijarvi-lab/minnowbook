@@ -80,7 +80,7 @@ const PricingTier = ({
           <span className="text-4xl font-serif font-bold text-foreground">€{price}</span>
           <span className="text-muted-foreground text-sm">{t("pricing.perMonth")}</span>
         </div>
-        <p className="text-xs text-muted-foreground mt-1">{t("pricing.trialIncluded")}</p>
+        <p className="text-xs text-muted-foreground mt-1">{t("pricing.trialIncluded")} · {t("pricing.inclVat") || "Incl. VAT"}</p>
       </div>
 
       <div className="mb-6 space-y-2 pb-6 border-b border-border">
