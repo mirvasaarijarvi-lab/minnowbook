@@ -444,7 +444,7 @@ const guideContent: Record<Language, GuideContent> = {
       tiers: [
         {
           name: "Basic",
-          price: "€29/mo",
+          price: "€19/mo",
           features: [
             "1 reservation type (you choose)",
             "1 resource per type",
@@ -456,7 +456,7 @@ const guideContent: Record<Language, GuideContent> = {
         },
         {
           name: "Pro",
-          price: "€79/mo",
+          price: "€59/mo",
           features: [
             "All reservation types (1 resource each)",
             "Up to 10 staff users",
@@ -469,7 +469,7 @@ const guideContent: Record<Language, GuideContent> = {
         },
         {
           name: "Business",
-          price: "€199/mo",
+          price: "€179/mo",
           features: [
             "Unlimited sites & resources",
             "Unlimited staff users",

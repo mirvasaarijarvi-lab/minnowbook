@@ -33,6 +33,11 @@ const logStep = (step: string, details?: any) => {
 
 // Map Stripe price IDs to tier names
 const PRICE_TO_TIER: Record<string, string> = {
+  // New VAT-inclusive prices (Apr 2026)
+  "price_1TM3VZAi9C4ePV8hzIKzpZHb": "basic",
+  "price_1TM3VxAi9C4ePV8hP4Olb3GN": "professional",
+  "price_1TM3bOAi9C4ePV8hv5EQysmt": "business",
+  // Legacy prices (keep for existing subscribers)
   "price_1T9LDMAi9C4ePV8hwdTtDJwR": "basic",
   "price_1T9LEYAi9C4ePV8hOkMDFa9r": "professional",
   "price_1T9LFNAi9C4ePV8hBMDXEnP5": "business",

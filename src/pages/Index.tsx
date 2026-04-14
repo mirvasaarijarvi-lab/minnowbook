@@ -88,7 +88,7 @@ const Index = () => {
           faqSchema([
             { question: "What is MimmoBook?", answer: "MimmoBook is a cloud-based SaaS reservation management platform designed for restaurants, venues, hotels, and guesthouses. It provides branded booking pages, automated email confirmations, team management, and real-time reporting." },
             { question: "Who is MimmoBook for?", answer: "MimmoBook is built for hospitality businesses including restaurants, event venues, hotels, guesthouses, and catering services that need to manage reservations online." },
-            { question: "How much does MimmoBook cost?", answer: "MimmoBook offers three plans: Basic at €29/month, Professional at €79/month, and Enterprise at €149/month. All plans include a 30-day free trial." },
+            { question: "How much does MimmoBook cost?", answer: "MimmoBook offers three plans: Basic at €19/month, Professional at €59/month, and Business at €179/month. All prices include VAT. All plans include a 30-day free trial." },
             { question: "Does MimmoBook support multiple locations?", answer: "Yes, the Enterprise plan supports unlimited sites and locations with centralized management, per-site branding, and independent booking pages." },
             { question: "What languages does MimmoBook support?", answer: "MimmoBook supports English, Finnish, and Swedish for both the management dashboard and public booking pages." },
           ]),

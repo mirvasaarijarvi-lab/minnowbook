@@ -8,9 +8,9 @@ describe("Data Exposure - Security Regression Tests", () => {
   describe("Stripe IDs should not be publicly exposed", () => {
     it("Stripe price IDs follow expected format", () => {
       const STRIPE_TIERS = {
-        basic: { price_id: "price_1T9LDMAi9C4ePV8hwdTtDJwR" },
-        professional: { price_id: "price_1T9LEYAi9C4ePV8hOkMDFa9r" },
-        business: { price_id: "price_1T9LFNAi9C4ePV8hBMDXEnP5" },
+        basic: { price_id: "price_1TM3VZAi9C4ePV8hzIKzpZHb" },
+        professional: { price_id: "price_1TM3VxAi9C4ePV8hP4Olb3GN" },
+        business: { price_id: "price_1TM3bOAi9C4ePV8hv5EQysmt" },
       };
 
       for (const [, tier] of Object.entries(STRIPE_TIERS)) {
