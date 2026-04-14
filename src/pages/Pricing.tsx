@@ -14,7 +14,7 @@ const Pricing = () => {
   const tiers = [
     {
       name: t("pricing.basicName"),
-      price: 29,
+      price: 19,
       description: t("pricing.basicDesc"),
       reservationTypes: t("pricing.basicTypes"),
       staffUsers: t("pricing.basicStaff"),
@@ -26,7 +26,7 @@ const Pricing = () => {
     },
     {
       name: t("pricing.proName"),
-      price: 79,
+      price: 59,
       description: t("pricing.proDesc"),
       reservationTypes: t("pricing.proTypes"),
       staffUsers: t("pricing.proStaff"),
@@ -39,7 +39,7 @@ const Pricing = () => {
     },
     {
       name: t("pricing.businessName"),
-      price: 199,
+      price: 179,
       description: t("pricing.businessDesc"),
       reservationTypes: t("pricing.businessTypes"),
       staffUsers: t("pricing.businessStaff"),
@@ -60,7 +60,7 @@ const Pricing = () => {
   ];
 
   const comparisonRows = [
-    [t("pricing.monthlyPrice"), "€29", "€79", "€199"],
+    [t("pricing.monthlyPrice"), "€19", "€59", "€179"],
     [t("pricing.freeTrial"), t("pricing.days30"), t("pricing.days30"), t("pricing.days30")],
     [t("pricing.sitesLocations"), "1", "1", t("pricing.unlimited")],
     [t("pricing.reservationTypes"), "1", t("pricing.all"), t("pricing.all")],
@@ -83,12 +83,12 @@ const Pricing = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <SEOHead
-        title="MimmoBook Pricing – Plans from €29/month"
-        description="Compare MimmoBook plans: Basic €29/mo, Professional €79/mo, Enterprise €149/mo. All include 30-day free trial, branded booking pages and automated emails."
+        title="MimmoBook Pricing – Plans from €19/month (incl. VAT)"
+        description="Compare MimmoBook plans: Basic €19/mo, Professional €59/mo, Business €179/mo. All prices include VAT. 30-day free trial, branded booking pages and automated emails."
         path="/pricing"
         jsonLd={[
           faqSchema([
-            { question: "How much does MimmoBook cost?", answer: "MimmoBook offers three plans: Basic at €29/month for small businesses, Professional at €79/month for growing teams, and Enterprise at €149/month for multi-site operations." },
+            { question: "How much does MimmoBook cost?", answer: "MimmoBook offers three plans: Basic at €19/month, Professional at €59/month, and Business at €179/month. All prices include VAT." },
             { question: "Is there a free trial?", answer: "Yes, all MimmoBook plans include a 30-day free trial with full access to features." },
             { question: "Can I change plans later?", answer: "Yes, you can upgrade or downgrade your plan at any time from the dashboard." },
           ]),
