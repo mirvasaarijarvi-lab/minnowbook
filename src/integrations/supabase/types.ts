@@ -2392,6 +2392,42 @@ export type Database = {
         }
         Relationships: []
       }
+      guest_reviews_safe: {
+        Row: {
+          comment: string | null
+          created_at: string | null
+          guest_name: string | null
+          id: string | null
+          is_published: boolean | null
+          rating: number | null
+          reservation_id: string | null
+          site_id: string | null
+          tenant_id: string | null
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string | null
+          guest_name?: string | null
+          id?: string | null
+          is_published?: boolean | null
+          rating?: number | null
+          reservation_id?: string | null
+          site_id?: string | null
+          tenant_id?: string | null
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string | null
+          guest_name?: string | null
+          id?: string | null
+          is_published?: boolean | null
+          rating?: number | null
+          reservation_id?: string | null
+          site_id?: string | null
+          tenant_id?: string | null
+        }
+        Relationships: []
+      }
       site_settings_public: {
         Row: {
           accent_color: string | null
