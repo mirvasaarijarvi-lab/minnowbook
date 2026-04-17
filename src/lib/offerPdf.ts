@@ -108,19 +108,29 @@ export async function generateOfferPdf(
   const lh = BODY_SIZE * LINE_H;
   const sectionLh = SECTION_SIZE * LINE_H;
 
-  // Try to embed logo
+  // Try to embed logo (with SSRF protections: only HTTPS, allow-listed hosts)
   let logoImage: Awaited<ReturnType<typeof pdfDoc.embedPng>> | null = null;
-  if (branding?.logoUrl) {
+  if (branding?.logoUrl && isSafeLogoUrl(branding.logoUrl)) {
     try {
-      const resp = await fetch(branding.logoUrl);
+      const resp = await fetch(branding.logoUrl, {
+        redirect: "error",
+        mode: "cors",
+      });
       if (resp.ok) {
-        const buf = await resp.arrayBuffer();
-        const bytes = new Uint8Array(buf);
-        // Detect PNG vs JPEG
-        if (bytes[0] === 0x89 && bytes[1] === 0x50) {
-          logoImage = await pdfDoc.embedPng(bytes);
-        } else {
-          logoImage = await pdfDoc.embedJpg(bytes) as any;
+        const contentType = resp.headers.get("content-type") || "";
+        // Only accept image responses
+        if (contentType.startsWith("image/")) {
+          const buf = await resp.arrayBuffer();
+          // Cap at 5MB to avoid memory exhaustion
+          if (buf.byteLength > 0 && buf.byteLength <= 5 * 1024 * 1024) {
+            const bytes = new Uint8Array(buf);
+            // Detect PNG vs JPEG by magic bytes
+            if (bytes[0] === 0x89 && bytes[1] === 0x50) {
+              logoImage = await pdfDoc.embedPng(bytes);
+            } else if (bytes[0] === 0xff && bytes[1] === 0xd8) {
+              logoImage = await pdfDoc.embedJpg(bytes) as any;
+            }
+          }
         }
       }
     } catch {
