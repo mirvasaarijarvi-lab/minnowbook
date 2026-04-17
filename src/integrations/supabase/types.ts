@@ -2392,42 +2392,6 @@ export type Database = {
         }
         Relationships: []
       }
-      guest_reviews_safe: {
-        Row: {
-          comment: string | null
-          created_at: string | null
-          guest_name: string | null
-          id: string | null
-          is_published: boolean | null
-          rating: number | null
-          reservation_id: string | null
-          site_id: string | null
-          tenant_id: string | null
-        }
-        Insert: {
-          comment?: string | null
-          created_at?: string | null
-          guest_name?: string | null
-          id?: string | null
-          is_published?: boolean | null
-          rating?: number | null
-          reservation_id?: string | null
-          site_id?: string | null
-          tenant_id?: string | null
-        }
-        Update: {
-          comment?: string | null
-          created_at?: string | null
-          guest_name?: string | null
-          id?: string | null
-          is_published?: boolean | null
-          rating?: number | null
-          reservation_id?: string | null
-          site_id?: string | null
-          tenant_id?: string | null
-        }
-        Relationships: []
-      }
       site_settings_public: {
         Row: {
           accent_color: string | null
@@ -2696,6 +2660,18 @@ export type Database = {
       enqueue_email: {
         Args: { payload: Json; queue_name: string }
         Returns: number
+      }
+      get_published_reviews: {
+        Args: { p_site_id?: string; p_tenant_id: string }
+        Returns: {
+          comment: string
+          created_at: string
+          guest_name: string
+          id: string
+          rating: number
+          site_id: string
+          tenant_id: string
+        }[]
       }
       get_tier_max_reservation_types: {
         Args: { p_tier: string }
