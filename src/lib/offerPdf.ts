@@ -28,6 +28,54 @@ function t(key: string, lang: string): string {
   return L[key]?.[lang] || L[key]?.en || key;
 }
 
+/**
+ * SSRF guard for fetching tenant logos client-side.
+ * - Only HTTPS
+ * - Blocks localhost, private IPs, and link-local addresses
+ * - Allow-lists Supabase storage and trusted image hosts
+ */
+function isSafeLogoUrl(raw: string): boolean {
+  try {
+    const u = new URL(raw);
+    if (u.protocol !== "https:") return false;
+
+    const host = u.hostname.toLowerCase();
+
+    const blocked = [
+      "localhost", "127.0.0.1", "0.0.0.0", "::1",
+      "169.254.169.254",
+      "metadata.google.internal",
+    ];
+    if (blocked.includes(host)) return false;
+
+    const ipv4 = host.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
+    if (ipv4) {
+      const [a, b] = [parseInt(ipv4[1], 10), parseInt(ipv4[2], 10)];
+      if (
+        a === 10 ||
+        a === 127 ||
+        (a === 169 && b === 254) ||
+        (a === 172 && b >= 16 && b <= 31) ||
+        (a === 192 && b === 168) ||
+        a === 0 ||
+        a >= 224
+      ) return false;
+    }
+    if (host.includes(":")) return false;
+
+    const allowedSuffixes = [
+      ".supabase.co",
+      ".supabase.in",
+      ".lovable.app",
+      ".lovable.dev",
+      "mimmobook.com",
+    ];
+    return allowedSuffixes.some((s) => host.endsWith(s));
+  } catch {
+    return false;
+  }
+}
+
 export interface TenantBranding {
   logoUrl?: string | null;
   businessName?: string | null;
@@ -108,19 +156,29 @@ export async function generateOfferPdf(
   const lh = BODY_SIZE * LINE_H;
   const sectionLh = SECTION_SIZE * LINE_H;
 
-  // Try to embed logo
+  // Try to embed logo (with SSRF protections: only HTTPS, allow-listed hosts)
   let logoImage: Awaited<ReturnType<typeof pdfDoc.embedPng>> | null = null;
-  if (branding?.logoUrl) {
+  if (branding?.logoUrl && isSafeLogoUrl(branding.logoUrl)) {
     try {
-      const resp = await fetch(branding.logoUrl);
+      const resp = await fetch(branding.logoUrl, {
+        redirect: "error",
+        mode: "cors",
+      });
       if (resp.ok) {
-        const buf = await resp.arrayBuffer();
-        const bytes = new Uint8Array(buf);
-        // Detect PNG vs JPEG
-        if (bytes[0] === 0x89 && bytes[1] === 0x50) {
-          logoImage = await pdfDoc.embedPng(bytes);
-        } else {
-          logoImage = await pdfDoc.embedJpg(bytes) as any;
+        const contentType = resp.headers.get("content-type") || "";
+        // Only accept image responses
+        if (contentType.startsWith("image/")) {
+          const buf = await resp.arrayBuffer();
+          // Cap at 5MB to avoid memory exhaustion
+          if (buf.byteLength > 0 && buf.byteLength <= 5 * 1024 * 1024) {
+            const bytes = new Uint8Array(buf);
+            // Detect PNG vs JPEG by magic bytes
+            if (bytes[0] === 0x89 && bytes[1] === 0x50) {
+              logoImage = await pdfDoc.embedPng(bytes);
+            } else if (bytes[0] === 0xff && bytes[1] === 0xd8) {
+              logoImage = await pdfDoc.embedJpg(bytes) as any;
+            }
+          }
         }
       }
     } catch {
