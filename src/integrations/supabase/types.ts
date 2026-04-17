@@ -2713,6 +2713,10 @@ export type Database = {
         Returns: boolean
       }
       is_valid_review_token: { Args: { p_token: string }; Returns: boolean }
+      is_valid_review_token_for_reservation: {
+        Args: { p_reservation_id: string; p_tenant_id: string; p_token: string }
+        Returns: boolean
+      }
       lookup_booking_token: {
         Args: { p_token: string }
         Returns: {
