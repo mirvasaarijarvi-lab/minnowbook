@@ -28,6 +28,54 @@ function t(key: string, lang: string): string {
   return L[key]?.[lang] || L[key]?.en || key;
 }
 
+/**
+ * SSRF guard for fetching tenant logos client-side.
+ * - Only HTTPS
+ * - Blocks localhost, private IPs, and link-local addresses
+ * - Allow-lists Supabase storage and trusted image hosts
+ */
+function isSafeLogoUrl(raw: string): boolean {
+  try {
+    const u = new URL(raw);
+    if (u.protocol !== "https:") return false;
+
+    const host = u.hostname.toLowerCase();
+
+    const blocked = [
+      "localhost", "127.0.0.1", "0.0.0.0", "::1",
+      "169.254.169.254",
+      "metadata.google.internal",
+    ];
+    if (blocked.includes(host)) return false;
+
+    const ipv4 = host.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
+    if (ipv4) {
+      const [a, b] = [parseInt(ipv4[1], 10), parseInt(ipv4[2], 10)];
+      if (
+        a === 10 ||
+        a === 127 ||
+        (a === 169 && b === 254) ||
+        (a === 172 && b >= 16 && b <= 31) ||
+        (a === 192 && b === 168) ||
+        a === 0 ||
+        a >= 224
+      ) return false;
+    }
+    if (host.includes(":")) return false;
+
+    const allowedSuffixes = [
+      ".supabase.co",
+      ".supabase.in",
+      ".lovable.app",
+      ".lovable.dev",
+      "mimmobook.com",
+    ];
+    return allowedSuffixes.some((s) => host.endsWith(s));
+  } catch {
+    return false;
+  }
+}
+
 export interface TenantBranding {
   logoUrl?: string | null;
   businessName?: string | null;
