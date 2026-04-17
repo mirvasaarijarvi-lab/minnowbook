@@ -105,7 +105,7 @@
     "js-yaml": ">=4.1.1",
     "yaml": ">=2.8.3",
     "minimatch": ">=3.1.4",
-    "brace-expansion": ">=1.1.13",
+    "brace-expansion": ">=2.0.2",
     "@tootallnate/once": ">=3.0.1",
     "ajv": "6.12.6",
     "browserslist": ">=4.24.4"
