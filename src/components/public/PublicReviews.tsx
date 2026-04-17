@@ -17,19 +17,12 @@ const PublicReviews = ({ tenantId, siteId, primaryColor, accentColor }: PublicRe
   const { data: reviews = [] } = useQuery({
     queryKey: ["public-reviews", tenantId, siteId],
     queryFn: async () => {
-      let query = supabase
-        .from("guest_reviews")
-        .select("id, guest_name, rating, comment, created_at")
-        .eq("tenant_id", tenantId)
-        .eq("is_published", true)
-        .order("created_at", { ascending: false })
-        .limit(6);
-      if (siteId) {
-        query = query.eq("site_id", siteId);
-      }
-      const { data, error } = await query;
+      const { data, error } = await supabase.rpc("get_published_reviews", {
+        p_tenant_id: tenantId,
+        p_site_id: siteId,
+      });
       if (error) throw error;
-      return data ?? [];
+      return (data ?? []).slice(0, 6);
     },
     enabled: !!tenantId,
   });
