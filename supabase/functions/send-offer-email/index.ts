@@ -45,6 +45,22 @@ function sanitizePathSegment(value: string) {
   return value.replace(/[^a-zA-Z0-9._-]/g, "");
 }
 
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function assertUuid(value: string, label: string): string {
+  if (!UUID_REGEX.test(value)) {
+    throw new Error(`Invalid ${label}`);
+  }
+  return value;
+}
+
+function safeFilenameOnly(value: string): string {
+  // Strip any path component and disallow traversal sequences
+  const base = value.split(/[/\\]/).pop() || "";
+  const cleaned = base.replace(/\.\.+/g, ".").replace(/[^a-zA-Z0-9._-]/g, "");
+  return cleaned || "Offer.pdf";
+}
+
 function decodeBase64(base64: string) {
   const binary = atob(base64);
   const bytes = new Uint8Array(binary.length);
@@ -169,8 +185,10 @@ Deno.serve(async (req) => {
 
     let downloadUrl: string | undefined;
     if (typeof pdfBase64 === "string" && pdfBase64.length > 0) {
-      const safeFilename = sanitizePathSegment(pdfFilename || "Offer.pdf") || "Offer.pdf";
-      const filePath = `${sanitizePathSegment(tenantUser.tenant_id)}/offers/${sanitizePathSegment(user.id)}/${Date.now()}-${safeFilename}`;
+      const safeFilename = safeFilenameOnly(pdfFilename || "Offer.pdf");
+      const safeTenantId = assertUuid(tenantUser.tenant_id, "tenant id");
+      const safeUserId = assertUuid(user.id, "user id");
+      const filePath = `${safeTenantId}/offers/${safeUserId}/${Date.now()}-${safeFilename}`;
       const pdfBytes = decodeBase64(pdfBase64);
 
       const { error: uploadError } = await supabaseAdmin.storage
