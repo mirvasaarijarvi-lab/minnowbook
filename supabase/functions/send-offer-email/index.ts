@@ -45,6 +45,22 @@ function sanitizePathSegment(value: string) {
   return value.replace(/[^a-zA-Z0-9._-]/g, "");
 }
 
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function assertUuid(value: string, label: string): string {
+  if (!UUID_REGEX.test(value)) {
+    throw new Error(`Invalid ${label}`);
+  }
+  return value;
+}
+
+function safeFilenameOnly(value: string): string {
+  // Strip any path component and disallow traversal sequences
+  const base = value.split(/[/\\]/).pop() || "";
+  const cleaned = base.replace(/\.\.+/g, ".").replace(/[^a-zA-Z0-9._-]/g, "");
+  return cleaned || "Offer.pdf";
+}
+
 function decodeBase64(base64: string) {
   const binary = atob(base64);
   const bytes = new Uint8Array(binary.length);
