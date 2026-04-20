@@ -185,8 +185,10 @@ Deno.serve(async (req) => {
 
     let downloadUrl: string | undefined;
     if (typeof pdfBase64 === "string" && pdfBase64.length > 0) {
-      const safeFilename = sanitizePathSegment(pdfFilename || "Offer.pdf") || "Offer.pdf";
-      const filePath = `${sanitizePathSegment(tenantUser.tenant_id)}/offers/${sanitizePathSegment(user.id)}/${Date.now()}-${safeFilename}`;
+      const safeFilename = safeFilenameOnly(pdfFilename || "Offer.pdf");
+      const safeTenantId = assertUuid(tenantUser.tenant_id, "tenant id");
+      const safeUserId = assertUuid(user.id, "user id");
+      const filePath = `${safeTenantId}/offers/${safeUserId}/${Date.now()}-${safeFilename}`;
       const pdfBytes = decodeBase64(pdfBase64);
 
       const { error: uploadError } = await supabaseAdmin.storage
