@@ -171,7 +171,7 @@ function renderRlsDetails(d: RlsFailureDetails): string {
 }
 
 function renderHtml(payload: ReportPayload): string {
-  const { totals, entries, generatedAt } = payload;
+  const { totals, entries, generatedAt, flavor } = payload;
 
   const rows = entries
     .map((e) => {
