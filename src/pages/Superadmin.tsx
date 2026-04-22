@@ -455,6 +455,9 @@ const Superadmin = () => {
         {/* Tenant Membership Integrity */}
         <TenantMembershipCheckPanel />
 
+        {/* Cross-tenant view of all route-guard denials (action='forbidden_access'). */}
+        <ForbiddenAccessLogPanel />
+
         {/* RLS Manifest Debug — exact SQL/filters used by manifest tests */}
         <RlsManifestDebugPanel />
       </main>
