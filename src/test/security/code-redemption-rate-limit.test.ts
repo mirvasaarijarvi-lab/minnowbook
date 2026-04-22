@@ -81,6 +81,26 @@ function errorMessage(a: Attempt): string {
   return (b?.error ?? "").toString();
 }
 
+function errorCode(a: Attempt): string {
+  const b = a.body as { code?: string } | null;
+  return (b?.code ?? "").toString();
+}
+
+/**
+ * The full set of stable error codes the redeem function may return.
+ * Mirrors `ERROR_CODES` in supabase/functions/redeem-access-code/index.ts.
+ * If a new code is added there, add it here too — and verify no existing
+ * code was renamed (that would be a contract break).
+ */
+const KNOWN_ERROR_CODES = new Set([
+  "REQUEST_TOO_LARGE",
+  "NOT_AUTHENTICATED",
+  "INVALID_CODE_FORMAT",
+  "NO_WORKSPACE",
+  "INVALID_OR_UNAVAILABLE_CODE",
+  "INTERNAL_ERROR",
+]);
+
 describe("redeem-access-code: brute-force & replay resilience", () => {
   beforeAll(() => {
     expect(SUPABASE_URL).toBeTruthy();
