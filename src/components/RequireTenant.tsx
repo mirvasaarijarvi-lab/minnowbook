@@ -3,15 +3,30 @@ import { Navigate, useLocation } from "react-router-dom";
 import { toast } from "sonner";
 import { useTenant } from "@/hooks/useTenant";
 import { useImpersonation } from "@/contexts/ImpersonationContext";
+import NoTenantState from "@/components/NoTenantState";
+
+interface RequireTenantProps {
+  children: React.ReactNode;
+  /**
+   * When true, render <NoTenantState /> in place of the protected children
+   * instead of redirecting to /onboarding. This keeps the user on the
+   * attempted route (so they can return after setup) and prevents any
+   * protected shell from rendering with empty data.
+   */
+  inline?: boolean;
+  /** Tailors the headline/copy of the inline NoTenantState. */
+  attemptedArea?: "dashboard" | "superadmin" | "generic";
+}
 
 /**
  * Global tenant guard. Wrap any route that depends on the current user
  * having an active tenant membership. If the membership is removed
  * mid-session (realtime DELETE in `useTenant` flips `tenantId` to null),
- * the user is sent to /onboarding so they can recover or set up a new
+ * the user is sent to /onboarding (default) or shown <NoTenantState />
+ * inline (when `inline` is set) so they can recover or set up a new
  * organization. Superadmin impersonation is treated as a valid tenant.
  */
-const RequireTenant = ({ children }: { children: React.ReactNode }) => {
+const RequireTenant = ({ children, inline = false, attemptedArea = "generic" }: RequireTenantProps) => {
   const { tenantId, loading } = useTenant();
   const { isImpersonating } = useImpersonation();
   const location = useLocation();
@@ -46,11 +61,13 @@ const RequireTenant = ({ children }: { children: React.ReactNode }) => {
     if (hadTenantRef.current && !toastFiredRef.current) {
       toastFiredRef.current = true;
       toast.error("Your access to this organization has been removed.", {
-        description: "You've been redirected to setup to continue.",
+        description: inline
+          ? "Complete setup or contact support to continue."
+          : "You've been redirected to setup to continue.",
         duration: 8000,
       });
     }
-  }, [loading, tenantId, isImpersonating, location.pathname]);
+  }, [loading, tenantId, isImpersonating, location.pathname, inline]);
 
   if (loading) {
     return (
@@ -61,6 +78,11 @@ const RequireTenant = ({ children }: { children: React.ReactNode }) => {
   }
 
   if (!tenantId && !isImpersonating) {
+    if (inline) {
+      // Render the friendly screen on the attempted route so the user can
+      // return here after completing setup. No protected children mount.
+      return <NoTenantState attemptedArea={attemptedArea} />;
+    }
     return <Navigate to="/onboarding" replace state={{ from: location.pathname }} />;
   }
 
