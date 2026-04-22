@@ -209,7 +209,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
   describe.runIf(hasSupabaseConfig)("Anonymous client storage enforcement", () => {
     let anon: SupabaseClient;
     const fakeTenantId = "00000000-0000-0000-0000-000000000000";
-    const anonPath = `${fakeTenantId}/__rls_test__/${RUN_ID}-anon.txt`;
+    const anonPath = ownPath(fakeTenantId, "anon");
 
     beforeAll(() => {
       anon = newAnonClient();
