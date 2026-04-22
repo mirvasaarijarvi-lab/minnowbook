@@ -232,7 +232,7 @@ const ResourceManagement = () => {
       toast({ title: (editingId ? t("dashboard.resourceUpdated") : t("dashboard.resourceCreated")) + statusMsg });
     },
     onError: (err: any) => {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      showError(err);
     },
   });
 
@@ -286,7 +286,7 @@ const ResourceManagement = () => {
       toast({ title: t("dashboard.resourcesCopied") });
     },
     onError: (err: any) => {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      showError(err);
     },
   });
 
@@ -335,7 +335,7 @@ const ResourceManagement = () => {
       toast({ title: t("dashboard.bulkAdded") });
     },
     onError: (err: any) => {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      showError(err);
     },
   });
 

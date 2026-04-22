@@ -114,7 +114,7 @@ const BulkAssignUsersDialog = ({
       });
     },
     onError: (err: any) => {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      showError(err);
     },
   });
 

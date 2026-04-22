@@ -245,6 +245,12 @@ const SitesManagementPanel = () => {
       toast({ title: t("sites.siteCreated") });
     },
     onError: (err: any) => {
+      // Tier-limit errors win first (they have stable codes + i18n).
+      const tierErr = formatTierError(err);
+      if (tierErr) {
+        toast({ title: "Error", description: tierErr.message, variant: "destructive" });
+        return;
+      }
       toast({
         title: "Error",
         description: err.message?.includes("duplicate")
