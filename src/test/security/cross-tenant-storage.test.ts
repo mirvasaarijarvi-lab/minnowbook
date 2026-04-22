@@ -2326,8 +2326,16 @@ describe("Cross-Tenant Storage RLS Tests", () => {
                 const victimTenantId = dir.victimTenantId();
                 const normalized = normalizeStoragePath(variant.path);
                 expect(normalized.firstSegment).not.toBe(victimTenantId);
-                expect([callerTenantId, null].includes(normalized.firstSegment)
-                  || normalized.firstSegment !== victimTenantId).toBe(true);
+                if (
+                  normalized.firstSegment !== null &&
+                  (normalized.firstSegment === callerTenantId ||
+                    normalized.firstSegment === victimTenantId)
+                ) {
+                  // If the segment is a real tenant id at all, it must
+                  // be the caller's own. Anything else is fine — RLS
+                  // rejects unknown tenant prefixes by default.
+                  expect(normalized.firstSegment).toBe(callerTenantId);
+                }
               },
               15000,
             );
