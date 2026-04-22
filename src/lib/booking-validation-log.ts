@@ -66,6 +66,93 @@ export async function computeBookingCapacity(params: {
   };
 }
 
+/**
+ * Build human-readable validation reasons that name the rule and include
+ * the identifiers a staff member needs to debug a soft warning or rejection.
+ *
+ * Each reason follows the pattern:
+ *   "[RULE_NAME] human sentence (key=value, key=value)"
+ */
+export function buildValidationReasons(input: {
+  tenantId: string;
+  siteId: string | null;
+  reservationType: string;
+  reservationDate: string;
+  startTime: string | null;
+  guestName: string;
+  guestEmail: string;
+  requestedGuests: number;
+  currentLoad: number;
+  capacity: number;
+  insertError?: string | null;
+}): { reasons: string[]; outcome: BookingOutcome } {
+  const {
+    tenantId,
+    siteId,
+    reservationType,
+    reservationDate,
+    startTime,
+    guestName,
+    guestEmail,
+    requestedGuests,
+    currentLoad,
+    capacity,
+    insertError,
+  } = input;
+
+  const projected = currentLoad + requestedGuests;
+  const idCtx = [
+    `tenant=${tenantId.slice(0, 8)}`,
+    `site=${siteId ? siteId.slice(0, 8) : "none"}`,
+    `type=${reservationType}`,
+    `date=${reservationDate}`,
+    `time=${startTime ?? "n/a"}`,
+    `guest="${guestName}" <${guestEmail}>`,
+  ].join(", ");
+
+  const reasons: string[] = [];
+
+  // Rule 1 — Capacity check
+  if (capacity > 0 && requestedGuests > 0) {
+    reasons.push(
+      `[CAPACITY_CHECK] ${requestedGuests} guest(s) requested; ${currentLoad}/${capacity} already booked on ${reservationDate}; projected ${projected}/${capacity}. (${idCtx})`,
+    );
+    if (projected > capacity) {
+      reasons.push(
+        `[CAPACITY_OVERFLOW] Projected total ${projected} exceeds capacity ${capacity} by ${projected - capacity}. Soft warning shown — booking still allowed. (${idCtx})`,
+      );
+    } else {
+      reasons.push(
+        `[CAPACITY_OK] Projected ${projected} is within capacity ${capacity}. (${idCtx})`,
+      );
+    }
+  } else if (capacity === 0) {
+    reasons.push(
+      `[CAPACITY_UNDEFINED] No active resources with capacity found for type "${reservationType}"${siteId ? " at this site" : ""}. Capacity rule skipped — booking allowed without limit. (${idCtx})`,
+    );
+  } else {
+    reasons.push(
+      `[CAPACITY_SKIPPED] Requested guests=${requestedGuests}; nothing to check. (${idCtx})`,
+    );
+  }
+
+  // Rule 2 — Database insert outcome
+  let outcome: BookingOutcome;
+  if (insertError) {
+    reasons.push(
+      `[DB_INSERT_FAILED] Reservation row could not be created: ${insertError}. (${idCtx})`,
+    );
+    outcome = "rejected";
+  } else {
+    outcome =
+      capacity > 0 && requestedGuests > 0 && projected > capacity
+        ? "soft_warning"
+        : "accepted";
+  }
+
+  return { reasons, outcome };
+}
+
 export async function logBookingValidation(row: {
   tenantId: string;
   siteId: string | null;
