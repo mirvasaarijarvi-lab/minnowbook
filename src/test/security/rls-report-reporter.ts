@@ -326,22 +326,39 @@ export default class RlsReportReporter implements Reporter {
       { total: 0, passed: 0, failed: 0, skipped: 0, durationMs: 0 },
     );
 
+    // Flavor distinguishes local-stack runs from remote-staging runs when
+    // both sets of artifacts land in the same review surface. Falls back to
+    // "default" so local `bun run test:rls-report` invocations still produce
+    // a valid report.
+    const flavor = (process.env.RLS_REPORT_FLAVOR ?? "default").trim() || "default";
+    const safeFlavor = flavor.replace(/[^a-zA-Z0-9_-]+/g, "-").toLowerCase();
+
     const payload: ReportPayload = {
       generatedAt: new Date().toISOString(),
+      flavor,
       totals,
       entries,
     };
 
     try {
       mkdirSync(this.outDir, { recursive: true });
+      // Always write the canonical filenames (back-compat with anything that
+      // already grep's `rls-report.json`) AND a flavored copy so multi-source
+      // artifact downloads don't collide.
       const jsonPath = resolve(this.outDir, "rls-report.json");
       const htmlPath = resolve(this.outDir, "rls-report.html");
-      writeFileSync(jsonPath, JSON.stringify(payload, null, 2), "utf-8");
-      writeFileSync(htmlPath, renderHtml(payload), "utf-8");
+      const flavoredJsonPath = resolve(this.outDir, `rls-report.${safeFlavor}.json`);
+      const flavoredHtmlPath = resolve(this.outDir, `rls-report.${safeFlavor}.html`);
+      const json = JSON.stringify(payload, null, 2);
+      const html = renderHtml(payload);
+      writeFileSync(jsonPath, json, "utf-8");
+      writeFileSync(htmlPath, html, "utf-8");
+      writeFileSync(flavoredJsonPath, json, "utf-8");
+      writeFileSync(flavoredHtmlPath, html, "utf-8");
       // eslint-disable-next-line no-console
       console.log(
-        `\n[rls-report] ${totals.passed}/${totals.total} passed (${totals.failed} failed, ${totals.skipped} skipped)\n` +
-          `[rls-report] JSON: ${jsonPath}\n[rls-report] HTML: ${htmlPath}`,
+        `\n[rls-report] (${flavor}) ${totals.passed}/${totals.total} passed (${totals.failed} failed, ${totals.skipped} skipped)\n` +
+          `[rls-report] JSON: ${jsonPath} (+ ${flavoredJsonPath})\n[rls-report] HTML: ${htmlPath} (+ ${flavoredHtmlPath})`,
       );
     } catch (err) {
       // eslint-disable-next-line no-console
