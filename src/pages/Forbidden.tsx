@@ -339,6 +339,29 @@ const Forbidden = ({
         // server (not the client) and attributed to the verified caller.
         data-audit-user-id={auditUserId ?? ""}
         data-audit-at={auditAt ?? ""}
+        // System-admin cache snapshot at the moment of denial. Surfaced
+        // for E2E specs and incident review so a denial caused by a
+        // stale cache, an in-flight first lookup, or a fail-closed RPC
+        // error is visually distinguishable from an "actually not an
+        // admin" denial. Empty strings when no `adminCheckState` was
+        // forwarded (e.g. denials from non-system-admin guards).
+        data-admin-check-loading={
+          adminCheckState ? String(adminCheckState.loading) : ""
+        }
+        data-admin-check-fetching={
+          adminCheckState ? String(adminCheckState.fetching) : ""
+        }
+        data-admin-check-stale={
+          adminCheckState ? String(adminCheckState.stale) : ""
+        }
+        data-admin-check-errored={
+          adminCheckState ? String(adminCheckState.errored) : ""
+        }
+        data-admin-check-status={adminCheckState?.status ?? ""}
+        data-admin-check-fetch-status={adminCheckState?.fetchStatus ?? ""}
+        data-admin-check-data-updated-at={
+          adminCheckState?.dataUpdatedAt ?? ""
+        }
       >
         <div className="max-w-md w-full text-center space-y-6">
           <div className="mx-auto h-16 w-16 rounded-full bg-destructive/10 flex items-center justify-center">
