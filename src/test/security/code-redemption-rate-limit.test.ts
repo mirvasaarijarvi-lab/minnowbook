@@ -81,6 +81,41 @@ function errorMessage(a: Attempt): string {
   return (b?.error ?? "").toString();
 }
 
+function errorCode(a: Attempt): string {
+  const b = a.body as { code?: string } | null;
+  return (b?.code ?? "").toString();
+}
+
+/**
+ * The full set of stable error codes that may appear in a 4xx response
+ * for the redeem function:
+ *   - codes emitted by our handler (mirrors `ERROR_CODES` in
+ *     supabase/functions/redeem-access-code/index.ts)
+ *   - codes emitted by the Supabase Functions auth gateway BEFORE our
+ *     handler runs (e.g. when there is no Authorization header at all,
+ *     the gateway short-circuits with UNAUTHORIZED_NO_AUTH_HEADER).
+ *
+ * If a new code is added on either side, add it here too — and verify
+ * no existing code was renamed (that would be a contract break).
+ */
+const KNOWN_ERROR_CODES = new Set([
+  // Our handler's codes:
+  "REQUEST_TOO_LARGE",
+  "NOT_AUTHENTICATED",
+  "INVALID_CODE_FORMAT",
+  "NO_WORKSPACE",
+  "INVALID_OR_UNAVAILABLE_CODE",
+  "INTERNAL_ERROR",
+  // Supabase Functions gateway codes (returned before our handler runs):
+  "UNAUTHORIZED_NO_AUTH_HEADER",
+]);
+
+/** Codes that mean "auth was rejected", from either layer. */
+const AUTH_REJECTION_CODES = new Set([
+  "NOT_AUTHENTICATED",
+  "UNAUTHORIZED_NO_AUTH_HEADER",
+]);
+
 describe("redeem-access-code: brute-force & replay resilience", () => {
   beforeAll(() => {
     expect(SUPABASE_URL).toBeTruthy();
@@ -92,7 +127,7 @@ describe("redeem-access-code: brute-force & replay resilience", () => {
     expect(data.session).toBeNull();
   });
 
-  it("20 parallel attempts with the same fake code: zero successes", async () => {
+  it("20 parallel attempts with the same fake code: zero successes, all known error codes", async () => {
     const N = 20;
     const results = await Promise.all(
       Array.from({ length: N }, () => callRedeem(FAKE_CODES[0], false)),
@@ -110,26 +145,36 @@ describe("redeem-access-code: brute-force & replay resilience", () => {
     for (const r of results) {
       expect(r.status, "each call must return a deterministic 4xx").toBeGreaterThanOrEqual(400);
       expect(r.status).toBeLessThan(500);
+      const code = errorCode(r);
+      expect(KNOWN_ERROR_CODES.has(code), `unexpected error code: ${code}`).toBe(true);
     }
   });
 
-  it("repeated serial attempts return the same generic error (no validity leak)", async () => {
+  it("repeated serial attempts return the same generic error code (no validity leak)", async () => {
     const ITER = 6;
+    const codes: string[] = [];
     const messages: string[] = [];
     for (let i = 0; i < ITER; i++) {
       const r = await callRedeem(FAKE_CODES[0], false);
+      codes.push(errorCode(r));
       messages.push(errorMessage(r));
     }
-    // All replays must produce identical error text — otherwise the
-    // server is leaking information about retry/throttle state.
-    const unique = new Set(messages);
-    expect(unique.size, `replay error messages must be deterministic, got: ${[...unique].join(" | ")}`).toBe(1);
+    // Both the human message AND the machine code must be perfectly stable
+    // across replays — anything else is a state-leak.
+    const uniqueMsgs = new Set(messages);
+    expect(uniqueMsgs.size, `replay messages drifted: ${[...uniqueMsgs].join(" | ")}`).toBe(1);
+    const uniqueCodes = new Set(codes);
+    expect(uniqueCodes.size, `replay codes drifted: ${[...uniqueCodes].join(" | ")}`).toBe(1);
+    // No-auth replays must specifically return an auth-rejection code
+    // (either our handler's NOT_AUTHENTICATED or the gateway's
+    // UNAUTHORIZED_NO_AUTH_HEADER, depending on which layer rejected).
+    expect(AUTH_REJECTION_CODES.has(codes[0]), `expected auth-rejection code, got: ${codes[0]}`).toBe(true);
   });
 
-  it("varied fake codes do NOT produce distinguishable error messages vs. malformed input", async () => {
-    // Probe matrix: shapes that should all surface as "Not authenticated"
-    // (since no auth is supplied) — never a code-specific error that
-    // would let an attacker classify the input.
+  it("varied fake codes do NOT produce distinguishable error codes vs. malformed input", async () => {
+    // Probe matrix: shapes that should all surface as an auth-rejection
+    // code (since no auth is supplied) — never a code-specific error
+    // that would let an attacker classify the input.
     const probes = [
       ...FAKE_CODES,
       "", // empty
@@ -140,23 +185,33 @@ describe("redeem-access-code: brute-force & replay resilience", () => {
     ];
     const results = await Promise.all(probes.map((c) => callRedeem(c, false)));
 
-    const messages = results.map(errorMessage);
-    // Every response must be a 400-class error.
     for (const r of results) {
+      // status 0 means the fetch itself failed (network blip under burst).
+      // We tolerate that — the security property is about responses that
+      // DID come back from the server.
+      if (r.status === 0) continue;
       expect(r.status).toBeGreaterThanOrEqual(400);
       expect(r.status).toBeLessThan(500);
     }
-    // Messages must collapse to a tiny set (ideally 1) — no per-code
-    // differentiation. Allow up to 2 variants to tolerate "Not authenticated"
-    // vs the generic auth-failure shape, but no more.
-    const unique = new Set(messages);
+    // Without auth, EVERY probe that received a response must return the
+    // same auth-rejection code. The auth check (gateway or handler) runs
+    // before any code-shape or code-existence check, so the response
+    // cannot vary by input.
+    const codes = results
+      .filter((r) => r.status !== 0)
+      .map(errorCode)
+      .filter((c) => c.length > 0);
+    expect(codes.length, "at least one probe must have produced a coded error").toBeGreaterThan(0);
+    const unique = new Set(codes);
     expect(
       unique.size,
-      `messages must not classify the input; got ${unique.size} variants: ${[...unique].join(" | ")}`,
-    ).toBeLessThanOrEqual(2);
+      `unauthenticated probes must collapse to one code; got: ${[...unique].join(" | ")}`,
+    ).toBe(1);
+    const only = [...unique][0];
+    expect(AUTH_REJECTION_CODES.has(only), `expected auth-rejection code, got: ${only}`).toBe(true);
   });
 
-  it("burst of 30 parallel calls across many distinct fake codes: zero leaks, zero 5xx", async () => {
+  it("burst of 30 parallel calls across many distinct fake codes: zero leaks, zero 5xx, stable codes", async () => {
     const codes = Array.from(
       { length: 30 },
       (_, i) => `BURST-${i.toString().padStart(4, "0")}-XYZW`,
@@ -168,13 +223,14 @@ describe("redeem-access-code: brute-force & replay resilience", () => {
     expect(successes.length).toBe(0);
     expect(serverErrors.length).toBe(0);
 
-    // None of the response bodies may ever expose a `tier`, `granted_until`,
-    // or `success: true` field — those are 2xx-only payload shapes.
     for (const r of results) {
       const b = (r.body ?? {}) as Record<string, unknown>;
       expect(b.success).not.toBe(true);
       expect(b.tier).toBeUndefined();
       expect(b.granted_until).toBeUndefined();
+      // Every error must carry a known machine-readable code.
+      const code = (b.code as string) ?? "";
+      expect(KNOWN_ERROR_CODES.has(code), `unexpected code: ${code}`).toBe(true);
     }
   });
 
@@ -195,6 +251,7 @@ describe("redeem-access-code: brute-force & replay resilience", () => {
     const after = await callRedeem(FAKE_CODES[1], false);
     expect(after.status).toBeGreaterThanOrEqual(400);
     expect(after.status).toBeLessThan(500);
+    expect(AUTH_REJECTION_CODES.has(errorCode(after)), `expected auth-rejection code, got: ${errorCode(after)}`).toBe(true);
   });
 });
 
