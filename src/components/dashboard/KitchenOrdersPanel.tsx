@@ -40,10 +40,13 @@ import {
   CheckCheck,
   CircleDot,
   Printer,
+  BookOpen,
 } from "lucide-react";
 import { toast } from "sonner";
 import DashboardTooltip from "./DashboardTooltip";
 import { cn } from "@/lib/utils";
+import KitchenMenuManager, { type MenuItem } from "./KitchenMenuManager";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 
 type Category = "food" | "drink" | "other";
 type Status = "received" | "preparing" | "ready" | "served";
