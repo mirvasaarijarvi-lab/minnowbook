@@ -28,6 +28,7 @@ import AuditLogPanel from "./AuditLogPanel";
 import PermissionsEditor from "./PermissionsEditor";
 import HealthCheckPanel from "./HealthCheckPanel";
 import EmailLogPanel from "./EmailLogPanel";
+import { StaffLimitBadge } from "./StaffLimitBadge";
 import { getMaxStaffUsers } from "@/lib/tier-limits";
 import { useTierErrorMessage } from "@/hooks/useTierErrorMessage";
 
