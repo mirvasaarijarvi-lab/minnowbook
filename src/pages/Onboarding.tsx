@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTenant } from "@/hooks/useTenant";
@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, ArrowLeft, Check, Crown, Zap, UtensilsCrossed, Building2, BedDouble, Palette } from "lucide-react";
+import { ArrowRight, ArrowLeft, Check, Crown, Zap, UtensilsCrossed, Building2, BedDouble, Palette, ShieldAlert, RefreshCw, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { canSelectMoreTypes, getTierLimits } from "@/lib/tier-limits";
 import { useT } from "@/contexts/I18nContext";
@@ -40,11 +40,52 @@ const Onboarding = () => {
   const [selectedTier, setSelectedTier] = useState("basic");
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
+  const [membershipRemovedAt, setMembershipRemovedAt] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
   const [branding, setBranding] = useState({
     businessName: "", businessEmail: user?.email ?? "", businessPhone: "",
     businessAddress: "", businessDescription: "",
     primaryColor: "#4a1d7a", secondaryColor: "#f5efe4", accentColor: "#ff4d1c",
   });
+
+  // Read the membership-removed flag set by useTenant when realtime detects
+  // the user's tenant_users row was deleted mid-session. Shown as a banner
+  // so the user understands why they ended up here, not a silent redirect.
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem("tenant-membership-removed");
+      if (!raw) return;
+      const parsed = JSON.parse(raw) as { at?: string };
+      if (parsed?.at) setMembershipRemovedAt(parsed.at);
+    } catch {
+      // ignore malformed/inaccessible storage
+    }
+  }, []);
+
+  const handleRetrySession = async () => {
+    setRefreshing(true);
+    try {
+      // Refresh the auth session, then re-check tenant membership. If the
+      // admin restored access, the tenantId guard will redirect to /dashboard.
+      await supabase.auth.refreshSession();
+      await queryClient.invalidateQueries({ queryKey: ["tenant-user"] });
+      toast({ title: "Session refreshed", description: "Checking your access again…" });
+      try {
+        sessionStorage.removeItem("tenant-membership-removed");
+      } catch {
+        // non-fatal
+      }
+      setMembershipRemovedAt(null);
+    } catch (err: any) {
+      toast({
+        title: "Couldn't refresh session",
+        description: err?.message ?? "Please try signing out and back in.",
+        variant: "destructive",
+      });
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   // If user already has a tenant, redirect to dashboard
   if (tenantLoading) {
@@ -137,6 +178,51 @@ const Onboarding = () => {
       </header>
 
       <main className="flex-1 flex flex-col items-center justify-center px-4 py-8">
+        {membershipRemovedAt && (
+          <div
+            role="alert"
+            aria-live="polite"
+            className="w-full max-w-2xl mb-4 rounded-md border border-destructive/40 bg-destructive/5 px-4 py-3 text-sm text-foreground"
+          >
+            <div className="flex items-start gap-3">
+              <ShieldAlert className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
+              <div className="flex-1 min-w-0">
+                <p className="font-medium text-destructive">Your organization access was removed</p>
+                <p className="text-muted-foreground mt-0.5">
+                  An administrator removed your membership while you were signed in. If this was a mistake,
+                  ask them to re-invite you, then refresh your session to continue.
+                </p>
+                <div className="mt-2 flex flex-wrap items-center gap-3">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={handleRetrySession}
+                    disabled={refreshing}
+                    className="gap-1.5 border-destructive/40 text-destructive hover:bg-destructive/10"
+                  >
+                    {refreshing ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <RefreshCw className="h-4 w-4" />
+                    )}
+                    {refreshing ? "Refreshing…" : "Refresh session"}
+                  </Button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      try { sessionStorage.removeItem("tenant-membership-removed"); } catch { /* ignore */ }
+                      setMembershipRemovedAt(null);
+                    }}
+                    className="text-xs text-muted-foreground hover:text-foreground underline-offset-2 hover:underline"
+                  >
+                    Dismiss
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
         {wasRedirected && (
           <div className="w-full max-w-2xl mb-6 rounded-md border border-accent/30 bg-accent/5 px-4 py-3 text-sm text-foreground">
             <p className="font-medium">Let's set up your workspace</p>
