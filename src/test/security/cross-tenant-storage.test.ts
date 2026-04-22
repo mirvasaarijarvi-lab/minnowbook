@@ -6,7 +6,11 @@ import {
   recordCleanup,
   recordUpload,
 } from "./storage-attempt-ledger";
-import { guardTenantPair } from "./fixtures/tenant-id-guard";
+import {
+  guardTenantPair,
+  assertDistinctTenantPairIds,
+  assertTenantMembership,
+} from "./fixtures/tenant-id-guard";
 
 /**
  * Service-role client used as a final cleanup safety net. Only constructed
