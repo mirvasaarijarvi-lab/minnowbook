@@ -89,6 +89,95 @@ async function sweepRunIdFolder(
       /* ignore — best-effort */
     }
   }
+  // After visible-object sweep, also clean up any S3-compatible multipart
+  // upload intermediates left behind by failed/aborted cross-tenant uploads.
+  await sweepMultipartIntermediates(bucket, tenantIds);
+}
+
+/**
+ * Cleanup for multipart upload intermediates.
+ *
+ * Supabase Storage uses S3-compatible multipart uploads (TUS / resumable
+ * uploads) for large files. When an upload is rejected mid-stream — which
+ * is exactly what RLS denial of a cross-tenant upload looks like for any
+ * file >6MB — the visible object never appears in `storage.objects`, but
+ * a row CAN linger in `storage.s3_multipart_uploads` (and its
+ * `s3_multipart_uploads_parts` child rows). These orphans:
+ *   - count toward storage quota,
+ *   - can be enumerated via the S3 ListMultipartUploads API, and
+ *   - are NOT cleaned up by `storage.from(bucket).remove([...])`.
+ *
+ * This helper uses the service-role client (which bypasses RLS) to:
+ *   1. Find any multipart_uploads rows for the given bucket whose `key`
+ *      starts with `{tenantId}/__rls_test__/` AND contains this run's
+ *      RUN_ID — i.e. only OUR test artifacts, never real tenant data.
+ *   2. Delete the child `s3_multipart_uploads_parts` rows first (FK), then
+ *      the parent `s3_multipart_uploads` rows.
+ *
+ * It's a true no-op when:
+ *   - the service-role key isn't available (CI flag not set), OR
+ *   - the multipart tables don't exist on this Supabase version, OR
+ *   - there's nothing to clean up.
+ *
+ * Path scoping is critical: we ONLY ever touch keys under
+ * `{tenantId}/__rls_test__/` and only those tagged with RUN_ID, so a bug
+ * here can never delete a real tenant's in-flight upload.
+ */
+async function sweepMultipartIntermediates(bucket: string, tenantIds: string[]) {
+  if (!adminClient) return;
+  for (const tenantId of tenantIds) {
+    const keyPrefix = `${tenantId}/__rls_test__/`;
+    try {
+      // Find orphan multipart upload rows scoped to this tenant's test
+      // folder AND tagged with this run's RUN_ID. We use `.schema('storage')`
+      // because these tables live in the `storage` schema, not `public`.
+      // The combined filter (bucket + path prefix + run-id substring) makes
+      // it impossible to scoop up a real tenant upload even if a dev runs
+      // these tests against a shared database.
+      const { data: orphans, error: selectErr } = await adminClient
+        .schema("storage")
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .from("s3_multipart_uploads" as any)
+        .select("id, key")
+        .eq("bucket_id", bucket)
+        .like("key", `${keyPrefix}%`)
+        .like("key", `%${RUN_ID}%`);
+
+      // The table may not exist on older Supabase versions / self-hosted
+      // installs without the S3 driver — that's fine, treat as no-op.
+      if (selectErr) continue;
+      if (!orphans || orphans.length === 0) continue;
+
+      const ids = (orphans as Array<{ id: string; key: string }>).map((row) => row.id);
+
+      // Delete child rows first to satisfy any FK constraint, then parents.
+      // Errors are swallowed individually so a partial failure doesn't
+      // mask the visible-object cleanup that already succeeded.
+      try {
+        await adminClient
+          .schema("storage")
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          .from("s3_multipart_uploads_parts" as any)
+          .delete()
+          .in("upload_id", ids);
+      } catch {
+        /* ignore — parts table may not exist on this version */
+      }
+
+      try {
+        await adminClient
+          .schema("storage")
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          .from("s3_multipart_uploads" as any)
+          .delete()
+          .in("id", ids);
+      } catch {
+        /* ignore */
+      }
+    } catch {
+      /* ignore — best-effort */
+    }
+  }
 }
 
 /**
