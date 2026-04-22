@@ -47,6 +47,16 @@ export const useTenant = () => {
         },
         (payload) => {
           if (payload.eventType === "DELETE") {
+            // Flag the removal so /onboarding can show a persistent banner
+            // explaining what happened (the toast alone is easy to miss).
+            try {
+              sessionStorage.setItem(
+                "tenant-membership-removed",
+                JSON.stringify({ at: new Date().toISOString() })
+              );
+            } catch {
+              // sessionStorage may be unavailable (private mode, SSR) — non-fatal
+            }
             toast.error("Your access to this organization has been removed.", {
               description: "Redirecting to setup…",
             });
