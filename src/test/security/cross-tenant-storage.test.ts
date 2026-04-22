@@ -397,6 +397,19 @@ describe("Cross-Tenant Storage RLS Tests", () => {
           setTimeout(() => resolve({ error: new Error("network-timeout"), data: null }), 4000),
         ),
       ]);
+      // Ledger every anon upload attempt so the PDF report shows them
+      // alongside the live cross-tenant attempts. Anon WRITES are always
+      // expected to be denied, so `outcome: "allowed"` would be a leak.
+      recordUpload({
+        bucket,
+        path: anonPath,
+        attacker: "anon",
+        owner: "fake-tenant",
+        expected: "denied",
+        outcome: result.error ? "denied" : "allowed",
+        errorMessage: result.error?.message,
+        scenario: "anon-upload",
+      });
       return result;
     };
 
