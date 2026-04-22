@@ -1,6 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
-import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
+import { useIsSystemAdmin } from "@/hooks/useIsSystemAdmin";
 import Forbidden from "@/pages/Forbidden";
 
 interface SystemAdminRouteProps {
@@ -17,33 +15,18 @@ interface SystemAdminRouteProps {
  * If the user is not a system admin, renders the 403 `Forbidden` page in
  * place (URL is preserved) instead of silently redirecting them away. This
  * matches the routing-level enforcement we want for `/superadmin`.
+ *
+ * The system-admin status itself comes from `useIsSystemAdmin`, a shared
+ * hook backed by a single React Query cache key with `staleTime: Infinity`.
+ * Navigating between guarded routes — or even unmounting and remounting
+ * this component — never re-hits the database; the first lookup of the
+ * session is reused everywhere.
  */
 const SystemAdminRoute = ({
   children,
   attemptedArea = "the Superadmin area",
 }: SystemAdminRouteProps) => {
-  const { user } = useAuth();
-
-  const { data: isSysAdmin, isLoading } = useQuery({
-    queryKey: ["is-system-admin", user?.id],
-    queryFn: async () => {
-      if (!user?.id) return false;
-      const { data, error } = await supabase
-        .from("system_admins")
-        .select("id")
-        .eq("user_id", user.id)
-        .maybeSingle();
-      if (error) {
-        // Treat lookup errors as denial — fail closed, never open.
-        return false;
-      }
-      return !!data;
-    },
-    enabled: !!user?.id,
-    // System-admin status rarely changes mid-session; cache aggressively
-    // so navigation between guarded routes doesn't re-hit the database.
-    staleTime: 5 * 60 * 1000,
-  });
+  const { isSystemAdmin, isLoading } = useIsSystemAdmin();
 
   if (isLoading) {
     return (
@@ -57,7 +40,7 @@ const SystemAdminRoute = ({
     );
   }
 
-  if (!isSysAdmin) {
+  if (!isSystemAdmin) {
     return <Forbidden attemptedArea={attemptedArea} />;
   }
 
