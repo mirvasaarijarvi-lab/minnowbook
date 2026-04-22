@@ -105,6 +105,16 @@ test.describe("Authenticated non-admin /superadmin denial flow", () => {
     const main = page.getByRole("main");
     await expect(main).toHaveAttribute("data-http-status", "403");
 
+    // The body copy must contain the EXACT `attemptedArea` string that
+    // `SystemAdminRoute` passes to `<Forbidden>` (default:
+    // "the Superadmin area"). Locks the contract that the visible
+    // denial copy stays in sync with the guard's configured label.
+    await expect(
+      main.getByText(
+        /your account doesn't have permission to access the Superadmin area/,
+      ),
+    ).toBeVisible();
+
     // Document title is part of the same observable surface — confirm it
     // matches what the README documents for monitoring.
     await expect(page).toHaveTitle(/Access denied — 403/);
