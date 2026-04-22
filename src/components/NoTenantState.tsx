@@ -1,4 +1,6 @@
+import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,6 +20,26 @@ interface NoTenantStateProps {
 const NoTenantState = ({ attemptedArea = "generic" }: NoTenantStateProps) => {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
+  const toastShownRef = useRef(false);
+
+  // Surface a toast the first time a user lands here from the dashboard
+  // so the redirect/blocked-access reason is obvious, not silent.
+  useEffect(() => {
+    if (toastShownRef.current) return;
+    toastShownRef.current = true;
+    if (attemptedArea === "dashboard") {
+      toast.info("Dashboard unavailable", {
+        description: "Your account isn't linked to an organization yet. Complete setup to continue.",
+        duration: 6000,
+      });
+    } else if (attemptedArea === "superadmin") {
+      toast.info("Superadmin area unavailable", {
+        description: "Your account isn't linked to an organization yet.",
+        duration: 6000,
+      });
+    }
+  }, [attemptedArea]);
+
 
   const headline =
     attemptedArea === "superadmin"
