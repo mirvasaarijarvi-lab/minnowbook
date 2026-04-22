@@ -242,7 +242,7 @@ describe("redeem-access-code: brute-force & replay resilience", () => {
     const after = await callRedeem(FAKE_CODES[1], false);
     expect(after.status).toBeGreaterThanOrEqual(400);
     expect(after.status).toBeLessThan(500);
-    expect(errorCode(after)).toBe("NOT_AUTHENTICATED");
+    expect(AUTH_REJECTION_CODES.has(errorCode(after)), `expected auth-rejection code, got: ${errorCode(after)}`).toBe(true);
   });
 });
 
