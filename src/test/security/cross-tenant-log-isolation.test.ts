@@ -108,12 +108,12 @@ liveDescribeEach([
   { table: "booking_validation_log" as const },
   { table: "audit_log" as const },
 ])("$table — anon cross-tenant read isolation", ({ table }) => {
-  it("plain SELECT returns zero rows", async () => {
+  liveIt("plain SELECT returns zero rows", async () => {
     const result = await anon.from(table).select("*").limit(50);
     expectNoRowsLeaked(result, `${table} plain select`);
   });
 
-  it("filtered by real tenant_id returns zero rows", async () => {
+  liveIt("filtered by real tenant_id returns zero rows", async () => {
     const result = await anon
       .from(table)
       .select("*")
@@ -122,7 +122,7 @@ liveDescribeEach([
     expectNoRowsLeaked(result, `${table} eq real tenant_id`);
   });
 
-  it("filtered by fake tenant_id returns zero rows", async () => {
+  liveIt("filtered by fake tenant_id returns zero rows", async () => {
     const result = await anon
       .from(table)
       .select("*")
@@ -131,7 +131,7 @@ liveDescribeEach([
     expectNoRowsLeaked(result, `${table} eq fake tenant_id`);
   });
 
-  it(".in([real, fake]) cannot smuggle rows past RLS", async () => {
+  liveIt(".in([real, fake]) cannot smuggle rows past RLS", async () => {
     const result = await anon
       .from(table)
       .select("*")
@@ -140,7 +140,7 @@ liveDescribeEach([
     expectNoRowsLeaked(result, `${table} in tenant_id list`);
   });
 
-  it(".neq tenant_id (broad scan) cannot smuggle rows past RLS", async () => {
+  liveIt(".neq tenant_id (broad scan) cannot smuggle rows past RLS", async () => {
     const result = await anon
       .from(table)
       .select("*")
@@ -149,7 +149,7 @@ liveDescribeEach([
     expectNoRowsLeaked(result, `${table} neq tenant_id`);
   });
 
-  it(".or() with multiple tenant_id branches cannot smuggle rows past RLS", async () => {
+  liveIt(".or() with multiple tenant_id branches cannot smuggle rows past RLS", async () => {
     const result = await anon
       .from(table)
       .select("*")
@@ -158,7 +158,7 @@ liveDescribeEach([
     expectNoRowsLeaked(result, `${table} or tenant_id branches`);
   });
 
-  it("narrow column projection (id only) cannot leak row existence", async () => {
+  liveIt("narrow column projection (id only) cannot leak row existence", async () => {
     // A common bypass attempt: ask only for `id` to count rows. RLS filters
     // rows, not columns, so this must still return zero.
     const result = await anon
@@ -169,7 +169,7 @@ liveDescribeEach([
     expectNoRowsLeaked(result, `${table} id-only projection`);
   });
 
-  it("HEAD count query cannot reveal row count", async () => {
+  liveIt("HEAD count query cannot reveal row count", async () => {
     // count: "exact" with head:true returns no rows but reports the count.
     // Under RLS denial the count must be 0 (or null) — never the real
     // number of rows in the tenant.
@@ -185,7 +185,7 @@ liveDescribeEach([
     }
   });
 
-  it("ordering by created_at desc cannot surface latest rows", async () => {
+  liveIt("ordering by created_at desc cannot surface latest rows", async () => {
     const result = await anon
       .from(table)
       .select("*")
@@ -194,7 +194,7 @@ liveDescribeEach([
     expectNoRowsLeaked(result, `${table} order by created_at`);
   });
 
-  it("50 parallel reads with mixed filters never surface a leak", async () => {
+  liveIt("50 parallel reads with mixed filters never surface a leak", async () => {
     const PARALLEL = 50;
     const queries = Array.from({ length: PARALLEL }, (_, i) => {
       const tid = i % 2 === 0 ? LIVE_TENANT_ID : FAKE_TENANT_ID;
