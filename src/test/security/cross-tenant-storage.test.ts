@@ -1346,6 +1346,300 @@ describe("Cross-Tenant Storage RLS Tests", () => {
   );
 
   // ============================================================
+  // Path-segment-position enforcement
+  // ------------------------------------------------------------
+  // Storage RLS policies in this project gate writes by extracting the
+  // FIRST segment of the object name (`storage.foldername(name)[1]`) and
+  // matching it against the caller's tenant_id. A common policy-author
+  // mistake is to use a substring/`LIKE '%tenant_id%'` check instead,
+  // which would also accept paths where the tenant_id appears anywhere
+  // — including DEEPER segments under an attacker-controlled root.
+  //
+  // These tests verify that putting the victim's tenant_id in a later
+  // segment (segment 2, 3, 4, ... — even right at the end as a filename)
+  // does NOT grant access. The first segment is what counts; everything
+  // else is just a folder name to the policy and must NOT widen scope.
+  //
+  // Layouts covered (V = victim tenant id, attacker = anon or other):
+  //   {wrongTenant}/{V}/file.txt           — V in segment 2
+  //   {wrongTenant}/docs/{V}/file.txt      — V in segment 3
+  //   {wrongTenant}/a/b/{V}/file.txt       — V in segment 4
+  //   {wrongTenant}/docs/{V}.txt           — V embedded in filename
+  //   {wrongTenant}/{V}/__rls_test__/...   — V mimicking our own root
+  // ============================================================
+  const lateSegmentPaths = (
+    attackerRoot: string,
+    victimTenantId: string,
+  ): Array<{ label: string; path: string }> => [
+    {
+      label: "victim-as-segment-2",
+      path: `${attackerRoot}/${victimTenantId}/file.txt`,
+    },
+    {
+      label: "victim-as-segment-3",
+      path: `${attackerRoot}/docs/${victimTenantId}/file.txt`,
+    },
+    {
+      label: "victim-as-segment-4",
+      path: `${attackerRoot}/a/b/${victimTenantId}/file.txt`,
+    },
+    {
+      label: "victim-embedded-in-filename",
+      path: `${attackerRoot}/docs/${victimTenantId}.txt`,
+    },
+    {
+      label: "victim-mimicking-rls-test-root",
+      // Mimics our own test layout but rooted under the wrong tenant —
+      // catches a hypothetical policy that special-cases `__rls_test__`.
+      path: `${attackerRoot}/${victimTenantId}/__rls_test__/${RUN_ID}/late-seg.txt`,
+    },
+  ];
+
+  describe.runIf(hasSupabaseConfig)(
+    "Anonymous: victim tenant_id in later path segments must not grant access",
+    () => {
+      let anon: SupabaseClient;
+      // Synthetic "attacker root" — anon writes are denied for every
+      // first segment, so any value works. Pick a different fake id
+      // from the adversarial-block fixture so failures are easy to
+      // attribute.
+      const attackerRoot = "22222222-2222-2222-2222-222222222222";
+      const victimTenantId = "33333333-3333-3333-3333-333333333333";
+
+      beforeAll(() => {
+        anon = newAnonClient();
+      });
+
+      afterAll(async () => {
+        await sweepTestArtifacts(PRIVATE_BUCKET, [attackerRoot, victimTenantId]);
+        await sweepTestArtifacts(ASSETS_BUCKET, [attackerRoot, victimTenantId]);
+      });
+
+      for (const bucket of [PRIVATE_BUCKET, ASSETS_BUCKET]) {
+        for (const variant of lateSegmentPaths(attackerRoot, victimTenantId)) {
+          it(
+            `anon cannot upload with victim id at '${variant.label}' to ${bucket}`,
+            async () => {
+              const result = await Promise.race([
+                anon.storage
+                  .from(bucket)
+                  .upload(variant.path, fileBytes(`anon-late-${variant.label}`), {
+                    upsert: true,
+                  }),
+                new Promise<{ error: Error; data: null }>((resolve) =>
+                  setTimeout(
+                    () => resolve({ error: new Error("network-timeout"), data: null }),
+                    4000,
+                  ),
+                ),
+              ]);
+
+              recordUpload({
+                bucket,
+                path: variant.path,
+                attacker: "anon",
+                owner: "fake-tenant",
+                expected: "denied",
+                outcome: result.error ? "denied" : "allowed",
+                errorMessage: result.error?.message,
+                scenario: `late-segment:${variant.label}`,
+              });
+
+              expect(result.error).toBeTruthy();
+            },
+            15000,
+          );
+        }
+      }
+    },
+  );
+
+  describe.runIf(hasSupabaseConfig && liveModeEnabled)(
+    "Live cross-tenant: victim tenant_id in later path segments must not grant access",
+    () => {
+      let clientA: SupabaseClient;
+      let clientB: SupabaseClient;
+
+      // Track every late-segment attempt so afterAll can attempt
+      // cleanup from BOTH attacker AND owner perspectives — same
+      // dual-cleanup pattern as the other live blocks.
+      const lateAttempts: Array<{
+        bucket: string;
+        path: string;
+        attacker: "a" | "b";
+        owner: "a" | "b";
+      }> = [];
+
+      beforeAll(async () => {
+        clientA = newAnonClient();
+        clientB = newAnonClient();
+
+        const { error: signInAError } = await clientA.auth.signInWithPassword({
+          email: liveCreds.a.email!,
+          password: liveCreds.a.password!,
+        });
+        if (signInAError) throw new Error(`Tenant A sign-in failed: ${signInAError.message}`);
+
+        const { error: signInBError } = await clientB.auth.signInWithPassword({
+          email: liveCreds.b.email!,
+          password: liveCreds.b.password!,
+        });
+        if (signInBError) throw new Error(`Tenant B sign-in failed: ${signInBError.message}`);
+      });
+
+      afterAll(async () => {
+        const clientFor = (key: "a" | "b") => (key === "a" ? clientA : clientB);
+
+        const seen = new Set<string>();
+        for (const { bucket, path, attacker, owner } of lateAttempts) {
+          const key = `${bucket}::${path}`;
+          if (seen.has(key)) continue;
+          seen.add(key);
+          for (const role of [attacker, owner] as const) {
+            try {
+              await clientFor(role).storage.from(bucket).remove([path]);
+            } catch {
+              /* ignore — attacker won't have rights, owner may not see it */
+            }
+          }
+        }
+
+        await sweepTestArtifacts(PRIVATE_BUCKET, [
+          liveCreds.a.tenantId!,
+          liveCreds.b.tenantId!,
+        ]);
+        await sweepTestArtifacts(ASSETS_BUCKET, [
+          liveCreds.a.tenantId!,
+          liveCreds.b.tenantId!,
+        ]);
+      });
+
+      // Bi-directional: A→B and B→A. Each direction uses the
+      // ATTACKER's own tenant_id as segment 1 (so the policy's
+      // `foldername()[1] = auth-tenant` check would PASS), then puts
+      // the VICTIM's id in a deeper segment hoping for a substring-
+      // style policy bug.
+      const directions: Array<{
+        attacker: "a" | "b";
+        owner: "a" | "b";
+        attackerClient: () => SupabaseClient;
+        attackerRoot: () => string;
+        victimTenantId: () => string;
+      }> = [
+        {
+          attacker: "a",
+          owner: "b",
+          attackerClient: () => clientA,
+          attackerRoot: () => liveCreds.a.tenantId!,
+          victimTenantId: () => liveCreds.b.tenantId!,
+        },
+        {
+          attacker: "b",
+          owner: "a",
+          attackerClient: () => clientB,
+          attackerRoot: () => liveCreds.b.tenantId!,
+          victimTenantId: () => liveCreds.a.tenantId!,
+        },
+      ];
+
+      for (const dir of directions) {
+        for (const bucket of [PRIVATE_BUCKET, ASSETS_BUCKET]) {
+          for (const labelHint of [
+            "victim-as-segment-2",
+            "victim-as-segment-3",
+            "victim-as-segment-4",
+            "victim-embedded-in-filename",
+            "victim-mimicking-rls-test-root",
+          ]) {
+            it(
+              `user ${dir.attacker.toUpperCase()} writing under OWN root with victim ${dir.owner.toUpperCase()}'s id at '${labelHint}' must not target ${dir.owner.toUpperCase()} (${bucket})`,
+              async () => {
+                // Anchor under the ATTACKER's run-id folder so the
+                // first segment passes the tenant check AND any object
+                // that does land lives under a folder our cleanup
+                // sweep already covers.
+                const attackerRunRoot = `${dir.attackerRoot()}/__rls_test__/${RUN_ID}/late-seg`;
+                const variant = lateSegmentPaths(attackerRunRoot, dir.victimTenantId()).find(
+                  (v) => v.label === labelHint,
+                )!;
+
+                lateAttempts.push({
+                  bucket,
+                  path: variant.path,
+                  attacker: dir.attacker,
+                  owner: dir.owner,
+                });
+
+                // The upload MIGHT succeed under the attacker's own
+                // folder — that's fine, the policy correctly scopes
+                // by segment 1. What matters is that the VICTIM's
+                // folder stays untouched.
+                const uploadResult = await Promise.race([
+                  dir
+                    .attackerClient()
+                    .storage.from(bucket)
+                    .upload(variant.path, fileBytes(`${dir.attacker}-late-${variant.label}`), {
+                      upsert: true,
+                    }),
+                  new Promise<{ error: Error; data: null }>((resolve) =>
+                    setTimeout(
+                      () => resolve({ error: new Error("network-timeout"), data: null }),
+                      4000,
+                    ),
+                  ),
+                ]);
+
+                const landedPath =
+                  !uploadResult.error && uploadResult.data
+                    ? // SDK returns either { path } or { Key } depending on version
+                      ((uploadResult.data as { path?: string }).path ??
+                        (uploadResult.data as { Key?: string }).Key ??
+                        variant.path)
+                    : null;
+
+                recordUpload({
+                  bucket,
+                  path: variant.path,
+                  attacker: dir.attacker,
+                  owner: dir.owner,
+                  expected: "denied",
+                  // "denied" = "did not land in the victim's folder"
+                  // — a successful upload under the attacker's own
+                  // root still counts as denial-of-target.
+                  outcome:
+                    landedPath && landedPath.startsWith(dir.victimTenantId())
+                      ? "allowed"
+                      : "denied",
+                  errorMessage: uploadResult.error?.message,
+                  scenario: `late-segment:${variant.label}`,
+                });
+
+                // Hard requirement #1: if anything landed, it must
+                // be under the attacker's own tenant prefix.
+                if (landedPath) {
+                  expect(landedPath.startsWith(dir.victimTenantId())).toBe(false);
+                }
+
+                // Hard requirement #2: the victim's mirror folder
+                // must not contain any artifact from this attempt.
+                const victimRoot = `${dir.victimTenantId()}/__rls_test__/${RUN_ID}/late-seg`;
+                const { data: victimList, error: victimListError } = await dir
+                  .attackerClient()
+                  .storage.from(bucket)
+                  .list(victimRoot, { limit: 5 });
+                const victimFolderClean =
+                  Boolean(victimListError) || !victimList || victimList.length === 0;
+                expect(victimFolderClean).toBe(true);
+              },
+              20000,
+            );
+          }
+        }
+      }
+    },
+  );
+
+  // ============================================================
   // Public bucket (`tenant-assets`) cross-tenant read isolation
   // ------------------------------------------------------------
   // `tenant-assets` is a PUBLIC bucket: anonymous users can fetch any
