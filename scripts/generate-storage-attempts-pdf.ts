@@ -322,13 +322,14 @@ function drawLeaksSection(c: Cursor, p: LedgerPayload): Cursor {
 
   c = ensureSpace(c, 60);
   drawText(c, "Unexpected Allowed Leaks", { size: 14, font: c.bold });
-  c.y -= 4;
+  // 14pt title baseline + a small gap before the muted description.
+  c.y -= 18;
   drawText(
     c,
     "Cross-tenant attempts that should have been DENIED but were ALLOWED by storage RLS.",
     { size: 9, color: C.muted, x: MARGIN },
   );
-  c.y -= 10;
+  c.y -= 12;
   rule(c);
   c.y -= 14;
 
