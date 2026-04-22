@@ -35,7 +35,7 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { CalendarIcon, Loader2, Tag } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { computeBookingCapacity, logBookingValidation } from "@/lib/booking-validation-log";
+import { computeBookingCapacity, logBookingValidation, buildValidationReasons } from "@/lib/booking-validation-log";
 
 interface ManualReservationDialogProps {
   open: boolean;
@@ -215,6 +215,19 @@ const ManualReservationDialog = ({
         }),
       } as any).select("id").single();
       if (error) {
+        const { reasons } = buildValidationReasons({
+          tenantId,
+          siteId: resolvedSiteId,
+          reservationType: form.reservation_type,
+          reservationDate: dateStr,
+          startTime: form.start_time || null,
+          guestName: form.guest_name.trim(),
+          guestEmail: form.guest_email.trim(),
+          requestedGuests,
+          currentLoad: cap.currentLoad,
+          capacity: cap.capacity,
+          insertError: error.message,
+        });
         await logBookingValidation({
           tenantId,
           siteId: resolvedSiteId,
@@ -228,22 +241,22 @@ const ManualReservationDialog = ({
           currentLoad: cap.currentLoad,
           capacityTotal: cap.capacity,
           outcome: "rejected",
-          reasons: [
-            `Capacity check: requested=${cap.requested}, currentLoad=${cap.currentLoad}, capacity=${cap.capacity}, projected=${cap.projected}`,
-            `Insert failed: ${error.message}`,
-          ],
+          reasons,
         });
         throw error;
       }
-      const outcome: "accepted" | "soft_warning" = cap.overCapacity ? "soft_warning" : "accepted";
-      const reasons = [
-        `Capacity check: requested=${cap.requested}, currentLoad=${cap.currentLoad}, capacity=${cap.capacity}, projected=${cap.projected}`,
-        cap.overCapacity
-          ? "PROJECTED OVER CAPACITY — soft warning, booking still allowed"
-          : cap.capacity > 0
-          ? "Within capacity"
-          : "Capacity check skipped (no capacity defined)",
-      ];
+      const { reasons, outcome } = buildValidationReasons({
+        tenantId,
+        siteId: resolvedSiteId,
+        reservationType: form.reservation_type,
+        reservationDate: dateStr,
+        startTime: form.start_time || null,
+        guestName: form.guest_name.trim(),
+        guestEmail: form.guest_email.trim(),
+        requestedGuests,
+        currentLoad: cap.currentLoad,
+        capacity: cap.capacity,
+      });
       await logBookingValidation({
         tenantId,
         siteId: resolvedSiteId,
@@ -256,7 +269,7 @@ const ManualReservationDialog = ({
         guestsRequested: requestedGuests || null,
         currentLoad: cap.currentLoad,
         capacityTotal: cap.capacity,
-        outcome,
+        outcome: outcome as "accepted" | "soft_warning",
         reasons,
         reservationId: inserted?.id ?? null,
       });
