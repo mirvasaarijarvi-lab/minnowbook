@@ -248,6 +248,29 @@ jobs:
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "_Passwords intentionally omitted from this summary._" >> "$GITHUB_STEP_SUMMARY"
 
+      # Turn up Postgres logging *before* the RLS sweep so any failing
+      # statement is captured with its full SQL text and SQLSTATE error
+      # code in the container log. We set these via ALTER SYSTEM + reload
+      # so they apply to the live cluster without a restart.
+      #   - log_statement = 'all'        → every SQL statement
+      #   - log_min_messages = 'warning' → keep noise down for non-errors
+      #   - log_min_error_statement = 'error' → include the offending SQL
+      #     on every error so we can correlate with the RLS test that
+      #     triggered it.
+      #   - log_error_verbosity = 'verbose' → emit SQLSTATE + DETAIL/HINT
+      - name: Enable verbose Postgres logging for RLS sweep
+        if: steps.supabase-ready.outcome == 'success'
+        env:
+          PGPASSWORD: postgres
+        run: |
+          set -uo pipefail
+          PSQL=(psql -h 127.0.0.1 -p 54322 -U postgres -d postgres -v ON_ERROR_STOP=1)
+          "${PSQL[@]}" -c "ALTER SYSTEM SET log_statement = 'all';"
+          "${PSQL[@]}" -c "ALTER SYSTEM SET log_min_messages = 'warning';"
+          "${PSQL[@]}" -c "ALTER SYSTEM SET log_min_error_statement = 'error';"
+          "${PSQL[@]}" -c "ALTER SYSTEM SET log_error_verbosity = 'verbose';"
+          "${PSQL[@]}" -c "SELECT pg_reload_conf();"
+
       - name: Run cross-tenant RLS tests (live, against local stack)
         id: rls-tests
         if: steps.supabase-ready.outcome == 'success'
