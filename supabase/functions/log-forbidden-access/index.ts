@@ -43,6 +43,86 @@ interface ForbiddenLogPayload {
   attemptedPath?: string;
   // Optional explicit tenant hint when the caller belongs to multiple tenants.
   tenantId?: string;
+  /**
+   * Optional snapshot of the client's system-admin React Query cache at
+   * the moment of denial. Forwarded by the SystemAdminRoute guard so the
+   * audit row can answer "WHY was access denied?" — was the cache fresh,
+   * stale, still loading, or fail-closed because the lookup errored?
+   *
+   * SECURITY: this is client-supplied and therefore advisory only. We
+   * whitelist by field name and coerce each field to its expected
+   * primitive type so a malicious client can't bloat the audit row or
+   * inject arbitrary JSON. Unknown fields are dropped.
+   */
+  adminCheckState?: unknown;
+}
+
+/**
+ * Whitelisted, type-coerced shape we persist for the admin-cache
+ * snapshot. Mirrors `IsSystemAdminCacheState` on the client. Anything
+ * outside this shape is dropped at the edge so the audit row stays
+ * compact and predictable.
+ */
+interface SanitizedAdminCheckState {
+  loading: boolean;
+  fetching: boolean;
+  stale: boolean;
+  errored: boolean;
+  dataUpdatedAt: string | null;
+  status: "pending" | "error" | "success" | "unknown";
+  fetchStatus: "fetching" | "paused" | "idle" | "unknown";
+}
+
+/**
+ * Coerce the client-supplied snapshot to the strict whitelisted shape.
+ * Returns `null` when the input isn't an object so the audit row simply
+ * omits the field instead of recording garbage.
+ *
+ * - Booleans default to `false` when missing or non-boolean.
+ * - `dataUpdatedAt` must be an ISO timestamp string of plausible length;
+ *   anything else collapses to `null` so we never store untrusted text.
+ * - `status` and `fetchStatus` are clamped to the React Query enums
+ *   we expect; anything else becomes `"unknown"` so incident review can
+ *   tell "field was tampered with" apart from a real value.
+ */
+function sanitizeAdminCheckState(
+  input: unknown,
+): SanitizedAdminCheckState | null {
+  if (!input || typeof input !== "object") return null;
+  const src = input as Record<string, unknown>;
+
+  const asBool = (v: unknown): boolean => v === true;
+
+  const asIsoTimestamp = (v: unknown): string | null => {
+    if (typeof v !== "string") return null;
+    // Cap length to defend against pathological inputs; any well-formed
+    // ISO 8601 UTC timestamp fits comfortably under 40 chars.
+    if (v.length === 0 || v.length > 40) return null;
+    const t = Date.parse(v);
+    return Number.isFinite(t) ? new Date(t).toISOString() : null;
+  };
+
+  const STATUS = new Set(["pending", "error", "success"]);
+  const FETCH_STATUS = new Set(["fetching", "paused", "idle"]);
+
+  const status =
+    typeof src.status === "string" && STATUS.has(src.status)
+      ? (src.status as SanitizedAdminCheckState["status"])
+      : "unknown";
+  const fetchStatus =
+    typeof src.fetchStatus === "string" && FETCH_STATUS.has(src.fetchStatus)
+      ? (src.fetchStatus as SanitizedAdminCheckState["fetchStatus"])
+      : "unknown";
+
+  return {
+    loading: asBool(src.loading),
+    fetching: asBool(src.fetching),
+    stale: asBool(src.stale),
+    errored: asBool(src.errored),
+    dataUpdatedAt: asIsoTimestamp(src.dataUpdatedAt),
+    status,
+    fetchStatus,
+  };
 }
 
 /**
