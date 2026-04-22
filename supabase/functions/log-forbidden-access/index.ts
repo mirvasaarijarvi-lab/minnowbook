@@ -281,6 +281,11 @@ Deno.serve(async (req) => {
   });
 
   if (insertErr) {
+    // Release the throttle slot so the next attempt isn't penalised by
+    // our own DB error — we want the caller to be able to retry.
+    if (THROTTLE_SECONDS > 0) {
+      throttleCache.delete(`${user.id}|${attemptedArea}`);
+    }
     return new Response(
       JSON.stringify({ logged: false, reason: "insert_failed" }),
       {
