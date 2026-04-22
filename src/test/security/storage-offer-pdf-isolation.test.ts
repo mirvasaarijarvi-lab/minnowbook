@@ -151,7 +151,10 @@ describe("Storage isolation: anon cannot reach offer PDFs in tenant-private", ()
   });
 
   describe("DOWNLOAD probes against tenant-private offer paths", () => {
-    it("anon cannot download a guessed offer PDF path", async () => {
+    // 3 tenants × 2 users × 3 filenames = 18 sequential network round-trips
+    // against the storage layer. The default 5s vitest timeout is far too
+    // tight for that many real HTTP calls; allow a generous budget.
+    it("anon cannot download a guessed offer PDF path", { timeout: 60_000 }, async () => {
       for (const tid of PROBE_TENANT_IDS) {
         for (const uid of PROBE_USER_IDS) {
           for (const file of PROBE_FILENAMES) {
