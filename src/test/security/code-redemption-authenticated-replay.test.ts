@@ -1,6 +1,17 @@
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { describe, it, expect, beforeAll, afterAll, afterEach } from "vitest";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { createHash, randomBytes } from "node:crypto";
+import {
+  createAccessCodeTracker,
+  type AccessCodeTracker,
+} from "./fixtures/access-code-cleanup";
+
+/**
+ * Stable, unique tag stamped into every seeded code's `description`.
+ * Used by the cleanup helper to recover from prior crashed runs whose
+ * UUIDs were lost when the test process died mid-race.
+ */
+const DESCRIPTION_TAG = "[replay-test]";
 
 /**
  * Authenticated single-redeem + replay contract test for `redeem-access-code`.
