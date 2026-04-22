@@ -171,7 +171,7 @@ describe("Forbidden page — forbidden-status beacon (fires once on mount)", () 
       expect(fetchSpy).toHaveBeenCalledTimes(1);
     });
 
-    const [calledUrl] = fetchSpy.mock.calls[0] as [string, RequestInit];
+    const [calledUrl] = fetchSpy.mock.calls[0] as unknown as [string, RequestInit];
     // "the Reports Dashboard" -> strip "the ", lowercase, hyphenate.
     expect(calledUrl).toBe(
       `${STUB_SUPABASE_URL}/functions/v1/forbidden-status?area=reports-dashboard`,
