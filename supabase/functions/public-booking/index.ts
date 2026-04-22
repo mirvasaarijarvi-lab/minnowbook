@@ -354,21 +354,37 @@ Deno.serve(async (req) => {
     const reasons: string[] = [];
     let outcome: "accepted" | "soft_warning" = "accepted";
     let warning: string | null = null;
+    const idCtx = [
+      `tenant=${tenant_id.slice(0, 8)}`,
+      `site=${site_id ? site_id.slice(0, 8) : "none"}`,
+      `type=${reservation_type}`,
+      `date=${date}`,
+      `time=${start_time ?? "n/a"}`,
+      `guest="${guest_name}" <${guest_email}>`,
+    ].join(", ");
     if (capacity_total > 0 && requestedGuests > 0) {
       const projected = current_load + requestedGuests;
       reasons.push(
-        `Capacity check: requested=${requestedGuests}, currentLoad=${current_load}, capacity=${capacity_total}, projected=${projected}`,
+        `[CAPACITY_CHECK] ${requestedGuests} guest(s) requested; ${current_load}/${capacity_total} already booked on ${date}; projected ${projected}/${capacity_total}. (${idCtx})`,
       );
       if (projected > capacity_total) {
         outcome = "soft_warning";
         warning = `This date is near or above capacity (${projected}/${capacity_total} guests including your booking). Your request was accepted and is pending staff confirmation.`;
-        reasons.push("PROJECTED OVER CAPACITY — soft warning issued, booking still allowed");
+        reasons.push(
+          `[CAPACITY_OVERFLOW] Projected total ${projected} exceeds capacity ${capacity_total} by ${projected - capacity_total}. Soft warning shown to guest — booking still allowed. (${idCtx})`,
+        );
       } else {
-        reasons.push("Within capacity");
+        reasons.push(
+          `[CAPACITY_OK] Projected ${projected} is within capacity ${capacity_total}. (${idCtx})`,
+        );
       }
+    } else if (capacity_total === 0) {
+      reasons.push(
+        `[CAPACITY_UNDEFINED] No active resources with capacity found for type "${reservation_type}"${site_id ? " at this site" : ""}. Capacity rule skipped — booking allowed without limit. (${idCtx})`,
+      );
     } else {
       reasons.push(
-        `Capacity check skipped (capacity=${capacity_total}, requested=${requestedGuests}) — no enforcement`,
+        `[CAPACITY_SKIPPED] Requested guests=${requestedGuests}; nothing to check. (${idCtx})`,
       );
     }
 
