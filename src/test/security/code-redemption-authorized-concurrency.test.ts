@@ -159,7 +159,10 @@ async function seedAccessCode(
     .insert({
       code_hash: hashCode(plaintext),
       code_prefix: plaintext.slice(0, 8),
-      description: "Authorized-user concurrency test — auto-cleaned",
+      // The description carries the suite tag so `sweepStaleRows()` can
+      // recover from a process that died before it could push the new
+      // id into the in-memory tracker.
+      description: `${DESCRIPTION_TAG} Authorized-user concurrency test — auto-cleaned`,
       tier: "business",
       duration_days: 7,
       max_uses: maxUses,
