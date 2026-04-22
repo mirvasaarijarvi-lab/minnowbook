@@ -13,6 +13,8 @@ export const useTenant = () => {
   const { user } = useAuth();
   const { impersonating, isImpersonating } = useImpersonation();
   const queryClient = useQueryClient();
+  const lastTenantIdRef = useRef<string | null>(null);
+  const lossReasonRef = useRef<"membership_removed" | "unknown">("unknown");
 
   const { data: tenantUser, isLoading: loadingTenantUser } = useQuery({
     queryKey: ["tenant-user", user?.id],
