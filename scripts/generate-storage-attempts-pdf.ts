@@ -346,7 +346,7 @@ function drawLeaksSection(c: Cursor, p: LedgerPayload): Cursor {
       borderWidth: 0.5,
     });
     c.page.drawText(
-      safe("✓ No unexpected leaks — every cross-tenant attempt was correctly denied."),
+      safe("OK  No unexpected leaks - every cross-tenant attempt was correctly denied."),
       {
         x: MARGIN + 10,
         y: c.y - 18,
@@ -373,7 +373,7 @@ function drawLeaksSection(c: Cursor, p: LedgerPayload): Cursor {
   });
   c.page.drawText(
     safe(
-      `⚠ ${leaks.length} leak${leaks.length === 1 ? "" : "s"} detected — investigate immediately.`,
+      `WARNING  ${leaks.length} leak${leaks.length === 1 ? "" : "s"} detected - investigate immediately.`,
     ),
     {
       x: MARGIN + 10,
@@ -445,7 +445,7 @@ function drawLeaksSection(c: Cursor, p: LedgerPayload): Cursor {
     c.y -= LINE_HEIGHT;
 
     if (leak.errorMessage) {
-      const msg = ellipsise(`↳ ${leak.errorMessage}`, c.mono, 7.5, CONTENT_W - 8);
+      const msg = ellipsise(`-> ${leak.errorMessage}`, c.mono, 7.5, CONTENT_W - 8);
       c.page.drawText(safe(msg), {
         x: MARGIN + 8,
         y: c.y - 8,
@@ -549,7 +549,7 @@ function drawAttemptsSection(c: Cursor, p: LedgerPayload): Cursor {
     c.y -= LINE_HEIGHT;
 
     if (u.errorMessage) {
-      const msg = ellipsise(`↳ ${u.errorMessage}`, c.mono, 7.5, CONTENT_W - 8);
+      const msg = ellipsise(`-> ${u.errorMessage}`, c.mono, 7.5, CONTENT_W - 8);
       c.page.drawText(safe(msg), {
         x: MARGIN + 8,
         y: c.y - 8,
