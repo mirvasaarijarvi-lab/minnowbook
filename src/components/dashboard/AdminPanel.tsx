@@ -29,6 +29,7 @@ import PermissionsEditor from "./PermissionsEditor";
 import HealthCheckPanel from "./HealthCheckPanel";
 import EmailLogPanel from "./EmailLogPanel";
 import { getMaxStaffUsers } from "@/lib/tier-limits";
+import { useTierErrorMessage } from "@/hooks/useTierErrorMessage";
 
 interface SiteAssignment {
   id?: string;
