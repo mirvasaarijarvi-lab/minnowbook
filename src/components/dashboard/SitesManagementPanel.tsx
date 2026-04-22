@@ -7,6 +7,7 @@ import { useTierGate } from "@/hooks/useTierGate";
 import { useT } from "@/contexts/I18nContext";
 import { PERM_SITES_MANAGE, PERM_SITES_APPROVE } from "@/lib/permissions";
 import { getTierLabel } from "@/lib/tier-limits";
+import { useTierErrorMessage } from "@/hooks/useTierErrorMessage";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ApprovalQueuePanel from "./ApprovalQueuePanel";
@@ -82,6 +83,14 @@ const typeIcons: Record<string, React.ElementType> = {
 
 const SitesManagementPanel = () => {
   const t = useT();
+  const formatTierError = useTierErrorMessage();
+  // Centralized error -> toast helper. Tier-limit errors get a friendly,
+  // localized message; everything else falls back to the raw server text.
+  const showError = (err: unknown) => {
+    const tierErr = formatTierError(err);
+    const description = tierErr ? tierErr.message : (err as { message?: string })?.message;
+    toast({ title: "Error", description, variant: "destructive" });
+  };
   const { tenantId, tenant } = useTenant();
   const { can, isSystemAdmin } = usePermissions();
   const { canCreateSiteCheck } = useTierGate();
