@@ -164,20 +164,24 @@ function safe(s: string | null | undefined): string {
 }
 
 function ellipsise(s: string, font: PDFFont, size: number, maxW: number): string {
-  if (font.widthOfTextAtSize(s, size) <= maxW) return s;
-  const ell = "…";
+  // Sanitize FIRST — pdf-lib's StandardFont throws on non-WinAnsi codepoints
+  // when measuring width, not just when drawing. `safe()` is idempotent so
+  // re-applying it at drawText time is harmless.
+  const sane = safe(s);
+  if (font.widthOfTextAtSize(sane, size) <= maxW) return sane;
+  const ell = "...";
   // Binary-search the longest prefix that fits with the ellipsis.
   let lo = 0;
-  let hi = s.length;
+  let hi = sane.length;
   while (lo < hi) {
     const mid = ((lo + hi + 1) / 2) | 0;
-    if (font.widthOfTextAtSize(s.slice(0, mid) + ell, size) <= maxW) {
+    if (font.widthOfTextAtSize(sane.slice(0, mid) + ell, size) <= maxW) {
       lo = mid;
     } else {
       hi = mid - 1;
     }
   }
-  return s.slice(0, lo) + ell;
+  return sane.slice(0, lo) + ell;
 }
 
 interface Cursor {
