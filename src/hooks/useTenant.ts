@@ -50,6 +50,11 @@ export const useTenant = () => {
         },
         (payload) => {
           if (payload.eventType === "DELETE") {
+            // Mark the upcoming tenantId=null transition as caused by an
+            // explicit membership removal (vs. an unrelated query refresh)
+            // so the analytics event in the effect below can attribute it.
+            lossReasonRef.current = "membership_removed";
+
             // Flag the removal so /onboarding can show a persistent banner
             // explaining what happened (the toast alone is easy to miss).
             try {
