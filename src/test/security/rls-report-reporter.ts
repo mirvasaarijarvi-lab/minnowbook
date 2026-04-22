@@ -1,6 +1,10 @@
 import { writeFileSync, mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import type { Reporter, File, Task, TaskResultPack } from "vitest";
+import {
+  readTenantGuardLog,
+  type TenantGuardRecord,
+} from "./fixtures/tenant-guard-record";
 
 /**
  * Custom Vitest reporter that produces a CI-friendly summary of the
@@ -66,6 +70,13 @@ interface ReportPayload {
     skipped: number;
     durationMs: number;
   };
+  /**
+   * Per-suite tenant-pair guard outcomes (validated tenant IDs +
+   * membership-probe pass/fail), populated by `guardTenantPair` via the
+   * file side-channel in `fixtures/tenant-guard-record.ts`. Empty array
+   * when no live cross-tenant suite ran (e.g. anon-only mode).
+   */
+  tenantGuard: TenantGuardRecord[];
   entries: ReportEntry[];
 }
 
@@ -170,8 +181,50 @@ function renderRlsDetails(d: RlsFailureDetails): string {
   return `<div class="rls-details">${rowsHtml}${errBlock}${rowsBlock}</div>`;
 }
 
+function membershipBadge(value: boolean | "skipped"): string {
+  if (value === true) return `<span class="badge ok">probe ✓</span>`;
+  if (value === false) return `<span class="badge fail">probe ✗</span>`;
+  return `<span class="badge skip">skipped</span>`;
+}
+
+function renderTenantGuardSection(records: TenantGuardRecord[]): string {
+  if (records.length === 0) {
+    // Empty intentionally: anon-only runs don't invoke the guard. Showing
+    // a "no guard" notice would create false noise in the dashboard.
+    return "";
+  }
+  const rows = records
+    .map((r) => {
+      const failureRow = r.failure
+        ? `<div class="guard-failure">⚠ ${escapeHtml(r.failure)}</div>`
+        : "";
+      const aLabel = r.emailA ? ` <span class="guard-email">(${escapeHtml(r.emailA)})</span>` : "";
+      const bLabel = r.emailB ? ` <span class="guard-email">(${escapeHtml(r.emailB)})</span>` : "";
+      return `<tr>
+          <td><code>${escapeHtml(r.suite)}</code></td>
+          <td><code>${escapeHtml(r.tenantA ?? "—")}</code>${aLabel}</td>
+          <td><code>${escapeHtml(r.tenantB ?? "—")}</code>${bLabel}</td>
+          <td>${membershipBadge(r.membershipA)}</td>
+          <td>${membershipBadge(r.membershipB)}</td>
+          <td><span class="guard-time">${escapeHtml(r.recordedAt)}</span>${failureRow}</td>
+        </tr>`;
+    })
+    .join("\n");
+  return `
+  <h2 class="guard-heading">Tenant-pair guard</h2>
+  <p class="guard-meta">UUID validation, distinctness check, and membership probe — all three must pass before the live cross-tenant assertions can be trusted.</p>
+  <table class="guard-table">
+    <thead>
+      <tr><th>Suite</th><th>Tenant A</th><th>Tenant B</th><th>Member A</th><th>Member B</th><th>Recorded</th></tr>
+    </thead>
+    <tbody>
+${rows}
+    </tbody>
+  </table>`;
+}
+
 function renderHtml(payload: ReportPayload): string {
-  const { totals, entries, generatedAt, flavor } = payload;
+  const { totals, entries, generatedAt, flavor, tenantGuard } = payload;
 
   const rows = entries
     .map((e) => {
@@ -237,6 +290,13 @@ function renderHtml(payload: ReportPayload): string {
   .kv-value { color: #fde68a; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
     font-size: 12px; word-break: break-word; }
   .kv-value pre { margin: 0; background: #0f172a; }
+  .guard-heading { margin: 24px 0 4px; font-size: 16px; }
+  .guard-meta { margin: 0 0 12px; color: #94a3b8; font-size: 12px; }
+  .guard-table { margin-bottom: 24px; }
+  .guard-table code { color: #fde68a; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .guard-email { color: #94a3b8; font-size: 11px; }
+  .guard-time { color: #94a3b8; font-size: 11px; font-variant-numeric: tabular-nums; }
+  .guard-failure { color: #fca5a5; font-size: 12px; margin-top: 4px; }
 </style>
 </head>
 <body>
@@ -250,6 +310,7 @@ function renderHtml(payload: ReportPayload): string {
     <div class="card fail"><div class="label">Failed</div><div class="value">${totals.failed}</div></div>
     <div class="card skip"><div class="label">Skipped</div><div class="value">${totals.skipped}</div></div>
   </div>
+  ${renderTenantGuardSection(tenantGuard)}
   <table>
     <thead>
       <tr><th>Status</th><th>Suite</th><th>Test</th><th>Duration</th><th>Details</th></tr>
@@ -333,10 +394,15 @@ export default class RlsReportReporter implements Reporter {
     const flavor = (process.env.RLS_REPORT_FLAVOR ?? "default").trim() || "default";
     const safeFlavor = flavor.replace(/[^a-zA-Z0-9_-]+/g, "-").toLowerCase();
 
+    // Pull guard outcomes recorded by `guardTenantPair` via the file
+    // side-channel. Empty when no live cross-tenant suite ran.
+    const tenantGuard = readTenantGuardLog().records;
+
     const payload: ReportPayload = {
       generatedAt: new Date().toISOString(),
       flavor,
       totals,
+      tenantGuard,
       entries,
     };
 

@@ -221,6 +221,7 @@ describe("Cross-Tenant RLS Regression Tests", () => {
         // by every cross-tenant suite. Surfaces config errors as setup
         // failures instead of misleading "RLS denied" passes.
         await guardTenantPair({
+          suite: "cross-tenant-rls",
           a: { client: clientA, tenantId: fixture.a.tenantId, email: fixture.a.email },
           b: { client: clientB, tenantId: fixture.b.tenantId, email: fixture.b.email },
         });

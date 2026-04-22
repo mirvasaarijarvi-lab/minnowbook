@@ -173,6 +173,10 @@ export interface TenantPairGuardInput {
   /** Skip the membership probe (rarely useful — only when membership is
    *  intentionally being mutated by the suite, e.g. duplicate-membership). */
   skipMembershipProbe?: boolean;
+  /** Suite name written into the guard record so the report can attribute
+   *  multiple guard runs (rls vs. storage) within a single CI invocation.
+   *  Defaults to "unknown-suite" when omitted. */
+  suite?: string;
 }
 
 /**
@@ -180,10 +184,16 @@ export interface TenantPairGuardInput {
  * authenticated clients, two distinct tenants" shape. Returns the
  * normalized (trimmed) tenant ids on success.
  *
+ * Side effect: appends a record to `reports/tenant-guard.json` (or the
+ * path in `RLS_GUARD_RECORD_PATH`) so the RLS report can surface which
+ * tenant ids were validated and whether each membership probe passed.
+ * The write is best-effort and never throws.
+ *
  * Call this from the suite's `beforeAll` immediately after sign-in:
  *
  * ```ts
  * const { tenantA, tenantB } = await guardTenantPair({
+ *   suite: "cross-tenant-rls",
  *   a: { client: clientA, tenantId: liveCreds.a.tenantId, email: liveCreds.a.email },
  *   b: { client: clientB, tenantId: liveCreds.b.tenantId, email: liveCreds.b.email },
  * });
@@ -192,24 +202,73 @@ export interface TenantPairGuardInput {
 export async function guardTenantPair(
   input: TenantPairGuardInput,
 ): Promise<{ tenantA: string; tenantB: string }> {
-  const { a: validA, b: validB } = assertDistinctTenantPairIds(
-    input.a.tenantId,
-    input.b.tenantId,
-    input.labels,
-  );
-  if (!input.skipMembershipProbe) {
-    await assertTenantMembership(input.a.client, {
-      label: input.labels?.a ?? "A",
-      expectedTenantId: validA,
-      email: input.a.email,
-      envPrefix: input.labels?.envPrefix,
+  // Lazy import keeps this module dependency-free for any non-test caller
+  // that wants `isUuid`/`assertDistinctTenantPairIds` without dragging in
+  // the node:fs side-channel.
+  const { appendTenantGuardRecord } = await import("./tenant-guard-record");
+  const labelA = input.labels?.a ?? "A";
+  const labelB = input.labels?.b ?? "B";
+  const suite = input.suite ?? "unknown-suite";
+
+  let validA: string | undefined;
+  let validB: string | undefined;
+  let membershipA: boolean | "skipped" = "skipped";
+  let membershipB: boolean | "skipped" = "skipped";
+
+  try {
+    const ids = assertDistinctTenantPairIds(
+      input.a.tenantId,
+      input.b.tenantId,
+      input.labels,
+    );
+    validA = ids.a;
+    validB = ids.b;
+
+    if (!input.skipMembershipProbe) {
+      await assertTenantMembership(input.a.client, {
+        label: labelA,
+        expectedTenantId: validA,
+        email: input.a.email,
+        envPrefix: input.labels?.envPrefix,
+      });
+      membershipA = true;
+      await assertTenantMembership(input.b.client, {
+        label: labelB,
+        expectedTenantId: validB,
+        email: input.b.email,
+        envPrefix: input.labels?.envPrefix,
+      });
+      membershipB = true;
+    }
+
+    appendTenantGuardRecord({
+      suite,
+      recordedAt: new Date().toISOString(),
+      tenantA: validA,
+      tenantB: validB,
+      membershipA,
+      membershipB,
+      emailA: input.a.email,
+      emailB: input.b.email,
     });
-    await assertTenantMembership(input.b.client, {
-      label: input.labels?.b ?? "B",
-      expectedTenantId: validB,
-      email: input.b.email,
-      envPrefix: input.labels?.envPrefix,
+
+    return { tenantA: validA, tenantB: validB };
+  } catch (err) {
+    // Record the partial state so the report explains WHICH check failed
+    // — the test runner will still see the thrown error and fail setup.
+    appendTenantGuardRecord({
+      suite,
+      recordedAt: new Date().toISOString(),
+      tenantA: validA,
+      tenantB: validB,
+      // If we threw before completing a probe, mark it as failed so the
+      // report distinguishes "skipped intentionally" from "blew up here".
+      membershipA: validA && !input.skipMembershipProbe ? membershipA || false : membershipA,
+      membershipB: validB && !input.skipMembershipProbe ? membershipB || false : membershipB,
+      emailA: input.a.email,
+      emailB: input.b.email,
+      failure: err instanceof Error ? err.message : String(err),
     });
+    throw err;
   }
-  return { tenantA: validA, tenantB: validB };
 }
