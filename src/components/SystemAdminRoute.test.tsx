@@ -194,9 +194,9 @@ describe("SystemAdminRoute (/superadmin enforcement)", () => {
     expect(screen.queryByText(/403 · Access denied/i)).not.toBeInTheDocument();
   });
 
-  it("shows a loading indicator while the system_admins lookup is in-flight", async () => {
-    // Render with the default non-admin user. Before the maybeSingle()
-    // promise resolves, the guard shows a spinner labeled for a11y.
+  it("shows a loading indicator while the is_system_admin RPC is in-flight", async () => {
+    // Render with the default non-admin user. Before the rpc() promise
+    // resolves, the guard shows a spinner labeled for a11y.
     renderAtSuperadmin();
 
     // The aria-label is the most stable hook for the loading state.
@@ -204,9 +204,86 @@ describe("SystemAdminRoute (/superadmin enforcement)", () => {
       screen.getByRole("status", { name: /checking permissions/i }),
     ).toBeInTheDocument();
 
-    // And then it resolves to Forbidden (because mockSystemAdminRow is null).
+    // And then it resolves to Forbidden (because mockIsSystemAdminResult is false).
     await waitFor(() => {
       expect(screen.getByText(/403 · Access denied/i)).toBeInTheDocument();
     });
+  });
+
+  it("does not re-query the database when the guard is unmounted and remounted", async () => {
+    // Caching contract: useIsSystemAdmin uses staleTime + gcTime: Infinity
+    // and refetchOnMount: false, so navigating between guarded routes
+    // (which unmounts/remounts the guard) must reuse the original
+    // resolution and never issue a second RPC call.
+    mockIsSystemAdminResult = true;
+    mockUseAuth.mockReturnValue({
+      user: { id: "user-cache-1", email: "admin@example.com" },
+      session: { access_token: "fake" },
+      loading: false,
+      subscription: {
+        subscribed: false,
+        tier: null,
+        subscriptionEnd: null,
+        subscriptionStatus: null,
+      },
+      refreshSubscription: vi.fn(),
+      signOut: vi.fn(),
+    });
+
+    // Use one shared QueryClient across both renders, mimicking the
+    // app's real shape (one provider at the root). A fresh provider per
+    // mount would invalidate the cache and is not the scenario we test.
+    const { supabase } = await import("@/integrations/supabase/client");
+    const rpcSpy = supabase.rpc as unknown as ReturnType<typeof vi.fn>;
+    rpcSpy.mockClear();
+
+    const client = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+
+    const Harness = ({ path }: { path: string }) => (
+      <QueryClientProvider client={client}>
+        <MemoryRouter initialEntries={[path]}>
+          <Routes>
+            <Route
+              path="/superadmin"
+              element={
+                <SystemAdminRoute attemptedArea="the Superadmin area">
+                  <div data-testid="superadmin-content">Superadmin</div>
+                </SystemAdminRoute>
+              }
+            />
+            <Route
+              path="/superadmin/other"
+              element={
+                <SystemAdminRoute attemptedArea="the Superadmin area">
+                  <div data-testid="superadmin-other">Other admin page</div>
+                </SystemAdminRoute>
+              }
+            />
+          </Routes>
+        </MemoryRouter>
+      </QueryClientProvider>
+    );
+
+    const first = render(<Harness path="/superadmin" />);
+    await waitFor(() => {
+      expect(screen.getByTestId("superadmin-content")).toBeInTheDocument();
+    });
+    const callsAfterFirst = rpcSpy.mock.calls.length;
+    expect(callsAfterFirst).toBeGreaterThanOrEqual(1);
+
+    // Tear down the first route entirely (simulates leaving /superadmin).
+    first.unmount();
+
+    // Re-mount the guard at a different superadmin-protected route. The
+    // shared cache must answer immediately without a new RPC call.
+    render(<Harness path="/superadmin/other" />);
+    await waitFor(() => {
+      expect(screen.getByTestId("superadmin-other")).toBeInTheDocument();
+    });
+
+    // No additional rpc() invocations between the two mounts.
+    expect(rpcSpy.mock.calls.length).toBe(callsAfterFirst);
   });
 });
