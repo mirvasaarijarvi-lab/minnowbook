@@ -676,38 +676,38 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       // ---------- Cross-tenant write denial ----------
       it("user A cannot UPLOAD to tenant B's tenant-private folder", async () => {
         const path = ownPath(liveCreds.b.tenantId!, "a-cross-private");
-        recordAttempt(PRIVATE_BUCKET, path, "a", "b");
-        const { error } = await clientA.storage
+        const result = await clientA.storage
           .from(PRIVATE_BUCKET)
           .upload(path, fileBytes("a-cross-private"), { upsert: true });
-        expect(error).toBeTruthy();
+        recordAttempt(PRIVATE_BUCKET, path, "a", "b", result);
+        expect(result.error).toBeTruthy();
       });
 
       it("user B cannot UPLOAD to tenant A's tenant-private folder", async () => {
         const path = ownPath(liveCreds.a.tenantId!, "b-cross-private");
-        recordAttempt(PRIVATE_BUCKET, path, "b", "a");
-        const { error } = await clientB.storage
+        const result = await clientB.storage
           .from(PRIVATE_BUCKET)
           .upload(path, fileBytes("b-cross-private"), { upsert: true });
-        expect(error).toBeTruthy();
+        recordAttempt(PRIVATE_BUCKET, path, "b", "a", result);
+        expect(result.error).toBeTruthy();
       });
 
       it("user A cannot UPLOAD to tenant B's tenant-assets folder", async () => {
         const path = ownPath(liveCreds.b.tenantId!, "a-cross-assets");
-        recordAttempt(ASSETS_BUCKET, path, "a", "b");
-        const { error } = await clientA.storage
+        const result = await clientA.storage
           .from(ASSETS_BUCKET)
           .upload(path, fileBytes("a-cross-assets"), { upsert: true });
-        expect(error).toBeTruthy();
+        recordAttempt(ASSETS_BUCKET, path, "a", "b", result);
+        expect(result.error).toBeTruthy();
       });
 
       it("user B cannot UPLOAD to tenant A's tenant-assets folder", async () => {
         const path = ownPath(liveCreds.a.tenantId!, "b-cross-assets");
-        recordAttempt(ASSETS_BUCKET, path, "b", "a");
-        const { error } = await clientB.storage
+        const result = await clientB.storage
           .from(ASSETS_BUCKET)
           .upload(path, fileBytes("b-cross-assets"), { upsert: true });
-        expect(error).toBeTruthy();
+        recordAttempt(ASSETS_BUCKET, path, "b", "a", result);
+        expect(result.error).toBeTruthy();
       });
 
       // ---------- Cross-tenant read denial (private bucket) ----------
