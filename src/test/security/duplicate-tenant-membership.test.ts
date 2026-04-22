@@ -106,6 +106,34 @@ describe("Duplicate Tenant Membership — Behavioural Contract", () => {
     let createdMembershipId: string | null = null;
 
     beforeAll(async () => {
+      // Shared guard: tenants A and B must be present, well-formed UUIDs,
+      // and distinct. We DON'T run the membership probe here because this
+      // suite intentionally mutates membership (adds the user to B mid-
+      // test) — the membership precondition is asserted further down in
+      // the existing "sanity: user already in A" check.
+      assertDistinctTenantPairIds(liveCreds.tenantA, liveCreds.tenantB, {
+        envPrefix: "RLS_TEST_TENANT",
+      });
+      // The third tenant must also be a distinct UUID — otherwise the
+      // "user CANNOT read third tenant" assertion would target one of the
+      // tenants the user IS in, and pass for the wrong reason.
+      if (!isUuid(liveCreds.tenantThird)) {
+        throw new Error(
+          `RLS_TEST_THIRD_TENANT_ID must be a UUID. Got "${liveCreds.tenantThird}".`,
+        );
+      }
+      const third = liveCreds.tenantThird!.trim().toLowerCase();
+      if (
+        third === liveCreds.tenantA!.trim().toLowerCase() ||
+        third === liveCreds.tenantB!.trim().toLowerCase()
+      ) {
+        throw new Error(
+          `RLS_TEST_THIRD_TENANT_ID ("${liveCreds.tenantThird}") must be distinct from ` +
+            `RLS_TEST_TENANT_A_ID and RLS_TEST_TENANT_B_ID — otherwise the cross-tenant ` +
+            `denial check would target a tenant the user IS in and pass for the wrong reason.`,
+        );
+      }
+
       // Authenticated client signs in as the test user (originally a member of tenant A).
       userClient = createClient(SUPABASE_URL!, SUPABASE_ANON_KEY!, {
         auth: { persistSession: false, autoRefreshToken: false },
