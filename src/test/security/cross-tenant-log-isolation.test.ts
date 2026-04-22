@@ -447,6 +447,254 @@ liveDescribe("booking_validation_log — anon cannot write or mutate cross-tenan
   });
 });
 
+/**
+ * Pagination + token-scoped filter probes.
+ *
+ * Threat model: an attacker who has guessed (or stolen) a single
+ * `booking_token` reservation handle — but where the token is
+ * **revoked** or **expired** — must not be able to use it as a
+ * filter to page through `booking_validation_log` or `audit_log`
+ * and infer:
+ *
+ *   - whether the token (or its reservation) ever existed,
+ *   - whether the underlying record exists in either log,
+ *   - the *count* of related rows in either log,
+ *   - timing/ordering information about recent activity.
+ *
+ * Both log tables expose a per-row handle that is the natural join
+ * target for a booking token (`booking_tokens.reservation_id`):
+ *   - booking_validation_log.reservation_id
+ *   - audit_log.record_id (holds the reservation id for reservation rows)
+ *
+ * RLS must hide every row from anon regardless of how that handle
+ * is paginated, sorted, or counted, AND the response must be
+ * indistinguishable between a "real but RLS-hidden" id and a fully
+ * fabricated id — otherwise the response shape itself becomes the
+ * existence oracle a revoked-token attacker would exploit.
+ *
+ * Anon is intentional here: this exercises the public attack surface
+ * a leaked-but-revoked token would expose to the outside world. The
+ * three sentinel handles below simulate the three cases the attacker
+ * cannot tell apart from outside RLS:
+ *   - REVOKED_TOKEN_RES_ID: matches a token whose `is_revoked=true`
+ *   - EXPIRED_TOKEN_RES_ID: matches a token whose `expires_at < now()`
+ *   - FAKE_RES_ID: never existed at all
+ */
+const REVOKED_TOKEN_RES_ID = "00000000-0000-0000-0000-0000000000b1";
+const EXPIRED_TOKEN_RES_ID = "00000000-0000-0000-0000-0000000000b2";
+const FAKE_RES_ID = "00000000-0000-0000-0000-0000000000b3";
+
+describe.each([
+  {
+    table: "booking_validation_log" as const,
+    handleColumn: "reservation_id" as const,
+  },
+  {
+    table: "audit_log" as const,
+    handleColumn: "record_id" as const,
+  },
+])("$table — token-scoped pagination cannot leak existence", ({ table, handleColumn }) => {
+  type Shape = { error: boolean; rows: number; count: number | null };
+  function shapeOf(result: {
+    data: unknown;
+    error: { message?: string } | null;
+    count?: number | null;
+  }): Shape {
+    if (result.error) return { error: true, rows: 0, count: null };
+    const rows = Array.isArray(result.data) ? (result.data as unknown[]).length : 0;
+    return { error: false, rows, count: result.count ?? null };
+  }
+
+  liveIt("range(0, 9) by handle returns zero rows for revoked/expired/fake", async () => {
+    const shapes: Shape[] = [];
+    for (const handle of [REVOKED_TOKEN_RES_ID, EXPIRED_TOKEN_RES_ID, FAKE_RES_ID]) {
+      const result = await anon
+        .from(table)
+        .select("*")
+        .eq(handleColumn, handle)
+        .range(0, 9);
+      expectNoRowsLeaked(result, `${table} range(0,9) ${handleColumn}=${handle}`);
+      shapes.push(shapeOf(result));
+    }
+    // Indistinguishability: revoked, expired, fake must all look the same.
+    expect(shapes[0]).toEqual(shapes[1]);
+    expect(shapes[1]).toEqual(shapes[2]);
+  });
+
+  liveIt("sequential pages 0-9, 10-19, 20-29 by handle leak no row + identical shapes", async () => {
+    const PAGE_SIZE = 10;
+    const PAGES = 3;
+    const perHandle: Shape[][] = [];
+    for (const handle of [REVOKED_TOKEN_RES_ID, EXPIRED_TOKEN_RES_ID, FAKE_RES_ID]) {
+      const pages: Shape[] = [];
+      for (let p = 0; p < PAGES; p++) {
+        const from = p * PAGE_SIZE;
+        const to = from + PAGE_SIZE - 1;
+        const result = await anon
+          .from(table)
+          .select("*")
+          .eq(handleColumn, handle)
+          .range(from, to);
+        expectNoRowsLeaked(
+          result,
+          `${table} ${handleColumn}=${handle} page ${p} range(${from},${to})`
+        );
+        pages.push(shapeOf(result));
+      }
+      perHandle.push(pages);
+    }
+    expect(perHandle[0]).toEqual(perHandle[1]);
+    expect(perHandle[1]).toEqual(perHandle[2]);
+  });
+
+  liveIt("deep offset range(10000, 10024) by handle returns zero rows", async () => {
+    const shapes: Shape[] = [];
+    for (const handle of [REVOKED_TOKEN_RES_ID, EXPIRED_TOKEN_RES_ID, FAKE_RES_ID]) {
+      const result = await anon
+        .from(table)
+        .select("*")
+        .eq(handleColumn, handle)
+        .range(10_000, 10_024);
+      expectNoRowsLeaked(
+        result,
+        `${table} deep offset ${handleColumn}=${handle}`
+      );
+      shapes.push(shapeOf(result));
+    }
+    expect(shapes[0]).toEqual(shapes[1]);
+    expect(shapes[1]).toEqual(shapes[2]);
+  });
+
+  liveIt("HEAD count by handle never reveals row count for revoked/expired/fake", async () => {
+    // The most direct existence oracle: ask for the count alone. RLS
+    // must collapse all three (revoked / expired / fake) to 0 or null.
+    const counts: Array<number | null> = [];
+    for (const handle of [REVOKED_TOKEN_RES_ID, EXPIRED_TOKEN_RES_ID, FAKE_RES_ID]) {
+      const { count, error } = await anon
+        .from(table)
+        .select("*", { count: "exact", head: true })
+        .eq(handleColumn, handle);
+      if (error) {
+        counts.push(null);
+      } else {
+        expect(
+          count ?? 0,
+          `${table} HEAD count by ${handleColumn}=${handle} must not leak existence`
+        ).toBe(0);
+        counts.push(count ?? 0);
+      }
+    }
+    expect(counts[0]).toBe(counts[1]);
+    expect(counts[1]).toBe(counts[2]);
+  });
+
+  liveIt("count alongside paginated rows by handle leaks neither rows nor cardinality", async () => {
+    const shapes: Shape[] = [];
+    for (const handle of [REVOKED_TOKEN_RES_ID, EXPIRED_TOKEN_RES_ID, FAKE_RES_ID]) {
+      const result = await anon
+        .from(table)
+        .select("*", { count: "exact" })
+        .eq(handleColumn, handle)
+        .range(0, 9);
+      if (!result.error) {
+        const rows = Array.isArray(result.data) ? (result.data as unknown[]).length : 0;
+        expect(rows, `${table} count+range data leak ${handle}`).toBe(0);
+        expect(result.count ?? 0, `${table} count+range count leak ${handle}`).toBe(0);
+      }
+      shapes.push(shapeOf(result));
+    }
+    expect(shapes[0]).toEqual(shapes[1]);
+    expect(shapes[1]).toEqual(shapes[2]);
+  });
+
+  liveIt("reverse-order pagination by handle cannot surface latest rows", async () => {
+    const shapes: Shape[] = [];
+    for (const handle of [REVOKED_TOKEN_RES_ID, EXPIRED_TOKEN_RES_ID, FAKE_RES_ID]) {
+      const result = await anon
+        .from(table)
+        .select("id, created_at")
+        .eq(handleColumn, handle)
+        .order("created_at", { ascending: false })
+        .range(0, 4);
+      expectNoRowsLeaked(
+        result,
+        `${table} reverse pagination ${handleColumn}=${handle}`
+      );
+      shapes.push(shapeOf(result));
+    }
+    expect(shapes[0]).toEqual(shapes[1]);
+    expect(shapes[1]).toEqual(shapes[2]);
+  });
+
+  liveIt("cursor walk (.gt created_at + handle filter) never surfaces a row", async () => {
+    // Forward hops anchored at the unix epoch — covers a misconfigured
+    // cursor-style paginator that drops the policy on subsequent hops.
+    const HOPS = 3;
+    for (const handle of [REVOKED_TOKEN_RES_ID, EXPIRED_TOKEN_RES_ID, FAKE_RES_ID]) {
+      let cursor = "1970-01-01T00:00:00Z";
+      for (let h = 0; h < HOPS; h++) {
+        const result = await anon
+          .from(table)
+          .select("id, created_at")
+          .eq(handleColumn, handle)
+          .gt("created_at", cursor)
+          .order("created_at", { ascending: true })
+          .limit(5);
+        expectNoRowsLeaked(
+          result,
+          `${table} cursor hop ${h} ${handleColumn}=${handle}`
+        );
+        cursor = new Date(Date.now() - (HOPS - h) * 1000).toISOString();
+      }
+    }
+  });
+
+  liveIt("combined tenant_id + handle pagination leaks neither row nor count", async () => {
+    const PAGE_SIZE = 10;
+    const PAGES = 2;
+    const perHandle: Shape[][] = [];
+    for (const handle of [REVOKED_TOKEN_RES_ID, EXPIRED_TOKEN_RES_ID, FAKE_RES_ID]) {
+      const pages: Shape[] = [];
+      for (let p = 0; p < PAGES; p++) {
+        const from = p * PAGE_SIZE;
+        const to = from + PAGE_SIZE - 1;
+        const result = await anon
+          .from(table)
+          .select("*", { count: "exact" })
+          .eq("tenant_id", LIVE_TENANT_ID)
+          .eq(handleColumn, handle)
+          .range(from, to);
+        expectNoRowsLeaked(
+          result,
+          `${table} tenant+handle ${handleColumn}=${handle} page ${p}`
+        );
+        if (!result.error) {
+          expect(
+            result.count ?? 0,
+            `${table} tenant+handle count leak ${handle} page ${p}`
+          ).toBe(0);
+        }
+        pages.push(shapeOf(result));
+      }
+      perHandle.push(pages);
+    }
+    expect(perHandle[0]).toEqual(perHandle[1]);
+    expect(perHandle[1]).toEqual(perHandle[2]);
+  });
+
+  liveIt(".in([revoked, expired, fake]) handle list cannot smuggle rows past RLS", async () => {
+    const result = await anon
+      .from(table)
+      .select("*", { count: "exact" })
+      .in(handleColumn, [REVOKED_TOKEN_RES_ID, EXPIRED_TOKEN_RES_ID, FAKE_RES_ID])
+      .range(0, 49);
+    expectNoRowsLeaked(result, `${table} in([revoked,expired,fake])`);
+    if (!result.error) {
+      expect(result.count ?? 0, `${table} in() count must not leak`).toBe(0);
+    }
+  });
+});
+
 liveDescribe("sanity guard", () => {
   it("anon client has no user session (prevents service-role false positives)", async () => {
     const { data } = await anon.auth.getUser();
