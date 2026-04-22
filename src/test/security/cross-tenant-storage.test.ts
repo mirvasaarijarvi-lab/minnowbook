@@ -3409,7 +3409,13 @@ describe("Cross-Tenant Storage RLS Tests", () => {
   // Skip conditions:
   //   - No service-role key   → can't insert into `storage.*` tables.
   //   - Live mode disabled    → no real tenant ids to use as the key prefix.
-  describe.runIf(hasSupabaseConfig && liveModeEnabled && Boolean(adminClient))(
+  // Also gated on MULTIPART_SWEEP_ENABLED: the entire purpose of this
+  // block is to prove the sweeper works, so running it with the sweep
+  // disabled would be a guaranteed failure that masks the RLS-comparison
+  // signal the operator is trying to capture by toggling the flag.
+  describe.runIf(
+    hasSupabaseConfig && liveModeEnabled && Boolean(adminClient) && MULTIPART_SWEEP_ENABLED,
+  )(
     "Aborted cross-tenant upload leaves multipart orphan that admin sweep removes",
     () => {
       // Each synthetic orphan key is unique per test run AND tagged with a
