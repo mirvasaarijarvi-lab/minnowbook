@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/hooks/useTenant";
 import { useT } from "@/contexts/I18nContext";
+import { useTierErrorMessage } from "@/hooks/useTierErrorMessage";
 import {
   Dialog,
   DialogContent,
@@ -47,6 +48,14 @@ const BulkAssignUsersDialog = ({
   const { tenantId } = useTenant();
   const t = useT();
   const queryClient = useQueryClient();
+  const formatTierError = useTierErrorMessage();
+  // Centralized error -> toast helper. Tier-limit errors get a friendly,
+  // localized message; everything else falls back to the raw server text.
+  const showError = (err: unknown) => {
+    const tierErr = formatTierError(err);
+    const description = tierErr ? tierErr.message : (err as { message?: string })?.message;
+    toast({ title: "Error", description, variant: "destructive" });
+  };
   const [selectedUserIds, setSelectedUserIds] = useState<Set<string>>(new Set());
   const [role, setRole] = useState("staff");
 

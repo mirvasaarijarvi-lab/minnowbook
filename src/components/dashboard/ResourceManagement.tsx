@@ -28,6 +28,7 @@ import { usePermissions } from "@/hooks/usePermissions";
 import { useTierGate } from "@/hooks/useTierGate";
 import { PERM_RESOURCES_MANAGE } from "@/lib/permissions";
 import { useAutoApproval } from "@/hooks/useAutoApproval";
+import { useTierErrorMessage } from "@/hooks/useTierErrorMessage";
 
 const typeIcons: Record<string, React.ElementType> = {
   guesthouse: BedDouble,
@@ -60,6 +61,14 @@ const ResourceManagement = () => {
   const [uploading, setUploading] = useState(false);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const t = useT();
+  const formatTierError = useTierErrorMessage();
+  // Centralized error -> toast helper. Tier-limit errors get a friendly,
+  // localized message; everything else falls back to the raw server text.
+  const showError = (err: unknown) => {
+    const tierErr = formatTierError(err);
+    const description = tierErr ? tierErr.message : (err as { message?: string })?.message;
+    toast({ title: "Error", description, variant: "destructive" });
+  };
   // Copy dialog state
   const [copyDialogOpen, setCopyDialogOpen] = useState(false);
   const [copySource, setCopySource] = useState<any>(null);
