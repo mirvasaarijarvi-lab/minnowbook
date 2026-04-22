@@ -227,6 +227,7 @@ Deno.serve(async (req) => {
       template_name: OFFER_TEMPLATE_LABEL,
       recipient_email: recipientEmail,
       status: "pending",
+      tenant_id: tenantUser.tenant_id,
     });
 
     const enqueuePayload: Record<string, unknown> = {
@@ -242,6 +243,7 @@ Deno.serve(async (req) => {
       idempotency_key: messageId,
       unsubscribe_token: tokenRow?.token || generatedToken,
       queued_at: new Date().toISOString(),
+      tenant_id: tenantUser.tenant_id,
     };
 
     if (replyToEmail) {
@@ -260,6 +262,7 @@ Deno.serve(async (req) => {
         recipient_email: recipientEmail,
         status: "failed",
         error_message: "Failed to enqueue offer email",
+        tenant_id: tenantUser.tenant_id,
       });
 
       return jsonResponse({ error: "Email send failed" }, 500);
