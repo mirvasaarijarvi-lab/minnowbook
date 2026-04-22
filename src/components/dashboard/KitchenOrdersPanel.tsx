@@ -230,6 +230,8 @@ const KitchenOrdersPanel = () => {
     },
     onError: () => toast.error(t("kitchen.error")),
   });
+
+  const updateOrder = useMutation({
     mutationFn: async ({ id, patch }: { id: string; patch: Partial<KitchenOrder> }) => {
       const { error } = await supabase.from("kitchen_orders").update(patch).eq("id", id);
       if (error) throw error;
