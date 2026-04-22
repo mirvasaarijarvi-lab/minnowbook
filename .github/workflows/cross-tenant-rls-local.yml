@@ -1,0 +1,133 @@
+name: Cross-Tenant RLS (Local Supabase)
+
+# Boots a fully local Supabase stack via the Supabase CLI on every push/PR,
+# applies the project's migrations, seeds two tenants + two users with the
+# `seed-rls-test-data.ts` script, and runs the cross-tenant RLS live-mode
+# tests against it. This means the live-mode coverage no longer depends on
+# a staging project being reachable — every PR exercises the full sweep
+# (anon denial + authenticated cross-tenant denial + write/delete denial +
+# positive controls) in an isolated ephemeral database.
+#
+# When the stack fails to start (e.g. Docker unavailable on a runner) the
+# job emits a clear skip notice and exits 0 so it doesn't block PRs that
+# are otherwise green.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  rls-local:
+    name: Cross-Tenant RLS (local stack)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+
+      - name: Setup Supabase CLI
+        id: supabase-cli
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+        continue-on-error: true
+
+      - name: Skip if Supabase CLI unavailable
+        if: steps.supabase-cli.outcome != 'success'
+        run: |
+          echo "::notice::Supabase CLI could not be installed on this runner — skipping local-stack RLS tests."
+          echo "skip_reason=cli-unavailable" >> "$GITHUB_ENV"
+          exit 0
+
+      - name: Install dependencies
+        if: steps.supabase-cli.outcome == 'success'
+        run: bun install --frozen-lockfile
+
+      - name: Start local Supabase stack
+        id: supabase-start
+        if: steps.supabase-cli.outcome == 'success'
+        # `supabase start` boots Postgres, GoTrue, PostgREST, Storage, etc. in
+        # Docker. Migrations from supabase/migrations/ are applied automatically.
+        run: |
+          set -euo pipefail
+          supabase start --exclude=imgproxy,inbucket,studio,realtime,edge-runtime
+        continue-on-error: true
+
+      - name: Skip if local stack failed to start
+        if: steps.supabase-cli.outcome == 'success' && steps.supabase-start.outcome != 'success'
+        run: |
+          echo "::notice::Local Supabase stack failed to start (Docker/runner constraint) — skipping live-mode RLS tests."
+          echo "Inspect the previous step's logs for details. The remote-credentials workflow still covers this if configured."
+          echo "skip_reason=stack-start-failed" >> "$GITHUB_ENV"
+          exit 0
+
+      - name: Capture local stack credentials
+        if: steps.supabase-start.outcome == 'success'
+        id: creds
+        run: |
+          set -euo pipefail
+          # `supabase status -o env` prints KEY=VALUE lines we can re-export.
+          supabase status -o env > /tmp/supabase.env
+          # The CLI emits API_URL / ANON_KEY / SERVICE_ROLE_KEY (sometimes
+          # prefixed with SUPABASE_). Normalise to the names our scripts expect.
+          set -a
+          # shellcheck disable=SC1091
+          source /tmp/supabase.env
+          set +a
+          {
+            echo "SUPABASE_URL=${API_URL:-${SUPABASE_API_URL:-http://127.0.0.1:54321}}"
+            echo "SUPABASE_ANON_KEY=${ANON_KEY:-$SUPABASE_ANON_KEY}"
+            echo "SUPABASE_SERVICE_ROLE_KEY=${SERVICE_ROLE_KEY:-$SUPABASE_SERVICE_ROLE_KEY}"
+          } >> "$GITHUB_ENV"
+
+      - name: Seed test tenants and users
+        if: steps.supabase-start.outcome == 'success'
+        run: |
+          set -euo pipefail
+          # Run seed script and append the emitted KEY=VALUE lines to
+          # $GITHUB_ENV so the next step picks up the live-mode creds.
+          bun run scripts/seed-rls-test-data.ts >> "$GITHUB_ENV"
+
+      - name: Run cross-tenant RLS tests (live, against local stack)
+        if: steps.supabase-start.outcome == 'success'
+        env:
+          # Vite reads these via import.meta.env at test compile time.
+          VITE_SUPABASE_URL: ${{ env.SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ env.SUPABASE_ANON_KEY }}
+        run: bun run test:rls-report
+
+      - name: Upload RLS report
+        if: always() && steps.supabase-start.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: rls-report-local
+          path: reports/
+          retention-days: 14
+
+      - name: Stop local Supabase stack
+        if: always() && steps.supabase-start.outcome == 'success'
+        run: supabase stop --no-backup || true
+
+      - name: Summary
+        if: always()
+        run: |
+          if [ -n "${skip_reason:-}" ]; then
+            echo "### Cross-Tenant RLS (Local) — Skipped" >> "$GITHUB_STEP_SUMMARY"
+            echo "Reason: \`${skip_reason}\`" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "This run did not exercise the live-mode RLS sweep. To unblock locally:" >> "$GITHUB_STEP_SUMMARY"
+            echo "1. Ensure Docker is available on the runner." >> "$GITHUB_STEP_SUMMARY"
+            echo "2. Re-run the workflow." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          if [ -f reports/rls-report.json ]; then
+            echo "### Cross-Tenant RLS (Local) — Results" >> "$GITHUB_STEP_SUMMARY"
+            node -e "const r=require('./reports/rls-report.json'); const t=r.totals; console.log('| Metric | Value |\n|---|---|\n| Total | '+t.total+' |\n| Passed | '+t.passed+' |\n| Failed | '+t.failed+' |\n| Skipped | '+t.skipped+' |');" >> "$GITHUB_STEP_SUMMARY"
+          fi

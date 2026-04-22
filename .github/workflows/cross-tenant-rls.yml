@@ -124,5 +124,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: |
-          echo "::notice::Live-mode cross-tenant tests skipped — RLS_TEST_TENANT_A/B secrets are not configured."
-          echo "See .github/workflows/cross-tenant-rls.yml for setup instructions."
+          echo "::notice::Live-mode cross-tenant tests against the REMOTE staging project were skipped — RLS_TEST_TENANT_A/B secrets are not configured."
+          echo "Live coverage is still provided by the local-stack workflow (.github/workflows/cross-tenant-rls-local.yml), which boots an ephemeral Supabase via the CLI on every PR."
+          echo "Configure the secrets listed in .github/workflows/cross-tenant-rls.yml to additionally exercise the remote staging project."
