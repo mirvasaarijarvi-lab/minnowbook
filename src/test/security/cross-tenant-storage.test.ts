@@ -531,9 +531,32 @@ async function sweepMultipartIntermediates(bucket: string, tenantIds: string[]) 
  * Convenience wrapper for cleanup paths that want the admin (service-role)
  * sweep — the strictest version, used as the final safety net. No-op if no
  * service role key is configured (e.g. local dev without CI secrets).
+ *
+ * Runs `cleanupPreflight` IMMEDIATELY before delegating to the recursive
+ * sweep so a misconfigured tenant pair (env drift, sign-in expiry,
+ * membership mutated mid-run) can never cause the admin client to list
+ * or remove files under the wrong folder. When the preflight fails the
+ * sweep is skipped entirely and the failure is ledgered.
+ *
+ * `clients` is optional and only used in live mode — pass it to also
+ * re-probe `tenant_users` membership for each tenant id. Anon blocks
+ * pass undefined and only get the UUID/distinctness shape check.
  */
-async function sweepTestArtifacts(bucket: string, tenantIds: string[]) {
+async function sweepTestArtifacts(
+  bucket: string,
+  tenantIds: string[],
+  preflightOpts?: {
+    scope: string;
+    clients?: Record<string, { client: SupabaseClient; email?: string }>;
+  },
+) {
   if (!adminClient) return;
+  const preflight = await cleanupPreflight({
+    tenantIds,
+    clients: preflightOpts?.clients,
+    scope: preflightOpts?.scope ?? `sweepTestArtifacts:${bucket}`,
+  });
+  if (!preflight.ok) return;
   await sweepRunIdFolder(bucket, tenantIds, adminClient);
 }
 
