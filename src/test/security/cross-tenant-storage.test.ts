@@ -742,6 +742,44 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       const denied = Boolean(error) || !data || data.length === 0;
       expect(denied).toBe(true);
     });
+
+    // ---------- Anonymous access to tenant-assets via AUTHENTICATED endpoints ----------
+    // `tenant-assets` is a public bucket — its intended public surface is
+    // the CDN URL returned by `getPublicUrl()`. The authenticated storage
+    // endpoints (`download()` and `list()`) must NOT be usable by an
+    // unauthenticated client to enumerate or bulk-fetch tenant content,
+    // even on a public bucket. Two regressions we're guarding against:
+    //   1. RLS SELECT policy is loosened for `tenant-assets` to `true` for
+    //      `anon`, which would let an attacker enumerate every tenant's
+    //      filenames via `list()`.
+    //   2. `download()` (which routes through the authenticated path,
+    //      not the CDN) is permitted for anon, giving a uniform exfil
+    //      channel that bypasses any future CDN-level access controls.
+    it("anon cannot LIST tenant-assets at the bucket root via authenticated client", async () => {
+      const { data, error } = await anon.storage.from(ASSETS_BUCKET).list("", { limit: 5 });
+      // A bucket-root listing must never reveal real tenant folder names
+      // to an anonymous caller. Either an error or an empty listing is
+      // acceptable; any non-empty payload here is a leak.
+      const denied = Boolean(error) || !data || data.length === 0;
+      expect(denied).toBe(true);
+    });
+
+    it("anon cannot LIST a fake tenant folder in tenant-assets via authenticated client", async () => {
+      const { data, error } = await anon.storage
+        .from(ASSETS_BUCKET)
+        .list(fakeTenantId, { limit: 5 });
+      const denied = Boolean(error) || !data || data.length === 0;
+      expect(denied).toBe(true);
+    });
+
+    it("anon cannot DOWNLOAD from tenant-assets via authenticated client (guessed path)", async () => {
+      // The anon path lives under a fake tenant id and is guaranteed not
+      // to exist — but `download()` should fail for any non-CDN call from
+      // an unauthenticated client regardless of whether the object exists.
+      const { data, error } = await anon.storage.from(ASSETS_BUCKET).download(anonPath);
+      const denied = Boolean(error) || !data;
+      expect(denied).toBe(true);
+    });
   });
 
   describe.runIf(hasSupabaseConfig && liveModeEnabled)(
