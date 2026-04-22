@@ -36,6 +36,7 @@ import CookieConsent from "./components/CookieConsent";
 import AccessibilityWidget from "./components/AccessibilityWidget";
 import { ImpersonationProvider } from "./contexts/ImpersonationContext";
 import SystemAdminRoute from "./components/SystemAdminRoute";
+import RequireTenant from "./components/RequireTenant";
 import { toast } from "sonner";
 
 const queryClient = new QueryClient();
