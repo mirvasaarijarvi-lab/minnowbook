@@ -38,6 +38,7 @@ import BetaFeedbackPanel from "@/components/dashboard/BetaFeedbackPanel";
 import SuperadminLoginHistory from "@/components/dashboard/SuperadminLoginHistory";
 import StripeRevenuePanel from "@/components/dashboard/StripeRevenuePanel";
 import TenantMembershipCheckPanel from "@/components/dashboard/TenantMembershipCheckPanel";
+import RlsManifestDebugPanel from "@/components/dashboard/RlsManifestDebugPanel";
 import NoTenantState from "@/components/NoTenantState";
 import { useTenant } from "@/hooks/useTenant";
 
