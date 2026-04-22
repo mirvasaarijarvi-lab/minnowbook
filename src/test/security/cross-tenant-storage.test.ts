@@ -2338,13 +2338,30 @@ describe("Cross-Tenant Storage RLS Tests", () => {
 
       afterAll(async () => {
         const clientFor = (key: "a" | "b") => (key === "a" ? clientA : clientB);
+
+        // Last-line preflight (see live-cross-tenant-flat block).
+        const preflightClients = {
+          [liveCreds.a.tenantId!]: { client: clientA, email: liveCreds.a.email },
+          [liveCreds.b.tenantId!]: { client: clientB, email: liveCreds.b.email },
+        };
+        const preflight = await cleanupPreflight({
+          tenantIds: [liveCreds.a.tenantId!, liveCreds.b.tenantId!],
+          clients: preflightClients,
+          scope: "live-cross-tenant-assets-isolation",
+        });
+        if (!preflight.ok) return;
+
         // seededAssets has no `bucket` field — it's all ASSETS_BUCKET. Map
         // to the shared shape so we get the same per-call timeout treatment.
         await teardownOwnedPaths(
           seededAssets.map((s) => ({ bucket: ASSETS_BUCKET, path: s.path, client: s.client })),
           clientFor,
         );
-        await sweepTestArtifacts(ASSETS_BUCKET, [liveCreds.a.tenantId!, liveCreds.b.tenantId!]);
+        await sweepTestArtifacts(
+          ASSETS_BUCKET,
+          [liveCreds.a.tenantId!, liveCreds.b.tenantId!],
+          { scope: "live-cross-tenant-assets-isolation:sweep", clients: preflightClients },
+        );
       });
 
       // ---------- Positive controls (own tenant) ----------
