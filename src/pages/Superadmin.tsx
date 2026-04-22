@@ -181,7 +181,11 @@ const Superadmin = () => {
     return <NoTenantState attemptedArea="superadmin" />;
   }
 
-  if (isSysAdmin === false) return <Navigate to="/dashboard" replace />;
+  // Note: routing-level system-admin enforcement happens in <SystemAdminRoute>
+  // before this component mounts. The `isSysAdmin` query here is kept as a
+  // defence-in-depth check and to gate data queries below; it should never
+  // resolve to `false` in practice because the route guard would have already
+  // rendered the 403 page.
 
   const filtered = (tenants ?? []).filter(
     (t) =>

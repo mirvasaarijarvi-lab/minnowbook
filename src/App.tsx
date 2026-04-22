@@ -35,6 +35,7 @@ import BetaGuide from "./pages/BetaGuide";
 import CookieConsent from "./components/CookieConsent";
 import AccessibilityWidget from "./components/AccessibilityWidget";
 import { ImpersonationProvider } from "./contexts/ImpersonationContext";
+import SystemAdminRoute from "./components/SystemAdminRoute";
 import { toast } from "sonner";
 
 const queryClient = new QueryClient();
@@ -143,7 +144,9 @@ const App = () => (
                 path="/superadmin"
                 element={
                   <ProtectedRoute>
-                    <Superadmin />
+                    <SystemAdminRoute attemptedArea="the Superadmin area">
+                      <Superadmin />
+                    </SystemAdminRoute>
                   </ProtectedRoute>
                 }
               />
