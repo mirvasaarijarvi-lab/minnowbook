@@ -182,7 +182,7 @@ const AdminPanel = () => {
       toast({ title: t("admin.userCreated") });
     },
     onError: (err: any) => {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      showError(err);
     },
   });
 
@@ -194,7 +194,7 @@ const AdminPanel = () => {
       toast({ title: t("admin.roleUpdated") });
     },
     onError: (err: any) => {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      showError(err);
     },
   });
 
@@ -207,7 +207,7 @@ const AdminPanel = () => {
       toast({ title: t("admin.siteAssignmentsUpdated") });
     },
     onError: (err: any) => {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      showError(err);
     },
   });
 
@@ -221,7 +221,7 @@ const AdminPanel = () => {
       toast({ title: t("admin.passwordChanged") });
     },
     onError: (err: any) => {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      showError(err);
     },
   });
 
@@ -232,7 +232,7 @@ const AdminPanel = () => {
       toast({ title: t("admin.userRemoved") });
     },
     onError: (err: any) => {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      showError(err);
     },
   });
 
