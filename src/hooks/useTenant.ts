@@ -1,9 +1,10 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useImpersonation } from "@/contexts/ImpersonationContext";
 import { toast } from "sonner";
+import { gtm } from "@/lib/gtm";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Tenant = Tables<"tenants">;
@@ -12,6 +13,8 @@ export const useTenant = () => {
   const { user } = useAuth();
   const { impersonating, isImpersonating } = useImpersonation();
   const queryClient = useQueryClient();
+  const lastTenantIdRef = useRef<string | null>(null);
+  const lossReasonRef = useRef<"membership_removed" | "unknown">("unknown");
 
   const { data: tenantUser, isLoading: loadingTenantUser } = useQuery({
     queryKey: ["tenant-user", user?.id],
@@ -47,6 +50,11 @@ export const useTenant = () => {
         },
         (payload) => {
           if (payload.eventType === "DELETE") {
+            // Mark the upcoming tenantId=null transition as caused by an
+            // explicit membership removal (vs. an unrelated query refresh)
+            // so the analytics event in the effect below can attribute it.
+            lossReasonRef.current = "membership_removed";
+
             // Flag the removal so /onboarding can show a persistent banner
             // explaining what happened (the toast alone is easy to miss).
             try {
@@ -85,6 +93,36 @@ export const useTenant = () => {
     },
     enabled: isImpersonating && !!impersonating.tenantId,
   });
+
+  // Track tenantId truthy → null transitions for analytics. We compare the
+  // resolved value against a ref so we only emit once per real loss event,
+  // and skip the initial mount (null → null) and impersonation sessions.
+  const resolvedTenantId = isImpersonating
+    ? impersonating.tenantId ?? null
+    : tenantUser?.tenant_id ?? null;
+
+  useEffect(() => {
+    if (loadingTenantUser) return;
+    if (isImpersonating) {
+      lastTenantIdRef.current = resolvedTenantId;
+      return;
+    }
+    const previous = lastTenantIdRef.current;
+    if (previous && !resolvedTenantId) {
+      try {
+        gtm.tenantLost({
+          reason: lossReasonRef.current,
+          user_id: user?.id ?? null,
+          previous_tenant_id: previous,
+          pathname: typeof window !== "undefined" ? window.location.pathname : undefined,
+        });
+      } catch {
+        // analytics push is best-effort
+      }
+      lossReasonRef.current = "unknown";
+    }
+    lastTenantIdRef.current = resolvedTenantId;
+  }, [resolvedTenantId, loadingTenantUser, isImpersonating, user?.id, impersonating.tenantId]);
 
   if (isImpersonating && impersonating.tenantId) {
     return {
