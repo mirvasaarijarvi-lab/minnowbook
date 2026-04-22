@@ -73,7 +73,7 @@ const Superadmin = () => {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [editTenant, setEditTenant] = useState<TenantWithStats | null>(null);
-  const [editForm, setEditForm] = useState({ name: "", tier: "", max_staff_users: 3, sample_start_date: "", sample_end_date: "", discount_percentage: 0, discount_reason: "" });
+  const [editForm, setEditForm] = useState({ name: "", tier: "", sample_start_date: "", sample_end_date: "", discount_percentage: 0, discount_reason: "" });
   const { startImpersonation, isImpersonating } = useImpersonation();
   const { tenantId, loading: tenantLoading } = useTenant();
 
