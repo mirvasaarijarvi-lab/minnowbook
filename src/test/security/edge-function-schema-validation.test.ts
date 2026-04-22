@@ -199,7 +199,7 @@ describe("Edge Function Schema Validation - support-chat", () => {
     ])("rejects non-object body: %s", (_label, body) => {
       const r = validateChatPayload(body);
       expect(r.ok).toBe(false);
-      if (!r.ok) expect(r.status).toBe(400);
+      if (r.ok === false) expect(r.status).toBe(400);
     });
 
     it("rejects body without messages key", () => {
