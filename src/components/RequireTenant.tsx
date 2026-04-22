@@ -61,11 +61,13 @@ const RequireTenant = ({ children, inline = false, attemptedArea = "generic" }: 
     if (hadTenantRef.current && !toastFiredRef.current) {
       toastFiredRef.current = true;
       toast.error("Your access to this organization has been removed.", {
-        description: "You've been redirected to setup to continue.",
+        description: inline
+          ? "Complete setup or contact support to continue."
+          : "You've been redirected to setup to continue.",
         duration: 8000,
       });
     }
-  }, [loading, tenantId, isImpersonating, location.pathname]);
+  }, [loading, tenantId, isImpersonating, location.pathname, inline]);
 
   if (loading) {
     return (
@@ -76,6 +78,11 @@ const RequireTenant = ({ children, inline = false, attemptedArea = "generic" }: 
   }
 
   if (!tenantId && !isImpersonating) {
+    if (inline) {
+      // Render the friendly screen on the attempted route so the user can
+      // return here after completing setup. No protected children mount.
+      return <NoTenantState attemptedArea={attemptedArea} />;
+    }
     return <Navigate to="/onboarding" replace state={{ from: location.pathname }} />;
   }
 
