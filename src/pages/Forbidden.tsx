@@ -74,6 +74,38 @@ const Forbidden = ({
     };
   }, [attemptedArea]);
 
+  // Persist the denial to the audit_log so tenant owners and system admins
+  // can review forbidden-access attempts. The edge function resolves the
+  // caller's user id from their JWT and writes user_id + timestamp + the
+  // attempted area. Fire-and-forget; we don't surface failures to the UI.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        // Skip silently if there's no session — Forbidden is normally only
+        // reached behind <ProtectedRoute>, but defensively guard anyway so
+        // we never fire an unauthenticated audit beacon.
+        const { data: sessionData } = await supabase.auth.getSession();
+        if (cancelled || !sessionData?.session) return;
+        await supabase.functions.invoke("log-forbidden-access", {
+          method: "POST",
+          body: {
+            attemptedArea,
+            attemptedPath:
+              typeof window !== "undefined"
+                ? window.location.pathname + window.location.search
+                : null,
+          },
+        });
+      } catch {
+        // Audit logging is best-effort — never block the user experience.
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [attemptedArea]);
+
   // Set title + status + noindex meta. The Status meta is the closest the
   // browser can come to a real status code on a static document.
   useEffect(() => {
