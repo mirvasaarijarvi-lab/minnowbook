@@ -237,8 +237,12 @@ suite(
     let userId: string;
     let tenantId: string;
     let token: string;
-    /** All seeded code IDs — afterAll cleans them up. */
-    const seededCodeIds: string[] = [];
+    /**
+     * Cleanup tracker — see `fixtures/access-code-cleanup.ts` for the
+     * three-layer recovery contract (per-test cleanup + pre-flight sweep
+     * by description tag + post-suite belt-and-suspenders sweep).
+     */
+    let tracker: AccessCodeTracker;
 
     beforeAll(async () => {
       admin = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!, {
@@ -248,6 +252,17 @@ suite(
       const fixture = await ensureFixtureUser(admin);
       userId = fixture.userId;
       tenantId = fixture.tenantId;
+
+      tracker = createAccessCodeTracker({
+        admin,
+        descriptionTag: DESCRIPTION_TAG,
+        fixtureUserId: userId,
+        fixtureTenantId: tenantId,
+      });
+
+      // PRE-FLIGHT SWEEP: erase any access codes + ledger rows left
+      // behind by a previous run that crashed before reaching afterAll.
+      await tracker.sweepStaleRows();
 
       // Reset tenant tier so we can verify the redemption side-effect cleanly.
       await admin
@@ -259,17 +274,23 @@ suite(
         })
         .eq("id", tenantId);
 
-      // Wipe any stale ledger rows from prior runs of this fixture.
-      await admin.from("access_code_redemptions").delete().eq("tenant_id", tenantId);
-
       token = await signInAndGetToken();
     }, 60_000);
 
+    // Per-test cleanup ensures stale rows never leak between `it()` blocks
+    // even if a test throws partway through its assertions.
+    afterEach(async () => {
+      if (!tracker) return;
+      await tracker.cleanupTracked();
+    }, 30_000);
+
     afterAll(async () => {
       if (!admin) return;
-      for (const id of seededCodeIds) {
-        await admin.from("access_code_redemptions").delete().eq("access_code_id", id);
-        await admin.from("access_codes").delete().eq("id", id);
+      if (tracker) {
+        // Run cleanupTracked first (fast, exact) then sweepStaleRows
+        // (slow, broad) so even a forgotten `register()` is recovered.
+        await tracker.cleanupTracked();
+        await tracker.sweepStaleRows();
       }
       if (tenantId) {
         await admin
