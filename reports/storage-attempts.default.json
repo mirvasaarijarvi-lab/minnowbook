@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-04-22T14:24:18.886Z",
+  "generatedAt": "2026-04-22T14:31:17.457Z",
   "flavor": "default",
-  "runId": "1776867778690-by5dsz",
+  "runId": "1776868197282-se6ppl",
   "tenants": {
     "a": null,
     "b": null
@@ -26,8 +26,10 @@
       "expected": "denied",
       "outcome": "denied",
       "errorMessage": "network-timeout",
+      "httpStatus": null,
+      "errorCode": "Error",
       "scenario": "adversarial:double-slash",
-      "recordedAt": "2026-04-22T14:23:02.749Z"
+      "recordedAt": "2026-04-22T14:30:01.346Z"
     },
     {
       "kind": "upload",
@@ -38,8 +40,10 @@
       "expected": "denied",
       "outcome": "denied",
       "errorMessage": "network-timeout",
+      "httpStatus": null,
+      "errorCode": "Error",
       "scenario": "adversarial:leading-slash",
-      "recordedAt": "2026-04-22T14:23:06.753Z"
+      "recordedAt": "2026-04-22T14:30:05.351Z"
     },
     {
       "kind": "upload",
@@ -50,8 +54,10 @@
       "expected": "denied",
       "outcome": "denied",
       "errorMessage": "network-timeout",
+      "httpStatus": null,
+      "errorCode": "Error",
       "scenario": "adversarial:trailing-slash",
-      "recordedAt": "2026-04-22T14:23:10.755Z"
+      "recordedAt": "2026-04-22T14:30:09.353Z"
     },
     {
       "kind": "upload",
@@ -62,8 +68,10 @@
       "expected": "denied",
       "outcome": "denied",
       "errorMessage": "network-timeout",
+      "httpStatus": null,
+      "errorCode": "Error",
       "scenario": "adversarial:dot-segment-traversal",
-      "recordedAt": "2026-04-22T14:23:14.760Z"
+      "recordedAt": "2026-04-22T14:30:13.356Z"
     },
     {
       "kind": "upload",
@@ -74,8 +82,10 @@
       "expected": "denied",
       "outcome": "denied",
       "errorMessage": "network-timeout",
+      "httpStatus": null,
+      "errorCode": "Error",
       "scenario": "adversarial:url-encoded-slash",
-      "recordedAt": "2026-04-22T14:23:18.762Z"
+      "recordedAt": "2026-04-22T14:30:17.358Z"
     },
     {
       "kind": "upload",
@@ -86,8 +96,10 @@
       "expected": "denied",
       "outcome": "denied",
       "errorMessage": "network-timeout",
+      "httpStatus": null,
+      "errorCode": "Error",
       "scenario": "adversarial:url-encoded-tenant-wrappers",
-      "recordedAt": "2026-04-22T14:23:22.764Z"
+      "recordedAt": "2026-04-22T14:30:21.360Z"
     },
     {
       "kind": "upload",
@@ -98,8 +110,10 @@
       "expected": "denied",
       "outcome": "denied",
       "errorMessage": "network-timeout",
+      "httpStatus": null,
+      "errorCode": "Error",
       "scenario": "adversarial:backslash-separators",
-      "recordedAt": "2026-04-22T14:23:26.767Z"
+      "recordedAt": "2026-04-22T14:30:25.362Z"
     },
     {
       "kind": "upload",
@@ -110,8 +124,10 @@
       "expected": "denied",
       "outcome": "denied",
       "errorMessage": "Bad Request",
+      "httpStatus": 400,
+      "errorCode": "StorageApiError",
       "scenario": "adversarial:null-byte-truncation",
-      "recordedAt": "2026-04-22T14:23:26.816Z"
+      "recordedAt": "2026-04-22T14:30:25.400Z"
     },
     {
       "kind": "upload",
@@ -122,8 +138,10 @@
       "expected": "denied",
       "outcome": "denied",
       "errorMessage": "network-timeout",
+      "httpStatus": null,
+      "errorCode": "Error",
       "scenario": "adversarial:double-encoded-slash",
-      "recordedAt": "2026-04-22T14:23:30.818Z"
+      "recordedAt": "2026-04-22T14:30:29.403Z"
     },
     {
       "kind": "upload",
@@ -134,8 +152,10 @@
       "expected": "denied",
       "outcome": "denied",
       "errorMessage": "network-timeout",
+      "httpStatus": null,
+      "errorCode": "Error",
       "scenario": "adversarial:url-encoded-dot-dot",
-      "recordedAt": "2026-04-22T14:23:34.820Z"
+      "recordedAt": "2026-04-22T14:30:33.405Z"
     },
     {
       "kind": "upload",
@@ -146,8 +166,10 @@
       "expected": "denied",
       "outcome": "denied",
       "errorMessage": "network-timeout",
+      "httpStatus": null,
+      "errorCode": "Error",
       "scenario": "adversarial:url-encoded-slash-plus-dot-dot",
-      "recordedAt": "2026-04-22T14:23:38.823Z"
+      "recordedAt": "2026-04-22T14:30:37.407Z"
     },
     {
       "kind": "upload",
@@ -158,8 +180,10 @@
       "expected": "denied",
       "outcome": "denied",
       "errorMessage": "network-timeout",
+      "httpStatus": null,
+      "errorCode": "Error",
       "scenario": "adversarial:double-slash",
-      "recordedAt": "2026-04-22T14:23:42.825Z"
+      "recordedAt": "2026-04-22T14:30:41.408Z"
     },
     {
       "kind": "upload",
@@ -170,8 +194,10 @@
       "expected": "denied",
       "outcome": "denied",
       "errorMessage": "network-timeout",
+      "httpStatus": null,
+      "errorCode": "Error",
       "scenario": "adversarial:leading-slash",
-      "recordedAt": "2026-04-22T14:23:46.826Z"
+      "recordedAt": "2026-04-22T14:30:45.410Z"
     },
     {
       "kind": "upload",
@@ -182,8 +208,10 @@
       "expected": "denied",
       "outcome": "denied",
       "errorMessage": "network-timeout",
+      "httpStatus": null,
+      "errorCode": "Error",
       "scenario": "adversarial:trailing-slash",
-      "recordedAt": "2026-04-22T14:23:50.837Z"
+      "recordedAt": "2026-04-22T14:30:49.412Z"
     },
     {
       "kind": "upload",
@@ -194,8 +222,10 @@
       "expected": "denied",
       "outcome": "denied",
       "errorMessage": "network-timeout",
+      "httpStatus": null,
+      "errorCode": "Error",
       "scenario": "adversarial:dot-segment-traversal",
-      "recordedAt": "2026-04-22T14:23:54.838Z"
+      "recordedAt": "2026-04-22T14:30:53.414Z"
     },
     {
       "kind": "upload",
@@ -206,8 +236,10 @@
       "expected": "denied",
       "outcome": "denied",
       "errorMessage": "network-timeout",
+      "httpStatus": null,
+      "errorCode": "Error",
       "scenario": "adversarial:url-encoded-slash",
-      "recordedAt": "2026-04-22T14:23:58.840Z"
+      "recordedAt": "2026-04-22T14:30:57.415Z"
     },
     {
       "kind": "upload",
@@ -218,8 +250,10 @@
       "expected": "denied",
       "outcome": "denied",
       "errorMessage": "network-timeout",
+      "httpStatus": null,
+      "errorCode": "Error",
       "scenario": "adversarial:url-encoded-tenant-wrappers",
-      "recordedAt": "2026-04-22T14:24:02.843Z"
+      "recordedAt": "2026-04-22T14:31:01.416Z"
     },
     {
       "kind": "upload",
@@ -230,8 +264,10 @@
       "expected": "denied",
       "outcome": "denied",
       "errorMessage": "network-timeout",
+      "httpStatus": null,
+      "errorCode": "Error",
       "scenario": "adversarial:backslash-separators",
-      "recordedAt": "2026-04-22T14:24:06.843Z"
+      "recordedAt": "2026-04-22T14:31:05.418Z"
     },
     {
       "kind": "upload",
@@ -242,8 +278,10 @@
       "expected": "denied",
       "outcome": "denied",
       "errorMessage": "Bad Request",
+      "httpStatus": 400,
+      "errorCode": "StorageApiError",
       "scenario": "adversarial:null-byte-truncation",
-      "recordedAt": "2026-04-22T14:24:06.871Z"
+      "recordedAt": "2026-04-22T14:31:05.448Z"
     },
     {
       "kind": "upload",
@@ -254,8 +292,10 @@
       "expected": "denied",
       "outcome": "denied",
       "errorMessage": "network-timeout",
+      "httpStatus": null,
+      "errorCode": "Error",
       "scenario": "adversarial:double-encoded-slash",
-      "recordedAt": "2026-04-22T14:24:10.871Z"
+      "recordedAt": "2026-04-22T14:31:09.449Z"
     },
     {
       "kind": "upload",
@@ -266,8 +306,10 @@
       "expected": "denied",
       "outcome": "denied",
       "errorMessage": "network-timeout",
+      "httpStatus": null,
+      "errorCode": "Error",
       "scenario": "adversarial:url-encoded-dot-dot",
-      "recordedAt": "2026-04-22T14:24:14.873Z"
+      "recordedAt": "2026-04-22T14:31:13.452Z"
     },
     {
       "kind": "upload",
@@ -278,8 +320,10 @@
       "expected": "denied",
       "outcome": "denied",
       "errorMessage": "network-timeout",
+      "httpStatus": null,
+      "errorCode": "Error",
       "scenario": "adversarial:url-encoded-slash-plus-dot-dot",
-      "recordedAt": "2026-04-22T14:24:18.878Z"
+      "recordedAt": "2026-04-22T14:31:17.455Z"
     }
   ],
   "cleanups": []

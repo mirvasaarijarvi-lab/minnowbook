@@ -38,6 +38,21 @@ export interface UploadAttemptRecord {
   outcome: "denied" | "allowed" | "error";
   /** First line of the SDK error, if any. Truncated to keep the PDF readable. */
   errorMessage: string | null;
+  /**
+   * HTTP status code returned by storage, when the SDK exposed it. Captured
+   * so the PDF can show *why* a request was denied (401/403/404/timeout) and
+   * spot regressions where a previously 4xx-rejected attempt starts coming
+   * back as 2xx (the textbook RLS-bypass signature). null = no status was
+   * available (e.g. our own client-side network-timeout race won).
+   */
+  httpStatus: number | null;
+  /**
+   * Supabase / PostgREST error code (`error.code` or `error.error`), if the
+   * SDK populated one. Examples: "PGRST116", "Unauthorized", "NotFound".
+   * Distinct from `errorMessage` (free text) — these are stable identifiers
+   * that diff cleanly across runs.
+   */
+  errorCode: string | null;
   /** ISO timestamp for ordering. */
   recordedAt: string;
   /** Free-form scenario label — e.g. "nested:documents/2026/invoices". */
@@ -62,6 +77,10 @@ export interface CleanupRecord {
   removed: boolean;
   /** Optional human-readable note (e.g. "no orphans found", "table missing"). */
   note?: string;
+  /** HTTP status from the underlying DELETE/list call, when the SDK exposed it. */
+  httpStatus?: number | null;
+  /** Supabase / PostgREST error code on the failing call, when present. */
+  errorCode?: string | null;
   recordedAt: string;
 }
 
@@ -117,9 +136,13 @@ function truncateError(msg: unknown): string | null {
   return firstLine.length > 240 ? firstLine.slice(0, 237) + "…" : firstLine;
 }
 
-export function recordUpload(rec: Omit<UploadAttemptRecord, "kind" | "recordedAt"> & {
-  errorMessage?: unknown;
-}) {
+export function recordUpload(
+  rec: Omit<UploadAttemptRecord, "kind" | "recordedAt" | "httpStatus" | "errorCode"> & {
+    errorMessage?: unknown;
+    httpStatus?: number | null;
+    errorCode?: string | null;
+  },
+) {
   uploads.push({
     kind: "upload",
     bucket: rec.bucket,
@@ -129,6 +152,8 @@ export function recordUpload(rec: Omit<UploadAttemptRecord, "kind" | "recordedAt
     expected: rec.expected,
     outcome: rec.outcome,
     errorMessage: truncateError(rec.errorMessage),
+    httpStatus: rec.httpStatus ?? null,
+    errorCode: rec.errorCode ?? null,
     scenario: rec.scenario,
     recordedAt: new Date().toISOString(),
   });
@@ -137,8 +162,56 @@ export function recordUpload(rec: Omit<UploadAttemptRecord, "kind" | "recordedAt
 export function recordCleanup(rec: Omit<CleanupRecord, "recordedAt">) {
   cleanups.push({
     ...rec,
+    httpStatus: rec.httpStatus ?? null,
+    errorCode: rec.errorCode ?? null,
     recordedAt: new Date().toISOString(),
   });
+}
+
+/**
+ * Pull HTTP status + Supabase error code out of a Supabase storage SDK
+ * response shape. The SDK returns errors in a few different shapes
+ * depending on transport (StorageApiError, StorageUnknownError, plain
+ * Error from our timeout race, etc.), so we defensively probe each one.
+ *
+ * Exported so the test suite can pass results through it before calling
+ * `recordUpload` / `recordCleanup` and stay in sync with the ledger
+ * schema as it evolves.
+ */
+export function extractStorageError(result: unknown): {
+  httpStatus: number | null;
+  errorCode: string | null;
+} {
+  if (!result || typeof result !== "object") {
+    return { httpStatus: null, errorCode: null };
+  }
+  const r = result as Record<string, unknown>;
+  // Some SDK responses wrap the error: { error: { ... }, data: ... }.
+  const err = (r.error ?? r) as Record<string, unknown> | null;
+  if (!err || typeof err !== "object") {
+    return { httpStatus: null, errorCode: null };
+  }
+  const rawStatus =
+    (err as { status?: unknown }).status ??
+    (err as { statusCode?: unknown }).statusCode ??
+    (err as { httpStatus?: unknown }).httpStatus;
+  const status =
+    typeof rawStatus === "number"
+      ? rawStatus
+      : typeof rawStatus === "string" && /^\d+$/.test(rawStatus)
+        ? Number(rawStatus)
+        : null;
+  // PostgREST surfaces `code`; storage REST sometimes uses `error` (e.g.
+  // "Unauthorized") as a string discriminator. Both are useful identifiers.
+  const codeCandidate =
+    (err as { code?: unknown }).code ??
+    (err as { error?: unknown }).error ??
+    (err as { name?: unknown }).name;
+  const code =
+    typeof codeCandidate === "string" && codeCandidate.trim().length > 0
+      ? codeCandidate.trim().slice(0, 60)
+      : null;
+  return { httpStatus: status, errorCode: code };
 }
 
 function summarize(): LedgerSummary {
