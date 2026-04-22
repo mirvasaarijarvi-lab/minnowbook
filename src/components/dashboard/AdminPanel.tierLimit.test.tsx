@@ -251,7 +251,9 @@ describe("AdminPanel: tier-limit enforcement (Basic = 5 staff users)", () => {
 
     render(
       <QueryClientProvider client={client}>
-        <AdminPanel />
+        <TooltipProvider>
+          <AdminPanel />
+        </TooltipProvider>
         <ToastSpy onUpdate={(t) => (lastToasts = t)} />
       </QueryClientProvider>,
     );
