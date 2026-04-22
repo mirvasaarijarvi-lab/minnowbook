@@ -1955,6 +1955,37 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       // foreign folder, so denial is still required.
       path: `${victimTenantId}/docs%00/file.txt`,
     },
+    // ----- Mixed / multi-pass encoding variants -----
+    // These probe layered decoders: a server that decodes ONCE will see a
+    // benign-looking `%2F` literal, but a server that decodes TWICE (e.g.
+    // a proxy + the storage layer) will resolve back to a real `/` and a
+    // foreign tenant prefix could materialise. RLS must reject all three
+    // without ever calling the decoder twice.
+    {
+      label: "double-encoded-slash",
+      // `%252F` → `%2F` after one decode → `/` after two. Anchored in a
+      // fake own-tenant prefix so the only "exit" out of our namespace is
+      // the encoded traversal segment.
+      path: `00000000-0000-0000-0000-000000000000%252F..%252F${victimTenantId}/file.txt`,
+    },
+    {
+      label: "url-encoded-dot-dot",
+      // `%2e%2e` → `..` after one decode. Used WITHOUT an encoded slash so
+      // the dot-segment is the only canonicalisation needed to escape the
+      // attacker's prefix; if normalisation runs after the policy check,
+      // the request reaches the victim's folder.
+      path: `00000000-0000-0000-0000-000000000000/%2e%2e/${victimTenantId}/file.txt`,
+    },
+    {
+      label: "url-encoded-slash-plus-dot-dot",
+      // `%2f%2e%2e` → `/..` after one decode. Combines the two tricks:
+      // the encoded slash hides the segment boundary, the encoded
+      // dot-dot hides the escape. A naive single-pass URL-decode would
+      // produce `00000000-0000-…/../{victim}/file.txt` — exactly the
+      // shape we explicitly deny in the plain "dot-segment-traversal"
+      // case above, but with one extra decode hop in between.
+      path: `00000000-0000-0000-0000-000000000000%2f%2e%2e/${victimTenantId}/file.txt`,
+    },
   ];
 
   describe.runIf(hasSupabaseConfig)("Anonymous adversarial path normalization", () => {
