@@ -98,12 +98,11 @@ describe("edge-function transport-security header consistency", () => {
         source,
         `${fn}/index.ts is missing the Strict-Transport-Security header`,
       ).toMatch(/["']Strict-Transport-Security["']\s*:/);
-      const match = extractHeaderValue(source, "Strict-Transport-Security");
+      const value = (extractHeaderValue(source, "Strict-Transport-Security") ?? "").toLowerCase();
       expect(
-        match,
+        value,
         `${fn}/index.ts has a Strict-Transport-Security key without a string value`,
-      ).not.toBeNull();
-      const value = (match?.[1] ?? "").toLowerCase();
+      ).not.toBe("");
       const maxAgeMatch = value.match(/max-age=(\d+)/);
       expect(
         maxAgeMatch,
@@ -133,10 +132,7 @@ describe("edge-function transport-security header consistency", () => {
       // (default in many browsers; leaks full URL on http→https) and
       // unsafe-url (always leaks). strict-origin-when-cross-origin
       // and stricter values are accepted.
-      const match = source.match(
-        /["']Referrer-Policy["']\s*:\s*["']([^"']+)["']/,
-      );
-      const value = (match?.[1] ?? "").toLowerCase();
+      const value = (extractHeaderValue(source, "Referrer-Policy") ?? "").toLowerCase();
       const acceptable = [
         "no-referrer",
         "same-origin",
@@ -158,10 +154,7 @@ describe("edge-function transport-security header consistency", () => {
         source,
         `${fn}/index.ts is missing the Content-Security-Policy header`,
       ).toMatch(/["']Content-Security-Policy["']\s*:/);
-      const match = source.match(
-        /["']Content-Security-Policy["']\s*:\s*["']([^"']+)["']/,
-      );
-      const value = (match?.[1] ?? "").toLowerCase();
+      const value = (extractHeaderValue(source, "Content-Security-Policy") ?? "").toLowerCase();
       // For a JSON-only API surface there's no legitimate need to
       // load scripts, frames, or any sub-resource. The minimum bar
       // is `default-src 'none'` AND `frame-ancestors 'none'` so the
