@@ -5,6 +5,7 @@ import {
   createAccessCodeTracker,
   type AccessCodeTracker,
 } from "./fixtures/access-code-cleanup";
+import { assertRedeemFunctionReachable } from "./fixtures/redeem-preflight";
 
 /**
  * Stable, unique tag stamped into every seeded code's `description`.
