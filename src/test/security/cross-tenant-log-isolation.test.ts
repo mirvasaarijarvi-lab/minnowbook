@@ -33,12 +33,44 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
  * harness here — instead we lock down the wider surface anon could attack.
  */
 
+// Supabase URL: prefer the Vite-prefixed name (matches the app & .env),
+// fall back to the bare `SUPABASE_URL` that backends/CI commonly expose
+// alongside a service-role key.
 const SUPABASE_URL =
   (import.meta.env?.VITE_SUPABASE_URL as string | undefined) ??
-  process.env.VITE_SUPABASE_URL;
+  process.env.VITE_SUPABASE_URL ??
+  process.env.SUPABASE_URL;
+
+// Anon/publishable key resolution.
+//
+// These tests probe the *anon* attack surface — they MUST run with a
+// non-privileged JWT, otherwise RLS is bypassed and "no rows leaked"
+// becomes vacuously false. We accept four env-var spellings in the
+// following preference order so the suite runs in as many CI shapes
+// as possible without ever silently using service-role:
+//
+//   1. VITE_SUPABASE_PUBLISHABLE_KEY  (matches app .env / Vite)
+//   2. SUPABASE_PUBLISHABLE_KEY       (bare publishable key, common in CI)
+//   3. SUPABASE_ANON_KEY              (legacy bare-anon-key spelling)
+//   4. VITE_SUPABASE_ANON_KEY         (legacy Vite spelling)
+//
+// `SUPABASE_SERVICE_ROLE_KEY` is intentionally NOT a fallback for this
+// list — using it would defeat the test. It is, however, considered
+// at the workflow gate so a CI environment that only ships service
+// role can still surface a clear, loud skip with a precise reason.
 const SUPABASE_ANON_KEY =
   (import.meta.env?.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined) ??
-  process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+  process.env.VITE_SUPABASE_PUBLISHABLE_KEY ??
+  process.env.SUPABASE_PUBLISHABLE_KEY ??
+  process.env.SUPABASE_ANON_KEY ??
+  process.env.VITE_SUPABASE_ANON_KEY;
+
+// We additionally inspect (but never USE) the service-role key so the
+// skip reason can distinguish "no backend secrets at all" from "only
+// service-role available — please also set publishable/anon".
+const SUPABASE_SERVICE_ROLE_KEY =
+  process.env.SUPABASE_SERVICE_ROLE_KEY ??
+  process.env.VITE_SUPABASE_SERVICE_ROLE_KEY;
 
 // CI-safe gating: if the publishable Supabase env vars are missing (e.g. a
 // fork PR build, a contributor's local checkout without `.env`, or a CI
@@ -50,8 +82,20 @@ const SUPABASE_ANON_KEY =
 const liveModeAvailable = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
 
 function skipReason(): string {
-  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-    return "VITE_SUPABASE_URL / VITE_SUPABASE_PUBLISHABLE_KEY missing — skipping live cross-tenant log isolation suite";
+  if (!SUPABASE_URL && !SUPABASE_ANON_KEY && !SUPABASE_SERVICE_ROLE_KEY) {
+    return "No Supabase env vars present — skipping live cross-tenant log isolation suite";
+  }
+  if (!SUPABASE_URL) {
+    return "SUPABASE_URL / VITE_SUPABASE_URL missing — skipping live cross-tenant log isolation suite";
+  }
+  if (!SUPABASE_ANON_KEY && SUPABASE_SERVICE_ROLE_KEY) {
+    // Loud, specific skip: the operator wired up service-role but no
+    // anon/publishable key. We refuse to silently substitute service-
+    // role because it would bypass the very RLS we're testing.
+    return "Only SUPABASE_SERVICE_ROLE_KEY is set — anon/publishable key is required (these probes must NOT bypass RLS). Set VITE_SUPABASE_PUBLISHABLE_KEY (or SUPABASE_PUBLISHABLE_KEY / SUPABASE_ANON_KEY) to enable the live suite.";
+  }
+  if (!SUPABASE_ANON_KEY) {
+    return "SUPABASE anon/publishable key missing — skipping live cross-tenant log isolation suite";
   }
   return "ok";
 }
