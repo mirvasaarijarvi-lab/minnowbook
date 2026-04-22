@@ -2278,6 +2278,56 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         const denied = Boolean(error) || !data;
         expect(denied).toBe(true);
       });
+
+      // ---------- Anon vs. real seeded tenant-assets files ----------
+      // The anon-only describe above proves anon can't enumerate or
+      // download via authenticated endpoints when there's nothing real
+      // to find. These tests prove the same when there ARE real files
+      // (seeded above by tenants A and B), which is the more dangerous
+      // case: a regression that loosened the SELECT policy to allow anon
+      // would surface here as either a non-empty `list()` or a non-null
+      // `download()` payload pointing at a known seed file.
+      it("anon cannot LIST tenant A's tenant-assets folder via authenticated client", async () => {
+        const anonClient = newAnonClient();
+        const { data, error } = await anonClient.storage
+          .from(ASSETS_BUCKET)
+          .list(liveCreds.a.tenantId!, { limit: 50 });
+        const leaked =
+          Array.isArray(data) &&
+          data.some((entry) => entry.name && entry.name.includes("a-assets-isolation-seed"));
+        expect(leaked).toBe(false);
+        const denied = Boolean(error) || !data || data.length === 0;
+        expect(denied).toBe(true);
+      });
+
+      it("anon cannot LIST tenant B's tenant-assets per-run folder via authenticated client", async () => {
+        const anonClient = newAnonClient();
+        const { data, error } = await anonClient.storage
+          .from(ASSETS_BUCKET)
+          .list(runRootFor(liveCreds.b.tenantId!), { limit: 50 });
+        const leaked =
+          Array.isArray(data) &&
+          data.some((entry) => entry.name && entry.name.includes("b-assets-isolation-seed"));
+        expect(leaked).toBe(false);
+        const denied = Boolean(error) || !data || data.length === 0;
+        expect(denied).toBe(true);
+      });
+
+      it("anon cannot DOWNLOAD tenant A's seeded tenant-assets file via authenticated client", async () => {
+        const anonClient = newAnonClient();
+        const path = ownPath(liveCreds.a.tenantId!, "a-assets-isolation-seed");
+        const { data, error } = await anonClient.storage.from(ASSETS_BUCKET).download(path);
+        const denied = Boolean(error) || !data;
+        expect(denied).toBe(true);
+      });
+
+      it("anon cannot DOWNLOAD tenant B's seeded tenant-assets file via authenticated client", async () => {
+        const anonClient = newAnonClient();
+        const path = ownPath(liveCreds.b.tenantId!, "b-assets-isolation-seed");
+        const { data, error } = await anonClient.storage.from(ASSETS_BUCKET).download(path);
+        const denied = Boolean(error) || !data;
+        expect(denied).toBe(true);
+      });
     },
   );
 
