@@ -652,6 +652,9 @@ async function main() {
   let c: Cursor = { doc, page, y: PAGE_H - MARGIN, font, bold, mono };
 
   c = drawCover(c, payload);
+  // Leaks first — reviewers must not have to scroll past hundreds of
+  // expected-deny rows to find a real RLS bypass.
+  c = drawLeaksSection(c, payload);
   c = drawAttemptsSection(c, payload);
   c = drawCleanupSection(c, payload);
 
