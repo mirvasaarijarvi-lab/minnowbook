@@ -78,6 +78,14 @@ const AdminPanel = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const t = useT();
+  const formatTierError = useTierErrorMessage();
+  // Centralized error -> toast helper. Tier-limit errors get a friendly,
+  // localized message; everything else falls back to the raw server text.
+  const showError = (err: unknown) => {
+    const tierErr = formatTierError(err);
+    const description = tierErr ? tierErr.message : (err as { message?: string })?.message;
+    toast({ title: "Error", description, variant: "destructive" });
+  };
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
   const [siteDialogOpen, setSiteDialogOpen] = useState(false);
