@@ -86,8 +86,26 @@ async function callRedeem(code: string, withAuth: boolean) {
   return { status: res.status, body };
 }
 
+/**
+ * Stable error-code contract for redeem-access-code. Mirrors ERROR_CODES
+ * in supabase/functions/redeem-access-code/index.ts. Tests assert on
+ * these strings so renaming any of them is a detected breaking change.
+ */
+const KNOWN_ERROR_CODES = new Set([
+  "REQUEST_TOO_LARGE",
+  "NOT_AUTHENTICATED",
+  "INVALID_CODE_FORMAT",
+  "NO_WORKSPACE",
+  "INVALID_OR_UNAVAILABLE_CODE",
+  "INTERNAL_ERROR",
+]);
+
+function bodyCode(body: unknown): string {
+  return ((body as { code?: string } | null)?.code ?? "").toString();
+}
+
 describe("redeem-access-code — parallel calls never produce a duplicate success", () => {
-  it("10 concurrent redemptions of the same fake code: zero successes, all deterministic", async () => {
+  it("10 concurrent redemptions of the same fake code: zero successes, all deterministic codes", async () => {
     const PARALLEL = 10;
     const attempts = await Promise.all(
       Array.from({ length: PARALLEL }, () =>
@@ -109,19 +127,33 @@ describe("redeem-access-code — parallel calls never produce a duplicate succes
       `function must not 5xx under concurrency. Got: ${JSON.stringify(crashes)}`
     ).toBe(0);
 
-    // 3. Every response should be a structured JSON error, not a leak.
+    // 3. Every response should be a structured JSON error with a known code.
     for (const a of attempts) {
       expect(a.status, "every response must be a client error").toBeGreaterThanOrEqual(400);
       expect(a.status).toBeLessThan(500);
       expect(a.body, "response body must be a JSON object").toBeTypeOf("object");
       expect((a.body as { error?: string })?.error, "error field present").toBeTruthy();
+      const code = bodyCode(a.body);
+      expect(
+        KNOWN_ERROR_CODES.has(code),
+        `unknown / drifted error code under concurrency: ${code}`,
+      ).toBe(true);
     }
+
+    // 4. All parallel calls must converge on the SAME code — divergence
+    //    would indicate state leaking between requests.
+    const uniqueCodes = new Set(attempts.map((a) => bodyCode(a.body)));
+    expect(
+      uniqueCodes.size,
+      `parallel codes diverged: ${[...uniqueCodes].join(" | ")}`,
+    ).toBe(1);
   }, 30_000);
 
-  it("serial replay of the same redemption returns the same deterministic error", async () => {
-    // Replay the exact same request 5 times. The error must be stable —
-    // a regression where "first call says invalid, second call says already
-    // redeemed" would indicate state leaking between requests.
+  it("serial replay of the same redemption returns the same deterministic error and code", async () => {
+    // Replay the exact same request 5 times. Both the human message AND
+    // the machine code must be stable — a regression where "first call
+    // says invalid, second call says already redeemed" would indicate
+    // state leaking between requests.
     const REPLAYS = 5;
     const results = [];
     for (let i = 0; i < REPLAYS; i++) {
@@ -130,17 +162,24 @@ describe("redeem-access-code — parallel calls never produce a duplicate succes
 
     const firstStatus = results[0].status;
     const firstError = (results[0].body as { error?: string })?.error;
+    const firstCode = bodyCode(results[0].body);
+    expect(KNOWN_ERROR_CODES.has(firstCode), `unknown code: ${firstCode}`).toBe(true);
+
     for (const r of results) {
       expect(r.status, "status must be stable across replays").toBe(firstStatus);
       expect(
         (r.body as { error?: string })?.error,
         "error message must be stable across replays"
       ).toBe(firstError);
+      expect(
+        bodyCode(r.body),
+        "error code must be stable across replays",
+      ).toBe(firstCode);
     }
   }, 30_000);
 
-  it("anon (no Authorization header) is rejected before reaching code lookup", async () => {
-    // The function should reject with "Not authenticated" before doing any
+  it("anon (no Authorization header) is rejected with NOT_AUTHENTICATED before reaching code lookup", async () => {
+    // The function should reject with NOT_AUTHENTICATED before doing any
     // code lookup — proves that an attacker cannot use parallelism to
     // enumerate codes anonymously.
     const res = await callRedeem(FAKE_BUT_VALID_SHAPE, false);
@@ -148,9 +187,10 @@ describe("redeem-access-code — parallel calls never produce a duplicate succes
     expect(res.status).toBeLessThan(500);
     const err = (res.body as { error?: string })?.error ?? "";
     expect(err.toLowerCase()).toContain("authenticated");
+    expect(bodyCode(res.body)).toBe("NOT_AUTHENTICATED");
   });
 
-  it("malformed code is rejected without leaking lookup behaviour", async () => {
+  it("malformed code returns a known error code without leaking lookup behaviour", async () => {
     // Length-bounded validation runs server-side BEFORE the SECURITY DEFINER
     // RPC, so this should never produce a "code not found" response.
     const tooShort = await callRedeem("A", true);
@@ -159,8 +199,15 @@ describe("redeem-access-code — parallel calls never produce a duplicate succes
       expect(r.status).toBeGreaterThanOrEqual(400);
       expect(r.status).toBeLessThan(500);
       const err = (r.body as { error?: string })?.error ?? "";
-      // Either "Invalid access code format" or auth rejection — both are OK.
       expect(err.length, "error message present").toBeGreaterThan(0);
+      const code = bodyCode(r.body);
+      // Either NOT_AUTHENTICATED (auth runs first) or INVALID_CODE_FORMAT
+      // is acceptable — but it MUST be one of the known codes, never
+      // something that distinguishes "code exists" from "code malformed".
+      expect(
+        code === "NOT_AUTHENTICATED" || code === "INVALID_CODE_FORMAT",
+        `unexpected code for malformed input: ${code}`,
+      ).toBe(true);
     }
   }, 15_000);
 });
