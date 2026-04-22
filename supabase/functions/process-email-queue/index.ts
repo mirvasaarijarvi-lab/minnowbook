@@ -102,6 +102,7 @@ Deno.serve(async (req) => {
             recipient_email: payload.to,
             status: 'dlq',
             error_message: `TTL exceeded (${ttlMinutes[queue]} minutes)`,
+            tenant_id: payload.tenant_id ?? null,
           })
           const { error: ttlDlqError } = await supabase.rpc('move_to_dlq', {
             source_queue: queue,
@@ -124,6 +125,7 @@ Deno.serve(async (req) => {
           recipient_email: payload.to,
           status: 'dlq',
           error_message: `Max retries (${MAX_RETRIES}) exceeded`,
+          tenant_id: payload.tenant_id ?? null,
         })
         const { error: retryDlqError } = await supabase.rpc('move_to_dlq', {
           source_queue: queue,
@@ -208,6 +210,7 @@ Deno.serve(async (req) => {
           template_name: payload.label || queue,
           recipient_email: payload.to,
           status: 'sent',
+          tenant_id: payload.tenant_id ?? null,
         })
 
         // Delete from queue
@@ -235,6 +238,7 @@ Deno.serve(async (req) => {
           recipient_email: payload.to,
           status: 'failed',
           error_message: errorMsg.slice(0, 1000),
+          tenant_id: payload.tenant_id ?? null,
         })
 
         if (isRateLimited(error)) {
