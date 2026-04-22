@@ -30,7 +30,7 @@ function getCorsHeaders(req: Request): Record<string, string> {
 // --- Safe error messages (prevent schema leakage) ---
 // Implementation extracted to ./sanitize-error.ts so it can be unit-tested
 // without spinning up the full Deno server.
-import { sanitizeError } from "./sanitize-error.ts";
+import { buildErrorResponseBody, sanitizeError } from "./sanitize-error.ts";
 
 // --- Input validation helpers ---
 const MAX_EMAIL_LENGTH = 255;
