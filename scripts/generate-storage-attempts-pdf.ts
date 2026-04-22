@@ -300,6 +300,164 @@ function drawCover(c: Cursor, p: LedgerPayload): Cursor {
   return c;
 }
 
+// ---------- Unexpected Allowed Leaks ----------
+/**
+ * Highlights every cross-tenant attempt that was expected to be `denied`
+ * but actually got `allowed` — i.e. a real RLS leak. Drawn BEFORE the full
+ * attempts table so a reviewer opening the PDF sees the leaks first and
+ * doesn't have to scan hundreds of green rows to find the red ones.
+ *
+ * When there are zero leaks (the happy path), we still draw a small
+ * confirmation banner so the section's absence can't be confused with a
+ * generation bug.
+ */
+function drawLeaksSection(c: Cursor, p: LedgerPayload): Cursor {
+  const leaks = p.uploads.filter(
+    (u) => u.expected === "denied" && u.outcome === "allowed",
+  );
+
+  c = ensureSpace(c, 60);
+  drawText(c, "Unexpected Allowed Leaks", { size: 14, font: c.bold });
+  c.y -= 4;
+  drawText(
+    c,
+    "Cross-tenant attempts that should have been DENIED but were ALLOWED by storage RLS.",
+    { size: 9, color: C.muted, x: MARGIN },
+  );
+  c.y -= 10;
+  rule(c);
+  c.y -= 14;
+
+  if (leaks.length === 0) {
+    // Solid-green confirmation banner so absence ≠ bug.
+    const bannerH = 28;
+    c = ensureSpace(c, bannerH + 12);
+    c.page.drawRectangle({
+      x: MARGIN,
+      y: c.y - bannerH,
+      width: CONTENT_W,
+      height: bannerH,
+      color: C.okBg,
+      borderColor: C.ok,
+      borderWidth: 0.5,
+    });
+    c.page.drawText(
+      safe("✓ No unexpected leaks — every cross-tenant attempt was correctly denied."),
+      {
+        x: MARGIN + 10,
+        y: c.y - 18,
+        size: 10,
+        font: c.bold,
+        color: C.ok,
+      },
+    );
+    c.y -= bannerH + 14;
+    return c;
+  }
+
+  // Red callout banner with the leak count.
+  const bannerH = 28;
+  c = ensureSpace(c, bannerH + 12);
+  c.page.drawRectangle({
+    x: MARGIN,
+    y: c.y - bannerH,
+    width: CONTENT_W,
+    height: bannerH,
+    color: C.failBg,
+    borderColor: C.fail,
+    borderWidth: 0.5,
+  });
+  c.page.drawText(
+    safe(
+      `⚠ ${leaks.length} leak${leaks.length === 1 ? "" : "s"} detected — investigate immediately.`,
+    ),
+    {
+      x: MARGIN + 10,
+      y: c.y - 18,
+      size: 10,
+      font: c.bold,
+      color: C.fail,
+    },
+  );
+  c.y -= bannerH + 12;
+
+  // Detailed leak table — same column layout as the full attempts table
+  // but every row is implicitly a leak so we drop the Expected column and
+  // expand Path. Scenario name is shown when present (it pinpoints which
+  // upload-permutation succeeded, which is invaluable for triage).
+  const COLS = {
+    bucket: { x: 0, w: 72, label: "Bucket" },
+    actor: { x: 74, w: 72, label: "Actor → Owner" },
+    scenario: { x: 148, w: 110, label: "Scenario" },
+    path: { x: 260, w: CONTENT_W - 260, label: "Path" },
+  };
+
+  for (const k of Object.keys(COLS) as (keyof typeof COLS)[]) {
+    c.page.drawText(safe(COLS[k].label), {
+      x: MARGIN + COLS[k].x,
+      y: c.y - 8,
+      size: 8,
+      font: c.bold,
+      color: C.muted,
+    });
+  }
+  c.y -= 14;
+  rule(c);
+  c.y -= 4;
+
+  for (const leak of leaks) {
+    const errLine = leak.errorMessage ? 1 : 0;
+    const rowH = LINE_HEIGHT + errLine * (LINE_HEIGHT - 2) + ROW_PAD;
+    c = ensureSpace(c, rowH + 4);
+
+    // Solid red-tinted row so leaks remain visually loud even if the
+    // section is printed in greyscale (the bold red text still reads as
+    // "darker" than ok/muted).
+    c.page.drawRectangle({
+      x: MARGIN - 2,
+      y: c.y - rowH + 2,
+      width: CONTENT_W + 4,
+      height: rowH,
+      color: C.failBg,
+    });
+
+    const ownerStr = leak.owner ?? "—";
+    const cells: Array<[keyof typeof COLS, string, ReturnType<typeof rgb>, PDFFont, number]> = [
+      ["bucket", leak.bucket, C.fail, c.bold, 9],
+      ["actor", `${leak.attacker} → ${ownerStr}`, C.fail, c.bold, 9],
+      ["scenario", leak.scenario ?? "(default)", C.fail, c.font, 9],
+      ["path", ellipsise(safe(leak.path), c.mono, 8, COLS.path.w), C.fail, c.mono, 8],
+    ];
+
+    for (const [k, val, color, font, size] of cells) {
+      c.page.drawText(safe(val), {
+        x: MARGIN + COLS[k].x,
+        y: c.y - 9,
+        size,
+        font,
+        color,
+      });
+    }
+    c.y -= LINE_HEIGHT;
+
+    if (leak.errorMessage) {
+      const msg = ellipsise(`↳ ${leak.errorMessage}`, c.mono, 7.5, CONTENT_W - 8);
+      c.page.drawText(safe(msg), {
+        x: MARGIN + 8,
+        y: c.y - 8,
+        size: 7.5,
+        font: c.mono,
+        color: C.fail,
+      });
+      c.y -= LINE_HEIGHT - 2;
+    }
+    c.y -= ROW_PAD;
+  }
+
+  c.y -= 8;
+  return c;
+}
+
 // ---------- Upload attempts table ----------
 function drawAttemptsSection(c: Cursor, p: LedgerPayload): Cursor {
   c = ensureSpace(c, 40);
