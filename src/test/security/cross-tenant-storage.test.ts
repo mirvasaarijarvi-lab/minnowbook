@@ -116,6 +116,23 @@ const fileBytes = (label: string) =>
 const ownPath = (tenantId: string, label: string) =>
   `${tenantId}/__rls_test__/${RUN_ID}-${label}.txt`;
 
+/**
+ * Build a deeply-nested path under a tenant folder. Storage RLS policies
+ * usually pin only the FIRST path segment to the tenant id (via
+ * `storage.foldername(name)[1]`), so any extra subfolders should still be
+ * gated by the same check. These helpers simulate realistic app paths like
+ * `{tenant_id}/documents/2026/invoices/inv-001.pdf` and
+ * `{tenant_id}/uploads/avatars/user-123/profile.txt`.
+ */
+const nestedOwnPath = (tenantId: string, segments: string[], label: string) =>
+  `${tenantId}/${segments.join("/")}/${RUN_ID}-${label}.txt`;
+
+const NESTED_SCENARIOS: Array<{ name: string; segments: string[] }> = [
+  { name: "documents/2026/invoices", segments: ["documents", "2026", "invoices"] },
+  { name: "uploads/avatars/user-123", segments: ["uploads", "avatars", "user-123"] },
+  { name: "exports/q1/reports/pdf", segments: ["exports", "q1", "reports", "pdf"] },
+];
+
 describe("Cross-Tenant Storage RLS Tests", () => {
   describe.runIf(hasSupabaseConfig)("Anonymous client storage enforcement", () => {
     let anon: SupabaseClient;
