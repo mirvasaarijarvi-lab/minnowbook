@@ -448,7 +448,7 @@ const guideContent: Record<Language, GuideContent> = {
           features: [
             "1 reservation type (you choose)",
             "1 resource per type",
-            "1–3 staff users",
+            "Up to 5 staff users",
             "Branded booking page",
             "Default email templates",
             "AI chatbot support",

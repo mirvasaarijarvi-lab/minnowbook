@@ -28,6 +28,7 @@ import AuditLogPanel from "./AuditLogPanel";
 import PermissionsEditor from "./PermissionsEditor";
 import HealthCheckPanel from "./HealthCheckPanel";
 import EmailLogPanel from "./EmailLogPanel";
+import { getMaxStaffUsers } from "@/lib/tier-limits";
 
 interface SiteAssignment {
   id?: string;
@@ -227,8 +228,11 @@ const AdminPanel = () => {
   });
 
   const userList = (users as TenantUser[]) ?? [];
-  const maxStaff = tenant?.max_staff_users ?? 3;
-  const isAtStaffLimit = !isSystemAdmin && userList.length >= maxStaff;
+  // Staff user limit is now derived from the tenant's tier (enforced by
+  // the `enforce_staff_user_limit` DB trigger). Business tier = unlimited.
+  const tierMaxStaff = getMaxStaffUsers(tenant?.tier);
+  const isAtStaffLimit =
+    !isSystemAdmin && tierMaxStaff !== null && userList.length >= tierMaxStaff;
 
   const openSiteDialog = (user: TenantUser) => {
     setSelectedUserId(user.user_id);
@@ -299,9 +303,9 @@ const AdminPanel = () => {
                     <DialogTrigger asChild>
                       <Button size="sm" className="gap-1.5" disabled={isAtStaffLimit}>
                         {isAtStaffLimit ? (
-                          <><Lock className="h-4 w-4" /> {t("admin.addUser")} ({userList.length}/{maxStaff})</>
+                          <><Lock className="h-4 w-4" /> {t("admin.addUser")} ({userList.length}/{tierMaxStaff ?? "∞"})</>
                         ) : (
-                          <><Plus className="h-4 w-4" /> {t("admin.addUser")} ({userList.length}/{isSystemAdmin ? "∞" : maxStaff})</>
+                          <><Plus className="h-4 w-4" /> {t("admin.addUser")} ({userList.length}/{isSystemAdmin || tierMaxStaff === null ? "∞" : tierMaxStaff})</>
                         )}
                       </Button>
                     </DialogTrigger>

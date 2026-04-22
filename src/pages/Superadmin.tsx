@@ -51,7 +51,9 @@ interface TenantWithStats {
   subscription_status: string | null;
   stripe_customer_id: string | null;
   stripe_subscription_id: string | null;
-  max_staff_users: number;
+  // Note: `max_staff_users` was removed — staff limits are now derived
+  // from the tenant's tier via the backend `get_tier_max_staff_users`
+  // function and enforced by the `enforce_staff_user_limit` trigger.
   allowed_reservation_types: string[];
   created_at: string | null;
   owner_user_id: string;
@@ -71,7 +73,7 @@ const Superadmin = () => {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [editTenant, setEditTenant] = useState<TenantWithStats | null>(null);
-  const [editForm, setEditForm] = useState({ name: "", tier: "", max_staff_users: 3, sample_start_date: "", sample_end_date: "", discount_percentage: 0, discount_reason: "" });
+  const [editForm, setEditForm] = useState({ name: "", tier: "", sample_start_date: "", sample_end_date: "", discount_percentage: 0, discount_reason: "" });
   const { startImpersonation, isImpersonating } = useImpersonation();
   const { tenantId, loading: tenantLoading } = useTenant();
 
@@ -137,11 +139,11 @@ const Superadmin = () => {
 
   // Edit tenant
   const editMutation = useMutation({
-    mutationFn: async ({ id, name, tier, max_staff_users, sample_start_date, sample_end_date, discount_percentage, discount_reason }: { id: string; name: string; tier: string; max_staff_users: number; sample_start_date: string; sample_end_date: string; discount_percentage: number; discount_reason: string }) => {
+    mutationFn: async ({ id, name, tier, sample_start_date, sample_end_date, discount_percentage, discount_reason }: { id: string; name: string; tier: string; sample_start_date: string; sample_end_date: string; discount_percentage: number; discount_reason: string }) => {
       const { error } = await supabase
         .from("tenants")
         .update({
-          name, tier, max_staff_users,
+          name, tier,
           sample_start_date: sample_start_date || null,
           sample_end_date: sample_end_date || null,
           discount_percentage: discount_percentage || 0,
@@ -202,7 +204,6 @@ const Superadmin = () => {
     setEditForm({
       name: t.name,
       tier: t.tier,
-      max_staff_users: t.max_staff_users,
       sample_start_date: t.sample_start_date ?? "",
       sample_end_date: t.sample_end_date ?? "",
       discount_percentage: t.discount_percentage ?? 0,
@@ -493,14 +494,12 @@ const Superadmin = () => {
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-1">
               <Label>Max Staff Users</Label>
-              <Input
-                type="number"
-                min={1}
-                value={editForm.max_staff_users}
-                onChange={(e) => setEditForm((f) => ({ ...f, max_staff_users: parseInt(e.target.value) || 1 }))}
-              />
+              <p className="text-sm text-muted-foreground">
+                Determined by tier — Basic: 5, Pro: 25, Business: unlimited.
+                Enforced by the backend on new staff additions.
+              </p>
             </div>
             <Separator />
             <div className="space-y-1">
