@@ -235,6 +235,9 @@ const Forbidden = ({
         // and synthetic monitors via a stable data attribute.
         data-http-status="403"
         data-status-beacon={beaconStatus ?? "pending"}
+        // Stable, route-derived slug so monitors can group denials by area
+        // independently of the human-readable copy that appears on screen.
+        data-area-slug={resolvedSlug}
       >
         <div className="max-w-md w-full text-center space-y-6">
           <div className="mx-auto h-16 w-16 rounded-full bg-destructive/10 flex items-center justify-center">
