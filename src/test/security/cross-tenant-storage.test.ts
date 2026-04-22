@@ -116,6 +116,23 @@ const fileBytes = (label: string) =>
 const ownPath = (tenantId: string, label: string) =>
   `${tenantId}/__rls_test__/${RUN_ID}-${label}.txt`;
 
+/**
+ * Build a deeply-nested path under a tenant folder. Storage RLS policies
+ * usually pin only the FIRST path segment to the tenant id (via
+ * `storage.foldername(name)[1]`), so any extra subfolders should still be
+ * gated by the same check. These helpers simulate realistic app paths like
+ * `{tenant_id}/documents/2026/invoices/inv-001.pdf` and
+ * `{tenant_id}/uploads/avatars/user-123/profile.txt`.
+ */
+const nestedOwnPath = (tenantId: string, segments: string[], label: string) =>
+  `${tenantId}/${segments.join("/")}/${RUN_ID}-${label}.txt`;
+
+const NESTED_SCENARIOS: Array<{ name: string; segments: string[] }> = [
+  { name: "documents/2026/invoices", segments: ["documents", "2026", "invoices"] },
+  { name: "uploads/avatars/user-123", segments: ["uploads", "avatars", "user-123"] },
+  { name: "exports/q1/reports/pdf", segments: ["exports", "q1", "reports", "pdf"] },
+];
+
 describe("Cross-Tenant Storage RLS Tests", () => {
   describe.runIf(hasSupabaseConfig)("Anonymous client storage enforcement", () => {
     let anon: SupabaseClient;
@@ -446,7 +463,228 @@ describe("Cross-Tenant Storage RLS Tests", () => {
     },
   );
 
-  describe.skipIf(hasSupabaseConfig)("Skipped: missing Supabase config", () => {
+  // ============================================================
+  // Nested-path enforcement
+  // ------------------------------------------------------------
+  // Storage RLS policies typically gate access using the FIRST path
+  // segment (`storage.foldername(name)[1] = tenant_id`). These tests
+  // confirm that adding extra subfolders after the tenant id (e.g.
+  // `{tenant_id}/documents/2026/invoices/...`) does NOT bypass the
+  // policy — the first-segment check must still reject foreign tenants.
+  // ============================================================
+  describe.runIf(hasSupabaseConfig)("Anonymous client nested-path enforcement", () => {
+    let anon: SupabaseClient;
+    const fakeTenantId = "00000000-0000-0000-0000-000000000000";
+
+    beforeAll(() => {
+      anon = newAnonClient();
+    });
+
+    afterAll(async () => {
+      await sweepTestArtifacts(PRIVATE_BUCKET, [fakeTenantId]);
+      await sweepTestArtifacts(ASSETS_BUCKET, [fakeTenantId]);
+    });
+
+    for (const scenario of NESTED_SCENARIOS) {
+      it(
+        `anon cannot upload to nested path '${scenario.name}' in tenant-private`,
+        async () => {
+          const path = nestedOwnPath(fakeTenantId, scenario.segments, "anon-nested");
+          const result = await Promise.race([
+            anon.storage
+              .from(PRIVATE_BUCKET)
+              .upload(path, fileBytes(`anon-nested-${scenario.name}`), { upsert: true }),
+            new Promise<{ error: Error; data: null }>((resolve) =>
+              setTimeout(
+                () => resolve({ error: new Error("network-timeout"), data: null }),
+                4000,
+              ),
+            ),
+          ]);
+          expect(result.error).toBeTruthy();
+        },
+        15000,
+      );
+
+      it(
+        `anon cannot upload to nested path '${scenario.name}' in tenant-assets`,
+        async () => {
+          const path = nestedOwnPath(fakeTenantId, scenario.segments, "anon-nested-assets");
+          const result = await Promise.race([
+            anon.storage
+              .from(ASSETS_BUCKET)
+              .upload(path, fileBytes(`anon-nested-assets-${scenario.name}`), { upsert: true }),
+            new Promise<{ error: Error; data: null }>((resolve) =>
+              setTimeout(
+                () => resolve({ error: new Error("network-timeout"), data: null }),
+                4000,
+              ),
+            ),
+          ]);
+          expect(result.error).toBeTruthy();
+        },
+        15000,
+      );
+
+      it(`anon cannot list nested folder '${scenario.name}' in tenant-private`, async () => {
+        const folder = `${fakeTenantId}/${scenario.segments.join("/")}`;
+        const { data, error } = await anon.storage
+          .from(PRIVATE_BUCKET)
+          .list(folder, { limit: 5 });
+        const denied = Boolean(error) || !data || data.length === 0;
+        expect(denied).toBe(true);
+      });
+    }
+  });
+
+  describe.runIf(hasSupabaseConfig && liveModeEnabled)(
+    "Live cross-tenant nested-path denial",
+    () => {
+      let clientA: SupabaseClient;
+      let clientB: SupabaseClient;
+
+      // Track every nested upload attempt — same dual-cleanup strategy as
+      // the flat-path live block: try removal as both attacker and owner so
+      // any leak (true RLS bypass OR write-to-own-folder bug) gets scrubbed.
+      const nestedAttempts: Array<{
+        bucket: string;
+        path: string;
+        attacker: "a" | "b";
+        owner: "a" | "b";
+      }> = [];
+
+      // Files we successfully created on our OWN tenant during sanity checks.
+      const ownNestedUploads: Array<{ bucket: string; path: string; client: "a" | "b" }> = [];
+
+      beforeAll(async () => {
+        clientA = newAnonClient();
+        clientB = newAnonClient();
+
+        const { error: signInAError } = await clientA.auth.signInWithPassword({
+          email: liveCreds.a.email!,
+          password: liveCreds.a.password!,
+        });
+        if (signInAError) throw new Error(`Tenant A sign-in failed: ${signInAError.message}`);
+
+        const { error: signInBError } = await clientB.auth.signInWithPassword({
+          email: liveCreds.b.email!,
+          password: liveCreds.b.password!,
+        });
+        if (signInBError) throw new Error(`Tenant B sign-in failed: ${signInBError.message}`);
+      });
+
+      afterAll(async () => {
+        const clientFor = (key: "a" | "b") => (key === "a" ? clientA : clientB);
+
+        for (const { bucket, path, client } of ownNestedUploads) {
+          try {
+            await clientFor(client).storage.from(bucket).remove([path]);
+          } catch {
+            /* ignore */
+          }
+        }
+
+        const seen = new Set<string>();
+        for (const { bucket, path, attacker, owner } of nestedAttempts) {
+          const key = `${bucket}::${path}`;
+          if (seen.has(key)) continue;
+          seen.add(key);
+          for (const role of [attacker, owner] as const) {
+            try {
+              await clientFor(role).storage.from(bucket).remove([path]);
+            } catch {
+              /* ignore */
+            }
+          }
+        }
+
+        await sweepTestArtifacts(PRIVATE_BUCKET, [liveCreds.a.tenantId!, liveCreds.b.tenantId!]);
+        await sweepTestArtifacts(ASSETS_BUCKET, [liveCreds.a.tenantId!, liveCreds.b.tenantId!]);
+      });
+
+      for (const scenario of NESTED_SCENARIOS) {
+        // ---- Sanity: own-tenant nested upload works ----
+        it(`user A CAN upload + read own nested path '${scenario.name}' (sanity)`, async () => {
+          const path = nestedOwnPath(liveCreds.a.tenantId!, scenario.segments, "a-own-nested");
+          const { error: upErr } = await clientA.storage
+            .from(PRIVATE_BUCKET)
+            .upload(path, fileBytes(`a-own-nested-${scenario.name}`), { upsert: true });
+          expect(upErr).toBeNull();
+          if (!upErr) ownNestedUploads.push({ bucket: PRIVATE_BUCKET, path, client: "a" });
+
+          const { data, error: dlErr } = await clientA.storage
+            .from(PRIVATE_BUCKET)
+            .download(path);
+          expect(dlErr).toBeNull();
+          expect(data).toBeTruthy();
+        });
+
+        // ---- Cross-tenant nested upload denial (private + assets) ----
+        it(`user A cannot UPLOAD to tenant B's nested '${scenario.name}' in tenant-private`, async () => {
+          const path = nestedOwnPath(liveCreds.b.tenantId!, scenario.segments, "a-cross-nested");
+          nestedAttempts.push({ bucket: PRIVATE_BUCKET, path, attacker: "a", owner: "b" });
+          const { error } = await clientA.storage
+            .from(PRIVATE_BUCKET)
+            .upload(path, fileBytes(`a-cross-nested-${scenario.name}`), { upsert: true });
+          expect(error).toBeTruthy();
+        });
+
+        it(`user B cannot UPLOAD to tenant A's nested '${scenario.name}' in tenant-private`, async () => {
+          const path = nestedOwnPath(liveCreds.a.tenantId!, scenario.segments, "b-cross-nested");
+          nestedAttempts.push({ bucket: PRIVATE_BUCKET, path, attacker: "b", owner: "a" });
+          const { error } = await clientB.storage
+            .from(PRIVATE_BUCKET)
+            .upload(path, fileBytes(`b-cross-nested-${scenario.name}`), { upsert: true });
+          expect(error).toBeTruthy();
+        });
+
+        it(`user A cannot UPLOAD to tenant B's nested '${scenario.name}' in tenant-assets`, async () => {
+          const path = nestedOwnPath(
+            liveCreds.b.tenantId!,
+            scenario.segments,
+            "a-cross-nested-assets",
+          );
+          nestedAttempts.push({ bucket: ASSETS_BUCKET, path, attacker: "a", owner: "b" });
+          const { error } = await clientA.storage
+            .from(ASSETS_BUCKET)
+            .upload(path, fileBytes(`a-cross-nested-assets-${scenario.name}`), { upsert: true });
+          expect(error).toBeTruthy();
+        });
+
+        // ---- Cross-tenant nested read/list/delete denial ----
+        it(`user B cannot DOWNLOAD tenant A's nested '${scenario.name}' file`, async () => {
+          const path = nestedOwnPath(liveCreds.a.tenantId!, scenario.segments, "a-own-nested");
+          const { data, error } = await clientB.storage.from(PRIVATE_BUCKET).download(path);
+          const denied = Boolean(error) || !data;
+          expect(denied).toBe(true);
+        });
+
+        it(`user B cannot LIST tenant A's nested folder '${scenario.name}'`, async () => {
+          const folder = `${liveCreds.a.tenantId!}/${scenario.segments.join("/")}`;
+          const { data, error } = await clientB.storage
+            .from(PRIVATE_BUCKET)
+            .list(folder, { limit: 5 });
+          const denied = Boolean(error) || !data || data.length === 0;
+          expect(denied).toBe(true);
+        });
+
+        it(`user B cannot DELETE tenant A's nested '${scenario.name}' file`, async () => {
+          const path = nestedOwnPath(liveCreds.a.tenantId!, scenario.segments, "a-own-nested");
+          const { data, error } = await clientB.storage.from(PRIVATE_BUCKET).remove([path]);
+          const denied = Boolean(error) || !data || data.length === 0;
+          expect(denied).toBe(true);
+
+          // File must still exist for the rightful owner.
+          const { data: stillThere } = await clientA.storage
+            .from(PRIVATE_BUCKET)
+            .download(path);
+          expect(stillThere).toBeTruthy();
+        });
+      }
+    },
+  );
+
+  describe.skipIf(hasSupabaseConfig)("Skipped: missing Supabase config", () => { 
     it("test environment is missing VITE_SUPABASE_URL / VITE_SUPABASE_PUBLISHABLE_KEY", () => {
       expect(true).toBe(true);
     });
