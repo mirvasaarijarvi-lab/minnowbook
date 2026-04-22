@@ -23,6 +23,40 @@ function getCorsHeaders(req: Request): Record<string, string> {
   };
 }
 
+/**
+ * Stable, machine-readable error codes for the redeem-access-code endpoint.
+ *
+ * IMPORTANT: These codes are part of the public contract. Do not rename
+ * existing values — only add new ones. Tests in
+ * src/test/security/code-redemption-*.test.ts assert on these strings.
+ *
+ * Note: distinguishing between "code does not exist" and "already redeemed"
+ * leaks information to attackers, so several different conditions
+ * intentionally collapse to the generic INVALID_OR_UNAVAILABLE_CODE.
+ */
+const ERROR_CODES = {
+  REQUEST_TOO_LARGE: "REQUEST_TOO_LARGE",
+  NOT_AUTHENTICATED: "NOT_AUTHENTICATED",
+  INVALID_CODE_FORMAT: "INVALID_CODE_FORMAT",
+  NO_WORKSPACE: "NO_WORKSPACE",
+  /** Generic — covers not-found / inactive / revoked / expired / over-quota / already-redeemed. */
+  INVALID_OR_UNAVAILABLE_CODE: "INVALID_OR_UNAVAILABLE_CODE",
+  INTERNAL_ERROR: "INTERNAL_ERROR",
+} as const;
+
+type ErrorCode = typeof ERROR_CODES[keyof typeof ERROR_CODES];
+
+function errorResponse(
+  corsHeaders: Record<string, string>,
+  status: number,
+  code: ErrorCode,
+  message: string,
+) {
+  return new Response(
+    JSON.stringify({ error: message, code }),
+    { status, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+  );
+}
 
 Deno.serve(async (req) => {
   const corsHeaders = getCorsHeaders(req);
@@ -35,10 +69,7 @@ Deno.serve(async (req) => {
     const MAX_BODY_SIZE = 50 * 1024;
     const contentLength = parseInt(req.headers.get("content-length") || "0", 10);
     if (contentLength > MAX_BODY_SIZE) {
-      return new Response(JSON.stringify({ error: "Request too large" }), {
-        status: 413,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return errorResponse(corsHeaders, 413, ERROR_CODES.REQUEST_TOO_LARGE, "Request too large");
     }
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
@@ -48,14 +79,18 @@ Deno.serve(async (req) => {
 
     // Authenticate the calling user
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader?.startsWith("Bearer ")) throw new Error("Not authenticated");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return errorResponse(corsHeaders, 401, ERROR_CODES.NOT_AUTHENTICATED, "Not authenticated");
+    }
 
     const userClient = createClient(supabaseUrl, anonKey, {
       global: { headers: { Authorization: authHeader } },
     });
     const token = authHeader.replace("Bearer ", "");
     const { data: claimsData, error: claimsError } = await userClient.auth.getClaims(token);
-    if (claimsError || !claimsData?.claims) throw new Error("Not authenticated");
+    if (claimsError || !claimsData?.claims) {
+      return errorResponse(corsHeaders, 401, ERROR_CODES.NOT_AUTHENTICATED, "Not authenticated");
+    }
 
     const userId = claimsData.claims.sub as string;
 
@@ -63,7 +98,7 @@ Deno.serve(async (req) => {
     const code = (body.code ?? "").trim().toUpperCase();
 
     if (!code || code.length < 3 || code.length > 50) {
-      throw new Error("Invalid access code format");
+      return errorResponse(corsHeaders, 400, ERROR_CODES.INVALID_CODE_FORMAT, "Invalid access code format");
     }
 
     // Get the user's tenant
@@ -74,7 +109,12 @@ Deno.serve(async (req) => {
       .maybeSingle();
 
     if (!tenantUser) {
-      throw new Error("You must have a workspace before redeeming a code. Complete onboarding first.");
+      return errorResponse(
+        corsHeaders,
+        400,
+        ERROR_CODES.NO_WORKSPACE,
+        "You must have a workspace before redeeming a code. Complete onboarding first.",
+      );
     }
 
     // Look up the access code by hash via SECURITY DEFINER RPC.
@@ -84,23 +124,36 @@ Deno.serve(async (req) => {
 
     if (codeError) throw codeError;
     const accessCode = Array.isArray(lookupRows) ? lookupRows[0] : lookupRows;
-    if (!accessCode) throw new Error("Invalid access code");
-    if (!accessCode.is_active) throw new Error("This access code is no longer active");
-    if (accessCode.is_revoked) throw new Error("This access code has been revoked");
+
+    // Generic "invalid or unavailable" — intentionally collapses several
+    // distinguishable conditions (not found, inactive, revoked, expired,
+    // out of uses, already redeemed) into one error so attackers cannot
+    // classify codes via the response.
+    const invalidOrUnavailable = () =>
+      errorResponse(
+        corsHeaders,
+        400,
+        ERROR_CODES.INVALID_OR_UNAVAILABLE_CODE,
+        "This access code is invalid or no longer available",
+      );
+
+    if (!accessCode) return invalidOrUnavailable();
+    if (!accessCode.is_active) return invalidOrUnavailable();
+    if (accessCode.is_revoked) return invalidOrUnavailable();
 
     // Check date validity
     const now = new Date();
     now.setHours(0, 0, 0, 0);
     if (accessCode.valid_from && new Date(accessCode.valid_from) > now) {
-      throw new Error("This access code is not yet valid");
+      return invalidOrUnavailable();
     }
     if (accessCode.valid_until && new Date(accessCode.valid_until) < now) {
-      throw new Error("This access code has expired");
+      return invalidOrUnavailable();
     }
 
     // Check usage limits
     if (accessCode.max_uses !== null && accessCode.used_count >= accessCode.max_uses) {
-      throw new Error("This access code has reached its maximum number of uses");
+      return invalidOrUnavailable();
     }
 
     // Check if this user already redeemed this code for their tenant
@@ -111,9 +164,7 @@ Deno.serve(async (req) => {
       .eq("tenant_id", tenantUser.tenant_id)
       .maybeSingle();
 
-    if (existing) {
-      throw new Error("This code has already been redeemed for your workspace");
-    }
+    if (existing) return invalidOrUnavailable();
 
     // Calculate granted_until
     const grantedUntil = new Date();
@@ -169,10 +220,9 @@ Deno.serve(async (req) => {
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
-  } catch (error: any) {
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Internal error";
+    console.error("redeem-access-code unexpected error:", message);
+    return errorResponse(corsHeaders, 500, ERROR_CODES.INTERNAL_ERROR, "Internal error");
   }
 });
