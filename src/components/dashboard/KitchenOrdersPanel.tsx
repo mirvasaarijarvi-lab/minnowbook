@@ -425,6 +425,14 @@ const KitchenOrdersPanel = () => {
                       ))}
                     </div>
                   )}
+                  {items.length > 0 && (
+                    <BulkStatusToolbar
+                      items={items}
+                      onBulk={(ids, status) => bulkUpdateStatus.mutate({ ids, status })}
+                      disabled={bulkUpdateStatus.isPending}
+                      t={t}
+                    />
+                  )}
                   <div className="flex flex-wrap gap-2 print:hidden">
                     <Button
                       variant="outline"
