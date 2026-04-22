@@ -157,6 +157,45 @@ Deno.serve(async (req) => {
       ? body.attemptedPath.slice(0, 500)
       : null;
 
+  // Throttle: short-circuit repeated beacons for the same (user, area)
+  // pair within the cooldown window. We do this BEFORE allocating the
+  // service-role client and resolving tenant membership so a flood of
+  // repeats stays cheap. Throttled responses still return 200 with a
+  // structured body so the dev indicator on the Forbidden page can
+  // surface the outcome — the audit trail just doesn't grow.
+  if (THROTTLE_SECONDS > 0) {
+    const now = Date.now();
+    const key = `${user.id}|${attemptedArea}`;
+    pruneThrottleCache(now);
+    const expiresAt = throttleCache.get(key);
+    if (expiresAt && expiresAt > now) {
+      const retryAfter = Math.max(1, Math.ceil((expiresAt - now) / 1000));
+      return new Response(
+        JSON.stringify({
+          logged: false,
+          reason: "rate_limited",
+          retryAfterSeconds: retryAfter,
+          userId: user.id,
+          at: new Date(now).toISOString(),
+        }),
+        {
+          status: 200,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+            "Cache-Control": "no-store",
+            // Standard hint so synthetic monitors / curl clients can see
+            // the throttle without parsing the body.
+            "Retry-After": String(retryAfter),
+          },
+        },
+      );
+    }
+    // Reserve the slot up-front. If the insert below fails we'll clear
+    // it so the next attempt isn't penalised for our error.
+    throttleCache.set(key, now + THROTTLE_SECONDS * 1000);
+  }
+
   // Best-effort request metadata. These are advisory only — do not gate
   // the insert on their presence.
   const userAgent = req.headers.get("user-agent")?.slice(0, 500) ?? null;
