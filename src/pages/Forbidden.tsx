@@ -156,6 +156,13 @@ const Forbidden = ({
     "logged" | "not_logged" | "skipped" | "error" | null
   >(null);
   const [auditReason, setAuditReason] = useState<string | null>(null);
+  // The edge function echoes back the JWT-resolved user_id and the
+  // server-set timestamp on success. Surfacing both in the DOM lets
+  // E2E tests, synthetic monitors, and the dev indicator confirm that
+  // the audit row was attributed and stamped server-side (never trusting
+  // any client-supplied id or clock).
+  const [auditUserId, setAuditUserId] = useState<string | null>(null);
+  const [auditAt, setAuditAt] = useState<string | null>(null);
 
   // Persist the denial to the audit_log so tenant owners and system admins
   // can review forbidden-access attempts. The edge function resolves the
