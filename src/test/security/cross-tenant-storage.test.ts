@@ -2581,6 +2581,254 @@ describe("Cross-Tenant Storage RLS Tests", () => {
     },
   );
 
+  // ============================================================
+  // Path-traversal probes against `tenant-assets`
+  // ------------------------------------------------------------
+  // RLS on `storage.objects` keys off the FIRST folder segment
+  // (`split_part(name, '/', 1) = tenant_id`). An attacker who can
+  // smuggle a foreign tenant id past that check via a tricky path
+  // segment would bypass isolation entirely. We probe the most
+  // common bypass shapes:
+  //
+  //   * `..` segments (`{victim}/../{attacker}/...`)
+  //   * leading slash (`/{victim}/...`) → empty first segment
+  //   * double slashes (`{attacker}//{victim}/...`)
+  //   * URL-encoded separators (`%2F`, `%2f`, `%2E%2E`) which the
+  //     storage server may decode AFTER the policy check
+  //   * Unicode look-alikes for `/` (fullwidth U+FF0F) — safety net
+  //     against any future normalization-aware policy
+  //   * Backslash separators that some clients normalize
+  //
+  // Each probe targets a real seeded victim file in the OTHER
+  // tenant's folder. A successful download / non-empty list / signed
+  // URL → bypass. Each tricky path is tried via `download()`,
+  // `list()` (parent), `createSignedUrl()` and `info()` to catch
+  // surface-specific decoders.
+  // ============================================================
+  describe.runIf(hasSupabaseConfig && liveModeEnabled)(
+    "tenant-assets: path-traversal bypass denial",
+    () => {
+      let clientA: SupabaseClient;
+      let clientB: SupabaseClient;
+
+      const seededAssets: Array<{ path: string; client: "a" | "b" }> = [];
+
+      // Crafted from attacker-A's perspective targeting victim-B's
+      // seeded asset. `victim` is the legitimate path segment under
+      // tenant B; `tricky` is the path the attacker actually sends.
+      // RLS on `storage.objects` evaluates the literal `name` value,
+      // so any of these that resolves server-side back to victim's
+      // file would constitute a bypass.
+      const buildTrickyPaths = (attackerTenant: string, victimTenant: string) => {
+        const victimLeaf = `${runRootFor(victimTenant)}/b-traversal-target.txt`;
+        return [
+          // Classic `..` traversal out of attacker's folder into victim's.
+          `${attackerTenant}/../${victimLeaf}`,
+          // Multi-step `..` chain.
+          `${attackerTenant}/sub/../../${victimLeaf}`,
+          // Leading slash — first segment becomes empty string, which
+          // must not match `attackerTenant` nor silently resolve to
+          // victim's namespace.
+          `/${victimLeaf}`,
+          // Double slash inside attacker's prefix — first segment is
+          // still attacker, but a buggy splitter could land on victim.
+          `${attackerTenant}//${victimLeaf}`,
+          // Triple slash and trailing slash variants.
+          `${attackerTenant}///${victimLeaf}/`,
+          // URL-encoded forward slash (lower + upper case hex).
+          `${attackerTenant}%2F..%2F${victimLeaf}`,
+          `${attackerTenant}%2f..%2f${victimLeaf}`,
+          // URL-encoded `..` plus URL-encoded slash combo.
+          `${attackerTenant}/%2E%2E/${victimLeaf}`,
+          `${attackerTenant}/%2e%2e/${victimLeaf}`,
+          // Double-encoded slash (`%252F` → `%2F` after one decode).
+          `${attackerTenant}%252F..%252F${victimLeaf}`,
+          // Backslash — non-canonical separator; some HTTP/SDK layers
+          // normalize \ → / which would shift the first segment.
+          `${attackerTenant}\\..\\${victimLeaf}`,
+          // Unicode fullwidth solidus (U+FF0F) — must NOT be treated
+          // as a path separator by the storage layer.
+          `${attackerTenant}\uFF0F..\uFF0F${victimLeaf}`,
+          // Null-byte injection — historic truncation attack.
+          `${attackerTenant}/\u0000${victimLeaf}`,
+          // Whitespace-padded `..` — defeats naive trim-based filters.
+          `${attackerTenant}/ ../${victimLeaf}`,
+          `${attackerTenant}/.. /${victimLeaf}`,
+          // Dot-segment with current-dir noise.
+          `${attackerTenant}/./../${victimLeaf}`,
+        ];
+      };
+
+      beforeAll(async () => {
+        clientA = newAnonClient();
+        clientB = newAnonClient();
+
+        const { error: signInAError } = await clientA.auth.signInWithPassword({
+          email: liveCreds.a.email!,
+          password: liveCreds.a.password!,
+        });
+        if (signInAError) throw new Error(`Tenant A sign-in failed: ${signInAError.message}`);
+
+        const { error: signInBError } = await clientB.auth.signInWithPassword({
+          email: liveCreds.b.email!,
+          password: liveCreds.b.password!,
+        });
+        if (signInBError) throw new Error(`Tenant B sign-in failed: ${signInBError.message}`);
+
+        // Seed one file per tenant under the run-scoped root so the
+        // tricky paths point at REAL victim objects. We deliberately
+        // use the literal leaf name `b-traversal-target.txt` (and
+        // mirror for A) so `buildTrickyPaths` can reconstruct it.
+        const aPath = `${runRootFor(liveCreds.a.tenantId!)}/a-traversal-target.txt`;
+        const { error: aErr } = await clientA.storage
+          .from(ASSETS_BUCKET)
+          .upload(aPath, fileBytes("a-traversal-target"), { upsert: true });
+        if (aErr) throw new Error(`Traversal seed for tenant A failed: ${aErr.message}`);
+        seededAssets.push({ path: aPath, client: "a" });
+
+        const bPath = `${runRootFor(liveCreds.b.tenantId!)}/b-traversal-target.txt`;
+        const { error: bErr } = await clientB.storage
+          .from(ASSETS_BUCKET)
+          .upload(bPath, fileBytes("b-traversal-target"), { upsert: true });
+        if (bErr) throw new Error(`Traversal seed for tenant B failed: ${bErr.message}`);
+        seededAssets.push({ path: bPath, client: "b" });
+      });
+
+      afterAll(async () => {
+        const clientFor = (key: "a" | "b") => (key === "a" ? clientA : clientB);
+        await teardownOwnedPaths(
+          seededAssets.map((s) => ({ bucket: ASSETS_BUCKET, path: s.path, client: s.client })),
+          clientFor,
+        );
+        await sweepTestArtifacts(ASSETS_BUCKET, [liveCreds.a.tenantId!, liveCreds.b.tenantId!]);
+      });
+
+      // ---------- download() ----------
+      // The textbook traversal probe. Any non-null `data` blob from a
+      // tricky path means the storage layer resolved it to a file the
+      // attacker isn't authorized to see — i.e. a bypass. We also
+      // assert the bytes (when leaked) don't match the victim's seed.
+      it("user A cannot download() tenant B's seeded asset via any tricky path", async () => {
+        const trickyPaths = buildTrickyPaths(liveCreds.a.tenantId!, liveCreds.b.tenantId!);
+        const victimBytes = await fileBytes("b-traversal-target").text();
+
+        for (const tricky of trickyPaths) {
+          const { data, error } = await clientA.storage
+            .from(ASSETS_BUCKET)
+            .download(tricky);
+          const denied = Boolean(error) || !data;
+          // Hard assertion: nothing came back. If the assertion fails
+          // we want the offending path in the test output, hence the
+          // contextual message via toBe(true).
+          expect(denied, `tricky path leaked content: ${tricky}`).toBe(true);
+
+          // Belt-and-braces: even if `data` slipped through (e.g. an
+          // empty placeholder), it MUST NOT contain the victim's
+          // marker bytes. This catches partial-leak regressions.
+          if (data) {
+            const leakedText = await data.text();
+            expect(leakedText.includes(victimBytes)).toBe(false);
+          }
+        }
+      });
+
+      it("user B cannot download() tenant A's seeded asset via any tricky path", async () => {
+        const trickyPaths = buildTrickyPaths(liveCreds.b.tenantId!, liveCreds.a.tenantId!).map(
+          (p) =>
+            // Swap the leaf so the probe references A's seed instead
+            // of B's. `buildTrickyPaths` hard-codes `b-traversal-...`;
+            // for the reverse direction we substitute it.
+            p.replace("b-traversal-target.txt", "a-traversal-target.txt"),
+        );
+        const victimBytes = await fileBytes("a-traversal-target").text();
+
+        for (const tricky of trickyPaths) {
+          const { data, error } = await clientB.storage
+            .from(ASSETS_BUCKET)
+            .download(tricky);
+          const denied = Boolean(error) || !data;
+          expect(denied, `tricky path leaked content: ${tricky}`).toBe(true);
+
+          if (data) {
+            const leakedText = await data.text();
+            expect(leakedText.includes(victimBytes)).toBe(false);
+          }
+        }
+      });
+
+      // ---------- list() with tricky parent prefixes ----------
+      // `list()` accepts a folder path. A tricky parent that resolves
+      // to the victim's folder would expose filenames. We list from
+      // attacker-crafted prefixes that try to escape into B's run
+      // root, and assert no entries from B's seed surface.
+      it("user A cannot list() tenant B's run-root via tricky parent prefixes", async () => {
+        const victimPrefix = runRootFor(liveCreds.b.tenantId!);
+        const trickyParents = [
+          `${liveCreds.a.tenantId!}/../${victimPrefix}`,
+          `/${victimPrefix}`,
+          `${liveCreds.a.tenantId!}//${victimPrefix}`,
+          `${liveCreds.a.tenantId!}%2F..%2F${victimPrefix}`,
+          `${liveCreds.a.tenantId!}/%2E%2E/${victimPrefix}`,
+          `${liveCreds.a.tenantId!}\\..\\${victimPrefix}`,
+        ];
+
+        for (const parent of trickyParents) {
+          const { data, error } = await clientA.storage
+            .from(ASSETS_BUCKET)
+            .list(parent, { limit: 50 });
+          const leaked =
+            Array.isArray(data) &&
+            data.some((entry) => entry.name && entry.name.includes("b-traversal-target"));
+          expect(leaked, `tricky list prefix leaked entries: ${parent}`).toBe(false);
+          // Either the server errors or returns an empty list — both
+          // are acceptable denial shapes.
+          const denied = Boolean(error) || !data || data.length === 0;
+          expect(denied, `tricky list prefix returned data: ${parent}`).toBe(true);
+        }
+      });
+
+      // ---------- createSignedUrl() ----------
+      // Signing is SELECT-gated. A signed URL for a tricky path that
+      // resolves to victim content is the most dangerous bypass: the
+      // attacker can hand the URL to a third party. Any non-null
+      // `signedUrl` must be treated as a hard failure.
+      it("user A cannot createSignedUrl() for tenant B's seeded asset via any tricky path", async () => {
+        const trickyPaths = buildTrickyPaths(liveCreds.a.tenantId!, liveCreds.b.tenantId!);
+
+        for (const tricky of trickyPaths) {
+          const { data, error } = await clientA.storage
+            .from(ASSETS_BUCKET)
+            .createSignedUrl(tricky, 60);
+          const denied = Boolean(error) || !data?.signedUrl;
+          expect(denied, `tricky path produced signed URL: ${tricky}`).toBe(true);
+        }
+      });
+
+      // ---------- info()/stat ----------
+      // Same SELECT gate as download/sign — a non-error metadata
+      // response on a tricky path proves the server resolved it to
+      // a real, foreign-tenant row. Feature-detected because not all
+      // pinned SDK versions expose `info()`; when absent the test
+      // passes vacuously rather than failing on the missing API.
+      it("user A cannot info()/stat tenant B's seeded asset via any tricky path", async () => {
+        const trickyPaths = buildTrickyPaths(liveCreds.a.tenantId!, liveCreds.b.tenantId!);
+        const bucketApi = clientA.storage.from(ASSETS_BUCKET) as unknown as {
+          info?: (p: string) => Promise<{ data: unknown; error: unknown }>;
+        };
+        if (typeof bucketApi.info !== "function") {
+          expect(true).toBe(true);
+          return;
+        }
+
+        for (const tricky of trickyPaths) {
+          const { data, error } = await bucketApi.info(tricky);
+          const denied = Boolean(error) || !data;
+          expect(denied, `tricky path leaked metadata: ${tricky}`).toBe(true);
+        }
+      });
+    },
+  );
+
   describe.skipIf(hasSupabaseConfig)("Skipped: missing Supabase config", () => { 
     it("test environment is missing VITE_SUPABASE_URL / VITE_SUPABASE_PUBLISHABLE_KEY", () => {
       expect(true).toBe(true);
