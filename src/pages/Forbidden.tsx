@@ -143,9 +143,7 @@ const Forbidden = ({
       window.clearTimeout(timeoutId);
       controller.abort();
     };
-  }, [attemptedArea]);
-
-  // Persist the denial to the audit_log so tenant owners and system admins
+  }, [resolvedSlug]);
   // can review forbidden-access attempts. The edge function resolves the
   // caller's user id from their JWT and writes user_id + timestamp + the
   // attempted area. Fire-and-forget; we don't surface failures to the UI.
