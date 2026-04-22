@@ -171,25 +171,33 @@ const newAnonClient = (): SupabaseClient =>
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
-// Tag uploads with a unique suffix so concurrent CI runs don't collide and
-// teardown can always identify what to clean up.
+// Per-run folder key — every artifact this suite writes lives under
+// `{tenantId}/__rls_test__/{RUN_ID}/...`. Putting RUN_ID in the PATH (not
+// just in the filename) lets the cleanup sweep restrict its `list()` to a
+// folder it owns end-to-end, so it can never accidentally enumerate or
+// delete files from concurrent CI runs, prior runs, or real tenant data.
 const RUN_ID = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
 const fileBytes = (label: string) =>
   new Blob([`storage-rls-test ${label} ${RUN_ID}`], { type: "text/plain" });
 
+// Folder root reserved for this run, scoped per tenant. Always a strict
+// prefix of every test path — used to anchor `list()` calls in cleanup.
+const runRootFor = (tenantId: string) => `${tenantId}/__rls_test__/${RUN_ID}`;
+
 const ownPath = (tenantId: string, label: string) =>
-  `${tenantId}/__rls_test__/${RUN_ID}-${label}.txt`;
+  `${runRootFor(tenantId)}/${label}.txt`;
 
 /**
- * Build a deeply-nested path under a tenant folder. Storage RLS policies
+ * Build a deeply-nested path UNDER the per-run folder. Storage RLS policies
  * usually pin only the FIRST path segment to the tenant id (via
- * `storage.foldername(name)[1]`), so any extra subfolders should still be
- * gated by the same check. These helpers simulate realistic app paths like
- * `{tenant_id}/documents/2026/invoices/inv-001.pdf` and
- * `{tenant_id}/uploads/avatars/user-123/profile.txt`.
+ * `storage.foldername(name)[1]`), so any extra subfolders below it must
+ * still be gated by the same check. We simulate realistic app paths like
+ * `{tenant_id}/__rls_test__/{RUN_ID}/documents/2026/invoices/inv-001.pdf`
+ * and `{tenant_id}/__rls_test__/{RUN_ID}/uploads/avatars/user-123/profile.txt`.
  */
 const nestedOwnPath = (tenantId: string, segments: string[], label: string) =>
-  `${tenantId}/${segments.join("/")}/${RUN_ID}-${label}.txt`;
+  `${runRootFor(tenantId)}/${segments.join("/")}/${label}.txt`;
 
 const NESTED_SCENARIOS: Array<{ name: string; segments: string[] }> = [
   { name: "documents/2026/invoices", segments: ["documents", "2026", "invoices"] },
