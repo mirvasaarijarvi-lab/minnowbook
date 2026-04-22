@@ -137,7 +137,7 @@ const App = () => (
                 path="/dashboard"
                 element={
                   <ProtectedRoute>
-                    <RequireTenant>
+                    <RequireTenant inline attemptedArea="dashboard">
                       <Dashboard />
                     </RequireTenant>
                   </ProtectedRoute>
@@ -159,7 +159,7 @@ const App = () => (
                 path="/guide"
                 element={
                   <ProtectedRoute>
-                    <RequireTenant>
+                    <RequireTenant inline attemptedArea="generic">
                       <StaffGuide />
                     </RequireTenant>
                   </ProtectedRoute>
