@@ -101,6 +101,68 @@ function escapeHtml(value: string): string {
     .replace(/'/g, "&#39;");
 }
 
+/**
+ * Parse a failure message produced by `expectReadDenied` /
+ * `expectWriteDenied` / `expectNoForeignTenantRows` (see rls-assert.ts).
+ * Format is intentionally line-oriented so it survives Vitest's serializer
+ * and stays greppable in raw CI logs.
+ */
+function parseRlsFailure(message: string | null): RlsFailureDetails | null {
+  if (!message || !message.includes("RLS DENIAL FAILED:")) return null;
+  const lines = message.split("\n");
+  const details: RlsFailureDetails = {};
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const m = line.match(/^RLS DENIAL FAILED:\s*(.+)$/);
+    if (m) details.scenario = m[1].trim();
+    else if (/^Table:\s+/.test(line)) details.table = line.replace(/^Table:\s+/, "").trim();
+    else if (/^Operation:\s+/.test(line))
+      details.operation = line.replace(/^Operation:\s+/, "").trim();
+    else if (/^Attempted query:\s+/.test(line))
+      details.attemptedQuery = line.replace(/^Attempted query:\s+/, "").trim();
+    else if (/^Acting tenant:\s+/.test(line))
+      details.actingTenant = line.replace(/^Acting tenant:\s+/, "").trim();
+    else if (/^Target tenant:\s+/.test(line))
+      details.targetTenant = line.replace(/^Target tenant:\s+/, "").trim();
+    else if (/^Reason:\s+/.test(line)) details.reason = line.replace(/^Reason:\s+/, "").trim();
+    else if (/^Supabase error:/.test(line)) {
+      const errLines: string[] = [line.replace(/^Supabase error:\s*/, "")];
+      while (i + 1 < lines.length && /^\s{2,}/.test(lines[i + 1])) {
+        i += 1;
+        errLines.push(lines[i].trim());
+      }
+      details.supabaseError = errLines.filter(Boolean).join("\n");
+    } else if (/^Returned rows:/.test(line)) {
+      details.returnedRows = lines.slice(i + 1).join("\n").trim();
+      break;
+    }
+  }
+  return Object.keys(details).length > 0 ? details : null;
+}
+
+function renderRlsDetails(d: RlsFailureDetails): string {
+  const row = (label: string, value: string | undefined) =>
+    value
+      ? `<div class="kv-row"><div class="kv-label">${escapeHtml(label)}</div><div class="kv-value">${escapeHtml(value)}</div></div>`
+      : "";
+  const rowsHtml = [
+    row("Scenario", d.scenario),
+    row("Table", d.table),
+    row("Operation", d.operation),
+    row("Attempted query", d.attemptedQuery),
+    row("Acting tenant", d.actingTenant),
+    row("Target tenant", d.targetTenant),
+    row("Reason", d.reason),
+  ].join("");
+  const errBlock = d.supabaseError
+    ? `<div class="kv-row"><div class="kv-label">Supabase error</div><div class="kv-value"><pre>${escapeHtml(d.supabaseError)}</pre></div></div>`
+    : "";
+  const rowsBlock = d.returnedRows
+    ? `<div class="kv-row"><div class="kv-label">Returned rows</div><div class="kv-value"><pre>${escapeHtml(d.returnedRows)}</pre></div></div>`
+    : "";
+  return `<div class="rls-details">${rowsHtml}${errBlock}${rowsBlock}</div>`;
+}
+
 function renderHtml(payload: ReportPayload): string {
   const { totals, entries, generatedAt } = payload;
 
