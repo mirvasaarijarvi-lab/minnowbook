@@ -6,6 +6,13 @@ of defence against a class of bugs that's invisible in normal app testing:
 queries that *look* correct from one tenant's session but silently leak rows
 from another tenant.
 
+## Policy contract
+
+The exact per-table SELECT/INSERT/UPDATE/DELETE expectations these tests
+enforce live in [`RLS_EXPECTATIONS.md`](./RLS_EXPECTATIONS.md). Update that
+matrix in the same PR as any policy migration so the suite, the docs, and
+the live schema stay aligned.
+
 ## Test files
 
 | File | What it covers |
