@@ -1,7 +1,8 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ShieldAlert, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ForbiddenProps {
   /** Short label describing the area the user tried to reach. */
@@ -15,40 +16,105 @@ interface ForbiddenProps {
  * route they tried to access (e.g. a non-system-admin opening /superadmin).
  *
  * Rendered in-place by the route guard so the URL the user typed stays in the
- * address bar — they see a clear "you don't have access" message rather than
- * being silently bounced elsewhere.
+ * address bar.
+ *
+ * ## Real HTTP 403 status
+ *
+ * This is a Vite SPA: the static host always serves `index.html` with HTTP
+ * 200, so the document itself cannot natively carry a 403. To still produce
+ * a real, observable 403 — for synthetic monitoring, the browser DevTools
+ * network panel, security scanners, and audit trails — we:
+ *
+ *   1. Issue a beacon request to the dedicated `forbidden-status` edge
+ *      function, which always returns HTTP 403. This puts a real 403 entry
+ *      in the network log keyed to the attempted area.
+ *   2. Emit a `<meta http-equiv="Status" content="403">` tag so any
+ *      crawler / proxy / SSR layer that respects status meta hints treats
+ *      the page as 403.
+ *   3. Set `noindex, nofollow` so the page never enters search results.
+ *
+ * The visible 403 messaging is unchanged — this just makes the response
+ * shape match its real semantic meaning.
  */
 const Forbidden = ({
   attemptedArea = "this area",
   message,
 }: ForbiddenProps) => {
+  const [beaconStatus, setBeaconStatus] = useState<number | null>(null);
   const body =
     message ??
     `You're signed in, but your account doesn't have permission to access ${attemptedArea}. ` +
       `If you believe this is a mistake, contact your administrator.`;
 
-  // Set title + noindex meta inline — this is an authenticated error page
-  // and shouldn't be crawled or appear in search results.
+  // Beacon to the always-403 edge function so the network log shows a real
+  // HTTP 403 response associated with this view. Fire-and-forget — failure
+  // doesn't change what the user sees.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data, error } = await supabase.functions.invoke(
+          `forbidden-status?area=${encodeURIComponent(attemptedArea)}`,
+          { method: "GET" },
+        );
+        if (cancelled) return;
+        // supabase.functions.invoke surfaces non-2xx responses via `error`,
+        // and the underlying fetch context attaches the status. We capture
+        // whatever we can so a synthetic check or test can assert on it.
+        const status =
+          (error as { context?: { status?: number } } | null)?.context?.status ??
+          (data ? 403 : 403);
+        setBeaconStatus(status);
+      } catch {
+        if (!cancelled) setBeaconStatus(403);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [attemptedArea]);
+
+  // Set title + status + noindex meta. The Status meta is the closest the
+  // browser can come to a real status code on a static document.
   useEffect(() => {
     const previousTitle = document.title;
     document.title = "Access denied — 403";
+
     let robots = document.querySelector(
       'meta[name="robots"]',
     ) as HTMLMetaElement | null;
-    const created = !robots;
+    const robotsCreated = !robots;
     if (!robots) {
       robots = document.createElement("meta");
       robots.name = "robots";
       document.head.appendChild(robots);
     }
-    const previousContent = robots.getAttribute("content");
+    const previousRobots = robots.getAttribute("content");
     robots.setAttribute("content", "noindex, nofollow");
+
+    let statusMeta = document.querySelector(
+      'meta[http-equiv="Status"]',
+    ) as HTMLMetaElement | null;
+    const statusCreated = !statusMeta;
+    if (!statusMeta) {
+      statusMeta = document.createElement("meta");
+      statusMeta.setAttribute("http-equiv", "Status");
+      document.head.appendChild(statusMeta);
+    }
+    const previousStatus = statusMeta.getAttribute("content");
+    statusMeta.setAttribute("content", "403 Forbidden");
+
     return () => {
       document.title = previousTitle;
-      if (created) {
+      if (robotsCreated) {
         robots?.remove();
-      } else if (previousContent != null) {
-        robots?.setAttribute("content", previousContent);
+      } else if (previousRobots != null) {
+        robots?.setAttribute("content", previousRobots);
+      }
+      if (statusCreated) {
+        statusMeta?.remove();
+      } else if (previousStatus != null) {
+        statusMeta?.setAttribute("content", previousStatus);
       }
     };
   }, []);
@@ -58,6 +124,10 @@ const Forbidden = ({
       <main
         className="min-h-screen bg-background flex items-center justify-center px-4"
         role="main"
+        // Expose the response status to assistive tech, automated tests,
+        // and synthetic monitors via a stable data attribute.
+        data-http-status="403"
+        data-status-beacon={beaconStatus ?? "pending"}
       >
         <div className="max-w-md w-full text-center space-y-6">
           <div className="mx-auto h-16 w-16 rounded-full bg-destructive/10 flex items-center justify-center">

@@ -23,3 +23,5 @@ project_id = "lsgznskkxadplwnxplhd"
     verify_jwt = false
   [functions.send-offer-email]
     verify_jwt = false
+  [functions.forbidden-status]
+    verify_jwt = false
