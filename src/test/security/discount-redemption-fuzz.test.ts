@@ -262,7 +262,19 @@ describe.runIf(liveAvailable)(
           `Tenant pair fixture unexpectedly unavailable: ${fixture.skipReason}`,
         );
       }
-      guardTenantPair(fixture);
+      await guardTenantPair({
+        suite: "discount-redemption-fuzz",
+        a: {
+          client: fixture.a!.client,
+          tenantId: fixture.a!.tenantId,
+          email: fixture.a!.email,
+        },
+        b: {
+          client: fixture.b!.client,
+          tenantId: fixture.b!.tenantId,
+          email: fixture.b!.email,
+        },
+      });
     }, 30_000);
 
     for (const table of TARGET_TABLES) {
