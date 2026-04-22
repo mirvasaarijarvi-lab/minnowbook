@@ -5,6 +5,12 @@ import {
   expectWriteDenied,
   expectNoForeignTenantRows,
 } from "./rls-assert";
+import {
+  createTenantPairFixture,
+  tenantPairFixtureLikelyAvailable,
+  tenantPairFixtureSkipReason,
+  type TenantPairFixture,
+} from "./fixtures/tenant-pair";
 
 /**
  * Cross-Tenant RLS Regression Tests
