@@ -133,7 +133,7 @@ jobs:
 
       - name: Upload edge test logs
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           # Artifact name itself includes the run id so downloads from
           # multiple runs don't collide when reviewers save them locally.
