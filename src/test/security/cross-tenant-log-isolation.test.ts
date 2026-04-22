@@ -205,6 +205,209 @@ describe.each([
   }, 30_000);
 });
 
+/**
+ * Pagination-based isolation probes.
+ *
+ * Even when a single SELECT correctly returns zero rows under RLS, a
+ * naive paginator could still leak signal at page boundaries:
+ *
+ *   - `range(0, N)` walks could surface rows on a later page if RLS were
+ *     applied per-batch instead of per-row.
+ *   - Deep `range(largeOffset, largeOffset+pageSize)` queries could
+ *     bypass index-time filters in some misconfigurations.
+ *   - `count: "exact"` returned alongside paginated rows could leak
+ *     the *true* tenant cardinality even when `data` is empty.
+ *   - Cursor-style queries (`.gt("created_at", cursor)`) could surface
+ *     a row that the same query without the cursor wouldn't.
+ *   - Reverse-order pagination could surface the newest row first
+ *     (a common timing/leak primitive).
+ *
+ * Every probe below must return zero rows AND, where applicable, a
+ * count of 0 (or null). Any non-zero result is a pagination-boundary
+ * RLS leak.
+ */
+describe.each([
+  { table: "booking_validation_log" as const },
+  { table: "audit_log" as const },
+])("$table — anon pagination isolation", ({ table }) => {
+  liveIt("range(0, 9) returns zero rows", async () => {
+    const result = await anon.from(table).select("*").range(0, 9);
+    expectNoRowsLeaked(result, `${table} range(0,9)`);
+  });
+
+  liveIt("range(0, 999) (large first page) returns zero rows", async () => {
+    const result = await anon.from(table).select("*").range(0, 999);
+    expectNoRowsLeaked(result, `${table} range(0,999)`);
+  });
+
+  liveIt("sequential pages 0-9, 10-19, 20-29 never surface a row", async () => {
+    // Walks the first three pages of size 10. If RLS were applied at
+    // batch boundaries (or only to the first page), a later page could
+    // leak. Each page must be independently empty.
+    const PAGE_SIZE = 10;
+    const PAGES = 3;
+    for (let p = 0; p < PAGES; p++) {
+      const from = p * PAGE_SIZE;
+      const to = from + PAGE_SIZE - 1;
+      const result = await anon.from(table).select("*").range(from, to);
+      expectNoRowsLeaked(result, `${table} page ${p} range(${from},${to})`);
+    }
+  });
+
+  liveIt("deep offset range(10000, 10024) returns zero rows", async () => {
+    // A deep offset bypass: some misconfigured paginators stop applying
+    // filters past a high offset. RLS must hold regardless of offset.
+    const result = await anon.from(table).select("*").range(10_000, 10_024);
+    expectNoRowsLeaked(result, `${table} deep range(10000,10024)`);
+  });
+
+  liveIt("range with eq tenant_id filter returns zero rows on every page", async () => {
+    const PAGE_SIZE = 5;
+    for (let p = 0; p < 4; p++) {
+      const from = p * PAGE_SIZE;
+      const to = from + PAGE_SIZE - 1;
+      const result = await anon
+        .from(table)
+        .select("*")
+        .eq("tenant_id", LIVE_TENANT_ID)
+        .range(from, to);
+      expectNoRowsLeaked(result, `${table} eq+range page ${p}`);
+    }
+  });
+
+  liveIt("count:'exact' alongside paginated select must not leak cardinality", async () => {
+    // The classic count-leak: PostgREST returns `data: []` (correctly
+    // RLS-filtered) but a non-zero `count` would still expose the true
+    // number of rows in the target tenant. RLS must filter the count too.
+    const { data, count, error } = await anon
+      .from(table)
+      .select("*", { count: "exact" })
+      .eq("tenant_id", LIVE_TENANT_ID)
+      .range(0, 9);
+    if (error) {
+      // Acceptable: explicit denial.
+      expect(error).toBeTruthy();
+      return;
+    }
+    const rows = (data ?? []) as unknown[];
+    expect(rows.length, `${table} count+page rows must be 0`).toBe(0);
+    expect(count ?? 0, `${table} count must not leak true cardinality`).toBe(0);
+  });
+
+  liveIt("count:'planned' returns no rows (planner estimate is global, not per-tenant)", async () => {
+    // PostgREST `count: "planned"` and `count: "estimated"` come from
+    // `pg_class.reltuples` — the planner's table-level row estimate.
+    // These are NOT RLS-filtered by design (they're global table
+    // metadata, not row data) and therefore reveal only total table
+    // size, never per-tenant cardinality. The actual security boundary
+    // is `data`, which must remain empty. We assert that here and
+    // document the planner-count caveat so future readers don't
+    // mistake it for a leak. Use `count: "exact"` (tested above) when
+    // you need a count that respects RLS.
+    const { data, error } = await anon
+      .from(table)
+      .select("*", { count: "planned" })
+      .range(0, 9);
+    if (error) {
+      expect(error).toBeTruthy();
+      return;
+    }
+    const rows = (data ?? []) as unknown[];
+    expect(rows.length, `${table} planned-count rows must be 0`).toBe(0);
+  });
+
+  liveIt("count:'estimated' returns no rows (planner estimate is global, not per-tenant)", async () => {
+    // Same caveat as `planned` above — `estimated` falls back to the
+    // planner row estimate when an exact count would be expensive.
+    // We only assert `data` is empty.
+    const { data, error } = await anon
+      .from(table)
+      .select("*", { count: "estimated" })
+      .range(0, 9);
+    if (error) {
+      expect(error).toBeTruthy();
+      return;
+    }
+    const rows = (data ?? []) as unknown[];
+    expect(rows.length, `${table} estimated-count rows must be 0`).toBe(0);
+  });
+
+  liveIt("cursor-style .gt('created_at', epoch) + order + limit returns zero rows", async () => {
+    // Cursor pagination is the recommended pattern for deep pagination;
+    // attackers will reach for it as a bypass too. Anchor at unix epoch
+    // so the cursor matches every possible row in the tenant.
+    const result = await anon
+      .from(table)
+      .select("*")
+      .eq("tenant_id", LIVE_TENANT_ID)
+      .gt("created_at", "1970-01-01T00:00:00Z")
+      .order("created_at", { ascending: true })
+      .limit(25);
+    expectNoRowsLeaked(result, `${table} cursor .gt(epoch) page`);
+  });
+
+  liveIt("cursor walk (3 hops with .gt + order + limit) never surfaces a row", async () => {
+    // Simulate three hops of forward cursor pagination. Even if the
+    // first hop is empty, an attacker may try advancing the cursor
+    // manually past a guessed boundary. Each hop must return zero.
+    let cursor = "1970-01-01T00:00:00Z";
+    for (let hop = 0; hop < 3; hop++) {
+      const result = await anon
+        .from(table)
+        .select("created_at, id, tenant_id")
+        .gt("created_at", cursor)
+        .order("created_at", { ascending: true })
+        .limit(10);
+      expectNoRowsLeaked(result, `${table} cursor hop ${hop}`);
+      // Advance cursor by an arbitrary year — there's nothing to read,
+      // so we just keep probing forward in time.
+      cursor = new Date(Date.parse(cursor) + 365 * 24 * 3600 * 1000).toISOString();
+    }
+  });
+
+  liveIt("reverse cursor (.lt + descending order) returns zero rows", async () => {
+    // Newest-first pagination is the most attractive primitive for an
+    // attacker: it would reveal the latest activity. Anchor in the far
+    // future to include every possible row in the tenant.
+    const result = await anon
+      .from(table)
+      .select("*")
+      .eq("tenant_id", LIVE_TENANT_ID)
+      .lt("created_at", "2999-12-31T23:59:59Z")
+      .order("created_at", { ascending: false })
+      .limit(25);
+    expectNoRowsLeaked(result, `${table} reverse cursor .lt(future)`);
+  });
+
+  liveIt("range with column projection ('id') on every page returns zero rows", async () => {
+    // Combine projection narrowing with pagination — a common bypass
+    // attempt to reduce response size and slip past detection.
+    const PAGE_SIZE = 20;
+    for (let p = 0; p < 3; p++) {
+      const from = p * PAGE_SIZE;
+      const to = from + PAGE_SIZE - 1;
+      const result = await anon.from(table).select("id").range(from, to);
+      expectNoRowsLeaked(result, `${table} id-only page ${p}`);
+    }
+  });
+
+  liveIt("range across .in([live, fake]) tenant_id filter on multiple pages returns zero rows", async () => {
+    // Combine a multi-tenant `in` filter with pagination — RLS must
+    // still strip every row regardless of how the filter shapes the plan.
+    const PAGE_SIZE = 10;
+    for (let p = 0; p < 3; p++) {
+      const from = p * PAGE_SIZE;
+      const to = from + PAGE_SIZE - 1;
+      const result = await anon
+        .from(table)
+        .select("id, tenant_id")
+        .in("tenant_id", [LIVE_TENANT_ID, FAKE_TENANT_ID])
+        .range(from, to);
+      expectNoRowsLeaked(result, `${table} in+range page ${p}`);
+    }
+  });
+});
+
 liveDescribe("booking_validation_log — anon cannot write or mutate cross-tenant", () => {
   // booking_validation_log INSERT is restricted to authenticated tenant
   // members. Anon must not be able to forge entries (which would pollute
