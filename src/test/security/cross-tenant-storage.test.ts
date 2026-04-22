@@ -2,6 +2,42 @@ import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 /**
+ * Service-role client used as a final cleanup safety net. Only constructed
+ * when SUPABASE_SERVICE_ROLE_KEY is present (typically in CI). It bypasses
+ * RLS so it can sweep any orphan that slipped past per-client teardown,
+ * e.g. files left by a true RLS bypass or a partial multipart upload that
+ * the originating client can no longer see.
+ */
+const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const adminClient: SupabaseClient | null =
+  SERVICE_ROLE_KEY && import.meta.env.VITE_SUPABASE_URL
+    ? createClient(import.meta.env.VITE_SUPABASE_URL as string, SERVICE_ROLE_KEY, {
+        auth: { persistSession: false, autoRefreshToken: false },
+      })
+    : null;
+
+/**
+ * Best-effort recursive sweep: list every file under `${tenantId}/__rls_test__/`
+ * for the current RUN_ID and remove anything still there. Safe to call from
+ * any cleanup path — it short-circuits if no admin client is available.
+ */
+async function sweepTestArtifacts(bucket: string, tenantIds: string[]) {
+  if (!adminClient) return;
+  for (const tenantId of tenantIds) {
+    try {
+      const { data } = await adminClient.storage
+        .from(bucket)
+        .list(`${tenantId}/__rls_test__`, { limit: 100, search: RUN_ID });
+      if (!data || data.length === 0) continue;
+      const paths = data.map((entry) => `${tenantId}/__rls_test__/${entry.name}`);
+      await adminClient.storage.from(bucket).remove(paths);
+    } catch {
+      /* ignore — best-effort */
+    }
+  }
+}
+
+/**
  * Cross-Tenant Storage Bucket Policy Tests
  *
  * Verifies that storage RLS policies on the `tenant-private` (private) and
