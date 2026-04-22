@@ -1,6 +1,18 @@
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { describe, it, expect, beforeAll, afterAll, afterEach } from "vitest";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { createHash, randomBytes } from "node:crypto";
+import {
+  createAccessCodeTracker,
+  type AccessCodeTracker,
+} from "./fixtures/access-code-cleanup";
+
+/**
+ * Stable, unique tag stamped into the `description` of every code seeded
+ * by this suite. Used by the cleanup helper to sweep ALL rows from prior
+ * crashed runs at the start of each suite — even rows whose UUIDs were
+ * lost when a previous test process died mid-race.
+ */
+const DESCRIPTION_TAG = "[authz-conc-test]";
 
 /**
  * Authorized-user concurrent-redemption integrity suite.
@@ -147,7 +159,10 @@ async function seedAccessCode(
     .insert({
       code_hash: hashCode(plaintext),
       code_prefix: plaintext.slice(0, 8),
-      description: "Authorized-user concurrency test — auto-cleaned",
+      // The description carries the suite tag so `sweepStaleRows()` can
+      // recover from a process that died before it could push the new
+      // id into the in-memory tracker.
+      description: `${DESCRIPTION_TAG} Authorized-user concurrency test — auto-cleaned`,
       tier: "business",
       duration_days: 7,
       max_uses: maxUses,
@@ -216,8 +231,14 @@ suite(
     let userId: string;
     let tenantId: string;
     let token: string;
-    /** Track every code we seed so afterAll can clean them up. */
-    const seededCodeIds: string[] = [];
+    /**
+     * Cleanup tracker. Combines three layers of defence:
+     *   1. `register()` after every seed → in-memory id list,
+     *   2. `cleanupTracked()` after every test → no inter-test accumulation,
+     *   3. `sweepStaleRows()` in `beforeAll` → recovers from a prior
+     *      process that died after INSERT but before `register()`.
+     */
+    let tracker: AccessCodeTracker;
 
     beforeAll(async () => {
       admin = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!, {
@@ -227,6 +248,20 @@ suite(
       const fixture = await ensureFixtureUser(admin);
       userId = fixture.userId;
       tenantId = fixture.tenantId;
+
+      tracker = createAccessCodeTracker({
+        admin,
+        descriptionTag: DESCRIPTION_TAG,
+        fixtureUserId: userId,
+        fixtureTenantId: tenantId,
+      });
+
+      // PRE-FLIGHT SWEEP: delete every access code (and its ledger) that
+      // a previous run of this suite might have left behind. This is the
+      // single most important line for "repeated runs never accumulate
+      // stale rows" — even a SIGKILL'd previous process is recovered
+      // here because we filter by description tag and created_by.
+      await tracker.sweepStaleRows();
 
       // Reset tenant tier so re-runs don't leave the tenant on "business".
       await admin
@@ -238,17 +273,25 @@ suite(
         })
         .eq("id", tenantId);
 
-      // Wipe stale redemption rows for this tenant from previous runs.
-      await admin.from("access_code_redemptions").delete().eq("tenant_id", tenantId);
-
       token = await signInAndGetToken();
     }, 60_000);
 
+    // Per-test cleanup: even if the previous test threw mid-Promise.all,
+    // its seeded codes are tracked and get deleted here. This guarantees
+    // that no test leaves rows behind for the next test.
+    afterEach(async () => {
+      if (!tracker) return;
+      await tracker.cleanupTracked();
+    }, 30_000);
+
     afterAll(async () => {
       if (!admin) return;
-      for (const id of seededCodeIds) {
-        await admin.from("access_code_redemptions").delete().eq("access_code_id", id);
-        await admin.from("access_codes").delete().eq("id", id);
+      // Final belt-and-suspenders: re-run the stale-row sweep so anything
+      // that slipped past per-test cleanup (e.g. an `it.only` that bypassed
+      // afterEach in a future edit) still gets cleaned.
+      if (tracker) {
+        await tracker.cleanupTracked();
+        await tracker.sweepStaleRows();
       }
       if (tenantId) {
         await admin
@@ -265,7 +308,7 @@ suite(
     it("25 concurrent redeems by the same authorized user produce exactly one success and a consistent ledger", async () => {
       const plaintext = freshPlaintext();
       const accessCodeId = await seedAccessCode(admin, plaintext, userId, 1);
-      seededCodeIds.push(accessCodeId);
+      tracker.register(accessCodeId);
 
       // Reset tenant + ledger so this test starts from a known clean slate.
       await admin
@@ -378,7 +421,7 @@ suite(
       // to make the second call a verbatim replay of the first.
       const plaintext = freshPlaintext();
       const accessCodeId = await seedAccessCode(admin, plaintext, userId, 1);
-      seededCodeIds.push(accessCodeId);
+      tracker.register(accessCodeId);
 
       await admin
         .from("tenants")
@@ -433,7 +476,7 @@ suite(
       // constraint. The win count must still be exactly 1.
       const plaintext = freshPlaintext();
       const accessCodeId = await seedAccessCode(admin, plaintext, userId, 1);
-      seededCodeIds.push(accessCodeId);
+      tracker.register(accessCodeId);
 
       await admin
         .from("tenants")

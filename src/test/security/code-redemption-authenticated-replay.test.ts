@@ -1,6 +1,17 @@
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { describe, it, expect, beforeAll, afterAll, afterEach } from "vitest";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { createHash, randomBytes } from "node:crypto";
+import {
+  createAccessCodeTracker,
+  type AccessCodeTracker,
+} from "./fixtures/access-code-cleanup";
+
+/**
+ * Stable, unique tag stamped into every seeded code's `description`.
+ * Used by the cleanup helper to recover from prior crashed runs whose
+ * UUIDs were lost when the test process died mid-race.
+ */
+const DESCRIPTION_TAG = "[replay-test]";
 
 /**
  * Authenticated single-redeem + replay contract test for `redeem-access-code`.
@@ -158,7 +169,10 @@ async function seedAccessCode(
     .insert({
       code_hash: hashCode(plaintext),
       code_prefix: plaintext.slice(0, 8),
-      description: "Authenticated single-redeem + replay test — auto-cleaned",
+      // Description carries the suite tag so `sweepStaleRows()` can
+      // recover from a process that died before the in-memory tracker
+      // could record this id.
+      description: `${DESCRIPTION_TAG} Authenticated single-redeem + replay test — auto-cleaned`,
       tier: "business",
       duration_days: 7,
       max_uses: 1,
@@ -223,8 +237,12 @@ suite(
     let userId: string;
     let tenantId: string;
     let token: string;
-    /** All seeded code IDs — afterAll cleans them up. */
-    const seededCodeIds: string[] = [];
+    /**
+     * Cleanup tracker — see `fixtures/access-code-cleanup.ts` for the
+     * three-layer recovery contract (per-test cleanup + pre-flight sweep
+     * by description tag + post-suite belt-and-suspenders sweep).
+     */
+    let tracker: AccessCodeTracker;
 
     beforeAll(async () => {
       admin = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!, {
@@ -234,6 +252,17 @@ suite(
       const fixture = await ensureFixtureUser(admin);
       userId = fixture.userId;
       tenantId = fixture.tenantId;
+
+      tracker = createAccessCodeTracker({
+        admin,
+        descriptionTag: DESCRIPTION_TAG,
+        fixtureUserId: userId,
+        fixtureTenantId: tenantId,
+      });
+
+      // PRE-FLIGHT SWEEP: erase any access codes + ledger rows left
+      // behind by a previous run that crashed before reaching afterAll.
+      await tracker.sweepStaleRows();
 
       // Reset tenant tier so we can verify the redemption side-effect cleanly.
       await admin
@@ -245,17 +274,23 @@ suite(
         })
         .eq("id", tenantId);
 
-      // Wipe any stale ledger rows from prior runs of this fixture.
-      await admin.from("access_code_redemptions").delete().eq("tenant_id", tenantId);
-
       token = await signInAndGetToken();
     }, 60_000);
 
+    // Per-test cleanup ensures stale rows never leak between `it()` blocks
+    // even if a test throws partway through its assertions.
+    afterEach(async () => {
+      if (!tracker) return;
+      await tracker.cleanupTracked();
+    }, 30_000);
+
     afterAll(async () => {
       if (!admin) return;
-      for (const id of seededCodeIds) {
-        await admin.from("access_code_redemptions").delete().eq("access_code_id", id);
-        await admin.from("access_codes").delete().eq("id", id);
+      if (tracker) {
+        // Run cleanupTracked first (fast, exact) then sweepStaleRows
+        // (slow, broad) so even a forgotten `register()` is recovered.
+        await tracker.cleanupTracked();
+        await tracker.sweepStaleRows();
       }
       if (tenantId) {
         await admin
@@ -272,7 +307,7 @@ suite(
     it("first redemption succeeds with 200, returns granted tier + duration, and writes exactly one ledger row", async () => {
       const plaintext = freshPlaintext();
       const accessCodeId = await seedAccessCode(admin, plaintext, userId);
-      seededCodeIds.push(accessCodeId);
+      tracker.register(accessCodeId);
 
       // Clean slate for this code.
       await admin
@@ -340,7 +375,7 @@ suite(
     it("replaying the same code returns a stable, generic, non-leaking 4xx error", async () => {
       const plaintext = freshPlaintext();
       const accessCodeId = await seedAccessCode(admin, plaintext, userId);
-      seededCodeIds.push(accessCodeId);
+      tracker.register(accessCodeId);
 
       await admin
         .from("tenants")
@@ -461,7 +496,7 @@ suite(
       // "this code never existed".
       const usedPlaintext = freshPlaintext();
       const usedId = await seedAccessCode(admin, usedPlaintext, userId);
-      seededCodeIds.push(usedId);
+      tracker.register(usedId);
 
       await admin
         .from("tenants")

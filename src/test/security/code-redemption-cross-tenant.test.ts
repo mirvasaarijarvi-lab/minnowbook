@@ -1,6 +1,17 @@
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { describe, it, expect, beforeAll, afterAll, afterEach } from "vitest";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { createHash, randomBytes } from "node:crypto";
+import {
+  createAccessCodeTracker,
+  type AccessCodeTracker,
+} from "./fixtures/access-code-cleanup";
+
+/**
+ * Stable, unique tag stamped into every seeded code's `description`.
+ * Used by the cleanup helper to recover from prior crashed runs whose
+ * UUIDs were lost when the test process died mid-race.
+ */
+const DESCRIPTION_TAG = "[xtenant-test]";
 
 /**
  * Cross-tenant authenticated redemption test for `redeem-access-code`.
@@ -204,8 +215,10 @@ async function seedAccessCode(
     .insert({
       code_hash: hashCode(plaintext),
       code_prefix: plaintext.slice(0, 8),
-      description:
-        "Cross-tenant redeem test — auto-cleaned. Code MUST land on the redeemer's tenant, never the 'intended' one.",
+      // Description carries the suite tag so `sweepStaleRows()` can
+      // recover from a process that died before the in-memory tracker
+      // could record this id.
+      description: `${DESCRIPTION_TAG} Cross-tenant redeem test — auto-cleaned. Code MUST land on the redeemer's tenant, never the 'intended' one.`,
       tier: "business",
       duration_days: 14,
       max_uses: 1,
@@ -295,8 +308,13 @@ suite(
     let userIdB: string;
     let tenantIdA: string;
     let tenantIdB: string;
-    /** Codes seeded by this suite — afterAll cleans them up. */
-    const seededCodeIds: string[] = [];
+    /**
+     * Cleanup tracker — see `fixtures/access-code-cleanup.ts` for the
+     * three-layer recovery contract. The tracker sweeps both fixture
+     * users and BOTH fixture tenants so cross-tenant leftovers (rows
+     * landed on the "wrong" tenant by a regression) are also wiped.
+     */
+    let tracker: AccessCodeTracker;
 
     beforeAll(async () => {
       admin = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!, {
@@ -319,13 +337,52 @@ suite(
             `Check the tenant_users table for cross-fixture leakage.`,
         );
       }
+
+      // Tracker created with userIdA (the seeder of every code) — but
+      // the pre-flight sweep also wipes ledger rows on BOTH tenants
+      // because cross-tenant tests legitimately land redemptions on B.
+      tracker = createAccessCodeTracker({
+        admin,
+        descriptionTag: DESCRIPTION_TAG,
+        fixtureUserId: userIdA,
+      });
+
+      // PRE-FLIGHT SWEEP: erase access codes + ledger rows from any
+      // previous run that crashed before reaching afterAll. We then
+      // separately purge per-tenant ledger rows for B (and A) since
+      // those are the ones cross-tenant tests are most likely to leak.
+      await tracker.sweepStaleRows();
+      for (const id of [tenantIdA, tenantIdB]) {
+        await admin
+          .from("access_code_redemptions")
+          .delete()
+          .eq("tenant_id", id);
+      }
     }, 60_000);
+
+    // Per-test cleanup: even if a test threw before reaching the
+    // verification phase, its seeded code is registered with the
+    // tracker and gets wiped here, preventing inter-test accumulation.
+    afterEach(async () => {
+      if (!tracker) return;
+      await tracker.cleanupTracked();
+      // Also clear ledger rows from BOTH fixture tenants between tests.
+      // The cross-tenant suite intentionally produces rows on tenant B
+      // (and verifies tenant A stays clean), so we must wipe both to
+      // give each test a fresh baseline.
+      for (const id of [tenantIdA, tenantIdB].filter(Boolean)) {
+        await admin
+          .from("access_code_redemptions")
+          .delete()
+          .eq("tenant_id", id);
+      }
+    }, 30_000);
 
     afterAll(async () => {
       if (!admin) return;
-      for (const id of seededCodeIds) {
-        await admin.from("access_code_redemptions").delete().eq("access_code_id", id);
-        await admin.from("access_codes").delete().eq("id", id);
+      if (tracker) {
+        await tracker.cleanupTracked();
+        await tracker.sweepStaleRows();
       }
       // Reset both tenants to a clean baseline so subsequent test runs
       // (and unrelated suites that share the fixture users) start fresh.
@@ -350,7 +407,7 @@ suite(
       // that even with that intent, the side effects strictly follow the
       // authenticated caller, never the creator.
       const accessCodeId = await seedAccessCode(admin, plaintext, userIdA);
-      seededCodeIds.push(accessCodeId);
+      tracker.register(accessCodeId);
 
       // Pre-test baseline: both tenants on basic, no sample window, no
       // ledger rows for this code. Captured AFTER reset so we can prove
@@ -479,7 +536,7 @@ suite(
       // code from tenant B's session.
       const plaintext = freshPlaintext();
       const accessCodeId = await seedAccessCode(admin, plaintext, userIdA);
-      seededCodeIds.push(accessCodeId);
+      tracker.register(accessCodeId);
 
       const baselineA = await resetTenantBaseline(admin, tenantIdA);
       await resetTenantBaseline(admin, tenantIdB);
