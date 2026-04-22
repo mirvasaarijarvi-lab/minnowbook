@@ -26,7 +26,9 @@ function getCorsHeaders(req: Request): Record<string, string> {
     "X-XSS-Protection": "1; mode=block",
     "Referrer-Policy": "strict-origin-when-cross-origin",
     "Content-Security-Policy": "default-src 'none'; frame-ancestors 'none'",
-    "Cache-Control": "no-store, no-cache, must-revalidate",
+    "Cache-Control": "no-store, no-cache, must-revalidate, private",
+    "Pragma": "no-cache",
+    "Vary": "Origin",
   };
 }
 
