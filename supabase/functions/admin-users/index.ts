@@ -3,7 +3,9 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 // --- CORS with origin allowlist ---
 const ALLOWED_ORIGINS = [
   "https://minnowbook.lovable.app",
-  /^https:\/\/.*\.lovable\.app$/,
+  // Subdomain pattern: only DNS-safe chars (letters, digits, dots, hyphens)
+  // Rejects userinfo (`@`), ports (`:`), paths (`/`), queries (`?`), etc.
+  /^https:\/\/[a-zA-Z0-9.-]+\.lovable\.app$/,
 ];
 
 const SECURITY_HEADERS = {
