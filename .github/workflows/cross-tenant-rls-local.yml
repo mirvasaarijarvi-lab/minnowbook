@@ -407,6 +407,169 @@ jobs:
           path: reports/
           retention-days: 14
 
+      # When cross-tenant *storage* validation fails (bucket isolation tests
+      # in cross-tenant-storage.test.ts), surface the resolved tenant IDs and
+      # membership-probe results directly in the GitHub Actions job summary.
+      # This is the fastest signal for distinguishing a real RLS regression
+      # from a seeding/membership glitch (e.g. a user accidentally linked to
+      # both tenants) — without forcing the reviewer to download artifacts.
+      #
+      # Steps:
+      #   1. Detect storage-test failures in reports/rls-report.json.
+      #   2. Echo the seeded tenant + user IDs from $GITHUB_ENV.
+      #   3. Run a service-role psql probe against tenant_users to confirm
+      #      that each user is a member of exactly one (the expected) tenant
+      #      and exercise the get_user_tenant_id() resolver — the same
+      #      function the storage RLS policies depend on.
+      #   4. Write everything to $GITHUB_STEP_SUMMARY in a Markdown table.
+      - name: Summarize storage RLS failures (tenants + membership probes)
+        if: always() && steps.rls-tests.outcome == 'failure'
+        env:
+          PGPASSWORD: postgres
+        run: |
+          set +e
+          REPORT="reports/rls-report.json"
+          if [ ! -f "$REPORT" ]; then
+            echo "No RLS report at $REPORT — nothing to summarize."
+            exit 0
+          fi
+
+          # Pull failing storage-test entries. The storage test file is
+          # cross-tenant-storage.test.ts; we also catch any entry whose
+          # name/suite mentions storage/bucket so future test-file renames
+          # don't silently bypass this summary.
+          STORAGE_FAILS_JSON=$(node -e "
+            const r = require('./reports/rls-report.json');
+            const fails = (r.entries || []).filter(e =>
+              e.status === 'failed' && (
+                /cross-tenant-storage|storage|bucket/i.test(e.file || '') ||
+                /storage|bucket/i.test(e.fullName || '') ||
+                /storage|bucket/i.test(e.suite || '')
+              )
+            );
+            process.stdout.write(JSON.stringify(fails));
+          " 2>/dev/null)
+
+          FAIL_COUNT=$(node -e "process.stdout.write(String(JSON.parse(process.argv[1] || '[]').length))" "$STORAGE_FAILS_JSON" 2>/dev/null)
+          FAIL_COUNT="${FAIL_COUNT:-0}"
+
+          if [ "$FAIL_COUNT" = "0" ]; then
+            echo "No cross-tenant storage failures detected — skipping storage summary."
+            exit 0
+          fi
+
+          echo "### ❌ Cross-tenant storage validation failed (${FAIL_COUNT} failing test(s))" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+
+          # Failing test list (first error line each, top 10).
+          echo "#### Failing storage tests" >> "$GITHUB_STEP_SUMMARY"
+          node -e "
+            const fails = JSON.parse(process.argv[1] || '[]').slice(0, 10);
+            for (const e of fails) {
+              const msg = (e.errorMessage || '(no message)').split('\n')[0].slice(0, 240);
+              console.log('- **' + (e.name || e.fullName) + '** — ' + msg);
+            }
+          " "$STORAGE_FAILS_JSON" >> "$GITHUB_STEP_SUMMARY" 2>/dev/null
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+
+          # Resolved tenant IDs from the seed step (already in $GITHUB_ENV).
+          echo "#### Resolved tenant identifiers" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Label | Email | Tenant ID |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|---|---|---|" >> "$GITHUB_STEP_SUMMARY"
+          for label in A B; do
+            email_var="RLS_TEST_TENANT_${label}_EMAIL"
+            tid_var="RLS_TEST_TENANT_${label}_ID"
+            echo "| ${label} | \`${!email_var:-<unset>}\` | \`${!tid_var:-<unset>}\` |" >> "$GITHUB_STEP_SUMMARY"
+          done
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+
+          # Membership probes: confirm each user is a member of exactly one
+          # tenant and that get_user_tenant_id() resolves to the expected ID.
+          # A mismatch here almost always explains a storage-bucket failure
+          # (a user linked to both tenants makes the resolver return NULL,
+          # which fails closed and surfaces as cross-tenant denial).
+          PSQL=(psql -h 127.0.0.1 -p 54322 -U postgres -d postgres -At -F '|')
+          echo "#### Membership probes" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Label | User ID | Membership count | tenant_users.tenant_id(s) | Expected tenant | get_user_tenant_id() | Verdict |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|---|---|---|---|---|---|---|" >> "$GITHUB_STEP_SUMMARY"
+
+          probe_failed=0
+          for label in A B; do
+            email_var="RLS_TEST_TENANT_${label}_EMAIL"
+            tid_var="RLS_TEST_TENANT_${label}_ID"
+            email="${!email_var:-}"
+            expected_tid="${!tid_var:-}"
+
+            if [ -z "$email" ] || [ -z "$expected_tid" ]; then
+              echo "| ${label} | – | – | – | \`${expected_tid:-<unset>}\` | – | ⚠️ env vars missing |" >> "$GITHUB_STEP_SUMMARY"
+              probe_failed=1
+              continue
+            fi
+
+            user_id=$("${PSQL[@]}" -c \
+              "SELECT id::text FROM auth.users WHERE lower(email) = lower('${email}') LIMIT 1;" \
+              2>/dev/null | head -n1)
+            user_id="${user_id:-}"
+
+            if [ -z "$user_id" ]; then
+              echo "| ${label} | (not found) | 0 | – | \`${expected_tid}\` | – | ❌ user missing |" >> "$GITHUB_STEP_SUMMARY"
+              probe_failed=1
+              continue
+            fi
+
+            mem_count=$("${PSQL[@]}" -c \
+              "SELECT count(*) FROM public.tenant_users WHERE user_id = '${user_id}'::uuid;" \
+              2>/dev/null | head -n1 | tr -d ' ')
+            mem_count="${mem_count:-0}"
+
+            mem_tids=$("${PSQL[@]}" -c \
+              "SELECT string_agg(tenant_id::text, ', ' ORDER BY tenant_id) FROM public.tenant_users WHERE user_id = '${user_id}'::uuid;" \
+              2>/dev/null | head -n1)
+            mem_tids="${mem_tids:-<none>}"
+
+            resolved=$("${PSQL[@]}" -c \
+              "SELECT COALESCE(public.get_user_tenant_id('${user_id}'::uuid)::text, '<NULL>');" \
+              2>/dev/null | head -n1)
+            resolved="${resolved:-<error>}"
+
+            verdict="✅ ok"
+            if [ "$mem_count" != "1" ]; then
+              verdict="❌ membership count != 1"
+              probe_failed=1
+            elif [ "$resolved" = "<NULL>" ]; then
+              verdict="❌ resolver returned NULL"
+              probe_failed=1
+            elif [ "$resolved" != "$expected_tid" ]; then
+              verdict="❌ resolver mismatch"
+              probe_failed=1
+            elif [ "$mem_tids" != "$expected_tid" ]; then
+              verdict="⚠️ tenant_users tenant_id != expected"
+              probe_failed=1
+            fi
+
+            # Also echo to job log for grep-friendly triage.
+            echo "Tenant ${label} probe:"
+            echo "  email          = ${email}"
+            echo "  user_id        = ${user_id}"
+            echo "  expected_tid   = ${expected_tid}"
+            echo "  membership_ct  = ${mem_count}"
+            echo "  tenant_ids     = ${mem_tids}"
+            echo "  resolver       = ${resolved}"
+            echo "  verdict        = ${verdict}"
+
+            echo "| ${label} | \`${user_id}\` | ${mem_count} | \`${mem_tids}\` | \`${expected_tid}\` | \`${resolved}\` | ${verdict} |" \
+              >> "$GITHUB_STEP_SUMMARY"
+          done
+
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          if [ "$probe_failed" = "1" ]; then
+            echo "> ⚠️ One or more membership probes failed — this typically explains the storage RLS failure (resolver returns NULL on duplicate memberships, fail-closed)." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "> ✅ Membership probes are clean — the storage failure is **not** caused by a duplicate / missing tenant_users row. Inspect the storage bucket policies and the failing test's expected outcome." >> "$GITHUB_STEP_SUMMARY"
+          fi
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "📦 Full details: \`rls-report-local\` artifact (HTML/JSON) and \`rls-postgres-logs-run-${GITHUB_RUN_ID}\` (filtered SQL errors)." >> "$GITHUB_STEP_SUMMARY"
+
       # When the RLS sweep itself fails, capture Postgres logs filtered to
       # the statements + errors that the failing tests produced. This is
       # narrower than the full container log dump below: it focuses on
