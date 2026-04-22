@@ -1658,6 +1658,15 @@ describe("Cross-Tenant Storage RLS Tests", () => {
           const path = nestedOwnPath(liveCreds.a.tenantId!, scenario.segments, "a-own-nested");
           const { data, error } = await clientB.storage.from(PRIVATE_BUCKET).remove([path]);
           const denied = Boolean(error) || !data || data.length === 0;
+          recordCleanup({
+            bucket: PRIVATE_BUCKET,
+            path,
+            role: "attacker",
+            removed: !denied,
+            note: denied
+              ? `nested cross-tenant DELETE by B (${scenario.name}) denied (${error?.message ?? "empty rows"})`
+              : `nested cross-tenant DELETE by B (${scenario.name}) UNEXPECTEDLY succeeded — RLS LEAK`,
+          });
           expect(denied).toBe(true);
 
           // File must still exist for the rightful owner.
@@ -2924,9 +2933,33 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         const denied = Boolean(error) || !data;
         expect(denied).toBe(true);
         // Defensive cleanup: if the leak DID materialise, remove the
-        // copied object so the run leaves no residue.
+        // copied object so the run leaves no residue. Either branch is
+        // ledgered so the PDF reflects what happened — either we
+        // confirmed denial without needing cleanup (removed=false,
+        // skipped note) or we caught a leak and report whether the
+        // residue removal succeeded.
         if (!denied) {
-          await clientA.storage.from(ASSETS_BUCKET).remove([destPath]).catch(() => undefined);
+          const { data: remData, error: remErr } = await clientA.storage
+            .from(ASSETS_BUCKET)
+            .remove([destPath]);
+          const removed = !remErr && Array.isArray(remData) && remData.length > 0;
+          recordCleanup({
+            bucket: ASSETS_BUCKET,
+            path: destPath,
+            role: "attacker",
+            removed,
+            note: removed
+              ? `RLS LEAK: copy() succeeded — residue removed by attacker`
+              : `RLS LEAK: copy() succeeded AND residue cleanup FAILED (${remErr?.message ?? "empty rows"}) — manual cleanup needed`,
+          });
+        } else {
+          recordCleanup({
+            bucket: ASSETS_BUCKET,
+            path: destPath,
+            role: "attacker",
+            removed: false,
+            note: `cross-tenant copy() denied — no residue cleanup needed`,
+          });
         }
       });
 
@@ -2939,7 +2972,27 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         const denied = Boolean(error) || !data;
         expect(denied).toBe(true);
         if (!denied) {
-          await clientB.storage.from(ASSETS_BUCKET).remove([destPath]).catch(() => undefined);
+          const { data: remData, error: remErr } = await clientB.storage
+            .from(ASSETS_BUCKET)
+            .remove([destPath]);
+          const removed = !remErr && Array.isArray(remData) && remData.length > 0;
+          recordCleanup({
+            bucket: ASSETS_BUCKET,
+            path: destPath,
+            role: "attacker",
+            removed,
+            note: removed
+              ? `RLS LEAK: move() succeeded — residue removed by attacker`
+              : `RLS LEAK: move() succeeded AND residue cleanup FAILED (${remErr?.message ?? "empty rows"}) — manual cleanup needed`,
+          });
+        } else {
+          recordCleanup({
+            bucket: ASSETS_BUCKET,
+            path: destPath,
+            role: "attacker",
+            removed: false,
+            note: `cross-tenant move() denied — no residue cleanup needed`,
+          });
         }
       });
 
