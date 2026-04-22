@@ -33,25 +33,59 @@ jobs:
       # those env vars are missing, but we gate the whole step at the
       # workflow level too so the log shows a clear "skipped" notice
       # instead of a misleading green "0 tests ran".
+      #
+      # Fallback: if a CI environment ships only the bare backend secret
+      # names (`SUPABASE_URL` + a publishable or anon key under any common
+      # spelling) we still run the same pagination subset by re-exporting
+      # them under the names the test file expects. Service-role alone is
+      # NOT sufficient — these probes must run with a non-privileged JWT
+      # or RLS is bypassed and the assertions become vacuous; the gate
+      # below detects and loudly refuses that case.
       - name: Check pagination-RLS prerequisites
         id: pag_check
         env:
-          SUPA_URL: ${{ secrets.VITE_SUPABASE_URL }}
-          SUPA_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          # Primary (Vite-prefixed) credential pair.
+          VITE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          # Fallback bare names that backends/CI commonly expose.
+          BARE_URL: ${{ secrets.SUPABASE_URL }}
+          BARE_PUB: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+          BARE_ANON: ${{ secrets.SUPABASE_ANON_KEY }}
+          BARE_SR: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: |
-          if [ -n "$SUPA_URL" ] && [ -n "$SUPA_KEY" ]; then
+          # Resolve URL: Vite-prefixed wins, bare is the fallback.
+          RESOLVED_URL="${VITE_URL:-$BARE_URL}"
+          # Resolve a non-privileged key (publishable/anon, never service-role).
+          RESOLVED_KEY="${VITE_KEY:-${BARE_PUB:-$BARE_ANON}}"
+
+          if [ -n "$RESOLVED_URL" ] && [ -n "$RESOLVED_KEY" ]; then
             echo "enabled=true" >> "$GITHUB_OUTPUT"
-            echo "✅ Supabase env vars present — pagination RLS probes will run."
+            echo "resolved_url=$RESOLVED_URL" >> "$GITHUB_OUTPUT"
+            # Mask before echoing — GitHub will scrub the value from logs.
+            echo "::add-mask::$RESOLVED_KEY"
+            echo "resolved_key=$RESOLVED_KEY" >> "$GITHUB_OUTPUT"
+            if [ -n "$VITE_URL" ] && [ -n "$VITE_KEY" ]; then
+              echo "✅ Vite-prefixed Supabase secrets present — pagination RLS probes will run."
+            else
+              echo "✅ Fallback Supabase secrets present (bare names) — pagination RLS probes will run."
+            fi
+          elif [ -n "$BARE_SR" ] && [ -z "$RESOLVED_KEY" ]; then
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::Only SUPABASE_SERVICE_ROLE_KEY is configured — pagination RLS probes refuse to run with service-role (would bypass RLS). Add SUPABASE_PUBLISHABLE_KEY or SUPABASE_ANON_KEY to enable."
           else
             echo "enabled=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::Skipping pagination-RLS probes — VITE_SUPABASE_URL / VITE_SUPABASE_PUBLISHABLE_KEY not configured."
+            echo "::notice::Skipping pagination-RLS probes — no Supabase URL + publishable/anon key pair configured (checked VITE_SUPABASE_*, SUPABASE_PUBLISHABLE_KEY, SUPABASE_ANON_KEY)."
           fi
 
       - name: Run pagination-only cross-tenant log isolation probes
         if: steps.pag_check.outputs.enabled == 'true'
         env:
-          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          # Re-export under the Vite-prefixed names the test file reads
+          # first; the test's own resolution chain also handles the bare
+          # names, but normalising here keeps logs and reproductions
+          # symmetrical regardless of which secret pair was present.
+          VITE_SUPABASE_URL: ${{ steps.pag_check.outputs.resolved_url }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ steps.pag_check.outputs.resolved_key }}
         run: |
           bunx vitest run \
             --config vitest.security.config.ts \
