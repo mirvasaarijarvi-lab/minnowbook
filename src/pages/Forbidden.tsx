@@ -273,6 +273,9 @@ const Forbidden = ({
         // Stable, route-derived slug so monitors can group denials by area
         // independently of the human-readable copy that appears on screen.
         data-area-slug={resolvedSlug}
+        // Audit beacon outcome — exposed for E2E tests and the dev indicator.
+        data-audit-status={auditStatus ?? "pending"}
+        data-audit-reason={auditReason ?? ""}
       >
         <div className="max-w-md w-full text-center space-y-6">
           <div className="mx-auto h-16 w-16 rounded-full bg-destructive/10 flex items-center justify-center">
@@ -306,6 +309,40 @@ const Forbidden = ({
               <Link to="/">Back to home</Link>
             </Button>
           </div>
+
+          {/*
+            Dev-only audit beacon indicator. Vite replaces `import.meta.env.DEV`
+            at build time, so this entire block is tree-shaken out of production
+            bundles. The `data-audit-*` attributes on <main> carry the same
+            signal for automated tests regardless of build mode.
+          */}
+          {import.meta.env.DEV && (
+            <div
+              className="mt-4 inline-flex items-center gap-2 rounded-md border border-border bg-muted/50 px-3 py-1.5 text-xs text-muted-foreground"
+              role="status"
+              aria-live="polite"
+              data-testid="forbidden-audit-indicator"
+            >
+              <span
+                className={
+                  "h-2 w-2 rounded-full " +
+                  (auditStatus === "logged"
+                    ? "bg-primary"
+                    : auditStatus === "not_logged" ||
+                        auditStatus === "skipped"
+                      ? "bg-muted-foreground"
+                      : auditStatus === "error"
+                        ? "bg-destructive"
+                        : "bg-muted-foreground/50 animate-pulse")
+                }
+                aria-hidden="true"
+              />
+              <span className="font-mono">
+                audit: {auditStatus ?? "pending…"}
+                {auditReason ? ` (${auditReason})` : ""}
+              </span>
+            </div>
+          )}
         </div>
       </main>
     </>
