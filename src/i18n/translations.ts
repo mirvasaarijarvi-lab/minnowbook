@@ -1527,6 +1527,42 @@ type TranslationKeys = {
   "nav.blog": string;
   "nav.whatIs": string;
   "nav.offers": string;
+  "nav.kitchen": string;
+
+  // Kitchen orders
+  "kitchen.title": string;
+  "kitchen.tooltip": string;
+  "kitchen.date": string;
+  "kitchen.today": string;
+  "kitchen.noReservations": string;
+  "kitchen.noOrders": string;
+  "kitchen.addItem": string;
+  "kitchen.itemName": string;
+  "kitchen.itemNamePlaceholder": string;
+  "kitchen.quantity": string;
+  "kitchen.category": string;
+  "kitchen.status": string;
+  "kitchen.notes": string;
+  "kitchen.notesPlaceholder": string;
+  "kitchen.unitPrice": string;
+  "kitchen.total": string;
+  "kitchen.guests": string;
+  "kitchen.cat.food": string;
+  "kitchen.cat.drink": string;
+  "kitchen.cat.other": string;
+  "kitchen.status.received": string;
+  "kitchen.status.preparing": string;
+  "kitchen.status.ready": string;
+  "kitchen.status.served": string;
+  "kitchen.save": string;
+  "kitchen.delete": string;
+  "kitchen.deleteConfirm": string;
+  "kitchen.itemAdded": string;
+  "kitchen.itemUpdated": string;
+  "kitchen.itemDeleted": string;
+  "kitchen.error": string;
+  "kitchen.filter.all": string;
+  "kitchen.print": string;
 
   // Offers
   "offers.title": string;
