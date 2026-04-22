@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { createHash, randomBytes } from "node:crypto";
+import { assertRedeemFunctionReachable } from "./fixtures/redeem-preflight";
 
 /**
  * Authenticated end-to-end concurrency test for `redeem-access-code`.
@@ -226,6 +227,16 @@ suite(
     let token: string;
 
     beforeAll(async () => {
+      // Reachability preflight FIRST — fail fast with a single,
+      // copy-pasteable error if the function is missing/misrouted/etc.
+      // Doing this before any provisioning saves operators 30+ seconds
+      // of "create user → create tenant → seed code → call function →
+      // 404 from a renamed function" debugging.
+      await assertRedeemFunctionReachable({
+        supabaseUrl: SUPABASE_URL!,
+        supabasePublishableKey: SUPABASE_ANON_KEY!,
+      });
+
       admin = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!, {
         auth: { persistSession: false, autoRefreshToken: false },
       });

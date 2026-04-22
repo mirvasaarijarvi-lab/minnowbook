@@ -5,6 +5,7 @@ import {
   createAccessCodeTracker,
   type AccessCodeTracker,
 } from "./fixtures/access-code-cleanup";
+import { assertRedeemFunctionReachable } from "./fixtures/redeem-preflight";
 
 /**
  * Stable, unique tag stamped into every seeded code's `description`.
@@ -245,6 +246,14 @@ suite(
     let tracker: AccessCodeTracker;
 
     beforeAll(async () => {
+      // Reachability preflight FIRST — surfaces a clear, single-line
+      // failure if the function is missing/renamed/misrouted, so we
+      // don't waste minutes seeing confusing 404s downstream.
+      await assertRedeemFunctionReachable({
+        supabaseUrl: SUPABASE_URL!,
+        supabasePublishableKey: SUPABASE_ANON_KEY!,
+      });
+
       admin = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!, {
         auth: { persistSession: false, autoRefreshToken: false },
       });
