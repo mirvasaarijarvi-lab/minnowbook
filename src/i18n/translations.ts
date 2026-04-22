@@ -1593,6 +1593,13 @@ type TranslationKeys = {
   "kitchen.menu.saveError": string;
   "kitchen.menu.close": string;
   "kitchen.menu.searchPlaceholder": string;
+  "kitchen.bulk.markAll": string;
+  "kitchen.bulk.advanceAll": string;
+  "kitchen.bulk.allPreparing": string;
+  "kitchen.bulk.allReady": string;
+  "kitchen.bulk.allServed": string;
+  "kitchen.bulk.updated": string;
+  "kitchen.bulk.nothingToUpdate": string;
 
   // Offers
   "offers.title": string;
@@ -3215,6 +3222,13 @@ const en: TranslationKeys = {
   "kitchen.menu.saveError": "Could not save menu item",
   "kitchen.menu.close": "Close",
   "kitchen.menu.searchPlaceholder": "Search menu...",
+  "kitchen.bulk.markAll": "Mark all",
+  "kitchen.bulk.advanceAll": "Advance all",
+  "kitchen.bulk.allPreparing": "All to Preparing",
+  "kitchen.bulk.allReady": "All to Ready",
+  "kitchen.bulk.allServed": "All to Served",
+  "kitchen.bulk.updated": "{count} item(s) updated",
+  "kitchen.bulk.nothingToUpdate": "Nothing to update",
 
   // Offers
   "offers.title": "Offers",
@@ -4833,6 +4847,13 @@ const fi: TranslationKeys = {
   "kitchen.menu.saveError": "Menutuotteen tallennus epäonnistui",
   "kitchen.menu.close": "Sulje",
   "kitchen.menu.searchPlaceholder": "Hae menusta...",
+  "kitchen.bulk.markAll": "Merkitse kaikki",
+  "kitchen.bulk.advanceAll": "Etene kaikilla",
+  "kitchen.bulk.allPreparing": "Kaikki valmistukseen",
+  "kitchen.bulk.allReady": "Kaikki valmiiksi",
+  "kitchen.bulk.allServed": "Kaikki tarjoiltu",
+  "kitchen.bulk.updated": "{count} tuotetta päivitetty",
+  "kitchen.bulk.nothingToUpdate": "Ei päivitettävää",
 
   // Offers
   "offers.title": "Tarjoukset",
@@ -6451,6 +6472,13 @@ const sv: TranslationKeys = {
   "kitchen.menu.saveError": "Kunde inte spara menyobjektet",
   "kitchen.menu.close": "Stäng",
   "kitchen.menu.searchPlaceholder": "Sök i menyn...",
+  "kitchen.bulk.markAll": "Markera alla",
+  "kitchen.bulk.advanceAll": "Gå framåt alla",
+  "kitchen.bulk.allPreparing": "Alla till Tillagas",
+  "kitchen.bulk.allReady": "Alla till Klar",
+  "kitchen.bulk.allServed": "Alla till Serverad",
+  "kitchen.bulk.updated": "{count} objekt uppdaterade",
+  "kitchen.bulk.nothingToUpdate": "Inget att uppdatera",
 
   // Offers
   "offers.title": "Erbjudanden",
