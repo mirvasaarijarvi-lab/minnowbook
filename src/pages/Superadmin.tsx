@@ -139,11 +139,11 @@ const Superadmin = () => {
 
   // Edit tenant
   const editMutation = useMutation({
-    mutationFn: async ({ id, name, tier, max_staff_users, sample_start_date, sample_end_date, discount_percentage, discount_reason }: { id: string; name: string; tier: string; max_staff_users: number; sample_start_date: string; sample_end_date: string; discount_percentage: number; discount_reason: string }) => {
+    mutationFn: async ({ id, name, tier, sample_start_date, sample_end_date, discount_percentage, discount_reason }: { id: string; name: string; tier: string; sample_start_date: string; sample_end_date: string; discount_percentage: number; discount_reason: string }) => {
       const { error } = await supabase
         .from("tenants")
         .update({
-          name, tier, max_staff_users,
+          name, tier,
           sample_start_date: sample_start_date || null,
           sample_end_date: sample_end_date || null,
           discount_percentage: discount_percentage || 0,
