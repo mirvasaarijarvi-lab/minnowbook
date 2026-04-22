@@ -144,6 +144,8 @@ const Forbidden = ({
       controller.abort();
     };
   }, [resolvedSlug]);
+
+  // Persist the denial to the audit_log so tenant owners and system admins
   // can review forbidden-access attempts. The edge function resolves the
   // caller's user id from their JWT and writes user_id + timestamp + the
   // attempted area. Fire-and-forget; we don't surface failures to the UI.
@@ -159,7 +161,11 @@ const Forbidden = ({
         await supabase.functions.invoke("log-forbidden-access", {
           method: "POST",
           body: {
-            attemptedArea,
+            // Send the stable slug as the canonical attemptedArea so audit
+            // queries can group by route. Also include the human label for
+            // operator readability in the log UI.
+            attemptedArea: resolvedSlug,
+            attemptedAreaLabel: attemptedArea,
             attemptedPath:
               typeof window !== "undefined"
                 ? window.location.pathname + window.location.search
@@ -173,7 +179,7 @@ const Forbidden = ({
     return () => {
       cancelled = true;
     };
-  }, [attemptedArea]);
+  }, [resolvedSlug, attemptedArea]);
 
   // Set title + status + noindex meta. The Status meta is the closest the
   // browser can come to a real status code on a static document.
