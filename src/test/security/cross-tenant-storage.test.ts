@@ -3240,6 +3240,152 @@ describe("Cross-Tenant Storage RLS Tests", () => {
     },
   );
 
+  // ============================================================
+  // Aborted cross-tenant upload — multipart intermediate cleanup
+  // ============================================================
+  // Background:
+  //   When a cross-tenant upload >6 MB is denied by RLS mid-stream, the
+  //   visible object never appears in `storage.objects`, but a row CAN
+  //   linger in `storage.s3_multipart_uploads`. These orphans count
+  //   toward storage quota and are NOT cleaned up by `storage.from(b).remove()`.
+  //
+  // What we test:
+  //   `sweepMultipartIntermediates()` is the dedicated cleanup path for
+  //   exactly that orphan. Reproducing a true aborted upload from the SDK
+  //   is timing-dependent (and the SDK may transparently retry), so we
+  //   simulate the artifact deterministically: we INSERT a synthetic
+  //   `s3_multipart_uploads` row via the service-role client whose `key`
+  //   matches our scoped path AND contains this run's RUN_ID — exactly
+  //   what an aborted cross-tenant upload would leave behind. We then
+  //   call the sweeper and assert the row is gone.
+  //
+  // Why this is safe:
+  //   The synthetic row's key is `{tenantId}/__rls_test__/{RUN_ID}/...`,
+  //   which is the same scope every other test artifact uses. Even if
+  //   the assertion fails, the suite-wide afterAll sweep will pick it up.
+  //
+  // Skip conditions:
+  //   - No service-role key   → can't insert into `storage.*` tables.
+  //   - Live mode disabled    → no real tenant ids to use as the key prefix.
+  describe.runIf(hasSupabaseConfig && liveModeEnabled && Boolean(adminClient))(
+    "Aborted cross-tenant upload leaves multipart orphan that admin sweep removes",
+    () => {
+      // Each synthetic orphan key is unique per test run AND tagged with a
+      // sub-marker so a flaky run can't confuse rows from different tests.
+      const SUB_MARKER = `aborted-multipart-${Math.random().toString(36).slice(2, 8)}`;
+      const orphanKey = `${runRootFor(liveCreds.a.tenantId!)}/${SUB_MARKER}/large-file.bin`;
+      // The synthetic id mirrors what storage would generate — a
+      // dot-separated bucket/key/version triple. Using a UUID-ish suffix
+      // keeps it unique across reruns.
+      const orphanId = `${PRIVATE_BUCKET}/${orphanKey}/${RUN_ID}-${SUB_MARKER}`;
+
+      // Track whether we successfully seeded — drives whether afterAll
+      // needs to clean up after a failed assertion.
+      let seeded = false;
+
+      afterAll(async () => {
+        // Best-effort residual cleanup: if the sweep DIDN'T remove the
+        // row (test failed before calling it, or the sweeper had a bug),
+        // delete it directly so we don't leave an orphan behind. Errors
+        // are swallowed — the suite-wide sweep is the final backstop.
+        if (!seeded || !adminClient) return;
+        try {
+          await adminClient
+            .schema("storage")
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            .from("s3_multipart_uploads" as any)
+            .delete()
+            .eq("id", orphanId);
+        } catch {
+          /* swallow — afterAll must never throw */
+        }
+      });
+
+      it("sweepMultipartIntermediates removes the orphan row left by an aborted cross-tenant upload", async () => {
+        // adminClient is non-null here per describe.runIf guard, but
+        // narrow the type for TS.
+        if (!adminClient) throw new Error("adminClient unexpectedly null");
+
+        // ---------- 1. Seed the synthetic orphan ----------
+        // Insert directly into `storage.s3_multipart_uploads` to
+        // deterministically simulate the row an aborted/RLS-denied
+        // cross-tenant multipart upload would leave behind. Only the
+        // NOT-NULL columns are populated; everything else takes its
+        // default.
+        const { error: insertErr } = await adminClient
+          .schema("storage")
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          .from("s3_multipart_uploads" as any)
+          .insert({
+            id: orphanId,
+            bucket_id: PRIVATE_BUCKET,
+            key: orphanKey,
+            version: `${RUN_ID}-v1`,
+            upload_signature: `synthetic-${SUB_MARKER}`,
+            in_progress_size: 0,
+          });
+
+        // If insert failed because the table doesn't exist on this
+        // Supabase version (older self-hosted without the S3 driver),
+        // the sweeper's own select would also no-op — skip cleanly so
+        // we don't fail CI on environments that simply don't have this
+        // surface. Any OTHER error is a genuine setup problem.
+        if (insertErr) {
+          const msg = insertErr.message ?? "";
+          if (/relation .* does not exist|schema .* does not exist/i.test(msg)) {
+            // eslint-disable-next-line no-console
+            console.warn(
+              `[multipart-orphan-test] Skipping: storage.s3_multipart_uploads not available (${msg})`,
+            );
+            return;
+          }
+          throw new Error(`Failed to seed synthetic multipart orphan: ${msg}`);
+        }
+        seeded = true;
+
+        // ---------- 2. Confirm the orphan exists pre-sweep ----------
+        // Without this guard, a silently-failed insert would let the
+        // post-sweep "row is gone" assertion pass for the wrong reason.
+        const { data: preSweep, error: preSweepErr } = await adminClient
+          .schema("storage")
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          .from("s3_multipart_uploads" as any)
+          .select("id, key")
+          .eq("id", orphanId);
+        expect(preSweepErr, `pre-sweep select failed: ${preSweepErr?.message}`).toBeNull();
+        expect(
+          Array.isArray(preSweep) && preSweep.length === 1,
+          "synthetic orphan was not visible after insert — test cannot proceed",
+        ).toBe(true);
+        expect((preSweep as Array<{ key: string }>)[0].key).toBe(orphanKey);
+
+        // ---------- 3. Run the cleanup under test ----------
+        // sweepMultipartIntermediates() is the production code path that
+        // runs in every other live-mode suite's afterAll. Calling it
+        // here (only for tenant A's id) exercises the same scope filter
+        // (`bucket + tenant prefix + RUN_ID substring`) that protects
+        // real customer data from being touched.
+        await sweepMultipartIntermediates(PRIVATE_BUCKET, [liveCreds.a.tenantId!]);
+
+        // ---------- 4. Verify the orphan is gone ----------
+        const { data: postSweep, error: postSweepErr } = await adminClient
+          .schema("storage")
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          .from("s3_multipart_uploads" as any)
+          .select("id, key")
+          .eq("id", orphanId);
+        expect(postSweepErr, `post-sweep select failed: ${postSweepErr?.message}`).toBeNull();
+        expect(
+          Array.isArray(postSweep) && postSweep.length === 0,
+          `multipart orphan still present after sweep: ${JSON.stringify(postSweep)}`,
+        ).toBe(true);
+
+        // Mark as cleaned so afterAll doesn't double-delete.
+        seeded = false;
+      });
+    },
+  );
+
   describe.skipIf(hasSupabaseConfig)("Skipped: missing Supabase config", () => { 
     it("test environment is missing VITE_SUPABASE_URL / VITE_SUPABASE_PUBLISHABLE_KEY", () => {
       expect(true).toBe(true);
