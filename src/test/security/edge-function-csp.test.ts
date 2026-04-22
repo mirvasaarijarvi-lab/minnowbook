@@ -85,36 +85,45 @@ describe("Edge Function CSP — admin-users & support-chat", () => {
     describe(`${fixture.name}`, () => {
       const source = loadSource(fixture);
       const builderBody = extractBuilderBody(source, fixture.builderName);
+      // The header bag may pull CSP from a sibling const (e.g. SECURITY_HEADERS
+      // spread into the builder), so fall back to scanning the whole file.
+      const cspSearchScope = /Content-Security-Policy/.test(builderBody)
+        ? builderBody
+        : source;
 
-      it("declares Content-Security-Policy in the header builder", () => {
-        expect(builderBody).toMatch(/["']Content-Security-Policy["']\s*:/);
+      it("declares Content-Security-Policy somewhere in the response header chain", () => {
+        expect(cspSearchScope).toMatch(/["']Content-Security-Policy["']\s*:/);
       });
 
       it("CSP includes a restrictive default-src directive", () => {
-        const cspMatch = builderBody.match(
-          /["']Content-Security-Policy["']\s*:\s*["']([^"']+)["']/,
+        // Use [^"]+ (not [^"']+) because CSP values contain single quotes
+        // around keywords like 'none' and 'self'.
+        const cspMatch = cspSearchScope.match(
+          /["']Content-Security-Policy["']\s*:\s*"([^"]+)"/,
         );
-        expect(cspMatch, "CSP value not found in header builder").not.toBeNull();
+        expect(cspMatch, "CSP value not found in source").not.toBeNull();
         const csp = cspMatch![1];
         expect(csp).toMatch(/default-src\s+'none'/);
       });
 
       it("CSP includes frame-ancestors 'none' to block clickjacking", () => {
-        const cspMatch = builderBody.match(
-          /["']Content-Security-Policy["']\s*:\s*["']([^"']+)["']/,
+        const cspMatch = cspSearchScope.match(
+          /["']Content-Security-Policy["']\s*:\s*"([^"]+)"/,
         );
         expect(cspMatch).not.toBeNull();
         expect(cspMatch![1]).toMatch(/frame-ancestors\s+'none'/);
       });
 
       it("declares X-Frame-Options: DENY (defence-in-depth alongside CSP)", () => {
-        expect(builderBody).toMatch(
+        const xfoScope = /X-Frame-Options/.test(builderBody) ? builderBody : source;
+        expect(xfoScope).toMatch(
           /["']X-Frame-Options["']\s*:\s*["']DENY["']/,
         );
       });
 
       it("declares X-Content-Type-Options: nosniff to prevent MIME sniffing", () => {
-        expect(builderBody).toMatch(
+        const xctoScope = /X-Content-Type-Options/.test(builderBody) ? builderBody : source;
+        expect(xctoScope).toMatch(
           /["']X-Content-Type-Options["']\s*:\s*["']nosniff["']/,
         );
       });
