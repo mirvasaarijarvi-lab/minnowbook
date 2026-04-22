@@ -783,6 +783,54 @@ export type Database = {
         }
         Relationships: []
       }
+      kitchen_orders: {
+        Row: {
+          category: string
+          created_at: string
+          created_by: string | null
+          id: string
+          item_name: string
+          notes: string | null
+          quantity: number
+          reservation_id: string
+          sort_order: number
+          status: string
+          tenant_id: string
+          unit_price_eur: number | null
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          item_name: string
+          notes?: string | null
+          quantity?: number
+          reservation_id: string
+          sort_order?: number
+          status?: string
+          tenant_id: string
+          unit_price_eur?: number | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          item_name?: string
+          notes?: string | null
+          quantity?: number
+          reservation_id?: string
+          sort_order?: number
+          status?: string
+          tenant_id?: string
+          unit_price_eur?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       login_history: {
         Row: {
           id: string
