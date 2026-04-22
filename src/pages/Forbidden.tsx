@@ -5,11 +5,36 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 
 interface ForbiddenProps {
-  /** Short label describing the area the user tried to reach. */
+  /**
+   * Human-readable label describing the area the user tried to reach.
+   * Used in the visible body copy (e.g. "the Superadmin area").
+   */
   attemptedArea?: string;
+  /**
+   * Stable, machine-friendly slug for the attempted area (e.g. "superadmin",
+   * "superadmin/audit-log"). Used as the `?area=` query param on the
+   * forbidden-status beacon and as the `attemptedArea` field on the
+   * audit-log beacon, so synthetic monitors and audit queries can group
+   * denials by route without depending on UI copy.
+   *
+   * Defaults to a slugified form of `attemptedArea` so existing call sites
+   * keep working, but route guards should pass an explicit slug to keep
+   * it stable across copy changes.
+   */
+  areaSlug?: string;
   /** Optional override for the body copy. */
   message?: string;
 }
+
+/** Slugify a human label as a fallback when no explicit `areaSlug` is passed. */
+const toSlug = (label: string): string =>
+  label
+    .toLowerCase()
+    .replace(/^the\s+/, "")
+    .replace(/\s+area$/, "")
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "") || "unknown";
 
 /**
  * 403 page shown when an authenticated user lacks the role required for the
