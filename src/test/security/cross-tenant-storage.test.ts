@@ -430,6 +430,43 @@ async function sweepRunIdFolder(
  */
 async function sweepMultipartIntermediates(bucket: string, tenantIds: string[]) {
   if (!adminClient) return;
+
+  // Per-tenant aggregate counters for the end-of-sweep summary log.
+  // Captures (a) how many orphan parent rows we found, (b) how many child
+  // `s3_multipart_uploads_parts` rows we deleted, (c) how many parent rows
+  // were actually removed, and (d) how many select/delete errors occurred.
+  // The summary is printed AND ledgered as a single `admin-multipart`
+  // record per tenant so the storage-attempts PDF shows a clear roll-up
+  // alongside the per-row entries.
+  type SweepStats = {
+    orphansFound: number;
+    partsDeleted: number;
+    parentsDeleted: number;
+    errors: number;
+  };
+  const statsByTenant = new Map<string, SweepStats>();
+  const bumpStats = (tenantId: string, key: keyof SweepStats, by = 1) => {
+    const cur = statsByTenant.get(tenantId) ?? {
+      orphansFound: 0,
+      partsDeleted: 0,
+      parentsDeleted: 0,
+      errors: 0,
+    };
+    cur[key] += by;
+    statsByTenant.set(tenantId, cur);
+  };
+  // Pre-initialise so even tenants with zero orphans show up in the summary,
+  // confirming the sweep actually ran for every tenant id passed in.
+  for (const tid of tenantIds) {
+    if (!statsByTenant.has(tid)) {
+      statsByTenant.set(tid, {
+        orphansFound: 0,
+        partsDeleted: 0,
+        parentsDeleted: 0,
+        errors: 0,
+      });
+    }
+  }
   for (const tenantId of tenantIds) {
     const keyPrefix = `${tenantId}/__rls_test__/`;
     try {
@@ -451,6 +488,7 @@ async function sweepMultipartIntermediates(bucket: string, tenantIds: string[]) 
       // The table may not exist on older Supabase versions / self-hosted
       // installs without the S3 driver — that's fine, treat as no-op.
       if (selectErr) {
+        bumpStats(tenantId, "errors");
         recordCleanup({
           bucket,
           path: `${keyPrefix}${RUN_ID}/*`,
@@ -472,6 +510,7 @@ async function sweepMultipartIntermediates(bucket: string, tenantIds: string[]) 
       }
 
       const orphanRows = orphans as Array<{ id: string; key: string }>;
+      bumpStats(tenantId, "orphansFound", orphanRows.length);
 
       // Defense-in-depth assertion: every row returned by the scope filter
       // MUST contain BOTH the tenant-prefixed test folder AND this run's
@@ -511,12 +550,18 @@ async function sweepMultipartIntermediates(bucket: string, tenantIds: string[]) 
       // Errors are swallowed individually so a partial failure doesn't
       // mask the visible-object cleanup that already succeeded.
       try {
-        await adminClient
+        // PostgREST returns the deleted rows when `Prefer: return=representation`
+        // is set (default in supabase-js). Counting them gives us an accurate
+        // per-tenant "parts deleted" figure for the summary line.
+        const { data: deletedParts } = await adminClient
           .schema("storage")
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           .from("s3_multipart_uploads_parts" as any)
           .delete()
-          .in("upload_id", ids);
+          .in("upload_id", ids)
+          .select("id");
+        const deletedCount = Array.isArray(deletedParts) ? deletedParts.length : 0;
+        if (deletedCount > 0) bumpStats(tenantId, "partsDeleted", deletedCount);
       } catch {
         /* ignore — parts table may not exist on this version */
       }
@@ -535,11 +580,14 @@ async function sweepMultipartIntermediates(bucket: string, tenantIds: string[]) 
           // this run's RUN_ID — a per-row audit trail for reviewers.
           const markerOk =
             row.key.startsWith(expectedPrefix) && row.key.includes(RUN_ID);
+          const wasRemoved = !delErr && markerOk;
+          if (wasRemoved) bumpStats(tenantId, "parentsDeleted");
+          if (delErr) bumpStats(tenantId, "errors");
           recordCleanup({
             bucket,
             path: row.key,
             role: "admin-multipart",
-            removed: !delErr && markerOk,
+            removed: wasRemoved,
             note: delErr
               ? `delete failed: ${delErr.message}`
               : markerOk
@@ -554,6 +602,7 @@ async function sweepMultipartIntermediates(bucket: string, tenantIds: string[]) 
           }
         }
       } catch (err) {
+        bumpStats(tenantId, "errors");
         for (const row of orphanRows) {
           recordCleanup({
             bucket,
@@ -566,6 +615,7 @@ async function sweepMultipartIntermediates(bucket: string, tenantIds: string[]) 
         throw err;
       }
     } catch (err) {
+      bumpStats(tenantId, "errors");
       recordCleanup({
         bucket,
         path: `${keyPrefix}${RUN_ID}/*`,
@@ -574,6 +624,38 @@ async function sweepMultipartIntermediates(bucket: string, tenantIds: string[]) 
         note: `exception: ${(err as Error).message}`,
       });
     }
+  }
+
+  // ---------- End-of-sweep summary ----------
+  // Emit ONE consolidated console line per (bucket, tenant) and ALSO push
+  // a synthetic ledger entry so the storage-attempts PDF gets a clear
+  // roll-up at the top of each tenant's section. The synthetic entry's
+  // `path` uses a `<summary>` suffix so it can't be mistaken for an
+  // actual storage key during PDF rendering or grep-based audits.
+  for (const [tenantId, stats] of statsByTenant) {
+    const shortTid = tenantId.slice(0, 8);
+    // eslint-disable-next-line no-console
+    console.log(
+      `[multipart-sweep] bucket="${bucket}" tenant=${shortTid} ` +
+        `orphans_found=${stats.orphansFound} ` +
+        `parts_deleted=${stats.partsDeleted} ` +
+        `parents_deleted=${stats.parentsDeleted} ` +
+        `errors=${stats.errors}`,
+    );
+    recordCleanup({
+      bucket,
+      path: `${tenantId}/__rls_test__/${RUN_ID}/<summary>`,
+      role: "admin-multipart",
+      // `removed: true` ONLY when we actually removed at least one parent
+      // row AND no errors occurred — that's the only state where the
+      // sweep can claim it cleaned anything for this tenant.
+      removed: stats.parentsDeleted > 0 && stats.errors === 0,
+      note:
+        `SUMMARY orphans_found=${stats.orphansFound} ` +
+        `parts_deleted=${stats.partsDeleted} ` +
+        `parents_deleted=${stats.parentsDeleted} ` +
+        `errors=${stats.errors}`,
+    });
   }
 }
 
