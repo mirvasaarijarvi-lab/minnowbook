@@ -14,11 +14,16 @@ const SECURITY_HEADERS = {
   "Content-Security-Policy": "default-src 'none'; frame-ancestors 'none'",
 };
 
-function getCorsHeaders(req: Request): Record<string, string> {
-  const origin = req.headers.get("Origin") || "";
-  const allowed = ALLOWED_ORIGINS.some((o) =>
+function isOriginAllowed(origin: string): boolean {
+  if (!origin) return true; // server-to-server / curl with no Origin
+  return ALLOWED_ORIGINS.some((o) =>
     typeof o === "string" ? o === origin : o.test(origin)
   );
+}
+
+function getCorsHeaders(req: Request): Record<string, string> {
+  const origin = req.headers.get("Origin") || "";
+  const allowed = isOriginAllowed(origin) && origin !== "";
   return {
     "Access-Control-Allow-Origin": allowed ? origin : ALLOWED_ORIGINS[0] as string,
     "Access-Control-Allow-Headers":
@@ -111,6 +116,18 @@ Deno.serve(async (req) => {
 
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
+  }
+
+  // Origin allowlist gate: reject browser requests from disallowed origins
+  // with an explicit 403 (not just a CORS-blocked browser response). This
+  // ensures attacker-controlled pages get a hard server-side rejection and
+  // never reach authentication/business logic.
+  const reqOrigin = req.headers.get("Origin") || "";
+  if (reqOrigin && !isOriginAllowed(reqOrigin)) {
+    return new Response(JSON.stringify({ error: "Forbidden" }), {
+      status: 403,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 
   const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||

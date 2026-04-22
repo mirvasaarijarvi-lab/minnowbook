@@ -7,11 +7,16 @@ const ALLOWED_ORIGINS = [
   /^https:\/\/.*\.lovable\.app$/,
 ];
 
-function getCorsHeaders(req: Request): Record<string, string> {
-  const origin = req.headers.get("Origin") || "";
-  const allowed = ALLOWED_ORIGINS.some((o) =>
+function isOriginAllowed(origin: string): boolean {
+  if (!origin) return true; // server-to-server / no Origin header
+  return ALLOWED_ORIGINS.some((o) =>
     typeof o === "string" ? o === origin : o.test(origin)
   );
+}
+
+function getCorsHeaders(req: Request): Record<string, string> {
+  const origin = req.headers.get("Origin") || "";
+  const allowed = isOriginAllowed(origin) && origin !== "";
   return {
     "Access-Control-Allow-Origin": allowed ? origin : ALLOWED_ORIGINS[0] as string,
     "Access-Control-Allow-Headers":
@@ -54,6 +59,17 @@ serve(async (req) => {
   const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
+  }
+
+  // Origin allowlist gate: explicit 403 for browser requests from
+  // disallowed origins. Body is intentionally generic to avoid leaking
+  // any allowlist or routing details.
+  const reqOrigin = req.headers.get("Origin") || "";
+  if (reqOrigin && !isOriginAllowed(reqOrigin)) {
+    return new Response(JSON.stringify({ error: "Forbidden" }), {
+      status: 403,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 
   // Rate limit check
