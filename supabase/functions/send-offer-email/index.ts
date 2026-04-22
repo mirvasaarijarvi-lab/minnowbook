@@ -8,7 +8,10 @@ const SENDER_DOMAIN = "notify.mimmobook.com";
 const FROM_DOMAIN = "mimmobook.com";
 const OFFER_TEMPLATE_LABEL = "offer_email";
 const OFFER_BUCKET = "tenant-private";
-const OFFER_DOWNLOAD_TTL_SECONDS = 60 * 60 * 24 * 30; // 30 days
+// Short-lived signed URL: 7 days. Long enough for recipients to act on an
+// emailed offer, short enough to limit exposure if the email is forwarded
+// or leaked. Resending an offer regenerates a fresh URL.
+const OFFER_DOWNLOAD_TTL_SECONDS = 60 * 60 * 24 * 7;
 
 function jsonResponse(payload: unknown, status = 200) {
   return new Response(JSON.stringify(payload), {
