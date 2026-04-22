@@ -240,8 +240,8 @@ function renderHtml(payload: ReportPayload): string {
 </style>
 </head>
 <body>
-  <h1>Cross-Tenant RLS Test Report</h1>
-  <div class="meta">Generated ${escapeHtml(generatedAt)} · Total duration ${totals.durationMs.toFixed(
+  <h1>Cross-Tenant RLS Test Report <span style="color:#94a3b8;font-weight:400;font-size:14px">· ${escapeHtml(flavor)}</span></h1>
+  <div class="meta">Generated ${escapeHtml(generatedAt)} · Flavor <code>${escapeHtml(flavor)}</code> · Total duration ${totals.durationMs.toFixed(
     0,
   )} ms</div>
   <div class="summary">
