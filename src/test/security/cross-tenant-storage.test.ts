@@ -2042,6 +2042,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
               ),
             ]);
 
+            const { httpStatus, errorCode } = extractStorageError(result);
             recordUpload({
               bucket,
               path: variant.path,
@@ -2050,6 +2051,8 @@ describe("Cross-Tenant Storage RLS Tests", () => {
               expected: "denied",
               outcome: result.error ? "denied" : "allowed",
               errorMessage: result.error?.message,
+              httpStatus,
+              errorCode,
               scenario: `adversarial:${variant.label}`,
             });
 
@@ -2206,6 +2209,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
                   ),
                 ]);
 
+                const { httpStatus, errorCode } = extractStorageError(result);
                 recordUpload({
                   bucket,
                   path: variant.path,
@@ -2214,6 +2218,8 @@ describe("Cross-Tenant Storage RLS Tests", () => {
                   expected: "denied",
                   outcome: result.error ? "denied" : "allowed",
                   errorMessage: result.error?.message,
+                  httpStatus,
+                  errorCode,
                   scenario: `adversarial:${variant.label}`,
                 });
 
@@ -2230,13 +2236,32 @@ describe("Cross-Tenant Storage RLS Tests", () => {
                 const variant = adversarialPaths(dir.victimTenantId()).find(
                   (v) => v.label === labelHint,
                 )!;
-                const { data, error } = await dir
+                const downloadResult = await dir
                   .attackerClient()
                   .storage.from(bucket)
                   .download(variant.path);
+                const { data, error } = downloadResult;
                 // Denial = error OR no data. We don't care which — both
                 // prove the path normalization didn't leak the file.
                 const denied = Boolean(error) || !data;
+                // Surface DOWNLOAD outcomes in the ledger too. The PDF
+                // currently focuses on uploads, but recording the download
+                // attempt as a "cleanup-style" row keeps every adversarial
+                // probe visible (status code + error code included) so a
+                // 200-with-bytes regression for a path that previously 4xx'd
+                // would jump out in the next CI artifact diff.
+                const { httpStatus, errorCode } = extractStorageError(downloadResult);
+                recordCleanup({
+                  bucket,
+                  path: variant.path,
+                  role: "attacker",
+                  removed: !denied,
+                  httpStatus,
+                  errorCode,
+                  note: denied
+                    ? `download-probe denied (${dir.attacker} -> ${dir.owner}, ${labelHint})`
+                    : `download-probe UNEXPECTEDLY returned bytes — RLS LEAK (${dir.attacker} -> ${dir.owner}, ${labelHint})`,
+                });
                 expect(denied).toBe(true);
               },
               15000,
@@ -2364,6 +2389,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
                 ),
               ]);
 
+              const { httpStatus, errorCode } = extractStorageError(result);
               recordUpload({
                 bucket,
                 path: variant.path,
@@ -2372,6 +2398,8 @@ describe("Cross-Tenant Storage RLS Tests", () => {
                 expected: "denied",
                 outcome: result.error ? "denied" : "allowed",
                 errorMessage: result.error?.message,
+                httpStatus,
+                errorCode,
                 scenario: `late-segment:${variant.label}`,
               });
 
@@ -2532,6 +2560,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
                         variant.path)
                     : null;
 
+                const { httpStatus, errorCode } = extractStorageError(uploadResult);
                 recordUpload({
                   bucket,
                   path: variant.path,
@@ -2546,6 +2575,8 @@ describe("Cross-Tenant Storage RLS Tests", () => {
                       ? "allowed"
                       : "denied",
                   errorMessage: uploadResult.error?.message,
+                  httpStatus,
+                  errorCode,
                   scenario: `late-segment:${variant.label}`,
                 });
 
