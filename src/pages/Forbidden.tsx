@@ -399,13 +399,32 @@ const Forbidden = ({
         data-admin-check-data-updated-at={
           adminCheckState?.dataUpdatedAt ?? ""
         }
+        // Distinguishes a "lookup failed / still loading" fallback render
+        // from a confirmed "not an admin" denial. E2E tests and synthetic
+        // monitors can assert on this without re-deriving from individual
+        // admin-check booleans. Values: "errored" | "loading" | "denied".
+        data-fallback-mode={
+          lookupErrored ? "errored" : lookupStillLoading ? "loading" : "denied"
+        }
       >
         <div className="max-w-md w-full text-center space-y-6">
-          <div className="mx-auto h-16 w-16 rounded-full bg-destructive/10 flex items-center justify-center">
-            <ShieldAlert
-              className="h-8 w-8 text-destructive"
-              aria-hidden="true"
-            />
+          <div
+            className={
+              "mx-auto h-16 w-16 rounded-full flex items-center justify-center " +
+              (isFallback ? "bg-warning/10" : "bg-destructive/10")
+            }
+          >
+            {isFallback ? (
+              <AlertTriangle
+                className="h-8 w-8 text-warning"
+                aria-hidden="true"
+              />
+            ) : (
+              <ShieldAlert
+                className="h-8 w-8 text-destructive"
+                aria-hidden="true"
+              />
+            )}
           </div>
 
           <div className="space-y-2">
@@ -416,13 +435,45 @@ const Forbidden = ({
               403 · Access denied
             </p>
             <h1 className="text-3xl font-semibold text-foreground">
-              You don't have access
+              {isFallback
+                ? lookupErrored
+                  ? "We couldn't verify your access"
+                  : "Verifying your access…"
+                : "You don't have access"}
             </h1>
             <p className="text-muted-foreground">{body}</p>
           </div>
 
+          {lookupErrored && (
+            <Alert variant="destructive" className="text-left">
+              <AlertTriangle className="h-4 w-4" aria-hidden="true" />
+              <AlertTitle>Permission lookup failed</AlertTitle>
+              <AlertDescription>
+                The server didn't respond to our permission check. We've
+                blocked access as a precaution. Try again, or sign out and
+                back in if the problem persists.
+              </AlertDescription>
+            </Alert>
+          )}
+
           <div className="flex flex-col sm:flex-row gap-2 justify-center pt-2">
-            <Button asChild variant="default">
+            {isFallback && (
+              <Button
+                onClick={handleRetry}
+                disabled={isRetrying}
+                variant="default"
+                data-testid="forbidden-retry-button"
+              >
+                <RefreshCw
+                  className={
+                    "h-4 w-4 mr-2 " + (isRetrying ? "animate-spin" : "")
+                  }
+                  aria-hidden="true"
+                />
+                {isRetrying ? "Retrying…" : "Try again"}
+              </Button>
+            )}
+            <Button asChild variant={isFallback ? "outline" : "default"}>
               <Link to="/dashboard">
                 <ArrowLeft className="h-4 w-4 mr-2" aria-hidden="true" />
                 Go to dashboard
@@ -432,6 +483,7 @@ const Forbidden = ({
               <Link to="/">Back to home</Link>
             </Button>
           </div>
+
 
           {/*
             Dev-only audit beacon indicator. Vite replaces `import.meta.env.DEV`
