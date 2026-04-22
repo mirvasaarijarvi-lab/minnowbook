@@ -110,6 +110,24 @@ const KitchenOrdersPanel = () => {
   const [selectedDate, setSelectedDate] = useState(today);
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [pendingDelete, setPendingDelete] = useState<string | null>(null);
+  const [menuManagerOpen, setMenuManagerOpen] = useState(false);
+
+  // Menu templates for quick-insert
+  const { data: menuItems = [] } = useQuery({
+    queryKey: ["kitchen-menu-items", tenantId],
+    enabled: !!tenantId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("kitchen_menu_items")
+        .select("*")
+        .eq("tenant_id", tenantId!)
+        .eq("is_active", true)
+        .order("sort_order", { ascending: true })
+        .order("name", { ascending: true });
+      if (error) throw error;
+      return (data ?? []) as MenuItem[];
+    },
+  });
 
   const selectedDateObj = parseISO(selectedDate);
   const shiftDay = (delta: number) =>
