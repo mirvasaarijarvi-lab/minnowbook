@@ -205,7 +205,31 @@ const KitchenOrdersPanel = () => {
     onError: () => toast.error(t("kitchen.error")),
   });
 
-  const updateOrder = useMutation({
+  const addOrderFromMenu = useMutation({
+    mutationFn: async ({
+      reservationId,
+      menuItem,
+    }: {
+      reservationId: string;
+      menuItem: MenuItem;
+    }) => {
+      const { error } = await supabase.from("kitchen_orders").insert({
+        tenant_id: tenantId!,
+        reservation_id: reservationId,
+        item_name: menuItem.name,
+        quantity: 1,
+        category: menuItem.category,
+        unit_price_eur: menuItem.unit_price_eur,
+        status: "received",
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      invalidate();
+      toast.success(t("kitchen.itemAdded"));
+    },
+    onError: () => toast.error(t("kitchen.error")),
+  });
     mutationFn: async ({ id, patch }: { id: string; patch: Partial<KitchenOrder> }) => {
       const { error } = await supabase.from("kitchen_orders").update(patch).eq("id", id);
       if (error) throw error;
