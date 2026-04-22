@@ -110,7 +110,7 @@ const Forbidden = ({
     }
 
     const url = `${supabaseUrl}/functions/v1/forbidden-status?area=${encodeURIComponent(
-      attemptedArea,
+      resolvedSlug,
     )}`;
 
     // Fire-and-forget: deliberately not awaited. The render path returns
