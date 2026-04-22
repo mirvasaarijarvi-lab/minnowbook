@@ -181,7 +181,9 @@ function ToastSpy({ onUpdate }: { onUpdate: (t: any[]) => void }) {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  mockInvoke.mockReset();
+  // Use mockClear (not mockReset) so per-test mockImplementation calls
+  // remain in effect for the duration of the test.
+  mockInvoke.mockClear();
 });
 
 // --- Tests ---------------------------------------------------------------
