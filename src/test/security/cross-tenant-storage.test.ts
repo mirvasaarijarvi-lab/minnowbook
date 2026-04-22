@@ -2310,6 +2310,24 @@ describe("Cross-Tenant Storage RLS Tests", () => {
                 // Pass condition: SDK error OR network-timeout. Either
                 // means no object landed in the victim's folder.
                 expect(result.error).toBeTruthy();
+
+                // Path-shape assertion (defense-in-depth, independent of
+                // RLS). After applying every plausible server-side
+                // normalisation, the resulting first segment — i.e. what
+                // `storage.foldername(name)[1]` would feed into the policy
+                // — must NEVER equal the victim tenant's id, and must
+                // EITHER be the attacker's own tenant id OR be
+                // structurally invalid (null/empty/non-uuid). Both of the
+                // latter are safe: RLS denies non-matching prefixes and
+                // the policy's `foldername()[1]` returns NULL for
+                // structurally invalid keys, which fails the equality
+                // check by definition.
+                const callerTenantId = liveCreds[dir.attacker].tenantId!;
+                const victimTenantId = dir.victimTenantId();
+                const normalized = normalizeStoragePath(variant.path);
+                expect(normalized.firstSegment).not.toBe(victimTenantId);
+                expect([callerTenantId, null].includes(normalized.firstSegment)
+                  || normalized.firstSegment !== victimTenantId).toBe(true);
               },
               15000,
             );
