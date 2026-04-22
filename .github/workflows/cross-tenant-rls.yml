@@ -89,15 +89,18 @@ jobs:
           RLS_TEST_TENANT_B_EMAIL: ${{ secrets.RLS_TEST_TENANT_B_EMAIL }}
           RLS_TEST_TENANT_B_PASSWORD: ${{ secrets.RLS_TEST_TENANT_B_PASSWORD }}
           RLS_TEST_TENANT_B_ID: ${{ secrets.RLS_TEST_TENANT_B_ID }}
+          # Tags the generated report so remote-staging output is
+          # distinguishable from local-stack output (`rls-report-local`).
+          RLS_REPORT_FLAVOR: remote
         run: bun run test:rls-report
 
-      - name: Upload RLS report
+      - name: Upload RLS report (remote)
         # Always upload — even on test failure — so the HTML/JSON dashboard
         # is available for triage from the workflow run page.
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: rls-report
+          name: rls-report-remote
           path: reports/
           retention-days: 30
 
