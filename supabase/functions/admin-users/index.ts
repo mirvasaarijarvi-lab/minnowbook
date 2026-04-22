@@ -28,34 +28,9 @@ function getCorsHeaders(req: Request): Record<string, string> {
 }
 
 // --- Safe error messages (prevent schema leakage) ---
-const SAFE_ERRORS = new Set([
-  "Not authenticated",
-  "Insufficient permissions",
-  "No tenant context",
-  "Action is required",
-  "Unknown action",
-  "Cannot delete yourself",
-  "User not in your tenant",
-  "Site not found in your tenant",
-  "No valid users found in your tenant",
-  "userIds array is required",
-  "Cannot assign more than 100 users at once",
-  "Only superadmins can grant admin access or above",
-]);
-
-function sanitizeError(msg: string): string {
-  if (SAFE_ERRORS.has(msg)) return msg;
-  // Allow validation errors from our own validators
-  if (/^(Email|Password|Display name|Role|Invalid).{0,80}$/.test(msg)) return msg;
-  // Allow tier-limit errors raised by DB triggers (enforce_staff_user_limit,
-  // enforce_site_limit, enforce_resource_per_type_limit, enforce_reservation_type_limit).
-  // These are user-actionable and explicitly designed to be shown to admins.
-  if (/^Tier ".{1,40}" allows at most \d+/.test(msg)) return msg;
-  if (/^Your plan allows only \d+ resource\(s\) per type/.test(msg)) return msg;
-  if (/already belongs to another organization/i.test(msg)) return msg;
-  console.error("[admin-users] Internal error:", msg);
-  return "An unexpected error occurred. Please try again.";
-}
+// Implementation extracted to ./sanitize-error.ts so it can be unit-tested
+// without spinning up the full Deno server.
+import { sanitizeError } from "./sanitize-error.ts";
 
 // --- Input validation helpers ---
 const MAX_EMAIL_LENGTH = 255;
