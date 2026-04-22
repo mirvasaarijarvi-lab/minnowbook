@@ -1045,12 +1045,35 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       const { data, error } = await anon.storage.from(PRIVATE_BUCKET).remove([anonPath]);
       // remove() returns deleted rows on success; RLS denial yields error or [].
       const denied = Boolean(error) || !data || data.length === 0;
+      // Ledger the negative-control delete so the PDF shows what happened
+      // alongside the per-attacker upload rows. `removed: !denied` means
+      // a row only counts as "removed" when the API actually returned a
+      // deleted record — RLS denials show up as removed=false with a
+      // human-readable note.
+      recordCleanup({
+        bucket: PRIVATE_BUCKET,
+        path: anonPath,
+        role: "attacker",
+        removed: !denied,
+        note: denied
+          ? `negative-control: anon DELETE denied (${error?.message ?? "empty rows"})`
+          : `negative-control: anon DELETE UNEXPECTEDLY succeeded — RLS LEAK`,
+      });
       expect(denied).toBe(true);
     });
 
     it("anon cannot delete from tenant-assets bucket", async () => {
       const { data, error } = await anon.storage.from(ASSETS_BUCKET).remove([anonPath]);
       const denied = Boolean(error) || !data || data.length === 0;
+      recordCleanup({
+        bucket: ASSETS_BUCKET,
+        path: anonPath,
+        role: "attacker",
+        removed: !denied,
+        note: denied
+          ? `negative-control: anon DELETE denied (${error?.message ?? "empty rows"})`
+          : `negative-control: anon DELETE UNEXPECTEDLY succeeded — RLS LEAK`,
+      });
       expect(denied).toBe(true);
     });
 
