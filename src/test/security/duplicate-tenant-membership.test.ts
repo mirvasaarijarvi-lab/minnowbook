@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { assertDistinctTenantPairIds, isUuid } from "./fixtures/tenant-id-guard";
 
 /**
  * Duplicate Tenant Membership — Behavioural Contract
