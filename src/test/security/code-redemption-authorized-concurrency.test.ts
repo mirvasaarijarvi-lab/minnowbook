@@ -1,6 +1,18 @@
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { describe, it, expect, beforeAll, afterAll, afterEach } from "vitest";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { createHash, randomBytes } from "node:crypto";
+import {
+  createAccessCodeTracker,
+  type AccessCodeTracker,
+} from "./fixtures/access-code-cleanup";
+
+/**
+ * Stable, unique tag stamped into the `description` of every code seeded
+ * by this suite. Used by the cleanup helper to sweep ALL rows from prior
+ * crashed runs at the start of each suite — even rows whose UUIDs were
+ * lost when a previous test process died mid-race.
+ */
+const DESCRIPTION_TAG = "[authz-conc-test]";
 
 /**
  * Authorized-user concurrent-redemption integrity suite.
