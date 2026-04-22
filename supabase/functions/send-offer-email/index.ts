@@ -203,11 +203,15 @@ Deno.serve(async (req) => {
         throw new Error(`Failed to prepare offer PDF: ${uploadError.message}`);
       }
 
-      const { data: publicUrlData } = supabaseAdmin.storage
+      const { data: signedUrlData, error: signedUrlError } = await supabaseAdmin.storage
         .from(OFFER_BUCKET)
-        .getPublicUrl(filePath);
+        .createSignedUrl(filePath, OFFER_DOWNLOAD_TTL_SECONDS);
 
-      downloadUrl = publicUrlData.publicUrl;
+      if (signedUrlError || !signedUrlData?.signedUrl) {
+        throw new Error(`Failed to create signed download URL: ${signedUrlError?.message ?? "unknown error"}`);
+      }
+
+      downloadUrl = signedUrlData.signedUrl;
     }
 
     const messageId = `offer-${crypto.randomUUID()}`;
