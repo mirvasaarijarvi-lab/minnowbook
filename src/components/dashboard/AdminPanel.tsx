@@ -227,8 +227,11 @@ const AdminPanel = () => {
   });
 
   const userList = (users as TenantUser[]) ?? [];
-  const maxStaff = tenant?.max_staff_users ?? 3;
-  const isAtStaffLimit = !isSystemAdmin && userList.length >= maxStaff;
+  // Staff user limit is now derived from the tenant's tier (enforced by
+  // the `enforce_staff_user_limit` DB trigger). Business tier = unlimited.
+  const tierMaxStaff = getMaxStaffUsers(tenant?.tier);
+  const isAtStaffLimit =
+    !isSystemAdmin && tierMaxStaff !== null && userList.length >= tierMaxStaff;
 
   const openSiteDialog = (user: TenantUser) => {
     setSelectedUserId(user.user_id);
