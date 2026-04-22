@@ -2154,6 +2154,15 @@ describe("Cross-Tenant Storage RLS Tests", () => {
             "url-encoded-tenant-wrappers",
             "backslash-separators",
             "null-byte-truncation",
+            // Mixed / multi-pass encoding probes — keep in sync with
+            // `adversarialPaths()` above. We list each label explicitly
+            // (rather than iterating every entry the generator returns)
+            // so a typo in `adversarialPaths()` surfaces here as a
+            // missing-variant test failure instead of being silently
+            // skipped.
+            "double-encoded-slash",
+            "url-encoded-dot-dot",
+            "url-encoded-slash-plus-dot-dot",
           ]) {
             it(
               `user ${dir.attacker.toUpperCase()} cannot UPLOAD via '${labelHint}' to tenant ${dir.owner.toUpperCase()}'s ${bucket}`,
