@@ -308,7 +308,7 @@ suite(
     it("25 concurrent redeems by the same authorized user produce exactly one success and a consistent ledger", async () => {
       const plaintext = freshPlaintext();
       const accessCodeId = await seedAccessCode(admin, plaintext, userId, 1);
-      seededCodeIds.push(accessCodeId);
+      tracker.register(accessCodeId);
 
       // Reset tenant + ledger so this test starts from a known clean slate.
       await admin
@@ -421,7 +421,7 @@ suite(
       // to make the second call a verbatim replay of the first.
       const plaintext = freshPlaintext();
       const accessCodeId = await seedAccessCode(admin, plaintext, userId, 1);
-      seededCodeIds.push(accessCodeId);
+      tracker.register(accessCodeId);
 
       await admin
         .from("tenants")
@@ -476,7 +476,7 @@ suite(
       // constraint. The win count must still be exactly 1.
       const plaintext = freshPlaintext();
       const accessCodeId = await seedAccessCode(admin, plaintext, userId, 1);
-      seededCodeIds.push(accessCodeId);
+      tracker.register(accessCodeId);
 
       await admin
         .from("tenants")
