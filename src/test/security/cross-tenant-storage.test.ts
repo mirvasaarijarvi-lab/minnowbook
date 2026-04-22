@@ -250,6 +250,36 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       };
 
       beforeAll(async () => {
+        // Guard: both tenant IDs must be present, well-formed UUIDs, and
+        // DISTINCT before we start uploading. If they aren't, every "cross-
+        // tenant" attempt below would actually target the same folder and
+        // silently pass — and any cleanup that hashed on `tenantId` would
+        // either skip files or sweep the wrong tenant. Fail loudly here so
+        // the report points at the misconfiguration instead of at "RLS".
+        const UUID_RE =
+          /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+        const idA = (liveCreds.a.tenantId ?? "").trim();
+        const idB = (liveCreds.b.tenantId ?? "").trim();
+        if (!idA || !idB) {
+          throw new Error(
+            `Live cross-tenant storage tests require both RLS_TEST_TENANT_A_ID and RLS_TEST_TENANT_B_ID. ` +
+              `Got A="${idA}" B="${idB}".`,
+          );
+        }
+        if (!UUID_RE.test(idA) || !UUID_RE.test(idB)) {
+          throw new Error(
+            `RLS_TEST_TENANT_A_ID / RLS_TEST_TENANT_B_ID must be UUIDs. ` +
+              `Got A="${idA}" B="${idB}".`,
+          );
+        }
+        if (idA.toLowerCase() === idB.toLowerCase()) {
+          throw new Error(
+            `RLS_TEST_TENANT_A_ID and RLS_TEST_TENANT_B_ID resolve to the same tenant ("${idA}"). ` +
+              `Cross-tenant tests cannot run against a single tenant — every "denial" would be a ` +
+              `false negative and cleanup would target the wrong folder. Configure two distinct tenants.`,
+          );
+        }
+
         clientA = newAnonClient();
         clientB = newAnonClient();
 
@@ -264,6 +294,36 @@ describe("Cross-Tenant Storage RLS Tests", () => {
           password: liveCreds.b.password!,
         });
         if (signInBError) throw new Error(`Tenant B sign-in failed: ${signInBError.message}`);
+
+        // Belt-and-braces: confirm via the authenticated session that each
+        // user is actually a member of the tenant ID we were told to use.
+        // A mismatch here means env vars are wired to the wrong tenants and
+        // the cleanup sweep at the end would scrub folders nobody owns.
+        const verifyMembership = async (
+          label: "A" | "B",
+          client: SupabaseClient,
+          expectedTenantId: string,
+        ) => {
+          const { data, error } = await client
+            .from("tenant_users")
+            .select("tenant_id")
+            .eq("tenant_id", expectedTenantId)
+            .limit(1);
+          if (error) {
+            throw new Error(
+              `Tenant ${label} membership probe failed for tenant ${expectedTenantId}: ${error.message}`,
+            );
+          }
+          if (!data || data.length === 0) {
+            throw new Error(
+              `Tenant ${label} (${liveCreds[label.toLowerCase() as "a" | "b"].email}) is NOT a member ` +
+                `of tenant ${expectedTenantId}. Update the RLS_TEST_TENANT_${label}_ID env var or add ` +
+                `the user to that tenant — otherwise cross-tenant cleanup will target the wrong folder.`,
+            );
+          }
+        };
+        await verifyMembership("A", clientA, idA);
+        await verifyMembership("B", clientB, idB);
       });
 
       afterAll(async () => {
