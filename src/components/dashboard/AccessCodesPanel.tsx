@@ -19,7 +19,7 @@ import BetaInviteEmailPreview from "./BetaInviteEmailPreview";
 
 interface AccessCode {
   id: string;
-  code: string;
+  code_prefix: string;
   description: string | null;
   tier: string;
   duration_days: number;
