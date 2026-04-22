@@ -3095,11 +3095,25 @@ describe("Cross-Tenant Storage RLS Tests", () => {
 
       afterAll(async () => {
         const clientFor = (key: "a" | "b") => (key === "a" ? clientA : clientB);
+        const preflightClients = {
+          [liveCreds.a.tenantId!]: { client: clientA, email: liveCreds.a.email },
+          [liveCreds.b.tenantId!]: { client: clientB, email: liveCreds.b.email },
+        };
+        const preflight = await cleanupPreflight({
+          tenantIds: [liveCreds.a.tenantId!, liveCreds.b.tenantId!],
+          clients: preflightClients,
+          scope: "live-cross-tenant-public-cdn",
+        });
+        if (!preflight.ok) return;
         await teardownOwnedPaths(
           seededAssets.map((s) => ({ bucket: ASSETS_BUCKET, path: s.path, client: s.client })),
           clientFor,
         );
-        await sweepTestArtifacts(ASSETS_BUCKET, [liveCreds.a.tenantId!, liveCreds.b.tenantId!]);
+        await sweepTestArtifacts(
+          ASSETS_BUCKET,
+          [liveCreds.a.tenantId!, liveCreds.b.tenantId!],
+          { scope: "live-cross-tenant-public-cdn:sweep", clients: preflightClients },
+        );
       });
 
       // ---------- Public CDN: anonymous fetch must succeed ----------
