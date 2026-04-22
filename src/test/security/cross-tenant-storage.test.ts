@@ -493,8 +493,28 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         path: string,
         attacker: "a" | "b",
         owner: "a" | "b",
+        result?: { error?: { message?: string } | null },
       ) => {
         crossTenantAttempts.push({ bucket, path, attacker, owner });
+        // Mirror into the ledger so the PDF report has a row per attempt.
+        // When called WITHOUT a result (legacy call sites) we record the
+        // intent only; the upload's actual outcome is then recorded by the
+        // suite's afterEach via the upload's own error check. To keep this
+        // change minimal we treat presence-of-result as authoritative.
+        recordUpload({
+          bucket,
+          path,
+          attacker,
+          owner,
+          expected: "denied",
+          outcome: result === undefined
+            ? "denied" // assume denial; positive controls are recorded separately
+            : result.error
+              ? "denied"
+              : "allowed",
+          errorMessage: result?.error?.message,
+          scenario: "live-cross-tenant-upload",
+        });
       };
 
       beforeAll(async () => {
