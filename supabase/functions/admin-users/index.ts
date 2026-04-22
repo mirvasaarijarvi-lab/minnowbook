@@ -14,11 +14,16 @@ const SECURITY_HEADERS = {
   "Content-Security-Policy": "default-src 'none'; frame-ancestors 'none'",
 };
 
-function getCorsHeaders(req: Request): Record<string, string> {
-  const origin = req.headers.get("Origin") || "";
-  const allowed = ALLOWED_ORIGINS.some((o) =>
+function isOriginAllowed(origin: string): boolean {
+  if (!origin) return true; // server-to-server / curl with no Origin
+  return ALLOWED_ORIGINS.some((o) =>
     typeof o === "string" ? o === origin : o.test(origin)
   );
+}
+
+function getCorsHeaders(req: Request): Record<string, string> {
+  const origin = req.headers.get("Origin") || "";
+  const allowed = isOriginAllowed(origin) && origin !== "";
   return {
     "Access-Control-Allow-Origin": allowed ? origin : ALLOWED_ORIGINS[0] as string,
     "Access-Control-Allow-Headers":
