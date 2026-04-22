@@ -282,7 +282,11 @@ describe("AdminPanel: tier-limit enforcement (Basic = 5 staff users)", () => {
     // enabled (which only happens once the password validator fires).
     const submit = within(dialog)
       .getAllByRole("button")
-      .find((b) => /Add User/i.test(b.textContent ?? "") && !b.disabled);
+      .find(
+        (b) =>
+          /Add User/i.test(b.textContent ?? "") &&
+          !(b as HTMLButtonElement).disabled,
+      );
     expect(submit, "submit button should be enabled once the form is valid")
       .toBeTruthy();
 
