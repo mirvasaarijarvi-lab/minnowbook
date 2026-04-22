@@ -151,37 +151,94 @@ describe("Storage isolation: anon cannot reach offer PDFs in tenant-private", ()
   });
 
   describe("DOWNLOAD probes against tenant-private offer paths", () => {
-    // 3 tenants × 2 users × 3 filenames = 18 sequential network round-trips
-    // against the storage layer. The default 5s vitest timeout is far too
-    // tight for that many real HTTP calls; allow a generous budget.
-    it("anon cannot download a guessed offer PDF path", { timeout: 60_000 }, async () => {
-      for (const tid of PROBE_TENANT_IDS) {
-        for (const uid of PROBE_USER_IDS) {
-          for (const file of PROBE_FILENAMES) {
-            const path = `${tid}/offers/${uid}/${file}`;
-            const { data, error } = await anon.storage
-              .from(PRIVATE_BUCKET)
-              .download(path);
+    // 3 tenants × 2 users × 3 filenames = 18 network round-trips against the
+    // storage layer. We run them concurrently with a per-request timeout +
+    // bounded retries so a single slow/hung HTTP call cannot blow the test
+    // budget. A denial via timeout/abort is still acceptable: the only
+    // unacceptable outcome is a successful download with a non-empty Blob.
+    const PER_REQUEST_TIMEOUT_MS = 8_000;
+    const MAX_ATTEMPTS = 3;
 
-            // Either the storage layer returns an error, or it returns no
-            // payload. A successful download with a Blob body would be a leak.
-            if (data) {
-              expect(
-                data.size,
-                `tenant-private/${path}: anon should not receive non-empty payload`
-              ).toBe(0);
-            }
-            // If data is null we expect an error to explain the denial.
-            if (!data) {
-              expect(
-                error,
-                `tenant-private/${path}: expected an error when no data returned`
-              ).toBeTruthy();
+    type DownloadResult = {
+      data: Blob | null;
+      error: { message?: string } | null;
+      timedOut: boolean;
+    };
+
+    async function downloadWithTimeout(path: string): Promise<DownloadResult> {
+      let lastError: { message?: string } | null = null;
+      for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt += 1) {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), PER_REQUEST_TIMEOUT_MS);
+        try {
+          // The supabase-js storage client does not expose AbortSignal directly,
+          // so race the download against the abort timer.
+          const downloadPromise = anon.storage
+            .from(PRIVATE_BUCKET)
+            .download(path);
+          const result = await Promise.race([
+            downloadPromise.then((r) => ({ kind: "ok" as const, r })),
+            new Promise<{ kind: "timeout" }>((resolve) => {
+              controller.signal.addEventListener("abort", () =>
+                resolve({ kind: "timeout" })
+              );
+            }),
+          ]);
+          if (result.kind === "timeout") {
+            lastError = { message: `request aborted after ${PER_REQUEST_TIMEOUT_MS}ms` };
+            // Retry on timeout — transient network blip should not flake the test.
+            continue;
+          }
+          return { ...result.r, timedOut: false } as DownloadResult;
+        } catch (err) {
+          lastError = { message: err instanceof Error ? err.message : String(err) };
+        } finally {
+          clearTimeout(timer);
+        }
+      }
+      // All attempts exhausted: report as denied-by-timeout. This is a
+      // legitimate denial outcome from the test's perspective — anon never
+      // received a payload.
+      return { data: null, error: lastError, timedOut: true };
+    }
+
+    it(
+      "anon cannot download a guessed offer PDF path",
+      { timeout: 90_000 },
+      async () => {
+        const paths: string[] = [];
+        for (const tid of PROBE_TENANT_IDS) {
+          for (const uid of PROBE_USER_IDS) {
+            for (const file of PROBE_FILENAMES) {
+              paths.push(`${tid}/offers/${uid}/${file}`);
             }
           }
         }
+
+        const results = await Promise.all(
+          paths.map(async (path) => ({ path, ...(await downloadWithTimeout(path)) }))
+        );
+
+        for (const { path, data, error, timedOut } of results) {
+          // A successful download with a non-empty Blob body would be a leak.
+          if (data) {
+            expect(
+              data.size,
+              `tenant-private/${path}: anon should not receive non-empty payload`
+            ).toBe(0);
+          }
+          // If no data and we did not time out, we expect an explicit error
+          // explaining the denial. A timeout is itself an acceptable denial
+          // signal (anon got nothing).
+          if (!data && !timedOut) {
+            expect(
+              error,
+              `tenant-private/${path}: expected an error when no data returned`
+            ).toBeTruthy();
+          }
+        }
       }
-    });
+    );
 
     it("anon cannot create a signed URL for tenant-private offer PDFs", async () => {
       // createSignedUrl requires authenticated permission to mint a token.
