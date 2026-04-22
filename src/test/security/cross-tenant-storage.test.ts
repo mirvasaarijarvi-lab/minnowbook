@@ -2132,15 +2132,28 @@ describe("Cross-Tenant Storage RLS Tests", () => {
 
             expect(result.error).toBeTruthy();
 
-            // Defense-in-depth: even if RLS were misconfigured, the
-            // normalized first segment of the adversarial path must NEVER
-            // resolve to the victim tenant's id. The anon block targets a
-            // synthetic `fakeTenantId`, so we assert the worst-case
-            // server-side normalization can't produce that exact prefix.
-            // A failure here means the path-shape itself is dangerous —
-            // independent of which RLS policy happens to be active.
-            const normalized = normalizeStoragePath(variant.path);
-            expect(normalized.firstSegment).not.toBe(fakeTenantId);
+            // Defense-in-depth assertion (escape-style variants only).
+            // Some adversarial paths intentionally start with the victim
+            // tenant id and just abuse separators (`//`, `\`, leading
+            // `/`, brace-wrapping) — for those, the path *legitimately*
+            // contains the victim prefix and the only defence is the
+            // upload-denial check above. The assertion below applies to
+            // the TRAVERSAL family: paths that start in a different
+            // (attacker-owned or synthetic) prefix and try to escape via
+            // `../` or its encoded equivalents. For those, the canonical
+            // form must NEVER come out as the victim id, regardless of
+            // how many decode passes the server applies.
+            const TRAVERSAL_LABELS = new Set([
+              "dot-segment-traversal",
+              "url-encoded-slash",
+              "double-encoded-slash",
+              "url-encoded-dot-dot",
+              "url-encoded-slash-plus-dot-dot",
+            ]);
+            if (TRAVERSAL_LABELS.has(variant.label)) {
+              const normalized = normalizeStoragePath(variant.path);
+              expect(normalized.firstSegment).not.toBe(fakeTenantId);
+            }
           },
           15000,
         );
