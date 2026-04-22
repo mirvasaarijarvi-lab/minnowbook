@@ -36,6 +36,7 @@ import ProfileSettings from "@/components/dashboard/ProfileSettings";
 import GuidedTour, { TourStep } from "@/components/dashboard/GuidedTour";
 import OffersManager from "@/components/dashboard/OffersManager";
 import KitchenOrdersPanel from "@/components/dashboard/KitchenOrdersPanel";
+import BookingValidationLogPanel from "@/components/dashboard/BookingValidationLogPanel";
 import SamplePeriodBanner from "@/components/dashboard/SamplePeriodBanner";
 import OnboardingChecklist from "@/components/dashboard/OnboardingChecklist";
 import QuickActionsFAB from "@/components/dashboard/QuickActionsFAB";
@@ -255,6 +256,7 @@ const Dashboard = () => {
     reports: gatedView("reports", <ReportsPanel />),
     settings: gatedView("settings", <SettingsPanel />),
     admin: gatedView("admin", <AdminPanel />),
+    bookingLog: gatedView("admin", <BookingValidationLogPanel />),
     sites: gatedView("sites", <SitesManagementPanel />),
     support: gatedView("support", <DashboardSupportPanel />),
     profile: <ProfileSettings />,

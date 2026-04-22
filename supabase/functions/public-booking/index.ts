@@ -25,7 +25,6 @@ function checkRateLimit(ip: string): boolean {
   return entry.count <= RATE_LIMIT_MAX;
 }
 
-// Cleanup stale entries every 5 min
 setInterval(() => {
   const now = Date.now();
   for (const [key, val] of rateLimitMap) {
@@ -88,12 +87,84 @@ const VALID_PRICING_TYPES = ["menu", "fixed_price", "quote"];
 const VALID_SUB_TYPES = ["dine_in", "catering", "popup"];
 const VALID_STALL_SIZES = ["small", "medium", "large"];
 
+// Helper: write a row to booking_validation_log (best-effort, never throws)
+async function logValidation(
+  adminClient: any,
+  row: {
+    tenant_id: string;
+    site_id: string | null;
+    source: string;
+    reservation_type: string | null;
+    reservation_date: string | null;
+    start_time: string | null;
+    guest_name: string | null;
+    guest_email: string | null;
+    guests_requested: number | null;
+    current_load: number | null;
+    capacity_total: number | null;
+    outcome: "accepted" | "soft_warning" | "rejected";
+    reasons: string[];
+    reservation_id?: string | null;
+  },
+) {
+  try {
+    await adminClient.from("booking_validation_log").insert(row);
+  } catch (e) {
+    console.error("Failed to write booking_validation_log:", e);
+  }
+}
+
+// Compute existing guest load + total capacity for given tenant/type/date/(site)
+async function computeCapacity(
+  adminClient: any,
+  tenantId: string,
+  reservationType: string,
+  date: string,
+  siteId: string | null,
+) {
+  // Sum capacity across active resources of matching type
+  const accommodationTypes = ["hotel", "guesthouse"];
+  const matchingTypes = accommodationTypes.includes(reservationType)
+    ? accommodationTypes
+    : [reservationType];
+
+  let resQuery = adminClient
+    .from("resources")
+    .select("capacity, site_id")
+    .eq("tenant_id", tenantId)
+    .in("resource_type", matchingTypes)
+    .eq("is_active", true)
+    .eq("approval_status", "approved");
+  if (siteId) resQuery = resQuery.eq("site_id", siteId);
+  const { data: resRows } = await resQuery;
+  const capacity_total = (resRows ?? []).reduce(
+    (s: number, r: any) => s + (typeof r.capacity === "number" ? r.capacity : 0),
+    0,
+  );
+
+  // Sum existing guests for that date+type+(site), excluding cancelled
+  let bookQuery = adminClient
+    .from("reservations")
+    .select("guests_count, estimated_guests")
+    .eq("tenant_id", tenantId)
+    .eq("date", date)
+    .eq("reservation_type", reservationType)
+    .neq("status", "cancelled");
+  if (siteId) bookQuery = bookQuery.eq("site_id", siteId);
+  const { data: existing } = await bookQuery;
+  const current_load = (existing ?? []).reduce(
+    (s: number, r: any) => s + (r.guests_count ?? r.estimated_guests ?? 0),
+    0,
+  );
+
+  return { capacity_total, current_load };
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
-  // Rate limit
   const clientIp =
     req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
     req.headers.get("cf-connecting-ip") ||
@@ -105,8 +176,11 @@ Deno.serve(async (req) => {
     );
   }
 
+  const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  const adminClient = createClient(supabaseUrl, serviceRoleKey);
+
   try {
-    // Reject oversized request bodies (50KB max)
     const contentLength = parseInt(req.headers.get("content-length") || "0", 10);
     if (contentLength > 50 * 1024) {
       return new Response(JSON.stringify({ error: "Request too large" }), {
@@ -117,7 +191,6 @@ Deno.serve(async (req) => {
 
     const body = await req.json();
 
-    // Validate all inputs server-side
     const tenant_id = validateUuid(body.tenant_id, "tenant_id", true)!;
     const guest_name = validateString(body.guest_name, "guest_name", 100, true)!;
     const guest_email = validateEmail(body.guest_email);
@@ -131,7 +204,6 @@ Deno.serve(async (req) => {
     const reservation_type = validateString(body.reservation_type, "reservation_type", 20, true)!;
     if (!VALID_TYPES.includes(reservation_type)) throw new Error("Invalid reservation type");
 
-    // Type-specific fields
     const isAccommodation = reservation_type === "hotel" || reservation_type === "guesthouse";
     const isVenue = reservation_type === "venue";
     const isRestaurant = reservation_type === "restaurant";
@@ -206,12 +278,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Use service role to insert (bypasses RLS, but we validate tenant is active)
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const adminClient = createClient(supabaseUrl, serviceRoleKey);
-
-    // Verify tenant exists and is active
+    // Verify tenant
     const { data: tenant, error: tenantErr } = await adminClient
       .from("tenants")
       .select("id, name, is_active, allowed_reservation_types")
@@ -226,7 +293,7 @@ Deno.serve(async (req) => {
       throw new Error("This reservation type is not available");
     }
 
-    // Validate promo code if provided
+    // Promo code (unchanged)
     const promo_code = validateString(body.promo_code, "promo_code", 50);
     let discount_type: string | null = null;
     let discount_value: number | null = null;
@@ -255,14 +322,13 @@ Deno.serve(async (req) => {
       discount_value = code.discount_value;
       discount_code_id = code.id;
 
-      // Increment used count
       await adminClient
         .from("discount_codes")
         .update({ used_count: code.used_count + 1 })
         .eq("id", code.id);
     }
 
-    // Resolve site_id: accept from body or auto-resolve from reservation_type
+    // Resolve site_id
     let site_id: string | null = validateUuid(body.site_id, "site_id", false);
     if (!site_id) {
       const { data: matchingSite } = await adminClient
@@ -276,7 +342,37 @@ Deno.serve(async (req) => {
       site_id = matchingSite?.site_id ?? null;
     }
 
-    // Insert reservation
+    // ---------- CAPACITY OBSERVATION (no hard block) ----------
+    const requestedGuests = guests_count ?? estimated_guests ?? 0;
+    const { capacity_total, current_load } = await computeCapacity(
+      adminClient,
+      tenant_id,
+      reservation_type,
+      date,
+      site_id,
+    );
+    const reasons: string[] = [];
+    let outcome: "accepted" | "soft_warning" = "accepted";
+    let warning: string | null = null;
+    if (capacity_total > 0 && requestedGuests > 0) {
+      const projected = current_load + requestedGuests;
+      reasons.push(
+        `Capacity check: requested=${requestedGuests}, currentLoad=${current_load}, capacity=${capacity_total}, projected=${projected}`,
+      );
+      if (projected > capacity_total) {
+        outcome = "soft_warning";
+        warning = `This date is near or above capacity (${projected}/${capacity_total} guests including your booking). Your request was accepted and is pending staff confirmation.`;
+        reasons.push("PROJECTED OVER CAPACITY — soft warning issued, booking still allowed");
+      } else {
+        reasons.push("Within capacity");
+      }
+    } else {
+      reasons.push(
+        `Capacity check skipped (capacity=${capacity_total}, requested=${requestedGuests}) — no enforcement`,
+      );
+    }
+
+    // Insert reservation (always proceeds)
     const insertData: Record<string, unknown> = {
       tenant_id,
       site_id,
@@ -329,11 +425,46 @@ Deno.serve(async (req) => {
       .insert(insertData)
       .select("id")
       .single();
-    if (insertErr) throw new Error("Failed to create reservation");
+    if (insertErr) {
+      reasons.push(`Insert failed: ${insertErr.message}`);
+      await logValidation(adminClient, {
+        tenant_id,
+        site_id,
+        source: "public_booking",
+        reservation_type,
+        reservation_date: date,
+        start_time,
+        guest_name,
+        guest_email,
+        guests_requested: requestedGuests || null,
+        current_load,
+        capacity_total,
+        outcome: "rejected",
+        reasons,
+      });
+      throw new Error("Failed to create reservation");
+    }
 
-    // Send acknowledgment email via transactional queue (fire-and-forget)
+    // Log success/warning
+    await logValidation(adminClient, {
+      tenant_id,
+      site_id,
+      source: "public_booking",
+      reservation_type,
+      reservation_date: date,
+      start_time,
+      guest_name,
+      guest_email,
+      guests_requested: requestedGuests || null,
+      current_load,
+      capacity_total,
+      outcome,
+      reasons,
+      reservation_id: insertedRes.id,
+    });
+
+    // ---------- Acknowledgment email (unchanged) ----------
     try {
-      // Fetch tenant settings for branding
       const { data: settings } = await adminClient
         .from("tenant_settings")
         .select("business_name, business_email, primary_color, logo_url, default_language")
@@ -371,7 +502,7 @@ Deno.serve(async (req) => {
         },
       };
 
-      const t = ackTranslations[lang] || ackTranslations.en;
+      const tr = ackTranslations[lang] || ackTranslations.en;
       const dlLabels: Record<string, Record<string, string>> = {
         en: { type: "Type", date: "Date", time: "Time", guests: "Guests" },
         fi: { type: "Tyyppi", date: "Päivämäärä", time: "Aika", guests: "Vieraat" },
@@ -398,15 +529,15 @@ Deno.serve(async (req) => {
         <tr><td style="padding:0 32px 32px">
           <div style="text-align:center;margin-bottom:24px">
             <div style="display:inline-block;width:48px;height:48px;line-height:48px;border-radius:50%;background-color:#f5f0fa;font-size:24px;text-align:center">📩</div>
-            <h1 style="color:#1E1519;font-size:24px;font-family:'Playfair Display',Georgia,serif;font-weight:700;margin:12px 0 0">${t.title}</h1>
+            <h1 style="color:#1E1519;font-size:24px;font-family:'Playfair Display',Georgia,serif;font-weight:700;margin:12px 0 0">${tr.title}</h1>
           </div>
-          <p style="color:#63516E;font-size:15px;font-family:'Inter',Arial,sans-serif;line-height:1.6">${t.greeting} <strong style="color:#1E1519">${guest_name}</strong>,</p>
-          <p style="color:#63516E;font-size:15px;font-family:'Inter',Arial,sans-serif;line-height:1.6">${t.body}</p>
+          <p style="color:#63516E;font-size:15px;font-family:'Inter',Arial,sans-serif;line-height:1.6">${tr.greeting} <strong style="color:#1E1519">${guest_name}</strong>,</p>
+          <p style="color:#63516E;font-size:15px;font-family:'Inter',Arial,sans-serif;line-height:1.6">${tr.body}</p>
           <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e8e0d8;border-radius:10px;overflow:hidden;margin:20px 0;font-size:14px">
             ${rows.join("")}
           </table>
-          <p style="color:#63516E;font-size:14px;font-family:'Inter',Arial,sans-serif;line-height:1.6">${t.footer}</p>
-          <p style="color:#1E1519;font-size:15px;font-family:'Inter',Arial,sans-serif;line-height:1.6;margin-top:24px">${t.regards}<br><strong>${businessName}</strong></p>
+          <p style="color:#63516E;font-size:14px;font-family:'Inter',Arial,sans-serif;line-height:1.6">${tr.footer}</p>
+          <p style="color:#1E1519;font-size:15px;font-family:'Inter',Arial,sans-serif;line-height:1.6;margin-top:24px">${tr.regards}<br><strong>${businessName}</strong></p>
         </td></tr>
         <tr><td style="padding:24px 32px;text-align:center;font-size:12px;color:#999;border-top:1px solid #e8e0d8;font-family:'Inter',Arial,sans-serif">
           <p style="margin:4px 0;font-weight:600;color:#63516E">${businessName}</p>
@@ -418,7 +549,6 @@ Deno.serve(async (req) => {
 
       const SENDER_DOMAIN = "notify.mimmobook.com";
 
-      // Determine reply-to: site-level overrides tenant-level
       let replyToEmail = settings?.business_email || undefined;
       if (site_id) {
         const { data: siteSettings } = await adminClient
@@ -432,7 +562,6 @@ Deno.serve(async (req) => {
         }
       }
 
-      // Generate or reuse unsubscribe token for the recipient
       const unsubToken = crypto.randomUUID();
       await adminClient
         .from("email_unsubscribe_tokens")
@@ -448,7 +577,7 @@ Deno.serve(async (req) => {
         to: guest_email,
         from: `${businessName} <noreply@${SENDER_DOMAIN}>`,
         sender_domain: SENDER_DOMAIN,
-        subject: t.subject,
+        subject: tr.subject,
         html: ackHtml,
         purpose: "transactional",
         label: "booking_acknowledgment",
@@ -466,19 +595,18 @@ Deno.serve(async (req) => {
         payload: enqueuePayload,
       });
 
-      // Mark ack email as sent
       await adminClient
         .from("reservations")
         .update({ acknowledgment_email_sent_at: new Date().toISOString() })
         .eq("id", insertedRes.id);
     } catch (ackErr) {
-      // Non-critical: don't fail the booking if ack email fails
       console.error("Failed to enqueue acknowledgment email:", ackErr);
     }
 
-    return new Response(JSON.stringify({ success: true }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({ success: true, warning, capacity: { current_load, capacity_total, requested: requestedGuests } }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
   } catch (error: any) {
     return new Response(JSON.stringify({ error: error.message || "Invalid request" }), {
       status: 400,
