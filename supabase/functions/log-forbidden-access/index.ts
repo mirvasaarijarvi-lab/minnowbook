@@ -94,6 +94,11 @@ Deno.serve(async (req) => {
     typeof body.attemptedArea === "string" && body.attemptedArea.length > 0
       ? body.attemptedArea.slice(0, 200)
       : "unknown";
+  const attemptedAreaLabel =
+    typeof body.attemptedAreaLabel === "string" &&
+    body.attemptedAreaLabel.length > 0
+      ? body.attemptedAreaLabel.slice(0, 200)
+      : null;
   const attemptedPath =
     typeof body.attemptedPath === "string"
       ? body.attemptedPath.slice(0, 500)
