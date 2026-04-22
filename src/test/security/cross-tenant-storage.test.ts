@@ -2397,36 +2397,22 @@ describe("Cross-Tenant Storage RLS Tests", () => {
                 });
                 expect(denied).toBe(true);
 
-                // Same path-shape assertion as the upload variant: even
-                // if the download had returned bytes (which would already
-                // fail the `denied` check above), the normalized first
-                // segment of the requested key must NOT match the victim
-                // tenant's id. This catches a subtle class of bug where
-                // an over-eager normalisation step (proxy double-decode
-                // followed by `..` collapse) could rewrite an attacker-
-                // owned key into a victim-owned key BEFORE RLS sees it.
-                //
-                // The normalized first segment must be one of:
-                //   - the attacker's own tenant id (RLS would allow but
-                //     the file is in their own folder, no leak),
-                //   - null/empty (structurally invalid; RLS denies via
-                //     `foldername()[1]` returning NULL),
-                //   - some unrelated string that is NOT a tenant id
-                //     (RLS denies because no matching tenant_users row).
-                // The one outcome we forbid is `firstSegment === victim`.
-                const callerTenantId = liveCreds[dir.attacker].tenantId!;
-                const victimTenantId = dir.victimTenantId();
-                const normalized = normalizeStoragePath(variant.path);
-                expect(normalized.firstSegment).not.toBe(victimTenantId);
-                if (
-                  normalized.firstSegment !== null &&
-                  (normalized.firstSegment === callerTenantId ||
-                    normalized.firstSegment === victimTenantId)
-                ) {
-                  // If the segment is a real tenant id at all, it must
-                  // be the caller's own. Anything else (random string,
-                  // garbage, partial uuid) is fine — RLS will reject it.
-                  expect(normalized.firstSegment).toBe(callerTenantId);
+                // Same path-shape assertion as the upload variant —
+                // gated on TRAVERSAL_LABELS for the same reason: direct-
+                // probe variants legitimately contain the victim id by
+                // construction.
+                if (TRAVERSAL_LABELS.has(labelHint)) {
+                  const callerTenantId = liveCreds[dir.attacker].tenantId!;
+                  const victimTenantId = dir.victimTenantId();
+                  const normalized = normalizeStoragePath(variant.path);
+                  expect(normalized.firstSegment).not.toBe(victimTenantId);
+                  if (
+                    normalized.firstSegment !== null &&
+                    (normalized.firstSegment === callerTenantId ||
+                      normalized.firstSegment === victimTenantId)
+                  ) {
+                    expect(normalized.firstSegment).toBe(callerTenantId);
+                  }
                 }
               },
               15000,
