@@ -501,12 +501,11 @@ Deno.serve(async (req) => {
 
     throw new Error("Unknown action");
   } catch (error: any) {
-    const safeMessage = sanitizeError(error.message || "Unknown error");
-    const status = safeMessage === "Not authenticated" ? 401
-      : safeMessage === "Insufficient permissions" ? 403
-      : safeMessage.includes("Too many") ? 429
-      : 400;
-    return new Response(JSON.stringify({ error: safeMessage }), {
+    // Centralized error mapping — see sanitize-error.ts. The shape
+    // (status + JSON body) is part of the contract the dashboard's
+    // tier-error UI depends on, so it's covered by unit tests.
+    const { status, body } = buildErrorResponseBody(error);
+    return new Response(JSON.stringify(body), {
       status,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
