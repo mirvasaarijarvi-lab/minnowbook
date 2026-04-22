@@ -64,16 +64,22 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-const renderWithState = (state?: IsSystemAdminCacheState) =>
-  render(
-    <MemoryRouter>
-      <Forbidden
-        attemptedArea="the Superadmin area"
-        areaSlug="superadmin"
-        adminCheckState={state}
-      />
-    </MemoryRouter>,
+const renderWithState = (state?: IsSystemAdminCacheState) => {
+  const client = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  return render(
+    <QueryClientProvider client={client}>
+      <MemoryRouter>
+        <Forbidden
+          attemptedArea="the Superadmin area"
+          areaSlug="superadmin"
+          adminCheckState={state}
+        />
+      </MemoryRouter>
+    </QueryClientProvider>,
   );
+};
 
 describe("Forbidden — adminCheckState plumbing", () => {
   it("forwards a fresh-success snapshot in the audit beacon body", async () => {
