@@ -17,24 +17,88 @@ const adminClient: SupabaseClient | null =
     : null;
 
 /**
- * Best-effort recursive sweep: list every file under `${tenantId}/__rls_test__/`
- * for the current RUN_ID and remove anything still there. Safe to call from
- * any cleanup path — it short-circuits if no admin client is available.
+ * Best-effort recursive sweep STRICTLY scoped to this run's RUN_ID folder.
+ *
+ * Path layout (every test artifact uses this shape):
+ *   {tenantId}/__rls_test__/{RUN_ID}/[...optional nested segments]/{label}.txt
+ *
+ * The sweep walks ONLY `{tenantId}/__rls_test__/{RUN_ID}/...` — never
+ * `{tenantId}/` and never `{tenantId}/__rls_test__/` — so a misconfigured
+ * RUN_ID can never delete artifacts from concurrent runs, prior runs, or
+ * (most importantly) real tenant data that happens to share the prefix.
+ *
+ * Safe to call from any cleanup path; short-circuits if no admin client
+ * is available.
  */
-async function sweepTestArtifacts(bucket: string, tenantIds: string[]) {
-  if (!adminClient) return;
+async function sweepRunIdFolder(
+  bucket: string,
+  tenantIds: string[],
+  client: SupabaseClient,
+) {
+  // Recursively collect every object key under `{tenantId}/__rls_test__/{RUN_ID}`.
+  // Storage's `list()` is non-recursive, so we walk depth-first.
+  const collect = async (root: string): Promise<string[]> => {
+    const out: string[] = [];
+    const stack: string[] = [root];
+    while (stack.length) {
+      const dir = stack.pop()!;
+      // Page through every entry — listing is capped at `limit` per call.
+      let offset = 0;
+      const pageSize = 100;
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        const { data, error } = await client.storage
+          .from(bucket)
+          .list(dir, { limit: pageSize, offset });
+        if (error || !data || data.length === 0) break;
+        for (const entry of data) {
+          // Folders surface as entries with `id === null` and no `metadata`.
+          // Files have a non-null id (object UUID) and `metadata.size`.
+          const path = `${dir}/${entry.name}`;
+          const isFolder = entry.id === null && !entry.metadata;
+          if (isFolder) {
+            stack.push(path);
+          } else {
+            out.push(path);
+          }
+        }
+        if (data.length < pageSize) break;
+        offset += pageSize;
+      }
+    }
+    return out;
+  };
+
   for (const tenantId of tenantIds) {
+    if (!tenantId) continue;
+    const runRoot = `${tenantId}/__rls_test__/${RUN_ID}`;
     try {
-      const { data } = await adminClient.storage
-        .from(bucket)
-        .list(`${tenantId}/__rls_test__`, { limit: 100, search: RUN_ID });
-      if (!data || data.length === 0) continue;
-      const paths = data.map((entry) => `${tenantId}/__rls_test__/${entry.name}`);
-      await adminClient.storage.from(bucket).remove(paths);
+      const paths = await collect(runRoot);
+      if (paths.length === 0) continue;
+      // Defensive guard: every path MUST start with the run root. If anything
+      // ever escaped that prefix it would mean a bug in `collect`, not RLS.
+      const safe = paths.filter((p) => p.startsWith(`${runRoot}/`));
+      if (safe.length === 0) continue;
+      // Storage `remove` accepts up to a few hundred keys per call; chunk
+      // to stay well under any service-side limit.
+      const chunkSize = 100;
+      for (let i = 0; i < safe.length; i += chunkSize) {
+        await client.storage.from(bucket).remove(safe.slice(i, i + chunkSize));
+      }
     } catch {
       /* ignore — best-effort */
     }
   }
+}
+
+/**
+ * Convenience wrapper for cleanup paths that want the admin (service-role)
+ * sweep — the strictest version, used as the final safety net. No-op if no
+ * service role key is configured (e.g. local dev without CI secrets).
+ */
+async function sweepTestArtifacts(bucket: string, tenantIds: string[]) {
+  if (!adminClient) return;
+  await sweepRunIdFolder(bucket, tenantIds, adminClient);
 }
 
 /**
@@ -107,25 +171,33 @@ const newAnonClient = (): SupabaseClient =>
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
-// Tag uploads with a unique suffix so concurrent CI runs don't collide and
-// teardown can always identify what to clean up.
+// Per-run folder key — every artifact this suite writes lives under
+// `{tenantId}/__rls_test__/{RUN_ID}/...`. Putting RUN_ID in the PATH (not
+// just in the filename) lets the cleanup sweep restrict its `list()` to a
+// folder it owns end-to-end, so it can never accidentally enumerate or
+// delete files from concurrent CI runs, prior runs, or real tenant data.
 const RUN_ID = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
 const fileBytes = (label: string) =>
   new Blob([`storage-rls-test ${label} ${RUN_ID}`], { type: "text/plain" });
 
+// Folder root reserved for this run, scoped per tenant. Always a strict
+// prefix of every test path — used to anchor `list()` calls in cleanup.
+const runRootFor = (tenantId: string) => `${tenantId}/__rls_test__/${RUN_ID}`;
+
 const ownPath = (tenantId: string, label: string) =>
-  `${tenantId}/__rls_test__/${RUN_ID}-${label}.txt`;
+  `${runRootFor(tenantId)}/${label}.txt`;
 
 /**
- * Build a deeply-nested path under a tenant folder. Storage RLS policies
+ * Build a deeply-nested path UNDER the per-run folder. Storage RLS policies
  * usually pin only the FIRST path segment to the tenant id (via
- * `storage.foldername(name)[1]`), so any extra subfolders should still be
- * gated by the same check. These helpers simulate realistic app paths like
- * `{tenant_id}/documents/2026/invoices/inv-001.pdf` and
- * `{tenant_id}/uploads/avatars/user-123/profile.txt`.
+ * `storage.foldername(name)[1]`), so any extra subfolders below it must
+ * still be gated by the same check. We simulate realistic app paths like
+ * `{tenant_id}/__rls_test__/{RUN_ID}/documents/2026/invoices/inv-001.pdf`
+ * and `{tenant_id}/__rls_test__/{RUN_ID}/uploads/avatars/user-123/profile.txt`.
  */
 const nestedOwnPath = (tenantId: string, segments: string[], label: string) =>
-  `${tenantId}/${segments.join("/")}/${RUN_ID}-${label}.txt`;
+  `${runRootFor(tenantId)}/${segments.join("/")}/${label}.txt`;
 
 const NESTED_SCENARIOS: Array<{ name: string; segments: string[] }> = [
   { name: "documents/2026/invoices", segments: ["documents", "2026", "invoices"] },
@@ -137,7 +209,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
   describe.runIf(hasSupabaseConfig)("Anonymous client storage enforcement", () => {
     let anon: SupabaseClient;
     const fakeTenantId = "00000000-0000-0000-0000-000000000000";
-    const anonPath = `${fakeTenantId}/__rls_test__/${RUN_ID}-anon.txt`;
+    const anonPath = ownPath(fakeTenantId, "anon");
 
     beforeAll(() => {
       anon = newAnonClient();
@@ -824,10 +896,10 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       });
 
       // ---------- Positive controls (own tenant) ----------
-      it("user A CAN list their own tenant-assets folder", async () => {
+      it("user A CAN list their own tenant-assets per-run folder", async () => {
         const { data, error } = await clientA.storage
           .from(ASSETS_BUCKET)
-          .list(`${liveCreds.a.tenantId!}/__rls_test__`, { limit: 50, search: RUN_ID });
+          .list(runRootFor(liveCreds.a.tenantId!), { limit: 50 });
         expect(error).toBeNull();
         expect(data).toBeTruthy();
         // Must include the seed we just uploaded.
@@ -857,10 +929,10 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         expect(denied).toBe(true);
       });
 
-      it("user A cannot LIST tenant B's nested tenant-assets folder", async () => {
+      it("user A cannot LIST tenant B's per-run tenant-assets folder", async () => {
         const { data, error } = await clientA.storage
           .from(ASSETS_BUCKET)
-          .list(`${liveCreds.b.tenantId!}/__rls_test__`, { limit: 50, search: RUN_ID });
+          .list(runRootFor(liveCreds.b.tenantId!), { limit: 50 });
         const leaked =
           Array.isArray(data) &&
           data.some((entry) => entry.name && entry.name.includes("b-assets-isolation-seed"));
@@ -881,10 +953,10 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         expect(denied).toBe(true);
       });
 
-      it("user B cannot LIST tenant A's nested tenant-assets folder", async () => {
+      it("user B cannot LIST tenant A's per-run tenant-assets folder", async () => {
         const { data, error } = await clientB.storage
           .from(ASSETS_BUCKET)
-          .list(`${liveCreds.a.tenantId!}/__rls_test__`, { limit: 50, search: RUN_ID });
+          .list(runRootFor(liveCreds.a.tenantId!), { limit: 50 });
         const leaked =
           Array.isArray(data) &&
           data.some((entry) => entry.name && entry.name.includes("a-assets-isolation-seed"));
