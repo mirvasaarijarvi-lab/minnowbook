@@ -470,6 +470,27 @@ async function sweepRunIdFolder(
 async function sweepMultipartIntermediates(bucket: string, tenantIds: string[]) {
   if (!adminClient) return;
 
+  // Honour the per-run kill switch BEFORE doing any DB work. We still
+  // ledger one entry per tenant so the resulting PDF doesn't look like
+  // the sweep "ran clean" — it didn't run at all.
+  if (!MULTIPART_SWEEP_ENABLED) {
+    for (const tid of tenantIds) {
+      recordCleanup({
+        bucket,
+        path: `${tid}/__rls_test__/${RUN_ID}/<sweep-disabled>`,
+        role: "admin-multipart",
+        removed: false,
+        note: `SKIPPED: RLS_MULTIPART_SWEEP=${process.env.RLS_MULTIPART_SWEEP ?? ""} (compare-mode)`,
+      });
+    }
+    // eslint-disable-next-line no-console
+    console.log(
+      `[multipart-sweep] bucket="${bucket}" SKIPPED for ${tenantIds.length} tenant(s) ` +
+        `— RLS_MULTIPART_SWEEP is off`,
+    );
+    return;
+  }
+
   // Per-tenant aggregate counters for the end-of-sweep summary log.
   // Captures (a) how many orphan parent rows we found, (b) how many child
   // `s3_multipart_uploads_parts` rows we deleted, (c) how many parent rows
