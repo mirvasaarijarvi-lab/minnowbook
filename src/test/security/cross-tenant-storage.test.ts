@@ -684,7 +684,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
     },
   );
 
-  describe.skipIf(hasSupabaseConfig)("Skipped: missing Supabase config", () => 
+  describe.skipIf(hasSupabaseConfig)("Skipped: missing Supabase config", () => { 
     it("test environment is missing VITE_SUPABASE_URL / VITE_SUPABASE_PUBLISHABLE_KEY", () => {
       expect(true).toBe(true);
     });
