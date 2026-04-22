@@ -182,6 +182,27 @@ const AccessCodesPanel = () => {
           </Button>
         </CardHeader>
         <CardContent>
+          {lastCreatedPlaintext && (
+            <div className="mb-4 p-3 rounded-md border border-accent bg-accent/10 space-y-2">
+              <p className="text-xs font-medium text-foreground">
+                New code created — copy it now. Only the hash is stored, so it can't be retrieved later.
+              </p>
+              <div className="flex items-center gap-2">
+                <code className="font-mono text-sm font-bold flex-1 px-2 py-1 rounded bg-background">
+                  {lastCreatedPlaintext}
+                </code>
+                <Button size="sm" variant="outline" onClick={() => copyCode(lastCreatedPlaintext)}>
+                  <Copy className="h-3 w-3 mr-1" /> Copy
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => setLastCreatedPlaintext(null)}>Dismiss</Button>
+              </div>
+              <BetaInviteEmailPreview
+                code={lastCreatedPlaintext}
+                tierLabel={form.tier === "professional" ? "Professional" : form.tier === "business" ? "Business" : "Basic"}
+                durationDays={form.duration_days}
+              />
+            </div>
+          )}
           {isLoading ? (
             <div className="flex justify-center py-8">
               <div className="animate-spin h-6 w-6 border-4 border-accent border-t-transparent rounded-full" />
