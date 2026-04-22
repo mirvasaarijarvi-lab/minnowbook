@@ -1296,6 +1296,39 @@ export type Database = {
           },
         ]
       }
+      redemption_idempotency: {
+        Row: {
+          created_at: string
+          endpoint: string
+          expires_at: string
+          id: string
+          idempotency_key: string
+          response_body: Json
+          response_status: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          endpoint: string
+          expires_at?: string
+          id?: string
+          idempotency_key: string
+          response_body: Json
+          response_status: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          endpoint?: string
+          expires_at?: string
+          id?: string
+          idempotency_key?: string
+          response_body?: Json
+          response_status?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       reservations: {
         Row: {
           accommodation_needed: boolean | null
@@ -2850,6 +2883,10 @@ export type Database = {
       }
     }
     Functions: {
+      cleanup_expired_redemption_idempotency: {
+        Args: never
+        Returns: undefined
+      }
       cleanup_old_audit_logs: { Args: never; Returns: undefined }
       cleanup_old_booking_validation_logs: { Args: never; Returns: undefined }
       copy_tenant_defaults_to_site: {
