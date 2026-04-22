@@ -63,9 +63,13 @@ const toSlug = (label: string): string =>
  */
 const Forbidden = ({
   attemptedArea = "this area",
+  areaSlug,
   message,
 }: ForbiddenProps) => {
   const [beaconStatus, setBeaconStatus] = useState<number | "unreachable" | null>(null);
+  // Resolve once per render: explicit slug wins, otherwise derive from the
+  // human label so legacy call sites keep working.
+  const resolvedSlug = areaSlug ?? toSlug(attemptedArea);
   const body =
     message ??
     `You're signed in, but your account doesn't have permission to access ${attemptedArea}. ` +
