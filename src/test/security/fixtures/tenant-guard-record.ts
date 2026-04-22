@@ -21,6 +21,30 @@
 import { mkdirSync, readFileSync, writeFileSync, existsSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 
+/**
+ * Snapshot of a seeded user's effective tenant membership row. Sourced
+ * from `tenant_users` (role + custom_role_key + is_approved). Surfacing
+ * this in the report turns "RLS denied my SELECT" failures from a
+ * mystery into a one-glance answer: if the user's role is `staff` and
+ * the policy requires `owner`, denial is correct and expected — the
+ * test fixture is wrong, not the policy.
+ */
+export interface TenantMembershipSnapshot {
+  /** Effective enum role from `tenant_users.role` (e.g. "owner", "staff"). */
+  role?: string | null;
+  /** Custom role key when the tenant uses bespoke roles; falls back to `role`. */
+  customRoleKey?: string | null;
+  /** Whether the membership row is approved (gates most RLS policies). */
+  isApproved?: boolean | null;
+  /** Auth user id, useful when correlating with login_history / audit_log. */
+  userId?: string | null;
+  /** Set when the lookup itself failed (e.g. RLS hid the row, or a typo
+   *  in the tenant id). Empty when the row was simply absent. */
+  lookupError?: string;
+  /** True when the probe ran and found exactly one matching row. */
+  found: boolean;
+}
+
 export interface TenantGuardRecord {
   /** Free-form label so multiple suites in one run don't overwrite each
    *  other (e.g. "cross-tenant-rls", "cross-tenant-storage"). */
@@ -40,6 +64,12 @@ export interface TenantGuardRecord {
   /** Email addresses surfaced for triage; never includes passwords. */
   emailA?: string;
   emailB?: string;
+  /** Effective membership row (role + custom_role_key + is_approved) for
+   *  each seeded user, captured immediately after the membership probe.
+   *  Omitted when the probe was skipped or the lookup failed; the report
+   *  renders a "—" cell in that case. */
+  membershipRowA?: TenantMembershipSnapshot;
+  membershipRowB?: TenantMembershipSnapshot;
   /** Set when any precondition (UUID / distinctness / membership) failed.
    *  When present the suite's `beforeAll` will have thrown — surfacing
    *  this in the report explains WHY every test in that block was

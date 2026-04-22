@@ -48,6 +48,7 @@
  *   trailing newline in an env file doesn't slip through as "different".
  */
 import type { SupabaseClient } from "@supabase/supabase-js";
+import type { TenantMembershipSnapshot } from "./tenant-guard-record";
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -162,6 +163,50 @@ export async function assertTenantMembership(
         `cross-tenant denial assertions would pass for the wrong reason and any cleanup would ` +
         `target the wrong folder.`,
     );
+  }
+}
+
+/**
+ * Fetch the seeded user's effective `tenant_users` row for diagnostics.
+ *
+ * This is best-effort: a missing row, an RLS-hidden row, or a network
+ * error all collapse to a snapshot with `found: false` and (where
+ * applicable) a `lookupError` string. We never throw here — the row is
+ * purely informational and surfaced in the RLS report so reviewers can
+ * see "user X is `staff` in tenant Y, not approved" at a glance when a
+ * cross-tenant test fails for an unexpected reason.
+ *
+ * The query intentionally uses the SAME client as the membership probe
+ * so the snapshot reflects what the test session can actually observe.
+ * If a future RLS change hides `role` from the member, the snapshot
+ * will degrade gracefully to `{ found: true, role: null }`.
+ */
+export async function fetchTenantMembershipSnapshot(
+  client: SupabaseClient,
+  tenantId: string,
+): Promise<TenantMembershipSnapshot> {
+  try {
+    const { data, error } = await client
+      .from("tenant_users")
+      .select("user_id, role, custom_role_key, is_approved")
+      .eq("tenant_id", tenantId)
+      .limit(1)
+      .maybeSingle();
+    if (error) {
+      return { found: false, lookupError: error.message };
+    }
+    if (!data) {
+      return { found: false };
+    }
+    return {
+      found: true,
+      userId: (data as { user_id?: string | null }).user_id ?? null,
+      role: (data as { role?: string | null }).role ?? null,
+      customRoleKey: (data as { custom_role_key?: string | null }).custom_role_key ?? null,
+      isApproved: (data as { is_approved?: boolean | null }).is_approved ?? null,
+    };
+  } catch (err) {
+    return { found: false, lookupError: err instanceof Error ? err.message : String(err) };
   }
 }
 
