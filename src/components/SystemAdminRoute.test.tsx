@@ -32,25 +32,31 @@ vi.mock("@/contexts/AuthContext", () => ({
 }));
 
 // The supabase client is used for two things in this code path:
-//   1. SystemAdminRoute -> supabase.from("system_admins").select(...)
+//   1. SystemAdminRoute -> useIsSystemAdmin -> supabase.rpc("is_system_admin")
 //   2. Forbidden -> supabase.auth.getSession() + supabase.functions.invoke(...)
-// We model both. The `system_admins` query result is configurable per test
-// via `mockSystemAdminRow`.
-let mockSystemAdminRow: { id: string } | null = null;
-let mockSystemAdminError: { message: string } | null = null;
+// We model both. The `is_system_admin` RPC result is configurable per test
+// via `mockIsSystemAdminResult` / `mockIsSystemAdminError`.
+let mockIsSystemAdminResult: boolean = false;
+let mockIsSystemAdminError: { message: string } | null = null;
 
 vi.mock("@/integrations/supabase/client", () => {
-  const maybeSingle = vi.fn(async () => ({
-    data: mockSystemAdminRow,
-    error: mockSystemAdminError,
+  const rpc = vi.fn(async (_fn: string) => ({
+    data: mockIsSystemAdminResult,
+    error: mockIsSystemAdminError,
   }));
-  const eq = vi.fn(() => ({ maybeSingle }));
-  const select = vi.fn(() => ({ eq }));
-  const from = vi.fn(() => ({ select }));
 
   return {
     supabase: {
-      from,
+      rpc,
+      // `from` is still referenced by other hooks transitively imported in
+      // some setups; provide a no-op chain so accidental calls don't throw.
+      from: vi.fn(() => ({
+        select: vi.fn(() => ({
+          eq: vi.fn(() => ({
+            maybeSingle: vi.fn(async () => ({ data: null, error: null })),
+          })),
+        })),
+      })),
       auth: {
         // Forbidden page guards on session presence before beaconing.
         // Returning null avoids any audit-log beacon noise in tests.
@@ -98,8 +104,8 @@ const renderAtSuperadmin = () => {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  mockSystemAdminRow = null;
-  mockSystemAdminError = null;
+  mockIsSystemAdminResult = false;
+  mockIsSystemAdminError = null;
   // Default: a normal authenticated user, not a system admin.
   mockUseAuth.mockReturnValue({
     user: { id: "user-non-admin-1", email: "user@example.com" },
@@ -120,9 +126,9 @@ beforeEach(() => {
 
 describe("SystemAdminRoute (/superadmin enforcement)", () => {
   it("renders the Forbidden page for an authenticated non-system-admin user", async () => {
-    // The system_admins lookup returns no row, which is the canonical
+    // The is_system_admin RPC returns false, which is the canonical
     // "not a system admin" signal.
-    mockSystemAdminRow = null;
+    mockIsSystemAdminResult = false;
 
     renderAtSuperadmin();
 
@@ -147,11 +153,11 @@ describe("SystemAdminRoute (/superadmin enforcement)", () => {
     ).toBeInTheDocument();
   });
 
-  it("renders the Forbidden page when the system_admins lookup fails (fail-closed)", async () => {
+  it("renders the Forbidden page when the is_system_admin RPC fails (fail-closed)", async () => {
     // Simulate a transient DB / RLS error. The guard must treat lookup
     // failures as denial, never as access.
-    mockSystemAdminRow = null;
-    mockSystemAdminError = { message: "lookup failed" };
+    mockIsSystemAdminResult = false;
+    mockIsSystemAdminError = { message: "rpc failed" };
 
     renderAtSuperadmin();
 
@@ -162,9 +168,8 @@ describe("SystemAdminRoute (/superadmin enforcement)", () => {
   });
 
   it("renders the Superadmin content for a confirmed system admin", async () => {
-    // The presence of any row in `system_admins` for this user is what
-    // grants access. The id value itself is irrelevant to the guard.
-    mockSystemAdminRow = { id: "sa-row-1" };
+    // A truthy RPC result is what grants access.
+    mockIsSystemAdminResult = true;
     mockUseAuth.mockReturnValue({
       user: { id: "user-system-admin-1", email: "admin@example.com" },
       session: { access_token: "fake" },
@@ -189,9 +194,9 @@ describe("SystemAdminRoute (/superadmin enforcement)", () => {
     expect(screen.queryByText(/403 · Access denied/i)).not.toBeInTheDocument();
   });
 
-  it("shows a loading indicator while the system_admins lookup is in-flight", async () => {
-    // Render with the default non-admin user. Before the maybeSingle()
-    // promise resolves, the guard shows a spinner labeled for a11y.
+  it("shows a loading indicator while the is_system_admin RPC is in-flight", async () => {
+    // Render with the default non-admin user. Before the rpc() promise
+    // resolves, the guard shows a spinner labeled for a11y.
     renderAtSuperadmin();
 
     // The aria-label is the most stable hook for the loading state.
@@ -199,9 +204,86 @@ describe("SystemAdminRoute (/superadmin enforcement)", () => {
       screen.getByRole("status", { name: /checking permissions/i }),
     ).toBeInTheDocument();
 
-    // And then it resolves to Forbidden (because mockSystemAdminRow is null).
+    // And then it resolves to Forbidden (because mockIsSystemAdminResult is false).
     await waitFor(() => {
       expect(screen.getByText(/403 · Access denied/i)).toBeInTheDocument();
     });
+  });
+
+  it("does not re-query the database when the guard is unmounted and remounted", async () => {
+    // Caching contract: useIsSystemAdmin uses staleTime + gcTime: Infinity
+    // and refetchOnMount: false, so navigating between guarded routes
+    // (which unmounts/remounts the guard) must reuse the original
+    // resolution and never issue a second RPC call.
+    mockIsSystemAdminResult = true;
+    mockUseAuth.mockReturnValue({
+      user: { id: "user-cache-1", email: "admin@example.com" },
+      session: { access_token: "fake" },
+      loading: false,
+      subscription: {
+        subscribed: false,
+        tier: null,
+        subscriptionEnd: null,
+        subscriptionStatus: null,
+      },
+      refreshSubscription: vi.fn(),
+      signOut: vi.fn(),
+    });
+
+    // Use one shared QueryClient across both renders, mimicking the
+    // app's real shape (one provider at the root). A fresh provider per
+    // mount would invalidate the cache and is not the scenario we test.
+    const { supabase } = await import("@/integrations/supabase/client");
+    const rpcSpy = supabase.rpc as unknown as ReturnType<typeof vi.fn>;
+    rpcSpy.mockClear();
+
+    const client = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+
+    const Harness = ({ path }: { path: string }) => (
+      <QueryClientProvider client={client}>
+        <MemoryRouter initialEntries={[path]}>
+          <Routes>
+            <Route
+              path="/superadmin"
+              element={
+                <SystemAdminRoute attemptedArea="the Superadmin area">
+                  <div data-testid="superadmin-content">Superadmin</div>
+                </SystemAdminRoute>
+              }
+            />
+            <Route
+              path="/superadmin/other"
+              element={
+                <SystemAdminRoute attemptedArea="the Superadmin area">
+                  <div data-testid="superadmin-other">Other admin page</div>
+                </SystemAdminRoute>
+              }
+            />
+          </Routes>
+        </MemoryRouter>
+      </QueryClientProvider>
+    );
+
+    const first = render(<Harness path="/superadmin" />);
+    await waitFor(() => {
+      expect(screen.getByTestId("superadmin-content")).toBeInTheDocument();
+    });
+    const callsAfterFirst = rpcSpy.mock.calls.length;
+    expect(callsAfterFirst).toBeGreaterThanOrEqual(1);
+
+    // Tear down the first route entirely (simulates leaving /superadmin).
+    first.unmount();
+
+    // Re-mount the guard at a different superadmin-protected route. The
+    // shared cache must answer immediately without a new RPC call.
+    render(<Harness path="/superadmin/other" />);
+    await waitFor(() => {
+      expect(screen.getByTestId("superadmin-other")).toBeInTheDocument();
+    });
+
+    // No additional rpc() invocations between the two mounts.
+    expect(rpcSpy.mock.calls.length).toBe(callsAfterFirst);
   });
 });
