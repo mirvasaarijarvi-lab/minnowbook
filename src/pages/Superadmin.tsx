@@ -443,6 +443,9 @@ const Superadmin = () => {
 
         {/* Beta Feedback */}
         <BetaFeedbackPanel />
+
+        {/* Tenant Membership Integrity */}
+        <TenantMembershipCheckPanel />
       </main>
 
       {/* Edit dialog */}
