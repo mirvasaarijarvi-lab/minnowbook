@@ -206,10 +206,24 @@ const Forbidden = ({
           setAuditReason(error.message ?? "invoke_error");
           return;
         }
-        const logged = (data as { logged?: boolean; reason?: string } | null)?.logged;
-        const reason = (data as { logged?: boolean; reason?: string } | null)?.reason ?? null;
+        const payload = data as
+          | {
+              logged?: boolean;
+              reason?: string;
+              userId?: string;
+              at?: string;
+            }
+          | null;
+        const logged = payload?.logged;
+        const reason = payload?.reason ?? null;
         setAuditStatus(logged ? "logged" : "not_logged");
         setAuditReason(reason);
+        // Surface the JWT-resolved user_id and the server timestamp so
+        // tests and monitoring can verify the audit row was attributed
+        // and stamped server-side. Only set on success — null otherwise
+        // so a failed/skipped beacon doesn't appear to expose identity.
+        setAuditUserId(logged ? (payload?.userId ?? null) : null);
+        setAuditAt(logged ? (payload?.at ?? null) : null);
       } catch (err) {
         // Audit logging is best-effort — never block the user experience.
         if (!cancelled) {
