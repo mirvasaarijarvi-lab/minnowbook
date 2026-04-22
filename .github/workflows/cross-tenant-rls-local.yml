@@ -181,7 +181,7 @@ jobs:
 
 
       - name: Seed test tenants and users
-        if: steps.supabase-start.outcome == 'success'
+        if: steps.supabase-ready.outcome == 'success'
         run: |
           set -euo pipefail
           # Run seed script and append the emitted KEY=VALUE lines to
@@ -189,7 +189,7 @@ jobs:
           bun run scripts/seed-rls-test-data.ts >> "$GITHUB_ENV"
 
       - name: Run cross-tenant RLS tests (live, against local stack)
-        if: steps.supabase-start.outcome == 'success'
+        if: steps.supabase-ready.outcome == 'success'
         env:
           # Vite reads these via import.meta.env at test compile time.
           VITE_SUPABASE_URL: ${{ env.SUPABASE_URL }}
