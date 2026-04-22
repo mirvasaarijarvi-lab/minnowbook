@@ -149,7 +149,17 @@ const NoTenantState = ({ attemptedArea = "generic" }: NoTenantStateProps) => {
               </Button>
               <Button
                 variant="outline"
-                onClick={() => navigate("/support")}
+                onClick={() => {
+                  // Deep-link to /support with prefill context so the form on
+                  // that page can show the area + originating route + email.
+                  const params = new URLSearchParams({
+                    area: attemptedArea,
+                    contact: "1",
+                  });
+                  if (attemptedPath) params.set("from", attemptedPath);
+                  if (user?.email) params.set("email", user.email);
+                  navigate(`/support?${params.toString()}#contact`);
+                }}
                 className="gap-1.5 flex-1"
               >
                 <BookOpen className="h-4 w-4" />
