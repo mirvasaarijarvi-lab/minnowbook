@@ -7,7 +7,8 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 const SENDER_DOMAIN = "notify.mimmobook.com";
 const FROM_DOMAIN = "mimmobook.com";
 const OFFER_TEMPLATE_LABEL = "offer_email";
-const OFFER_BUCKET = "tenant-assets";
+const OFFER_BUCKET = "tenant-private";
+const OFFER_DOWNLOAD_TTL_SECONDS = 60 * 60 * 24 * 30; // 30 days
 
 function jsonResponse(payload: unknown, status = 200) {
   return new Response(JSON.stringify(payload), {
