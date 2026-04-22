@@ -247,6 +247,28 @@ Deno.serve(async (req) => {
 
       const baseRole = (role === "superadmin" || role === "owner" || role === "admin") ? role : "staff";
 
+      // Pre-check: a user can only belong to one tenant. If an account with this email already
+      // exists AND is already linked to any tenant, refuse before creating/duplicating anything.
+      // (The DB also enforces this via the tenant_users_user_id_unique constraint as a safety net.)
+      const { data: existingList } = await adminClient.auth.admin.listUsers();
+      const existingAuthUser = existingList?.users?.find(
+        (u: any) => (u.email || "").toLowerCase() === email.toLowerCase(),
+      );
+      if (existingAuthUser) {
+        const { data: existingMembership } = await adminClient
+          .from("tenant_users")
+          .select("tenant_id")
+          .eq("user_id", existingAuthUser.id)
+          .maybeSingle();
+        if (existingMembership) {
+          throw new Error(
+            `An account with ${email} already belongs to another organization. ` +
+              `A user can only belong to one organization. Ask them to leave their current ` +
+              `organization first, or invite a different email address.`,
+          );
+        }
+      }
+
       const { data: newUser, error: createError } = await adminClient.auth.admin.createUser({
         email,
         password,
@@ -264,6 +286,16 @@ Deno.serve(async (req) => {
       });
       if (tuError) {
         await adminClient.auth.admin.deleteUser(newUser.user!.id);
+        // Map the unique-constraint violation to a friendly message
+        if (
+          (tuError as any).code === "23505" ||
+          /tenant_users_user_id_unique|duplicate key/i.test((tuError as any).message || "")
+        ) {
+          throw new Error(
+            `An account with ${email} already belongs to another organization. ` +
+              `A user can only belong to one organization at a time.`,
+          );
+        }
         throw tuError;
       }
 
