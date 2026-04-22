@@ -111,6 +111,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         if (event === "SIGNED_IN" && session?.user) {
           gtm.login();
+          // The `/superadmin` gate caches `is_system_admin` per-user with
+          // `staleTime: Infinity`. On a fresh sign-in we MUST refetch
+          // against the new JWT, otherwise a non-admin signing in after
+          // an admin signed out (or vice-versa) on the same tab would
+          // see a stale answer until a hard reload. Scoping by
+          // `session.user.id` keeps any other cached entries intact.
+          void invalidateIsSystemAdmin(queryClient, session.user.id);
+
           // Record login event
           setTimeout(async () => {
             try {
@@ -135,6 +143,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         if (event === "SIGNED_OUT") {
           setSubscription(defaultSubscription);
+          // Drop EVERY cached `is-system-admin` entry. Without this, a
+          // shared device that goes user A -> sign out -> user B could
+          // briefly serve A's admin status to B before the per-user
+          // SIGNED_IN invalidator above runs.
+          void invalidateIsSystemAdmin(queryClient);
+        }
+
+        if (event === "TOKEN_REFRESHED" && session?.user) {
+          // A refreshed JWT can carry updated claims (e.g. the user was
+          // just promoted server-side). Re-validate so guarded routes
+          // pick up the change without waiting for a full reload.
+          void invalidateIsSystemAdmin(queryClient, session.user.id);
         }
       }
     );
