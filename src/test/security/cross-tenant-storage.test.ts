@@ -580,11 +580,14 @@ async function sweepMultipartIntermediates(bucket: string, tenantIds: string[]) 
           // this run's RUN_ID — a per-row audit trail for reviewers.
           const markerOk =
             row.key.startsWith(expectedPrefix) && row.key.includes(RUN_ID);
+          const wasRemoved = !delErr && markerOk;
+          if (wasRemoved) bumpStats(tenantId, "parentsDeleted");
+          if (delErr) bumpStats(tenantId, "errors");
           recordCleanup({
             bucket,
             path: row.key,
             role: "admin-multipart",
-            removed: !delErr && markerOk,
+            removed: wasRemoved,
             note: delErr
               ? `delete failed: ${delErr.message}`
               : markerOk
@@ -599,6 +602,7 @@ async function sweepMultipartIntermediates(bucket: string, tenantIds: string[]) 
           }
         }
       } catch (err) {
+        bumpStats(tenantId, "errors");
         for (const row of orphanRows) {
           recordCleanup({
             bucket,
@@ -611,6 +615,7 @@ async function sweepMultipartIntermediates(bucket: string, tenantIds: string[]) 
         throw err;
       }
     } catch (err) {
+      bumpStats(tenantId, "errors");
       recordCleanup({
         bucket,
         path: `${keyPrefix}${RUN_ID}/*`,
@@ -619,6 +624,38 @@ async function sweepMultipartIntermediates(bucket: string, tenantIds: string[]) 
         note: `exception: ${(err as Error).message}`,
       });
     }
+  }
+
+  // ---------- End-of-sweep summary ----------
+  // Emit ONE consolidated console line per (bucket, tenant) and ALSO push
+  // a synthetic ledger entry so the storage-attempts PDF gets a clear
+  // roll-up at the top of each tenant's section. The synthetic entry's
+  // `path` uses a `<summary>` suffix so it can't be mistaken for an
+  // actual storage key during PDF rendering or grep-based audits.
+  for (const [tenantId, stats] of statsByTenant) {
+    const shortTid = tenantId.slice(0, 8);
+    // eslint-disable-next-line no-console
+    console.log(
+      `[multipart-sweep] bucket="${bucket}" tenant=${shortTid} ` +
+        `orphans_found=${stats.orphansFound} ` +
+        `parts_deleted=${stats.partsDeleted} ` +
+        `parents_deleted=${stats.parentsDeleted} ` +
+        `errors=${stats.errors}`,
+    );
+    recordCleanup({
+      bucket,
+      path: `${tenantId}/__rls_test__/${RUN_ID}/<summary>`,
+      role: "admin-multipart",
+      // `removed: true` ONLY when we actually removed at least one parent
+      // row AND no errors occurred — that's the only state where the
+      // sweep can claim it cleaned anything for this tenant.
+      removed: stats.parentsDeleted > 0 && stats.errors === 0,
+      note:
+        `SUMMARY orphans_found=${stats.orphansFound} ` +
+        `parts_deleted=${stats.partsDeleted} ` +
+        `parents_deleted=${stats.parentsDeleted} ` +
+        `errors=${stats.errors}`,
+    });
   }
 }
 
