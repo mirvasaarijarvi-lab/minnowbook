@@ -2131,6 +2131,16 @@ describe("Cross-Tenant Storage RLS Tests", () => {
             });
 
             expect(result.error).toBeTruthy();
+
+            // Defense-in-depth: even if RLS were misconfigured, the
+            // normalized first segment of the adversarial path must NEVER
+            // resolve to the victim tenant's id. The anon block targets a
+            // synthetic `fakeTenantId`, so we assert the worst-case
+            // server-side normalization can't produce that exact prefix.
+            // A failure here means the path-shape itself is dangerous —
+            // independent of which RLS policy happens to be active.
+            const normalized = normalizeStoragePath(variant.path);
+            expect(normalized.firstSegment).not.toBe(fakeTenantId);
           },
           15000,
         );
