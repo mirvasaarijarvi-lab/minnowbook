@@ -44,35 +44,38 @@ vi.mock("@/contexts/AuthContext", () => ({
 }));
 
 // Track invoke calls so we can assert they DON'T happen for anonymous users.
-const mockFunctionsInvoke = vi.fn(async () => ({ data: null, error: null }));
-const mockListFactors = vi.fn(async () => ({
-  data: { totp: [] },
-  error: null,
-}));
-
-vi.mock("@/integrations/supabase/client", () => ({
-  supabase: {
-    auth: {
-      getSession: vi.fn(async () => ({ data: { session: null } })),
-      mfa: {
-        listFactors: mockListFactors,
-        getAuthenticatorAssuranceLevel: vi.fn(async () => ({
-          data: { currentLevel: "aal1", nextLevel: "aal1" },
-          error: null,
-        })),
+// Mocks must be inlined inside the factory because `vi.mock` is hoisted
+// above any top-level `const` declarations.
+vi.mock("@/integrations/supabase/client", () => {
+  const invoke = vi.fn(async () => ({ data: null, error: null }));
+  return {
+    supabase: {
+      auth: {
+        getSession: vi.fn(async () => ({ data: { session: null } })),
+        mfa: {
+          listFactors: vi.fn(async () => ({
+            data: { totp: [] },
+            error: null,
+          })),
+          getAuthenticatorAssuranceLevel: vi.fn(async () => ({
+            data: { currentLevel: "aal1", nextLevel: "aal1" },
+            error: null,
+          })),
+        },
       },
-    },
-    rpc: vi.fn(async () => ({ data: false, error: null })),
-    functions: { invoke: mockFunctionsInvoke },
-    from: vi.fn(() => ({
-      select: vi.fn(() => ({
-        eq: vi.fn(() => ({
-          maybeSingle: vi.fn(async () => ({ data: null, error: null })),
+      rpc: vi.fn(async () => ({ data: false, error: null })),
+      functions: { invoke },
+      from: vi.fn(() => ({
+        select: vi.fn(() => ({
+          eq: vi.fn(() => ({
+            maybeSingle: vi.fn(async () => ({ data: null, error: null })),
+          })),
         })),
       })),
-    })),
-  },
-}));
+      __invokeSpy: invoke,
+    },
+  };
+});
 
 // --- Imports under test --------------------------------------------------
 
