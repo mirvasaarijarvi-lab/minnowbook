@@ -3203,6 +3203,18 @@ const en: TranslationKeys = {
   "kitchen.error": "Could not save item",
   "kitchen.filter.all": "All",
   "kitchen.print": "Print",
+  "kitchen.menu.title": "Menu Templates",
+  "kitchen.menu.manage": "Manage menu",
+  "kitchen.menu.empty": "No menu items yet. Add common items to insert them quickly into orders.",
+  "kitchen.menu.addToOrder": "Add to order",
+  "kitchen.menu.pickFromMenu": "From menu",
+  "kitchen.menu.newItem": "Add menu item",
+  "kitchen.menu.namePlaceholder": "Item name (e.g. Margherita pizza)",
+  "kitchen.menu.saved": "Menu item saved",
+  "kitchen.menu.deleted": "Menu item removed",
+  "kitchen.menu.saveError": "Could not save menu item",
+  "kitchen.menu.close": "Close",
+  "kitchen.menu.searchPlaceholder": "Search menu...",
 
   // Offers
   "offers.title": "Offers",
