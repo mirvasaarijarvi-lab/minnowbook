@@ -488,6 +488,7 @@ async function sweepMultipartIntermediates(bucket: string, tenantIds: string[]) 
       // The table may not exist on older Supabase versions / self-hosted
       // installs without the S3 driver — that's fine, treat as no-op.
       if (selectErr) {
+        bumpStats(tenantId, "errors");
         recordCleanup({
           bucket,
           path: `${keyPrefix}${RUN_ID}/*`,
@@ -509,6 +510,7 @@ async function sweepMultipartIntermediates(bucket: string, tenantIds: string[]) 
       }
 
       const orphanRows = orphans as Array<{ id: string; key: string }>;
+      bumpStats(tenantId, "orphansFound", orphanRows.length);
 
       // Defense-in-depth assertion: every row returned by the scope filter
       // MUST contain BOTH the tenant-prefixed test folder AND this run's
