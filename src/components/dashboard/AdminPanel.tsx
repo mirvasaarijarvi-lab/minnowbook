@@ -28,6 +28,7 @@ import AuditLogPanel from "./AuditLogPanel";
 import PermissionsEditor from "./PermissionsEditor";
 import HealthCheckPanel from "./HealthCheckPanel";
 import EmailLogPanel from "./EmailLogPanel";
+import { StaffLimitBadge } from "./StaffLimitBadge";
 import { getMaxStaffUsers } from "@/lib/tier-limits";
 import { useTierErrorMessage } from "@/hooks/useTierErrorMessage";
 
@@ -342,10 +343,15 @@ const AdminPanel = () => {
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between flex-wrap gap-2">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <Users className="h-5 w-5 text-primary" />
               <CardTitle className="font-serif">{t("admin.userManagement")}</CardTitle>
               <DashboardTooltip text={t("admin.userManagementDesc")} />
+              <StaffLimitBadge
+                tier={tenant?.tier}
+                currentCount={userList.length}
+                unlimitedOverride={isSystemAdmin}
+              />
             </div>
             <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
               <Tooltip>
