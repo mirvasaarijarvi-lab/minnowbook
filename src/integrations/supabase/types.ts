@@ -57,6 +57,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "access_code_redemptions_access_code_id_fkey"
+            columns: ["access_code_id"]
+            isOneToOne: false
+            referencedRelation: "access_codes_redeemed_view"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "access_code_redemptions_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
@@ -81,7 +88,8 @@ export type Database = {
       }
       access_codes: {
         Row: {
-          code: string
+          code_hash: string
+          code_prefix: string
           created_at: string
           created_by: string
           description: string | null
@@ -99,7 +107,8 @@ export type Database = {
           valid_until: string | null
         }
         Insert: {
-          code: string
+          code_hash: string
+          code_prefix: string
           created_at?: string
           created_by: string
           description?: string | null
@@ -117,7 +126,8 @@ export type Database = {
           valid_until?: string | null
         }
         Update: {
-          code?: string
+          code_hash?: string
+          code_prefix?: string
           created_at?: string
           created_by?: string
           description?: string | null
@@ -2528,6 +2538,52 @@ export type Database = {
       }
     }
     Views: {
+      access_codes_redeemed_view: {
+        Row: {
+          code_prefix: string | null
+          created_at: string | null
+          description: string | null
+          duration_days: number | null
+          granted_tier: string | null
+          granted_until: string | null
+          id: string | null
+          is_active: boolean | null
+          is_revoked: boolean | null
+          max_uses: number | null
+          redeemed_by_tenant_id: string | null
+          redemption_active: boolean | null
+          revoked_at: string | null
+          revoked_reason: string | null
+          tier: string | null
+          updated_at: string | null
+          used_count: number | null
+          valid_from: string | null
+          valid_until: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "access_code_redemptions_tenant_id_fkey"
+            columns: ["redeemed_by_tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "access_code_redemptions_tenant_id_fkey"
+            columns: ["redeemed_by_tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "access_code_redemptions_tenant_id_fkey"
+            columns: ["redeemed_by_tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants_safe"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       guest_reviews_public: {
         Row: {
           comment: string | null
@@ -2806,6 +2862,18 @@ export type Database = {
         Args: { p_site_id: string; p_tenant_id: string }
         Returns: undefined
       }
+      create_access_code: {
+        Args: {
+          p_code: string
+          p_description: string
+          p_duration_days: number
+          p_max_uses: number
+          p_tier: string
+          p_valid_from: string
+          p_valid_until: string
+        }
+        Returns: string
+      }
       create_tenant: {
         Args: {
           p_accent_color?: string
@@ -2886,6 +2954,34 @@ export type Database = {
       is_valid_review_token_for_reservation: {
         Args: { p_reservation_id: string; p_tenant_id: string; p_token: string }
         Returns: boolean
+      }
+      lookup_access_code_by_plaintext: {
+        Args: { p_code: string }
+        Returns: {
+          code_hash: string
+          code_prefix: string
+          created_at: string
+          created_by: string
+          description: string | null
+          duration_days: number
+          id: string
+          is_active: boolean
+          is_revoked: boolean
+          max_uses: number | null
+          revoked_at: string | null
+          revoked_reason: string | null
+          tier: string
+          updated_at: string
+          used_count: number
+          valid_from: string | null
+          valid_until: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "access_codes"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       lookup_booking_token: {
         Args: { p_token: string }

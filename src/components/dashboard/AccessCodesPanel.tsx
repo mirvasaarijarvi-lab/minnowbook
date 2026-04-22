@@ -19,7 +19,7 @@ import BetaInviteEmailPreview from "./BetaInviteEmailPreview";
 
 interface AccessCode {
   id: string;
-  code: string;
+  code_prefix: string;
   description: string | null;
   tier: string;
   duration_days: number;
@@ -50,6 +50,9 @@ const AccessCodesPanel = () => {
   const [createOpen, setCreateOpen] = useState(false);
   const [revokeId, setRevokeId] = useState<string | null>(null);
   const [revokeReason, setRevokeReason] = useState("");
+  // After successful creation, plaintext is shown ONCE for the superadmin to copy/share.
+  // It is never stored in the DB (only the SHA-256 hash is).
+  const [lastCreatedPlaintext, setLastCreatedPlaintext] = useState<string | null>(null);
   const [form, setForm] = useState({
     code: generateCode(),
     description: "",
@@ -65,7 +68,7 @@ const AccessCodesPanel = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("access_codes")
-        .select("*")
+        .select("id, code_prefix, description, tier, duration_days, valid_from, valid_until, max_uses, used_count, is_active, is_revoked, revoked_at, revoked_reason, created_by, created_at")
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data as AccessCode[];
@@ -86,23 +89,25 @@ const AccessCodesPanel = () => {
 
   const createMutation = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.from("access_codes").insert({
-        code: form.code.trim().toUpperCase(),
-        description: form.description || null,
-        tier: form.tier,
-        duration_days: form.duration_days,
-        valid_from: form.valid_from || null,
-        valid_until: form.valid_until || null,
-        max_uses: form.max_uses ? parseInt(form.max_uses) : null,
-        created_by: user!.id,
+      const plaintext = form.code.trim().toUpperCase();
+      const { error } = await supabase.rpc("create_access_code", {
+        p_code: plaintext,
+        p_description: form.description || null,
+        p_tier: form.tier,
+        p_duration_days: form.duration_days,
+        p_valid_from: form.valid_from || null,
+        p_valid_until: form.valid_until || null,
+        p_max_uses: form.max_uses ? parseInt(form.max_uses) : null,
       });
       if (error) throw error;
+      return plaintext;
     },
-    onSuccess: () => {
+    onSuccess: (plaintext) => {
       queryClient.invalidateQueries({ queryKey: ["access-codes"] });
       setCreateOpen(false);
+      setLastCreatedPlaintext(plaintext);
       setForm({ ...form, code: generateCode(), description: "", max_uses: "" });
-      toast({ title: "Access code created" });
+      toast({ title: "Access code created", description: "Copy it now — only the hash is stored." });
     },
     onError: (err: any) => {
       toast({ title: "Error", description: err.message, variant: "destructive" });
@@ -177,6 +182,27 @@ const AccessCodesPanel = () => {
           </Button>
         </CardHeader>
         <CardContent>
+          {lastCreatedPlaintext && (
+            <div className="mb-4 p-3 rounded-md border border-accent bg-accent/10 space-y-2">
+              <p className="text-xs font-medium text-foreground">
+                New code created — copy it now. Only the hash is stored, so it can't be retrieved later.
+              </p>
+              <div className="flex items-center gap-2">
+                <code className="font-mono text-sm font-bold flex-1 px-2 py-1 rounded bg-background">
+                  {lastCreatedPlaintext}
+                </code>
+                <Button size="sm" variant="outline" onClick={() => copyCode(lastCreatedPlaintext)}>
+                  <Copy className="h-3 w-3 mr-1" /> Copy
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => setLastCreatedPlaintext(null)}>Dismiss</Button>
+              </div>
+              <BetaInviteEmailPreview
+                code={lastCreatedPlaintext}
+                tierLabel={form.tier === "professional" ? "Professional" : form.tier === "business" ? "Business" : "Basic"}
+                durationDays={form.duration_days}
+              />
+            </div>
+          )}
           {isLoading ? (
             <div className="flex justify-center py-8">
               <div className="animate-spin h-6 w-6 border-4 border-accent border-t-transparent rounded-full" />
@@ -191,13 +217,12 @@ const AccessCodesPanel = () => {
                   <div key={ac.id} className="p-4 rounded-lg border border-border bg-card space-y-2">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => copyCode(ac.code)}
-                          className="font-mono text-sm font-bold text-foreground hover:text-primary flex items-center gap-1"
+                        <span
+                          className="font-mono text-sm font-bold text-foreground flex items-center gap-1"
+                          title="Only the prefix is shown — the full code is hashed and cannot be retrieved"
                         >
-                          {ac.code}
-                          <Copy className="h-3 w-3" />
-                        </button>
+                          {ac.code_prefix}…
+                        </span>
                         <Badge variant={ac.is_revoked ? "destructive" : ac.is_active ? "default" : "secondary"} className="text-[10px]">
                           {ac.is_revoked ? "Revoked" : ac.is_active ? "Active" : "Paused"}
                         </Badge>
@@ -261,15 +286,6 @@ const AccessCodesPanel = () => {
                             {!r.is_active && <Badge variant="destructive" className="text-[9px] h-4">Revoked</Badge>}
                           </div>
                         ))}
-                      </div>
-                    )}
-                    {!ac.is_revoked && ac.is_active && (
-                      <div className="pt-2 border-t border-border mt-2">
-                        <BetaInviteEmailPreview
-                          code={ac.code}
-                          tierLabel={ac.tier === "professional" ? "Professional" : ac.tier === "business" ? "Business" : "Basic"}
-                          durationDays={ac.duration_days}
-                        />
                       </div>
                     )}
                   </div>
