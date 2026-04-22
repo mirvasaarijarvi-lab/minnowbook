@@ -18,9 +18,126 @@ jobs:
           deno-version: v1.x
 
       - name: Run edge function tests
+        id: deno-tests
         run: |
+          # Per-test logs are saved under a run-scoped directory so that
+          # uploaded artifacts and any inline summary can be correlated
+          # back to a specific GitHub Actions run + the exact test that
+          # produced them. Filename pattern:
+          #
+          #   run-<run_id>__<sanitized_test_path>.log
+          #
+          # The combined log keeps the historical single-file behavior.
+          LOG_DIR="/tmp/edge-test-logs"
+          mkdir -p "$LOG_DIR"
+          COMBINED="$LOG_DIR/run-${GITHUB_RUN_ID}__all-tests.log"
+          : > "$COMBINED"
+
+          # Expose for later steps (summary + artifact upload).
+          echo "log_dir=$LOG_DIR" >> "$GITHUB_OUTPUT"
+          echo "combined_log=$COMBINED" >> "$GITHUB_OUTPUT"
+
+          STATUS=0
           for test_file in $(find supabase/functions -name '*_test.ts' -o -name '*.test.ts' 2>/dev/null); do
-            echo "Running $test_file"
-            deno test --allow-net --allow-env --allow-read "$test_file"
+            # Sanitize: drop the leading "supabase/functions/" prefix and
+            # replace path separators / unsafe chars so the filename is
+            # readable and safe on any FS.
+            rel="${test_file#supabase/functions/}"
+            safe_name=$(echo "$rel" | sed -E 's#[/ ]+#__#g; s#[^A-Za-z0-9._-]+#_#g')
+            per_test_log="$LOG_DIR/run-${GITHUB_RUN_ID}__${safe_name}.log"
+
+            {
+              echo "===== test_file: $test_file ====="
+              echo "===== run_id:    $GITHUB_RUN_ID ====="
+              echo "===== started:   $(date -u +%FT%TZ) ====="
+            } | tee -a "$per_test_log" "$COMBINED" > /dev/null
+
+            echo "Running $test_file (log: $per_test_log)"
+            if ! deno test --allow-net --allow-env --allow-read "$test_file" 2>&1 \
+                  | tee -a "$per_test_log" "$COMBINED"; then
+              STATUS=1
+              # Rename failing logs so they sort to the top of the
+              # artifact listing and stand out in reviews.
+              failed_log="$LOG_DIR/FAILED__run-${GITHUB_RUN_ID}__${safe_name}.log"
+              mv "$per_test_log" "$failed_log"
+              echo "::error file=$test_file::Deno test failed — see artifact $(basename "$failed_log")"
+            fi
           done
-          echo "Edge function tests completed"
+
+          echo "Edge function tests completed (combined log: $COMBINED)"
+          exit $STATUS
+
+      - name: Summarize top 10 error lines from Supabase container logs
+        # Always run, even on test failure — that's exactly when we need
+        # the summary the most. The previous step's exit code is still
+        # respected by the job because this step doesn't override it.
+        if: always()
+        run: |
+          LOG="${{ steps.deno-tests.outputs.combined_log }}"
+          LOG_DIR="${{ steps.deno-tests.outputs.log_dir }}"
+          SUMMARY="${GITHUB_STEP_SUMMARY:-/dev/stdout}"
+
+          {
+            echo "## Supabase / Edge Function — Top 10 Error Lines"
+            echo ""
+            echo "_Run ID: \`${GITHUB_RUN_ID}\`_"
+            echo ""
+          } >> "$SUMMARY"
+
+          if [ ! -s "$LOG" ]; then
+            echo "_No test log was captured (file missing or empty)._" >> "$SUMMARY"
+            exit 0
+          fi
+
+          # Pull the most relevant signal lines: explicit ERROR/FAIL/panic
+          # markers, Deno's "error:" prefix, and uncaught/unhandled
+          # rejections. Case-insensitive, deduplicated, capped at 10.
+          ERRORS=$(grep -E -i \
+            -e '(^|[[:space:]])error([[:space:]:]|$)' \
+            -e '(^|[[:space:]])fail(ed|ure)?([[:space:]:]|$)' \
+            -e '(^|[[:space:]])panic([[:space:]:]|$)' \
+            -e 'uncaught|unhandled rejection' \
+            "$LOG" \
+            | sed 's/[[:space:]]\+$//' \
+            | awk '!seen[$0]++' \
+            | head -n 10 || true)
+
+          if [ -z "$ERRORS" ]; then
+            echo "_No error lines detected in the captured log._" >> "$SUMMARY"
+          else
+            {
+              echo '```'
+              echo "$ERRORS"
+              echo '```'
+            } >> "$SUMMARY"
+          fi
+
+          # List the per-test log filenames so reviewers can map summary
+          # entries back to specific files in the uploaded artifact.
+          if [ -d "$LOG_DIR" ]; then
+            {
+              echo ""
+              echo "### Per-test log files"
+              echo ""
+              echo '```'
+              ls -1 "$LOG_DIR" | sort
+              echo '```'
+            } >> "$SUMMARY"
+          fi
+
+          # Also print to the live job log so it's visible without
+          # opening the summary panel.
+          echo "----- Top 10 error lines (Supabase / edge tests) -----"
+          echo "${ERRORS:-<none detected>}"
+          echo "------------------------------------------------------"
+
+      - name: Upload edge test logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          # Artifact name itself includes the run id so downloads from
+          # multiple runs don't collide when reviewers save them locally.
+          name: edge-test-logs-run-${{ github.run_id }}
+          path: /tmp/edge-test-logs/
+          if-no-files-found: warn
+          retention-days: 14
