@@ -362,6 +362,25 @@ Deno.serve(async (req) => {
       user_agent: userAgent,
       ip,
       attempted_at: at,
+      // Snapshot of the client's system-admin React Query cache when
+      // the guard rendered Forbidden. Omit the field entirely (rather
+      // than persisting `null`) when the client didn't supply one, so
+      // legacy rows and incident dashboards can tell "not provided" apart
+      // from "provided but all-false". Snake-cased to match the rest of
+      // the JSON column convention.
+      ...(adminCheckState
+        ? {
+            admin_check_state: {
+              loading: adminCheckState.loading,
+              fetching: adminCheckState.fetching,
+              stale: adminCheckState.stale,
+              errored: adminCheckState.errored,
+              data_updated_at: adminCheckState.dataUpdatedAt,
+              status: adminCheckState.status,
+              fetch_status: adminCheckState.fetchStatus,
+            },
+          }
+        : {}),
     },
   });
 
