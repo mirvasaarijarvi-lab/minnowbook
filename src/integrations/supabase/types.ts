@@ -2899,6 +2899,16 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      find_users_with_multiple_tenants: {
+        Args: never
+        Returns: {
+          resolved_tenant_id: string
+          tenant_count: number
+          tenant_ids: string[]
+          tenant_names: string[]
+          user_id: string
+        }[]
+      }
       get_published_reviews: {
         Args: { p_site_id?: string; p_tenant_id: string }
         Returns: {
@@ -2909,6 +2919,15 @@ export type Database = {
           rating: number
           site_id: string
           tenant_id: string
+        }[]
+      }
+      get_tenant_membership_health: {
+        Args: never
+        Returns: {
+          total_memberships: number
+          unique_users: number
+          users_with_multiple_tenants: number
+          users_with_no_resolvable_tenant: number
         }[]
       }
       get_tier_max_reservation_types: {
