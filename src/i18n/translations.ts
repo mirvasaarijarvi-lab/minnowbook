@@ -6439,6 +6439,18 @@ const sv: TranslationKeys = {
   "kitchen.error": "Kunde inte spara objektet",
   "kitchen.filter.all": "Alla",
   "kitchen.print": "Skriv ut",
+  "kitchen.menu.title": "Menymallar",
+  "kitchen.menu.manage": "Hantera meny",
+  "kitchen.menu.empty": "Inga menyobjekt än. Lägg till vanliga objekt för att snabbt infoga dem i beställningar.",
+  "kitchen.menu.addToOrder": "Lägg till i beställning",
+  "kitchen.menu.pickFromMenu": "Från meny",
+  "kitchen.menu.newItem": "Lägg till menyobjekt",
+  "kitchen.menu.namePlaceholder": "Objektnamn (t.ex. Margherita-pizza)",
+  "kitchen.menu.saved": "Menyobjekt sparat",
+  "kitchen.menu.deleted": "Menyobjekt borttaget",
+  "kitchen.menu.saveError": "Kunde inte spara menyobjektet",
+  "kitchen.menu.close": "Stäng",
+  "kitchen.menu.searchPlaceholder": "Sök i menyn...",
 
   // Offers
   "offers.title": "Erbjudanden",
