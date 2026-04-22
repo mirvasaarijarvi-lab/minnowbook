@@ -29,6 +29,7 @@ import PermissionsEditor from "./PermissionsEditor";
 import HealthCheckPanel from "./HealthCheckPanel";
 import EmailLogPanel from "./EmailLogPanel";
 import { getMaxStaffUsers } from "@/lib/tier-limits";
+import { useTierErrorMessage } from "@/hooks/useTierErrorMessage";
 
 interface SiteAssignment {
   id?: string;
@@ -77,6 +78,14 @@ const AdminPanel = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const t = useT();
+  const formatTierError = useTierErrorMessage();
+  // Centralized error -> toast helper. Tier-limit errors get a friendly,
+  // localized message; everything else falls back to the raw server text.
+  const showError = (err: unknown) => {
+    const tierErr = formatTierError(err);
+    const description = tierErr ? tierErr.message : (err as { message?: string })?.message;
+    toast({ title: "Error", description, variant: "destructive" });
+  };
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
   const [siteDialogOpen, setSiteDialogOpen] = useState(false);
@@ -173,7 +182,7 @@ const AdminPanel = () => {
       toast({ title: t("admin.userCreated") });
     },
     onError: (err: any) => {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      showError(err);
     },
   });
 
@@ -185,7 +194,7 @@ const AdminPanel = () => {
       toast({ title: t("admin.roleUpdated") });
     },
     onError: (err: any) => {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      showError(err);
     },
   });
 
@@ -198,7 +207,7 @@ const AdminPanel = () => {
       toast({ title: t("admin.siteAssignmentsUpdated") });
     },
     onError: (err: any) => {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      showError(err);
     },
   });
 
@@ -212,7 +221,7 @@ const AdminPanel = () => {
       toast({ title: t("admin.passwordChanged") });
     },
     onError: (err: any) => {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      showError(err);
     },
   });
 
@@ -223,7 +232,7 @@ const AdminPanel = () => {
       toast({ title: t("admin.userRemoved") });
     },
     onError: (err: any) => {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      showError(err);
     },
   });
 

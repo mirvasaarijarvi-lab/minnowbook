@@ -1653,6 +1653,12 @@ type TranslationKeys = {
   "offers.crossBookingAddError": string;
   "offers.crossBookingRemoved": string;
   "offers.crossBookingRemoveError": string;
+
+  // Tier limit errors (raised by backend triggers / RPCs)
+  "tierError.STAFF_USER_LIMIT_REACHED": string;
+  "tierError.SITE_LIMIT_REACHED": string;
+  "tierError.RESERVATION_TYPE_LIMIT_REACHED": string;
+  "tierError.RESOURCE_PER_TYPE_LIMIT_REACHED": string;
 };
 
 export type TranslationKey = keyof TranslationKeys;
@@ -3282,6 +3288,12 @@ const en: TranslationKeys = {
   "offers.crossBookingAddError": "Error linking reservation",
   "offers.crossBookingRemoved": "Reservation unlinked",
   "offers.crossBookingRemoveError": "Error unlinking reservation",
+
+  // Tier limit errors
+  "tierError.STAFF_USER_LIMIT_REACHED": "Your plan allows up to {limit} staff users. Upgrade to add more team members.",
+  "tierError.SITE_LIMIT_REACHED": "Your plan allows up to {limit} site. Upgrade to Business to manage multiple locations.",
+  "tierError.RESERVATION_TYPE_LIMIT_REACHED": "Your plan allows up to {limit} reservation type. Upgrade to unlock additional booking categories.",
+  "tierError.RESOURCE_PER_TYPE_LIMIT_REACHED": "Your plan allows only {limit} resource per type. Upgrade to Business for unlimited resources.",
 };
 
 const fi: TranslationKeys = {
@@ -4907,6 +4919,12 @@ const fi: TranslationKeys = {
   "offers.crossBookingAddError": "Virhe varauksen linkittämisessä",
   "offers.crossBookingRemoved": "Varauksen linkitys poistettu",
   "offers.crossBookingRemoveError": "Virhe varauksen linkityksen poistamisessa",
+
+  // Tier-rajojen virheet
+  "tierError.STAFF_USER_LIMIT_REACHED": "Tilauksesi sallii enintään {limit} käyttäjää. Päivitä lisätäksesi tiimiläisiä.",
+  "tierError.SITE_LIMIT_REACHED": "Tilauksesi sallii enintään {limit} toimipisteen. Päivitä Business-tasoon hallitaksesi useita.",
+  "tierError.RESERVATION_TYPE_LIMIT_REACHED": "Tilauksesi sallii enintään {limit} varaustyypin. Päivitä lisätäksesi varauskategorioita.",
+  "tierError.RESOURCE_PER_TYPE_LIMIT_REACHED": "Tilauksesi sallii vain {limit} resurssin per tyyppi. Päivitä Business-tasoon saadaksesi rajattomat resurssit.",
 };
 
 const sv: TranslationKeys = {
@@ -6532,6 +6550,12 @@ const sv: TranslationKeys = {
   "offers.crossBookingAddError": "Fel vid länkning av bokning",
   "offers.crossBookingRemoved": "Bokning avlänkad",
   "offers.crossBookingRemoveError": "Fel vid avlänkning av bokning",
+
+  // Tier-gränsfel
+  "tierError.STAFF_USER_LIMIT_REACHED": "Din plan tillåter upp till {limit} användare. Uppgradera för att lägga till fler teammedlemmar.",
+  "tierError.SITE_LIMIT_REACHED": "Din plan tillåter upp till {limit} plats. Uppgradera till Business för att hantera flera platser.",
+  "tierError.RESERVATION_TYPE_LIMIT_REACHED": "Din plan tillåter upp till {limit} bokningstyp. Uppgradera för fler bokningskategorier.",
+  "tierError.RESOURCE_PER_TYPE_LIMIT_REACHED": "Din plan tillåter endast {limit} resurs per typ. Uppgradera till Business för obegränsade resurser.",
 };
 
 export const translations: Record<Language, TranslationKeys> = { en, fi, sv };
