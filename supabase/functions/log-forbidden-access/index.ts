@@ -180,6 +180,7 @@ Deno.serve(async (req) => {
     summary,
     new_data: {
       attempted_area: attemptedArea,
+      attempted_area_label: attemptedAreaLabel,
       attempted_path: attemptedPath,
       user_agent: userAgent,
       ip,
