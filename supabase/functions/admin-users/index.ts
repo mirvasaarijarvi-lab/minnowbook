@@ -118,6 +118,18 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Origin allowlist gate: reject browser requests from disallowed origins
+  // with an explicit 403 (not just a CORS-blocked browser response). This
+  // ensures attacker-controlled pages get a hard server-side rejection and
+  // never reach authentication/business logic.
+  const reqOrigin = req.headers.get("Origin") || "";
+  if (reqOrigin && !isOriginAllowed(reqOrigin)) {
+    return new Response(JSON.stringify({ error: "Forbidden" }), {
+      status: 403,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
   const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
     req.headers.get("cf-connecting-ip") || "unknown";
   if (!checkRateLimit(clientIp)) {
