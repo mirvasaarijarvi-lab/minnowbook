@@ -94,6 +94,36 @@ export const useTenant = () => {
     enabled: isImpersonating && !!impersonating.tenantId,
   });
 
+  // Track tenantId truthy → null transitions for analytics. We compare the
+  // resolved value against a ref so we only emit once per real loss event,
+  // and skip the initial mount (null → null) and impersonation sessions.
+  const resolvedTenantId = isImpersonating
+    ? impersonating.tenantId ?? null
+    : tenantUser?.tenant_id ?? null;
+
+  useEffect(() => {
+    if (loadingTenantUser) return;
+    if (isImpersonating) {
+      lastTenantIdRef.current = resolvedTenantId;
+      return;
+    }
+    const previous = lastTenantIdRef.current;
+    if (previous && !resolvedTenantId) {
+      try {
+        gtm.tenantLost({
+          reason: lossReasonRef.current,
+          user_id: user?.id ?? null,
+          previous_tenant_id: previous,
+          pathname: typeof window !== "undefined" ? window.location.pathname : undefined,
+        });
+      } catch {
+        // analytics push is best-effort
+      }
+      lossReasonRef.current = "unknown";
+    }
+    lastTenantIdRef.current = resolvedTenantId;
+  }, [resolvedTenantId, loadingTenantUser, isImpersonating, user?.id, impersonating.tenantId]);
+
   if (isImpersonating && impersonating.tenantId) {
     return {
       tenantUser,
