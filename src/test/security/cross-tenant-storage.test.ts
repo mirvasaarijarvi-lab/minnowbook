@@ -863,6 +863,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         if (signInBError) throw new Error(`Tenant B sign-in failed: ${signInBError.message}`);
 
         await guardTenantPair({
+          suite: "cross-tenant-storage",
           a: { client: clientA, tenantId: liveCreds.a.tenantId, email: liveCreds.a.email },
           b: { client: clientB, tenantId: liveCreds.b.tenantId, email: liveCreds.b.email },
         });
