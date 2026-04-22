@@ -38,6 +38,10 @@ interface UploadAttemptRecord {
   expected: "denied" | "allowed";
   outcome: "denied" | "allowed" | "error";
   errorMessage: string | null;
+  /** HTTP status from the storage call, when the SDK exposed one. */
+  httpStatus?: number | null;
+  /** Supabase / PostgREST error code, when the SDK exposed one. */
+  errorCode?: string | null;
   scenario?: string;
   recordedAt: string;
 }
@@ -48,6 +52,8 @@ interface CleanupRecord {
   role: "attacker" | "owner" | "self" | "admin-sweep" | "admin-multipart";
   removed: boolean;
   note?: string;
+  httpStatus?: number | null;
+  errorCode?: string | null;
   recordedAt: string;
 }
 
