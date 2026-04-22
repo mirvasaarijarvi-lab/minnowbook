@@ -25,3 +25,5 @@ project_id = "lsgznskkxadplwnxplhd"
     verify_jwt = false
   [functions.forbidden-status]
     verify_jwt = false
+  [functions.log-forbidden-access]
+    verify_jwt = true
