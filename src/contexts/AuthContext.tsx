@@ -1,6 +1,8 @@
 import { createContext, useContext, useEffect, useState, useRef, useCallback, ReactNode } from "react";
 import { Session, User } from "@supabase/supabase-js";
+import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { invalidateIsSystemAdmin } from "@/hooks/useIsSystemAdmin";
 import { gtm } from "@/lib/gtm";
 
 // --- Session idle timeout (30 minutes) ---
@@ -47,6 +49,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [subscription, setSubscription] = useState<SubscriptionInfo>(defaultSubscription);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // We invalidate the cached `is_system_admin` lookup on every auth
+  // transition so the next render of `<SystemAdminRoute>` (and any
+  // consumer of `useIsSystemAdmin`) refetches against the fresh JWT
+  // instead of serving the previous user's answer. The provider lives
+  // inside `<QueryClientProvider>` (see App.tsx), so this hook is safe.
+  const queryClient = useQueryClient();
 
   // --- Idle timeout: sign out after 30 min of inactivity ---
   const resetIdleTimer = useCallback(() => {
@@ -103,6 +111,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         if (event === "SIGNED_IN" && session?.user) {
           gtm.login();
+          // The `/superadmin` gate caches `is_system_admin` per-user with
+          // `staleTime: Infinity`. On a fresh sign-in we MUST refetch
+          // against the new JWT, otherwise a non-admin signing in after
+          // an admin signed out (or vice-versa) on the same tab would
+          // see a stale answer until a hard reload. Scoping by
+          // `session.user.id` keeps any other cached entries intact.
+          void invalidateIsSystemAdmin(queryClient, session.user.id);
+
           // Record login event
           setTimeout(async () => {
             try {
@@ -127,6 +143,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         if (event === "SIGNED_OUT") {
           setSubscription(defaultSubscription);
+          // Drop EVERY cached `is-system-admin` entry. Without this, a
+          // shared device that goes user A -> sign out -> user B could
+          // briefly serve A's admin status to B before the per-user
+          // SIGNED_IN invalidator above runs.
+          void invalidateIsSystemAdmin(queryClient);
+        }
+
+        if (event === "TOKEN_REFRESHED" && session?.user) {
+          // A refreshed JWT can carry updated claims (e.g. the user was
+          // just promoted server-side). Re-validate so guarded routes
+          // pick up the change without waiting for a full reload.
+          void invalidateIsSystemAdmin(queryClient, session.user.id);
         }
       }
     );
@@ -151,7 +179,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       authSub.unsubscribe();
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [checkSubscription]);
+  }, [checkSubscription, queryClient]);
 
   const signOut = async () => {
     await supabase.auth.signOut();

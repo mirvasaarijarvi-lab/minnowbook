@@ -1,4 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
+import { useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -14,6 +15,68 @@ import { supabase } from "@/integrations/supabase/client";
  */
 export const isSystemAdminQueryKey = (userId: string | undefined) =>
   ["is-system-admin", userId] as const;
+
+/**
+ * Stable prefix used to match every `is-system-admin` cache entry,
+ * regardless of which `userId` it was scoped to. Used by the broad
+ * "clear all" invalidator (e.g. on sign-out, when we want to drop any
+ * leftover cache for the previous user).
+ */
+const isSystemAdminQueryKeyPrefix = ["is-system-admin"] as const;
+
+/**
+ * Imperatively invalidate the system-admin lookup for a single user so
+ * the next subscriber refetches from the server. Use this after an
+ * out-of-band change to the user's `system_admins` row (e.g. a superadmin
+ * promotes/demotes them, or the user accepts a new invite that grants
+ * platform-level access) and you want `/superadmin` and any guarded UI
+ * to reflect the change without a full reload.
+ *
+ * Pass `undefined` (or omit the second arg) to clear ALL cached
+ * `is-system-admin` entries — useful on sign-out where we don't want
+ * one user's admin status lingering for the next session.
+ *
+ * Safe to call from anywhere that has access to the app's
+ * `QueryClient` instance (including non-React utilities).
+ */
+export function invalidateIsSystemAdmin(
+  queryClient: QueryClient,
+  userId?: string,
+): Promise<void> {
+  if (userId) {
+    return queryClient.invalidateQueries({
+      queryKey: isSystemAdminQueryKey(userId),
+      exact: true,
+    });
+  }
+  // No userId → clear every cached variant. `exact: false` matches by
+  // prefix so we sweep all `["is-system-admin", *]` entries.
+  return queryClient.invalidateQueries({
+    queryKey: isSystemAdminQueryKeyPrefix,
+    exact: false,
+  });
+}
+
+/**
+ * React hook that returns a memoized invalidator bound to the current
+ * `QueryClient`. Prefer this in components/hooks; reach for the bare
+ * `invalidateIsSystemAdmin(queryClient, ...)` only when you don't have
+ * a hook context.
+ *
+ * Usage:
+ *   const refreshAdminCache = useInvalidateIsSystemAdmin();
+ *   // After granting/revoking system-admin role for a specific user:
+ *   await refreshAdminCache(targetUserId);
+ *   // Or to clear everything (e.g. on sign-out):
+ *   await refreshAdminCache();
+ */
+export function useInvalidateIsSystemAdmin() {
+  const queryClient = useQueryClient();
+  return useCallback(
+    (userId?: string) => invalidateIsSystemAdmin(queryClient, userId),
+    [queryClient],
+  );
+}
 
 /**
  * Returns whether the currently authenticated user is a platform-level
