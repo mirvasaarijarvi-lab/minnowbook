@@ -40,6 +40,7 @@ import SuperadminLoginHistory from "@/components/dashboard/SuperadminLoginHistor
 import StripeRevenuePanel from "@/components/dashboard/StripeRevenuePanel";
 import TenantMembershipCheckPanel from "@/components/dashboard/TenantMembershipCheckPanel";
 import RlsManifestDebugPanel from "@/components/dashboard/RlsManifestDebugPanel";
+import ForbiddenAccessLogPanel from "@/components/dashboard/ForbiddenAccessLogPanel";
 import NoTenantState from "@/components/NoTenantState";
 import { useTenant } from "@/hooks/useTenant";
 
@@ -453,6 +454,9 @@ const Superadmin = () => {
 
         {/* Tenant Membership Integrity */}
         <TenantMembershipCheckPanel />
+
+        {/* Cross-tenant view of all route-guard denials (action='forbidden_access'). */}
+        <ForbiddenAccessLogPanel />
 
         {/* RLS Manifest Debug — exact SQL/filters used by manifest tests */}
         <RlsManifestDebugPanel />
