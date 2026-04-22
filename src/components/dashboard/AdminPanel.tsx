@@ -164,7 +164,46 @@ const AdminPanel = () => {
   });
 
   const createMutation = useMutation({
-    mutationFn: () => {
+    // Re-validate the staff limit at submit time. The user could have been
+    // sitting on the dialog while:
+    //   - the tenant tier was downgraded (e.g. by a superadmin), shrinking
+    //     the cap below the current head-count, OR
+    //   - another admin added users in a different tab and pushed us at /
+    //     over the cap.
+    // The DB trigger `enforce_staff_user_limit` is the source of truth, but
+    // we want the user to see the SAME tier-limit toast they'd get from the
+    // server WITHOUT spending a round-trip on a request that's guaranteed
+    // to fail. We refetch the latest tenant tier + user list, recompute the
+    // cap, and short-circuit with the same shaped error the trigger raises
+    // — `useTierErrorMessage` then renders the localized message.
+    mutationFn: async () => {
+      const [{ data: freshTenant }, freshUsers] = await Promise.all([
+        supabase
+          .from("tenants")
+          .select("tier")
+          .eq("id", tenantId!)
+          .maybeSingle(),
+        invokeAdmin({ action: "list" }),
+      ]);
+
+      // Push the freshly-fetched data into the React Query cache so the
+      // disabled-state on the trigger button stays consistent with what
+      // we just validated against.
+      queryClient.setQueryData(["admin-users", tenantId], freshUsers);
+
+      const freshTier = (freshTenant?.tier as string | undefined) ?? tenant?.tier;
+      const freshMax = getMaxStaffUsers(freshTier);
+      const freshCount = Array.isArray(freshUsers) ? freshUsers.length : 0;
+
+      if (!isSystemAdmin && freshMax !== null && freshCount >= freshMax) {
+        // Mirror the verbatim message format from the
+        // `enforce_staff_user_limit` trigger so `parseTierLimitError`
+        // recognizes it as STAFF_USER_LIMIT_REACHED.
+        throw new Error(
+          `Tier "${freshTier ?? "basic"}" allows at most ${freshMax} staff user(s). Upgrade your plan to add more.`,
+        );
+      }
+
       const isSystemRole = ["superadmin", "owner", "admin", "staff"].includes(newUser.role);
       return invokeAdmin({
         action: "create",
@@ -182,6 +221,9 @@ const AdminPanel = () => {
       toast({ title: t("admin.userCreated") });
     },
     onError: (err: any) => {
+      // Whether the error came from the pre-flight re-validation above or
+      // from the server-side trigger, both go through `showError` ->
+      // `useTierErrorMessage` for a consistent localized toast.
       showError(err);
     },
   });
