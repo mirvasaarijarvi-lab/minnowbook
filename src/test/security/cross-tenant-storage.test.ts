@@ -22,6 +22,155 @@ const adminClient: SupabaseClient | null =
       })
     : null;
 
+// ---------------------------------------------------------------------
+// Timeout-bounded teardown primitives
+// ---------------------------------------------------------------------
+// Cleanup paths in `afterAll` MUST NOT depend on the network behaving.
+// Storage SDK calls (`remove`, `list`, `download`) can hang indefinitely
+// if the upload that preceded them was killed mid-stream, if the server
+// is recycling a multipart upload, or if the path is malformed enough
+// that the gateway never closes the request. A hung `afterAll` either:
+//   - blocks the run until vitest's hook timeout aborts the whole file
+//     (no admin sweep, no ledger flush — orphans persist), OR
+//   - silently swallows the rest of the cleanup queue when one call
+//     waits forever in series.
+//
+// `withTimeout` guarantees a deterministic upper bound on every storage
+// call we make from a teardown context. Timeouts are recorded in the
+// ledger so they show up in the PDF report — we never want a silent
+// "we tried, gave up, moved on".
+const TEARDOWN_OP_TIMEOUT_MS = 6_000;
+
+const TEARDOWN_TIMEOUT_SENTINEL = Symbol("teardown-timeout");
+
+async function withTimeout<T>(
+  op: () => Promise<T>,
+  ms = TEARDOWN_OP_TIMEOUT_MS,
+): Promise<T | typeof TEARDOWN_TIMEOUT_SENTINEL> {
+  let timer: ReturnType<typeof setTimeout> | null = null;
+  try {
+    return await Promise.race<T | typeof TEARDOWN_TIMEOUT_SENTINEL>([
+      op(),
+      new Promise<typeof TEARDOWN_TIMEOUT_SENTINEL>((resolve) => {
+        timer = setTimeout(() => resolve(TEARDOWN_TIMEOUT_SENTINEL), ms);
+      }),
+    ]);
+  } catch (err) {
+    // Surface as a sentinel-like rejection so callers can branch uniformly.
+    throw err;
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
+/**
+ * Bounded `storage.remove([path])` for a single key. Always resolves —
+ * never rejects — so it's safe to chain in cleanup loops without
+ * try/catch noise. Returns `{ removed, timedOut, errorMessage }` so the
+ * caller can ledger the outcome.
+ */
+async function safeRemove(
+  client: SupabaseClient,
+  bucket: string,
+  path: string,
+): Promise<{ removed: boolean; timedOut: boolean; errorMessage: string | null }> {
+  try {
+    const result = await withTimeout(() =>
+      client.storage.from(bucket).remove([path]),
+    );
+    if (result === TEARDOWN_TIMEOUT_SENTINEL) {
+      return { removed: false, timedOut: true, errorMessage: "teardown-timeout" };
+    }
+    const removed =
+      !result.error && Array.isArray(result.data) && result.data.length > 0;
+    return {
+      removed,
+      timedOut: false,
+      errorMessage: result.error?.message ?? null,
+    };
+  } catch (err) {
+    return {
+      removed: false,
+      timedOut: false,
+      errorMessage: (err as Error).message ?? "unknown",
+    };
+  }
+}
+
+/**
+ * Iterate per-attempt cleanup pairs (attacker + owner) with hard
+ * per-call timeouts so a single hung remove() can't stall the whole
+ * teardown. Records every outcome in the ledger so the PDF reflects
+ * exactly what cleanup did and didn't manage.
+ */
+async function teardownAttemptPaths(
+  attempts: Array<{
+    bucket: string;
+    path: string;
+    attacker: "a" | "b";
+    owner: "a" | "b";
+  }>,
+  clientFor: (key: "a" | "b") => SupabaseClient,
+) {
+  const seen = new Set<string>();
+  for (const { bucket, path, attacker, owner } of attempts) {
+    const key = `${bucket}::${path}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    for (const role of [attacker, owner] as const) {
+      const { removed, timedOut, errorMessage } = await safeRemove(
+        clientFor(role),
+        bucket,
+        path,
+      );
+      // Only ledger non-trivial outcomes — a clean "nothing to remove" from
+      // every per-client attempt would flood the PDF with no signal. Log
+      // timeouts (deterministic-bound proof) and successful removals.
+      if (timedOut || removed) {
+        recordCleanup({
+          bucket,
+          path,
+          role: role === attacker ? "attacker" : "owner",
+          removed,
+          note: timedOut
+            ? "timed out — handed off to admin sweep"
+            : errorMessage ?? undefined,
+        });
+      }
+    }
+  }
+}
+
+/**
+ * Iterate "self-owned" cleanup paths (own-tenant sanity uploads) with
+ * the same per-call timeout discipline.
+ */
+async function teardownOwnedPaths(
+  paths: Array<{ bucket: string; path: string; client: "a" | "b" }>,
+  clientFor: (key: "a" | "b") => SupabaseClient,
+) {
+  for (const { bucket, path, client } of paths) {
+    const { removed, timedOut, errorMessage } = await safeRemove(
+      clientFor(client),
+      bucket,
+      path,
+    );
+    if (timedOut || !removed) {
+      // Own-tenant remove SHOULD succeed; flag any miss so the admin
+      // sweep can pick it up and the ledger records the handoff.
+      recordCleanup({
+        bucket,
+        path,
+        role: "self",
+        removed,
+        note: timedOut
+          ? "timed out — handed off to admin sweep"
+          : errorMessage ?? "remove returned no rows",
+      });
+    }
+  }
+}
+
 /**
  * Best-effort recursive sweep STRICTLY scoped to this run's RUN_ID folder.
  *
@@ -32,6 +181,12 @@ const adminClient: SupabaseClient | null =
  * `{tenantId}/` and never `{tenantId}/__rls_test__/` — so a misconfigured
  * RUN_ID can never delete artifacts from concurrent runs, prior runs, or
  * (most importantly) real tenant data that happens to share the prefix.
+ *
+ * Every storage call is wrapped in `withTimeout` so a hung list() or
+ * remove() can't stall teardown indefinitely. The sweep does up to
+ * `MAX_PASSES` passes — each pass re-lists from the run root so files
+ * left behind by partial-success uploads (which the originating client
+ * could not see) get picked up by the admin client.
  *
  * Safe to call from any cleanup path; short-circuits if no admin client
  * is available.
