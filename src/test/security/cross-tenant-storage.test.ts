@@ -550,12 +550,18 @@ async function sweepMultipartIntermediates(bucket: string, tenantIds: string[]) 
       // Errors are swallowed individually so a partial failure doesn't
       // mask the visible-object cleanup that already succeeded.
       try {
-        await adminClient
+        // PostgREST returns the deleted rows when `Prefer: return=representation`
+        // is set (default in supabase-js). Counting them gives us an accurate
+        // per-tenant "parts deleted" figure for the summary line.
+        const { data: deletedParts } = await adminClient
           .schema("storage")
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           .from("s3_multipart_uploads_parts" as any)
           .delete()
-          .in("upload_id", ids);
+          .in("upload_id", ids)
+          .select("id");
+        const deletedCount = Array.isArray(deletedParts) ? deletedParts.length : 0;
+        if (deletedCount > 0) bumpStats(tenantId, "partsDeleted", deletedCount);
       } catch {
         /* ignore — parts table may not exist on this version */
       }
