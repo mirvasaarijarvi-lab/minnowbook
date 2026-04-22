@@ -88,16 +88,28 @@ async function callRedeem(code: string, withAuth: boolean) {
 
 /**
  * Stable error-code contract for redeem-access-code. Mirrors ERROR_CODES
- * in supabase/functions/redeem-access-code/index.ts. Tests assert on
- * these strings so renaming any of them is a detected breaking change.
+ * in supabase/functions/redeem-access-code/index.ts, plus the codes
+ * emitted by the Supabase Functions auth gateway BEFORE our handler runs
+ * (notably UNAUTHORIZED_NO_AUTH_HEADER when no Authorization header at
+ * all is sent). Tests assert on these strings so renaming any of them
+ * is a detected breaking change.
  */
 const KNOWN_ERROR_CODES = new Set([
+  // Our handler's codes:
   "REQUEST_TOO_LARGE",
   "NOT_AUTHENTICATED",
   "INVALID_CODE_FORMAT",
   "NO_WORKSPACE",
   "INVALID_OR_UNAVAILABLE_CODE",
   "INTERNAL_ERROR",
+  // Supabase Functions gateway codes (returned before our handler runs):
+  "UNAUTHORIZED_NO_AUTH_HEADER",
+]);
+
+/** Codes that mean "auth was rejected", from either layer. */
+const AUTH_REJECTION_CODES = new Set([
+  "NOT_AUTHENTICATED",
+  "UNAUTHORIZED_NO_AUTH_HEADER",
 ]);
 
 function bodyCode(body: unknown): string {
