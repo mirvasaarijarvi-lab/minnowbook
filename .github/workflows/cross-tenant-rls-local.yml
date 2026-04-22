@@ -179,9 +179,125 @@ jobs:
           supabase status || true
           exit 1
 
+      # Second readiness gate: TCP-up does not imply migrations have finished
+      # applying. The Supabase CLI applies files from supabase/migrations/ in
+      # the background after `supabase start` returns, and seeding before
+      # they finish surfaces as cryptic "relation does not exist" or RLS
+      # policy mismatches deep inside the test run. We block here until:
+      #   1. supabase_migrations.schema_migrations exists (the CLI's own
+      #      tracking table — proof the migration runner has initialised),
+      #   2. the count of applied versions is >= the number of .sql files in
+      #      supabase/migrations/ (proof every project migration ran),
+      #   3. a representative set of tenant-scoped tables the RLS sweep
+      #      depends on are actually present in the public schema.
+      # Each check is polled with the same backoff as the TCP gate so a
+      # slow runner doesn't spuriously fail; on timeout we dump diagnostic
+      # state to make triage obvious.
+      - name: Wait for migrations to be applied
+        id: migrations-ready
+        if: steps.supabase-ready.outcome == 'success'
+        env:
+          PGPASSWORD: postgres
+        run: |
+          set -uo pipefail
+          MAX_ATTEMPTS=60
+          SLEEP_SECS=2
+
+          PSQL=(psql -h 127.0.0.1 -p 54322 -U postgres -d postgres -At)
+
+          # Count migration files shipped in the repo. The CLI applies one
+          # row per file in supabase_migrations.schema_migrations, so this
+          # gives us the exact target version count to wait for.
+          expected=$(find supabase/migrations -maxdepth 1 -type f -name '*.sql' \
+            2>/dev/null | wc -l | tr -d ' ')
+          if [ -z "$expected" ] || [ "$expected" = "0" ]; then
+            echo "::warning::No .sql files found under supabase/migrations/ — skipping version-count check."
+            expected=0
+          fi
+          echo "Expecting at least ${expected} migration(s) to be applied."
+
+          # Tables the cross-tenant RLS sweep + seed script touch directly.
+          # If any of these is missing after migrations, seeding will fail
+          # in confusing ways — fail fast here instead.
+          REQUIRED_TABLES=(
+            tenants
+            tenant_users
+            reservations
+            resources
+            sites
+            audit_log
+            system_admins
+          )
+
+          tracking_ready=false
+          version_ready=false
+          tables_ready=false
+
+          for i in $(seq 1 "$MAX_ATTEMPTS"); do
+            if [ "$tracking_ready" != "true" ]; then
+              # The CLI's migration runner creates this schema/table as its
+              # very first action. Its absence means migrations haven't even
+              # started yet — keep waiting.
+              if "${PSQL[@]}" -c "SELECT 1 FROM information_schema.tables \
+                WHERE table_schema = 'supabase_migrations' \
+                  AND table_name = 'schema_migrations' LIMIT 1;" \
+                2>/dev/null | grep -q '^1$'; then
+                tracking_ready=true
+                echo "[$i/${MAX_ATTEMPTS}] ✅ supabase_migrations.schema_migrations exists"
+              fi
+            fi
+
+            if [ "$tracking_ready" = "true" ] && [ "$version_ready" != "true" ]; then
+              applied=$("${PSQL[@]}" -c \
+                "SELECT count(*) FROM supabase_migrations.schema_migrations;" \
+                2>/dev/null | tr -d ' ')
+              applied="${applied:-0}"
+              if [ "$applied" -ge "$expected" ]; then
+                version_ready=true
+                echo "[$i/${MAX_ATTEMPTS}] ✅ ${applied}/${expected} migrations applied"
+              else
+                echo "[$i/${MAX_ATTEMPTS}] ⏳ ${applied}/${expected} migrations applied"
+              fi
+            fi
+
+            if [ "$version_ready" = "true" ] && [ "$tables_ready" != "true" ]; then
+              missing=()
+              for t in "${REQUIRED_TABLES[@]}"; do
+                if ! "${PSQL[@]}" -c "SELECT 1 FROM information_schema.tables \
+                  WHERE table_schema = 'public' AND table_name = '${t}' \
+                  LIMIT 1;" 2>/dev/null | grep -q '^1$'; then
+                  missing+=("$t")
+                fi
+              done
+              if [ ${#missing[@]} -eq 0 ]; then
+                tables_ready=true
+                echo "[$i/${MAX_ATTEMPTS}] ✅ All required tenant tables present"
+              else
+                echo "[$i/${MAX_ATTEMPTS}] ⏳ Missing tables: ${missing[*]}"
+              fi
+            fi
+
+            if [ "$tracking_ready" = "true" ] \
+              && [ "$version_ready" = "true" ] \
+              && [ "$tables_ready" = "true" ]; then
+              echo "Migrations ready after $((i * SLEEP_SECS))s"
+              exit 0
+            fi
+            sleep "$SLEEP_SECS"
+          done
+
+          echo "::error::Migrations did not finish applying within $((MAX_ATTEMPTS * SLEEP_SECS))s"
+          echo "  tracking_ready=$tracking_ready version_ready=$version_ready tables_ready=$tables_ready"
+          echo "Applied versions:"
+          "${PSQL[@]}" -c "SELECT version FROM supabase_migrations.schema_migrations \
+            ORDER BY version;" 2>&1 || true
+          echo "Public tables present:"
+          "${PSQL[@]}" -c "SELECT table_name FROM information_schema.tables \
+            WHERE table_schema = 'public' ORDER BY table_name;" 2>&1 || true
+          exit 1
 
       - name: Seed test tenants and users
-        if: steps.supabase-ready.outcome == 'success'
+        if: steps.supabase-ready.outcome == 'success' && steps.migrations-ready.outcome == 'success'
         run: |
           set -euo pipefail
           # Run seed script and append the emitted KEY=VALUE lines to
