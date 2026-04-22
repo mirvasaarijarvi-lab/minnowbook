@@ -77,6 +77,110 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      # Print the seeded tenant identifiers (IDs, slug, name, masked email)
+      # BEFORE running the test sweep so a hung or failing run can still be
+      # triaged from the workflow summary. Mirrors the local-stack workflow's
+      # "Print seeded tenant debug info" step but, since we have no direct
+      # Postgres access in remote staging, fetches slug/name from the
+      # public `tenants_public` view via PostgREST + the anon key.
+      #
+      # Secret-leak hygiene:
+      #   - Tenant IDs and slugs are not secrets (they appear in URLs and
+      #     RLS policy errors anyway) so we print them in full.
+      #   - Emails are masked to `f***@example.com` so the local part isn't
+      #     leaked into public PR-run logs even though it's a configured
+      #     secret.
+      #   - Passwords are NEVER referenced — GitHub would mask them, but
+      #     the safest approach is not to touch them at all.
+      - name: Print seeded tenant debug info (no secrets)
+        env:
+          SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          A_EMAIL: ${{ secrets.RLS_TEST_TENANT_A_EMAIL }}
+          A_TID: ${{ secrets.RLS_TEST_TENANT_A_ID }}
+          B_EMAIL: ${{ secrets.RLS_TEST_TENANT_B_EMAIL }}
+          B_TID: ${{ secrets.RLS_TEST_TENANT_B_ID }}
+        run: |
+          set -uo pipefail
+          echo "### Seeded RLS test fixtures (remote staging)" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Label | Email (masked) | Tenant ID | Tenant slug | Tenant name |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|---|---|---|---|---|" >> "$GITHUB_STEP_SUMMARY"
+
+          # Mask email local-part so it never appears verbatim in logs even
+          # when GitHub's automatic secret masking would already redact it.
+          # Format:  "fred.smith@acme.io" -> "f***@acme.io"
+          mask_email() {
+            local raw="${1:-}"
+            if [ -z "$raw" ]; then
+              printf '(missing)'
+              return
+            fi
+            local local_part="${raw%@*}"
+            local domain_part="${raw#*@}"
+            local first="${local_part:0:1}"
+            printf '%s***@%s' "$first" "$domain_part"
+          }
+
+          # Fetch the tenant slug+name from the public view via PostgREST.
+          # The anon key is enough because `tenants_public` is exposed to
+          # anon for active tenants; failing requests are tolerated and
+          # reported as `?` so the workflow stays informative even if the
+          # view is unavailable.
+          fetch_tenant() {
+            local tid="$1"
+            if [ -z "$tid" ]; then
+              echo "|"
+              return
+            fi
+            local resp
+            resp=$(curl -sS --max-time 10 \
+              -H "apikey: ${SUPABASE_ANON_KEY}" \
+              -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" \
+              "${SUPABASE_URL%/}/rest/v1/tenants_public?id=eq.${tid}&select=slug,name" \
+              2>/dev/null || echo "[]")
+            # Tolerate missing `node` by parsing with a tiny inline script;
+            # GitHub-hosted runners always have node available.
+            node -e "
+              try {
+                const arr = JSON.parse(process.argv[1] || '[]');
+                const row = Array.isArray(arr) && arr[0] ? arr[0] : {};
+                process.stdout.write((row.slug || '') + '|' + (row.name || ''));
+              } catch (_) { process.stdout.write('|'); }
+            " "$resp"
+          }
+
+          for label in A B; do
+            email_var="${label}_EMAIL"
+            tid_var="${label}_TID"
+            email="${!email_var:-}"
+            tenant_id="${!tid_var:-}"
+
+            if [ -z "$tenant_id" ] && [ -z "$email" ]; then
+              echo "::warning::Tenant ${label} secrets missing"
+              echo "| ${label} | (missing) | (missing) | – | – |" >> "$GITHUB_STEP_SUMMARY"
+              continue
+            fi
+
+            masked=$(mask_email "$email")
+            row=$(fetch_tenant "$tenant_id")
+            slug=$(echo "$row" | cut -d'|' -f1)
+            tname=$(echo "$row" | cut -d'|' -f2)
+
+            # Console output (also masked) — visible in the raw step log
+            # without expanding the job summary.
+            echo "Tenant ${label}:"
+            echo "  email     = ${masked}"
+            echo "  tenant_id = ${tenant_id:-<missing>}"
+            echo "  slug      = ${slug:-<unknown>}"
+            echo "  name      = ${tname:-<unknown>}"
+
+            echo "| ${label} | \`${masked}\` | \`${tenant_id:-?}\` | \`${slug:-?}\` | ${tname:-?} |" >> "$GITHUB_STEP_SUMMARY"
+          done
+
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "_Emails are masked and passwords are intentionally omitted._" >> "$GITHUB_STEP_SUMMARY"
+
       - name: Run cross-tenant RLS tests (live) + generate report
         env:
           # Public Supabase config — exposed to Vite via import.meta.env
