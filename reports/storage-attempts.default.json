@@ -1,25 +1,53 @@
 {
-  "generatedAt": "2026-04-22T14:47:27.836Z",
+  "generatedAt": "2026-04-22T15:32:20.289Z",
   "flavor": "default",
-  "runId": "1776869167650-qk7wxv",
+  "runId": "1776871787011-dkklu2",
   "tenants": {
     "a": null,
     "b": null
   },
   "summary": {
-    "totalUploadAttempts": 22,
-    "expectedDenied": 22,
+    "totalUploadAttempts": 34,
+    "expectedDenied": 34,
     "expectedAllowed": 0,
     "unexpectedAllowed": 0,
     "unexpectedDenied": 0,
-    "totalCleanupOps": 0,
+    "totalCleanupOps": 2,
     "cleanupRemoved": 0,
-    "cleanupSkipped": 0
+    "cleanupSkipped": 2
   },
   "uploads": [
     {
       "kind": "upload",
       "bucket": "tenant-private",
+      "path": "00000000-0000-0000-0000-000000000000/__rls_test__/1776871787011-dkklu2/anon.txt",
+      "attacker": "anon",
+      "owner": "fake-tenant",
+      "expected": "denied",
+      "outcome": "denied",
+      "errorMessage": "network-timeout",
+      "httpStatus": null,
+      "errorCode": "Error",
+      "scenario": "anon-upload",
+      "recordedAt": "2026-04-22T15:29:51.075Z"
+    },
+    {
+      "kind": "upload",
+      "bucket": "tenant-assets",
+      "path": "00000000-0000-0000-0000-000000000000/__rls_test__/1776871787011-dkklu2/anon.txt",
+      "attacker": "anon",
+      "owner": "fake-tenant",
+      "expected": "denied",
+      "outcome": "denied",
+      "errorMessage": "network-timeout",
+      "httpStatus": null,
+      "errorCode": "Error",
+      "scenario": "anon-upload",
+      "recordedAt": "2026-04-22T15:29:55.078Z"
+    },
+    {
+      "kind": "upload",
+      "bucket": "tenant-private",
       "path": "11111111-1111-1111-1111-111111111111//docs/file.txt",
       "attacker": "anon",
       "owner": "fake-tenant",
@@ -29,7 +57,7 @@
       "httpStatus": null,
       "errorCode": "Error",
       "scenario": "adversarial:double-slash",
-      "recordedAt": "2026-04-22T14:46:11.717Z"
+      "recordedAt": "2026-04-22T15:30:24.165Z"
     },
     {
       "kind": "upload",
@@ -43,7 +71,7 @@
       "httpStatus": null,
       "errorCode": "Error",
       "scenario": "adversarial:leading-slash",
-      "recordedAt": "2026-04-22T14:46:15.721Z"
+      "recordedAt": "2026-04-22T15:30:28.169Z"
     },
     {
       "kind": "upload",
@@ -57,7 +85,7 @@
       "httpStatus": null,
       "errorCode": "Error",
       "scenario": "adversarial:trailing-slash",
-      "recordedAt": "2026-04-22T14:46:19.722Z"
+      "recordedAt": "2026-04-22T15:30:32.171Z"
     },
     {
       "kind": "upload",
@@ -71,7 +99,7 @@
       "httpStatus": null,
       "errorCode": "Error",
       "scenario": "adversarial:dot-segment-traversal",
-      "recordedAt": "2026-04-22T14:46:23.726Z"
+      "recordedAt": "2026-04-22T15:30:36.173Z"
     },
     {
       "kind": "upload",
@@ -85,7 +113,7 @@
       "httpStatus": null,
       "errorCode": "Error",
       "scenario": "adversarial:url-encoded-slash",
-      "recordedAt": "2026-04-22T14:46:27.732Z"
+      "recordedAt": "2026-04-22T15:30:40.176Z"
     },
     {
       "kind": "upload",
@@ -99,7 +127,7 @@
       "httpStatus": null,
       "errorCode": "Error",
       "scenario": "adversarial:url-encoded-tenant-wrappers",
-      "recordedAt": "2026-04-22T14:46:31.734Z"
+      "recordedAt": "2026-04-22T15:30:44.177Z"
     },
     {
       "kind": "upload",
@@ -113,7 +141,7 @@
       "httpStatus": null,
       "errorCode": "Error",
       "scenario": "adversarial:backslash-separators",
-      "recordedAt": "2026-04-22T14:46:35.737Z"
+      "recordedAt": "2026-04-22T15:30:48.179Z"
     },
     {
       "kind": "upload",
@@ -127,7 +155,7 @@
       "httpStatus": 400,
       "errorCode": "StorageApiError",
       "scenario": "adversarial:null-byte-truncation",
-      "recordedAt": "2026-04-22T14:46:35.784Z"
+      "recordedAt": "2026-04-22T15:30:48.210Z"
     },
     {
       "kind": "upload",
@@ -141,7 +169,7 @@
       "httpStatus": null,
       "errorCode": "Error",
       "scenario": "adversarial:double-encoded-slash",
-      "recordedAt": "2026-04-22T14:46:39.786Z"
+      "recordedAt": "2026-04-22T15:30:52.212Z"
     },
     {
       "kind": "upload",
@@ -155,7 +183,7 @@
       "httpStatus": null,
       "errorCode": "Error",
       "scenario": "adversarial:url-encoded-dot-dot",
-      "recordedAt": "2026-04-22T14:46:43.788Z"
+      "recordedAt": "2026-04-22T15:30:56.222Z"
     },
     {
       "kind": "upload",
@@ -169,7 +197,7 @@
       "httpStatus": null,
       "errorCode": "Error",
       "scenario": "adversarial:url-encoded-slash-plus-dot-dot",
-      "recordedAt": "2026-04-22T14:46:47.789Z"
+      "recordedAt": "2026-04-22T15:31:00.224Z"
     },
     {
       "kind": "upload",
@@ -183,7 +211,7 @@
       "httpStatus": null,
       "errorCode": "Error",
       "scenario": "adversarial:double-slash",
-      "recordedAt": "2026-04-22T14:46:51.791Z"
+      "recordedAt": "2026-04-22T15:31:04.225Z"
     },
     {
       "kind": "upload",
@@ -197,7 +225,7 @@
       "httpStatus": null,
       "errorCode": "Error",
       "scenario": "adversarial:leading-slash",
-      "recordedAt": "2026-04-22T14:46:55.794Z"
+      "recordedAt": "2026-04-22T15:31:08.226Z"
     },
     {
       "kind": "upload",
@@ -211,7 +239,7 @@
       "httpStatus": null,
       "errorCode": "Error",
       "scenario": "adversarial:trailing-slash",
-      "recordedAt": "2026-04-22T14:46:59.795Z"
+      "recordedAt": "2026-04-22T15:31:12.228Z"
     },
     {
       "kind": "upload",
@@ -225,7 +253,7 @@
       "httpStatus": null,
       "errorCode": "Error",
       "scenario": "adversarial:dot-segment-traversal",
-      "recordedAt": "2026-04-22T14:47:03.797Z"
+      "recordedAt": "2026-04-22T15:31:16.230Z"
     },
     {
       "kind": "upload",
@@ -239,7 +267,7 @@
       "httpStatus": null,
       "errorCode": "Error",
       "scenario": "adversarial:url-encoded-slash",
-      "recordedAt": "2026-04-22T14:47:07.799Z"
+      "recordedAt": "2026-04-22T15:31:20.231Z"
     },
     {
       "kind": "upload",
@@ -253,7 +281,7 @@
       "httpStatus": null,
       "errorCode": "Error",
       "scenario": "adversarial:url-encoded-tenant-wrappers",
-      "recordedAt": "2026-04-22T14:47:11.801Z"
+      "recordedAt": "2026-04-22T15:31:24.233Z"
     },
     {
       "kind": "upload",
@@ -267,7 +295,7 @@
       "httpStatus": null,
       "errorCode": "Error",
       "scenario": "adversarial:backslash-separators",
-      "recordedAt": "2026-04-22T14:47:15.803Z"
+      "recordedAt": "2026-04-22T15:31:28.234Z"
     },
     {
       "kind": "upload",
@@ -281,7 +309,7 @@
       "httpStatus": 400,
       "errorCode": "StorageApiError",
       "scenario": "adversarial:null-byte-truncation",
-      "recordedAt": "2026-04-22T14:47:15.827Z"
+      "recordedAt": "2026-04-22T15:31:28.261Z"
     },
     {
       "kind": "upload",
@@ -295,7 +323,7 @@
       "httpStatus": null,
       "errorCode": "Error",
       "scenario": "adversarial:double-encoded-slash",
-      "recordedAt": "2026-04-22T14:47:19.829Z"
+      "recordedAt": "2026-04-22T15:31:32.263Z"
     },
     {
       "kind": "upload",
@@ -309,7 +337,7 @@
       "httpStatus": null,
       "errorCode": "Error",
       "scenario": "adversarial:url-encoded-dot-dot",
-      "recordedAt": "2026-04-22T14:47:23.832Z"
+      "recordedAt": "2026-04-22T15:31:36.265Z"
     },
     {
       "kind": "upload",
@@ -323,8 +351,169 @@
       "httpStatus": null,
       "errorCode": "Error",
       "scenario": "adversarial:url-encoded-slash-plus-dot-dot",
-      "recordedAt": "2026-04-22T14:47:27.834Z"
+      "recordedAt": "2026-04-22T15:31:40.267Z"
+    },
+    {
+      "kind": "upload",
+      "bucket": "tenant-private",
+      "path": "22222222-2222-2222-2222-222222222222/33333333-3333-3333-3333-333333333333/file.txt",
+      "attacker": "anon",
+      "owner": "fake-tenant",
+      "expected": "denied",
+      "outcome": "denied",
+      "errorMessage": "network-timeout",
+      "httpStatus": null,
+      "errorCode": "Error",
+      "scenario": "late-segment:victim-as-segment-2",
+      "recordedAt": "2026-04-22T15:31:44.272Z"
+    },
+    {
+      "kind": "upload",
+      "bucket": "tenant-private",
+      "path": "22222222-2222-2222-2222-222222222222/docs/33333333-3333-3333-3333-333333333333/file.txt",
+      "attacker": "anon",
+      "owner": "fake-tenant",
+      "expected": "denied",
+      "outcome": "denied",
+      "errorMessage": "network-timeout",
+      "httpStatus": null,
+      "errorCode": "Error",
+      "scenario": "late-segment:victim-as-segment-3",
+      "recordedAt": "2026-04-22T15:31:48.273Z"
+    },
+    {
+      "kind": "upload",
+      "bucket": "tenant-private",
+      "path": "22222222-2222-2222-2222-222222222222/a/b/33333333-3333-3333-3333-333333333333/file.txt",
+      "attacker": "anon",
+      "owner": "fake-tenant",
+      "expected": "denied",
+      "outcome": "denied",
+      "errorMessage": "network-timeout",
+      "httpStatus": null,
+      "errorCode": "Error",
+      "scenario": "late-segment:victim-as-segment-4",
+      "recordedAt": "2026-04-22T15:31:52.275Z"
+    },
+    {
+      "kind": "upload",
+      "bucket": "tenant-private",
+      "path": "22222222-2222-2222-2222-222222222222/docs/33333333-3333-3333-3333-333333333333.txt",
+      "attacker": "anon",
+      "owner": "fake-tenant",
+      "expected": "denied",
+      "outcome": "denied",
+      "errorMessage": "network-timeout",
+      "httpStatus": null,
+      "errorCode": "Error",
+      "scenario": "late-segment:victim-embedded-in-filename",
+      "recordedAt": "2026-04-22T15:31:56.277Z"
+    },
+    {
+      "kind": "upload",
+      "bucket": "tenant-private",
+      "path": "22222222-2222-2222-2222-222222222222/33333333-3333-3333-3333-333333333333/__rls_test__/1776871787011-dkklu2/late-seg.txt",
+      "attacker": "anon",
+      "owner": "fake-tenant",
+      "expected": "denied",
+      "outcome": "denied",
+      "errorMessage": "network-timeout",
+      "httpStatus": null,
+      "errorCode": "Error",
+      "scenario": "late-segment:victim-mimicking-rls-test-root",
+      "recordedAt": "2026-04-22T15:32:00.278Z"
+    },
+    {
+      "kind": "upload",
+      "bucket": "tenant-assets",
+      "path": "22222222-2222-2222-2222-222222222222/33333333-3333-3333-3333-333333333333/file.txt",
+      "attacker": "anon",
+      "owner": "fake-tenant",
+      "expected": "denied",
+      "outcome": "denied",
+      "errorMessage": "network-timeout",
+      "httpStatus": null,
+      "errorCode": "Error",
+      "scenario": "late-segment:victim-as-segment-2",
+      "recordedAt": "2026-04-22T15:32:04.280Z"
+    },
+    {
+      "kind": "upload",
+      "bucket": "tenant-assets",
+      "path": "22222222-2222-2222-2222-222222222222/docs/33333333-3333-3333-3333-333333333333/file.txt",
+      "attacker": "anon",
+      "owner": "fake-tenant",
+      "expected": "denied",
+      "outcome": "denied",
+      "errorMessage": "network-timeout",
+      "httpStatus": null,
+      "errorCode": "Error",
+      "scenario": "late-segment:victim-as-segment-3",
+      "recordedAt": "2026-04-22T15:32:08.282Z"
+    },
+    {
+      "kind": "upload",
+      "bucket": "tenant-assets",
+      "path": "22222222-2222-2222-2222-222222222222/a/b/33333333-3333-3333-3333-333333333333/file.txt",
+      "attacker": "anon",
+      "owner": "fake-tenant",
+      "expected": "denied",
+      "outcome": "denied",
+      "errorMessage": "network-timeout",
+      "httpStatus": null,
+      "errorCode": "Error",
+      "scenario": "late-segment:victim-as-segment-4",
+      "recordedAt": "2026-04-22T15:32:12.284Z"
+    },
+    {
+      "kind": "upload",
+      "bucket": "tenant-assets",
+      "path": "22222222-2222-2222-2222-222222222222/docs/33333333-3333-3333-3333-333333333333.txt",
+      "attacker": "anon",
+      "owner": "fake-tenant",
+      "expected": "denied",
+      "outcome": "denied",
+      "errorMessage": "network-timeout",
+      "httpStatus": null,
+      "errorCode": "Error",
+      "scenario": "late-segment:victim-embedded-in-filename",
+      "recordedAt": "2026-04-22T15:32:16.286Z"
+    },
+    {
+      "kind": "upload",
+      "bucket": "tenant-assets",
+      "path": "22222222-2222-2222-2222-222222222222/33333333-3333-3333-3333-333333333333/__rls_test__/1776871787011-dkklu2/late-seg.txt",
+      "attacker": "anon",
+      "owner": "fake-tenant",
+      "expected": "denied",
+      "outcome": "denied",
+      "errorMessage": "network-timeout",
+      "httpStatus": null,
+      "errorCode": "Error",
+      "scenario": "late-segment:victim-mimicking-rls-test-root",
+      "recordedAt": "2026-04-22T15:32:20.289Z"
     }
   ],
-  "cleanups": []
+  "cleanups": [
+    {
+      "bucket": "tenant-private",
+      "path": "00000000-0000-0000-0000-000000000000/__rls_test__/1776871787011-dkklu2/anon.txt",
+      "role": "attacker",
+      "removed": false,
+      "httpStatus": null,
+      "errorCode": null,
+      "note": "negative-control: anon DELETE denied (empty rows)",
+      "recordedAt": "2026-04-22T15:29:55.345Z"
+    },
+    {
+      "bucket": "tenant-assets",
+      "path": "00000000-0000-0000-0000-000000000000/__rls_test__/1776871787011-dkklu2/anon.txt",
+      "role": "attacker",
+      "removed": false,
+      "httpStatus": null,
+      "errorCode": null,
+      "note": "negative-control: anon DELETE denied (empty rows)",
+      "recordedAt": "2026-04-22T15:29:55.413Z"
+    }
+  ]
 }
