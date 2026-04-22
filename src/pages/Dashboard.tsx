@@ -304,6 +304,7 @@ const Dashboard = () => {
           </button>
           <Logo variant="color" size="sm" showText={false} />
           <div className="flex items-center gap-1">
+            <TenantBadge compact />
             <NotificationBell />
             <LanguageSwitcher variant="compact" />
             <Tooltip>
