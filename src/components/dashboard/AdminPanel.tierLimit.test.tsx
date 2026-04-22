@@ -230,7 +230,8 @@ describe("AdminPanel: tier-limit enforcement (Basic = 5 staff users)", () => {
     const triggerMessage =
       'Tier "basic" allows at most 5 staff user(s). Upgrade your plan to add more.';
 
-    mockInvoke.mockImplementation(async ({ body }: any) => {
+    mockInvoke.mockImplementation(async (_name: string, opts: any) => {
+      const body = opts?.body;
       if (body?.action === "list") {
         // 4 users → gate is open, button is enabled, dialog can open.
         return { data: fakeUsers(4), error: null };
