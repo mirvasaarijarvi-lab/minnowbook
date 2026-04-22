@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, Navigate } from "react-router-dom";
+import { useNavigate, Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTenant } from "@/hooks/useTenant";
 import { supabase } from "@/integrations/supabase/client";
@@ -31,6 +31,8 @@ const Onboarding = () => {
   const { user } = useAuth();
   const { tenantId, loading: tenantLoading } = useTenant();
   const navigate = useNavigate();
+  const location = useLocation();
+  const wasRedirected = (location.state as { reason?: string } | null)?.reason === "no-tenant";
   const queryClient = useQueryClient();
   const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
@@ -135,6 +137,14 @@ const Onboarding = () => {
       </header>
 
       <main className="flex-1 flex flex-col items-center justify-center px-4 py-8">
+        {wasRedirected && (
+          <div className="w-full max-w-2xl mb-6 rounded-md border border-accent/30 bg-accent/5 px-4 py-3 text-sm text-foreground">
+            <p className="font-medium">Let's set up your workspace</p>
+            <p className="text-muted-foreground mt-0.5">
+              Your account isn't connected to an organization yet. Complete these steps to create one and start using MimmoBook.
+            </p>
+          </div>
+        )}
         <div className="flex items-center gap-2 mb-8">
           {STEPS.map((labelKey, i) => (
             <div key={labelKey} className="flex items-center gap-2">

@@ -217,7 +217,7 @@ const Dashboard = () => {
   }
 
   if (!tenantId) {
-    return <Navigate to="/onboarding" replace />;
+    return <Navigate to="/onboarding" replace state={{ reason: "no-tenant" }} />;
   }
 
   const permissionGate: Partial<Record<DashboardView, string>> = {
