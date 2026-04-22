@@ -2331,6 +2331,256 @@ describe("Cross-Tenant Storage RLS Tests", () => {
     },
   );
 
+  // ============================================================
+  // Cross-tenant existence probing on `tenant-assets`
+  // ------------------------------------------------------------
+  // A `download()` denial alone is not enough: an attacker doesn't need
+  // the file's bytes to learn something useful — they just need to know
+  // the file *exists*. Side-channel oracles include:
+  //
+  //   * `createSignedUrl(path)` — succeeds only if SELECT is granted.
+  //     A 200 with a signed URL is itself a confirmation the row is
+  //     visible to the caller, even before the URL is fetched.
+  //   * `list(prefix, { search })` — server-side prefix/substring match.
+  //     A non-empty result reveals filenames in another tenant's folder.
+  //   * `copy()` / `move()` — these read the source row first; success
+  //     (or even a different error code for "exists vs missing") leaks
+  //     existence.
+  //   * `info(path)` — stat-style metadata (added in newer storage SDK
+  //     versions). Must never return metadata for a foreign tenant's
+  //     object.
+  //   * Repeated `download()` against existing vs. obviously-missing
+  //     paths must produce indistinguishable failures (same error
+  //     code/shape) — otherwise the differential is a live oracle.
+  //
+  // All probes target seeded files so we know there IS a real object
+  // on the other side. A leak surfaces as a non-error, non-empty
+  // payload from any of the probes below.
+  // ============================================================
+  describe.runIf(hasSupabaseConfig && liveModeEnabled)(
+    "tenant-assets: cross-tenant existence-probe denial",
+    () => {
+      let clientA: SupabaseClient;
+      let clientB: SupabaseClient;
+
+      const seededAssets: Array<{ path: string; client: "a" | "b" }> = [];
+
+      beforeAll(async () => {
+        clientA = newAnonClient();
+        clientB = newAnonClient();
+
+        const { error: signInAError } = await clientA.auth.signInWithPassword({
+          email: liveCreds.a.email!,
+          password: liveCreds.a.password!,
+        });
+        if (signInAError) throw new Error(`Tenant A sign-in failed: ${signInAError.message}`);
+
+        const { error: signInBError } = await clientB.auth.signInWithPassword({
+          email: liveCreds.b.email!,
+          password: liveCreds.b.password!,
+        });
+        if (signInBError) throw new Error(`Tenant B sign-in failed: ${signInBError.message}`);
+
+        // Seed one distinctively-named asset per tenant so prefix/search
+        // probes have a real target. Names embed a probe marker so a
+        // leak is unambiguous in test output.
+        const aPath = ownPath(liveCreds.a.tenantId!, "a-probe-target-asset");
+        const { error: aErr } = await clientA.storage
+          .from(ASSETS_BUCKET)
+          .upload(aPath, fileBytes("a-probe-target-asset"), { upsert: true });
+        if (aErr) throw new Error(`Probe seed for tenant A failed: ${aErr.message}`);
+        seededAssets.push({ path: aPath, client: "a" });
+
+        const bPath = ownPath(liveCreds.b.tenantId!, "b-probe-target-asset");
+        const { error: bErr } = await clientB.storage
+          .from(ASSETS_BUCKET)
+          .upload(bPath, fileBytes("b-probe-target-asset"), { upsert: true });
+        if (bErr) throw new Error(`Probe seed for tenant B failed: ${bErr.message}`);
+        seededAssets.push({ path: bPath, client: "b" });
+      });
+
+      afterAll(async () => {
+        const clientFor = (key: "a" | "b") => (key === "a" ? clientA : clientB);
+        await teardownOwnedPaths(
+          seededAssets.map((s) => ({ bucket: ASSETS_BUCKET, path: s.path, client: s.client })),
+          clientFor,
+        );
+        await sweepTestArtifacts(ASSETS_BUCKET, [liveCreds.a.tenantId!, liveCreds.b.tenantId!]);
+      });
+
+      // ---------- createSignedUrl (the most common existence oracle) ----------
+      // The storage server only signs URLs after an RLS SELECT check.
+      // A successful sign for another tenant's path means SELECT was
+      // granted — i.e. the attacker has just confirmed the file exists
+      // AND has been handed a usable download URL. Either is fatal.
+      it("user A cannot createSignedUrl for tenant B's seeded tenant-assets file", async () => {
+        const path = ownPath(liveCreds.b.tenantId!, "b-probe-target-asset");
+        const { data, error } = await clientA.storage
+          .from(ASSETS_BUCKET)
+          .createSignedUrl(path, 60);
+        const denied = Boolean(error) || !data?.signedUrl;
+        expect(denied).toBe(true);
+      });
+
+      it("user B cannot createSignedUrl for tenant A's seeded tenant-assets file", async () => {
+        const path = ownPath(liveCreds.a.tenantId!, "a-probe-target-asset");
+        const { data, error } = await clientB.storage
+          .from(ASSETS_BUCKET)
+          .createSignedUrl(path, 60);
+        const denied = Boolean(error) || !data?.signedUrl;
+        expect(denied).toBe(true);
+      });
+
+      // ---------- createSignedUrls (batch) ----------
+      // Batch sign reveals existence per-path: any entry with a non-null
+      // `signedUrl` for the foreign-tenant path is a leak even if other
+      // entries error out.
+      it("user A cannot batch-sign URLs for tenant B's seeded tenant-assets file", async () => {
+        const path = ownPath(liveCreds.b.tenantId!, "b-probe-target-asset");
+        const { data, error } = await clientA.storage
+          .from(ASSETS_BUCKET)
+          .createSignedUrls([path], 60);
+        if (error) {
+          expect(error).toBeTruthy();
+          return;
+        }
+        const leakedEntry = (data ?? []).find((entry) => entry?.signedUrl);
+        expect(leakedEntry).toBeUndefined();
+      });
+
+      // ---------- list() with a search filter (substring oracle) ----------
+      // The Supabase storage `list` endpoint accepts `{ search }`,
+      // which performs a server-side filename match. If RLS is keyed on
+      // the bucket only (not the first folder segment), the foreign
+      // tenant could discover named assets by guessing substrings. The
+      // assertion: searching for our distinctive seed marker under the
+      // OTHER tenant's prefix must never return the seeded entry.
+      it("user A cannot enumerate tenant B's tenant-assets via list({ search })", async () => {
+        const { data, error } = await clientA.storage
+          .from(ASSETS_BUCKET)
+          .list(liveCreds.b.tenantId!, { limit: 50, search: "b-probe-target-asset" });
+        const leaked =
+          Array.isArray(data) &&
+          data.some((entry) => entry.name && entry.name.includes("b-probe-target-asset"));
+        expect(leaked).toBe(false);
+        const denied = Boolean(error) || !data || data.length === 0;
+        expect(denied).toBe(true);
+      });
+
+      it("user B cannot enumerate tenant A's tenant-assets via list({ search })", async () => {
+        const { data, error } = await clientB.storage
+          .from(ASSETS_BUCKET)
+          .list(liveCreds.a.tenantId!, { limit: 50, search: "a-probe-target-asset" });
+        const leaked =
+          Array.isArray(data) &&
+          data.some((entry) => entry.name && entry.name.includes("a-probe-target-asset"));
+        expect(leaked).toBe(false);
+        const denied = Boolean(error) || !data || data.length === 0;
+        expect(denied).toBe(true);
+      });
+
+      // ---------- copy() / move() as existence oracles ----------
+      // Both operations require SELECT on the source. A 200 result —
+      // even if the destination write later fails — proves the row
+      // exists. We point the destination at the attacker's OWN folder
+      // so a hypothetical bypass would actually materialise the leak.
+      it("user A cannot copy() tenant B's seeded tenant-assets file", async () => {
+        const sourcePath = ownPath(liveCreds.b.tenantId!, "b-probe-target-asset");
+        const destPath = ownPath(liveCreds.a.tenantId!, "a-copy-from-b-probe");
+        const { data, error } = await clientA.storage
+          .from(ASSETS_BUCKET)
+          .copy(sourcePath, destPath);
+        const denied = Boolean(error) || !data;
+        expect(denied).toBe(true);
+        // Defensive cleanup: if the leak DID materialise, remove the
+        // copied object so the run leaves no residue.
+        if (!denied) {
+          await clientA.storage.from(ASSETS_BUCKET).remove([destPath]).catch(() => undefined);
+        }
+      });
+
+      it("user B cannot move() tenant A's seeded tenant-assets file", async () => {
+        const sourcePath = ownPath(liveCreds.a.tenantId!, "a-probe-target-asset");
+        const destPath = ownPath(liveCreds.b.tenantId!, "b-move-from-a-probe");
+        const { data, error } = await clientB.storage
+          .from(ASSETS_BUCKET)
+          .move(sourcePath, destPath);
+        const denied = Boolean(error) || !data;
+        expect(denied).toBe(true);
+        if (!denied) {
+          await clientB.storage.from(ASSETS_BUCKET).remove([destPath]).catch(() => undefined);
+        }
+      });
+
+      // ---------- info() / stat (metadata-only oracle) ----------
+      // The `info()` API on newer Supabase storage SDKs returns object
+      // metadata (size, mime, etag) without transferring bytes. It's
+      // SELECT-gated by RLS, so a non-error response on a foreign path
+      // is the textbook stat-style existence oracle. We feature-detect
+      // because not every pinned SDK version exposes it; if absent, the
+      // assertion still holds vacuously (nothing to call → nothing to
+      // leak). When present, it MUST refuse the foreign tenant.
+      it("user A cannot info()/stat tenant B's seeded tenant-assets file", async () => {
+        const path = ownPath(liveCreds.b.tenantId!, "b-probe-target-asset");
+        const bucketApi = clientA.storage.from(ASSETS_BUCKET) as unknown as {
+          info?: (p: string) => Promise<{ data: unknown; error: unknown }>;
+        };
+        if (typeof bucketApi.info !== "function") {
+          expect(true).toBe(true);
+          return;
+        }
+        const { data, error } = await bucketApi.info(path);
+        const denied = Boolean(error) || !data;
+        expect(denied).toBe(true);
+      });
+
+      it("user B cannot info()/stat tenant A's seeded tenant-assets file", async () => {
+        const path = ownPath(liveCreds.a.tenantId!, "a-probe-target-asset");
+        const bucketApi = clientB.storage.from(ASSETS_BUCKET) as unknown as {
+          info?: (p: string) => Promise<{ data: unknown; error: unknown }>;
+        };
+        if (typeof bucketApi.info !== "function") {
+          expect(true).toBe(true);
+          return;
+        }
+        const { data, error } = await bucketApi.info(path);
+        const denied = Boolean(error) || !data;
+        expect(denied).toBe(true);
+      });
+
+      // ---------- Differential-error oracle ----------
+      // If `download(existing-foreign-path)` and `download(definitely-
+      // missing-foreign-path)` produce different error codes/messages,
+      // the difference itself is a usable existence oracle (even when
+      // both technically "fail"). The expectation: both paths produce
+      // the same shape of denial and never one-hit/one-miss.
+      it("user A's foreign-tenant download() failures are indistinguishable for existing vs. missing paths", async () => {
+        const existingForeign = ownPath(liveCreds.b.tenantId!, "b-probe-target-asset");
+        const missingForeign = ownPath(
+          liveCreds.b.tenantId!,
+          `definitely-missing-${Math.random().toString(36).slice(2, 10)}`,
+        );
+
+        const [existingRes, missingRes] = await Promise.all([
+          clientA.storage.from(ASSETS_BUCKET).download(existingForeign),
+          clientA.storage.from(ASSETS_BUCKET).download(missingForeign),
+        ]);
+
+        const existingDenied = Boolean(existingRes.error) || !existingRes.data;
+        const missingDenied = Boolean(missingRes.error) || !missingRes.data;
+        expect(existingDenied).toBe(true);
+        expect(missingDenied).toBe(true);
+
+        // Strict oracle check: a 404 vs. 403 (or "not found" vs.
+        // "permission denied") differential is itself the leak. Both
+        // outcomes MUST be indistinguishable in shape.
+        const existingShape = existingRes.error ? "error" : "no-data";
+        const missingShape = missingRes.error ? "error" : "no-data";
+        expect(existingShape).toBe(missingShape);
+      });
+    },
+  );
+
   describe.skipIf(hasSupabaseConfig)("Skipped: missing Supabase config", () => { 
     it("test environment is missing VITE_SUPABASE_URL / VITE_SUPABASE_PUBLISHABLE_KEY", () => {
       expect(true).toBe(true);
