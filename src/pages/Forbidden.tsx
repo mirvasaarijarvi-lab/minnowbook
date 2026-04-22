@@ -297,6 +297,12 @@ const Forbidden = ({
         // Audit beacon outcome — exposed for E2E tests and the dev indicator.
         data-audit-status={auditStatus ?? "pending"}
         data-audit-reason={auditReason ?? ""}
+        // The audit row's JWT-attributed user_id and server-set timestamp,
+        // echoed back from the edge function on success. These let tests
+        // and synthetic monitors confirm that the row was stamped on the
+        // server (not the client) and attributed to the verified caller.
+        data-audit-user-id={auditUserId ?? ""}
+        data-audit-at={auditAt ?? ""}
       >
         <div className="max-w-md w-full text-center space-y-6">
           <div className="mx-auto h-16 w-16 rounded-full bg-destructive/10 flex items-center justify-center">
