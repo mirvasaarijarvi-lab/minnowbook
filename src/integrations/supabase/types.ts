@@ -578,6 +578,63 @@ export type Database = {
         }
         Relationships: []
       }
+      booking_validation_log: {
+        Row: {
+          capacity_total: number | null
+          created_at: string
+          current_load: number | null
+          guest_email: string | null
+          guest_name: string | null
+          guests_requested: number | null
+          id: string
+          outcome: string
+          reasons: Json
+          reservation_date: string | null
+          reservation_id: string | null
+          reservation_type: string | null
+          site_id: string | null
+          source: string
+          start_time: string | null
+          tenant_id: string
+        }
+        Insert: {
+          capacity_total?: number | null
+          created_at?: string
+          current_load?: number | null
+          guest_email?: string | null
+          guest_name?: string | null
+          guests_requested?: number | null
+          id?: string
+          outcome: string
+          reasons?: Json
+          reservation_date?: string | null
+          reservation_id?: string | null
+          reservation_type?: string | null
+          site_id?: string | null
+          source: string
+          start_time?: string | null
+          tenant_id: string
+        }
+        Update: {
+          capacity_total?: number | null
+          created_at?: string
+          current_load?: number | null
+          guest_email?: string | null
+          guest_name?: string | null
+          guests_requested?: number | null
+          id?: string
+          outcome?: string
+          reasons?: Json
+          reservation_date?: string | null
+          reservation_id?: string | null
+          reservation_type?: string | null
+          site_id?: string | null
+          source?: string
+          start_time?: string | null
+          tenant_id?: string
+        }
+        Relationships: []
+      }
       discount_codes: {
         Row: {
           applies_to: string[] | null
@@ -2680,6 +2737,7 @@ export type Database = {
     }
     Functions: {
       cleanup_old_audit_logs: { Args: never; Returns: undefined }
+      cleanup_old_booking_validation_logs: { Args: never; Returns: undefined }
       copy_tenant_defaults_to_site: {
         Args: { p_site_id: string; p_tenant_id: string }
         Returns: undefined
