@@ -1,6 +1,10 @@
 import { writeFileSync, mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import type { Reporter, File, Task, TaskResultPack } from "vitest";
+import {
+  readTenantGuardLog,
+  type TenantGuardRecord,
+} from "./fixtures/tenant-guard-record";
 
 /**
  * Custom Vitest reporter that produces a CI-friendly summary of the
