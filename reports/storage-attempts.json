@@ -1,14 +1,14 @@
 {
-  "generatedAt": "2026-04-22T10:38:18.074Z",
+  "generatedAt": "2026-04-22T10:45:27.688Z",
   "flavor": "default",
-  "runId": "1776854209263-xaugwl",
+  "runId": "1776854598522-0cd7cf",
   "tenants": {
     "a": null,
     "b": null
   },
   "summary": {
-    "totalUploadAttempts": 18,
-    "expectedDenied": 18,
+    "totalUploadAttempts": 28,
+    "expectedDenied": 28,
     "expectedAllowed": 0,
     "unexpectedAllowed": 0,
     "unexpectedDenied": 0,
@@ -20,26 +20,26 @@
     {
       "kind": "upload",
       "bucket": "tenant-private",
-      "path": "00000000-0000-0000-0000-000000000000/__rls_test__/1776854209263-xaugwl/anon.txt",
+      "path": "00000000-0000-0000-0000-000000000000/__rls_test__/1776854598522-0cd7cf/anon.txt",
       "attacker": "anon",
       "owner": "fake-tenant",
       "expected": "denied",
       "outcome": "denied",
       "errorMessage": "network-timeout",
       "scenario": "anon-upload",
-      "recordedAt": "2026-04-22T10:36:53.299Z"
+      "recordedAt": "2026-04-22T10:43:22.573Z"
     },
     {
       "kind": "upload",
       "bucket": "tenant-assets",
-      "path": "00000000-0000-0000-0000-000000000000/__rls_test__/1776854209263-xaugwl/anon.txt",
+      "path": "00000000-0000-0000-0000-000000000000/__rls_test__/1776854598522-0cd7cf/anon.txt",
       "attacker": "anon",
       "owner": "fake-tenant",
       "expected": "denied",
       "outcome": "denied",
       "errorMessage": "network-timeout",
       "scenario": "anon-upload",
-      "recordedAt": "2026-04-22T10:36:57.304Z"
+      "recordedAt": "2026-04-22T10:43:26.579Z"
     },
     {
       "kind": "upload",
@@ -51,7 +51,7 @@
       "outcome": "denied",
       "errorMessage": "network-timeout",
       "scenario": "adversarial:double-slash",
-      "recordedAt": "2026-04-22T10:37:26.002Z"
+      "recordedAt": "2026-04-22T10:43:55.591Z"
     },
     {
       "kind": "upload",
@@ -63,7 +63,7 @@
       "outcome": "denied",
       "errorMessage": "network-timeout",
       "scenario": "adversarial:leading-slash",
-      "recordedAt": "2026-04-22T10:37:30.004Z"
+      "recordedAt": "2026-04-22T10:43:59.593Z"
     },
     {
       "kind": "upload",
@@ -75,7 +75,7 @@
       "outcome": "denied",
       "errorMessage": "network-timeout",
       "scenario": "adversarial:trailing-slash",
-      "recordedAt": "2026-04-22T10:37:34.005Z"
+      "recordedAt": "2026-04-22T10:44:03.594Z"
     },
     {
       "kind": "upload",
@@ -87,7 +87,7 @@
       "outcome": "denied",
       "errorMessage": "network-timeout",
       "scenario": "adversarial:dot-segment-traversal",
-      "recordedAt": "2026-04-22T10:37:38.006Z"
+      "recordedAt": "2026-04-22T10:44:07.595Z"
     },
     {
       "kind": "upload",
@@ -99,7 +99,7 @@
       "outcome": "denied",
       "errorMessage": "network-timeout",
       "scenario": "adversarial:url-encoded-slash",
-      "recordedAt": "2026-04-22T10:37:42.008Z"
+      "recordedAt": "2026-04-22T10:44:11.597Z"
     },
     {
       "kind": "upload",
@@ -111,7 +111,7 @@
       "outcome": "denied",
       "errorMessage": "network-timeout",
       "scenario": "adversarial:url-encoded-tenant-wrappers",
-      "recordedAt": "2026-04-22T10:37:46.010Z"
+      "recordedAt": "2026-04-22T10:44:15.599Z"
     },
     {
       "kind": "upload",
@@ -123,7 +123,7 @@
       "outcome": "denied",
       "errorMessage": "network-timeout",
       "scenario": "adversarial:backslash-separators",
-      "recordedAt": "2026-04-22T10:37:50.012Z"
+      "recordedAt": "2026-04-22T10:44:19.600Z"
     },
     {
       "kind": "upload",
@@ -135,7 +135,7 @@
       "outcome": "denied",
       "errorMessage": "Bad Request",
       "scenario": "adversarial:null-byte-truncation",
-      "recordedAt": "2026-04-22T10:37:50.035Z"
+      "recordedAt": "2026-04-22T10:44:19.632Z"
     },
     {
       "kind": "upload",
@@ -147,7 +147,7 @@
       "outcome": "denied",
       "errorMessage": "network-timeout",
       "scenario": "adversarial:double-slash",
-      "recordedAt": "2026-04-22T10:37:54.037Z"
+      "recordedAt": "2026-04-22T10:44:23.634Z"
     },
     {
       "kind": "upload",
@@ -159,7 +159,7 @@
       "outcome": "denied",
       "errorMessage": "network-timeout",
       "scenario": "adversarial:leading-slash",
-      "recordedAt": "2026-04-22T10:37:58.039Z"
+      "recordedAt": "2026-04-22T10:44:27.636Z"
     },
     {
       "kind": "upload",
@@ -171,7 +171,7 @@
       "outcome": "denied",
       "errorMessage": "network-timeout",
       "scenario": "adversarial:trailing-slash",
-      "recordedAt": "2026-04-22T10:38:02.041Z"
+      "recordedAt": "2026-04-22T10:44:31.639Z"
     },
     {
       "kind": "upload",
@@ -183,7 +183,7 @@
       "outcome": "denied",
       "errorMessage": "network-timeout",
       "scenario": "adversarial:dot-segment-traversal",
-      "recordedAt": "2026-04-22T10:38:06.042Z"
+      "recordedAt": "2026-04-22T10:44:35.641Z"
     },
     {
       "kind": "upload",
@@ -195,7 +195,7 @@
       "outcome": "denied",
       "errorMessage": "network-timeout",
       "scenario": "adversarial:url-encoded-slash",
-      "recordedAt": "2026-04-22T10:38:10.043Z"
+      "recordedAt": "2026-04-22T10:44:39.642Z"
     },
     {
       "kind": "upload",
@@ -207,7 +207,7 @@
       "outcome": "denied",
       "errorMessage": "network-timeout",
       "scenario": "adversarial:url-encoded-tenant-wrappers",
-      "recordedAt": "2026-04-22T10:38:14.045Z"
+      "recordedAt": "2026-04-22T10:44:43.643Z"
     },
     {
       "kind": "upload",
@@ -219,7 +219,7 @@
       "outcome": "denied",
       "errorMessage": "network-timeout",
       "scenario": "adversarial:backslash-separators",
-      "recordedAt": "2026-04-22T10:38:18.046Z"
+      "recordedAt": "2026-04-22T10:44:47.645Z"
     },
     {
       "kind": "upload",
@@ -231,7 +231,127 @@
       "outcome": "denied",
       "errorMessage": "Bad Request",
       "scenario": "adversarial:null-byte-truncation",
-      "recordedAt": "2026-04-22T10:38:18.071Z"
+      "recordedAt": "2026-04-22T10:44:47.671Z"
+    },
+    {
+      "kind": "upload",
+      "bucket": "tenant-private",
+      "path": "22222222-2222-2222-2222-222222222222/33333333-3333-3333-3333-333333333333/file.txt",
+      "attacker": "anon",
+      "owner": "fake-tenant",
+      "expected": "denied",
+      "outcome": "denied",
+      "errorMessage": "network-timeout",
+      "scenario": "late-segment:victim-as-segment-2",
+      "recordedAt": "2026-04-22T10:44:51.675Z"
+    },
+    {
+      "kind": "upload",
+      "bucket": "tenant-private",
+      "path": "22222222-2222-2222-2222-222222222222/docs/33333333-3333-3333-3333-333333333333/file.txt",
+      "attacker": "anon",
+      "owner": "fake-tenant",
+      "expected": "denied",
+      "outcome": "denied",
+      "errorMessage": "network-timeout",
+      "scenario": "late-segment:victim-as-segment-3",
+      "recordedAt": "2026-04-22T10:44:55.675Z"
+    },
+    {
+      "kind": "upload",
+      "bucket": "tenant-private",
+      "path": "22222222-2222-2222-2222-222222222222/a/b/33333333-3333-3333-3333-333333333333/file.txt",
+      "attacker": "anon",
+      "owner": "fake-tenant",
+      "expected": "denied",
+      "outcome": "denied",
+      "errorMessage": "network-timeout",
+      "scenario": "late-segment:victim-as-segment-4",
+      "recordedAt": "2026-04-22T10:44:59.676Z"
+    },
+    {
+      "kind": "upload",
+      "bucket": "tenant-private",
+      "path": "22222222-2222-2222-2222-222222222222/docs/33333333-3333-3333-3333-333333333333.txt",
+      "attacker": "anon",
+      "owner": "fake-tenant",
+      "expected": "denied",
+      "outcome": "denied",
+      "errorMessage": "network-timeout",
+      "scenario": "late-segment:victim-embedded-in-filename",
+      "recordedAt": "2026-04-22T10:45:03.677Z"
+    },
+    {
+      "kind": "upload",
+      "bucket": "tenant-private",
+      "path": "22222222-2222-2222-2222-222222222222/33333333-3333-3333-3333-333333333333/__rls_test__/1776854598522-0cd7cf/late-seg.txt",
+      "attacker": "anon",
+      "owner": "fake-tenant",
+      "expected": "denied",
+      "outcome": "denied",
+      "errorMessage": "network-timeout",
+      "scenario": "late-segment:victim-mimicking-rls-test-root",
+      "recordedAt": "2026-04-22T10:45:07.679Z"
+    },
+    {
+      "kind": "upload",
+      "bucket": "tenant-assets",
+      "path": "22222222-2222-2222-2222-222222222222/33333333-3333-3333-3333-333333333333/file.txt",
+      "attacker": "anon",
+      "owner": "fake-tenant",
+      "expected": "denied",
+      "outcome": "denied",
+      "errorMessage": "network-timeout",
+      "scenario": "late-segment:victim-as-segment-2",
+      "recordedAt": "2026-04-22T10:45:11.680Z"
+    },
+    {
+      "kind": "upload",
+      "bucket": "tenant-assets",
+      "path": "22222222-2222-2222-2222-222222222222/docs/33333333-3333-3333-3333-333333333333/file.txt",
+      "attacker": "anon",
+      "owner": "fake-tenant",
+      "expected": "denied",
+      "outcome": "denied",
+      "errorMessage": "network-timeout",
+      "scenario": "late-segment:victim-as-segment-3",
+      "recordedAt": "2026-04-22T10:45:15.683Z"
+    },
+    {
+      "kind": "upload",
+      "bucket": "tenant-assets",
+      "path": "22222222-2222-2222-2222-222222222222/a/b/33333333-3333-3333-3333-333333333333/file.txt",
+      "attacker": "anon",
+      "owner": "fake-tenant",
+      "expected": "denied",
+      "outcome": "denied",
+      "errorMessage": "network-timeout",
+      "scenario": "late-segment:victim-as-segment-4",
+      "recordedAt": "2026-04-22T10:45:19.685Z"
+    },
+    {
+      "kind": "upload",
+      "bucket": "tenant-assets",
+      "path": "22222222-2222-2222-2222-222222222222/docs/33333333-3333-3333-3333-333333333333.txt",
+      "attacker": "anon",
+      "owner": "fake-tenant",
+      "expected": "denied",
+      "outcome": "denied",
+      "errorMessage": "network-timeout",
+      "scenario": "late-segment:victim-embedded-in-filename",
+      "recordedAt": "2026-04-22T10:45:23.685Z"
+    },
+    {
+      "kind": "upload",
+      "bucket": "tenant-assets",
+      "path": "22222222-2222-2222-2222-222222222222/33333333-3333-3333-3333-333333333333/__rls_test__/1776854598522-0cd7cf/late-seg.txt",
+      "attacker": "anon",
+      "owner": "fake-tenant",
+      "expected": "denied",
+      "outcome": "denied",
+      "errorMessage": "network-timeout",
+      "scenario": "late-segment:victim-mimicking-rls-test-root",
+      "recordedAt": "2026-04-22T10:45:27.687Z"
     }
   ],
   "cleanups": []
