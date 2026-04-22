@@ -4,6 +4,7 @@ import type { Reporter, File, Task, TaskResultPack } from "vitest";
 import {
   readTenantGuardLog,
   type TenantGuardRecord,
+  type TenantMembershipSnapshot,
 } from "./fixtures/tenant-guard-record";
 
 /**
