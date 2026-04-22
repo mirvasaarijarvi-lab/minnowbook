@@ -13,7 +13,15 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
  *
  * 2. OPT-IN (live integration): When the following env vars are set, the
  *    test will sign in as two users from different tenants and confirm
- *    each user cannot read or write the other tenant's data:
+ *    each user cannot read or write the other tenant's data, including:
+ *      - SELECT denial across every tenant-scoped table (both directions)
+ *      - INSERT denial when forging the other tenant's tenant_id
+ *      - UPDATE / DELETE denial via cross-tenant filters
+ *      - Unfiltered queries never leak rows from the other tenant
+ *      - Positive control: each user CAN read their OWN tenant_users row
+ *        (catches misconfigured test setup that would let denial pass trivially)
+ *
+ *    Required env vars:
  *      - RLS_TEST_TENANT_A_EMAIL / RLS_TEST_TENANT_A_PASSWORD / RLS_TEST_TENANT_A_ID
  *      - RLS_TEST_TENANT_B_EMAIL / RLS_TEST_TENANT_B_PASSWORD / RLS_TEST_TENANT_B_ID
  *
