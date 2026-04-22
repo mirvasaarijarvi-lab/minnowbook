@@ -249,6 +249,7 @@ jobs:
           echo "_Passwords intentionally omitted from this summary._" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Run cross-tenant RLS tests (live, against local stack)
+        id: rls-tests
         if: steps.supabase-ready.outcome == 'success'
         env:
           # Vite reads these via import.meta.env at test compile time.
