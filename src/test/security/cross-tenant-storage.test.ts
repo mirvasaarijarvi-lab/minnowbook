@@ -80,7 +80,16 @@ async function sweepRunIdFolder(
     const runRoot = `${tenantId}/__rls_test__/${RUN_ID}`;
     try {
       const paths = await collect(runRoot);
-      if (paths.length === 0) continue;
+      if (paths.length === 0) {
+        recordCleanup({
+          bucket,
+          path: runRoot,
+          role: "admin-sweep",
+          removed: false,
+          note: "no orphans found under run root",
+        });
+        continue;
+      }
       // Defensive guard: every path MUST start with the run root. If anything
       // ever escaped that prefix it would mean a bug in `collect`, not RLS.
       const safe = paths.filter((p) => p.startsWith(`${runRoot}/`));
@@ -89,10 +98,27 @@ async function sweepRunIdFolder(
       // to stay well under any service-side limit.
       const chunkSize = 100;
       for (let i = 0; i < safe.length; i += chunkSize) {
-        await client.storage.from(bucket).remove(safe.slice(i, i + chunkSize));
+        const chunk = safe.slice(i, i + chunkSize);
+        const { data, error } = await client.storage.from(bucket).remove(chunk);
+        const removed = !error && Array.isArray(data) && data.length > 0;
+        for (const p of chunk) {
+          recordCleanup({
+            bucket,
+            path: p,
+            role: "admin-sweep",
+            removed,
+            note: error ? `error: ${error.message}` : undefined,
+          });
+        }
       }
-    } catch {
-      /* ignore — best-effort */
+    } catch (err) {
+      recordCleanup({
+        bucket,
+        path: runRoot,
+        role: "admin-sweep",
+        removed: false,
+        note: `exception: ${(err as Error).message}`,
+      });
     }
   }
   // After visible-object sweep, also clean up any S3-compatible multipart
