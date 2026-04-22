@@ -538,6 +538,18 @@ suite(
       // In either case, the codes must agree.
       expect(bodyCode(a.body)).toBe(bodyCode(b.body));
 
+      // If either call failed, BOTH must satisfy the strict generic-failure
+      // contract — same body bytes, same security headers. This rules out
+      // a subtle drift where the cache replay returns slightly different
+      // headers (e.g. a stale Cache-Control) than the original failure.
+      if (a.status !== 200) {
+        assertGenericFailure(a, "same-idem-key call A (failure path)");
+        assertGenericFailure(b, "same-idem-key call B (failure path)");
+        // Body must be byte-identical between the two calls — proving the
+        // replay is a verbatim cache hit, not a freshly-computed response.
+        expect(a.rawText, "same-idem-key replay must be byte-identical").toBe(b.rawText);
+      }
+
       // Exactly one ledger row, regardless of cache-hit ordering.
       const { data: redemptions } = await admin
         .from("access_code_redemptions")
