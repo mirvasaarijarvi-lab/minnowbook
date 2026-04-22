@@ -280,6 +280,14 @@ describe("Cross-Tenant Storage RLS Tests", () => {
             }
           }
         }
+
+        // 3. Final safety net: list-and-remove anything still tagged with
+        //    this run's RUN_ID under either tenant's __rls_test__ folder
+        //    in either bucket. Catches files left by partial uploads, by a
+        //    true RLS bypass that the per-client paths above couldn't
+        //    enumerate, or by a previous interrupted CI job.
+        await sweepTestArtifacts(PRIVATE_BUCKET, [liveCreds.a.tenantId!, liveCreds.b.tenantId!]);
+        await sweepTestArtifacts(ASSETS_BUCKET, [liveCreds.a.tenantId!, liveCreds.b.tenantId!]);
       });
 
       // ---------- Positive controls: own-tenant access works ----------
