@@ -215,11 +215,109 @@ async function callRedeem(
   } catch {
     body = text;
   }
-  return { status: res.status, body, rawText: text };
+  // Snapshot response headers so loser assertions can verify the full
+  // wire contract (no caching, no cookies, anti-sniff/clickjack hardening).
+  const responseHeaders: Record<string, string> = {};
+  res.headers.forEach((value, key) => {
+    responseHeaders[key.toLowerCase()] = value;
+  });
+  return { status: res.status, body, rawText: text, headers: responseHeaders };
 }
 
 function bodyCode(body: unknown): string {
   return ((body as { code?: string } | null)?.code ?? "").toString();
+}
+
+/**
+ * The exact, byte-for-byte generic-failure contract every loser in a
+ * concurrent-redeem race must satisfy. Centralising this assertion
+ * means a future drift in either the body shape OR the security
+ * headers fails *every* concurrency test, not just one.
+ *
+ * Information-leakage rules verified here:
+ *   - Status is exactly 400 (never 401/403/404/409/429/5xx — any of
+ *     which would let an attacker classify the loser's reason).
+ *   - Body has EXACTLY two keys: `error` and `code`. No `reason`,
+ *     `details`, `attempt`, `hint`, `redemption_id`, `tenant_id`, etc.
+ *   - `error` is the fixed generic string the function emits on the
+ *     not-found / inactive / revoked / expired / over-quota /
+ *     already-redeemed branches. (Source of truth:
+ *     supabase/functions/redeem-access-code/index.ts → `invalidPayload`.)
+ *   - `code` is the fixed `INVALID_OR_UNAVAILABLE_CODE` constant.
+ *   - Content-Type is application/json so no HTML/text drift.
+ *   - Cache-Control disables every cache hop — losers must never be
+ *     cached by a CDN where another tenant could observe them.
+ *   - X-Content-Type-Options/X-Frame-Options/Referrer-Policy are set
+ *     so a stale loser response can't be weaponised via MIME-sniffing
+ *     or framing.
+ *   - No Set-Cookie — failures must never mutate session state.
+ */
+const GENERIC_FAILURE_BODY = Object.freeze({
+  error: "This access code is invalid or no longer available",
+  code: "INVALID_OR_UNAVAILABLE_CODE",
+});
+
+function assertGenericFailure(
+  result: { status: number; body: unknown; rawText: string; headers: Record<string, string> },
+  context: string,
+) {
+  // Status must be exactly 400 — not "any 4xx".
+  expect(
+    result.status,
+    `${context}: expected status 400, got ${result.status}. Body: ${result.rawText}`,
+  ).toBe(400);
+
+  // Body must be a plain object (not a string, not null).
+  expect(
+    result.body !== null && typeof result.body === "object" && !Array.isArray(result.body),
+    `${context}: body must be a JSON object, got ${typeof result.body}: ${result.rawText}`,
+  ).toBe(true);
+
+  const bodyObj = result.body as Record<string, unknown>;
+  // Exact key set — no extra keys may leak through.
+  const keys = Object.keys(bodyObj).sort();
+  expect(
+    keys,
+    `${context}: body keys drifted, got [${keys.join(", ")}]. Body: ${result.rawText}`,
+  ).toEqual(["code", "error"]);
+  // Exact values, byte-for-byte.
+  expect(bodyObj.error, `${context}: error message drifted`).toBe(GENERIC_FAILURE_BODY.error);
+  expect(bodyObj.code, `${context}: error code drifted`).toBe(GENERIC_FAILURE_BODY.code);
+
+  // Header contract.
+  const ct = result.headers["content-type"] ?? "";
+  expect(
+    ct.toLowerCase().includes("application/json"),
+    `${context}: Content-Type must be application/json, got "${ct}"`,
+  ).toBe(true);
+
+  const cacheControl = result.headers["cache-control"] ?? "";
+  // Must forbid every cache layer. We assert the no-store directive
+  // is present (the strongest one) rather than an exact-string match,
+  // so adding further directives in the future doesn't break this.
+  expect(
+    cacheControl.toLowerCase().includes("no-store"),
+    `${context}: Cache-Control must include no-store, got "${cacheControl}"`,
+  ).toBe(true);
+
+  expect(
+    result.headers["x-content-type-options"],
+    `${context}: X-Content-Type-Options must be nosniff`,
+  ).toBe("nosniff");
+  expect(
+    result.headers["x-frame-options"],
+    `${context}: X-Frame-Options must be DENY`,
+  ).toBe("DENY");
+  expect(
+    result.headers["referrer-policy"],
+    `${context}: Referrer-Policy must be strict-origin-when-cross-origin`,
+  ).toBe("strict-origin-when-cross-origin");
+
+  // A failure must never set a cookie — that would smuggle state.
+  expect(
+    result.headers["set-cookie"],
+    `${context}: failures must not set cookies, got "${result.headers["set-cookie"]}"`,
+  ).toBeUndefined();
 }
 
 const suite = liveModeAvailable ? describe : describe.skip;
@@ -337,21 +435,13 @@ suite(
       ).toBe(1);
       expect(failures.length).toBe(PARALLEL - 1);
 
-      // Every loser must collapse to the same generic code — no information
-      // leakage about which loser lost why.
-      for (const f of failures) {
-        expect(
-          f.status,
-          `loser must be 4xx, got ${f.status}: ${f.rawText}`,
-        ).toBeGreaterThanOrEqual(400);
-        expect(f.status, `loser must not 5xx: ${f.rawText}`).toBeLessThan(500);
-        expect(
-          bodyCode(f.body),
-          `loser must collapse to INVALID_OR_UNAVAILABLE_CODE, got "${bodyCode(
-            f.body,
-          )}". Body: ${f.rawText}`,
-        ).toBe("INVALID_OR_UNAVAILABLE_CODE");
-      }
+      // Every loser must collapse to the same generic 400 with the
+      // exact body shape AND the full security-header contract — no
+      // information leakage about which loser lost why, no cache-able
+      // response, no MIME-sniff vector, no smuggled cookie.
+      failures.forEach((f, i) => {
+        assertGenericFailure(f, `25-way race loser #${i}`);
+      });
 
       // Document the win latency for triage if this ever flakes.
       console.info(
@@ -448,6 +538,18 @@ suite(
       // In either case, the codes must agree.
       expect(bodyCode(a.body)).toBe(bodyCode(b.body));
 
+      // If either call failed, BOTH must satisfy the strict generic-failure
+      // contract — same body bytes, same security headers. This rules out
+      // a subtle drift where the cache replay returns slightly different
+      // headers (e.g. a stale Cache-Control) than the original failure.
+      if (a.status !== 200) {
+        assertGenericFailure(a, "same-idem-key call A (failure path)");
+        assertGenericFailure(b, "same-idem-key call B (failure path)");
+        // Body must be byte-identical between the two calls — proving the
+        // replay is a verbatim cache hit, not a freshly-computed response.
+        expect(a.rawText, "same-idem-key replay must be byte-identical").toBe(b.rawText);
+      }
+
       // Exactly one ledger row, regardless of cache-hit ordering.
       const { data: redemptions } = await admin
         .from("access_code_redemptions")
@@ -503,11 +605,13 @@ suite(
             successes.map((s) => s.body),
           )}`,
       ).toBe(1);
-      for (const f of failures) {
-        expect(f.status).toBeGreaterThanOrEqual(400);
-        expect(f.status).toBeLessThan(500);
-        expect(bodyCode(f.body)).toBe("INVALID_OR_UNAVAILABLE_CODE");
-      }
+      // Same strict contract for losers in the distinct-idem-keys race.
+      // The cache fast-path is bypassed here, so this exercises the
+      // "duplicate-redemption check + unique constraint" loss path —
+      // it must emit the SAME bytes and headers as the cache-hit path.
+      failures.forEach((f, i) => {
+        assertGenericFailure(f, `distinct-idem-keys loser #${i}`);
+      });
 
       const { data: redemptions } = await admin
         .from("access_code_redemptions")
