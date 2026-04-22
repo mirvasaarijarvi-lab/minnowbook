@@ -303,9 +303,9 @@ const AdminPanel = () => {
                     <DialogTrigger asChild>
                       <Button size="sm" className="gap-1.5" disabled={isAtStaffLimit}>
                         {isAtStaffLimit ? (
-                          <><Lock className="h-4 w-4" /> {t("admin.addUser")} ({userList.length}/{maxStaff})</>
+                          <><Lock className="h-4 w-4" /> {t("admin.addUser")} ({userList.length}/{tierMaxStaff ?? "∞"})</>
                         ) : (
-                          <><Plus className="h-4 w-4" /> {t("admin.addUser")} ({userList.length}/{isSystemAdmin ? "∞" : maxStaff})</>
+                          <><Plus className="h-4 w-4" /> {t("admin.addUser")} ({userList.length}/{isSystemAdmin || tierMaxStaff === null ? "∞" : tierMaxStaff})</>
                         )}
                       </Button>
                     </DialogTrigger>
