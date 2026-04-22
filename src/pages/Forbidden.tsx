@@ -1,9 +1,13 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ShieldAlert, ArrowLeft } from "lucide-react";
+import { ShieldAlert, ArrowLeft, AlertTriangle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { supabase } from "@/integrations/supabase/client";
-import type { IsSystemAdminCacheState } from "@/hooks/useIsSystemAdmin";
+import {
+  type IsSystemAdminCacheState,
+  useInvalidateIsSystemAdmin,
+} from "@/hooks/useIsSystemAdmin";
 
 interface ForbiddenProps {
   /**
@@ -81,13 +85,46 @@ const Forbidden = ({
   adminCheckState,
 }: ForbiddenProps) => {
   const [beaconStatus, setBeaconStatus] = useState<number | "unreachable" | null>(null);
+  const [isRetrying, setIsRetrying] = useState(false);
+  const invalidateAdminCache = useInvalidateIsSystemAdmin();
   // Resolve once per render: explicit slug wins, otherwise derive from the
   // human label so legacy call sites keep working.
   const resolvedSlug = areaSlug ?? toSlug(attemptedArea);
-  const body =
-    message ??
+
+  // Distinguish "actually not an admin" from "we couldn't tell because the
+  // lookup failed or was still loading". Both fail closed (the user sees
+  // 403), but the copy and CTAs change so the user knows whether to
+  // contact an administrator or simply retry.
+  const lookupErrored = adminCheckState?.errored === true;
+  const lookupStillLoading =
+    adminCheckState?.loading === true || adminCheckState?.status === "pending";
+  const isFallback = lookupErrored || lookupStillLoading;
+
+  const defaultDeniedBody =
     `You're signed in, but your account doesn't have permission to access ${attemptedArea}. ` +
-      `If you believe this is a mistake, contact your administrator.`;
+    `If you believe this is a mistake, contact your administrator.`;
+  const defaultFallbackBody = lookupErrored
+    ? `We couldn't verify your permissions for ${attemptedArea} right now. ` +
+      `Access has been denied as a precaution. This is usually temporary — please try again in a moment.`
+    : `We're still verifying your permissions for ${attemptedArea}. ` +
+      `Access has been denied as a precaution. Please try again in a moment.`;
+  const body = message ?? (isFallback ? defaultFallbackBody : defaultDeniedBody);
+
+  const handleRetry = async () => {
+    setIsRetrying(true);
+    try {
+      // Invalidate every cached `is-system-admin` entry so the next render
+      // of the guard refetches against a fresh JWT.
+      await invalidateAdminCache();
+    } finally {
+      // Force a navigation reload so the route re-mounts cleanly with the
+      // refreshed answer. This is the most reliable way to re-run the
+      // guard chain regardless of where Forbidden was rendered from.
+      if (typeof window !== "undefined") {
+        window.location.reload();
+      }
+    }
+  };
 
   // Beacon to the always-403 edge function so the network log shows a real
   // HTTP 403 response associated with this view.
@@ -362,13 +399,32 @@ const Forbidden = ({
         data-admin-check-data-updated-at={
           adminCheckState?.dataUpdatedAt ?? ""
         }
+        // Distinguishes a "lookup failed / still loading" fallback render
+        // from a confirmed "not an admin" denial. E2E tests and synthetic
+        // monitors can assert on this without re-deriving from individual
+        // admin-check booleans. Values: "errored" | "loading" | "denied".
+        data-fallback-mode={
+          lookupErrored ? "errored" : lookupStillLoading ? "loading" : "denied"
+        }
       >
         <div className="max-w-md w-full text-center space-y-6">
-          <div className="mx-auto h-16 w-16 rounded-full bg-destructive/10 flex items-center justify-center">
-            <ShieldAlert
-              className="h-8 w-8 text-destructive"
-              aria-hidden="true"
-            />
+          <div
+            className={
+              "mx-auto h-16 w-16 rounded-full flex items-center justify-center " +
+              (isFallback ? "bg-warning/10" : "bg-destructive/10")
+            }
+          >
+            {isFallback ? (
+              <AlertTriangle
+                className="h-8 w-8 text-warning"
+                aria-hidden="true"
+              />
+            ) : (
+              <ShieldAlert
+                className="h-8 w-8 text-destructive"
+                aria-hidden="true"
+              />
+            )}
           </div>
 
           <div className="space-y-2">
@@ -379,13 +435,45 @@ const Forbidden = ({
               403 · Access denied
             </p>
             <h1 className="text-3xl font-semibold text-foreground">
-              You don't have access
+              {isFallback
+                ? lookupErrored
+                  ? "We couldn't verify your access"
+                  : "Verifying your access…"
+                : "You don't have access"}
             </h1>
             <p className="text-muted-foreground">{body}</p>
           </div>
 
+          {lookupErrored && (
+            <Alert variant="destructive" className="text-left">
+              <AlertTriangle className="h-4 w-4" aria-hidden="true" />
+              <AlertTitle>Permission lookup failed</AlertTitle>
+              <AlertDescription>
+                The server didn't respond to our permission check. We've
+                blocked access as a precaution. Try again, or sign out and
+                back in if the problem persists.
+              </AlertDescription>
+            </Alert>
+          )}
+
           <div className="flex flex-col sm:flex-row gap-2 justify-center pt-2">
-            <Button asChild variant="default">
+            {isFallback && (
+              <Button
+                onClick={handleRetry}
+                disabled={isRetrying}
+                variant="default"
+                data-testid="forbidden-retry-button"
+              >
+                <RefreshCw
+                  className={
+                    "h-4 w-4 mr-2 " + (isRetrying ? "animate-spin" : "")
+                  }
+                  aria-hidden="true"
+                />
+                {isRetrying ? "Retrying…" : "Try again"}
+              </Button>
+            )}
+            <Button asChild variant={isFallback ? "outline" : "default"}>
               <Link to="/dashboard">
                 <ArrowLeft className="h-4 w-4 mr-2" aria-hidden="true" />
                 Go to dashboard
@@ -395,6 +483,7 @@ const Forbidden = ({
               <Link to="/">Back to home</Link>
             </Button>
           </div>
+
 
           {/*
             Dev-only audit beacon indicator. Vite replaces `import.meta.env.DEV`

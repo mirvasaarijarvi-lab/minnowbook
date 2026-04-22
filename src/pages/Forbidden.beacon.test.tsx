@@ -30,6 +30,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 // --- Mocks ---------------------------------------------------------------
 
@@ -73,12 +74,18 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-const renderForbidden = (props: React.ComponentProps<typeof Forbidden>) =>
-  render(
-    <MemoryRouter>
-      <Forbidden {...props} />
-    </MemoryRouter>,
+const renderForbidden = (props: React.ComponentProps<typeof Forbidden>) => {
+  const client = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  return render(
+    <QueryClientProvider client={client}>
+      <MemoryRouter>
+        <Forbidden {...props} />
+      </MemoryRouter>
+    </QueryClientProvider>,
   );
+};
 
 // --- Tests ---------------------------------------------------------------
 
@@ -144,12 +151,18 @@ describe("Forbidden page — forbidden-status beacon (fires once on mount)", () 
     // Re-render with identical props. The beacon's effect dependency is
     // `resolvedSlug`, which is unchanged — so no new fetch should fire.
     rerender(
-      <MemoryRouter>
-        <Forbidden
-          attemptedArea="the Superadmin area"
-          areaSlug="superadmin"
-        />
-      </MemoryRouter>,
+      <QueryClientProvider
+        client={
+          new QueryClient({ defaultOptions: { queries: { retry: false } } })
+        }
+      >
+        <MemoryRouter>
+          <Forbidden
+            attemptedArea="the Superadmin area"
+            areaSlug="superadmin"
+          />
+        </MemoryRouter>
+      </QueryClientProvider>,
     );
 
     // Allow any stray effects to flush, then re-assert the count is still 1.

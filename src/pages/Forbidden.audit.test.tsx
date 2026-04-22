@@ -35,6 +35,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 // --- Mocks ---------------------------------------------------------------
 
@@ -108,12 +109,18 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-const renderForbidden = () =>
-  render(
-    <MemoryRouter>
-      <Forbidden attemptedArea="the Superadmin area" areaSlug="superadmin" />
-    </MemoryRouter>,
+const renderForbidden = () => {
+  const client = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  return render(
+    <QueryClientProvider client={client}>
+      <MemoryRouter>
+        <Forbidden attemptedArea="the Superadmin area" areaSlug="superadmin" />
+      </MemoryRouter>
+    </QueryClientProvider>,
   );
+};
 
 // --- Tests ---------------------------------------------------------------
 

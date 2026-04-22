@@ -14,6 +14,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { IsSystemAdminCacheState } from "@/hooks/useIsSystemAdmin";
 
 const FAKE_USER_ID = "00000000-0000-0000-0000-000000000def";
@@ -63,16 +64,22 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-const renderWithState = (state?: IsSystemAdminCacheState) =>
-  render(
-    <MemoryRouter>
-      <Forbidden
-        attemptedArea="the Superadmin area"
-        areaSlug="superadmin"
-        adminCheckState={state}
-      />
-    </MemoryRouter>,
+const renderWithState = (state?: IsSystemAdminCacheState) => {
+  const client = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  return render(
+    <QueryClientProvider client={client}>
+      <MemoryRouter>
+        <Forbidden
+          attemptedArea="the Superadmin area"
+          areaSlug="superadmin"
+          adminCheckState={state}
+        />
+      </MemoryRouter>
+    </QueryClientProvider>,
   );
+};
 
 describe("Forbidden — adminCheckState plumbing", () => {
   it("forwards a fresh-success snapshot in the audit beacon body", async () => {
