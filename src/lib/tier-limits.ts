@@ -1,22 +1,26 @@
 /**
- * Tier-based limits for sites and reservation types.
+ * Tier-based limits for sites, reservation types, resources, and staff users.
  *
- * Tier mapping:
- *   basic         → 1 site, 1 reservation type, 1 resource per type
- *   professional  → 1 site, all types, 1 resource per type
- *   business      → unlimited sites, all types, unlimited resources
+ * Tier mapping (kept in sync with the backend functions
+ * `get_tier_max_sites`, `get_tier_max_reservation_types`,
+ * `get_tier_max_staff_users`, and the `enforce_*_limit` triggers):
+ *
+ *   basic         → 1 site, 1 reservation type, 1 resource per type, 5 staff users
+ *   professional  → 1 site, all types, 1 resource per type, 25 staff users
+ *   business      → unlimited sites, all types, unlimited resources, unlimited staff users
  */
 
 interface TierLimits {
   maxSites: number | null;
   maxReservationTypes: number | null;
   maxResourcesPerType: number | null; // null = unlimited
+  maxStaffUsers: number | null;       // null = unlimited
 }
 
 const TIER_LIMITS: Record<string, TierLimits> = {
-  basic: { maxSites: 1, maxReservationTypes: 1, maxResourcesPerType: 1 },
-  professional: { maxSites: 1, maxReservationTypes: null, maxResourcesPerType: 1 },
-  business: { maxSites: null, maxReservationTypes: null, maxResourcesPerType: null },
+  basic:        { maxSites: 1,    maxReservationTypes: 1,    maxResourcesPerType: 1,    maxStaffUsers: 5 },
+  professional: { maxSites: 1,    maxReservationTypes: null, maxResourcesPerType: 1,    maxStaffUsers: 25 },
+  business:     { maxSites: null, maxReservationTypes: null, maxResourcesPerType: null, maxStaffUsers: null },
 };
 
 export function getTierLimits(tier: string | null | undefined): TierLimits {
@@ -48,6 +52,28 @@ export function canCreateResourceOfType(
   if (maxResourcesPerType === null) return true;
   const count = existingResources.filter((r) => r.resource_type === resourceType).length;
   return count < maxResourcesPerType;
+}
+
+/**
+ * Returns the max number of staff users (tenant_users rows) allowed for a tier.
+ * `null` means unlimited. Mirrors the backend `get_tier_max_staff_users` function.
+ */
+export function getMaxStaffUsers(tier: string | null | undefined): number | null {
+  return getTierLimits(tier).maxStaffUsers;
+}
+
+/**
+ * Whether the tenant can add another staff user given its current count.
+ * Existing rows over the limit (e.g. after a downgrade) are tolerated —
+ * only NEW additions are blocked, matching the backend trigger.
+ */
+export function canAddStaffUser(
+  tier: string | null | undefined,
+  currentStaffCount: number
+): boolean {
+  const max = getMaxStaffUsers(tier);
+  if (max === null) return true;
+  return currentStaffCount < max;
 }
 
 export function isResourceTypeAllowed(
