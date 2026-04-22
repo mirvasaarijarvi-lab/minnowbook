@@ -138,7 +138,7 @@ export function createAccessCodeTracker(
         // Find all codes matching our suite tag OR our fixture user.
         // We use `like` on description to catch the unique tag and OR
         // it with created_by when a fixture user id is known.
-        let query = admin
+        const query = admin
           .from("access_codes")
           .select("id")
           .ilike("description", `%${descriptionTag}%`);
