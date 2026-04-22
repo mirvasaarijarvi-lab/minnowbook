@@ -1528,6 +1528,24 @@ type TranslationKeys = {
   "nav.whatIs": string;
   "nav.offers": string;
   "nav.kitchen": string;
+  "nav.bookingLog": string;
+
+  // Booking validation log
+  "bookingLog.title": string;
+  "bookingLog.tooltip": string;
+  "bookingLog.recentTitle": string;
+  "bookingLog.searchPlaceholder": string;
+  "bookingLog.allOutcomes": string;
+  "bookingLog.empty": string;
+  "bookingLog.when": string;
+  "bookingLog.guest": string;
+  "bookingLog.type": string;
+  "bookingLog.date": string;
+  "bookingLog.capacity": string;
+  "bookingLog.outcome": string;
+  "bookingLog.reasonsTitle": string;
+  "bookingLog.noReasons": string;
+  "bookingLog.softWarningToast": string;
 
   // Kitchen orders
   "kitchen.title": string;
@@ -3123,6 +3141,22 @@ const en: TranslationKeys = {
   "nav.whatIs": "What Is MimmoBook?",
   "nav.offers": "Offers",
   "nav.kitchen": "Kitchen",
+  "nav.bookingLog": "Booking log",
+  "bookingLog.title": "Booking validation log",
+  "bookingLog.tooltip": "Every booking attempt is recorded here with capacity context, so you can see exactly why a request was accepted, warned about, or rejected.",
+  "bookingLog.recentTitle": "Recent attempts (last 200)",
+  "bookingLog.searchPlaceholder": "Search by name, email, or type",
+  "bookingLog.allOutcomes": "All outcomes",
+  "bookingLog.empty": "No booking attempts logged yet.",
+  "bookingLog.when": "When",
+  "bookingLog.guest": "Guest",
+  "bookingLog.type": "Type / source",
+  "bookingLog.date": "For date",
+  "bookingLog.capacity": "Capacity",
+  "bookingLog.outcome": "Outcome",
+  "bookingLog.reasonsTitle": "Validation reasons:",
+  "bookingLog.noReasons": "No detail recorded.",
+  "bookingLog.softWarningToast": "Booking saved, but this date is near or above capacity.",
 
   "kitchen.title": "Kitchen Orders",
   "kitchen.tooltip": "Track food, drink, and other orders for restaurant and venue reservations",
@@ -4713,6 +4747,22 @@ const fi: TranslationKeys = {
   "nav.whatIs": "Mikä on MimmoBook?",
   "nav.offers": "Tarjoukset",
   "nav.kitchen": "Keittiö",
+  "nav.bookingLog": "Varausloki",
+  "bookingLog.title": "Varausten validointiloki",
+  "bookingLog.tooltip": "Jokainen varausyritys tallennetaan tähän kapasiteettitietoineen, joten näet tarkasti miksi pyyntö hyväksyttiin, sai varoituksen tai hylättiin.",
+  "bookingLog.recentTitle": "Viimeisimmät yritykset (200)",
+  "bookingLog.searchPlaceholder": "Hae nimellä, sähköpostilla tai tyypillä",
+  "bookingLog.allOutcomes": "Kaikki tulokset",
+  "bookingLog.empty": "Ei vielä lokimerkintöjä.",
+  "bookingLog.when": "Aika",
+  "bookingLog.guest": "Vieras",
+  "bookingLog.type": "Tyyppi / lähde",
+  "bookingLog.date": "Päivälle",
+  "bookingLog.capacity": "Kapasiteetti",
+  "bookingLog.outcome": "Tulos",
+  "bookingLog.reasonsTitle": "Validointisyyt:",
+  "bookingLog.noReasons": "Ei tallennettuja yksityiskohtia.",
+  "bookingLog.softWarningToast": "Varaus tallennettu, mutta päivä on lähellä kapasiteetin rajaa tai sen yli.",
 
   "kitchen.title": "Keittiötilaukset",
   "kitchen.tooltip": "Seuraa ruoka-, juoma- ja muita tilauksia ravintola- ja juhlatilavarauksille",
@@ -6303,6 +6353,22 @@ const sv: TranslationKeys = {
   "nav.whatIs": "Vad är MimmoBook?",
   "nav.offers": "Erbjudanden",
   "nav.kitchen": "Kök",
+  "nav.bookingLog": "Bokningslogg",
+  "bookingLog.title": "Bokningsvalideringslogg",
+  "bookingLog.tooltip": "Varje bokningsförsök loggas här med kapacitetskontext, så du ser exakt varför en begäran accepterades, varnades för eller avvisades.",
+  "bookingLog.recentTitle": "Senaste försöken (200)",
+  "bookingLog.searchPlaceholder": "Sök efter namn, e-post eller typ",
+  "bookingLog.allOutcomes": "Alla utfall",
+  "bookingLog.empty": "Inga bokningsförsök loggade ännu.",
+  "bookingLog.when": "När",
+  "bookingLog.guest": "Gäst",
+  "bookingLog.type": "Typ / källa",
+  "bookingLog.date": "För datum",
+  "bookingLog.capacity": "Kapacitet",
+  "bookingLog.outcome": "Utfall",
+  "bookingLog.reasonsTitle": "Valideringsskäl:",
+  "bookingLog.noReasons": "Inga detaljer registrerade.",
+  "bookingLog.softWarningToast": "Bokning sparad, men datumet är nära eller över kapaciteten.",
 
   "kitchen.title": "Köksbeställningar",
   "kitchen.tooltip": "Följ mat-, dryck- och andra beställningar för restaurang- och festlokalbokningar",
