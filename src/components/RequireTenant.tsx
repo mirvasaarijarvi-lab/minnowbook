@@ -3,15 +3,30 @@ import { Navigate, useLocation } from "react-router-dom";
 import { toast } from "sonner";
 import { useTenant } from "@/hooks/useTenant";
 import { useImpersonation } from "@/contexts/ImpersonationContext";
+import NoTenantState from "@/components/NoTenantState";
+
+interface RequireTenantProps {
+  children: React.ReactNode;
+  /**
+   * When true, render <NoTenantState /> in place of the protected children
+   * instead of redirecting to /onboarding. This keeps the user on the
+   * attempted route (so they can return after setup) and prevents any
+   * protected shell from rendering with empty data.
+   */
+  inline?: boolean;
+  /** Tailors the headline/copy of the inline NoTenantState. */
+  attemptedArea?: "dashboard" | "superadmin" | "generic";
+}
 
 /**
  * Global tenant guard. Wrap any route that depends on the current user
  * having an active tenant membership. If the membership is removed
  * mid-session (realtime DELETE in `useTenant` flips `tenantId` to null),
- * the user is sent to /onboarding so they can recover or set up a new
+ * the user is sent to /onboarding (default) or shown <NoTenantState />
+ * inline (when `inline` is set) so they can recover or set up a new
  * organization. Superadmin impersonation is treated as a valid tenant.
  */
-const RequireTenant = ({ children }: { children: React.ReactNode }) => {
+const RequireTenant = ({ children, inline = false, attemptedArea = "generic" }: RequireTenantProps) => {
   const { tenantId, loading } = useTenant();
   const { isImpersonating } = useImpersonation();
   const location = useLocation();
