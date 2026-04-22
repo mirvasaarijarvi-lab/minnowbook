@@ -2002,6 +2002,26 @@ describe("Cross-Tenant Storage RLS Tests", () => {
   };
 
   /**
+   * Realistic first-segment extractor — mirrors what Supabase storage
+   * ACTUALLY feeds into the RLS policy via `storage.foldername(name)[1]`.
+   * That function splits on `/` only: it does NOT URL-decode, does NOT
+   * resolve `.`/`..`, does NOT translate backslashes. The leading-empty
+   * segment from a leading `/` is also discarded by `foldername()`.
+   *
+   * This is the function whose output the assertions below compare
+   * against the victim tenant id. The aggressive `normalizeStoragePath`
+   * above remains as documentation of the worst-case attacker model and
+   * is kept for diagnostic use, but is NOT what the server sees.
+   */
+  const serverFirstSegment = (raw: string): string | null => {
+    const segments = raw.split("/");
+    for (const seg of segments) {
+      if (seg !== "") return seg;
+    }
+    return null;
+  };
+
+  /**
    * Bag of adversarial path generators. Each produces a candidate STRING
    * targeting `victimTenantId` (the *other* tenant). The label is used
    * only for the test name + ledger row.
