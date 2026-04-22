@@ -11,6 +11,7 @@ import {
   tenantPairFixtureSkipReason,
   type TenantPairFixture,
 } from "./fixtures/tenant-pair";
+import { guardTenantPair } from "./fixtures/tenant-id-guard";
 
 /**
  * Cross-Tenant RLS Regression Tests
