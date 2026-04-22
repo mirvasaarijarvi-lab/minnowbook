@@ -179,7 +179,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       authSub.unsubscribe();
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [checkSubscription]);
+  }, [checkSubscription, queryClient]);
 
   const signOut = async () => {
     await supabase.auth.signOut();
