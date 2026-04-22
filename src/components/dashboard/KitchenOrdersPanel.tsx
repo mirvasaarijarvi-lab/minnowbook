@@ -252,6 +252,27 @@ const KitchenOrdersPanel = () => {
     onError: () => toast.error(t("kitchen.error")),
   });
 
+  const bulkUpdateStatus = useMutation({
+    mutationFn: async ({ ids, status }: { ids: string[]; status: Status }) => {
+      if (ids.length === 0) return 0;
+      const { error } = await supabase
+        .from("kitchen_orders")
+        .update({ status })
+        .in("id", ids);
+      if (error) throw error;
+      return ids.length;
+    },
+    onSuccess: (count) => {
+      invalidate();
+      if (count && count > 0) {
+        toast.success(t("kitchen.bulk.updated").replace("{count}", String(count)));
+      } else {
+        toast.info(t("kitchen.bulk.nothingToUpdate"));
+      }
+    },
+    onError: () => toast.error(t("kitchen.error")),
+  });
+
   const guestsLabel = (r: Reservation) => r.guests_count ?? r.estimated_guests ?? "—";
 
   return (
