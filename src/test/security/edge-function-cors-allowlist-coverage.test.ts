@@ -27,7 +27,10 @@ const FUNCTIONS = ["admin-users", "support-chat"] as const;
 // changes, update this and the assertions below.
 const ALLOWED_ORIGINS: Array<string | RegExp> = [
   "https://minnowbook.lovable.app",
-  /^https:\/\/.*\.lovable\.app$/,
+  // Mirror of the function-side regex — DNS-safe chars only, rejects
+  // userinfo/ports/paths so things like `https://attacker@x.lovable.app`
+  // do NOT match.
+  /^https:\/\/[a-zA-Z0-9.-]+\.lovable\.app$/,
 ];
 // The literal fallback that disallowed origins should be normalized to.
 const CANONICAL_FALLBACK = "https://minnowbook.lovable.app";
