@@ -131,18 +131,24 @@ vi.mock("@/integrations/supabase/client", () => {
 
 import AdminPanel from "./AdminPanel";
 import { useToast } from "@/hooks/use-toast";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 // Render harness. AdminPanel relies on React Query but no other providers
 // are required (the I18n context has a sensible default that resolves
 // keys directly from the English translations bundle, so toast copy will
 // match the shipped translations file without a real I18nProvider).
+// A TooltipProvider IS required because the "Add User" button is wrapped
+// in a Radix `<Tooltip>` (to surface the staff-limit explanation) and
+// Radix throws synchronously without a provider in the tree.
 const renderPanel = () => {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
   });
   return render(
     <QueryClientProvider client={client}>
-      <AdminPanel />
+      <TooltipProvider>
+        <AdminPanel />
+      </TooltipProvider>
     </QueryClientProvider>,
   );
 };
