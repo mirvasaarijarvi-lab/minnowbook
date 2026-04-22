@@ -202,7 +202,7 @@ liveDescribeEach([
   }, 30_000);
 });
 
-describe("booking_validation_log — anon cannot write or mutate cross-tenant", () => {
+liveDescribe("booking_validation_log — anon cannot write or mutate cross-tenant", () => {
   // booking_validation_log INSERT is restricted to authenticated tenant
   // members. Anon must not be able to forge entries (which would pollute
   // the tenant's forensic record) or delete entries (which would let an
@@ -241,9 +241,21 @@ describe("booking_validation_log — anon cannot write or mutate cross-tenant", 
   });
 });
 
-describe("sanity guard", () => {
+liveDescribe("sanity guard", () => {
   it("anon client has no user session (prevents service-role false positives)", async () => {
     const { data } = await anon.auth.getUser();
     expect(data.user).toBeNull();
   });
 });
+
+// Always-on gating test: surfaces whether the live suite ran or was skipped
+// so the security report makes the gap visible even on no-secrets CI runs.
+describe("cross-tenant log isolation — gating", () => {
+  it("documents whether the live-mode suite ran or was skipped", () => {
+    if (!liveModeAvailable) {
+      console.warn(`[cross-tenant-log-isolation] live mode skipped: ${skipReason()}`);
+    }
+    expect(typeof liveModeAvailable).toBe("boolean");
+  });
+});
+
