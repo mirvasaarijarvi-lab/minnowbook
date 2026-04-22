@@ -418,6 +418,7 @@ jobs:
             echo "2. Re-run the workflow." >> "$GITHUB_STEP_SUMMARY"
             echo "" >> "$GITHUB_STEP_SUMMARY"
             echo "📦 Container logs (if any) are uploaded as the \`supabase-container-logs\` artifact." >> "$GITHUB_STEP_SUMMARY"
+            echo "🧾 Effective Supabase config + redacted env are uploaded as the \`supabase-config-snapshot-run-${GITHUB_RUN_ID}\` artifact." >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
           if [ -f reports/rls-report.json ]; then
