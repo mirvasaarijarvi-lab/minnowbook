@@ -5,6 +5,12 @@ import {
   expectWriteDenied,
   expectNoForeignTenantRows,
 } from "./rls-assert";
+import {
+  createTenantPairFixture,
+  tenantPairFixtureLikelyAvailable,
+  tenantPairFixtureSkipReason,
+  type TenantPairFixture,
+} from "./fixtures/tenant-pair";
 
 /**
  * Cross-Tenant RLS Regression Tests
@@ -91,27 +97,11 @@ const PRIVATE_ONLY_TABLES = new Set([
 
 const hasSupabaseConfig = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
 
-const liveCreds = {
-  a: {
-    email: process.env.RLS_TEST_TENANT_A_EMAIL,
-    password: process.env.RLS_TEST_TENANT_A_PASSWORD,
-    tenantId: process.env.RLS_TEST_TENANT_A_ID,
-  },
-  b: {
-    email: process.env.RLS_TEST_TENANT_B_EMAIL,
-    password: process.env.RLS_TEST_TENANT_B_PASSWORD,
-    tenantId: process.env.RLS_TEST_TENANT_B_ID,
-  },
-};
-
-const liveModeEnabled = Boolean(
-  liveCreds.a.email &&
-    liveCreds.a.password &&
-    liveCreds.a.tenantId &&
-    liveCreds.b.email &&
-    liveCreds.b.password &&
-    liveCreds.b.tenantId,
-);
+// Live-mode credentials are now resolved by the reusable tenant-pair fixture
+// (`./fixtures/tenant-pair`). The fixture supports two paths:
+//   1. RLS_TEST_TENANT_A/B_EMAIL/PASSWORD/ID env vars (explicit creds)
+//   2. SUPABASE_SERVICE_ROLE_KEY (auto-provisions throwaway users + tenants)
+// See the fixture file for full resolution order and skip semantics.
 
 const newAnonClient = (): SupabaseClient =>
   createClient(SUPABASE_URL!, SUPABASE_ANON_KEY!, {
@@ -202,27 +192,33 @@ describe("Cross-Tenant RLS Regression Tests", () => {
     });
   });
 
-  describe.runIf(hasSupabaseConfig && liveModeEnabled)(
+  describe.runIf(tenantPairFixtureLikelyAvailable())(
     "Live cross-tenant access denial",
     () => {
       let clientA: SupabaseClient;
       let clientB: SupabaseClient;
+      // Mirror the old shape so the existing `it` blocks below keep working.
+      // Populated from the fixture in beforeAll().
+      const liveCreds = {
+        a: { tenantId: undefined as string | undefined },
+        b: { tenantId: undefined as string | undefined },
+      };
+      let fixture: TenantPairFixture | undefined;
 
       beforeAll(async () => {
-        clientA = newAnonClient();
-        clientB = newAnonClient();
-
-        const { error: signInAError } = await clientA.auth.signInWithPassword({
-          email: liveCreds.a.email!,
-          password: liveCreds.a.password!,
-        });
-        if (signInAError) throw new Error(`Tenant A sign-in failed: ${signInAError.message}`);
-
-        const { error: signInBError } = await clientB.auth.signInWithPassword({
-          email: liveCreds.b.email!,
-          password: liveCreds.b.password!,
-        });
-        if (signInBError) throw new Error(`Tenant B sign-in failed: ${signInBError.message}`);
+        fixture = await createTenantPairFixture();
+        if (!fixture.available || !fixture.a || !fixture.b) {
+          throw new Error(
+            `Tenant pair fixture unexpectedly unavailable: ${fixture.skipReason ?? "(no reason)"}`,
+          );
+        }
+        clientA = fixture.a.client;
+        clientB = fixture.b.client;
+        liveCreds.a.tenantId = fixture.a.tenantId;
+        liveCreds.b.tenantId = fixture.b.tenantId;
+        console.error(
+          `[rls-fixture] using ${fixture.source} credentials — A=${fixture.a.tenantId} B=${fixture.b.tenantId}`,
+        );
       });
 
       it("user A cannot SELECT tenant B reservations", async () => {
@@ -652,11 +648,13 @@ describe("Cross-Tenant RLS Regression Tests", () => {
     });
   });
 
-  describe.skipIf(!hasSupabaseConfig || liveModeEnabled)(
+  describe.skipIf(tenantPairFixtureLikelyAvailable())(
     "Skipped: live cross-tenant mode disabled",
     () => {
       it(
-        "Set RLS_TEST_TENANT_A_EMAIL/PASSWORD/ID and RLS_TEST_TENANT_B_EMAIL/PASSWORD/ID to enable. CI auto-provisions these via the local Supabase stack workflow (.github/workflows/cross-tenant-rls-local.yml).",
+        `Live mode disabled — ${
+          tenantPairFixtureSkipReason() ?? "unknown reason"
+        }. Set RLS_TEST_TENANT_A/B_EMAIL/PASSWORD/ID, OR provide SUPABASE_SERVICE_ROLE_KEY to auto-provision throwaway users (CI does this via .github/workflows/cross-tenant-rls-local.yml).`,
         () => {
           expect(true).toBe(true);
         },
