@@ -229,6 +229,18 @@ test.describe("/superadmin — mocked auth states (lightweight E2E)", () => {
       await expect(main).toHaveAttribute("data-area-slug", "superadmin");
       await expect(page).toHaveTitle(/Access denied — 403/);
 
+      // The body copy must include the EXACT `attemptedArea` string that
+      // `SystemAdminRoute` forwards to `<Forbidden>` (default:
+      // "the Superadmin area"). This pins the contract that route guards
+      // can rely on the human label appearing verbatim in the denial UI,
+      // so changing the default in one place can never silently drift the
+      // visible copy out of sync.
+      await expect(
+        main.getByText(
+          /your account doesn't have permission to access the Superadmin area/,
+        ),
+      ).toBeVisible();
+
       // Real HTTP 403 in the browser network log.
       const beacon = await beaconPromise;
       expect(beacon.status()).toBe(403);
