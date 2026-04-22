@@ -1,5 +1,6 @@
 import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate, Navigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import NoTenantState from "@/components/NoTenantState";
 import { useState, useEffect, useCallback } from "react";
 import { useTenant } from "@/hooks/useTenant";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -217,8 +218,8 @@ const Dashboard = () => {
     );
   }
 
-  if (!tenantId) {
-    return <Navigate to="/onboarding" replace state={{ reason: "no-tenant" }} />;
+  if (!tenantId && !isImpersonating) {
+    return <NoTenantState attemptedArea="dashboard" />;
   }
 
   const permissionGate: Partial<Record<DashboardView, string>> = {

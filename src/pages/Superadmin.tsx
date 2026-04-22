@@ -38,6 +38,8 @@ import BetaFeedbackPanel from "@/components/dashboard/BetaFeedbackPanel";
 import SuperadminLoginHistory from "@/components/dashboard/SuperadminLoginHistory";
 import StripeRevenuePanel from "@/components/dashboard/StripeRevenuePanel";
 import TenantMembershipCheckPanel from "@/components/dashboard/TenantMembershipCheckPanel";
+import NoTenantState from "@/components/NoTenantState";
+import { useTenant } from "@/hooks/useTenant";
 
 interface TenantWithStats {
   id: string;
