@@ -185,6 +185,21 @@ export async function fetchTenantMembershipSnapshot(
   client: SupabaseClient,
   tenantId: string,
 ): Promise<TenantMembershipSnapshot> {
+  // Time every debug query so a slow PostgREST round-trip (cold local
+  // stack, network blip, missing index) is obvious in CI logs instead of
+  // silently inflating suite startup time. Anything >500ms gets a warn
+  // prefix; the threshold is intentionally low because this is a
+  // single-row PK-ish lookup that should complete in <50ms locally.
+  const startedAt = performance.now();
+  const finish = (outcome: string) => {
+    if (process.env.RLS_GUARD_QUIET === "1") return;
+    const elapsed = Math.round(performance.now() - startedAt);
+    const prefix = elapsed > 500 ? "[tenant-guard][SLOW]" : "[tenant-guard]";
+    // eslint-disable-next-line no-console
+    console.log(
+      `${prefix} fetchTenantMembershipSnapshot(tenant=${tenantId.slice(0, 8)}…) ${outcome} in ${elapsed}ms`,
+    );
+  };
   try {
     const { data, error } = await client
       .from("tenant_users")
@@ -193,11 +208,14 @@ export async function fetchTenantMembershipSnapshot(
       .limit(1)
       .maybeSingle();
     if (error) {
+      finish(`error=${error.message}`);
       return { found: false, lookupError: error.message };
     }
     if (!data) {
+      finish("no-row");
       return { found: false };
     }
+    finish("ok");
     return {
       found: true,
       userId: (data as { user_id?: string | null }).user_id ?? null,
@@ -206,6 +224,7 @@ export async function fetchTenantMembershipSnapshot(
       isApproved: (data as { is_approved?: boolean | null }).is_approved ?? null,
     };
   } catch (err) {
+    finish(`threw=${err instanceof Error ? err.message : String(err)}`);
     return { found: false, lookupError: err instanceof Error ? err.message : String(err) };
   }
 }
