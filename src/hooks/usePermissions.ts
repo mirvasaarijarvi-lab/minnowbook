@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTenant } from "@/hooks/useTenant";
+import { useIsSystemAdmin } from "@/hooks/useIsSystemAdmin";
 
 /**
  * Fetches the current user's granted permissions and provides
@@ -10,24 +11,23 @@ import { useTenant } from "@/hooks/useTenant";
  *
  * Supports custom_role_key: if set on tenant_users, permissions
  * are looked up by custom_role_key instead of the enum role.
+ *
+ * The system-admin lookup is delegated to `useIsSystemAdmin`, a shared
+ * hook with a session-long cache. That guarantees the same single
+ * answer is reused across every consumer (`SystemAdminRoute`, this
+ * hook, the Superadmin page, etc.) without re-querying the database
+ * on each navigation.
  */
 export function usePermissions() {
   const { user } = useAuth();
   const { tenantId, isOwner } = useTenant();
+  const { isSystemAdmin } = useIsSystemAdmin();
 
   const { data: permissions, isLoading } = useQuery({
-    queryKey: ["my-permissions", user?.id, tenantId],
+    queryKey: ["my-permissions", user?.id, tenantId, isSystemAdmin, isOwner],
     queryFn: async () => {
-      if (isOwner) return "__all__"; // Owner and superadmin have everything
-
-      // Check system admin
-      const { data: sysAdmin } = await supabase
-        .from("system_admins")
-        .select("id")
-        .eq("user_id", user!.id)
-        .maybeSingle();
-
-      if (sysAdmin) return "__all__";
+      // Owner and system admin shortcut — all permissions granted.
+      if (isOwner || isSystemAdmin) return "__all__";
 
       // Fetch role + custom_role_key for this user
       const { data: tenantUser } = await supabase
@@ -60,21 +60,6 @@ export function usePermissions() {
     return (permissions as string[]).includes(permission);
   };
 
-  // Use the database function directly (SECURITY DEFINER, bypasses RLS)
-  const { data: sysAdminRecord } = useQuery({
-    queryKey: ["is-system-admin", user?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase.rpc("is_system_admin", {
-        p_user_id: user!.id,
-      });
-      if (error) console.error("[usePermissions] is_system_admin RPC error:", error);
-      return data === true;
-    },
-    enabled: !!user?.id,
-    staleTime: 300_000,
-  });
-
-  const isSystemAdmin = sysAdminRecord === true;
-
   return { can, isLoading, isSystemAdmin };
 }
+

@@ -77,19 +77,9 @@ const Superadmin = () => {
   const { startImpersonation, isImpersonating } = useImpersonation();
   const { tenantId, loading: tenantLoading } = useTenant();
 
-  // Check system admin
-  const { data: isSysAdmin, isLoading: adminLoading } = useQuery({
-    queryKey: ["is-system-admin", user?.id],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("system_admins")
-        .select("id")
-        .eq("user_id", user!.id)
-        .maybeSingle();
-      return !!data;
-    },
-    enabled: !!user?.id,
-  });
+  // Check system admin via the shared session-long cache so we don't
+  // re-query the database on each navigation into /superadmin.
+  const { isSystemAdmin: isSysAdmin, isLoading: adminLoading } = useIsSystemAdmin();
 
   // Fetch all tenants
   const { data: tenants, isLoading: tenantsLoading } = useQuery({
