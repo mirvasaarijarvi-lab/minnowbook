@@ -2153,23 +2153,8 @@ describe("Cross-Tenant Storage RLS Tests", () => {
             expect(result.error).toBeTruthy();
 
             // Defense-in-depth assertion (escape-style variants only).
-            // Some adversarial paths intentionally start with the victim
-            // tenant id and just abuse separators (`//`, `\`, leading
-            // `/`, brace-wrapping) — for those, the path *legitimately*
-            // contains the victim prefix and the only defence is the
-            // upload-denial check above. The assertion below applies to
-            // the TRAVERSAL family: paths that start in a different
-            // (attacker-owned or synthetic) prefix and try to escape via
-            // `../` or its encoded equivalents. For those, the canonical
-            // form must NEVER come out as the victim id, regardless of
-            // how many decode passes the server applies.
-            const TRAVERSAL_LABELS = new Set([
-              "dot-segment-traversal",
-              "url-encoded-slash",
-              "double-encoded-slash",
-              "url-encoded-dot-dot",
-              "url-encoded-slash-plus-dot-dot",
-            ]);
+            // See `TRAVERSAL_LABELS` near `adversarialPaths` for the
+            // rationale on why direct-probe variants are skipped here.
             if (TRAVERSAL_LABELS.has(variant.label)) {
               const normalized = normalizeStoragePath(variant.path);
               expect(normalized.firstSegment).not.toBe(fakeTenantId);
