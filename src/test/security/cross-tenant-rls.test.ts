@@ -542,11 +542,13 @@ describe("Cross-Tenant RLS Regression Tests", () => {
     });
   });
 
-  describe.skipIf(!hasSupabaseConfig || liveModeEnabled)(
+  describe.skipIf(tenantPairFixtureLikelyAvailable())(
     "Skipped: live cross-tenant mode disabled",
     () => {
       it(
-        "Set RLS_TEST_TENANT_A_EMAIL/PASSWORD/ID and RLS_TEST_TENANT_B_EMAIL/PASSWORD/ID to enable. CI auto-provisions these via the local Supabase stack workflow (.github/workflows/cross-tenant-rls-local.yml).",
+        `Live mode disabled — ${
+          tenantPairFixtureSkipReason() ?? "unknown reason"
+        }. Set RLS_TEST_TENANT_A/B_EMAIL/PASSWORD/ID, OR provide SUPABASE_SERVICE_ROLE_KEY to auto-provision throwaway users (CI does this via .github/workflows/cross-tenant-rls-local.yml).`,
         () => {
           expect(true).toBe(true);
         },
