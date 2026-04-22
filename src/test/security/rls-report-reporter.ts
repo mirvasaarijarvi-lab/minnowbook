@@ -310,6 +310,7 @@ function renderHtml(payload: ReportPayload): string {
     <div class="card fail"><div class="label">Failed</div><div class="value">${totals.failed}</div></div>
     <div class="card skip"><div class="label">Skipped</div><div class="value">${totals.skipped}</div></div>
   </div>
+  ${renderTenantGuardSection(tenantGuard)}
   <table>
     <thead>
       <tr><th>Status</th><th>Suite</th><th>Test</th><th>Duration</th><th>Details</th></tr>
