@@ -190,16 +190,19 @@ describe("redeem-access-code — parallel calls never produce a duplicate succes
     }
   }, 30_000);
 
-  it("anon (no Authorization header) is rejected with NOT_AUTHENTICATED before reaching code lookup", async () => {
-    // The function should reject with NOT_AUTHENTICATED before doing any
-    // code lookup — proves that an attacker cannot use parallelism to
-    // enumerate codes anonymously.
+  it("anon (no Authorization header) is rejected with an auth-rejection code before reaching code lookup", async () => {
+    // The function should reject before doing any code lookup — proves
+    // that an attacker cannot use parallelism to enumerate codes
+    // anonymously. Either the gateway (UNAUTHORIZED_NO_AUTH_HEADER) or
+    // our handler (NOT_AUTHENTICATED) may emit the rejection.
     const res = await callRedeem(FAKE_BUT_VALID_SHAPE, false);
     expect(res.status).toBeGreaterThanOrEqual(400);
     expect(res.status).toBeLessThan(500);
-    const err = (res.body as { error?: string })?.error ?? "";
-    expect(err.toLowerCase()).toContain("authenticated");
-    expect(bodyCode(res.body)).toBe("NOT_AUTHENTICATED");
+    const code = bodyCode(res.body);
+    expect(
+      AUTH_REJECTION_CODES.has(code),
+      `expected auth-rejection code, got: ${code}`,
+    ).toBe(true);
   });
 
   it("malformed code returns a known error code without leaking lookup behaviour", async () => {
