@@ -166,6 +166,7 @@ function loadLedger(): { path: string; payload: LedgerPayload } {
  */
 function safe(s: string | null | undefined): string {
   if (s == null) return "";
+  // eslint-disable-next-line no-control-regex
   return s.replace(/[^\x09\x0A\x0D\x20-\x7E\xA0-\xFF]/g, "?");
 }
 

@@ -100,9 +100,6 @@ async function withTimeout<T>(
         timer = setTimeout(() => resolve(TEARDOWN_TIMEOUT_SENTINEL), ms);
       }),
     ]);
-  } catch (err) {
-    // Surface as a sentinel-like rejection so callers can branch uniformly.
-    throw err;
   } finally {
     if (timer) clearTimeout(timer);
   }
