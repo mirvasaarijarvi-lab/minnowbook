@@ -77,14 +77,13 @@ Deno.serve(async (req) => {
       throw new Error("You must have a workspace before redeeming a code. Complete onboarding first.");
     }
 
-    // Look up the access code using service role (bypasses RLS)
-    const { data: accessCode, error: codeError } = await adminClient
-      .from("access_codes")
-      .select("*")
-      .eq("code", code)
-      .maybeSingle();
+    // Look up the access code by hash via SECURITY DEFINER RPC.
+    // Plaintext is never stored — only SHA-256 hash. Service role required.
+    const { data: lookupRows, error: codeError } = await adminClient
+      .rpc("lookup_access_code_by_plaintext", { p_code: code });
 
     if (codeError) throw codeError;
+    const accessCode = Array.isArray(lookupRows) ? lookupRows[0] : lookupRows;
     if (!accessCode) throw new Error("Invalid access code");
     if (!accessCode.is_active) throw new Error("This access code is no longer active");
     if (accessCode.is_revoked) throw new Error("This access code has been revoked");
