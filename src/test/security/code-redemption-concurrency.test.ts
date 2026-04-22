@@ -237,7 +237,7 @@ describe("discount_codes — replay/concurrency surface as anon", () => {
       )
     );
     for (const r of results) {
-      const len = Array.isArray(r.data) ? r.data.length : 0;
+      const len = Array.isArray(r.data) ? (r.data?.length ?? 0) : 0;
       expect(len, "anon must never see a discount_code row, even under load").toBe(0);
     }
   }, 30_000);
