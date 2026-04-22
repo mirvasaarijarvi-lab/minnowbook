@@ -1,9 +1,13 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ShieldAlert, ArrowLeft } from "lucide-react";
+import { ShieldAlert, ArrowLeft, AlertTriangle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { supabase } from "@/integrations/supabase/client";
-import type { IsSystemAdminCacheState } from "@/hooks/useIsSystemAdmin";
+import {
+  type IsSystemAdminCacheState,
+  useInvalidateIsSystemAdmin,
+} from "@/hooks/useIsSystemAdmin";
 
 interface ForbiddenProps {
   /**
