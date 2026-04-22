@@ -483,13 +483,45 @@ jobs:
           RLS_REPORT_FLAVOR: local
         run: bun run test:rls-report
 
+      # Belt-and-braces verification that the test run actually flushed a
+      # ledger for THIS flavor before we hand it to the PDF generator.
+      # `flushLedger()` writes both `reports/storage-attempts.json` AND
+      # `reports/storage-attempts.local.json` — if the flavored copy is
+      # missing it means the test process crashed before afterAll ran,
+      # and any rendering would silently use a stale canonical file from
+      # a previous run. Logging the resolved paths here lets a reviewer
+      # eyeball the env→path mapping straight from the workflow log.
+      - name: Verify flavored storage-attempts ledger exists (local)
+        if: always() && steps.supabase-start.outcome == 'success'
+        env:
+          RLS_REPORT_FLAVOR: local
+        run: |
+          set -uo pipefail
+          FLAVORED="reports/storage-attempts.${RLS_REPORT_FLAVOR}.json"
+          CANONICAL="reports/storage-attempts.json"
+          echo "Resolving storage-attempts ledger for flavor='${RLS_REPORT_FLAVOR}':"
+          echo "  flavored  = ${FLAVORED}"
+          echo "  canonical = ${CANONICAL}"
+          if [ -f "$FLAVORED" ]; then
+            echo "✅ Flavored ledger present ($(wc -c < "$FLAVORED") bytes)"
+            # Pin the PDF generator to the flavored file so a leftover
+            # canonical copy from a previous run can't be picked up.
+            echo "STORAGE_ATTEMPTS_LEDGER=${PWD}/${FLAVORED}" >> "$GITHUB_ENV"
+          elif [ -f "$CANONICAL" ]; then
+            echo "::warning::Flavored ledger ${FLAVORED} missing — falling back to ${CANONICAL}."
+            echo "STORAGE_ATTEMPTS_LEDGER=${PWD}/${CANONICAL}" >> "$GITHUB_ENV"
+          else
+            echo "::warning::No storage-attempts ledger found — PDF step will be skipped."
+            echo "STORAGE_ATTEMPTS_LEDGER=" >> "$GITHUB_ENV"
+          fi
+
       # Render the storage-attempts ledger written by cross-tenant-storage.test.ts
       # into a reviewable PDF. Runs `if: always()` so a failed test sweep
       # (which is exactly when the PDF is most useful for triage) still
-      # produces the artifact. The script no-ops gracefully when the JSON
-      # ledger is missing, so we don't need an extra existence check here.
+      # produces the artifact. `STORAGE_ATTEMPTS_LEDGER` is pinned by the
+      # previous step so the generator never picks up a stale file.
       - name: Generate storage-attempts PDF (local)
-        if: always() && steps.supabase-start.outcome == 'success'
+        if: always() && steps.supabase-start.outcome == 'success' && env.STORAGE_ATTEMPTS_LEDGER != ''
         env:
           RLS_REPORT_FLAVOR: local
         run: bun run scripts/generate-storage-attempts-pdf.ts || true
