@@ -118,6 +118,73 @@ export function useInvalidateIsSystemAdmin() {
  * naturally produces a different cache key — so we cannot accidentally
  * serve User A's admin status to User B.
  */
+/**
+ * Snapshot of the React Query state behind `useIsSystemAdmin` at the
+ * moment a consumer reads it. Captured separately from `isSystemAdmin`
+ * itself so route guards can attach it to denial audit logs and incident
+ * tooling without re-reading the cache out-of-band.
+ *
+ * This is the schema we forward to `log-forbidden-access`. Keep the
+ * fields stable — the edge function validates/whitelists by name and
+ * persists them under `new_data.admin_check_state` for incident
+ * correlation. Adding a new field here is fine; renaming or removing
+ * one is a breaking change for the audit trail.
+ */
+export interface IsSystemAdminCacheState {
+  /**
+   * True while the FIRST resolution for this user is in flight (no data
+   * has ever been returned). A denial recorded with `loading=true` means
+   * the guard rendered Forbidden before the answer landed — almost
+   * certainly a bug in the consumer (it should wait), and very useful
+   * to flag in incident review.
+   */
+  loading: boolean;
+  /**
+   * True whenever a network request is in progress, including background
+   * refetches after invalidation. Distinguishing from `loading` lets
+   * incident review tell "first lookup hasn't resolved" apart from
+   * "stale value is being refreshed in the background".
+   */
+  fetching: boolean;
+  /**
+   * True when React Query considers the cached value stale (i.e. it
+   * would refetch on next subscribe under default settings). Because
+   * this hook sets `staleTime: Infinity`, this flips to true ONLY after
+   * an explicit `invalidateIsSystemAdmin(...)` call — which is exactly
+   * the diagnostic we want: "the denial was based on a value that had
+   * just been invalidated, before the refresh landed".
+   */
+  stale: boolean;
+  /**
+   * True when the underlying RPC threw or returned an error. The hook
+   * fails closed (returns `false`) on error, so a `false` answer paired
+   * with `errored=true` distinguishes "actively denied" from "denied
+   * because the lookup failed" — a critical distinction for incident
+   * triage.
+   */
+  errored: boolean;
+  /**
+   * ISO timestamp (UTC) of the last successful resolution, or `null` if
+   * the value has never resolved. Useful in the audit row to compute
+   * "the cached answer was N seconds old when the denial happened".
+   * Sourced from React Query's `dataUpdatedAt` (epoch ms) so it reflects
+   * the actual cache hit, not the time the audit row was written.
+   */
+  dataUpdatedAt: string | null;
+  /**
+   * React Query's coarse `status` field: `"pending" | "error" | "success"`.
+   * Captured verbatim so future incident dashboards can group denials by
+   * status without re-deriving it from the booleans above.
+   */
+  status: "pending" | "error" | "success";
+  /**
+   * React Query's `fetchStatus`: `"fetching" | "paused" | "idle"`.
+   * Distinguishes a paused fetch (e.g. offline) from one that's actively
+   * in flight, which the booleans alone can't express.
+   */
+  fetchStatus: "fetching" | "paused" | "idle";
+}
+
 export function useIsSystemAdmin() {
   const { user } = useAuth();
 
@@ -133,7 +200,11 @@ export function useIsSystemAdmin() {
         // Logged via console so ops can surface persistent issues, but
         // not surfaced to the user — guarded UI simply hides itself.
         console.error("[useIsSystemAdmin] RPC error:", error);
-        return false;
+        // Throw so React Query records this as an `error` status (the
+        // audit snapshot below uses that signal to flag fail-closed
+        // denials). Returning `false` here would mask the failure as a
+        // legitimate "not an admin" answer in incident review.
+        throw error;
       }
       return data === true;
     },
@@ -148,12 +219,43 @@ export function useIsSystemAdmin() {
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
     refetchOnMount: false,
+    // Don't retry on failure — failing closed once is enough; retrying
+    // would mask transient errors from incident review.
+    retry: false,
   });
 
+  // Snapshot the cache state for the audit trail. Computed on every
+  // render so consumers always read the freshest values; cheap because
+  // it's just object construction from already-loaded query fields.
+  const cacheState: IsSystemAdminCacheState = {
+    loading: query.isLoading,
+    fetching: query.isFetching,
+    stale: query.isStale,
+    errored: query.isError,
+    dataUpdatedAt:
+      query.dataUpdatedAt > 0
+        ? new Date(query.dataUpdatedAt).toISOString()
+        : null,
+    status: query.status,
+    fetchStatus: query.fetchStatus,
+  };
+
   return {
-    /** True only when the RPC has resolved to `true`. */
+    /**
+     * True only when the RPC has resolved to `true`. A failed lookup
+     * (errored) is treated as `false` — see `cacheState.errored` to
+     * distinguish "denied" from "denied because lookup failed".
+     */
     isSystemAdmin: query.data === true,
     /** True while the first resolution is in flight. */
     isLoading: query.isLoading,
+    /**
+     * Snapshot of the React Query cache state for this lookup. Route
+     * guards forward this to `<Forbidden>` so denial audit rows can
+     * record whether the answer was fresh, stale, loading, or errored
+     * at the moment access was denied. See `IsSystemAdminCacheState`
+     * for field-by-field debugging guidance.
+     */
+    cacheState,
   };
 }

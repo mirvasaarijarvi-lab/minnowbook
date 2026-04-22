@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { ShieldAlert, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import type { IsSystemAdminCacheState } from "@/hooks/useIsSystemAdmin";
 
 interface ForbiddenProps {
   /**
@@ -24,6 +25,18 @@ interface ForbiddenProps {
   areaSlug?: string;
   /** Optional override for the body copy. */
   message?: string;
+  /**
+   * Snapshot of the system-admin React Query cache at the exact moment
+   * the route guard rendered this page. Forwarded by `SystemAdminRoute`
+   * so the audit row captures *why* access was denied: a fresh `false`
+   * answer, a stale answer pending refresh, a loading state the guard
+   * shouldn't have rendered through, or a fail-closed lookup error.
+   *
+   * Optional because non-admin denials from other guards (or direct
+   * imports) won't have it. The audit beacon simply omits the field
+   * when absent — the edge function tolerates and ignores its absence.
+   */
+  adminCheckState?: IsSystemAdminCacheState;
 }
 
 /** Slugify a human label as a fallback when no explicit `areaSlug` is passed. */
@@ -65,6 +78,7 @@ const Forbidden = ({
   attemptedArea = "this area",
   areaSlug,
   message,
+  adminCheckState,
 }: ForbiddenProps) => {
   const [beaconStatus, setBeaconStatus] = useState<number | "unreachable" | null>(null);
   // Resolve once per render: explicit slug wins, otherwise derive from the
@@ -169,6 +183,20 @@ const Forbidden = ({
   // caller's user id from their JWT and writes user_id + timestamp + the
   // attempted area. Fire-and-forget; we don't surface failures to the UI
   // (production), but the dev indicator below reflects the outcome.
+  //
+  // The `adminCheckState` snapshot (when present) is forwarded so the
+  // audit row records whether the system-admin lookup was loading,
+  // stale, errored, or fresh at the moment access was denied. The
+  // edge function whitelists the field shape and stores it under
+  // `new_data.admin_check_state` for incident triage.
+  //
+  // We serialize the snapshot for the effect dependency array so a new
+  // object identity from a parent re-render with semantically-identical
+  // state doesn't refire the beacon. (`resolvedSlug` and `attemptedArea`
+  // are still tracked individually since they're primitives.)
+  const adminCheckStateKey = adminCheckState
+    ? JSON.stringify(adminCheckState)
+    : "";
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -197,6 +225,10 @@ const Forbidden = ({
                 typeof window !== "undefined"
                   ? window.location.pathname + window.location.search
                   : null,
+              // Optional cache-state snapshot. Omit the property entirely
+              // when the caller didn't pass one so the server can tell
+              // "not provided" apart from "provided but all false".
+              ...(adminCheckState ? { adminCheckState } : {}),
             },
           },
         );
@@ -235,7 +267,11 @@ const Forbidden = ({
     return () => {
       cancelled = true;
     };
-  }, [resolvedSlug, attemptedArea]);
+    // `adminCheckStateKey` (a stable string of the snapshot) and the raw
+    // `adminCheckState` reference are both listed: the key is what
+    // actually triggers re-runs, the raw value is the data we read inside.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resolvedSlug, attemptedArea, adminCheckStateKey]);
 
   // Set title + status + noindex meta. The Status meta is the closest the
   // browser can come to a real status code on a static document.
@@ -303,6 +339,29 @@ const Forbidden = ({
         // server (not the client) and attributed to the verified caller.
         data-audit-user-id={auditUserId ?? ""}
         data-audit-at={auditAt ?? ""}
+        // System-admin cache snapshot at the moment of denial. Surfaced
+        // for E2E specs and incident review so a denial caused by a
+        // stale cache, an in-flight first lookup, or a fail-closed RPC
+        // error is visually distinguishable from an "actually not an
+        // admin" denial. Empty strings when no `adminCheckState` was
+        // forwarded (e.g. denials from non-system-admin guards).
+        data-admin-check-loading={
+          adminCheckState ? String(adminCheckState.loading) : ""
+        }
+        data-admin-check-fetching={
+          adminCheckState ? String(adminCheckState.fetching) : ""
+        }
+        data-admin-check-stale={
+          adminCheckState ? String(adminCheckState.stale) : ""
+        }
+        data-admin-check-errored={
+          adminCheckState ? String(adminCheckState.errored) : ""
+        }
+        data-admin-check-status={adminCheckState?.status ?? ""}
+        data-admin-check-fetch-status={adminCheckState?.fetchStatus ?? ""}
+        data-admin-check-data-updated-at={
+          adminCheckState?.dataUpdatedAt ?? ""
+        }
       >
         <div className="max-w-md w-full text-center space-y-6">
           <div className="mx-auto h-16 w-16 rounded-full bg-destructive/10 flex items-center justify-center">
