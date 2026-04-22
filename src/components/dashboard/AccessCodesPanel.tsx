@@ -50,6 +50,9 @@ const AccessCodesPanel = () => {
   const [createOpen, setCreateOpen] = useState(false);
   const [revokeId, setRevokeId] = useState<string | null>(null);
   const [revokeReason, setRevokeReason] = useState("");
+  // After successful creation, plaintext is shown ONCE for the superadmin to copy/share.
+  // It is never stored in the DB (only the SHA-256 hash is).
+  const [lastCreatedPlaintext, setLastCreatedPlaintext] = useState<string | null>(null);
   const [form, setForm] = useState({
     code: generateCode(),
     description: "",
@@ -65,7 +68,7 @@ const AccessCodesPanel = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("access_codes")
-        .select("*")
+        .select("id, code_prefix, description, tier, duration_days, valid_from, valid_until, max_uses, used_count, is_active, is_revoked, revoked_at, revoked_reason, created_by, created_at")
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data as AccessCode[];
@@ -86,23 +89,25 @@ const AccessCodesPanel = () => {
 
   const createMutation = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.from("access_codes").insert({
-        code: form.code.trim().toUpperCase(),
-        description: form.description || null,
-        tier: form.tier,
-        duration_days: form.duration_days,
-        valid_from: form.valid_from || null,
-        valid_until: form.valid_until || null,
-        max_uses: form.max_uses ? parseInt(form.max_uses) : null,
-        created_by: user!.id,
+      const plaintext = form.code.trim().toUpperCase();
+      const { error } = await supabase.rpc("create_access_code", {
+        p_code: plaintext,
+        p_description: form.description || null,
+        p_tier: form.tier,
+        p_duration_days: form.duration_days,
+        p_valid_from: form.valid_from || null,
+        p_valid_until: form.valid_until || null,
+        p_max_uses: form.max_uses ? parseInt(form.max_uses) : null,
       });
       if (error) throw error;
+      return plaintext;
     },
-    onSuccess: () => {
+    onSuccess: (plaintext) => {
       queryClient.invalidateQueries({ queryKey: ["access-codes"] });
       setCreateOpen(false);
+      setLastCreatedPlaintext(plaintext);
       setForm({ ...form, code: generateCode(), description: "", max_uses: "" });
-      toast({ title: "Access code created" });
+      toast({ title: "Access code created", description: "Copy it now — only the hash is stored." });
     },
     onError: (err: any) => {
       toast({ title: "Error", description: err.message, variant: "destructive" });
