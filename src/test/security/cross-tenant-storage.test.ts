@@ -1,5 +1,11 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import {
+  configureLedger,
+  flushLedger,
+  recordCleanup,
+  recordUpload,
+} from "./storage-attempt-ledger";
 
 /**
  * Service-role client used as a final cleanup safety net. Only constructed
