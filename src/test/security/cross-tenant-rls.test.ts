@@ -463,8 +463,20 @@ describe("Cross-Tenant RLS Regression Tests", () => {
   );
 
   describe.skipIf(hasSupabaseConfig)("Skipped: missing Supabase config", () => {
-    it("test environment is missing VITE_SUPABASE_URL / VITE_SUPABASE_PUBLISHABLE_KEY", () => {
+    it("test environment is missing VITE_SUPABASE_URL / VITE_SUPABASE_PUBLISHABLE_KEY — set both to enable the anon-denial sweep", () => {
       expect(true).toBe(true);
     });
   });
+
+  describe.skipIf(!hasSupabaseConfig || liveModeEnabled)(
+    "Skipped: live cross-tenant mode disabled",
+    () => {
+      it(
+        "Set RLS_TEST_TENANT_A_EMAIL/PASSWORD/ID and RLS_TEST_TENANT_B_EMAIL/PASSWORD/ID to enable. CI auto-provisions these via the local Supabase stack workflow (.github/workflows/cross-tenant-rls-local.yml).",
+        () => {
+          expect(true).toBe(true);
+        },
+      );
+    },
+  );
 });
