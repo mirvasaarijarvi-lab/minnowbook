@@ -126,6 +126,14 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       anon = newAnonClient();
     });
 
+    afterAll(async () => {
+      // The anon attempts SHOULD all be denied, but if a regression let
+      // anything through we want to scrub it before the next CI run. The
+      // admin sweep is a no-op when SUPABASE_SERVICE_ROLE_KEY isn't set.
+      await sweepTestArtifacts(PRIVATE_BUCKET, [fakeTenantId]);
+      await sweepTestArtifacts(ASSETS_BUCKET, [fakeTenantId]);
+    });
+
     // Upload calls may be denied either via an explicit RLS error response
     // or by a network-level rejection that surfaces as a hang/timeout in
     // jsdom. Either way, the file MUST NOT end up in storage. We bound the
