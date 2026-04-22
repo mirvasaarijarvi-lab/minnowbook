@@ -2374,20 +2374,33 @@ describe("Cross-Tenant Storage RLS Tests", () => {
                 // an over-eager normalisation step (proxy double-decode
                 // followed by `..` collapse) could rewrite an attacker-
                 // owned key into a victim-owned key BEFORE RLS sees it.
+                //
+                // The normalized first segment must be one of:
+                //   - the attacker's own tenant id (RLS would allow but
+                //     the file is in their own folder, no leak),
+                //   - null/empty (structurally invalid; RLS denies via
+                //     `foldername()[1]` returning NULL),
+                //   - some unrelated string that is NOT a tenant id
+                //     (RLS denies because no matching tenant_users row).
+                // The one outcome we forbid is `firstSegment === victim`.
                 const callerTenantId = liveCreds[dir.attacker].tenantId!;
                 const victimTenantId = dir.victimTenantId();
                 const normalized = normalizeStoragePath(variant.path);
                 expect(normalized.firstSegment).not.toBe(victimTenantId);
-                // Stronger invariant where applicable: the normalized
-                // prefix is either the caller's own tenant or structurally
-                // invalid (null). We allow `null` because some adversarial
-                // paths normalise to empty (e.g. `/X/..`), which RLS will
-                // deny via NULL `foldername()[1]`.
-                if (normalized.firstSegment !== null) {
-                  expect([callerTenantId, victimTenantId]).not.toContain(
-                    normalized.firstSegment === victimTenantId ? victimTenantId : callerTenantId === normalized.firstSegment ? "__caller_ok__" : normalized.firstSegment,
-                  );
+                if (
+                  normalized.firstSegment !== null &&
+                  (normalized.firstSegment === callerTenantId ||
+                    normalized.firstSegment === victimTenantId)
+                ) {
+                  // If the segment is a real tenant id at all, it must
+                  // be the caller's own. Anything else (random string,
+                  // garbage, partial uuid) is fine — RLS will reject it.
+                  expect(normalized.firstSegment).toBe(callerTenantId);
                 }
+              },
+              15000,
+            );
+          }
 
           // Listing with adversarial folder names follows the same rule:
           // never reveal contents of the victim's folder. Both the
