@@ -151,12 +151,18 @@ describe("Forbidden page — forbidden-status beacon (fires once on mount)", () 
     // Re-render with identical props. The beacon's effect dependency is
     // `resolvedSlug`, which is unchanged — so no new fetch should fire.
     rerender(
-      <MemoryRouter>
-        <Forbidden
-          attemptedArea="the Superadmin area"
-          areaSlug="superadmin"
-        />
-      </MemoryRouter>,
+      <QueryClientProvider
+        client={
+          new QueryClient({ defaultOptions: { queries: { retry: false } } })
+        }
+      >
+        <MemoryRouter>
+          <Forbidden
+            attemptedArea="the Superadmin area"
+            areaSlug="superadmin"
+          />
+        </MemoryRouter>
+      </QueryClientProvider>,
     );
 
     // Allow any stray effects to flush, then re-assert the count is still 1.
