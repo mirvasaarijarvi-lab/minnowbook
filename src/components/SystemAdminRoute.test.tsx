@@ -286,4 +286,100 @@ describe("SystemAdminRoute (/superadmin enforcement)", () => {
     // No additional rpc() invocations between the two mounts.
     expect(rpcSpy.mock.calls.length).toBe(callsAfterFirst);
   });
+
+  it("issues exactly ONE is_system_admin RPC even when multiple SystemAdminRoute instances mount simultaneously", async () => {
+    // Concurrent-mount contract: a single React render that contains
+    // several `<SystemAdminRoute>` instances (e.g. a layout that wraps
+    // both a sidebar admin link guard and a main-area admin panel guard,
+    // or a route tree where parent and child are both guarded) must
+    // share one in-flight query and one resolved cache entry — never
+    // fan out into N RPC calls.
+    //
+    // React Query deduplicates by queryKey, so if all consumers go
+    // through `useIsSystemAdmin()` (which uses `isSystemAdminQueryKey`),
+    // the first hook to mount kicks off the request and every other
+    // hook subscribes to the same in-flight promise. This test pins
+    // that contract so a future regression (e.g. someone hard-codes a
+    // different query key, or bypasses the hook with a direct rpc call)
+    // is caught immediately.
+    mockIsSystemAdminResult = true;
+    mockUseAuth.mockReturnValue({
+      user: { id: "user-concurrent-1", email: "admin@example.com" },
+      session: { access_token: "fake" },
+      loading: false,
+      subscription: {
+        subscribed: false,
+        tier: null,
+        subscriptionEnd: null,
+        subscriptionStatus: null,
+      },
+      refreshSubscription: vi.fn(),
+      signOut: vi.fn(),
+    });
+
+    const { supabase } = await import("@/integrations/supabase/client");
+    const rpcSpy = supabase.rpc as unknown as ReturnType<typeof vi.fn>;
+    rpcSpy.mockClear();
+
+    // Single QueryClient shared across all guards — same as App.tsx.
+    const client = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+
+    // Mount FIVE guards in the same React tree, all in one render pass.
+    // Three are siblings inside the matched route element (the most
+    // common real-world shape: a layout with several admin-only
+    // widgets), and two are nested children, exercising the parent +
+    // child guard pattern as well. All five subscribe via the same
+    // hook + queryKey, so they should collapse to a single RPC.
+    render(
+      <QueryClientProvider client={client}>
+        <MemoryRouter initialEntries={["/superadmin"]}>
+          <Routes>
+            <Route
+              path="/superadmin"
+              element={
+                <SystemAdminRoute attemptedArea="the Superadmin area">
+                  <SystemAdminRoute attemptedArea="the Superadmin area">
+                    <div>
+                      <SystemAdminRoute attemptedArea="the Superadmin area">
+                        <div data-testid="guard-a">A</div>
+                      </SystemAdminRoute>
+                      <SystemAdminRoute attemptedArea="the Superadmin area">
+                        <div data-testid="guard-b">B</div>
+                      </SystemAdminRoute>
+                      <SystemAdminRoute attemptedArea="the Superadmin area">
+                        <div data-testid="guard-c">C</div>
+                      </SystemAdminRoute>
+                    </div>
+                  </SystemAdminRoute>
+                </SystemAdminRoute>
+              }
+            />
+          </Routes>
+        </MemoryRouter>
+      </QueryClientProvider>,
+    );
+
+    // Wait until every guard has resolved and rendered its child. This
+    // proves all five subscribers received the same answer.
+    await waitFor(() => {
+      expect(screen.getByTestId("guard-a")).toBeInTheDocument();
+      expect(screen.getByTestId("guard-b")).toBeInTheDocument();
+      expect(screen.getByTestId("guard-c")).toBeInTheDocument();
+    });
+
+    // The headline assertion: exactly one RPC was issued, not five.
+    // React Query's request deduplication is the contract that makes
+    // it safe to scatter `<SystemAdminRoute>` (and `useIsSystemAdmin`)
+    // calls throughout the tree without worrying about request
+    // amplification.
+    const isSystemAdminCalls = rpcSpy.mock.calls.filter(
+      ([fnName]) => fnName === "is_system_admin",
+    );
+    expect(
+      isSystemAdminCalls.length,
+      "is_system_admin RPC must fire exactly once across all concurrent SystemAdminRoute instances",
+    ).toBe(1);
+  });
 });
