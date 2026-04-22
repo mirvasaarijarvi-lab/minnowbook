@@ -102,7 +102,7 @@ function expectNoRowsLeaked(
   return rows.length;
 }
 
-liveDescribeEach([
+describe.each([
   { table: "booking_validation_log" as const },
   { table: "audit_log" as const },
 ])("$table — anon cross-tenant read isolation", ({ table }) => {
