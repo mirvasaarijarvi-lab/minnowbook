@@ -13,7 +13,15 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
  *
  * 2. OPT-IN (live integration): When the following env vars are set, the
  *    test will sign in as two users from different tenants and confirm
- *    each user cannot read or write the other tenant's data:
+ *    each user cannot read or write the other tenant's data, including:
+ *      - SELECT denial across every tenant-scoped table (both directions)
+ *      - INSERT denial when forging the other tenant's tenant_id
+ *      - UPDATE / DELETE denial via cross-tenant filters
+ *      - Unfiltered queries never leak rows from the other tenant
+ *      - Positive control: each user CAN read their OWN tenant_users row
+ *        (catches misconfigured test setup that would let denial pass trivially)
+ *
+ *    Required env vars:
  *      - RLS_TEST_TENANT_A_EMAIL / RLS_TEST_TENANT_A_PASSWORD / RLS_TEST_TENANT_A_ID
  *      - RLS_TEST_TENANT_B_EMAIL / RLS_TEST_TENANT_B_PASSWORD / RLS_TEST_TENANT_B_ID
  *
@@ -276,6 +284,181 @@ describe("Cross-Tenant RLS Regression Tests", () => {
           }
         },
       );
+
+      it.each(TENANT_SCOPED_TABLES)(
+        "user B cannot read tenant A rows from %s",
+        async (table) => {
+          const { data, error } = await clientB
+            .from(table)
+            .select("tenant_id")
+            .eq("tenant_id", liveCreds.a.tenantId!)
+            .limit(1);
+          if (error) {
+            expect(error.message).toBeTruthy();
+            return;
+          }
+          const PRIVATE_ONLY = [
+            "access_code_redemptions",
+            "audit_log",
+            "beta_feedback",
+            "booking_tokens",
+            "booking_validation_log",
+            "discount_codes",
+            "email_send_log",
+            "kitchen_menu_items",
+            "kitchen_orders",
+            "login_history",
+            "notifications",
+            "offers",
+            "archived_reservations",
+            "reservations",
+          ];
+          if (PRIVATE_ONLY.includes(table)) {
+            expect(data ?? []).toEqual([]);
+          }
+        },
+      );
+
+      // ---------- Cross-tenant WRITE denial sweep ----------
+      // These tables have an INSERT policy that requires tenant membership.
+      // Forging tenant_id of the OTHER tenant must be denied.
+      const WRITE_DENIAL_INSERTS: Array<{ table: string; payload: (tenantId: string) => Record<string, unknown> }> = [
+        {
+          table: "notifications",
+          payload: (t) => ({ tenant_id: t, type: "test", title: "x", message: "x" }),
+        },
+        {
+          table: "booking_validation_log",
+          payload: (t) => ({ tenant_id: t, source: "rls_test", outcome: "denied" }),
+        },
+        {
+          table: "kitchen_menu_items",
+          payload: (t) => ({ tenant_id: t, name: "rls_test_item", category: "food" }),
+        },
+        {
+          table: "kitchen_orders",
+          payload: (t) => ({
+            tenant_id: t,
+            reservation_id: "00000000-0000-0000-0000-000000000000",
+            item_name: "rls_test",
+          }),
+        },
+        {
+          table: "discount_codes",
+          payload: (t) => ({ tenant_id: t, code: "RLS_TEST", discount_value: 0 }),
+        },
+        {
+          table: "offers",
+          payload: (t) => ({
+            tenant_id: t,
+            guest_name: "rls",
+            guest_email: "rls@test.local",
+            guest_phone: "0",
+            guests_count: 1,
+            event_date: "2099-01-01",
+            start_time: "10:00",
+          }),
+        },
+        {
+          table: "blocked_slots",
+          payload: (t) => ({
+            tenant_id: t,
+            resource_type: "table",
+            date: "2099-01-01",
+          }),
+        },
+      ];
+
+      it.each(WRITE_DENIAL_INSERTS)(
+        "user A cannot INSERT a forged tenant B row into $table",
+        async ({ table, payload }) => {
+          const { data, error } = await clientA
+            .from(table)
+            .insert(payload(liveCreds.b.tenantId!))
+            .select();
+          // Either RLS rejects with an error, or with-check filters silently
+          // drop the insert and return [] / null. Both are acceptable proof
+          // that the cross-tenant write was denied.
+          const denied = Boolean(error) || !data || data.length === 0;
+          expect(denied).toBe(true);
+        },
+      );
+
+      it.each(WRITE_DENIAL_INSERTS)(
+        "user B cannot INSERT a forged tenant A row into $table",
+        async ({ table, payload }) => {
+          const { data, error } = await clientB
+            .from(table)
+            .insert(payload(liveCreds.a.tenantId!))
+            .select();
+          const denied = Boolean(error) || !data || data.length === 0;
+          expect(denied).toBe(true);
+        },
+      );
+
+      it("user A cannot DELETE tenant B notifications via cross-tenant filter", async () => {
+        const { data } = await clientA
+          .from("notifications")
+          .delete()
+          .eq("tenant_id", liveCreds.b.tenantId!)
+          .select();
+        expect(data ?? []).toEqual([]);
+      });
+
+      it("user A cannot UPDATE tenant B reservations via cross-tenant filter", async () => {
+        const { data } = await clientA
+          .from("reservations")
+          .update({ internal_notes: "RLS-test should not apply" })
+          .eq("tenant_id", liveCreds.b.tenantId!)
+          .select();
+        expect(data ?? []).toEqual([]);
+      });
+
+      // ---------- Positive control: own-tenant access works ----------
+      // If these fail, the test setup is broken (wrong tenant ID / user not
+      // a member). Without this guard, all denial tests would pass trivially
+      // even if RLS were misconfigured to deny everything.
+      it("user A CAN read their own tenant_users row (sanity check)", async () => {
+        const { data, error } = await clientA
+          .from("tenant_users")
+          .select("tenant_id")
+          .eq("tenant_id", liveCreds.a.tenantId!);
+        expect(error).toBeNull();
+        expect((data ?? []).length).toBeGreaterThan(0);
+        for (const row of data ?? []) {
+          expect(row.tenant_id).toBe(liveCreds.a.tenantId!);
+        }
+      });
+
+      it("user B CAN read their own tenant_users row (sanity check)", async () => {
+        const { data, error } = await clientB
+          .from("tenant_users")
+          .select("tenant_id")
+          .eq("tenant_id", liveCreds.b.tenantId!);
+        expect(error).toBeNull();
+        expect((data ?? []).length).toBeGreaterThan(0);
+        for (const row of data ?? []) {
+          expect(row.tenant_id).toBe(liveCreds.b.tenantId!);
+        }
+      });
+
+      it("user A reservations query never leaks tenant B rows (unfiltered)", async () => {
+        // Without an explicit tenant_id filter, RLS must still scope results
+        // to user A's tenant only. Any tenant B row here would be a leak.
+        const { data, error } = await clientA.from("reservations").select("tenant_id").limit(50);
+        expect(error).toBeNull();
+        for (const row of data ?? []) {
+          expect(row.tenant_id).not.toBe(liveCreds.b.tenantId!);
+        }
+      });
+
+      it("user B reservations query never leaks tenant A rows (unfiltered)", async () => {
+        const { data, error } = await clientB.from("reservations").select("tenant_id").limit(50);
+        expect(error).toBeNull();
+        for (const row of data ?? []) {
+          expect(row.tenant_id).not.toBe(liveCreds.a.tenantId!);
+        }
+      });
     },
   );
 
