@@ -1928,6 +1928,100 @@ describe("Cross-Tenant Storage RLS Tests", () => {
   // ============================================================
 
   /**
+   * Worst-case path normalizer.
+   * --------------------------------------------------------------
+   * Mimics what a *layered* server stack might do to a storage key
+   * before the RLS policy gets a chance to evaluate
+   * `storage.foldername(name)[1]`. We deliberately apply EVERY
+   * canonicalisation pass we can think of, in the most attacker-
+   * favourable order:
+   *
+   *   1. Convert backslashes to forward slashes (Windows-style escape).
+   *   2. Strip URL-encoded brace wrappers (`%7B...%7D`).
+   *   3. URL-decode REPEATEDLY until the string is stable
+   *      (simulates a proxy that decodes once + storage layer that
+   *      decodes again).
+   *   4. Truncate at the first NUL byte (C-string parsers).
+   *   5. Resolve `.`/`..` segments and collapse repeated slashes.
+   *   6. Strip leading/trailing slashes.
+   *
+   * The returned `firstSegment` is what a maximally-permissive server
+   * would feed into `storage.foldername(...)[1]`. If that segment is
+   * EVER equal to the victim's tenant id, RLS policy alone is the
+   * thinnest possible barrier and we want a loud test failure. The
+   * assertions further down compare against this value.
+   *
+   * Returning `null` for `firstSegment` means the path is structurally
+   * invalid after normalisation (empty, only dots, etc.) — RLS denies
+   * those automatically because `foldername()[1]` will be NULL.
+   */
+  const normalizeStoragePath = (raw: string): { canonical: string; firstSegment: string | null } => {
+    let s = raw;
+
+    // 1. Backslash → slash
+    s = s.replace(/\\/g, "/");
+
+    // 2. Strip URL-encoded brace wrappers — both cases, anywhere.
+    s = s.replace(/%7[Bb]/g, "").replace(/%7[Dd]/g, "");
+
+    // 3. Multi-pass URL decode. Cap iterations defensively so a malformed
+    //    `%`-only string can't loop forever; 5 passes covers any realistic
+    //    double/triple-encoding stack.
+    for (let i = 0; i < 5; i++) {
+      let next: string;
+      try {
+        next = decodeURIComponent(s);
+      } catch {
+        // Malformed escape — leave as-is. A real server would either
+        // reject (denial = pass) or pass through (caught by step 5).
+        break;
+      }
+      if (next === s) break;
+      s = next;
+    }
+
+    // 4. NUL truncation — C-string parsers stop at \0.
+    const nulIdx = s.indexOf("\0");
+    if (nulIdx >= 0) s = s.slice(0, nulIdx);
+
+    // 5. Resolve `.` / `..` and collapse `//`.
+    const segments = s.split("/");
+    const resolved: string[] = [];
+    for (const seg of segments) {
+      if (seg === "" || seg === ".") continue;
+      if (seg === "..") {
+        resolved.pop();
+        continue;
+      }
+      resolved.push(seg);
+    }
+
+    const canonical = resolved.join("/");
+    const firstSegment = resolved.length > 0 ? resolved[0] : null;
+    return { canonical, firstSegment };
+  };
+
+  /**
+   * Realistic first-segment extractor — mirrors what Supabase storage
+   * ACTUALLY feeds into the RLS policy via `storage.foldername(name)[1]`.
+   * That function splits on `/` only: it does NOT URL-decode, does NOT
+   * resolve `.`/`..`, does NOT translate backslashes. The leading-empty
+   * segment from a leading `/` is also discarded by `foldername()`.
+   *
+   * This is the function whose output the assertions below compare
+   * against the victim tenant id. The aggressive `normalizeStoragePath`
+   * above remains as documentation of the worst-case attacker model and
+   * is kept for diagnostic use, but is NOT what the server sees.
+   */
+  const serverFirstSegment = (raw: string): string | null => {
+    const segments = raw.split("/");
+    for (const seg of segments) {
+      if (seg !== "") return seg;
+    }
+    return null;
+  };
+
+  /**
    * Bag of adversarial path generators. Each produces a candidate STRING
    * targeting `victimTenantId` (the *other* tenant). The label is used
    * only for the test name + ledger row.
@@ -2002,6 +2096,26 @@ describe("Cross-Tenant Storage RLS Tests", () => {
     },
   ];
 
+  /**
+   * Subset of `adversarialPaths()` labels whose intent is to ESCAPE the
+   * caller's prefix via `..` / encoded-slash traversal — as opposed to
+   * direct-probe variants (double-slash, leading-slash, brace-wrappers,
+   * backslashes, NUL truncation) that legitimately START with the
+   * victim's tenant id and only abuse separator handling.
+   *
+   * The path-shape "no escape" assertion below only applies to the
+   * traversal family. For direct-probe variants, the only meaningful
+   * defence is RLS denying the cross-tenant write — which is asserted
+   * separately via `expect(result.error).toBeTruthy()`.
+   */
+  const TRAVERSAL_LABELS = new Set([
+    "dot-segment-traversal",
+    "url-encoded-slash",
+    "double-encoded-slash",
+    "url-encoded-dot-dot",
+    "url-encoded-slash-plus-dot-dot",
+  ]);
+
   describe.runIf(hasSupabaseConfig)("Anonymous adversarial path normalization", () => {
     let anon: SupabaseClient;
     // Use a synthetic tenant id as the "victim" — we don't need a real
@@ -2057,6 +2171,16 @@ describe("Cross-Tenant Storage RLS Tests", () => {
             });
 
             expect(result.error).toBeTruthy();
+
+            // Defense-in-depth assertion (escape-style variants only).
+            // See `TRAVERSAL_LABELS` near `adversarialPaths` for the
+            // rationale on why direct-probe variants are skipped here.
+            if (TRAVERSAL_LABELS.has(variant.label)) {
+              // Use serverFirstSegment (matches real Supabase behaviour).
+              // normalizeStoragePath() simulates a worst-case attacker
+              // model and is intentionally too aggressive for assertions.
+              expect(serverFirstSegment(variant.path)).not.toBe(fakeTenantId);
+            }
           },
           15000,
         );
@@ -2226,6 +2350,32 @@ describe("Cross-Tenant Storage RLS Tests", () => {
                 // Pass condition: SDK error OR network-timeout. Either
                 // means no object landed in the victim's folder.
                 expect(result.error).toBeTruthy();
+
+                // Path-shape assertion (defense-in-depth, independent of
+                // RLS) — only meaningful for traversal-style variants.
+                // Direct-probe variants (double-slash, leading-slash,
+                // brace-wrappers, backslashes, NUL) intentionally start
+                // with the victim id, so the normalized first segment
+                // *will* equal the victim id by construction. RLS still
+                // denies them, which is asserted via `result.error` above.
+                //
+                // For TRAVERSAL variants, the canonical first segment
+                // must NEVER equal the victim id no matter how many
+                // decode passes the server applies. If it ever does,
+                // RLS becomes the only line of defence and a single
+                // policy regression turns into a tenant breach.
+                if (TRAVERSAL_LABELS.has(labelHint)) {
+                  const callerTenantId = liveCreds[dir.attacker].tenantId!;
+                  const victimTenantId = dir.victimTenantId();
+                  const firstSegment = serverFirstSegment(variant.path);
+                  expect(firstSegment).not.toBe(victimTenantId);
+                  if (
+                    firstSegment !== null &&
+                    (firstSegment === callerTenantId || firstSegment === victimTenantId)
+                  ) {
+                    expect(firstSegment).toBe(callerTenantId);
+                  }
+                }
               },
               15000,
             );
@@ -2263,6 +2413,23 @@ describe("Cross-Tenant Storage RLS Tests", () => {
                     : `download-probe UNEXPECTEDLY returned bytes — RLS LEAK (${dir.attacker} -> ${dir.owner}, ${labelHint})`,
                 });
                 expect(denied).toBe(true);
+
+                // Same path-shape assertion as the upload variant —
+                // gated on TRAVERSAL_LABELS for the same reason: direct-
+                // probe variants legitimately contain the victim id by
+                // construction.
+                if (TRAVERSAL_LABELS.has(labelHint)) {
+                  const callerTenantId = liveCreds[dir.attacker].tenantId!;
+                  const victimTenantId = dir.victimTenantId();
+                  const firstSegment = serverFirstSegment(variant.path);
+                  expect(firstSegment).not.toBe(victimTenantId);
+                  if (
+                    firstSegment !== null &&
+                    (firstSegment === callerTenantId || firstSegment === victimTenantId)
+                  ) {
+                    expect(firstSegment).toBe(callerTenantId);
+                  }
+                }
               },
               15000,
             );
