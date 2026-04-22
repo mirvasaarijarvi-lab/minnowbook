@@ -4821,6 +4821,18 @@ const fi: TranslationKeys = {
   "kitchen.error": "Tuotteen tallennus epäonnistui",
   "kitchen.filter.all": "Kaikki",
   "kitchen.print": "Tulosta",
+  "kitchen.menu.title": "Menupohjat",
+  "kitchen.menu.manage": "Hallinnoi menua",
+  "kitchen.menu.empty": "Ei vielä menutuotteita. Lisää usein käytettyjä tuotteita nopeaa tilaamista varten.",
+  "kitchen.menu.addToOrder": "Lisää tilaukseen",
+  "kitchen.menu.pickFromMenu": "Menusta",
+  "kitchen.menu.newItem": "Lisää menutuote",
+  "kitchen.menu.namePlaceholder": "Tuotteen nimi (esim. Margherita-pizza)",
+  "kitchen.menu.saved": "Menutuote tallennettu",
+  "kitchen.menu.deleted": "Menutuote poistettu",
+  "kitchen.menu.saveError": "Menutuotteen tallennus epäonnistui",
+  "kitchen.menu.close": "Sulje",
+  "kitchen.menu.searchPlaceholder": "Hae menusta...",
 
   // Offers
   "offers.title": "Tarjoukset",
