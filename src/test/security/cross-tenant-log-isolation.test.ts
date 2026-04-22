@@ -65,7 +65,9 @@ const FAKE_TENANT_ID = "00000000-0000-0000-0000-0000000000aa";
 let anon: SupabaseClient;
 
 const liveDescribe = liveModeAvailable ? describe : describe.skip;
-const liveDescribeEach = liveModeAvailable ? describe.each : describe.skip.each;
+// `describe.skip.each` does not exist in vitest, so we use describe.each
+// unconditionally and skip individual `it` calls inside when we lack env.
+const liveDescribeEach = describe.each;
 
 beforeAll(() => {
   // Only construct the client when we have the env to do so. The describe
