@@ -493,12 +493,12 @@ function drawAttemptsSection(c: Cursor, p: LedgerPayload): Cursor {
   // Column layout (relative to MARGIN). Total = CONTENT_W (540pt).
   // Tightened to fit a new "HTTP" status column without truncating Path.
   const COLS = {
-    bucket: { x: 0, w: 60, label: "Bucket" },
-    actor: { x: 62, w: 56, label: "Actor → Owner" },
-    expected: { x: 120, w: 48, label: "Expected" },
-    outcome: { x: 170, w: 48, label: "Outcome" },
-    status: { x: 220, w: 36, label: "HTTP" },
-    path: { x: 258, w: CONTENT_W - 258, label: "Path" },
+    bucket: { x: 0, w: 56, label: "Bucket" },
+    actor: { x: 58, w: 78, label: "Actor → Owner" },
+    expected: { x: 138, w: 44, label: "Expected" },
+    outcome: { x: 184, w: 44, label: "Outcome" },
+    status: { x: 230, w: 30, label: "HTTP" },
+    path: { x: 262, w: CONTENT_W - 262, label: "Path" },
   };
 
   // Header row
