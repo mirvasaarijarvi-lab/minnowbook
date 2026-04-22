@@ -290,6 +290,13 @@ function renderHtml(payload: ReportPayload): string {
   .kv-value { color: #fde68a; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
     font-size: 12px; word-break: break-word; }
   .kv-value pre { margin: 0; background: #0f172a; }
+  .guard-heading { margin: 24px 0 4px; font-size: 16px; }
+  .guard-meta { margin: 0 0 12px; color: #94a3b8; font-size: 12px; }
+  .guard-table { margin-bottom: 24px; }
+  .guard-table code { color: #fde68a; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .guard-email { color: #94a3b8; font-size: 11px; }
+  .guard-time { color: #94a3b8; font-size: 11px; font-variant-numeric: tabular-nums; }
+  .guard-failure { color: #fca5a5; font-size: 12px; margin-top: 4px; }
 </style>
 </head>
 <body>
