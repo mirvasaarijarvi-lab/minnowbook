@@ -51,7 +51,9 @@ interface TenantWithStats {
   subscription_status: string | null;
   stripe_customer_id: string | null;
   stripe_subscription_id: string | null;
-  max_staff_users: number;
+  // Note: `max_staff_users` was removed — staff limits are now derived
+  // from the tenant's tier via the backend `get_tier_max_staff_users`
+  // function and enforced by the `enforce_staff_user_limit` trigger.
   allowed_reservation_types: string[];
   created_at: string | null;
   owner_user_id: string;
