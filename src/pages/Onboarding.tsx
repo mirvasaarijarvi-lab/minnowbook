@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, Navigate } from "react-router-dom";
+import { useNavigate, Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTenant } from "@/hooks/useTenant";
 import { supabase } from "@/integrations/supabase/client";
@@ -31,6 +31,8 @@ const Onboarding = () => {
   const { user } = useAuth();
   const { tenantId, loading: tenantLoading } = useTenant();
   const navigate = useNavigate();
+  const location = useLocation();
+  const wasRedirected = (location.state as { reason?: string } | null)?.reason === "no-tenant";
   const queryClient = useQueryClient();
   const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
