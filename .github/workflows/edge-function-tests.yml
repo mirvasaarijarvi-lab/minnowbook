@@ -18,9 +18,69 @@ jobs:
           deno-version: v1.x
 
       - name: Run edge function tests
+        id: deno-tests
         run: |
+          # Capture the full test output to a log file so a follow-up step
+          # can summarize errors even when this step succeeds (early
+          # warnings are useful too).
+          mkdir -p /tmp/edge-test-logs
+          LOG=/tmp/edge-test-logs/deno-tests.log
+          : > "$LOG"
+
+          STATUS=0
           for test_file in $(find supabase/functions -name '*_test.ts' -o -name '*.test.ts' 2>/dev/null); do
-            echo "Running $test_file"
-            deno test --allow-net --allow-env --allow-read "$test_file"
+            echo "Running $test_file" | tee -a "$LOG"
+            if ! deno test --allow-net --allow-env --allow-read "$test_file" 2>&1 | tee -a "$LOG"; then
+              STATUS=1
+            fi
           done
-          echo "Edge function tests completed"
+          echo "Edge function tests completed" | tee -a "$LOG"
+          exit $STATUS
+
+      - name: Summarize top 10 error lines from Supabase container logs
+        # Always run, even on test failure — that's exactly when we need
+        # the summary the most. The previous step's exit code is still
+        # respected by the job because this step doesn't override it.
+        if: always()
+        run: |
+          LOG=/tmp/edge-test-logs/deno-tests.log
+          SUMMARY="${GITHUB_STEP_SUMMARY:-/dev/stdout}"
+
+          {
+            echo "## Supabase / Edge Function — Top 10 Error Lines"
+            echo ""
+          } >> "$SUMMARY"
+
+          if [ ! -s "$LOG" ]; then
+            echo "_No test log was captured (file missing or empty)._" >> "$SUMMARY"
+            exit 0
+          fi
+
+          # Pull the most relevant signal lines: explicit ERROR/FAIL/panic
+          # markers, Deno's "error:" prefix, and uncaught/unhandled
+          # rejections. Case-insensitive, deduplicated, capped at 10.
+          ERRORS=$(grep -E -i \
+            -e '(^|[[:space:]])error([[:space:]:]|$)' \
+            -e '(^|[[:space:]])fail(ed|ure)?([[:space:]:]|$)' \
+            -e '(^|[[:space:]])panic([[:space:]:]|$)' \
+            -e 'uncaught|unhandled rejection' \
+            "$LOG" \
+            | sed 's/[[:space:]]\+$//' \
+            | awk '!seen[$0]++' \
+            | head -n 10 || true)
+
+          if [ -z "$ERRORS" ]; then
+            echo "_No error lines detected in the captured log._" >> "$SUMMARY"
+          else
+            {
+              echo '```'
+              echo "$ERRORS"
+              echo '```'
+            } >> "$SUMMARY"
+          fi
+
+          # Also print to the live job log so it's visible without
+          # opening the summary panel.
+          echo "----- Top 10 error lines (Supabase / edge tests) -----"
+          echo "${ERRORS:-<none detected>}"
+          echo "------------------------------------------------------"
