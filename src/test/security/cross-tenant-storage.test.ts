@@ -17,24 +17,88 @@ const adminClient: SupabaseClient | null =
     : null;
 
 /**
- * Best-effort recursive sweep: list every file under `${tenantId}/__rls_test__/`
- * for the current RUN_ID and remove anything still there. Safe to call from
- * any cleanup path — it short-circuits if no admin client is available.
+ * Best-effort recursive sweep STRICTLY scoped to this run's RUN_ID folder.
+ *
+ * Path layout (every test artifact uses this shape):
+ *   {tenantId}/__rls_test__/{RUN_ID}/[...optional nested segments]/{label}.txt
+ *
+ * The sweep walks ONLY `{tenantId}/__rls_test__/{RUN_ID}/...` — never
+ * `{tenantId}/` and never `{tenantId}/__rls_test__/` — so a misconfigured
+ * RUN_ID can never delete artifacts from concurrent runs, prior runs, or
+ * (most importantly) real tenant data that happens to share the prefix.
+ *
+ * Safe to call from any cleanup path; short-circuits if no admin client
+ * is available.
  */
-async function sweepTestArtifacts(bucket: string, tenantIds: string[]) {
-  if (!adminClient) return;
+async function sweepRunIdFolder(
+  bucket: string,
+  tenantIds: string[],
+  client: SupabaseClient,
+) {
+  // Recursively collect every object key under `{tenantId}/__rls_test__/{RUN_ID}`.
+  // Storage's `list()` is non-recursive, so we walk depth-first.
+  const collect = async (root: string): Promise<string[]> => {
+    const out: string[] = [];
+    const stack: string[] = [root];
+    while (stack.length) {
+      const dir = stack.pop()!;
+      // Page through every entry — listing is capped at `limit` per call.
+      let offset = 0;
+      const pageSize = 100;
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        const { data, error } = await client.storage
+          .from(bucket)
+          .list(dir, { limit: pageSize, offset });
+        if (error || !data || data.length === 0) break;
+        for (const entry of data) {
+          // Folders surface as entries with `id === null` and no `metadata`.
+          // Files have a non-null id (object UUID) and `metadata.size`.
+          const path = `${dir}/${entry.name}`;
+          const isFolder = entry.id === null && !entry.metadata;
+          if (isFolder) {
+            stack.push(path);
+          } else {
+            out.push(path);
+          }
+        }
+        if (data.length < pageSize) break;
+        offset += pageSize;
+      }
+    }
+    return out;
+  };
+
   for (const tenantId of tenantIds) {
+    if (!tenantId) continue;
+    const runRoot = `${tenantId}/__rls_test__/${RUN_ID}`;
     try {
-      const { data } = await adminClient.storage
-        .from(bucket)
-        .list(`${tenantId}/__rls_test__`, { limit: 100, search: RUN_ID });
-      if (!data || data.length === 0) continue;
-      const paths = data.map((entry) => `${tenantId}/__rls_test__/${entry.name}`);
-      await adminClient.storage.from(bucket).remove(paths);
+      const paths = await collect(runRoot);
+      if (paths.length === 0) continue;
+      // Defensive guard: every path MUST start with the run root. If anything
+      // ever escaped that prefix it would mean a bug in `collect`, not RLS.
+      const safe = paths.filter((p) => p.startsWith(`${runRoot}/`));
+      if (safe.length === 0) continue;
+      // Storage `remove` accepts up to a few hundred keys per call; chunk
+      // to stay well under any service-side limit.
+      const chunkSize = 100;
+      for (let i = 0; i < safe.length; i += chunkSize) {
+        await client.storage.from(bucket).remove(safe.slice(i, i + chunkSize));
+      }
     } catch {
       /* ignore — best-effort */
     }
   }
+}
+
+/**
+ * Convenience wrapper for cleanup paths that want the admin (service-role)
+ * sweep — the strictest version, used as the final safety net. No-op if no
+ * service role key is configured (e.g. local dev without CI secrets).
+ */
+async function sweepTestArtifacts(bucket: string, tenantIds: string[]) {
+  if (!adminClient) return;
+  await sweepRunIdFolder(bucket, tenantIds, adminClient);
 }
 
 /**
