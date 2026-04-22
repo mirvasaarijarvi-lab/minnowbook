@@ -196,13 +196,12 @@ const AccessCodesPanel = () => {
                   <div key={ac.id} className="p-4 rounded-lg border border-border bg-card space-y-2">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => copyCode(ac.code)}
-                          className="font-mono text-sm font-bold text-foreground hover:text-primary flex items-center gap-1"
+                        <span
+                          className="font-mono text-sm font-bold text-foreground flex items-center gap-1"
+                          title="Only the prefix is shown — the full code is hashed and cannot be retrieved"
                         >
-                          {ac.code}
-                          <Copy className="h-3 w-3" />
-                        </button>
+                          {ac.code_prefix}…
+                        </span>
                         <Badge variant={ac.is_revoked ? "destructive" : ac.is_active ? "default" : "secondary"} className="text-[10px]">
                           {ac.is_revoked ? "Revoked" : ac.is_active ? "Active" : "Paused"}
                         </Badge>
@@ -266,15 +265,6 @@ const AccessCodesPanel = () => {
                             {!r.is_active && <Badge variant="destructive" className="text-[9px] h-4">Revoked</Badge>}
                           </div>
                         ))}
-                      </div>
-                    )}
-                    {!ac.is_revoked && ac.is_active && (
-                      <div className="pt-2 border-t border-border mt-2">
-                        <BetaInviteEmailPreview
-                          code={ac.code}
-                          tierLabel={ac.tier === "professional" ? "Professional" : ac.tier === "business" ? "Business" : "Basic"}
-                          durationDays={ac.duration_days}
-                        />
                       </div>
                     )}
                   </div>
