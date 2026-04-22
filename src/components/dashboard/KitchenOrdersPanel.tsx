@@ -40,10 +40,13 @@ import {
   CheckCheck,
   CircleDot,
   Printer,
+  BookOpen,
 } from "lucide-react";
 import { toast } from "sonner";
 import DashboardTooltip from "./DashboardTooltip";
 import { cn } from "@/lib/utils";
+import KitchenMenuManager, { type MenuItem } from "./KitchenMenuManager";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 
 type Category = "food" | "drink" | "other";
 type Status = "received" | "preparing" | "ready" | "served";
@@ -107,6 +110,24 @@ const KitchenOrdersPanel = () => {
   const [selectedDate, setSelectedDate] = useState(today);
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [pendingDelete, setPendingDelete] = useState<string | null>(null);
+  const [menuManagerOpen, setMenuManagerOpen] = useState(false);
+
+  // Menu templates for quick-insert
+  const { data: menuItems = [] } = useQuery({
+    queryKey: ["kitchen-menu-items", tenantId],
+    enabled: !!tenantId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("kitchen_menu_items")
+        .select("*")
+        .eq("tenant_id", tenantId!)
+        .eq("is_active", true)
+        .order("sort_order", { ascending: true })
+        .order("name", { ascending: true });
+      if (error) throw error;
+      return (data ?? []) as MenuItem[];
+    },
+  });
 
   const selectedDateObj = parseISO(selectedDate);
   const shiftDay = (delta: number) =>
@@ -173,6 +194,32 @@ const KitchenOrdersPanel = () => {
         item_name: "",
         quantity: 1,
         category: "food",
+        status: "received",
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      invalidate();
+      toast.success(t("kitchen.itemAdded"));
+    },
+    onError: () => toast.error(t("kitchen.error")),
+  });
+
+  const addOrderFromMenu = useMutation({
+    mutationFn: async ({
+      reservationId,
+      menuItem,
+    }: {
+      reservationId: string;
+      menuItem: MenuItem;
+    }) => {
+      const { error } = await supabase.from("kitchen_orders").insert({
+        tenant_id: tenantId!,
+        reservation_id: reservationId,
+        item_name: menuItem.name,
+        quantity: 1,
+        category: menuItem.category,
+        unit_price_eur: menuItem.unit_price_eur,
         status: "received",
       });
       if (error) throw error;
@@ -272,6 +319,15 @@ const KitchenOrdersPanel = () => {
           >
             {t("kitchen.today")}
           </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setMenuManagerOpen(true)}
+            className="gap-1.5"
+          >
+            <BookOpen className="h-4 w-4" />
+            {t("kitchen.menu.manage")}
+          </Button>
           <Button variant="outline" size="sm" onClick={() => window.print()} className="gap-1.5">
             <Printer className="h-4 w-4" />
             {t("kitchen.print")}
@@ -348,16 +404,27 @@ const KitchenOrdersPanel = () => {
                       ))}
                     </div>
                   )}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="gap-1.5 print:hidden"
-                    onClick={() => addOrder.mutate(r.id)}
-                    disabled={addOrder.isPending}
-                  >
-                    <Plus className="h-4 w-4" />
-                    {t("kitchen.addItem")}
-                  </Button>
+                  <div className="flex flex-wrap gap-2 print:hidden">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-1.5"
+                      onClick={() => addOrder.mutate(r.id)}
+                      disabled={addOrder.isPending}
+                    >
+                      <Plus className="h-4 w-4" />
+                      {t("kitchen.addItem")}
+                    </Button>
+                    {menuItems.length > 0 && (
+                      <MenuPicker
+                        menuItems={menuItems}
+                        onPick={(menuItem) =>
+                          addOrderFromMenu.mutate({ reservationId: r.id, menuItem })
+                        }
+                        t={t}
+                      />
+                    )}
+                  </div>
                 </CardContent>
               </Card>
             );
@@ -384,7 +451,63 @@ const KitchenOrdersPanel = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <KitchenMenuManager open={menuManagerOpen} onOpenChange={setMenuManagerOpen} />
     </div>
+  );
+};
+
+interface MenuPickerProps {
+  menuItems: MenuItem[];
+  onPick: (item: MenuItem) => void;
+  t: (key: any) => string;
+}
+
+const MenuPicker = ({ menuItems, onPick, t }: MenuPickerProps) => {
+  const [open, setOpen] = useState(false);
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button variant="secondary" size="sm" className="gap-1.5">
+          <BookOpen className="h-4 w-4" />
+          {t("kitchen.menu.pickFromMenu")}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="p-0 w-72" align="start">
+        <Command>
+          <CommandInput placeholder={t("kitchen.menu.searchPlaceholder")} />
+          <CommandList>
+            <CommandEmpty>{t("kitchen.menu.empty")}</CommandEmpty>
+            <CommandGroup>
+              {menuItems.map((item) => {
+                const Icon = CATEGORY_ICON[item.category];
+                return (
+                  <CommandItem
+                    key={item.id}
+                    value={item.name}
+                    onSelect={() => {
+                      onPick(item);
+                      setOpen(false);
+                    }}
+                    className="flex items-center justify-between gap-2"
+                  >
+                    <span className="flex items-center gap-2 truncate">
+                      <Icon className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                      <span className="truncate">{item.name}</span>
+                    </span>
+                    {item.unit_price_eur != null && (
+                      <span className="text-xs text-muted-foreground shrink-0">
+                        {Number(item.unit_price_eur).toFixed(2)} €
+                      </span>
+                    )}
+                  </CommandItem>
+                );
+              })}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
   );
 };
 

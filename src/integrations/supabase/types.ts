@@ -840,6 +840,45 @@ export type Database = {
         }
         Relationships: []
       }
+      kitchen_menu_items: {
+        Row: {
+          category: string
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean
+          name: string
+          sort_order: number
+          tenant_id: string
+          unit_price_eur: number | null
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          sort_order?: number
+          tenant_id: string
+          unit_price_eur?: number | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          sort_order?: number
+          tenant_id?: string
+          unit_price_eur?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       kitchen_orders: {
         Row: {
           category: string

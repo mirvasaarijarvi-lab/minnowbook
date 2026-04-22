@@ -1581,6 +1581,18 @@ type TranslationKeys = {
   "kitchen.error": string;
   "kitchen.filter.all": string;
   "kitchen.print": string;
+  "kitchen.menu.title": string;
+  "kitchen.menu.manage": string;
+  "kitchen.menu.empty": string;
+  "kitchen.menu.addToOrder": string;
+  "kitchen.menu.pickFromMenu": string;
+  "kitchen.menu.newItem": string;
+  "kitchen.menu.namePlaceholder": string;
+  "kitchen.menu.saved": string;
+  "kitchen.menu.deleted": string;
+  "kitchen.menu.saveError": string;
+  "kitchen.menu.close": string;
+  "kitchen.menu.searchPlaceholder": string;
 
   // Offers
   "offers.title": string;
@@ -3191,6 +3203,18 @@ const en: TranslationKeys = {
   "kitchen.error": "Could not save item",
   "kitchen.filter.all": "All",
   "kitchen.print": "Print",
+  "kitchen.menu.title": "Menu Templates",
+  "kitchen.menu.manage": "Manage menu",
+  "kitchen.menu.empty": "No menu items yet. Add common items to insert them quickly into orders.",
+  "kitchen.menu.addToOrder": "Add to order",
+  "kitchen.menu.pickFromMenu": "From menu",
+  "kitchen.menu.newItem": "Add menu item",
+  "kitchen.menu.namePlaceholder": "Item name (e.g. Margherita pizza)",
+  "kitchen.menu.saved": "Menu item saved",
+  "kitchen.menu.deleted": "Menu item removed",
+  "kitchen.menu.saveError": "Could not save menu item",
+  "kitchen.menu.close": "Close",
+  "kitchen.menu.searchPlaceholder": "Search menu...",
 
   // Offers
   "offers.title": "Offers",
@@ -4797,6 +4821,18 @@ const fi: TranslationKeys = {
   "kitchen.error": "Tuotteen tallennus epäonnistui",
   "kitchen.filter.all": "Kaikki",
   "kitchen.print": "Tulosta",
+  "kitchen.menu.title": "Menupohjat",
+  "kitchen.menu.manage": "Hallinnoi menua",
+  "kitchen.menu.empty": "Ei vielä menutuotteita. Lisää usein käytettyjä tuotteita nopeaa tilaamista varten.",
+  "kitchen.menu.addToOrder": "Lisää tilaukseen",
+  "kitchen.menu.pickFromMenu": "Menusta",
+  "kitchen.menu.newItem": "Lisää menutuote",
+  "kitchen.menu.namePlaceholder": "Tuotteen nimi (esim. Margherita-pizza)",
+  "kitchen.menu.saved": "Menutuote tallennettu",
+  "kitchen.menu.deleted": "Menutuote poistettu",
+  "kitchen.menu.saveError": "Menutuotteen tallennus epäonnistui",
+  "kitchen.menu.close": "Sulje",
+  "kitchen.menu.searchPlaceholder": "Hae menusta...",
 
   // Offers
   "offers.title": "Tarjoukset",
@@ -6403,6 +6439,18 @@ const sv: TranslationKeys = {
   "kitchen.error": "Kunde inte spara objektet",
   "kitchen.filter.all": "Alla",
   "kitchen.print": "Skriv ut",
+  "kitchen.menu.title": "Menymallar",
+  "kitchen.menu.manage": "Hantera meny",
+  "kitchen.menu.empty": "Inga menyobjekt än. Lägg till vanliga objekt för att snabbt infoga dem i beställningar.",
+  "kitchen.menu.addToOrder": "Lägg till i beställning",
+  "kitchen.menu.pickFromMenu": "Från meny",
+  "kitchen.menu.newItem": "Lägg till menyobjekt",
+  "kitchen.menu.namePlaceholder": "Objektnamn (t.ex. Margherita-pizza)",
+  "kitchen.menu.saved": "Menyobjekt sparat",
+  "kitchen.menu.deleted": "Menyobjekt borttaget",
+  "kitchen.menu.saveError": "Kunde inte spara menyobjektet",
+  "kitchen.menu.close": "Stäng",
+  "kitchen.menu.searchPlaceholder": "Sök i menyn...",
 
   // Offers
   "offers.title": "Erbjudanden",
