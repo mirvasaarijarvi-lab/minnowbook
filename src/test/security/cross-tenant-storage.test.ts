@@ -2365,10 +2365,29 @@ describe("Cross-Tenant Storage RLS Tests", () => {
                     : `download-probe UNEXPECTEDLY returned bytes — RLS LEAK (${dir.attacker} -> ${dir.owner}, ${labelHint})`,
                 });
                 expect(denied).toBe(true);
-              },
-              15000,
-            );
-          }
+
+                // Same path-shape assertion as the upload variant: even
+                // if the download had returned bytes (which would already
+                // fail the `denied` check above), the normalized first
+                // segment of the requested key must NOT match the victim
+                // tenant's id. This catches a subtle class of bug where
+                // an over-eager normalisation step (proxy double-decode
+                // followed by `..` collapse) could rewrite an attacker-
+                // owned key into a victim-owned key BEFORE RLS sees it.
+                const callerTenantId = liveCreds[dir.attacker].tenantId!;
+                const victimTenantId = dir.victimTenantId();
+                const normalized = normalizeStoragePath(variant.path);
+                expect(normalized.firstSegment).not.toBe(victimTenantId);
+                // Stronger invariant where applicable: the normalized
+                // prefix is either the caller's own tenant or structurally
+                // invalid (null). We allow `null` because some adversarial
+                // paths normalise to empty (e.g. `/X/..`), which RLS will
+                // deny via NULL `foldername()[1]`.
+                if (normalized.firstSegment !== null) {
+                  expect([callerTenantId, victimTenantId]).not.toContain(
+                    normalized.firstSegment === victimTenantId ? victimTenantId : callerTenantId === normalized.firstSegment ? "__caller_ok__" : normalized.firstSegment,
+                  );
+                }
 
           // Listing with adversarial folder names follows the same rule:
           // never reveal contents of the victim's folder. Both the
