@@ -1802,6 +1802,20 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       afterAll(async () => {
         const clientFor = (key: "a" | "b") => (key === "a" ? clientA : clientB);
 
+        // Last-line preflight (see live-cross-tenant-flat block for the
+        // full rationale). Adversarial paths are exactly the kind of
+        // payload where a misconfigured cleanup could do the most damage.
+        const preflightClients = {
+          [liveCreds.a.tenantId!]: { client: clientA, email: liveCreds.a.email },
+          [liveCreds.b.tenantId!]: { client: clientB, email: liveCreds.b.email },
+        };
+        const preflight = await cleanupPreflight({
+          tenantIds: [liveCreds.a.tenantId!, liveCreds.b.tenantId!],
+          clients: preflightClients,
+          scope: "live-cross-tenant-adversarial",
+        });
+        if (!preflight.ok) return;
+
         // Adversarial paths (URL-encoded slashes, null bytes, backslashes)
         // are the MOST likely to hang remove() on the gateway. The
         // per-call timeout in teardownAttemptPaths guarantees forward
@@ -1809,8 +1823,16 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         // residual set by listing instead of trusting the malformed key.
         await teardownAttemptPaths(adversarialAttempts, clientFor);
 
-        await sweepTestArtifacts(PRIVATE_BUCKET, [liveCreds.a.tenantId!, liveCreds.b.tenantId!]);
-        await sweepTestArtifacts(ASSETS_BUCKET, [liveCreds.a.tenantId!, liveCreds.b.tenantId!]);
+        await sweepTestArtifacts(
+          PRIVATE_BUCKET,
+          [liveCreds.a.tenantId!, liveCreds.b.tenantId!],
+          { scope: "live-cross-tenant-adversarial:sweep", clients: preflightClients },
+        );
+        await sweepTestArtifacts(
+          ASSETS_BUCKET,
+          [liveCreds.a.tenantId!, liveCreds.b.tenantId!],
+          { scope: "live-cross-tenant-adversarial:sweep", clients: preflightClients },
+        );
       });
 
       // Test BOTH directions (A→B and B→A) for every variant on both
