@@ -49,6 +49,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [subscription, setSubscription] = useState<SubscriptionInfo>(defaultSubscription);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // We invalidate the cached `is_system_admin` lookup on every auth
+  // transition so the next render of `<SystemAdminRoute>` (and any
+  // consumer of `useIsSystemAdmin`) refetches against the fresh JWT
+  // instead of serving the previous user's answer. The provider lives
+  // inside `<QueryClientProvider>` (see App.tsx), so this hook is safe.
+  const queryClient = useQueryClient();
 
   // --- Idle timeout: sign out after 30 min of inactivity ---
   const resetIdleTimer = useCallback(() => {
