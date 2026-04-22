@@ -95,16 +95,54 @@ const C = {
 };
 
 function loadLedger(): { path: string; payload: LedgerPayload } {
-  // Allow CI to pass the flavored path explicitly; default to canonical.
+  // Resolution order — first match wins:
+  //   1. `STORAGE_ATTEMPTS_LEDGER` (explicit absolute/relative path).
+  //      Highest priority so a developer can point at any saved
+  //      ledger when re-rendering an old run locally.
+  //   2. `reports/storage-attempts.<RLS_REPORT_FLAVOR>.json` — the
+  //      flavored copy `flushLedger()` wrote in the test run. Preferring
+  //      it over the canonical file means a stale `storage-attempts.json`
+  //      from a previous, differently-flavored run can never be picked
+  //      up by mistake (the canonical is overwritten on every flush, but
+  //      a crash mid-test could leave the previous run's copy behind).
+  //   3. `reports/storage-attempts.json` — canonical fallback.
+  //
+  // Whichever file is selected, we cross-check `payload.flavor` against
+  // `RLS_REPORT_FLAVOR` AFTER loading and warn loudly on a mismatch so
+  // CI surfaces "wrong artifact" bugs instead of silently rendering them.
   const explicit = process.env.STORAGE_ATTEMPTS_LEDGER;
-  const candidates = [
-    explicit,
-    resolve(process.cwd(), "reports", "storage-attempts.json"),
-  ].filter(Boolean) as string[];
+  const flavorEnv = (process.env.RLS_REPORT_FLAVOR ?? "").trim();
+  const safeFlavorEnv = flavorEnv.replace(/[^a-zA-Z0-9_-]+/g, "-").toLowerCase();
+  const reportsDir = resolve(process.cwd(), "reports");
+
+  const candidates: string[] = [];
+  if (explicit) candidates.push(explicit);
+  if (safeFlavorEnv) {
+    candidates.push(resolve(reportsDir, `storage-attempts.${safeFlavorEnv}.json`));
+  }
+  candidates.push(resolve(reportsDir, "storage-attempts.json"));
 
   for (const c of candidates) {
     if (existsSync(c)) {
       const payload = JSON.parse(readFileSync(c, "utf-8")) as LedgerPayload;
+      const loadedFlavor = (payload.flavor ?? "").trim().toLowerCase();
+      if (flavorEnv && loadedFlavor && loadedFlavor !== flavorEnv.toLowerCase()) {
+        // eslint-disable-next-line no-console
+        console.warn(
+          `[storage-attempts-pdf] ⚠️  flavor mismatch: RLS_REPORT_FLAVOR="${flavorEnv}" ` +
+            `but loaded ledger has flavor="${payload.flavor}" (path=${c}). ` +
+            `This usually means a stale ledger from a previous run was picked up — ` +
+            `delete reports/ between runs or set STORAGE_ATTEMPTS_LEDGER explicitly.`,
+        );
+      }
+      // eslint-disable-next-line no-console
+      console.log(
+        `[storage-attempts-pdf] Resolved ledger:\n` +
+          `  path   = ${c}\n` +
+          `  flavor = ${payload.flavor ?? "(unset)"} (env RLS_REPORT_FLAVOR="${flavorEnv || "(unset)"}")\n` +
+          `  runId  = ${payload.runId ?? "(unset)"}\n` +
+          `  uploads=${payload.uploads?.length ?? 0} cleanups=${payload.cleanups?.length ?? 0}`,
+      );
       return { path: c, payload };
     }
   }
