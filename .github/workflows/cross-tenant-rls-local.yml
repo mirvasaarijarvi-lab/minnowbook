@@ -126,6 +126,41 @@ jobs:
           path: reports/
           retention-days: 14
 
+      # Capture container logs whenever the live RLS run failed OR the local
+      # stack failed to start. This gives post-mortem visibility into
+      # Postgres / GoTrue / PostgREST / Storage without needing to reproduce
+      # locally. We dump per-container logs because `supabase logs` is
+      # interactive; `docker logs` against the names the CLI assigns is the
+      # most reliable path on a hosted runner.
+      - name: Collect Supabase container logs
+        if: always() && (job.status == 'failure' || steps.supabase-start.outcome != 'success')
+        run: |
+          set +e
+          mkdir -p supabase-logs
+          mapfile -t containers < <(docker ps -a --format '{{.Names}}' | grep -E '^supabase_' || true)
+          if [ "${#containers[@]}" -eq 0 ]; then
+            echo "No supabase_* containers found." > supabase-logs/_no-containers.txt
+            docker ps -a > supabase-logs/_docker-ps.txt 2>&1 || true
+          else
+            for c in "${containers[@]}"; do
+              echo "Collecting logs for $c"
+              docker logs "$c" > "supabase-logs/${c}.log" 2>&1 || true
+              docker inspect "$c" > "supabase-logs/${c}.inspect.json" 2>&1 || true
+            done
+          fi
+          supabase status > supabase-logs/_supabase-status.txt 2>&1 || true
+          echo "skip_reason=${skip_reason:-none}" > supabase-logs/_skip-reason.txt
+          ls -la supabase-logs
+
+      - name: Upload Supabase container logs
+        if: always() && (job.status == 'failure' || steps.supabase-start.outcome != 'success')
+        uses: actions/upload-artifact@v4
+        with:
+          name: supabase-container-logs
+          path: supabase-logs/
+          retention-days: 14
+          if-no-files-found: warn
+
       - name: Stop local Supabase stack
         if: always() && steps.supabase-start.outcome == 'success'
         run: supabase stop --no-backup || true
@@ -140,6 +175,8 @@ jobs:
             echo "This run did not exercise the live-mode RLS sweep. To unblock locally:" >> "$GITHUB_STEP_SUMMARY"
             echo "1. Ensure Docker is available on the runner." >> "$GITHUB_STEP_SUMMARY"
             echo "2. Re-run the workflow." >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "📦 Container logs (if any) are uploaded as the \`supabase-container-logs\` artifact." >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
           if [ -f reports/rls-report.json ]; then
