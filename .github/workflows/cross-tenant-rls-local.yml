@@ -526,6 +526,18 @@ jobs:
           RLS_REPORT_FLAVOR: local
         run: bun run scripts/generate-storage-attempts-pdf.ts || true
 
+      # Sibling of the PDF step: emit a small HTML summary focused on the
+      # adversarial subset (path traversal, encoding tricks, late segments).
+      # Uploaded with the rest of `reports/` below so reviewers can open
+      # `adversarial-summary.local.html` straight from the artifact bundle
+      # without scrolling the full PDF. Safe-fail so a render bug never
+      # masks an upstream test failure.
+      - name: Generate adversarial HTML summary (local)
+        if: always() && steps.supabase-start.outcome == 'success' && env.STORAGE_ATTEMPTS_LEDGER != ''
+        env:
+          RLS_REPORT_FLAVOR: local
+        run: bun run scripts/generate-adversarial-html-summary.ts || true
+
       - name: Upload RLS report (local)
         if: always() && steps.supabase-start.outcome == 'success'
         uses: actions/upload-artifact@v4
