@@ -2,6 +2,42 @@ import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 /**
+ * Service-role client used as a final cleanup safety net. Only constructed
+ * when SUPABASE_SERVICE_ROLE_KEY is present (typically in CI). It bypasses
+ * RLS so it can sweep any orphan that slipped past per-client teardown,
+ * e.g. files left by a true RLS bypass or a partial multipart upload that
+ * the originating client can no longer see.
+ */
+const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const adminClient: SupabaseClient | null =
+  SERVICE_ROLE_KEY && import.meta.env.VITE_SUPABASE_URL
+    ? createClient(import.meta.env.VITE_SUPABASE_URL as string, SERVICE_ROLE_KEY, {
+        auth: { persistSession: false, autoRefreshToken: false },
+      })
+    : null;
+
+/**
+ * Best-effort recursive sweep: list every file under `${tenantId}/__rls_test__/`
+ * for the current RUN_ID and remove anything still there. Safe to call from
+ * any cleanup path — it short-circuits if no admin client is available.
+ */
+async function sweepTestArtifacts(bucket: string, tenantIds: string[]) {
+  if (!adminClient) return;
+  for (const tenantId of tenantIds) {
+    try {
+      const { data } = await adminClient.storage
+        .from(bucket)
+        .list(`${tenantId}/__rls_test__`, { limit: 100, search: RUN_ID });
+      if (!data || data.length === 0) continue;
+      const paths = data.map((entry) => `${tenantId}/__rls_test__/${entry.name}`);
+      await adminClient.storage.from(bucket).remove(paths);
+    } catch {
+      /* ignore — best-effort */
+    }
+  }
+}
+
+/**
  * Cross-Tenant Storage Bucket Policy Tests
  *
  * Verifies that storage RLS policies on the `tenant-private` (private) and
@@ -90,6 +126,14 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       anon = newAnonClient();
     });
 
+    afterAll(async () => {
+      // The anon attempts SHOULD all be denied, but if a regression let
+      // anything through we want to scrub it before the next CI run. The
+      // admin sweep is a no-op when SUPABASE_SERVICE_ROLE_KEY isn't set.
+      await sweepTestArtifacts(PRIVATE_BUCKET, [fakeTenantId]);
+      await sweepTestArtifacts(ASSETS_BUCKET, [fakeTenantId]);
+    });
+
     // Upload calls may be denied either via an explicit RLS error response
     // or by a network-level rejection that surfaces as a hang/timeout in
     // jsdom. Either way, the file MUST NOT end up in storage. We bound the
@@ -157,7 +201,36 @@ describe("Cross-Tenant Storage RLS Tests", () => {
     () => {
       let clientA: SupabaseClient;
       let clientB: SupabaseClient;
+
+      // Files we successfully created (own-tenant, sanity-check uploads). The
+      // owning client is responsible for removing these in afterAll.
       const uploadedPaths: Array<{ bucket: string; path: string; client: "a" | "b" }> = [];
+
+      // Every cross-tenant write *attempt* — regardless of whether the SDK
+      // returned an error. RLS should reject these, but a regression could
+      // cause one of two leaks we want to clean up:
+      //   1. The file lands in the foreign tenant's folder anyway (true RLS
+      //      bypass). Owner-side cleanup must run as the foreign tenant.
+      //   2. The file lands as a partial / orphaned object in the attacker's
+      //      own folder (path normalisation bug). Attacker-side cleanup
+      //      catches that.
+      // We try removal from BOTH the attacker and the owner client so the
+      // bucket is verifiably empty no matter which leak shape occurred.
+      const crossTenantAttempts: Array<{
+        bucket: string;
+        path: string;
+        attacker: "a" | "b";
+        owner: "a" | "b";
+      }> = [];
+
+      const recordAttempt = (
+        bucket: string,
+        path: string,
+        attacker: "a" | "b",
+        owner: "a" | "b",
+      ) => {
+        crossTenantAttempts.push({ bucket, path, attacker, owner });
+      };
 
       beforeAll(async () => {
         clientA = newAnonClient();
@@ -177,16 +250,44 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       });
 
       afterAll(async () => {
-        // Best-effort cleanup. Each user removes the files they own; cross-tenant
-        // attempts are expected to no-op anyway.
+        const clientFor = (key: "a" | "b") => (key === "a" ? clientA : clientB);
+
+        // 1. Remove successful own-tenant sanity uploads.
         for (const { bucket, path, client } of uploadedPaths) {
-          const c = client === "a" ? clientA : clientB;
           try {
-            await c.storage.from(bucket).remove([path]);
+            await clientFor(client).storage.from(bucket).remove([path]);
           } catch {
-            /* ignore */
+            /* ignore — best-effort */
           }
         }
+
+        // 2. Remove any orphans from cross-tenant attempts. We try as the
+        //    attacker first (catches "wrote to my own folder by mistake")
+        //    and then as the owner (catches "RLS bypassed and the file
+        //    actually landed in the foreign folder"). Both paths are no-ops
+        //    if the file doesn't exist, so there's no harm in always trying.
+        const seen = new Set<string>();
+        for (const { bucket, path, attacker, owner } of crossTenantAttempts) {
+          const key = `${bucket}::${path}`;
+          if (seen.has(key)) continue;
+          seen.add(key);
+
+          for (const role of [attacker, owner] as const) {
+            try {
+              await clientFor(role).storage.from(bucket).remove([path]);
+            } catch {
+              /* ignore */
+            }
+          }
+        }
+
+        // 3. Final safety net: list-and-remove anything still tagged with
+        //    this run's RUN_ID under either tenant's __rls_test__ folder
+        //    in either bucket. Catches files left by partial uploads, by a
+        //    true RLS bypass that the per-client paths above couldn't
+        //    enumerate, or by a previous interrupted CI job.
+        await sweepTestArtifacts(PRIVATE_BUCKET, [liveCreds.a.tenantId!, liveCreds.b.tenantId!]);
+        await sweepTestArtifacts(ASSETS_BUCKET, [liveCreds.a.tenantId!, liveCreds.b.tenantId!]);
       });
 
       // ---------- Positive controls: own-tenant access works ----------
@@ -230,6 +331,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       // ---------- Cross-tenant write denial ----------
       it("user A cannot UPLOAD to tenant B's tenant-private folder", async () => {
         const path = ownPath(liveCreds.b.tenantId!, "a-cross-private");
+        recordAttempt(PRIVATE_BUCKET, path, "a", "b");
         const { error } = await clientA.storage
           .from(PRIVATE_BUCKET)
           .upload(path, fileBytes("a-cross-private"), { upsert: true });
@@ -238,6 +340,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
 
       it("user B cannot UPLOAD to tenant A's tenant-private folder", async () => {
         const path = ownPath(liveCreds.a.tenantId!, "b-cross-private");
+        recordAttempt(PRIVATE_BUCKET, path, "b", "a");
         const { error } = await clientB.storage
           .from(PRIVATE_BUCKET)
           .upload(path, fileBytes("b-cross-private"), { upsert: true });
@@ -246,6 +349,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
 
       it("user A cannot UPLOAD to tenant B's tenant-assets folder", async () => {
         const path = ownPath(liveCreds.b.tenantId!, "a-cross-assets");
+        recordAttempt(ASSETS_BUCKET, path, "a", "b");
         const { error } = await clientA.storage
           .from(ASSETS_BUCKET)
           .upload(path, fileBytes("a-cross-assets"), { upsert: true });
@@ -254,6 +358,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
 
       it("user B cannot UPLOAD to tenant A's tenant-assets folder", async () => {
         const path = ownPath(liveCreds.a.tenantId!, "b-cross-assets");
+        recordAttempt(ASSETS_BUCKET, path, "b", "a");
         const { error } = await clientB.storage
           .from(ASSETS_BUCKET)
           .upload(path, fileBytes("b-cross-assets"), { upsert: true });
@@ -332,6 +437,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
 
       it("user A cannot OVERWRITE (update) tenant B's tenant-private file via upsert", async () => {
         const path = ownPath(liveCreds.b.tenantId!, "b-own-private");
+        recordAttempt(PRIVATE_BUCKET, path, "a", "b");
         const { error } = await clientA.storage
           .from(PRIVATE_BUCKET)
           .upload(path, fileBytes("a-overwrite-attempt"), { upsert: true });
