@@ -16,7 +16,7 @@ const upgradeInfo: Record<string, { targetTier: string; features: string[] }> = 
     targetTier: "professional",
     features: [
       "All reservation types (Restaurant, Venue, Guesthouse, Hotel)",
-      "Up to 10 staff users",
+      "Up to 25 staff users",
       "Custom branding & branded booking page",
       "Email templates & discount codes",
     ],
