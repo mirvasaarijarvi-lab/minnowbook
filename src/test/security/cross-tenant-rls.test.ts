@@ -483,6 +483,112 @@ describe("Cross-Tenant RLS Regression Tests", () => {
         );
       });
 
+      // ---------- Cross-tenant UPDATE / DELETE sweep (every tenant-scoped table) ----------
+      //
+      // For every tenant-scoped table we attempt:
+      //   1. UPDATE ... WHERE tenant_id = '<other tenant>'  (no-op SET that
+      //      touches only the tenant_id column with its current value, so the
+      //      payload is universally valid). Under correct RLS this must affect
+      //      ZERO rows — either the policy errors out, or the USING/WITH CHECK
+      //      clause filters every candidate row.
+      //   2. DELETE ... WHERE tenant_id = '<other tenant>'  (same intent —
+      //      should never match any row from the foreign tenant).
+      //
+      // We use the shared expectWriteDenied helper which treats both an
+      // explicit error AND a silent zero-row result as denial. Anything else
+      // (data.length > 0) is a leak and throws with full query context.
+      const SWEEP_TABLES = TENANT_SCOPED_TABLES;
+
+      it.each(SWEEP_TABLES)(
+        "user A cannot UPDATE tenant B rows in %s (cross-tenant filter)",
+        async (table) => {
+          const { data, error } = await clientA
+            .from(table)
+            // Self-assigning tenant_id is a no-op write that works for every
+            // tenant-scoped table without needing per-table column knowledge.
+            .update({ tenant_id: liveCreds.b.tenantId! })
+            .eq("tenant_id", liveCreds.b.tenantId!)
+            .select("tenant_id");
+          expectWriteDenied(
+            {
+              table,
+              operation: "UPDATE",
+              attemptedQuery: `update ${table} set tenant_id='${liveCreds.b.tenantId}' where tenant_id='${liveCreds.b.tenantId}'`,
+              actingTenantId: liveCreds.a.tenantId,
+              targetTenantId: liveCreds.b.tenantId,
+              scenario: `user A sweeping UPDATE on ${table} for tenant B rows`,
+            },
+            { data, error },
+          );
+        },
+      );
+
+      it.each(SWEEP_TABLES)(
+        "user B cannot UPDATE tenant A rows in %s (cross-tenant filter)",
+        async (table) => {
+          const { data, error } = await clientB
+            .from(table)
+            .update({ tenant_id: liveCreds.a.tenantId! })
+            .eq("tenant_id", liveCreds.a.tenantId!)
+            .select("tenant_id");
+          expectWriteDenied(
+            {
+              table,
+              operation: "UPDATE",
+              attemptedQuery: `update ${table} set tenant_id='${liveCreds.a.tenantId}' where tenant_id='${liveCreds.a.tenantId}'`,
+              actingTenantId: liveCreds.b.tenantId,
+              targetTenantId: liveCreds.a.tenantId,
+              scenario: `user B sweeping UPDATE on ${table} for tenant A rows`,
+            },
+            { data, error },
+          );
+        },
+      );
+
+      it.each(SWEEP_TABLES)(
+        "user A cannot DELETE tenant B rows in %s (cross-tenant filter)",
+        async (table) => {
+          const { data, error } = await clientA
+            .from(table)
+            .delete()
+            .eq("tenant_id", liveCreds.b.tenantId!)
+            .select("tenant_id");
+          expectWriteDenied(
+            {
+              table,
+              operation: "DELETE",
+              attemptedQuery: `delete from ${table} where tenant_id='${liveCreds.b.tenantId}'`,
+              actingTenantId: liveCreds.a.tenantId,
+              targetTenantId: liveCreds.b.tenantId,
+              scenario: `user A sweeping DELETE on ${table} for tenant B rows`,
+            },
+            { data, error },
+          );
+        },
+      );
+
+      it.each(SWEEP_TABLES)(
+        "user B cannot DELETE tenant A rows in %s (cross-tenant filter)",
+        async (table) => {
+          const { data, error } = await clientB
+            .from(table)
+            .delete()
+            .eq("tenant_id", liveCreds.a.tenantId!)
+            .select("tenant_id");
+          expectWriteDenied(
+            {
+              table,
+              operation: "DELETE",
+              attemptedQuery: `delete from ${table} where tenant_id='${liveCreds.a.tenantId}'`,
+              actingTenantId: liveCreds.b.tenantId,
+              targetTenantId: liveCreds.a.tenantId,
+              scenario: `user B sweeping DELETE on ${table} for tenant A rows`,
+            },
+            { data, error },
+          );
+        },
+      );
+
       // ---------- Positive control: own-tenant access works ----------
       it("user A CAN read their own tenant_users row (sanity check)", async () => {
         const { data, error } = await clientA
