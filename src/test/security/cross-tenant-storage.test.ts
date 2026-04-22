@@ -191,6 +191,16 @@ async function teardownOwnedPaths(
  * Safe to call from any cleanup path; short-circuits if no admin client
  * is available.
  */
+// Maximum number of list+remove cycles per tenant root. A correctly
+// behaving sweep finishes in pass 1; we allow a few extra to absorb
+// eventual-consistency lag where a removed object briefly reappears in
+// list() output, or where a partial multipart finalizes between passes.
+const SWEEP_MAX_PASSES = 3;
+// Per-call timeout for list/remove inside the sweep. Generous enough to
+// page through hundreds of objects, tight enough that a hung call can't
+// stall vitest's `afterAll` (default hook timeout is 10s).
+const SWEEP_OP_TIMEOUT_MS = 8_000;
+
 async function sweepRunIdFolder(
   bucket: string,
   tenantIds: string[],
@@ -198,19 +208,27 @@ async function sweepRunIdFolder(
 ) {
   // Recursively collect every object key under `{tenantId}/__rls_test__/{RUN_ID}`.
   // Storage's `list()` is non-recursive, so we walk depth-first.
-  const collect = async (root: string): Promise<string[]> => {
+  // Each list() call is wrapped in withTimeout — a hung page never blocks
+  // the rest of the sweep (we just abandon that subtree and move on).
+  const collect = async (root: string): Promise<{ paths: string[]; timedOut: boolean }> => {
     const out: string[] = [];
+    let anyTimeout = false;
     const stack: string[] = [root];
     while (stack.length) {
       const dir = stack.pop()!;
-      // Page through every entry — listing is capped at `limit` per call.
       let offset = 0;
       const pageSize = 100;
       // eslint-disable-next-line no-constant-condition
       while (true) {
-        const { data, error } = await client.storage
-          .from(bucket)
-          .list(dir, { limit: pageSize, offset });
+        const result = await withTimeout(
+          () => client.storage.from(bucket).list(dir, { limit: pageSize, offset }),
+          SWEEP_OP_TIMEOUT_MS,
+        );
+        if (result === TEARDOWN_TIMEOUT_SENTINEL) {
+          anyTimeout = true;
+          break; // skip the rest of this folder's pages; next pass will retry
+        }
+        const { data, error } = result;
         if (error || !data || data.length === 0) break;
         for (const entry of data) {
           // Folders surface as entries with `id === null` and no `metadata`.
@@ -227,34 +245,83 @@ async function sweepRunIdFolder(
         offset += pageSize;
       }
     }
-    return out;
+    return { paths: out, timedOut: anyTimeout };
   };
 
   for (const tenantId of tenantIds) {
     if (!tenantId) continue;
     const runRoot = `${tenantId}/__rls_test__/${RUN_ID}`;
-    try {
-      const paths = await collect(runRoot);
-      if (paths.length === 0) {
+
+    let lastPathCount = -1;
+    let pass = 0;
+    let everFoundOrphan = false;
+    let listEverTimedOut = false;
+
+    while (pass < SWEEP_MAX_PASSES) {
+      pass += 1;
+      let pathsResult: { paths: string[]; timedOut: boolean };
+      try {
+        pathsResult = await collect(runRoot);
+      } catch (err) {
         recordCleanup({
           bucket,
           path: runRoot,
           role: "admin-sweep",
           removed: false,
-          note: "no orphans found under run root",
+          note: `pass ${pass} list exception: ${(err as Error).message}`,
         });
-        continue;
+        break;
       }
+
+      const { paths, timedOut } = pathsResult;
+      if (timedOut) listEverTimedOut = true;
+
+      if (paths.length === 0) {
+        if (!everFoundOrphan && pass === 1) {
+          recordCleanup({
+            bucket,
+            path: runRoot,
+            role: "admin-sweep",
+            removed: false,
+            note: listEverTimedOut
+              ? "no orphans visible (list partially timed out — verify pass below)"
+              : "no orphans found under run root",
+          });
+        }
+        break;
+      }
+      everFoundOrphan = true;
+
       // Defensive guard: every path MUST start with the run root. If anything
       // ever escaped that prefix it would mean a bug in `collect`, not RLS.
       const safe = paths.filter((p) => p.startsWith(`${runRoot}/`));
-      if (safe.length === 0) continue;
+      if (safe.length === 0) break;
+
       // Storage `remove` accepts up to a few hundred keys per call; chunk
-      // to stay well under any service-side limit.
+      // to stay well under any service-side limit AND so a single chunk
+      // timeout doesn't drop the whole batch from the ledger.
       const chunkSize = 100;
       for (let i = 0; i < safe.length; i += chunkSize) {
         const chunk = safe.slice(i, i + chunkSize);
-        const { data, error } = await client.storage.from(bucket).remove(chunk);
+        const result = await withTimeout(
+          () => client.storage.from(bucket).remove(chunk),
+          SWEEP_OP_TIMEOUT_MS,
+        );
+
+        if (result === TEARDOWN_TIMEOUT_SENTINEL) {
+          for (const p of chunk) {
+            recordCleanup({
+              bucket,
+              path: p,
+              role: "admin-sweep",
+              removed: false,
+              note: `pass ${pass} remove timed out`,
+            });
+          }
+          continue;
+        }
+
+        const { data, error } = result;
         const removed = !error && Array.isArray(data) && data.length > 0;
         for (const p of chunk) {
           recordCleanup({
@@ -262,23 +329,69 @@ async function sweepRunIdFolder(
             path: p,
             role: "admin-sweep",
             removed,
-            note: error ? `error: ${error.message}` : undefined,
+            note: error ? `pass ${pass} error: ${error.message}` : undefined,
           });
         }
       }
-    } catch (err) {
-      recordCleanup({
-        bucket,
-        path: runRoot,
-        role: "admin-sweep",
-        removed: false,
-        note: `exception: ${(err as Error).message}`,
-      });
+
+      // Convergence guard: if a pass found and tried to remove the same
+      // number of paths as the previous pass, additional passes won't
+      // help — break out and let the multipart sweep + final verify
+      // surface whatever's still stuck.
+      if (paths.length === lastPathCount) break;
+      lastPathCount = paths.length;
     }
   }
   // After visible-object sweep, also clean up any S3-compatible multipart
   // upload intermediates left behind by failed/aborted cross-tenant uploads.
   await sweepMultipartIntermediates(bucket, tenantIds);
+
+  // Final verification pass: list each run root one more time and ledger
+  // the result. If anything is still visible after multipart cleanup, the
+  // PDF will show it as an "admin-sweep" entry with `removed: false` —
+  // which is exactly the signal a security reviewer needs to triage.
+  for (const tenantId of tenantIds) {
+    if (!tenantId) continue;
+    const runRoot = `${tenantId}/__rls_test__/${RUN_ID}`;
+    const verify = await withTimeout(
+      () => client.storage.from(bucket).list(runRoot, { limit: 100 }),
+      SWEEP_OP_TIMEOUT_MS,
+    );
+    if (verify === TEARDOWN_TIMEOUT_SENTINEL) {
+      recordCleanup({
+        bucket,
+        path: runRoot,
+        role: "admin-sweep",
+        removed: false,
+        note: "verify-pass timed out — manual inspection recommended",
+      });
+      continue;
+    }
+    const { data: residuals, error: verifyErr } = verify;
+    if (verifyErr) {
+      recordCleanup({
+        bucket,
+        path: runRoot,
+        role: "admin-sweep",
+        removed: false,
+        note: `verify-pass error: ${verifyErr.message}`,
+      });
+      continue;
+    }
+    if (residuals && residuals.length > 0) {
+      // Anything still here after MAX_PASSES + multipart sweep is a real
+      // concern. Record each residual so it lands in the PDF.
+      for (const entry of residuals) {
+        recordCleanup({
+          bucket,
+          path: `${runRoot}/${entry.name}`,
+          role: "admin-sweep",
+          removed: false,
+          note: `RESIDUAL after ${SWEEP_MAX_PASSES} sweep passes — manual cleanup needed`,
+        });
+      }
+    }
+  }
 }
 
 /**
