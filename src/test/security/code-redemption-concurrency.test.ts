@@ -192,9 +192,8 @@ describe("discount_codes — replay/concurrency surface as anon", () => {
       is_active: true,
     } as never);
     expect(error, "anon insert into discount_codes must be denied").toBeTruthy();
-    if (Array.isArray(data)) {
-      expect(data.length).toBe(0);
-    }
+    const insertedRows = (data ?? []) as unknown[];
+    expect(insertedRows.length).toBe(0);
   });
 
   it("anon cannot UPDATE used_count to bypass max_uses", async () => {
@@ -258,7 +257,8 @@ describe("redemption ledger — anon cannot forge or reset access_code_redemptio
       granted_until: "2099-12-31",
     } as never);
     expect(error, "anon insert into redemptions must be denied").toBeTruthy();
-    if (Array.isArray(data)) expect(data.length).toBe(0);
+    const insertedRows = (data ?? []) as unknown[];
+    expect(insertedRows.length).toBe(0);
   });
 
   it("anon cannot DELETE access_code_redemptions to enable replay", async () => {
