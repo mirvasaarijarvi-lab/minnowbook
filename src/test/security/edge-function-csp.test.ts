@@ -169,13 +169,10 @@ describe("Edge Function CSP — admin-users & support-chat", () => {
 
   describe("Cross-function consistency", () => {
     it("admin-users and support-chat use the same CSP value (consistent posture)", () => {
-      const sources = FIXTURES.map((f) => ({
-        name: f.name,
-        body: extractBuilderBody(loadSource(f), f.builderName),
-      }));
-      const csps = sources.map((s) => {
-        const m = s.body.match(/["']Content-Security-Policy["']\s*:\s*["']([^"']+)["']/);
-        return { name: s.name, csp: m?.[1] ?? null };
+      const csps = FIXTURES.map((f) => {
+        const src = loadSource(f);
+        const m = src.match(/["']Content-Security-Policy["']\s*:\s*"([^"]+)"/);
+        return { name: f.name, csp: m?.[1] ?? null };
       });
       for (const c of csps) {
         expect(c.csp, `${c.name} missing CSP`).not.toBeNull();
