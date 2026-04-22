@@ -1,0 +1,872 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Cross-Tenant RLS Test Report</title>
+<style>
+  :root { color-scheme: light dark; }
+  body { font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    margin: 0; padding: 24px; background: #0f172a; color: #e2e8f0; }
+  h1 { margin: 0 0 4px; font-size: 20px; }
+  .meta { color: #94a3b8; font-size: 12px; margin-bottom: 16px; }
+  .summary { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+  .card { background: #1e293b; padding: 12px 16px; border-radius: 8px; min-width: 100px; }
+  .card .label { font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: .05em; }
+  .card .value { font-size: 22px; font-weight: 600; margin-top: 2px; }
+  .card.ok .value { color: #4ade80; }
+  .card.fail .value { color: #f87171; }
+  .card.skip .value { color: #fbbf24; }
+  table { width: 100%; border-collapse: collapse; background: #1e293b; border-radius: 8px; overflow: hidden; }
+  th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #334155; vertical-align: top; }
+  th { background: #0f172a; font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: #94a3b8; }
+  tr:last-child td { border-bottom: none; }
+  tr.fail { background: rgba(248, 113, 113, 0.06); }
+  td.num { font-variant-numeric: tabular-nums; color: #94a3b8; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; text-transform: uppercase; }
+  .badge.ok { background: #14532d; color: #4ade80; }
+  .badge.fail { background: #7f1d1d; color: #fca5a5; }
+  .badge.skip { background: #78350f; color: #fcd34d; }
+  details { margin: 0; }
+  summary { cursor: pointer; color: #f87171; font-weight: 500; }
+  pre { background: #0f172a; color: #fda4af; padding: 10px; border-radius: 6px;
+    overflow-x: auto; margin: 8px 0 0; font-size: 12px; white-space: pre-wrap; word-break: break-word; }
+</style>
+</head>
+<body>
+  <h1>Cross-Tenant RLS Test Report</h1>
+  <div class="meta">Generated 2026-04-22T08:58:14.836Z · Total duration 9892 ms</div>
+  <div class="summary">
+    <div class="card"><div class="label">Total</div><div class="value">117</div></div>
+    <div class="card ok"><div class="label">Passed</div><div class="value">35</div></div>
+    <div class="card fail"><div class="label">Failed</div><div class="value">0</div></div>
+    <div class="card skip"><div class="label">Skipped</div><div class="value">82</div></div>
+  </div>
+  <table>
+    <thead>
+      <tr><th>Status</th><th>Suite</th><th>Test</th><th>Duration</th><th>Details</th></tr>
+    </thead>
+    <tbody>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Test manifest sanity</td>
+          <td>lists every known tenant-scoped table</td>
+          <td class="num">2 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Test manifest sanity</td>
+          <td>table names follow naming conventions</td>
+          <td class="num">1 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
+          <td>anon SELECT * FROM access_code_redemptions returns no rows (RLS enforced)</td>
+          <td class="num">228 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
+          <td>anon SELECT * FROM archived_reservations returns no rows (RLS enforced)</td>
+          <td class="num">123 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
+          <td>anon SELECT * FROM audit_log returns no rows (RLS enforced)</td>
+          <td class="num">61 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
+          <td>anon SELECT * FROM beta_feedback returns no rows (RLS enforced)</td>
+          <td class="num">52 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
+          <td>anon SELECT * FROM blocked_slots returns no rows (RLS enforced)</td>
+          <td class="num">71 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
+          <td>anon SELECT * FROM booking_tokens returns no rows (RLS enforced)</td>
+          <td class="num">53 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
+          <td>anon SELECT * FROM booking_validation_log returns no rows (RLS enforced)</td>
+          <td class="num">58 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
+          <td>anon SELECT * FROM discount_codes returns no rows (RLS enforced)</td>
+          <td class="num">47 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
+          <td>anon SELECT * FROM email_send_log returns no rows (RLS enforced)</td>
+          <td class="num">63 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
+          <td>anon SELECT * FROM guest_reviews returns no rows (RLS enforced)</td>
+          <td class="num">54 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
+          <td>anon SELECT * FROM kitchen_menu_items returns no rows (RLS enforced)</td>
+          <td class="num">67 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
+          <td>anon SELECT * FROM kitchen_orders returns no rows (RLS enforced)</td>
+          <td class="num">46 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
+          <td>anon SELECT * FROM login_history returns no rows (RLS enforced)</td>
+          <td class="num">74 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
+          <td>anon SELECT * FROM notifications returns no rows (RLS enforced)</td>
+          <td class="num">49 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
+          <td>anon SELECT * FROM offers returns no rows (RLS enforced)</td>
+          <td class="num">55 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
+          <td>anon SELECT * FROM recurring_blocked_slots returns no rows (RLS enforced)</td>
+          <td class="num">55 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
+          <td>anon SELECT * FROM reservations returns no rows (RLS enforced)</td>
+          <td class="num">57 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
+          <td>anon SELECT * FROM resource_images returns no rows (RLS enforced)</td>
+          <td class="num">64 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
+          <td>anon SELECT * FROM resource_opening_hours returns no rows (RLS enforced)</td>
+          <td class="num">61 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
+          <td>anon SELECT * FROM resources returns no rows (RLS enforced)</td>
+          <td class="num">51 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
+          <td>anon INSERT into private tenant tables is denied</td>
+          <td class="num">67 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
+          <td>anon UPDATE on private tenant tables is denied</td>
+          <td class="num">59 ms</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot SELECT tenant B reservations</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot SELECT tenant A reservations</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot INSERT into tenant B audit_log</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot UPDATE tenant B notifications</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot read tenant B rows from access_code_redemptions</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot read tenant B rows from archived_reservations</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot read tenant B rows from audit_log</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot read tenant B rows from beta_feedback</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot read tenant B rows from blocked_slots</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot read tenant B rows from booking_tokens</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot read tenant B rows from booking_validation_log</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot read tenant B rows from discount_codes</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot read tenant B rows from email_send_log</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot read tenant B rows from guest_reviews</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot read tenant B rows from kitchen_menu_items</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot read tenant B rows from kitchen_orders</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot read tenant B rows from login_history</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot read tenant B rows from notifications</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot read tenant B rows from offers</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot read tenant B rows from recurring_blocked_slots</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot read tenant B rows from reservations</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot read tenant B rows from resource_images</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot read tenant B rows from resource_opening_hours</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot read tenant B rows from resources</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot read tenant A rows from access_code_redemptions</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot read tenant A rows from archived_reservations</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot read tenant A rows from audit_log</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot read tenant A rows from beta_feedback</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot read tenant A rows from blocked_slots</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot read tenant A rows from booking_tokens</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot read tenant A rows from booking_validation_log</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot read tenant A rows from discount_codes</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot read tenant A rows from email_send_log</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot read tenant A rows from guest_reviews</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot read tenant A rows from kitchen_menu_items</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot read tenant A rows from kitchen_orders</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot read tenant A rows from login_history</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot read tenant A rows from notifications</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot read tenant A rows from offers</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot read tenant A rows from recurring_blocked_slots</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot read tenant A rows from reservations</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot read tenant A rows from resource_images</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot read tenant A rows from resource_opening_hours</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot read tenant A rows from resources</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot INSERT a forged tenant B row into &#39;notifications&#39;</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot INSERT a forged tenant B row into &#39;booking_validation_log&#39;</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot INSERT a forged tenant B row into &#39;kitchen_menu_items&#39;</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot INSERT a forged tenant B row into &#39;kitchen_orders&#39;</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot INSERT a forged tenant B row into &#39;discount_codes&#39;</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot INSERT a forged tenant B row into &#39;offers&#39;</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot INSERT a forged tenant B row into &#39;blocked_slots&#39;</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot INSERT a forged tenant A row into &#39;notifications&#39;</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot INSERT a forged tenant A row into &#39;booking_validation_log&#39;</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot INSERT a forged tenant A row into &#39;kitchen_menu_items&#39;</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot INSERT a forged tenant A row into &#39;kitchen_orders&#39;</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot INSERT a forged tenant A row into &#39;discount_codes&#39;</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot INSERT a forged tenant A row into &#39;offers&#39;</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot INSERT a forged tenant A row into &#39;blocked_slots&#39;</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot DELETE tenant B notifications via cross-tenant filter</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot UPDATE tenant B reservations via cross-tenant filter</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A CAN read their own tenant_users row (sanity check)</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B CAN read their own tenant_users row (sanity check)</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A reservations query never leaks tenant B rows (unfiltered)</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B reservations query never leaks tenant A rows (unfiltered)</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Skipped: missing Supabase config</td>
+          <td>test environment is missing VITE_SUPABASE_URL / VITE_SUPABASE_PUBLISHABLE_KEY</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-storage.test.ts &gt; Cross-Tenant Storage RLS Tests &gt; Anonymous client storage enforcement</td>
+          <td>anon cannot upload to tenant-private bucket</td>
+          <td class="num">4006 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-storage.test.ts &gt; Cross-Tenant Storage RLS Tests &gt; Anonymous client storage enforcement</td>
+          <td>anon cannot upload to tenant-assets bucket</td>
+          <td class="num">4003 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-storage.test.ts &gt; Cross-Tenant Storage RLS Tests &gt; Anonymous client storage enforcement</td>
+          <td>anon cannot download from tenant-private bucket</td>
+          <td class="num">141 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-storage.test.ts &gt; Cross-Tenant Storage RLS Tests &gt; Anonymous client storage enforcement</td>
+          <td>anon cannot list files in tenant-private bucket</td>
+          <td class="num">91 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-storage.test.ts &gt; Cross-Tenant Storage RLS Tests &gt; Anonymous client storage enforcement</td>
+          <td>anon cannot delete from tenant-private bucket</td>
+          <td class="num">77 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-storage.test.ts &gt; Cross-Tenant Storage RLS Tests &gt; Anonymous client storage enforcement</td>
+          <td>anon cannot delete from tenant-assets bucket</td>
+          <td class="num">52 ms</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-storage.test.ts &gt; Cross-Tenant Storage RLS Tests &gt; Live cross-tenant storage denial</td>
+          <td>user A CAN upload + download in their own tenant-private folder (sanity)</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-storage.test.ts &gt; Cross-Tenant Storage RLS Tests &gt; Live cross-tenant storage denial</td>
+          <td>user B CAN upload + download in their own tenant-private folder (sanity)</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-storage.test.ts &gt; Cross-Tenant Storage RLS Tests &gt; Live cross-tenant storage denial</td>
+          <td>user A CAN upload to their own tenant-assets folder (sanity)</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-storage.test.ts &gt; Cross-Tenant Storage RLS Tests &gt; Live cross-tenant storage denial</td>
+          <td>user A cannot UPLOAD to tenant B&#39;s tenant-private folder</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-storage.test.ts &gt; Cross-Tenant Storage RLS Tests &gt; Live cross-tenant storage denial</td>
+          <td>user B cannot UPLOAD to tenant A&#39;s tenant-private folder</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-storage.test.ts &gt; Cross-Tenant Storage RLS Tests &gt; Live cross-tenant storage denial</td>
+          <td>user A cannot UPLOAD to tenant B&#39;s tenant-assets folder</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-storage.test.ts &gt; Cross-Tenant Storage RLS Tests &gt; Live cross-tenant storage denial</td>
+          <td>user B cannot UPLOAD to tenant A&#39;s tenant-assets folder</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-storage.test.ts &gt; Cross-Tenant Storage RLS Tests &gt; Live cross-tenant storage denial</td>
+          <td>user A cannot DOWNLOAD tenant B&#39;s tenant-private file</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-storage.test.ts &gt; Cross-Tenant Storage RLS Tests &gt; Live cross-tenant storage denial</td>
+          <td>user B cannot DOWNLOAD tenant A&#39;s tenant-private file</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-storage.test.ts &gt; Cross-Tenant Storage RLS Tests &gt; Live cross-tenant storage denial</td>
+          <td>user A cannot LIST tenant B&#39;s tenant-private folder</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-storage.test.ts &gt; Cross-Tenant Storage RLS Tests &gt; Live cross-tenant storage denial</td>
+          <td>user B cannot LIST tenant A&#39;s tenant-private folder</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-storage.test.ts &gt; Cross-Tenant Storage RLS Tests &gt; Live cross-tenant storage denial</td>
+          <td>user A cannot DELETE tenant B&#39;s tenant-private file</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-storage.test.ts &gt; Cross-Tenant Storage RLS Tests &gt; Live cross-tenant storage denial</td>
+          <td>user B cannot DELETE tenant A&#39;s tenant-private file</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-storage.test.ts &gt; Cross-Tenant Storage RLS Tests &gt; Live cross-tenant storage denial</td>
+          <td>user A cannot DELETE tenant B&#39;s tenant-assets file</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-storage.test.ts &gt; Cross-Tenant Storage RLS Tests &gt; Live cross-tenant storage denial</td>
+          <td>user A cannot OVERWRITE (update) tenant B&#39;s tenant-private file via upsert</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/cross-tenant-storage.test.ts &gt; Cross-Tenant Storage RLS Tests &gt; Skipped: missing Supabase config</td>
+          <td>test environment is missing VITE_SUPABASE_URL / VITE_SUPABASE_PUBLISHABLE_KEY</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/tenant-table-manifest.test.ts &gt; Tenant Table Manifest — Coverage Guard &gt; Live schema introspection</td>
+          <td>RPC returns at least one tenant-scoped table (sanity)</td>
+          <td class="num">2 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/tenant-table-manifest.test.ts &gt; Tenant Table Manifest — Coverage Guard &gt; Live schema introspection</td>
+          <td>every live tenant-scoped table is covered or explicitly excluded</td>
+          <td class="num">1 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/tenant-table-manifest.test.ts &gt; Tenant Table Manifest — Coverage Guard &gt; Live schema introspection</td>
+          <td>manifest does not list tables that no longer exist in the schema</td>
+          <td class="num">0 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/tenant-table-manifest.test.ts &gt; Tenant Table Manifest — Coverage Guard &gt; Live schema introspection</td>
+          <td>no table is in both COVERED_TABLES and EXCLUDED_TABLES</td>
+          <td class="num">0 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/tenant-table-manifest.test.ts &gt; Tenant Table Manifest — Coverage Guard &gt; Live schema introspection</td>
+          <td>every EXCLUDED_TABLES entry has a non-empty justification</td>
+          <td class="num">0 ms</td>
+          <td></td>
+        </tr>
+<tr class="skip">
+          <td><span class="badge skip">skipped</span></td>
+          <td>src/test/security/tenant-table-manifest.test.ts &gt; Tenant Table Manifest — Coverage Guard &gt; Skipped: missing Supabase config</td>
+          <td>test environment is missing VITE_SUPABASE_URL / VITE_SUPABASE_PUBLISHABLE_KEY</td>
+          <td class="num">—</td>
+          <td></td>
+        </tr>
+    </tbody>
+  </table>
+</body>
+</html>

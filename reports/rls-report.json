@@ -1,0 +1,1182 @@
+{
+  "generatedAt": "2026-04-22T08:58:14.836Z",
+  "totals": {
+    "total": 117,
+    "passed": 35,
+    "failed": 0,
+    "skipped": 82,
+    "durationMs": 9891.695029000002
+  },
+  "entries": [
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Test manifest sanity",
+      "name": "lists every known tenant-scoped table",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Test manifest sanity > lists every known tenant-scoped table",
+      "status": "passed",
+      "durationMs": 2.1740270000000237,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Test manifest sanity",
+      "name": "table names follow naming conventions",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Test manifest sanity > table names follow naming conventions",
+      "status": "passed",
+      "durationMs": 0.9118419999999787,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement",
+      "name": "anon SELECT * FROM access_code_redemptions returns no rows (RLS enforced)",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon SELECT * FROM access_code_redemptions returns no rows (RLS enforced)",
+      "status": "passed",
+      "durationMs": 227.80556099999967,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement",
+      "name": "anon SELECT * FROM archived_reservations returns no rows (RLS enforced)",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon SELECT * FROM archived_reservations returns no rows (RLS enforced)",
+      "status": "passed",
+      "durationMs": 123.215913,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement",
+      "name": "anon SELECT * FROM audit_log returns no rows (RLS enforced)",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon SELECT * FROM audit_log returns no rows (RLS enforced)",
+      "status": "passed",
+      "durationMs": 61.249690999999984,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement",
+      "name": "anon SELECT * FROM beta_feedback returns no rows (RLS enforced)",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon SELECT * FROM beta_feedback returns no rows (RLS enforced)",
+      "status": "passed",
+      "durationMs": 51.51801700000033,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement",
+      "name": "anon SELECT * FROM blocked_slots returns no rows (RLS enforced)",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon SELECT * FROM blocked_slots returns no rows (RLS enforced)",
+      "status": "passed",
+      "durationMs": 71.24605500000007,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement",
+      "name": "anon SELECT * FROM booking_tokens returns no rows (RLS enforced)",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon SELECT * FROM booking_tokens returns no rows (RLS enforced)",
+      "status": "passed",
+      "durationMs": 52.76612399999976,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement",
+      "name": "anon SELECT * FROM booking_validation_log returns no rows (RLS enforced)",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon SELECT * FROM booking_validation_log returns no rows (RLS enforced)",
+      "status": "passed",
+      "durationMs": 58.295200999999906,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement",
+      "name": "anon SELECT * FROM discount_codes returns no rows (RLS enforced)",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon SELECT * FROM discount_codes returns no rows (RLS enforced)",
+      "status": "passed",
+      "durationMs": 47.42196100000001,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement",
+      "name": "anon SELECT * FROM email_send_log returns no rows (RLS enforced)",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon SELECT * FROM email_send_log returns no rows (RLS enforced)",
+      "status": "passed",
+      "durationMs": 62.63559899999973,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement",
+      "name": "anon SELECT * FROM guest_reviews returns no rows (RLS enforced)",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon SELECT * FROM guest_reviews returns no rows (RLS enforced)",
+      "status": "passed",
+      "durationMs": 54.41430000000037,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement",
+      "name": "anon SELECT * FROM kitchen_menu_items returns no rows (RLS enforced)",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon SELECT * FROM kitchen_menu_items returns no rows (RLS enforced)",
+      "status": "passed",
+      "durationMs": 66.51831600000014,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement",
+      "name": "anon SELECT * FROM kitchen_orders returns no rows (RLS enforced)",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon SELECT * FROM kitchen_orders returns no rows (RLS enforced)",
+      "status": "passed",
+      "durationMs": 46.36219200000005,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement",
+      "name": "anon SELECT * FROM login_history returns no rows (RLS enforced)",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon SELECT * FROM login_history returns no rows (RLS enforced)",
+      "status": "passed",
+      "durationMs": 73.88492200000019,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement",
+      "name": "anon SELECT * FROM notifications returns no rows (RLS enforced)",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon SELECT * FROM notifications returns no rows (RLS enforced)",
+      "status": "passed",
+      "durationMs": 48.75459099999989,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement",
+      "name": "anon SELECT * FROM offers returns no rows (RLS enforced)",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon SELECT * FROM offers returns no rows (RLS enforced)",
+      "status": "passed",
+      "durationMs": 55.07453000000032,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement",
+      "name": "anon SELECT * FROM recurring_blocked_slots returns no rows (RLS enforced)",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon SELECT * FROM recurring_blocked_slots returns no rows (RLS enforced)",
+      "status": "passed",
+      "durationMs": 55.48551899999984,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement",
+      "name": "anon SELECT * FROM reservations returns no rows (RLS enforced)",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon SELECT * FROM reservations returns no rows (RLS enforced)",
+      "status": "passed",
+      "durationMs": 57.16961700000047,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement",
+      "name": "anon SELECT * FROM resource_images returns no rows (RLS enforced)",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon SELECT * FROM resource_images returns no rows (RLS enforced)",
+      "status": "passed",
+      "durationMs": 63.75294399999984,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement",
+      "name": "anon SELECT * FROM resource_opening_hours returns no rows (RLS enforced)",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon SELECT * FROM resource_opening_hours returns no rows (RLS enforced)",
+      "status": "passed",
+      "durationMs": 60.63496599999962,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement",
+      "name": "anon SELECT * FROM resources returns no rows (RLS enforced)",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon SELECT * FROM resources returns no rows (RLS enforced)",
+      "status": "passed",
+      "durationMs": 50.76907300000039,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement",
+      "name": "anon INSERT into private tenant tables is denied",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon INSERT into private tenant tables is denied",
+      "status": "passed",
+      "durationMs": 67.32925100000011,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement",
+      "name": "anon UPDATE on private tenant tables is denied",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon UPDATE on private tenant tables is denied",
+      "status": "passed",
+      "durationMs": 59.381538999999975,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial",
+      "name": "user A cannot SELECT tenant B reservations",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot SELECT tenant B reservations",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial",
+      "name": "user B cannot SELECT tenant A reservations",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot SELECT tenant A reservations",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial",
+      "name": "user A cannot INSERT into tenant B audit_log",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot INSERT into tenant B audit_log",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial",
+      "name": "user A cannot UPDATE tenant B notifications",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot UPDATE tenant B notifications",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial",
+      "name": "user A cannot read tenant B rows from access_code_redemptions",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot read tenant B rows from access_code_redemptions",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial",
+      "name": "user A cannot read tenant B rows from archived_reservations",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot read tenant B rows from archived_reservations",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial",
+      "name": "user A cannot read tenant B rows from audit_log",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot read tenant B rows from audit_log",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial",
+      "name": "user A cannot read tenant B rows from beta_feedback",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot read tenant B rows from beta_feedback",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial",
+      "name": "user A cannot read tenant B rows from blocked_slots",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot read tenant B rows from blocked_slots",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial",
+      "name": "user A cannot read tenant B rows from booking_tokens",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot read tenant B rows from booking_tokens",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial",
+      "name": "user A cannot read tenant B rows from booking_validation_log",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot read tenant B rows from booking_validation_log",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial",
+      "name": "user A cannot read tenant B rows from discount_codes",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot read tenant B rows from discount_codes",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial",
+      "name": "user A cannot read tenant B rows from email_send_log",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot read tenant B rows from email_send_log",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial",
+      "name": "user A cannot read tenant B rows from guest_reviews",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot read tenant B rows from guest_reviews",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial",
+      "name": "user A cannot read tenant B rows from kitchen_menu_items",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot read tenant B rows from kitchen_menu_items",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial",
+      "name": "user A cannot read tenant B rows from kitchen_orders",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot read tenant B rows from kitchen_orders",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial",
+      "name": "user A cannot read tenant B rows from login_history",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot read tenant B rows from login_history",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial",
+      "name": "user A cannot read tenant B rows from notifications",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot read tenant B rows from notifications",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial",
+      "name": "user A cannot read tenant B rows from offers",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot read tenant B rows from offers",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial",
+      "name": "user A cannot read tenant B rows from recurring_blocked_slots",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot read tenant B rows from recurring_blocked_slots",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial",
+      "name": "user A cannot read tenant B rows from reservations",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot read tenant B rows from reservations",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial",
+      "name": "user A cannot read tenant B rows from resource_images",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot read tenant B rows from resource_images",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial",
+      "name": "user A cannot read tenant B rows from resource_opening_hours",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot read tenant B rows from resource_opening_hours",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial",
+      "name": "user A cannot read tenant B rows from resources",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot read tenant B rows from resources",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial",
+      "name": "user B cannot read tenant A rows from access_code_redemptions",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot read tenant A rows from access_code_redemptions",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial",
+      "name": "user B cannot read tenant A rows from archived_reservations",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot read tenant A rows from archived_reservations",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial",
+      "name": "user B cannot read tenant A rows from audit_log",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot read tenant A rows from audit_log",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial",
+      "name": "user B cannot read tenant A rows from beta_feedback",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot read tenant A rows from beta_feedback",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial",
+      "name": "user B cannot read tenant A rows from blocked_slots",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot read tenant A rows from blocked_slots",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial",
+      "name": "user B cannot read tenant A rows from booking_tokens",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot read tenant A rows from booking_tokens",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial",
+      "name": "user B cannot read tenant A rows from booking_validation_log",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot read tenant A rows from booking_validation_log",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial",
+      "name": "user B cannot read tenant A rows from discount_codes",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot read tenant A rows from discount_codes",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial",
+      "name": "user B cannot read tenant A rows from email_send_log",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot read tenant A rows from email_send_log",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial",
+      "name": "user B cannot read tenant A rows from guest_reviews",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot read tenant A rows from guest_reviews",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial",
+      "name": "user B cannot read tenant A rows from kitchen_menu_items",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot read tenant A rows from kitchen_menu_items",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial",
+      "name": "user B cannot read tenant A rows from kitchen_orders",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot read tenant A rows from kitchen_orders",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial",
+      "name": "user B cannot read tenant A rows from login_history",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot read tenant A rows from login_history",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial",
+      "name": "user B cannot read tenant A rows from notifications",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot read tenant A rows from notifications",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial",
+      "name": "user B cannot read tenant A rows from offers",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot read tenant A rows from offers",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial",
+      "name": "user B cannot read tenant A rows from recurring_blocked_slots",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot read tenant A rows from recurring_blocked_slots",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial",
+      "name": "user B cannot read tenant A rows from reservations",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot read tenant A rows from reservations",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial",
+      "name": "user B cannot read tenant A rows from resource_images",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot read tenant A rows from resource_images",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial",
+      "name": "user B cannot read tenant A rows from resource_opening_hours",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot read tenant A rows from resource_opening_hours",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial",
+      "name": "user B cannot read tenant A rows from resources",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot read tenant A rows from resources",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial",
+      "name": "user A cannot INSERT a forged tenant B row into 'notifications'",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot INSERT a forged tenant B row into 'notifications'",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial",
+      "name": "user A cannot INSERT a forged tenant B row into 'booking_validation_log'",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot INSERT a forged tenant B row into 'booking_validation_log'",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial",
+      "name": "user A cannot INSERT a forged tenant B row into 'kitchen_menu_items'",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot INSERT a forged tenant B row into 'kitchen_menu_items'",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial",
+      "name": "user A cannot INSERT a forged tenant B row into 'kitchen_orders'",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot INSERT a forged tenant B row into 'kitchen_orders'",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial",
+      "name": "user A cannot INSERT a forged tenant B row into 'discount_codes'",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot INSERT a forged tenant B row into 'discount_codes'",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial",
+      "name": "user A cannot INSERT a forged tenant B row into 'offers'",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot INSERT a forged tenant B row into 'offers'",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial",
+      "name": "user A cannot INSERT a forged tenant B row into 'blocked_slots'",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot INSERT a forged tenant B row into 'blocked_slots'",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial",
+      "name": "user B cannot INSERT a forged tenant A row into 'notifications'",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot INSERT a forged tenant A row into 'notifications'",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial",
+      "name": "user B cannot INSERT a forged tenant A row into 'booking_validation_log'",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot INSERT a forged tenant A row into 'booking_validation_log'",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial",
+      "name": "user B cannot INSERT a forged tenant A row into 'kitchen_menu_items'",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot INSERT a forged tenant A row into 'kitchen_menu_items'",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial",
+      "name": "user B cannot INSERT a forged tenant A row into 'kitchen_orders'",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot INSERT a forged tenant A row into 'kitchen_orders'",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial",
+      "name": "user B cannot INSERT a forged tenant A row into 'discount_codes'",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot INSERT a forged tenant A row into 'discount_codes'",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial",
+      "name": "user B cannot INSERT a forged tenant A row into 'offers'",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot INSERT a forged tenant A row into 'offers'",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial",
+      "name": "user B cannot INSERT a forged tenant A row into 'blocked_slots'",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot INSERT a forged tenant A row into 'blocked_slots'",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial",
+      "name": "user A cannot DELETE tenant B notifications via cross-tenant filter",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot DELETE tenant B notifications via cross-tenant filter",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial",
+      "name": "user A cannot UPDATE tenant B reservations via cross-tenant filter",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot UPDATE tenant B reservations via cross-tenant filter",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial",
+      "name": "user A CAN read their own tenant_users row (sanity check)",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A CAN read their own tenant_users row (sanity check)",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial",
+      "name": "user B CAN read their own tenant_users row (sanity check)",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B CAN read their own tenant_users row (sanity check)",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial",
+      "name": "user A reservations query never leaks tenant B rows (unfiltered)",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A reservations query never leaks tenant B rows (unfiltered)",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial",
+      "name": "user B reservations query never leaks tenant A rows (unfiltered)",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B reservations query never leaks tenant A rows (unfiltered)",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-rls.test.ts",
+      "suite": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Skipped: missing Supabase config",
+      "name": "test environment is missing VITE_SUPABASE_URL / VITE_SUPABASE_PUBLISHABLE_KEY",
+      "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Skipped: missing Supabase config > test environment is missing VITE_SUPABASE_URL / VITE_SUPABASE_PUBLISHABLE_KEY",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-storage.test.ts",
+      "suite": "src/test/security/cross-tenant-storage.test.ts > Cross-Tenant Storage RLS Tests > Anonymous client storage enforcement",
+      "name": "anon cannot upload to tenant-private bucket",
+      "fullName": "src/test/security/cross-tenant-storage.test.ts > Cross-Tenant Storage RLS Tests > Anonymous client storage enforcement > anon cannot upload to tenant-private bucket",
+      "status": "passed",
+      "durationMs": 4005.810044,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-storage.test.ts",
+      "suite": "src/test/security/cross-tenant-storage.test.ts > Cross-Tenant Storage RLS Tests > Anonymous client storage enforcement",
+      "name": "anon cannot upload to tenant-assets bucket",
+      "fullName": "src/test/security/cross-tenant-storage.test.ts > Cross-Tenant Storage RLS Tests > Anonymous client storage enforcement > anon cannot upload to tenant-assets bucket",
+      "status": "passed",
+      "durationMs": 4003.2335040000007,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-storage.test.ts",
+      "suite": "src/test/security/cross-tenant-storage.test.ts > Cross-Tenant Storage RLS Tests > Anonymous client storage enforcement",
+      "name": "anon cannot download from tenant-private bucket",
+      "fullName": "src/test/security/cross-tenant-storage.test.ts > Cross-Tenant Storage RLS Tests > Anonymous client storage enforcement > anon cannot download from tenant-private bucket",
+      "status": "passed",
+      "durationMs": 140.58679400000074,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-storage.test.ts",
+      "suite": "src/test/security/cross-tenant-storage.test.ts > Cross-Tenant Storage RLS Tests > Anonymous client storage enforcement",
+      "name": "anon cannot list files in tenant-private bucket",
+      "fullName": "src/test/security/cross-tenant-storage.test.ts > Cross-Tenant Storage RLS Tests > Anonymous client storage enforcement > anon cannot list files in tenant-private bucket",
+      "status": "passed",
+      "durationMs": 90.71758299999965,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-storage.test.ts",
+      "suite": "src/test/security/cross-tenant-storage.test.ts > Cross-Tenant Storage RLS Tests > Anonymous client storage enforcement",
+      "name": "anon cannot delete from tenant-private bucket",
+      "fullName": "src/test/security/cross-tenant-storage.test.ts > Cross-Tenant Storage RLS Tests > Anonymous client storage enforcement > anon cannot delete from tenant-private bucket",
+      "status": "passed",
+      "durationMs": 76.69038,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-storage.test.ts",
+      "suite": "src/test/security/cross-tenant-storage.test.ts > Cross-Tenant Storage RLS Tests > Anonymous client storage enforcement",
+      "name": "anon cannot delete from tenant-assets bucket",
+      "fullName": "src/test/security/cross-tenant-storage.test.ts > Cross-Tenant Storage RLS Tests > Anonymous client storage enforcement > anon cannot delete from tenant-assets bucket",
+      "status": "passed",
+      "durationMs": 52.05890999999974,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-storage.test.ts",
+      "suite": "src/test/security/cross-tenant-storage.test.ts > Cross-Tenant Storage RLS Tests > Live cross-tenant storage denial",
+      "name": "user A CAN upload + download in their own tenant-private folder (sanity)",
+      "fullName": "src/test/security/cross-tenant-storage.test.ts > Cross-Tenant Storage RLS Tests > Live cross-tenant storage denial > user A CAN upload + download in their own tenant-private folder (sanity)",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-storage.test.ts",
+      "suite": "src/test/security/cross-tenant-storage.test.ts > Cross-Tenant Storage RLS Tests > Live cross-tenant storage denial",
+      "name": "user B CAN upload + download in their own tenant-private folder (sanity)",
+      "fullName": "src/test/security/cross-tenant-storage.test.ts > Cross-Tenant Storage RLS Tests > Live cross-tenant storage denial > user B CAN upload + download in their own tenant-private folder (sanity)",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-storage.test.ts",
+      "suite": "src/test/security/cross-tenant-storage.test.ts > Cross-Tenant Storage RLS Tests > Live cross-tenant storage denial",
+      "name": "user A CAN upload to their own tenant-assets folder (sanity)",
+      "fullName": "src/test/security/cross-tenant-storage.test.ts > Cross-Tenant Storage RLS Tests > Live cross-tenant storage denial > user A CAN upload to their own tenant-assets folder (sanity)",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-storage.test.ts",
+      "suite": "src/test/security/cross-tenant-storage.test.ts > Cross-Tenant Storage RLS Tests > Live cross-tenant storage denial",
+      "name": "user A cannot UPLOAD to tenant B's tenant-private folder",
+      "fullName": "src/test/security/cross-tenant-storage.test.ts > Cross-Tenant Storage RLS Tests > Live cross-tenant storage denial > user A cannot UPLOAD to tenant B's tenant-private folder",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-storage.test.ts",
+      "suite": "src/test/security/cross-tenant-storage.test.ts > Cross-Tenant Storage RLS Tests > Live cross-tenant storage denial",
+      "name": "user B cannot UPLOAD to tenant A's tenant-private folder",
+      "fullName": "src/test/security/cross-tenant-storage.test.ts > Cross-Tenant Storage RLS Tests > Live cross-tenant storage denial > user B cannot UPLOAD to tenant A's tenant-private folder",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-storage.test.ts",
+      "suite": "src/test/security/cross-tenant-storage.test.ts > Cross-Tenant Storage RLS Tests > Live cross-tenant storage denial",
+      "name": "user A cannot UPLOAD to tenant B's tenant-assets folder",
+      "fullName": "src/test/security/cross-tenant-storage.test.ts > Cross-Tenant Storage RLS Tests > Live cross-tenant storage denial > user A cannot UPLOAD to tenant B's tenant-assets folder",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-storage.test.ts",
+      "suite": "src/test/security/cross-tenant-storage.test.ts > Cross-Tenant Storage RLS Tests > Live cross-tenant storage denial",
+      "name": "user B cannot UPLOAD to tenant A's tenant-assets folder",
+      "fullName": "src/test/security/cross-tenant-storage.test.ts > Cross-Tenant Storage RLS Tests > Live cross-tenant storage denial > user B cannot UPLOAD to tenant A's tenant-assets folder",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-storage.test.ts",
+      "suite": "src/test/security/cross-tenant-storage.test.ts > Cross-Tenant Storage RLS Tests > Live cross-tenant storage denial",
+      "name": "user A cannot DOWNLOAD tenant B's tenant-private file",
+      "fullName": "src/test/security/cross-tenant-storage.test.ts > Cross-Tenant Storage RLS Tests > Live cross-tenant storage denial > user A cannot DOWNLOAD tenant B's tenant-private file",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-storage.test.ts",
+      "suite": "src/test/security/cross-tenant-storage.test.ts > Cross-Tenant Storage RLS Tests > Live cross-tenant storage denial",
+      "name": "user B cannot DOWNLOAD tenant A's tenant-private file",
+      "fullName": "src/test/security/cross-tenant-storage.test.ts > Cross-Tenant Storage RLS Tests > Live cross-tenant storage denial > user B cannot DOWNLOAD tenant A's tenant-private file",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-storage.test.ts",
+      "suite": "src/test/security/cross-tenant-storage.test.ts > Cross-Tenant Storage RLS Tests > Live cross-tenant storage denial",
+      "name": "user A cannot LIST tenant B's tenant-private folder",
+      "fullName": "src/test/security/cross-tenant-storage.test.ts > Cross-Tenant Storage RLS Tests > Live cross-tenant storage denial > user A cannot LIST tenant B's tenant-private folder",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-storage.test.ts",
+      "suite": "src/test/security/cross-tenant-storage.test.ts > Cross-Tenant Storage RLS Tests > Live cross-tenant storage denial",
+      "name": "user B cannot LIST tenant A's tenant-private folder",
+      "fullName": "src/test/security/cross-tenant-storage.test.ts > Cross-Tenant Storage RLS Tests > Live cross-tenant storage denial > user B cannot LIST tenant A's tenant-private folder",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-storage.test.ts",
+      "suite": "src/test/security/cross-tenant-storage.test.ts > Cross-Tenant Storage RLS Tests > Live cross-tenant storage denial",
+      "name": "user A cannot DELETE tenant B's tenant-private file",
+      "fullName": "src/test/security/cross-tenant-storage.test.ts > Cross-Tenant Storage RLS Tests > Live cross-tenant storage denial > user A cannot DELETE tenant B's tenant-private file",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-storage.test.ts",
+      "suite": "src/test/security/cross-tenant-storage.test.ts > Cross-Tenant Storage RLS Tests > Live cross-tenant storage denial",
+      "name": "user B cannot DELETE tenant A's tenant-private file",
+      "fullName": "src/test/security/cross-tenant-storage.test.ts > Cross-Tenant Storage RLS Tests > Live cross-tenant storage denial > user B cannot DELETE tenant A's tenant-private file",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-storage.test.ts",
+      "suite": "src/test/security/cross-tenant-storage.test.ts > Cross-Tenant Storage RLS Tests > Live cross-tenant storage denial",
+      "name": "user A cannot DELETE tenant B's tenant-assets file",
+      "fullName": "src/test/security/cross-tenant-storage.test.ts > Cross-Tenant Storage RLS Tests > Live cross-tenant storage denial > user A cannot DELETE tenant B's tenant-assets file",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-storage.test.ts",
+      "suite": "src/test/security/cross-tenant-storage.test.ts > Cross-Tenant Storage RLS Tests > Live cross-tenant storage denial",
+      "name": "user A cannot OVERWRITE (update) tenant B's tenant-private file via upsert",
+      "fullName": "src/test/security/cross-tenant-storage.test.ts > Cross-Tenant Storage RLS Tests > Live cross-tenant storage denial > user A cannot OVERWRITE (update) tenant B's tenant-private file via upsert",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "cross-tenant-storage.test.ts",
+      "suite": "src/test/security/cross-tenant-storage.test.ts > Cross-Tenant Storage RLS Tests > Skipped: missing Supabase config",
+      "name": "test environment is missing VITE_SUPABASE_URL / VITE_SUPABASE_PUBLISHABLE_KEY",
+      "fullName": "src/test/security/cross-tenant-storage.test.ts > Cross-Tenant Storage RLS Tests > Skipped: missing Supabase config > test environment is missing VITE_SUPABASE_URL / VITE_SUPABASE_PUBLISHABLE_KEY",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "tenant-table-manifest.test.ts",
+      "suite": "src/test/security/tenant-table-manifest.test.ts > Tenant Table Manifest — Coverage Guard > Live schema introspection",
+      "name": "RPC returns at least one tenant-scoped table (sanity)",
+      "fullName": "src/test/security/tenant-table-manifest.test.ts > Tenant Table Manifest — Coverage Guard > Live schema introspection > RPC returns at least one tenant-scoped table (sanity)",
+      "status": "passed",
+      "durationMs": 1.7793409999999312,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "tenant-table-manifest.test.ts",
+      "suite": "src/test/security/tenant-table-manifest.test.ts > Tenant Table Manifest — Coverage Guard > Live schema introspection",
+      "name": "every live tenant-scoped table is covered or explicitly excluded",
+      "fullName": "src/test/security/tenant-table-manifest.test.ts > Tenant Table Manifest — Coverage Guard > Live schema introspection > every live tenant-scoped table is covered or explicitly excluded",
+      "status": "passed",
+      "durationMs": 1.098167999999987,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "tenant-table-manifest.test.ts",
+      "suite": "src/test/security/tenant-table-manifest.test.ts > Tenant Table Manifest — Coverage Guard > Live schema introspection",
+      "name": "manifest does not list tables that no longer exist in the schema",
+      "fullName": "src/test/security/tenant-table-manifest.test.ts > Tenant Table Manifest — Coverage Guard > Live schema introspection > manifest does not list tables that no longer exist in the schema",
+      "status": "passed",
+      "durationMs": 0.3426219999996647,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "tenant-table-manifest.test.ts",
+      "suite": "src/test/security/tenant-table-manifest.test.ts > Tenant Table Manifest — Coverage Guard > Live schema introspection",
+      "name": "no table is in both COVERED_TABLES and EXCLUDED_TABLES",
+      "fullName": "src/test/security/tenant-table-manifest.test.ts > Tenant Table Manifest — Coverage Guard > Live schema introspection > no table is in both COVERED_TABLES and EXCLUDED_TABLES",
+      "status": "passed",
+      "durationMs": 0.35310600000002523,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "tenant-table-manifest.test.ts",
+      "suite": "src/test/security/tenant-table-manifest.test.ts > Tenant Table Manifest — Coverage Guard > Live schema introspection",
+      "name": "every EXCLUDED_TABLES entry has a non-empty justification",
+      "fullName": "src/test/security/tenant-table-manifest.test.ts > Tenant Table Manifest — Coverage Guard > Live schema introspection > every EXCLUDED_TABLES entry has a non-empty justification",
+      "status": "passed",
+      "durationMs": 0.2528259999999136,
+      "errorMessage": null,
+      "errorStack": null
+    },
+    {
+      "file": "tenant-table-manifest.test.ts",
+      "suite": "src/test/security/tenant-table-manifest.test.ts > Tenant Table Manifest — Coverage Guard > Skipped: missing Supabase config",
+      "name": "test environment is missing VITE_SUPABASE_URL / VITE_SUPABASE_PUBLISHABLE_KEY",
+      "fullName": "src/test/security/tenant-table-manifest.test.ts > Tenant Table Manifest — Coverage Guard > Skipped: missing Supabase config > test environment is missing VITE_SUPABASE_URL / VITE_SUPABASE_PUBLISHABLE_KEY",
+      "status": "skipped",
+      "durationMs": null,
+      "errorMessage": null,
+      "errorStack": null
+    }
+  ]
+}
