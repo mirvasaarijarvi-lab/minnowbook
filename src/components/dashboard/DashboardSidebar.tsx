@@ -1,4 +1,4 @@
-import { CalendarDays, List, Settings, LogOut, LayoutDashboard, Menu, X, ShieldCheck, Cog, BarChart3, LifeBuoy, Shield, Building2, Crown, UserCircle, FileText } from "lucide-react";
+import { CalendarDays, List, Settings, LogOut, LayoutDashboard, Menu, X, ShieldCheck, Cog, BarChart3, LifeBuoy, Shield, Building2, Crown, UserCircle, FileText, ChefHat } from "lucide-react";
 import Logo from "@/components/Logo";
 import SiteSelector from "./SiteSelector";
 import { useTenant } from "@/hooks/useTenant";
@@ -21,8 +21,9 @@ import {
   PERM_SUPPORT_VIEW,
   PERM_SITES_VIEW,
 } from "@/lib/permissions";
+import { useHasKitchenResources } from "@/hooks/useHasKitchenResources";
 
-export type DashboardView = "overview" | "calendar" | "reservations" | "resources" | "offers" | "reports" | "settings" | "admin" | "support" | "sites" | "profile";
+export type DashboardView = "overview" | "calendar" | "reservations" | "resources" | "offers" | "kitchen" | "reports" | "settings" | "admin" | "support" | "sites" | "profile";
 
 interface DashboardSidebarProps {
   currentView: DashboardView;
@@ -34,12 +35,13 @@ interface DashboardSidebarProps {
   isAdmin?: boolean;
 }
 
-const navItems: { view: DashboardView; labelKey: TranslationKey; icon: React.ElementType; adminOnly?: boolean; permission?: string; tierRequired?: string }[] = [
+const navItems: { view: DashboardView; labelKey: TranslationKey; icon: React.ElementType; adminOnly?: boolean; permission?: string; tierRequired?: string; requiresKitchenResources?: boolean }[] = [
   { view: "overview", labelKey: "nav.overview", icon: LayoutDashboard },
   { view: "calendar", labelKey: "nav.calendar", icon: CalendarDays, permission: PERM_CALENDAR_VIEW },
   { view: "reservations", labelKey: "nav.reservations", icon: List, permission: PERM_RESERVATIONS_VIEW },
   { view: "resources", labelKey: "nav.resources", icon: Settings, permission: PERM_RESOURCES_VIEW },
   { view: "offers", labelKey: "nav.offers" as TranslationKey, icon: FileText, permission: PERM_RESERVATIONS_VIEW },
+  { view: "kitchen", labelKey: "nav.kitchen" as TranslationKey, icon: ChefHat, permission: PERM_RESERVATIONS_VIEW, requiresKitchenResources: true },
   { view: "reports", labelKey: "nav.reports", icon: BarChart3, permission: PERM_REPORTS_VIEW },
   { view: "settings", labelKey: "nav.settings", icon: Cog, permission: PERM_SETTINGS_VIEW },
   { view: "admin", labelKey: "nav.admin", icon: ShieldCheck, adminOnly: true, permission: PERM_ADMIN_VIEW },
@@ -53,11 +55,13 @@ const DashboardSidebar = ({ currentView, onViewChange, userEmail, onSignOut, mob
   const { can, isSystemAdmin } = usePermissions();
   const { tenant } = useTenant();
   const { isMultiSite, effectiveTier } = useTierGate();
+  const { hasKitchenResources } = useHasKitchenResources();
   const navigate = useNavigate();
   const visibleItems = navItems.filter((item) => {
     if (item.adminOnly && !isAdminUser) return false;
     if (item.permission && !can(item.permission)) return false;
     if (item.tierRequired && effectiveTier !== item.tierRequired) return false;
+    if (item.requiresKitchenResources && !hasKitchenResources) return false;
     return true;
   });
 
