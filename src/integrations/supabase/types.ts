@@ -2974,6 +2974,12 @@ export type Database = {
         Args: { p_reservation_id: string; p_tenant_id: string; p_token: string }
         Returns: boolean
       }
+      list_tenant_scoped_tables: {
+        Args: never
+        Returns: {
+          table_name: string
+        }[]
+      }
       lookup_access_code_by_plaintext: {
         Args: { p_code: string }
         Returns: {
