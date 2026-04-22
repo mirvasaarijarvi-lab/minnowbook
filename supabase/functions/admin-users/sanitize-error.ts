@@ -58,3 +58,43 @@ export function sanitizeError(msg: string): string {
   console.error("[admin-users] Internal error:", msg);
   return GENERIC_ERROR_MESSAGE;
 }
+
+/**
+ * Map a sanitized message to the HTTP status code the edge function
+ * returns. Mirrors the logic at the end of `Deno.serve` in index.ts so
+ * tests can assert the full response contract (status + body) without
+ * spinning up the server.
+ *
+ * Tier-limit messages fall through to 400 — that's the right code for
+ * "you tried to create something the plan doesn't allow", and matches
+ * what the dashboard's `useTierErrorMessage` hook expects.
+ */
+export function statusForSanitized(safeMessage: string): number {
+  if (safeMessage === "Not authenticated") return 401;
+  if (safeMessage === "Insufficient permissions") return 403;
+  if (safeMessage.includes("Too many")) return 429;
+  return 400;
+}
+
+/**
+ * Build the JSON response the catch block in index.ts hands back to
+ * the SPA. Centralizing it here means any test that wants to assert
+ * "what does the UI actually receive when the DB throws X?" can call
+ * this directly without spinning up Deno.serve.
+ */
+export function buildErrorResponseBody(rawError: unknown): {
+  status: number;
+  body: { error: string };
+} {
+  const rawMessage =
+    (rawError && typeof rawError === "object" && "message" in rawError
+      ? String((rawError as { message?: unknown }).message ?? "")
+      : typeof rawError === "string"
+      ? rawError
+      : "") || "Unknown error";
+  const safeMessage = sanitizeError(rawMessage);
+  return {
+    status: statusForSanitized(safeMessage),
+    body: { error: safeMessage },
+  };
+}
