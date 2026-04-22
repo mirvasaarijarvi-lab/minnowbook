@@ -603,11 +603,15 @@ function drawCleanupSection(c: Cursor, p: LedgerPayload): Cursor {
   rule(c);
   c.y -= 14;
 
+  // Added an "HTTP" column so download/list/delete probes (which now flow
+  // through this section) can show their status code at a glance. Path
+  // column shrinks accordingly; long paths still ellipsise gracefully.
   const COLS = {
-    role: { x: 0, w: 100, label: "Role" },
-    bucket: { x: 102, w: 70, label: "Bucket" },
-    status: { x: 174, w: 60, label: "Status" },
-    path: { x: 236, w: CONTENT_W - 236, label: "Path / note" },
+    role: { x: 0, w: 88, label: "Role" },
+    bucket: { x: 90, w: 64, label: "Bucket" },
+    state: { x: 156, w: 52, label: "State" },
+    http: { x: 210, w: 36, label: "HTTP" },
+    path: { x: 248, w: CONTENT_W - 248, label: "Path / note" },
   };
 
   for (const k of Object.keys(COLS) as (keyof typeof COLS)[]) {
@@ -630,15 +634,21 @@ function drawCleanupSection(c: Cursor, p: LedgerPayload): Cursor {
   }
 
   for (const op of p.cleanups) {
-    c = ensureSpace(c, LINE_HEIGHT + ROW_PAD);
+    // Reserve a second wrapped line whenever we have an error code to
+    // surface — the main row stays compact, the code lands underneath.
+    const hasCodeLine = Boolean(op.errorCode);
+    const rowH = LINE_HEIGHT + (hasCodeLine ? LINE_HEIGHT - 2 : 0) + ROW_PAD;
+    c = ensureSpace(c, rowH + 4);
     const statusColor = op.removed ? C.ok : C.muted;
     const statusText = op.removed ? "removed" : "no-op";
     const pathOrNote = op.note ? `${op.path}  (${op.note})` : op.path;
+    const httpStr = op.httpStatus != null ? String(op.httpStatus) : "—";
 
     const cells: Array<[keyof typeof COLS, string, ReturnType<typeof rgb>, PDFFont, number]> = [
       ["role", op.role, C.text, c.font, 9],
       ["bucket", op.bucket, C.text, c.font, 9],
-      ["status", statusText, statusColor, c.bold, 9],
+      ["state", statusText, statusColor, c.bold, 9],
+      ["http", httpStr, C.muted, c.font, 9],
       ["path", ellipsise(pathOrNote, c.mono, 8, COLS.path.w), C.text, c.mono, 8],
     ];
 
@@ -651,7 +661,20 @@ function drawCleanupSection(c: Cursor, p: LedgerPayload): Cursor {
         color,
       });
     }
-    c.y -= LINE_HEIGHT + ROW_PAD;
+    c.y -= LINE_HEIGHT;
+
+    if (hasCodeLine) {
+      const detail = ellipsise(`code=${op.errorCode}`, c.mono, 7.5, CONTENT_W - 8);
+      c.page.drawText(safe(detail), {
+        x: MARGIN + 8,
+        y: c.y - 8,
+        size: 7.5,
+        font: c.mono,
+        color: C.muted,
+      });
+      c.y -= LINE_HEIGHT - 2;
+    }
+    c.y -= ROW_PAD;
   }
 
   return c;
