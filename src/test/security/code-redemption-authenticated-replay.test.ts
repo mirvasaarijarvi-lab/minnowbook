@@ -496,7 +496,7 @@ suite(
       // "this code never existed".
       const usedPlaintext = freshPlaintext();
       const usedId = await seedAccessCode(admin, usedPlaintext, userId);
-      seededCodeIds.push(usedId);
+      tracker.register(usedId);
 
       await admin
         .from("tenants")
