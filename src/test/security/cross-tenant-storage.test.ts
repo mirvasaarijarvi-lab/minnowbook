@@ -990,6 +990,24 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       afterAll(async () => {
         const clientFor = (key: "a" | "b") => (key === "a" ? clientA : clientB);
 
+        // Last-line preflight: re-validate tenant pair distinctness AND
+        // re-probe membership for both authenticated clients RIGHT
+        // BEFORE we delete anything. Catches env drift, expired sessions,
+        // or membership mutations that happened mid-run. If anything is
+        // off we skip every removal in this block — better to leak test
+        // artifacts under our own RUN_ID than to delete from the wrong
+        // tenant folder. The failure is ledgered for the PDF report.
+        const preflightClients = {
+          [liveCreds.a.tenantId!]: { client: clientA, email: liveCreds.a.email },
+          [liveCreds.b.tenantId!]: { client: clientB, email: liveCreds.b.email },
+        };
+        const preflight = await cleanupPreflight({
+          tenantIds: [liveCreds.a.tenantId!, liveCreds.b.tenantId!],
+          clients: preflightClients,
+          scope: "live-cross-tenant-flat",
+        });
+        if (!preflight.ok) return;
+
         // Each phase below is bounded per-call by withTimeout (inside the
         // helpers) so a single hung remove() can't stall the rest. The
         // admin sweep at the end is the deterministic backstop — even if
@@ -1011,8 +1029,18 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         //    behind by partial uploads, by a true RLS bypass that the
         //    per-client paths above couldn't enumerate, by a previous
         //    interrupted CI job, OR by the per-client phase timing out.
-        await sweepTestArtifacts(PRIVATE_BUCKET, [liveCreds.a.tenantId!, liveCreds.b.tenantId!]);
-        await sweepTestArtifacts(ASSETS_BUCKET, [liveCreds.a.tenantId!, liveCreds.b.tenantId!]);
+        //    The sweep itself ALSO re-runs the preflight as a defense in
+        //    depth — pass the same scope so the ledger is unambiguous.
+        await sweepTestArtifacts(
+          PRIVATE_BUCKET,
+          [liveCreds.a.tenantId!, liveCreds.b.tenantId!],
+          { scope: "live-cross-tenant-flat:sweep", clients: preflightClients },
+        );
+        await sweepTestArtifacts(
+          ASSETS_BUCKET,
+          [liveCreds.a.tenantId!, liveCreds.b.tenantId!],
+          { scope: "live-cross-tenant-flat:sweep", clients: preflightClients },
+        );
       });
 
       // ---------- Positive controls: own-tenant access works ----------
