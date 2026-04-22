@@ -35,6 +35,7 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { CalendarIcon, Loader2, Tag } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { computeBookingCapacity, logBookingValidation } from "@/lib/booking-validation-log";
 
 interface ManualReservationDialogProps {
   open: boolean;
@@ -155,7 +156,19 @@ const ManualReservationDialog = ({
         resolvedSiteId = matchingSite?.site_id ?? null;
       }
 
-      const { error } = await supabase.from("reservations").insert({
+      const dateStr = format(selectedDate, "yyyy-MM-dd");
+      const requestedGuests = form.guests_count ? parseInt(form.guests_count) : 0;
+
+      // Capacity observation (no hard block)
+      const cap = await computeBookingCapacity({
+        tenantId,
+        reservationType: form.reservation_type,
+        date: dateStr,
+        siteId: resolvedSiteId,
+        requestedGuests,
+      });
+
+      const { data: inserted, error } = await supabase.from("reservations").insert({
         tenant_id: tenantId,
         site_id: resolvedSiteId,
         guest_name: form.guest_name.trim(),
@@ -163,7 +176,7 @@ const ManualReservationDialog = ({
         guest_phone: form.guest_phone.trim() || null,
         guests_count: form.guests_count ? parseInt(form.guests_count) : null,
         reservation_type: form.reservation_type,
-        date: format(selectedDate, "yyyy-MM-dd"),
+        date: dateStr,
         start_time: form.start_time || null,
         special_requests: form.special_requests.trim() || null,
         internal_notes: form.internal_notes.trim() || null,
@@ -200,8 +213,58 @@ const ManualReservationDialog = ({
           food_permits: form.food_permits || null,
           stall_fee: form.stall_fee ? parseFloat(form.stall_fee) : null,
         }),
-      } as any);
-      if (error) throw error;
+      } as any).select("id").single();
+      if (error) {
+        await logBookingValidation({
+          tenantId,
+          siteId: resolvedSiteId,
+          source: "manual_dashboard",
+          reservationType: form.reservation_type,
+          reservationDate: dateStr,
+          startTime: form.start_time || null,
+          guestName: form.guest_name.trim(),
+          guestEmail: form.guest_email.trim(),
+          guestsRequested: requestedGuests || null,
+          currentLoad: cap.currentLoad,
+          capacityTotal: cap.capacity,
+          outcome: "rejected",
+          reasons: [
+            `Capacity check: requested=${cap.requested}, currentLoad=${cap.currentLoad}, capacity=${cap.capacity}, projected=${cap.projected}`,
+            `Insert failed: ${error.message}`,
+          ],
+        });
+        throw error;
+      }
+      const outcome: "accepted" | "soft_warning" = cap.overCapacity ? "soft_warning" : "accepted";
+      const reasons = [
+        `Capacity check: requested=${cap.requested}, currentLoad=${cap.currentLoad}, capacity=${cap.capacity}, projected=${cap.projected}`,
+        cap.overCapacity
+          ? "PROJECTED OVER CAPACITY — soft warning, booking still allowed"
+          : cap.capacity > 0
+          ? "Within capacity"
+          : "Capacity check skipped (no capacity defined)",
+      ];
+      await logBookingValidation({
+        tenantId,
+        siteId: resolvedSiteId,
+        source: "manual_dashboard",
+        reservationType: form.reservation_type,
+        reservationDate: dateStr,
+        startTime: form.start_time || null,
+        guestName: form.guest_name.trim(),
+        guestEmail: form.guest_email.trim(),
+        guestsRequested: requestedGuests || null,
+        currentLoad: cap.currentLoad,
+        capacityTotal: cap.capacity,
+        outcome,
+        reasons,
+        reservationId: inserted?.id ?? null,
+      });
+      if (cap.overCapacity) {
+        toast.warning(t("bookingLog.softWarningToast" as any), {
+          description: `${cap.projected}/${cap.capacity} guests`,
+        });
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["reservations"] });

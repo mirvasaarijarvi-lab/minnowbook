@@ -1,4 +1,4 @@
-import { CalendarDays, List, Settings, LogOut, LayoutDashboard, Menu, X, ShieldCheck, Cog, BarChart3, LifeBuoy, Shield, Building2, Crown, UserCircle, FileText, ChefHat } from "lucide-react";
+import { CalendarDays, List, Settings, LogOut, LayoutDashboard, Menu, X, ShieldCheck, Cog, BarChart3, LifeBuoy, Shield, Building2, Crown, UserCircle, FileText, ChefHat, ScrollText } from "lucide-react";
 import Logo from "@/components/Logo";
 import SiteSelector from "./SiteSelector";
 import { useTenant } from "@/hooks/useTenant";
@@ -23,7 +23,7 @@ import {
 } from "@/lib/permissions";
 import { useHasKitchenResources } from "@/hooks/useHasKitchenResources";
 
-export type DashboardView = "overview" | "calendar" | "reservations" | "resources" | "offers" | "kitchen" | "reports" | "settings" | "admin" | "support" | "sites" | "profile";
+export type DashboardView = "overview" | "calendar" | "reservations" | "resources" | "offers" | "kitchen" | "reports" | "settings" | "admin" | "bookingLog" | "support" | "sites" | "profile";
 
 interface DashboardSidebarProps {
   currentView: DashboardView;
@@ -45,6 +45,7 @@ const navItems: { view: DashboardView; labelKey: TranslationKey; icon: React.Ele
   { view: "reports", labelKey: "nav.reports", icon: BarChart3, permission: PERM_REPORTS_VIEW },
   { view: "settings", labelKey: "nav.settings", icon: Cog, permission: PERM_SETTINGS_VIEW },
   { view: "admin", labelKey: "nav.admin", icon: ShieldCheck, adminOnly: true, permission: PERM_ADMIN_VIEW },
+  { view: "bookingLog", labelKey: "nav.bookingLog" as TranslationKey, icon: ScrollText, adminOnly: true, permission: PERM_ADMIN_VIEW },
   { view: "sites", labelKey: "nav.sites" as TranslationKey, icon: Building2, permission: PERM_SITES_VIEW, tierRequired: "business" },
   { view: "support", labelKey: "nav.support", icon: LifeBuoy, permission: PERM_SUPPORT_VIEW },
   { view: "profile", labelKey: "nav.profile" as TranslationKey, icon: UserCircle },
