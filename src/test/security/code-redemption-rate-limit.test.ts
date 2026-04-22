@@ -172,9 +172,9 @@ describe("redeem-access-code: brute-force & replay resilience", () => {
   });
 
   it("varied fake codes do NOT produce distinguishable error codes vs. malformed input", async () => {
-    // Probe matrix: shapes that should all surface as NOT_AUTHENTICATED
-    // (since no auth is supplied) — never a code-specific error that
-    // would let an attacker classify the input.
+    // Probe matrix: shapes that should all surface as an auth-rejection
+    // code (since no auth is supplied) — never a code-specific error
+    // that would let an attacker classify the input.
     const probes = [
       ...FAKE_CODES,
       "", // empty
@@ -189,16 +189,17 @@ describe("redeem-access-code: brute-force & replay resilience", () => {
       expect(r.status).toBeGreaterThanOrEqual(400);
       expect(r.status).toBeLessThan(500);
     }
-    // Without auth, EVERY probe must return exactly NOT_AUTHENTICATED.
-    // The auth check runs before any code-shape or code-existence check,
-    // so the response cannot vary by input.
+    // Without auth, EVERY probe must return exactly the same auth-rejection
+    // code. The auth check (whether at gateway or handler) runs before any
+    // code-shape or code-existence check, so the response cannot vary by input.
     const codes = results.map(errorCode);
     const unique = new Set(codes);
     expect(
       unique.size,
       `unauthenticated probes must collapse to one code; got: ${[...unique].join(" | ")}`,
     ).toBe(1);
-    expect([...unique][0]).toBe("NOT_AUTHENTICATED");
+    const only = [...unique][0];
+    expect(AUTH_REJECTION_CODES.has(only), `expected auth-rejection code, got: ${only}`).toBe(true);
   });
 
   it("burst of 30 parallel calls across many distinct fake codes: zero leaks, zero 5xx, stable codes", async () => {
