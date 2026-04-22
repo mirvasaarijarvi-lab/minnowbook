@@ -2269,16 +2269,43 @@ describe("Cross-Tenant Storage RLS Tests", () => {
           }
 
           // Listing with adversarial folder names follows the same rule:
-          // never reveal contents of the victim's folder.
+          // never reveal contents of the victim's folder. Both the
+          // double-slash and leading-slash variants get a ledger entry
+          // with HTTP status + error code so the PDF artifact can show
+          // every adversarial probe (upload + download + list) side-by-
+          // side and surface any 200-OK list regression on a path that
+          // previously 4xx'd.
+          const ledgerListProbe = (
+            label: string,
+            folder: string,
+            result: { data: unknown; error: unknown },
+            denied: boolean,
+          ) => {
+            const { httpStatus, errorCode } = extractStorageError(result);
+            recordCleanup({
+              bucket,
+              path: folder,
+              role: "attacker",
+              removed: !denied,
+              httpStatus,
+              errorCode,
+              note: denied
+                ? `list-probe denied (${dir.attacker} -> ${dir.owner}, ${label})`
+                : `list-probe UNEXPECTEDLY returned rows — RLS LEAK (${dir.attacker} -> ${dir.owner}, ${label})`,
+            });
+          };
+
           it(
             `user ${dir.attacker.toUpperCase()} cannot LIST '${dir.owner.toUpperCase()}//' (double-slash) folder in ${bucket}`,
             async () => {
               const folder = `${dir.victimTenantId()}//`;
-              const { data, error } = await dir
+              const result = await dir
                 .attackerClient()
                 .storage.from(bucket)
                 .list(folder, { limit: 5 });
+              const { data, error } = result;
               const denied = Boolean(error) || !data || data.length === 0;
+              ledgerListProbe("double-slash", folder, result, denied);
               expect(denied).toBe(true);
             },
           );
@@ -2287,11 +2314,13 @@ describe("Cross-Tenant Storage RLS Tests", () => {
             `user ${dir.attacker.toUpperCase()} cannot LIST '/${dir.owner.toUpperCase()}/' (leading-slash) folder in ${bucket}`,
             async () => {
               const folder = `/${dir.victimTenantId()}/`;
-              const { data, error } = await dir
+              const result = await dir
                 .attackerClient()
                 .storage.from(bucket)
                 .list(folder, { limit: 5 });
+              const { data, error } = result;
               const denied = Boolean(error) || !data || data.length === 0;
+              ledgerListProbe("leading-slash", folder, result, denied);
               expect(denied).toBe(true);
             },
           );
