@@ -896,10 +896,10 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       });
 
       // ---------- Positive controls (own tenant) ----------
-      it("user A CAN list their own tenant-assets folder", async () => {
+      it("user A CAN list their own tenant-assets per-run folder", async () => {
         const { data, error } = await clientA.storage
           .from(ASSETS_BUCKET)
-          .list(`${liveCreds.a.tenantId!}/__rls_test__`, { limit: 50, search: RUN_ID });
+          .list(runRootFor(liveCreds.a.tenantId!), { limit: 50 });
         expect(error).toBeNull();
         expect(data).toBeTruthy();
         // Must include the seed we just uploaded.
