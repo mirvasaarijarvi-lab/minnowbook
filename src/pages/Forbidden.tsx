@@ -85,13 +85,46 @@ const Forbidden = ({
   adminCheckState,
 }: ForbiddenProps) => {
   const [beaconStatus, setBeaconStatus] = useState<number | "unreachable" | null>(null);
+  const [isRetrying, setIsRetrying] = useState(false);
+  const invalidateAdminCache = useInvalidateIsSystemAdmin();
   // Resolve once per render: explicit slug wins, otherwise derive from the
   // human label so legacy call sites keep working.
   const resolvedSlug = areaSlug ?? toSlug(attemptedArea);
-  const body =
-    message ??
+
+  // Distinguish "actually not an admin" from "we couldn't tell because the
+  // lookup failed or was still loading". Both fail closed (the user sees
+  // 403), but the copy and CTAs change so the user knows whether to
+  // contact an administrator or simply retry.
+  const lookupErrored = adminCheckState?.errored === true;
+  const lookupStillLoading =
+    adminCheckState?.loading === true || adminCheckState?.status === "pending";
+  const isFallback = lookupErrored || lookupStillLoading;
+
+  const defaultDeniedBody =
     `You're signed in, but your account doesn't have permission to access ${attemptedArea}. ` +
-      `If you believe this is a mistake, contact your administrator.`;
+    `If you believe this is a mistake, contact your administrator.`;
+  const defaultFallbackBody = lookupErrored
+    ? `We couldn't verify your permissions for ${attemptedArea} right now. ` +
+      `Access has been denied as a precaution. This is usually temporary — please try again in a moment.`
+    : `We're still verifying your permissions for ${attemptedArea}. ` +
+      `Access has been denied as a precaution. Please try again in a moment.`;
+  const body = message ?? (isFallback ? defaultFallbackBody : defaultDeniedBody);
+
+  const handleRetry = async () => {
+    setIsRetrying(true);
+    try {
+      // Invalidate every cached `is-system-admin` entry so the next render
+      // of the guard refetches against a fresh JWT.
+      await invalidateAdminCache();
+    } finally {
+      // Force a navigation reload so the route re-mounts cleanly with the
+      // refreshed answer. This is the most reliable way to re-run the
+      // guard chain regardless of where Forbidden was rendered from.
+      if (typeof window !== "undefined") {
+        window.location.reload();
+      }
+    }
+  };
 
   // Beacon to the always-403 edge function so the network log shows a real
   // HTTP 403 response associated with this view.
