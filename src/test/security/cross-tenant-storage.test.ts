@@ -2115,19 +2115,33 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       afterAll(async () => {
         const clientFor = (key: "a" | "b") => (key === "a" ? clientA : clientB);
 
+        // Last-line preflight (see live-cross-tenant-flat block).
+        const preflightClients = {
+          [liveCreds.a.tenantId!]: { client: clientA, email: liveCreds.a.email },
+          [liveCreds.b.tenantId!]: { client: clientB, email: liveCreds.b.email },
+        };
+        const preflight = await cleanupPreflight({
+          tenantIds: [liveCreds.a.tenantId!, liveCreds.b.tenantId!],
+          clients: preflightClients,
+          scope: "live-cross-tenant-late-segment",
+        });
+        if (!preflight.ok) return;
+
         // Late-segment attempts share the same hang risk as adversarial
         // ones (tenant-id buried in deep folders → larger key, slower
         // gateway round-trip). Bounded per-call cleanup + admin sweep.
         await teardownAttemptPaths(lateAttempts, clientFor);
 
-        await sweepTestArtifacts(PRIVATE_BUCKET, [
-          liveCreds.a.tenantId!,
-          liveCreds.b.tenantId!,
-        ]);
-        await sweepTestArtifacts(ASSETS_BUCKET, [
-          liveCreds.a.tenantId!,
-          liveCreds.b.tenantId!,
-        ]);
+        await sweepTestArtifacts(
+          PRIVATE_BUCKET,
+          [liveCreds.a.tenantId!, liveCreds.b.tenantId!],
+          { scope: "live-cross-tenant-late-segment:sweep", clients: preflightClients },
+        );
+        await sweepTestArtifacts(
+          ASSETS_BUCKET,
+          [liveCreds.a.tenantId!, liveCreds.b.tenantId!],
+          { scope: "live-cross-tenant-late-segment:sweep", clients: preflightClients },
+        );
       });
 
       // Bi-directional: A→B and B→A. Each direction uses the
