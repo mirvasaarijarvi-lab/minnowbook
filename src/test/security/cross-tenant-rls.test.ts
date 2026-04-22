@@ -11,6 +11,7 @@ import {
   tenantPairFixtureSkipReason,
   type TenantPairFixture,
 } from "./fixtures/tenant-pair";
+import { guardTenantPair } from "./fixtures/tenant-id-guard";
 
 /**
  * Cross-Tenant RLS Regression Tests
@@ -216,6 +217,13 @@ describe("Cross-Tenant RLS Regression Tests", () => {
         clientB = fixture.b.client;
         liveCreds.a.tenantId = fixture.a.tenantId;
         liveCreds.b.tenantId = fixture.b.tenantId;
+        // Shared guard: enforces UUID/dedup/membership preconditions used
+        // by every cross-tenant suite. Surfaces config errors as setup
+        // failures instead of misleading "RLS denied" passes.
+        await guardTenantPair({
+          a: { client: clientA, tenantId: fixture.a.tenantId, email: fixture.a.email },
+          b: { client: clientB, tenantId: fixture.b.tenantId, email: fixture.b.email },
+        });
         console.error(
           `[rls-fixture] using ${fixture.source} credentials — A=${fixture.a.tenantId} B=${fixture.b.tenantId}`,
         );
