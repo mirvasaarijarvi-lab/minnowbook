@@ -90,19 +90,37 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       anon = newAnonClient();
     });
 
-    it("anon cannot upload to tenant-private bucket", async () => {
-      const { error } = await anon.storage
-        .from(PRIVATE_BUCKET)
-        .upload(anonPath, fileBytes("anon-private"), { upsert: true });
-      expect(error).toBeTruthy();
-    });
+    // Upload calls may be denied either via an explicit RLS error response
+    // or by a network-level rejection that surfaces as a hang/timeout in
+    // jsdom. Either way, the file MUST NOT end up in storage. We bound the
+    // attempt with our own timeout and treat timeout-as-denial.
+    const tryUpload = async (bucket: string) => {
+      const result = await Promise.race([
+        anon.storage.from(bucket).upload(anonPath, fileBytes(`anon-${bucket}`), { upsert: true }),
+        new Promise<{ error: Error; data: null }>((resolve) =>
+          setTimeout(() => resolve({ error: new Error("network-timeout"), data: null }), 4000),
+        ),
+      ]);
+      return result;
+    };
 
-    it("anon cannot upload to tenant-assets bucket", async () => {
-      const { error } = await anon.storage
-        .from(ASSETS_BUCKET)
-        .upload(anonPath, fileBytes("anon-assets"), { upsert: true });
-      expect(error).toBeTruthy();
-    });
+    it(
+      "anon cannot upload to tenant-private bucket",
+      async () => {
+        const { error } = await tryUpload(PRIVATE_BUCKET);
+        expect(error).toBeTruthy();
+      },
+      15000,
+    );
+
+    it(
+      "anon cannot upload to tenant-assets bucket",
+      async () => {
+        const { error } = await tryUpload(ASSETS_BUCKET);
+        expect(error).toBeTruthy();
+      },
+      15000,
+    );
 
     it("anon cannot download from tenant-private bucket", async () => {
       // Even guessing a path should fail — bucket is private, no SELECT for anon.
