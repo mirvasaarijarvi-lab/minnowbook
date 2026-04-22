@@ -1264,6 +1264,215 @@ describe("Cross-Tenant Storage RLS Tests", () => {
             .download(path);
           expect(stillThere).toBeTruthy();
         });
+
+        // ---- Cross-tenant OVERWRITE / UPSERT denial -------------------
+        // The previous block proves the attacker can't *create* a file at
+        // a foreign nested path. This block proves they also can't *replace*
+        // an existing one — neither via `{ upsert: true }` (the supabase-js
+        // term for "PUT semantics, overwrite if exists") nor via the
+        // default `{ upsert: false }` (which on a conflicting key returns
+        // a 409 — still must NOT leak the original payload or modify it).
+        //
+        // We prove four properties per scenario, per attacker direction:
+        //   1. The upload call itself is denied (error returned).
+        //   2. The victim's existing object is byte-for-byte unchanged
+        //      after the attempt (no partial overwrite, no content swap).
+        //   3. Same for the public `tenant-assets` bucket.
+        //   4. Both `upsert: true` and `upsert: false` paths are covered —
+        //      a permissive overwrite policy is a particularly nasty
+        //      footgun because the SDK default differs across versions.
+        //
+        // Pre-seeding the victim file inline (rather than depending on
+        // the sanity test above having run first) keeps each `it` block
+        // independent: if vitest reorders or re-runs them, behaviour is
+        // identical. The seeded file is registered for cleanup via both
+        // `ownNestedUploads` (own-tenant) and `nestedAttempts` (the
+        // attacker's failed write target points at the SAME key, so the
+        // dual-cleanup pass already covers any RLS bypass that might
+        // have actually overwritten it).
+        const ATTACKER_PAYLOAD_TAG = "ATTACKER_OVERWRITE_PAYLOAD_DO_NOT_PERSIST";
+        const seedVictimFile = async (
+          ownerClient: SupabaseClient,
+          ownerKey: "a" | "b",
+          ownerTenantId: string,
+          bucket: string,
+          label: string,
+        ): Promise<{ path: string; originalBytes: ArrayBuffer } | null> => {
+          const path = nestedOwnPath(ownerTenantId, scenario.segments, label);
+          const originalContent = `victim-original-${label}-${scenario.name}-${Date.now()}`;
+          const { error: seedErr } = await ownerClient.storage
+            .from(bucket)
+            .upload(path, fileBytes(originalContent), { upsert: true });
+          if (seedErr) return null;
+          ownNestedUploads.push({ bucket, path, client: ownerKey });
+          // Read it back so we have a known-good baseline to diff against.
+          const { data: blob } = await ownerClient.storage.from(bucket).download(path);
+          if (!blob) return null;
+          const originalBytes = await blob.arrayBuffer();
+          return { path, originalBytes };
+        };
+
+        const assertVictimUnchanged = async (
+          ownerClient: SupabaseClient,
+          bucket: string,
+          path: string,
+          originalBytes: ArrayBuffer,
+        ) => {
+          const { data: afterBlob, error: afterErr } = await ownerClient.storage
+            .from(bucket)
+            .download(path);
+          expect(afterErr).toBeNull();
+          expect(afterBlob).toBeTruthy();
+          if (!afterBlob) return;
+          const afterBytes = await afterBlob.arrayBuffer();
+          // Byte-length match is the cheapest tripwire — overwrite would
+          // almost always change size since the attacker payload tag is
+          // longer than typical seed content.
+          expect(afterBytes.byteLength).toBe(originalBytes.byteLength);
+          // Full byte equality — the real assertion. If the attacker
+          // managed to swap content (e.g., via signed URL bypass or
+          // a misconfigured policy that allows overwrite-only), the
+          // tagged payload would surface here.
+          const before = new Uint8Array(originalBytes);
+          const after = new Uint8Array(afterBytes);
+          for (let i = 0; i < before.length; i++) {
+            if (before[i] !== after[i]) {
+              throw new Error(
+                `Victim file at '${path}' was MODIFIED by cross-tenant upsert ` +
+                  `(byte ${i}: ${before[i]} → ${after[i]}). RLS leak.`,
+              );
+            }
+          }
+        };
+
+        for (const upsertMode of [true, false] as const) {
+          it(
+            `user B cannot OVERWRITE tenant A's nested '${scenario.name}' ` +
+              `(upsert=${upsertMode}, tenant-private)`,
+            async () => {
+              const seeded = await seedVictimFile(
+                clientA,
+                "a",
+                liveCreds.a.tenantId!,
+                PRIVATE_BUCKET,
+                `a-victim-upsert-${upsertMode}`,
+              );
+              if (!seeded) {
+                // If the owner couldn't even seed, the test environment is
+                // misconfigured — fail loudly rather than silently passing.
+                throw new Error(
+                  `Failed to seed victim file for upsert=${upsertMode} test`,
+                );
+              }
+              nestedAttempts.push({
+                bucket: PRIVATE_BUCKET,
+                path: seeded.path,
+                attacker: "b",
+                owner: "a",
+              });
+
+              const { error } = await clientB.storage
+                .from(PRIVATE_BUCKET)
+                .upload(seeded.path, fileBytes(ATTACKER_PAYLOAD_TAG), {
+                  upsert: upsertMode,
+                });
+              // Either path MUST error: upsert=true would be an overwrite
+              // (denied by the policy on UPDATE/INSERT-with-replace),
+              // upsert=false would be either a 409 conflict OR the same
+              // policy denial — both are acceptable, both are non-null.
+              expect(error).toBeTruthy();
+
+              await assertVictimUnchanged(
+                clientA,
+                PRIVATE_BUCKET,
+                seeded.path,
+                seeded.originalBytes,
+              );
+            },
+          );
+
+          it(
+            `user A cannot OVERWRITE tenant B's nested '${scenario.name}' ` +
+              `(upsert=${upsertMode}, tenant-private)`,
+            async () => {
+              const seeded = await seedVictimFile(
+                clientB,
+                "b",
+                liveCreds.b.tenantId!,
+                PRIVATE_BUCKET,
+                `b-victim-upsert-${upsertMode}`,
+              );
+              if (!seeded) {
+                throw new Error(
+                  `Failed to seed victim file for upsert=${upsertMode} test`,
+                );
+              }
+              nestedAttempts.push({
+                bucket: PRIVATE_BUCKET,
+                path: seeded.path,
+                attacker: "a",
+                owner: "b",
+              });
+
+              const { error } = await clientA.storage
+                .from(PRIVATE_BUCKET)
+                .upload(seeded.path, fileBytes(ATTACKER_PAYLOAD_TAG), {
+                  upsert: upsertMode,
+                });
+              expect(error).toBeTruthy();
+
+              await assertVictimUnchanged(
+                clientB,
+                PRIVATE_BUCKET,
+                seeded.path,
+                seeded.originalBytes,
+              );
+            },
+          );
+
+          it(
+            `user B cannot OVERWRITE tenant A's nested '${scenario.name}' ` +
+              `(upsert=${upsertMode}, tenant-assets)`,
+            async () => {
+              // Public bucket cross-check: tenant-assets allows anonymous
+              // SELECT but writes are still tenant-gated. An overwrite
+              // bypass here would be even worse than tenant-private since
+              // the modified bytes become world-readable.
+              const seeded = await seedVictimFile(
+                clientA,
+                "a",
+                liveCreds.a.tenantId!,
+                ASSETS_BUCKET,
+                `a-victim-assets-upsert-${upsertMode}`,
+              );
+              if (!seeded) {
+                throw new Error(
+                  `Failed to seed victim file for upsert=${upsertMode} (assets) test`,
+                );
+              }
+              nestedAttempts.push({
+                bucket: ASSETS_BUCKET,
+                path: seeded.path,
+                attacker: "b",
+                owner: "a",
+              });
+
+              const { error } = await clientB.storage
+                .from(ASSETS_BUCKET)
+                .upload(seeded.path, fileBytes(ATTACKER_PAYLOAD_TAG), {
+                  upsert: upsertMode,
+                });
+              expect(error).toBeTruthy();
+
+              await assertVictimUnchanged(
+                clientA,
+                ASSETS_BUCKET,
+                seeded.path,
+                seeded.originalBytes,
+              );
+            },
+          );
+        }
       }
     },
   );
