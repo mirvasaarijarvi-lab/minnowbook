@@ -204,7 +204,6 @@ const Superadmin = () => {
     setEditForm({
       name: t.name,
       tier: t.tier,
-      max_staff_users: t.max_staff_users,
       sample_start_date: t.sample_start_date ?? "",
       sample_end_date: t.sample_end_date ?? "",
       discount_percentage: t.discount_percentage ?? 0,
