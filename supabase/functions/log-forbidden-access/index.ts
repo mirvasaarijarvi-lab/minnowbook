@@ -45,6 +45,59 @@ interface ForbiddenLogPayload {
   tenantId?: string;
 }
 
+/**
+ * In-memory throttle for repeated forbidden-access beacons.
+ *
+ * Why this exists:
+ *   The Forbidden page beacons this function on every mount. A user who
+ *   repeatedly navigates to /superadmin (browser back/forward, hot reload
+ *   during dev, an automated probe) would otherwise insert one `audit_log`
+ *   row per mount. That's noise, not signal — the same denial from the
+ *   same user against the same area within a short window is already
+ *   covered by the first row.
+ *
+ * Why in-memory:
+ *   The platform doesn't expose a managed rate-limiter primitive yet, so
+ *   this is intentionally ad-hoc. The map lives in the edge function's
+ *   isolate; Deno Deploy may run multiple isolates per region and recycle
+ *   them, so the throttle is best-effort — it dampens bursts but doesn't
+ *   guarantee global de-dup. That tradeoff is acceptable: the worst case
+ *   is a few extra audit rows, never fewer than required.
+ *
+ * Key shape: `${userId}|${attemptedArea}`. Scoping by user means one
+ * user's spamming can't suppress another user's denials. Scoping by area
+ * means a denial on /superadmin doesn't suppress a separate denial on
+ * /superadmin/audit-log a second later — we still want both visible.
+ *
+ * Window is configurable via `FORBIDDEN_LOG_THROTTLE_SECONDS` (default
+ * 60s). Set to 0 to disable, useful for integration tests.
+ */
+const throttleCache = new Map<string, number>();
+const THROTTLE_SECONDS = (() => {
+  const raw = Deno.env.get("FORBIDDEN_LOG_THROTTLE_SECONDS");
+  if (raw == null || raw === "") return 60;
+  const parsed = Number.parseInt(raw, 10);
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : 60;
+})();
+// Cap the cache so a hostile client can't grow it unboundedly by sending
+// many distinct (user, area) pairs. When we exceed the cap, drop the
+// oldest half — Map preserves insertion order.
+const THROTTLE_CACHE_MAX = 5000;
+
+function pruneThrottleCache(now: number): void {
+  for (const [key, expiresAt] of throttleCache) {
+    if (expiresAt <= now) throttleCache.delete(key);
+  }
+  if (throttleCache.size > THROTTLE_CACHE_MAX) {
+    const toDrop = throttleCache.size - Math.floor(THROTTLE_CACHE_MAX / 2);
+    let dropped = 0;
+    for (const key of throttleCache.keys()) {
+      throttleCache.delete(key);
+      if (++dropped >= toDrop) break;
+    }
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 204, headers: corsHeaders });
