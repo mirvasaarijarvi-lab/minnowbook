@@ -236,6 +236,11 @@ Deno.serve(async (req) => {
     typeof body.attemptedPath === "string"
       ? body.attemptedPath.slice(0, 500)
       : null;
+  // Sanitize the admin-cache snapshot up-front (cheap, no I/O) so the
+  // value is ready by the time we build the audit row, and so a malformed
+  // snapshot is dropped before throttling/tenant resolution rather than
+  // after.
+  const adminCheckState = sanitizeAdminCheckState(body.adminCheckState);
 
   // Throttle: short-circuit repeated beacons for the same (user, area)
   // pair within the cooldown window. We do this BEFORE allocating the
