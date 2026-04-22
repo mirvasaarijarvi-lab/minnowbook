@@ -1,6 +1,7 @@
 import SEOHead, { breadcrumbSchema } from "@/components/SEOHead";
 import MarketingHeader from "@/components/MarketingHeader";
 import MarketingFooter from "@/components/MarketingFooter";
+import SupportContactForm from "@/components/SupportContactForm";
 import { Input } from "@/components/ui/input";
 import { useState, useMemo } from "react";
 import {
