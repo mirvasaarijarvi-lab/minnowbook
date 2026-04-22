@@ -87,18 +87,33 @@ function errorCode(a: Attempt): string {
 }
 
 /**
- * The full set of stable error codes the redeem function may return.
- * Mirrors `ERROR_CODES` in supabase/functions/redeem-access-code/index.ts.
- * If a new code is added there, add it here too — and verify no existing
- * code was renamed (that would be a contract break).
+ * The full set of stable error codes that may appear in a 4xx response
+ * for the redeem function:
+ *   - codes emitted by our handler (mirrors `ERROR_CODES` in
+ *     supabase/functions/redeem-access-code/index.ts)
+ *   - codes emitted by the Supabase Functions auth gateway BEFORE our
+ *     handler runs (e.g. when there is no Authorization header at all,
+ *     the gateway short-circuits with UNAUTHORIZED_NO_AUTH_HEADER).
+ *
+ * If a new code is added on either side, add it here too — and verify
+ * no existing code was renamed (that would be a contract break).
  */
 const KNOWN_ERROR_CODES = new Set([
+  // Our handler's codes:
   "REQUEST_TOO_LARGE",
   "NOT_AUTHENTICATED",
   "INVALID_CODE_FORMAT",
   "NO_WORKSPACE",
   "INVALID_OR_UNAVAILABLE_CODE",
   "INTERNAL_ERROR",
+  // Supabase Functions gateway codes (returned before our handler runs):
+  "UNAUTHORIZED_NO_AUTH_HEADER",
+]);
+
+/** Codes that mean "auth was rejected", from either layer. */
+const AUTH_REJECTION_CODES = new Set([
+  "NOT_AUTHENTICATED",
+  "UNAUTHORIZED_NO_AUTH_HEADER",
 ]);
 
 describe("redeem-access-code: brute-force & replay resilience", () => {
