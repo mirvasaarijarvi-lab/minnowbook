@@ -52,6 +52,13 @@ interface ReportEntry {
 
 interface ReportPayload {
   generatedAt: string;
+  /**
+   * Identifies which environment produced the report so local-stack and
+   * remote-staging artifacts stay distinguishable when downloaded
+   * side-by-side. Driven by the `RLS_REPORT_FLAVOR` env var (set by the CI
+   * workflows). Defaults to "default" when unset (e.g. running locally).
+   */
+  flavor: string;
   totals: {
     total: number;
     passed: number;
