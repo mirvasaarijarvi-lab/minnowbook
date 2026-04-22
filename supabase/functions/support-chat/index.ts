@@ -61,6 +61,17 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Origin allowlist gate: explicit 403 for browser requests from
+  // disallowed origins. Body is intentionally generic to avoid leaking
+  // any allowlist or routing details.
+  const reqOrigin = req.headers.get("Origin") || "";
+  if (reqOrigin && !isOriginAllowed(reqOrigin)) {
+    return new Response(JSON.stringify({ error: "Forbidden" }), {
+      status: 403,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
   // Rate limit check
   const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
     req.headers.get("cf-connecting-ip") || "unknown";
