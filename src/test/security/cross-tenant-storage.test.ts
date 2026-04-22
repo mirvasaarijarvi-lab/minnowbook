@@ -27,6 +27,45 @@ const adminClient: SupabaseClient | null =
       })
     : null;
 
+/**
+ * Per-run toggle for the multipart-intermediates sweep.
+ * ----------------------------------------------------
+ * Set `RLS_MULTIPART_SWEEP=off` (or `0`/`false`/`disabled`) to suppress
+ * `sweepMultipartIntermediates()` for this Vitest run. Default is ON,
+ * matching production CI behavior.
+ *
+ * Why this exists: when investigating an RLS regression, you want to
+ * know whether a path is "really" denied by RLS or just hidden because
+ * the post-test sweeper deleted the evidence. Running the suite twice —
+ * once with the sweep on, once with it off — and diffing the
+ * `storage-attempts.json` ledger gives a definitive answer.
+ *
+ * When disabled the helper still runs its bookkeeping (per-tenant
+ * stats, ledger entries) so the PDF clearly shows the sweep was
+ * deliberately skipped — never silently. Each tenant gets a single
+ * `admin-multipart` ledger row with `note: "SKIPPED ..."` and
+ * `removed: false`, so a reviewer comparing two runs can immediately
+ * tell which artifacts came from a sweeper-off comparison run.
+ *
+ * The synthetic-orphan describe block (which exists *to verify the
+ * sweeper works*) is also skipped when this flag is off — running it
+ * with the sweep disabled would always fail and would obscure the
+ * RLS-comparison signal we're trying to capture.
+ */
+const MULTIPART_SWEEP_RAW = (process.env.RLS_MULTIPART_SWEEP ?? "").trim().toLowerCase();
+const MULTIPART_SWEEP_ENABLED = !["off", "0", "false", "disabled", "no"].includes(
+  MULTIPART_SWEEP_RAW,
+);
+if (!MULTIPART_SWEEP_ENABLED) {
+  // Single startup banner so it's obvious in CI logs which mode the run
+  // is in. Printed once, regardless of how many describe blocks run.
+  // eslint-disable-next-line no-console
+  console.log(
+    `[cross-tenant-storage] RLS_MULTIPART_SWEEP=${process.env.RLS_MULTIPART_SWEEP} ` +
+      `→ multipart sweep DISABLED for this run (compare-mode)`,
+  );
+}
+
 // ---------------------------------------------------------------------
 // Timeout-bounded teardown primitives
 // ---------------------------------------------------------------------
