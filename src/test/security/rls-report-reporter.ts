@@ -70,6 +70,13 @@ interface ReportPayload {
     skipped: number;
     durationMs: number;
   };
+  /**
+   * Per-suite tenant-pair guard outcomes (validated tenant IDs +
+   * membership-probe pass/fail), populated by `guardTenantPair` via the
+   * file side-channel in `fixtures/tenant-guard-record.ts`. Empty array
+   * when no live cross-tenant suite ran (e.g. anon-only mode).
+   */
+  tenantGuard: TenantGuardRecord[];
   entries: ReportEntry[];
 }
 
