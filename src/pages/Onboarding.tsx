@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTenant } from "@/hooks/useTenant";
@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, ArrowLeft, Check, Crown, Zap, UtensilsCrossed, Building2, BedDouble, Palette } from "lucide-react";
+import { ArrowRight, ArrowLeft, Check, Crown, Zap, UtensilsCrossed, Building2, BedDouble, Palette, ShieldAlert, RefreshCw, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { canSelectMoreTypes, getTierLimits } from "@/lib/tier-limits";
 import { useT } from "@/contexts/I18nContext";
