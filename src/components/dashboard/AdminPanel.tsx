@@ -27,6 +27,7 @@ import LoginHistoryPanel from "./LoginHistoryPanel";
 import AuditLogPanel from "./AuditLogPanel";
 import PermissionsEditor from "./PermissionsEditor";
 import HealthCheckPanel from "./HealthCheckPanel";
+import EmailLogPanel from "./EmailLogPanel";
 
 interface SiteAssignment {
   id?: string;
@@ -554,6 +555,9 @@ const AdminPanel = () => {
 
       {/* Login History */}
       <LoginHistoryPanel />
+
+      {/* Email Log */}
+      <EmailLogPanel />
 
       {/* Audit / Change Log */}
       <AuditLogPanel />
