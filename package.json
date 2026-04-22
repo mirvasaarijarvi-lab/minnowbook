@@ -10,7 +10,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:rls-report": "vitest run --reporter=default --reporter=./src/test/security/rls-report-reporter.ts src/test/security/cross-tenant-rls.test.ts src/test/security/cross-tenant-storage.test.ts src/test/security/tenant-table-manifest.test.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

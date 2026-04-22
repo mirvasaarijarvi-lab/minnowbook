@@ -77,7 +77,7 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
-      - name: Run cross-tenant RLS tests (live)
+      - name: Run cross-tenant RLS tests (live) + generate report
         env:
           # Public Supabase config — exposed to Vite via import.meta.env
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
@@ -89,14 +89,33 @@ jobs:
           RLS_TEST_TENANT_B_EMAIL: ${{ secrets.RLS_TEST_TENANT_B_EMAIL }}
           RLS_TEST_TENANT_B_PASSWORD: ${{ secrets.RLS_TEST_TENANT_B_PASSWORD }}
           RLS_TEST_TENANT_B_ID: ${{ secrets.RLS_TEST_TENANT_B_ID }}
-        run: |
-          bunx vitest run --reporter=verbose \
-            src/test/security/cross-tenant-rls.test.ts \
-            src/test/security/cross-tenant-storage.test.ts
+        run: bun run test:rls-report
+
+      - name: Upload RLS report
+        # Always upload — even on test failure — so the HTML/JSON dashboard
+        # is available for triage from the workflow run page.
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rls-report
+          path: reports/
+          retention-days: 30
 
       - name: Summary
         if: always()
-        run: echo "Cross-tenant RLS live-mode tests completed"
+        run: |
+          echo "Cross-tenant RLS live-mode tests completed"
+          if [ -f reports/rls-report.json ]; then
+            echo ""
+            echo "### RLS Report Summary" >> "$GITHUB_STEP_SUMMARY"
+            node -e "const r=require('./reports/rls-report.json'); const t=r.totals; console.log('| Metric | Value |\n|---|---|\n| Total | '+t.total+' |\n| Passed | '+t.passed+' |\n| Failed | '+t.failed+' |\n| Skipped | '+t.skipped+' |');" >> "$GITHUB_STEP_SUMMARY"
+            FAILED=$(node -e "console.log(require('./reports/rls-report.json').entries.filter(e=>e.status==='failed').map(e=>'- **'+e.fullName+'**: '+(e.errorMessage||'(no message)').split('\\n')[0]).join('\\n'))")
+            if [ -n "$FAILED" ]; then
+              echo "" >> "$GITHUB_STEP_SUMMARY"
+              echo "#### Failures" >> "$GITHUB_STEP_SUMMARY"
+              echo "$FAILED" >> "$GITHUB_STEP_SUMMARY"
+            fi
+          fi
 
   skipped-notice:
     name: Cross-Tenant RLS (skipped)
