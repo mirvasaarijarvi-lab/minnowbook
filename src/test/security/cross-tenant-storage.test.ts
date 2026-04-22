@@ -2076,6 +2076,26 @@ describe("Cross-Tenant Storage RLS Tests", () => {
     },
   ];
 
+  /**
+   * Subset of `adversarialPaths()` labels whose intent is to ESCAPE the
+   * caller's prefix via `..` / encoded-slash traversal — as opposed to
+   * direct-probe variants (double-slash, leading-slash, brace-wrappers,
+   * backslashes, NUL truncation) that legitimately START with the
+   * victim's tenant id and only abuse separator handling.
+   *
+   * The path-shape "no escape" assertion below only applies to the
+   * traversal family. For direct-probe variants, the only meaningful
+   * defence is RLS denying the cross-tenant write — which is asserted
+   * separately via `expect(result.error).toBeTruthy()`.
+   */
+  const TRAVERSAL_LABELS = new Set([
+    "dot-segment-traversal",
+    "url-encoded-slash",
+    "double-encoded-slash",
+    "url-encoded-dot-dot",
+    "url-encoded-slash-plus-dot-dot",
+  ]);
+
   describe.runIf(hasSupabaseConfig)("Anonymous adversarial path normalization", () => {
     let anon: SupabaseClient;
     // Use a synthetic tenant id as the "victim" — we don't need a real
