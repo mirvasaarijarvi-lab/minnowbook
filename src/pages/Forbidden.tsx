@@ -78,6 +78,7 @@ const Forbidden = ({
   attemptedArea = "this area",
   areaSlug,
   message,
+  adminCheckState,
 }: ForbiddenProps) => {
   const [beaconStatus, setBeaconStatus] = useState<number | "unreachable" | null>(null);
   // Resolve once per render: explicit slug wins, otherwise derive from the
