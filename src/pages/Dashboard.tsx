@@ -41,6 +41,7 @@ import SamplePeriodBanner from "@/components/dashboard/SamplePeriodBanner";
 import OnboardingChecklist from "@/components/dashboard/OnboardingChecklist";
 import QuickActionsFAB from "@/components/dashboard/QuickActionsFAB";
 import KeyboardShortcutsModal from "@/components/dashboard/KeyboardShortcutsModal";
+import TenantBadge from "@/components/dashboard/TenantBadge";
 import ThemeToggle from "@/components/ThemeToggle";
 import { useSamplePeriod } from "@/hooks/useSamplePeriod";
 import { Button } from "@/components/ui/button";
@@ -303,6 +304,7 @@ const Dashboard = () => {
           </button>
           <Logo variant="color" size="sm" showText={false} />
           <div className="flex items-center gap-1">
+            <TenantBadge compact />
             <NotificationBell />
             <LanguageSwitcher variant="compact" />
             <Tooltip>
@@ -337,6 +339,7 @@ const Dashboard = () => {
           <div className="flex items-center justify-between mb-0">
             <div />
             <div className="hidden lg:flex items-center gap-2">
+              <TenantBadge />
               <ThemeToggle />
               <NotificationBell />
               <Button
