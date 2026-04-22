@@ -37,6 +37,7 @@ import AccessCodesPanel from "@/components/dashboard/AccessCodesPanel";
 import BetaFeedbackPanel from "@/components/dashboard/BetaFeedbackPanel";
 import SuperadminLoginHistory from "@/components/dashboard/SuperadminLoginHistory";
 import StripeRevenuePanel from "@/components/dashboard/StripeRevenuePanel";
+import TenantMembershipCheckPanel from "@/components/dashboard/TenantMembershipCheckPanel";
 
 interface TenantWithStats {
   id: string;
