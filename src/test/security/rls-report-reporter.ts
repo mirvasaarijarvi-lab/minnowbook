@@ -394,10 +394,15 @@ export default class RlsReportReporter implements Reporter {
     const flavor = (process.env.RLS_REPORT_FLAVOR ?? "default").trim() || "default";
     const safeFlavor = flavor.replace(/[^a-zA-Z0-9_-]+/g, "-").toLowerCase();
 
+    // Pull guard outcomes recorded by `guardTenantPair` via the file
+    // side-channel. Empty when no live cross-tenant suite ran.
+    const tenantGuard = readTenantGuardLog().records;
+
     const payload: ReportPayload = {
       generatedAt: new Date().toISOString(),
       flavor,
       totals,
+      tenantGuard,
       entries,
     };
 
