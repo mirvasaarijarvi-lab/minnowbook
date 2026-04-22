@@ -880,40 +880,27 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       afterAll(async () => {
         const clientFor = (key: "a" | "b") => (key === "a" ? clientA : clientB);
 
-        // 1. Remove successful own-tenant sanity uploads.
-        for (const { bucket, path, client } of uploadedPaths) {
-          try {
-            await clientFor(client).storage.from(bucket).remove([path]);
-          } catch {
-            /* ignore — best-effort */
-          }
-        }
+        // Each phase below is bounded per-call by withTimeout (inside the
+        // helpers) so a single hung remove() can't stall the rest. The
+        // admin sweep at the end is the deterministic backstop — even if
+        // every per-client call timed out, it lists and removes anything
+        // still under our RUN_ID folder.
 
-        // 2. Remove any orphans from cross-tenant attempts. We try as the
+        // 1. Remove successful own-tenant sanity uploads.
+        await teardownOwnedPaths(uploadedPaths, clientFor);
+
+        // 2. Remove any orphans from cross-tenant attempts. Try as the
         //    attacker first (catches "wrote to my own folder by mistake")
         //    and then as the owner (catches "RLS bypassed and the file
-        //    actually landed in the foreign folder"). Both paths are no-ops
-        //    if the file doesn't exist, so there's no harm in always trying.
-        const seen = new Set<string>();
-        for (const { bucket, path, attacker, owner } of crossTenantAttempts) {
-          const key = `${bucket}::${path}`;
-          if (seen.has(key)) continue;
-          seen.add(key);
+        //    actually landed in the foreign folder").
+        await teardownAttemptPaths(crossTenantAttempts, clientFor);
 
-          for (const role of [attacker, owner] as const) {
-            try {
-              await clientFor(role).storage.from(bucket).remove([path]);
-            } catch {
-              /* ignore */
-            }
-          }
-        }
-
-        // 3. Final safety net: list-and-remove anything still tagged with
-        //    this run's RUN_ID under either tenant's __rls_test__ folder
-        //    in either bucket. Catches files left by partial uploads, by a
-        //    true RLS bypass that the per-client paths above couldn't
-        //    enumerate, or by a previous interrupted CI job.
+        // 3. Final safety net: multi-pass list-and-remove anything still
+        //    tagged with this run's RUN_ID under either tenant's
+        //    __rls_test__ folder in either bucket. Picks up files left
+        //    behind by partial uploads, by a true RLS bypass that the
+        //    per-client paths above couldn't enumerate, by a previous
+        //    interrupted CI job, OR by the per-client phase timing out.
         await sweepTestArtifacts(PRIVATE_BUCKET, [liveCreds.a.tenantId!, liveCreds.b.tenantId!]);
         await sweepTestArtifacts(ASSETS_BUCKET, [liveCreds.a.tenantId!, liveCreds.b.tenantId!]);
       });
@@ -1187,27 +1174,13 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       afterAll(async () => {
         const clientFor = (key: "a" | "b") => (key === "a" ? clientA : clientB);
 
-        for (const { bucket, path, client } of ownNestedUploads) {
-          try {
-            await clientFor(client).storage.from(bucket).remove([path]);
-          } catch {
-            /* ignore */
-          }
-        }
-
-        const seen = new Set<string>();
-        for (const { bucket, path, attacker, owner } of nestedAttempts) {
-          const key = `${bucket}::${path}`;
-          if (seen.has(key)) continue;
-          seen.add(key);
-          for (const role of [attacker, owner] as const) {
-            try {
-              await clientFor(role).storage.from(bucket).remove([path]);
-            } catch {
-              /* ignore */
-            }
-          }
-        }
+        // Per-call bounded — see teardownOwnedPaths / teardownAttemptPaths.
+        // Nested-path tests are the most likely to leave partial-success
+        // orphans (deep folder structures + hangs), so the admin sweep
+        // below is the real cleanup; the per-client passes are best-effort
+        // attempts to avoid quota churn.
+        await teardownOwnedPaths(ownNestedUploads, clientFor);
+        await teardownAttemptPaths(nestedAttempts, clientFor);
 
         await sweepTestArtifacts(PRIVATE_BUCKET, [liveCreds.a.tenantId!, liveCreds.b.tenantId!]);
         await sweepTestArtifacts(ASSETS_BUCKET, [liveCreds.a.tenantId!, liveCreds.b.tenantId!]);
@@ -1460,19 +1433,12 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       afterAll(async () => {
         const clientFor = (key: "a" | "b") => (key === "a" ? clientA : clientB);
 
-        const seen = new Set<string>();
-        for (const { bucket, path, attacker, owner } of adversarialAttempts) {
-          const key = `${bucket}::${path}`;
-          if (seen.has(key)) continue;
-          seen.add(key);
-          for (const role of [attacker, owner] as const) {
-            try {
-              await clientFor(role).storage.from(bucket).remove([path]);
-            } catch {
-              /* ignore — most of these paths are malformed and remove() will throw */
-            }
-          }
-        }
+        // Adversarial paths (URL-encoded slashes, null bytes, backslashes)
+        // are the MOST likely to hang remove() on the gateway. The
+        // per-call timeout in teardownAttemptPaths guarantees forward
+        // progress; the admin sweep below converges on the actual
+        // residual set by listing instead of trusting the malformed key.
+        await teardownAttemptPaths(adversarialAttempts, clientFor);
 
         await sweepTestArtifacts(PRIVATE_BUCKET, [liveCreds.a.tenantId!, liveCreds.b.tenantId!]);
         await sweepTestArtifacts(ASSETS_BUCKET, [liveCreds.a.tenantId!, liveCreds.b.tenantId!]);
@@ -1758,19 +1724,10 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       afterAll(async () => {
         const clientFor = (key: "a" | "b") => (key === "a" ? clientA : clientB);
 
-        const seen = new Set<string>();
-        for (const { bucket, path, attacker, owner } of lateAttempts) {
-          const key = `${bucket}::${path}`;
-          if (seen.has(key)) continue;
-          seen.add(key);
-          for (const role of [attacker, owner] as const) {
-            try {
-              await clientFor(role).storage.from(bucket).remove([path]);
-            } catch {
-              /* ignore — attacker won't have rights, owner may not see it */
-            }
-          }
-        }
+        // Late-segment attempts share the same hang risk as adversarial
+        // ones (tenant-id buried in deep folders → larger key, slower
+        // gateway round-trip). Bounded per-call cleanup + admin sweep.
+        await teardownAttemptPaths(lateAttempts, clientFor);
 
         await sweepTestArtifacts(PRIVATE_BUCKET, [
           liveCreds.a.tenantId!,
@@ -1976,13 +1933,12 @@ describe("Cross-Tenant Storage RLS Tests", () => {
 
       afterAll(async () => {
         const clientFor = (key: "a" | "b") => (key === "a" ? clientA : clientB);
-        for (const { path, client } of seededAssets) {
-          try {
-            await clientFor(client).storage.from(ASSETS_BUCKET).remove([path]);
-          } catch {
-            /* ignore — best-effort */
-          }
-        }
+        // seededAssets has no `bucket` field — it's all ASSETS_BUCKET. Map
+        // to the shared shape so we get the same per-call timeout treatment.
+        await teardownOwnedPaths(
+          seededAssets.map((s) => ({ bucket: ASSETS_BUCKET, path: s.path, client: s.client })),
+          clientFor,
+        );
         await sweepTestArtifacts(ASSETS_BUCKET, [liveCreds.a.tenantId!, liveCreds.b.tenantId!]);
       });
 
