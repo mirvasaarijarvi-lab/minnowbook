@@ -35,7 +35,7 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { CalendarIcon, Loader2, Tag } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { computeBookingCapacity, logBookingValidation } from "@/lib/booking-validation-log";
+import { computeBookingCapacity, logBookingValidation, buildValidationReasons } from "@/lib/booking-validation-log";
 
 interface ManualReservationDialogProps {
   open: boolean;
