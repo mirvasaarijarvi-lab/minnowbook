@@ -404,16 +404,27 @@ const KitchenOrdersPanel = () => {
                       ))}
                     </div>
                   )}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="gap-1.5 print:hidden"
-                    onClick={() => addOrder.mutate(r.id)}
-                    disabled={addOrder.isPending}
-                  >
-                    <Plus className="h-4 w-4" />
-                    {t("kitchen.addItem")}
-                  </Button>
+                  <div className="flex flex-wrap gap-2 print:hidden">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-1.5"
+                      onClick={() => addOrder.mutate(r.id)}
+                      disabled={addOrder.isPending}
+                    >
+                      <Plus className="h-4 w-4" />
+                      {t("kitchen.addItem")}
+                    </Button>
+                    {menuItems.length > 0 && (
+                      <MenuPicker
+                        menuItems={menuItems}
+                        onPick={(menuItem) =>
+                          addOrderFromMenu.mutate({ reservationId: r.id, menuItem })
+                        }
+                        t={t}
+                      />
+                    )}
+                  </div>
                 </CardContent>
               </Card>
             );
