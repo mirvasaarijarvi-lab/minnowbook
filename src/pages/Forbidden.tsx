@@ -145,10 +145,23 @@ const Forbidden = ({
     };
   }, [resolvedSlug]);
 
+  // Audit beacon outcome, surfaced as a small dev-only indicator below the
+  // 403 copy. Values:
+  //   - null: in-flight / not yet attempted
+  //   - "skipped": no session, so we deliberately didn't beacon
+  //   - "logged": edge function returned { logged: true }
+  //   - "not_logged": edge function returned { logged: false } (e.g. no_tenant)
+  //   - "error": network/CORS/exception path
+  const [auditStatus, setAuditStatus] = useState<
+    "logged" | "not_logged" | "skipped" | "error" | null
+  >(null);
+  const [auditReason, setAuditReason] = useState<string | null>(null);
+
   // Persist the denial to the audit_log so tenant owners and system admins
   // can review forbidden-access attempts. The edge function resolves the
   // caller's user id from their JWT and writes user_id + timestamp + the
-  // attempted area. Fire-and-forget; we don't surface failures to the UI.
+  // attempted area. Fire-and-forget; we don't surface failures to the UI
+  // (production), but the dev indicator below reflects the outcome.
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -157,23 +170,45 @@ const Forbidden = ({
         // reached behind <ProtectedRoute>, but defensively guard anyway so
         // we never fire an unauthenticated audit beacon.
         const { data: sessionData } = await supabase.auth.getSession();
-        if (cancelled || !sessionData?.session) return;
-        await supabase.functions.invoke("log-forbidden-access", {
-          method: "POST",
-          body: {
-            // Send the stable slug as the canonical attemptedArea so audit
-            // queries can group by route. Also include the human label for
-            // operator readability in the log UI.
-            attemptedArea: resolvedSlug,
-            attemptedAreaLabel: attemptedArea,
-            attemptedPath:
-              typeof window !== "undefined"
-                ? window.location.pathname + window.location.search
-                : null,
+        if (cancelled) return;
+        if (!sessionData?.session) {
+          setAuditStatus("skipped");
+          setAuditReason("no_session");
+          return;
+        }
+        const { data, error } = await supabase.functions.invoke(
+          "log-forbidden-access",
+          {
+            method: "POST",
+            body: {
+              // Send the stable slug as the canonical attemptedArea so audit
+              // queries can group by route. Also include the human label for
+              // operator readability in the log UI.
+              attemptedArea: resolvedSlug,
+              attemptedAreaLabel: attemptedArea,
+              attemptedPath:
+                typeof window !== "undefined"
+                  ? window.location.pathname + window.location.search
+                  : null,
+            },
           },
-        });
-      } catch {
+        );
+        if (cancelled) return;
+        if (error) {
+          setAuditStatus("error");
+          setAuditReason(error.message ?? "invoke_error");
+          return;
+        }
+        const logged = (data as { logged?: boolean; reason?: string } | null)?.logged;
+        const reason = (data as { logged?: boolean; reason?: string } | null)?.reason ?? null;
+        setAuditStatus(logged ? "logged" : "not_logged");
+        setAuditReason(reason);
+      } catch (err) {
         // Audit logging is best-effort — never block the user experience.
+        if (!cancelled) {
+          setAuditStatus("error");
+          setAuditReason(err instanceof Error ? err.message : "exception");
+        }
       }
     })();
     return () => {
