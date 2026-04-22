@@ -41,7 +41,7 @@ const SystemAdminRoute = ({
   attemptedArea = "the Superadmin area",
   areaSlug = "superadmin",
 }: SystemAdminRouteProps) => {
-  const { isSystemAdmin, isLoading } = useIsSystemAdmin();
+  const { isSystemAdmin, isLoading, cacheState } = useIsSystemAdmin();
 
   if (isLoading) {
     return (
@@ -56,7 +56,18 @@ const SystemAdminRoute = ({
   }
 
   if (!isSystemAdmin) {
-    return <Forbidden attemptedArea={attemptedArea} areaSlug={areaSlug} />;
+    // Forward the cache state at the moment of denial so the audit row
+    // captures whether the admin lookup was fresh, stale, errored, or
+    // still loading. This is the only place we hold that snapshot — the
+    // Forbidden page itself can't re-derive it without re-subscribing
+    // to the same query (which would race with the unmounting guard).
+    return (
+      <Forbidden
+        attemptedArea={attemptedArea}
+        areaSlug={areaSlug}
+        adminCheckState={cacheState}
+      />
+    );
   }
 
   return <>{children}</>;
