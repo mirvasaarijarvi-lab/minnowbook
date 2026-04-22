@@ -6,7 +6,11 @@ import {
   recordCleanup,
   recordUpload,
 } from "./storage-attempt-ledger";
-import { guardTenantPair } from "./fixtures/tenant-id-guard";
+import {
+  guardTenantPair,
+  assertDistinctTenantPairIds,
+  assertTenantMembership,
+} from "./fixtures/tenant-id-guard";
 
 /**
  * Service-role client used as a final cleanup safety net. Only constructed
@@ -527,10 +531,124 @@ async function sweepMultipartIntermediates(bucket: string, tenantIds: string[]) 
  * Convenience wrapper for cleanup paths that want the admin (service-role)
  * sweep — the strictest version, used as the final safety net. No-op if no
  * service role key is configured (e.g. local dev without CI secrets).
+ *
+ * Runs `cleanupPreflight` IMMEDIATELY before delegating to the recursive
+ * sweep so a misconfigured tenant pair (env drift, sign-in expiry,
+ * membership mutated mid-run) can never cause the admin client to list
+ * or remove files under the wrong folder. When the preflight fails the
+ * sweep is skipped entirely and the failure is ledgered.
+ *
+ * `clients` is optional and only used in live mode — pass it to also
+ * re-probe `tenant_users` membership for each tenant id. Anon blocks
+ * pass undefined and only get the UUID/distinctness shape check.
  */
-async function sweepTestArtifacts(bucket: string, tenantIds: string[]) {
+async function sweepTestArtifacts(
+  bucket: string,
+  tenantIds: string[],
+  preflightOpts?: {
+    scope: string;
+    clients?: Record<string, { client: SupabaseClient; email?: string }>;
+  },
+) {
   if (!adminClient) return;
+  const preflight = await cleanupPreflight({
+    tenantIds,
+    clients: preflightOpts?.clients,
+    scope: preflightOpts?.scope ?? `sweepTestArtifacts:${bucket}`,
+  });
+  if (!preflight.ok) return;
   await sweepRunIdFolder(bucket, tenantIds, adminClient);
+}
+
+/**
+ * Cleanup preflight — last-line guard that runs IMMEDIATELY before any
+ * file removal. We already validated the tenant pair at sign-in time via
+ * `guardTenantPair`, but the cleanup path is the place where a stale env
+ * var, a mid-run mutation to `tenant_users`, or a copy-paste typo turns
+ * "delete from the right folder" into "delete from a real customer's
+ * folder". Re-validating here keeps the blast radius bounded:
+ *
+ *   - **UUID + distinctness**: cheap, deterministic, catches env drift
+ *     and accidental same-tenant configs (`assertDistinctTenantPairIds`
+ *     is the same helper guard uses, so the contract can't drift).
+ *   - **Membership probe (live mode only)**: confirms each authenticated
+ *     client is STILL a member of the tenant whose folder we're about to
+ *     scrub. If a test mutated membership (or sign-in silently expired
+ *     mid-run), the probe surfaces it before any `remove()` fires.
+ *
+ * On failure: returns `{ ok: false }` and ledgers a `cleanup-preflight`
+ * note so the PDF report explains why cleanup was skipped. The caller
+ * MUST short-circuit cleanup when `ok` is false — the comment block at
+ * each call site repeats this contract.
+ *
+ * Anon-only blocks pass `clients: undefined` to skip the membership probe
+ * (there's no authenticated user to probe), but still get the UUID +
+ * distinctness check on whatever tenant ids they're about to sweep.
+ */
+async function cleanupPreflight(opts: {
+  /** Tenant ids the cleanup is about to operate on. Must be 1 or 2 ids. */
+  tenantIds: string[];
+  /**
+   * Live-mode clients keyed by tenant id, used to re-probe membership.
+   * Omit for anon blocks — they're scrubbing a synthetic tenant id that
+   * no one is a member of, so the membership check would never apply.
+   */
+  clients?: Record<string, { client: SupabaseClient; email?: string }>;
+  /** Suite block label, surfaced in the ledger note for triage. */
+  scope: string;
+}): Promise<{ ok: boolean; reason?: string }> {
+  const { tenantIds, clients, scope } = opts;
+  // Anon blocks operate on a synthetic single tenant id — only the UUID
+  // shape matters there. Live blocks always pass exactly two ids and we
+  // re-run the full distinct-pair check.
+  try {
+    if (tenantIds.length === 2) {
+      assertDistinctTenantPairIds(tenantIds[0], tenantIds[1], {
+        envPrefix: "RLS_TEST_TENANT",
+      });
+    } else {
+      // Single-tenant cleanup (anon synthetic): just confirm UUID shape.
+      const id = (tenantIds[0] ?? "").trim();
+      const ok = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+      if (!ok) {
+        throw new Error(
+          `Cleanup preflight: tenant id "${id}" is not a valid UUID — refusing to sweep.`,
+        );
+      }
+    }
+
+    if (clients) {
+      for (const tenantId of tenantIds) {
+        const probeTarget = clients[tenantId];
+        if (!probeTarget) continue;
+        await assertTenantMembership(probeTarget.client, {
+          label: tenantId.slice(0, 8),
+          expectedTenantId: tenantId,
+          email: probeTarget.email,
+        });
+      }
+    }
+    return { ok: true };
+  } catch (err) {
+    const reason = err instanceof Error ? err.message : String(err);
+    // Ledger one entry per tenant id we WOULD have touched, so the PDF
+    // makes it impossible to miss that cleanup was deliberately skipped.
+    for (const tenantId of tenantIds) {
+      recordCleanup({
+        bucket: "(preflight)",
+        path: `${tenantId}/__rls_test__/${RUN_ID}`,
+        role: "admin-sweep",
+        removed: false,
+        note: `cleanup-preflight skipped scope="${scope}": ${reason}`,
+      });
+    }
+    // eslint-disable-next-line no-console
+    console.warn(
+      `[cross-tenant-storage] cleanup preflight FAILED for "${scope}" — ` +
+        `skipping deletions to avoid touching the wrong folder.\n  reason: ${reason}`,
+    );
+    return { ok: false, reason };
+  }
 }
 
 /**
@@ -872,6 +990,24 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       afterAll(async () => {
         const clientFor = (key: "a" | "b") => (key === "a" ? clientA : clientB);
 
+        // Last-line preflight: re-validate tenant pair distinctness AND
+        // re-probe membership for both authenticated clients RIGHT
+        // BEFORE we delete anything. Catches env drift, expired sessions,
+        // or membership mutations that happened mid-run. If anything is
+        // off we skip every removal in this block — better to leak test
+        // artifacts under our own RUN_ID than to delete from the wrong
+        // tenant folder. The failure is ledgered for the PDF report.
+        const preflightClients = {
+          [liveCreds.a.tenantId!]: { client: clientA, email: liveCreds.a.email },
+          [liveCreds.b.tenantId!]: { client: clientB, email: liveCreds.b.email },
+        };
+        const preflight = await cleanupPreflight({
+          tenantIds: [liveCreds.a.tenantId!, liveCreds.b.tenantId!],
+          clients: preflightClients,
+          scope: "live-cross-tenant-flat",
+        });
+        if (!preflight.ok) return;
+
         // Each phase below is bounded per-call by withTimeout (inside the
         // helpers) so a single hung remove() can't stall the rest. The
         // admin sweep at the end is the deterministic backstop — even if
@@ -893,8 +1029,18 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         //    behind by partial uploads, by a true RLS bypass that the
         //    per-client paths above couldn't enumerate, by a previous
         //    interrupted CI job, OR by the per-client phase timing out.
-        await sweepTestArtifacts(PRIVATE_BUCKET, [liveCreds.a.tenantId!, liveCreds.b.tenantId!]);
-        await sweepTestArtifacts(ASSETS_BUCKET, [liveCreds.a.tenantId!, liveCreds.b.tenantId!]);
+        //    The sweep itself ALSO re-runs the preflight as a defense in
+        //    depth — pass the same scope so the ledger is unambiguous.
+        await sweepTestArtifacts(
+          PRIVATE_BUCKET,
+          [liveCreds.a.tenantId!, liveCreds.b.tenantId!],
+          { scope: "live-cross-tenant-flat:sweep", clients: preflightClients },
+        );
+        await sweepTestArtifacts(
+          ASSETS_BUCKET,
+          [liveCreds.a.tenantId!, liveCreds.b.tenantId!],
+          { scope: "live-cross-tenant-flat:sweep", clients: preflightClients },
+        );
       });
 
       // ---------- Positive controls: own-tenant access works ----------
@@ -1166,6 +1312,20 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       afterAll(async () => {
         const clientFor = (key: "a" | "b") => (key === "a" ? clientA : clientB);
 
+        // Last-line preflight (see live-cross-tenant-flat block for the
+        // full rationale). Without this, a bad env var or expired sign-in
+        // could send the admin sweep against the wrong tenant folder.
+        const preflightClients = {
+          [liveCreds.a.tenantId!]: { client: clientA, email: liveCreds.a.email },
+          [liveCreds.b.tenantId!]: { client: clientB, email: liveCreds.b.email },
+        };
+        const preflight = await cleanupPreflight({
+          tenantIds: [liveCreds.a.tenantId!, liveCreds.b.tenantId!],
+          clients: preflightClients,
+          scope: "live-cross-tenant-nested",
+        });
+        if (!preflight.ok) return;
+
         // Per-call bounded — see teardownOwnedPaths / teardownAttemptPaths.
         // Nested-path tests are the most likely to leave partial-success
         // orphans (deep folder structures + hangs), so the admin sweep
@@ -1174,8 +1334,16 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         await teardownOwnedPaths(ownNestedUploads, clientFor);
         await teardownAttemptPaths(nestedAttempts, clientFor);
 
-        await sweepTestArtifacts(PRIVATE_BUCKET, [liveCreds.a.tenantId!, liveCreds.b.tenantId!]);
-        await sweepTestArtifacts(ASSETS_BUCKET, [liveCreds.a.tenantId!, liveCreds.b.tenantId!]);
+        await sweepTestArtifacts(
+          PRIVATE_BUCKET,
+          [liveCreds.a.tenantId!, liveCreds.b.tenantId!],
+          { scope: "live-cross-tenant-nested:sweep", clients: preflightClients },
+        );
+        await sweepTestArtifacts(
+          ASSETS_BUCKET,
+          [liveCreds.a.tenantId!, liveCreds.b.tenantId!],
+          { scope: "live-cross-tenant-nested:sweep", clients: preflightClients },
+        );
       });
 
       for (const scenario of NESTED_SCENARIOS) {
@@ -1634,6 +1802,20 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       afterAll(async () => {
         const clientFor = (key: "a" | "b") => (key === "a" ? clientA : clientB);
 
+        // Last-line preflight (see live-cross-tenant-flat block for the
+        // full rationale). Adversarial paths are exactly the kind of
+        // payload where a misconfigured cleanup could do the most damage.
+        const preflightClients = {
+          [liveCreds.a.tenantId!]: { client: clientA, email: liveCreds.a.email },
+          [liveCreds.b.tenantId!]: { client: clientB, email: liveCreds.b.email },
+        };
+        const preflight = await cleanupPreflight({
+          tenantIds: [liveCreds.a.tenantId!, liveCreds.b.tenantId!],
+          clients: preflightClients,
+          scope: "live-cross-tenant-adversarial",
+        });
+        if (!preflight.ok) return;
+
         // Adversarial paths (URL-encoded slashes, null bytes, backslashes)
         // are the MOST likely to hang remove() on the gateway. The
         // per-call timeout in teardownAttemptPaths guarantees forward
@@ -1641,8 +1823,16 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         // residual set by listing instead of trusting the malformed key.
         await teardownAttemptPaths(adversarialAttempts, clientFor);
 
-        await sweepTestArtifacts(PRIVATE_BUCKET, [liveCreds.a.tenantId!, liveCreds.b.tenantId!]);
-        await sweepTestArtifacts(ASSETS_BUCKET, [liveCreds.a.tenantId!, liveCreds.b.tenantId!]);
+        await sweepTestArtifacts(
+          PRIVATE_BUCKET,
+          [liveCreds.a.tenantId!, liveCreds.b.tenantId!],
+          { scope: "live-cross-tenant-adversarial:sweep", clients: preflightClients },
+        );
+        await sweepTestArtifacts(
+          ASSETS_BUCKET,
+          [liveCreds.a.tenantId!, liveCreds.b.tenantId!],
+          { scope: "live-cross-tenant-adversarial:sweep", clients: preflightClients },
+        );
       });
 
       // Test BOTH directions (A→B and B→A) for every variant on both
@@ -1925,19 +2115,33 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       afterAll(async () => {
         const clientFor = (key: "a" | "b") => (key === "a" ? clientA : clientB);
 
+        // Last-line preflight (see live-cross-tenant-flat block).
+        const preflightClients = {
+          [liveCreds.a.tenantId!]: { client: clientA, email: liveCreds.a.email },
+          [liveCreds.b.tenantId!]: { client: clientB, email: liveCreds.b.email },
+        };
+        const preflight = await cleanupPreflight({
+          tenantIds: [liveCreds.a.tenantId!, liveCreds.b.tenantId!],
+          clients: preflightClients,
+          scope: "live-cross-tenant-late-segment",
+        });
+        if (!preflight.ok) return;
+
         // Late-segment attempts share the same hang risk as adversarial
         // ones (tenant-id buried in deep folders → larger key, slower
         // gateway round-trip). Bounded per-call cleanup + admin sweep.
         await teardownAttemptPaths(lateAttempts, clientFor);
 
-        await sweepTestArtifacts(PRIVATE_BUCKET, [
-          liveCreds.a.tenantId!,
-          liveCreds.b.tenantId!,
-        ]);
-        await sweepTestArtifacts(ASSETS_BUCKET, [
-          liveCreds.a.tenantId!,
-          liveCreds.b.tenantId!,
-        ]);
+        await sweepTestArtifacts(
+          PRIVATE_BUCKET,
+          [liveCreds.a.tenantId!, liveCreds.b.tenantId!],
+          { scope: "live-cross-tenant-late-segment:sweep", clients: preflightClients },
+        );
+        await sweepTestArtifacts(
+          ASSETS_BUCKET,
+          [liveCreds.a.tenantId!, liveCreds.b.tenantId!],
+          { scope: "live-cross-tenant-late-segment:sweep", clients: preflightClients },
+        );
       });
 
       // Bi-directional: A→B and B→A. Each direction uses the
@@ -2134,13 +2338,30 @@ describe("Cross-Tenant Storage RLS Tests", () => {
 
       afterAll(async () => {
         const clientFor = (key: "a" | "b") => (key === "a" ? clientA : clientB);
+
+        // Last-line preflight (see live-cross-tenant-flat block).
+        const preflightClients = {
+          [liveCreds.a.tenantId!]: { client: clientA, email: liveCreds.a.email },
+          [liveCreds.b.tenantId!]: { client: clientB, email: liveCreds.b.email },
+        };
+        const preflight = await cleanupPreflight({
+          tenantIds: [liveCreds.a.tenantId!, liveCreds.b.tenantId!],
+          clients: preflightClients,
+          scope: "live-cross-tenant-assets-isolation",
+        });
+        if (!preflight.ok) return;
+
         // seededAssets has no `bucket` field — it's all ASSETS_BUCKET. Map
         // to the shared shape so we get the same per-call timeout treatment.
         await teardownOwnedPaths(
           seededAssets.map((s) => ({ bucket: ASSETS_BUCKET, path: s.path, client: s.client })),
           clientFor,
         );
-        await sweepTestArtifacts(ASSETS_BUCKET, [liveCreds.a.tenantId!, liveCreds.b.tenantId!]);
+        await sweepTestArtifacts(
+          ASSETS_BUCKET,
+          [liveCreds.a.tenantId!, liveCreds.b.tenantId!],
+          { scope: "live-cross-tenant-assets-isolation:sweep", clients: preflightClients },
+        );
       });
 
       // ---------- Positive controls (own tenant) ----------
@@ -2355,11 +2576,25 @@ describe("Cross-Tenant Storage RLS Tests", () => {
 
       afterAll(async () => {
         const clientFor = (key: "a" | "b") => (key === "a" ? clientA : clientB);
+        const preflightClients = {
+          [liveCreds.a.tenantId!]: { client: clientA, email: liveCreds.a.email },
+          [liveCreds.b.tenantId!]: { client: clientB, email: liveCreds.b.email },
+        };
+        const preflight = await cleanupPreflight({
+          tenantIds: [liveCreds.a.tenantId!, liveCreds.b.tenantId!],
+          clients: preflightClients,
+          scope: "live-cross-tenant-existence-oracle",
+        });
+        if (!preflight.ok) return;
         await teardownOwnedPaths(
           seededAssets.map((s) => ({ bucket: ASSETS_BUCKET, path: s.path, client: s.client })),
           clientFor,
         );
-        await sweepTestArtifacts(ASSETS_BUCKET, [liveCreds.a.tenantId!, liveCreds.b.tenantId!]);
+        await sweepTestArtifacts(
+          ASSETS_BUCKET,
+          [liveCreds.a.tenantId!, liveCreds.b.tenantId!],
+          { scope: "live-cross-tenant-existence-oracle:sweep", clients: preflightClients },
+        );
       });
 
       // ---------- createSignedUrl (the most common existence oracle) ----------
@@ -2650,11 +2885,25 @@ describe("Cross-Tenant Storage RLS Tests", () => {
 
       afterAll(async () => {
         const clientFor = (key: "a" | "b") => (key === "a" ? clientA : clientB);
+        const preflightClients = {
+          [liveCreds.a.tenantId!]: { client: clientA, email: liveCreds.a.email },
+          [liveCreds.b.tenantId!]: { client: clientB, email: liveCreds.b.email },
+        };
+        const preflight = await cleanupPreflight({
+          tenantIds: [liveCreds.a.tenantId!, liveCreds.b.tenantId!],
+          clients: preflightClients,
+          scope: "live-cross-tenant-traversal",
+        });
+        if (!preflight.ok) return;
         await teardownOwnedPaths(
           seededAssets.map((s) => ({ bucket: ASSETS_BUCKET, path: s.path, client: s.client })),
           clientFor,
         );
-        await sweepTestArtifacts(ASSETS_BUCKET, [liveCreds.a.tenantId!, liveCreds.b.tenantId!]);
+        await sweepTestArtifacts(
+          ASSETS_BUCKET,
+          [liveCreds.a.tenantId!, liveCreds.b.tenantId!],
+          { scope: "live-cross-tenant-traversal:sweep", clients: preflightClients },
+        );
       });
 
       // ---------- download() ----------
@@ -2846,11 +3095,25 @@ describe("Cross-Tenant Storage RLS Tests", () => {
 
       afterAll(async () => {
         const clientFor = (key: "a" | "b") => (key === "a" ? clientA : clientB);
+        const preflightClients = {
+          [liveCreds.a.tenantId!]: { client: clientA, email: liveCreds.a.email },
+          [liveCreds.b.tenantId!]: { client: clientB, email: liveCreds.b.email },
+        };
+        const preflight = await cleanupPreflight({
+          tenantIds: [liveCreds.a.tenantId!, liveCreds.b.tenantId!],
+          clients: preflightClients,
+          scope: "live-cross-tenant-public-cdn",
+        });
+        if (!preflight.ok) return;
         await teardownOwnedPaths(
           seededAssets.map((s) => ({ bucket: ASSETS_BUCKET, path: s.path, client: s.client })),
           clientFor,
         );
-        await sweepTestArtifacts(ASSETS_BUCKET, [liveCreds.a.tenantId!, liveCreds.b.tenantId!]);
+        await sweepTestArtifacts(
+          ASSETS_BUCKET,
+          [liveCreds.a.tenantId!, liveCreds.b.tenantId!],
+          { scope: "live-cross-tenant-public-cdn:sweep", clients: preflightClients },
+        );
       });
 
       // ---------- Public CDN: anonymous fetch must succeed ----------
