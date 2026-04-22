@@ -162,7 +162,28 @@ const Onboarding = () => {
       if (error) throw error;
       await queryClient.invalidateQueries({ queryKey: ["tenant-user"] });
       toast({ title: t("dashboard.welcome") + "!", description: "Your workspace is ready." });
-      navigate("/dashboard");
+
+      // If the user was bounced here from a guarded route, send them back so
+      // they don't lose their place. Falls back to the dashboard otherwise.
+      const stateReturnTo = (location.state as { returnTo?: string } | null)?.returnTo;
+      let stashedReturnTo: string | null = null;
+      try {
+        stashedReturnTo = sessionStorage.getItem("tenant-guard-redirect-from");
+      } catch {
+        // non-fatal
+      }
+      const returnTo = stateReturnTo || stashedReturnTo;
+      // Only honor in-app paths and skip /onboarding to avoid loops.
+      const safeReturnTo =
+        returnTo && returnTo.startsWith("/") && !returnTo.startsWith("//") && returnTo !== "/onboarding"
+          ? returnTo
+          : null;
+      try {
+        sessionStorage.removeItem("tenant-guard-redirect-from");
+      } catch {
+        // non-fatal
+      }
+      navigate(safeReturnTo ?? "/dashboard");
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
     } finally {
