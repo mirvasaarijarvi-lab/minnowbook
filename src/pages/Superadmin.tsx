@@ -165,7 +165,7 @@ const Superadmin = () => {
     navigate("/");
   };
 
-  if (adminLoading) {
+  if (adminLoading || tenantLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="animate-spin h-8 w-8 border-4 border-accent border-t-transparent rounded-full" />
@@ -174,6 +174,13 @@ const Superadmin = () => {
   }
 
   if (!user) return <Navigate to="/login" replace />;
+
+  // Authenticated but with no tenant membership: show a friendly CTA
+  // instead of bouncing them to /dashboard (which would also block them).
+  if (!tenantId && !isImpersonating) {
+    return <NoTenantState attemptedArea="superadmin" />;
+  }
+
   if (isSysAdmin === false) return <Navigate to="/dashboard" replace />;
 
   const filtered = (tenants ?? []).filter(
