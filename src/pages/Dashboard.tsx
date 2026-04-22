@@ -41,6 +41,7 @@ import SamplePeriodBanner from "@/components/dashboard/SamplePeriodBanner";
 import OnboardingChecklist from "@/components/dashboard/OnboardingChecklist";
 import QuickActionsFAB from "@/components/dashboard/QuickActionsFAB";
 import KeyboardShortcutsModal from "@/components/dashboard/KeyboardShortcutsModal";
+import TenantBadge from "@/components/dashboard/TenantBadge";
 import ThemeToggle from "@/components/ThemeToggle";
 import { useSamplePeriod } from "@/hooks/useSamplePeriod";
 import { Button } from "@/components/ui/button";
