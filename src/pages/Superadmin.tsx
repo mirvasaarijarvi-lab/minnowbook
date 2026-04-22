@@ -38,6 +38,8 @@ import BetaFeedbackPanel from "@/components/dashboard/BetaFeedbackPanel";
 import SuperadminLoginHistory from "@/components/dashboard/SuperadminLoginHistory";
 import StripeRevenuePanel from "@/components/dashboard/StripeRevenuePanel";
 import TenantMembershipCheckPanel from "@/components/dashboard/TenantMembershipCheckPanel";
+import NoTenantState from "@/components/NoTenantState";
+import { useTenant } from "@/hooks/useTenant";
 
 interface TenantWithStats {
   id: string;
@@ -69,7 +71,8 @@ const Superadmin = () => {
   const [search, setSearch] = useState("");
   const [editTenant, setEditTenant] = useState<TenantWithStats | null>(null);
   const [editForm, setEditForm] = useState({ name: "", tier: "", max_staff_users: 3, sample_start_date: "", sample_end_date: "", discount_percentage: 0, discount_reason: "" });
-  const { startImpersonation } = useImpersonation();
+  const { startImpersonation, isImpersonating } = useImpersonation();
+  const { tenantId, loading: tenantLoading } = useTenant();
 
   // Check system admin
   const { data: isSysAdmin, isLoading: adminLoading } = useQuery({
@@ -162,7 +165,7 @@ const Superadmin = () => {
     navigate("/");
   };
 
-  if (adminLoading) {
+  if (adminLoading || tenantLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="animate-spin h-8 w-8 border-4 border-accent border-t-transparent rounded-full" />
@@ -171,6 +174,13 @@ const Superadmin = () => {
   }
 
   if (!user) return <Navigate to="/login" replace />;
+
+  // Authenticated but with no tenant membership: show a friendly CTA
+  // instead of bouncing them to /dashboard (which would also block them).
+  if (!tenantId && !isImpersonating) {
+    return <NoTenantState attemptedArea="superadmin" />;
+  }
+
   if (isSysAdmin === false) return <Navigate to="/dashboard" replace />;
 
   const filtered = (tenants ?? []).filter(
