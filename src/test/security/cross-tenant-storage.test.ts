@@ -1905,6 +1905,9 @@ describe("Cross-Tenant Storage RLS Tests", () => {
   //   6. URL-encoded tenant:    `%7B{B}%7D/file.txt`     →  encoded braces around id
   //   7. Backslash separators:  `{B}\\docs\\file.txt`    →  Windows-style separators
   //   8. Null byte:             `{B}/docs%00/file.txt`   →  C-string truncation trick
+  //   9. Double-encoded slash:  `{A}%252F..%252F{B}/…`   →  two-pass decode bypass
+  //  10. Encoded dot-dot:       `{A}/%2e%2e/{B}/file`    →  late-decoded traversal
+  //  11. Mixed encoding combo:  `{A}%2f%2e%2e/{B}/file`  →  encoded slash + dot-dot
   //
   // The expected behaviour for ALL of these, in BOTH buckets, is the same:
   // the upload, list, and download MUST be denied (or, equivalently, the
@@ -1954,6 +1957,37 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       // first NUL, which would turn this into `{victim}/docs` — still a
       // foreign folder, so denial is still required.
       path: `${victimTenantId}/docs%00/file.txt`,
+    },
+    // ----- Mixed / multi-pass encoding variants -----
+    // These probe layered decoders: a server that decodes ONCE will see a
+    // benign-looking `%2F` literal, but a server that decodes TWICE (e.g.
+    // a proxy + the storage layer) will resolve back to a real `/` and a
+    // foreign tenant prefix could materialise. RLS must reject all three
+    // without ever calling the decoder twice.
+    {
+      label: "double-encoded-slash",
+      // `%252F` → `%2F` after one decode → `/` after two. Anchored in a
+      // fake own-tenant prefix so the only "exit" out of our namespace is
+      // the encoded traversal segment.
+      path: `00000000-0000-0000-0000-000000000000%252F..%252F${victimTenantId}/file.txt`,
+    },
+    {
+      label: "url-encoded-dot-dot",
+      // `%2e%2e` → `..` after one decode. Used WITHOUT an encoded slash so
+      // the dot-segment is the only canonicalisation needed to escape the
+      // attacker's prefix; if normalisation runs after the policy check,
+      // the request reaches the victim's folder.
+      path: `00000000-0000-0000-0000-000000000000/%2e%2e/${victimTenantId}/file.txt`,
+    },
+    {
+      label: "url-encoded-slash-plus-dot-dot",
+      // `%2f%2e%2e` → `/..` after one decode. Combines the two tricks:
+      // the encoded slash hides the segment boundary, the encoded
+      // dot-dot hides the escape. A naive single-pass URL-decode would
+      // produce `00000000-0000-…/../{victim}/file.txt` — exactly the
+      // shape we explicitly deny in the plain "dot-segment-traversal"
+      // case above, but with one extra decode hop in between.
+      path: `00000000-0000-0000-0000-000000000000%2f%2e%2e/${victimTenantId}/file.txt`,
     },
   ];
 
@@ -2123,6 +2157,15 @@ describe("Cross-Tenant Storage RLS Tests", () => {
             "url-encoded-tenant-wrappers",
             "backslash-separators",
             "null-byte-truncation",
+            // Mixed / multi-pass encoding probes — keep in sync with
+            // `adversarialPaths()` above. We list each label explicitly
+            // (rather than iterating every entry the generator returns)
+            // so a typo in `adversarialPaths()` surfaces here as a
+            // missing-variant test failure instead of being silently
+            // skipped.
+            "double-encoded-slash",
+            "url-encoded-dot-dot",
+            "url-encoded-slash-plus-dot-dot",
           ]) {
             it(
               `user ${dir.attacker.toUpperCase()} cannot UPLOAD via '${labelHint}' to tenant ${dir.owner.toUpperCase()}'s ${bucket}`,
