@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { ShieldAlert, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import type { IsSystemAdminCacheState } from "@/hooks/useIsSystemAdmin";
 
 interface ForbiddenProps {
   /**
@@ -24,6 +25,18 @@ interface ForbiddenProps {
   areaSlug?: string;
   /** Optional override for the body copy. */
   message?: string;
+  /**
+   * Snapshot of the system-admin React Query cache at the exact moment
+   * the route guard rendered this page. Forwarded by `SystemAdminRoute`
+   * so the audit row captures *why* access was denied: a fresh `false`
+   * answer, a stale answer pending refresh, a loading state the guard
+   * shouldn't have rendered through, or a fail-closed lookup error.
+   *
+   * Optional because non-admin denials from other guards (or direct
+   * imports) won't have it. The audit beacon simply omits the field
+   * when absent — the edge function tolerates and ignores its absence.
+   */
+  adminCheckState?: IsSystemAdminCacheState;
 }
 
 /** Slugify a human label as a fallback when no explicit `areaSlug` is passed. */
