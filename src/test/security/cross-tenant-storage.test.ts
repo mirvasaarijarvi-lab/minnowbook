@@ -538,6 +538,97 @@ async function sweepTestArtifacts(bucket: string, tenantIds: string[]) {
 }
 
 /**
+ * Cleanup preflight — last-line guard that runs IMMEDIATELY before any
+ * file removal. We already validated the tenant pair at sign-in time via
+ * `guardTenantPair`, but the cleanup path is the place where a stale env
+ * var, a mid-run mutation to `tenant_users`, or a copy-paste typo turns
+ * "delete from the right folder" into "delete from a real customer's
+ * folder". Re-validating here keeps the blast radius bounded:
+ *
+ *   - **UUID + distinctness**: cheap, deterministic, catches env drift
+ *     and accidental same-tenant configs (`assertDistinctTenantPairIds`
+ *     is the same helper guard uses, so the contract can't drift).
+ *   - **Membership probe (live mode only)**: confirms each authenticated
+ *     client is STILL a member of the tenant whose folder we're about to
+ *     scrub. If a test mutated membership (or sign-in silently expired
+ *     mid-run), the probe surfaces it before any `remove()` fires.
+ *
+ * On failure: returns `{ ok: false }` and ledgers a `cleanup-preflight`
+ * note so the PDF report explains why cleanup was skipped. The caller
+ * MUST short-circuit cleanup when `ok` is false — the comment block at
+ * each call site repeats this contract.
+ *
+ * Anon-only blocks pass `clients: undefined` to skip the membership probe
+ * (there's no authenticated user to probe), but still get the UUID +
+ * distinctness check on whatever tenant ids they're about to sweep.
+ */
+async function cleanupPreflight(opts: {
+  /** Tenant ids the cleanup is about to operate on. Must be 1 or 2 ids. */
+  tenantIds: string[];
+  /**
+   * Live-mode clients keyed by tenant id, used to re-probe membership.
+   * Omit for anon blocks — they're scrubbing a synthetic tenant id that
+   * no one is a member of, so the membership check would never apply.
+   */
+  clients?: Record<string, { client: SupabaseClient; email?: string }>;
+  /** Suite block label, surfaced in the ledger note for triage. */
+  scope: string;
+}): Promise<{ ok: boolean; reason?: string }> {
+  const { tenantIds, clients, scope } = opts;
+  // Anon blocks operate on a synthetic single tenant id — only the UUID
+  // shape matters there. Live blocks always pass exactly two ids and we
+  // re-run the full distinct-pair check.
+  try {
+    if (tenantIds.length === 2) {
+      assertDistinctTenantPairIds(tenantIds[0], tenantIds[1], {
+        envPrefix: "RLS_TEST_TENANT",
+      });
+    } else {
+      // Single-tenant cleanup (anon synthetic): just confirm UUID shape.
+      const id = (tenantIds[0] ?? "").trim();
+      const ok = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+      if (!ok) {
+        throw new Error(
+          `Cleanup preflight: tenant id "${id}" is not a valid UUID — refusing to sweep.`,
+        );
+      }
+    }
+
+    if (clients) {
+      for (const tenantId of tenantIds) {
+        const probeTarget = clients[tenantId];
+        if (!probeTarget) continue;
+        await assertTenantMembership(probeTarget.client, {
+          label: tenantId.slice(0, 8),
+          expectedTenantId: tenantId,
+          email: probeTarget.email,
+        });
+      }
+    }
+    return { ok: true };
+  } catch (err) {
+    const reason = err instanceof Error ? err.message : String(err);
+    // Ledger one entry per tenant id we WOULD have touched, so the PDF
+    // makes it impossible to miss that cleanup was deliberately skipped.
+    for (const tenantId of tenantIds) {
+      recordCleanup({
+        bucket: "(preflight)",
+        path: `${tenantId}/__rls_test__/${RUN_ID}`,
+        role: "admin-sweep",
+        removed: false,
+        note: `cleanup-preflight skipped scope="${scope}": ${reason}`,
+      });
+    }
+    // eslint-disable-next-line no-console
+    console.warn(
+      `[cross-tenant-storage] cleanup preflight FAILED for "${scope}" — ` +
+        `skipping deletions to avoid touching the wrong folder.\n  reason: ${reason}`,
+    );
+    return { ok: false, reason };
+  }
+}
+
+/**
  * Cross-Tenant Storage Bucket Policy Tests
  *
  * Verifies that storage RLS policies on the `tenant-private` (private) and
