@@ -36,7 +36,10 @@ const corsHeaders = {
 };
 
 interface ForbiddenLogPayload {
+  /** Stable, route-derived slug (e.g. "superadmin"). */
   attemptedArea?: string;
+  /** Human-readable label as shown on the 403 page (advisory only). */
+  attemptedAreaLabel?: string;
   attemptedPath?: string;
   // Optional explicit tenant hint when the caller belongs to multiple tenants.
   tenantId?: string;
