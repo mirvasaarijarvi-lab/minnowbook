@@ -169,7 +169,10 @@ async function seedAccessCode(
     .insert({
       code_hash: hashCode(plaintext),
       code_prefix: plaintext.slice(0, 8),
-      description: "Authenticated single-redeem + replay test — auto-cleaned",
+      // Description carries the suite tag so `sweepStaleRows()` can
+      // recover from a process that died before the in-memory tracker
+      // could record this id.
+      description: `${DESCRIPTION_TAG} Authenticated single-redeem + replay test — auto-cleaned`,
       tier: "business",
       duration_days: 7,
       max_uses: 1,
