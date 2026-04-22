@@ -494,14 +494,12 @@ const Superadmin = () => {
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-1">
               <Label>Max Staff Users</Label>
-              <Input
-                type="number"
-                min={1}
-                value={editForm.max_staff_users}
-                onChange={(e) => setEditForm((f) => ({ ...f, max_staff_users: parseInt(e.target.value) || 1 }))}
-              />
+              <p className="text-sm text-muted-foreground">
+                Determined by tier — Basic: 5, Pro: 25, Business: unlimited.
+                Enforced by the backend on new staff additions.
+              </p>
             </div>
             <Separator />
             <div className="space-y-1">
