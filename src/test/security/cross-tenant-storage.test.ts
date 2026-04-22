@@ -27,6 +27,45 @@ const adminClient: SupabaseClient | null =
       })
     : null;
 
+/**
+ * Per-run toggle for the multipart-intermediates sweep.
+ * ----------------------------------------------------
+ * Set `RLS_MULTIPART_SWEEP=off` (or `0`/`false`/`disabled`) to suppress
+ * `sweepMultipartIntermediates()` for this Vitest run. Default is ON,
+ * matching production CI behavior.
+ *
+ * Why this exists: when investigating an RLS regression, you want to
+ * know whether a path is "really" denied by RLS or just hidden because
+ * the post-test sweeper deleted the evidence. Running the suite twice —
+ * once with the sweep on, once with it off — and diffing the
+ * `storage-attempts.json` ledger gives a definitive answer.
+ *
+ * When disabled the helper still runs its bookkeeping (per-tenant
+ * stats, ledger entries) so the PDF clearly shows the sweep was
+ * deliberately skipped — never silently. Each tenant gets a single
+ * `admin-multipart` ledger row with `note: "SKIPPED ..."` and
+ * `removed: false`, so a reviewer comparing two runs can immediately
+ * tell which artifacts came from a sweeper-off comparison run.
+ *
+ * The synthetic-orphan describe block (which exists *to verify the
+ * sweeper works*) is also skipped when this flag is off — running it
+ * with the sweep disabled would always fail and would obscure the
+ * RLS-comparison signal we're trying to capture.
+ */
+const MULTIPART_SWEEP_RAW = (process.env.RLS_MULTIPART_SWEEP ?? "").trim().toLowerCase();
+const MULTIPART_SWEEP_ENABLED = !["off", "0", "false", "disabled", "no"].includes(
+  MULTIPART_SWEEP_RAW,
+);
+if (!MULTIPART_SWEEP_ENABLED) {
+  // Single startup banner so it's obvious in CI logs which mode the run
+  // is in. Printed once, regardless of how many describe blocks run.
+  // eslint-disable-next-line no-console
+  console.log(
+    `[cross-tenant-storage] RLS_MULTIPART_SWEEP=${process.env.RLS_MULTIPART_SWEEP} ` +
+      `→ multipart sweep DISABLED for this run (compare-mode)`,
+  );
+}
+
 // ---------------------------------------------------------------------
 // Timeout-bounded teardown primitives
 // ---------------------------------------------------------------------
@@ -430,6 +469,27 @@ async function sweepRunIdFolder(
  */
 async function sweepMultipartIntermediates(bucket: string, tenantIds: string[]) {
   if (!adminClient) return;
+
+  // Honour the per-run kill switch BEFORE doing any DB work. We still
+  // ledger one entry per tenant so the resulting PDF doesn't look like
+  // the sweep "ran clean" — it didn't run at all.
+  if (!MULTIPART_SWEEP_ENABLED) {
+    for (const tid of tenantIds) {
+      recordCleanup({
+        bucket,
+        path: `${tid}/__rls_test__/${RUN_ID}/<sweep-disabled>`,
+        role: "admin-multipart",
+        removed: false,
+        note: `SKIPPED: RLS_MULTIPART_SWEEP=${process.env.RLS_MULTIPART_SWEEP ?? ""} (compare-mode)`,
+      });
+    }
+    // eslint-disable-next-line no-console
+    console.log(
+      `[multipart-sweep] bucket="${bucket}" SKIPPED for ${tenantIds.length} tenant(s) ` +
+        `— RLS_MULTIPART_SWEEP is off`,
+    );
+    return;
+  }
 
   // Per-tenant aggregate counters for the end-of-sweep summary log.
   // Captures (a) how many orphan parent rows we found, (b) how many child
@@ -3349,7 +3409,13 @@ describe("Cross-Tenant Storage RLS Tests", () => {
   // Skip conditions:
   //   - No service-role key   → can't insert into `storage.*` tables.
   //   - Live mode disabled    → no real tenant ids to use as the key prefix.
-  describe.runIf(hasSupabaseConfig && liveModeEnabled && Boolean(adminClient))(
+  // Also gated on MULTIPART_SWEEP_ENABLED: the entire purpose of this
+  // block is to prove the sweeper works, so running it with the sweep
+  // disabled would be a guaranteed failure that masks the RLS-comparison
+  // signal the operator is trying to capture by toggling the flag.
+  describe.runIf(
+    hasSupabaseConfig && liveModeEnabled && Boolean(adminClient) && MULTIPART_SWEEP_ENABLED,
+  )(
     "Aborted cross-tenant upload leaves multipart orphan that admin sweep removes",
     () => {
       // Each synthetic orphan key is unique per test run AND tagged with a
