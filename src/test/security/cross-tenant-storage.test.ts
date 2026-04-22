@@ -1372,6 +1372,15 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         const { data, error } = await clientA.storage.from(PRIVATE_BUCKET).remove([path]);
         // Successful delete returns the removed row(s); denial → error or [].
         const denied = Boolean(error) || !data || data.length === 0;
+        recordCleanup({
+          bucket: PRIVATE_BUCKET,
+          path,
+          role: "attacker",
+          removed: !denied,
+          note: denied
+            ? `cross-tenant DELETE by A denied (${error?.message ?? "empty rows"})`
+            : `cross-tenant DELETE by A UNEXPECTEDLY succeeded — RLS LEAK`,
+        });
         expect(denied).toBe(true);
 
         // Confirm the file still exists from B's perspective.
@@ -1383,6 +1392,15 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         const path = ownPath(liveCreds.a.tenantId!, "a-own-private");
         const { data, error } = await clientB.storage.from(PRIVATE_BUCKET).remove([path]);
         const denied = Boolean(error) || !data || data.length === 0;
+        recordCleanup({
+          bucket: PRIVATE_BUCKET,
+          path,
+          role: "attacker",
+          removed: !denied,
+          note: denied
+            ? `cross-tenant DELETE by B denied (${error?.message ?? "empty rows"})`
+            : `cross-tenant DELETE by B UNEXPECTEDLY succeeded — RLS LEAK`,
+        });
         expect(denied).toBe(true);
 
         const { data: stillThere } = await clientA.storage.from(PRIVATE_BUCKET).download(path);
@@ -1400,6 +1418,15 @@ describe("Cross-Tenant Storage RLS Tests", () => {
 
         const { data, error } = await clientA.storage.from(ASSETS_BUCKET).remove([path]);
         const denied = Boolean(error) || !data || data.length === 0;
+        recordCleanup({
+          bucket: ASSETS_BUCKET,
+          path,
+          role: "attacker",
+          removed: !denied,
+          note: denied
+            ? `cross-tenant DELETE by A on assets denied (${error?.message ?? "empty rows"})`
+            : `cross-tenant DELETE by A on assets UNEXPECTEDLY succeeded — RLS LEAK`,
+        });
         expect(denied).toBe(true);
       });
 
