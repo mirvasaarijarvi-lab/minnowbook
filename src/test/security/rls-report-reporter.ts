@@ -170,17 +170,19 @@ function renderHtml(payload: ReportPayload): string {
     .map((e) => {
       const statusClass =
         e.status === "passed" ? "ok" : e.status === "failed" ? "fail" : "skip";
-      const errorBlock = e.errorMessage
-        ? `<details><summary>Error</summary><pre>${escapeHtml(e.errorMessage)}${
+      const rlsBlock = e.rlsDetails ? renderRlsDetails(e.rlsDetails) : "";
+      const rawError = e.errorMessage
+        ? `<details${e.rlsDetails ? "" : " open"}><summary>Raw error / stack</summary><pre>${escapeHtml(e.errorMessage)}${
             e.errorStack ? "\n\n" + escapeHtml(e.errorStack) : ""
           }</pre></details>`
         : "";
+      const detailsCell = rlsBlock || rawError ? `${rlsBlock}${rawError}` : "";
       return `<tr class="${statusClass}">
           <td><span class="badge ${statusClass}">${e.status}</span></td>
           <td>${escapeHtml(e.suite)}</td>
           <td>${escapeHtml(e.name)}</td>
           <td class="num">${e.durationMs != null ? e.durationMs.toFixed(0) + " ms" : "—"}</td>
-          <td>${errorBlock}</td>
+          <td>${detailsCell}</td>
         </tr>`;
     })
     .join("\n");
