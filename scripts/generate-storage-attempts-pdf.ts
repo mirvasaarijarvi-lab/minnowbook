@@ -397,10 +397,11 @@ function drawLeaksSection(c: Cursor, p: LedgerPayload): Cursor {
   // expand Path. Scenario name is shown when present (it pinpoints which
   // upload-permutation succeeded, which is invaluable for triage).
   const COLS = {
-    bucket: { x: 0, w: 72, label: "Bucket" },
-    actor: { x: 74, w: 72, label: "Actor → Owner" },
-    scenario: { x: 148, w: 110, label: "Scenario" },
-    path: { x: 260, w: CONTENT_W - 260, label: "Path" },
+    bucket: { x: 0, w: 64, label: "Bucket" },
+    actor: { x: 66, w: 68, label: "Actor → Owner" },
+    status: { x: 136, w: 38, label: "HTTP" },
+    scenario: { x: 176, w: 96, label: "Scenario" },
+    path: { x: 274, w: CONTENT_W - 274, label: "Path" },
   };
 
   for (const k of Object.keys(COLS) as (keyof typeof COLS)[]) {
@@ -417,7 +418,11 @@ function drawLeaksSection(c: Cursor, p: LedgerPayload): Cursor {
   c.y -= 4;
 
   for (const leak of leaks) {
-    const errLine = leak.errorMessage ? 1 : 0;
+    // Leaks need an extra detail line if EITHER the SDK error message OR
+    // the Supabase error code is present (both are appended on the same
+    // wrapped line below the row).
+    const hasDetail = Boolean(leak.errorMessage) || Boolean(leak.errorCode);
+    const errLine = hasDetail ? 1 : 0;
     const rowH = LINE_HEIGHT + errLine * (LINE_HEIGHT - 2) + ROW_PAD;
     c = ensureSpace(c, rowH + 4);
 
@@ -433,9 +438,11 @@ function drawLeaksSection(c: Cursor, p: LedgerPayload): Cursor {
     });
 
     const ownerStr = leak.owner ?? "—";
+    const statusStr = leak.httpStatus != null ? String(leak.httpStatus) : "—";
     const cells: Array<[keyof typeof COLS, string, ReturnType<typeof rgb>, PDFFont, number]> = [
       ["bucket", leak.bucket, C.fail, c.bold, 9],
       ["actor", `${leak.attacker} → ${ownerStr}`, C.fail, c.bold, 9],
+      ["status", statusStr, C.fail, c.bold, 9],
       ["scenario", leak.scenario ?? "(default)", C.fail, c.font, 9],
       ["path", ellipsise(safe(leak.path), c.mono, 8, COLS.path.w), C.fail, c.mono, 8],
     ];
@@ -451,8 +458,14 @@ function drawLeaksSection(c: Cursor, p: LedgerPayload): Cursor {
     }
     c.y -= LINE_HEIGHT;
 
-    if (leak.errorMessage) {
-      const msg = ellipsise(`-> ${leak.errorMessage}`, c.mono, 7.5, CONTENT_W - 8);
+    if (hasDetail) {
+      // Single combined detail line: "code=<errorCode> -> <errorMessage>"
+      // Either side may be missing; we elide gracefully so the row never
+      // collapses to whitespace.
+      const codePart = leak.errorCode ? `code=${leak.errorCode}` : "";
+      const msgPart = leak.errorMessage ? `-> ${leak.errorMessage}` : "";
+      const detail = [codePart, msgPart].filter(Boolean).join("  ");
+      const msg = ellipsise(detail, c.mono, 7.5, CONTENT_W - 8);
       c.page.drawText(safe(msg), {
         x: MARGIN + 8,
         y: c.y - 8,
@@ -478,12 +491,14 @@ function drawAttemptsSection(c: Cursor, p: LedgerPayload): Cursor {
   c.y -= 14;
 
   // Column layout (relative to MARGIN). Total = CONTENT_W (540pt).
+  // Tightened to fit a new "HTTP" status column without truncating Path.
   const COLS = {
-    bucket: { x: 0, w: 70, label: "Bucket" },
-    actor: { x: 72, w: 56, label: "Actor → Owner" },
-    expected: { x: 130, w: 56, label: "Expected" },
-    outcome: { x: 188, w: 56, label: "Outcome" },
-    path: { x: 246, w: CONTENT_W - 246, label: "Path" },
+    bucket: { x: 0, w: 60, label: "Bucket" },
+    actor: { x: 62, w: 56, label: "Actor → Owner" },
+    expected: { x: 120, w: 48, label: "Expected" },
+    outcome: { x: 170, w: 48, label: "Outcome" },
+    status: { x: 220, w: 36, label: "HTTP" },
+    path: { x: 258, w: CONTENT_W - 258, label: "Path" },
   };
 
   // Header row
@@ -510,8 +525,10 @@ function drawAttemptsSection(c: Cursor, p: LedgerPayload): Cursor {
   }
 
   for (const u of p.uploads) {
-    // Row needs at least one line for the main row + optional error line.
-    const errLine = u.errorMessage ? 1 : 0;
+    // Row needs at least one line for the main row + optional detail line
+    // (errorMessage and/or errorCode share a single wrapped line below).
+    const hasDetail = Boolean(u.errorMessage) || Boolean(u.errorCode);
+    const errLine = hasDetail ? 1 : 0;
     const rowH = LINE_HEIGHT + errLine * (LINE_HEIGHT - 2) + ROW_PAD;
     c = ensureSpace(c, rowH + 4);
 
@@ -531,6 +548,7 @@ function drawAttemptsSection(c: Cursor, p: LedgerPayload): Cursor {
 
     const ownerStr = u.owner ?? "—";
     const actorCell = `${u.attacker} → ${ownerStr}`;
+    const statusStr = u.httpStatus != null ? String(u.httpStatus) : "—";
 
     const cells: Array<[keyof typeof COLS, string, ReturnType<typeof rgb>]> = [
       ["bucket", u.bucket, C.text],
@@ -541,6 +559,7 @@ function drawAttemptsSection(c: Cursor, p: LedgerPayload): Cursor {
         u.outcome,
         u.outcome === "allowed" ? (isLeak ? C.fail : C.ok) : C.muted,
       ],
+      ["status", statusStr, C.muted],
       ["path", ellipsise(safe(u.path), c.mono, 8, COLS.path.w), C.text],
     ];
 
@@ -555,8 +574,11 @@ function drawAttemptsSection(c: Cursor, p: LedgerPayload): Cursor {
     }
     c.y -= LINE_HEIGHT;
 
-    if (u.errorMessage) {
-      const msg = ellipsise(`-> ${u.errorMessage}`, c.mono, 7.5, CONTENT_W - 8);
+    if (hasDetail) {
+      const codePart = u.errorCode ? `code=${u.errorCode}` : "";
+      const msgPart = u.errorMessage ? `-> ${u.errorMessage}` : "";
+      const detail = [codePart, msgPart].filter(Boolean).join("  ");
+      const msg = ellipsise(detail, c.mono, 7.5, CONTENT_W - 8);
       c.page.drawText(safe(msg), {
         x: MARGIN + 8,
         y: c.y - 8,
