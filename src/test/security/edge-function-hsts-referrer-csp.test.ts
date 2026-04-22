@@ -57,6 +57,21 @@ function readFn(name: string): string {
   return readFileSync(join(FUNCTIONS_DIR, name, "index.ts"), "utf8");
 }
 
+/**
+ * Extract a header value, respecting the outer quote so values that
+ * embed the *other* quote style (e.g. CSP's `'none'` inside a "..."
+ * string) are captured in full. Returns `null` if not found.
+ */
+function extractHeaderValue(source: string, headerName: string): string | null {
+  const escaped = headerName.replace(/[-]/g, "\\-");
+  // Match `"Header"` or `'Header'` followed by `:` then a quoted value.
+  const re = new RegExp(
+    `["']${escaped}["']\\s*:\\s*("|')((?:\\\\.|(?!\\1).)*)\\1`,
+  );
+  const m = source.match(re);
+  return m ? m[2] : null;
+}
+
 const functions = listFunctionDirs();
 
 describe("edge-function transport-security header consistency", () => {
