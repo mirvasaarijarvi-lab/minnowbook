@@ -2829,6 +2829,150 @@ describe("Cross-Tenant Storage RLS Tests", () => {
     },
   );
 
+  // ============================================================
+  // Public CDN reachability vs. authenticated enumeration
+  // ------------------------------------------------------------
+  // `tenant-assets` is intentionally a public bucket: the storage
+  // CDN serves objects unauthenticated via /object/public/<bucket>/
+  // so guest-facing pages (booking flow, reviews) can render images
+  // without a session. That public read MUST coexist with strict
+  // RLS on `storage.objects` so anon clients cannot enumerate
+  // tenant folders via the authenticated API.
+  //
+  // We assert both halves in one block:
+  //   1. An anonymous fetch() of the canonical public URL for a
+  //      seeded asset returns 200 with the file bytes.
+  //   2. An anonymous SDK list() against either tenant's folder
+  //      returns no enumerable entries (error or empty array).
+  //
+  // The test depends on having seeded files for both tenants, so
+  // it's gated on liveModeEnabled (uses Tenant A & B credentials
+  // to write the seeds via authenticated upload).
+  // ============================================================
+  describe.runIf(hasSupabaseConfig && liveModeEnabled)(
+    "tenant-assets: public CDN read works, anon enumeration denied",
+    () => {
+      let clientA: SupabaseClient;
+      let clientB: SupabaseClient;
+      const seededAssets: Array<{ path: string; client: "a" | "b" }> = [];
+
+      beforeAll(async () => {
+        clientA = newAnonClient();
+        clientB = newAnonClient();
+
+        const { error: signInAError } = await clientA.auth.signInWithPassword({
+          email: liveCreds.a.email!,
+          password: liveCreds.a.password!,
+        });
+        if (signInAError) throw new Error(`Tenant A sign-in failed: ${signInAError.message}`);
+
+        const { error: signInBError } = await clientB.auth.signInWithPassword({
+          email: liveCreds.b.email!,
+          password: liveCreds.b.password!,
+        });
+        if (signInBError) throw new Error(`Tenant B sign-in failed: ${signInBError.message}`);
+
+        // Seed one publicly addressable asset per tenant. The leaf
+        // names are distinctive so leak detection in list() can
+        // unambiguously flag them.
+        const aPath = `${runRootFor(liveCreds.a.tenantId!)}/a-public-cdn-seed.txt`;
+        const { error: aErr } = await clientA.storage
+          .from(ASSETS_BUCKET)
+          .upload(aPath, fileBytes("a-public-cdn-seed"), { upsert: true });
+        if (aErr) throw new Error(`Seed for tenant A failed: ${aErr.message}`);
+        seededAssets.push({ path: aPath, client: "a" });
+
+        const bPath = `${runRootFor(liveCreds.b.tenantId!)}/b-public-cdn-seed.txt`;
+        const { error: bErr } = await clientB.storage
+          .from(ASSETS_BUCKET)
+          .upload(bPath, fileBytes("b-public-cdn-seed"), { upsert: true });
+        if (bErr) throw new Error(`Seed for tenant B failed: ${bErr.message}`);
+        seededAssets.push({ path: bPath, client: "b" });
+      });
+
+      afterAll(async () => {
+        const clientFor = (key: "a" | "b") => (key === "a" ? clientA : clientB);
+        await teardownOwnedPaths(
+          seededAssets.map((s) => ({ bucket: ASSETS_BUCKET, path: s.path, client: s.client })),
+          clientFor,
+        );
+        await sweepTestArtifacts(ASSETS_BUCKET, [liveCreds.a.tenantId!, liveCreds.b.tenantId!]);
+      });
+
+      // ---------- Public CDN: anonymous fetch must succeed ----------
+      // The whole point of `tenant-assets` being public is that an
+      // unauthenticated browser GET to the CDN URL returns the bytes.
+      // We use raw fetch() (no SDK auth headers) and assert HTTP 200
+      // plus byte equality so a regression that flips the bucket to
+      // private — or tightens RLS to block anon SELECT — is caught.
+      it("anonymous fetch() of public CDN URL returns the file bytes for both tenants", async () => {
+        const expectedA = await fileBytes("a-public-cdn-seed").text();
+        const expectedB = await fileBytes("b-public-cdn-seed").text();
+
+        const aPath = `${runRootFor(liveCreds.a.tenantId!)}/a-public-cdn-seed.txt`;
+        const bPath = `${runRootFor(liveCreds.b.tenantId!)}/b-public-cdn-seed.txt`;
+
+        // getPublicUrl() is a pure URL builder — no network, no auth
+        // — so this is equivalent to constructing the CDN path by
+        // hand but stays in lockstep with SDK conventions.
+        const urlA = clientA.storage.from(ASSETS_BUCKET).getPublicUrl(aPath).data.publicUrl;
+        const urlB = clientB.storage.from(ASSETS_BUCKET).getPublicUrl(bPath).data.publicUrl;
+
+        // Strip any session cookies/headers by using a fresh global
+        // fetch with no Authorization header. The CDN must serve
+        // these regardless of caller identity.
+        const [respA, respB] = await Promise.all([
+          fetch(urlA, { headers: { "cache-control": "no-cache" } }),
+          fetch(urlB, { headers: { "cache-control": "no-cache" } }),
+        ]);
+
+        expect(respA.status, `expected 200 from CDN URL ${urlA}`).toBe(200);
+        expect(respB.status, `expected 200 from CDN URL ${urlB}`).toBe(200);
+
+        const [bodyA, bodyB] = await Promise.all([respA.text(), respB.text()]);
+        expect(bodyA).toBe(expectedA);
+        expect(bodyB).toBe(expectedB);
+      });
+
+      // ---------- Anon enumeration: list() must NOT reveal entries ----------
+      // Even though the bucket is public for direct CDN reads, the
+      // authenticated `list()` API is RLS-gated on storage.objects.
+      // An anon caller hitting list() against a tenant folder must
+      // get an error or empty array — never the seeded filenames.
+      // This is the regression guard that keeps "public bucket" from
+      // silently meaning "publicly enumerable".
+      it("anonymous list() against either tenant's folder yields no enumerable entries", async () => {
+        const anon = newAnonClient();
+        const folders = [liveCreds.a.tenantId!, liveCreds.b.tenantId!];
+
+        for (const folder of folders) {
+          // List the tenant root.
+          const { data: rootData, error: rootError } = await anon.storage
+            .from(ASSETS_BUCKET)
+            .list(folder, { limit: 100 });
+          const rootLeaked =
+            Array.isArray(rootData) &&
+            rootData.some((entry) => entry.name && entry.name.includes("public-cdn-seed"));
+          expect(rootLeaked, `anon list() leaked tenant ${folder} root entries`).toBe(false);
+          const rootDenied = Boolean(rootError) || !rootData || rootData.length === 0;
+          expect(rootDenied, `anon list() returned data for tenant ${folder} root`).toBe(true);
+
+          // List the run-scoped subfolder where the seed actually lives —
+          // a more targeted enumeration attempt.
+          const { data: subData, error: subError } = await anon.storage
+            .from(ASSETS_BUCKET)
+            .list(runRootFor(folder), { limit: 100 });
+          const subLeaked =
+            Array.isArray(subData) &&
+            subData.some((entry) => entry.name && entry.name.includes("public-cdn-seed"));
+          expect(subLeaked, `anon list() leaked tenant ${folder} subfolder entries`).toBe(false);
+          const subDenied = Boolean(subError) || !subData || subData.length === 0;
+          expect(subDenied, `anon list() returned data for tenant ${folder} subfolder`).toBe(true);
+        }
+      });
+    },
+  );
+
   describe.skipIf(hasSupabaseConfig)("Skipped: missing Supabase config", () => { 
     it("test environment is missing VITE_SUPABASE_URL / VITE_SUPABASE_PUBLISHABLE_KEY", () => {
       expect(true).toBe(true);
