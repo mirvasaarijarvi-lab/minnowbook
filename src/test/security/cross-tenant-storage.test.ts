@@ -430,6 +430,43 @@ async function sweepRunIdFolder(
  */
 async function sweepMultipartIntermediates(bucket: string, tenantIds: string[]) {
   if (!adminClient) return;
+
+  // Per-tenant aggregate counters for the end-of-sweep summary log.
+  // Captures (a) how many orphan parent rows we found, (b) how many child
+  // `s3_multipart_uploads_parts` rows we deleted, (c) how many parent rows
+  // were actually removed, and (d) how many select/delete errors occurred.
+  // The summary is printed AND ledgered as a single `admin-multipart`
+  // record per tenant so the storage-attempts PDF shows a clear roll-up
+  // alongside the per-row entries.
+  type SweepStats = {
+    orphansFound: number;
+    partsDeleted: number;
+    parentsDeleted: number;
+    errors: number;
+  };
+  const statsByTenant = new Map<string, SweepStats>();
+  const bumpStats = (tenantId: string, key: keyof SweepStats, by = 1) => {
+    const cur = statsByTenant.get(tenantId) ?? {
+      orphansFound: 0,
+      partsDeleted: 0,
+      parentsDeleted: 0,
+      errors: 0,
+    };
+    cur[key] += by;
+    statsByTenant.set(tenantId, cur);
+  };
+  // Pre-initialise so even tenants with zero orphans show up in the summary,
+  // confirming the sweep actually ran for every tenant id passed in.
+  for (const tid of tenantIds) {
+    if (!statsByTenant.has(tid)) {
+      statsByTenant.set(tid, {
+        orphansFound: 0,
+        partsDeleted: 0,
+        parentsDeleted: 0,
+        errors: 0,
+      });
+    }
+  }
   for (const tenantId of tenantIds) {
     const keyPrefix = `${tenantId}/__rls_test__/`;
     try {
