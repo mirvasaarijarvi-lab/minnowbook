@@ -112,7 +112,7 @@ describe("redeem-access-code: brute-force & replay resilience", () => {
     expect(data.session).toBeNull();
   });
 
-  it("20 parallel attempts with the same fake code: zero successes", async () => {
+  it("20 parallel attempts with the same fake code: zero successes, all known error codes", async () => {
     const N = 20;
     const results = await Promise.all(
       Array.from({ length: N }, () => callRedeem(FAKE_CODES[0], false)),
@@ -130,24 +130,32 @@ describe("redeem-access-code: brute-force & replay resilience", () => {
     for (const r of results) {
       expect(r.status, "each call must return a deterministic 4xx").toBeGreaterThanOrEqual(400);
       expect(r.status).toBeLessThan(500);
+      const code = errorCode(r);
+      expect(KNOWN_ERROR_CODES.has(code), `unexpected error code: ${code}`).toBe(true);
     }
   });
 
-  it("repeated serial attempts return the same generic error (no validity leak)", async () => {
+  it("repeated serial attempts return the same generic error code (no validity leak)", async () => {
     const ITER = 6;
+    const codes: string[] = [];
     const messages: string[] = [];
     for (let i = 0; i < ITER; i++) {
       const r = await callRedeem(FAKE_CODES[0], false);
+      codes.push(errorCode(r));
       messages.push(errorMessage(r));
     }
-    // All replays must produce identical error text — otherwise the
-    // server is leaking information about retry/throttle state.
-    const unique = new Set(messages);
-    expect(unique.size, `replay error messages must be deterministic, got: ${[...unique].join(" | ")}`).toBe(1);
+    // Both the human message AND the machine code must be perfectly stable
+    // across replays — anything else is a state-leak.
+    const uniqueMsgs = new Set(messages);
+    expect(uniqueMsgs.size, `replay messages drifted: ${[...uniqueMsgs].join(" | ")}`).toBe(1);
+    const uniqueCodes = new Set(codes);
+    expect(uniqueCodes.size, `replay codes drifted: ${[...uniqueCodes].join(" | ")}`).toBe(1);
+    // No-auth replays must specifically return NOT_AUTHENTICATED.
+    expect(codes[0]).toBe("NOT_AUTHENTICATED");
   });
 
-  it("varied fake codes do NOT produce distinguishable error messages vs. malformed input", async () => {
-    // Probe matrix: shapes that should all surface as "Not authenticated"
+  it("varied fake codes do NOT produce distinguishable error codes vs. malformed input", async () => {
+    // Probe matrix: shapes that should all surface as NOT_AUTHENTICATED
     // (since no auth is supplied) — never a code-specific error that
     // would let an attacker classify the input.
     const probes = [
@@ -160,23 +168,23 @@ describe("redeem-access-code: brute-force & replay resilience", () => {
     ];
     const results = await Promise.all(probes.map((c) => callRedeem(c, false)));
 
-    const messages = results.map(errorMessage);
-    // Every response must be a 400-class error.
     for (const r of results) {
       expect(r.status).toBeGreaterThanOrEqual(400);
       expect(r.status).toBeLessThan(500);
     }
-    // Messages must collapse to a tiny set (ideally 1) — no per-code
-    // differentiation. Allow up to 2 variants to tolerate "Not authenticated"
-    // vs the generic auth-failure shape, but no more.
-    const unique = new Set(messages);
+    // Without auth, EVERY probe must return exactly NOT_AUTHENTICATED.
+    // The auth check runs before any code-shape or code-existence check,
+    // so the response cannot vary by input.
+    const codes = results.map(errorCode);
+    const unique = new Set(codes);
     expect(
       unique.size,
-      `messages must not classify the input; got ${unique.size} variants: ${[...unique].join(" | ")}`,
-    ).toBeLessThanOrEqual(2);
+      `unauthenticated probes must collapse to one code; got: ${[...unique].join(" | ")}`,
+    ).toBe(1);
+    expect([...unique][0]).toBe("NOT_AUTHENTICATED");
   });
 
-  it("burst of 30 parallel calls across many distinct fake codes: zero leaks, zero 5xx", async () => {
+  it("burst of 30 parallel calls across many distinct fake codes: zero leaks, zero 5xx, stable codes", async () => {
     const codes = Array.from(
       { length: 30 },
       (_, i) => `BURST-${i.toString().padStart(4, "0")}-XYZW`,
@@ -188,13 +196,14 @@ describe("redeem-access-code: brute-force & replay resilience", () => {
     expect(successes.length).toBe(0);
     expect(serverErrors.length).toBe(0);
 
-    // None of the response bodies may ever expose a `tier`, `granted_until`,
-    // or `success: true` field — those are 2xx-only payload shapes.
     for (const r of results) {
       const b = (r.body ?? {}) as Record<string, unknown>;
       expect(b.success).not.toBe(true);
       expect(b.tier).toBeUndefined();
       expect(b.granted_until).toBeUndefined();
+      // Every error must carry a known machine-readable code.
+      const code = (b.code as string) ?? "";
+      expect(KNOWN_ERROR_CODES.has(code), `unexpected code: ${code}`).toBe(true);
     }
   });
 
@@ -215,6 +224,7 @@ describe("redeem-access-code: brute-force & replay resilience", () => {
     const after = await callRedeem(FAKE_CODES[1], false);
     expect(after.status).toBeGreaterThanOrEqual(400);
     expect(after.status).toBeLessThan(500);
+    expect(errorCode(after)).toBe("NOT_AUTHENTICATED");
   });
 });
 
