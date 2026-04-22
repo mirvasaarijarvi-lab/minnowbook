@@ -5,11 +5,36 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 
 interface ForbiddenProps {
-  /** Short label describing the area the user tried to reach. */
+  /**
+   * Human-readable label describing the area the user tried to reach.
+   * Used in the visible body copy (e.g. "the Superadmin area").
+   */
   attemptedArea?: string;
+  /**
+   * Stable, machine-friendly slug for the attempted area (e.g. "superadmin",
+   * "superadmin/audit-log"). Used as the `?area=` query param on the
+   * forbidden-status beacon and as the `attemptedArea` field on the
+   * audit-log beacon, so synthetic monitors and audit queries can group
+   * denials by route without depending on UI copy.
+   *
+   * Defaults to a slugified form of `attemptedArea` so existing call sites
+   * keep working, but route guards should pass an explicit slug to keep
+   * it stable across copy changes.
+   */
+  areaSlug?: string;
   /** Optional override for the body copy. */
   message?: string;
 }
+
+/** Slugify a human label as a fallback when no explicit `areaSlug` is passed. */
+const toSlug = (label: string): string =>
+  label
+    .toLowerCase()
+    .replace(/^the\s+/, "")
+    .replace(/\s+area$/, "")
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "") || "unknown";
 
 /**
  * 403 page shown when an authenticated user lacks the role required for the
@@ -38,9 +63,13 @@ interface ForbiddenProps {
  */
 const Forbidden = ({
   attemptedArea = "this area",
+  areaSlug,
   message,
 }: ForbiddenProps) => {
   const [beaconStatus, setBeaconStatus] = useState<number | "unreachable" | null>(null);
+  // Resolve once per render: explicit slug wins, otherwise derive from the
+  // human label so legacy call sites keep working.
+  const resolvedSlug = areaSlug ?? toSlug(attemptedArea);
   const body =
     message ??
     `You're signed in, but your account doesn't have permission to access ${attemptedArea}. ` +
@@ -81,7 +110,7 @@ const Forbidden = ({
     }
 
     const url = `${supabaseUrl}/functions/v1/forbidden-status?area=${encodeURIComponent(
-      attemptedArea,
+      resolvedSlug,
     )}`;
 
     // Fire-and-forget: deliberately not awaited. The render path returns
@@ -114,7 +143,7 @@ const Forbidden = ({
       window.clearTimeout(timeoutId);
       controller.abort();
     };
-  }, [attemptedArea]);
+  }, [resolvedSlug]);
 
   // Persist the denial to the audit_log so tenant owners and system admins
   // can review forbidden-access attempts. The edge function resolves the
@@ -132,7 +161,11 @@ const Forbidden = ({
         await supabase.functions.invoke("log-forbidden-access", {
           method: "POST",
           body: {
-            attemptedArea,
+            // Send the stable slug as the canonical attemptedArea so audit
+            // queries can group by route. Also include the human label for
+            // operator readability in the log UI.
+            attemptedArea: resolvedSlug,
+            attemptedAreaLabel: attemptedArea,
             attemptedPath:
               typeof window !== "undefined"
                 ? window.location.pathname + window.location.search
@@ -146,7 +179,7 @@ const Forbidden = ({
     return () => {
       cancelled = true;
     };
-  }, [attemptedArea]);
+  }, [resolvedSlug, attemptedArea]);
 
   // Set title + status + noindex meta. The Status meta is the closest the
   // browser can come to a real status code on a static document.
@@ -202,6 +235,9 @@ const Forbidden = ({
         // and synthetic monitors via a stable data attribute.
         data-http-status="403"
         data-status-beacon={beaconStatus ?? "pending"}
+        // Stable, route-derived slug so monitors can group denials by area
+        // independently of the human-readable copy that appears on screen.
+        data-area-slug={resolvedSlug}
       >
         <div className="max-w-md w-full text-center space-y-6">
           <div className="mx-auto h-16 w-16 rounded-full bg-destructive/10 flex items-center justify-center">

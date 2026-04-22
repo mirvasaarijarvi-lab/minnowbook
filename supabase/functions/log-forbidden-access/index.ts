@@ -36,7 +36,10 @@ const corsHeaders = {
 };
 
 interface ForbiddenLogPayload {
+  /** Stable, route-derived slug (e.g. "superadmin"). */
   attemptedArea?: string;
+  /** Human-readable label as shown on the 403 page (advisory only). */
+  attemptedAreaLabel?: string;
   attemptedPath?: string;
   // Optional explicit tenant hint when the caller belongs to multiple tenants.
   tenantId?: string;
@@ -91,6 +94,11 @@ Deno.serve(async (req) => {
     typeof body.attemptedArea === "string" && body.attemptedArea.length > 0
       ? body.attemptedArea.slice(0, 200)
       : "unknown";
+  const attemptedAreaLabel =
+    typeof body.attemptedAreaLabel === "string" &&
+    body.attemptedAreaLabel.length > 0
+      ? body.attemptedAreaLabel.slice(0, 200)
+      : null;
   const attemptedPath =
     typeof body.attemptedPath === "string"
       ? body.attemptedPath.slice(0, 500)
@@ -172,6 +180,7 @@ Deno.serve(async (req) => {
     summary,
     new_data: {
       attempted_area: attemptedArea,
+      attempted_area_label: attemptedAreaLabel,
       attempted_path: attemptedPath,
       user_agent: userAgent,
       ip,

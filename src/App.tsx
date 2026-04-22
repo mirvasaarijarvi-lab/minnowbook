@@ -147,7 +147,10 @@ const App = () => (
                 path="/superadmin"
                 element={
                   <ProtectedRoute>
-                    <SystemAdminRoute attemptedArea="the Superadmin area">
+                    <SystemAdminRoute
+                      attemptedArea="the Superadmin area"
+                      areaSlug="superadmin"
+                    >
                       <Superadmin />
                     </SystemAdminRoute>
                   </ProtectedRoute>
