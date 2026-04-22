@@ -153,30 +153,35 @@ async function ensureTenant(
 }
 
 async function seedOne(spec: (typeof TENANTS)[number]): Promise<SeededTenant> {
-  const userId = await ensureUser(spec.email, spec.password);
+  return await timed(`seedOne tenant=${spec.label}`, async () => {
+    const userId = await ensureUser(spec.email, spec.password);
 
-  // Use a fresh anon-key client per user so we never carry sessions over.
-  const userClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY!, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
-  const { error: signInError } = await userClient.auth.signInWithPassword({
-    email: spec.email,
-    password: spec.password,
-  });
-  if (signInError)
-    throw new Error(`sign-in for ${spec.email} failed: ${signInError.message}`);
+    // Use a fresh anon-key client per user so we never carry sessions over.
+    const userClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY!, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+    const { error: signInError } = await timed(`signIn ${spec.email}`, () =>
+      userClient.auth.signInWithPassword({
+        email: spec.email,
+        password: spec.password,
+      }),
+    );
+    if (signInError)
+      throw new Error(`sign-in for ${spec.email} failed: ${signInError.message}`);
 
-  const tenantId = await ensureTenant(
-    userClient,
-    userId,
-    spec.tenantName,
-    spec.tenantSlug,
-  );
+    const tenantId = await ensureTenant(
+      userClient,
+      userId,
+      spec.tenantName,
+      spec.tenantSlug,
+    );
 
-  return { email: spec.email, password: spec.password, tenantId };
+    return { email: spec.email, password: spec.password, tenantId };
+  }, 5_000);
 }
 
 (async () => {
+  const totalStart = Date.now();
   const seeded: Record<"A" | "B", SeededTenant> = {} as never;
   for (const spec of TENANTS) {
     try {
@@ -187,6 +192,7 @@ async function seedOne(spec: (typeof TENANTS)[number]): Promise<SeededTenant> {
       process.exit(1);
     }
   }
+  console.error(`[seed] TOTAL elapsed=${Date.now() - totalStart}ms`);
 
   // Emit env-var lines on stdout so callers can pipe to $GITHUB_ENV.
   const out: string[] = [];
