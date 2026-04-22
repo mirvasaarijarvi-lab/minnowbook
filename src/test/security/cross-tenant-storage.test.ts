@@ -684,6 +684,177 @@ describe("Cross-Tenant Storage RLS Tests", () => {
     },
   );
 
+  // ============================================================
+  // Public bucket (`tenant-assets`) cross-tenant read isolation
+  // ------------------------------------------------------------
+  // `tenant-assets` is a PUBLIC bucket: anonymous users can fetch any
+  // object via its public URL (`getPublicUrl`) — that's the intended
+  // carve-out for things like resource images embedded in marketing
+  // pages. What MUST still be denied is anything that lets a foreign
+  // tenant *enumerate* or *bulk-fetch* another tenant's folder via the
+  // authenticated storage API:
+  //
+  //   1. `list({tenant_id}/...)` from another tenant must NOT reveal
+  //      filenames in the foreign folder.
+  //   2. `download(...)` (which goes through the authenticated storage
+  //      endpoint, not the public CDN) must NOT return another tenant's
+  //      file when called by a tenant member.
+  //   3. The owner CAN still list and download files in their own folder
+  //      (positive control), so we know the test setup is wired up.
+  //
+  // Note: the public-URL path is intentionally NOT covered here — that's
+  // the documented carve-out. If a regression broke `getPublicUrl()`
+  // access we'd want OTHER tests (e.g. for guest portals) to fail loudly.
+  // ============================================================
+  describe.runIf(hasSupabaseConfig && liveModeEnabled)(
+    "tenant-assets public bucket: cross-tenant list/download isolation",
+    () => {
+      let clientA: SupabaseClient;
+      let clientB: SupabaseClient;
+
+      // Files we created on our own tenant for the read-isolation checks.
+      // Cleaned up by the owning client in afterAll.
+      const seededAssets: Array<{ path: string; client: "a" | "b" }> = [];
+
+      beforeAll(async () => {
+        clientA = newAnonClient();
+        clientB = newAnonClient();
+
+        const { error: signInAError } = await clientA.auth.signInWithPassword({
+          email: liveCreds.a.email!,
+          password: liveCreds.a.password!,
+        });
+        if (signInAError) throw new Error(`Tenant A sign-in failed: ${signInAError.message}`);
+
+        const { error: signInBError } = await clientB.auth.signInWithPassword({
+          email: liveCreds.b.email!,
+          password: liveCreds.b.password!,
+        });
+        if (signInBError) throw new Error(`Tenant B sign-in failed: ${signInBError.message}`);
+
+        // Seed one asset in each tenant's folder so the cross-tenant
+        // list/download attempts have something real to find — otherwise
+        // an empty result could mask a leak (we wouldn't be able to tell
+        // "nothing to see" from "policy hid it").
+        const aPath = ownPath(liveCreds.a.tenantId!, "a-assets-isolation-seed");
+        const { error: aErr } = await clientA.storage
+          .from(ASSETS_BUCKET)
+          .upload(aPath, fileBytes("a-assets-isolation-seed"), { upsert: true });
+        if (aErr) throw new Error(`Seed upload for tenant A failed: ${aErr.message}`);
+        seededAssets.push({ path: aPath, client: "a" });
+
+        const bPath = ownPath(liveCreds.b.tenantId!, "b-assets-isolation-seed");
+        const { error: bErr } = await clientB.storage
+          .from(ASSETS_BUCKET)
+          .upload(bPath, fileBytes("b-assets-isolation-seed"), { upsert: true });
+        if (bErr) throw new Error(`Seed upload for tenant B failed: ${bErr.message}`);
+        seededAssets.push({ path: bPath, client: "b" });
+      });
+
+      afterAll(async () => {
+        const clientFor = (key: "a" | "b") => (key === "a" ? clientA : clientB);
+        for (const { path, client } of seededAssets) {
+          try {
+            await clientFor(client).storage.from(ASSETS_BUCKET).remove([path]);
+          } catch {
+            /* ignore — best-effort */
+          }
+        }
+        await sweepTestArtifacts(ASSETS_BUCKET, [liveCreds.a.tenantId!, liveCreds.b.tenantId!]);
+      });
+
+      // ---------- Positive controls (own tenant) ----------
+      it("user A CAN list their own tenant-assets folder", async () => {
+        const { data, error } = await clientA.storage
+          .from(ASSETS_BUCKET)
+          .list(`${liveCreds.a.tenantId!}/__rls_test__`, { limit: 50, search: RUN_ID });
+        expect(error).toBeNull();
+        expect(data).toBeTruthy();
+        // Must include the seed we just uploaded.
+        const names = (data ?? []).map((entry) => entry.name);
+        expect(names.some((n) => n.includes("a-assets-isolation-seed"))).toBe(true);
+      });
+
+      it("user A CAN download their own tenant-assets file via authenticated client", async () => {
+        const path = ownPath(liveCreds.a.tenantId!, "a-assets-isolation-seed");
+        const { data, error } = await clientA.storage.from(ASSETS_BUCKET).download(path);
+        expect(error).toBeNull();
+        expect(data).toBeTruthy();
+      });
+
+      // ---------- Cross-tenant list denial ----------
+      it("user A cannot LIST tenant B's tenant-assets folder root", async () => {
+        const { data, error } = await clientA.storage
+          .from(ASSETS_BUCKET)
+          .list(liveCreds.b.tenantId!, { limit: 50 });
+        // RLS-denied list returns either an error or an empty array. The
+        // critical assertion: B's seed file MUST NOT appear in A's result.
+        const leaked =
+          Array.isArray(data) &&
+          data.some((entry) => entry.name && entry.name.includes("b-assets-isolation-seed"));
+        expect(leaked).toBe(false);
+        const denied = Boolean(error) || !data || data.length === 0;
+        expect(denied).toBe(true);
+      });
+
+      it("user A cannot LIST tenant B's nested tenant-assets folder", async () => {
+        const { data, error } = await clientA.storage
+          .from(ASSETS_BUCKET)
+          .list(`${liveCreds.b.tenantId!}/__rls_test__`, { limit: 50, search: RUN_ID });
+        const leaked =
+          Array.isArray(data) &&
+          data.some((entry) => entry.name && entry.name.includes("b-assets-isolation-seed"));
+        expect(leaked).toBe(false);
+        const denied = Boolean(error) || !data || data.length === 0;
+        expect(denied).toBe(true);
+      });
+
+      it("user B cannot LIST tenant A's tenant-assets folder root", async () => {
+        const { data, error } = await clientB.storage
+          .from(ASSETS_BUCKET)
+          .list(liveCreds.a.tenantId!, { limit: 50 });
+        const leaked =
+          Array.isArray(data) &&
+          data.some((entry) => entry.name && entry.name.includes("a-assets-isolation-seed"));
+        expect(leaked).toBe(false);
+        const denied = Boolean(error) || !data || data.length === 0;
+        expect(denied).toBe(true);
+      });
+
+      it("user B cannot LIST tenant A's nested tenant-assets folder", async () => {
+        const { data, error } = await clientB.storage
+          .from(ASSETS_BUCKET)
+          .list(`${liveCreds.a.tenantId!}/__rls_test__`, { limit: 50, search: RUN_ID });
+        const leaked =
+          Array.isArray(data) &&
+          data.some((entry) => entry.name && entry.name.includes("a-assets-isolation-seed"));
+        expect(leaked).toBe(false);
+        const denied = Boolean(error) || !data || data.length === 0;
+        expect(denied).toBe(true);
+      });
+
+      // ---------- Cross-tenant authenticated-download denial ----------
+      // Even though the public CDN URL works for anyone, the authenticated
+      // `download()` call goes through the storage RLS-checked path. A
+      // tenant member must not be able to download another tenant's file
+      // via that channel — that would imply the SELECT policy is keyed on
+      // bucket alone instead of `foldername(name)[1] = tenant_id`.
+      it("user A cannot DOWNLOAD tenant B's tenant-assets file via authenticated client", async () => {
+        const path = ownPath(liveCreds.b.tenantId!, "b-assets-isolation-seed");
+        const { data, error } = await clientA.storage.from(ASSETS_BUCKET).download(path);
+        const denied = Boolean(error) || !data;
+        expect(denied).toBe(true);
+      });
+
+      it("user B cannot DOWNLOAD tenant A's tenant-assets file via authenticated client", async () => {
+        const path = ownPath(liveCreds.a.tenantId!, "a-assets-isolation-seed");
+        const { data, error } = await clientB.storage.from(ASSETS_BUCKET).download(path);
+        const denied = Boolean(error) || !data;
+        expect(denied).toBe(true);
+      });
+    },
+  );
+
   describe.skipIf(hasSupabaseConfig)("Skipped: missing Supabase config", () => { 
     it("test environment is missing VITE_SUPABASE_URL / VITE_SUPABASE_PUBLISHABLE_KEY", () => {
       expect(true).toBe(true);
