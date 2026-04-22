@@ -333,6 +333,9 @@ function renderHtml(payload: ReportPayload): string {
   .guard-email { color: #94a3b8; font-size: 11px; }
   .guard-time { color: #94a3b8; font-size: 11px; font-variant-numeric: tabular-nums; }
   .guard-failure { color: #fca5a5; font-size: 12px; margin-top: 4px; }
+  .guard-rowdetail { color: #94a3b8; font-size: 11px; margin-top: 2px; }
+  .guard-rolebadge { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+  .guard-rolebadge code { font-size: 12px; }
 </style>
 </head>
 <body>
