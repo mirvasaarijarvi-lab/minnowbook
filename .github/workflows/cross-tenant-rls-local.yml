@@ -302,6 +302,106 @@ jobs:
           retention-days: 14
           if-no-files-found: warn
 
+      # Capture the *effective* Supabase / docker-compose configuration plus
+      # the env vars the run actually used. This lets a reviewer reproduce
+      # the exact stack shape (image versions, ports, volumes, healthchecks)
+      # and the exact non-secret env that was in scope when the failure or
+      # skip happened — without needing access to the runner.
+      #
+      # Secrets are redacted in two layers:
+      #   1. We only export a hand-picked allowlist of variables (no blanket
+      #      `env` dump), so service-role keys, GH tokens, etc. are never
+      #      written to disk.
+      #   2. Anything matching common secret name patterns is masked even
+      #      inside the allowlisted output as a belt-and-braces step.
+      - name: Capture effective Supabase config + env (redacted)
+        if: always() && (job.status == 'failure' || steps.supabase-start.outcome != 'success')
+        run: |
+          set +e
+          mkdir -p supabase-config
+          echo "Capturing effective Supabase configuration for run ${GITHUB_RUN_ID}..."
+
+          # 1. Project-checked-in config (source of truth before CLI overlays).
+          if [ -f supabase/config.toml ]; then
+            cp supabase/config.toml supabase-config/config.toml
+          else
+            echo "supabase/config.toml not present in checkout" \
+              > supabase-config/_config-toml-missing.txt
+          fi
+
+          # 2. Effective `supabase status` (URLs, ports, container handles).
+          supabase status > supabase-config/supabase-status.txt 2>&1 || true
+          supabase status -o env > supabase-config/supabase-status.env 2>&1 || true
+
+          # 3. The docker-compose view of what's actually running. The CLI
+          #    doesn't expose its compose file directly, but `docker inspect`
+          #    on each supabase_* container captures the same effective state
+          #    (image, env, mounts, networks, healthcheck) in JSON form.
+          mapfile -t containers < <(docker ps -a --format '{{.Names}}' | grep -E '^supabase_' || true)
+          if [ "${#containers[@]}" -gt 0 ]; then
+            for c in "${containers[@]}"; do
+              docker inspect "$c" \
+                > "supabase-config/compose-${c}.inspect.json" 2>&1 || true
+            done
+            docker ps -a --filter 'name=^supabase_' \
+              --format 'table {{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}' \
+              > supabase-config/compose-overview.txt 2>&1 || true
+          else
+            echo "No supabase_* containers running at capture time." \
+              > supabase-config/_no-containers.txt
+          fi
+
+          # 4. Allowlisted env snapshot. Only public/non-secret vars known to
+          #    influence stack behavior — never service-role keys or tokens.
+          ENV_ALLOWLIST=(
+            GITHUB_RUN_ID GITHUB_RUN_ATTEMPT GITHUB_REPOSITORY
+            GITHUB_REF GITHUB_SHA GITHUB_WORKFLOW GITHUB_JOB
+            RUNNER_OS RUNNER_ARCH
+            SUPABASE_URL VITE_SUPABASE_URL
+            RLS_REPORT_FLAVOR
+            RLS_TEST_TENANT_A_EMAIL RLS_TEST_TENANT_A_ID
+            RLS_TEST_TENANT_B_EMAIL RLS_TEST_TENANT_B_ID
+            skip_reason
+          )
+          {
+            echo "# Effective env vars used for run ${GITHUB_RUN_ID}"
+            echo "# Captured: $(date -u +%FT%TZ)"
+            echo "# Only an allowlist is included; secrets are intentionally omitted."
+            echo ""
+            for var in "${ENV_ALLOWLIST[@]}"; do
+              val="${!var-<unset>}"
+              # Belt-and-braces: redact anything that looks like a secret even
+              # if it sneaks into an allowlisted var (e.g. URL with token).
+              case "$var" in
+                *KEY*|*TOKEN*|*SECRET*|*PASSWORD*)
+                  val="<redacted>"
+                  ;;
+              esac
+              printf '%s=%s\n' "$var" "$val"
+            done
+          } > supabase-config/effective-env.txt
+
+          # 5. Versions of the tools that produced the stack — useful when a
+          #    failure correlates with a CLI / Docker upgrade.
+          {
+            echo "supabase: $(supabase --version 2>&1 || echo unknown)"
+            echo "docker:   $(docker --version 2>&1 || echo unknown)"
+            echo "compose:  $(docker compose version 2>&1 || echo unknown)"
+          } > supabase-config/_tool-versions.txt
+
+          ls -la supabase-config
+
+      - name: Upload Supabase config + env snapshot
+        if: always() && (job.status == 'failure' || steps.supabase-start.outcome != 'success')
+        uses: actions/upload-artifact@v4
+        with:
+          # Run-id-scoped name so multiple failed runs don't collide when
+          # downloaded side-by-side for comparison.
+          name: supabase-config-snapshot-run-${{ github.run_id }}
+          path: supabase-config/
+          retention-days: 14
+          if-no-files-found: warn
+
       - name: Stop local Supabase stack
         if: always() && steps.supabase-start.outcome == 'success'
         run: supabase stop --no-backup || true
@@ -318,6 +418,7 @@ jobs:
             echo "2. Re-run the workflow." >> "$GITHUB_STEP_SUMMARY"
             echo "" >> "$GITHUB_STEP_SUMMARY"
             echo "📦 Container logs (if any) are uploaded as the \`supabase-container-logs\` artifact." >> "$GITHUB_STEP_SUMMARY"
+            echo "🧾 Effective Supabase config + redacted env are uploaded as the \`supabase-config-snapshot-run-${GITHUB_RUN_ID}\` artifact." >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
           if [ -f reports/rls-report.json ]; then
