@@ -1,6 +1,10 @@
 import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { format } from "date-fns";
+import { format, addDays, parseISO, isToday } from "date-fns";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useDateLocale } from "@/hooks/useDateLocale";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/hooks/useTenant";
 import { useT } from "@/contexts/I18nContext";
@@ -98,9 +102,15 @@ const KitchenOrdersPanel = () => {
   const { tenantId } = useTenant();
   const { selectedSiteId } = useSiteContext();
   const queryClient = useQueryClient();
+  const dateLocale = useDateLocale();
   const today = format(new Date(), "yyyy-MM-dd");
   const [selectedDate, setSelectedDate] = useState(today);
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [pendingDelete, setPendingDelete] = useState<string | null>(null);
+
+  const selectedDateObj = parseISO(selectedDate);
+  const shiftDay = (delta: number) =>
+    setSelectedDate(format(addDays(selectedDateObj, delta), "yyyy-MM-dd"));
 
   // Reservations of restaurant/venue type for the selected date
   const { data: reservations = [], isLoading: resLoading } = useQuery({
@@ -204,17 +214,62 @@ const KitchenOrdersPanel = () => {
           <h2 className="text-xl sm:text-2xl font-serif font-bold text-foreground">{t("kitchen.title")}</h2>
           <DashboardTooltip text={t("kitchen.tooltip")} />
         </div>
-        <div className="flex items-center gap-2 print:hidden">
-          <div className="flex items-center gap-1.5">
-            <CalendarIcon className="h-4 w-4 text-muted-foreground" />
-            <Input
-              type="date"
-              value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
-              className="h-9 w-44"
-            />
+        <div className="flex items-center gap-2 print:hidden flex-wrap">
+          <div className="flex items-center gap-1 rounded-md border border-border bg-card">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-9 w-9"
+              onClick={() => shiftDay(-1)}
+              aria-label="Previous day"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={cn(
+                    "h-9 px-3 gap-2 font-normal min-w-[180px] justify-start",
+                    !selectedDate && "text-muted-foreground",
+                  )}
+                >
+                  <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+                  {format(selectedDateObj, "PPP", { locale: dateLocale })}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={selectedDateObj}
+                  onSelect={(d) => {
+                    if (d) {
+                      setSelectedDate(format(d, "yyyy-MM-dd"));
+                      setDatePickerOpen(false);
+                    }
+                  }}
+                  initialFocus
+                  locale={dateLocale}
+                  className={cn("p-3 pointer-events-auto")}
+                />
+              </PopoverContent>
+            </Popover>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-9 w-9"
+              onClick={() => shiftDay(1)}
+              aria-label="Next day"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
           </div>
-          <Button variant="outline" size="sm" onClick={() => setSelectedDate(today)}>
+          <Button
+            variant={isToday(selectedDateObj) ? "default" : "outline"}
+            size="sm"
+            onClick={() => setSelectedDate(today)}
+          >
             {t("kitchen.today")}
           </Button>
           <Button variant="outline" size="sm" onClick={() => window.print()} className="gap-1.5">
