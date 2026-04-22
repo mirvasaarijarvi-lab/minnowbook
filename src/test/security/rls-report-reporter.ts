@@ -181,8 +181,50 @@ function renderRlsDetails(d: RlsFailureDetails): string {
   return `<div class="rls-details">${rowsHtml}${errBlock}${rowsBlock}</div>`;
 }
 
+function membershipBadge(value: boolean | "skipped"): string {
+  if (value === true) return `<span class="badge ok">probe ✓</span>`;
+  if (value === false) return `<span class="badge fail">probe ✗</span>`;
+  return `<span class="badge skip">skipped</span>`;
+}
+
+function renderTenantGuardSection(records: TenantGuardRecord[]): string {
+  if (records.length === 0) {
+    // Empty intentionally: anon-only runs don't invoke the guard. Showing
+    // a "no guard" notice would create false noise in the dashboard.
+    return "";
+  }
+  const rows = records
+    .map((r) => {
+      const failureRow = r.failure
+        ? `<div class="guard-failure">⚠ ${escapeHtml(r.failure)}</div>`
+        : "";
+      const aLabel = r.emailA ? ` <span class="guard-email">(${escapeHtml(r.emailA)})</span>` : "";
+      const bLabel = r.emailB ? ` <span class="guard-email">(${escapeHtml(r.emailB)})</span>` : "";
+      return `<tr>
+          <td><code>${escapeHtml(r.suite)}</code></td>
+          <td><code>${escapeHtml(r.tenantA ?? "—")}</code>${aLabel}</td>
+          <td><code>${escapeHtml(r.tenantB ?? "—")}</code>${bLabel}</td>
+          <td>${membershipBadge(r.membershipA)}</td>
+          <td>${membershipBadge(r.membershipB)}</td>
+          <td><span class="guard-time">${escapeHtml(r.recordedAt)}</span>${failureRow}</td>
+        </tr>`;
+    })
+    .join("\n");
+  return `
+  <h2 class="guard-heading">Tenant-pair guard</h2>
+  <p class="guard-meta">UUID validation, distinctness check, and membership probe — all three must pass before the live cross-tenant assertions can be trusted.</p>
+  <table class="guard-table">
+    <thead>
+      <tr><th>Suite</th><th>Tenant A</th><th>Tenant B</th><th>Member A</th><th>Member B</th><th>Recorded</th></tr>
+    </thead>
+    <tbody>
+${rows}
+    </tbody>
+  </table>`;
+}
+
 function renderHtml(payload: ReportPayload): string {
-  const { totals, entries, generatedAt, flavor } = payload;
+  const { totals, entries, generatedAt, flavor, tenantGuard } = payload;
 
   const rows = entries
     .map((e) => {
