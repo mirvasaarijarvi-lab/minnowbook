@@ -47,6 +47,12 @@ function sanitizeError(msg: string): string {
   if (SAFE_ERRORS.has(msg)) return msg;
   // Allow validation errors from our own validators
   if (/^(Email|Password|Display name|Role|Invalid).{0,80}$/.test(msg)) return msg;
+  // Allow tier-limit errors raised by DB triggers (enforce_staff_user_limit,
+  // enforce_site_limit, enforce_resource_per_type_limit, enforce_reservation_type_limit).
+  // These are user-actionable and explicitly designed to be shown to admins.
+  if (/^Tier ".{1,40}" allows at most \d+/.test(msg)) return msg;
+  if (/^Your plan allows only \d+ resource\(s\) per type/.test(msg)) return msg;
+  if (/already belongs to another organization/i.test(msg)) return msg;
   console.error("[admin-users] Internal error:", msg);
   return "An unexpected error occurred. Please try again.";
 }
