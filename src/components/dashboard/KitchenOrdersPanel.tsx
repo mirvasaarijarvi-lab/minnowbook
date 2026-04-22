@@ -451,7 +451,63 @@ const KitchenOrdersPanel = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <KitchenMenuManager open={menuManagerOpen} onOpenChange={setMenuManagerOpen} />
     </div>
+  );
+};
+
+interface MenuPickerProps {
+  menuItems: MenuItem[];
+  onPick: (item: MenuItem) => void;
+  t: (key: any) => string;
+}
+
+const MenuPicker = ({ menuItems, onPick, t }: MenuPickerProps) => {
+  const [open, setOpen] = useState(false);
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button variant="secondary" size="sm" className="gap-1.5">
+          <BookOpen className="h-4 w-4" />
+          {t("kitchen.menu.pickFromMenu")}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="p-0 w-72" align="start">
+        <Command>
+          <CommandInput placeholder={t("kitchen.menu.searchPlaceholder")} />
+          <CommandList>
+            <CommandEmpty>{t("kitchen.menu.empty")}</CommandEmpty>
+            <CommandGroup>
+              {menuItems.map((item) => {
+                const Icon = CATEGORY_ICON[item.category];
+                return (
+                  <CommandItem
+                    key={item.id}
+                    value={item.name}
+                    onSelect={() => {
+                      onPick(item);
+                      setOpen(false);
+                    }}
+                    className="flex items-center justify-between gap-2"
+                  >
+                    <span className="flex items-center gap-2 truncate">
+                      <Icon className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                      <span className="truncate">{item.name}</span>
+                    </span>
+                    {item.unit_price_eur != null && (
+                      <span className="text-xs text-muted-foreground shrink-0">
+                        {Number(item.unit_price_eur).toFixed(2)} €
+                      </span>
+                    )}
+                  </CommandItem>
+                );
+              })}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
   );
 };
 
