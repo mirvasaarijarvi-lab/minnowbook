@@ -38,43 +38,55 @@ export const useTenant = () => {
   useEffect(() => {
     if (!user?.id || isImpersonating) return;
 
+    // Debounce invalidations so a burst of DELETEs (e.g., bulk role rotation
+    // or a row being deleted then reinserted) only triggers a single refetch.
+    let invalidateTimer: ReturnType<typeof setTimeout> | null = null;
+    const scheduleInvalidate = () => {
+      if (invalidateTimer) clearTimeout(invalidateTimer);
+      invalidateTimer = setTimeout(() => {
+        invalidateTimer = null;
+        queryClient.invalidateQueries({ queryKey: ["tenant-user", user.id] });
+      }, 300);
+    };
+
     const channel = supabase
       .channel(`tenant-membership-${user.id}`)
       .on(
         "postgres_changes",
         {
-          event: "*",
+          // Only DELETE: INSERT/UPDATE don't represent loss of access and were
+          // adding refetch noise on every role/display_name change.
+          event: "DELETE",
           schema: "public",
           table: "tenant_users",
           filter: `user_id=eq.${user.id}`,
         },
-        (payload) => {
-          if (payload.eventType === "DELETE") {
-            // Mark the upcoming tenantId=null transition as caused by an
-            // explicit membership removal (vs. an unrelated query refresh)
-            // so the analytics event in the effect below can attribute it.
-            lossReasonRef.current = "membership_removed";
+        () => {
+          // Mark the upcoming tenantId=null transition as caused by an
+          // explicit membership removal (vs. an unrelated query refresh)
+          // so the analytics event in the effect below can attribute it.
+          lossReasonRef.current = "membership_removed";
 
-            // Flag the removal so /onboarding can show a persistent banner
-            // explaining what happened (the toast alone is easy to miss).
-            try {
-              sessionStorage.setItem(
-                "tenant-membership-removed",
-                JSON.stringify({ at: new Date().toISOString() })
-              );
-            } catch {
-              // sessionStorage may be unavailable (private mode, SSR) — non-fatal
-            }
-            toast.error("Your access to this organization has been removed.", {
-              description: "Redirecting to setup…",
-            });
+          // Flag the removal so /onboarding can show a persistent banner
+          // explaining what happened (the toast alone is easy to miss).
+          try {
+            sessionStorage.setItem(
+              "tenant-membership-removed",
+              JSON.stringify({ at: new Date().toISOString() })
+            );
+          } catch {
+            // sessionStorage may be unavailable (private mode, SSR) — non-fatal
           }
-          queryClient.invalidateQueries({ queryKey: ["tenant-user", user.id] });
+          toast.error("Your access to this organization has been removed.", {
+            description: "Redirecting to setup…",
+          });
+          scheduleInvalidate();
         }
       )
       .subscribe();
 
     return () => {
+      if (invalidateTimer) clearTimeout(invalidateTimer);
       supabase.removeChannel(channel);
     };
   }, [user?.id, isImpersonating, queryClient]);
