@@ -32,25 +32,31 @@ vi.mock("@/contexts/AuthContext", () => ({
 }));
 
 // The supabase client is used for two things in this code path:
-//   1. SystemAdminRoute -> supabase.from("system_admins").select(...)
+//   1. SystemAdminRoute -> useIsSystemAdmin -> supabase.rpc("is_system_admin")
 //   2. Forbidden -> supabase.auth.getSession() + supabase.functions.invoke(...)
-// We model both. The `system_admins` query result is configurable per test
-// via `mockSystemAdminRow`.
-let mockSystemAdminRow: { id: string } | null = null;
-let mockSystemAdminError: { message: string } | null = null;
+// We model both. The `is_system_admin` RPC result is configurable per test
+// via `mockIsSystemAdminResult` / `mockIsSystemAdminError`.
+let mockIsSystemAdminResult: boolean = false;
+let mockIsSystemAdminError: { message: string } | null = null;
 
 vi.mock("@/integrations/supabase/client", () => {
-  const maybeSingle = vi.fn(async () => ({
-    data: mockSystemAdminRow,
-    error: mockSystemAdminError,
+  const rpc = vi.fn(async (_fn: string) => ({
+    data: mockIsSystemAdminResult,
+    error: mockIsSystemAdminError,
   }));
-  const eq = vi.fn(() => ({ maybeSingle }));
-  const select = vi.fn(() => ({ eq }));
-  const from = vi.fn(() => ({ select }));
 
   return {
     supabase: {
-      from,
+      rpc,
+      // `from` is still referenced by other hooks transitively imported in
+      // some setups; provide a no-op chain so accidental calls don't throw.
+      from: vi.fn(() => ({
+        select: vi.fn(() => ({
+          eq: vi.fn(() => ({
+            maybeSingle: vi.fn(async () => ({ data: null, error: null })),
+          })),
+        })),
+      })),
       auth: {
         // Forbidden page guards on session presence before beaconing.
         // Returning null avoids any audit-log beacon noise in tests.
