@@ -3,8 +3,16 @@ import Forbidden from "@/pages/Forbidden";
 
 interface SystemAdminRouteProps {
   children: React.ReactNode;
-  /** Label used in the 403 message. */
+  /** Human-readable label used in the visible 403 message. */
   attemptedArea?: string;
+  /**
+   * Stable slug used by the forbidden-status beacon (`?area=`) and the
+   * audit log entry. Defaults to `"superadmin"` because every consumer of
+   * this guard today sits under the /superadmin route tree; pass a more
+   * specific value (e.g. `"superadmin/audit-log"`) when wrapping a
+   * sub-route so monitoring can group denials by exact destination.
+   */
+  areaSlug?: string;
 }
 
 /**
@@ -21,10 +29,17 @@ interface SystemAdminRouteProps {
  * Navigating between guarded routes — or even unmounting and remounting
  * this component — never re-hits the database; the first lookup of the
  * session is reused everywhere.
+ *
+ * The `attemptedArea` (human label) and `areaSlug` (stable identifier)
+ * are forwarded to `<Forbidden>` so the visible copy and the
+ * forbidden-status beacon's `?area=` parameter / audit log entry stay in
+ * sync. This guarantees the 403 response body the edge function returns
+ * always describes the correct area, regardless of any UI copy changes.
  */
 const SystemAdminRoute = ({
   children,
   attemptedArea = "the Superadmin area",
+  areaSlug = "superadmin",
 }: SystemAdminRouteProps) => {
   const { isSystemAdmin, isLoading } = useIsSystemAdmin();
 
@@ -41,7 +56,7 @@ const SystemAdminRoute = ({
   }
 
   if (!isSystemAdmin) {
-    return <Forbidden attemptedArea={attemptedArea} />;
+    return <Forbidden attemptedArea={attemptedArea} areaSlug={areaSlug} />;
   }
 
   return <>{children}</>;
