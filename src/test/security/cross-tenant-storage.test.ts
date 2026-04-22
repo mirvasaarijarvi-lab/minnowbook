@@ -1905,6 +1905,9 @@ describe("Cross-Tenant Storage RLS Tests", () => {
   //   6. URL-encoded tenant:    `%7B{B}%7D/file.txt`     →  encoded braces around id
   //   7. Backslash separators:  `{B}\\docs\\file.txt`    →  Windows-style separators
   //   8. Null byte:             `{B}/docs%00/file.txt`   →  C-string truncation trick
+  //   9. Double-encoded slash:  `{A}%252F..%252F{B}/…`   →  two-pass decode bypass
+  //  10. Encoded dot-dot:       `{A}/%2e%2e/{B}/file`    →  late-decoded traversal
+  //  11. Mixed encoding combo:  `{A}%2f%2e%2e/{B}/file`  →  encoded slash + dot-dot
   //
   // The expected behaviour for ALL of these, in BOTH buckets, is the same:
   // the upload, list, and download MUST be denied (or, equivalently, the
