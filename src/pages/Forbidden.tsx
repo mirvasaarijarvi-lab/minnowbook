@@ -156,6 +156,13 @@ const Forbidden = ({
     "logged" | "not_logged" | "skipped" | "error" | null
   >(null);
   const [auditReason, setAuditReason] = useState<string | null>(null);
+  // The edge function echoes back the JWT-resolved user_id and the
+  // server-set timestamp on success. Surfacing both in the DOM lets
+  // E2E tests, synthetic monitors, and the dev indicator confirm that
+  // the audit row was attributed and stamped server-side (never trusting
+  // any client-supplied id or clock).
+  const [auditUserId, setAuditUserId] = useState<string | null>(null);
+  const [auditAt, setAuditAt] = useState<string | null>(null);
 
   // Persist the denial to the audit_log so tenant owners and system admins
   // can review forbidden-access attempts. The edge function resolves the
@@ -199,10 +206,24 @@ const Forbidden = ({
           setAuditReason(error.message ?? "invoke_error");
           return;
         }
-        const logged = (data as { logged?: boolean; reason?: string } | null)?.logged;
-        const reason = (data as { logged?: boolean; reason?: string } | null)?.reason ?? null;
+        const payload = data as
+          | {
+              logged?: boolean;
+              reason?: string;
+              userId?: string;
+              at?: string;
+            }
+          | null;
+        const logged = payload?.logged;
+        const reason = payload?.reason ?? null;
         setAuditStatus(logged ? "logged" : "not_logged");
         setAuditReason(reason);
+        // Surface the JWT-resolved user_id and the server timestamp so
+        // tests and monitoring can verify the audit row was attributed
+        // and stamped server-side. Only set on success — null otherwise
+        // so a failed/skipped beacon doesn't appear to expose identity.
+        setAuditUserId(logged ? (payload?.userId ?? null) : null);
+        setAuditAt(logged ? (payload?.at ?? null) : null);
       } catch (err) {
         // Audit logging is best-effort — never block the user experience.
         if (!cancelled) {
@@ -276,6 +297,12 @@ const Forbidden = ({
         // Audit beacon outcome — exposed for E2E tests and the dev indicator.
         data-audit-status={auditStatus ?? "pending"}
         data-audit-reason={auditReason ?? ""}
+        // The audit row's JWT-attributed user_id and server-set timestamp,
+        // echoed back from the edge function on success. These let tests
+        // and synthetic monitors confirm that the row was stamped on the
+        // server (not the client) and attributed to the verified caller.
+        data-audit-user-id={auditUserId ?? ""}
+        data-audit-at={auditAt ?? ""}
       >
         <div className="max-w-md w-full text-center space-y-6">
           <div className="mx-auto h-16 w-16 rounded-full bg-destructive/10 flex items-center justify-center">
