@@ -184,7 +184,9 @@ describe("Anonymous /superadmin visit (auth-gate before role-gate)", () => {
     // short-circuits before the role-gate runs, nothing should have hit
     // the functions.invoke spy. This guarantees anonymous denials don't
     // pollute the audit log or the forbidden-status monitoring stream.
-    expect(mockFunctionsInvoke).not.toHaveBeenCalled();
+    const { supabase } = await import("@/integrations/supabase/client");
+    const invokeSpy = (supabase as unknown as { __invokeSpy: ReturnType<typeof vi.fn> }).__invokeSpy;
+    expect(invokeSpy).not.toHaveBeenCalled();
   });
 
   it("renders a loading indicator (not a redirect or Forbidden) while auth is still resolving", () => {
