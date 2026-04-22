@@ -188,6 +188,66 @@ jobs:
           # $GITHUB_ENV so the next step picks up the live-mode creds.
           bun run scripts/seed-rls-test-data.ts >> "$GITHUB_ENV"
 
+      # Print the seeded tenant/user identifiers (IDs, emails, slugs) so a
+      # failed RLS run can be triaged without re-running the seed locally.
+      # Passwords are deliberately NOT echoed — the seed script keeps them
+      # only in $GITHUB_ENV (masked when used as secrets in later steps).
+      # We resolve user_id and slug from the DB by email so the summary
+      # stays accurate even if the seed script's emitted vars change.
+      - name: Print seeded tenant debug info (no secrets)
+        if: steps.supabase-ready.outcome == 'success'
+        env:
+          PGPASSWORD: postgres
+        run: |
+          set -uo pipefail
+          echo "### Seeded RLS test fixtures" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Label | Email | Tenant ID | Tenant slug | Tenant name | User ID |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|---|---|---|---|---|---|" >> "$GITHUB_STEP_SUMMARY"
+
+          # Local Supabase CLI exposes Postgres on 127.0.0.1:54322 with the
+          # default `postgres`/`postgres` superuser credentials.
+          PSQL=(psql -h 127.0.0.1 -p 54322 -U postgres -d postgres -At -F '|')
+
+          for label in A B; do
+            email_var="RLS_TEST_TENANT_${label}_EMAIL"
+            tid_var="RLS_TEST_TENANT_${label}_ID"
+            email="${!email_var:-}"
+            tenant_id="${!tid_var:-}"
+            if [ -z "$email" ] || [ -z "$tenant_id" ]; then
+              echo "::warning::Tenant ${label} env vars missing (email='${email}' tenant_id='${tenant_id}')"
+              echo "| ${label} | (missing) | (missing) | – | – | – |" >> "$GITHUB_STEP_SUMMARY"
+              continue
+            fi
+
+            row=$("${PSQL[@]}" -c "
+              SELECT
+                u.id::text,
+                t.slug,
+                t.name
+              FROM auth.users u
+              LEFT JOIN public.tenants t ON t.id = '${tenant_id}'::uuid
+              WHERE lower(u.email) = lower('${email}')
+              LIMIT 1;
+            " 2>/dev/null)
+
+            user_id=$(echo "$row" | cut -d'|' -f1)
+            slug=$(echo "$row"   | cut -d'|' -f2)
+            tname=$(echo "$row"  | cut -d'|' -f3)
+
+            echo "Tenant ${label}:"
+            echo "  email     = ${email}"
+            echo "  user_id   = ${user_id:-<not found>}"
+            echo "  tenant_id = ${tenant_id}"
+            echo "  slug      = ${slug:-<not found>}"
+            echo "  name      = ${tname:-<not found>}"
+
+            echo "| ${label} | \`${email}\` | \`${tenant_id}\` | \`${slug:-?}\` | ${tname:-?} | \`${user_id:-?}\` |" >> "$GITHUB_STEP_SUMMARY"
+          done
+
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "_Passwords intentionally omitted from this summary._" >> "$GITHUB_STEP_SUMMARY"
+
       - name: Run cross-tenant RLS tests (live, against local stack)
         if: steps.supabase-ready.outcome == 'success'
         env:
