@@ -145,10 +145,23 @@ const Forbidden = ({
     };
   }, [resolvedSlug]);
 
+  // Audit beacon outcome, surfaced as a small dev-only indicator below the
+  // 403 copy. Values:
+  //   - null: in-flight / not yet attempted
+  //   - "skipped": no session, so we deliberately didn't beacon
+  //   - "logged": edge function returned { logged: true }
+  //   - "not_logged": edge function returned { logged: false } (e.g. no_tenant)
+  //   - "error": network/CORS/exception path
+  const [auditStatus, setAuditStatus] = useState<
+    "logged" | "not_logged" | "skipped" | "error" | null
+  >(null);
+  const [auditReason, setAuditReason] = useState<string | null>(null);
+
   // Persist the denial to the audit_log so tenant owners and system admins
   // can review forbidden-access attempts. The edge function resolves the
   // caller's user id from their JWT and writes user_id + timestamp + the
-  // attempted area. Fire-and-forget; we don't surface failures to the UI.
+  // attempted area. Fire-and-forget; we don't surface failures to the UI
+  // (production), but the dev indicator below reflects the outcome.
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -157,23 +170,45 @@ const Forbidden = ({
         // reached behind <ProtectedRoute>, but defensively guard anyway so
         // we never fire an unauthenticated audit beacon.
         const { data: sessionData } = await supabase.auth.getSession();
-        if (cancelled || !sessionData?.session) return;
-        await supabase.functions.invoke("log-forbidden-access", {
-          method: "POST",
-          body: {
-            // Send the stable slug as the canonical attemptedArea so audit
-            // queries can group by route. Also include the human label for
-            // operator readability in the log UI.
-            attemptedArea: resolvedSlug,
-            attemptedAreaLabel: attemptedArea,
-            attemptedPath:
-              typeof window !== "undefined"
-                ? window.location.pathname + window.location.search
-                : null,
+        if (cancelled) return;
+        if (!sessionData?.session) {
+          setAuditStatus("skipped");
+          setAuditReason("no_session");
+          return;
+        }
+        const { data, error } = await supabase.functions.invoke(
+          "log-forbidden-access",
+          {
+            method: "POST",
+            body: {
+              // Send the stable slug as the canonical attemptedArea so audit
+              // queries can group by route. Also include the human label for
+              // operator readability in the log UI.
+              attemptedArea: resolvedSlug,
+              attemptedAreaLabel: attemptedArea,
+              attemptedPath:
+                typeof window !== "undefined"
+                  ? window.location.pathname + window.location.search
+                  : null,
+            },
           },
-        });
-      } catch {
+        );
+        if (cancelled) return;
+        if (error) {
+          setAuditStatus("error");
+          setAuditReason(error.message ?? "invoke_error");
+          return;
+        }
+        const logged = (data as { logged?: boolean; reason?: string } | null)?.logged;
+        const reason = (data as { logged?: boolean; reason?: string } | null)?.reason ?? null;
+        setAuditStatus(logged ? "logged" : "not_logged");
+        setAuditReason(reason);
+      } catch (err) {
         // Audit logging is best-effort — never block the user experience.
+        if (!cancelled) {
+          setAuditStatus("error");
+          setAuditReason(err instanceof Error ? err.message : "exception");
+        }
       }
     })();
     return () => {
@@ -238,6 +273,9 @@ const Forbidden = ({
         // Stable, route-derived slug so monitors can group denials by area
         // independently of the human-readable copy that appears on screen.
         data-area-slug={resolvedSlug}
+        // Audit beacon outcome — exposed for E2E tests and the dev indicator.
+        data-audit-status={auditStatus ?? "pending"}
+        data-audit-reason={auditReason ?? ""}
       >
         <div className="max-w-md w-full text-center space-y-6">
           <div className="mx-auto h-16 w-16 rounded-full bg-destructive/10 flex items-center justify-center">
@@ -271,6 +309,40 @@ const Forbidden = ({
               <Link to="/">Back to home</Link>
             </Button>
           </div>
+
+          {/*
+            Dev-only audit beacon indicator. Vite replaces `import.meta.env.DEV`
+            at build time, so this entire block is tree-shaken out of production
+            bundles. The `data-audit-*` attributes on <main> carry the same
+            signal for automated tests regardless of build mode.
+          */}
+          {import.meta.env.DEV && (
+            <div
+              className="mt-4 inline-flex items-center gap-2 rounded-md border border-border bg-muted/50 px-3 py-1.5 text-xs text-muted-foreground"
+              role="status"
+              aria-live="polite"
+              data-testid="forbidden-audit-indicator"
+            >
+              <span
+                className={
+                  "h-2 w-2 rounded-full " +
+                  (auditStatus === "logged"
+                    ? "bg-primary"
+                    : auditStatus === "not_logged" ||
+                        auditStatus === "skipped"
+                      ? "bg-muted-foreground"
+                      : auditStatus === "error"
+                        ? "bg-destructive"
+                        : "bg-muted-foreground/50 animate-pulse")
+                }
+                aria-hidden="true"
+              />
+              <span className="font-mono">
+                audit: {auditStatus ?? "pending…"}
+                {auditReason ? ` (${auditReason})` : ""}
+              </span>
+            </div>
+          )}
         </div>
       </main>
     </>
