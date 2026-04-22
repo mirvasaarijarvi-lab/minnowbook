@@ -34,7 +34,7 @@ Deno.serve(async (req) => {
     console.error('Missing required environment variables')
     return new Response(
       JSON.stringify({ error: 'Server configuration error' }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   }
 
@@ -52,7 +52,7 @@ Deno.serve(async (req) => {
   if (state?.retry_after_until && new Date(state.retry_after_until) > new Date()) {
     return new Response(
       JSON.stringify({ skipped: true, reason: 'rate_limited' }),
-      { headers: { 'Content-Type': 'application/json' } }
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   }
 
@@ -256,7 +256,7 @@ Deno.serve(async (req) => {
           // Stop processing — remaining messages stay in queue (VT expires, retried next cycle)
           return new Response(
             JSON.stringify({ processed: totalProcessed, stopped: 'rate_limited' }),
-            { headers: { 'Content-Type': 'application/json' } }
+            { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
           )
         }
 
@@ -272,6 +272,6 @@ Deno.serve(async (req) => {
 
   return new Response(
     JSON.stringify({ processed: totalProcessed }),
-    { headers: { 'Content-Type': 'application/json' } }
+    { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
   )
 })
