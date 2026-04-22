@@ -68,7 +68,7 @@ const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
  */
 async function timed<T>(
   label: string,
-  fn: () => Promise<T>,
+  fn: () => PromiseLike<T>,
   slowMs = 1500,
 ): Promise<T> {
   const startedAt = Date.now();
