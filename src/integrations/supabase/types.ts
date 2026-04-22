@@ -2440,7 +2440,6 @@ export type Database = {
           discount_reason: string | null
           id: string
           is_active: boolean | null
-          max_staff_users: number
           name: string
           owner_user_id: string
           sample_end_date: string | null
@@ -2460,7 +2459,6 @@ export type Database = {
           discount_reason?: string | null
           id?: string
           is_active?: boolean | null
-          max_staff_users?: number
           name: string
           owner_user_id: string
           sample_end_date?: string | null
@@ -2480,7 +2478,6 @@ export type Database = {
           discount_reason?: string | null
           id?: string
           is_active?: boolean | null
-          max_staff_users?: number
           name?: string
           owner_user_id?: string
           sample_end_date?: string | null
@@ -2800,7 +2797,6 @@ export type Database = {
           discount_reason: string | null
           id: string | null
           is_active: boolean | null
-          max_staff_users: number | null
           name: string | null
           owner_user_id: string | null
           sample_end_date: string | null
@@ -2820,7 +2816,6 @@ export type Database = {
           discount_reason?: string | null
           id?: string | null
           is_active?: boolean | null
-          max_staff_users?: number | null
           name?: string | null
           owner_user_id?: string | null
           sample_end_date?: string | null
@@ -2840,7 +2835,6 @@ export type Database = {
           discount_reason?: string | null
           id?: string | null
           is_active?: boolean | null
-          max_staff_users?: number | null
           name?: string | null
           owner_user_id?: string | null
           sample_end_date?: string | null
@@ -2935,6 +2929,7 @@ export type Database = {
         Returns: number
       }
       get_tier_max_sites: { Args: { p_tier: string }; Returns: number }
+      get_tier_max_staff_users: { Args: { p_tier: string }; Returns: number }
       get_unconfirmed_users: {
         Args: { since_date: string }
         Returns: {
