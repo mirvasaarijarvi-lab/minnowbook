@@ -198,9 +198,22 @@ jobs:
           RLS_REPORT_FLAVOR: remote
         run: bun run test:rls-report
 
+      # Render the storage-attempts ledger written by cross-tenant-storage.test.ts
+      # into a reviewable PDF. Runs `if: always()` so a failed test sweep
+      # (which is exactly when the PDF is most useful for triage) still
+      # produces the artifact. The script no-ops gracefully when the JSON
+      # ledger is missing, so we don't need an extra existence check here.
+      - name: Generate storage-attempts PDF (remote)
+        if: always()
+        env:
+          RLS_REPORT_FLAVOR: remote
+        run: bun run scripts/generate-storage-attempts-pdf.ts || true
+
       - name: Upload RLS report (remote)
         # Always upload — even on test failure — so the HTML/JSON dashboard
-        # is available for triage from the workflow run page.
+        # AND the storage-attempts PDF/JSON ledger are available for triage
+        # from the workflow run page. `reports/` covers both artifact
+        # families in a single upload.
         if: always()
         uses: actions/upload-artifact@v4
         with:
