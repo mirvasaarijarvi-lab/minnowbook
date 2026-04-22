@@ -593,11 +593,13 @@ suite(
             successes.map((s) => s.body),
           )}`,
       ).toBe(1);
-      for (const f of failures) {
-        expect(f.status).toBeGreaterThanOrEqual(400);
-        expect(f.status).toBeLessThan(500);
-        expect(bodyCode(f.body)).toBe("INVALID_OR_UNAVAILABLE_CODE");
-      }
+      // Same strict contract for losers in the distinct-idem-keys race.
+      // The cache fast-path is bypassed here, so this exercises the
+      // "duplicate-redemption check + unique constraint" loss path —
+      // it must emit the SAME bytes and headers as the cache-hit path.
+      failures.forEach((f, i) => {
+        assertGenericFailure(f, `distinct-idem-keys loser #${i}`);
+      });
 
       const { data: redemptions } = await admin
         .from("access_code_redemptions")
