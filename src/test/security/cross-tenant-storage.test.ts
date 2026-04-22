@@ -369,6 +369,21 @@ const NESTED_SCENARIOS: Array<{ name: string; segments: string[] }> = [
 ];
 
 describe("Cross-Tenant Storage RLS Tests", () => {
+  // Configure the ledger up-front so RUN_ID + tenant ids are present even
+  // when only the anon block runs (live-mode skipped). Flushed once at the
+  // end so the PDF generator has a complete picture.
+  beforeAll(() => {
+    configureLedger({
+      runId: RUN_ID,
+      tenantA: liveCreds.a.tenantId ?? null,
+      tenantB: liveCreds.b.tenantId ?? null,
+    });
+  });
+
+  afterAll(() => {
+    flushLedger();
+  });
+
   describe.runIf(hasSupabaseConfig)("Anonymous client storage enforcement", () => {
     let anon: SupabaseClient;
     const fakeTenantId = "00000000-0000-0000-0000-000000000000";
