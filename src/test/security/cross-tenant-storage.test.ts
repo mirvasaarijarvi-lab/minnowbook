@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import {
   configureLedger,
+  extractStorageError,
   flushLedger,
   recordCleanup,
   recordUpload,
@@ -994,6 +995,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       // Ledger every anon upload attempt so the PDF report shows them
       // alongside the live cross-tenant attempts. Anon WRITES are always
       // expected to be denied, so `outcome: "allowed"` would be a leak.
+      const { httpStatus, errorCode } = extractStorageError(result);
       recordUpload({
         bucket,
         path: anonPath,
@@ -1002,6 +1004,8 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         expected: "denied",
         outcome: result.error ? "denied" : "allowed",
         errorMessage: result.error?.message,
+        httpStatus,
+        errorCode,
         scenario: "anon-upload",
       });
       return result;
@@ -1042,9 +1046,10 @@ describe("Cross-Tenant Storage RLS Tests", () => {
     });
 
     it("anon cannot delete from tenant-private bucket", async () => {
-      const { data, error } = await anon.storage.from(PRIVATE_BUCKET).remove([anonPath]);
-      // remove() returns deleted rows on success; RLS denial yields error or [].
+      const result = await anon.storage.from(PRIVATE_BUCKET).remove([anonPath]);
+      const { data, error } = result;
       const denied = Boolean(error) || !data || data.length === 0;
+      const { httpStatus, errorCode } = extractStorageError(result);
       // Ledger the negative-control delete so the PDF shows what happened
       // alongside the per-attacker upload rows. `removed: !denied` means
       // a row only counts as "removed" when the API actually returned a
@@ -1055,6 +1060,8 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         path: anonPath,
         role: "attacker",
         removed: !denied,
+        httpStatus,
+        errorCode,
         note: denied
           ? `negative-control: anon DELETE denied (${error?.message ?? "empty rows"})`
           : `negative-control: anon DELETE UNEXPECTEDLY succeeded — RLS LEAK`,
@@ -1063,13 +1070,17 @@ describe("Cross-Tenant Storage RLS Tests", () => {
     });
 
     it("anon cannot delete from tenant-assets bucket", async () => {
-      const { data, error } = await anon.storage.from(ASSETS_BUCKET).remove([anonPath]);
+      const result = await anon.storage.from(ASSETS_BUCKET).remove([anonPath]);
+      const { data, error } = result;
       const denied = Boolean(error) || !data || data.length === 0;
+      const { httpStatus, errorCode } = extractStorageError(result);
       recordCleanup({
         bucket: ASSETS_BUCKET,
         path: anonPath,
         role: "attacker",
         removed: !denied,
+        httpStatus,
+        errorCode,
         note: denied
           ? `negative-control: anon DELETE denied (${error?.message ?? "empty rows"})`
           : `negative-control: anon DELETE UNEXPECTEDLY succeeded — RLS LEAK`,
