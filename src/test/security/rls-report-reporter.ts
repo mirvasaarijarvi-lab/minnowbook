@@ -282,6 +282,7 @@ export default class RlsReportReporter implements Reporter {
         const status = statusFromTask(task);
         const errors = task.result?.errors ?? [];
         const firstError = errors[0];
+        const errorMessage = firstError?.message ?? null;
         entries.push({
           file: fileLabel,
           suite,
@@ -289,8 +290,9 @@ export default class RlsReportReporter implements Reporter {
           fullName: `${suite} > ${task.name}`,
           status,
           durationMs: task.result?.duration ?? null,
-          errorMessage: firstError?.message ?? null,
+          errorMessage,
           errorStack: firstError?.stack ?? null,
+          rlsDetails: parseRlsFailure(errorMessage),
         });
       }
     }
