@@ -71,3 +71,68 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+
+## SPA shell returns 200, but a real 403 is observable
+
+This app is a Vite single-page application served from a static host. Every
+deep link (including `/forbidden`, `/superadmin`, etc.) is rewritten by the
+host to `index.html` and served with **HTTP 200** so the React Router can
+take over on the client. There is no way to make the document itself carry
+a 403 status code without server-side rendering.
+
+That creates a real monitoring problem: synthetic checks, security scanners,
+and audit pipelines that look at HTTP status codes would never see a denial,
+even when a user is actually blocked from a protected route. To close that
+gap, the `Forbidden` page (`src/pages/Forbidden.tsx`) emits a beacon to a
+dedicated edge function — [`supabase/functions/forbidden-status`](./supabase/functions/forbidden-status/index.ts)
+— which **always responds with HTTP 403** and includes the attempted area
+in its body. The result:
+
+- The user sees the 403 UI immediately, regardless of beacon outcome.
+- The browser network log contains a real `403 Forbidden` entry tied to
+  the denial, with the attempted area as a query parameter.
+- A second beacon to `log-forbidden-access` writes the denial to
+  `audit_log` (user id, path, timestamp) for tenant owners and system
+  admins to review.
+- The page also sets `<meta http-equiv="Status" content="403 Forbidden">`,
+  `<meta name="robots" content="noindex, nofollow">`, and
+  `data-http-status="403"` on `<main>` so crawlers, scanners, and
+  end-to-end tests have stable hooks.
+
+The beacon is fire-and-forget (raw `fetch` with `keepalive: true`,
+`credentials: "omit"`, and a 4 s `AbortController` timeout). If the edge
+function is unreachable — DNS failure, CORS rejection, opaque error, or
+abort — `data-status-beacon` becomes `"unreachable"` and rendering is
+unaffected.
+
+### How to validate it
+
+**1. Manually, in the browser.** Sign in as a non-system-admin and navigate
+to `/superadmin`. In DevTools → Network, filter for `forbidden-status` and
+confirm the request returns `403 Forbidden`. Inspect `<main>` and check
+that `data-http-status="403"` and `data-status-beacon="403"` are present.
+
+**2. Via curl, as a synthetic check.** The function is publicly callable:
+
+```sh
+curl -i "$VITE_SUPABASE_URL/functions/v1/forbidden-status?area=superadmin"
+# → HTTP/2 403
+# → content-type: application/json
+# → {"status":403,"area":"superadmin"}
+```
+
+Any monitor that asserts `status_code == 403` for this URL will catch
+regressions where the edge function starts returning 200 (which would
+silently break the audit signal even though the UI still shows the page).
+
+**3. Via the audit log.** As a system admin, open the dashboard → Audit Log
+panel and filter for `forbidden_access` actions. Each forbidden navigation
+by an authenticated user produces one row.
+
+**4. In automated tests.** The Playwright suite under `e2e/` and the
+forbidden-flow tests under `src/components/SystemAdminRoute.test.tsx`
+exercise the redirect path; the Vitest edge-function tests in
+[`supabase/functions/forbidden-status`](./supabase/functions/forbidden-status)
+assert the always-403 behavior. Run `bun test` and
+`npx playwright test` to validate end-to-end.
+
