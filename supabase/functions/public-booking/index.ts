@@ -442,7 +442,9 @@ Deno.serve(async (req) => {
       .select("id")
       .single();
     if (insertErr) {
-      reasons.push(`Insert failed: ${insertErr.message}`);
+      reasons.push(
+        `[DB_INSERT_FAILED] Reservation row could not be created: ${insertErr.message}. (${idCtx})`,
+      );
       await logValidation(adminClient, {
         tenant_id,
         site_id,
