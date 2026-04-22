@@ -177,10 +177,29 @@ async function sweepMultipartIntermediates(bucket: string, tenantIds: string[]) 
 
       // The table may not exist on older Supabase versions / self-hosted
       // installs without the S3 driver — that's fine, treat as no-op.
-      if (selectErr) continue;
-      if (!orphans || orphans.length === 0) continue;
+      if (selectErr) {
+        recordCleanup({
+          bucket,
+          path: `${keyPrefix}${RUN_ID}/*`,
+          role: "admin-multipart",
+          removed: false,
+          note: `select failed: ${selectErr.message}`,
+        });
+        continue;
+      }
+      if (!orphans || orphans.length === 0) {
+        recordCleanup({
+          bucket,
+          path: `${keyPrefix}${RUN_ID}/*`,
+          role: "admin-multipart",
+          removed: false,
+          note: "no multipart intermediates found",
+        });
+        continue;
+      }
 
-      const ids = (orphans as Array<{ id: string; key: string }>).map((row) => row.id);
+      const orphanRows = orphans as Array<{ id: string; key: string }>;
+      const ids = orphanRows.map((row) => row.id);
 
       // Delete child rows first to satisfy any FK constraint, then parents.
       // Errors are swallowed individually so a partial failure doesn't
@@ -197,17 +216,40 @@ async function sweepMultipartIntermediates(bucket: string, tenantIds: string[]) 
       }
 
       try {
-        await adminClient
+        const { error: delErr } = await adminClient
           .schema("storage")
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           .from("s3_multipart_uploads" as any)
           .delete()
           .in("id", ids);
-      } catch {
-        /* ignore */
+        for (const row of orphanRows) {
+          recordCleanup({
+            bucket,
+            path: row.key,
+            role: "admin-multipart",
+            removed: !delErr,
+            note: delErr ? `delete failed: ${delErr.message}` : undefined,
+          });
+        }
+      } catch (err) {
+        for (const row of orphanRows) {
+          recordCleanup({
+            bucket,
+            path: row.key,
+            role: "admin-multipart",
+            removed: false,
+            note: `exception: ${(err as Error).message}`,
+          });
+        }
       }
-    } catch {
-      /* ignore — best-effort */
+    } catch (err) {
+      recordCleanup({
+        bucket,
+        path: `${keyPrefix}${RUN_ID}/*`,
+        role: "admin-multipart",
+        removed: false,
+        note: `exception: ${(err as Error).message}`,
+      });
     }
   }
 }
