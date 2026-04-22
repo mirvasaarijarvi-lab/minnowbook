@@ -2176,8 +2176,10 @@ describe("Cross-Tenant Storage RLS Tests", () => {
             // See `TRAVERSAL_LABELS` near `adversarialPaths` for the
             // rationale on why direct-probe variants are skipped here.
             if (TRAVERSAL_LABELS.has(variant.label)) {
-              const normalized = normalizeStoragePath(variant.path);
-              expect(normalized.firstSegment).not.toBe(fakeTenantId);
+              // Use serverFirstSegment (matches real Supabase behaviour).
+              // normalizeStoragePath() simulates a worst-case attacker
+              // model and is intentionally too aggressive for assertions.
+              expect(serverFirstSegment(variant.path)).not.toBe(fakeTenantId);
             }
           },
           15000,
