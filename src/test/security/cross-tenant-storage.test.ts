@@ -472,6 +472,39 @@ async function sweepMultipartIntermediates(bucket: string, tenantIds: string[]) 
       }
 
       const orphanRows = orphans as Array<{ id: string; key: string }>;
+
+      // Defense-in-depth assertion: every row returned by the scope filter
+      // MUST contain BOTH the tenant-prefixed test folder AND this run's
+      // RUN_ID marker. PostgREST `.like()` filters are normally reliable,
+      // but a future migration could rename the column, change the index
+      // collation, or add a trigger that rewrites keys — any of which would
+      // silently widen the deletion blast radius. We re-check in JS so the
+      // service-role DELETE that follows can NEVER touch a row whose key
+      // doesn't match `{tenantId}/__rls_test__/...{RUN_ID}...`.
+      const expectedPrefix = `${tenantId}/__rls_test__/`;
+      const unexpected = orphanRows.filter(
+        (row) => !row.key.startsWith(expectedPrefix) || !row.key.includes(RUN_ID),
+      );
+      if (unexpected.length > 0) {
+        // Ledger every offending row before throwing so the PDF captures
+        // exactly which keys triggered the abort.
+        for (const row of unexpected) {
+          recordCleanup({
+            bucket,
+            path: row.key,
+            role: "admin-multipart",
+            removed: false,
+            note: `SCOPE-VIOLATION: key missing prefix '${expectedPrefix}' or RUN_ID '${RUN_ID}'`,
+          });
+        }
+        throw new Error(
+          `[cross-tenant-storage] Multipart scope filter returned ${unexpected.length} ` +
+            `row(s) outside the expected scope ` +
+            `('${expectedPrefix}*${RUN_ID}*'). Refusing to delete. ` +
+            `First offending key: ${unexpected[0].key}`,
+        );
+      }
+
       const ids = orphanRows.map((row) => row.id);
 
       // Delete child rows first to satisfy any FK constraint, then parents.
@@ -496,13 +529,29 @@ async function sweepMultipartIntermediates(bucket: string, tenantIds: string[]) 
           .delete()
           .in("id", ids);
         for (const row of orphanRows) {
+          // Post-delete invariant: re-assert the marker on every key we
+          // claim to have removed. This guarantees the ledger / PDF only
+          // ever shows `removed: true` for rows that actually carried
+          // this run's RUN_ID — a per-row audit trail for reviewers.
+          const markerOk =
+            row.key.startsWith(expectedPrefix) && row.key.includes(RUN_ID);
           recordCleanup({
             bucket,
             path: row.key,
             role: "admin-multipart",
-            removed: !delErr,
-            note: delErr ? `delete failed: ${delErr.message}` : undefined,
+            removed: !delErr && markerOk,
+            note: delErr
+              ? `delete failed: ${delErr.message}`
+              : markerOk
+                ? undefined
+                : `SCOPE-VIOLATION at delete-time: key missing RUN_ID '${RUN_ID}'`,
           });
+          if (!delErr && !markerOk) {
+            throw new Error(
+              `[cross-tenant-storage] Deleted multipart row whose key does not ` +
+                `contain RUN_ID '${RUN_ID}': ${row.key}`,
+            );
+          }
         }
       } catch (err) {
         for (const row of orphanRows) {
@@ -514,6 +563,7 @@ async function sweepMultipartIntermediates(bucket: string, tenantIds: string[]) 
             note: `exception: ${(err as Error).message}`,
           });
         }
+        throw err;
       }
     } catch (err) {
       recordCleanup({
