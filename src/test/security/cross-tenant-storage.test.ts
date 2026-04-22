@@ -1928,6 +1928,80 @@ describe("Cross-Tenant Storage RLS Tests", () => {
   // ============================================================
 
   /**
+   * Worst-case path normalizer.
+   * --------------------------------------------------------------
+   * Mimics what a *layered* server stack might do to a storage key
+   * before the RLS policy gets a chance to evaluate
+   * `storage.foldername(name)[1]`. We deliberately apply EVERY
+   * canonicalisation pass we can think of, in the most attacker-
+   * favourable order:
+   *
+   *   1. Convert backslashes to forward slashes (Windows-style escape).
+   *   2. Strip URL-encoded brace wrappers (`%7B...%7D`).
+   *   3. URL-decode REPEATEDLY until the string is stable
+   *      (simulates a proxy that decodes once + storage layer that
+   *      decodes again).
+   *   4. Truncate at the first NUL byte (C-string parsers).
+   *   5. Resolve `.`/`..` segments and collapse repeated slashes.
+   *   6. Strip leading/trailing slashes.
+   *
+   * The returned `firstSegment` is what a maximally-permissive server
+   * would feed into `storage.foldername(...)[1]`. If that segment is
+   * EVER equal to the victim's tenant id, RLS policy alone is the
+   * thinnest possible barrier and we want a loud test failure. The
+   * assertions further down compare against this value.
+   *
+   * Returning `null` for `firstSegment` means the path is structurally
+   * invalid after normalisation (empty, only dots, etc.) — RLS denies
+   * those automatically because `foldername()[1]` will be NULL.
+   */
+  const normalizeStoragePath = (raw: string): { canonical: string; firstSegment: string | null } => {
+    let s = raw;
+
+    // 1. Backslash → slash
+    s = s.replace(/\\/g, "/");
+
+    // 2. Strip URL-encoded brace wrappers — both cases, anywhere.
+    s = s.replace(/%7[Bb]/g, "").replace(/%7[Dd]/g, "");
+
+    // 3. Multi-pass URL decode. Cap iterations defensively so a malformed
+    //    `%`-only string can't loop forever; 5 passes covers any realistic
+    //    double/triple-encoding stack.
+    for (let i = 0; i < 5; i++) {
+      let next: string;
+      try {
+        next = decodeURIComponent(s);
+      } catch {
+        // Malformed escape — leave as-is. A real server would either
+        // reject (denial = pass) or pass through (caught by step 5).
+        break;
+      }
+      if (next === s) break;
+      s = next;
+    }
+
+    // 4. NUL truncation — C-string parsers stop at \0.
+    const nulIdx = s.indexOf("\0");
+    if (nulIdx >= 0) s = s.slice(0, nulIdx);
+
+    // 5. Resolve `.` / `..` and collapse `//`.
+    const segments = s.split("/");
+    const resolved: string[] = [];
+    for (const seg of segments) {
+      if (seg === "" || seg === ".") continue;
+      if (seg === "..") {
+        resolved.pop();
+        continue;
+      }
+      resolved.push(seg);
+    }
+
+    const canonical = resolved.join("/");
+    const firstSegment = resolved.length > 0 ? resolved[0] : null;
+    return { canonical, firstSegment };
+  };
+
+  /**
    * Bag of adversarial path generators. Each produces a candidate STRING
    * targeting `victimTenantId` (the *other* tenant). The label is used
    * only for the test name + ledger row.
