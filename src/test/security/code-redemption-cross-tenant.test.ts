@@ -407,7 +407,7 @@ suite(
       // that even with that intent, the side effects strictly follow the
       // authenticated caller, never the creator.
       const accessCodeId = await seedAccessCode(admin, plaintext, userIdA);
-      seededCodeIds.push(accessCodeId);
+      tracker.register(accessCodeId);
 
       // Pre-test baseline: both tenants on basic, no sample window, no
       // ledger rows for this code. Captured AFTER reset so we can prove
@@ -536,7 +536,7 @@ suite(
       // code from tenant B's session.
       const plaintext = freshPlaintext();
       const accessCodeId = await seedAccessCode(admin, plaintext, userIdA);
-      seededCodeIds.push(accessCodeId);
+      tracker.register(accessCodeId);
 
       const baselineA = await resetTenantBaseline(admin, tenantIdA);
       await resetTenantBaseline(admin, tenantIdB);
