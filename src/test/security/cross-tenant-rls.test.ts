@@ -97,27 +97,11 @@ const PRIVATE_ONLY_TABLES = new Set([
 
 const hasSupabaseConfig = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
 
-const liveCreds = {
-  a: {
-    email: process.env.RLS_TEST_TENANT_A_EMAIL,
-    password: process.env.RLS_TEST_TENANT_A_PASSWORD,
-    tenantId: process.env.RLS_TEST_TENANT_A_ID,
-  },
-  b: {
-    email: process.env.RLS_TEST_TENANT_B_EMAIL,
-    password: process.env.RLS_TEST_TENANT_B_PASSWORD,
-    tenantId: process.env.RLS_TEST_TENANT_B_ID,
-  },
-};
-
-const liveModeEnabled = Boolean(
-  liveCreds.a.email &&
-    liveCreds.a.password &&
-    liveCreds.a.tenantId &&
-    liveCreds.b.email &&
-    liveCreds.b.password &&
-    liveCreds.b.tenantId,
-);
+// Live-mode credentials are now resolved by the reusable tenant-pair fixture
+// (`./fixtures/tenant-pair`). The fixture supports two paths:
+//   1. RLS_TEST_TENANT_A/B_EMAIL/PASSWORD/ID env vars (explicit creds)
+//   2. SUPABASE_SERVICE_ROLE_KEY (auto-provisions throwaway users + tenants)
+// See the fixture file for full resolution order and skip semantics.
 
 const newAnonClient = (): SupabaseClient =>
   createClient(SUPABASE_URL!, SUPABASE_ANON_KEY!, {
