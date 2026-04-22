@@ -2330,29 +2330,34 @@ describe("Cross-Tenant Storage RLS Tests", () => {
                 expect(result.error).toBeTruthy();
 
                 // Path-shape assertion (defense-in-depth, independent of
-                // RLS). After applying every plausible server-side
-                // normalisation, the resulting first segment — i.e. what
-                // `storage.foldername(name)[1]` would feed into the policy
-                // — must NEVER equal the victim tenant's id, and must
-                // EITHER be the attacker's own tenant id OR be
-                // structurally invalid (null/empty/non-uuid). Both of the
-                // latter are safe: RLS denies non-matching prefixes and
-                // the policy's `foldername()[1]` returns NULL for
-                // structurally invalid keys, which fails the equality
-                // check by definition.
-                const callerTenantId = liveCreds[dir.attacker].tenantId!;
-                const victimTenantId = dir.victimTenantId();
-                const normalized = normalizeStoragePath(variant.path);
-                expect(normalized.firstSegment).not.toBe(victimTenantId);
-                if (
-                  normalized.firstSegment !== null &&
-                  (normalized.firstSegment === callerTenantId ||
-                    normalized.firstSegment === victimTenantId)
-                ) {
-                  // If the segment is a real tenant id at all, it must
-                  // be the caller's own. Anything else is fine — RLS
-                  // rejects unknown tenant prefixes by default.
-                  expect(normalized.firstSegment).toBe(callerTenantId);
+                // RLS) — only meaningful for traversal-style variants.
+                // Direct-probe variants (double-slash, leading-slash,
+                // brace-wrappers, backslashes, NUL) intentionally start
+                // with the victim id, so the normalized first segment
+                // *will* equal the victim id by construction. RLS still
+                // denies them, which is asserted via `result.error` above.
+                //
+                // For TRAVERSAL variants, the canonical first segment
+                // must NEVER equal the victim id no matter how many
+                // decode passes the server applies. If it ever does,
+                // RLS becomes the only line of defence and a single
+                // policy regression turns into a tenant breach.
+                if (TRAVERSAL_LABELS.has(labelHint)) {
+                  const callerTenantId = liveCreds[dir.attacker].tenantId!;
+                  const victimTenantId = dir.victimTenantId();
+                  const normalized = normalizeStoragePath(variant.path);
+                  expect(normalized.firstSegment).not.toBe(victimTenantId);
+                  if (
+                    normalized.firstSegment !== null &&
+                    (normalized.firstSegment === callerTenantId ||
+                      normalized.firstSegment === victimTenantId)
+                  ) {
+                    // If the segment is a real tenant id at all, it
+                    // must be the caller's own. Anything else (random
+                    // string, garbage, partial uuid) is fine — RLS
+                    // rejects unknown tenant prefixes by default.
+                    expect(normalized.firstSegment).toBe(callerTenantId);
+                  }
                 }
               },
               15000,
