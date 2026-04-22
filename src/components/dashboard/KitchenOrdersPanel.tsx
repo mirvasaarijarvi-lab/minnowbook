@@ -492,6 +492,84 @@ interface MenuPickerProps {
   t: (key: any) => string;
 }
 
+interface BulkStatusToolbarProps {
+  items: KitchenOrder[];
+  onBulk: (ids: string[], status: Status) => void;
+  disabled?: boolean;
+  t: (key: any) => string;
+}
+
+const NEXT_STATUS: Record<Status, Status | null> = {
+  received: "preparing",
+  preparing: "ready",
+  ready: "served",
+  served: null,
+};
+
+const BulkStatusToolbar = ({ items, onBulk, disabled, t }: BulkStatusToolbarProps) => {
+  // For "Advance all": every non-served item moves to its next status.
+  // We split into groups by current status, then call onBulk once per group.
+  const advanceAll = () => {
+    const groups: Record<Status, string[]> = { received: [], preparing: [], ready: [], served: [] };
+    for (const it of items) {
+      const next = NEXT_STATUS[it.status];
+      if (next) groups[it.status].push(it.id);
+    }
+    let triggered = 0;
+    (Object.keys(groups) as Status[]).forEach((status) => {
+      const ids = groups[status];
+      const next = NEXT_STATUS[status];
+      if (ids.length > 0 && next) {
+        triggered += ids.length;
+        onBulk(ids, next);
+      }
+    });
+    if (triggered === 0) onBulk([], "served"); // surfaces "nothing to update" toast
+  };
+
+  const setAllTo = (status: Status) => {
+    const ids = items.filter((it) => it.status !== status).map((it) => it.id);
+    onBulk(ids, status);
+  };
+
+  const StatusButton = ({ status, label }: { status: Status; label: string }) => {
+    const Icon = STATUS_ICON[status];
+    return (
+      <Button
+        variant="outline"
+        size="sm"
+        className="gap-1.5 h-8"
+        disabled={disabled}
+        onClick={() => setAllTo(status)}
+      >
+        <Icon className="h-3.5 w-3.5" />
+        {label}
+      </Button>
+    );
+  };
+
+  return (
+    <div className="flex flex-wrap items-center gap-1.5 rounded-md border border-border bg-muted/30 p-2 print:hidden">
+      <span className="text-xs font-medium text-muted-foreground mr-1">
+        {t("kitchen.bulk.markAll")}:
+      </span>
+      <Button
+        variant="default"
+        size="sm"
+        className="gap-1.5 h-8"
+        disabled={disabled}
+        onClick={advanceAll}
+      >
+        <ChevronRight className="h-3.5 w-3.5" />
+        {t("kitchen.bulk.advanceAll")}
+      </Button>
+      <StatusButton status="preparing" label={t("kitchen.bulk.allPreparing")} />
+      <StatusButton status="ready" label={t("kitchen.bulk.allReady")} />
+      <StatusButton status="served" label={t("kitchen.bulk.allServed")} />
+    </div>
+  );
+};
+
 const MenuPicker = ({ menuItems, onPick, t }: MenuPickerProps) => {
   const [open, setOpen] = useState(false);
   return (
