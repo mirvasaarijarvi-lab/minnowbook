@@ -461,6 +461,9 @@ const Superadmin = () => {
 
         {/* Tenant Membership Integrity */}
         <TenantMembershipCheckPanel />
+
+        {/* RLS Manifest Debug — exact SQL/filters used by manifest tests */}
+        <RlsManifestDebugPanel />
       </main>
 
       {/* Edit dialog */}
