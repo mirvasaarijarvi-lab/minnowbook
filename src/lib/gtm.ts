@@ -23,4 +23,16 @@ export const gtm = {
 
   reservationCreated: (type: string) =>
     push("reservation_created", { reservation_type: type }),
+
+  /**
+   * Fired when a user's active tenant becomes null mid-session.
+   * Used to track how often membership removals or other state changes
+   * cause an unexpected redirect to /onboarding.
+   */
+  tenantLost: (params: {
+    reason: "membership_removed" | "unknown";
+    user_id?: string | null;
+    previous_tenant_id?: string | null;
+    pathname?: string;
+  }) => push("tenant_lost", params),
 };
