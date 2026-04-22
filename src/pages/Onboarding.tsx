@@ -178,6 +178,51 @@ const Onboarding = () => {
       </header>
 
       <main className="flex-1 flex flex-col items-center justify-center px-4 py-8">
+        {membershipRemovedAt && (
+          <div
+            role="alert"
+            aria-live="polite"
+            className="w-full max-w-2xl mb-4 rounded-md border border-destructive/40 bg-destructive/5 px-4 py-3 text-sm text-foreground"
+          >
+            <div className="flex items-start gap-3">
+              <ShieldAlert className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
+              <div className="flex-1 min-w-0">
+                <p className="font-medium text-destructive">Your organization access was removed</p>
+                <p className="text-muted-foreground mt-0.5">
+                  An administrator removed your membership while you were signed in. If this was a mistake,
+                  ask them to re-invite you, then refresh your session to continue.
+                </p>
+                <div className="mt-2 flex flex-wrap items-center gap-3">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={handleRetrySession}
+                    disabled={refreshing}
+                    className="gap-1.5 border-destructive/40 text-destructive hover:bg-destructive/10"
+                  >
+                    {refreshing ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <RefreshCw className="h-4 w-4" />
+                    )}
+                    {refreshing ? "Refreshing…" : "Refresh session"}
+                  </Button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      try { sessionStorage.removeItem("tenant-membership-removed"); } catch { /* ignore */ }
+                      setMembershipRemovedAt(null);
+                    }}
+                    className="text-xs text-muted-foreground hover:text-foreground underline-offset-2 hover:underline"
+                  >
+                    Dismiss
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
         {wasRedirected && (
           <div className="w-full max-w-2xl mb-6 rounded-md border border-accent/30 bg-accent/5 px-4 py-3 text-sm text-foreground">
             <p className="font-medium">Let's set up your workspace</p>
