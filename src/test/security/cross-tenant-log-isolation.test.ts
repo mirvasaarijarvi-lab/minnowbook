@@ -65,11 +65,9 @@ const FAKE_TENANT_ID = "00000000-0000-0000-0000-0000000000aa";
 let anon: SupabaseClient;
 
 const liveDescribe = liveModeAvailable ? describe : describe.skip;
-// `describe.skip.each` does not exist in vitest, so we use describe.each
-// unconditionally and skip individual `it` calls inside via `liveIt` when
-// we lack env. The describe block still appears in the report, but every
-// test inside is marked skipped — no createClient call is made.
-const liveDescribeEach = describe.each;
+// `describe.each` is a getter on the describe object; aliasing it loses
+// the `this` binding and breaks. Call it directly inline below. To skip
+// individual cases when env is missing, use `liveIt` inside the each body.
 const liveIt = liveModeAvailable ? it : it.skip;
 
 beforeAll(() => {
