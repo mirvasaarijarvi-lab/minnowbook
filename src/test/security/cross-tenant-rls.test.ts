@@ -208,27 +208,33 @@ describe("Cross-Tenant RLS Regression Tests", () => {
     });
   });
 
-  describe.runIf(hasSupabaseConfig && liveModeEnabled)(
+  describe.runIf(tenantPairFixtureLikelyAvailable())(
     "Live cross-tenant access denial",
     () => {
       let clientA: SupabaseClient;
       let clientB: SupabaseClient;
+      // Mirror the old shape so the existing `it` blocks below keep working.
+      // Populated from the fixture in beforeAll().
+      const liveCreds = {
+        a: { tenantId: undefined as string | undefined },
+        b: { tenantId: undefined as string | undefined },
+      };
+      let fixture: TenantPairFixture | undefined;
 
       beforeAll(async () => {
-        clientA = newAnonClient();
-        clientB = newAnonClient();
-
-        const { error: signInAError } = await clientA.auth.signInWithPassword({
-          email: liveCreds.a.email!,
-          password: liveCreds.a.password!,
-        });
-        if (signInAError) throw new Error(`Tenant A sign-in failed: ${signInAError.message}`);
-
-        const { error: signInBError } = await clientB.auth.signInWithPassword({
-          email: liveCreds.b.email!,
-          password: liveCreds.b.password!,
-        });
-        if (signInBError) throw new Error(`Tenant B sign-in failed: ${signInBError.message}`);
+        fixture = await createTenantPairFixture();
+        if (!fixture.available || !fixture.a || !fixture.b) {
+          throw new Error(
+            `Tenant pair fixture unexpectedly unavailable: ${fixture.skipReason ?? "(no reason)"}`,
+          );
+        }
+        clientA = fixture.a.client;
+        clientB = fixture.b.client;
+        liveCreds.a.tenantId = fixture.a.tenantId;
+        liveCreds.b.tenantId = fixture.b.tenantId;
+        console.error(
+          `[rls-fixture] using ${fixture.source} credentials — A=${fixture.a.tenantId} B=${fixture.b.tenantId}`,
+        );
       });
 
       it("user A cannot SELECT tenant B reservations", async () => {
