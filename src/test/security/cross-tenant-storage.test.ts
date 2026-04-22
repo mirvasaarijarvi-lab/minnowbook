@@ -1312,6 +1312,20 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       afterAll(async () => {
         const clientFor = (key: "a" | "b") => (key === "a" ? clientA : clientB);
 
+        // Last-line preflight (see live-cross-tenant-flat block for the
+        // full rationale). Without this, a bad env var or expired sign-in
+        // could send the admin sweep against the wrong tenant folder.
+        const preflightClients = {
+          [liveCreds.a.tenantId!]: { client: clientA, email: liveCreds.a.email },
+          [liveCreds.b.tenantId!]: { client: clientB, email: liveCreds.b.email },
+        };
+        const preflight = await cleanupPreflight({
+          tenantIds: [liveCreds.a.tenantId!, liveCreds.b.tenantId!],
+          clients: preflightClients,
+          scope: "live-cross-tenant-nested",
+        });
+        if (!preflight.ok) return;
+
         // Per-call bounded — see teardownOwnedPaths / teardownAttemptPaths.
         // Nested-path tests are the most likely to leave partial-success
         // orphans (deep folder structures + hangs), so the admin sweep
@@ -1320,8 +1334,16 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         await teardownOwnedPaths(ownNestedUploads, clientFor);
         await teardownAttemptPaths(nestedAttempts, clientFor);
 
-        await sweepTestArtifacts(PRIVATE_BUCKET, [liveCreds.a.tenantId!, liveCreds.b.tenantId!]);
-        await sweepTestArtifacts(ASSETS_BUCKET, [liveCreds.a.tenantId!, liveCreds.b.tenantId!]);
+        await sweepTestArtifacts(
+          PRIVATE_BUCKET,
+          [liveCreds.a.tenantId!, liveCreds.b.tenantId!],
+          { scope: "live-cross-tenant-nested:sweep", clients: preflightClients },
+        );
+        await sweepTestArtifacts(
+          ASSETS_BUCKET,
+          [liveCreds.a.tenantId!, liveCreds.b.tenantId!],
+          { scope: "live-cross-tenant-nested:sweep", clients: preflightClients },
+        );
       });
 
       for (const scenario of NESTED_SCENARIOS) {
