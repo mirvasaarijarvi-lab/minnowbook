@@ -156,12 +156,12 @@ describe("Edge Function CSP — admin-users & support-chat", () => {
       });
 
       it("rate-limit (429) response carries the header bag", () => {
-        // Both functions return 429 with a JSON body for rate limiting
-        const block = source.match(
-          /Too many requests[\s\S]{0,500}?new\s+Response\s*\(([\s\S]{0,400}?)\}\s*\)/,
-        );
-        if (block) {
-          expect(block[1]).toMatch(fixture.headerVarPattern);
+        // Find every Response with status 429 and assert the header bag is present
+        const re = /new\s+Response\s*\([\s\S]{0,400}?status:\s*429[\s\S]{0,200}?\}\s*\)/g;
+        const matches = source.match(re) ?? [];
+        expect(matches.length, "expected at least one 429 response").toBeGreaterThan(0);
+        for (const m of matches) {
+          expect(m).toMatch(fixture.headerVarPattern);
         }
       });
     });
