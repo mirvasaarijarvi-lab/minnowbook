@@ -435,21 +435,13 @@ suite(
       ).toBe(1);
       expect(failures.length).toBe(PARALLEL - 1);
 
-      // Every loser must collapse to the same generic code — no information
-      // leakage about which loser lost why.
-      for (const f of failures) {
-        expect(
-          f.status,
-          `loser must be 4xx, got ${f.status}: ${f.rawText}`,
-        ).toBeGreaterThanOrEqual(400);
-        expect(f.status, `loser must not 5xx: ${f.rawText}`).toBeLessThan(500);
-        expect(
-          bodyCode(f.body),
-          `loser must collapse to INVALID_OR_UNAVAILABLE_CODE, got "${bodyCode(
-            f.body,
-          )}". Body: ${f.rawText}`,
-        ).toBe("INVALID_OR_UNAVAILABLE_CODE");
-      }
+      // Every loser must collapse to the same generic 400 with the
+      // exact body shape AND the full security-header contract — no
+      // information leakage about which loser lost why, no cache-able
+      // response, no MIME-sniff vector, no smuggled cookie.
+      failures.forEach((f, i) => {
+        assertGenericFailure(f, `25-way race loser #${i}`);
+      });
 
       // Document the win latency for triage if this ever flakes.
       console.info(
