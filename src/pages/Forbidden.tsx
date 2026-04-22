@@ -183,6 +183,20 @@ const Forbidden = ({
   // caller's user id from their JWT and writes user_id + timestamp + the
   // attempted area. Fire-and-forget; we don't surface failures to the UI
   // (production), but the dev indicator below reflects the outcome.
+  //
+  // The `adminCheckState` snapshot (when present) is forwarded so the
+  // audit row records whether the system-admin lookup was loading,
+  // stale, errored, or fresh at the moment access was denied. The
+  // edge function whitelists the field shape and stores it under
+  // `new_data.admin_check_state` for incident triage.
+  //
+  // We serialize the snapshot for the effect dependency array so a new
+  // object identity from a parent re-render with semantically-identical
+  // state doesn't refire the beacon. (`resolvedSlug` and `attemptedArea`
+  // are still tracked individually since they're primitives.)
+  const adminCheckStateKey = adminCheckState
+    ? JSON.stringify(adminCheckState)
+    : "";
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -211,6 +225,10 @@ const Forbidden = ({
                 typeof window !== "undefined"
                   ? window.location.pathname + window.location.search
                   : null,
+              // Optional cache-state snapshot. Omit the property entirely
+              // when the caller didn't pass one so the server can tell
+              // "not provided" apart from "provided but all false".
+              ...(adminCheckState ? { adminCheckState } : {}),
             },
           },
         );
@@ -249,7 +267,11 @@ const Forbidden = ({
     return () => {
       cancelled = true;
     };
-  }, [resolvedSlug, attemptedArea]);
+    // `adminCheckStateKey` (a stable string of the snapshot) and the raw
+    // `adminCheckState` reference are both listed: the key is what
+    // actually triggers re-runs, the raw value is the data we read inside.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resolvedSlug, attemptedArea, adminCheckStateKey]);
 
   // Set title + status + noindex meta. The Status meta is the closest the
   // browser can come to a real status code on a static document.
