@@ -40,37 +40,79 @@ const Forbidden = ({
   attemptedArea = "this area",
   message,
 }: ForbiddenProps) => {
-  const [beaconStatus, setBeaconStatus] = useState<number | null>(null);
+  const [beaconStatus, setBeaconStatus] = useState<number | "unreachable" | null>(null);
   const body =
     message ??
     `You're signed in, but your account doesn't have permission to access ${attemptedArea}. ` +
       `If you believe this is a mistake, contact your administrator.`;
 
   // Beacon to the always-403 edge function so the network log shows a real
-  // HTTP 403 response associated with this view. Fire-and-forget — failure
-  // doesn't change what the user sees.
+  // HTTP 403 response associated with this view.
+  //
+  // Hardening notes:
+  //   * We bypass `supabase.functions.invoke` because it awaits the full
+  //     response body and rethrows on non-2xx, which makes a true 403
+  //     indistinguishable from a network failure and forces the caller to
+  //     handle a rejected promise. A raw `fetch` lets us read the status
+  //     directly and treat any failure mode as best-effort.
+  //   * `keepalive: true` so the request survives if the user navigates
+  //     away mid-flight (Beacon API semantics without losing the response
+  //     status, which navigator.sendBeacon doesn't expose).
+  //   * `mode: "cors"` with no custom auth header — the function is
+  //     publicly reachable (verify_jwt = false) and we don't need cookies
+  //     or credentials. If CORS or DNS fails, the catch swallows it.
+  //   * An `AbortController` with a 4s timeout guarantees the effect's
+  //     cleanup never leaves a hanging request, and the UI never blocks:
+  //     the beacon runs entirely in the background and the page renders
+  //     immediately regardless.
   useEffect(() => {
     let cancelled = false;
-    (async () => {
-      try {
-        const { data, error } = await supabase.functions.invoke(
-          `forbidden-status?area=${encodeURIComponent(attemptedArea)}`,
-          { method: "GET" },
-        );
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => controller.abort(), 4000);
+
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string | undefined;
+    if (!supabaseUrl) {
+      // Misconfigured environment — fail closed but don't block render.
+      setBeaconStatus("unreachable");
+      window.clearTimeout(timeoutId);
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    const url = `${supabaseUrl}/functions/v1/forbidden-status?area=${encodeURIComponent(
+      attemptedArea,
+    )}`;
+
+    // Fire-and-forget: deliberately not awaited. The render path returns
+    // immediately and the network call resolves in the background.
+    fetch(url, {
+      method: "GET",
+      mode: "cors",
+      credentials: "omit",
+      keepalive: true,
+      signal: controller.signal,
+      headers: { accept: "application/json" },
+    })
+      .then((res) => {
         if (cancelled) return;
-        // supabase.functions.invoke surfaces non-2xx responses via `error`,
-        // and the underlying fetch context attaches the status. We capture
-        // whatever we can so a synthetic check or test can assert on it.
-        const status =
-          (error as { context?: { status?: number } } | null)?.context?.status ??
-          (data ? 403 : 403);
-        setBeaconStatus(status);
-      } catch {
-        if (!cancelled) setBeaconStatus(403);
-      }
-    })();
+        // The function always responds 403; we record whatever the server
+        // actually returned so synthetic checks can assert on it.
+        setBeaconStatus(res.status);
+      })
+      .catch(() => {
+        // AbortError, network error, DNS failure, opaque CORS rejection —
+        // all collapse to "unreachable". Never surface to the user.
+        if (!cancelled) setBeaconStatus("unreachable");
+      })
+      .finally(() => {
+        window.clearTimeout(timeoutId);
+      });
+
     return () => {
       cancelled = true;
+      window.clearTimeout(timeoutId);
+      controller.abort();
     };
   }, [attemptedArea]);
 
