@@ -116,9 +116,12 @@ jobs:
           # Vite reads these via import.meta.env at test compile time.
           VITE_SUPABASE_URL: ${{ env.SUPABASE_URL }}
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ env.SUPABASE_ANON_KEY }}
+          # Tags the generated report so local-stack output is distinguishable
+          # from remote-staging output when both artifacts are downloaded.
+          RLS_REPORT_FLAVOR: local
         run: bun run test:rls-report
 
-      - name: Upload RLS report
+      - name: Upload RLS report (local)
         if: always() && steps.supabase-start.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
