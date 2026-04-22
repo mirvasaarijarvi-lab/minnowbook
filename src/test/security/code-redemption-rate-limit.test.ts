@@ -165,8 +165,10 @@ describe("redeem-access-code: brute-force & replay resilience", () => {
     expect(uniqueMsgs.size, `replay messages drifted: ${[...uniqueMsgs].join(" | ")}`).toBe(1);
     const uniqueCodes = new Set(codes);
     expect(uniqueCodes.size, `replay codes drifted: ${[...uniqueCodes].join(" | ")}`).toBe(1);
-    // No-auth replays must specifically return NOT_AUTHENTICATED.
-    expect(codes[0]).toBe("NOT_AUTHENTICATED");
+    // No-auth replays must specifically return an auth-rejection code
+    // (either our handler's NOT_AUTHENTICATED or the gateway's
+    // UNAUTHORIZED_NO_AUTH_HEADER, depending on which layer rejected).
+    expect(AUTH_REJECTION_CODES.has(codes[0]), `expected auth-rejection code, got: ${codes[0]}`).toBe(true);
   });
 
   it("varied fake codes do NOT produce distinguishable error codes vs. malformed input", async () => {
