@@ -74,12 +74,18 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-const renderForbidden = (props: React.ComponentProps<typeof Forbidden>) =>
-  render(
-    <MemoryRouter>
-      <Forbidden {...props} />
-    </MemoryRouter>,
+const renderForbidden = (props: React.ComponentProps<typeof Forbidden>) => {
+  const client = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  return render(
+    <QueryClientProvider client={client}>
+      <MemoryRouter>
+        <Forbidden {...props} />
+      </MemoryRouter>
+    </QueryClientProvider>,
   );
+};
 
 // --- Tests ---------------------------------------------------------------
 
