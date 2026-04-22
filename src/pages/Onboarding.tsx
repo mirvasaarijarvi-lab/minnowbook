@@ -40,11 +40,52 @@ const Onboarding = () => {
   const [selectedTier, setSelectedTier] = useState("basic");
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
+  const [membershipRemovedAt, setMembershipRemovedAt] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
   const [branding, setBranding] = useState({
     businessName: "", businessEmail: user?.email ?? "", businessPhone: "",
     businessAddress: "", businessDescription: "",
     primaryColor: "#4a1d7a", secondaryColor: "#f5efe4", accentColor: "#ff4d1c",
   });
+
+  // Read the membership-removed flag set by useTenant when realtime detects
+  // the user's tenant_users row was deleted mid-session. Shown as a banner
+  // so the user understands why they ended up here, not a silent redirect.
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem("tenant-membership-removed");
+      if (!raw) return;
+      const parsed = JSON.parse(raw) as { at?: string };
+      if (parsed?.at) setMembershipRemovedAt(parsed.at);
+    } catch {
+      // ignore malformed/inaccessible storage
+    }
+  }, []);
+
+  const handleRetrySession = async () => {
+    setRefreshing(true);
+    try {
+      // Refresh the auth session, then re-check tenant membership. If the
+      // admin restored access, the tenantId guard will redirect to /dashboard.
+      await supabase.auth.refreshSession();
+      await queryClient.invalidateQueries({ queryKey: ["tenant-user"] });
+      toast({ title: "Session refreshed", description: "Checking your access again…" });
+      try {
+        sessionStorage.removeItem("tenant-membership-removed");
+      } catch {
+        // non-fatal
+      }
+      setMembershipRemovedAt(null);
+    } catch (err: any) {
+      toast({
+        title: "Couldn't refresh session",
+        description: err?.message ?? "Please try signing out and back in.",
+        variant: "destructive",
+      });
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   // If user already has a tenant, redirect to dashboard
   if (tenantLoading) {
