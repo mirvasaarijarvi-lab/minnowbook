@@ -182,6 +182,39 @@ function renderRlsDetails(d: RlsFailureDetails): string {
   return `<div class="rls-details">${rowsHtml}${errBlock}${rowsBlock}</div>`;
 }
 
+/**
+ * Render a compact one-line summary of a seeded user's `tenant_users`
+ * row. Designed for the guard table cell so reviewers can see "owner,
+ * approved" or "staff, NOT APPROVED" at a glance without expanding
+ * anything. Returns "—" when no snapshot was captured (probe skipped or
+ * the suite errored before fetching).
+ */
+function renderMembershipRow(snap?: TenantMembershipSnapshot): string {
+  if (!snap) return `<span class="guard-time">—</span>`;
+  if (snap.lookupError) {
+    return `<span class="badge fail">lookup error</span><div class="guard-rowdetail">${escapeHtml(snap.lookupError)}</div>`;
+  }
+  if (!snap.found) {
+    return `<span class="badge skip">no row</span><div class="guard-rowdetail">RLS-hidden or membership missing</div>`;
+  }
+  const role = snap.role ?? "(null)";
+  const customKey = snap.customRoleKey;
+  const effective = customKey || snap.role || "(null)";
+  const approvedBadge =
+    snap.isApproved === true
+      ? `<span class="badge ok">approved</span>`
+      : snap.isApproved === false
+        ? `<span class="badge fail">not approved</span>`
+        : `<span class="badge skip">approval ?</span>`;
+  const customLine = customKey
+    ? `<div class="guard-rowdetail">custom_role_key=<code>${escapeHtml(customKey)}</code> · effective=<code>${escapeHtml(effective)}</code></div>`
+    : "";
+  const userLine = snap.userId
+    ? `<div class="guard-rowdetail">user_id=<code>${escapeHtml(snap.userId)}</code></div>`
+    : "";
+  return `<div class="guard-rolebadge"><code>${escapeHtml(role)}</code> ${approvedBadge}</div>${customLine}${userLine}`;
+}
+
 function membershipBadge(value: boolean | "skipped"): string {
   if (value === true) return `<span class="badge ok">probe ✓</span>`;
   if (value === false) return `<span class="badge fail">probe ✗</span>`;
@@ -207,16 +240,18 @@ function renderTenantGuardSection(records: TenantGuardRecord[]): string {
           <td><code>${escapeHtml(r.tenantB ?? "—")}</code>${bLabel}</td>
           <td>${membershipBadge(r.membershipA)}</td>
           <td>${membershipBadge(r.membershipB)}</td>
+          <td>${renderMembershipRow(r.membershipRowA)}</td>
+          <td>${renderMembershipRow(r.membershipRowB)}</td>
           <td><span class="guard-time">${escapeHtml(r.recordedAt)}</span>${failureRow}</td>
         </tr>`;
     })
     .join("\n");
   return `
   <h2 class="guard-heading">Tenant-pair guard</h2>
-  <p class="guard-meta">UUID validation, distinctness check, and membership probe — all three must pass before the live cross-tenant assertions can be trusted.</p>
+  <p class="guard-meta">UUID validation, distinctness check, membership probe, and effective <code>tenant_users</code> row — captured before any cross-tenant assertion runs so RLS failures show the actor's actual permissions.</p>
   <table class="guard-table">
     <thead>
-      <tr><th>Suite</th><th>Tenant A</th><th>Tenant B</th><th>Member A</th><th>Member B</th><th>Recorded</th></tr>
+      <tr><th>Suite</th><th>Tenant A</th><th>Tenant B</th><th>Member A</th><th>Member B</th><th>Role row A</th><th>Role row B</th><th>Recorded</th></tr>
     </thead>
     <tbody>
 ${rows}
