@@ -83,9 +83,7 @@ describe("edge-function transport-security header consistency", () => {
         source,
         `${fn}/index.ts is missing the Strict-Transport-Security header`,
       ).toMatch(/["']Strict-Transport-Security["']\s*:/);
-      const match = source.match(
-        /["']Strict-Transport-Security["']\s*:\s*["']([^"']+)["']/,
-      );
+      const match = extractHeaderValue(source, "Strict-Transport-Security");
       expect(
         match,
         `${fn}/index.ts has a Strict-Transport-Security key without a string value`,
