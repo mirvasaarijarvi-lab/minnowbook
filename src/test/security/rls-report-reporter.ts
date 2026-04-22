@@ -21,6 +21,23 @@ import type { Reporter, File, Task, TaskResultPack } from "vitest";
 
 type EntryStatus = "passed" | "failed" | "skipped";
 
+/**
+ * Structured details extracted from `rls-assert.ts` failure messages.
+ * When present, the reporter renders these as a labelled grid in the HTML
+ * report instead of a generic stack trace.
+ */
+interface RlsFailureDetails {
+  scenario?: string;
+  table?: string;
+  operation?: string;
+  attemptedQuery?: string;
+  actingTenant?: string;
+  targetTenant?: string;
+  reason?: string;
+  supabaseError?: string;
+  returnedRows?: string;
+}
+
 interface ReportEntry {
   file: string;
   suite: string;
@@ -30,6 +47,7 @@ interface ReportEntry {
   durationMs: number | null;
   errorMessage: string | null;
   errorStack: string | null;
+  rlsDetails: RlsFailureDetails | null;
 }
 
 interface ReportPayload {
@@ -83,6 +101,68 @@ function escapeHtml(value: string): string {
     .replace(/'/g, "&#39;");
 }
 
+/**
+ * Parse a failure message produced by `expectReadDenied` /
+ * `expectWriteDenied` / `expectNoForeignTenantRows` (see rls-assert.ts).
+ * Format is intentionally line-oriented so it survives Vitest's serializer
+ * and stays greppable in raw CI logs.
+ */
+function parseRlsFailure(message: string | null): RlsFailureDetails | null {
+  if (!message || !message.includes("RLS DENIAL FAILED:")) return null;
+  const lines = message.split("\n");
+  const details: RlsFailureDetails = {};
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const m = line.match(/^RLS DENIAL FAILED:\s*(.+)$/);
+    if (m) details.scenario = m[1].trim();
+    else if (/^Table:\s+/.test(line)) details.table = line.replace(/^Table:\s+/, "").trim();
+    else if (/^Operation:\s+/.test(line))
+      details.operation = line.replace(/^Operation:\s+/, "").trim();
+    else if (/^Attempted query:\s+/.test(line))
+      details.attemptedQuery = line.replace(/^Attempted query:\s+/, "").trim();
+    else if (/^Acting tenant:\s+/.test(line))
+      details.actingTenant = line.replace(/^Acting tenant:\s+/, "").trim();
+    else if (/^Target tenant:\s+/.test(line))
+      details.targetTenant = line.replace(/^Target tenant:\s+/, "").trim();
+    else if (/^Reason:\s+/.test(line)) details.reason = line.replace(/^Reason:\s+/, "").trim();
+    else if (/^Supabase error:/.test(line)) {
+      const errLines: string[] = [line.replace(/^Supabase error:\s*/, "")];
+      while (i + 1 < lines.length && /^\s{2,}/.test(lines[i + 1])) {
+        i += 1;
+        errLines.push(lines[i].trim());
+      }
+      details.supabaseError = errLines.filter(Boolean).join("\n");
+    } else if (/^Returned rows:/.test(line)) {
+      details.returnedRows = lines.slice(i + 1).join("\n").trim();
+      break;
+    }
+  }
+  return Object.keys(details).length > 0 ? details : null;
+}
+
+function renderRlsDetails(d: RlsFailureDetails): string {
+  const row = (label: string, value: string | undefined) =>
+    value
+      ? `<div class="kv-row"><div class="kv-label">${escapeHtml(label)}</div><div class="kv-value">${escapeHtml(value)}</div></div>`
+      : "";
+  const rowsHtml = [
+    row("Scenario", d.scenario),
+    row("Table", d.table),
+    row("Operation", d.operation),
+    row("Attempted query", d.attemptedQuery),
+    row("Acting tenant", d.actingTenant),
+    row("Target tenant", d.targetTenant),
+    row("Reason", d.reason),
+  ].join("");
+  const errBlock = d.supabaseError
+    ? `<div class="kv-row"><div class="kv-label">Supabase error</div><div class="kv-value"><pre>${escapeHtml(d.supabaseError)}</pre></div></div>`
+    : "";
+  const rowsBlock = d.returnedRows
+    ? `<div class="kv-row"><div class="kv-label">Returned rows</div><div class="kv-value"><pre>${escapeHtml(d.returnedRows)}</pre></div></div>`
+    : "";
+  return `<div class="rls-details">${rowsHtml}${errBlock}${rowsBlock}</div>`;
+}
+
 function renderHtml(payload: ReportPayload): string {
   const { totals, entries, generatedAt } = payload;
 
@@ -90,17 +170,19 @@ function renderHtml(payload: ReportPayload): string {
     .map((e) => {
       const statusClass =
         e.status === "passed" ? "ok" : e.status === "failed" ? "fail" : "skip";
-      const errorBlock = e.errorMessage
-        ? `<details><summary>Error</summary><pre>${escapeHtml(e.errorMessage)}${
+      const rlsBlock = e.rlsDetails ? renderRlsDetails(e.rlsDetails) : "";
+      const rawError = e.errorMessage
+        ? `<details${e.rlsDetails ? "" : " open"}><summary>Raw error / stack</summary><pre>${escapeHtml(e.errorMessage)}${
             e.errorStack ? "\n\n" + escapeHtml(e.errorStack) : ""
           }</pre></details>`
         : "";
+      const detailsCell = rlsBlock || rawError ? `${rlsBlock}${rawError}` : "";
       return `<tr class="${statusClass}">
           <td><span class="badge ${statusClass}">${e.status}</span></td>
           <td>${escapeHtml(e.suite)}</td>
           <td>${escapeHtml(e.name)}</td>
           <td class="num">${e.durationMs != null ? e.durationMs.toFixed(0) + " ms" : "—"}</td>
-          <td>${errorBlock}</td>
+          <td>${detailsCell}</td>
         </tr>`;
     })
     .join("\n");
@@ -138,6 +220,16 @@ function renderHtml(payload: ReportPayload): string {
   summary { cursor: pointer; color: #f87171; font-weight: 500; }
   pre { background: #0f172a; color: #fda4af; padding: 10px; border-radius: 6px;
     overflow-x: auto; margin: 8px 0 0; font-size: 12px; white-space: pre-wrap; word-break: break-word; }
+  .rls-details { background: rgba(248, 113, 113, 0.08); border-left: 3px solid #f87171;
+    padding: 10px 12px; border-radius: 6px; margin-bottom: 8px; }
+  .kv-row { display: grid; grid-template-columns: 140px 1fr; gap: 8px;
+    padding: 4px 0; border-bottom: 1px dashed rgba(148, 163, 184, 0.15); }
+  .kv-row:last-child { border-bottom: none; }
+  .kv-label { color: #94a3b8; font-size: 11px; text-transform: uppercase;
+    letter-spacing: .05em; padding-top: 2px; }
+  .kv-value { color: #fde68a; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12px; word-break: break-word; }
+  .kv-value pre { margin: 0; background: #0f172a; }
 </style>
 </head>
 <body>
@@ -200,6 +292,7 @@ export default class RlsReportReporter implements Reporter {
         const status = statusFromTask(task);
         const errors = task.result?.errors ?? [];
         const firstError = errors[0];
+        const errorMessage = firstError?.message ?? null;
         entries.push({
           file: fileLabel,
           suite,
@@ -207,8 +300,9 @@ export default class RlsReportReporter implements Reporter {
           fullName: `${suite} > ${task.name}`,
           status,
           durationMs: task.result?.duration ?? null,
-          errorMessage: firstError?.message ?? null,
+          errorMessage,
           errorStack: firstError?.stack ?? null,
+          rlsDetails: parseRlsFailure(errorMessage),
         });
       }
     }
