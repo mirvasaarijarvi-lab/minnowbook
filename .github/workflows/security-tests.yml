@@ -25,6 +25,40 @@ jobs:
       - name: Run security regression tests (security-only runner)
         run: bunx vitest run --config vitest.security.config.ts --reporter=verbose
 
+      # Pagination-boundary RLS probes against the live remote backend.
+      # These are a strict subset of `cross-tenant-log-isolation.test.ts`
+      # (the `describe`s tagged "anon pagination isolation") that need
+      # `VITE_SUPABASE_URL` + `VITE_SUPABASE_PUBLISHABLE_KEY` to actually
+      # hit the staging project. The inner `liveIt` blocks self-skip when
+      # those env vars are missing, but we gate the whole step at the
+      # workflow level too so the log shows a clear "skipped" notice
+      # instead of a misleading green "0 tests ran".
+      - name: Check pagination-RLS prerequisites
+        id: pag_check
+        env:
+          SUPA_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          SUPA_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          if [ -n "$SUPA_URL" ] && [ -n "$SUPA_KEY" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+            echo "✅ Supabase env vars present — pagination RLS probes will run."
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Skipping pagination-RLS probes — VITE_SUPABASE_URL / VITE_SUPABASE_PUBLISHABLE_KEY not configured."
+          fi
+
+      - name: Run pagination-only cross-tenant log isolation probes
+        if: steps.pag_check.outputs.enabled == 'true'
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          bunx vitest run \
+            --config vitest.security.config.ts \
+            --reporter=verbose \
+            src/test/security/cross-tenant-log-isolation.test.ts \
+            -t "anon pagination isolation"
+
       - name: Summary
         if: always()
         run: echo "Security regression tests completed"
