@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-04-22T08:58:14.836Z",
+  "generatedAt": "2026-04-22T08:59:09.313Z",
   "totals": {
     "total": 117,
     "passed": 35,
     "failed": 0,
     "skipped": 82,
-    "durationMs": 9891.695029000002
+    "durationMs": 9989.80032
   },
   "entries": [
     {
@@ -14,7 +14,7 @@
       "name": "lists every known tenant-scoped table",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Test manifest sanity > lists every known tenant-scoped table",
       "status": "passed",
-      "durationMs": 2.1740270000000237,
+      "durationMs": 4.395897999999761,
       "errorMessage": null,
       "errorStack": null
     },
@@ -24,7 +24,7 @@
       "name": "table names follow naming conventions",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Test manifest sanity > table names follow naming conventions",
       "status": "passed",
-      "durationMs": 0.9118419999999787,
+      "durationMs": 1.7077570000001288,
       "errorMessage": null,
       "errorStack": null
     },
@@ -34,7 +34,7 @@
       "name": "anon SELECT * FROM access_code_redemptions returns no rows (RLS enforced)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon SELECT * FROM access_code_redemptions returns no rows (RLS enforced)",
       "status": "passed",
-      "durationMs": 227.80556099999967,
+      "durationMs": 213.617029,
       "errorMessage": null,
       "errorStack": null
     },
@@ -44,7 +44,7 @@
       "name": "anon SELECT * FROM archived_reservations returns no rows (RLS enforced)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon SELECT * FROM archived_reservations returns no rows (RLS enforced)",
       "status": "passed",
-      "durationMs": 123.215913,
+      "durationMs": 132.11759800000027,
       "errorMessage": null,
       "errorStack": null
     },
@@ -54,7 +54,7 @@
       "name": "anon SELECT * FROM audit_log returns no rows (RLS enforced)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon SELECT * FROM audit_log returns no rows (RLS enforced)",
       "status": "passed",
-      "durationMs": 61.249690999999984,
+      "durationMs": 56.589946000000054,
       "errorMessage": null,
       "errorStack": null
     },
@@ -64,7 +64,7 @@
       "name": "anon SELECT * FROM beta_feedback returns no rows (RLS enforced)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon SELECT * FROM beta_feedback returns no rows (RLS enforced)",
       "status": "passed",
-      "durationMs": 51.51801700000033,
+      "durationMs": 56.03802700000051,
       "errorMessage": null,
       "errorStack": null
     },
@@ -74,7 +74,7 @@
       "name": "anon SELECT * FROM blocked_slots returns no rows (RLS enforced)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon SELECT * FROM blocked_slots returns no rows (RLS enforced)",
       "status": "passed",
-      "durationMs": 71.24605500000007,
+      "durationMs": 51.30940999999984,
       "errorMessage": null,
       "errorStack": null
     },
@@ -84,7 +84,7 @@
       "name": "anon SELECT * FROM booking_tokens returns no rows (RLS enforced)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon SELECT * FROM booking_tokens returns no rows (RLS enforced)",
       "status": "passed",
-      "durationMs": 52.76612399999976,
+      "durationMs": 58.98645899999974,
       "errorMessage": null,
       "errorStack": null
     },
@@ -94,7 +94,7 @@
       "name": "anon SELECT * FROM booking_validation_log returns no rows (RLS enforced)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon SELECT * FROM booking_validation_log returns no rows (RLS enforced)",
       "status": "passed",
-      "durationMs": 58.295200999999906,
+      "durationMs": 50.79420399999981,
       "errorMessage": null,
       "errorStack": null
     },
@@ -104,7 +104,7 @@
       "name": "anon SELECT * FROM discount_codes returns no rows (RLS enforced)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon SELECT * FROM discount_codes returns no rows (RLS enforced)",
       "status": "passed",
-      "durationMs": 47.42196100000001,
+      "durationMs": 60.29308800000035,
       "errorMessage": null,
       "errorStack": null
     },
@@ -114,7 +114,7 @@
       "name": "anon SELECT * FROM email_send_log returns no rows (RLS enforced)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon SELECT * FROM email_send_log returns no rows (RLS enforced)",
       "status": "passed",
-      "durationMs": 62.63559899999973,
+      "durationMs": 55.74470200000087,
       "errorMessage": null,
       "errorStack": null
     },
@@ -124,7 +124,7 @@
       "name": "anon SELECT * FROM guest_reviews returns no rows (RLS enforced)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon SELECT * FROM guest_reviews returns no rows (RLS enforced)",
       "status": "passed",
-      "durationMs": 54.41430000000037,
+      "durationMs": 66.75805700000001,
       "errorMessage": null,
       "errorStack": null
     },
@@ -134,7 +134,7 @@
       "name": "anon SELECT * FROM kitchen_menu_items returns no rows (RLS enforced)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon SELECT * FROM kitchen_menu_items returns no rows (RLS enforced)",
       "status": "passed",
-      "durationMs": 66.51831600000014,
+      "durationMs": 47.41730499999994,
       "errorMessage": null,
       "errorStack": null
     },
@@ -144,7 +144,7 @@
       "name": "anon SELECT * FROM kitchen_orders returns no rows (RLS enforced)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon SELECT * FROM kitchen_orders returns no rows (RLS enforced)",
       "status": "passed",
-      "durationMs": 46.36219200000005,
+      "durationMs": 63.58608899999945,
       "errorMessage": null,
       "errorStack": null
     },
@@ -154,7 +154,7 @@
       "name": "anon SELECT * FROM login_history returns no rows (RLS enforced)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon SELECT * FROM login_history returns no rows (RLS enforced)",
       "status": "passed",
-      "durationMs": 73.88492200000019,
+      "durationMs": 71.57147999999961,
       "errorMessage": null,
       "errorStack": null
     },
@@ -164,7 +164,7 @@
       "name": "anon SELECT * FROM notifications returns no rows (RLS enforced)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon SELECT * FROM notifications returns no rows (RLS enforced)",
       "status": "passed",
-      "durationMs": 48.75459099999989,
+      "durationMs": 74.0097880000003,
       "errorMessage": null,
       "errorStack": null
     },
@@ -174,7 +174,7 @@
       "name": "anon SELECT * FROM offers returns no rows (RLS enforced)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon SELECT * FROM offers returns no rows (RLS enforced)",
       "status": "passed",
-      "durationMs": 55.07453000000032,
+      "durationMs": 53.5791650000001,
       "errorMessage": null,
       "errorStack": null
     },
@@ -184,7 +184,7 @@
       "name": "anon SELECT * FROM recurring_blocked_slots returns no rows (RLS enforced)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon SELECT * FROM recurring_blocked_slots returns no rows (RLS enforced)",
       "status": "passed",
-      "durationMs": 55.48551899999984,
+      "durationMs": 55.35103100000015,
       "errorMessage": null,
       "errorStack": null
     },
@@ -194,7 +194,7 @@
       "name": "anon SELECT * FROM reservations returns no rows (RLS enforced)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon SELECT * FROM reservations returns no rows (RLS enforced)",
       "status": "passed",
-      "durationMs": 57.16961700000047,
+      "durationMs": 56.30004099999951,
       "errorMessage": null,
       "errorStack": null
     },
@@ -204,7 +204,7 @@
       "name": "anon SELECT * FROM resource_images returns no rows (RLS enforced)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon SELECT * FROM resource_images returns no rows (RLS enforced)",
       "status": "passed",
-      "durationMs": 63.75294399999984,
+      "durationMs": 65.31325300000026,
       "errorMessage": null,
       "errorStack": null
     },
@@ -214,7 +214,7 @@
       "name": "anon SELECT * FROM resource_opening_hours returns no rows (RLS enforced)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon SELECT * FROM resource_opening_hours returns no rows (RLS enforced)",
       "status": "passed",
-      "durationMs": 60.63496599999962,
+      "durationMs": 52.59532599999966,
       "errorMessage": null,
       "errorStack": null
     },
@@ -224,7 +224,7 @@
       "name": "anon SELECT * FROM resources returns no rows (RLS enforced)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon SELECT * FROM resources returns no rows (RLS enforced)",
       "status": "passed",
-      "durationMs": 50.76907300000039,
+      "durationMs": 65.21360100000038,
       "errorMessage": null,
       "errorStack": null
     },
@@ -234,7 +234,7 @@
       "name": "anon INSERT into private tenant tables is denied",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon INSERT into private tenant tables is denied",
       "status": "passed",
-      "durationMs": 67.32925100000011,
+      "durationMs": 53.404145999999855,
       "errorMessage": null,
       "errorStack": null
     },
@@ -244,7 +244,7 @@
       "name": "anon UPDATE on private tenant tables is denied",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon UPDATE on private tenant tables is denied",
       "status": "passed",
-      "durationMs": 59.381538999999975,
+      "durationMs": 58.14850800000022,
       "errorMessage": null,
       "errorStack": null
     },
@@ -904,7 +904,7 @@
       "name": "anon cannot upload to tenant-private bucket",
       "fullName": "src/test/security/cross-tenant-storage.test.ts > Cross-Tenant Storage RLS Tests > Anonymous client storage enforcement > anon cannot upload to tenant-private bucket",
       "status": "passed",
-      "durationMs": 4005.810044,
+      "durationMs": 4006.493618,
       "errorMessage": null,
       "errorStack": null
     },
@@ -914,7 +914,7 @@
       "name": "anon cannot upload to tenant-assets bucket",
       "fullName": "src/test/security/cross-tenant-storage.test.ts > Cross-Tenant Storage RLS Tests > Anonymous client storage enforcement > anon cannot upload to tenant-assets bucket",
       "status": "passed",
-      "durationMs": 4003.2335040000007,
+      "durationMs": 4002.3630779999994,
       "errorMessage": null,
       "errorStack": null
     },
@@ -924,7 +924,7 @@
       "name": "anon cannot download from tenant-private bucket",
       "fullName": "src/test/security/cross-tenant-storage.test.ts > Cross-Tenant Storage RLS Tests > Anonymous client storage enforcement > anon cannot download from tenant-private bucket",
       "status": "passed",
-      "durationMs": 140.58679400000074,
+      "durationMs": 212.20813400000043,
       "errorMessage": null,
       "errorStack": null
     },
@@ -934,7 +934,7 @@
       "name": "anon cannot list files in tenant-private bucket",
       "fullName": "src/test/security/cross-tenant-storage.test.ts > Cross-Tenant Storage RLS Tests > Anonymous client storage enforcement > anon cannot list files in tenant-private bucket",
       "status": "passed",
-      "durationMs": 90.71758299999965,
+      "durationMs": 87.60794999999962,
       "errorMessage": null,
       "errorStack": null
     },
@@ -944,7 +944,7 @@
       "name": "anon cannot delete from tenant-private bucket",
       "fullName": "src/test/security/cross-tenant-storage.test.ts > Cross-Tenant Storage RLS Tests > Anonymous client storage enforcement > anon cannot delete from tenant-private bucket",
       "status": "passed",
-      "durationMs": 76.69038,
+      "durationMs": 81.02928399999837,
       "errorMessage": null,
       "errorStack": null
     },
@@ -954,7 +954,7 @@
       "name": "anon cannot delete from tenant-assets bucket",
       "fullName": "src/test/security/cross-tenant-storage.test.ts > Cross-Tenant Storage RLS Tests > Anonymous client storage enforcement > anon cannot delete from tenant-assets bucket",
       "status": "passed",
-      "durationMs": 52.05890999999974,
+      "durationMs": 71.66959599999973,
       "errorMessage": null,
       "errorStack": null
     },
@@ -1124,7 +1124,7 @@
       "name": "RPC returns at least one tenant-scoped table (sanity)",
       "fullName": "src/test/security/tenant-table-manifest.test.ts > Tenant Table Manifest — Coverage Guard > Live schema introspection > RPC returns at least one tenant-scoped table (sanity)",
       "status": "passed",
-      "durationMs": 1.7793409999999312,
+      "durationMs": 1.606377000000066,
       "errorMessage": null,
       "errorStack": null
     },
@@ -1134,7 +1134,7 @@
       "name": "every live tenant-scoped table is covered or explicitly excluded",
       "fullName": "src/test/security/tenant-table-manifest.test.ts > Tenant Table Manifest — Coverage Guard > Live schema introspection > every live tenant-scoped table is covered or explicitly excluded",
       "status": "passed",
-      "durationMs": 1.098167999999987,
+      "durationMs": 1.0434359999999288,
       "errorMessage": null,
       "errorStack": null
     },
@@ -1144,7 +1144,7 @@
       "name": "manifest does not list tables that no longer exist in the schema",
       "fullName": "src/test/security/tenant-table-manifest.test.ts > Tenant Table Manifest — Coverage Guard > Live schema introspection > manifest does not list tables that no longer exist in the schema",
       "status": "passed",
-      "durationMs": 0.3426219999996647,
+      "durationMs": 0.3297109999998611,
       "errorMessage": null,
       "errorStack": null
     },
@@ -1154,7 +1154,7 @@
       "name": "no table is in both COVERED_TABLES and EXCLUDED_TABLES",
       "fullName": "src/test/security/tenant-table-manifest.test.ts > Tenant Table Manifest — Coverage Guard > Live schema introspection > no table is in both COVERED_TABLES and EXCLUDED_TABLES",
       "status": "passed",
-      "durationMs": 0.35310600000002523,
+      "durationMs": 0.3493180000000393,
       "errorMessage": null,
       "errorStack": null
     },
@@ -1164,7 +1164,7 @@
       "name": "every EXCLUDED_TABLES entry has a non-empty justification",
       "fullName": "src/test/security/tenant-table-manifest.test.ts > Tenant Table Manifest — Coverage Guard > Live schema introspection > every EXCLUDED_TABLES entry has a non-empty justification",
       "status": "passed",
-      "durationMs": 0.2528259999999136,
+      "durationMs": 0.2579100000002654,
       "errorMessage": null,
       "errorStack": null
     },
