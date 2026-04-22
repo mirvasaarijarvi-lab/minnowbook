@@ -1,7 +1,9 @@
-import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useImpersonation } from "@/contexts/ImpersonationContext";
+import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Tenant = Tables<"tenants">;
@@ -9,6 +11,7 @@ type Tenant = Tables<"tenants">;
 export const useTenant = () => {
   const { user } = useAuth();
   const { impersonating, isImpersonating } = useImpersonation();
+  const queryClient = useQueryClient();
 
   const { data: tenantUser, isLoading: loadingTenantUser } = useQuery({
     queryKey: ["tenant-user", user?.id],
@@ -24,6 +27,39 @@ export const useTenant = () => {
     },
     enabled: !!user?.id,
   });
+
+  // Watch for mid-session membership removal: subscribe to changes on
+  // tenant_users rows belonging to the current user. If the row is deleted
+  // (admin removed access, role rotation, etc.), refetch so consumers see
+  // tenantId=null and the app can redirect to /onboarding.
+  useEffect(() => {
+    if (!user?.id || isImpersonating) return;
+
+    const channel = supabase
+      .channel(`tenant-membership-${user.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "tenant_users",
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload) => {
+          if (payload.eventType === "DELETE") {
+            toast.error("Your access to this organization has been removed.", {
+              description: "Redirecting to setup…",
+            });
+          }
+          queryClient.invalidateQueries({ queryKey: ["tenant-user", user.id] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id, isImpersonating, queryClient]);
 
   // When impersonating, fetch the impersonated tenant
   const { data: impersonatedTenant } = useQuery({
