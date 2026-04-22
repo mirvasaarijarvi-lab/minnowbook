@@ -109,7 +109,7 @@ describe("Forbidden page — forbidden-status beacon (fires once on mount)", () 
     // The single call must target the always-403 edge function with the
     // exact slug the guard passed in. We assert on the URL (first arg)
     // since the page passes the URL string directly to fetch.
-    const [calledUrl, calledInit] = fetchSpy.mock.calls[0] as [
+    const [calledUrl, calledInit] = fetchSpy.mock.calls[0] as unknown as [
       string,
       RequestInit,
     ];
