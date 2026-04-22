@@ -319,6 +319,15 @@ const KitchenOrdersPanel = () => {
           >
             {t("kitchen.today")}
           </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setMenuManagerOpen(true)}
+            className="gap-1.5"
+          >
+            <BookOpen className="h-4 w-4" />
+            {t("kitchen.menu.manage")}
+          </Button>
           <Button variant="outline" size="sm" onClick={() => window.print()} className="gap-1.5">
             <Printer className="h-4 w-4" />
             {t("kitchen.print")}
