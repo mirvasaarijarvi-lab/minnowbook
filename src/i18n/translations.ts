@@ -1581,6 +1581,18 @@ type TranslationKeys = {
   "kitchen.error": string;
   "kitchen.filter.all": string;
   "kitchen.print": string;
+  "kitchen.menu.title": string;
+  "kitchen.menu.manage": string;
+  "kitchen.menu.empty": string;
+  "kitchen.menu.addToOrder": string;
+  "kitchen.menu.pickFromMenu": string;
+  "kitchen.menu.newItem": string;
+  "kitchen.menu.namePlaceholder": string;
+  "kitchen.menu.saved": string;
+  "kitchen.menu.deleted": string;
+  "kitchen.menu.saveError": string;
+  "kitchen.menu.close": string;
+  "kitchen.menu.searchPlaceholder": string;
 
   // Offers
   "offers.title": string;
