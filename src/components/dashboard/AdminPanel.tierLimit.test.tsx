@@ -195,8 +195,6 @@ describe("AdminPanel: tier-limit enforcement (Basic = 5 staff users)", () => {
     // because mockInvoke has no second response queued.
     mockInvoke.mockImplementation(async (_name: string, opts: any) => {
       const body = opts?.body;
-      // eslint-disable-next-line no-console
-      console.log("[test] invoke body:", body);
       if (body?.action === "list") {
         return { data: fakeUsers(5), error: null };
       }
