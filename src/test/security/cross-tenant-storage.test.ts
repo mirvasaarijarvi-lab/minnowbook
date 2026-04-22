@@ -953,10 +953,10 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         expect(denied).toBe(true);
       });
 
-      it("user B cannot LIST tenant A's nested tenant-assets folder", async () => {
+      it("user B cannot LIST tenant A's per-run tenant-assets folder", async () => {
         const { data, error } = await clientB.storage
           .from(ASSETS_BUCKET)
-          .list(`${liveCreds.a.tenantId!}/__rls_test__`, { limit: 50, search: RUN_ID });
+          .list(runRootFor(liveCreds.a.tenantId!), { limit: 50 });
         const leaked =
           Array.isArray(data) &&
           data.some((entry) => entry.name && entry.name.includes("a-assets-isolation-seed"));
