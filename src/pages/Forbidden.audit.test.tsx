@@ -109,12 +109,18 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-const renderForbidden = () =>
-  render(
-    <MemoryRouter>
-      <Forbidden attemptedArea="the Superadmin area" areaSlug="superadmin" />
-    </MemoryRouter>,
+const renderForbidden = () => {
+  const client = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  return render(
+    <QueryClientProvider client={client}>
+      <MemoryRouter>
+        <Forbidden attemptedArea="the Superadmin area" areaSlug="superadmin" />
+      </MemoryRouter>
+    </QueryClientProvider>,
   );
+};
 
 // --- Tests ---------------------------------------------------------------
 
