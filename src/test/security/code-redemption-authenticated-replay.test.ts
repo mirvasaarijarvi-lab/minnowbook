@@ -307,7 +307,7 @@ suite(
     it("first redemption succeeds with 200, returns granted tier + duration, and writes exactly one ledger row", async () => {
       const plaintext = freshPlaintext();
       const accessCodeId = await seedAccessCode(admin, plaintext, userId);
-      seededCodeIds.push(accessCodeId);
+      tracker.register(accessCodeId);
 
       // Clean slate for this code.
       await admin
@@ -375,7 +375,7 @@ suite(
     it("replaying the same code returns a stable, generic, non-leaking 4xx error", async () => {
       const plaintext = freshPlaintext();
       const accessCodeId = await seedAccessCode(admin, plaintext, userId);
-      seededCodeIds.push(accessCodeId);
+      tracker.register(accessCodeId);
 
       await admin
         .from("tenants")
