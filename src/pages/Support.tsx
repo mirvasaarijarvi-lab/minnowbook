@@ -230,9 +230,9 @@ const Support = () => {
         </div>
       </section>
 
-      {/* CTA */}
+      {/* CTA + Contact form */}
       <section className="py-16 bg-secondary/50">
-        <div className="container mx-auto px-4 text-center">
+        <div className="container mx-auto px-4 text-center mb-10">
           <h2 className="text-2xl font-serif font-bold text-foreground mb-3">
             {t("support.stillNeedHelp")}
           </h2>
@@ -240,6 +240,7 @@ const Support = () => {
             {t("support.stillNeedHelpDesc")}
           </p>
         </div>
+        <SupportContactForm />
       </section>
 
       <MarketingFooter />
