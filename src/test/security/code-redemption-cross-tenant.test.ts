@@ -215,8 +215,10 @@ async function seedAccessCode(
     .insert({
       code_hash: hashCode(plaintext),
       code_prefix: plaintext.slice(0, 8),
-      description:
-        "Cross-tenant redeem test — auto-cleaned. Code MUST land on the redeemer's tenant, never the 'intended' one.",
+      // Description carries the suite tag so `sweepStaleRows()` can
+      // recover from a process that died before the in-memory tracker
+      // could record this id.
+      description: `${DESCRIPTION_TAG} Cross-tenant redeem test — auto-cleaned. Code MUST land on the redeemer's tenant, never the 'intended' one.`,
       tier: "business",
       duration_days: 14,
       max_uses: 1,
