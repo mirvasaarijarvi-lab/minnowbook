@@ -459,7 +459,7 @@ const guideContent: Record<Language, GuideContent> = {
           price: "€59/mo",
           features: [
             "All reservation types (1 resource each)",
-            "Up to 10 staff users",
+            "Up to 25 staff users",
             "Custom email templates",
             "Advanced booking rules",
             "Multi-language booking pages",

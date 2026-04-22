@@ -66,7 +66,7 @@ const Pricing = () => {
     [t("pricing.reservationTypes"), "1", t("pricing.all"), t("pricing.all")],
     [t("pricing.operationTypes"), "1", t("pricing.onePerResType"), t("pricing.unlimited")],
     [t("pricing.resourcesPerType"), "1", "1", t("pricing.unlimited")],
-    [t("pricing.staffUsers"), "1–3", t("pricing.proStaff"), t("pricing.unlimited")],
+    [t("pricing.staffUsers"), "1–5", t("pricing.proStaff"), t("pricing.unlimited")],
     [t("pricing.brandedBooking"), "✓", "✓", "✓"],
     [t("pricing.defaultTemplates"), "✓", "✓", "✓"],
     [t("pricing.customTemplates"), "—", "✓", "✓"],
