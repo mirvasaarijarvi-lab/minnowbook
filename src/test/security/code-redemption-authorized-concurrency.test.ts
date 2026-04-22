@@ -215,11 +215,109 @@ async function callRedeem(
   } catch {
     body = text;
   }
-  return { status: res.status, body, rawText: text };
+  // Snapshot response headers so loser assertions can verify the full
+  // wire contract (no caching, no cookies, anti-sniff/clickjack hardening).
+  const responseHeaders: Record<string, string> = {};
+  res.headers.forEach((value, key) => {
+    responseHeaders[key.toLowerCase()] = value;
+  });
+  return { status: res.status, body, rawText: text, headers: responseHeaders };
 }
 
 function bodyCode(body: unknown): string {
   return ((body as { code?: string } | null)?.code ?? "").toString();
+}
+
+/**
+ * The exact, byte-for-byte generic-failure contract every loser in a
+ * concurrent-redeem race must satisfy. Centralising this assertion
+ * means a future drift in either the body shape OR the security
+ * headers fails *every* concurrency test, not just one.
+ *
+ * Information-leakage rules verified here:
+ *   - Status is exactly 400 (never 401/403/404/409/429/5xx — any of
+ *     which would let an attacker classify the loser's reason).
+ *   - Body has EXACTLY two keys: `error` and `code`. No `reason`,
+ *     `details`, `attempt`, `hint`, `redemption_id`, `tenant_id`, etc.
+ *   - `error` is the fixed generic string the function emits on the
+ *     not-found / inactive / revoked / expired / over-quota /
+ *     already-redeemed branches. (Source of truth:
+ *     supabase/functions/redeem-access-code/index.ts → `invalidPayload`.)
+ *   - `code` is the fixed `INVALID_OR_UNAVAILABLE_CODE` constant.
+ *   - Content-Type is application/json so no HTML/text drift.
+ *   - Cache-Control disables every cache hop — losers must never be
+ *     cached by a CDN where another tenant could observe them.
+ *   - X-Content-Type-Options/X-Frame-Options/Referrer-Policy are set
+ *     so a stale loser response can't be weaponised via MIME-sniffing
+ *     or framing.
+ *   - No Set-Cookie — failures must never mutate session state.
+ */
+const GENERIC_FAILURE_BODY = Object.freeze({
+  error: "This access code is invalid or no longer available",
+  code: "INVALID_OR_UNAVAILABLE_CODE",
+});
+
+function assertGenericFailure(
+  result: { status: number; body: unknown; rawText: string; headers: Record<string, string> },
+  context: string,
+) {
+  // Status must be exactly 400 — not "any 4xx".
+  expect(
+    result.status,
+    `${context}: expected status 400, got ${result.status}. Body: ${result.rawText}`,
+  ).toBe(400);
+
+  // Body must be a plain object (not a string, not null).
+  expect(
+    result.body !== null && typeof result.body === "object" && !Array.isArray(result.body),
+    `${context}: body must be a JSON object, got ${typeof result.body}: ${result.rawText}`,
+  ).toBe(true);
+
+  const bodyObj = result.body as Record<string, unknown>;
+  // Exact key set — no extra keys may leak through.
+  const keys = Object.keys(bodyObj).sort();
+  expect(
+    keys,
+    `${context}: body keys drifted, got [${keys.join(", ")}]. Body: ${result.rawText}`,
+  ).toEqual(["code", "error"]);
+  // Exact values, byte-for-byte.
+  expect(bodyObj.error, `${context}: error message drifted`).toBe(GENERIC_FAILURE_BODY.error);
+  expect(bodyObj.code, `${context}: error code drifted`).toBe(GENERIC_FAILURE_BODY.code);
+
+  // Header contract.
+  const ct = result.headers["content-type"] ?? "";
+  expect(
+    ct.toLowerCase().includes("application/json"),
+    `${context}: Content-Type must be application/json, got "${ct}"`,
+  ).toBe(true);
+
+  const cacheControl = result.headers["cache-control"] ?? "";
+  // Must forbid every cache layer. We assert the no-store directive
+  // is present (the strongest one) rather than an exact-string match,
+  // so adding further directives in the future doesn't break this.
+  expect(
+    cacheControl.toLowerCase().includes("no-store"),
+    `${context}: Cache-Control must include no-store, got "${cacheControl}"`,
+  ).toBe(true);
+
+  expect(
+    result.headers["x-content-type-options"],
+    `${context}: X-Content-Type-Options must be nosniff`,
+  ).toBe("nosniff");
+  expect(
+    result.headers["x-frame-options"],
+    `${context}: X-Frame-Options must be DENY`,
+  ).toBe("DENY");
+  expect(
+    result.headers["referrer-policy"],
+    `${context}: Referrer-Policy must be strict-origin-when-cross-origin`,
+  ).toBe("strict-origin-when-cross-origin");
+
+  // A failure must never set a cookie — that would smuggle state.
+  expect(
+    result.headers["set-cookie"],
+    `${context}: failures must not set cookies, got "${result.headers["set-cookie"]}"`,
+  ).toBeUndefined();
 }
 
 const suite = liveModeAvailable ? describe : describe.skip;
