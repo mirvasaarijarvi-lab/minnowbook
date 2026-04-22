@@ -104,8 +104,8 @@ const renderAtSuperadmin = () => {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  mockSystemAdminRow = null;
-  mockSystemAdminError = null;
+  mockIsSystemAdminResult = false;
+  mockIsSystemAdminError = null;
   // Default: a normal authenticated user, not a system admin.
   mockUseAuth.mockReturnValue({
     user: { id: "user-non-admin-1", email: "user@example.com" },
@@ -126,9 +126,9 @@ beforeEach(() => {
 
 describe("SystemAdminRoute (/superadmin enforcement)", () => {
   it("renders the Forbidden page for an authenticated non-system-admin user", async () => {
-    // The system_admins lookup returns no row, which is the canonical
+    // The is_system_admin RPC returns false, which is the canonical
     // "not a system admin" signal.
-    mockSystemAdminRow = null;
+    mockIsSystemAdminResult = false;
 
     renderAtSuperadmin();
 
@@ -153,11 +153,11 @@ describe("SystemAdminRoute (/superadmin enforcement)", () => {
     ).toBeInTheDocument();
   });
 
-  it("renders the Forbidden page when the system_admins lookup fails (fail-closed)", async () => {
+  it("renders the Forbidden page when the is_system_admin RPC fails (fail-closed)", async () => {
     // Simulate a transient DB / RLS error. The guard must treat lookup
     // failures as denial, never as access.
-    mockSystemAdminRow = null;
-    mockSystemAdminError = { message: "lookup failed" };
+    mockIsSystemAdminResult = false;
+    mockIsSystemAdminError = { message: "rpc failed" };
 
     renderAtSuperadmin();
 
@@ -168,9 +168,8 @@ describe("SystemAdminRoute (/superadmin enforcement)", () => {
   });
 
   it("renders the Superadmin content for a confirmed system admin", async () => {
-    // The presence of any row in `system_admins` for this user is what
-    // grants access. The id value itself is irrelevant to the guard.
-    mockSystemAdminRow = { id: "sa-row-1" };
+    // A truthy RPC result is what grants access.
+    mockIsSystemAdminResult = true;
     mockUseAuth.mockReturnValue({
       user: { id: "user-system-admin-1", email: "admin@example.com" },
       session: { access_token: "fake" },
