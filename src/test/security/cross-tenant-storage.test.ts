@@ -2421,14 +2421,13 @@ describe("Cross-Tenant Storage RLS Tests", () => {
                 if (TRAVERSAL_LABELS.has(labelHint)) {
                   const callerTenantId = liveCreds[dir.attacker].tenantId!;
                   const victimTenantId = dir.victimTenantId();
-                  const normalized = normalizeStoragePath(variant.path);
-                  expect(normalized.firstSegment).not.toBe(victimTenantId);
+                  const firstSegment = serverFirstSegment(variant.path);
+                  expect(firstSegment).not.toBe(victimTenantId);
                   if (
-                    normalized.firstSegment !== null &&
-                    (normalized.firstSegment === callerTenantId ||
-                      normalized.firstSegment === victimTenantId)
+                    firstSegment !== null &&
+                    (firstSegment === callerTenantId || firstSegment === victimTenantId)
                   ) {
-                    expect(normalized.firstSegment).toBe(callerTenantId);
+                    expect(firstSegment).toBe(callerTenantId);
                   }
                 }
               },
