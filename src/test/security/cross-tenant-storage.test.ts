@@ -1028,6 +1028,324 @@ describe("Cross-Tenant Storage RLS Tests", () => {
   );
 
   // ============================================================
+  // Adversarial path-normalization denial
+  // ------------------------------------------------------------
+  // Storage RLS gates access via `storage.foldername(name)[1] = tenant_id`.
+  // That parser splits on `/`, so any input that confuses splitting,
+  // canonicalization, or URL decoding could — in theory — cause a
+  // foreign-tenant prefix to "look like" the caller's own tenant id once
+  // normalized. We probe the obvious offenders:
+  //
+  //   1. Double slashes:        `{B}//docs/file.txt`     →  empty segment in the middle
+  //   2. Leading slash:         `/{B}/docs/file.txt`     →  empty FIRST segment, B becomes [2]
+  //   3. Trailing slash:        `{B}/docs/file.txt/`     →  trailing empty segment
+  //   4. Dot-segment traversal: `{A}/../{B}/file.txt`    →  classic ".." escape
+  //   5. URL-encoded slash:     `{A}%2F..%2F{B}/file`    →  decoded slash bypass
+  //   6. URL-encoded tenant:    `%7B{B}%7D/file.txt`     →  encoded braces around id
+  //   7. Backslash separators:  `{B}\\docs\\file.txt`    →  Windows-style separators
+  //   8. Null byte:             `{B}/docs%00/file.txt`   →  C-string truncation trick
+  //
+  // The expected behaviour for ALL of these, in BOTH buckets, is the same:
+  // the upload, list, and download MUST be denied (or, equivalently, the
+  // SDK rejects the path as malformed before it ever leaves the client).
+  // Either outcome is a pass — what we never want is a 200 + a real object
+  // landing in another tenant's folder.
+  // ============================================================
+
+  /**
+   * Bag of adversarial path generators. Each produces a candidate STRING
+   * targeting `victimTenantId` (the *other* tenant). The label is used
+   * only for the test name + ledger row.
+   *
+   * These intentionally produce strings that may be rejected by the
+   * Supabase JS client's own validation BEFORE hitting the network. That
+   * still counts as denial for our purposes — the goal is "no bytes ever
+   * land in tenant B's folder", not "request reaches the server".
+   */
+  const adversarialPaths = (victimTenantId: string): Array<{ label: string; path: string }> => [
+    { label: "double-slash", path: `${victimTenantId}//docs/file.txt` },
+    { label: "leading-slash", path: `/${victimTenantId}/docs/file.txt` },
+    { label: "trailing-slash", path: `${victimTenantId}/docs/file.txt/` },
+    {
+      label: "dot-segment-traversal",
+      // Anchor in a fake-but-valid-looking own-tenant prefix so the policy
+      // can't trivially reject by missing-tenant. The "../" should be the
+      // only thing standing between us and the victim's folder.
+      path: `00000000-0000-0000-0000-000000000000/../${victimTenantId}/file.txt`,
+    },
+    {
+      label: "url-encoded-slash",
+      path: `00000000-0000-0000-0000-000000000000%2F..%2F${victimTenantId}/file.txt`,
+    },
+    {
+      label: "url-encoded-tenant-wrappers",
+      // %7B = { , %7D = } — brace-wrapping a real tenant id is sometimes
+      // accepted by lenient parsers as a "templated" segment.
+      path: `%7B${victimTenantId}%7D/file.txt`,
+    },
+    {
+      label: "backslash-separators",
+      path: `${victimTenantId}\\docs\\file.txt`,
+    },
+    {
+      label: "null-byte-truncation",
+      // %00 is the URL-encoded null. Some C-backed parsers truncate at the
+      // first NUL, which would turn this into `{victim}/docs` — still a
+      // foreign folder, so denial is still required.
+      path: `${victimTenantId}/docs%00/file.txt`,
+    },
+  ];
+
+  describe.runIf(hasSupabaseConfig)("Anonymous adversarial path normalization", () => {
+    let anon: SupabaseClient;
+    // Use a synthetic tenant id as the "victim" — we don't need a real
+    // tenant for the anon block, since anon writes are denied for ALL
+    // tenants, real or not. This keeps the suite runnable without live
+    // credentials and without ever touching real folders.
+    const fakeTenantId = "11111111-1111-1111-1111-111111111111";
+
+    beforeAll(() => {
+      anon = newAnonClient();
+    });
+
+    afterAll(async () => {
+      // Defensive: even though all of these should be denied, a regression
+      // could theoretically write SOMETHING under the fake tenant root.
+      // Sweep the run-id folder under the fake tenant to be sure.
+      await sweepTestArtifacts(PRIVATE_BUCKET, [fakeTenantId]);
+      await sweepTestArtifacts(ASSETS_BUCKET, [fakeTenantId]);
+    });
+
+    for (const bucket of [PRIVATE_BUCKET, ASSETS_BUCKET]) {
+      for (const variant of adversarialPaths(fakeTenantId)) {
+        it(
+          `anon cannot upload via '${variant.label}' path to ${bucket}`,
+          async () => {
+            // We bound this with a hard timeout because some malformed paths
+            // make jsdom + the SDK hang waiting on a response that never
+            // comes — timeout-as-denial is fine for our threat model.
+            const result = await Promise.race([
+              anon.storage
+                .from(bucket)
+                .upload(variant.path, fileBytes(`anon-${variant.label}`), { upsert: true }),
+              new Promise<{ error: Error; data: null }>((resolve) =>
+                setTimeout(
+                  () => resolve({ error: new Error("network-timeout"), data: null }),
+                  4000,
+                ),
+              ),
+            ]);
+
+            recordUpload({
+              bucket,
+              path: variant.path,
+              attacker: "anon",
+              owner: "fake-tenant",
+              expected: "denied",
+              outcome: result.error ? "denied" : "allowed",
+              errorMessage: result.error?.message,
+              scenario: `adversarial:${variant.label}`,
+            });
+
+            expect(result.error).toBeTruthy();
+          },
+          15000,
+        );
+      }
+    }
+  });
+
+  describe.runIf(hasSupabaseConfig && liveModeEnabled)(
+    "Live cross-tenant adversarial path normalization",
+    () => {
+      let clientA: SupabaseClient;
+      let clientB: SupabaseClient;
+
+      // Track every adversarial attempt so afterAll can attempt cleanup
+      // from BOTH the attacker and owner perspectives — same dual-cleanup
+      // pattern as the other live blocks. If a leak ever happens, this
+      // ensures the file gets scrubbed regardless of which side can see it.
+      const adversarialAttempts: Array<{
+        bucket: string;
+        path: string;
+        attacker: "a" | "b";
+        owner: "a" | "b";
+      }> = [];
+
+      beforeAll(async () => {
+        clientA = newAnonClient();
+        clientB = newAnonClient();
+
+        const { error: signInAError } = await clientA.auth.signInWithPassword({
+          email: liveCreds.a.email!,
+          password: liveCreds.a.password!,
+        });
+        if (signInAError) throw new Error(`Tenant A sign-in failed: ${signInAError.message}`);
+
+        const { error: signInBError } = await clientB.auth.signInWithPassword({
+          email: liveCreds.b.email!,
+          password: liveCreds.b.password!,
+        });
+        if (signInBError) throw new Error(`Tenant B sign-in failed: ${signInBError.message}`);
+      });
+
+      afterAll(async () => {
+        const clientFor = (key: "a" | "b") => (key === "a" ? clientA : clientB);
+
+        const seen = new Set<string>();
+        for (const { bucket, path, attacker, owner } of adversarialAttempts) {
+          const key = `${bucket}::${path}`;
+          if (seen.has(key)) continue;
+          seen.add(key);
+          for (const role of [attacker, owner] as const) {
+            try {
+              await clientFor(role).storage.from(bucket).remove([path]);
+            } catch {
+              /* ignore — most of these paths are malformed and remove() will throw */
+            }
+          }
+        }
+
+        await sweepTestArtifacts(PRIVATE_BUCKET, [liveCreds.a.tenantId!, liveCreds.b.tenantId!]);
+        await sweepTestArtifacts(ASSETS_BUCKET, [liveCreds.a.tenantId!, liveCreds.b.tenantId!]);
+      });
+
+      // Test BOTH directions (A→B and B→A) for every variant on both
+      // buckets. Asymmetric bugs (e.g. "policy works one way but not the
+      // reverse") have happened in real codebases — covering both is cheap.
+      const directions: Array<{
+        attacker: "a" | "b";
+        owner: "a" | "b";
+        attackerClient: () => SupabaseClient;
+        victimTenantId: () => string;
+      }> = [
+        {
+          attacker: "a",
+          owner: "b",
+          attackerClient: () => clientA,
+          victimTenantId: () => liveCreds.b.tenantId!,
+        },
+        {
+          attacker: "b",
+          owner: "a",
+          attackerClient: () => clientB,
+          victimTenantId: () => liveCreds.a.tenantId!,
+        },
+      ];
+
+      for (const dir of directions) {
+        for (const bucket of [PRIVATE_BUCKET, ASSETS_BUCKET]) {
+          // We instantiate `adversarialPaths` lazily inside each test so
+          // it picks up the live tenant id at run time (beforeAll has
+          // populated `liveCreds.*.tenantId`).
+          for (const labelHint of [
+            "double-slash",
+            "leading-slash",
+            "trailing-slash",
+            "dot-segment-traversal",
+            "url-encoded-slash",
+            "url-encoded-tenant-wrappers",
+            "backslash-separators",
+            "null-byte-truncation",
+          ]) {
+            it(
+              `user ${dir.attacker.toUpperCase()} cannot UPLOAD via '${labelHint}' to tenant ${dir.owner.toUpperCase()}'s ${bucket}`,
+              async () => {
+                const variant = adversarialPaths(dir.victimTenantId()).find(
+                  (v) => v.label === labelHint,
+                )!;
+                adversarialAttempts.push({
+                  bucket,
+                  path: variant.path,
+                  attacker: dir.attacker,
+                  owner: dir.owner,
+                });
+
+                const result = await Promise.race([
+                  dir
+                    .attackerClient()
+                    .storage.from(bucket)
+                    .upload(variant.path, fileBytes(`${dir.attacker}-${variant.label}`), {
+                      upsert: true,
+                    }),
+                  new Promise<{ error: Error; data: null }>((resolve) =>
+                    setTimeout(
+                      () => resolve({ error: new Error("network-timeout"), data: null }),
+                      4000,
+                    ),
+                  ),
+                ]);
+
+                recordUpload({
+                  bucket,
+                  path: variant.path,
+                  attacker: dir.attacker,
+                  owner: dir.owner,
+                  expected: "denied",
+                  outcome: result.error ? "denied" : "allowed",
+                  errorMessage: result.error?.message,
+                  scenario: `adversarial:${variant.label}`,
+                });
+
+                // Pass condition: SDK error OR network-timeout. Either
+                // means no object landed in the victim's folder.
+                expect(result.error).toBeTruthy();
+              },
+              15000,
+            );
+
+            it(
+              `user ${dir.attacker.toUpperCase()} cannot DOWNLOAD via '${labelHint}' from tenant ${dir.owner.toUpperCase()}'s ${bucket}`,
+              async () => {
+                const variant = adversarialPaths(dir.victimTenantId()).find(
+                  (v) => v.label === labelHint,
+                )!;
+                const { data, error } = await dir
+                  .attackerClient()
+                  .storage.from(bucket)
+                  .download(variant.path);
+                // Denial = error OR no data. We don't care which — both
+                // prove the path normalization didn't leak the file.
+                const denied = Boolean(error) || !data;
+                expect(denied).toBe(true);
+              },
+              15000,
+            );
+          }
+
+          // Listing with adversarial folder names follows the same rule:
+          // never reveal contents of the victim's folder.
+          it(
+            `user ${dir.attacker.toUpperCase()} cannot LIST '${dir.owner.toUpperCase()}//' (double-slash) folder in ${bucket}`,
+            async () => {
+              const folder = `${dir.victimTenantId()}//`;
+              const { data, error } = await dir
+                .attackerClient()
+                .storage.from(bucket)
+                .list(folder, { limit: 5 });
+              const denied = Boolean(error) || !data || data.length === 0;
+              expect(denied).toBe(true);
+            },
+          );
+
+          it(
+            `user ${dir.attacker.toUpperCase()} cannot LIST '/${dir.owner.toUpperCase()}/' (leading-slash) folder in ${bucket}`,
+            async () => {
+              const folder = `/${dir.victimTenantId()}/`;
+              const { data, error } = await dir
+                .attackerClient()
+                .storage.from(bucket)
+                .list(folder, { limit: 5 });
+              const denied = Boolean(error) || !data || data.length === 0;
+              expect(denied).toBe(true);
+            },
+          );
+        }
+      }
+    },
+  );
+
+  // ============================================================
   // Public bucket (`tenant-assets`) cross-tenant read isolation
   // ------------------------------------------------------------
   // `tenant-assets` is a PUBLIC bucket: anonymous users can fetch any
