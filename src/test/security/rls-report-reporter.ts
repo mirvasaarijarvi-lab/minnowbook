@@ -21,6 +21,23 @@ import type { Reporter, File, Task, TaskResultPack } from "vitest";
 
 type EntryStatus = "passed" | "failed" | "skipped";
 
+/**
+ * Structured details extracted from `rls-assert.ts` failure messages.
+ * When present, the reporter renders these as a labelled grid in the HTML
+ * report instead of a generic stack trace.
+ */
+interface RlsFailureDetails {
+  scenario?: string;
+  table?: string;
+  operation?: string;
+  attemptedQuery?: string;
+  actingTenant?: string;
+  targetTenant?: string;
+  reason?: string;
+  supabaseError?: string;
+  returnedRows?: string;
+}
+
 interface ReportEntry {
   file: string;
   suite: string;
@@ -30,6 +47,7 @@ interface ReportEntry {
   durationMs: number | null;
   errorMessage: string | null;
   errorStack: string | null;
+  rlsDetails: RlsFailureDetails | null;
 }
 
 interface ReportPayload {
