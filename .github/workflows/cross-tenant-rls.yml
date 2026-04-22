@@ -241,6 +241,17 @@ jobs:
           RLS_REPORT_FLAVOR: remote
         run: bun run scripts/generate-storage-attempts-pdf.ts || true
 
+      # Sibling of the PDF step: emit a focused HTML summary of the
+      # adversarial cases (path traversal, encoding tricks). Lives inside
+      # the same `reports/` directory uploaded below, so reviewers can
+      # open `adversarial-summary.remote.html` straight from the artifact
+      # bundle. Safe-fail so a render bug never masks a test failure.
+      - name: Generate adversarial HTML summary (remote)
+        if: always() && env.STORAGE_ATTEMPTS_LEDGER != ''
+        env:
+          RLS_REPORT_FLAVOR: remote
+        run: bun run scripts/generate-adversarial-html-summary.ts || true
+
       - name: Upload RLS report (remote)
         # Always upload — even on test failure — so the HTML/JSON dashboard
         # AND the storage-attempts PDF/JSON ledger are available for triage
