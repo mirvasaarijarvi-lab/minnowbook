@@ -66,8 +66,11 @@ let anon: SupabaseClient;
 
 const liveDescribe = liveModeAvailable ? describe : describe.skip;
 // `describe.skip.each` does not exist in vitest, so we use describe.each
-// unconditionally and skip individual `it` calls inside when we lack env.
+// unconditionally and skip individual `it` calls inside via `liveIt` when
+// we lack env. The describe block still appears in the report, but every
+// test inside is marked skipped — no createClient call is made.
 const liveDescribeEach = describe.each;
+const liveIt = liveModeAvailable ? it : it.skip;
 
 beforeAll(() => {
   // Only construct the client when we have the env to do so. The describe
