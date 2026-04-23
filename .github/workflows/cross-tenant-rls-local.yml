@@ -78,6 +78,96 @@ jobs:
           echo "::notice::Docker unavailable on this runner — skipping local-stack RLS tests."
           echo "skip_reason=docker-unavailable" >> "$GITHUB_ENV"
 
+      # ============================================================
+      # REMOTE FALLBACK
+      # ============================================================
+      # When the local stack can't boot (no Docker on the runner), we still
+      # want some live-mode RLS coverage rather than a silent skip. If the
+      # repository has the remote staging credentials configured (the same
+      # secrets used by `cross-tenant-rls.yml`), re-run the same sweep
+      # against the remote backend instead.
+      #
+      # Required secrets for fallback:
+      #   - VITE_SUPABASE_URL
+      #   - VITE_SUPABASE_PUBLISHABLE_KEY
+      #   - RLS_TEST_TENANT_A_EMAIL / _PASSWORD / _ID
+      #   - RLS_TEST_TENANT_B_EMAIL / _PASSWORD / _ID
+      #
+      # If any are missing the fallback self-skips cleanly with a notice;
+      # the job stays green (matches existing skip behavior).
+      - name: Detect remote fallback prerequisites
+        id: remote-check
+        if: steps.docker-check.outputs.available != 'true'
+        env:
+          REMOTE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          REMOTE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          A_EMAIL: ${{ secrets.RLS_TEST_TENANT_A_EMAIL }}
+          A_PASSWORD: ${{ secrets.RLS_TEST_TENANT_A_PASSWORD }}
+          A_ID: ${{ secrets.RLS_TEST_TENANT_A_ID }}
+          B_EMAIL: ${{ secrets.RLS_TEST_TENANT_B_EMAIL }}
+          B_PASSWORD: ${{ secrets.RLS_TEST_TENANT_B_PASSWORD }}
+          B_ID: ${{ secrets.RLS_TEST_TENANT_B_ID }}
+        run: |
+          missing=()
+          [ -z "$REMOTE_URL" ]   && missing+=("VITE_SUPABASE_URL")
+          [ -z "$REMOTE_KEY" ]   && missing+=("VITE_SUPABASE_PUBLISHABLE_KEY")
+          [ -z "$A_EMAIL" ]      && missing+=("RLS_TEST_TENANT_A_EMAIL")
+          [ -z "$A_PASSWORD" ]   && missing+=("RLS_TEST_TENANT_A_PASSWORD")
+          [ -z "$A_ID" ]         && missing+=("RLS_TEST_TENANT_A_ID")
+          [ -z "$B_EMAIL" ]      && missing+=("RLS_TEST_TENANT_B_EMAIL")
+          [ -z "$B_PASSWORD" ]   && missing+=("RLS_TEST_TENANT_B_PASSWORD")
+          [ -z "$B_ID" ]         && missing+=("RLS_TEST_TENANT_B_ID")
+          if [ ${#missing[@]} -eq 0 ]; then
+            echo "✅ All remote-fallback secrets present — will run RLS sweep against remote backend."
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::Remote-fallback secrets missing (${missing[*]}) — RLS sweep cannot run."
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install dependencies (remote fallback)
+        if: steps.docker-check.outputs.available != 'true' && steps.remote-check.outputs.enabled == 'true'
+        run: bun install --frozen-lockfile
+
+      - name: Run cross-tenant RLS tests (remote fallback)
+        id: remote-rls-tests
+        if: steps.docker-check.outputs.available != 'true' && steps.remote-check.outputs.enabled == 'true'
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          RLS_TEST_TENANT_A_EMAIL: ${{ secrets.RLS_TEST_TENANT_A_EMAIL }}
+          RLS_TEST_TENANT_A_PASSWORD: ${{ secrets.RLS_TEST_TENANT_A_PASSWORD }}
+          RLS_TEST_TENANT_A_ID: ${{ secrets.RLS_TEST_TENANT_A_ID }}
+          RLS_TEST_TENANT_B_EMAIL: ${{ secrets.RLS_TEST_TENANT_B_EMAIL }}
+          RLS_TEST_TENANT_B_PASSWORD: ${{ secrets.RLS_TEST_TENANT_B_PASSWORD }}
+          RLS_TEST_TENANT_B_ID: ${{ secrets.RLS_TEST_TENANT_B_ID }}
+          # Tag the report so the remote-fallback artifact is distinguishable
+          # from the local-stack artifact (different filename suffix).
+          RLS_REPORT_FLAVOR: remote-fallback
+        run: bun run test:rls-report
+
+      - name: Upload RLS report (remote fallback)
+        if: always() && steps.docker-check.outputs.available != 'true' && steps.remote-check.outputs.enabled == 'true' && steps.remote-rls-tests.conclusion != 'skipped'
+        uses: actions/upload-artifact@v7
+        with:
+          name: rls-report-remote-fallback
+          path: reports/
+          retention-days: 14
+          if-no-files-found: warn
+
+      # When the fallback ran (success OR failure), clear the skip notice so
+      # the final Summary step reflects what actually happened. The job's
+      # exit status is still driven by the `remote-rls-tests` step itself.
+      - name: Mark fallback ran (override skip notice)
+        if: always() && (steps.remote-rls-tests.outcome == 'success' || steps.remote-rls-tests.outcome == 'failure')
+        run: |
+          echo "skip_reason=" >> "$GITHUB_ENV"
+          echo "fallback_ran=remote" >> "$GITHUB_ENV"
+          echo "fallback_outcome=${{ steps.remote-rls-tests.outcome }}" >> "$GITHUB_ENV"
+      # ============================================================
+      # END REMOTE FALLBACK
+      # ============================================================
+
       - name: Setup Supabase CLI
         id: supabase-cli
         if: steps.docker-check.outputs.available == 'true'
@@ -1007,13 +1097,31 @@ jobs:
       - name: Summary
         if: always()
         run: |
+          # Fallback path: docker was unavailable but the remote sweep ran.
+          if [ -n "${fallback_ran:-}" ]; then
+            echo "### Cross-Tenant RLS (Local) — Ran via Remote Fallback" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "Docker was not available on this runner, so the live-mode RLS sweep was executed against the **remote** staging backend instead of a local Supabase stack." >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "- Fallback target: \`remote\`" >> "$GITHUB_STEP_SUMMARY"
+            echo "- Fallback outcome: \`${fallback_outcome:-unknown}\`" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "📦 Report uploaded as the \`rls-report-remote-fallback\` artifact." >> "$GITHUB_STEP_SUMMARY"
+            if [ -f reports/rls-report.json ]; then
+              echo "" >> "$GITHUB_STEP_SUMMARY"
+              node -e "const r=require('./reports/rls-report.json'); const t=r.totals; console.log('| Metric | Value |\n|---|---|\n| Total | '+t.total+' |\n| Passed | '+t.passed+' |\n| Failed | '+t.failed+' |\n| Skipped | '+t.skipped+' |');" >> "$GITHUB_STEP_SUMMARY"
+            fi
+            exit 0
+          fi
+          # Skip path: neither the local stack nor the remote fallback ran.
           if [ -n "${skip_reason:-}" ]; then
             echo "### Cross-Tenant RLS (Local) — Skipped" >> "$GITHUB_STEP_SUMMARY"
             echo "Reason: \`${skip_reason}\`" >> "$GITHUB_STEP_SUMMARY"
             echo "" >> "$GITHUB_STEP_SUMMARY"
             echo "This run did not exercise the live-mode RLS sweep. To unblock locally:" >> "$GITHUB_STEP_SUMMARY"
-            echo "1. Ensure Docker is available on the runner." >> "$GITHUB_STEP_SUMMARY"
-            echo "2. Re-run the workflow." >> "$GITHUB_STEP_SUMMARY"
+            echo "1. Ensure Docker is available on the runner, **or**" >> "$GITHUB_STEP_SUMMARY"
+            echo "2. Configure the remote-fallback secrets (\`VITE_SUPABASE_URL\`, \`VITE_SUPABASE_PUBLISHABLE_KEY\`, \`RLS_TEST_TENANT_{A,B}_{EMAIL,PASSWORD,ID}\`)." >> "$GITHUB_STEP_SUMMARY"
+            echo "3. Re-run the workflow." >> "$GITHUB_STEP_SUMMARY"
             echo "" >> "$GITHUB_STEP_SUMMARY"
             echo "📦 Container logs (if any) are uploaded as the \`supabase-container-logs\` artifact." >> "$GITHUB_STEP_SUMMARY"
             echo "🧾 Effective Supabase config + redacted env are uploaded as the \`supabase-config-snapshot-run-${GITHUB_RUN_ID}\` artifact." >> "$GITHUB_STEP_SUMMARY"
