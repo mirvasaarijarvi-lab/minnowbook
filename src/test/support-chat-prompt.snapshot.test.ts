@@ -207,7 +207,11 @@ describe("support-chat system prompt — snapshot lock", () => {
 
   it("locks the 'Recent additions' section", () => {
     const section = extractSection(prompt, "### Recent additions");
-    expect(section).toMatchSnapshot();
+    expectMatchesSnapshotWithDiff(
+      section,
+      "support-chat system prompt — snapshot lock > locks the 'Recent additions' section",
+      () => expect(section).toMatchSnapshot()
+    );
   });
 
   it("locks the Calendar Sync Q&A flow", () => {
