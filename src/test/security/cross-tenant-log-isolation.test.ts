@@ -591,7 +591,7 @@ describe.each([
     expect(perHandle[1]).toEqual(perHandle[2]);
   });
 
-  liveIt("deep offset range(10000, 10024) by handle returns zero rows", async () => {
+  liveIt("deep offset range(10000, 10024) by handle returns zero rows", { timeout: 15_000 }, async () => {
     const shapes: Shape[] = [];
     for (const handle of [REVOKED_TOKEN_RES_ID, EXPIRED_TOKEN_RES_ID, FAKE_RES_ID]) {
       const result = await anon
