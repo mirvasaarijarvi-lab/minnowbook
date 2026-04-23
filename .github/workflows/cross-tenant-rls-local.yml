@@ -38,7 +38,7 @@ jobs:
       # persists across runs, which is safe because lockfile changes
       # invalidate the key automatically.
       - name: Cache Bun dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.bun/install/cache
@@ -47,45 +47,72 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-bun-
 
+      # Pre-flight: confirm Docker is actually usable on this runner BEFORE
+      # invoking `supabase start`. When a hosted runner image lacks Docker
+      # (which has happened intermittently on GitHub-hosted ARM runners and
+      # on self-hosted minimal images), letting `supabase start` fail
+      # produces a noisy red `Process completed with exit code 1` annotation
+      # even when wrapped in `continue-on-error: true`. Detecting the
+      # missing daemon up front lets us skip the entire stack-start path
+      # cleanly with a notice instead.
+      - name: Detect Docker availability
+        id: docker-check
+        run: |
+          set +e
+          if ! command -v docker >/dev/null 2>&1; then
+            echo "::notice::docker CLI not present on this runner."
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if ! docker info >/dev/null 2>&1; then
+            echo "::notice::docker daemon not reachable on this runner."
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "Docker is available: $(docker --version)"
+          echo "available=true" >> "$GITHUB_OUTPUT"
+
+      - name: Skip if Docker unavailable
+        if: steps.docker-check.outputs.available != 'true'
+        run: |
+          echo "::notice::Docker unavailable on this runner — skipping local-stack RLS tests."
+          echo "skip_reason=docker-unavailable" >> "$GITHUB_ENV"
+
       - name: Setup Supabase CLI
         id: supabase-cli
+        if: steps.docker-check.outputs.available == 'true'
         # Pinned to a full commit SHA to mitigate supply-chain risk if the
-        # `v1` tag is moved/compromised. Update by replacing both the SHA
+        # `v2` tag is moved/compromised. Update by replacing both the SHA
         # and the trailing comment with a newer release from
         # https://github.com/supabase/setup-cli/releases.
-        uses: supabase/setup-cli@b60b5899c73b63a2d2d651b1e90db8d4c9392f51 # v1.6.0
+        uses: supabase/setup-cli@b579fc8c7122aa485f1d947120eaeb11ee04d312 # v2.0.0
         with:
           version: latest
         continue-on-error: true
 
       - name: Skip if Supabase CLI unavailable
-        if: steps.supabase-cli.outcome != 'success'
+        if: steps.docker-check.outputs.available == 'true' && steps.supabase-cli.outcome != 'success'
         run: |
           echo "::notice::Supabase CLI could not be installed on this runner — skipping local-stack RLS tests."
           echo "skip_reason=cli-unavailable" >> "$GITHUB_ENV"
-          exit 0
 
       - name: Install dependencies
-        if: steps.supabase-cli.outcome == 'success'
+        if: steps.docker-check.outputs.available == 'true' && steps.supabase-cli.outcome == 'success'
         run: bun install --frozen-lockfile
 
+      # `continue-on-error` is intentionally NOT set here. Docker availability
+      # is verified up-front by `docker-check`, so any failure at this point
+      # is a genuine bug (corrupt migration, port collision, image pull
+      # failure on the GitHub Container Registry, etc.) and should fail the
+      # job loudly rather than be silently swallowed.
       - name: Start local Supabase stack
         id: supabase-start
-        if: steps.supabase-cli.outcome == 'success'
+        if: steps.docker-check.outputs.available == 'true' && steps.supabase-cli.outcome == 'success'
         # `supabase start` boots Postgres, GoTrue, PostgREST, Storage, etc. in
         # Docker. Migrations from supabase/migrations/ are applied automatically.
         run: |
           set -euo pipefail
           supabase start --exclude=imgproxy,inbucket,studio,realtime,edge-runtime
-        continue-on-error: true
-
-      - name: Skip if local stack failed to start
-        if: steps.supabase-cli.outcome == 'success' && steps.supabase-start.outcome != 'success'
-        run: |
-          echo "::notice::Local Supabase stack failed to start (Docker/runner constraint) — skipping live-mode RLS tests."
-          echo "Inspect the previous step's logs for details. The remote-credentials workflow still covers this if configured."
-          echo "skip_reason=stack-start-failed" >> "$GITHUB_ENV"
-          exit 0
 
       - name: Capture local stack credentials
         if: steps.supabase-start.outcome == 'success'
@@ -544,7 +571,7 @@ jobs:
 
       - name: Upload RLS report (local)
         if: always() && steps.supabase-start.outcome == 'success'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           # `reports/` already contains the storage-attempts PDF + JSON
           # alongside the rls-report HTML/JSON, so a single upload covers
@@ -831,7 +858,7 @@ jobs:
 
       - name: Upload filtered Postgres logs (RLS failure)
         if: always() && steps.rls-tests.outcome == 'failure'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: rls-postgres-logs-run-${{ github.run_id }}
           path: rls-postgres-logs/
@@ -866,7 +893,7 @@ jobs:
 
       - name: Upload Supabase container logs
         if: always() && (job.status == 'failure' || steps.supabase-start.outcome != 'success')
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: supabase-container-logs
           path: supabase-logs/
@@ -964,7 +991,7 @@ jobs:
 
       - name: Upload Supabase config + env snapshot
         if: always() && (job.status == 'failure' || steps.supabase-start.outcome != 'success')
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           # Run-id-scoped name so multiple failed runs don't collide when
           # downloaded side-by-side for comparison.
