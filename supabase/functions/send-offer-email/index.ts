@@ -68,6 +68,32 @@ function safeFilenameOnly(value: string): string {
   return cleaned || "Offer.pdf";
 }
 
+/**
+ * Defence-in-depth: even though every component of the offer storage path
+ * is independently validated (UUIDs via {@link assertUuid}, the filename
+ * via {@link safeFilenameOnly}), assert the **fully-assembled** path is
+ * free of traversal sequences, absolute-path markers, NUL bytes, and
+ * backslashes before handing it to the Storage SDK. The Supabase SDK
+ * resolves paths internally, so a single regression in any component
+ * builder could otherwise reach the bucket. This guard is intentionally
+ * stricter than the per-segment sanitisers and throws on any anomaly.
+ */
+function assertSafeStoragePath(path: string): string {
+  if (
+    !path ||
+    path.length > 512 ||
+    path.startsWith("/") ||
+    path.includes("..") ||
+    path.includes("\\") ||
+    path.includes("\0") ||
+    path.includes("//") ||
+    /[^a-zA-Z0-9._\-/]/.test(path)
+  ) {
+    throw new Error("Refused to use unsafe storage path");
+  }
+  return path;
+}
+
 function decodeBase64(base64: string) {
   const binary = atob(base64);
   const bytes = new Uint8Array(binary.length);
@@ -195,7 +221,14 @@ Deno.serve(async (req) => {
       const safeFilename = safeFilenameOnly(pdfFilename || "Offer.pdf");
       const safeTenantId = assertUuid(tenantUser.tenant_id, "tenant id");
       const safeUserId = assertUuid(user.id, "user id");
-      const filePath = `${safeTenantId}/offers/${safeUserId}/${Date.now()}-${safeFilename}`;
+      // Path components are individually validated above; the final path is
+      // also asserted via assertSafeStoragePath() to defend against any
+      // future regression in component builders. Supabase Storage resolves
+      // paths internally, so we never let user input flow into a path
+      // without this guard.
+      const filePath = assertSafeStoragePath(
+        `${safeTenantId}/offers/${safeUserId}/${Date.now()}-${safeFilename}`
+      );
       const pdfBytes = decodeBase64(pdfBase64);
 
       const { error: uploadError } = await supabaseAdmin.storage
