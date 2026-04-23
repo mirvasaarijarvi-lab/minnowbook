@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
+import { unifiedDiff } from "./utils/unified-diff";
 
 const source = readFileSync(
   resolve(__dirname, "../../supabase/functions/support-chat/index.ts"),
