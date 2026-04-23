@@ -1,39 +1,21 @@
 import { describe, it, expect } from "vitest";
 import { translations } from "@/i18n/translations";
-import { SUPPORT_CHAT_SYSTEM_PROMPT } from "../../supabase/functions/support-chat/prompt";
-
-// Read the prompt directly from the edge function module — same string the
-// runtime serves to the AI gateway.
-const source = SUPPORT_CHAT_SYSTEM_PROMPT;
+import {
+  prompt,
+  extractSection,
+  extractBoldBulletLabels,
+} from "./utils/prompt-sections";
 
 /**
- * Extract the "Recent additions" bullet list from the system prompt and return
- * the bold feature label of each bullet (e.g. "Guest Portal").
- *
- * The prompt format is:
- *   ### Recent additions (always mention if relevant)
- *   - **Guest Portal**: ...
- *   - **Waitlist**: ...
- *   ...
+ * Extract the "Recent additions" bullet list and return the bold feature
+ * label of each top-level bullet (e.g. "Guest Portal"). Uses the shared
+ * `extractSection` helper with `"### "` so the `#### Calendar Sync` child
+ * subsection is included in the slice (its sub-bullets are filtered out
+ * by `extractBoldBulletLabels` which only matches non-indented bullets).
  */
 function extractRecentAdditionFeatures(src: string): string[] {
-  const start = src.indexOf("### Recent additions");
-  if (start === -1) throw new Error("'### Recent additions' header not found");
-  // Bound the section by the next top-level `### ` header (not `#### `, since
-  // the Calendar Sync Q&A subsection lives inside this section) or the closing
-  // "Keep answers concise" paragraph.
-  const rest = src.slice(start);
-  const endRel = rest.search(/\n### |\nKeep answers concise/);
-  const section = endRel === -1 ? rest : rest.slice(0, endRel);
-
-  const labels: string[] = [];
-  for (const line of section.split("\n")) {
-    // Match top-level bullets only: "- **Label**:" (no indent — sub-bullets
-    // inside the Q&A flow are indented with spaces).
-    const m = /^- \*\*([^*]+)\*\*\s*:/.exec(line);
-    if (m) labels.push(m[1].trim());
-  }
-  return labels;
+  const section = extractSection(src, "### Recent additions", "### ");
+  return extractBoldBulletLabels(section);
 }
 
 /**
@@ -67,7 +49,7 @@ const RECENT_FEATURES: Array<{ name: string; keywords: RegExp }> = [
 ];
 
 describe("'Recent additions' prompt section ↔ dashboard UI parity", () => {
-  const promptFeatures = extractRecentAdditionFeatures(source);
+  const promptFeatures = extractRecentAdditionFeatures(prompt);
   const uiCopy = [
     translations.en["help.art10Title"],
     translations.en["help.art10Desc"],

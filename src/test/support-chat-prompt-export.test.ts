@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { SUPPORT_CHAT_SYSTEM_PROMPT } from "../../supabase/functions/support-chat/prompt";
+import { SUPPORT_CHAT_SYSTEM_PROMPT } from "./utils/prompt-sections";
 
 /**
  * This suite imports the system prompt as a runtime export from the edge

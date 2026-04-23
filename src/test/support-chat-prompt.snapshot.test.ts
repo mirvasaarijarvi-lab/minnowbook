@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { readFileSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { unifiedDiff } from "./utils/unified-diff";
-import { SUPPORT_CHAT_SYSTEM_PROMPT } from "../../supabase/functions/support-chat/prompt";
+import { prompt, extractSection } from "./utils/prompt-sections";
 
 const SNAPSHOT_FILE = resolve(
   __dirname,
@@ -74,20 +74,7 @@ function expectMatchesSnapshotWithDiff(
   }
 }
 
-function extractSection(prompt: string, header: string, nextHeaderPrefix = "###"): string {
-  const start = prompt.indexOf(header);
-  if (start === -1) throw new Error(`Section not found: ${header}`);
-  // Find the next section header after this one to bound the slice.
-  const after = prompt.indexOf(`\n${nextHeaderPrefix} `, start + header.length);
-  const end = after === -1 ? prompt.length : after;
-  return prompt.slice(start, end).trimEnd();
-}
-
 describe("support-chat system prompt — snapshot lock", () => {
-  // Imported directly from the edge function module — same string the runtime
-  // serves to the AI gateway. No source-file extraction.
-  const prompt = SUPPORT_CHAT_SYSTEM_PROMPT;
-
   it("locks the full system prompt", () => {
     expect(prompt).toMatchSnapshot();
   });
@@ -102,11 +89,7 @@ describe("support-chat system prompt — snapshot lock", () => {
   });
 
   it("locks the Calendar Sync Q&A flow", () => {
-    const section = extractSection(
-      prompt,
-      "#### Calendar Sync — Q&A flow",
-      "###" // next "###"-prefixed header (covers both ### and ####)
-    );
+    const section = extractSection(prompt, "#### Calendar Sync — Q&A flow");
     expect(section).toMatchSnapshot();
   });
 });
