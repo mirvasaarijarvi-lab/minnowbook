@@ -17,11 +17,25 @@ function extractSystemPrompt(src: string): string {
   if (sysIdx === -1) throw new Error('Could not find role: "system" marker');
   const contentIdx = src.indexOf("content:", sysIdx);
   if (contentIdx === -1) throw new Error("Could not find content: after system role");
-  const tickStart = src.indexOf("`", contentIdx);
-  if (tickStart === -1) throw new Error("Could not find opening backtick of system prompt");
-  const tickEnd = src.indexOf("`", tickStart + 1);
-  if (tickEnd === -1) throw new Error("Could not find closing backtick of system prompt");
-  return src.slice(tickStart + 1, tickEnd);
+  // Walk character-by-character so we skip escaped backticks (\`) inside the literal.
+  let i = src.indexOf("`", contentIdx);
+  if (i === -1) throw new Error("Could not find opening backtick of system prompt");
+  const tickStart = i;
+  i++;
+  while (i < src.length) {
+    const ch = src[i];
+    if (ch === "\\" && src[i + 1] === "`") {
+      i += 2;
+      continue;
+    }
+    if (ch === "`") {
+      const raw = src.slice(tickStart + 1, i);
+      // Unescape \` → ` so the snapshot reflects the runtime string.
+      return raw.replace(/\\`/g, "`");
+    }
+    i++;
+  }
+  throw new Error("Could not find closing backtick of system prompt");
 }
 
 function extractSection(prompt: string, header: string, nextHeaderPrefix = "###"): string {
