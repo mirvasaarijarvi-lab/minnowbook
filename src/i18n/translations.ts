@@ -1145,6 +1145,12 @@ type TranslationKeys = {
   "help.art9C2": string;
   "help.art9C3": string;
   "help.art9C4": string;
+  "help.art10Title": string;
+  "help.art10Desc": string;
+  "help.art10C1": string;
+  "help.art10C2": string;
+  "help.art10C3": string;
+  "help.art10C4": string;
   "help.guide1Q": string;
   "help.guide1A": string;
   "help.guide2Q": string;
@@ -1155,6 +1161,8 @@ type TranslationKeys = {
   "help.guide4A": string;
   "help.guide5Q": string;
   "help.guide5A": string;
+  "help.guide6Q": string;
+  "help.guide6A": string;
 
   "aid.title": string;
   "aid.subtitle": string;
@@ -2657,6 +2665,12 @@ const en: TranslationKeys = {
   "help.art9C2": "Q: Can I use my own domain? A: Custom domains are on our roadmap.",
   "help.art9C3": "Q: How do guests receive confirmations? A: Automatically via email when you confirm a booking.",
   "help.art9C4": "Q: Can I export my data? A: Yes, reports can be exported from the Reports panel.",
+  "help.art10Title": "What's New",
+  "help.art10Desc": "Recent features: Guest Portal, Waitlist, Calendar Sync, exports and more.",
+  "help.art10C1": "Guest Portal: guests can view or cancel their booking via a magic link (/my-booking/:token) — no login required.",
+  "help.art10C2": "Waitlist: when a slot is full, guests can join a waitlist and get notified automatically when it opens.",
+  "help.art10C3": "Google Calendar sync: subscribe to your reservations via the iCal feed (Settings → Calendar Sync). CSV/PDF export from Reservations and Reports.",
+  "help.art10C4": "Dashboard upgrades: dark mode toggle, keyboard shortcuts (press ?), Quick Actions FAB on mobile, onboarding checklist, audit-log filters, and analytics charts.",
   "help.guide1Q": "How do I manage reservations?",
   "help.guide1A": "Go to your **Dashboard → Reservations** to view, filter, edit, and manage all bookings. You can confirm or cancel reservations from the action menu on each card.",
   "help.guide2Q": "How do I customize my booking page?",
@@ -2667,6 +2681,8 @@ const en: TranslationKeys = {
   "help.guide4A": "Go to **Admin → Users** to invite new staff. You can set roles (Owner, Admin, Staff) and approve or remove team members.",
   "help.guide5Q": "How do I add or edit resources?",
   "help.guide5A": "Go to **Dashboard → Resources** to create rooms, tables, or venues. You can set capacity, pricing, upload up to 5 images, and toggle active/inactive status.",
+  "help.guide6Q": "What's new in MimmoBook?",
+  "help.guide6A": "Recent additions: **Guest Portal** (magic-link booking management), **Waitlist** with auto-notify, **Google Calendar sync** via iCal feed, **CSV/PDF export**, **dark mode**, **keyboard shortcuts** (press `?`), **Quick Actions FAB** on mobile, **onboarding checklist**, **audit-log filters**, **analytics charts**, **public reviews/testimonials**, and a **Stripe revenue dashboard** for superadmins.",
 
   // MimmoAid
   "aid.title": "MimmoAid",
@@ -4289,6 +4305,12 @@ const fi: TranslationKeys = {
   "help.art9C2": "K: Voinko käyttää omaa verkkotunnusta? V: Omat verkkotunnukset ovat suunnitelmissa.",
   "help.art9C3": "K: Miten vieraat saavat vahvistuksen? V: Automaattisesti sähköpostitse vahvistuksen yhteydessä.",
   "help.art9C4": "K: Voinko viedä tietoni? V: Kyllä, raportit voidaan viedä Raportit-paneelista.",
+  "help.art10Title": "Mitä uutta",
+  "help.art10Desc": "Uusimmat ominaisuudet: vierasportaali, jonotuslista, kalenterisynkronointi, vienti ja muuta.",
+  "help.art10C1": "Vierasportaali: vieraat voivat katsoa tai peruuttaa varauksensa maagisella linkillä (/my-booking/:token) — kirjautumista ei tarvita.",
+  "help.art10C2": "Jonotuslista: kun vuoro on täynnä, vieraat voivat liittyä jonoon ja saavat automaattisen ilmoituksen, kun paikka vapautuu.",
+  "help.art10C3": "Google-kalenterisynkronointi: tilaa varauksesi iCal-syötteellä (Asetukset → Kalenterisynkronointi). CSV/PDF-vienti Varauksista ja Raporteista.",
+  "help.art10C4": "Hallintapaneelin parannukset: tumma teema, pikanäppäimet (paina ?), pikatoimintojen FAB mobiilissa, käyttöönoton tarkistuslista, audit-lokin suodattimet ja analytiikkakaaviot.",
   "help.guide1Q": "Miten hallitsen varauksia?",
   "help.guide1A": "Siirry kohtaan **Hallintapaneeli → Varaukset** selataksesi, suodattaaksesi, muokataksesi ja hallinnoitsesi kaikkia varauksia.",
   "help.guide2Q": "Miten mukautan varaussivua?",
@@ -4299,6 +4321,8 @@ const fi: TranslationKeys = {
   "help.guide4A": "Siirry kohtaan **Hallinta → Käyttäjät** kutsuaksesi uutta henkilöstöä. Voit asettaa rooleja ja hyväksyä tai poistaa jäseniä.",
   "help.guide5Q": "Miten lisään tai muokkaan resursseja?",
   "help.guide5A": "Siirry kohtaan **Hallintapaneeli → Resurssit** luodaksesi huoneita, pöytiä tai tiloja.",
+  "help.guide6Q": "Mitä uutta MimmoBookissa?",
+  "help.guide6A": "Viimeisimmät lisäykset: **Vierasportaali** (varauksen hallinta maagisella linkillä), **jonotuslista** automaattisilla ilmoituksilla, **Google-kalenterisynkronointi** iCal-syötteellä, **CSV/PDF-vienti**, **tumma teema**, **pikanäppäimet** (paina `?`), **pikatoimintojen FAB** mobiilissa, **käyttöönoton tarkistuslista**, **audit-lokin suodattimet**, **analytiikkakaaviot**, **julkiset arvostelut/suosittelut** ja **Stripe-tulospaneeli** pääkäyttäjille.",
 
   // MimmoAid
   "aid.title": "MimmoAid",
@@ -5920,6 +5944,12 @@ const sv: TranslationKeys = {
   "help.art9C2": "F: Kan jag använda min egen domän? S: Egna domäner finns på vår roadmap.",
   "help.art9C3": "F: Hur får gäster bekräftelser? S: Automatiskt via mejl när du bekräftar en bokning.",
   "help.art9C4": "F: Kan jag exportera mina data? S: Ja, rapporter kan exporteras från Rapporter-panelen.",
+  "help.art10Title": "Nyheter",
+  "help.art10Desc": "Senaste funktionerna: gästportal, väntelista, kalendersynk, export och mer.",
+  "help.art10C1": "Gästportal: gäster kan visa eller avboka sin bokning via en magisk länk (/my-booking/:token) — ingen inloggning krävs.",
+  "help.art10C2": "Väntelista: när en tid är fullbokad kan gäster gå med i en väntelista och meddelas automatiskt när en plats blir ledig.",
+  "help.art10C3": "Google Kalender-synk: prenumerera på dina bokningar via iCal-flödet (Inställningar → Kalendersynk). CSV/PDF-export från Bokningar och Rapporter.",
+  "help.art10C4": "Förbättringar i instrumentpanelen: mörkt läge, kortkommandon (tryck ?), Snabbåtgärds-FAB på mobil, introduktionscheckslista, granskningsloggfilter och analysdiagram.",
   "help.guide1Q": "Hur hanterar jag bokningar?",
   "help.guide1A": "Gå till **Instrumentpanel → Bokningar** för att visa, filtrera, redigera och hantera alla bokningar.",
   "help.guide2Q": "Hur anpassar jag min bokningssida?",
@@ -5930,6 +5960,8 @@ const sv: TranslationKeys = {
   "help.guide4A": "Gå till **Admin → Användare** för att bjuda in ny personal. Du kan ange roller och godkänna eller ta bort medlemmar.",
   "help.guide5Q": "Hur lägger jag till eller redigerar resurser?",
   "help.guide5A": "Gå till **Instrumentpanel → Resurser** för att skapa rum, bord eller lokaler.",
+  "help.guide6Q": "Vad är nytt i MimmoBook?",
+  "help.guide6A": "Senaste tilläggen: **Gästportal** (bokningshantering via magisk länk), **väntelista** med automatiska aviseringar, **Google Kalender-synk** via iCal-flöde, **CSV/PDF-export**, **mörkt läge**, **kortkommandon** (tryck `?`), **Snabbåtgärds-FAB** på mobil, **introduktionscheckslista**, **granskningsloggfilter**, **analysdiagram**, **publika omdömen/recensioner** och en **Stripe-intäktspanel** för superadmins.",
 
   // MimmoAid
   "aid.title": "MimmoAid",
