@@ -1,12 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
 import { translations } from "@/i18n/translations";
+import { SUPPORT_CHAT_SYSTEM_PROMPT } from "../../supabase/functions/support-chat/prompt";
 
-const promptSource = readFileSync(
-  resolve(__dirname, "../../supabase/functions/support-chat/index.ts"),
-  "utf8"
-);
+// Imported from the edge function module export rather than re-read from the
+// source file — what we test is what the runtime ships.
+const promptSource = SUPPORT_CHAT_SYSTEM_PROMPT;
 
 describe("support chat — system prompt content", () => {
   it("includes the 'Recent additions' section header", () => {
