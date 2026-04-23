@@ -1097,13 +1097,31 @@ jobs:
       - name: Summary
         if: always()
         run: |
+          # Fallback path: docker was unavailable but the remote sweep ran.
+          if [ -n "${fallback_ran:-}" ]; then
+            echo "### Cross-Tenant RLS (Local) — Ran via Remote Fallback" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "Docker was not available on this runner, so the live-mode RLS sweep was executed against the **remote** staging backend instead of a local Supabase stack." >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "- Fallback target: \`remote\`" >> "$GITHUB_STEP_SUMMARY"
+            echo "- Fallback outcome: \`${fallback_outcome:-unknown}\`" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "📦 Report uploaded as the \`rls-report-remote-fallback\` artifact." >> "$GITHUB_STEP_SUMMARY"
+            if [ -f reports/rls-report.json ]; then
+              echo "" >> "$GITHUB_STEP_SUMMARY"
+              node -e "const r=require('./reports/rls-report.json'); const t=r.totals; console.log('| Metric | Value |\n|---|---|\n| Total | '+t.total+' |\n| Passed | '+t.passed+' |\n| Failed | '+t.failed+' |\n| Skipped | '+t.skipped+' |');" >> "$GITHUB_STEP_SUMMARY"
+            fi
+            exit 0
+          fi
+          # Skip path: neither the local stack nor the remote fallback ran.
           if [ -n "${skip_reason:-}" ]; then
             echo "### Cross-Tenant RLS (Local) — Skipped" >> "$GITHUB_STEP_SUMMARY"
             echo "Reason: \`${skip_reason}\`" >> "$GITHUB_STEP_SUMMARY"
             echo "" >> "$GITHUB_STEP_SUMMARY"
             echo "This run did not exercise the live-mode RLS sweep. To unblock locally:" >> "$GITHUB_STEP_SUMMARY"
-            echo "1. Ensure Docker is available on the runner." >> "$GITHUB_STEP_SUMMARY"
-            echo "2. Re-run the workflow." >> "$GITHUB_STEP_SUMMARY"
+            echo "1. Ensure Docker is available on the runner, **or**" >> "$GITHUB_STEP_SUMMARY"
+            echo "2. Configure the remote-fallback secrets (\`VITE_SUPABASE_URL\`, \`VITE_SUPABASE_PUBLISHABLE_KEY\`, \`RLS_TEST_TENANT_{A,B}_{EMAIL,PASSWORD,ID}\`)." >> "$GITHUB_STEP_SUMMARY"
+            echo "3. Re-run the workflow." >> "$GITHUB_STEP_SUMMARY"
             echo "" >> "$GITHUB_STEP_SUMMARY"
             echo "📦 Container logs (if any) are uploaded as the \`supabase-container-logs\` artifact." >> "$GITHUB_STEP_SUMMARY"
             echo "🧾 Effective Supabase config + redacted env are uploaded as the \`supabase-config-snapshot-run-${GITHUB_RUN_ID}\` artifact." >> "$GITHUB_STEP_SUMMARY"
