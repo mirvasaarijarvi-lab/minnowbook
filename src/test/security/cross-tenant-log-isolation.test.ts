@@ -565,7 +565,7 @@ describe.each([
     expect(shapes[1]).toEqual(shapes[2]);
   });
 
-  liveIt("sequential pages 0-9, 10-19, 20-29 by handle leak no row + identical shapes", async () => {
+  liveIt("sequential pages 0-9, 10-19, 20-29 by handle leak no row + identical shapes", { timeout: 30_000 }, async () => {
     const PAGE_SIZE = 10;
     const PAGES = 3;
     const perHandle: Shape[][] = [];
@@ -591,7 +591,7 @@ describe.each([
     expect(perHandle[1]).toEqual(perHandle[2]);
   });
 
-  liveIt("deep offset range(10000, 10024) by handle returns zero rows", async () => {
+  liveIt("deep offset range(10000, 10024) by handle returns zero rows", { timeout: 15_000 }, async () => {
     const shapes: Shape[] = [];
     for (const handle of [REVOKED_TOKEN_RES_ID, EXPIRED_TOKEN_RES_ID, FAKE_RES_ID]) {
       const result = await anon
