@@ -21,14 +21,17 @@ const source = readFileSync(
 function extractRecentAdditionFeatures(src: string): string[] {
   const start = src.indexOf("### Recent additions");
   if (start === -1) throw new Error("'### Recent additions' header not found");
-  // Bound the section by the next ###/#### header or a closing instruction line.
+  // Bound the section by the next top-level `### ` header (not `#### `, since
+  // the Calendar Sync Q&A subsection lives inside this section) or the closing
+  // "Keep answers concise" paragraph.
   const rest = src.slice(start);
-  const endRel = rest.search(/\n(?:#{3,4} |Keep answers concise)/);
+  const endRel = rest.search(/\n### |\nKeep answers concise/);
   const section = endRel === -1 ? rest : rest.slice(0, endRel);
 
   const labels: string[] = [];
   for (const line of section.split("\n")) {
-    // Match top-level bullets only: "- **Label**:"
+    // Match top-level bullets only: "- **Label**:" (no indent — sub-bullets
+    // inside the Q&A flow are indented with spaces).
     const m = /^- \*\*([^*]+)\*\*\s*:/.exec(line);
     if (m) labels.push(m[1].trim());
   }
