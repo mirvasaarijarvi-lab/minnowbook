@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { SUPPORT_CHAT_SYSTEM_PROMPT } from "../../supabase/functions/support-chat/prompt";
+import { prompt, extractSection } from "./utils/prompt-sections";
 
 /**
  * Behavioural assertions for the Calendar Sync Q&A flow in the support-chat
@@ -9,19 +9,10 @@ import { SUPPORT_CHAT_SYSTEM_PROMPT } from "../../supabase/functions/support-cha
  * with a readable, intent-revealing error message.
  */
 
-const prompt = SUPPORT_CHAT_SYSTEM_PROMPT;
-
-function sliceCalendarSection(): string {
-  const start = prompt.indexOf("#### Calendar Sync — Q&A flow");
-  expect(start, "Calendar Sync Q&A header must exist").toBeGreaterThan(-1);
-  // Bound the slice at the next "- **" bullet that comes after the section
-  // (the "CSV/PDF export" recent-additions bullet).
-  const after = prompt.indexOf("\n- **CSV/PDF export", start);
-  return prompt.slice(start, after === -1 ? prompt.length : after);
-}
-
 describe("support-chat — Calendar Sync Q&A flow", () => {
-  const section = sliceCalendarSection();
+  // `extractSection` with the default `"###"` bound stops at the next
+  // `### ` or `#### ` header — exactly the Q&A subsection.
+  const section = extractSection(prompt, "#### Calendar Sync — Q&A flow");
 
   it("instructs the assistant to ask iCal vs Google before answering", () => {
     expect(section).toContain("Always ask first");
