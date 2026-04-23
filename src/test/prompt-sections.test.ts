@@ -18,14 +18,26 @@ describe("prompt-sections helper", () => {
       expect(section).not.toContain("Keep answers concise");
     });
 
-    it("with default bound, stops at the next ### or #### header", () => {
+    it("with default bound, stops before the closing paragraph", () => {
       const section = extractSection(prompt, "#### Calendar Sync — Q&A flow");
-      // The Q&A subsection contains numbered steps but should NOT spill into
-      // the next top-level "### " header or sibling "#### " header.
       expect(section).toContain("Calendar Sync — Q&A flow");
-      // The subsequent recent-additions bullet (CSV/PDF export) lives back
-      // at top level and must not be included.
-      expect(section).not.toContain("CSV/PDF export");
+      // No top-level `### ` header follows the Q&A subsection, so the slice
+      // runs to the "Keep answers concise" closing paragraph, which
+      // `extractSection` trims.
+      expect(section).not.toContain("Keep answers concise");
+    });
+
+    it("bounded by `####` stops at the next #### sibling", () => {
+      // Fixture so this doesn't depend on the prompt ever having two ####s.
+      const fixture = [
+        "#### One",
+        "alpha line",
+        "#### Two",
+        "beta line",
+      ].join("\n");
+      const section = extractSection(fixture, "#### One", "####");
+      expect(section).toContain("alpha line");
+      expect(section).not.toContain("beta line");
     });
 
     it("throws a readable error when the header is missing", () => {
