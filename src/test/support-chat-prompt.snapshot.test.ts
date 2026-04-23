@@ -2,11 +2,7 @@ import { describe, it, expect } from "vitest";
 import { readFileSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { unifiedDiff } from "./utils/unified-diff";
-
-const source = readFileSync(
-  resolve(__dirname, "../../supabase/functions/support-chat/index.ts"),
-  "utf8"
-);
+import { SUPPORT_CHAT_SYSTEM_PROMPT } from "../../supabase/functions/support-chat/prompt";
 
 const SNAPSHOT_FILE = resolve(
   __dirname,
@@ -78,37 +74,6 @@ function expectMatchesSnapshotWithDiff(
   }
 }
 
-/**
- * Extract the system prompt string by locating the `content: \`...\`` template
- * literal that follows `role: "system"`. Backticks inside the template (none
- * expected today) would need escaping in source; we keep extraction strict.
- */
-function extractSystemPrompt(src: string): string {
-  const sysIdx = src.indexOf('role: "system"');
-  if (sysIdx === -1) throw new Error('Could not find role: "system" marker');
-  const contentIdx = src.indexOf("content:", sysIdx);
-  if (contentIdx === -1) throw new Error("Could not find content: after system role");
-  // Walk character-by-character so we skip escaped backticks (\`) inside the literal.
-  let i = src.indexOf("`", contentIdx);
-  if (i === -1) throw new Error("Could not find opening backtick of system prompt");
-  const tickStart = i;
-  i++;
-  while (i < src.length) {
-    const ch = src[i];
-    if (ch === "\\" && src[i + 1] === "`") {
-      i += 2;
-      continue;
-    }
-    if (ch === "`") {
-      const raw = src.slice(tickStart + 1, i);
-      // Unescape \` → ` so the snapshot reflects the runtime string.
-      return raw.replace(/\\`/g, "`");
-    }
-    i++;
-  }
-  throw new Error("Could not find closing backtick of system prompt");
-}
-
 function extractSection(prompt: string, header: string, nextHeaderPrefix = "###"): string {
   const start = prompt.indexOf(header);
   if (start === -1) throw new Error(`Section not found: ${header}`);
@@ -119,7 +84,9 @@ function extractSection(prompt: string, header: string, nextHeaderPrefix = "###"
 }
 
 describe("support-chat system prompt — snapshot lock", () => {
-  const prompt = extractSystemPrompt(source);
+  // Imported directly from the edge function module — same string the runtime
+  // serves to the AI gateway. No source-file extraction.
+  const prompt = SUPPORT_CHAT_SYSTEM_PROMPT;
 
   it("locks the full system prompt", () => {
     expect(prompt).toMatchSnapshot();

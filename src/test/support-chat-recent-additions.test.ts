@@ -1,12 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
 import { translations } from "@/i18n/translations";
+import { SUPPORT_CHAT_SYSTEM_PROMPT } from "../../supabase/functions/support-chat/prompt";
 
-const source = readFileSync(
-  resolve(__dirname, "../../supabase/functions/support-chat/index.ts"),
-  "utf8"
-);
+// Read the prompt directly from the edge function module — same string the
+// runtime serves to the AI gateway.
+const source = SUPPORT_CHAT_SYSTEM_PROMPT;
 
 /**
  * Extract the "Recent additions" bullet list from the system prompt and return
