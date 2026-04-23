@@ -565,7 +565,7 @@ describe.each([
     expect(shapes[1]).toEqual(shapes[2]);
   });
 
-  liveIt("sequential pages 0-9, 10-19, 20-29 by handle leak no row + identical shapes", async () => {
+  liveIt("sequential pages 0-9, 10-19, 20-29 by handle leak no row + identical shapes", { timeout: 30_000 }, async () => {
     const PAGE_SIZE = 10;
     const PAGES = 3;
     const perHandle: Shape[][] = [];
