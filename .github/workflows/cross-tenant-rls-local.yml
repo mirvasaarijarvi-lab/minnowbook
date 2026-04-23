@@ -571,7 +571,7 @@ jobs:
 
       - name: Upload RLS report (local)
         if: always() && steps.supabase-start.outcome == 'success'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           # `reports/` already contains the storage-attempts PDF + JSON
           # alongside the rls-report HTML/JSON, so a single upload covers
@@ -858,7 +858,7 @@ jobs:
 
       - name: Upload filtered Postgres logs (RLS failure)
         if: always() && steps.rls-tests.outcome == 'failure'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: rls-postgres-logs-run-${{ github.run_id }}
           path: rls-postgres-logs/
@@ -893,7 +893,7 @@ jobs:
 
       - name: Upload Supabase container logs
         if: always() && (job.status == 'failure' || steps.supabase-start.outcome != 'success')
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: supabase-container-logs
           path: supabase-logs/
@@ -991,7 +991,7 @@ jobs:
 
       - name: Upload Supabase config + env snapshot
         if: always() && (job.status == 'failure' || steps.supabase-start.outcome != 'success')
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           # Run-id-scoped name so multiple failed runs don't collide when
           # downloaded side-by-side for comparison.
