@@ -25,5 +25,12 @@ jobs:
       - name: Type-check
         run: bunx tsc --noEmit
 
+      - name: Unit tests (Vitest)
+        # Includes the support-chat system prompt snapshot lock
+        # (src/test/support-chat-prompt.snapshot.test.ts) and its
+        # sibling export/diff tests. Pure Node + jsdom — no network
+        # or Supabase env vars required.
+        run: bun run test
+
       - name: Build
         run: bunx vite build
