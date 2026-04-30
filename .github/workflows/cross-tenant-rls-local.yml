@@ -197,19 +197,45 @@ jobs:
       # any seed migration. This file is generated at runtime and never
       # committed; it has zero effect on environments where the tenant
       # already exists (ON CONFLICT DO NOTHING).
+      # The placeholder must run AFTER `public.tenants` is created
+      # (migration 20260224082114) but BEFORE the first seed migration
+      # that references this tenant id (20260224104504). We pick a
+      # timestamp one second after the table-creation migration so it
+      # sorts correctly between the two. The tenants table also requires
+      # a non-null owner_user_id referencing auth.users, so we create a
+      # placeholder auth user via a DO block (auth schema exists at this
+      # point because gotrue migrations run during `supabase start`
+      # initialisation, before our public migrations).
       - name: Inject placeholder tenant for local-only seed data
         if: steps.docker-check.outputs.available == 'true' && steps.supabase-cli.outcome == 'success'
         run: |
           set -euo pipefail
-          cat > supabase/migrations/00000000000000_ci_placeholder_tenant.sql <<'SQL'
-          INSERT INTO public.tenants (id, name, slug, tier, is_active, subscription_status)
+          cat > supabase/migrations/20260224082115_ci_placeholder_tenant.sql <<'SQL'
+          -- CI-only placeholder. Creates a synthetic auth user + tenant
+          -- so historical seed migrations (which hardcode a production
+          -- tenant id) can satisfy their FK constraints in an empty
+          -- local stack. No-op when the rows already exist.
+          INSERT INTO auth.users (id, instance_id, aud, role, email, encrypted_password, email_confirmed_at, created_at, updated_at)
+          VALUES (
+            '00000000-0000-0000-0000-0000000000ci',
+            '00000000-0000-0000-0000-000000000000',
+            'authenticated',
+            'authenticated',
+            'ci-placeholder@example.invalid',
+            crypt('ci-placeholder-password', gen_salt('bf')),
+            now(), now(), now()
+          )
+          ON CONFLICT (id) DO NOTHING;
+
+          INSERT INTO public.tenants (id, name, slug, tier, is_active, subscription_status, owner_user_id)
           VALUES (
             '9ac05fbf-0834-44fd-a52a-d030b7074a30',
             'CI Placeholder Tenant',
             'ci-placeholder-tenant',
             'business',
             true,
-            'active'
+            'active',
+            '00000000-0000-0000-0000-0000000000ci'
           )
           ON CONFLICT (id) DO NOTHING;
           SQL
