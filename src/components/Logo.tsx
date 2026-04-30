@@ -33,7 +33,7 @@ const Logo = ({ variant = "color", size = "md", showText = true, className = "" 
       <img
         src={logoSrc[variant]}
         alt="MimmoBook logo"
-        className={`${sizeClasses[size]} rounded-lg object-contain`}
+        className={`${sizeClasses[size]} object-contain`}
       />
       {showText && (
         <span className={`${textSizeClasses[size]} font-serif font-semibold`}>
