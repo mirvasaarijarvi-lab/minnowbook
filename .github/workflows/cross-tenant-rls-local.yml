@@ -190,6 +190,30 @@ jobs:
         if: steps.docker-check.outputs.available == 'true' && steps.supabase-cli.outcome == 'success'
         run: bun install --frozen-lockfile
 
+      # Several historical migrations contain hardcoded seed data tied to a
+      # production tenant UUID. On a fresh local stack that tenant doesn't
+      # exist, so the FK-bearing INSERTs fail. Pre-create a placeholder
+      # tenant row via a CI-only migration with a timestamp earlier than
+      # any seed migration. This file is generated at runtime and never
+      # committed; it has zero effect on environments where the tenant
+      # already exists (ON CONFLICT DO NOTHING).
+      - name: Inject placeholder tenant for local-only seed data
+        if: steps.docker-check.outputs.available == 'true' && steps.supabase-cli.outcome == 'success'
+        run: |
+          set -euo pipefail
+          cat > supabase/migrations/00000000000000_ci_placeholder_tenant.sql <<'SQL'
+          INSERT INTO public.tenants (id, name, slug, tier, is_active, subscription_status)
+          VALUES (
+            '9ac05fbf-0834-44fd-a52a-d030b7074a30',
+            'CI Placeholder Tenant',
+            'ci-placeholder-tenant',
+            'business',
+            true,
+            'active'
+          )
+          ON CONFLICT (id) DO NOTHING;
+          SQL
+
       # `continue-on-error` is intentionally NOT set here. Docker availability
       # is verified up-front by `docker-check`, so any failure at this point
       # is a genuine bug (corrupt migration, port collision, image pull
