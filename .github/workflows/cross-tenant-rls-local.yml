@@ -235,7 +235,7 @@ jobs:
             'business',
             true,
             'active',
-            '00000000-0000-0000-0000-0000000000ci'
+            '00000000-0000-0000-0000-0000000000c1'
           )
           ON CONFLICT (id) DO NOTHING;
           SQL
