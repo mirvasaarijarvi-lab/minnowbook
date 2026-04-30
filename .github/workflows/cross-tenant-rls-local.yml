@@ -202,7 +202,7 @@ jobs:
         # Docker. Migrations from supabase/migrations/ are applied automatically.
         run: |
           set -euo pipefail
-          supabase start --exclude=imgproxy,inbucket,studio,realtime,edge-runtime
+          supabase start --exclude=imgproxy,mailpit,studio,realtime,edge-runtime
 
       - name: Capture local stack credentials
         if: steps.supabase-start.outcome == 'success'
