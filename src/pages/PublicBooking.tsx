@@ -1257,7 +1257,7 @@ const PublicBookingInner = () => {
           )}
 
           {/* Step 1: Type Selection */}
-          {allowedTypes.length > 0 && (
+          {typeTiles.length > 0 && (
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg font-serif" style={{ color: primaryColor }}>
@@ -1266,20 +1266,34 @@ const PublicBookingInner = () => {
               </CardHeader>
               <CardContent>
                 <div className="grid gap-4 sm:grid-cols-3">
-                  {allowedTypes.map((type) => {
-                    const Icon = typeIcons[type] ?? Building2;
-                    const isSelected = form.reservation_type === type;
-                    const descKey = typeDescKeys[type] ?? "";
+                  {typeTiles.map((tile) => {
+                    const isCustom = tile.kind === "custom";
+                    const Icon = isCustom ? Sparkles : (typeIcons[tile.type] ?? Building2);
+                    const isSelected = isCustom
+                      ? form.reservation_type === "custom" && form.resource_id === tile.resourceId
+                      : form.reservation_type === tile.type && !form.resource_id?.startsWith?.("");
+                    // Built-in selection check (ignore resource_id specifics for non-custom)
+                    const isSelectedBuiltin = !isCustom && form.reservation_type === tile.type && form.reservation_type !== "custom";
+                    const tileSelected = isCustom ? isSelected : isSelectedBuiltin;
+                    const descKey = isCustom ? "" : (typeDescKeys[tile.type] ?? "");
+                    const label = isCustom
+                      ? tile.label
+                      : ((settings?.resource_type_names as Record<string, string>)?.[tile.type] || tDynamic(`dashboard.${tile.type}`));
+                    const desc = isCustom
+                      ? ""
+                      : ((settings?.resource_type_descriptions as Record<string, string>)?.[tile.type] || (descKey ? t(descKey) : ""));
                     return (
                       <button
-                        key={type}
+                        key={tile.key}
                         type="button"
                         onClick={() => {
                           // Clear type-specific fields when switching booking types
                           setForm((prev) => ({
                             ...prev,
-                            reservation_type: type,
-                            resource_id: type === "restaurant" ? "" : prev.resource_id,
+                            reservation_type: isCustom ? "custom" : tile.type,
+                            resource_id: isCustom
+                              ? tile.resourceId
+                              : (tile.type === "restaurant" ? "" : prev.resource_id),
                             check_out_date: "",
                             room_type: "",
                             breakfast_included: false,
@@ -1298,17 +1312,18 @@ const PublicBookingInner = () => {
                             water_needed: false,
                             food_permits: "",
                             stall_fee: "",
+                            selected_sub_services: [],
                           }));
                           if (errors.reservation_type) setErrors((prev) => ({ ...prev, reservation_type: "" }));
                         }}
                         className="group relative flex flex-col items-center gap-2 p-3 sm:p-6 rounded-xl border-2 transition-all duration-300 text-center hover:scale-105 hover:shadow-lg"
                         style={{
-                          borderColor: isSelected ? accentColor : "#e5e7eb",
-                          backgroundColor: isSelected ? `${accentColor}10` : "transparent",
-                          boxShadow: isSelected ? `0 0 0 1px ${accentColor}40, 0 4px 12px ${accentColor}15` : undefined,
+                          borderColor: tileSelected ? accentColor : "#e5e7eb",
+                          backgroundColor: tileSelected ? `${accentColor}10` : "transparent",
+                          boxShadow: tileSelected ? `0 0 0 1px ${accentColor}40, 0 4px 12px ${accentColor}15` : undefined,
                         }}
                       >
-                        {isSelected && (
+                        {tileSelected && (
                           <span
                             className="absolute top-2.5 right-2.5 h-2 w-2 rounded-full"
                             style={{ backgroundColor: accentColor }}
@@ -1316,28 +1331,20 @@ const PublicBookingInner = () => {
                         )}
                         <span
                           className="flex items-center justify-center h-12 w-12 rounded-full transition-colors duration-200"
-                          style={{
-                            backgroundColor: isSelected ? `${accentColor}20` : `${primaryColor}10`,
-                          }}
+                          style={{ backgroundColor: tileSelected ? `${accentColor}20` : `${primaryColor}10` }}
                         >
                           <Icon
                             className="h-6 w-6 transition-colors duration-200"
-                            style={{ color: isSelected ? accentColor : primaryColor }}
+                            style={{ color: tileSelected ? accentColor : primaryColor }}
                           />
                         </span>
                         <div className="space-y-1">
-                          <span
-                            className="text-sm font-semibold block"
-                            style={{ color: primaryColor }}
-                          >
-                            {(settings?.resource_type_names as Record<string, string>)?.[type] || tDynamic(`dashboard.${type}`)}
+                          <span className="text-sm font-semibold block" style={{ color: primaryColor }}>
+                            {label}
                           </span>
-                          {((settings?.resource_type_descriptions as Record<string, string>)?.[type] || (descKey && t(descKey))) && (
-                            <span
-                              className="text-xs block leading-relaxed"
-                              style={{ color: `${primaryColor}80` }}
-                            >
-                              {(settings?.resource_type_descriptions as Record<string, string>)?.[type] || (descKey ? t(descKey) : "")}
+                          {desc && (
+                            <span className="text-xs block leading-relaxed" style={{ color: `${primaryColor}80` }}>
+                              {desc}
                             </span>
                           )}
                         </div>
@@ -1348,6 +1355,90 @@ const PublicBookingInner = () => {
                 {errors.reservation_type && (
                   <p className="text-sm text-destructive mt-2">{errors.reservation_type}</p>
                 )}
+
+                {/* Sub-services picker for selected custom resource */}
+                {form.reservation_type === "custom" && form.resource_id && (() => {
+                  const tile = typeTiles.find((t) => t.kind === "custom" && (t as any).resourceId === form.resource_id) as
+                    | (Extract<TypeTile, { kind: "custom" }>)
+                    | undefined;
+                  const subs = tile?.subServices ?? [];
+                  if (subs.length === 0) return null;
+                  return (
+                    <div className="mt-6 space-y-3">
+                      <Label className="text-sm font-semibold" style={{ color: primaryColor }}>
+                        {t("booking.subServices")}
+                      </Label>
+                      <div className="space-y-2">
+                        {subs.map((s) => {
+                          const sel = form.selected_sub_services.find((x) => x.id === s.id);
+                          const checked = !!sel;
+                          const qty = sel?.qty ?? 1;
+                          return (
+                            <div key={s.id} className="flex items-center justify-between gap-3 p-3 rounded-md border">
+                              <label className="flex items-center gap-3 cursor-pointer flex-1 min-w-0">
+                                <Checkbox
+                                  checked={checked}
+                                  onCheckedChange={(c) => {
+                                    setForm((prev) => {
+                                      const list = prev.selected_sub_services.filter((x) => x.id !== s.id);
+                                      if (c) list.push({ id: s.id, name: s.name, price_eur: s.price_eur, qty: 1 });
+                                      return { ...prev, selected_sub_services: list };
+                                    });
+                                  }}
+                                />
+                                <div className="min-w-0">
+                                  <div className="text-sm font-medium truncate">{s.name}</div>
+                                  {s.price_eur != null && (
+                                    <div className="text-xs text-muted-foreground">€{Number(s.price_eur).toFixed(2)}</div>
+                                  )}
+                                </div>
+                              </label>
+                              {checked && (
+                                <div className="flex items-center gap-1 shrink-0">
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="icon"
+                                    className="h-8 w-8"
+                                    onClick={() => {
+                                      setForm((prev) => ({
+                                        ...prev,
+                                        selected_sub_services: prev.selected_sub_services.map((x) =>
+                                          x.id === s.id ? { ...x, qty: Math.max(1, x.qty - 1) } : x
+                                        ),
+                                      }));
+                                    }}
+                                    aria-label={t("booking.subServiceQty")}
+                                  >
+                                    <Minus className="h-3 w-3" />
+                                  </Button>
+                                  <span className="w-8 text-center text-sm">{qty}</span>
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="icon"
+                                    className="h-8 w-8"
+                                    onClick={() => {
+                                      setForm((prev) => ({
+                                        ...prev,
+                                        selected_sub_services: prev.selected_sub_services.map((x) =>
+                                          x.id === s.id ? { ...x, qty: Math.min(99, x.qty + 1) } : x
+                                        ),
+                                      }));
+                                    }}
+                                    aria-label={t("booking.subServiceQty")}
+                                  >
+                                    <Plus className="h-3 w-3" />
+                                  </Button>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })()}
               </CardContent>
             </Card>
           )}
