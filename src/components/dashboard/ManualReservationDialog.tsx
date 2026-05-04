@@ -168,6 +168,8 @@ const ManualReservationDialog = ({
 
       const dateStr = format(selectedDate, "yyyy-MM-dd");
       const requestedGuests = form.guests_count ? parseInt(form.guests_count) : 0;
+      const validLinked = linkedEntries.filter((e) => e.reservation_type && e.date);
+      const linkedGroupId = validLinked.length > 0 ? crypto.randomUUID() : null;
 
       // Capacity observation (no hard block)
       const cap = await computeBookingCapacity({
