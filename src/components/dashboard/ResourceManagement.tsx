@@ -228,6 +228,12 @@ const ResourceManagement = () => {
         offers_set_menu: form.resource_type === "restaurant" ? form.offers_set_menu : true,
         approval_status: getApprovalStatus(),
         site_id: form.site_id || null,
+        custom_type_label: form.resource_type === "custom" ? (form.custom_type_label.trim() || form.name.trim() || null) : null,
+        sub_services: form.resource_type === "custom"
+          ? subServices
+              .filter((s) => s.name.trim().length > 0)
+              .map((s) => ({ id: s.id, name: s.name.trim().slice(0, 100), price_eur: s.price_eur }))
+          : [],
       };
       if (editingId) {
         const { error } = await supabase.from("resources").update(payload).eq("id", editingId);
