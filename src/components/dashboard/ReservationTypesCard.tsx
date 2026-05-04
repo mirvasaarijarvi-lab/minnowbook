@@ -90,9 +90,13 @@ const ReservationTypesCard = () => {
       <CardHeader>
         <CardTitle className="text-lg font-serif">{t("settings.reservationTypes")}</CardTitle>
         <p className="text-sm text-muted-foreground">{t("settings.reservationTypesDesc")}</p>
-        {max !== null && (
+        {max !== null ? (
           <p className="text-xs text-muted-foreground">
             {t("settings.reservationTypesLimit").replace("{max}", String(max))} ({selected.length}/{max})
+          </p>
+        ) : (
+          <p className="text-xs text-muted-foreground">
+            {isSystemAdmin ? "System admin: no limit (all types selectable)." : `${selected.length} selected`}
           </p>
         )}
       </CardHeader>
