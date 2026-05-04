@@ -559,6 +559,7 @@ type TranslationKeys = {
   "dashboard.venue": string;
   "dashboard.guesthouse": string;
   "dashboard.hotel": string;
+  "dashboard.custom": string;
   "dashboard.checkoutToday": string;
   "dashboard.editReservation": string;
   "dashboard.reservationUpdated": string;
@@ -788,6 +789,15 @@ type TranslationKeys = {
   "onboarding.venueDesc": string;
   "onboarding.guesthouseDesc": string;
   "onboarding.hotelDesc": string;
+  "onboarding.customDesc": string;
+  "booking.subServices": string;
+  "booking.subServiceQty": string;
+  "dashboard.customTypeLabel": string;
+  "dashboard.customTypeLabelHelp": string;
+  "dashboard.subServices": string;
+  "dashboard.addSubService": string;
+  "dashboard.subServiceName": string;
+  "dashboard.subServicePrice": string;
 
   // Tiers
   "tier.basic": string;
