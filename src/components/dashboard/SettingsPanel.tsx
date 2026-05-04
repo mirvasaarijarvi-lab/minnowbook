@@ -1036,6 +1036,9 @@ const SettingsPanel = () => {
       <DiscountCodesPanel />
 
 
+      {/* Reservation Types — toggle which types this tenant offers */}
+      <ReservationTypesCard />
+
       {/* Resource Type Names & Descriptions */}
       {tenant?.allowed_reservation_types?.length > 0 && (
         <Card>
