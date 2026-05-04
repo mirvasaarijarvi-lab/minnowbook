@@ -29,6 +29,7 @@ import { useTierGate } from "@/hooks/useTierGate";
 import { PERM_RESOURCES_MANAGE } from "@/lib/permissions";
 import { useAutoApproval } from "@/hooks/useAutoApproval";
 import { useTierErrorMessage } from "@/hooks/useTierErrorMessage";
+import { getTierLimits } from "@/lib/tier-limits";
 
 const typeIcons: Record<string, React.ElementType> = {
   guesthouse: BedDouble,
