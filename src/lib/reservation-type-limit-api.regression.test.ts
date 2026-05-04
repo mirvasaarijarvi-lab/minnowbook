@@ -231,4 +231,86 @@ describe("reservations-type API: Professional 5-type cap", () => {
       });
     },
   );
+
+  // ---- Persistence integrity on rejection ------------------------------
+  //
+  // The trigger raises an exception inside the UPDATE statement, which
+  // aborts the row write transactionally. The API contract therefore
+  // guarantees that an over-cap call leaves `allowed_reservation_types`
+  // byte-identical to whatever was stored before the call. These tests
+  // assert that contract across every baseline shape and every rejected
+  // 6-type payload, plus a multi-call sequence to catch any state drift.
+
+  const BASELINES: Array<{ name: string; types: string[] }> = [
+    { name: "single built-in", types: ["restaurant"] },
+    { name: "two built-ins", types: ["hotel", "spa"] },
+    { name: "at-cap built-ins", types: [...BUILT_IN] },
+    { name: "at-cap mixed with custom", types: ["hotel", "restaurant", "spa", "venue", "custom"] },
+    { name: "only custom", types: ["custom"] },
+    { name: "empty", types: [] },
+  ];
+
+  describe("rejected updates never mutate the persisted row", () => {
+    for (const baseline of BASELINES) {
+      for (const combo of SIX_TYPE_COMBOS) {
+        it(`baseline [${baseline.name}] is preserved when rejecting [${combo.name}]`, async () => {
+          seedTenant(baseline.types);
+          const before = await readPersistedTypes();
+          // Snapshot defensively in case any layer accidentally aliases.
+          const beforeSnapshot = JSON.stringify(before);
+
+          const { data, error } = await callReservationTypesApi(combo.types);
+
+          // The trigger must have rejected and returned no row.
+          expect(error).not.toBeNull();
+          expect(data).toBeNull();
+
+          // The persisted row must be byte-identical to the baseline.
+          const after = await readPersistedTypes();
+          expect(JSON.stringify(after)).toBe(beforeSnapshot);
+          expect(after).toEqual(baseline.types);
+        });
+      }
+    }
+
+    it("after several rejections in a row, no partial write leaks through", async () => {
+      seedTenant(["hotel", "spa"]);
+
+      for (const combo of SIX_TYPE_COMBOS) {
+        const { error } = await callReservationTypesApi(combo.types);
+        expect(error).not.toBeNull();
+        // Read between each rejection to catch incremental drift.
+        expect(await readPersistedTypes()).toEqual(["hotel", "spa"]);
+      }
+    });
+
+    it("an accepted update between rejections persists, and a later rejection does not undo it", async () => {
+      seedTenant(["hotel"]);
+
+      // Reject first.
+      let res = await callReservationTypesApi([...BUILT_IN, "custom"]);
+      expect(res.error).not.toBeNull();
+      expect(await readPersistedTypes()).toEqual(["hotel"]);
+
+      // Accept a valid 5-type update.
+      const valid = ["hotel", "restaurant", "spa", "venue", "custom"];
+      res = await callReservationTypesApi(valid);
+      expect(res.error).toBeNull();
+      expect(await readPersistedTypes()).toEqual(valid);
+
+      // Reject again. The previously accepted value must remain intact.
+      res = await callReservationTypesApi([...valid, "extra"]);
+      expect(res.error).not.toBeNull();
+      expect(await readPersistedTypes()).toEqual(valid);
+    });
+
+    it("rejection on a non-existent row creates nothing", async () => {
+      // Sanity check: an over-cap UPDATE on an unseeded id must not
+      // create the row as a side effect.
+      const { error } = await callReservationTypesApi([...BUILT_IN, "custom"], "ghost-tenant");
+      expect(error).not.toBeNull();
+      expect(await readPersistedTypes("ghost-tenant")).toBeNull();
+    });
+  });
 });
+
