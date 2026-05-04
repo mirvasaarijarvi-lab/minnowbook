@@ -3489,6 +3489,11 @@ const fi: TranslationKeys = {
    "settings.heroImageUploadError": "Hero-kuvan lataus epäonnistui",
    "settings.resourceTypeNames": "Varauskohteiden nimet",
    "settings.resourceTypeNamesDesc": "Anna omat näyttönimet varauskohteillesi. Nämä nimet näkyvät julkisella varaussivulla.",
+   "settings.reservationTypes": "Varaustyypit",
+   "settings.reservationTypesDesc": "Valitse, mitä varaustyyppejä yrityksesi tarjoaa. Nämä näkyvät ruutuina julkisella varaussivulla.",
+   "settings.reservationTypesLimit": "Tilauksesi sallii enintään {max} tyyppiä.",
+   "settings.reservationTypesSaved": "Varaustyypit päivitetty.",
+   "settings.reservationTypesUpgrade": "Päivitä tilauksesi ottaaksesi käyttöön lisää tyyppejä.",
    "settings.resourceTypeName": "Näyttönimi: {type}",
    "settings.resourceTypeDescPlaceholder": "Oma kuvaus varaussivulle",
 
