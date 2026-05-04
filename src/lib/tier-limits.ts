@@ -3,9 +3,10 @@
  *
  * Tier mapping (kept in sync with the backend functions
  * `get_tier_max_sites`, `get_tier_max_reservation_types`,
- * `get_tier_max_staff_users`, and the `enforce_*_limit` triggers):
+ * `get_tier_max_resources_total`, `get_tier_max_staff_users`,
+ * and the `enforce_*_limit` triggers):
  *
- *   basic         → 1 site, 1 reservation type, 1 resource per type, 5 staff users
+ *   basic         → 1 site, 2 reservation types, 2 resources TOTAL (any types), 5 staff users
  *   professional  → 1 site, all types, 1 resource per type, 25 staff users
  *   business      → unlimited sites, all types, unlimited resources, unlimited staff users
  */
@@ -13,14 +14,15 @@
 interface TierLimits {
   maxSites: number | null;
   maxReservationTypes: number | null;
-  maxResourcesPerType: number | null; // null = unlimited
+  maxResourcesPerType: number | null; // null = no per-type cap
+  maxResourcesTotal: number | null;   // null = unlimited total
   maxStaffUsers: number | null;       // null = unlimited
 }
 
 const TIER_LIMITS: Record<string, TierLimits> = {
-  basic:        { maxSites: 1,    maxReservationTypes: 1,    maxResourcesPerType: 1,    maxStaffUsers: 5 },
-  professional: { maxSites: 1,    maxReservationTypes: null, maxResourcesPerType: 1,    maxStaffUsers: 25 },
-  business:     { maxSites: null, maxReservationTypes: null, maxResourcesPerType: null, maxStaffUsers: null },
+  basic:        { maxSites: 1,    maxReservationTypes: 2,    maxResourcesPerType: null, maxResourcesTotal: 2,    maxStaffUsers: 5 },
+  professional: { maxSites: 1,    maxReservationTypes: null, maxResourcesPerType: 1,    maxResourcesTotal: null, maxStaffUsers: 25 },
+  business:     { maxSites: null, maxReservationTypes: null, maxResourcesPerType: null, maxResourcesTotal: null, maxStaffUsers: null },
 };
 
 export function getTierLimits(tier: string | null | undefined): TierLimits {
