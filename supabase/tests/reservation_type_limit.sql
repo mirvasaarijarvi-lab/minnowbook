@@ -36,6 +36,10 @@ DECLARE
   v_pass int := 0;
   v_fail int := 0;
   v_errmsg text;
+  v_status text;
+  v_detail text;
+  v_results text[] := ARRAY[]::text[];
+  v_line text;
 BEGIN
   INSERT INTO auth.users (id, instance_id, email, encrypted_password, email_confirmed_at, created_at, updated_at, aud, role)
   VALUES (v_user_id, '00000000-0000-0000-0000-000000000000', 'tier-test-' || v_user_id || '@test.local', '', now(), now(), now(), 'authenticated', 'authenticated');
@@ -51,11 +55,18 @@ BEGIN
     BEGIN
       UPDATE public.tenants SET allowed_reservation_types = v_combo WHERE id = v_tenant_id;
       v_pass := v_pass + 1;
-      RAISE NOTICE 'PASS valid #% (% types)', v_i+1, array_length(v_combo,1);
+      v_status := 'PASS';
+      v_detail := 'accepted';
     EXCEPTION WHEN OTHERS THEN
       v_fail := v_fail + 1;
-      RAISE WARNING 'FAIL valid #% should have been accepted: %', v_i+1, SQLERRM;
+      v_status := 'FAIL';
+      v_detail := 'unexpected reject: ' || SQLERRM;
     END;
+    v_results := v_results || format(
+      '  %-4s | valid   | #%-2s | %-2s types | %-50s | %s',
+      v_status, v_i+1, COALESCE(array_length(v_combo,1),0),
+      left(array_to_string(v_combo, ','), 50), v_detail
+    );
   END LOOP;
 
   -- Invalid combinations (>5 types — must be rejected by the trigger)
@@ -65,26 +76,34 @@ BEGIN
     BEGIN
       UPDATE public.tenants SET allowed_reservation_types = v_combo WHERE id = v_tenant_id;
       v_fail := v_fail + 1;
-      RAISE WARNING 'FAIL invalid #% (% types) should have been rejected', v_i+1, array_length(v_combo,1);
+      v_status := 'FAIL';
+      v_detail := 'should have been rejected but was accepted';
     EXCEPTION WHEN OTHERS THEN
       v_errmsg := SQLERRM;
       IF v_errmsg LIKE '%at most 5%' THEN
         v_pass := v_pass + 1;
-        RAISE NOTICE 'PASS invalid #% rejected', v_i+1;
+        v_status := 'PASS';
+        v_detail := 'rejected as expected';
       ELSE
         v_fail := v_fail + 1;
-        RAISE WARNING 'FAIL invalid #% rejected with wrong error: %', v_i+1, v_errmsg;
+        v_status := 'FAIL';
+        v_detail := 'wrong error: ' || v_errmsg;
       END IF;
     END;
+    v_results := v_results || format(
+      '  %-4s | invalid | #%-2s | %-2s types | %-50s | %s',
+      v_status, v_i+1, COALESCE(array_length(v_combo,1),0),
+      left(array_to_string(v_combo, ','), 50), v_detail
+    );
   END LOOP;
 
   -- No partial writes after rejected updates
   IF (SELECT array_length(allowed_reservation_types,1) FROM public.tenants WHERE id = v_tenant_id) > 5 THEN
     v_fail := v_fail + 1;
-    RAISE WARNING 'FAIL: partial write detected after rejection';
+    v_results := v_results || '  FAIL | atomic  | -- | --       | partial-write check                                | row exceeds 5 types after rejection';
   ELSE
     v_pass := v_pass + 1;
-    RAISE NOTICE 'PASS: no partial writes';
+    v_results := v_results || '  PASS | atomic  | -- | --       | partial-write check                                | row unchanged after rejection';
   END IF;
 
   -- Cleanup
@@ -95,9 +114,20 @@ BEGIN
   DELETE FROM public.tenants WHERE id = v_tenant_id;
   DELETE FROM auth.users WHERE id = v_user_id;
 
-  RAISE NOTICE '=== Tier-limit trigger results: % passed, % failed ===', v_pass, v_fail;
+  -- Aligned summary table for fast CI debugging.
+  RAISE NOTICE '';
+  RAISE NOTICE '=== Reservation-type tier-limit trigger: results table ===';
+  RAISE NOTICE '  Stat | Kind    | #   | Size     | Combo                                              | Detail';
+  RAISE NOTICE '  -----+---------+-----+----------+----------------------------------------------------+--------------------------';
+  FOREACH v_line IN ARRAY v_results LOOP
+    RAISE NOTICE '%', v_line;
+  END LOOP;
+  RAISE NOTICE '  -----+---------+-----+----------+----------------------------------------------------+--------------------------';
+  RAISE NOTICE '  Totals: % passed, % failed (of % cases)', v_pass, v_fail, v_pass + v_fail;
+  RAISE NOTICE '';
+
   IF v_fail > 0 THEN
-    RAISE EXCEPTION 'Tier-limit trigger tests FAILED: % failures', v_fail;
+    RAISE EXCEPTION 'Tier-limit trigger tests FAILED: % of % cases failed', v_fail, v_pass + v_fail;
   END IF;
 END
 $test$;
