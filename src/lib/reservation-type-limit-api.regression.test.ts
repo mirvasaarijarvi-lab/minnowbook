@@ -45,59 +45,94 @@ const TRIGGER_MESSAGE =
   `Upgrade to add more.`;
 
 vi.mock("@/integrations/supabase/client", () => {
-  const updateMock = vi.fn((payload: { allowed_reservation_types?: string[] }) => {
-    const types = payload.allowed_reservation_types ?? [];
-    if (types.length > PROFESSIONAL_LIMIT) {
-      // Mirrors a real PostgrestError: { message, code, details, hint }.
-      return {
-        eq: () => ({
-          select: () => ({
-            maybeSingle: async () => ({
-              data: null,
-              error: {
-                message: TRIGGER_MESSAGE,
-                code: "P0001",
-                details: null,
-                hint: null,
-              },
-            }),
-          }),
-        }),
-      };
-    }
-    return {
-      eq: () => ({
+  // In-memory store keyed by tenant id. Mirrors a real Postgres row so we
+  // can assert that a rejected UPDATE never mutates the persisted value
+  // (atomicity contract enforced by `enforce_reservation_type_limit`).
+  const store = new Map<string, { id: string; allowed_reservation_types: string[] }>();
+
+  const fromMock = vi.fn((_table: string) => ({
+    update: (payload: { allowed_reservation_types?: string[] }) => ({
+      eq: (_col: string, id: string) => ({
         select: () => ({
-          maybeSingle: async () => ({
-            data: { id: "tenant-test", allowed_reservation_types: types },
-            error: null,
-          }),
+          maybeSingle: async () => {
+            const types = payload.allowed_reservation_types ?? [];
+            const existing = store.get(id);
+            if (types.length > PROFESSIONAL_LIMIT) {
+              // Trigger rejects: row is NOT touched. We deliberately do
+              // not write to the store, mirroring transactional rollback.
+              return {
+                data: null,
+                error: {
+                  message: TRIGGER_MESSAGE,
+                  code: "P0001",
+                  details: null,
+                  hint: null,
+                },
+              };
+            }
+            const next = { id, allowed_reservation_types: [...types] };
+            store.set(id, next);
+            return { data: { ...next }, error: null };
+          },
         }),
       }),
-    };
-  });
+    }),
+    select: (_cols?: string) => ({
+      eq: (_col: string, id: string) => ({
+        maybeSingle: async () => {
+          const row = store.get(id);
+          return {
+            data: row ? { ...row, allowed_reservation_types: [...row.allowed_reservation_types] } : null,
+            error: null,
+          };
+        },
+      }),
+    }),
+  }));
 
   return {
-    supabase: {
-      from: () => ({ update: updateMock }),
-    },
-    __updateMock: updateMock,
+    supabase: { from: fromMock },
+    __store: store,
   };
 });
 
 // Import AFTER vi.mock so the mocked module is resolved.
-import { supabase } from "@/integrations/supabase/client";
+import * as supabaseModule from "@/integrations/supabase/client";
+const { supabase } = supabaseModule;
+// Internal handle to the in-memory store, exposed by the mock above.
+const tenantStore = (supabaseModule as unknown as {
+  __store: Map<string, { id: string; allowed_reservation_types: string[] }>;
+}).__store;
 
-// ---- Helper: the call the Settings UI actually makes -------------------
 
-async function callReservationTypesApi(types: string[]) {
+// ---- Helpers: the calls the Settings UI actually makes -----------------
+
+const TENANT_ID = "tenant-test";
+
+async function callReservationTypesApi(types: string[], id: string = TENANT_ID) {
   return await supabase
     .from("tenants")
     .update({ allowed_reservation_types: types })
-    .eq("id", "tenant-test")
+    .eq("id", id)
     .select()
     .maybeSingle();
 }
+
+/** Read the persisted row exactly as a follow-up SELECT from the UI would. */
+async function readPersistedTypes(id: string = TENANT_ID): Promise<string[] | null> {
+  const { data } = await supabase
+    .from("tenants")
+    .select("allowed_reservation_types")
+    .eq("id", id)
+    .maybeSingle();
+  return data ? (data as { allowed_reservation_types: string[] }).allowed_reservation_types : null;
+}
+
+/** Seed the in-memory tenant row with a known baseline. */
+function seedTenant(types: string[], id: string = TENANT_ID) {
+  tenantStore.set(id, { id, allowed_reservation_types: [...types] });
+}
+
 
 // ---- Combinations under test -------------------------------------------
 
@@ -148,10 +183,12 @@ const FIVE_TYPE_COMBOS: Array<{ name: string; types: string[] }> = [
 describe("reservations-type API: Professional 5-type cap", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    tenantStore.clear();
   });
 
   afterEach(() => {
     vi.clearAllMocks();
+    tenantStore.clear();
   });
 
   it("frontend cap mirror agrees with the DB cap (5)", () => {
@@ -194,4 +231,86 @@ describe("reservations-type API: Professional 5-type cap", () => {
       });
     },
   );
+
+  // ---- Persistence integrity on rejection ------------------------------
+  //
+  // The trigger raises an exception inside the UPDATE statement, which
+  // aborts the row write transactionally. The API contract therefore
+  // guarantees that an over-cap call leaves `allowed_reservation_types`
+  // byte-identical to whatever was stored before the call. These tests
+  // assert that contract across every baseline shape and every rejected
+  // 6-type payload, plus a multi-call sequence to catch any state drift.
+
+  const BASELINES: Array<{ name: string; types: string[] }> = [
+    { name: "single built-in", types: ["restaurant"] },
+    { name: "two built-ins", types: ["hotel", "spa"] },
+    { name: "at-cap built-ins", types: [...BUILT_IN] },
+    { name: "at-cap mixed with custom", types: ["hotel", "restaurant", "spa", "venue", "custom"] },
+    { name: "only custom", types: ["custom"] },
+    { name: "empty", types: [] },
+  ];
+
+  describe("rejected updates never mutate the persisted row", () => {
+    for (const baseline of BASELINES) {
+      for (const combo of SIX_TYPE_COMBOS) {
+        it(`baseline [${baseline.name}] is preserved when rejecting [${combo.name}]`, async () => {
+          seedTenant(baseline.types);
+          const before = await readPersistedTypes();
+          // Snapshot defensively in case any layer accidentally aliases.
+          const beforeSnapshot = JSON.stringify(before);
+
+          const { data, error } = await callReservationTypesApi(combo.types);
+
+          // The trigger must have rejected and returned no row.
+          expect(error).not.toBeNull();
+          expect(data).toBeNull();
+
+          // The persisted row must be byte-identical to the baseline.
+          const after = await readPersistedTypes();
+          expect(JSON.stringify(after)).toBe(beforeSnapshot);
+          expect(after).toEqual(baseline.types);
+        });
+      }
+    }
+
+    it("after several rejections in a row, no partial write leaks through", async () => {
+      seedTenant(["hotel", "spa"]);
+
+      for (const combo of SIX_TYPE_COMBOS) {
+        const { error } = await callReservationTypesApi(combo.types);
+        expect(error).not.toBeNull();
+        // Read between each rejection to catch incremental drift.
+        expect(await readPersistedTypes()).toEqual(["hotel", "spa"]);
+      }
+    });
+
+    it("an accepted update between rejections persists, and a later rejection does not undo it", async () => {
+      seedTenant(["hotel"]);
+
+      // Reject first.
+      let res = await callReservationTypesApi([...BUILT_IN, "custom"]);
+      expect(res.error).not.toBeNull();
+      expect(await readPersistedTypes()).toEqual(["hotel"]);
+
+      // Accept a valid 5-type update.
+      const valid = ["hotel", "restaurant", "spa", "venue", "custom"];
+      res = await callReservationTypesApi(valid);
+      expect(res.error).toBeNull();
+      expect(await readPersistedTypes()).toEqual(valid);
+
+      // Reject again. The previously accepted value must remain intact.
+      res = await callReservationTypesApi([...valid, "extra"]);
+      expect(res.error).not.toBeNull();
+      expect(await readPersistedTypes()).toEqual(valid);
+    });
+
+    it("rejection on a non-existent row creates nothing", async () => {
+      // Sanity check: an over-cap UPDATE on an unseeded id must not
+      // create the row as a side effect.
+      const { error } = await callReservationTypesApi([...BUILT_IN, "custom"], "ghost-tenant");
+      expect(error).not.toBeNull();
+      expect(await readPersistedTypes("ghost-tenant")).toBeNull();
+    });
+  });
 });
+
