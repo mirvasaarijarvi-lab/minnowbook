@@ -50,16 +50,26 @@ vi.mock("@/integrations/supabase/client", () => {
   // (atomicity contract enforced by `enforce_reservation_type_limit`).
   const store = new Map<string, { id: string; allowed_reservation_types: string[] }>();
 
+  // To realistically simulate concurrent in-flight requests, every
+  // store read/write yields one microtask before committing. That way
+  // `Promise.all([...])` actually interleaves the operations instead of
+  // running them serially, which is what would happen on a real DB
+  // where each statement is a separate round-trip.
+  const yieldTick = () => new Promise<void>((r) => setTimeout(r, 0));
+
   const fromMock = vi.fn((_table: string) => ({
     update: (payload: { allowed_reservation_types?: string[] }) => ({
       eq: (_col: string, id: string) => ({
         select: () => ({
           maybeSingle: async () => {
             const types = payload.allowed_reservation_types ?? [];
-            const existing = store.get(id);
+            // Read phase: yield so a parallel update can interleave.
+            await yieldTick();
             if (types.length > PROFESSIONAL_LIMIT) {
-              // Trigger rejects: row is NOT touched. We deliberately do
-              // not write to the store, mirroring transactional rollback.
+              // Trigger rejects: row is NOT touched. Yield once more
+              // before returning so a queued accept can commit first
+              // and we can verify it was not clobbered.
+              await yieldTick();
               return {
                 data: null,
                 error: {
@@ -70,6 +80,9 @@ vi.mock("@/integrations/supabase/client", () => {
                 },
               };
             }
+            // Commit phase: yield so the trigger-rejection branch above
+            // has a chance to "race" us before we write.
+            await yieldTick();
             const next = { id, allowed_reservation_types: [...types] };
             store.set(id, next);
             return { data: { ...next }, error: null };
@@ -80,6 +93,7 @@ vi.mock("@/integrations/supabase/client", () => {
     select: (_cols?: string) => ({
       eq: (_col: string, id: string) => ({
         maybeSingle: async () => {
+          await yieldTick();
           const row = store.get(id);
           return {
             data: row ? { ...row, allowed_reservation_types: [...row.allowed_reservation_types] } : null,
@@ -89,6 +103,7 @@ vi.mock("@/integrations/supabase/client", () => {
       }),
     }),
   }));
+
 
   return {
     supabase: { from: fromMock },
