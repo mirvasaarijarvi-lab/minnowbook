@@ -463,9 +463,6 @@ Deno.serve(async (req) => {
       insertData.stall_fee = stall_fee;
     }
 
-    if (resource_id) {
-      insertData.resource_id = resource_id;
-    }
     if (selected_sub_services) {
       insertData.selected_sub_services = selected_sub_services;
     }
