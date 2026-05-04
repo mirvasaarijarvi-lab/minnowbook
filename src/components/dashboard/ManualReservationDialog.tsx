@@ -194,6 +194,7 @@ const ManualReservationDialog = ({
         internal_notes: form.internal_notes.trim() || null,
         price_eur: form.price_eur ? parseFloat(form.price_eur) : null,
         status: "confirmed",
+        ...(linkedGroupId ? { linked_group_id: linkedGroupId } : {}),
         ...(form.discount_type && form.discount_value ? {
           discount_type: form.discount_type,
           discount_value: parseFloat(form.discount_value),
