@@ -241,35 +241,49 @@ describe("reservations-type API: Professional 5-type cap", () => {
 
   describe.each(SIX_TYPE_COMBOS)(
     "rejects 6-type combination: $name",
-    ({ types }) => {
+    ({ name, types }) => {
       it("returns the trigger error and parses to RESERVATION_TYPE_LIMIT_REACHED", async () => {
-        const { data, error } = await callReservationTypesApi(types);
-
-        // The API must NOT silently accept an over-cap payload.
-        expect(data).toBeNull();
-        expect(error).not.toBeNull();
-        expect(error!.message).toBe(TRIGGER_MESSAGE);
-
-        // The UI relies on this parser to localize the message. If the
-        // shape ever changes we want this test to fail loudly.
-        const parsed = parseTierLimitError(error);
-        expect(parsed).not.toBeNull();
-        expect(parsed!.code).toBe("RESERVATION_TYPE_LIMIT_REACHED");
-        expect(parsed!.tier).toBe("professional");
-        expect(parsed!.limit).toBe(PROFESSIONAL_LIMIT);
+        let detail = "rejected and parsed to RESERVATION_TYPE_LIMIT_REACHED";
+        let status: "PASS" | "FAIL" = "PASS";
+        try {
+          const { data, error } = await callReservationTypesApi(types);
+          expect(data).toBeNull();
+          expect(error).not.toBeNull();
+          expect(error!.message).toBe(TRIGGER_MESSAGE);
+          const parsed = parseTierLimitError(error);
+          expect(parsed).not.toBeNull();
+          expect(parsed!.code).toBe("RESERVATION_TYPE_LIMIT_REACHED");
+          expect(parsed!.tier).toBe("professional");
+          expect(parsed!.limit).toBe(PROFESSIONAL_LIMIT);
+        } catch (e) {
+          status = "FAIL";
+          detail = `assertion failed: ${(e as Error).message.split("\n")[0]}`;
+          throw e;
+        } finally {
+          record({ status, kind: "invalid", name, size: types.length, detail });
+        }
       });
     },
   );
 
   describe.each(FIVE_TYPE_COMBOS)(
     "accepts 5-type combination at the cap: $name",
-    ({ types }) => {
+    ({ name, types }) => {
       it("returns the saved row and no error", async () => {
-        const { data, error } = await callReservationTypesApi(types);
-
-        expect(error).toBeNull();
-        expect(data).not.toBeNull();
-        expect(data!.allowed_reservation_types).toEqual(types);
+        let detail = "accepted at cap";
+        let status: "PASS" | "FAIL" = "PASS";
+        try {
+          const { data, error } = await callReservationTypesApi(types);
+          expect(error).toBeNull();
+          expect(data).not.toBeNull();
+          expect(data!.allowed_reservation_types).toEqual(types);
+        } catch (e) {
+          status = "FAIL";
+          detail = `assertion failed: ${(e as Error).message.split("\n")[0]}`;
+          throw e;
+        } finally {
+          record({ status, kind: "valid", name, size: types.length, detail });
+        }
       });
     },
   );
