@@ -165,6 +165,9 @@ type TranslationKeys = {
   "booking.guestCount": string;
   "booking.specialRequests": string;
   "booking.preferredTime": string;
+  "booking.linkedReservations": string;
+  "booking.addLinked": string;
+  "booking.linkedHint": string;
   "booking.closedDay": string;
   "days.monday": string;
   "days.tuesday": string;
@@ -1830,6 +1833,9 @@ const en: TranslationKeys = {
   "booking.guestCount": "Number of guests",
   "booking.specialRequests": "Special requests",
   "booking.preferredTime": "Preferred time",
+  "booking.linkedReservations": "Linked reservations",
+  "booking.addLinked": "Add linked",
+  "booking.linkedHint": "Add additional reservations of a different type for the same guest. They share guest details and are grouped together.",
   "booking.closedDay": "Closed on this day.",
   "days.monday": "Monday",
   "days.tuesday": "Tuesday",
@@ -3472,6 +3478,9 @@ const fi: TranslationKeys = {
   "booking.guestCount": "Vieraiden määrä",
   "booking.specialRequests": "Erityistoiveet",
   "booking.preferredTime": "Toivottu aika",
+  "booking.linkedReservations": "Liitetyt varaukset",
+  "booking.addLinked": "Lisää liitetty",
+  "booking.linkedHint": "Lisää saman vieraan toiseen tyyppiin liittyviä varauksia. Ne jakavat vieraan tiedot ja ryhmitellään yhteen.",
   "booking.closedDay": "Suljettu tänä päivänä.",
   "days.monday": "Maanantai",
   "days.tuesday": "Tiistai",
@@ -5112,6 +5121,9 @@ const sv: TranslationKeys = {
   "booking.guestCount": "Antal gäster",
   "booking.specialRequests": "Speciella önskemål",
   "booking.preferredTime": "Önskad tid",
+  "booking.linkedReservations": "Länkade reservationer",
+  "booking.addLinked": "Lägg till länkad",
+  "booking.linkedHint": "Lägg till ytterligare reservationer av annan typ för samma gäst. De delar gästens uppgifter och grupperas tillsammans.",
   "booking.closedDay": "Stängt denna dag.",
   "days.monday": "Måndag",
   "days.tuesday": "Tisdag",

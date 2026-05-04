@@ -1365,6 +1365,7 @@ export type Database = {
           is_invoiced: boolean | null
           is_used: boolean
           language: string | null
+          linked_group_id: string | null
           no_email_ack: boolean | null
           no_email_cancel: boolean | null
           no_email_confirm: boolean | null
@@ -1423,6 +1424,7 @@ export type Database = {
           is_invoiced?: boolean | null
           is_used?: boolean
           language?: string | null
+          linked_group_id?: string | null
           no_email_ack?: boolean | null
           no_email_cancel?: boolean | null
           no_email_confirm?: boolean | null
@@ -1481,6 +1483,7 @@ export type Database = {
           is_invoiced?: boolean | null
           is_used?: boolean
           language?: string | null
+          linked_group_id?: string | null
           no_email_ack?: boolean | null
           no_email_cancel?: boolean | null
           no_email_confirm?: boolean | null

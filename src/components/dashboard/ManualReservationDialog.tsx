@@ -33,7 +33,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useDateLocale } from "@/hooks/useDateLocale";
 import { toast } from "sonner";
 import { format } from "date-fns";
-import { CalendarIcon, Loader2, Tag } from "lucide-react";
+import { CalendarIcon, Loader2, Tag, Link2, Plus, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { computeBookingCapacity, logBookingValidation, buildValidationReasons } from "@/lib/booking-validation-log";
 
@@ -100,6 +100,15 @@ const ManualReservationDialog = ({
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(defaultDate);
   const [selectedResourceId, setSelectedResourceId] = useState("");
 
+  type LinkedEntry = {
+    id: string;
+    reservation_type: string;
+    date: string; // yyyy-MM-dd
+    start_time: string;
+    notes: string;
+  };
+  const [linkedEntries, setLinkedEntries] = useState<LinkedEntry[]>([]);
+
   // Reset form when dialog opens
   const handleOpenChange = (isOpen: boolean) => {
     if (isOpen) {
@@ -108,6 +117,7 @@ const ManualReservationDialog = ({
       setForm({ ...emptyForm, reservation_type: autoType });
       setSelectedDate(defaultDate);
       setSelectedResourceId("");
+      setLinkedEntries([]);
     }
     onOpenChange(isOpen);
   };
@@ -158,6 +168,8 @@ const ManualReservationDialog = ({
 
       const dateStr = format(selectedDate, "yyyy-MM-dd");
       const requestedGuests = form.guests_count ? parseInt(form.guests_count) : 0;
+      const validLinked = linkedEntries.filter((e) => e.reservation_type && e.date);
+      const linkedGroupId = validLinked.length > 0 ? crypto.randomUUID() : null;
 
       // Capacity observation (no hard block)
       const cap = await computeBookingCapacity({
@@ -182,6 +194,7 @@ const ManualReservationDialog = ({
         internal_notes: form.internal_notes.trim() || null,
         price_eur: form.price_eur ? parseFloat(form.price_eur) : null,
         status: "confirmed",
+        ...(linkedGroupId ? { linked_group_id: linkedGroupId } : {}),
         ...(form.discount_type && form.discount_value ? {
           discount_type: form.discount_type,
           discount_value: parseFloat(form.discount_value),
@@ -277,6 +290,45 @@ const ManualReservationDialog = ({
         toast.warning(t("bookingLog.softWarningToast" as any), {
           description: `${cap.projected}/${cap.capacity} guests`,
         });
+      }
+
+      // Create linked reservations (cross-type) sharing the same group
+      if (linkedGroupId && validLinked.length > 0) {
+        const rows = await Promise.all(
+          validLinked.map(async (entry) => {
+            // Resolve site for this linked type
+            let entrySiteId = selectedSiteId;
+            if (!entrySiteId) {
+              const { data: matchingSite } = await supabase
+                .from("resources")
+                .select("site_id")
+                .eq("tenant_id", tenantId)
+                .eq("resource_type", entry.reservation_type)
+                .not("site_id", "is", null)
+                .limit(1)
+                .maybeSingle();
+              entrySiteId = matchingSite?.site_id ?? null;
+            }
+            return {
+              tenant_id: tenantId,
+              site_id: entrySiteId,
+              guest_name: form.guest_name.trim(),
+              guest_email: form.guest_email.trim(),
+              guest_phone: form.guest_phone.trim() || null,
+              guests_count: form.guests_count ? parseInt(form.guests_count) : null,
+              reservation_type: entry.reservation_type,
+              date: entry.date,
+              start_time: entry.start_time || null,
+              internal_notes: entry.notes.trim() || null,
+              status: "confirmed",
+              linked_group_id: linkedGroupId,
+            };
+          })
+        );
+        const { error: linkedErr } = await supabase.from("reservations").insert(rows as any);
+        if (linkedErr) {
+          toast.error(`Linked reservations partial failure: ${linkedErr.message}`);
+        }
       }
     },
     onSuccess: () => {
@@ -612,6 +664,102 @@ const ManualReservationDialog = ({
             <Label>{t("dashboard.internalNotes")}</Label>
             <Textarea value={form.internal_notes} onChange={(e) => updateField("internal_notes", e.target.value)} rows={2} maxLength={2000} />
           </div>
+
+          {/* Linked (cross-type) reservations */}
+          {allowedTypes.length > 1 && (
+            <div className="space-y-3 rounded-lg border border-border p-3">
+              <div className="flex items-center justify-between gap-2">
+                <Label className="font-medium flex items-center gap-1.5">
+                  <Link2 className="h-3.5 w-3.5 text-accent" />
+                  {t("booking.linkedReservations" as any)}
+                </Label>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    setLinkedEntries((prev) => [
+                      ...prev,
+                      {
+                        id: crypto.randomUUID(),
+                        reservation_type: "",
+                        date: selectedDate ? format(selectedDate, "yyyy-MM-dd") : "",
+                        start_time: "",
+                        notes: "",
+                      },
+                    ])
+                  }
+                >
+                  <Plus className="h-3.5 w-3.5 mr-1" />
+                  {t("booking.addLinked" as any)}
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {t("booking.linkedHint" as any)}
+              </p>
+              {linkedEntries.map((entry, idx) => (
+                <div key={entry.id} className="grid gap-2 sm:grid-cols-[1fr_1fr_auto_auto] items-end border-t border-border pt-3">
+                  <div className="space-y-1">
+                    <Label className="text-xs">{t("common.type")}</Label>
+                    <Select
+                      value={entry.reservation_type}
+                      onValueChange={(v) =>
+                        setLinkedEntries((prev) => prev.map((e) => (e.id === entry.id ? { ...e, reservation_type: v } : e)))
+                      }
+                    >
+                      <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
+                      <SelectContent>
+                        {allowedTypes
+                          .filter((tp) => tp !== form.reservation_type)
+                          .map((tp) => (
+                            <SelectItem key={tp} value={tp}>{tDynamic(`dashboard.${tp}`)}</SelectItem>
+                          ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">{t("common.date")}</Label>
+                    <Input
+                      type="date"
+                      value={entry.date}
+                      onChange={(e) =>
+                        setLinkedEntries((prev) => prev.map((x) => (x.id === entry.id ? { ...x, date: e.target.value } : x)))
+                      }
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">{t("booking.preferredTime")}</Label>
+                    <Input
+                      type="time"
+                      value={entry.start_time}
+                      onChange={(e) =>
+                        setLinkedEntries((prev) => prev.map((x) => (x.id === entry.id ? { ...x, start_time: e.target.value } : x)))
+                      }
+                    />
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setLinkedEntries((prev) => prev.filter((x) => x.id !== entry.id))}
+                    aria-label="Remove"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                  <div className="sm:col-span-4 space-y-1">
+                    <Label className="text-xs">{t("dashboard.internalNotes")}</Label>
+                    <Input
+                      value={entry.notes}
+                      onChange={(e) =>
+                        setLinkedEntries((prev) => prev.map((x) => (x.id === entry.id ? { ...x, notes: e.target.value } : x)))
+                      }
+                      maxLength={500}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         <DialogFooter>
