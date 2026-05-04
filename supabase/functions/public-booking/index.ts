@@ -463,7 +463,12 @@ Deno.serve(async (req) => {
       insertData.stall_fee = stall_fee;
     }
 
-    const { data: insertedRes, error: insertErr } = await adminClient
+    if (resource_id) {
+      insertData.resource_id = resource_id;
+    }
+    if (selected_sub_services) {
+      insertData.selected_sub_services = selected_sub_services;
+    }
       .from("reservations")
       .insert(insertData)
       .select("id")
