@@ -400,14 +400,14 @@ const PublicBookingInner = () => {
     enabled: !!tenant?.id,
   });
 
-  // Fetch ALL resources for the site to derive available types
+  // Fetch ALL resources for the site to derive available types (and custom-type tiles)
   const { data: allSiteResources } = useQuery({
     queryKey: ["public-site-all-resources", tenant?.id, activeSiteId],
     queryFn: async () => {
       if (!tenant?.id) return [];
       let query = supabase
         .from("resources")
-        .select("resource_type")
+        .select("id, resource_type, custom_type_label, sub_services, name")
         .eq("tenant_id", tenant.id)
         .eq("is_active", true);
       if (activeSiteId) {
