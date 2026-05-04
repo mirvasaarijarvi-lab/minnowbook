@@ -165,6 +165,9 @@ type TranslationKeys = {
   "booking.guestCount": string;
   "booking.specialRequests": string;
   "booking.preferredTime": string;
+  "booking.linkedReservations": string;
+  "booking.addLinked": string;
+  "booking.linkedHint": string;
   "booking.closedDay": string;
   "days.monday": string;
   "days.tuesday": string;
