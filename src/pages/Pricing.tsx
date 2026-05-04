@@ -21,7 +21,7 @@ const Pricing = () => {
       priceId: STRIPE_TIERS.basic.price_id,
       features: [
         t("pricing.basicF1"), t("pricing.basicF2"), t("pricing.basicF3"),
-        t("pricing.basicF4"), t("pricing.basicF5"), t("pricing.offers"),
+        t("pricing.basicF4"), t("pricing.basicF5"), t("pricing.offers"), t("pricing.crossReservations"),
       ],
     },
     {
