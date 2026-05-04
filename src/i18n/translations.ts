@@ -803,6 +803,7 @@ type TranslationKeys = {
   "pricing.basicDesc": string;
   "pricing.basicTypes": string;
   "pricing.basicStaff": string;
+  "pricing.basicResourcesTotal": string;
   "pricing.proName": string;
   "pricing.proDesc": string;
   "pricing.proTypes": string;
