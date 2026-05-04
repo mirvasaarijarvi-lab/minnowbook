@@ -195,6 +195,7 @@ export type Database = {
           reservation_type: string
           restaurant_sub_type: string | null
           room_type: string | null
+          selected_sub_services: Json | null
           site_id: string | null
           special_requests: string | null
           staff_needed: boolean | null
@@ -255,6 +256,7 @@ export type Database = {
           reservation_type: string
           restaurant_sub_type?: string | null
           room_type?: string | null
+          selected_sub_services?: Json | null
           site_id?: string | null
           special_requests?: string | null
           staff_needed?: boolean | null
@@ -315,6 +317,7 @@ export type Database = {
           reservation_type?: string
           restaurant_sub_type?: string | null
           room_type?: string | null
+          selected_sub_services?: Json | null
           site_id?: string | null
           special_requests?: string | null
           staff_needed?: boolean | null
@@ -1377,6 +1380,7 @@ export type Database = {
           reservation_type: string
           restaurant_sub_type: string | null
           room_type: string | null
+          selected_sub_services: Json | null
           site_id: string | null
           special_requests: string | null
           staff_needed: boolean | null
@@ -1436,6 +1440,7 @@ export type Database = {
           reservation_type: string
           restaurant_sub_type?: string | null
           room_type?: string | null
+          selected_sub_services?: Json | null
           site_id?: string | null
           special_requests?: string | null
           staff_needed?: boolean | null
@@ -1495,6 +1500,7 @@ export type Database = {
           reservation_type?: string
           restaurant_sub_type?: string | null
           room_type?: string | null
+          selected_sub_services?: Json | null
           site_id?: string | null
           special_requests?: string | null
           staff_needed?: boolean | null
@@ -1664,6 +1670,7 @@ export type Database = {
           breakfast_price_per_person: number | null
           capacity: number | null
           created_at: string | null
+          custom_type_label: string | null
           description: string | null
           id: string
           image_url: string | null
@@ -1681,6 +1688,7 @@ export type Database = {
           room_type: string | null
           room_type_pricing: Json | null
           site_id: string | null
+          sub_services: Json
           tenant_id: string
         }
         Insert: {
@@ -1690,6 +1698,7 @@ export type Database = {
           breakfast_price_per_person?: number | null
           capacity?: number | null
           created_at?: string | null
+          custom_type_label?: string | null
           description?: string | null
           id?: string
           image_url?: string | null
@@ -1707,6 +1716,7 @@ export type Database = {
           room_type?: string | null
           room_type_pricing?: Json | null
           site_id?: string | null
+          sub_services?: Json
           tenant_id: string
         }
         Update: {
@@ -1716,6 +1726,7 @@ export type Database = {
           breakfast_price_per_person?: number | null
           capacity?: number | null
           created_at?: string | null
+          custom_type_label?: string | null
           description?: string | null
           id?: string
           image_url?: string | null
@@ -1733,6 +1744,7 @@ export type Database = {
           room_type?: string | null
           room_type_pricing?: Json | null
           site_id?: string | null
+          sub_services?: Json
           tenant_id?: string
         }
         Relationships: [
