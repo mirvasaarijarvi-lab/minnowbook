@@ -225,4 +225,101 @@ describe.skipIf(skip)("LIVE: reservation-type cap end-to-end", () => {
     // Row still holds the previously accepted 5-type value.
     expect(await readTypes(t.tenantId)).toEqual(five);
   });
+
+  // ---- Concurrency against real Postgres ------------------------------
+  //
+  // Each supabase-js call opens its own HTTP/PostgREST connection, so
+  // `Promise.all([...])` actually fires parallel SQL statements against
+  // the same row. Postgres serializes UPDATEs on the row via row-level
+  // locks, but the trigger still fires inside each statement and
+  // rejected statements roll back atomically. The contracts under test:
+  //
+  //   - every accepted call returns a row whose array length <= 5
+  //   - every rejected call returns the canonical TRIGGER_MESSAGE and
+  //     no row data
+  //   - the final SELECT is one of the accepted payloads (or the seed)
+  //   - the final SELECT never matches a rejected payload
+  //   - the final SELECT array length is always <= 5
+
+  it("burst of 12 mixed updates against the same row never drifts", async () => {
+    const seed = ["restaurant"];
+    const t = await makeProfessionalTenant(seed);
+
+    const accepted: string[][] = Array.from({ length: 6 }, (_, i) => [
+      "hotel",
+      "spa",
+      "venue",
+      "custom",
+      `tag-${i}`,
+    ]);
+    const rejected: string[][] = Array.from({ length: 6 }, (_, i) => [
+      ...BUILT_IN,
+      `extra-${i}`,
+    ]);
+
+    // Interleave so the request order alternates accept/reject.
+    const all: string[][] = [];
+    for (let i = 0; i < 6; i++) {
+      all.push(accepted[i]);
+      all.push(rejected[i]);
+    }
+
+    const results = await Promise.all(all.map((p) => updateTypes(t.tenantId, p)));
+
+    let acceptedCount = 0;
+    let rejectedCount = 0;
+    for (const r of results) {
+      if (r.error) {
+        rejectedCount++;
+        expect(r.error.message).toBe(TRIGGER_MESSAGE);
+        expect(r.data).toBeNull();
+      } else {
+        acceptedCount++;
+        expect(r.data!.allowed_reservation_types.length).toBeLessThanOrEqual(
+          PROFESSIONAL_LIMIT,
+        );
+      }
+    }
+    expect(acceptedCount).toBe(6);
+    expect(rejectedCount).toBe(6);
+
+    const persisted = await readTypes(t.tenantId);
+    expect(persisted.length).toBeLessThanOrEqual(PROFESSIONAL_LIMIT);
+
+    const persistedKey = JSON.stringify(persisted);
+    const acceptedKeys = new Set(accepted.map((a) => JSON.stringify(a)));
+    expect(
+      acceptedKeys.has(persistedKey) || persistedKey === JSON.stringify(seed),
+      `persisted ${persistedKey} is neither an accepted payload nor the seed`,
+    ).toBe(true);
+    for (const rej of rejected) {
+      expect(persistedKey).not.toBe(JSON.stringify(rej));
+    }
+  });
+
+  it("25 parallel rejects against a stable accepted baseline never mutate it", async () => {
+    const baseline = ["hotel", "restaurant", "spa", "venue", "custom"];
+    const t = await makeProfessionalTenant(["restaurant"]);
+
+    // First, establish the baseline with a single accepted update.
+    const ok = await updateTypes(t.tenantId, baseline);
+    expect(ok.error, ok.error?.message).toBeNull();
+
+    const rejects = Array.from({ length: 25 }, (_, i) => [
+      ...baseline,
+      `extra-${i}`, // 6 types each
+    ]);
+
+    const results = await Promise.all(
+      rejects.map((p) => updateTypes(t.tenantId, p)),
+    );
+
+    for (const r of results) {
+      expect(r.error).not.toBeNull();
+      expect(r.error!.message).toBe(TRIGGER_MESSAGE);
+      expect(r.data).toBeNull();
+    }
+
+    expect(await readTypes(t.tenantId)).toEqual(baseline);
+  });
 });
