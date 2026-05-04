@@ -82,7 +82,7 @@ const EditReservationDialog = ({
   const queryClient = useQueryClient();
   const { tenant, tenantId } = useTenant();
   const { isGated } = useTierGate();
-  const canCrossReserve = !isGated("basic");
+  const canCrossReserve = true; // Cross-reservations available on all tiers
 
   const [activeTab, setActiveTab] = useState("details");
   const [customMessage, setCustomMessage] = useState("");
