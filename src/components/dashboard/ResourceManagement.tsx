@@ -359,7 +359,8 @@ const ResourceManagement = () => {
     setEditingId(null);
     setEditingSiteId(null);
     setBeds([]);
-    setForm({ name: "", resource_type: defaultType, capacity: "", price_per_night: "", description: "", image_url: "", breakfast_price_per_person: "", room_type_pricing: { ...defaultRoomPricing }, is_active: true, room_type: "", room_description: "", offers_catering: false, offers_popup: false, offers_table_reservation: true, offers_quote: true, offers_set_menu: true, site_id: selectedSiteId || "" });
+    setSubServices([]);
+    setForm({ name: "", resource_type: defaultType, capacity: "", price_per_night: "", description: "", image_url: "", breakfast_price_per_person: "", room_type_pricing: { ...defaultRoomPricing }, is_active: true, room_type: "", room_description: "", offers_catering: false, offers_popup: false, offers_table_reservation: true, offers_quote: true, offers_set_menu: true, site_id: selectedSiteId || "", custom_type_label: "" });
   };
 
   const openEdit = (r: any) => {
@@ -368,6 +369,14 @@ const ResourceManagement = () => {
     const rtp = r.room_type_pricing ?? {};
     const bedConfig = r.bed_configuration as Record<string, number> | null;
     setBeds(bedConfig ? Object.entries(bedConfig).map(([type, count]) => ({ type, count: count as number })) : []);
+    const ss = Array.isArray(r.sub_services) ? (r.sub_services as any[]) : [];
+    setSubServices(
+      ss.map((s) => ({
+        id: s.id ?? crypto.randomUUID(),
+        name: s.name ?? "",
+        price_eur: s.price_eur != null ? Number(s.price_eur) : null,
+      }))
+    );
     setForm({
       name: r.name, resource_type: r.resource_type,
       capacity: r.capacity?.toString() ?? "", price_per_night: r.price_per_night?.toString() ?? "",
@@ -382,6 +391,7 @@ const ResourceManagement = () => {
       offers_quote: (r as any).offers_quote ?? true,
       offers_set_menu: (r as any).offers_set_menu ?? true,
       site_id: r.site_id || "",
+      custom_type_label: r.custom_type_label ?? "",
       room_type_pricing: {
         single: rtp.single?.toString() ?? "1.0",
         double: rtp.double?.toString() ?? "1.5",
