@@ -45,48 +45,65 @@ const TRIGGER_MESSAGE =
   `Upgrade to add more.`;
 
 vi.mock("@/integrations/supabase/client", () => {
-  const updateMock = vi.fn((payload: { allowed_reservation_types?: string[] }) => {
-    const types = payload.allowed_reservation_types ?? [];
-    if (types.length > PROFESSIONAL_LIMIT) {
-      // Mirrors a real PostgrestError: { message, code, details, hint }.
-      return {
-        eq: () => ({
-          select: () => ({
-            maybeSingle: async () => ({
-              data: null,
-              error: {
-                message: TRIGGER_MESSAGE,
-                code: "P0001",
-                details: null,
-                hint: null,
-              },
-            }),
-          }),
-        }),
-      };
-    }
-    return {
-      eq: () => ({
+  // In-memory store keyed by tenant id. Mirrors a real Postgres row so we
+  // can assert that a rejected UPDATE never mutates the persisted value
+  // (atomicity contract enforced by `enforce_reservation_type_limit`).
+  const store = new Map<string, { id: string; allowed_reservation_types: string[] }>();
+
+  const fromMock = vi.fn((_table: string) => ({
+    update: (payload: { allowed_reservation_types?: string[] }) => ({
+      eq: (_col: string, id: string) => ({
         select: () => ({
-          maybeSingle: async () => ({
-            data: { id: "tenant-test", allowed_reservation_types: types },
-            error: null,
-          }),
+          maybeSingle: async () => {
+            const types = payload.allowed_reservation_types ?? [];
+            const existing = store.get(id);
+            if (types.length > PROFESSIONAL_LIMIT) {
+              // Trigger rejects: row is NOT touched. We deliberately do
+              // not write to the store, mirroring transactional rollback.
+              return {
+                data: null,
+                error: {
+                  message: TRIGGER_MESSAGE,
+                  code: "P0001",
+                  details: null,
+                  hint: null,
+                },
+              };
+            }
+            const next = { id, allowed_reservation_types: [...types] };
+            store.set(id, next);
+            return { data: { ...next }, error: null };
+          },
         }),
       }),
-    };
-  });
+    }),
+    select: (_cols?: string) => ({
+      eq: (_col: string, id: string) => ({
+        maybeSingle: async () => {
+          const row = store.get(id);
+          return {
+            data: row ? { ...row, allowed_reservation_types: [...row.allowed_reservation_types] } : null,
+            error: null,
+          };
+        },
+      }),
+    }),
+  }));
 
   return {
-    supabase: {
-      from: () => ({ update: updateMock }),
-    },
-    __updateMock: updateMock,
+    supabase: { from: fromMock },
+    __store: store,
   };
 });
 
 // Import AFTER vi.mock so the mocked module is resolved.
-import { supabase } from "@/integrations/supabase/client";
+import * as supabaseModule from "@/integrations/supabase/client";
+const { supabase } = supabaseModule;
+// Internal handle to the in-memory store, exposed by the mock above.
+const tenantStore = (supabaseModule as unknown as {
+  __store: Map<string, { id: string; allowed_reservation_types: string[] }>;
+}).__store;
+
 
 // ---- Helper: the call the Settings UI actually makes -------------------
 
