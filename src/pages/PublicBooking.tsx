@@ -682,6 +682,20 @@ const PublicBookingInner = () => {
         special_requests: parsed.special_requests ?? null,
       };
 
+      // Always pass through resource_id when set (used for custom type, hotel rooms, etc.)
+      if (form.resource_id) {
+        payload.resource_id = form.resource_id;
+      }
+
+      if (parsed.reservation_type === "custom" && form.selected_sub_services.length > 0) {
+        payload.selected_sub_services = form.selected_sub_services.map((s) => ({
+          id: s.id,
+          name: s.name,
+          price_eur: s.price_eur ?? null,
+          qty: s.qty,
+        }));
+      }
+
       if (isAccommodation) {
         payload.check_out_date = form.check_out_date || null;
         payload.room_type = form.room_type || null;
