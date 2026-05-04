@@ -495,6 +495,9 @@ const ResourceManagement = () => {
                         {(tenant as any)?.allowed_reservation_types?.includes("hotel") && (
                           <SelectItem value="hotel">{typeLabel("hotel")}</SelectItem>
                         )}
+                        {(tenant as any)?.allowed_reservation_types?.includes("custom") && (
+                          <SelectItem value="custom">{t("dashboard.custom")}</SelectItem>
+                        )}
                         {/* Fallback if none match (shouldn't happen) */}
                         {!(tenant as any)?.allowed_reservation_types?.length && (
                           <>
