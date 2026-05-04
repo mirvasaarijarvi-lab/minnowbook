@@ -117,6 +117,7 @@ const ManualReservationDialog = ({
       setForm({ ...emptyForm, reservation_type: autoType });
       setSelectedDate(defaultDate);
       setSelectedResourceId("");
+      setLinkedEntries([]);
     }
     onOpenChange(isOpen);
   };
