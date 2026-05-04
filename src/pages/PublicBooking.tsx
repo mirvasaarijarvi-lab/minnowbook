@@ -258,6 +258,8 @@ const PublicBookingInner = () => {
     water_needed: false,
     food_permits: "",
     stall_fee: "",
+    // Custom type sub-services: { id, name, qty }
+    selected_sub_services: [] as { id: string; name: string; price_eur?: number; qty: number }[],
   });
 
   // Pre-select booking type from URL query param (?type=venue, ?type=guesthouse, etc.)
