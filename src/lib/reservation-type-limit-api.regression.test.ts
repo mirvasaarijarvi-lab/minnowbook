@@ -157,7 +157,7 @@ describe("reservations-type API: Professional 5-type cap", () => {
   it("frontend cap mirror agrees with the DB cap (5)", () => {
     // If these ever drift, the UI will show a wrong number while the
     // API keeps rejecting at a different threshold.
-    expect(getTierMaxReservationTypes("professional")).toBe(PROFESSIONAL_LIMIT);
+    expect(getTierLimits("professional").maxReservationTypes).toBe(PROFESSIONAL_LIMIT);
   });
 
   describe.each(SIX_TYPE_COMBOS)(
