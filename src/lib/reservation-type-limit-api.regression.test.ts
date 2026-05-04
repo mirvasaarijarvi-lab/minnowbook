@@ -30,7 +30,7 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { parseTierLimitError } from "./tier-error-codes";
-import { getTierMaxReservationTypes } from "./tier-limits";
+import { getTierLimits } from "./tier-limits";
 
 // ---- Mocked Supabase client --------------------------------------------
 
