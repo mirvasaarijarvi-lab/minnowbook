@@ -180,6 +180,21 @@ const FIVE_TYPE_COMBOS: Array<{ name: string; types: string[] }> = [
 
 // ---- Tests --------------------------------------------------------------
 
+// Aggregated results so we can print one aligned summary table at the
+// end of the suite. Mirrors the SQL test in supabase/tests/ for a
+// uniform debugging experience across the API and DB layers.
+type ResultRow = {
+  status: "PASS" | "FAIL";
+  kind: "valid" | "invalid" | "atomic";
+  name: string;
+  size: number | "--";
+  detail: string;
+};
+const summary: ResultRow[] = [];
+function record(row: ResultRow) {
+  summary.push(row);
+}
+
 describe("reservations-type API: Professional 5-type cap", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -189,6 +204,33 @@ describe("reservations-type API: Professional 5-type cap", () => {
   afterEach(() => {
     vi.clearAllMocks();
     tenantStore.clear();
+  });
+
+  afterAll(() => {
+    const pass = summary.filter((r) => r.status === "PASS").length;
+    const fail = summary.filter((r) => r.status === "FAIL").length;
+    const pad = (s: string, n: number) => (s + " ".repeat(n)).slice(0, n);
+    const lines: string[] = [];
+    lines.push("");
+    lines.push("=== Reservation-type API tier-limit: results table ===");
+    lines.push(
+      `  ${pad("Stat", 4)} | ${pad("Kind", 7)} | ${pad("Size", 4)} | ${pad("Case", 50)} | Detail`,
+    );
+    lines.push(
+      `  ${"-".repeat(4)}-+-${"-".repeat(7)}-+-${"-".repeat(4)}-+-${"-".repeat(50)}-+-${"-".repeat(40)}`,
+    );
+    for (const r of summary) {
+      lines.push(
+        `  ${pad(r.status, 4)} | ${pad(r.kind, 7)} | ${pad(String(r.size), 4)} | ${pad(r.name, 50)} | ${r.detail}`,
+      );
+    }
+    lines.push(
+      `  ${"-".repeat(4)}-+-${"-".repeat(7)}-+-${"-".repeat(4)}-+-${"-".repeat(50)}-+-${"-".repeat(40)}`,
+    );
+    lines.push(`  Totals: ${pass} passed, ${fail} failed (of ${pass + fail} cases)`);
+    lines.push("");
+    // eslint-disable-next-line no-console
+    console.log(lines.join("\n"));
   });
 
   it("frontend cap mirror agrees with the DB cap (5)", () => {
