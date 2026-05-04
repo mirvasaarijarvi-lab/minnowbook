@@ -5147,6 +5147,11 @@ const sv: TranslationKeys = {
    "settings.heroImageUploadError": "Kunde inte ladda upp hero-bild",
    "settings.resourceTypeNames": "Namn på bokningstyperna",
    "settings.resourceTypeNamesDesc": "Ge egna visningsnamn åt dina bokningstyper. Dessa namn visas på den offentliga bokningssidan.",
+   "settings.reservationTypes": "Bokningstyper",
+   "settings.reservationTypesDesc": "Välj vilka bokningstyper ditt företag erbjuder. Dessa visas som rutor på den offentliga bokningssidan.",
+   "settings.reservationTypesLimit": "Din prenumeration tillåter högst {max} typ(er).",
+   "settings.reservationTypesSaved": "Bokningstyperna uppdaterades.",
+   "settings.reservationTypesUpgrade": "Uppgradera din prenumeration för att aktivera fler typer.",
    "settings.resourceTypeName": "Visningsnamn för {type}",
    "settings.resourceTypeDescPlaceholder": "Egen beskrivning för bokningssidan",
 
