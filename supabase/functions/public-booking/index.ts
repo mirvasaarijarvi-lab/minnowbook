@@ -82,7 +82,7 @@ function validateUuid(val: unknown, field: string, required = false): string | n
   return s;
 }
 
-const VALID_TYPES = ["restaurant", "venue", "guesthouse", "hotel"];
+const VALID_TYPES = ["restaurant", "venue", "guesthouse", "hotel", "custom"];
 const VALID_ROOM_TYPES = ["single", "double", "suite", "dorm"];
 const VALID_EVENT_TYPES = ["wedding", "corporate", "birthday", "conference", "other"];
 const VALID_PRICING_TYPES = ["menu", "fixed_price", "quote"];
