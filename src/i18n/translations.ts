@@ -148,6 +148,11 @@ type TranslationKeys = {
   "settings.resourceTypeNamesDesc": string;
   "settings.resourceTypeName": string;
   "settings.resourceTypeDescPlaceholder": string;
+  "settings.reservationTypes": string;
+  "settings.reservationTypesDesc": string;
+  "settings.reservationTypesLimit": string;
+  "settings.reservationTypesSaved": string;
+  "settings.reservationTypesUpgrade": string;
 
   // Booking (public)
   "booking.title": string;
