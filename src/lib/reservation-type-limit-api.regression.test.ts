@@ -183,10 +183,12 @@ const FIVE_TYPE_COMBOS: Array<{ name: string; types: string[] }> = [
 describe("reservations-type API: Professional 5-type cap", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    tenantStore.clear();
   });
 
   afterEach(() => {
     vi.clearAllMocks();
+    tenantStore.clear();
   });
 
   it("frontend cap mirror agrees with the DB cap (5)", () => {
