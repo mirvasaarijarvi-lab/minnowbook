@@ -100,6 +100,15 @@ const ManualReservationDialog = ({
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(defaultDate);
   const [selectedResourceId, setSelectedResourceId] = useState("");
 
+  type LinkedEntry = {
+    id: string;
+    reservation_type: string;
+    date: string; // yyyy-MM-dd
+    start_time: string;
+    notes: string;
+  };
+  const [linkedEntries, setLinkedEntries] = useState<LinkedEntry[]>([]);
+
   // Reset form when dialog opens
   const handleOpenChange = (isOpen: boolean) => {
     if (isOpen) {
