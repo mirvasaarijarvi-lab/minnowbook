@@ -15,7 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash2, BedDouble, UtensilsCrossed, Building2, Upload, X, Loader2, ExternalLink, Lock, Copy, Clock, PlusCircle, MinusCircle } from "lucide-react";
+import { Plus, Pencil, Trash2, BedDouble, UtensilsCrossed, Building2, Upload, X, Loader2, ExternalLink, Lock, Copy, Clock, PlusCircle, MinusCircle, Sparkles } from "lucide-react";
 import { useState, useRef } from "react";
 import { useT } from "@/contexts/I18nContext";
 import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
@@ -35,7 +35,10 @@ const typeIcons: Record<string, React.ElementType> = {
   hotel: BedDouble,
   restaurant: UtensilsCrossed,
   venue: Building2,
+  custom: Sparkles,
 };
+
+type SubService = { id: string; name: string; price_eur: number | null };
 
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = ["image/png", "image/jpeg", "image/webp"];
@@ -85,6 +88,7 @@ const ResourceManagement = () => {
 
   const defaultRoomPricing = { single: "1.0", double: "1.5", suite: "2.5", dorm: "0.6" };
   const [beds, setBeds] = useState<BedEntry[]>([]);
+  const [subServices, setSubServices] = useState<SubService[]>([]);
   const [form, setForm] = useState({
     name: "", resource_type: "restaurant", capacity: "", price_per_night: "", description: "", image_url: "", breakfast_price_per_person: "",
     room_type_pricing: { ...defaultRoomPricing }, is_active: true,
@@ -92,6 +96,7 @@ const ResourceManagement = () => {
     offers_catering: false, offers_popup: false,
     offers_table_reservation: true, offers_quote: true, offers_set_menu: true,
     site_id: "" as string,
+    custom_type_label: "",
   });
 
   const { data: sites } = useQuery({
@@ -223,6 +228,12 @@ const ResourceManagement = () => {
         offers_set_menu: form.resource_type === "restaurant" ? form.offers_set_menu : true,
         approval_status: getApprovalStatus(),
         site_id: form.site_id || null,
+        custom_type_label: form.resource_type === "custom" ? (form.custom_type_label.trim() || form.name.trim() || null) : null,
+        sub_services: form.resource_type === "custom"
+          ? subServices
+              .filter((s) => s.name.trim().length > 0)
+              .map((s) => ({ id: s.id, name: s.name.trim().slice(0, 100), price_eur: s.price_eur }))
+          : [],
       };
       if (editingId) {
         const { error } = await supabase.from("resources").update(payload).eq("id", editingId);
@@ -354,7 +365,8 @@ const ResourceManagement = () => {
     setEditingId(null);
     setEditingSiteId(null);
     setBeds([]);
-    setForm({ name: "", resource_type: defaultType, capacity: "", price_per_night: "", description: "", image_url: "", breakfast_price_per_person: "", room_type_pricing: { ...defaultRoomPricing }, is_active: true, room_type: "", room_description: "", offers_catering: false, offers_popup: false, offers_table_reservation: true, offers_quote: true, offers_set_menu: true, site_id: selectedSiteId || "" });
+    setSubServices([]);
+    setForm({ name: "", resource_type: defaultType, capacity: "", price_per_night: "", description: "", image_url: "", breakfast_price_per_person: "", room_type_pricing: { ...defaultRoomPricing }, is_active: true, room_type: "", room_description: "", offers_catering: false, offers_popup: false, offers_table_reservation: true, offers_quote: true, offers_set_menu: true, site_id: selectedSiteId || "", custom_type_label: "" });
   };
 
   const openEdit = (r: any) => {
@@ -363,6 +375,14 @@ const ResourceManagement = () => {
     const rtp = r.room_type_pricing ?? {};
     const bedConfig = r.bed_configuration as Record<string, number> | null;
     setBeds(bedConfig ? Object.entries(bedConfig).map(([type, count]) => ({ type, count: count as number })) : []);
+    const ss = Array.isArray(r.sub_services) ? (r.sub_services as any[]) : [];
+    setSubServices(
+      ss.map((s) => ({
+        id: s.id ?? crypto.randomUUID(),
+        name: s.name ?? "",
+        price_eur: s.price_eur != null ? Number(s.price_eur) : null,
+      }))
+    );
     setForm({
       name: r.name, resource_type: r.resource_type,
       capacity: r.capacity?.toString() ?? "", price_per_night: r.price_per_night?.toString() ?? "",
@@ -377,6 +397,7 @@ const ResourceManagement = () => {
       offers_quote: (r as any).offers_quote ?? true,
       offers_set_menu: (r as any).offers_set_menu ?? true,
       site_id: r.site_id || "",
+      custom_type_label: r.custom_type_label ?? "",
       room_type_pricing: {
         single: rtp.single?.toString() ?? "1.0",
         double: rtp.double?.toString() ?? "1.5",
@@ -473,6 +494,9 @@ const ResourceManagement = () => {
                         )}
                         {(tenant as any)?.allowed_reservation_types?.includes("hotel") && (
                           <SelectItem value="hotel">{typeLabel("hotel")}</SelectItem>
+                        )}
+                        {(tenant as any)?.allowed_reservation_types?.includes("custom") && (
+                          <SelectItem value="custom">{t("dashboard.custom")}</SelectItem>
                         )}
                         {/* Fallback if none match (shouldn't happen) */}
                         {!(tenant as any)?.allowed_reservation_types?.length && (
@@ -667,7 +691,74 @@ const ResourceManagement = () => {
                     )
                   )}
 
-                  {/* Action buttons */}
+                  {/* Custom type: label + sub-services editor */}
+                  {form.resource_type === "custom" && (
+                    <div className="space-y-3 rounded-lg border border-border p-3">
+                      <div>
+                        <Label>{t("dashboard.customTypeLabel")} *</Label>
+                        <Input
+                          value={form.custom_type_label}
+                          maxLength={50}
+                          placeholder="Spa, Workshops, Tours..."
+                          onChange={(e) => setForm({ ...form, custom_type_label: e.target.value })}
+                        />
+                        <p className="text-xs text-muted-foreground mt-1">{t("dashboard.customTypeLabelHelp")}</p>
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="font-medium">{t("dashboard.subServices")}</Label>
+                        {subServices.map((s, idx) => (
+                          <div key={s.id} className="grid grid-cols-[1fr_120px_auto] gap-2 items-center">
+                            <Input
+                              placeholder={t("dashboard.subServiceName")}
+                              value={s.name}
+                              maxLength={100}
+                              onChange={(e) => {
+                                const next = [...subServices];
+                                next[idx] = { ...next[idx], name: e.target.value };
+                                setSubServices(next);
+                              }}
+                            />
+                            <div className="relative">
+                              <Input
+                                type="number"
+                                step="0.01"
+                                min={0}
+                                placeholder={t("dashboard.subServicePrice")}
+                                value={s.price_eur ?? ""}
+                                onChange={(e) => {
+                                  const v = e.target.value;
+                                  const next = [...subServices];
+                                  next[idx] = { ...next[idx], price_eur: v === "" ? null : parseFloat(v) };
+                                  setSubServices(next);
+                                }}
+                                className="pr-7"
+                              />
+                              <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">€</span>
+                            </div>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-destructive"
+                              onClick={() => setSubServices(subServices.filter((_, j) => j !== idx))}
+                            >
+                              <MinusCircle className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ))}
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="gap-1"
+                          onClick={() => setSubServices([...subServices, { id: crypto.randomUUID(), name: "", price_eur: null }])}
+                        >
+                          <PlusCircle className="h-3.5 w-3.5" /> {t("dashboard.addSubService")}
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="flex justify-end gap-2 pt-2">
                     <Button variant="outline" onClick={() => { setDialogOpen(false); resetForm(); }}>{t("common.cancel")}</Button>
                     <Button onClick={() => upsertMutation.mutate()} disabled={!form.name || upsertMutation.isPending}>

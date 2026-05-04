@@ -559,6 +559,7 @@ type TranslationKeys = {
   "dashboard.venue": string;
   "dashboard.guesthouse": string;
   "dashboard.hotel": string;
+  "dashboard.custom": string;
   "dashboard.checkoutToday": string;
   "dashboard.editReservation": string;
   "dashboard.reservationUpdated": string;
@@ -788,6 +789,15 @@ type TranslationKeys = {
   "onboarding.venueDesc": string;
   "onboarding.guesthouseDesc": string;
   "onboarding.hotelDesc": string;
+  "onboarding.customDesc": string;
+  "booking.subServices": string;
+  "booking.subServiceQty": string;
+  "dashboard.customTypeLabel": string;
+  "dashboard.customTypeLabelHelp": string;
+  "dashboard.subServices": string;
+  "dashboard.addSubService": string;
+  "dashboard.subServiceName": string;
+  "dashboard.subServicePrice": string;
 
   // Tiers
   "tier.basic": string;
@@ -2223,7 +2233,8 @@ const en: TranslationKeys = {
   "dashboard.restaurant": "Restaurant",
   "dashboard.venue": "Venue",
   "dashboard.guesthouse": "Hotel / Guesthouse",
-   "dashboard.hotel": "Hotel",
+  "dashboard.hotel": "Hotel",
+  "dashboard.custom": "Add your own",
    "dashboard.checkoutToday": "Check-outs today",
    "dashboard.editReservation": "Edit Reservation",
   "dashboard.reservationUpdated": "Reservation updated",
@@ -2453,6 +2464,15 @@ const en: TranslationKeys = {
   "onboarding.venueDesc": "Event spaces, meetings, celebrations",
   "onboarding.guesthouseDesc": "Room bookings and accommodation",
   "onboarding.hotelDesc": "Hotel and gasthaus rooms.",
+  "onboarding.customDesc": "Define your own type, like Spa or Workshops, with optional sub-services.",
+  "booking.subServices": "Choose services",
+  "booking.subServiceQty": "Quantity",
+  "dashboard.customTypeLabel": "Type name",
+  "dashboard.customTypeLabelHelp": "What guests see, e.g. Spa, Workshops, Tours.",
+  "dashboard.subServices": "Sub-services",
+  "dashboard.addSubService": "Add sub-service",
+  "dashboard.subServiceName": "Name",
+  "dashboard.subServicePrice": "Price (€)",
   // Tiers
   "tier.basic": "Basic",
   "tier.basicDesc": "Perfect for a single hotel, restaurant or event venue.",
@@ -3867,7 +3887,8 @@ const fi: TranslationKeys = {
   "dashboard.restaurant": "Ravintola",
   "dashboard.venue": "Tila",
   "dashboard.guesthouse": "Hotelli / Majatalo",
-   "dashboard.hotel": "Hotelli",
+  "dashboard.hotel": "Hotelli",
+  "dashboard.custom": "Lisää oma",
    "dashboard.checkoutToday": "Uloskirjaukset tänään",
    "dashboard.editReservation": "Muokkaa varausta",
   "dashboard.reservationUpdated": "Varaus päivitetty",
@@ -4097,6 +4118,15 @@ const fi: TranslationKeys = {
   "onboarding.venueDesc": "Tapahtumatilat, kokoukset, juhlat",
   "onboarding.guesthouseDesc": "Huonevaraukset ja majoitus",
   "onboarding.hotelDesc": "Hotelli- ja majatalohuoneet.",
+  "onboarding.customDesc": "Määritä oma tyyppi, kuten Spa tai Työpajat, ja valinnaiset alipalvelut.",
+  "booking.subServices": "Valitse palvelut",
+  "booking.subServiceQty": "Määrä",
+  "dashboard.customTypeLabel": "Tyypin nimi",
+  "dashboard.customTypeLabelHelp": "Mitä asiakkaat näkevät, esim. Spa, Työpajat, Kierrokset.",
+  "dashboard.subServices": "Alipalvelut",
+  "dashboard.addSubService": "Lisää alipalvelu",
+  "dashboard.subServiceName": "Nimi",
+  "dashboard.subServicePrice": "Hinta (€)",
   // Tiers
   "tier.basic": "Basic",
   "tier.basicDesc": "Täydellinen yhdelle hotellille, ravintolalle tai tapahtumapaikalle.",
@@ -5510,7 +5540,8 @@ const sv: TranslationKeys = {
   "dashboard.restaurant": "Restaurang",
   "dashboard.venue": "Lokal",
   "dashboard.guesthouse": "Hotell / Gästhus",
-   "dashboard.hotel": "Hotell",
+  "dashboard.hotel": "Hotell",
+  "dashboard.custom": "Lägg till egen",
    "dashboard.checkoutToday": "Utcheckningar idag",
    "dashboard.editReservation": "Redigera bokning",
   "dashboard.reservationUpdated": "Bokning uppdaterad",
@@ -5740,6 +5771,15 @@ const sv: TranslationKeys = {
   "onboarding.venueDesc": "Evenemangslokaler, möten, festligheter",
   "onboarding.guesthouseDesc": "Rumsreservationer och boende",
   "onboarding.hotelDesc": "Hotell- och gästhusrump.",
+  "onboarding.customDesc": "Definiera egen typ, t.ex. Spa eller Workshops, med valfria undertjänster.",
+  "booking.subServices": "Välj tjänster",
+  "booking.subServiceQty": "Antal",
+  "dashboard.customTypeLabel": "Typnamn",
+  "dashboard.customTypeLabelHelp": "Det som gästerna ser, t.ex. Spa, Workshops, Turer.",
+  "dashboard.subServices": "Undertjänster",
+  "dashboard.addSubService": "Lägg till undertjänst",
+  "dashboard.subServiceName": "Namn",
+  "dashboard.subServicePrice": "Pris (€)",
   // Tiers
   "tier.basic": "Basic",
   "tier.basicDesc": "Perfekt för ett enskilt hotell, en restaurang eller en eventlokal.",
