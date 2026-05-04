@@ -42,18 +42,23 @@ export function canSelectMoreTypes(tier: string | null | undefined, currentCount
 }
 
 /**
- * Check if a new resource of a given type can be created,
- * based on the tier's per-type resource limit.
+ * Check if a new resource of a given type can be created.
+ * Respects both the per-type cap and the total cap (whichever applies).
  */
 export function canCreateResourceOfType(
   tier: string | null | undefined,
   resourceType: string,
   existingResources: { resource_type: string }[]
 ): boolean {
-  const { maxResourcesPerType } = getTierLimits(tier);
-  if (maxResourcesPerType === null) return true;
-  const count = existingResources.filter((r) => r.resource_type === resourceType).length;
-  return count < maxResourcesPerType;
+  const { maxResourcesPerType, maxResourcesTotal } = getTierLimits(tier);
+  if (maxResourcesTotal !== null && existingResources.length >= maxResourcesTotal) {
+    return false;
+  }
+  if (maxResourcesPerType !== null) {
+    const count = existingResources.filter((r) => r.resource_type === resourceType).length;
+    if (count >= maxResourcesPerType) return false;
+  }
+  return true;
 }
 
 /**
