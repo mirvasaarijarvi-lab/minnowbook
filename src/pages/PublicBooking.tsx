@@ -53,6 +53,7 @@ const typeIcons: Record<string, React.ElementType> = {
   venue: Building2,
   guesthouse: Home,
   hotel: Home,
+  custom: Sparkles,
 };
 
 const typeDescKeys: Record<string, TranslationKey> = {
