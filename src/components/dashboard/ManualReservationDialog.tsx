@@ -664,6 +664,102 @@ const ManualReservationDialog = ({
             <Label>{t("dashboard.internalNotes")}</Label>
             <Textarea value={form.internal_notes} onChange={(e) => updateField("internal_notes", e.target.value)} rows={2} maxLength={2000} />
           </div>
+
+          {/* Linked (cross-type) reservations */}
+          {allowedTypes.length > 1 && (
+            <div className="space-y-3 rounded-lg border border-border p-3">
+              <div className="flex items-center justify-between gap-2">
+                <Label className="font-medium flex items-center gap-1.5">
+                  <Link2 className="h-3.5 w-3.5 text-accent" />
+                  {t("booking.linkedReservations" as any)}
+                </Label>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    setLinkedEntries((prev) => [
+                      ...prev,
+                      {
+                        id: crypto.randomUUID(),
+                        reservation_type: "",
+                        date: selectedDate ? format(selectedDate, "yyyy-MM-dd") : "",
+                        start_time: "",
+                        notes: "",
+                      },
+                    ])
+                  }
+                >
+                  <Plus className="h-3.5 w-3.5 mr-1" />
+                  {t("booking.addLinked" as any)}
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {t("booking.linkedHint" as any)}
+              </p>
+              {linkedEntries.map((entry, idx) => (
+                <div key={entry.id} className="grid gap-2 sm:grid-cols-[1fr_1fr_auto_auto] items-end border-t border-border pt-3">
+                  <div className="space-y-1">
+                    <Label className="text-xs">{t("common.type")}</Label>
+                    <Select
+                      value={entry.reservation_type}
+                      onValueChange={(v) =>
+                        setLinkedEntries((prev) => prev.map((e) => (e.id === entry.id ? { ...e, reservation_type: v } : e)))
+                      }
+                    >
+                      <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
+                      <SelectContent>
+                        {allowedTypes
+                          .filter((tp) => tp !== form.reservation_type)
+                          .map((tp) => (
+                            <SelectItem key={tp} value={tp}>{tDynamic(`dashboard.${tp}`)}</SelectItem>
+                          ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">{t("common.date")}</Label>
+                    <Input
+                      type="date"
+                      value={entry.date}
+                      onChange={(e) =>
+                        setLinkedEntries((prev) => prev.map((x) => (x.id === entry.id ? { ...x, date: e.target.value } : x)))
+                      }
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">{t("booking.preferredTime")}</Label>
+                    <Input
+                      type="time"
+                      value={entry.start_time}
+                      onChange={(e) =>
+                        setLinkedEntries((prev) => prev.map((x) => (x.id === entry.id ? { ...x, start_time: e.target.value } : x)))
+                      }
+                    />
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setLinkedEntries((prev) => prev.filter((x) => x.id !== entry.id))}
+                    aria-label="Remove"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                  <div className="sm:col-span-4 space-y-1">
+                    <Label className="text-xs">{t("dashboard.internalNotes")}</Label>
+                    <Input
+                      value={entry.notes}
+                      onChange={(e) =>
+                        setLinkedEntries((prev) => prev.map((x) => (x.id === entry.id ? { ...x, notes: e.target.value } : x)))
+                      }
+                      maxLength={500}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         <DialogFooter>
