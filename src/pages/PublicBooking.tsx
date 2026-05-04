@@ -914,7 +914,7 @@ const PublicBookingInner = () => {
                 </Button>
                 <Button
                   variant="outline"
-                  onClick={() => { setSubmitted(false); setForm({ guest_name: "", guest_email: "", guest_phone: "", guests_count: "", reservation_type: "", start_time: "", special_requests: "", resource_id: "", check_out_date: "", room_type: "", breakfast_included: false, event_type: "", estimated_guests: "", catering_needed: false, pricing_type: "", fixed_price: "", restaurant_sub_type: "dine_in", delivery_address: "", dietary_notes: "", equipment_needed: false, staff_needed: false, festival_name: "", stall_size: "", electricity_needed: false, water_needed: false, food_permits: "", stall_fee: "", promo_code: "" }); setSelectedDate(undefined); }}
+                  onClick={() => { setSubmitted(false); setForm({ guest_name: "", guest_email: "", guest_phone: "", guests_count: "", reservation_type: "", start_time: "", special_requests: "", resource_id: "", check_out_date: "", room_type: "", breakfast_included: false, event_type: "", estimated_guests: "", catering_needed: false, pricing_type: "", fixed_price: "", restaurant_sub_type: "dine_in", delivery_address: "", dietary_notes: "", equipment_needed: false, staff_needed: false, festival_name: "", stall_size: "", electricity_needed: false, water_needed: false, food_permits: "", stall_fee: "", promo_code: "", selected_sub_services: [] }); setSelectedDate(undefined); }}
                 >
                   {t("booking.makeAnother")}
                 </Button>
