@@ -134,7 +134,7 @@ const ManualReservationDialog = ({
         : [form.reservation_type];
       const { data, error } = await supabase
         .from("resources")
-        .select("id, name, resource_type, is_active, price_per_night, breakfast_price_per_person, room_type_pricing")
+        .select("id, name, resource_type, is_active, price_per_night, breakfast_price_per_person, room_type_pricing, custom_type_label, sub_services")
         .eq("tenant_id", tenantId)
         .in("resource_type", types)
         .eq("is_active", true)
