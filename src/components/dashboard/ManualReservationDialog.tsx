@@ -99,6 +99,7 @@ const ManualReservationDialog = ({
   const [form, setForm] = useState({ ...emptyForm, reservation_type: defaultType ?? "" });
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(defaultDate);
   const [selectedResourceId, setSelectedResourceId] = useState("");
+  const [selectedSubServices, setSelectedSubServices] = useState<{ id: string; name: string; price_eur?: number; qty: number }[]>([]);
 
   type LinkedEntry = {
     id: string;
@@ -117,6 +118,7 @@ const ManualReservationDialog = ({
       setForm({ ...emptyForm, reservation_type: autoType });
       setSelectedDate(defaultDate);
       setSelectedResourceId("");
+      setSelectedSubServices([]);
       setLinkedEntries([]);
     }
     onOpenChange(isOpen);
@@ -134,7 +136,7 @@ const ManualReservationDialog = ({
         : [form.reservation_type];
       const { data, error } = await supabase
         .from("resources")
-        .select("id, name, resource_type, is_active, price_per_night, breakfast_price_per_person, room_type_pricing")
+        .select("id, name, resource_type, is_active, price_per_night, breakfast_price_per_person, room_type_pricing, custom_type_label, sub_services")
         .eq("tenant_id", tenantId)
         .in("resource_type", types)
         .eq("is_active", true)
@@ -225,6 +227,11 @@ const ManualReservationDialog = ({
           water_needed: form.water_needed,
           food_permits: form.food_permits || null,
           stall_fee: form.stall_fee ? parseFloat(form.stall_fee) : null,
+        }),
+        ...(form.reservation_type === "custom" && selectedSubServices.length > 0 && {
+          selected_sub_services: selectedSubServices.map((s) => ({
+            id: s.id, name: s.name, price_eur: s.price_eur ?? null, qty: s.qty,
+          })),
         }),
       } as any).select("id").single();
       if (error) {
@@ -414,18 +421,81 @@ const ManualReservationDialog = ({
           {resources.length > 0 && (
             <div className="space-y-1.5">
               <Label>{t("booking.selectResource")}</Label>
-              <Select value={selectedResourceId} onValueChange={setSelectedResourceId}>
+              <Select
+                value={selectedResourceId}
+                onValueChange={(v) => {
+                  setSelectedResourceId(v);
+                  setSelectedSubServices([]);
+                }}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="—" />
                 </SelectTrigger>
                 <SelectContent>
                   {resources.map((r) => (
-                    <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
+                    <SelectItem key={r.id} value={r.id}>
+                      {(r as any).custom_type_label ? `${(r as any).custom_type_label} — ${r.name}` : r.name}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
           )}
+
+          {/* Sub-services picker for selected custom resource */}
+          {form.reservation_type === "custom" && selectedResourceId && (() => {
+            const r: any = resources.find((x: any) => x.id === selectedResourceId);
+            const subs: { id: string; name: string; price_eur?: number }[] = Array.isArray(r?.sub_services) ? r.sub_services : [];
+            if (subs.length === 0) return null;
+            return (
+              <div className="space-y-2">
+                <Label>{t("booking.subServices")}</Label>
+                <div className="space-y-2">
+                  {subs.map((s) => {
+                    const sel = selectedSubServices.find((x) => x.id === s.id);
+                    const checked = !!sel;
+                    const qty = sel?.qty ?? 1;
+                    return (
+                      <div key={s.id} className="flex items-center justify-between gap-3 p-2 rounded-md border">
+                        <label className="flex items-center gap-3 cursor-pointer flex-1 min-w-0">
+                          <Checkbox
+                            checked={checked}
+                            onCheckedChange={(c) => {
+                              setSelectedSubServices((prev) => {
+                                const list = prev.filter((x) => x.id !== s.id);
+                                if (c) list.push({ id: s.id, name: s.name, price_eur: s.price_eur, qty: 1 });
+                                return list;
+                              });
+                            }}
+                          />
+                          <div className="min-w-0">
+                            <div className="text-sm font-medium truncate">{s.name}</div>
+                            {s.price_eur != null && (
+                              <div className="text-xs text-muted-foreground">€{Number(s.price_eur).toFixed(2)}</div>
+                            )}
+                          </div>
+                        </label>
+                        {checked && (
+                          <Input
+                            type="number"
+                            min={1}
+                            max={99}
+                            value={qty}
+                            onChange={(e) => {
+                              const n = Math.max(1, Math.min(99, parseInt(e.target.value) || 1));
+                              setSelectedSubServices((prev) => prev.map((x) => x.id === s.id ? { ...x, qty: n } : x));
+                            }}
+                            className="w-16 h-8 shrink-0"
+                            aria-label={t("booking.subServiceQty")}
+                          />
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Guest details */}
           <div className="grid gap-3 sm:grid-cols-2">

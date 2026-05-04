@@ -82,7 +82,7 @@ function validateUuid(val: unknown, field: string, required = false): string | n
   return s;
 }
 
-const VALID_TYPES = ["restaurant", "venue", "guesthouse", "hotel"];
+const VALID_TYPES = ["restaurant", "venue", "guesthouse", "hotel", "custom"];
 const VALID_ROOM_TYPES = ["single", "double", "suite", "dorm"];
 const VALID_EVENT_TYPES = ["wedding", "corporate", "birthday", "conference", "other"];
 const VALID_PRICING_TYPES = ["menu", "fixed_price", "quote"];
@@ -280,6 +280,31 @@ Deno.serve(async (req) => {
       }
     }
 
+    // Optional: explicit resource selection (used for custom-type bookings, etc.)
+    const resource_id = validateUuid(body.resource_id, "resource_id");
+
+    // Optional: sub-services for custom type
+    let selected_sub_services: { id: string; name: string; price_eur: number | null; qty: number }[] | null = null;
+    if (reservation_type === "custom" && Array.isArray(body.selected_sub_services)) {
+      if (body.selected_sub_services.length > 50) throw new Error("Too many sub-services");
+      const cleaned: { id: string; name: string; price_eur: number | null; qty: number }[] = [];
+      for (const raw of body.selected_sub_services) {
+        if (!raw || typeof raw !== "object") continue;
+        const id = validateString((raw as any).id, "sub_service.id", 64, true)!;
+        const name = validateString((raw as any).name, "sub_service.name", 100, true)!;
+        const qtyN = validateInt((raw as any).qty, "sub_service.qty", 1, 99) ?? 1;
+        let price: number | null = null;
+        const rawPrice = (raw as any).price_eur;
+        if (rawPrice !== undefined && rawPrice !== null && rawPrice !== "") {
+          const p = typeof rawPrice === "number" ? rawPrice : parseFloat(String(rawPrice));
+          if (isNaN(p) || p < 0 || p > 999999) throw new Error("Invalid sub_service.price_eur");
+          price = p;
+        }
+        cleaned.push({ id, name, price_eur: price, qty: qtyN });
+      }
+      if (cleaned.length > 0) selected_sub_services = cleaned;
+    }
+
     // Verify tenant
     const { data: tenant, error: tenantErr } = await adminClient
       .from("tenants")
@@ -438,7 +463,9 @@ Deno.serve(async (req) => {
       insertData.stall_fee = stall_fee;
     }
 
-    const { data: insertedRes, error: insertErr } = await adminClient
+    if (selected_sub_services) {
+      insertData.selected_sub_services = selected_sub_services;
+    }
       .from("reservations")
       .insert(insertData)
       .select("id")
