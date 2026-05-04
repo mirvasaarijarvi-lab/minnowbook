@@ -494,5 +494,157 @@ describe("reservations-type API: Professional 5-type cap", () => {
       },
     );
   });
+
+  // ---- Concurrent updates ----------------------------------------------
+  //
+  // The trigger fires inside each UPDATE statement and rolls back the
+  // row on rejection. Even when many rejected and accepted updates are
+  // in flight against the same tenant simultaneously, the persisted
+  // value must always be one of the accepted payloads (or the seed) and
+  // never a partial mix or an over-cap value. These tests fan out a
+  // burst of overlapping calls via `Promise.all` (the mock yields a
+  // microtask between read/commit so they actually interleave) and
+  // assert the final state plus the per-call outcomes.
+
+  describe("concurrent rejected + accepted updates do not drift", () => {
+    it("interleaved 6-type reject and 5-type accept: row matches the accepted payload", async () => {
+      seedTenant(["restaurant"]);
+      const accepted = ["hotel", "restaurant", "spa", "venue", "custom"];
+      const rejected = [...BUILT_IN, "custom"]; // 6 types
+
+      // Fire both in parallel. The mock yields microtasks during read
+      // and commit phases so they interleave non-deterministically.
+      const [acceptRes, rejectRes] = await Promise.all([
+        callReservationTypesApi(accepted),
+        callReservationTypesApi(rejected),
+      ]);
+
+      expect(acceptRes.error).toBeNull();
+      expect(acceptRes.data!.allowed_reservation_types).toEqual(accepted);
+
+      expect(rejectRes.error).not.toBeNull();
+      expect(rejectRes.error!.message).toBe(TRIGGER_MESSAGE);
+      expect(rejectRes.data).toBeNull();
+
+      // Final persisted row must be the accepted payload, never the
+      // rejected one and never the original seed (since accept wins
+      // last-write regardless of interleaving order with the reject).
+      const persisted = await readPersistedTypes();
+      expect(persisted).toEqual(accepted);
+      expect(persisted!.length).toBeLessThanOrEqual(PROFESSIONAL_LIMIT);
+    });
+
+    it("burst of 20 mixed updates: final row is one of the accepted payloads, never over-cap", async () => {
+      const SEED = ["restaurant"];
+      seedTenant(SEED);
+
+      // 10 valid, 10 invalid, fully shuffled. Each accepted payload is
+      // distinct so we can detect which one ended up persisted.
+      const accepted: string[][] = Array.from({ length: 10 }, (_, i) => [
+        "hotel",
+        "spa",
+        "venue",
+        "custom",
+        `tag-${i}`,
+      ]);
+      const rejected: string[][] = Array.from({ length: 10 }, (_, i) => [
+        ...BUILT_IN,
+        `extra-${i}`, // 6 types
+      ]);
+      const all = [...accepted, ...rejected];
+      // Deterministic shuffle for reproducibility.
+      for (let i = all.length - 1; i > 0; i--) {
+        const j = (i * 9301 + 49297) % (i + 1);
+        [all[i], all[j]] = [all[j], all[i]];
+      }
+
+      const results = await Promise.all(all.map((p) => callReservationTypesApi(p)));
+
+      let acceptedCount = 0;
+      let rejectedCount = 0;
+      for (const r of results) {
+        if (r.error) {
+          rejectedCount++;
+          // Every failure must be the canonical trigger message.
+          expect(r.error.message).toBe(TRIGGER_MESSAGE);
+          expect(r.data).toBeNull();
+        } else {
+          acceptedCount++;
+          expect(r.data!.allowed_reservation_types.length).toBeLessThanOrEqual(
+            PROFESSIONAL_LIMIT,
+          );
+        }
+      }
+      expect(acceptedCount).toBe(10);
+      expect(rejectedCount).toBe(10);
+
+      // Final persisted state must be one of the accepted payloads or
+      // the seed, and must never exceed the cap. We also assert it does
+      // NOT match any rejected payload (no torn write leaked through).
+      const persisted = await readPersistedTypes();
+      expect(persisted).not.toBeNull();
+      expect(persisted!.length).toBeLessThanOrEqual(PROFESSIONAL_LIMIT);
+
+      const persistedKey = JSON.stringify(persisted);
+      const acceptedKeys = new Set(accepted.map((a) => JSON.stringify(a)));
+      const seedKey = JSON.stringify(SEED);
+      expect(
+        acceptedKeys.has(persistedKey) || persistedKey === seedKey,
+        `persisted value ${persistedKey} is neither an accepted payload nor the seed`,
+      ).toBe(true);
+
+      for (const rej of rejected) {
+        expect(persistedKey).not.toBe(JSON.stringify(rej));
+      }
+    });
+
+    it("repeated rejects against a stable accepted baseline never mutate it", async () => {
+      const baseline = ["hotel", "restaurant", "spa", "venue", "custom"];
+      seedTenant(baseline);
+
+      // Fire 25 over-cap rejects in parallel. None should change the row.
+      const rejects = Array.from({ length: 25 }, (_, i) => [
+        ...baseline,
+        `extra-${i}`, // 6 types each
+      ]);
+
+      const results = await Promise.all(rejects.map((p) => callReservationTypesApi(p)));
+
+      for (const r of results) {
+        expect(r.error).not.toBeNull();
+        expect(r.error!.message).toBe(TRIGGER_MESSAGE);
+        expect(r.data).toBeNull();
+      }
+
+      // Baseline survives untouched after the storm.
+      expect(await readPersistedTypes()).toEqual(baseline);
+    });
+
+    it("interleaved accept-reject-accept sequence: last accept wins, no over-cap leak", async () => {
+      seedTenant(["restaurant"]);
+      const a1 = ["hotel", "spa"];
+      const a2 = ["hotel", "restaurant", "spa", "venue", "custom"];
+      const r = [...BUILT_IN, "extra"]; // 6 types
+
+      // Order: accept-1, reject, accept-2 — but launched concurrently.
+      const results = await Promise.all([
+        callReservationTypesApi(a1),
+        callReservationTypesApi(r),
+        callReservationTypesApi(a2),
+      ]);
+
+      expect(results[0].error).toBeNull();
+      expect(results[1].error?.message).toBe(TRIGGER_MESSAGE);
+      expect(results[2].error).toBeNull();
+
+      // Final row must be a1 OR a2 — depending on which accept commit
+      // landed last in the interleaving — but never the rejected
+      // payload and never something over the cap.
+      const persisted = await readPersistedTypes();
+      const persistedKey = JSON.stringify(persisted);
+      expect([JSON.stringify(a1), JSON.stringify(a2)]).toContain(persistedKey);
+      expect(persisted!.length).toBeLessThanOrEqual(PROFESSIONAL_LIMIT);
+    });
+  });
 });
 
