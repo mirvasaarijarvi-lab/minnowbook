@@ -63,19 +63,32 @@ jobs:
         run: echo "::notice::Supabase CLI install failed, skipping."
 
       # See tier-trigger-tests.yml for context: legacy seed migrations
-      # reference a hardcoded production tenant id, so we pre-create a
-      # placeholder tenant + auth user for them to attach to.
+      # reference hardcoded production ids (tenant, site, staff user),
+      # so we pre-create placeholder rows for them to attach to.
       - name: Inject placeholder tenant for local-only seed data
         if: steps.docker-check.outputs.available == 'true' && steps.supabase-cli.outcome == 'success'
         run: |
           set -euo pipefail
           cat > supabase/migrations/20260224082115_ci_placeholder_tenant.sql <<'SQL'
+          -- Placeholder tenant owner
           INSERT INTO auth.users (id, instance_id, aud, role, email, encrypted_password, email_confirmed_at, created_at, updated_at)
           VALUES (
             '00000000-0000-0000-0000-0000000000c1',
             '00000000-0000-0000-0000-000000000000',
             'authenticated', 'authenticated',
             'ci-placeholder@example.invalid',
+            crypt('ci-placeholder-password', gen_salt('bf')),
+            now(), now(), now()
+          )
+          ON CONFLICT (id) DO NOTHING;
+
+          -- Placeholder staff user referenced by legacy site_users seed
+          INSERT INTO auth.users (id, instance_id, aud, role, email, encrypted_password, email_confirmed_at, created_at, updated_at)
+          VALUES (
+            'ea50e91e-5dbf-4dcc-a13c-f96c4016f952',
+            '00000000-0000-0000-0000-000000000000',
+            'authenticated', 'authenticated',
+            'ci-placeholder-staff@example.invalid',
             crypt('ci-placeholder-password', gen_salt('bf')),
             now(), now(), now()
           )
@@ -88,6 +101,17 @@ jobs:
             'ci-placeholder-tenant',
             'business', true, 'active',
             '00000000-0000-0000-0000-0000000000c1'
+          )
+          ON CONFLICT (id) DO NOTHING;
+
+          -- Placeholder site referenced by legacy reservation/site_users seeds
+          INSERT INTO public.sites (id, tenant_id, name, slug, is_active)
+          VALUES (
+            'b040ab30-f4d2-45cc-8695-2000572428d7',
+            '9ac05fbf-0834-44fd-a52a-d030b7074a30',
+            'CI Placeholder Site',
+            'ci-placeholder-site',
+            true
           )
           ON CONFLICT (id) DO NOTHING;
           SQL
