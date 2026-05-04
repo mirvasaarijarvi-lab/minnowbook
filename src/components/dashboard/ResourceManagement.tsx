@@ -29,6 +29,7 @@ import { useTierGate } from "@/hooks/useTierGate";
 import { PERM_RESOURCES_MANAGE } from "@/lib/permissions";
 import { useAutoApproval } from "@/hooks/useAutoApproval";
 import { useTierErrorMessage } from "@/hooks/useTierErrorMessage";
+import { getTierLimits } from "@/lib/tier-limits";
 
 const typeIcons: Record<string, React.ElementType> = {
   guesthouse: BedDouble,
@@ -414,9 +415,22 @@ const ResourceManagement = () => {
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3" data-tour="resources-header">
         <div className="min-w-0">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <h2 className="text-xl sm:text-2xl font-serif font-bold text-foreground">{t("dashboard.resourceManagement")}</h2>
             <DashboardTooltip text="Add rooms, tables, or venues here. Set capacity, pricing, and upload photos. Toggle resources active/inactive to control booking availability." />
+            {(() => {
+              const allowed: string[] = (tenant as any)?.allowed_reservation_types ?? [];
+              const max = getTierLimits((tenant as any)?.tier).maxReservationTypes;
+              if (max === null) return null;
+              const used = allowed.length;
+              const remaining = Math.max(0, max - used);
+              const atLimit = remaining === 0;
+              return (
+                <Badge variant={atLimit ? "destructive" : "secondary"} className="font-normal">
+                  {used} / {max} types used {atLimit ? "(limit reached)" : `(${remaining} left)`}
+                </Badge>
+              );
+            })()}
           </div>
           <p className="text-sm text-muted-foreground">{t("dashboard.resourceManagementDesc")}</p>
         </div>
