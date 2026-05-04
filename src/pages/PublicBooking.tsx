@@ -26,6 +26,7 @@ import LanguageSwitcher from "@/components/LanguageSwitcher";
 import PublicReviews from "@/components/public/PublicReviews";
 import WaitlistButton from "@/components/public/WaitlistButton";
 import React from "react";
+import { buildTypeTiles } from "@/lib/booking-tiles";
 
 // Types for public views (not in auto-generated types)
 interface PublicTenant {
@@ -834,33 +835,18 @@ const PublicBookingInner = () => {
     return tenantTypes;
   }, [tenant?.allowed_reservation_types, activeSiteId, allSiteResources]);
 
-  // Build the list of selectable tiles. Built-in types render as one tile each.
-  // Each "custom" resource renders as its own tile keyed by `custom:<resource_id>`,
+  // Build the list of selectable tiles. See `src/lib/booking-tiles.ts` for the
+  // pure logic (covered by unit tests). Built-in types render as one tile each;
+  // each "custom" resource renders as its own tile keyed by `custom:<resource_id>`,
   // labelled with `custom_type_label` (or the resource name as fallback).
   type TypeTile =
     | { kind: "builtin"; key: string; type: string }
     | { kind: "custom"; key: string; resourceId: string; label: string; subServices: { id: string; name: string; price_eur?: number }[] };
 
-  const typeTiles: TypeTile[] = useMemo(() => {
-    const tiles: TypeTile[] = [];
-    for (const type of allowedTypes) {
-      if (type === "custom") continue;
-      tiles.push({ kind: "builtin", key: type, type });
-    }
-    if (allowedTypes.includes("custom") && allSiteResources) {
-      const customResources = allSiteResources.filter((r: any) => r.resource_type === "custom");
-      for (const r of customResources) {
-        tiles.push({
-          kind: "custom",
-          key: `custom:${r.id}`,
-          resourceId: r.id,
-          label: (r as any).custom_type_label || (r as any).name || "Custom",
-          subServices: Array.isArray((r as any).sub_services) ? (r as any).sub_services : [],
-        });
-      }
-    }
-    return tiles;
-  }, [allowedTypes, allSiteResources]);
+  const typeTiles: TypeTile[] = useMemo(
+    () => buildTypeTiles(allowedTypes, allSiteResources as any) as TypeTile[],
+    [allowedTypes, allSiteResources],
+  );
 
   // Helper: resolve site name from site_id
   const siteNameMap = useMemo(() => {
