@@ -691,7 +691,74 @@ const ResourceManagement = () => {
                     )
                   )}
 
-                  {/* Action buttons */}
+                  {/* Custom type: label + sub-services editor */}
+                  {form.resource_type === "custom" && (
+                    <div className="space-y-3 rounded-lg border border-border p-3">
+                      <div>
+                        <Label>{t("dashboard.customTypeLabel")} *</Label>
+                        <Input
+                          value={form.custom_type_label}
+                          maxLength={50}
+                          placeholder="Spa, Workshops, Tours..."
+                          onChange={(e) => setForm({ ...form, custom_type_label: e.target.value })}
+                        />
+                        <p className="text-xs text-muted-foreground mt-1">{t("dashboard.customTypeLabelHelp")}</p>
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="font-medium">{t("dashboard.subServices")}</Label>
+                        {subServices.map((s, idx) => (
+                          <div key={s.id} className="grid grid-cols-[1fr_120px_auto] gap-2 items-center">
+                            <Input
+                              placeholder={t("dashboard.subServiceName")}
+                              value={s.name}
+                              maxLength={100}
+                              onChange={(e) => {
+                                const next = [...subServices];
+                                next[idx] = { ...next[idx], name: e.target.value };
+                                setSubServices(next);
+                              }}
+                            />
+                            <div className="relative">
+                              <Input
+                                type="number"
+                                step="0.01"
+                                min={0}
+                                placeholder={t("dashboard.subServicePrice")}
+                                value={s.price_eur ?? ""}
+                                onChange={(e) => {
+                                  const v = e.target.value;
+                                  const next = [...subServices];
+                                  next[idx] = { ...next[idx], price_eur: v === "" ? null : parseFloat(v) };
+                                  setSubServices(next);
+                                }}
+                                className="pr-7"
+                              />
+                              <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">€</span>
+                            </div>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-destructive"
+                              onClick={() => setSubServices(subServices.filter((_, j) => j !== idx))}
+                            >
+                              <MinusCircle className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ))}
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="gap-1"
+                          onClick={() => setSubServices([...subServices, { id: crypto.randomUUID(), name: "", price_eur: null }])}
+                        >
+                          <PlusCircle className="h-3.5 w-3.5" /> {t("dashboard.addSubService")}
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="flex justify-end gap-2 pt-2">
                     <Button variant="outline" onClick={() => { setDialogOpen(false); resetForm(); }}>{t("common.cancel")}</Button>
                     <Button onClick={() => upsertMutation.mutate()} disabled={!form.name || upsertMutation.isPending}>
