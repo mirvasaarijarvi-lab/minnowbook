@@ -291,6 +291,45 @@ const ManualReservationDialog = ({
           description: `${cap.projected}/${cap.capacity} guests`,
         });
       }
+
+      // Create linked reservations (cross-type) sharing the same group
+      if (linkedGroupId && validLinked.length > 0) {
+        const rows = await Promise.all(
+          validLinked.map(async (entry) => {
+            // Resolve site for this linked type
+            let entrySiteId = selectedSiteId;
+            if (!entrySiteId) {
+              const { data: matchingSite } = await supabase
+                .from("resources")
+                .select("site_id")
+                .eq("tenant_id", tenantId)
+                .eq("resource_type", entry.reservation_type)
+                .not("site_id", "is", null)
+                .limit(1)
+                .maybeSingle();
+              entrySiteId = matchingSite?.site_id ?? null;
+            }
+            return {
+              tenant_id: tenantId,
+              site_id: entrySiteId,
+              guest_name: form.guest_name.trim(),
+              guest_email: form.guest_email.trim(),
+              guest_phone: form.guest_phone.trim() || null,
+              guests_count: form.guests_count ? parseInt(form.guests_count) : null,
+              reservation_type: entry.reservation_type,
+              date: entry.date,
+              start_time: entry.start_time || null,
+              internal_notes: entry.notes.trim() || null,
+              status: "confirmed",
+              linked_group_id: linkedGroupId,
+            };
+          })
+        );
+        const { error: linkedErr } = await supabase.from("reservations").insert(rows as any);
+        if (linkedErr) {
+          toast.error(`Linked reservations partial failure: ${linkedErr.message}`);
+        }
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["reservations"] });
