@@ -2965,6 +2965,10 @@ export type Database = {
         Args: { p_tier: string }
         Returns: number
       }
+      get_tier_max_resources_total: {
+        Args: { p_tier: string }
+        Returns: number
+      }
       get_tier_max_sites: { Args: { p_tier: string }; Returns: number }
       get_tier_max_staff_users: { Args: { p_tier: string }; Returns: number }
       get_unconfirmed_users: {

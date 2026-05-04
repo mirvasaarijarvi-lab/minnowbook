@@ -803,6 +803,7 @@ type TranslationKeys = {
   "pricing.basicDesc": string;
   "pricing.basicTypes": string;
   "pricing.basicStaff": string;
+  "pricing.basicResourcesTotal": string;
   "pricing.proName": string;
   "pricing.proDesc": string;
   "pricing.proTypes": string;
@@ -2883,8 +2884,9 @@ const en: TranslationKeys = {
   "pricing.heroSubtitle": "Start with a 30-day free trial. Upgrade to the next tier or cancel anytime.",
   "pricing.basicName": "Basic",
   "pricing.basicDesc": "Perfect for a single hotel, restaurant or event venue.",
-  "pricing.basicTypes": "1 type",
+  "pricing.basicTypes": "2 types",
   "pricing.basicStaff": "1 to 5",
+  "pricing.basicResourcesTotal": "2 total",
   "pricing.proName": "Pro",
   "pricing.proDesc": "For businesses offering hotel, restaurant and event venue services in one place.",
   "pricing.proTypes": "All 3 types, 1 of each (e.g. cannot switch to two restaurants and one hotel)",
@@ -4522,8 +4524,9 @@ const fi: TranslationKeys = {
   "pricing.heroSubtitle": "Aloita 30 päivän ilmaisella kokeilujaksolla. Korota seuraavaan tasoon tai peruuta milloin tahansa.",
   "pricing.basicName": "Perustaso",
   "pricing.basicDesc": "Täydellinen yhdelle hotellille, ravintolalle tai tapahtumapaikalle.",
-  "pricing.basicTypes": "1 tyyppi",
-  "pricing.basicStaff": "1–5",
+  "pricing.basicTypes": "2 tyyppiä",
+  "pricing.basicStaff": "1 to 5",
+  "pricing.basicResourcesTotal": "2 yhteensä",
   "pricing.proName": "Protaso",
   "pricing.proDesc": "Yrityksille, jotka tarjoavat hotelli-, ravintola- ja tapahtumatilapalvelun yhdessä paikassa.",
   "pricing.proTypes": "Käytössä kaikki 3 tyyppiä, 1 kutakin (ei voi vaihtaa esim. kahteen ravintolaan ja yhteen hotelliin)",
@@ -6161,8 +6164,9 @@ const sv: TranslationKeys = {
   "pricing.heroSubtitle": "Börja med en 30 dagars gratis provperiod. Uppgradera till nästa nivå eller avbryt när som helst.",
   "pricing.basicName": "Basic",
   "pricing.basicDesc": "Perfekt för ett enskilt hotell, en restaurang eller en eventlokal.",
-  "pricing.basicTypes": "1 typ",
+  "pricing.basicTypes": "2 typer",
   "pricing.basicStaff": "1 till 5",
+  "pricing.basicResourcesTotal": "2 totalt",
   "pricing.proName": "Pro",
   "pricing.proDesc": "För företag som erbjuder hotell-, restaurang- och evenemangstjänster på ett ställe.",
   "pricing.proTypes": "Alla 3 typer, 1 av varje (kan inte byta till t.ex. två restauranger och ett hotell)",

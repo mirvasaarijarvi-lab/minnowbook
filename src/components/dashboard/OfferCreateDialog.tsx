@@ -39,7 +39,7 @@ const OfferCreateDialog = ({ open, onOpenChange, editOffer }: Props) => {
   const { tenantId, tenant } = useTenant();
   const { isGated } = useTierGate();
   const dateLocale = useDateLocale();
-  const canCrossReserve = !isGated("basic");
+  const canCrossReserve = true; // Cross-reservations available on all tiers
   const createOffer = useCreateOffer();
   const updateOffer = useUpdateOffer();
   const isEditing = !!editOffer;
