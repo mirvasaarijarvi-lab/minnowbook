@@ -58,9 +58,14 @@ export function useTierGate() {
     resourceType: string,
     existingResources: { resource_type: string }[]
   ) => {
-    if (limits.maxResourcesPerType === null) return true;
-    const count = existingResources.filter((r) => r.resource_type === resourceType).length;
-    return count < limits.maxResourcesPerType;
+    if (limits.maxResourcesTotal !== null && existingResources.length >= limits.maxResourcesTotal) {
+      return false;
+    }
+    if (limits.maxResourcesPerType !== null) {
+      const count = existingResources.filter((r) => r.resource_type === resourceType).length;
+      if (count >= limits.maxResourcesPerType) return false;
+    }
+    return true;
   };
 
   return {
