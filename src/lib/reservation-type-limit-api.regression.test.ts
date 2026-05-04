@@ -393,5 +393,91 @@ describe("reservations-type API: Professional 5-type cap", () => {
       }
     });
   });
+
+  // ---- Trigger message contract ----------------------------------------
+  //
+  // The exact substring `"at most 5"` is what `parseTierLimitError` and
+  // the SQL regression in `supabase/tests/reservation_type_limit.sql`
+  // both rely on to classify the failure. If the trigger ever drifts to
+  // a different phrase (e.g. "max of 5", "5 maximum", "limit reached"),
+  // the UI silently loses the localized error and the SQL CI test stops
+  // catching invalid combinations. This block enumerates a wide range of
+  // over-limit shapes, with custom in every position and at sizes well
+  // beyond the cap, to guarantee the message is byte-for-byte stable.
+
+  /** Build over-limit combos by varying size and the position of `custom`. */
+  function buildCustomMixCombos(): Array<{ name: string; types: string[] }> {
+    const sizes = [6, 7, 8, 10];
+    const out: Array<{ name: string; types: string[] }> = [];
+    for (const size of sizes) {
+      // Generate `size - 1` filler labels, then insert `custom` at every
+      // possible index. Filler uses built-ins cyclically + numeric
+      // suffixes so we never accidentally produce a <=5 unique set that
+      // the trigger might treat differently.
+      const filler = Array.from({ length: size - 1 }, (_, i) =>
+        i < BUILT_IN.length ? BUILT_IN[i] : `extra-${i}`,
+      );
+      for (let pos = 0; pos <= filler.length; pos++) {
+        const types = [...filler.slice(0, pos), "custom", ...filler.slice(pos)];
+        out.push({
+          name: `size=${size}, custom@${pos}`,
+          types,
+        });
+      }
+      // Also a no-custom variant at this size to cover the non-custom path.
+      out.push({
+        name: `size=${size}, no custom`,
+        types: [...filler, `extra-${size - 1}`],
+      });
+      // And a custom-heavy variant (multiple customs) at this size.
+      const heavy = [
+        ...Array.from({ length: Math.ceil(size / 2) }, () => "custom"),
+        ...filler.slice(0, Math.floor(size / 2)),
+      ];
+      out.push({ name: `size=${size}, ${Math.ceil(size / 2)} customs`, types: heavy });
+    }
+    return out;
+  }
+
+  const MESSAGE_CONTRACT_COMBOS = buildCustomMixCombos();
+
+  describe("trigger returns the exact 'at most 5' error for every over-limit combo", () => {
+    it.each(MESSAGE_CONTRACT_COMBOS)(
+      "matches the contract for $name",
+      async ({ name, types }) => {
+        let status: "PASS" | "FAIL" = "PASS";
+        let detail = `message contains "at most 5" and equals trigger string`;
+        try {
+          const { data, error } = await callReservationTypesApi(types);
+
+          // Hard contract: rejection, no row, error present.
+          expect(data).toBeNull();
+          expect(error).not.toBeNull();
+
+          // The substring the parser pivots on. Keep this assertion
+          // separate so a regression points directly at the substring,
+          // not the full string.
+          expect(error!.message).toMatch(/at most 5\b/);
+
+          // The full, byte-for-byte string the trigger emits. Catches
+          // tier-name drift (e.g. "Pro" vs "professional") and unit
+          // drift (e.g. "type" vs "reservation type(s)").
+          expect(error!.message).toBe(TRIGGER_MESSAGE);
+
+          // Parser still classifies it correctly.
+          const parsed = parseTierLimitError(error);
+          expect(parsed?.code).toBe("RESERVATION_TYPE_LIMIT_REACHED");
+          expect(parsed?.tier).toBe("professional");
+          expect(parsed?.limit).toBe(PROFESSIONAL_LIMIT);
+        } catch (e) {
+          status = "FAIL";
+          detail = `message contract broken: ${(e as Error).message.split("\n")[0]}`;
+          throw e;
+        } finally {
+          record({ status, kind: "invalid", name: `msg: ${name}`, size: types.length, detail });
+        }
+      },
+    );
+  });
 });
 
