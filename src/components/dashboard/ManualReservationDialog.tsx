@@ -99,6 +99,7 @@ const ManualReservationDialog = ({
   const [form, setForm] = useState({ ...emptyForm, reservation_type: defaultType ?? "" });
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(defaultDate);
   const [selectedResourceId, setSelectedResourceId] = useState("");
+  const [selectedSubServices, setSelectedSubServices] = useState<{ id: string; name: string; price_eur?: number; qty: number }[]>([]);
 
   type LinkedEntry = {
     id: string;
