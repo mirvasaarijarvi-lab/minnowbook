@@ -26,6 +26,7 @@ import LanguageSwitcher from "@/components/LanguageSwitcher";
 import PublicReviews from "@/components/public/PublicReviews";
 import WaitlistButton from "@/components/public/WaitlistButton";
 import React from "react";
+import { buildTypeTiles } from "@/lib/booking-tiles";
 
 // Types for public views (not in auto-generated types)
 interface PublicTenant {
