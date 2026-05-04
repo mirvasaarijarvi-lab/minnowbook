@@ -28,7 +28,7 @@
  * error in a way that would break the UI's tier-error pipeline.
  */
 
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { parseTierLimitError } from "./tier-error-codes";
 import { getTierLimits } from "./tier-limits";
 
