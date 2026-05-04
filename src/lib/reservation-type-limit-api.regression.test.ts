@@ -309,63 +309,88 @@ describe("reservations-type API: Professional 5-type cap", () => {
   describe("rejected updates never mutate the persisted row", () => {
     for (const baseline of BASELINES) {
       for (const combo of SIX_TYPE_COMBOS) {
+        const caseName = `baseline[${baseline.name}] vs reject[${combo.name}]`;
         it(`baseline [${baseline.name}] is preserved when rejecting [${combo.name}]`, async () => {
-          seedTenant(baseline.types);
-          const before = await readPersistedTypes();
-          // Snapshot defensively in case any layer accidentally aliases.
-          const beforeSnapshot = JSON.stringify(before);
-
-          const { data, error } = await callReservationTypesApi(combo.types);
-
-          // The trigger must have rejected and returned no row.
-          expect(error).not.toBeNull();
-          expect(data).toBeNull();
-
-          // The persisted row must be byte-identical to the baseline.
-          const after = await readPersistedTypes();
-          expect(JSON.stringify(after)).toBe(beforeSnapshot);
-          expect(after).toEqual(baseline.types);
+          let status: "PASS" | "FAIL" = "PASS";
+          let detail = "row byte-identical after rejection";
+          try {
+            seedTenant(baseline.types);
+            const before = await readPersistedTypes();
+            const beforeSnapshot = JSON.stringify(before);
+            const { data, error } = await callReservationTypesApi(combo.types);
+            expect(error).not.toBeNull();
+            expect(data).toBeNull();
+            const after = await readPersistedTypes();
+            expect(JSON.stringify(after)).toBe(beforeSnapshot);
+            expect(after).toEqual(baseline.types);
+          } catch (e) {
+            status = "FAIL";
+            detail = `mutation detected: ${(e as Error).message.split("\n")[0]}`;
+            throw e;
+          } finally {
+            record({ status, kind: "atomic", name: caseName, size: combo.types.length, detail });
+          }
         });
       }
     }
 
     it("after several rejections in a row, no partial write leaks through", async () => {
-      seedTenant(["hotel", "spa"]);
-
-      for (const combo of SIX_TYPE_COMBOS) {
-        const { error } = await callReservationTypesApi(combo.types);
-        expect(error).not.toBeNull();
-        // Read between each rejection to catch incremental drift.
-        expect(await readPersistedTypes()).toEqual(["hotel", "spa"]);
+      let status: "PASS" | "FAIL" = "PASS";
+      let detail = "no drift across sequential rejections";
+      try {
+        seedTenant(["hotel", "spa"]);
+        for (const combo of SIX_TYPE_COMBOS) {
+          const { error } = await callReservationTypesApi(combo.types);
+          expect(error).not.toBeNull();
+          expect(await readPersistedTypes()).toEqual(["hotel", "spa"]);
+        }
+      } catch (e) {
+        status = "FAIL";
+        detail = `drift: ${(e as Error).message.split("\n")[0]}`;
+        throw e;
+      } finally {
+        record({ status, kind: "atomic", name: "sequential rejections", size: "--", detail });
       }
     });
 
     it("an accepted update between rejections persists, and a later rejection does not undo it", async () => {
-      seedTenant(["hotel"]);
-
-      // Reject first.
-      let res = await callReservationTypesApi([...BUILT_IN, "custom"]);
-      expect(res.error).not.toBeNull();
-      expect(await readPersistedTypes()).toEqual(["hotel"]);
-
-      // Accept a valid 5-type update.
-      const valid = ["hotel", "restaurant", "spa", "venue", "custom"];
-      res = await callReservationTypesApi(valid);
-      expect(res.error).toBeNull();
-      expect(await readPersistedTypes()).toEqual(valid);
-
-      // Reject again. The previously accepted value must remain intact.
-      res = await callReservationTypesApi([...valid, "extra"]);
-      expect(res.error).not.toBeNull();
-      expect(await readPersistedTypes()).toEqual(valid);
+      let status: "PASS" | "FAIL" = "PASS";
+      let detail = "accepted value preserved across surrounding rejections";
+      try {
+        seedTenant(["hotel"]);
+        let res = await callReservationTypesApi([...BUILT_IN, "custom"]);
+        expect(res.error).not.toBeNull();
+        expect(await readPersistedTypes()).toEqual(["hotel"]);
+        const valid = ["hotel", "restaurant", "spa", "venue", "custom"];
+        res = await callReservationTypesApi(valid);
+        expect(res.error).toBeNull();
+        expect(await readPersistedTypes()).toEqual(valid);
+        res = await callReservationTypesApi([...valid, "extra"]);
+        expect(res.error).not.toBeNull();
+        expect(await readPersistedTypes()).toEqual(valid);
+      } catch (e) {
+        status = "FAIL";
+        detail = `regression: ${(e as Error).message.split("\n")[0]}`;
+        throw e;
+      } finally {
+        record({ status, kind: "atomic", name: "accept between rejects", size: "--", detail });
+      }
     });
 
     it("rejection on a non-existent row creates nothing", async () => {
-      // Sanity check: an over-cap UPDATE on an unseeded id must not
-      // create the row as a side effect.
-      const { error } = await callReservationTypesApi([...BUILT_IN, "custom"], "ghost-tenant");
-      expect(error).not.toBeNull();
-      expect(await readPersistedTypes("ghost-tenant")).toBeNull();
+      let status: "PASS" | "FAIL" = "PASS";
+      let detail = "no phantom row created on rejection";
+      try {
+        const { error } = await callReservationTypesApi([...BUILT_IN, "custom"], "ghost-tenant");
+        expect(error).not.toBeNull();
+        expect(await readPersistedTypes("ghost-tenant")).toBeNull();
+      } catch (e) {
+        status = "FAIL";
+        detail = `phantom row: ${(e as Error).message.split("\n")[0]}`;
+        throw e;
+      } finally {
+        record({ status, kind: "atomic", name: "ghost tenant", size: "--", detail });
+      }
     });
   });
 });
