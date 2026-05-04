@@ -1,0 +1,142 @@
+name: Live Reservation-Type Cap Tests
+
+# Boots a real local Supabase stack (Postgres + PostgREST + Auth) and
+# runs the end-to-end vitest suite in supabase/tests/integration/ that
+# verifies the Professional 5-type cap through the same supabase-js
+# network path the production app uses.
+#
+# This complements:
+#   - .github/workflows/tier-trigger-tests.yml (raw psql trigger tests)
+#   - src/lib/reservation-type-limit-api.regression.test.ts (mocked unit)
+#
+# When Docker is unavailable on the runner, the job emits a notice and
+# exits 0 to avoid blocking PRs on infra issues.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  live-cap-tests:
+    name: Reservation-type cap (live Postgres)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Detect Docker availability
+        id: docker-check
+        run: |
+          set +e
+          if ! command -v docker >/dev/null 2>&1 || ! docker info >/dev/null 2>&1; then
+            echo "::notice::Docker unavailable, skipping live cap tests."
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "available=true" >> "$GITHUB_OUTPUT"
+
+      - name: Setup Bun
+        if: steps.docker-check.outputs.available == 'true'
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        if: steps.docker-check.outputs.available == 'true'
+        run: bun install --frozen-lockfile
+
+      - name: Setup Supabase CLI
+        id: supabase-cli
+        if: steps.docker-check.outputs.available == 'true'
+        uses: supabase/setup-cli@b579fc8c7122aa485f1d947120eaeb11ee04d312 # v2.0.0
+        with:
+          version: latest
+        continue-on-error: true
+
+      - name: Skip if Supabase CLI unavailable
+        if: steps.docker-check.outputs.available == 'true' && steps.supabase-cli.outcome != 'success'
+        run: echo "::notice::Supabase CLI install failed, skipping."
+
+      # See tier-trigger-tests.yml for context: legacy seed migrations
+      # reference a hardcoded production tenant id, so we pre-create a
+      # placeholder tenant + auth user for them to attach to.
+      - name: Inject placeholder tenant for local-only seed data
+        if: steps.docker-check.outputs.available == 'true' && steps.supabase-cli.outcome == 'success'
+        run: |
+          set -euo pipefail
+          cat > supabase/migrations/20260224082115_ci_placeholder_tenant.sql <<'SQL'
+          INSERT INTO auth.users (id, instance_id, aud, role, email, encrypted_password, email_confirmed_at, created_at, updated_at)
+          VALUES (
+            '00000000-0000-0000-0000-0000000000c1',
+            '00000000-0000-0000-0000-000000000000',
+            'authenticated', 'authenticated',
+            'ci-placeholder@example.invalid',
+            crypt('ci-placeholder-password', gen_salt('bf')),
+            now(), now(), now()
+          )
+          ON CONFLICT (id) DO NOTHING;
+
+          INSERT INTO public.tenants (id, name, slug, tier, is_active, subscription_status, owner_user_id)
+          VALUES (
+            '9ac05fbf-0834-44fd-a52a-d030b7074a30',
+            'CI Placeholder Tenant',
+            'ci-placeholder-tenant',
+            'business', true, 'active',
+            '00000000-0000-0000-0000-0000000000c1'
+          )
+          ON CONFLICT (id) DO NOTHING;
+          SQL
+
+      - name: Start local Supabase stack
+        id: supabase-start
+        if: steps.docker-check.outputs.available == 'true' && steps.supabase-cli.outcome == 'success'
+        run: |
+          set -euo pipefail
+          # We need PostgREST (the API layer) for end-to-end coverage,
+          # so do NOT exclude it. Excluding heavy services keeps boot
+          # time reasonable.
+          supabase start --exclude=imgproxy,mailpit,studio,realtime,edge-runtime
+
+      - name: Wait for PostgREST API
+        if: steps.supabase-start.outcome == 'success'
+        run: |
+          set -uo pipefail
+          for i in $(seq 1 60); do
+            if curl -sf "http://127.0.0.1:54321/rest/v1/" >/dev/null 2>&1; then
+              echo "PostgREST ready after ${i}s"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "::error::PostgREST never came up"
+          exit 1
+
+      - name: Resolve local Supabase keys
+        id: keys
+        if: steps.supabase-start.outcome == 'success'
+        run: |
+          set -euo pipefail
+          # `supabase status -o env` prints KEY=VALUE pairs we can source.
+          eval "$(supabase status -o env)"
+          {
+            echo "url=${API_URL}"
+            echo "service_role=${SERVICE_ROLE_KEY}"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Run live integration tests
+        if: steps.supabase-start.outcome == 'success'
+        env:
+          SUPABASE_URL: ${{ steps.keys.outputs.url }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ steps.keys.outputs.service_role }}
+        run: |
+          set -euo pipefail
+          bunx vitest run --config vitest.live.config.ts --reporter=verbose
+
+      - name: Stop local Supabase stack
+        if: always() && steps.supabase-start.outcome == 'success'
+        run: supabase stop --no-backup || true
