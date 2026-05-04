@@ -105,16 +105,34 @@ const tenantStore = (supabaseModule as unknown as {
 }).__store;
 
 
-// ---- Helper: the call the Settings UI actually makes -------------------
+// ---- Helpers: the calls the Settings UI actually makes -----------------
 
-async function callReservationTypesApi(types: string[]) {
+const TENANT_ID = "tenant-test";
+
+async function callReservationTypesApi(types: string[], id: string = TENANT_ID) {
   return await supabase
     .from("tenants")
     .update({ allowed_reservation_types: types })
-    .eq("id", "tenant-test")
+    .eq("id", id)
     .select()
     .maybeSingle();
 }
+
+/** Read the persisted row exactly as a follow-up SELECT from the UI would. */
+async function readPersistedTypes(id: string = TENANT_ID): Promise<string[] | null> {
+  const { data } = await supabase
+    .from("tenants")
+    .select("allowed_reservation_types")
+    .eq("id", id)
+    .maybeSingle();
+  return data ? (data as { allowed_reservation_types: string[] }).allowed_reservation_types : null;
+}
+
+/** Seed the in-memory tenant row with a known baseline. */
+function seedTenant(types: string[], id: string = TENANT_ID) {
+  tenantStore.set(id, { id, allowed_reservation_types: [...types] });
+}
+
 
 // ---- Combinations under test -------------------------------------------
 
