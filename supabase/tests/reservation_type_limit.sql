@@ -80,14 +80,18 @@ BEGIN
       v_detail := 'should have been rejected but was accepted';
     EXCEPTION WHEN OTHERS THEN
       v_errmsg := SQLERRM;
-      IF v_errmsg LIKE '%at most 5%' THEN
+      IF v_errmsg = 'Tier "professional" allows at most 5 reservation type(s). Upgrade to add more.' THEN
         v_pass := v_pass + 1;
         v_status := 'PASS';
-        v_detail := 'rejected as expected';
+        v_detail := 'rejected with exact contract message';
+      ELSIF v_errmsg LIKE '%at most 5%' THEN
+        v_fail := v_fail + 1;
+        v_status := 'FAIL';
+        v_detail := 'message drift (substring ok, full string differs): ' || v_errmsg;
       ELSE
         v_fail := v_fail + 1;
         v_status := 'FAIL';
-        v_detail := 'wrong error: ' || v_errmsg;
+        v_detail := 'wrong error (no "at most 5"): ' || v_errmsg;
       END IF;
     END;
     v_results := v_results || format(
