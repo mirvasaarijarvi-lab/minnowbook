@@ -148,6 +148,11 @@ type TranslationKeys = {
   "settings.resourceTypeNamesDesc": string;
   "settings.resourceTypeName": string;
   "settings.resourceTypeDescPlaceholder": string;
+  "settings.reservationTypes": string;
+  "settings.reservationTypesDesc": string;
+  "settings.reservationTypesLimit": string;
+  "settings.reservationTypesSaved": string;
+  "settings.reservationTypesUpgrade": string;
 
   // Booking (public)
   "booking.title": string;
@@ -1822,8 +1827,13 @@ const en: TranslationKeys = {
   "settings.heroImageHint": "Recommended: 1600×600 px. PNG, JPG or WebP. Max 5 MB.",
   "settings.heroImageUploaded": "Hero image uploaded",
    "settings.heroImageUploadError": "Failed to upload hero image",
-   "settings.resourceTypeNames": "Resource Type Names",
-   "settings.resourceTypeNamesDesc": "Give custom display names to your booking types. These names appear on the public booking page.",
+  "settings.resourceTypeNames": "Resource Type Names",
+  "settings.resourceTypeNamesDesc": "Give custom display names to your booking types. These names appear on the public booking page.",
+  "settings.reservationTypes": "Reservation Types",
+  "settings.reservationTypesDesc": "Choose which booking types your business offers. These appear as tiles on your public booking page.",
+  "settings.reservationTypesLimit": "Your plan allows up to {max} type(s).",
+  "settings.reservationTypesSaved": "Reservation types updated.",
+  "settings.reservationTypesUpgrade": "Upgrade your plan to enable more types.",
    "settings.resourceTypeName": "Display name for {type}",
    "settings.resourceTypeDescPlaceholder": "Custom description for booking page",
 
@@ -3479,6 +3489,11 @@ const fi: TranslationKeys = {
    "settings.heroImageUploadError": "Hero-kuvan lataus epäonnistui",
    "settings.resourceTypeNames": "Varauskohteiden nimet",
    "settings.resourceTypeNamesDesc": "Anna omat näyttönimet varauskohteillesi. Nämä nimet näkyvät julkisella varaussivulla.",
+   "settings.reservationTypes": "Varaustyypit",
+   "settings.reservationTypesDesc": "Valitse, mitä varaustyyppejä yrityksesi tarjoaa. Nämä näkyvät ruutuina julkisella varaussivulla.",
+   "settings.reservationTypesLimit": "Tilauksesi sallii enintään {max} tyyppiä.",
+   "settings.reservationTypesSaved": "Varaustyypit päivitetty.",
+   "settings.reservationTypesUpgrade": "Päivitä tilauksesi ottaaksesi käyttöön lisää tyyppejä.",
    "settings.resourceTypeName": "Näyttönimi: {type}",
    "settings.resourceTypeDescPlaceholder": "Oma kuvaus varaussivulle",
 
@@ -5132,6 +5147,11 @@ const sv: TranslationKeys = {
    "settings.heroImageUploadError": "Kunde inte ladda upp hero-bild",
    "settings.resourceTypeNames": "Namn på bokningstyperna",
    "settings.resourceTypeNamesDesc": "Ge egna visningsnamn åt dina bokningstyper. Dessa namn visas på den offentliga bokningssidan.",
+   "settings.reservationTypes": "Bokningstyper",
+   "settings.reservationTypesDesc": "Välj vilka bokningstyper ditt företag erbjuder. Dessa visas som rutor på den offentliga bokningssidan.",
+   "settings.reservationTypesLimit": "Din prenumeration tillåter högst {max} typ(er).",
+   "settings.reservationTypesSaved": "Bokningstyperna uppdaterades.",
+   "settings.reservationTypesUpgrade": "Uppgradera din prenumeration för att aktivera fler typer.",
    "settings.resourceTypeName": "Visningsnamn för {type}",
    "settings.resourceTypeDescPlaceholder": "Egen beskrivning för bokningssidan",
 

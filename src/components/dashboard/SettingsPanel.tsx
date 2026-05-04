@@ -20,6 +20,7 @@ import EmailTemplateEditor from "./EmailTemplateEditor";
 import OpeningHoursSettings from "./OpeningHoursSettings";
 import DiscountCodesPanel from "./DiscountCodesPanel";
 import RedeemAccessCode from "./RedeemAccessCode";
+import ReservationTypesCard from "./ReservationTypesCard";
 
 const SITE_COLOR_PRESETS = [
   { name: "Navy & Amber", primary: "#1e3a5f", secondary: "#f5f0e8", accent: "#d4a853" },
@@ -1034,6 +1035,9 @@ const SettingsPanel = () => {
       {/* Discount Codes */}
       <DiscountCodesPanel />
 
+
+      {/* Reservation Types — toggle which types this tenant offers */}
+      <ReservationTypesCard />
 
       {/* Resource Type Names & Descriptions */}
       {tenant?.allowed_reservation_types?.length > 0 && (
