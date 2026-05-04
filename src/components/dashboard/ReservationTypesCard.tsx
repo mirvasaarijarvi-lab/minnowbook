@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/hooks/useTenant";
+import { useTierGate } from "@/hooks/useTierGate";
 import { useT, useTDynamic } from "@/contexts/I18nContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,7 +10,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { UtensilsCrossed, Building2, BedDouble, Sparkles, Loader2 } from "lucide-react";
-import { getTierLimits } from "@/lib/tier-limits";
 
 const TYPE_OPTIONS = [
   { id: "restaurant", icon: UtensilsCrossed },
@@ -21,6 +21,9 @@ const TYPE_OPTIONS = [
 
 const ReservationTypesCard = () => {
   const { tenantId, tenant, isOwner } = useTenant();
+  // Use useTierGate so superadmins/system admins automatically bypass the
+  // reservation-type cap (effectiveTier=business → maxReservationTypes=null).
+  const { limits, isSystemAdmin } = useTierGate();
   const t = useT();
   const tDynamic = useTDynamic();
   const queryClient = useQueryClient();
@@ -35,8 +38,7 @@ const ReservationTypesCard = () => {
     setSelected(initial);
   }, [initial]);
 
-  const limits = getTierLimits(tenant?.tier);
-  const max = limits.maxReservationTypes;
+  const max = limits.maxReservationTypes; // null = unlimited (e.g. business or superadmin)
 
   const toggle = (id: string) => {
     setSelected((prev) => {
