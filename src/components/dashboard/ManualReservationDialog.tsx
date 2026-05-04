@@ -227,6 +227,10 @@ const ManualReservationDialog = ({
           water_needed: form.water_needed,
           food_permits: form.food_permits || null,
           stall_fee: form.stall_fee ? parseFloat(form.stall_fee) : null,
+        ...(form.reservation_type === "custom" && selectedSubServices.length > 0 && {
+          selected_sub_services: selectedSubServices.map((s) => ({
+            id: s.id, name: s.name, price_eur: s.price_eur ?? null, qty: s.qty,
+          })),
         }),
       } as any).select("id").single();
       if (error) {
