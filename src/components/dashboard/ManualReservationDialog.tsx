@@ -33,7 +33,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useDateLocale } from "@/hooks/useDateLocale";
 import { toast } from "sonner";
 import { format } from "date-fns";
-import { CalendarIcon, Loader2, Tag } from "lucide-react";
+import { CalendarIcon, Loader2, Tag, Link2, Plus, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { computeBookingCapacity, logBookingValidation, buildValidationReasons } from "@/lib/booking-validation-log";
 
