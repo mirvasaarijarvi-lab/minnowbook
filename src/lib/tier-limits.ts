@@ -21,7 +21,7 @@ interface TierLimits {
 
 const TIER_LIMITS: Record<string, TierLimits> = {
   basic:        { maxSites: 1,    maxReservationTypes: 2,    maxResourcesPerType: null, maxResourcesTotal: 2,    maxStaffUsers: 5 },
-  professional: { maxSites: 1,    maxReservationTypes: null, maxResourcesPerType: 1,    maxResourcesTotal: null, maxStaffUsers: 25 },
+  professional: { maxSites: 1,    maxReservationTypes: 5,    maxResourcesPerType: null, maxResourcesTotal: null, maxStaffUsers: 25 },
   business:     { maxSites: null, maxReservationTypes: null, maxResourcesPerType: null, maxResourcesTotal: null, maxStaffUsers: null },
 };
 
