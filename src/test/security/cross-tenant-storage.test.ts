@@ -3832,7 +3832,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         // names are distinctive so leak detection in list() can
         // unambiguously flag them.
         const aPath = `${runRootFor(liveCreds.a.tenantId!)}/a-public-cdn-seed.txt`;
-        const { error: aErr } = await storageCall(
+        const { error: aErr } = await allowedStorageCall(
           () => clientA.storage
             .from(ASSETS_BUCKET)
             .upload(aPath, fileBytes("a-public-cdn-seed"), { upsert: true }),
@@ -3842,7 +3842,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         seededAssets.push({ path: aPath, client: "a" });
 
         const bPath = `${runRootFor(liveCreds.b.tenantId!)}/b-public-cdn-seed.txt`;
-        const { error: bErr } = await storageCall(
+        const { error: bErr } = await allowedStorageCall(
           () => clientB.storage
             .from(ASSETS_BUCKET)
             .upload(bPath, fileBytes("b-public-cdn-seed"), { upsert: true }),
