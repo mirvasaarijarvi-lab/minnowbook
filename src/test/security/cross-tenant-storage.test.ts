@@ -1334,7 +1334,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       // setup is misconfigured (wrong tenant IDs, missing membership, etc.).
       it("user A CAN upload + download in their own tenant-private folder (sanity)", async () => {
         const path = ownPath(liveCreds.a.tenantId!, "a-own-private");
-        const { error: upErr } = await storageCall(
+        const { error: upErr } = await allowedStorageCall(
           () => clientA.storage
             .from(PRIVATE_BUCKET)
             .upload(path, fileBytes("a-own-private"), { upsert: true }),
@@ -1343,7 +1343,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         expect(upErr).toBeNull();
         if (!upErr) uploadedPaths.push({ bucket: PRIVATE_BUCKET, path, client: "a" });
 
-        const { data, error: dlErr } = await storageCall(
+        const { data, error: dlErr } = await allowedStorageCall(
           () => clientA.storage.from(PRIVATE_BUCKET).download(path),
           "A private download",
         );
@@ -1353,7 +1353,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
 
       it("user B CAN upload + download in their own tenant-private folder (sanity)", async () => {
         const path = ownPath(liveCreds.b.tenantId!, "b-own-private");
-        const { error: upErr } = await storageCall(
+        const { error: upErr } = await allowedStorageCall(
           () => clientB.storage
             .from(PRIVATE_BUCKET)
             .upload(path, fileBytes("b-own-private"), { upsert: true }),
@@ -1362,7 +1362,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         expect(upErr).toBeNull();
         if (!upErr) uploadedPaths.push({ bucket: PRIVATE_BUCKET, path, client: "b" });
 
-        const { data, error: dlErr } = await storageCall(
+        const { data, error: dlErr } = await allowedStorageCall(
           () => clientB.storage.from(PRIVATE_BUCKET).download(path),
           "B private download",
         );
@@ -1372,7 +1372,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
 
       it("user A CAN upload to their own tenant-assets folder (sanity)", async () => {
         const path = ownPath(liveCreds.a.tenantId!, "a-own-assets");
-        const { error } = await storageCall(
+        const { error } = await allowedStorageCall(
           () => clientA.storage
             .from(ASSETS_BUCKET)
             .upload(path, fileBytes("a-own-assets"), { upsert: true }),
