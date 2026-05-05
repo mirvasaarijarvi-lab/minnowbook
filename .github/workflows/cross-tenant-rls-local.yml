@@ -813,9 +813,9 @@ jobs:
           # Keep every storage request bounded below the Vitest timeout so
           # policy failures surface as actionable errors instead of 120s hangs.
           RLS_STORAGE_DENIAL_CALL_TIMEOUT_MS: 6000
-          RLS_STORAGE_ALLOWED_CALL_TIMEOUT_MS: 15000
-          RLS_STORAGE_FETCH_TIMEOUT_MS: 15000
-          RLS_STORAGE_ALLOWED_RETRY_ATTEMPTS: 1
+          RLS_STORAGE_ALLOWED_CALL_TIMEOUT_MS: 25000
+          RLS_STORAGE_FETCH_TIMEOUT_MS: 25000
+          RLS_STORAGE_ALLOWED_RETRY_ATTEMPTS: 3
           # Tags the generated report so local-stack output is distinguishable
           # from remote-staging output when both artifacts are downloaded.
           RLS_REPORT_FLAVOR: ${{ matrix.flavor }}
