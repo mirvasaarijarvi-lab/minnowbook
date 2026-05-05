@@ -107,7 +107,12 @@ jobs:
           )
           ON CONFLICT (id) DO NOTHING;
 
-          -- Placeholder site referenced by legacy reservation/site_users seeds
+          SQL
+
+          # Site placeholder must run AFTER the sites table is created
+          # (migration 20260303093523_*) and BEFORE the legacy site_users
+          # seed at 20260303123922_*.
+          cat > supabase/migrations/20260303093524_ci_placeholder_site.sql <<'SQL'
           INSERT INTO public.sites (id, tenant_id, name, slug, is_active)
           VALUES (
             'b040ab30-f4d2-45cc-8695-2000572428d7',
