@@ -21,9 +21,28 @@ on:
 
 jobs:
   rls-local:
-    name: Cross-Tenant RLS (local stack)
+    name: Cross-Tenant RLS (local stack, ${{ matrix.label }})
     runs-on: ubuntu-latest
     timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: core
+            flavor: local-core
+            command: test:rls-report:core
+          - label: storage-baseline
+            flavor: local-storage-baseline
+            command: test:rls-report:storage-baseline
+          - label: storage-adversarial
+            flavor: local-storage-adversarial
+            command: test:rls-report:storage-adversarial
+          - label: storage-assets
+            flavor: local-storage-assets
+            command: test:rls-report:storage-assets
+          - label: storage-multipart
+            flavor: local-storage-multipart
+            command: test:rls-report:storage-multipart
 
     steps:
       - name: Checkout code
@@ -143,14 +162,14 @@ jobs:
           RLS_TEST_TENANT_B_ID: ${{ secrets.RLS_TEST_TENANT_B_ID }}
           # Tag the report so the remote-fallback artifact is distinguishable
           # from the local-stack artifact (different filename suffix).
-          RLS_REPORT_FLAVOR: remote-fallback
-        run: bun run test:rls-report
+          RLS_REPORT_FLAVOR: remote-fallback-${{ matrix.label }}
+        run: bun run ${{ matrix.command }}
 
       - name: Upload RLS report (remote fallback)
         if: always() && steps.docker-check.outputs.available != 'true' && steps.remote-check.outputs.enabled == 'true' && steps.remote-rls-tests.conclusion != 'skipped'
         uses: actions/upload-artifact@v7
         with:
-          name: rls-report-remote-fallback
+          name: rls-report-remote-fallback-${{ matrix.label }}
           path: reports/
           retention-days: 14
           if-no-files-found: warn
