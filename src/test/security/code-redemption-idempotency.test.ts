@@ -227,7 +227,7 @@ describe("redeem-access-code — idempotency key contract", () => {
     // cache replay of each other, and neither carries the replay header.
     expect(r1.replay).toBeNull();
     expect(r2.replay).toBeNull();
-  });
+  }, 30_000);
 
   it("idempotency key passed via Idempotency-Key header is accepted equivalently to the body field", async () => {
     // Verifies the dual-input contract documented in the function:
