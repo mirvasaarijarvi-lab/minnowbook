@@ -2964,7 +2964,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
                       .storage.from(bucket)
                       .upload(
                         variant.path,
-                        fileBytes(`${dir.attacker}-late-${variant.label}`),
+                        fileText(`${dir.attacker}-late-${variant.label}`),
                         { upsert: true },
                       ),
                   `late-segment upload ${bucket}/${variant.path}`,
@@ -3737,7 +3737,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       // assert the bytes (when leaked) don't match the victim's seed.
       it("user A cannot download() tenant B's seeded asset via any tricky path", async () => {
         const trickyPaths = buildTrickyPaths(liveCreds.a.tenantId!, liveCreds.b.tenantId!);
-        const victimBytes = await fileBytes("b-traversal-target").text();
+        const victimBytes = fileText("b-traversal-target");
 
         for (const tricky of trickyPaths) {
           const { data, error } = await clientA.storage
@@ -3767,7 +3767,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
             // for the reverse direction we substitute it.
             p.replace("b-traversal-target.txt", "a-traversal-target.txt"),
         );
-        const victimBytes = await fileBytes("a-traversal-target").text();
+        const victimBytes = fileText("a-traversal-target");
 
         for (const tricky of trickyPaths) {
           const { data, error } = await clientB.storage
@@ -3953,8 +3953,8 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       // plus byte equality so a regression that flips the bucket to
       // private — or tightens RLS to block anon SELECT — is caught.
       it("anonymous fetch() of public CDN URL returns the file bytes for both tenants", async () => {
-        const expectedA = await fileBytes("a-public-cdn-seed").text();
-        const expectedB = await fileBytes("b-public-cdn-seed").text();
+        const expectedA = fileText("a-public-cdn-seed");
+        const expectedB = fileText("b-public-cdn-seed");
 
         const aPath = `${runRootFor(liveCreds.a.tenantId!)}/a-public-cdn-seed.txt`;
         const bPath = `${runRootFor(liveCreds.b.tenantId!)}/b-public-cdn-seed.txt`;
