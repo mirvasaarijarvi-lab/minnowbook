@@ -6036,7 +6036,7 @@ const sv: TranslationKeys = {
   "help.guide5Q": "Hur lägger jag till eller redigerar resurser?",
   "help.guide5A": "Gå till **Instrumentpanel → Resurser** för att skapa rum, bord eller lokaler.",
   "help.guide6Q": "Vad är nytt i MimmoBook?",
-  "help.guide6A": "Senaste tilläggen: **Gästportal** (bokningshantering via magisk länk), **väntelista** med automatiska aviseringar, **Google Kalender-synk** via iCal-flöde, **CSV/PDF-export**, **mörkt läge**, **kortkommandon** (tryck `?`), **Snabbåtgärds-FAB** på mobil, **introduktionscheckslista**, **granskningsloggfilter**, **analysdiagram**, **publika omdömen/recensioner** och en **Stripe-intäktspanel** för superadmins.",
+  "help.guide6A": "Senaste tilläggen: **Gästportal** (bokningshantering via magisk länk), **väntelista** med automatiska aviseringar, **Google Kalender-synk** via iCal-flöde, **CSV/PDF-export**, **mörkt läge**, **kortkommandon** (tryck `?`), **Snabbåtgärds-FAB** på mobil, **introduktionscheckslista**, **granskningsloggfilter**, **analysdiagram**, **publika omdömen/recensioner**, **kökets beställningar** för restaurang- och lokalbokningar, och en **Stripe-intäktspanel** för superadmins.",
 
   // MimmoAid
   "aid.title": "MimmoAid",
