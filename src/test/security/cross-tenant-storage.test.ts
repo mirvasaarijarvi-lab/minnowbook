@@ -57,6 +57,10 @@ const MULTIPART_SWEEP_RAW = (process.env.RLS_MULTIPART_SWEEP ?? "").trim().toLow
 const MULTIPART_SWEEP_ENABLED = !["off", "0", "false", "disabled", "no"].includes(
   MULTIPART_SWEEP_RAW,
 );
+const isUnsupportedStorageSchemaError = (message: string) =>
+  /Invalid schema:\s*storage|schema .*storage.*does not exist|relation .*s3_multipart_uploads.*does not exist/i.test(
+    message,
+  );
 if (!MULTIPART_SWEEP_ENABLED) {
   // Single startup banner so it's obvious in CI logs which mode the run
   // is in. Printed once, regardless of how many describe blocks run.
@@ -546,6 +550,16 @@ async function sweepMultipartIntermediates(bucket: string, tenantIds: string[]) 
       // The table may not exist on older Supabase versions / self-hosted
       // installs without the S3 driver — that's fine, treat as no-op.
       if (selectErr) {
+        if (isUnsupportedStorageSchemaError(selectErr.message ?? "")) {
+          recordCleanup({
+            bucket,
+            path: `${keyPrefix}${RUN_ID}/*`,
+            role: "admin-multipart",
+            removed: false,
+            note: `multipart sweep skipped: ${selectErr.message}`,
+          });
+          continue;
+        }
         bumpStats(tenantId, "errors");
         recordCleanup({
           bucket,
