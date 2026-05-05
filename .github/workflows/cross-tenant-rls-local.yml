@@ -767,6 +767,7 @@ jobs:
           # Vite reads these via import.meta.env at test compile time.
           VITE_SUPABASE_URL: ${{ env.SUPABASE_URL }}
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ env.SUPABASE_ANON_KEY }}
+          RLS_STORAGE_CALL_TIMEOUT_MS: 6000
           # Tags the generated report so local-stack output is distinguishable
           # from remote-staging output when both artifacts are downloaded.
           RLS_REPORT_FLAVOR: ${{ matrix.flavor }}
