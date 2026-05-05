@@ -1915,11 +1915,14 @@ describe("Cross-Tenant Storage RLS Tests", () => {
                 owner: "a",
               });
 
-              const { error } = await clientB.storage
-                .from(PRIVATE_BUCKET)
-                .upload(seeded.path, fileBytes(ATTACKER_PAYLOAD_TAG), {
-                  upsert: upsertMode,
-                });
+              const { error } = await storageCall(
+                () => clientB.storage
+                  .from(PRIVATE_BUCKET)
+                  .upload(seeded.path, fileBytes(ATTACKER_PAYLOAD_TAG), {
+                    upsert: upsertMode,
+                  }),
+                `B overwrite private ${scenario.name} upsert=${upsertMode}`,
+              );
               // Either path MUST error: upsert=true would be an overwrite
               // (denied by the policy on UPDATE/INSERT-with-replace),
               // upsert=false would be either a 409 conflict OR the same
@@ -1958,11 +1961,14 @@ describe("Cross-Tenant Storage RLS Tests", () => {
                 owner: "b",
               });
 
-              const { error } = await clientA.storage
-                .from(PRIVATE_BUCKET)
-                .upload(seeded.path, fileBytes(ATTACKER_PAYLOAD_TAG), {
-                  upsert: upsertMode,
-                });
+              const { error } = await storageCall(
+                () => clientA.storage
+                  .from(PRIVATE_BUCKET)
+                  .upload(seeded.path, fileBytes(ATTACKER_PAYLOAD_TAG), {
+                    upsert: upsertMode,
+                  }),
+                `A overwrite private ${scenario.name} upsert=${upsertMode}`,
+              );
               expect(error).toBeTruthy();
 
               await assertVictimUnchanged(
@@ -2001,11 +2007,14 @@ describe("Cross-Tenant Storage RLS Tests", () => {
                 owner: "a",
               });
 
-              const { error } = await clientB.storage
-                .from(ASSETS_BUCKET)
-                .upload(seeded.path, fileBytes(ATTACKER_PAYLOAD_TAG), {
-                  upsert: upsertMode,
-                });
+              const { error } = await storageCall(
+                () => clientB.storage
+                  .from(ASSETS_BUCKET)
+                  .upload(seeded.path, fileBytes(ATTACKER_PAYLOAD_TAG), {
+                    upsert: upsertMode,
+                  }),
+                `B overwrite assets ${scenario.name} upsert=${upsertMode}`,
+              );
               expect(error).toBeTruthy();
 
               await assertVictimUnchanged(
