@@ -12,11 +12,12 @@ insert or update on table "site_users" violates foreign key constraint
 ```
 
 To keep CI green without rewriting the historical migrations, each
-workflow that boots a local Supabase stack injects an extra migration
-named `20260224082115_ci_placeholder_tenant.sql` **before** running
-`supabase start`. That migration pre-creates placeholder rows with the
-exact IDs the legacy seeds expect, so the seeds can attach to them via
-`ON CONFLICT DO NOTHING`.
+workflow that boots a local Supabase stack injects CI-only migrations
+**before** running `supabase start`. The tenant placeholder runs right
+after the `tenants` table exists, and the site placeholder runs right
+after the `sites` table exists. Together they pre-create placeholder
+rows with the exact IDs the legacy seeds expect, so the seeds can attach
+to them via `ON CONFLICT DO NOTHING`.
 
 ## Placeholder IDs (do not change)
 
@@ -34,10 +35,10 @@ the placeholder tenant.
 
 ## Where the IDs are injected
 
-Both workflows write the same `supabase/migrations/20260224082115_ci_placeholder_tenant.sql`
-file in a step named **"Inject placeholder tenant for local-only seed
-data"**, which runs after the Supabase CLI install and before
-`supabase start`:
+Workflows write the same `supabase/migrations/20260224082115_ci_placeholder_tenant.sql`
+and `supabase/migrations/20260303093524_ci_placeholder_site.sql` files in
+a step named **"Inject placeholder tenant for local-only seed data"**, which
+runs after the Supabase CLI install and before `supabase start`:
 
 - `.github/workflows/tier-trigger-tests.yml` , runs the raw psql
   trigger regression tests in `supabase/tests/*.sql`.
@@ -55,10 +56,13 @@ Update the table above (and the inject steps in every workflow) if:
 
 1. A new legacy migration starts referencing a different hardcoded
    production ID. Add the new ID and a corresponding placeholder row.
-2. An existing legacy migration is rewritten to stop depending on
+2. The site placeholder timestamp changes. It must stay after
+   `20260303093523_*` where `public.sites` is created and before
+   `20260303123922_*` where the legacy `site_users` seed runs.
+3. An existing legacy migration is rewritten to stop depending on
    hardcoded IDs. Remove the now-unused row from every workflow and
    from the table.
-3. A new CI workflow boots a local Supabase stack. Copy the
+4. A new CI workflow boots a local Supabase stack. Copy the
    "Inject placeholder tenant for local-only seed data" step verbatim
    so the seeds keep applying cleanly.
 
