@@ -3013,7 +3013,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         // an empty result could mask a leak (we wouldn't be able to tell
         // "nothing to see" from "policy hid it").
         const aPath = ownPath(liveCreds.a.tenantId!, "a-assets-isolation-seed");
-        const { error: aErr } = await storageCall(
+        const { error: aErr } = await allowedStorageCall(
           () => clientA.storage
             .from(ASSETS_BUCKET)
             .upload(aPath, fileBytes("a-assets-isolation-seed"), { upsert: true }),
@@ -3023,7 +3023,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         seededAssets.push({ path: aPath, client: "a" });
 
         const bPath = ownPath(liveCreds.b.tenantId!, "b-assets-isolation-seed");
-        const { error: bErr } = await storageCall(
+        const { error: bErr } = await allowedStorageCall(
           () => clientB.storage
             .from(ASSETS_BUCKET)
             .upload(bPath, fileBytes("b-assets-isolation-seed"), { upsert: true }),
@@ -3257,7 +3257,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         // probes have a real target. Names embed a probe marker so a
         // leak is unambiguous in test output.
         const aPath = ownPath(liveCreds.a.tenantId!, "a-probe-target-asset");
-        const { error: aErr } = await storageCall(
+        const { error: aErr } = await allowedStorageCall(
           () => clientA.storage
             .from(ASSETS_BUCKET)
             .upload(aPath, fileBytes("a-probe-target-asset"), { upsert: true }),
