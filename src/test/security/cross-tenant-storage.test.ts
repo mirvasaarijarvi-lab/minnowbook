@@ -27,6 +27,32 @@ const AUTH_STORAGE_NAMESPACE = `rls-storage-${Date.now()}-${Math.random()
 let authStorageSequence = 0;
 const nextAuthStorageKey = (label: string) =>
   `${AUTH_STORAGE_NAMESPACE}-${label}-${++authStorageSequence}`;
+function parseTimeoutMs(value: string | undefined, fallback: number) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+}
+const STORAGE_FETCH_TIMEOUT_MS = parseTimeoutMs(process.env.RLS_STORAGE_FETCH_TIMEOUT_MS, 25_000);
+const timeoutFetch: typeof fetch = async (input, init = {}) => {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), STORAGE_FETCH_TIMEOUT_MS);
+  const upstreamSignal = init.signal;
+  if (upstreamSignal?.aborted) {
+    controller.abort();
+  } else {
+    upstreamSignal?.addEventListener("abort", () => controller.abort(), { once: true });
+  }
+
+  try {
+    return await fetch(input, { ...init, signal: controller.signal });
+  } catch (err) {
+    if (controller.signal.aborted && !upstreamSignal?.aborted) {
+      throw new Error(`Storage fetch timed out after ${STORAGE_FETCH_TIMEOUT_MS}ms`);
+    }
+    throw err;
+  } finally {
+    clearTimeout(timeout);
+  }
+};
 const adminClient: SupabaseClient | null =
   SERVICE_ROLE_KEY && import.meta.env.VITE_SUPABASE_URL
     ? createClient(import.meta.env.VITE_SUPABASE_URL as string, SERVICE_ROLE_KEY, {
@@ -35,6 +61,7 @@ const adminClient: SupabaseClient | null =
           autoRefreshToken: false,
           storageKey: nextAuthStorageKey("admin"),
         },
+        global: { fetch: timeoutFetch },
       })
     : null;
 
@@ -949,11 +976,6 @@ const RUN_ID = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 const fileBytes = (label: string) =>
   new Blob([`storage-rls-test ${label} ${RUN_ID}`], { type: "text/plain" });
 
-const parseTimeoutMs = (value: string | undefined, fallback: number) => {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
-};
-
 const STORAGE_DENIAL_CALL_TIMEOUT_MS = parseTimeoutMs(
   process.env.RLS_STORAGE_DENIAL_CALL_TIMEOUT_MS,
   6_000,
@@ -990,7 +1012,7 @@ async function storageCall<T>(
 // genuine RLS denials still surface but warmup-jitter is absorbed.
 const STORAGE_ALLOWED_RETRY_ATTEMPTS = parseTimeoutMs(
   process.env.RLS_STORAGE_ALLOWED_RETRY_ATTEMPTS,
-  3,
+  1,
 );
 
 const allowedStorageCall = async <T>(
