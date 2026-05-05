@@ -167,8 +167,8 @@ jobs:
           RLS_TEST_TENANT_B_PASSWORD: ${{ secrets.RLS_TEST_TENANT_B_PASSWORD }}
           RLS_TEST_TENANT_B_ID: ${{ secrets.RLS_TEST_TENANT_B_ID }}
           RLS_STORAGE_DENIAL_CALL_TIMEOUT_MS: 6000
-          RLS_STORAGE_ALLOWED_CALL_TIMEOUT_MS: 25000
-          RLS_STORAGE_FETCH_TIMEOUT_MS: 25000
+          RLS_STORAGE_ALLOWED_CALL_TIMEOUT_MS: 15000
+          RLS_STORAGE_FETCH_TIMEOUT_MS: 15000
           RLS_STORAGE_ALLOWED_RETRY_ATTEMPTS: 1
           # Tag the report so the remote-fallback artifact is distinguishable
           # from the local-stack artifact (different filename suffix).
@@ -813,8 +813,8 @@ jobs:
           # Keep every storage request bounded below the Vitest timeout so
           # policy failures surface as actionable errors instead of 120s hangs.
           RLS_STORAGE_DENIAL_CALL_TIMEOUT_MS: 6000
-          RLS_STORAGE_ALLOWED_CALL_TIMEOUT_MS: 25000
-          RLS_STORAGE_FETCH_TIMEOUT_MS: 25000
+          RLS_STORAGE_ALLOWED_CALL_TIMEOUT_MS: 15000
+          RLS_STORAGE_FETCH_TIMEOUT_MS: 15000
           RLS_STORAGE_ALLOWED_RETRY_ATTEMPTS: 1
           # Tags the generated report so local-stack output is distinguishable
           # from remote-staging output when both artifacts are downloaded.
