@@ -985,9 +985,9 @@ const STORAGE_DENIAL_CALL_TIMEOUT_MS = parseTimeoutMs(
 const STORAGE_ALLOWED_CALL_TIMEOUT_MS = Math.max(
   parseTimeoutMs(
     process.env.RLS_STORAGE_ALLOWED_CALL_TIMEOUT_MS ?? process.env.RLS_STORAGE_CALL_TIMEOUT_MS,
-    45_000,
+    25_000,
   ),
-  45_000,
+  STORAGE_DENIAL_CALL_TIMEOUT_MS,
 );
 type TimedStorageResult<T> = T extends { error?: unknown }
   ? T
