@@ -975,8 +975,7 @@ const newAnonClient = (): SupabaseClient =>
 // delete files from concurrent CI runs, prior runs, or real tenant data.
 const RUN_ID = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
-const fileBytes = (label: string) =>
-  new Blob([`storage-rls-test ${label} ${RUN_ID}`], { type: "text/plain" });
+const fileText = (label: string) => `storage-rls-test ${label} ${RUN_ID}`;
 
 const STORAGE_DENIAL_CALL_TIMEOUT_MS = parseTimeoutMs(
   process.env.RLS_STORAGE_DENIAL_CALL_TIMEOUT_MS,
