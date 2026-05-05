@@ -166,6 +166,8 @@ jobs:
           RLS_TEST_TENANT_B_EMAIL: ${{ secrets.RLS_TEST_TENANT_B_EMAIL }}
           RLS_TEST_TENANT_B_PASSWORD: ${{ secrets.RLS_TEST_TENANT_B_PASSWORD }}
           RLS_TEST_TENANT_B_ID: ${{ secrets.RLS_TEST_TENANT_B_ID }}
+          RLS_STORAGE_DENIAL_CALL_TIMEOUT_MS: 6000
+          RLS_STORAGE_ALLOWED_CALL_TIMEOUT_MS: 45000
           # Tag the report so the remote-fallback artifact is distinguishable
           # from the local-stack artifact (different filename suffix).
           RLS_REPORT_FLAVOR: remote-fallback-${{ matrix.label }}
@@ -767,12 +769,12 @@ jobs:
           # Vite reads these via import.meta.env at test compile time.
           VITE_SUPABASE_URL: ${{ env.SUPABASE_URL }}
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ env.SUPABASE_ANON_KEY }}
-          # Local Supabase storage on GitHub runners is bursty; uploads
-          # routinely take 8 to 15s under matrix load. Give each storage
-          # SDK call generous headroom so seed steps don't trip the
-          # per-test timeout. The per-test timeout is bumped via the
-          # `--testTimeout` flag in the package.json scripts.
-          RLS_STORAGE_CALL_TIMEOUT_MS: 45000
+          # Local Supabase storage on GitHub runners is bursty. Keep denied
+          # probes short, but give positive-control uploads and seed uploads
+          # enough headroom so slow local storage is not reported as an RLS
+          # regression. The test file enforces a 45s minimum for allowed calls.
+          RLS_STORAGE_DENIAL_CALL_TIMEOUT_MS: 6000
+          RLS_STORAGE_ALLOWED_CALL_TIMEOUT_MS: 45000
           # Tags the generated report so local-stack output is distinguishable
           # from remote-staging output when both artifacts are downloaded.
           RLS_REPORT_FLAVOR: ${{ matrix.flavor }}

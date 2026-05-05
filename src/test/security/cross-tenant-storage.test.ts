@@ -949,7 +949,22 @@ const RUN_ID = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 const fileBytes = (label: string) =>
   new Blob([`storage-rls-test ${label} ${RUN_ID}`], { type: "text/plain" });
 
-const STORAGE_CALL_TIMEOUT_MS = Number(process.env.RLS_STORAGE_CALL_TIMEOUT_MS ?? "12000");
+const parseTimeoutMs = (value: string | undefined, fallback: number) => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+};
+
+const STORAGE_DENIAL_CALL_TIMEOUT_MS = parseTimeoutMs(
+  process.env.RLS_STORAGE_DENIAL_CALL_TIMEOUT_MS,
+  6_000,
+);
+const STORAGE_ALLOWED_CALL_TIMEOUT_MS = Math.max(
+  parseTimeoutMs(
+    process.env.RLS_STORAGE_ALLOWED_CALL_TIMEOUT_MS ?? process.env.RLS_STORAGE_CALL_TIMEOUT_MS,
+    45_000,
+  ),
+  45_000,
+);
 type TimedStorageResult<T> = T extends { error?: unknown }
   ? T
   : { data: null; error: Error };
@@ -957,7 +972,7 @@ type TimedStorageResult<T> = T extends { error?: unknown }
 async function storageCall<T>(
   op: () => Promise<T>,
   label: string,
-  ms = STORAGE_CALL_TIMEOUT_MS,
+  ms = STORAGE_DENIAL_CALL_TIMEOUT_MS,
 ): Promise<TimedStorageResult<T>> {
   const result = await withTimeout(op, ms);
   if (result === TEARDOWN_TIMEOUT_SENTINEL) {
@@ -965,6 +980,9 @@ async function storageCall<T>(
   }
   return result as TimedStorageResult<T>;
 }
+
+const allowedStorageCall = <T>(op: () => Promise<T>, label: string) =>
+  storageCall(op, label, STORAGE_ALLOWED_CALL_TIMEOUT_MS);
 
 // Folder root reserved for this run, scoped per tenant. Always a strict
 // prefix of every test path — used to anchor `list()` calls in cleanup.
@@ -1316,7 +1334,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       // setup is misconfigured (wrong tenant IDs, missing membership, etc.).
       it("user A CAN upload + download in their own tenant-private folder (sanity)", async () => {
         const path = ownPath(liveCreds.a.tenantId!, "a-own-private");
-        const { error: upErr } = await storageCall(
+        const { error: upErr } = await allowedStorageCall(
           () => clientA.storage
             .from(PRIVATE_BUCKET)
             .upload(path, fileBytes("a-own-private"), { upsert: true }),
@@ -1325,7 +1343,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         expect(upErr).toBeNull();
         if (!upErr) uploadedPaths.push({ bucket: PRIVATE_BUCKET, path, client: "a" });
 
-        const { data, error: dlErr } = await storageCall(
+        const { data, error: dlErr } = await allowedStorageCall(
           () => clientA.storage.from(PRIVATE_BUCKET).download(path),
           "A private download",
         );
@@ -1335,7 +1353,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
 
       it("user B CAN upload + download in their own tenant-private folder (sanity)", async () => {
         const path = ownPath(liveCreds.b.tenantId!, "b-own-private");
-        const { error: upErr } = await storageCall(
+        const { error: upErr } = await allowedStorageCall(
           () => clientB.storage
             .from(PRIVATE_BUCKET)
             .upload(path, fileBytes("b-own-private"), { upsert: true }),
@@ -1344,7 +1362,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         expect(upErr).toBeNull();
         if (!upErr) uploadedPaths.push({ bucket: PRIVATE_BUCKET, path, client: "b" });
 
-        const { data, error: dlErr } = await storageCall(
+        const { data, error: dlErr } = await allowedStorageCall(
           () => clientB.storage.from(PRIVATE_BUCKET).download(path),
           "B private download",
         );
@@ -1354,7 +1372,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
 
       it("user A CAN upload to their own tenant-assets folder (sanity)", async () => {
         const path = ownPath(liveCreds.a.tenantId!, "a-own-assets");
-        const { error } = await storageCall(
+        const { error } = await allowedStorageCall(
           () => clientA.storage
             .from(ASSETS_BUCKET)
             .upload(path, fileBytes("a-own-assets"), { upsert: true }),
@@ -1479,7 +1497,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         expect(denied).toBe(true);
 
         // Confirm the file still exists from B's perspective.
-        const { data: stillThere } = await storageCall(
+        const { data: stillThere } = await allowedStorageCall(
           () => clientB.storage.from(PRIVATE_BUCKET).download(path),
           "B verify private download",
         );
@@ -1504,7 +1522,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         });
         expect(denied).toBe(true);
 
-        const { data: stillThere } = await storageCall(
+        const { data: stillThere } = await allowedStorageCall(
           () => clientA.storage.from(PRIVATE_BUCKET).download(path),
           "A verify private download",
         );
@@ -1514,7 +1532,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       it("user A cannot DELETE tenant B's tenant-assets file", async () => {
         // Upload a file as B first so there's something to attempt deletion on.
         const path = ownPath(liveCreds.b.tenantId!, "b-own-assets-for-delete");
-        const { error: upErr } = await storageCall(
+        const { error: upErr } = await allowedStorageCall(
           () => clientB.storage
             .from(ASSETS_BUCKET)
             .upload(path, fileBytes("b-own-assets-for-delete"), { upsert: true }),
@@ -1705,7 +1723,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         // ---- Sanity: own-tenant nested upload works ----
         it(`user A CAN upload + read own nested path '${scenario.name}' (sanity)`, async () => {
           const path = nestedOwnPath(liveCreds.a.tenantId!, scenario.segments, "a-own-nested");
-          const { error: upErr } = await storageCall(
+          const { error: upErr } = await allowedStorageCall(
             () => clientA.storage
               .from(PRIVATE_BUCKET)
               .upload(path, fileBytes(`a-own-nested-${scenario.name}`), { upsert: true }),
@@ -1714,7 +1732,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
           expect(upErr).toBeNull();
           if (!upErr) ownNestedUploads.push({ bucket: PRIVATE_BUCKET, path, client: "a" });
 
-          const { data, error: dlErr } = await storageCall(
+          const { data, error: dlErr } = await allowedStorageCall(
             () => clientA.storage.from(PRIVATE_BUCKET).download(path),
             `A own nested private download ${scenario.name}`,
           );
@@ -1837,7 +1855,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         ): Promise<{ path: string; originalBytes: ArrayBuffer } | null> => {
           const path = nestedOwnPath(ownerTenantId, scenario.segments, label);
           const originalContent = `victim-original-${label}-${scenario.name}-${Date.now()}`;
-          const { error: seedErr } = await storageCall(
+          const { error: seedErr } = await allowedStorageCall(
             () => ownerClient.storage
               .from(bucket)
               .upload(path, fileBytes(originalContent), { upsert: true }),
@@ -1846,7 +1864,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
           if (seedErr) return null;
           ownNestedUploads.push({ bucket, path, client: ownerKey });
           // Read it back so we have a known-good baseline to diff against.
-          const { data: blob } = await storageCall(
+          const { data: blob } = await allowedStorageCall(
             () => ownerClient.storage.from(bucket).download(path),
             `download victim ${bucket} ${label} ${scenario.name}`,
           );
@@ -1861,7 +1879,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
           path: string,
           originalBytes: ArrayBuffer,
         ) => {
-          const { data: afterBlob, error: afterErr } = await storageCall(
+          const { data: afterBlob, error: afterErr } = await allowedStorageCall(
             () => ownerClient.storage.from(bucket).download(path),
             `verify victim unchanged ${bucket} ${path}`,
           );
@@ -2995,7 +3013,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         // an empty result could mask a leak (we wouldn't be able to tell
         // "nothing to see" from "policy hid it").
         const aPath = ownPath(liveCreds.a.tenantId!, "a-assets-isolation-seed");
-        const { error: aErr } = await storageCall(
+        const { error: aErr } = await allowedStorageCall(
           () => clientA.storage
             .from(ASSETS_BUCKET)
             .upload(aPath, fileBytes("a-assets-isolation-seed"), { upsert: true }),
@@ -3005,7 +3023,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         seededAssets.push({ path: aPath, client: "a" });
 
         const bPath = ownPath(liveCreds.b.tenantId!, "b-assets-isolation-seed");
-        const { error: bErr } = await storageCall(
+        const { error: bErr } = await allowedStorageCall(
           () => clientB.storage
             .from(ASSETS_BUCKET)
             .upload(bPath, fileBytes("b-assets-isolation-seed"), { upsert: true }),
@@ -3239,7 +3257,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         // probes have a real target. Names embed a probe marker so a
         // leak is unambiguous in test output.
         const aPath = ownPath(liveCreds.a.tenantId!, "a-probe-target-asset");
-        const { error: aErr } = await storageCall(
+        const { error: aErr } = await allowedStorageCall(
           () => clientA.storage
             .from(ASSETS_BUCKET)
             .upload(aPath, fileBytes("a-probe-target-asset"), { upsert: true }),
@@ -3249,7 +3267,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         seededAssets.push({ path: aPath, client: "a" });
 
         const bPath = ownPath(liveCreds.b.tenantId!, "b-probe-target-asset");
-        const { error: bErr } = await storageCall(
+        const { error: bErr } = await allowedStorageCall(
           () => clientB.storage
             .from(ASSETS_BUCKET)
             .upload(bPath, fileBytes("b-probe-target-asset"), { upsert: true }),
@@ -3598,7 +3616,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         // use the literal leaf name `b-traversal-target.txt` (and
         // mirror for A) so `buildTrickyPaths` can reconstruct it.
         const aPath = `${runRootFor(liveCreds.a.tenantId!)}/a-traversal-target.txt`;
-        const { error: aErr } = await storageCall(
+        const { error: aErr } = await allowedStorageCall(
           () => clientA.storage
             .from(ASSETS_BUCKET)
             .upload(aPath, fileBytes("a-traversal-target"), { upsert: true }),
@@ -3608,7 +3626,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         seededAssets.push({ path: aPath, client: "a" });
 
         const bPath = `${runRootFor(liveCreds.b.tenantId!)}/b-traversal-target.txt`;
-        const { error: bErr } = await storageCall(
+        const { error: bErr } = await allowedStorageCall(
           () => clientB.storage
             .from(ASSETS_BUCKET)
             .upload(bPath, fileBytes("b-traversal-target"), { upsert: true }),
@@ -3814,7 +3832,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         // names are distinctive so leak detection in list() can
         // unambiguously flag them.
         const aPath = `${runRootFor(liveCreds.a.tenantId!)}/a-public-cdn-seed.txt`;
-        const { error: aErr } = await storageCall(
+        const { error: aErr } = await allowedStorageCall(
           () => clientA.storage
             .from(ASSETS_BUCKET)
             .upload(aPath, fileBytes("a-public-cdn-seed"), { upsert: true }),
@@ -3824,7 +3842,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         seededAssets.push({ path: aPath, client: "a" });
 
         const bPath = `${runRootFor(liveCreds.b.tenantId!)}/b-public-cdn-seed.txt`;
-        const { error: bErr } = await storageCall(
+        const { error: bErr } = await allowedStorageCall(
           () => clientB.storage
             .from(ASSETS_BUCKET)
             .upload(bPath, fileBytes("b-public-cdn-seed"), { upsert: true }),
