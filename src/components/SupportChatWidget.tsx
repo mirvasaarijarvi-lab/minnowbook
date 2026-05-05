@@ -133,12 +133,19 @@ const SupportChatWidget = ({ businessTier = false }: SupportChatWidgetProps) => 
     const allMessages = [...messages, userMsg];
 
     try {
+      const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
       const headers: Record<string, string> = {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        // apikey is always the project anon key (required by the Functions gateway)
+        apikey: anonKey,
       };
+      // Authorization carries the user's session if signed in, otherwise the
+      // anon key so we never send an invalid/expired bearer that would trigger
+      // an "Invalid session" error on public pages.
       if (session?.access_token) {
-        headers["Authorization"] = `Bearer ${session.access_token}`;
+        headers.Authorization = `Bearer ${session.access_token}`;
+      } else {
+        headers.Authorization = `Bearer ${anonKey}`;
       }
 
       const resp = await fetch(CHAT_URL, {
