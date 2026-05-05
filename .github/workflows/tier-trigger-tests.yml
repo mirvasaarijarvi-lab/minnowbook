@@ -72,7 +72,7 @@ jobs:
         if: steps.docker-check.outputs.available == 'true' && steps.supabase-cli.outcome == 'success'
         run: |
           set -euo pipefail
-          cat > supabase/migrations/20260504999999_ci_placeholder_tenant.sql <<'SQL'
+          cat > supabase/migrations/20260224082115_ci_placeholder_tenant.sql <<'SQL'
           -- Placeholder tenant owner
           INSERT INTO auth.users (id, instance_id, aud, role, email, encrypted_password, email_confirmed_at, created_at, updated_at)
           VALUES (
