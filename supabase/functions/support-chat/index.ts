@@ -105,6 +105,37 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Health/status endpoint: GET /support-chat/health (or /status).
+  // Returns 200 with CORS + environment configuration check. Safe to expose:
+  // it only reports presence of required env vars, never their values.
+  const url = new URL(req.url);
+  const pathTail = url.pathname.split("/").pop() || "";
+  if (req.method === "GET" && (pathTail === "health" || pathTail === "status")) {
+    const hasLovableKey = !!Deno.env.get("LOVABLE_API_KEY");
+    const hasSupabaseUrl = !!Deno.env.get("SUPABASE_URL");
+    const hasAnonKey = !!Deno.env.get("SUPABASE_ANON_KEY");
+    const originAllowed = reqOrigin ? isOriginAllowed(reqOrigin) : null;
+    const ok = hasLovableKey && hasSupabaseUrl && hasAnonKey;
+    const body = {
+      status: ok ? "ok" : "degraded",
+      timestamp: new Date().toISOString(),
+      cors: {
+        requestOrigin: reqOrigin || null,
+        originAllowed,
+        allowOriginEcho: corsHeaders["Access-Control-Allow-Origin"] ?? null,
+      },
+      env: {
+        LOVABLE_API_KEY: hasLovableKey,
+        SUPABASE_URL: hasSupabaseUrl,
+        SUPABASE_ANON_KEY: hasAnonKey,
+      },
+    };
+    return new Response(JSON.stringify(body), {
+      status: ok ? 200 : 503,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
   // Origin allowlist gate: explicit 403 for browser requests from
   // disallowed origins. Body is intentionally generic to avoid leaking
   // any allowlist or routing details.
