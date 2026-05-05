@@ -2707,7 +2707,7 @@ const en: TranslationKeys = {
   "help.art10C1": "Guest Portal: guests can view or cancel their booking via a magic link (/my-booking/:token) — no login required.",
   "help.art10C2": "Waitlist: when a slot is full, guests can join a waitlist and get notified automatically when it opens.",
   "help.art10C3": "Google Calendar sync: subscribe to your reservations via the iCal feed (Settings → Calendar Sync). CSV/PDF export from Reservations and Reports.",
-  "help.art10C4": "Dashboard upgrades: dark mode, keyboard shortcuts (press ?), Quick Actions FAB on mobile, onboarding checklist, audit log filters, analytics charts, login rate limiting, backup status indicator, public reviews/testimonials, multi-language public booking, and a Stripe revenue dashboard for superadmins.",
+  "help.art10C4": "Dashboard upgrades: dark mode, keyboard shortcuts (press ?), Quick Actions FAB on mobile, onboarding checklist, audit log filters, analytics charts, login rate limiting, backup status indicator, public reviews/testimonials, multi-language public booking, Kitchen orders for restaurant and venue reservations, and a Stripe revenue dashboard for superadmins.",
   "help.guide1Q": "How do I manage reservations?",
   "help.guide1A": "Go to your **Dashboard → Reservations** to view, filter, edit, and manage all bookings. You can confirm or cancel reservations from the action menu on each card.",
   "help.guide2Q": "How do I customize my booking page?",
@@ -2719,7 +2719,7 @@ const en: TranslationKeys = {
   "help.guide5Q": "How do I add or edit resources?",
   "help.guide5A": "Go to **Dashboard → Resources** to create rooms, tables, or venues. You can set capacity, pricing, upload up to 5 images, and toggle active/inactive status.",
   "help.guide6Q": "What's new in MimmoBook?",
-  "help.guide6A": "Recent additions: **Guest Portal** (magic-link booking management), **Waitlist** with auto-notify, **Google Calendar sync** via iCal feed, **CSV/PDF export**, **dark mode**, **keyboard shortcuts** (press `?`), **Quick Actions FAB** on mobile, **onboarding checklist**, **audit-log filters**, **analytics charts**, **public reviews/testimonials**, and a **Stripe revenue dashboard** for superadmins.",
+  "help.guide6A": "Recent additions: **Guest Portal** (magic-link booking management), **Waitlist** with auto-notify, **Google Calendar sync** via iCal feed, **CSV/PDF export**, **dark mode**, **keyboard shortcuts** (press `?`), **Quick Actions FAB** on mobile, **onboarding checklist**, **audit-log filters**, **analytics charts**, **public reviews/testimonials**, **Kitchen orders** for restaurant and venue reservations, and a **Stripe revenue dashboard** for superadmins.",
 
   // MimmoAid
   "aid.title": "MimmoAid",
@@ -4366,7 +4366,7 @@ const fi: TranslationKeys = {
   "help.art10C1": "Vierasportaali: vieraat voivat katsoa tai peruuttaa varauksensa maagisella linkillä (/my-booking/:token) — kirjautumista ei tarvita.",
   "help.art10C2": "Jonotuslista: kun vuoro on täynnä, vieraat voivat liittyä jonoon ja saavat automaattisen ilmoituksen, kun paikka vapautuu.",
   "help.art10C3": "Google-kalenterisynkronointi: tilaa varauksesi iCal-syötteellä (Asetukset → Kalenterisynkronointi). CSV/PDF-vienti Varauksista ja Raporteista.",
-  "help.art10C4": "Hallintapaneelin parannukset: tumma teema, pikanäppäimet (paina ?), pikatoimintojen FAB mobiilissa, käyttöönoton tarkistuslista, audit-lokin suodattimet, analytiikkakaaviot, kirjautumisen rate-rajoitus, varmuuskopion tilailmaisin, julkiset arvostelut/suosittelut, monikielinen julkinen varaussivu ja Stripe-tulospaneeli pääkäyttäjille.",
+  "help.art10C4": "Hallintapaneelin parannukset: tumma teema, pikanäppäimet (paina ?), pikatoimintojen FAB mobiilissa, käyttöönoton tarkistuslista, audit-lokin suodattimet, analytiikkakaaviot, kirjautumisen rate-rajoitus, varmuuskopion tilailmaisin, julkiset arvostelut/suosittelut, monikielinen julkinen varaussivu, keittiötilaukset ravintola- ja tilavarauksille, ja Stripe-tulospaneeli pääkäyttäjille.",
   "help.guide1Q": "Miten hallitsen varauksia?",
   "help.guide1A": "Siirry kohtaan **Hallintapaneeli → Varaukset** selataksesi, suodattaaksesi, muokataksesi ja hallinnoitsesi kaikkia varauksia.",
   "help.guide2Q": "Miten mukautan varaussivua?",
@@ -4378,7 +4378,7 @@ const fi: TranslationKeys = {
   "help.guide5Q": "Miten lisään tai muokkaan resursseja?",
   "help.guide5A": "Siirry kohtaan **Hallintapaneeli → Resurssit** luodaksesi huoneita, pöytiä tai tiloja.",
   "help.guide6Q": "Mitä uutta MimmoBookissa?",
-  "help.guide6A": "Viimeisimmät lisäykset: **Vierasportaali** (varauksen hallinta maagisella linkillä), **jonotuslista** automaattisilla ilmoituksilla, **Google-kalenterisynkronointi** iCal-syötteellä, **CSV/PDF-vienti**, **tumma teema**, **pikanäppäimet** (paina `?`), **pikatoimintojen FAB** mobiilissa, **käyttöönoton tarkistuslista**, **audit-lokin suodattimet**, **analytiikkakaaviot**, **julkiset arvostelut/suosittelut** ja **Stripe-tulospaneeli** pääkäyttäjille.",
+  "help.guide6A": "Viimeisimmät lisäykset: **Vierasportaali** (varauksen hallinta maagisella linkillä), **jonotuslista** automaattisilla ilmoituksilla, **Google-kalenterisynkronointi** iCal-syötteellä, **CSV/PDF-vienti**, **tumma teema**, **pikanäppäimet** (paina `?`), **pikatoimintojen FAB** mobiilissa, **käyttöönoton tarkistuslista**, **audit-lokin suodattimet**, **analytiikkakaaviot**, **julkiset arvostelut/suosittelut**, **keittiötilaukset** ravintola- ja tilavarauksille, ja **Stripe-tulospaneeli** pääkäyttäjille.",
 
   // MimmoAid
   "aid.title": "MimmoAid",
@@ -6024,7 +6024,7 @@ const sv: TranslationKeys = {
   "help.art10C1": "Gästportal: gäster kan visa eller avboka sin bokning via en magisk länk (/my-booking/:token) — ingen inloggning krävs.",
   "help.art10C2": "Väntelista: när en tid är fullbokad kan gäster gå med i en väntelista och meddelas automatiskt när en plats blir ledig.",
   "help.art10C3": "Google Kalender-synk: prenumerera på dina bokningar via iCal-flödet (Inställningar → Kalendersynk). CSV/PDF-export från Bokningar och Rapporter.",
-  "help.art10C4": "Förbättringar i instrumentpanelen: mörkt läge, kortkommandon (tryck ?), Snabbåtgärds-FAB på mobil, introduktionscheckslista, granskningsloggfilter, analysdiagram, inloggningsbegränsning, säkerhetskopieringsstatus, publika omdömen/recensioner, flerspråkig publik bokningssida och en Stripe-intäktspanel för superadmins.",
+  "help.art10C4": "Förbättringar i instrumentpanelen: mörkt läge, kortkommandon (tryck ?), Snabbåtgärds-FAB på mobil, introduktionscheckslista, granskningsloggfilter, analysdiagram, inloggningsbegränsning, säkerhetskopieringsstatus, publika omdömen/recensioner, flerspråkig publik bokningssida, kökets beställningar för restaurang- och lokalbokningar, och en Stripe-intäktspanel för superadmins.",
   "help.guide1Q": "Hur hanterar jag bokningar?",
   "help.guide1A": "Gå till **Instrumentpanel → Bokningar** för att visa, filtrera, redigera och hantera alla bokningar.",
   "help.guide2Q": "Hur anpassar jag min bokningssida?",
@@ -6036,7 +6036,7 @@ const sv: TranslationKeys = {
   "help.guide5Q": "Hur lägger jag till eller redigerar resurser?",
   "help.guide5A": "Gå till **Instrumentpanel → Resurser** för att skapa rum, bord eller lokaler.",
   "help.guide6Q": "Vad är nytt i MimmoBook?",
-  "help.guide6A": "Senaste tilläggen: **Gästportal** (bokningshantering via magisk länk), **väntelista** med automatiska aviseringar, **Google Kalender-synk** via iCal-flöde, **CSV/PDF-export**, **mörkt läge**, **kortkommandon** (tryck `?`), **Snabbåtgärds-FAB** på mobil, **introduktionscheckslista**, **granskningsloggfilter**, **analysdiagram**, **publika omdömen/recensioner** och en **Stripe-intäktspanel** för superadmins.",
+  "help.guide6A": "Senaste tilläggen: **Gästportal** (bokningshantering via magisk länk), **väntelista** med automatiska aviseringar, **Google Kalender-synk** via iCal-flöde, **CSV/PDF-export**, **mörkt läge**, **kortkommandon** (tryck `?`), **Snabbåtgärds-FAB** på mobil, **introduktionscheckslista**, **granskningsloggfilter**, **analysdiagram**, **publika omdömen/recensioner**, **kökets beställningar** för restaurang- och lokalbokningar, och en **Stripe-intäktspanel** för superadmins.",
 
   // MimmoAid
   "aid.title": "MimmoAid",
