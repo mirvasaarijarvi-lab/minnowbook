@@ -3267,7 +3267,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         seededAssets.push({ path: aPath, client: "a" });
 
         const bPath = ownPath(liveCreds.b.tenantId!, "b-probe-target-asset");
-        const { error: bErr } = await storageCall(
+        const { error: bErr } = await allowedStorageCall(
           () => clientB.storage
             .from(ASSETS_BUCKET)
             .upload(bPath, fileBytes("b-probe-target-asset"), { upsert: true }),
@@ -3616,7 +3616,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         // use the literal leaf name `b-traversal-target.txt` (and
         // mirror for A) so `buildTrickyPaths` can reconstruct it.
         const aPath = `${runRootFor(liveCreds.a.tenantId!)}/a-traversal-target.txt`;
-        const { error: aErr } = await storageCall(
+        const { error: aErr } = await allowedStorageCall(
           () => clientA.storage
             .from(ASSETS_BUCKET)
             .upload(aPath, fileBytes("a-traversal-target"), { upsert: true }),
@@ -3626,7 +3626,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         seededAssets.push({ path: aPath, client: "a" });
 
         const bPath = `${runRootFor(liveCreds.b.tenantId!)}/b-traversal-target.txt`;
-        const { error: bErr } = await storageCall(
+        const { error: bErr } = await allowedStorageCall(
           () => clientB.storage
             .from(ASSETS_BUCKET)
             .upload(bPath, fileBytes("b-traversal-target"), { upsert: true }),
