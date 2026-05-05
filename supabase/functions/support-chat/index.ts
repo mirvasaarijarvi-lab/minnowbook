@@ -5,9 +5,12 @@ import { SUPPORT_CHAT_SYSTEM_PROMPT } from "./prompt.ts";
 // --- CORS with origin allowlist ---
 const ALLOWED_ORIGINS = [
   "https://minnowbook.lovable.app",
+  "https://mimmobook.com",
+  "https://www.mimmobook.com",
   // Subdomain pattern: only DNS-safe chars (letters, digits, dots, hyphens)
   // Rejects userinfo (`@`), ports (`:`), paths (`/`), queries (`?`), etc.
   /^https:\/\/[a-zA-Z0-9.-]+\.lovable\.app$/,
+  /^https:\/\/[a-zA-Z0-9.-]+\.lovableproject\.com$/,
 ];
 
 function isOriginAllowed(origin: string): boolean {
