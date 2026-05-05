@@ -116,6 +116,9 @@ const DashboardSupportPanel = () => {
 
         const resp = await fetch(CHAT_URL, {
           method: "POST",
+          mode: "cors",
+          credentials: "omit",
+          cache: "no-store",
           headers,
           body: JSON.stringify({ messages: allMessages }),
         });
