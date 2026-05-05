@@ -949,7 +949,22 @@ const RUN_ID = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 const fileBytes = (label: string) =>
   new Blob([`storage-rls-test ${label} ${RUN_ID}`], { type: "text/plain" });
 
-const STORAGE_CALL_TIMEOUT_MS = Number(process.env.RLS_STORAGE_CALL_TIMEOUT_MS ?? "12000");
+const parseTimeoutMs = (value: string | undefined, fallback: number) => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+};
+
+const STORAGE_DENIAL_CALL_TIMEOUT_MS = parseTimeoutMs(
+  process.env.RLS_STORAGE_DENIAL_CALL_TIMEOUT_MS,
+  6_000,
+);
+const STORAGE_ALLOWED_CALL_TIMEOUT_MS = Math.max(
+  parseTimeoutMs(
+    process.env.RLS_STORAGE_ALLOWED_CALL_TIMEOUT_MS ?? process.env.RLS_STORAGE_CALL_TIMEOUT_MS,
+    45_000,
+  ),
+  45_000,
+);
 type TimedStorageResult<T> = T extends { error?: unknown }
   ? T
   : { data: null; error: Error };
@@ -957,7 +972,7 @@ type TimedStorageResult<T> = T extends { error?: unknown }
 async function storageCall<T>(
   op: () => Promise<T>,
   label: string,
-  ms = STORAGE_CALL_TIMEOUT_MS,
+  ms = STORAGE_DENIAL_CALL_TIMEOUT_MS,
 ): Promise<TimedStorageResult<T>> {
   const result = await withTimeout(op, ms);
   if (result === TEARDOWN_TIMEOUT_SENTINEL) {
@@ -965,6 +980,9 @@ async function storageCall<T>(
   }
   return result as TimedStorageResult<T>;
 }
+
+const allowedStorageCall = <T>(op: () => Promise<T>, label: string) =>
+  storageCall(op, label, STORAGE_ALLOWED_CALL_TIMEOUT_MS);
 
 // Folder root reserved for this run, scoped per tenant. Always a strict
 // prefix of every test path — used to anchor `list()` calls in cleanup.
