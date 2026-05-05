@@ -104,10 +104,10 @@ BEGIN
   -- No partial writes after rejected updates
   IF (SELECT array_length(allowed_reservation_types,1) FROM public.tenants WHERE id = v_tenant_id) > 5 THEN
     v_fail := v_fail + 1;
-    v_results := v_results || '  FAIL | atomic  | -- | --       | partial-write check                                | row exceeds 5 types after rejection';
+    v_results := v_results || ARRAY['  FAIL | atomic  | -- | --       | partial-write check                                | row exceeds 5 types after rejection'];
   ELSE
     v_pass := v_pass + 1;
-    v_results := v_results || '  PASS | atomic  | -- | --       | partial-write check                                | row unchanged after rejection';
+    v_results := v_results || ARRAY['  PASS | atomic  | -- | --       | partial-write check                                | row unchanged after rejection'];
   END IF;
 
   -- Cleanup
