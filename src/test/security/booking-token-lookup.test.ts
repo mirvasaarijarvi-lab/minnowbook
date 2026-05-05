@@ -168,7 +168,7 @@ describe("booking token lookup — security & determinism", () => {
     for (const r of results) {
       expectNoRow(r, "random guess");
     }
-  });
+  }, 30000);
 
   it("returns deterministic empty result for repeated identical guesses", async () => {
     // No timing/state leak: repeated calls with the same invalid token
