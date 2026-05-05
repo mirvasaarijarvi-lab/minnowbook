@@ -2821,20 +2821,23 @@ describe("Cross-Tenant Storage RLS Tests", () => {
                 // folder — that's fine, the policy correctly scopes
                 // by segment 1. What matters is that the VICTIM's
                 // folder stays untouched.
-                const uploadResult = await Promise.race([
-                  dir
-                    .attackerClient()
-                    .storage.from(bucket)
-                    .upload(variant.path, fileBytes(`${dir.attacker}-late-${variant.label}`), {
-                      upsert: true,
-                    }),
-                  new Promise<{ error: Error; data: null }>((resolve) =>
-                    setTimeout(
-                      () => resolve({ error: new Error("network-timeout"), data: null }),
-                      4000,
-                    ),
-                  ),
-                ]);
+                // Bounded upload — replaces an earlier inline Promise.race
+                // whose losing SDK promise could keep the process alive
+                // long after the test passed, eventually tripping the
+                // step timeout and canceling the whole job.
+                const uploadResult = await storageCall(
+                  () =>
+                    dir
+                      .attackerClient()
+                      .storage.from(bucket)
+                      .upload(
+                        variant.path,
+                        fileBytes(`${dir.attacker}-late-${variant.label}`),
+                        { upsert: true },
+                      ),
+                  `late-segment upload ${bucket}/${variant.path}`,
+                  6000,
+                );
 
                 const landedPath =
                   !uploadResult.error && uploadResult.data
@@ -2872,11 +2875,18 @@ describe("Cross-Tenant Storage RLS Tests", () => {
 
                 // Hard requirement #2: the victim's mirror folder
                 // must not contain any artifact from this attempt.
+                // Bounded so a hung list() can't drag the suite past
+                // the job budget.
                 const victimRoot = `${dir.victimTenantId()}/__rls_test__/${RUN_ID}/late-seg`;
-                const { data: victimList, error: victimListError } = await dir
-                  .attackerClient()
-                  .storage.from(bucket)
-                  .list(victimRoot, { limit: 5 });
+                const { data: victimList, error: victimListError } = await storageCall(
+                  () =>
+                    dir
+                      .attackerClient()
+                      .storage.from(bucket)
+                      .list(victimRoot, { limit: 5 }),
+                  `late-segment list ${bucket}/${victimRoot}`,
+                  6000,
+                );
                 const victimFolderClean =
                   Boolean(victimListError) || !victimList || victimList.length === 0;
                 expect(victimFolderClean).toBe(true);
