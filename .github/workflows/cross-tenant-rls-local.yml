@@ -166,6 +166,8 @@ jobs:
           RLS_TEST_TENANT_B_EMAIL: ${{ secrets.RLS_TEST_TENANT_B_EMAIL }}
           RLS_TEST_TENANT_B_PASSWORD: ${{ secrets.RLS_TEST_TENANT_B_PASSWORD }}
           RLS_TEST_TENANT_B_ID: ${{ secrets.RLS_TEST_TENANT_B_ID }}
+          RLS_STORAGE_DENIAL_CALL_TIMEOUT_MS: 6000
+          RLS_STORAGE_ALLOWED_CALL_TIMEOUT_MS: 45000
           # Tag the report so the remote-fallback artifact is distinguishable
           # from the local-stack artifact (different filename suffix).
           RLS_REPORT_FLAVOR: remote-fallback-${{ matrix.label }}
