@@ -935,6 +935,23 @@ const RUN_ID = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 const fileBytes = (label: string) =>
   new Blob([`storage-rls-test ${label} ${RUN_ID}`], { type: "text/plain" });
 
+const STORAGE_CALL_TIMEOUT_MS = Number(process.env.RLS_STORAGE_CALL_TIMEOUT_MS ?? "12000");
+type TimedStorageResult<T> = T extends { error?: unknown }
+  ? T
+  : { data: null; error: Error };
+
+async function storageCall<T>(
+  op: () => Promise<T>,
+  label: string,
+  ms = STORAGE_CALL_TIMEOUT_MS,
+): Promise<TimedStorageResult<T>> {
+  const result = await withTimeout(op, ms);
+  if (result === TEARDOWN_TIMEOUT_SENTINEL) {
+    return { data: null, error: new Error(`${label} timed out after ${ms}ms`) } as TimedStorageResult<T>;
+  }
+  return result as TimedStorageResult<T>;
+}
+
 // Folder root reserved for this run, scoped per tenant. Always a strict
 // prefix of every test path — used to anchor `list()` calls in cleanup.
 const runRootFor = (tenantId: string) => `${tenantId}/__rls_test__/${RUN_ID}`;
