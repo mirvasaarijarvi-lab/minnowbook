@@ -769,7 +769,7 @@ jobs:
       # Belt-and-braces verification that the test run actually flushed a
       # ledger for THIS flavor before we hand it to the PDF generator.
       # `flushLedger()` writes both `reports/storage-attempts.json` AND a
-      # matrix-flavored copy such as `reports/storage-attempts.local-core.json` — if the flavored copy is
+      # matrix-flavored copy such as `reports/storage-attempts.local-core.json`, if the flavored copy is
       # missing it means the test process crashed before afterAll ran,
       # and any rendering would silently use a stale canonical file from
       # a previous run. Logging the resolved paths here lets a reviewer
@@ -993,7 +993,7 @@ jobs:
             echo "> ✅ Membership probes are clean — the storage failure is **not** caused by a duplicate / missing tenant_users row. Inspect the storage bucket policies and the failing test's expected outcome." >> "$GITHUB_STEP_SUMMARY"
           fi
           echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "📦 Full details: \`rls-report-${RLS_REPORT_FLAVOR:-local}\` artifact (HTML/JSON) and \`rls-postgres-logs-run-${GITHUB_RUN_ID}\` (filtered SQL errors)." >> "$GITHUB_STEP_SUMMARY"
+          echo "📦 Full details: \`rls-report-${{ matrix.flavor }}\` artifact (HTML/JSON) and \`rls-postgres-logs-run-${GITHUB_RUN_ID}\` (filtered SQL errors)." >> "$GITHUB_STEP_SUMMARY"
 
       # When the RLS sweep itself fails, capture Postgres logs filtered to
       # the statements + errors that the failing tests produced. This is
