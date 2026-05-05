@@ -527,7 +527,7 @@ jobs:
       # Some late regression-test migrations create temporary auth.users rows
       # directly in SQL. GoTrue's admin listUsers endpoint expects token text
       # columns to be strings, so normalize after every migration has run and
-      # before seed-rls-test-data.ts calls listUsers.
+      # before any auth admin endpoint or sign-in path reads those rows.
       - name: Normalize auth users for GoTrue listUsers
         if: steps.supabase-ready.outcome == 'success' && steps.migrations-ready.outcome == 'success'
         env:
