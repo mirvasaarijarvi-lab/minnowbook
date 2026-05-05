@@ -1705,15 +1705,19 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         // ---- Sanity: own-tenant nested upload works ----
         it(`user A CAN upload + read own nested path '${scenario.name}' (sanity)`, async () => {
           const path = nestedOwnPath(liveCreds.a.tenantId!, scenario.segments, "a-own-nested");
-          const { error: upErr } = await clientA.storage
-            .from(PRIVATE_BUCKET)
-            .upload(path, fileBytes(`a-own-nested-${scenario.name}`), { upsert: true });
+          const { error: upErr } = await storageCall(
+            () => clientA.storage
+              .from(PRIVATE_BUCKET)
+              .upload(path, fileBytes(`a-own-nested-${scenario.name}`), { upsert: true }),
+            `A own nested private upload ${scenario.name}`,
+          );
           expect(upErr).toBeNull();
           if (!upErr) ownNestedUploads.push({ bucket: PRIVATE_BUCKET, path, client: "a" });
 
-          const { data, error: dlErr } = await clientA.storage
-            .from(PRIVATE_BUCKET)
-            .download(path);
+          const { data, error: dlErr } = await storageCall(
+            () => clientA.storage.from(PRIVATE_BUCKET).download(path),
+            `A own nested private download ${scenario.name}`,
+          );
           expect(dlErr).toBeNull();
           expect(data).toBeTruthy();
         });
@@ -1722,18 +1726,24 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         it(`user A cannot UPLOAD to tenant B's nested '${scenario.name}' in tenant-private`, async () => {
           const path = nestedOwnPath(liveCreds.b.tenantId!, scenario.segments, "a-cross-nested");
           nestedAttempts.push({ bucket: PRIVATE_BUCKET, path, attacker: "a", owner: "b" });
-          const { error } = await clientA.storage
-            .from(PRIVATE_BUCKET)
-            .upload(path, fileBytes(`a-cross-nested-${scenario.name}`), { upsert: true });
+          const { error } = await storageCall(
+            () => clientA.storage
+              .from(PRIVATE_BUCKET)
+              .upload(path, fileBytes(`a-cross-nested-${scenario.name}`), { upsert: true }),
+            `A cross nested private upload ${scenario.name}`,
+          );
           expect(error).toBeTruthy();
         });
 
         it(`user B cannot UPLOAD to tenant A's nested '${scenario.name}' in tenant-private`, async () => {
           const path = nestedOwnPath(liveCreds.a.tenantId!, scenario.segments, "b-cross-nested");
           nestedAttempts.push({ bucket: PRIVATE_BUCKET, path, attacker: "b", owner: "a" });
-          const { error } = await clientB.storage
-            .from(PRIVATE_BUCKET)
-            .upload(path, fileBytes(`b-cross-nested-${scenario.name}`), { upsert: true });
+          const { error } = await storageCall(
+            () => clientB.storage
+              .from(PRIVATE_BUCKET)
+              .upload(path, fileBytes(`b-cross-nested-${scenario.name}`), { upsert: true }),
+            `B cross nested private upload ${scenario.name}`,
+          );
           expect(error).toBeTruthy();
         });
 
@@ -1744,9 +1754,12 @@ describe("Cross-Tenant Storage RLS Tests", () => {
             "a-cross-nested-assets",
           );
           nestedAttempts.push({ bucket: ASSETS_BUCKET, path, attacker: "a", owner: "b" });
-          const { error } = await clientA.storage
-            .from(ASSETS_BUCKET)
-            .upload(path, fileBytes(`a-cross-nested-assets-${scenario.name}`), { upsert: true });
+          const { error } = await storageCall(
+            () => clientA.storage
+              .from(ASSETS_BUCKET)
+              .upload(path, fileBytes(`a-cross-nested-assets-${scenario.name}`), { upsert: true }),
+            `A cross nested assets upload ${scenario.name}`,
+          );
           expect(error).toBeTruthy();
         });
 
