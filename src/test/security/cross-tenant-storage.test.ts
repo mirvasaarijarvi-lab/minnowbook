@@ -21,10 +21,20 @@ import {
  * the originating client can no longer see.
  */
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const AUTH_STORAGE_NAMESPACE = `rls-storage-${Date.now()}-${Math.random()
+  .toString(36)
+  .slice(2, 8)}`;
+let authStorageSequence = 0;
+const nextAuthStorageKey = (label: string) =>
+  `${AUTH_STORAGE_NAMESPACE}-${label}-${++authStorageSequence}`;
 const adminClient: SupabaseClient | null =
   SERVICE_ROLE_KEY && import.meta.env.VITE_SUPABASE_URL
     ? createClient(import.meta.env.VITE_SUPABASE_URL as string, SERVICE_ROLE_KEY, {
-        auth: { persistSession: false, autoRefreshToken: false },
+        auth: {
+          persistSession: false,
+          autoRefreshToken: false,
+          storageKey: nextAuthStorageKey("admin"),
+        },
       })
     : null;
 
@@ -922,7 +932,11 @@ const liveModeEnabled = Boolean(
 
 const newAnonClient = (): SupabaseClient =>
   createClient(SUPABASE_URL!, SUPABASE_ANON_KEY!, {
-    auth: { persistSession: false, autoRefreshToken: false },
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+      storageKey: nextAuthStorageKey("anon"),
+    },
   });
 
 // Per-run folder key — every artifact this suite writes lives under
