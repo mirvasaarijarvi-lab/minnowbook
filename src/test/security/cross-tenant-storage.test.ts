@@ -965,6 +965,7 @@ const newAnonClient = (): SupabaseClient =>
       autoRefreshToken: false,
       storageKey: nextAuthStorageKey("anon"),
     },
+    global: { fetch: timeoutFetch },
   });
 
 // Per-run folder key — every artifact this suite writes lives under
