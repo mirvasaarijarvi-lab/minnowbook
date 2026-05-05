@@ -1101,7 +1101,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
     // attempt with our own timeout and treat timeout-as-denial.
     const tryUpload = async (bucket: string) => {
       const result = await Promise.race([
-        anon.storage.from(bucket).upload(anonPath, fileBytes(`anon-${bucket}`), { upsert: true }),
+        anon.storage.from(bucket).upload(anonPath, fileText(`anon-${bucket}`), { upsert: true }),
         new Promise<{ error: Error; data: null }>((resolve) =>
           setTimeout(() => resolve({ error: new Error("network-timeout"), data: null }), 4000),
         ),
@@ -1391,7 +1391,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         const { error: upErr } = await allowedStorageCall(
           () => clientA.storage
             .from(PRIVATE_BUCKET)
-            .upload(path, fileBytes("a-own-private"), { upsert: true }),
+            .upload(path, fileText("a-own-private"), { upsert: true }),
           "A own private upload",
         );
         expect(upErr).toBeNull();
@@ -1410,7 +1410,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         const { error: upErr } = await allowedStorageCall(
           () => clientB.storage
             .from(PRIVATE_BUCKET)
-            .upload(path, fileBytes("b-own-private"), { upsert: true }),
+            .upload(path, fileText("b-own-private"), { upsert: true }),
           "B own private upload",
         );
         expect(upErr).toBeNull();
@@ -1429,7 +1429,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         const { error } = await allowedStorageCall(
           () => clientA.storage
             .from(ASSETS_BUCKET)
-            .upload(path, fileBytes("a-own-assets"), { upsert: true }),
+            .upload(path, fileText("a-own-assets"), { upsert: true }),
           "A own assets upload",
         );
         expect(error).toBeNull();
@@ -1442,7 +1442,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         const result = await storageCall(
           () => clientA.storage
             .from(PRIVATE_BUCKET)
-            .upload(path, fileBytes("a-cross-private"), { upsert: true }),
+            .upload(path, fileText("a-cross-private"), { upsert: true }),
           "A cross private upload",
         );
         recordAttempt(PRIVATE_BUCKET, path, "a", "b", result);
@@ -1454,7 +1454,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         const result = await storageCall(
           () => clientB.storage
             .from(PRIVATE_BUCKET)
-            .upload(path, fileBytes("b-cross-private"), { upsert: true }),
+            .upload(path, fileText("b-cross-private"), { upsert: true }),
           "B cross private upload",
         );
         recordAttempt(PRIVATE_BUCKET, path, "b", "a", result);
@@ -1466,7 +1466,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         const result = await storageCall(
           () => clientA.storage
             .from(ASSETS_BUCKET)
-            .upload(path, fileBytes("a-cross-assets"), { upsert: true }),
+            .upload(path, fileText("a-cross-assets"), { upsert: true }),
           "A cross assets upload",
         );
         recordAttempt(ASSETS_BUCKET, path, "a", "b", result);
@@ -1478,7 +1478,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         const result = await storageCall(
           () => clientB.storage
             .from(ASSETS_BUCKET)
-            .upload(path, fileBytes("b-cross-assets"), { upsert: true }),
+            .upload(path, fileText("b-cross-assets"), { upsert: true }),
           "B cross assets upload",
         );
         recordAttempt(ASSETS_BUCKET, path, "b", "a", result);
@@ -1536,7 +1536,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         const { error: seedErr } = await allowedStorageCall(
           () => clientB.storage
             .from(PRIVATE_BUCKET)
-            .upload(path, fileBytes("b-private-delete-victim"), { upsert: true }),
+            .upload(path, fileText("b-private-delete-victim"), { upsert: true }),
           "B private delete seed upload",
         );
         expect(seedErr).toBeNull();
@@ -1572,7 +1572,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         const { error: seedErr } = await allowedStorageCall(
           () => clientA.storage
             .from(PRIVATE_BUCKET)
-            .upload(path, fileBytes("a-private-delete-victim"), { upsert: true }),
+            .upload(path, fileText("a-private-delete-victim"), { upsert: true }),
           "A private delete seed upload",
         );
         expect(seedErr).toBeNull();
@@ -1607,7 +1607,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         const { error: upErr } = await allowedStorageCall(
           () => clientB.storage
             .from(ASSETS_BUCKET)
-            .upload(path, fileBytes("b-own-assets-for-delete"), { upsert: true }),
+            .upload(path, fileText("b-own-assets-for-delete"), { upsert: true }),
           "B assets delete seed upload",
         );
         expect(upErr).toBeNull();
@@ -1636,7 +1636,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         const { error } = await storageCall(
           () => clientA.storage
             .from(PRIVATE_BUCKET)
-            .upload(path, fileBytes("a-overwrite-attempt"), { upsert: true }),
+            .upload(path, fileText("a-overwrite-attempt"), { upsert: true }),
           "A cross private overwrite",
         );
         expect(error).toBeTruthy();
@@ -1674,7 +1674,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
           const result = await Promise.race([
             anon.storage
               .from(PRIVATE_BUCKET)
-              .upload(path, fileBytes(`anon-nested-${scenario.name}`), { upsert: true }),
+              .upload(path, fileText(`anon-nested-${scenario.name}`), { upsert: true }),
             new Promise<{ error: Error; data: null }>((resolve) =>
               setTimeout(
                 () => resolve({ error: new Error("network-timeout"), data: null }),
@@ -1694,7 +1694,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
           const result = await Promise.race([
             anon.storage
               .from(ASSETS_BUCKET)
-              .upload(path, fileBytes(`anon-nested-assets-${scenario.name}`), { upsert: true }),
+              .upload(path, fileText(`anon-nested-assets-${scenario.name}`), { upsert: true }),
             new Promise<{ error: Error; data: null }>((resolve) =>
               setTimeout(
                 () => resolve({ error: new Error("network-timeout"), data: null }),
@@ -1798,7 +1798,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
           const { error: upErr } = await allowedStorageCall(
             () => clientA.storage
               .from(PRIVATE_BUCKET)
-              .upload(path, fileBytes(`a-own-nested-${scenario.name}`), { upsert: true }),
+              .upload(path, fileText(`a-own-nested-${scenario.name}`), { upsert: true }),
             `A own nested private upload ${scenario.name}`,
           );
           expect(upErr).toBeNull();
@@ -1819,7 +1819,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
           const { error } = await storageCall(
             () => clientA.storage
               .from(PRIVATE_BUCKET)
-              .upload(path, fileBytes(`a-cross-nested-${scenario.name}`), { upsert: true }),
+              .upload(path, fileText(`a-cross-nested-${scenario.name}`), { upsert: true }),
             `A cross nested private upload ${scenario.name}`,
           );
           expect(error).toBeTruthy();
@@ -1831,7 +1831,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
           const { error } = await storageCall(
             () => clientB.storage
               .from(PRIVATE_BUCKET)
-              .upload(path, fileBytes(`b-cross-nested-${scenario.name}`), { upsert: true }),
+              .upload(path, fileText(`b-cross-nested-${scenario.name}`), { upsert: true }),
             `B cross nested private upload ${scenario.name}`,
           );
           expect(error).toBeTruthy();
@@ -1847,7 +1847,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
           const { error } = await storageCall(
             () => clientA.storage
               .from(ASSETS_BUCKET)
-              .upload(path, fileBytes(`a-cross-nested-assets-${scenario.name}`), { upsert: true }),
+              .upload(path, fileText(`a-cross-nested-assets-${scenario.name}`), { upsert: true }),
             `A cross nested assets upload ${scenario.name}`,
           );
           expect(error).toBeTruthy();
@@ -1930,7 +1930,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
           const { error: seedErr } = await allowedStorageCall(
             () => ownerClient.storage
               .from(bucket)
-              .upload(path, fileBytes(originalContent), { upsert: true }),
+              .upload(path, fileText(originalContent), { upsert: true }),
             `seed victim ${bucket} ${label} ${scenario.name}`,
           );
           if (seedErr) return null;
@@ -2008,7 +2008,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
               const { error } = await storageCall(
                 () => clientB.storage
                   .from(PRIVATE_BUCKET)
-                  .upload(seeded.path, fileBytes(ATTACKER_PAYLOAD_TAG), {
+                  .upload(seeded.path, fileText(ATTACKER_PAYLOAD_TAG), {
                     upsert: upsertMode,
                   }),
                 `B overwrite private ${scenario.name} upsert=${upsertMode}`,
@@ -2054,7 +2054,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
               const { error } = await storageCall(
                 () => clientA.storage
                   .from(PRIVATE_BUCKET)
-                  .upload(seeded.path, fileBytes(ATTACKER_PAYLOAD_TAG), {
+                  .upload(seeded.path, fileText(ATTACKER_PAYLOAD_TAG), {
                     upsert: upsertMode,
                   }),
                 `A overwrite private ${scenario.name} upsert=${upsertMode}`,
@@ -2100,7 +2100,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
               const { error } = await storageCall(
                 () => clientB.storage
                   .from(ASSETS_BUCKET)
-                  .upload(seeded.path, fileBytes(ATTACKER_PAYLOAD_TAG), {
+                  .upload(seeded.path, fileText(ATTACKER_PAYLOAD_TAG), {
                     upsert: upsertMode,
                   }),
                 `B overwrite assets ${scenario.name} upsert=${upsertMode}`,
@@ -2368,7 +2368,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
             const result = await Promise.race([
               anon.storage
                 .from(bucket)
-                .upload(variant.path, fileBytes(`anon-${variant.label}`), { upsert: true }),
+                .upload(variant.path, fileText(`anon-${variant.label}`), { upsert: true }),
               new Promise<{ error: Error; data: null }>((resolve) =>
                 setTimeout(
                   () => resolve({ error: new Error("network-timeout"), data: null }),
@@ -2543,7 +2543,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
                   dir
                     .attackerClient()
                     .storage.from(bucket)
-                    .upload(variant.path, fileBytes(`${dir.attacker}-${variant.label}`), {
+                    .upload(variant.path, fileText(`${dir.attacker}-${variant.label}`), {
                       upsert: true,
                     }),
                   new Promise<{ error: Error; data: null }>((resolve) =>
@@ -2795,7 +2795,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
               const result = await Promise.race([
                 anon.storage
                   .from(bucket)
-                  .upload(variant.path, fileBytes(`anon-late-${variant.label}`), {
+                  .upload(variant.path, fileText(`anon-late-${variant.label}`), {
                     upsert: true,
                   }),
                 new Promise<{ error: Error; data: null }>((resolve) =>
@@ -3088,7 +3088,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         const { error: aErr } = await allowedStorageCall(
           () => clientA.storage
             .from(ASSETS_BUCKET)
-            .upload(aPath, fileBytes("a-assets-isolation-seed"), { upsert: true }),
+            .upload(aPath, fileText("a-assets-isolation-seed"), { upsert: true }),
           "A assets isolation seed upload",
         );
         if (aErr) throw new Error(`Seed upload for tenant A failed: ${aErr.message}`);
@@ -3098,7 +3098,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         const { error: bErr } = await allowedStorageCall(
           () => clientB.storage
             .from(ASSETS_BUCKET)
-            .upload(bPath, fileBytes("b-assets-isolation-seed"), { upsert: true }),
+            .upload(bPath, fileText("b-assets-isolation-seed"), { upsert: true }),
           "B assets isolation seed upload",
         );
         if (bErr) throw new Error(`Seed upload for tenant B failed: ${bErr.message}`);
@@ -3332,7 +3332,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         const { error: aErr } = await allowedStorageCall(
           () => clientA.storage
             .from(ASSETS_BUCKET)
-            .upload(aPath, fileBytes("a-probe-target-asset"), { upsert: true }),
+            .upload(aPath, fileText("a-probe-target-asset"), { upsert: true }),
           "A probe seed upload",
         );
         if (aErr) throw new Error(`Probe seed for tenant A failed: ${aErr.message}`);
@@ -3342,7 +3342,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         const { error: bErr } = await allowedStorageCall(
           () => clientB.storage
             .from(ASSETS_BUCKET)
-            .upload(bPath, fileBytes("b-probe-target-asset"), { upsert: true }),
+            .upload(bPath, fileText("b-probe-target-asset"), { upsert: true }),
           "B probe seed upload",
         );
         if (bErr) throw new Error(`Probe seed for tenant B failed: ${bErr.message}`);
@@ -3691,7 +3691,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         const { error: aErr } = await allowedStorageCall(
           () => clientA.storage
             .from(ASSETS_BUCKET)
-            .upload(aPath, fileBytes("a-traversal-target"), { upsert: true }),
+            .upload(aPath, fileText("a-traversal-target"), { upsert: true }),
           "A traversal seed upload",
         );
         if (aErr) throw new Error(`Traversal seed for tenant A failed: ${aErr.message}`);
@@ -3701,7 +3701,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         const { error: bErr } = await allowedStorageCall(
           () => clientB.storage
             .from(ASSETS_BUCKET)
-            .upload(bPath, fileBytes("b-traversal-target"), { upsert: true }),
+            .upload(bPath, fileText("b-traversal-target"), { upsert: true }),
           "B traversal seed upload",
         );
         if (bErr) throw new Error(`Traversal seed for tenant B failed: ${bErr.message}`);
@@ -3907,7 +3907,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         const { error: aErr } = await allowedStorageCall(
           () => clientA.storage
             .from(ASSETS_BUCKET)
-            .upload(aPath, fileBytes("a-public-cdn-seed"), { upsert: true }),
+            .upload(aPath, fileText("a-public-cdn-seed"), { upsert: true }),
           "A public CDN seed upload",
         );
         if (aErr) throw new Error(`Seed for tenant A failed: ${aErr.message}`);
@@ -3917,7 +3917,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         const { error: bErr } = await allowedStorageCall(
           () => clientB.storage
             .from(ASSETS_BUCKET)
-            .upload(bPath, fileBytes("b-public-cdn-seed"), { upsert: true }),
+            .upload(bPath, fileText("b-public-cdn-seed"), { upsert: true }),
           "B public CDN seed upload",
         );
         if (bErr) throw new Error(`Seed for tenant B failed: ${bErr.message}`);
