@@ -39,9 +39,9 @@ file in a step named **"Inject placeholder tenant for local-only seed
 data"**, which runs after the Supabase CLI install and before
 `supabase start`:
 
-- `.github/workflows/tier-trigger-tests.yml` — runs the raw psql
+- `.github/workflows/tier-trigger-tests.yml` , runs the raw psql
   trigger regression tests in `supabase/tests/*.sql`.
-- `.github/workflows/reservation-type-limit-live.yml` — runs the
+- `.github/workflows/reservation-type-limit-live.yml` , runs the
   end-to-end vitest suite in `supabase/tests/integration/` against a
   real PostgREST + Postgres stack.
 

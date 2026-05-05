@@ -66,7 +66,7 @@ jobs:
       # Legacy seed migrations reference hardcoded production ids
       # (tenant, site, staff user). We pre-create placeholder rows so
       # the seeds attach cleanly. IDs and rationale are documented in
-      # docs/ci-placeholder-ids.md — keep this step in sync with the
+      # docs/ci-placeholder-ids.md , keep this step in sync with the
       # equivalent step in reservation-type-limit-live.yml and cross-tenant-rls-local.yml.
       - name: Inject placeholder tenant for local-only seed data
         if: steps.docker-check.outputs.available == 'true' && steps.supabase-cli.outcome == 'success'
