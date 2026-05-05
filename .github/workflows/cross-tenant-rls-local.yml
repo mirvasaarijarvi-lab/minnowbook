@@ -762,6 +762,45 @@ jobs:
           "${PSQL[@]}" -c "SELECT pg_reload_conf();" || echo "(skipping pg_reload_conf)"
           exit 0
 
+      # Warm up the local Storage container before the test sweep. The
+      # Supabase Storage API on a freshly-booted local stack is bursty —
+      # the first few uploads (especially after a cold image pull) can
+      # routinely exceed 30s while internal connection pools, S3
+      # emulator, and multipart machinery initialise. Issuing a couple of
+      # throwaway requests here pays that warmup cost OUTSIDE the test
+      # timeout budget, so the suite's positive-control uploads don't
+      # spuriously trip the 45s per-call cap.
+      - name: Warm up local Storage API
+        if: steps.supabase-ready.outcome == 'success'
+        env:
+          SUPABASE_URL: ${{ env.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ env.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          set -uo pipefail
+          STORAGE_URL="${SUPABASE_URL%/}/storage/v1"
+          echo "Warming Storage API at $STORAGE_URL ..."
+          for i in 1 2 3 4 5; do
+            code=$(curl -sS -o /dev/null -w '%{http_code}' \
+              -H "apikey: ${SUPABASE_SERVICE_ROLE_KEY}" \
+              -H "Authorization: Bearer ${SUPABASE_SERVICE_ROLE_KEY}" \
+              "$STORAGE_URL/bucket" || echo "000")
+            echo "  warmup $i: HTTP $code"
+            if [ "$code" = "200" ]; then break; fi
+            sleep 2
+          done
+          # Issue a list against each bucket the suite uses so the storage
+          # backend opens and caches its connections before tests start.
+          for bucket in tenant-private tenant-assets; do
+            curl -sS -o /dev/null -w "  $bucket list: HTTP %{http_code}\n" \
+              -X POST \
+              -H "apikey: ${SUPABASE_SERVICE_ROLE_KEY}" \
+              -H "Authorization: Bearer ${SUPABASE_SERVICE_ROLE_KEY}" \
+              -H "Content-Type: application/json" \
+              -d '{"prefix":"","limit":1}' \
+              "$STORAGE_URL/object/list/$bucket" || true
+          done
+          exit 0
+
       - name: Run cross-tenant RLS tests (live, against local stack)
         id: rls-tests
         if: steps.supabase-ready.outcome == 'success'
@@ -772,9 +811,11 @@ jobs:
           # Local Supabase storage on GitHub runners is bursty. Keep denied
           # probes short, but give positive-control uploads and seed uploads
           # enough headroom so slow local storage is not reported as an RLS
-          # regression. The test file enforces a 45s minimum for allowed calls.
+          # regression. The test file enforces a 45s minimum for allowed calls
+          # and retries timed-out positive-control calls a few times.
           RLS_STORAGE_DENIAL_CALL_TIMEOUT_MS: 6000
-          RLS_STORAGE_ALLOWED_CALL_TIMEOUT_MS: 45000
+          RLS_STORAGE_ALLOWED_CALL_TIMEOUT_MS: 60000
+          RLS_STORAGE_ALLOWED_RETRY_ATTEMPTS: 4
           # Tags the generated report so local-stack output is distinguishable
           # from remote-staging output when both artifacts are downloaded.
           RLS_REPORT_FLAVOR: ${{ matrix.flavor }}
