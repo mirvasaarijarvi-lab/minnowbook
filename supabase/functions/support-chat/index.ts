@@ -86,15 +86,34 @@ setInterval(() => {
 
 serve(async (req) => {
   const corsHeaders = getCorsHeaders(req);
+  const reqOrigin = req.headers.get("Origin") || "";
+  const referer = req.headers.get("Referer") || "";
+  const userAgent = req.headers.get("User-Agent") || "";
+
+  console.log("[support-chat] request", {
+    method: req.method,
+    origin: reqOrigin || "(none)",
+    referer: referer || "(none)",
+    userAgent: userAgent.slice(0, 120),
+  });
+
   if (req.method === "OPTIONS") {
+    console.log("[support-chat] preflight", {
+      origin: reqOrigin || "(none)",
+      originAllowed: reqOrigin ? isOriginAllowed(reqOrigin) : true,
+    });
     return new Response(null, { headers: corsHeaders });
   }
 
   // Origin allowlist gate: explicit 403 for browser requests from
   // disallowed origins. Body is intentionally generic to avoid leaking
   // any allowlist or routing details.
-  const reqOrigin = req.headers.get("Origin") || "";
   if (reqOrigin && !isOriginAllowed(reqOrigin)) {
+    console.warn("[support-chat] rejected: origin not in allowlist", {
+      origin: reqOrigin,
+      reason: "origin_not_allowlisted",
+      allowlist: ALLOWED_ORIGINS.map((o) => (typeof o === "string" ? o : o.toString())),
+    });
     return new Response(JSON.stringify({ error: "Forbidden" }), {
       status: 403,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
