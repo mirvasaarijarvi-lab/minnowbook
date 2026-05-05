@@ -2942,16 +2942,22 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         // an empty result could mask a leak (we wouldn't be able to tell
         // "nothing to see" from "policy hid it").
         const aPath = ownPath(liveCreds.a.tenantId!, "a-assets-isolation-seed");
-        const { error: aErr } = await clientA.storage
-          .from(ASSETS_BUCKET)
-          .upload(aPath, fileBytes("a-assets-isolation-seed"), { upsert: true });
+        const { error: aErr } = await storageCall(
+          () => clientA.storage
+            .from(ASSETS_BUCKET)
+            .upload(aPath, fileBytes("a-assets-isolation-seed"), { upsert: true }),
+          "A assets isolation seed upload",
+        );
         if (aErr) throw new Error(`Seed upload for tenant A failed: ${aErr.message}`);
         seededAssets.push({ path: aPath, client: "a" });
 
         const bPath = ownPath(liveCreds.b.tenantId!, "b-assets-isolation-seed");
-        const { error: bErr } = await clientB.storage
-          .from(ASSETS_BUCKET)
-          .upload(bPath, fileBytes("b-assets-isolation-seed"), { upsert: true });
+        const { error: bErr } = await storageCall(
+          () => clientB.storage
+            .from(ASSETS_BUCKET)
+            .upload(bPath, fileBytes("b-assets-isolation-seed"), { upsert: true }),
+          "B assets isolation seed upload",
+        );
         if (bErr) throw new Error(`Seed upload for tenant B failed: ${bErr.message}`);
         seededAssets.push({ path: bPath, client: "b" });
       });
@@ -3180,16 +3186,22 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         // probes have a real target. Names embed a probe marker so a
         // leak is unambiguous in test output.
         const aPath = ownPath(liveCreds.a.tenantId!, "a-probe-target-asset");
-        const { error: aErr } = await clientA.storage
-          .from(ASSETS_BUCKET)
-          .upload(aPath, fileBytes("a-probe-target-asset"), { upsert: true });
+        const { error: aErr } = await storageCall(
+          () => clientA.storage
+            .from(ASSETS_BUCKET)
+            .upload(aPath, fileBytes("a-probe-target-asset"), { upsert: true }),
+          "A probe seed upload",
+        );
         if (aErr) throw new Error(`Probe seed for tenant A failed: ${aErr.message}`);
         seededAssets.push({ path: aPath, client: "a" });
 
         const bPath = ownPath(liveCreds.b.tenantId!, "b-probe-target-asset");
-        const { error: bErr } = await clientB.storage
-          .from(ASSETS_BUCKET)
-          .upload(bPath, fileBytes("b-probe-target-asset"), { upsert: true });
+        const { error: bErr } = await storageCall(
+          () => clientB.storage
+            .from(ASSETS_BUCKET)
+            .upload(bPath, fileBytes("b-probe-target-asset"), { upsert: true }),
+          "B probe seed upload",
+        );
         if (bErr) throw new Error(`Probe seed for tenant B failed: ${bErr.message}`);
         seededAssets.push({ path: bPath, client: "b" });
       });
@@ -3533,16 +3545,22 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         // use the literal leaf name `b-traversal-target.txt` (and
         // mirror for A) so `buildTrickyPaths` can reconstruct it.
         const aPath = `${runRootFor(liveCreds.a.tenantId!)}/a-traversal-target.txt`;
-        const { error: aErr } = await clientA.storage
-          .from(ASSETS_BUCKET)
-          .upload(aPath, fileBytes("a-traversal-target"), { upsert: true });
+        const { error: aErr } = await storageCall(
+          () => clientA.storage
+            .from(ASSETS_BUCKET)
+            .upload(aPath, fileBytes("a-traversal-target"), { upsert: true }),
+          "A traversal seed upload",
+        );
         if (aErr) throw new Error(`Traversal seed for tenant A failed: ${aErr.message}`);
         seededAssets.push({ path: aPath, client: "a" });
 
         const bPath = `${runRootFor(liveCreds.b.tenantId!)}/b-traversal-target.txt`;
-        const { error: bErr } = await clientB.storage
-          .from(ASSETS_BUCKET)
-          .upload(bPath, fileBytes("b-traversal-target"), { upsert: true });
+        const { error: bErr } = await storageCall(
+          () => clientB.storage
+            .from(ASSETS_BUCKET)
+            .upload(bPath, fileBytes("b-traversal-target"), { upsert: true }),
+          "B traversal seed upload",
+        );
         if (bErr) throw new Error(`Traversal seed for tenant B failed: ${bErr.message}`);
         seededAssets.push({ path: bPath, client: "b" });
       });
@@ -3743,16 +3761,22 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         // names are distinctive so leak detection in list() can
         // unambiguously flag them.
         const aPath = `${runRootFor(liveCreds.a.tenantId!)}/a-public-cdn-seed.txt`;
-        const { error: aErr } = await clientA.storage
-          .from(ASSETS_BUCKET)
-          .upload(aPath, fileBytes("a-public-cdn-seed"), { upsert: true });
+        const { error: aErr } = await storageCall(
+          () => clientA.storage
+            .from(ASSETS_BUCKET)
+            .upload(aPath, fileBytes("a-public-cdn-seed"), { upsert: true }),
+          "A public CDN seed upload",
+        );
         if (aErr) throw new Error(`Seed for tenant A failed: ${aErr.message}`);
         seededAssets.push({ path: aPath, client: "a" });
 
         const bPath = `${runRootFor(liveCreds.b.tenantId!)}/b-public-cdn-seed.txt`;
-        const { error: bErr } = await clientB.storage
-          .from(ASSETS_BUCKET)
-          .upload(bPath, fileBytes("b-public-cdn-seed"), { upsert: true });
+        const { error: bErr } = await storageCall(
+          () => clientB.storage
+            .from(ASSETS_BUCKET)
+            .upload(bPath, fileBytes("b-public-cdn-seed"), { upsert: true }),
+          "B public CDN seed upload",
+        );
         if (bErr) throw new Error(`Seed for tenant B failed: ${bErr.message}`);
         seededAssets.push({ path: bPath, client: "b" });
       });
