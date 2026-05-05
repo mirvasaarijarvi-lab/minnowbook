@@ -721,13 +721,19 @@ jobs:
         env:
           PGPASSWORD: postgres
         run: |
+          # Best-effort: in the local Supabase stack the `postgres` role may
+          # not have privileges to alter superuser-only GUCs like
+          # `log_statement`. We don't want this debug-only logging tweak to
+          # fail the entire workflow, so each statement is tolerant of
+          # permission errors and we always exit 0.
           set -uo pipefail
-          PSQL=(psql -h 127.0.0.1 -p 54322 -U postgres -d postgres -v ON_ERROR_STOP=1)
-          "${PSQL[@]}" -c "ALTER SYSTEM SET log_statement = 'all';"
-          "${PSQL[@]}" -c "ALTER SYSTEM SET log_min_messages = 'warning';"
-          "${PSQL[@]}" -c "ALTER SYSTEM SET log_min_error_statement = 'error';"
-          "${PSQL[@]}" -c "ALTER SYSTEM SET log_error_verbosity = 'verbose';"
-          "${PSQL[@]}" -c "SELECT pg_reload_conf();"
+          PSQL=(psql -h 127.0.0.1 -p 54322 -U postgres -d postgres)
+          "${PSQL[@]}" -c "ALTER SYSTEM SET log_statement = 'all';" || echo "(skipping log_statement: insufficient privileges)"
+          "${PSQL[@]}" -c "ALTER SYSTEM SET log_min_messages = 'warning';" || echo "(skipping log_min_messages)"
+          "${PSQL[@]}" -c "ALTER SYSTEM SET log_min_error_statement = 'error';" || echo "(skipping log_min_error_statement)"
+          "${PSQL[@]}" -c "ALTER SYSTEM SET log_error_verbosity = 'verbose';" || echo "(skipping log_error_verbosity)"
+          "${PSQL[@]}" -c "SELECT pg_reload_conf();" || echo "(skipping pg_reload_conf)"
+          exit 0
 
       - name: Run cross-tenant RLS tests (live, against local stack)
         id: rls-tests
