@@ -981,8 +981,38 @@ async function storageCall<T>(
   return result as TimedStorageResult<T>;
 }
 
-const allowedStorageCall = <T>(op: () => Promise<T>, label: string) =>
-  storageCall(op, label, STORAGE_ALLOWED_CALL_TIMEOUT_MS);
+// Positive-control / seed uploads against a freshly-booted local Storage
+// container can intermittently exceed the per-call timeout while the
+// container is still warming up (cold image pulls, multipart init, GoTrue
+// session caching, etc.). A single timeout is not evidence of an RLS
+// regression — it's almost always transient infrastructure. Retry the
+// call a couple of times with backoff before declaring failure, so that
+// genuine RLS denials still surface but warmup-jitter is absorbed.
+const STORAGE_ALLOWED_RETRY_ATTEMPTS = parseTimeoutMs(
+  process.env.RLS_STORAGE_ALLOWED_RETRY_ATTEMPTS,
+  3,
+);
+
+const allowedStorageCall = async <T>(
+  op: () => Promise<T>,
+  label: string,
+): Promise<TimedStorageResult<T>> => {
+  let lastResult: TimedStorageResult<T> | null = null;
+  for (let attempt = 1; attempt <= STORAGE_ALLOWED_RETRY_ATTEMPTS; attempt++) {
+    const attemptLabel =
+      attempt === 1 ? label : `${label} (retry ${attempt - 1})`;
+    const result = await storageCall(op, attemptLabel, STORAGE_ALLOWED_CALL_TIMEOUT_MS);
+    lastResult = result;
+    const err = (result as { error?: { message?: string } | null }).error;
+    const timedOut =
+      err && typeof err.message === "string" && err.message.includes("timed out after");
+    if (!timedOut) return result;
+    if (attempt < STORAGE_ALLOWED_RETRY_ATTEMPTS) {
+      await new Promise((r) => setTimeout(r, 500 * attempt));
+    }
+  }
+  return lastResult as TimedStorageResult<T>;
+};
 
 // Folder root reserved for this run, scoped per tenant. Always a strict
 // prefix of every test path — used to anchor `list()` calls in cleanup.
