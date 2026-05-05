@@ -22,11 +22,12 @@ function isOriginAllowed(origin: string): boolean {
 
 function getCorsHeaders(req: Request): Record<string, string> {
   const origin = req.headers.get("Origin") || "";
-  const allowed = isOriginAllowed(origin) && origin !== "";
-  return {
-    "Access-Control-Allow-Origin": allowed ? origin : ALLOWED_ORIGINS[0] as string,
+  const allowed = origin !== "" && isOriginAllowed(origin);
+  const headers: Record<string, string> = {
     "Access-Control-Allow-Headers":
       "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Credentials": "false",
     "X-Content-Type-Options": "nosniff",
     "X-Frame-Options": "DENY",
     "X-XSS-Protection": "1; mode=block",
@@ -37,6 +38,13 @@ function getCorsHeaders(req: Request): Record<string, string> {
     "Pragma": "no-cache",
     "Vary": "Origin",
   };
+  // Only echo the Origin when it's on the allowlist. For disallowed or
+  // missing origins, omit Access-Control-Allow-Origin entirely so the
+  // browser blocks the response instead of trusting a fallback value.
+  if (allowed) {
+    headers["Access-Control-Allow-Origin"] = origin;
+  }
+  return headers;
 }
 
 function getJwtPayload(token: string): Record<string, unknown> | null {
