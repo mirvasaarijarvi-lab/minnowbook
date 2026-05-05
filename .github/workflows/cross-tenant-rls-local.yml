@@ -763,8 +763,8 @@ jobs:
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ env.SUPABASE_ANON_KEY }}
           # Tags the generated report so local-stack output is distinguishable
           # from remote-staging output when both artifacts are downloaded.
-          RLS_REPORT_FLAVOR: local
-        run: bun run test:rls-report
+          RLS_REPORT_FLAVOR: ${{ matrix.flavor }}
+        run: bun run ${{ matrix.command }}
 
       # Belt-and-braces verification that the test run actually flushed a
       # ledger for THIS flavor before we hand it to the PDF generator.
@@ -777,7 +777,7 @@ jobs:
       - name: Verify flavored storage-attempts ledger exists (local)
         if: always() && steps.supabase-start.outcome == 'success'
         env:
-          RLS_REPORT_FLAVOR: local
+          RLS_REPORT_FLAVOR: ${{ matrix.flavor }}
         run: |
           set -uo pipefail
           FLAVORED="reports/storage-attempts.${RLS_REPORT_FLAVOR}.json"
@@ -806,7 +806,7 @@ jobs:
       - name: Generate storage-attempts PDF (local)
         if: always() && steps.supabase-start.outcome == 'success' && env.STORAGE_ATTEMPTS_LEDGER != ''
         env:
-          RLS_REPORT_FLAVOR: local
+          RLS_REPORT_FLAVOR: ${{ matrix.flavor }}
         run: bun run scripts/generate-storage-attempts-pdf.ts || true
 
       # Sibling of the PDF step: emit a small HTML summary focused on the
@@ -818,7 +818,7 @@ jobs:
       - name: Generate adversarial HTML summary (local)
         if: always() && steps.supabase-start.outcome == 'success' && env.STORAGE_ATTEMPTS_LEDGER != ''
         env:
-          RLS_REPORT_FLAVOR: local
+          RLS_REPORT_FLAVOR: ${{ matrix.flavor }}
         run: bun run scripts/generate-adversarial-html-summary.ts || true
 
       - name: Upload RLS report (local)
@@ -828,7 +828,7 @@ jobs:
           # `reports/` already contains the storage-attempts PDF + JSON
           # alongside the rls-report HTML/JSON, so a single upload covers
           # both artifact families.
-          name: rls-report-local
+          name: rls-report-${{ matrix.flavor }}
           path: reports/
           retention-days: 14
 
