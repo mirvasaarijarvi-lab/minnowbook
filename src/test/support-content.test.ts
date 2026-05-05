@@ -27,6 +27,7 @@ describe("support chat — system prompt content", () => {
     "Public reviews/testimonials",
     "Multi-language public booking",
     "Stripe revenue dashboard",
+    "Kitchen orders",
   ];
 
   for (const bullet of recentBullets) {
