@@ -1532,7 +1532,16 @@ describe("Cross-Tenant Storage RLS Tests", () => {
 
       // ---------- Cross-tenant update / delete denial ----------
       it("user A cannot DELETE tenant B's tenant-private file", async () => {
-        const path = ownPath(liveCreds.b.tenantId!, "b-own-private");
+        const path = ownPath(liveCreds.b.tenantId!, "b-private-delete-victim");
+        const { error: seedErr } = await allowedStorageCall(
+          () => clientB.storage
+            .from(PRIVATE_BUCKET)
+            .upload(path, fileBytes("b-private-delete-victim"), { upsert: true }),
+          "B private delete seed upload",
+        );
+        expect(seedErr).toBeNull();
+        if (!seedErr) uploadedPaths.push({ bucket: PRIVATE_BUCKET, path, client: "b" });
+
         const { data, error } = await storageCall(
           () => clientA.storage.from(PRIVATE_BUCKET).remove([path]),
           "A cross private remove",
@@ -1559,7 +1568,16 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       });
 
       it("user B cannot DELETE tenant A's tenant-private file", async () => {
-        const path = ownPath(liveCreds.a.tenantId!, "a-own-private");
+        const path = ownPath(liveCreds.a.tenantId!, "a-private-delete-victim");
+        const { error: seedErr } = await allowedStorageCall(
+          () => clientA.storage
+            .from(PRIVATE_BUCKET)
+            .upload(path, fileBytes("a-private-delete-victim"), { upsert: true }),
+          "A private delete seed upload",
+        );
+        expect(seedErr).toBeNull();
+        if (!seedErr) uploadedPaths.push({ bucket: PRIVATE_BUCKET, path, client: "a" });
+
         const { data, error } = await storageCall(
           () => clientB.storage.from(PRIVATE_BUCKET).remove([path]),
           "B cross private remove",
