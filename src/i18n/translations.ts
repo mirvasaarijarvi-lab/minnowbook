@@ -4366,7 +4366,7 @@ const fi: TranslationKeys = {
   "help.art10C1": "Vierasportaali: vieraat voivat katsoa tai peruuttaa varauksensa maagisella linkillä (/my-booking/:token) — kirjautumista ei tarvita.",
   "help.art10C2": "Jonotuslista: kun vuoro on täynnä, vieraat voivat liittyä jonoon ja saavat automaattisen ilmoituksen, kun paikka vapautuu.",
   "help.art10C3": "Google-kalenterisynkronointi: tilaa varauksesi iCal-syötteellä (Asetukset → Kalenterisynkronointi). CSV/PDF-vienti Varauksista ja Raporteista.",
-  "help.art10C4": "Hallintapaneelin parannukset: tumma teema, pikanäppäimet (paina ?), pikatoimintojen FAB mobiilissa, käyttöönoton tarkistuslista, audit-lokin suodattimet, analytiikkakaaviot, kirjautumisen rate-rajoitus, varmuuskopion tilailmaisin, julkiset arvostelut/suosittelut, monikielinen julkinen varaussivu ja Stripe-tulospaneeli pääkäyttäjille.",
+  "help.art10C4": "Hallintapaneelin parannukset: tumma teema, pikanäppäimet (paina ?), pikatoimintojen FAB mobiilissa, käyttöönoton tarkistuslista, audit-lokin suodattimet, analytiikkakaaviot, kirjautumisen rate-rajoitus, varmuuskopion tilailmaisin, julkiset arvostelut/suosittelut, monikielinen julkinen varaussivu, keittiötilaukset ravintola- ja tilavarauksille, ja Stripe-tulospaneeli pääkäyttäjille.",
   "help.guide1Q": "Miten hallitsen varauksia?",
   "help.guide1A": "Siirry kohtaan **Hallintapaneeli → Varaukset** selataksesi, suodattaaksesi, muokataksesi ja hallinnoitsesi kaikkia varauksia.",
   "help.guide2Q": "Miten mukautan varaussivua?",
