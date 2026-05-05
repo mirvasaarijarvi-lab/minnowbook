@@ -21,10 +21,20 @@ import {
  * the originating client can no longer see.
  */
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const AUTH_STORAGE_NAMESPACE = `rls-storage-${Date.now()}-${Math.random()
+  .toString(36)
+  .slice(2, 8)}`;
+let authStorageSequence = 0;
+const nextAuthStorageKey = (label: string) =>
+  `${AUTH_STORAGE_NAMESPACE}-${label}-${++authStorageSequence}`;
 const adminClient: SupabaseClient | null =
   SERVICE_ROLE_KEY && import.meta.env.VITE_SUPABASE_URL
     ? createClient(import.meta.env.VITE_SUPABASE_URL as string, SERVICE_ROLE_KEY, {
-        auth: { persistSession: false, autoRefreshToken: false },
+        auth: {
+          persistSession: false,
+          autoRefreshToken: false,
+          storageKey: nextAuthStorageKey("admin"),
+        },
       })
     : null;
 
@@ -922,7 +932,11 @@ const liveModeEnabled = Boolean(
 
 const newAnonClient = (): SupabaseClient =>
   createClient(SUPABASE_URL!, SUPABASE_ANON_KEY!, {
-    auth: { persistSession: false, autoRefreshToken: false },
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+      storageKey: nextAuthStorageKey("anon"),
+    },
   });
 
 // Per-run folder key — every artifact this suite writes lives under
@@ -1691,15 +1705,19 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         // ---- Sanity: own-tenant nested upload works ----
         it(`user A CAN upload + read own nested path '${scenario.name}' (sanity)`, async () => {
           const path = nestedOwnPath(liveCreds.a.tenantId!, scenario.segments, "a-own-nested");
-          const { error: upErr } = await clientA.storage
-            .from(PRIVATE_BUCKET)
-            .upload(path, fileBytes(`a-own-nested-${scenario.name}`), { upsert: true });
+          const { error: upErr } = await storageCall(
+            () => clientA.storage
+              .from(PRIVATE_BUCKET)
+              .upload(path, fileBytes(`a-own-nested-${scenario.name}`), { upsert: true }),
+            `A own nested private upload ${scenario.name}`,
+          );
           expect(upErr).toBeNull();
           if (!upErr) ownNestedUploads.push({ bucket: PRIVATE_BUCKET, path, client: "a" });
 
-          const { data, error: dlErr } = await clientA.storage
-            .from(PRIVATE_BUCKET)
-            .download(path);
+          const { data, error: dlErr } = await storageCall(
+            () => clientA.storage.from(PRIVATE_BUCKET).download(path),
+            `A own nested private download ${scenario.name}`,
+          );
           expect(dlErr).toBeNull();
           expect(data).toBeTruthy();
         });
@@ -1708,18 +1726,24 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         it(`user A cannot UPLOAD to tenant B's nested '${scenario.name}' in tenant-private`, async () => {
           const path = nestedOwnPath(liveCreds.b.tenantId!, scenario.segments, "a-cross-nested");
           nestedAttempts.push({ bucket: PRIVATE_BUCKET, path, attacker: "a", owner: "b" });
-          const { error } = await clientA.storage
-            .from(PRIVATE_BUCKET)
-            .upload(path, fileBytes(`a-cross-nested-${scenario.name}`), { upsert: true });
+          const { error } = await storageCall(
+            () => clientA.storage
+              .from(PRIVATE_BUCKET)
+              .upload(path, fileBytes(`a-cross-nested-${scenario.name}`), { upsert: true }),
+            `A cross nested private upload ${scenario.name}`,
+          );
           expect(error).toBeTruthy();
         });
 
         it(`user B cannot UPLOAD to tenant A's nested '${scenario.name}' in tenant-private`, async () => {
           const path = nestedOwnPath(liveCreds.a.tenantId!, scenario.segments, "b-cross-nested");
           nestedAttempts.push({ bucket: PRIVATE_BUCKET, path, attacker: "b", owner: "a" });
-          const { error } = await clientB.storage
-            .from(PRIVATE_BUCKET)
-            .upload(path, fileBytes(`b-cross-nested-${scenario.name}`), { upsert: true });
+          const { error } = await storageCall(
+            () => clientB.storage
+              .from(PRIVATE_BUCKET)
+              .upload(path, fileBytes(`b-cross-nested-${scenario.name}`), { upsert: true }),
+            `B cross nested private upload ${scenario.name}`,
+          );
           expect(error).toBeTruthy();
         });
 
@@ -1730,9 +1754,12 @@ describe("Cross-Tenant Storage RLS Tests", () => {
             "a-cross-nested-assets",
           );
           nestedAttempts.push({ bucket: ASSETS_BUCKET, path, attacker: "a", owner: "b" });
-          const { error } = await clientA.storage
-            .from(ASSETS_BUCKET)
-            .upload(path, fileBytes(`a-cross-nested-assets-${scenario.name}`), { upsert: true });
+          const { error } = await storageCall(
+            () => clientA.storage
+              .from(ASSETS_BUCKET)
+              .upload(path, fileBytes(`a-cross-nested-assets-${scenario.name}`), { upsert: true }),
+            `A cross nested assets upload ${scenario.name}`,
+          );
           expect(error).toBeTruthy();
         });
 
@@ -1810,13 +1837,19 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         ): Promise<{ path: string; originalBytes: ArrayBuffer } | null> => {
           const path = nestedOwnPath(ownerTenantId, scenario.segments, label);
           const originalContent = `victim-original-${label}-${scenario.name}-${Date.now()}`;
-          const { error: seedErr } = await ownerClient.storage
-            .from(bucket)
-            .upload(path, fileBytes(originalContent), { upsert: true });
+          const { error: seedErr } = await storageCall(
+            () => ownerClient.storage
+              .from(bucket)
+              .upload(path, fileBytes(originalContent), { upsert: true }),
+            `seed victim ${bucket} ${label} ${scenario.name}`,
+          );
           if (seedErr) return null;
           ownNestedUploads.push({ bucket, path, client: ownerKey });
           // Read it back so we have a known-good baseline to diff against.
-          const { data: blob } = await ownerClient.storage.from(bucket).download(path);
+          const { data: blob } = await storageCall(
+            () => ownerClient.storage.from(bucket).download(path),
+            `download victim ${bucket} ${label} ${scenario.name}`,
+          );
           if (!blob) return null;
           const originalBytes = await blob.arrayBuffer();
           return { path, originalBytes };
@@ -1828,9 +1861,10 @@ describe("Cross-Tenant Storage RLS Tests", () => {
           path: string,
           originalBytes: ArrayBuffer,
         ) => {
-          const { data: afterBlob, error: afterErr } = await ownerClient.storage
-            .from(bucket)
-            .download(path);
+          const { data: afterBlob, error: afterErr } = await storageCall(
+            () => ownerClient.storage.from(bucket).download(path),
+            `verify victim unchanged ${bucket} ${path}`,
+          );
           expect(afterErr).toBeNull();
           expect(afterBlob).toBeTruthy();
           if (!afterBlob) return;
@@ -1881,11 +1915,14 @@ describe("Cross-Tenant Storage RLS Tests", () => {
                 owner: "a",
               });
 
-              const { error } = await clientB.storage
-                .from(PRIVATE_BUCKET)
-                .upload(seeded.path, fileBytes(ATTACKER_PAYLOAD_TAG), {
-                  upsert: upsertMode,
-                });
+              const { error } = await storageCall(
+                () => clientB.storage
+                  .from(PRIVATE_BUCKET)
+                  .upload(seeded.path, fileBytes(ATTACKER_PAYLOAD_TAG), {
+                    upsert: upsertMode,
+                  }),
+                `B overwrite private ${scenario.name} upsert=${upsertMode}`,
+              );
               // Either path MUST error: upsert=true would be an overwrite
               // (denied by the policy on UPDATE/INSERT-with-replace),
               // upsert=false would be either a 409 conflict OR the same
@@ -1924,11 +1961,14 @@ describe("Cross-Tenant Storage RLS Tests", () => {
                 owner: "b",
               });
 
-              const { error } = await clientA.storage
-                .from(PRIVATE_BUCKET)
-                .upload(seeded.path, fileBytes(ATTACKER_PAYLOAD_TAG), {
-                  upsert: upsertMode,
-                });
+              const { error } = await storageCall(
+                () => clientA.storage
+                  .from(PRIVATE_BUCKET)
+                  .upload(seeded.path, fileBytes(ATTACKER_PAYLOAD_TAG), {
+                    upsert: upsertMode,
+                  }),
+                `A overwrite private ${scenario.name} upsert=${upsertMode}`,
+              );
               expect(error).toBeTruthy();
 
               await assertVictimUnchanged(
@@ -1967,11 +2007,14 @@ describe("Cross-Tenant Storage RLS Tests", () => {
                 owner: "a",
               });
 
-              const { error } = await clientB.storage
-                .from(ASSETS_BUCKET)
-                .upload(seeded.path, fileBytes(ATTACKER_PAYLOAD_TAG), {
-                  upsert: upsertMode,
-                });
+              const { error } = await storageCall(
+                () => clientB.storage
+                  .from(ASSETS_BUCKET)
+                  .upload(seeded.path, fileBytes(ATTACKER_PAYLOAD_TAG), {
+                    upsert: upsertMode,
+                  }),
+                `B overwrite assets ${scenario.name} upsert=${upsertMode}`,
+              );
               expect(error).toBeTruthy();
 
               await assertVictimUnchanged(
