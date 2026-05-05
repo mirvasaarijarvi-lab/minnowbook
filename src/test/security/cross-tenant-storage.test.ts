@@ -31,7 +31,7 @@ function parseTimeoutMs(value: string | undefined, fallback: number) {
   const parsed = Number(value);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
 }
-const STORAGE_FETCH_TIMEOUT_MS = parseTimeoutMs(process.env.RLS_STORAGE_FETCH_TIMEOUT_MS, 25_000);
+const STORAGE_FETCH_TIMEOUT_MS = parseTimeoutMs(process.env.RLS_STORAGE_FETCH_TIMEOUT_MS, 15_000);
 const timeoutFetch: typeof fetch = async (input, init?: RequestInit) => {
   const requestInit = init ?? {};
   const controller = new AbortController();
@@ -985,7 +985,7 @@ const STORAGE_DENIAL_CALL_TIMEOUT_MS = parseTimeoutMs(
 const STORAGE_ALLOWED_CALL_TIMEOUT_MS = Math.max(
   parseTimeoutMs(
     process.env.RLS_STORAGE_ALLOWED_CALL_TIMEOUT_MS ?? process.env.RLS_STORAGE_CALL_TIMEOUT_MS,
-    25_000,
+    15_000,
   ),
   STORAGE_DENIAL_CALL_TIMEOUT_MS,
 );
