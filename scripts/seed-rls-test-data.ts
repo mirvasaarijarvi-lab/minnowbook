@@ -90,19 +90,13 @@ async function timed<T>(
 /**
  * Create or fetch an auth user via the admin API. Auto-confirms the email so
  * the subsequent password sign-in succeeds without an email round trip.
+ *
+ * Avoid admin.listUsers here: local CI has legacy migrations that manually
+ * insert auth.users rows, and GoTrue can fail listUsers when any token text
+ * column is NULL. createUser plus duplicate fallback keeps the seed path
+ * independent of unrelated historical auth rows.
  */
 async function ensureUser(email: string, password: string): Promise<string> {
-  // Check existing users (paginate up to a few pages — local DB is small)
-  for (let page = 1; page <= 5; page++) {
-    const { data, error } = await timed(`listUsers page=${page}`, () =>
-      admin.auth.admin.listUsers({ page, perPage: 200 }),
-    );
-    if (error) throw new Error(`listUsers failed: ${error.message}`);
-    const found = data.users.find((u) => u.email?.toLowerCase() === email.toLowerCase());
-    if (found) return found.id;
-    if (data.users.length < 200) break;
-  }
-
   const { data, error } = await timed(`createUser ${email}`, () =>
     admin.auth.admin.createUser({
       email,
@@ -110,9 +104,32 @@ async function ensureUser(email: string, password: string): Promise<string> {
       email_confirm: true,
     }),
   );
-  if (error) throw new Error(`createUser(${email}) failed: ${error.message}`);
-  if (!data.user) throw new Error(`createUser(${email}) returned no user`);
-  return data.user.id;
+  if (!error) {
+    if (!data.user) throw new Error(`createUser(${email}) returned no user`);
+    return data.user.id;
+  }
+
+  if (!/already|exists|registered/i.test(error.message)) {
+    throw new Error(`createUser(${email}) failed: ${error.message}`);
+  }
+
+  const existingUserClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY!, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+  const { data: signInData, error: signInError } = await timed(
+    `signIn existing ${email}`,
+    () =>
+      existingUserClient.auth.signInWithPassword({
+        email,
+        password,
+      }),
+  );
+  if (signInError) {
+    throw new Error(`sign-in for existing ${email} failed: ${signInError.message}`);
+  }
+  if (!signInData.user?.id) throw new Error(`sign-in for existing ${email} returned no user`);
+  await existingUserClient.auth.signOut();
+  return signInData.user.id;
 }
 
 /**
