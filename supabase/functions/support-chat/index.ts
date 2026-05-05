@@ -39,6 +39,18 @@ function getCorsHeaders(req: Request): Record<string, string> {
   };
 }
 
+function getJwtPayload(token: string): Record<string, unknown> | null {
+  try {
+    const payload = token.split(".")[1];
+    if (!payload) return null;
+    const base64 = payload.replace(/-/g, "+").replace(/_/g, "/");
+    const padded = base64.padEnd(Math.ceil(base64.length / 4) * 4, "=");
+    return JSON.parse(atob(padded));
+  } catch {
+    return null;
+  }
+}
+
 
 // --- Rate limiting ---
 const RATE_LIMIT_WINDOW_MS = 60_000; // 1 minute
@@ -106,23 +118,23 @@ serve(async (req) => {
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
     // Authentication is OPTIONAL: the support chat widget also renders on
-    // public pages (landing/marketing). If a real user Bearer token is sent,
-    // we verify it; if only the publishable/anon key is sent (or nothing),
-    // we proceed as an anonymous visitor. Rate limiting above guards abuse.
+    // public pages (landing/marketing). If a real signed-in user Bearer token
+    // is sent, we validate it for future user-aware behavior. Anonymous keys,
+    // missing tokens, expired sessions, or malformed tokens are treated as an
+    // anonymous visitor because this endpoint does not expose private data.
     const authHeader = req.headers.get("Authorization");
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
     const bearer = authHeader?.replace(/^Bearer\s+/i, "").trim();
-    if (bearer && bearer !== anonKey) {
+    const payload = bearer ? getJwtPayload(bearer) : null;
+    const isAuthenticatedUserToken = payload?.role === "authenticated" && typeof payload?.sub === "string";
+    if (bearer && bearer !== anonKey && isAuthenticatedUserToken) {
       const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
       const supabase = createClient(supabaseUrl, anonKey, {
         global: { headers: { Authorization: authHeader! } },
       });
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      const { data: { user }, error: authError } = await supabase.auth.getUser(bearer);
       if (authError || !user) {
-        return new Response(JSON.stringify({ error: "Invalid session" }), {
-          status: 401,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        console.warn("support-chat continuing as anonymous after invalid optional session");
       }
     }
 
