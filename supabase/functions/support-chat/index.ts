@@ -102,23 +102,26 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    // Verify the user is authenticated and on Business tier
+    // Authentication is OPTIONAL: the support chat widget also renders on
+    // public pages (landing/marketing). If a real user Bearer token is sent,
+    // we verify it; if only the publishable/anon key is sent (or nothing),
+    // we proceed as an anonymous visitor. Rate limiting above guards abuse.
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) throw new Error("Not authenticated");
-
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseKey = Deno.env.get("SUPABASE_ANON_KEY")!;
-    const supabase = createClient(supabaseUrl, supabaseKey, {
-      global: { headers: { Authorization: authHeader } },
-    });
-
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-    if (authError || !user) throw new Error("Not authenticated");
-
-    // AI chat is available to all authenticated users
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const bearer = authHeader?.replace(/^Bearer\s+/i, "").trim();
+    if (bearer && bearer !== anonKey) {
+      const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+      const supabase = createClient(supabaseUrl, anonKey, {
+        global: { headers: { Authorization: authHeader! } },
+      });
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) {
+        return new Response(JSON.stringify({ error: "Invalid session" }), {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
 
 
     const body = await req.json();
