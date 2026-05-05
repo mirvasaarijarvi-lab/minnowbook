@@ -1497,7 +1497,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         expect(denied).toBe(true);
 
         // Confirm the file still exists from B's perspective.
-        const { data: stillThere } = await storageCall(
+        const { data: stillThere } = await allowedStorageCall(
           () => clientB.storage.from(PRIVATE_BUCKET).download(path),
           "B verify private download",
         );
@@ -1522,7 +1522,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         });
         expect(denied).toBe(true);
 
-        const { data: stillThere } = await storageCall(
+        const { data: stillThere } = await allowedStorageCall(
           () => clientA.storage.from(PRIVATE_BUCKET).download(path),
           "A verify private download",
         );
@@ -1532,7 +1532,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       it("user A cannot DELETE tenant B's tenant-assets file", async () => {
         // Upload a file as B first so there's something to attempt deletion on.
         const path = ownPath(liveCreds.b.tenantId!, "b-own-assets-for-delete");
-        const { error: upErr } = await storageCall(
+        const { error: upErr } = await allowedStorageCall(
           () => clientB.storage
             .from(ASSETS_BUCKET)
             .upload(path, fileBytes("b-own-assets-for-delete"), { upsert: true }),
