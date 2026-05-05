@@ -768,8 +768,8 @@ jobs:
 
       # Belt-and-braces verification that the test run actually flushed a
       # ledger for THIS flavor before we hand it to the PDF generator.
-      # `flushLedger()` writes both `reports/storage-attempts.json` AND
-      # `reports/storage-attempts.local.json` — if the flavored copy is
+      # `flushLedger()` writes both `reports/storage-attempts.json` AND a
+      # matrix-flavored copy such as `reports/storage-attempts.local-core.json` — if the flavored copy is
       # missing it means the test process crashed before afterAll ran,
       # and any rendering would silently use a stale canonical file from
       # a previous run. Logging the resolved paths here lets a reviewer
@@ -993,7 +993,7 @@ jobs:
             echo "> ✅ Membership probes are clean — the storage failure is **not** caused by a duplicate / missing tenant_users row. Inspect the storage bucket policies and the failing test's expected outcome." >> "$GITHUB_STEP_SUMMARY"
           fi
           echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "📦 Full details: \`rls-report-local\` artifact (HTML/JSON) and \`rls-postgres-logs-run-${GITHUB_RUN_ID}\` (filtered SQL errors)." >> "$GITHUB_STEP_SUMMARY"
+          echo "📦 Full details: \`rls-report-${RLS_REPORT_FLAVOR:-local}\` artifact (HTML/JSON) and \`rls-postgres-logs-run-${GITHUB_RUN_ID}\` (filtered SQL errors)." >> "$GITHUB_STEP_SUMMARY"
 
       # When the RLS sweep itself fails, capture Postgres logs filtered to
       # the statements + errors that the failing tests produced. This is
@@ -1268,7 +1268,7 @@ jobs:
             echo "- Fallback target: \`remote\`" >> "$GITHUB_STEP_SUMMARY"
             echo "- Fallback outcome: \`${fallback_outcome:-unknown}\`" >> "$GITHUB_STEP_SUMMARY"
             echo "" >> "$GITHUB_STEP_SUMMARY"
-            echo "📦 Report uploaded as the \`rls-report-remote-fallback\` artifact." >> "$GITHUB_STEP_SUMMARY"
+              echo "📦 Report uploaded as the \`rls-report-remote-fallback-${{ matrix.label }}\` artifact." >> "$GITHUB_STEP_SUMMARY"
             if [ -f reports/rls-report.json ]; then
               echo "" >> "$GITHUB_STEP_SUMMARY"
               node -e "const r=require('./reports/rls-report.json'); const t=r.totals; console.log('| Metric | Value |\n|---|---|\n| Total | '+t.total+' |\n| Passed | '+t.passed+' |\n| Failed | '+t.failed+' |\n| Skipped | '+t.skipped+' |');" >> "$GITHUB_STEP_SUMMARY"
