@@ -32,10 +32,11 @@ function parseTimeoutMs(value: string | undefined, fallback: number) {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
 }
 const STORAGE_FETCH_TIMEOUT_MS = parseTimeoutMs(process.env.RLS_STORAGE_FETCH_TIMEOUT_MS, 25_000);
-const timeoutFetch: typeof fetch = async (input, init = {}) => {
+const timeoutFetch: typeof fetch = async (input, init?: RequestInit) => {
+  const requestInit = init ?? {};
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), STORAGE_FETCH_TIMEOUT_MS);
-  const upstreamSignal = init.signal;
+  const upstreamSignal = requestInit.signal;
   if (upstreamSignal?.aborted) {
     controller.abort();
   } else {
@@ -43,7 +44,7 @@ const timeoutFetch: typeof fetch = async (input, init = {}) => {
   }
 
   try {
-    return await fetch(input, { ...init, signal: controller.signal });
+    return await fetch(input, { ...requestInit, signal: controller.signal });
   } catch (err) {
     if (controller.signal.aborted && !upstreamSignal?.aborted) {
       throw new Error(`Storage fetch timed out after ${STORAGE_FETCH_TIMEOUT_MS}ms`);
