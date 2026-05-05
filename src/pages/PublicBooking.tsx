@@ -797,7 +797,7 @@ const PublicBookingInner = () => {
     } catch (err) {
       if (err instanceof z.ZodError) {
         const fieldErrors: Record<string, string> = {};
-        err.errors.forEach((e) => {
+        err.issues.forEach((e) => {
           if (e.path[0]) fieldErrors[String(e.path[0])] = e.message;
         });
         setErrors(fieldErrors);
