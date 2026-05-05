@@ -46,6 +46,7 @@ const RECENT_FEATURES: Array<{ name: string; keywords: RegExp }> = [
   { name: "Public reviews/testimonials", keywords: /reviews|testimonial/i },
   { name: "Multi-language public booking", keywords: /Multi-language public booking|multi-language/i },
   { name: "Stripe revenue dashboard", keywords: /Stripe revenue/i },
+  { name: "Kitchen orders", keywords: /Kitchen orders|keittiötilaukset|kökets beställningar/i },
 ];
 
 describe("'Recent additions' prompt section ↔ dashboard UI parity", () => {
