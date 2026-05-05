@@ -1302,35 +1302,50 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       // setup is misconfigured (wrong tenant IDs, missing membership, etc.).
       it("user A CAN upload + download in their own tenant-private folder (sanity)", async () => {
         const path = ownPath(liveCreds.a.tenantId!, "a-own-private");
-        const { error: upErr } = await clientA.storage
-          .from(PRIVATE_BUCKET)
-          .upload(path, fileBytes("a-own-private"), { upsert: true });
+        const { error: upErr } = await storageCall(
+          () => clientA.storage
+            .from(PRIVATE_BUCKET)
+            .upload(path, fileBytes("a-own-private"), { upsert: true }),
+          "A own private upload",
+        );
         expect(upErr).toBeNull();
         if (!upErr) uploadedPaths.push({ bucket: PRIVATE_BUCKET, path, client: "a" });
 
-        const { data, error: dlErr } = await clientA.storage.from(PRIVATE_BUCKET).download(path);
+        const { data, error: dlErr } = await storageCall(
+          () => clientA.storage.from(PRIVATE_BUCKET).download(path),
+          "A private download",
+        );
         expect(dlErr).toBeNull();
         expect(data).toBeTruthy();
       });
 
       it("user B CAN upload + download in their own tenant-private folder (sanity)", async () => {
         const path = ownPath(liveCreds.b.tenantId!, "b-own-private");
-        const { error: upErr } = await clientB.storage
-          .from(PRIVATE_BUCKET)
-          .upload(path, fileBytes("b-own-private"), { upsert: true });
+        const { error: upErr } = await storageCall(
+          () => clientB.storage
+            .from(PRIVATE_BUCKET)
+            .upload(path, fileBytes("b-own-private"), { upsert: true }),
+          "B own private upload",
+        );
         expect(upErr).toBeNull();
         if (!upErr) uploadedPaths.push({ bucket: PRIVATE_BUCKET, path, client: "b" });
 
-        const { data, error: dlErr } = await clientB.storage.from(PRIVATE_BUCKET).download(path);
+        const { data, error: dlErr } = await storageCall(
+          () => clientB.storage.from(PRIVATE_BUCKET).download(path),
+          "B private download",
+        );
         expect(dlErr).toBeNull();
         expect(data).toBeTruthy();
       });
 
       it("user A CAN upload to their own tenant-assets folder (sanity)", async () => {
         const path = ownPath(liveCreds.a.tenantId!, "a-own-assets");
-        const { error } = await clientA.storage
-          .from(ASSETS_BUCKET)
-          .upload(path, fileBytes("a-own-assets"), { upsert: true });
+        const { error } = await storageCall(
+          () => clientA.storage
+            .from(ASSETS_BUCKET)
+            .upload(path, fileBytes("a-own-assets"), { upsert: true }),
+          "A own assets upload",
+        );
         expect(error).toBeNull();
         if (!error) uploadedPaths.push({ bucket: ASSETS_BUCKET, path, client: "a" });
       });
@@ -1338,36 +1353,48 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       // ---------- Cross-tenant write denial ----------
       it("user A cannot UPLOAD to tenant B's tenant-private folder", async () => {
         const path = ownPath(liveCreds.b.tenantId!, "a-cross-private");
-        const result = await clientA.storage
-          .from(PRIVATE_BUCKET)
-          .upload(path, fileBytes("a-cross-private"), { upsert: true });
+        const result = await storageCall(
+          () => clientA.storage
+            .from(PRIVATE_BUCKET)
+            .upload(path, fileBytes("a-cross-private"), { upsert: true }),
+          "A cross private upload",
+        );
         recordAttempt(PRIVATE_BUCKET, path, "a", "b", result);
         expect(result.error).toBeTruthy();
       });
 
       it("user B cannot UPLOAD to tenant A's tenant-private folder", async () => {
         const path = ownPath(liveCreds.a.tenantId!, "b-cross-private");
-        const result = await clientB.storage
-          .from(PRIVATE_BUCKET)
-          .upload(path, fileBytes("b-cross-private"), { upsert: true });
+        const result = await storageCall(
+          () => clientB.storage
+            .from(PRIVATE_BUCKET)
+            .upload(path, fileBytes("b-cross-private"), { upsert: true }),
+          "B cross private upload",
+        );
         recordAttempt(PRIVATE_BUCKET, path, "b", "a", result);
         expect(result.error).toBeTruthy();
       });
 
       it("user A cannot UPLOAD to tenant B's tenant-assets folder", async () => {
         const path = ownPath(liveCreds.b.tenantId!, "a-cross-assets");
-        const result = await clientA.storage
-          .from(ASSETS_BUCKET)
-          .upload(path, fileBytes("a-cross-assets"), { upsert: true });
+        const result = await storageCall(
+          () => clientA.storage
+            .from(ASSETS_BUCKET)
+            .upload(path, fileBytes("a-cross-assets"), { upsert: true }),
+          "A cross assets upload",
+        );
         recordAttempt(ASSETS_BUCKET, path, "a", "b", result);
         expect(result.error).toBeTruthy();
       });
 
       it("user B cannot UPLOAD to tenant A's tenant-assets folder", async () => {
         const path = ownPath(liveCreds.a.tenantId!, "b-cross-assets");
-        const result = await clientB.storage
-          .from(ASSETS_BUCKET)
-          .upload(path, fileBytes("b-cross-assets"), { upsert: true });
+        const result = await storageCall(
+          () => clientB.storage
+            .from(ASSETS_BUCKET)
+            .upload(path, fileBytes("b-cross-assets"), { upsert: true }),
+          "B cross assets upload",
+        );
         recordAttempt(ASSETS_BUCKET, path, "b", "a", result);
         expect(result.error).toBeTruthy();
       });
@@ -1376,31 +1403,43 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       it("user A cannot DOWNLOAD tenant B's tenant-private file", async () => {
         // Tenant B uploaded a file in their own folder during sanity check.
         const path = ownPath(liveCreds.b.tenantId!, "b-own-private");
-        const { data, error } = await clientA.storage.from(PRIVATE_BUCKET).download(path);
+        const { data, error } = await storageCall(
+          () => clientA.storage.from(PRIVATE_BUCKET).download(path),
+          "A cross private download",
+        );
         const denied = Boolean(error) || !data;
         expect(denied).toBe(true);
       });
 
       it("user B cannot DOWNLOAD tenant A's tenant-private file", async () => {
         const path = ownPath(liveCreds.a.tenantId!, "a-own-private");
-        const { data, error } = await clientB.storage.from(PRIVATE_BUCKET).download(path);
+        const { data, error } = await storageCall(
+          () => clientB.storage.from(PRIVATE_BUCKET).download(path),
+          "B cross private download",
+        );
         const denied = Boolean(error) || !data;
         expect(denied).toBe(true);
       });
 
       it("user A cannot LIST tenant B's tenant-private folder", async () => {
-        const { data, error } = await clientA.storage
-          .from(PRIVATE_BUCKET)
-          .list(liveCreds.b.tenantId!, { limit: 5 });
+        const { data, error } = await storageCall(
+          () => clientA.storage
+            .from(PRIVATE_BUCKET)
+            .list(liveCreds.b.tenantId!, { limit: 5 }),
+          "A cross private list",
+        );
         // RLS-denied list returns either error or empty array.
         const denied = Boolean(error) || !data || data.length === 0;
         expect(denied).toBe(true);
       });
 
       it("user B cannot LIST tenant A's tenant-private folder", async () => {
-        const { data, error } = await clientB.storage
-          .from(PRIVATE_BUCKET)
-          .list(liveCreds.a.tenantId!, { limit: 5 });
+        const { data, error } = await storageCall(
+          () => clientB.storage
+            .from(PRIVATE_BUCKET)
+            .list(liveCreds.a.tenantId!, { limit: 5 }),
+          "B cross private list",
+        );
         const denied = Boolean(error) || !data || data.length === 0;
         expect(denied).toBe(true);
       });
@@ -1408,7 +1447,10 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       // ---------- Cross-tenant update / delete denial ----------
       it("user A cannot DELETE tenant B's tenant-private file", async () => {
         const path = ownPath(liveCreds.b.tenantId!, "b-own-private");
-        const { data, error } = await clientA.storage.from(PRIVATE_BUCKET).remove([path]);
+        const { data, error } = await storageCall(
+          () => clientA.storage.from(PRIVATE_BUCKET).remove([path]),
+          "A cross private remove",
+        );
         // Successful delete returns the removed row(s); denial → error or [].
         const denied = Boolean(error) || !data || data.length === 0;
         recordCleanup({
@@ -1423,13 +1465,19 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         expect(denied).toBe(true);
 
         // Confirm the file still exists from B's perspective.
-        const { data: stillThere } = await clientB.storage.from(PRIVATE_BUCKET).download(path);
+        const { data: stillThere } = await storageCall(
+          () => clientB.storage.from(PRIVATE_BUCKET).download(path),
+          "B verify private download",
+        );
         expect(stillThere).toBeTruthy();
       });
 
       it("user B cannot DELETE tenant A's tenant-private file", async () => {
         const path = ownPath(liveCreds.a.tenantId!, "a-own-private");
-        const { data, error } = await clientB.storage.from(PRIVATE_BUCKET).remove([path]);
+        const { data, error } = await storageCall(
+          () => clientB.storage.from(PRIVATE_BUCKET).remove([path]),
+          "B cross private remove",
+        );
         const denied = Boolean(error) || !data || data.length === 0;
         recordCleanup({
           bucket: PRIVATE_BUCKET,
@@ -1442,20 +1490,29 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         });
         expect(denied).toBe(true);
 
-        const { data: stillThere } = await clientA.storage.from(PRIVATE_BUCKET).download(path);
+        const { data: stillThere } = await storageCall(
+          () => clientA.storage.from(PRIVATE_BUCKET).download(path),
+          "A verify private download",
+        );
         expect(stillThere).toBeTruthy();
       });
 
       it("user A cannot DELETE tenant B's tenant-assets file", async () => {
         // Upload a file as B first so there's something to attempt deletion on.
         const path = ownPath(liveCreds.b.tenantId!, "b-own-assets-for-delete");
-        const { error: upErr } = await clientB.storage
-          .from(ASSETS_BUCKET)
-          .upload(path, fileBytes("b-own-assets-for-delete"), { upsert: true });
+        const { error: upErr } = await storageCall(
+          () => clientB.storage
+            .from(ASSETS_BUCKET)
+            .upload(path, fileBytes("b-own-assets-for-delete"), { upsert: true }),
+          "B assets delete seed upload",
+        );
         expect(upErr).toBeNull();
         if (!upErr) uploadedPaths.push({ bucket: ASSETS_BUCKET, path, client: "b" });
 
-        const { data, error } = await clientA.storage.from(ASSETS_BUCKET).remove([path]);
+        const { data, error } = await storageCall(
+          () => clientA.storage.from(ASSETS_BUCKET).remove([path]),
+          "A cross assets remove",
+        );
         const denied = Boolean(error) || !data || data.length === 0;
         recordCleanup({
           bucket: ASSETS_BUCKET,
@@ -1472,9 +1529,12 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       it("user A cannot OVERWRITE (update) tenant B's tenant-private file via upsert", async () => {
         const path = ownPath(liveCreds.b.tenantId!, "b-own-private");
         recordAttempt(PRIVATE_BUCKET, path, "a", "b");
-        const { error } = await clientA.storage
-          .from(PRIVATE_BUCKET)
-          .upload(path, fileBytes("a-overwrite-attempt"), { upsert: true });
+        const { error } = await storageCall(
+          () => clientA.storage
+            .from(PRIVATE_BUCKET)
+            .upload(path, fileBytes("a-overwrite-attempt"), { upsert: true }),
+          "A cross private overwrite",
+        );
         expect(error).toBeTruthy();
       });
     },
