@@ -1855,7 +1855,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         ): Promise<{ path: string; originalBytes: ArrayBuffer } | null> => {
           const path = nestedOwnPath(ownerTenantId, scenario.segments, label);
           const originalContent = `victim-original-${label}-${scenario.name}-${Date.now()}`;
-          const { error: seedErr } = await storageCall(
+          const { error: seedErr } = await allowedStorageCall(
             () => ownerClient.storage
               .from(bucket)
               .upload(path, fileBytes(originalContent), { upsert: true }),
@@ -1864,7 +1864,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
           if (seedErr) return null;
           ownNestedUploads.push({ bucket, path, client: ownerKey });
           // Read it back so we have a known-good baseline to diff against.
-          const { data: blob } = await storageCall(
+          const { data: blob } = await allowedStorageCall(
             () => ownerClient.storage.from(bucket).download(path),
             `download victim ${bucket} ${label} ${scenario.name}`,
           );
@@ -1879,7 +1879,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
           path: string,
           originalBytes: ArrayBuffer,
         ) => {
-          const { data: afterBlob, error: afterErr } = await storageCall(
+          const { data: afterBlob, error: afterErr } = await allowedStorageCall(
             () => ownerClient.storage.from(bucket).download(path),
             `verify victim unchanged ${bucket} ${path}`,
           );
