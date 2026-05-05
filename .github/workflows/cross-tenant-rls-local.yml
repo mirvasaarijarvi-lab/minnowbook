@@ -34,6 +34,12 @@ jobs:
           - label: storage-baseline
             flavor: local-storage-baseline
             command: test:rls-report:storage-baseline
+          - label: storage-nested-private
+            flavor: local-storage-nested-private
+            command: test:rls-report:storage-nested-private
+          - label: storage-nested-assets
+            flavor: local-storage-nested-assets
+            command: test:rls-report:storage-nested-assets
           - label: storage-adversarial
             flavor: local-storage-adversarial
             command: test:rls-report:storage-adversarial
