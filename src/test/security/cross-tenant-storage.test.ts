@@ -3976,7 +3976,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         // surface. Any OTHER error is a genuine setup problem.
         if (insertErr) {
           const msg = insertErr.message ?? "";
-          if (/relation .* does not exist|schema .* does not exist/i.test(msg)) {
+          if (isUnsupportedStorageSchemaError(msg)) {
             // eslint-disable-next-line no-console
             console.warn(
               `[multipart-orphan-test] Skipping: storage.s3_multipart_uploads not available (${msg})`,
