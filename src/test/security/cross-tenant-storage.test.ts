@@ -27,6 +27,33 @@ const AUTH_STORAGE_NAMESPACE = `rls-storage-${Date.now()}-${Math.random()
 let authStorageSequence = 0;
 const nextAuthStorageKey = (label: string) =>
   `${AUTH_STORAGE_NAMESPACE}-${label}-${++authStorageSequence}`;
+function parseTimeoutMs(value: string | undefined, fallback: number) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+}
+const STORAGE_FETCH_TIMEOUT_MS = parseTimeoutMs(process.env.RLS_STORAGE_FETCH_TIMEOUT_MS, 15_000);
+const timeoutFetch: typeof fetch = async (input, init?: RequestInit) => {
+  const requestInit = init ?? {};
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), STORAGE_FETCH_TIMEOUT_MS);
+  const upstreamSignal = requestInit.signal;
+  if (upstreamSignal?.aborted) {
+    controller.abort();
+  } else {
+    upstreamSignal?.addEventListener("abort", () => controller.abort(), { once: true });
+  }
+
+  try {
+    return await fetch(input, { ...requestInit, signal: controller.signal });
+  } catch (err) {
+    if (controller.signal.aborted && !upstreamSignal?.aborted) {
+      throw new Error(`Storage fetch timed out after ${STORAGE_FETCH_TIMEOUT_MS}ms`);
+    }
+    throw err;
+  } finally {
+    clearTimeout(timeout);
+  }
+};
 const adminClient: SupabaseClient | null =
   SERVICE_ROLE_KEY && import.meta.env.VITE_SUPABASE_URL
     ? createClient(import.meta.env.VITE_SUPABASE_URL as string, SERVICE_ROLE_KEY, {
@@ -35,6 +62,7 @@ const adminClient: SupabaseClient | null =
           autoRefreshToken: false,
           storageKey: nextAuthStorageKey("admin"),
         },
+        global: { fetch: timeoutFetch },
       })
     : null;
 
@@ -937,6 +965,7 @@ const newAnonClient = (): SupabaseClient =>
       autoRefreshToken: false,
       storageKey: nextAuthStorageKey("anon"),
     },
+    global: { fetch: timeoutFetch },
   });
 
 // Per-run folder key — every artifact this suite writes lives under
@@ -949,11 +978,6 @@ const RUN_ID = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 const fileBytes = (label: string) =>
   new Blob([`storage-rls-test ${label} ${RUN_ID}`], { type: "text/plain" });
 
-const parseTimeoutMs = (value: string | undefined, fallback: number) => {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
-};
-
 const STORAGE_DENIAL_CALL_TIMEOUT_MS = parseTimeoutMs(
   process.env.RLS_STORAGE_DENIAL_CALL_TIMEOUT_MS,
   6_000,
@@ -961,9 +985,9 @@ const STORAGE_DENIAL_CALL_TIMEOUT_MS = parseTimeoutMs(
 const STORAGE_ALLOWED_CALL_TIMEOUT_MS = Math.max(
   parseTimeoutMs(
     process.env.RLS_STORAGE_ALLOWED_CALL_TIMEOUT_MS ?? process.env.RLS_STORAGE_CALL_TIMEOUT_MS,
-    45_000,
+    15_000,
   ),
-  45_000,
+  STORAGE_DENIAL_CALL_TIMEOUT_MS,
 );
 type TimedStorageResult<T> = T extends { error?: unknown }
   ? T
@@ -990,7 +1014,7 @@ async function storageCall<T>(
 // genuine RLS denials still surface but warmup-jitter is absorbed.
 const STORAGE_ALLOWED_RETRY_ATTEMPTS = parseTimeoutMs(
   process.env.RLS_STORAGE_ALLOWED_RETRY_ATTEMPTS,
-  3,
+  1,
 );
 
 const allowedStorageCall = async <T>(
@@ -1508,7 +1532,16 @@ describe("Cross-Tenant Storage RLS Tests", () => {
 
       // ---------- Cross-tenant update / delete denial ----------
       it("user A cannot DELETE tenant B's tenant-private file", async () => {
-        const path = ownPath(liveCreds.b.tenantId!, "b-own-private");
+        const path = ownPath(liveCreds.b.tenantId!, "b-private-delete-victim");
+        const { error: seedErr } = await allowedStorageCall(
+          () => clientB.storage
+            .from(PRIVATE_BUCKET)
+            .upload(path, fileBytes("b-private-delete-victim"), { upsert: true }),
+          "B private delete seed upload",
+        );
+        expect(seedErr).toBeNull();
+        if (!seedErr) uploadedPaths.push({ bucket: PRIVATE_BUCKET, path, client: "b" });
+
         const { data, error } = await storageCall(
           () => clientA.storage.from(PRIVATE_BUCKET).remove([path]),
           "A cross private remove",
@@ -1535,7 +1568,16 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       });
 
       it("user B cannot DELETE tenant A's tenant-private file", async () => {
-        const path = ownPath(liveCreds.a.tenantId!, "a-own-private");
+        const path = ownPath(liveCreds.a.tenantId!, "a-private-delete-victim");
+        const { error: seedErr } = await allowedStorageCall(
+          () => clientA.storage
+            .from(PRIVATE_BUCKET)
+            .upload(path, fileBytes("a-private-delete-victim"), { upsert: true }),
+          "A private delete seed upload",
+        );
+        expect(seedErr).toBeNull();
+        if (!seedErr) uploadedPaths.push({ bucket: PRIVATE_BUCKET, path, client: "a" });
+
         const { data, error } = await storageCall(
           () => clientB.storage.from(PRIVATE_BUCKET).remove([path]),
           "B cross private remove",
