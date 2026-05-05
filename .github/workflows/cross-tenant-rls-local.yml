@@ -210,7 +210,7 @@ jobs:
         if: steps.docker-check.outputs.available == 'true' && steps.supabase-cli.outcome == 'success'
         run: |
           set -euo pipefail
-          cat > supabase/migrations/20260224082115_ci_placeholder_tenant.sql <<'SQL'
+          cat > supabase/migrations/20260504999999_ci_placeholder_tenant.sql <<'SQL'
           -- CI-only placeholder. Creates a synthetic auth user + tenant
           -- so historical seed migrations (which hardcode a production
           -- tenant id) can satisfy their FK constraints in an empty
