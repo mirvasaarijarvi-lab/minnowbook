@@ -106,13 +106,14 @@ const DashboardSupportPanel = () => {
       const allMessages = [...chatMessages, userMsg];
 
       try {
+        const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
         const headers: Record<string, string> = {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          apikey: anonKey,
+          // Use the user's access token if signed in, otherwise fall back to
+          // the anon key so we never send a stale/invalid bearer.
+          Authorization: `Bearer ${session?.access_token ?? anonKey}`,
         };
-        if (session?.access_token) {
-          headers["Authorization"] = `Bearer ${session.access_token}`;
-        }
 
         const resp = await fetch(CHAT_URL, {
           method: "POST",
