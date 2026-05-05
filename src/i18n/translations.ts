@@ -2707,7 +2707,7 @@ const en: TranslationKeys = {
   "help.art10C1": "Guest Portal: guests can view or cancel their booking via a magic link (/my-booking/:token) — no login required.",
   "help.art10C2": "Waitlist: when a slot is full, guests can join a waitlist and get notified automatically when it opens.",
   "help.art10C3": "Google Calendar sync: subscribe to your reservations via the iCal feed (Settings → Calendar Sync). CSV/PDF export from Reservations and Reports.",
-  "help.art10C4": "Dashboard upgrades: dark mode, keyboard shortcuts (press ?), Quick Actions FAB on mobile, onboarding checklist, audit log filters, analytics charts, login rate limiting, backup status indicator, public reviews/testimonials, multi-language public booking, and a Stripe revenue dashboard for superadmins.",
+  "help.art10C4": "Dashboard upgrades: dark mode, keyboard shortcuts (press ?), Quick Actions FAB on mobile, onboarding checklist, audit log filters, analytics charts, login rate limiting, backup status indicator, public reviews/testimonials, multi-language public booking, Kitchen orders for restaurant and venue reservations, and a Stripe revenue dashboard for superadmins.",
   "help.guide1Q": "How do I manage reservations?",
   "help.guide1A": "Go to your **Dashboard → Reservations** to view, filter, edit, and manage all bookings. You can confirm or cancel reservations from the action menu on each card.",
   "help.guide2Q": "How do I customize my booking page?",
