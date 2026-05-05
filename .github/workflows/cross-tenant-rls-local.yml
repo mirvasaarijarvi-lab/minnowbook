@@ -775,7 +775,7 @@ jobs:
       # a previous run. Logging the resolved paths here lets a reviewer
       # eyeball the env→path mapping straight from the workflow log.
       - name: Verify flavored storage-attempts ledger exists (local)
-        if: always() && steps.supabase-start.outcome == 'success'
+        if: always() && steps.supabase-start.outcome == 'success' && matrix.label != 'core'
         env:
           RLS_REPORT_FLAVOR: ${{ matrix.flavor }}
         run: |
@@ -804,7 +804,7 @@ jobs:
       # produces the artifact. `STORAGE_ATTEMPTS_LEDGER` is pinned by the
       # previous step so the generator never picks up a stale file.
       - name: Generate storage-attempts PDF (local)
-        if: always() && steps.supabase-start.outcome == 'success' && env.STORAGE_ATTEMPTS_LEDGER != ''
+        if: always() && steps.supabase-start.outcome == 'success' && matrix.label != 'core' && env.STORAGE_ATTEMPTS_LEDGER != ''
         env:
           RLS_REPORT_FLAVOR: ${{ matrix.flavor }}
         run: bun run scripts/generate-storage-attempts-pdf.ts || true
@@ -816,7 +816,7 @@ jobs:
       # without scrolling the full PDF. Safe-fail so a render bug never
       # masks an upstream test failure.
       - name: Generate adversarial HTML summary (local)
-        if: always() && steps.supabase-start.outcome == 'success' && env.STORAGE_ATTEMPTS_LEDGER != ''
+        if: always() && steps.supabase-start.outcome == 'success' && matrix.label != 'core' && env.STORAGE_ATTEMPTS_LEDGER != ''
         env:
           RLS_REPORT_FLAVOR: ${{ matrix.flavor }}
         run: bun run scripts/generate-adversarial-html-summary.ts || true
