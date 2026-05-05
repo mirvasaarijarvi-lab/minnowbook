@@ -211,7 +211,7 @@ jobs:
         run: |
           set -euo pipefail
           cat > supabase/migrations/20260224082115_ci_placeholder_tenant.sql <<'SQL'
-          -- CI-only placeholder. Creates a synthetic auth user + tenant
+          -- CI-only placeholder. Creates synthetic auth users + tenant
           -- so historical seed migrations (which hardcode a production
           -- tenant id) can satisfy their FK constraints in an empty
           -- local stack. No-op when the rows already exist.
@@ -227,6 +227,19 @@ jobs:
           )
           ON CONFLICT (id) DO NOTHING;
 
+          -- Placeholder staff user referenced by legacy site_users seed
+          INSERT INTO auth.users (id, instance_id, aud, role, email, encrypted_password, email_confirmed_at, created_at, updated_at)
+          VALUES (
+            'ea50e91e-5dbf-4dcc-a13c-f96c4016f952',
+            '00000000-0000-0000-0000-000000000000',
+            'authenticated',
+            'authenticated',
+            'ci-placeholder-staff@example.invalid',
+            crypt('ci-placeholder-password', gen_salt('bf')),
+            now(), now(), now()
+          )
+          ON CONFLICT (id) DO NOTHING;
+
           INSERT INTO public.tenants (id, name, slug, tier, is_active, subscription_status, owner_user_id)
           VALUES (
             '9ac05fbf-0834-44fd-a52a-d030b7074a30',
@@ -236,6 +249,21 @@ jobs:
             true,
             'active',
             '00000000-0000-0000-0000-0000000000c1'
+          )
+          ON CONFLICT (id) DO NOTHING;
+          SQL
+
+          # Site placeholder must run AFTER the sites table is created
+          # (migration 20260303093523_*) and BEFORE the legacy site_users
+          # seed at 20260303123922_*.
+          cat > supabase/migrations/20260303093524_ci_placeholder_site.sql <<'SQL'
+          INSERT INTO public.sites (id, tenant_id, name, slug, is_active)
+          VALUES (
+            'b040ab30-f4d2-45cc-8695-2000572428d7',
+            '9ac05fbf-0834-44fd-a52a-d030b7074a30',
+            'CI Placeholder Site',
+            'ci-placeholder-site',
+            true
           )
           ON CONFLICT (id) DO NOTHING;
           SQL
