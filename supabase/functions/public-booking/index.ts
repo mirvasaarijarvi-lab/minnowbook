@@ -528,7 +528,8 @@ Deno.serve(async (req) => {
     if (isRestaurant) {
       insertData.restaurant_sub_type = restaurant_sub_type;
       insertData.pricing_type = pricing_type;
-      insertData.price_eur = price_eur;
+      // Only fall back to client-provided price if server-side computation didn't yield one
+      if (insertData.price_eur === undefined) insertData.price_eur = price_eur;
       insertData.delivery_address = delivery_address;
       insertData.dietary_notes = dietary_notes;
       insertData.equipment_needed = equipment_needed;
