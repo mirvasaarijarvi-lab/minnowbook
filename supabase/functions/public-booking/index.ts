@@ -415,6 +415,78 @@ Deno.serve(async (req) => {
       );
     }
 
+    // ---------- Server-side price computation ----------
+    // Inherits any prices defined by the tenant on resources / sub-services
+    // and writes both `original_price_eur` (pre-discount) and `price_eur` (final).
+    let gross_eur: number | null = null;
+    let nightsCount = 0;
+
+    // Look up the matching resource (when one was selected, or single-match by type+site)
+    let pricingResource: any = null;
+    if (resource_id) {
+      const { data: r } = await adminClient
+        .from("resources")
+        .select("id, resource_type, price_per_night, breakfast_price_per_person, room_type_pricing, sub_services")
+        .eq("tenant_id", tenant_id)
+        .eq("id", resource_id)
+        .maybeSingle();
+      pricingResource = r ?? null;
+    } else if (isAccommodation) {
+      const { data: r } = await adminClient
+        .from("resources")
+        .select("id, resource_type, price_per_night, breakfast_price_per_person, room_type_pricing")
+        .eq("tenant_id", tenant_id)
+        .in("resource_type", ["hotel", "guesthouse"])
+        .eq("is_active", true)
+        .order("created_at", { ascending: true })
+        .limit(1)
+        .maybeSingle();
+      pricingResource = r ?? null;
+    }
+
+    if (isAccommodation && pricingResource?.price_per_night && check_out_date) {
+      const ci = new Date(date + "T00:00:00").getTime();
+      const co = new Date(check_out_date + "T00:00:00").getTime();
+      nightsCount = Math.max(0, Math.round((co - ci) / 86400000));
+      if (nightsCount > 0) {
+        const pricing = pricingResource.room_type_pricing ?? { single: 1.0, double: 1.5, suite: 2.5, dorm: 0.6 };
+        const multiplier = room_type ? (Number(pricing[room_type]) || 1.0) : 1.0;
+        const roomTotal = nightsCount * Number(pricingResource.price_per_night) * multiplier;
+        const bfPrice = Number(pricingResource.breakfast_price_per_person ?? 15);
+        const guestsForBf = guests_count ?? 1;
+        const bfTotal = breakfast_included ? nightsCount * guestsForBf * bfPrice : 0;
+        gross_eur = roomTotal + bfTotal;
+      }
+    } else if (reservation_type === "custom" && selected_sub_services && selected_sub_services.length > 0) {
+      let total = 0;
+      for (const s of selected_sub_services) {
+        if (s.price_eur != null) total += Number(s.price_eur) * Number(s.qty || 1);
+      }
+      if (total > 0) gross_eur = total;
+    } else if (isRestaurant && restaurant_sub_type === "dine_in" && pricing_type === "fixed_price" && price_eur != null) {
+      gross_eur = price_eur;
+    } else if (isRestaurant && restaurant_sub_type === "popup" && stall_fee != null) {
+      gross_eur = stall_fee;
+    }
+
+    // Apply discount to compute final payable
+    let final_eur: number | null = gross_eur;
+    if (gross_eur != null && discount_type && discount_value != null) {
+      if (discount_type === "percentage") {
+        final_eur = Math.max(0, gross_eur * (1 - Number(discount_value) / 100));
+      } else if (discount_type === "fixed") {
+        final_eur = Math.max(0, gross_eur - Number(discount_value));
+      } else if (discount_type === "free_nights" && nightsCount > 0 && pricingResource?.price_per_night) {
+        const pricing = pricingResource.room_type_pricing ?? {};
+        const multiplier = room_type ? (Number(pricing[room_type]) || 1.0) : 1.0;
+        const perNight = Number(pricingResource.price_per_night) * multiplier;
+        final_eur = Math.max(0, gross_eur - perNight * Math.min(Number(discount_value), nightsCount));
+      }
+    }
+
+    if (gross_eur != null) gross_eur = Math.round(gross_eur * 100) / 100;
+    if (final_eur != null) final_eur = Math.round(final_eur * 100) / 100;
+
     // Insert reservation (always proceeds)
     const insertData: Record<string, unknown> = {
       tenant_id,
@@ -435,6 +507,12 @@ Deno.serve(async (req) => {
       insertData.discount_value = discount_value;
       insertData.discount_code_id = discount_code_id;
       insertData.discount_reason = `Promo code: ${promo_code}`;
+    }
+
+    // Persist computed prices (final = what guest will actually pay)
+    if (gross_eur != null) {
+      insertData.original_price_eur = gross_eur;
+      insertData.price_eur = final_eur;
     }
 
     if (isAccommodation) {
