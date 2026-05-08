@@ -352,6 +352,32 @@ const ReportsPanel = () => {
 
   const grandTotal = useMemo(() => reservations.reduce((s, r) => s + effectivePrice(r), 0), [reservations, effectivePrice]);
 
+  // Offers in period (by created_at) and conversion to reservations
+  const { data: offersInPeriod = [] } = useQuery({
+    queryKey: ["reports-offers", tenantId, startStr, endStr],
+    queryFn: async () => {
+      if (!tenantId) return [];
+      const { data, error } = await supabase
+        .from("offers")
+        .select("id, status, reservation_ids, created_at")
+        .eq("tenant_id", tenantId)
+        .gte("created_at", `${startStr}T00:00:00`)
+        .lte("created_at", `${endStr}T23:59:59`);
+      if (error) throw error;
+      return data ?? [];
+    },
+    enabled: !!tenantId,
+  });
+
+  const offerConversion = useMemo(() => {
+    const total = offersInPeriod.length;
+    const converted = offersInPeriod.filter(
+      (o: any) => o.status === "confirmed" || (Array.isArray(o.reservation_ids) && o.reservation_ids.length > 0),
+    ).length;
+    const rate = total > 0 ? Math.round((converted / total) * 100) : 0;
+    return { total, converted, rate };
+  }, [offersInPeriod]);
+
   const prevPeriodLabel = useMemo(() => compareMode ? `${format(prevStart, "d.M.", { locale: dateLocale })} – ${format(prevEnd, "d.M.yyyy", { locale: dateLocale })}` : "", [compareMode, prevStart, prevEnd, dateLocale]);
 
   /* ── CSV Export ──────────────────────────────────────── */
