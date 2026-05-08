@@ -29,7 +29,7 @@ import {
   ChevronLeft, ChevronRight, CheckCircle2, Clock, XCircle,
   CalendarIcon, Download, Printer, Receipt, TrendingUp, TrendingDown,
   Minus, AlertCircle, Euro, Coffee, BedDouble, GitCompareArrows, Building2, Tag, Percent,
-  Lock as LockIcon,
+  Lock as LockIcon, FileText,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
