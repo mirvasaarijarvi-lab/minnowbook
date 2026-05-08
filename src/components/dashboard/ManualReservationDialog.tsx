@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { computeReservationPrice } from "@/lib/reservation-pricing";
 import { gtm } from "@/lib/gtm";
 import { useT, useTDynamic } from "@/contexts/I18nContext";
 import { useSiteContext } from "@/hooks/useSiteContext";
@@ -240,7 +241,7 @@ const ManualReservationDialog = ({
           estimated_guests: form.guests_count ? parseInt(form.guests_count) : null,
           catering_needed: form.catering_needed,
         }),
-        ...(isRestaurant && {
+        ...(form.reservation_type === "restaurant" && {
           pricing_type: form.pricing_type || null,
           restaurant_sub_type: form.restaurant_sub_type,
           delivery_address: form.delivery_address || null,
