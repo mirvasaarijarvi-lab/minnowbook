@@ -66,6 +66,10 @@ type TranslationKeys = {
   "reports.totalPrice": string;
   "reports.totalRevenue": string;
   "reports.invoicing": string;
+  "reports.offerConversion": string;
+  "reports.totalOffers": string;
+  "reports.convertedOffers": string;
+  "reports.conversionRate": string;
   "reports.details": string;
   "reports.chart.title": string;
   "reports.print": string;
