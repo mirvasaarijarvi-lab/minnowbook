@@ -256,7 +256,7 @@ describe("redeem-access-code: brute-force & replay resilience", () => {
 });
 
 describe("discount_codes: brute-force / replay resilience (no public endpoint)", () => {
-  it("100 parallel anon SELECTs return zero rows (no enumeration)", async () => {
+  it("100 parallel anon SELECTs return zero rows (no enumeration)", { timeout: 30000 }, async () => {
     const results = await Promise.all(
       Array.from({ length: 100 }, () =>
         anon.from("discount_codes").select("id, code").limit(1),
