@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Shield } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useT } from "@/contexts/I18nContext";
+import { gtm } from "@/lib/gtm";
 
 const CookieConsent = forwardRef<HTMLDivElement>(function CookieConsent(_props, ref) {
   const t = useT();
@@ -10,7 +11,11 @@ const CookieConsent = forwardRef<HTMLDivElement>(function CookieConsent(_props, 
 
   useEffect(() => {
     const consent = localStorage.getItem("cookie-consent");
-    if (!consent) {
+    if (consent === "accepted") {
+      gtm.updateConsent(true);
+    } else if (consent === "rejected") {
+      gtm.updateConsent(false);
+    } else {
       const timer = setTimeout(() => setVisible(true), 1200);
       return () => clearTimeout(timer);
     }
@@ -18,11 +23,14 @@ const CookieConsent = forwardRef<HTMLDivElement>(function CookieConsent(_props, 
 
   const handleAccept = useCallback(() => {
     localStorage.setItem("cookie-consent", "accepted");
+    gtm.updateConsent(true);
+    gtm.pageView("banner_accept");
     setVisible(false);
   }, []);
 
   const handleReject = useCallback(() => {
     localStorage.setItem("cookie-consent", "rejected");
+    gtm.updateConsent(false);
     setVisible(false);
   }, []);
 
