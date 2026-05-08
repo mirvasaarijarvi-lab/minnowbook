@@ -66,6 +66,10 @@ type TranslationKeys = {
   "reports.totalPrice": string;
   "reports.totalRevenue": string;
   "reports.invoicing": string;
+  "reports.offerConversion": string;
+  "reports.totalOffers": string;
+  "reports.convertedOffers": string;
+  "reports.conversionRate": string;
   "reports.details": string;
   "reports.chart.title": string;
   "reports.print": string;
@@ -1749,6 +1753,10 @@ const en: TranslationKeys = {
   "reports.totalPrice": "Total",
   "reports.totalRevenue": "Total Revenue",
   "reports.invoicing": "Invoicing",
+  "reports.offerConversion": "Offers to Reservations",
+  "reports.totalOffers": "Total offers",
+  "reports.convertedOffers": "Converted to reservations",
+  "reports.conversionRate": "Conversion rate",
   "reports.details": "Detailed list",
   "reports.chart.title": "Reservations by type",
   "reports.print": "Print",
@@ -3409,6 +3417,10 @@ const fi: TranslationKeys = {
   "reports.totalPrice": "Yhteensä",
   "reports.totalRevenue": "Kokonaistulo",
   "reports.invoicing": "Laskutus",
+  "reports.offerConversion": "Tarjouksista varauksiksi",
+  "reports.totalOffers": "Tarjouksia yhteensä",
+  "reports.convertedOffers": "Muunnettu varauksiksi",
+  "reports.conversionRate": "Muunnosprosentti",
   "reports.details": "Yksityiskohtainen lista",
   "reports.chart.title": "Varaukset tyypeittäin",
   "reports.print": "Tulosta",
@@ -5067,6 +5079,10 @@ const sv: TranslationKeys = {
   "reports.totalPrice": "Totalt",
   "reports.totalRevenue": "Total intäkt",
   "reports.invoicing": "Fakturering",
+  "reports.offerConversion": "Offerter till bokningar",
+  "reports.totalOffers": "Totalt antal offerter",
+  "reports.convertedOffers": "Konverterade till bokningar",
+  "reports.conversionRate": "Konverteringsgrad",
   "reports.details": "Detaljerad lista",
   "reports.chart.title": "Bokningar per typ",
   "reports.print": "Skriv ut",
