@@ -46,7 +46,10 @@ const AnalyticsPageView = () => {
 
   useEffect(() => {
     if (localStorage.getItem("cookie-consent") === "accepted") {
-      import("@/lib/gtm").then(({ gtm }) => gtm.pageView("route_change"));
+      import("@/lib/gtm").then(({ gtm }) => {
+        gtm.updateConsent(true);
+        gtm.pageView("route_change");
+      });
     }
   }, [location.pathname, location.search]);
 
