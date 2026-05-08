@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { I18nProvider } from "@/contexts/I18nContext";
 import { ThemeProvider } from "next-themes";
@@ -40,6 +40,18 @@ import RequireTenant from "./components/RequireTenant";
 import { toast } from "sonner";
 
 const queryClient = new QueryClient();
+
+const AnalyticsPageView = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+    if (localStorage.getItem("cookie-consent") === "accepted") {
+      import("@/lib/gtm").then(({ gtm }) => gtm.pageView("route_change"));
+    }
+  }, [location.pathname, location.search]);
+
+  return null;
+};
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading, signOut } = useAuth();
@@ -108,6 +120,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
+            <AnalyticsPageView />
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/pricing" element={<Pricing />} />
