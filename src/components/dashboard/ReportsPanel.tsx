@@ -881,6 +881,36 @@ const ReportsPanel = () => {
             </CardContent>
           </Card>
 
+          {/* Offer conversion */}
+          {offerConversion.total > 0 && (
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium flex items-center gap-2">
+                  <FileText className="h-4 w-4" />{t("reports.offerConversion")}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-3">
+                  <div className="space-y-1">
+                    <p className="text-xs text-muted-foreground font-medium">{t("reports.totalOffers")}</p>
+                    <p className="text-2xl font-bold">{offerConversion.total}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-xs text-muted-foreground font-medium">{t("reports.convertedOffers")}</p>
+                    <p className="text-2xl font-bold">{offerConversion.converted}</p>
+                  </div>
+                  <div className="space-y-1 col-span-2 sm:col-span-1">
+                    <p className="text-xs text-muted-foreground font-medium">{t("reports.conversionRate")}</p>
+                    <p className="text-2xl font-bold">{offerConversion.rate}%</p>
+                    <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
+                      <div className="bg-primary h-2 rounded-full transition-all" style={{ width: `${offerConversion.rate}%` }} />
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Alert banners */}
           {uninvoicedStats.count > 0 && (
             <div className="rounded-lg border border-accent/40 bg-accent/5 px-4 py-3 text-sm flex items-center gap-2">
