@@ -10,7 +10,7 @@ declare global {
   }
 }
 
-const GA_MEASUREMENT_ID = "G-0N9SFEWC7E";
+const GA_MEASUREMENT_ID = "G-C7CJERJ7BR";
 
 function ensureTrackingGlobals() {
   window.dataLayer = window.dataLayer || [];
