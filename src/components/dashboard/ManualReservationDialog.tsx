@@ -182,58 +182,32 @@ const ManualReservationDialog = ({
         requestedGuests,
       });
 
-      // ---------- Auto-compute price from any tenant-defined source ----------
+      // ---------- Auto-compute price via shared helper ----------
       // Mirrors the public booking edge function so the backend reservation
       // shows the price the customer will actually pay.
-      const isRestaurant = form.reservation_type === "restaurant";
       const selRes: any = resources.find((r: any) => r.id === selectedResourceId);
-      let gross: number | null = null;
-      let nightsCount = 0;
-
-      if (isAccommodation && selRes?.price_per_night && selectedDate && form.check_out_date) {
-        const ci = new Date(format(selectedDate, "yyyy-MM-dd") + "T00:00:00").getTime();
-        const co = new Date(form.check_out_date + "T00:00:00").getTime();
-        nightsCount = Math.max(0, Math.round((co - ci) / 86400000));
-        if (nightsCount > 0) {
-          const pricing = selRes.room_type_pricing ?? { single: 1.0, double: 1.5, suite: 2.5, dorm: 0.6 };
-          const multiplier = form.room_type ? (Number(pricing[form.room_type]) || 1.0) : 1.0;
-          const roomTotal = nightsCount * Number(selRes.price_per_night) * multiplier;
-          const bfPrice = Number(selRes.breakfast_price_per_person ?? 15);
-          const guestsForBf = form.guests_count ? parseInt(form.guests_count) : 1;
-          const bfTotal = form.breakfast_included ? nightsCount * guestsForBf * bfPrice : 0;
-          gross = roomTotal + bfTotal;
-        }
-      } else if (form.reservation_type === "custom" && selectedSubServices.length > 0) {
-        let total = 0;
-        for (const s of selectedSubServices) {
-          if (s.price_eur != null) total += Number(s.price_eur) * Number(s.qty || 1);
-        }
-        if (total > 0) gross = total;
-      } else if (isRestaurant && form.pricing_type === "fixed_price" && form.price_eur) {
-        gross = parseFloat(form.price_eur);
-      } else if (isRestaurant && form.restaurant_sub_type === "popup" && form.stall_fee) {
-        gross = parseFloat(form.stall_fee);
-      } else if (form.price_eur) {
-        gross = parseFloat(form.price_eur);
-      }
-
-      // Apply discount to compute final payable
-      let final: number | null = gross;
-      if (gross != null && form.discount_type && form.discount_value) {
-        const dv = parseFloat(form.discount_value);
-        if (form.discount_type === "percentage") {
-          final = Math.max(0, gross * (1 - dv / 100));
-        } else if (form.discount_type === "fixed") {
-          final = Math.max(0, gross - dv);
-        } else if (form.discount_type === "free_nights" && nightsCount > 0 && selRes?.price_per_night) {
-          const pricing = selRes.room_type_pricing ?? {};
-          const multiplier = form.room_type ? (Number(pricing[form.room_type]) || 1.0) : 1.0;
-          const perNight = Number(selRes.price_per_night) * multiplier;
-          final = Math.max(0, gross - perNight * Math.min(dv, nightsCount));
-        }
-      }
-      if (gross != null) gross = Math.round(gross * 100) / 100;
-      if (final != null) final = Math.round(final * 100) / 100;
+      const priced = computeReservationPrice({
+        reservation_type: form.reservation_type,
+        resource: selRes ?? null,
+        check_in_date: format(selectedDate, "yyyy-MM-dd"),
+        check_out_date: form.check_out_date || null,
+        room_type: form.room_type || null,
+        guests_count: form.guests_count ? parseInt(form.guests_count) : null,
+        breakfast_included: !!form.breakfast_included,
+        selected_sub_services: selectedSubServices,
+        restaurant_sub_type: form.restaurant_sub_type || null,
+        pricing_type: form.pricing_type || null,
+        fixed_price_eur:
+          form.pricing_type === "fixed_price" && form.price_eur
+            ? parseFloat(form.price_eur)
+            : null,
+        stall_fee_eur: form.stall_fee ? parseFloat(form.stall_fee) : null,
+        discount_type: (form.discount_type as any) || null,
+        discount_value: form.discount_value ? parseFloat(form.discount_value) : null,
+        manual_price_eur: form.price_eur ? parseFloat(form.price_eur) : null,
+      });
+      const gross = priced.gross_eur;
+      const final = priced.final_eur;
 
       const { data: inserted, error } = await supabase.from("reservations").insert({
         tenant_id: tenantId,
