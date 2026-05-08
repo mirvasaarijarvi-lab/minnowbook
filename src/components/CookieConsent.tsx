@@ -13,7 +13,6 @@ const CookieConsent = forwardRef<HTMLDivElement>(function CookieConsent(_props, 
     const consent = localStorage.getItem("cookie-consent");
     if (consent === "accepted") {
       gtm.updateConsent(true);
-      gtm.pageView("stored_consent");
     } else if (consent === "rejected") {
       gtm.updateConsent(false);
     } else {
