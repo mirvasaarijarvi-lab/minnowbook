@@ -441,7 +441,6 @@ Deno.serve(async (req) => {
       pricingResource = r ?? null;
     }
 
-    const { computeReservationPrice } = await import("../_shared/reservation-pricing.ts");
     const priced = computeReservationPrice({
       reservation_type,
       resource: pricingResource,
