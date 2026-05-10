@@ -476,6 +476,7 @@ export function useBrandingSignedUrlState(
       // already exhausted retries; the visitor would only see a flash
       // of "loading" before falling back to the same UI anyway.
       if (!forceRefresh && isFallbackCached(tenantId, path, ttlSeconds)) {
+        logFallbackShortCircuit(tenantId, path, ttlSeconds, "load");
         setUrl("");
         setStatus("error");
         return;
