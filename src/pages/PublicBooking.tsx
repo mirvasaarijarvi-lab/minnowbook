@@ -1092,12 +1092,19 @@ const PublicBookingInner = () => {
       {/* Header with optional hero image */}
       {settings?.hero_image_url && !heroFailed ? (
         <header className="relative overflow-hidden" style={{ backgroundColor: primaryColor }}>
-          <img
-            src={heroSignedUrl || undefined}
-            alt=""
-            onError={heroBranding.handleImgError}
-            className="absolute inset-0 w-full h-full object-cover opacity-40"
-          />
+          {heroSignedUrl ? (
+            <img
+              src={heroSignedUrl}
+              alt=""
+              onError={heroBranding.handleImgError}
+              className="absolute inset-0 w-full h-full object-cover opacity-40"
+            />
+          ) : (
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 w-full h-full bg-white/10 animate-pulse"
+            />
+          )}
           <div className="relative">
             <div className="border-b border-white/20 py-4 px-4 sm:px-6">
               <div className="max-w-3xl mx-auto flex items-center justify-between">
@@ -1108,6 +1115,11 @@ const PublicBookingInner = () => {
                       alt=""
                       onError={logoBranding.handleImgError}
                       className="h-8 w-8 rounded-full object-cover"
+                    />
+                  ) : settings?.logo_url && logoLoading ? (
+                    <span
+                      aria-hidden="true"
+                      className="h-8 w-8 rounded-full bg-white/20 animate-pulse"
                     />
                   ) : settings?.logo_url && logoFailed ? (
                     <span
