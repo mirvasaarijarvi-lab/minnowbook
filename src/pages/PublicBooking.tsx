@@ -376,11 +376,15 @@ const PublicBookingInner = () => {
     };
   }, [tenantSettings, siteSettings]);
 
-  // Resolve branding URLs to short-lived signed URLs at render time so
-  // we don't depend on the persisted public-bucket URL surviving any
-  // future flip of `tenant-branding` to private.
-  const logoSignedUrl = useBrandingSignedUrl(settings?.logo_url);
-  const heroSignedUrl = useBrandingSignedUrl(settings?.hero_image_url);
+  // Resolve branding URLs to short-lived signed URLs at render time, with
+  // a graceful fallback path if the signed URL ever fails (e.g. expired
+  // or revoked) so the booking page still renders without broken images.
+  const logoBranding = useBrandingSignedUrlState(settings?.logo_url);
+  const heroBranding = useBrandingSignedUrlState(settings?.hero_image_url);
+  const logoSignedUrl = logoBranding.url;
+  const heroSignedUrl = heroBranding.url;
+  const logoFailed = logoBranding.status === "error";
+  const heroFailed = heroBranding.status === "error";
 
   // The resolved site ID for filtering queries
   const activeSiteId = siteLockedByUrl ? (site?.id ?? null) : pickedSiteId;
