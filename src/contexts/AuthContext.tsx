@@ -190,8 +190,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
   }, [checkSubscription, queryClient]);
 
-  const signOut = async () => {
-    await supabase.auth.signOut();
+  const signOut = async (reason: SignOutReason) => {
+    // Mark this sign-out as intentional BEFORE calling the SDK so the
+    // `SIGNED_OUT` listener above sees the reason and skips the
+    // unexpected-sign-out warning.
+    intentionalSignOutRef.current = reason;
+    try {
+      await supabase.auth.signOut();
+    } catch (err) {
+      // If the SDK call throws, no SIGNED_OUT will fire and the ref would
+      // leak into the next (unrelated) sign-out, so clear it here.
+      intentionalSignOutRef.current = null;
+      throw err;
+    }
   };
 
   return (
