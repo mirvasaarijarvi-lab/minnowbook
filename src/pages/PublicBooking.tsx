@@ -1084,20 +1084,33 @@ const PublicBookingInner = () => {
   return (
     <div className="min-h-screen" style={{ backgroundColor: secondaryColor }}>
       {/* Header with optional hero image */}
-      {settings?.hero_image_url ? (
+      {settings?.hero_image_url && !heroFailed ? (
         <header className="relative overflow-hidden" style={{ backgroundColor: primaryColor }}>
           <img
             src={heroSignedUrl || undefined}
             alt=""
+            onError={heroBranding.handleImgError}
             className="absolute inset-0 w-full h-full object-cover opacity-40"
           />
           <div className="relative">
             <div className="border-b border-white/20 py-4 px-4 sm:px-6">
               <div className="max-w-3xl mx-auto flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  {settings?.logo_url && logoSignedUrl && (
-                    <img src={logoSignedUrl} alt="" className="h-8 w-8 rounded-full object-cover" />
-                  )}
+                  {settings?.logo_url && logoSignedUrl ? (
+                    <img
+                      src={logoSignedUrl}
+                      alt=""
+                      onError={logoBranding.handleImgError}
+                      className="h-8 w-8 rounded-full object-cover"
+                    />
+                  ) : settings?.logo_url && logoFailed ? (
+                    <span
+                      aria-hidden="true"
+                      className="h-8 w-8 rounded-full bg-white/20 text-white text-xs font-semibold flex items-center justify-center"
+                    >
+                      {(displayName || "?").trim().charAt(0).toUpperCase()}
+                    </span>
+                  ) : null}
                   <h1 className="text-xl font-serif font-bold text-white">{displayName}</h1>
                 </div>
                 <LanguageSwitcher variant="dark" />
@@ -1141,9 +1154,21 @@ const PublicBookingInner = () => {
         <header className="border-b py-4 px-4 sm:px-6" style={{ backgroundColor: primaryColor }}>
           <div className="max-w-3xl mx-auto flex items-center justify-between">
             <div className="flex items-center gap-3">
-              {settings?.logo_url && logoSignedUrl && (
-                <img src={logoSignedUrl} alt="" className="h-8 w-8 rounded-full object-cover" />
-              )}
+              {settings?.logo_url && logoSignedUrl ? (
+                <img
+                  src={logoSignedUrl}
+                  alt=""
+                  onError={logoBranding.handleImgError}
+                  className="h-8 w-8 rounded-full object-cover"
+                />
+              ) : settings?.logo_url && logoFailed ? (
+                <span
+                  aria-hidden="true"
+                  className="h-8 w-8 rounded-full bg-white/20 text-white text-xs font-semibold flex items-center justify-center"
+                >
+                  {(displayName || "?").trim().charAt(0).toUpperCase()}
+                </span>
+              ) : null}
               <h1 className="text-xl font-serif font-bold text-white">{displayName}</h1>
             </div>
             <LanguageSwitcher variant="dark" />
@@ -1152,8 +1177,8 @@ const PublicBookingInner = () => {
       )}
 
       <main className="max-w-3xl mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
-        {/* Show title below only when no hero */}
-        {!settings?.hero_image_url && (
+        {/* Show title below only when no hero (or when the hero failed and we degraded) */}
+        {(!settings?.hero_image_url || heroFailed) && (
           <div>
             <h2 className="text-2xl sm:text-3xl font-serif font-bold" style={{ color: primaryColor }}>
               {t("booking.title")}
