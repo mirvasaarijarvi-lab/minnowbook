@@ -189,6 +189,7 @@ const App = () => (
             </Routes>
             <CookieConsent />
             <AccessibilityWidget />
+            <SessionStatusIndicator />
           </BrowserRouter>
         </TooltipProvider>
         </ImpersonationProvider>
