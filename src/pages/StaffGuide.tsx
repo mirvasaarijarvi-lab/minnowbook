@@ -1024,6 +1024,7 @@ const guideContent: Record<Language, GuideContent> = {
           "Bokningsantal per typ.",
           "Jämförelseläge visar två perioder sida vid sida.",
           "Pro & Business: CSV-export och utskrift är tillgängliga.",
+          "Offerter till bokningar: se totalt antal offerter, hur många blev bokningar och konverteringsgrad, med en egen CSV-exportknapp på kortet.",
         ],
         tip: "Alla planer kan visa rapporter. CSV-export och utskrift kräver Pro eller Business.",
       },
