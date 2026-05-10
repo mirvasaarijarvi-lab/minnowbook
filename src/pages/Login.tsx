@@ -54,6 +54,7 @@ const setAttemptState = (count: number, lockedUntil: number) => {
 
 const Login = () => {
   const navigate = useNavigate();
+  const { signOut } = useAuth();
   const [loading, setLoading] = useState(false);
   const [oauthLoading, setOauthLoading] = useState<string | null>(null);
   const [email, setEmail] = useState("");
