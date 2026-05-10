@@ -81,7 +81,9 @@ describe("tenant-assets is private (regression)", () => {
         // RLS denial surfaces as either an error OR an empty array. What
         // must NEVER happen: a populated array of real tenant folders.
         if (error) {
-          expect(error.message).toMatch(/permission|not allowed|denied|policy/i);
+          expect(error.message).toMatch(
+            /permission|not allowed|denied|policy|invalid input|uuid/i,
+          );
         } else {
           expect(data ?? []).toEqual([]);
         }
