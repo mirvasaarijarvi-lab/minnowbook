@@ -285,6 +285,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [checkSubscription, queryClient]);
 
   const signOut = async (reason: SignOutReason) => {
+    // eslint-disable-next-line no-console
+    console.info("[AuthContext][signout] explicit signOut() called", {
+      reason,
+      at: new Date().toISOString(),
+      callerStack: new Error().stack?.split("\n").slice(2, 5).join(" <- "),
+    });
     // Mark this sign-out as intentional BEFORE calling the SDK so the
     // `SIGNED_OUT` listener above sees the reason and skips the
     // unexpected-sign-out warning.
@@ -292,8 +298,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       await supabase.auth.signOut();
     } catch (err) {
-      // If the SDK call throws, no SIGNED_OUT will fire and the ref would
-      // leak into the next (unrelated) sign-out, so clear it here.
+      // eslint-disable-next-line no-console
+      console.error("[AuthContext][signout] SDK signOut() threw", {
+        reason,
+        error: err instanceof Error ? err.message : String(err),
+      });
       intentionalSignOutRef.current = null;
       throw err;
     }
