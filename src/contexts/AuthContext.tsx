@@ -356,7 +356,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         // starts clean. Tagged `corrupted_session` so the sign-out log
         // shows why this happened (and the unexpected-SIGNED_OUT
         // warning is suppressed by the intentional-reason ref).
-        intentionalSignOutRef.current = "corrupted_session" as SignOutReason;
+        intentionalSignOutRef.current = "corrupted_session";
         void supabase.auth
           .signOut()
           .catch(() => {
