@@ -2995,10 +2995,19 @@ export type Database = {
         }[]
       }
       get_user_tenant_id: { Args: { p_user_id: string }; Returns: string }
-      has_permission: {
-        Args: { p_permission: string; p_user_id: string }
-        Returns: boolean
-      }
+      has_permission:
+        | {
+            Args: { p_permission: string; p_user_id: string }
+            Returns: boolean
+          }
+        | {
+            Args: {
+              p_permission: string
+              p_tenant_id: string
+              p_user_id: string
+            }
+            Returns: boolean
+          }
       has_tenant_role:
         | {
             Args: {
