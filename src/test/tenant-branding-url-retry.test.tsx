@@ -34,8 +34,13 @@ vi.mock("@/integrations/supabase/client", () => ({
   },
 }));
 
-const PATH = "tenant-abc/logo.png";
+import { useBrandingSignedUrlState } from "@/lib/tenant-branding-url";
+
 const TTL = 60;
+// Each test uses a unique path so module-level caches / shared retry
+// locks from a previous test cannot bleed into the next one.
+let testCounter = 0;
+let PATH = "tenant-init/logo.png";
 
 function HookProbe({
   storedUrl,
@@ -48,10 +53,6 @@ function HookProbe({
   onState: (s: { url: string; status: string }) => void;
   retryRef?: { current: (() => void) | null };
 }) {
-  // Imported lazily inside the component so vi.resetModules() between
-  // tests gives us a fresh module-level cache / lock map.
-  const { useBrandingSignedUrlState } =
-    require("@/lib/tenant-branding-url") as typeof import("@/lib/tenant-branding-url");
   const state = useBrandingSignedUrlState(storedUrl, ttl);
   if (retryRef) retryRef.current = state.retry;
   onState({ url: state.url, status: state.status });
