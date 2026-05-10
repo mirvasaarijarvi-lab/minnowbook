@@ -352,7 +352,7 @@ export function useBrandingSignedUrlState(
           });
         });
     },
-    [path, ttlSeconds, tenantId],
+    [path, ttlSeconds, tenantId, fallbackCacheTtlMs],
   );
 
   useEffect(() => {
@@ -387,7 +387,7 @@ export function useBrandingSignedUrlState(
       if (id !== reqIdRef.current) return;
       load(true);
     });
-  }, [path, ttlSeconds, tenantId, load]);
+  }, [path, ttlSeconds, tenantId, fallbackCacheTtlMs, load]);
 
   const retry = useCallback(() => {
     if (path) {
@@ -396,7 +396,7 @@ export function useBrandingSignedUrlState(
       invalidateBrandingSignedUrl(path, ttlSeconds);
     }
     load(true);
-  }, [path, ttlSeconds, tenantId, load]);
+  }, [path, ttlSeconds, tenantId, fallbackCacheTtlMs, load]);
 
   return { url, status, handleImgError, retry };
 }
