@@ -26,8 +26,26 @@ export const TENANT_BRANDING_BUCKET = "tenant-branding";
 /** 24h, mirrors the private-bucket TTL used elsewhere in the app. */
 export const BRANDING_SIGNED_URL_TTL_SECONDS = 24 * 60 * 60;
 const RENEWAL_WINDOW_SECONDS = 5 * 60;
-/** How many automatic retries we attempt after a signed URL fails to load. */
-const MAX_AUTOMATIC_RETRIES = 1;
+/**
+ * How many automatic retries we attempt after a signed URL fails to
+ * mint or load. With the backoff schedule below this caps the total
+ * recovery window at ~7.5s and 4 mint attempts, so a transient network
+ * blip recovers quickly without spamming `createSignedUrl`.
+ */
+const MAX_AUTOMATIC_RETRIES = 4;
+/**
+ * Exponential backoff schedule (ms) used between retry attempts. Index
+ * 0 is the delay before retry #1, index 1 before retry #2, etc. We cap
+ * at 4s and add a small jitter so multiple components sharing the same
+ * path don't stampede the storage API at the same instant.
+ */
+const RETRY_BACKOFF_MS = [400, 800, 1600, 3200];
+const RETRY_JITTER_MS = 200;
+
+function backoffDelay(attempt: number): number {
+  const base = RETRY_BACKOFF_MS[Math.min(attempt, RETRY_BACKOFF_MS.length - 1)];
+  return base + Math.floor(Math.random() * RETRY_JITTER_MS);
+}
 
 interface CacheEntry {
   url: string;
@@ -127,12 +145,21 @@ export function useBrandingSignedUrlState(
   const [status, setStatus] = useState<BrandingUrlStatus>("idle");
   const retriesRef = useRef(0);
   const reqIdRef = useRef(0);
+  const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const path = extractBrandingObjectPath(storedUrl);
+
+  const clearRetryTimer = useCallback(() => {
+    if (retryTimerRef.current !== null) {
+      clearTimeout(retryTimerRef.current);
+      retryTimerRef.current = null;
+    }
+  }, []);
 
   const load = useCallback(
     (forceRefresh: boolean) => {
       if (!path) {
+        clearRetryTimer();
         setUrl("");
         setStatus("idle");
         return;
@@ -142,22 +169,38 @@ export function useBrandingSignedUrlState(
       getOrMint(path, ttlSeconds, forceRefresh)
         .then((signed) => {
           if (id !== reqIdRef.current) return;
+          retriesRef.current = 0;
           setUrl(signed);
           setStatus("ready");
         })
         .catch(() => {
           if (id !== reqIdRef.current) return;
-          setUrl("");
-          setStatus("error");
+          // Mint itself failed (network, 5xx, RLS). Schedule a backoff
+          // retry rather than immediately re-hitting createSignedUrl.
+          if (retriesRef.current >= MAX_AUTOMATIC_RETRIES) {
+            setUrl("");
+            setStatus("error");
+            return;
+          }
+          const attempt = retriesRef.current;
+          retriesRef.current += 1;
+          clearRetryTimer();
+          retryTimerRef.current = setTimeout(() => {
+            retryTimerRef.current = null;
+            invalidateBrandingSignedUrl(path, ttlSeconds);
+            load(true);
+          }, backoffDelay(attempt));
         });
     },
-    [path, ttlSeconds],
+    [path, ttlSeconds, clearRetryTimer],
   );
 
   useEffect(() => {
     retriesRef.current = 0;
+    clearRetryTimer();
     load(false);
-  }, [load]);
+    return clearRetryTimer;
+  }, [load, clearRetryTimer]);
 
   const handleImgError = useCallback(() => {
     if (!path) {
@@ -169,16 +212,27 @@ export function useBrandingSignedUrlState(
       setStatus("error");
       return;
     }
+    const attempt = retriesRef.current;
     retriesRef.current += 1;
+    clearRetryTimer();
+    // Drop the cached (likely-expired or rejected) URL immediately so a
+    // parallel hook instance won't reuse it, but wait the backoff
+    // window before re-minting to avoid spamming the storage API when
+    // many <img> tags fail in quick succession.
     invalidateBrandingSignedUrl(path, ttlSeconds);
-    load(true);
-  }, [path, ttlSeconds, load]);
+    setStatus("loading");
+    retryTimerRef.current = setTimeout(() => {
+      retryTimerRef.current = null;
+      load(true);
+    }, backoffDelay(attempt));
+  }, [path, ttlSeconds, load, clearRetryTimer]);
 
   const retry = useCallback(() => {
     retriesRef.current = 0;
+    clearRetryTimer();
     if (path) invalidateBrandingSignedUrl(path, ttlSeconds);
     load(true);
-  }, [path, ttlSeconds, load]);
+  }, [path, ttlSeconds, load, clearRetryTimer]);
 
   return { url, status, handleImgError, retry };
 }
