@@ -166,7 +166,7 @@ const Login = () => {
           navigate("/dashboard");
         }}
         onCancel={async () => {
-          await supabase.auth.signOut();
+          await signOut("mfa_cancel");
           setMfaFactorId(null);
         }}
       />
