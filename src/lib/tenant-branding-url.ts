@@ -279,6 +279,16 @@ export interface BrandingUrlOptions {
    * booking page on the same browser session.
    */
   tenantId?: string | null;
+  /**
+   * How long (in milliseconds) to remember a "fallback exhausted"
+   * verdict for this (tenant, path) before re-attempting on the next
+   * mount. Defaults to `getDefaultBrandingFallbackCacheTtlMs()` (5
+   * minutes). Set to a smaller value in low-stakes environments
+   * (preview/staging, short signed-URL TTLs) so transient outages
+   * recover faster, or larger in production where the storage layer
+   * is stable and you want to avoid retry storms across many tabs.
+   */
+  fallbackCacheTtlMs?: number;
 }
 
 export function useBrandingSignedUrlState(
@@ -287,6 +297,10 @@ export function useBrandingSignedUrlState(
   options?: BrandingUrlOptions,
 ): BrandingUrlState {
   const tenantId = options?.tenantId ?? null;
+  const fallbackCacheTtlMs =
+    typeof options?.fallbackCacheTtlMs === "number" && options.fallbackCacheTtlMs > 0
+      ? options.fallbackCacheTtlMs
+      : defaultFallbackCacheTtlMs;
   const [url, setUrl] = useState<string>("");
   const [status, setStatus] = useState<BrandingUrlStatus>("idle");
   const reqIdRef = useRef(0);
