@@ -134,6 +134,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             : null,
         });
 
+        // Capture the route at every successful auth event so the next
+        // SIGNED_OUT (if it ever arrives unexpectedly) can report what
+        // page the user was on the last time the session was healthy,
+        // plus how long they sat on it before the session vanished.
+        const currentPath =
+          typeof window !== "undefined"
+            ? `${window.location.pathname}${window.location.search}`
+            : null;
+        if (
+          event === "SIGNED_IN" ||
+          event === "TOKEN_REFRESHED" ||
+          event === "USER_UPDATED"
+        ) {
+          lastAuthEventPathRef.current = currentPath;
+          lastAuthEventAtRef.current = nowMs;
+        }
+
         // Keep a snapshot of the *previous* session so the SIGNED_OUT branch
         // can describe what just got cleared.
         const previousSession = lastSessionRef.current;
