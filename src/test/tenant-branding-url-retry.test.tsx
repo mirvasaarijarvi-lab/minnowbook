@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { render, cleanup, act, waitFor } from "@testing-library/react";
+import { render, cleanup, act } from "@testing-library/react";
 
 /**
  * Retry-policy contract tests for `useBrandingSignedUrlState`.
