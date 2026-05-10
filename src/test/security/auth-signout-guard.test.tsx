@@ -96,7 +96,7 @@ describe("AuthContext explicit-logout guard", () => {
 
     expect(signOutMock).toHaveBeenCalledTimes(1);
     const unexpectedWarnings = warnSpy.mock.calls.filter((c) =>
-      String(c[0]).includes("Unexpected SIGNED_OUT"),
+      String(c[0]).includes("[AuthContext][signout] unexpected"),
     );
     expect(unexpectedWarnings).toHaveLength(0);
   });
@@ -112,10 +112,10 @@ describe("AuthContext explicit-logout guard", () => {
     });
 
     const unexpectedWarnings = warnSpy.mock.calls.filter((c) =>
-      String(c[0]).includes("Unexpected SIGNED_OUT"),
+      String(c[0]).includes("[AuthContext][signout] unexpected"),
     );
     expect(unexpectedWarnings.length).toBeGreaterThanOrEqual(1);
-    expect(String(unexpectedWarnings[0][0])).toMatch(/not user-initiated/i);
+    expect(String(unexpectedWarnings[0][1] ?? unexpectedWarnings[0][0])).toMatch(/cause/i);
   });
 
   it("each successive SIGNED_OUT requires its own reason (ref does not leak)", async () => {
@@ -131,7 +131,7 @@ describe("AuthContext explicit-logout guard", () => {
     });
 
     const unexpectedWarnings = warnSpy.mock.calls.filter((c) =>
-      String(c[0]).includes("Unexpected SIGNED_OUT"),
+      String(c[0]).includes("[AuthContext][signout] unexpected"),
     );
     expect(unexpectedWarnings).toHaveLength(1);
   });
