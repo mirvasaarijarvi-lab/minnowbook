@@ -28,6 +28,7 @@ import WaitlistButton from "@/components/public/WaitlistButton";
 import React from "react";
 import { buildTypeTiles } from "@/lib/booking-tiles";
 import { useBrandingSignedUrlState } from "@/lib/tenant-branding-url";
+import { FadeInImage } from "@/components/branding/FadeInImage";
 
 // Types for public views (not in auto-generated types)
 interface PublicTenant {
@@ -1092,42 +1093,38 @@ const PublicBookingInner = () => {
       {/* Header with optional hero image */}
       {settings?.hero_image_url && !heroFailed ? (
         <header className="relative overflow-hidden" style={{ backgroundColor: primaryColor }}>
-          {heroSignedUrl ? (
-            <img
-              src={heroSignedUrl}
-              alt=""
-              onError={heroBranding.handleImgError}
-              className="absolute inset-0 w-full h-full object-cover opacity-40"
-            />
-          ) : (
-            <div
-              aria-hidden="true"
-              className="absolute inset-0 w-full h-full bg-white/10 animate-pulse"
-            />
-          )}
+          <FadeInImage
+            src={heroSignedUrl || undefined}
+            alt=""
+            onError={heroBranding.handleImgError}
+            wrapperClassName="absolute inset-0 w-full h-full block"
+            className="absolute inset-0 w-full h-full object-cover"
+            loadedOpacity={0.4}
+            placeholder={
+              <span className="absolute inset-0 w-full h-full bg-white/10 animate-pulse" />
+            }
+          />
           <div className="relative">
             <div className="border-b border-white/20 py-4 px-4 sm:px-6">
               <div className="max-w-3xl mx-auto flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  {settings?.logo_url && logoSignedUrl ? (
-                    <img
-                      src={logoSignedUrl}
+                  {settings?.logo_url ? (
+                    <FadeInImage
+                      src={logoSignedUrl || undefined}
                       alt=""
                       onError={logoBranding.handleImgError}
-                      className="h-8 w-8 rounded-full object-cover"
+                      wrapperClassName="h-8 w-8 shrink-0"
+                      className="absolute inset-0 h-8 w-8 rounded-full object-cover"
+                      placeholder={
+                        logoFailed ? (
+                          <span className="absolute inset-0 h-8 w-8 rounded-full bg-white/20 text-white text-xs font-semibold flex items-center justify-center">
+                            {(displayName || "?").trim().charAt(0).toUpperCase()}
+                          </span>
+                        ) : (
+                          <span className="absolute inset-0 h-8 w-8 rounded-full bg-white/20 animate-pulse" />
+                        )
+                      }
                     />
-                  ) : settings?.logo_url && logoLoading ? (
-                    <span
-                      aria-hidden="true"
-                      className="h-8 w-8 rounded-full bg-white/20 animate-pulse"
-                    />
-                  ) : settings?.logo_url && logoFailed ? (
-                    <span
-                      aria-hidden="true"
-                      className="h-8 w-8 rounded-full bg-white/20 text-white text-xs font-semibold flex items-center justify-center"
-                    >
-                      {(displayName || "?").trim().charAt(0).toUpperCase()}
-                    </span>
                   ) : null}
                   <h1 className="text-xl font-serif font-bold text-white">{displayName}</h1>
                 </div>
@@ -1172,25 +1169,23 @@ const PublicBookingInner = () => {
         <header className="border-b py-4 px-4 sm:px-6" style={{ backgroundColor: primaryColor }}>
           <div className="max-w-3xl mx-auto flex items-center justify-between">
             <div className="flex items-center gap-3">
-              {settings?.logo_url && logoSignedUrl ? (
-                <img
-                  src={logoSignedUrl}
+              {settings?.logo_url ? (
+                <FadeInImage
+                  src={logoSignedUrl || undefined}
                   alt=""
                   onError={logoBranding.handleImgError}
-                  className="h-8 w-8 rounded-full object-cover"
+                  wrapperClassName="h-8 w-8 shrink-0"
+                  className="absolute inset-0 h-8 w-8 rounded-full object-cover"
+                  placeholder={
+                    logoFailed ? (
+                      <span className="absolute inset-0 h-8 w-8 rounded-full bg-white/20 text-white text-xs font-semibold flex items-center justify-center">
+                        {(displayName || "?").trim().charAt(0).toUpperCase()}
+                      </span>
+                    ) : (
+                      <span className="absolute inset-0 h-8 w-8 rounded-full bg-white/20 animate-pulse" />
+                    )
+                  }
                 />
-              ) : settings?.logo_url && logoLoading ? (
-                <span
-                  aria-hidden="true"
-                  className="h-8 w-8 rounded-full bg-white/20 animate-pulse"
-                />
-              ) : settings?.logo_url && logoFailed ? (
-                <span
-                  aria-hidden="true"
-                  className="h-8 w-8 rounded-full bg-white/20 text-white text-xs font-semibold flex items-center justify-center"
-                >
-                  {(displayName || "?").trim().charAt(0).toUpperCase()}
-                </span>
               ) : null}
               <h1 className="text-xl font-serif font-bold text-white">{displayName}</h1>
             </div>
