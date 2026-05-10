@@ -785,6 +785,7 @@ const guideContent: Record<Language, GuideContent> = {
           "Varausmäärät eriteltynä tyypeittäin.",
           "Vertailutilassa voit tarkastella kahta ajanjaksoa rinnakkain.",
           "Pro & Business: CSV-vienti ja tulostus ovat käytettävissä.",
+          "Tarjouksista varauksiin: näe tarjousten kokonaismäärä, kuinka moni muuttui varauksiksi ja konversioprosentti. Kortilla on oma CSV-vientipainike.",
         ],
         tip: "Kaikki tilaukset voivat tarkastella raportteja. CSV-vienti ja tulostus vaativat Pro- tai Business-tilauksen.",
       },
