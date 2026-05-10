@@ -385,6 +385,12 @@ const PublicBookingInner = () => {
   const heroSignedUrl = heroBranding.url;
   const logoFailed = logoBranding.status === "error";
   const heroFailed = heroBranding.status === "error";
+  // While a signed URL is still being minted, render skeleton
+  // placeholders that occupy the final layout slot. This keeps the
+  // header height + logo footprint stable instead of collapsing into
+  // the no-hero layout for a frame and then jumping back.
+  const logoLoading = logoBranding.status === "loading" || logoBranding.status === "idle";
+  const heroLoading = heroBranding.status === "loading" || heroBranding.status === "idle";
 
   // The resolved site ID for filtering queries
   const activeSiteId = siteLockedByUrl ? (site?.id ?? null) : pickedSiteId;
