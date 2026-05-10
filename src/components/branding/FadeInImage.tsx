@@ -31,10 +31,12 @@ export function FadeInImage({
   placeholder,
   wrapperClassName,
   fadeDurationMs = 300,
+  loadedOpacity = 1,
   className,
   src,
   onLoad,
   onError,
+  style,
   ...imgProps
 }: FadeInImageProps) {
   const [loaded, setLoaded] = useState(false);
