@@ -1108,25 +1108,23 @@ const PublicBookingInner = () => {
             <div className="border-b border-white/20 py-4 px-4 sm:px-6">
               <div className="max-w-3xl mx-auto flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  {settings?.logo_url && logoSignedUrl ? (
-                    <img
-                      src={logoSignedUrl}
+                  {settings?.logo_url ? (
+                    <FadeInImage
+                      src={logoSignedUrl || undefined}
                       alt=""
                       onError={logoBranding.handleImgError}
-                      className="h-8 w-8 rounded-full object-cover"
+                      wrapperClassName="h-8 w-8 shrink-0"
+                      className="absolute inset-0 h-8 w-8 rounded-full object-cover"
+                      placeholder={
+                        logoFailed ? (
+                          <span className="absolute inset-0 h-8 w-8 rounded-full bg-white/20 text-white text-xs font-semibold flex items-center justify-center">
+                            {(displayName || "?").trim().charAt(0).toUpperCase()}
+                          </span>
+                        ) : (
+                          <span className="absolute inset-0 h-8 w-8 rounded-full bg-white/20 animate-pulse" />
+                        )
+                      }
                     />
-                  ) : settings?.logo_url && logoLoading ? (
-                    <span
-                      aria-hidden="true"
-                      className="h-8 w-8 rounded-full bg-white/20 animate-pulse"
-                    />
-                  ) : settings?.logo_url && logoFailed ? (
-                    <span
-                      aria-hidden="true"
-                      className="h-8 w-8 rounded-full bg-white/20 text-white text-xs font-semibold flex items-center justify-center"
-                    >
-                      {(displayName || "?").trim().charAt(0).toUpperCase()}
-                    </span>
                   ) : null}
                   <h1 className="text-xl font-serif font-bold text-white">{displayName}</h1>
                 </div>
