@@ -119,6 +119,38 @@ export function invalidateBrandingSignedUrl(path: string, ttlSeconds = BRANDING_
   cache.delete(`${path}::${ttlSeconds}`);
 }
 
+/**
+ * Per-path "fallback decided" cache. Once a path has exhausted its
+ * retry budget we remember that for `FALLBACK_CACHE_TTL_MS` so future
+ * mounts of the hook (e.g. the visitor navigates between booking
+ * steps, or another component on the same page references the same
+ * tenant logo) skip the mint+retry dance and render the fallback UI
+ * immediately. Cleared on manual `retry()` or via
+ * `clearBrandingFallback()`.
+ */
+const FALLBACK_CACHE_TTL_MS = 5 * 60 * 1000;
+const fallbackCache = new Map<string, number>();
+
+function fallbackKey(path: string, ttlSeconds: number): string {
+  return `${path}::${ttlSeconds}`;
+}
+function isFallbackCached(path: string, ttlSeconds: number): boolean {
+  const key = fallbackKey(path, ttlSeconds);
+  const expiresAt = fallbackCache.get(key);
+  if (!expiresAt) return false;
+  if (expiresAt <= Date.now()) {
+    fallbackCache.delete(key);
+    return false;
+  }
+  return true;
+}
+function rememberFallback(path: string, ttlSeconds: number): void {
+  fallbackCache.set(fallbackKey(path, ttlSeconds), Date.now() + FALLBACK_CACHE_TTL_MS);
+}
+export function clearBrandingFallback(path: string, ttlSeconds = BRANDING_SIGNED_URL_TTL_SECONDS): void {
+  fallbackCache.delete(fallbackKey(path, ttlSeconds));
+}
+
 export type BrandingUrlStatus = "idle" | "loading" | "ready" | "error";
 
 export interface BrandingUrlState {
