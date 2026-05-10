@@ -196,12 +196,21 @@ export function useBrandingSignedUrlState(
         setStatus("idle");
         return;
       }
+      // Skip the mint entirely if a recent run for this path already
+      // exhausted retries; the visitor would only see a flash of
+      // "loading" before falling back to the same UI anyway.
+      if (!forceRefresh && isFallbackCached(path, ttlSeconds)) {
+        setUrl("");
+        setStatus("error");
+        return;
+      }
       const id = ++reqIdRef.current;
       setStatus("loading");
       getOrMint(path, ttlSeconds, forceRefresh)
         .then((signed) => {
           if (id !== reqIdRef.current) return;
           retriesRef.current = 0;
+          clearBrandingFallback(path, ttlSeconds);
           setUrl(signed);
           setStatus("ready");
         })
@@ -210,6 +219,7 @@ export function useBrandingSignedUrlState(
           // Mint itself failed (network, 5xx, RLS). Schedule a backoff
           // retry rather than immediately re-hitting createSignedUrl.
           if (retriesRef.current >= MAX_AUTOMATIC_RETRIES) {
+            rememberFallback(path, ttlSeconds);
             setUrl("");
             setStatus("error");
             return;
@@ -240,6 +250,7 @@ export function useBrandingSignedUrlState(
       return;
     }
     if (retriesRef.current >= MAX_AUTOMATIC_RETRIES) {
+      rememberFallback(path, ttlSeconds);
       setUrl("");
       setStatus("error");
       return;
@@ -262,7 +273,10 @@ export function useBrandingSignedUrlState(
   const retry = useCallback(() => {
     retriesRef.current = 0;
     clearRetryTimer();
-    if (path) invalidateBrandingSignedUrl(path, ttlSeconds);
+    if (path) {
+      clearBrandingFallback(path, ttlSeconds);
+      invalidateBrandingSignedUrl(path, ttlSeconds);
+    }
     load(true);
   }, [path, ttlSeconds, load, clearRetryTimer]);
 
