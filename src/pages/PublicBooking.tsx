@@ -27,7 +27,7 @@ import PublicReviews from "@/components/public/PublicReviews";
 import WaitlistButton from "@/components/public/WaitlistButton";
 import React from "react";
 import { buildTypeTiles } from "@/lib/booking-tiles";
-import { useBrandingSignedUrl } from "@/lib/tenant-branding-url";
+import { useBrandingSignedUrlState } from "@/lib/tenant-branding-url";
 
 // Types for public views (not in auto-generated types)
 interface PublicTenant {
