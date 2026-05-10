@@ -114,10 +114,12 @@ describe("CORS Origin Validation - Security Regression Tests", () => {
     });
   });
 
-  describe("session idle timeout", () => {
-    it("timeout is set to 30 minutes", () => {
-      const IDLE_TIMEOUT_MS = 30 * 60 * 1000;
-      expect(IDLE_TIMEOUT_MS).toBe(1_800_000);
+  describe("session persistence", () => {
+    it("no idle timeout is enforced (users stay signed in until they sign out)", async () => {
+      const fs = await import("fs");
+      const src = await fs.promises.readFile("src/contexts/AuthContext.tsx", "utf8");
+      expect(src).not.toMatch(/IDLE_TIMEOUT_MS/);
+      expect(src).not.toMatch(/idleTimerRef/);
     });
   });
 });
