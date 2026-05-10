@@ -654,13 +654,13 @@ const SettingsPanel = () => {
       const filePath = `${safeTenant}/logo.${ext}`;
 
       const { error: uploadError } = await supabase.storage
-        .from("tenant-assets")
+        .from("tenant-branding")
         .upload(filePath, file, { upsert: true });
 
       if (uploadError) throw uploadError;
 
       const { data: urlData } = supabase.storage
-        .from("tenant-assets")
+        .from("tenant-branding")
         .getPublicUrl(filePath);
 
       // Add cache-buster to force refresh
