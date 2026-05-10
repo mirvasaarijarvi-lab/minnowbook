@@ -1179,6 +1179,11 @@ const PublicBookingInner = () => {
                   onError={logoBranding.handleImgError}
                   className="h-8 w-8 rounded-full object-cover"
                 />
+              ) : settings?.logo_url && logoLoading ? (
+                <span
+                  aria-hidden="true"
+                  className="h-8 w-8 rounded-full bg-white/20 animate-pulse"
+                />
               ) : settings?.logo_url && logoFailed ? (
                 <span
                   aria-hidden="true"
