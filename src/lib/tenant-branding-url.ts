@@ -371,7 +371,7 @@ export function useBrandingSignedUrlState(
     }
     const attempt = getSharedAttempt(tenantId, path, ttlSeconds);
     if (attempt >= MAX_AUTOMATIC_RETRIES) {
-      rememberFallback(tenantId, path, ttlSeconds);
+      rememberFallback(tenantId, path, ttlSeconds, fallbackCacheTtlMs);
       setUrl("");
       setStatus("error");
       return;
