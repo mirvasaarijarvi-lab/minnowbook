@@ -26,6 +26,16 @@ jobs:
     steps:
       - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
 
+      - name: Verify package-lock.json is present in checkout
+        run: |
+          if [ ! -f package-lock.json ]; then
+            echo "::error file=package-lock.json::package-lock.json is missing from the checkout."
+            echo "External pipelines that run \`npm ci\` require a committed package-lock.json."
+            echo "Fix: regenerate locally with \`npm install --package-lock-only --ignore-scripts\` and commit the result."
+            exit 1
+          fi
+          echo "package-lock.json present ($(wc -c < package-lock.json) bytes)."
+
       - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
         with:
           node-version: 22
