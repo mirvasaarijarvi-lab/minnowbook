@@ -1083,7 +1083,7 @@ const PublicBookingInner = () => {
       {settings?.hero_image_url ? (
         <header className="relative overflow-hidden" style={{ backgroundColor: primaryColor }}>
           <img
-            src={settings.hero_image_url}
+            src={heroSignedUrl || undefined}
             alt=""
             className="absolute inset-0 w-full h-full object-cover opacity-40"
           />
