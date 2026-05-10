@@ -76,6 +76,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // structured log can report which user was logged in, when their token
   // would have expired, and how stale it was at the moment of sign-out.
   const lastSessionRef = useRef<Session | null>(null);
+  // Pathname captured at the most recent successful auth event
+  // (SIGNED_IN / TOKEN_REFRESHED / USER_UPDATED). Used in the
+  // unexpected-SIGNED_OUT diagnostic so monitoring can see "the user
+  // was on /dashboard/reservations when their session vanished".
+  const lastAuthEventPathRef = useRef<string | null>(null);
+  const lastAuthEventAtRef = useRef<number | null>(null);
   // We invalidate the cached `is_system_admin` lookup on every auth
   // transition so the next render of `<SystemAdminRoute>` (and any
   // consumer of `useIsSystemAdmin`) refetches against the fresh JWT
@@ -127,6 +133,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             ? session.expires_at - Math.floor(nowMs / 1000)
             : null,
         });
+
+        // Capture the route at every successful auth event so the next
+        // SIGNED_OUT (if it ever arrives unexpectedly) can report what
+        // page the user was on the last time the session was healthy,
+        // plus how long they sat on it before the session vanished.
+        const currentPath =
+          typeof window !== "undefined"
+            ? `${window.location.pathname}${window.location.search}`
+            : null;
+        if (
+          event === "SIGNED_IN" ||
+          event === "TOKEN_REFRESHED" ||
+          event === "USER_UPDATED"
+        ) {
+          lastAuthEventPathRef.current = currentPath;
+          lastAuthEventAtRef.current = nowMs;
+        }
 
         // Keep a snapshot of the *previous* session so the SIGNED_OUT branch
         // can describe what just got cleared.
@@ -215,8 +238,46 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             cause = "unknown_background_event";
           }
 
+          // Best-guess "what likely caused this" string for monitoring.
+          // Same inputs as `cause`, but phrased as an action verb so log
+          // dashboards can pivot on it without parsing free text.
+          let suspectedTrigger: string;
+          if (reason) {
+            suspectedTrigger = `explicit_logout_button:${reason}`;
+          } else if (serverError && /missing sub claim/i.test(serverError)) {
+            suspectedTrigger = "server_rejected_jwt_sub_claim";
+          } else if (serverError && /bad[_ ]?jwt|invalid[_ ]?jwt/i.test(serverError)) {
+            suspectedTrigger = "server_rejected_jwt";
+          } else if (tokenWasStale && lastRefreshAgoMs === null) {
+            suspectedTrigger = "session_expired_without_refresh_attempt";
+          } else if (tokenWasStale) {
+            suspectedTrigger = "silent_token_refresh_failed";
+          } else if (lastRefreshAgoMs !== null && lastRefreshAgoMs > 60_000) {
+            suspectedTrigger = "stale_refresh_loop";
+          } else if (serverError) {
+            suspectedTrigger = "supabase_sdk_reported_error";
+          } else {
+            suspectedTrigger = "background_sdk_event_no_signal_available";
+          }
+
+          const route = currentPath;
+          const lastHealthyPath = lastAuthEventPathRef.current;
+          const msSinceLastAuthEvent = lastAuthEventAtRef.current
+            ? nowMs - lastAuthEventAtRef.current
+            : null;
+
           const diagnostic = {
             cause,
+            suspectedTrigger,
+            // Hoist userId to the top level (in addition to
+            // previousUserId) so log filters can group by user without
+            // a nested-field query.
+            userId: previousSession?.user?.id ?? null,
+            route,
+            lastHealthyRoute: lastHealthyPath,
+            msSinceLastHealthyAuthEvent: msSinceLastAuthEvent,
+            referrer:
+              typeof document !== "undefined" ? document.referrer || null : null,
             intentionalReason: reason,
             previousUserId: previousSession?.user?.id ?? null,
             previousExpiresAt: prevExpiresAt
