@@ -109,18 +109,36 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const { data: { subscription: authSub } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        // ---- Event-level diagnostic log (every transition) ----------------
+        // Lets you correlate UI state with Supabase events 1:1 in DevTools.
+        // We log redacted info only: user id (no email/PII fields beyond id),
+        // token expiry, and a short event tag.
+        const nowMs = Date.now();
+        // eslint-disable-next-line no-console
+        console.info("[AuthContext][event]", {
+          event,
+          at: new Date(nowMs).toISOString(),
+          hasSession: !!session,
+          userId: session?.user?.id ?? null,
+          expiresAt: session?.expires_at
+            ? new Date(session.expires_at * 1000).toISOString()
+            : null,
+          secondsUntilExpiry: session?.expires_at
+            ? session.expires_at - Math.floor(nowMs / 1000)
+            : null,
+        });
+
+        // Keep a snapshot of the *previous* session so the SIGNED_OUT branch
+        // can describe what just got cleared.
+        const previousSession = lastSessionRef.current;
+        lastSessionRef.current = session;
+
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
 
         if (event === "SIGNED_IN" && session?.user) {
           gtm.login();
-          // The `/superadmin` gate caches `is_system_admin` per-user with
-          // `staleTime: Infinity`. On a fresh sign-in we MUST refetch
-          // against the new JWT, otherwise a non-admin signing in after
-          // an admin signed out (or vice-versa) on the same tab would
-          // see a stale answer until a hard reload. Scoping by
-          // `session.user.id` keeps any other cached entries intact.
           void invalidateIsSystemAdmin(queryClient, session.user.id);
 
           // Record login event
@@ -148,31 +166,98 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (event === "SIGNED_OUT") {
           const reason = intentionalSignOutRef.current;
           intentionalSignOutRef.current = null;
-          if (!reason) {
-            // The Supabase SDK cleared the session WITHOUT us calling
-            // `signOut(reason)`. This usually means a silent token
-            // refresh failed (network blip, revoked refresh token, etc.).
-            // We log it so it surfaces in monitoring; the design contract
-            // is that only the explicit Logout button may end a session.
-            console.warn(
-              "[AuthContext] Unexpected SIGNED_OUT event (not user-initiated). " +
-                "Most likely a background token refresh failed. The user did NOT " +
-                "click Logout."
-            );
+
+          // After SIGNED_OUT the SDK may still hold an error from the last
+          // /user or /token call (e.g. `bad_jwt`, `missing sub claim`).
+          // Surface it so we can tell apart:
+          //   - user_logout       -> intentional, no error
+          //   - token_refresh_failure -> no intentional reason, getSession
+          //                              error, or expiresAt in the past
+          //   - missing_sub_claim -> server rejected the JWT sub claim
+          //   - unknown           -> background event with no error info
+          let serverError: string | null = null;
+          let serverErrorCode: string | null = null;
+          try {
+            const probe = await supabase.auth.getSession();
+            if (probe.error) {
+              serverError = probe.error.message ?? String(probe.error);
+              serverErrorCode =
+                (probe.error as { code?: string }).code ??
+                ((probe.error as { status?: number }).status
+                  ? String((probe.error as { status?: number }).status)
+                  : null);
+            }
+          } catch (err) {
+            serverError = err instanceof Error ? err.message : String(err);
           }
+
+          const prevExpiresAt = previousSession?.expires_at ?? null;
+          const nowSec = Math.floor(nowMs / 1000);
+          const tokenWasStale =
+            prevExpiresAt !== null && prevExpiresAt <= nowSec;
+          const lastRefreshAgoMs = lastTokenRefreshAtRef.current
+            ? nowMs - lastTokenRefreshAtRef.current
+            : null;
+
+          // Classify the cause for human-readable monitoring.
+          let cause: string;
+          if (reason) {
+            cause = `user_action:${reason}`;
+          } else if (serverError && /missing sub claim/i.test(serverError)) {
+            cause = "missing_sub_claim";
+          } else if (
+            serverError ||
+            tokenWasStale ||
+            (lastRefreshAgoMs !== null && lastRefreshAgoMs > 60_000)
+          ) {
+            cause = "token_refresh_failure";
+          } else {
+            cause = "unknown_background_event";
+          }
+
+          const diagnostic = {
+            cause,
+            intentionalReason: reason,
+            previousUserId: previousSession?.user?.id ?? null,
+            previousExpiresAt: prevExpiresAt
+              ? new Date(prevExpiresAt * 1000).toISOString()
+              : null,
+            tokenWasStaleAtSignOut: tokenWasStale,
+            lastSuccessfulRefreshAgoMs: lastRefreshAgoMs,
+            serverError,
+            serverErrorCode,
+            at: new Date(nowMs).toISOString(),
+          };
+
+          if (reason) {
+            // eslint-disable-next-line no-console
+            console.info("[AuthContext][signout]", diagnostic);
+          } else {
+            // eslint-disable-next-line no-console
+            console.warn("[AuthContext][signout] unexpected", diagnostic);
+          }
+
           setSubscription(defaultSubscription);
-          // Drop EVERY cached `is-system-admin` entry. Without this, a
-          // shared device that goes user A -> sign out -> user B could
-          // briefly serve A's admin status to B before the per-user
-          // SIGNED_IN invalidator above runs.
           void invalidateIsSystemAdmin(queryClient);
         }
 
         if (event === "TOKEN_REFRESHED" && session?.user) {
-          // A refreshed JWT can carry updated claims (e.g. the user was
-          // just promoted server-side). Re-validate so guarded routes
-          // pick up the change without waiting for a full reload.
+          lastTokenRefreshAtRef.current = nowMs;
+          // eslint-disable-next-line no-console
+          console.info("[AuthContext][refresh] token refreshed", {
+            userId: session.user.id,
+            newExpiresAt: session.expires_at
+              ? new Date(session.expires_at * 1000).toISOString()
+              : null,
+          });
           void invalidateIsSystemAdmin(queryClient, session.user.id);
+        }
+
+        if (event === "USER_UPDATED") {
+          // eslint-disable-next-line no-console
+          console.info("[AuthContext][user_updated]", {
+            userId: session?.user?.id ?? null,
+          });
         }
       }
     );
