@@ -1093,19 +1093,16 @@ const PublicBookingInner = () => {
       {/* Header with optional hero image */}
       {settings?.hero_image_url && !heroFailed ? (
         <header className="relative overflow-hidden" style={{ backgroundColor: primaryColor }}>
-          {heroSignedUrl ? (
-            <img
-              src={heroSignedUrl}
-              alt=""
-              onError={heroBranding.handleImgError}
-              className="absolute inset-0 w-full h-full object-cover opacity-40"
-            />
-          ) : (
-            <div
-              aria-hidden="true"
-              className="absolute inset-0 w-full h-full bg-white/10 animate-pulse"
-            />
-          )}
+          <FadeInImage
+            src={heroSignedUrl || undefined}
+            alt=""
+            onError={heroBranding.handleImgError}
+            wrapperClassName="absolute inset-0 w-full h-full block"
+            className="absolute inset-0 w-full h-full object-cover opacity-40"
+            placeholder={
+              <span className="absolute inset-0 w-full h-full bg-white/10 animate-pulse" />
+            }
+          />
           <div className="relative">
             <div className="border-b border-white/20 py-4 px-4 sm:px-6">
               <div className="max-w-3xl mx-auto flex items-center justify-between">
