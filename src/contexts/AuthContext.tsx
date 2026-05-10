@@ -58,6 +58,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [subscription, setSubscription] = useState<SubscriptionInfo>(defaultSubscription);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  // Tracks the reason for the most recent *intentional* signOut call. Set
+  // synchronously by `signOut(reason)` immediately before invoking
+  // `supabase.auth.signOut()`, then read and cleared by the `SIGNED_OUT`
+  // branch of `onAuthStateChange`. If a `SIGNED_OUT` event arrives while
+  // this ref is `null`, the sign-out was NOT user-initiated (typically a
+  // failed silent token refresh) and we surface a warning so it shows up
+  // in monitoring. The user must press the explicit Logout button for the
+  // session to be cleared "on purpose".
+  const intentionalSignOutRef = useRef<SignOutReason | null>(null);
   // We invalidate the cached `is_system_admin` lookup on every auth
   // transition so the next render of `<SystemAdminRoute>` (and any
   // consumer of `useIsSystemAdmin`) refetches against the fresh JWT
