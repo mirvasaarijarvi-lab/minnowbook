@@ -5,9 +5,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { invalidateIsSystemAdmin } from "@/hooks/useIsSystemAdmin";
 import { gtm } from "@/lib/gtm";
 
-// --- Session idle timeout (30 minutes) ---
-const IDLE_TIMEOUT_MS = 30 * 60 * 1000;
-
 interface SubscriptionInfo {
   subscribed: boolean;
   tier: string | null;
