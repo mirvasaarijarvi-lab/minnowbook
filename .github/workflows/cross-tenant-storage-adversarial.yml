@@ -1,0 +1,95 @@
+name: Cross-Tenant Storage RLS (Adversarial)
+
+# Runs the adversarial path-normalization storage RLS tests on every PR
+# to prevent regressions like the ones we hit recently:
+#   - trailing-slash bypass attempts
+#   - leading-slash / dot-segment normalization
+#   - victim tenant_id smuggled into later path segments
+#   - cross-tenant overwrite via upsert in tenant-assets / tenant-private
+#
+# These tests need real Supabase credentials to talk to the live storage
+# API (RLS path-traversal can only be reproduced against the actual
+# PostgREST + storage stack, not against a mock client). When secrets are
+# not configured (e.g. on forks) the job is skipped instead of failing,
+# matching the policy of `cross-tenant-rls.yml`.
+#
+# Required repository secrets (same set as the live cross-tenant workflow):
+#   VITE_SUPABASE_URL
+#   VITE_SUPABASE_PUBLISHABLE_KEY
+#   RLS_TEST_TENANT_A_EMAIL / _PASSWORD / _ID
+#   RLS_TEST_TENANT_B_EMAIL / _PASSWORD / _ID
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: cross-tenant-storage-adversarial-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check-secrets:
+    name: Check live-mode secrets
+    runs-on: ubuntu-latest
+    outputs:
+      enabled: ${{ steps.check.outputs.enabled }}
+    steps:
+      - id: check
+        env:
+          A_EMAIL: ${{ secrets.RLS_TEST_TENANT_A_EMAIL }}
+          B_EMAIL: ${{ secrets.RLS_TEST_TENANT_B_EMAIL }}
+        run: |
+          if [ -n "$A_EMAIL" ] && [ -n "$B_EMAIL" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+            echo "Live-mode secrets detected, adversarial storage tests will run."
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "Live-mode secrets not configured, skipping (forks / no-secret PRs)."
+          fi
+
+  storage-adversarial:
+    name: Storage RLS adversarial sweep
+    needs: check-secrets
+    if: needs.check-secrets.outputs.enabled == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Run adversarial storage RLS tests
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          RLS_TEST_TENANT_A_EMAIL: ${{ secrets.RLS_TEST_TENANT_A_EMAIL }}
+          RLS_TEST_TENANT_A_PASSWORD: ${{ secrets.RLS_TEST_TENANT_A_PASSWORD }}
+          RLS_TEST_TENANT_A_ID: ${{ secrets.RLS_TEST_TENANT_A_ID }}
+          RLS_TEST_TENANT_B_EMAIL: ${{ secrets.RLS_TEST_TENANT_B_EMAIL }}
+          RLS_TEST_TENANT_B_PASSWORD: ${{ secrets.RLS_TEST_TENANT_B_PASSWORD }}
+          RLS_TEST_TENANT_B_ID: ${{ secrets.RLS_TEST_TENANT_B_ID }}
+          # Tag the report flavor so artifacts don't collide with the
+          # broader cross-tenant-rls.yml workflow's outputs.
+          RLS_REPORT_FLAVOR: storage-adversarial
+        run: bun run test:rls-report:storage-adversarial
+
+      - name: Upload RLS report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: storage-adversarial-rls-report
+          path: |
+            reports/rls-report*.json
+            reports/rls-report*.html
+            reports/storage-attempts*.json
+          if-no-files-found: ignore
+          retention-days: 14
