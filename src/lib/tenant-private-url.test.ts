@@ -12,12 +12,16 @@ vi.mock("@/integrations/supabase/client", () => ({
 
 import {
   createTenantPrivateSignedUrl,
+  clearTenantPrivateSignedUrlCache,
+  invalidateTenantPrivateSignedUrl,
   PRIVATE_SIGNED_URL_TTL_SECONDS,
 } from "@/lib/tenant-private-url";
 
 describe("tenant-private-url helper", () => {
   beforeEach(() => {
     createSignedUrl.mockReset();
+    clearTenantPrivateSignedUrlCache();
+    vi.useRealTimers();
   });
 
   it("uses a 24h TTL by default", async () => {
@@ -61,5 +65,73 @@ describe("tenant-private-url helper", () => {
     await expect(createTenantPrivateSignedUrl("missing.pdf")).rejects.toThrow(
       /not found/,
     );
+  });
+
+  it("re-uses cached URLs across repeated calls", async () => {
+    createSignedUrl.mockResolvedValue({
+      data: { signedUrl: "https://example/sig-1" },
+      error: null,
+    });
+    const a = await createTenantPrivateSignedUrl("cache/a.png");
+    const b = await createTenantPrivateSignedUrl("cache/a.png");
+    expect(a).toBe(b);
+    expect(createSignedUrl).toHaveBeenCalledTimes(1);
+  });
+
+  it("dedupes concurrent in-flight requests", async () => {
+    createSignedUrl.mockResolvedValue({
+      data: { signedUrl: "https://example/sig-concurrent" },
+      error: null,
+    });
+    const [a, b] = await Promise.all([
+      createTenantPrivateSignedUrl("cache/concurrent.png"),
+      createTenantPrivateSignedUrl("cache/concurrent.png"),
+    ]);
+    expect(a).toBe(b);
+    expect(createSignedUrl).toHaveBeenCalledTimes(1);
+  });
+
+  it("renews the URL once it nears expiry", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-01-01T00:00:00Z"));
+    createSignedUrl
+      .mockResolvedValueOnce({ data: { signedUrl: "https://example/v1" }, error: null })
+      .mockResolvedValueOnce({ data: { signedUrl: "https://example/v2" }, error: null });
+
+    const first = await createTenantPrivateSignedUrl("cache/renew.png", {
+      expiresInSeconds: 600, // 10 minutes
+    });
+    expect(first).toBe("https://example/v1");
+
+    // Advance 9 minutes, well inside the 5-minute renewal window.
+    vi.setSystemTime(new Date("2026-01-01T00:09:00Z"));
+    const second = await createTenantPrivateSignedUrl("cache/renew.png", {
+      expiresInSeconds: 600,
+    });
+    expect(second).toBe("https://example/v2");
+    expect(createSignedUrl).toHaveBeenCalledTimes(2);
+  });
+
+  it("forceRefresh bypasses the cache", async () => {
+    createSignedUrl
+      .mockResolvedValueOnce({ data: { signedUrl: "https://example/v1" }, error: null })
+      .mockResolvedValueOnce({ data: { signedUrl: "https://example/v2" }, error: null });
+    await createTenantPrivateSignedUrl("cache/force.png");
+    const fresh = await createTenantPrivateSignedUrl("cache/force.png", {
+      forceRefresh: true,
+    });
+    expect(fresh).toBe("https://example/v2");
+    expect(createSignedUrl).toHaveBeenCalledTimes(2);
+  });
+
+  it("invalidate drops a single cached entry", async () => {
+    createSignedUrl
+      .mockResolvedValueOnce({ data: { signedUrl: "https://example/v1" }, error: null })
+      .mockResolvedValueOnce({ data: { signedUrl: "https://example/v2" }, error: null });
+    await createTenantPrivateSignedUrl("cache/invalidate.png");
+    invalidateTenantPrivateSignedUrl("cache/invalidate.png");
+    const next = await createTenantPrivateSignedUrl("cache/invalidate.png");
+    expect(next).toBe("https://example/v2");
+    expect(createSignedUrl).toHaveBeenCalledTimes(2);
   });
 });
