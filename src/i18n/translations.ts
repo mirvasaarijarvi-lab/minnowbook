@@ -4390,7 +4390,7 @@ const fi: TranslationKeys = {
   "help.guide5Q": "Miten lisään tai muokkaan resursseja?",
   "help.guide5A": "Siirry kohtaan **Hallintapaneeli → Resurssit** luodaksesi huoneita, pöytiä tai tiloja.",
   "help.guide6Q": "Mitä uutta MimmoBookissa?",
-  "help.guide6A": "Viimeisimmät lisäykset: **Vierasportaali** (varauksen hallinta maagisella linkillä), **jonotuslista** automaattisilla ilmoituksilla, **Google-kalenterisynkronointi** iCal-syötteellä, **CSV/PDF-vienti**, **tumma teema**, **pikanäppäimet** (paina `?`), **pikatoimintojen FAB** mobiilissa, **käyttöönoton tarkistuslista**, **audit-lokin suodattimet**, **analytiikkakaaviot**, **julkiset arvostelut/suosittelut**, **keittiötilaukset** ravintola- ja tilavarauksille, ja **Stripe-tulospaneeli** pääkäyttäjille.",
+  "help.guide6A": "Viimeisimmät lisäykset: **Vierasportaali** (varauksen hallinta maagisella linkillä), **jonotuslista** automaattisilla ilmoituksilla, **Google-kalenterisynkronointi** iCal-syötteellä, **CSV/PDF-vienti**, **tumma teema**, **pikanäppäimet** (paina `?`), **pikatoimintojen FAB** mobiilissa, **käyttöönoton tarkistuslista**, **audit-lokin suodattimet**, **analytiikkakaaviot**, **julkiset arvostelut/suosittelut**, **keittiötilaukset** ravintola- ja tilavarauksille, **Tarjouksista varauksiin -konversioraportti** CSV-vientillä, ja **Stripe-tulospaneeli** pääkäyttäjille.",
 
   // MimmoAid
   "aid.title": "MimmoAid",
