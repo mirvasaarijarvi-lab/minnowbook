@@ -137,6 +137,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
 
         if (event === "SIGNED_OUT") {
+          const reason = intentionalSignOutRef.current;
+          intentionalSignOutRef.current = null;
+          if (!reason) {
+            // The Supabase SDK cleared the session WITHOUT us calling
+            // `signOut(reason)`. This usually means a silent token
+            // refresh failed (network blip, revoked refresh token, etc.).
+            // We log it so it surfaces in monitoring; the design contract
+            // is that only the explicit Logout button may end a session.
+            console.warn(
+              "[AuthContext] Unexpected SIGNED_OUT event (not user-initiated). " +
+                "Most likely a background token refresh failed. The user did NOT " +
+                "click Logout."
+            );
+          }
           setSubscription(defaultSubscription);
           // Drop EVERY cached `is-system-admin` entry. Without this, a
           // shared device that goes user A -> sign out -> user B could
