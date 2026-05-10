@@ -145,12 +145,21 @@ export function useBrandingSignedUrlState(
   const [status, setStatus] = useState<BrandingUrlStatus>("idle");
   const retriesRef = useRef(0);
   const reqIdRef = useRef(0);
+  const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const path = extractBrandingObjectPath(storedUrl);
+
+  const clearRetryTimer = useCallback(() => {
+    if (retryTimerRef.current !== null) {
+      clearTimeout(retryTimerRef.current);
+      retryTimerRef.current = null;
+    }
+  }, []);
 
   const load = useCallback(
     (forceRefresh: boolean) => {
       if (!path) {
+        clearRetryTimer();
         setUrl("");
         setStatus("idle");
         return;
@@ -160,22 +169,38 @@ export function useBrandingSignedUrlState(
       getOrMint(path, ttlSeconds, forceRefresh)
         .then((signed) => {
           if (id !== reqIdRef.current) return;
+          retriesRef.current = 0;
           setUrl(signed);
           setStatus("ready");
         })
         .catch(() => {
           if (id !== reqIdRef.current) return;
-          setUrl("");
-          setStatus("error");
+          // Mint itself failed (network, 5xx, RLS). Schedule a backoff
+          // retry rather than immediately re-hitting createSignedUrl.
+          if (retriesRef.current >= MAX_AUTOMATIC_RETRIES) {
+            setUrl("");
+            setStatus("error");
+            return;
+          }
+          const attempt = retriesRef.current;
+          retriesRef.current += 1;
+          clearRetryTimer();
+          retryTimerRef.current = setTimeout(() => {
+            retryTimerRef.current = null;
+            invalidateBrandingSignedUrl(path, ttlSeconds);
+            load(true);
+          }, backoffDelay(attempt));
         });
     },
-    [path, ttlSeconds],
+    [path, ttlSeconds, clearRetryTimer],
   );
 
   useEffect(() => {
     retriesRef.current = 0;
+    clearRetryTimer();
     load(false);
-  }, [load]);
+    return clearRetryTimer;
+  }, [load, clearRetryTimer]);
 
   const handleImgError = useCallback(() => {
     if (!path) {
@@ -187,16 +212,27 @@ export function useBrandingSignedUrlState(
       setStatus("error");
       return;
     }
+    const attempt = retriesRef.current;
     retriesRef.current += 1;
+    clearRetryTimer();
+    // Drop the cached (likely-expired or rejected) URL immediately so a
+    // parallel hook instance won't reuse it, but wait the backoff
+    // window before re-minting to avoid spamming the storage API when
+    // many <img> tags fail in quick succession.
     invalidateBrandingSignedUrl(path, ttlSeconds);
-    load(true);
-  }, [path, ttlSeconds, load]);
+    setStatus("loading");
+    retryTimerRef.current = setTimeout(() => {
+      retryTimerRef.current = null;
+      load(true);
+    }, backoffDelay(attempt));
+  }, [path, ttlSeconds, load, clearRetryTimer]);
 
   const retry = useCallback(() => {
     retriesRef.current = 0;
+    clearRetryTimer();
     if (path) invalidateBrandingSignedUrl(path, ttlSeconds);
     load(true);
-  }, [path, ttlSeconds, load]);
+  }, [path, ttlSeconds, load, clearRetryTimer]);
 
   return { url, status, handleImgError, retry };
 }
