@@ -9,6 +9,23 @@
  * Used by the public booking header for the tenant logo and hero
  * image, both of which arrive asynchronously through
  * `useBrandingSignedUrlState`.
+ *
+ * Accessibility:
+ *  - The wrapper carries `role="img"` plus the consumer-provided
+ *    `alt` text as its accessible name, so the whole slot reads as a
+ *    single image to assistive tech regardless of which layer is
+ *    currently visible.
+ *  - While loading, the wrapper sets `aria-busy="true"` and the inner
+ *    `<img>` is hidden from the accessibility tree (`aria-hidden`,
+ *    `role="presentation"`). The skeleton placeholder is also
+ *    `aria-hidden`, so screen readers don't see two competing nodes
+ *    or announce the decorative pulse.
+ *  - Optional `loadingLabel` mounts a `aria-live="polite"` status node
+ *    (visually hidden) that announces e.g. "Loading logo" while the
+ *    image resolves. Opt-in to avoid spamming AT for purely decorative
+ *    images.
+ *  - Decorative usage (`alt=""`) keeps the slot out of the AT tree
+ *    entirely by collapsing to `role="presentation"`.
  */
 import { useEffect, useRef, useState, type ImgHTMLAttributes, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
@@ -25,6 +42,13 @@ export interface FadeInImageProps extends ImgHTMLAttributes<HTMLImageElement> {
    * decorative overlays (e.g. a hero behind tinted text). Defaults to 1.
    */
   loadedOpacity?: number;
+  /**
+   * If provided, mounts a visually-hidden `aria-live="polite"` status
+   * node that announces this label while the image is loading (e.g.
+   * "Loading tenant logo"). Cleared once the image is ready so the
+   * announcement only fires for the loading transition.
+   */
+  loadingLabel?: string;
 }
 
 export function FadeInImage({
@@ -32,8 +56,10 @@ export function FadeInImage({
   wrapperClassName,
   fadeDurationMs = 300,
   loadedOpacity = 1,
+  loadingLabel,
   className,
   src,
+  alt,
   onLoad,
   onError,
   style,
@@ -54,10 +80,22 @@ export function FadeInImage({
     }
   }, [src]);
 
-  const transitionStyle = { transitionDuration: `${fadeDurationMs}ms` };
+  const isBusy = !loaded && !!src;
+  const isDecorative = alt === "";
+  // Promote the wrapper to the single accessible image node when the
+  // consumer supplied a non-empty `alt`. For decorative slots we keep
+  // the wrapper out of the tree entirely so AT users don't hear an
+  // empty "image" announcement.
+  const wrapperRole = isDecorative ? "presentation" : "img";
+  const wrapperAriaLabel = isDecorative ? undefined : alt;
 
   return (
-    <span className={cn("relative inline-block", wrapperClassName)}>
+    <span
+      className={cn("relative inline-block", wrapperClassName)}
+      role={wrapperRole}
+      aria-label={wrapperAriaLabel}
+      aria-busy={isBusy || undefined}
+    >
       {placeholder ? (
         <span
           aria-hidden="true"
@@ -65,7 +103,7 @@ export function FadeInImage({
             "absolute inset-0 transition-opacity ease-out",
             loaded ? "opacity-0" : "opacity-100",
           )}
-          style={transitionStyle}
+          style={{ transitionDuration: `${fadeDurationMs}ms` }}
         >
           {placeholder}
         </span>
@@ -73,6 +111,12 @@ export function FadeInImage({
       <img
         ref={imgRef}
         src={src}
+        // The wrapper now owns the accessible name. Always hide the
+        // raw <img> from AT so we don't double-announce, and so the
+        // invisible (opacity 0) image during loading isn't read out.
+        alt=""
+        aria-hidden="true"
+        role="presentation"
         {...imgProps}
         onLoad={(e) => {
           setLoaded(true);
@@ -89,6 +133,15 @@ export function FadeInImage({
           opacity: loaded ? loadedOpacity : 0,
         }}
       />
+      {loadingLabel ? (
+        <span
+          role="status"
+          aria-live="polite"
+          className="sr-only"
+        >
+          {isBusy ? loadingLabel : ""}
+        </span>
+      ) : null}
     </span>
   );
 }
