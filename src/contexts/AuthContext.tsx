@@ -67,6 +67,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // in monitoring. The user must press the explicit Logout button for the
   // session to be cleared "on purpose".
   const intentionalSignOutRef = useRef<SignOutReason | null>(null);
+  // Wall-clock of the most recent successful TOKEN_REFRESHED. We use it to
+  // distinguish "refresh just failed" (no recent refresh, session vanished)
+  // from "user clicked Logout" (intentional ref set) when a SIGNED_OUT
+  // arrives. `null` means we have never seen a refresh in this tab.
+  const lastTokenRefreshAtRef = useRef<number | null>(null);
+  // Snapshot of the previous session right before SIGNED_OUT lands, so the
+  // structured log can report which user was logged in, when their token
+  // would have expired, and how stale it was at the moment of sign-out.
+  const lastSessionRef = useRef<Session | null>(null);
   // We invalidate the cached `is_system_admin` lookup on every auth
   // transition so the next render of `<SystemAdminRoute>` (and any
   // consumer of `useIsSystemAdmin`) refetches against the fresh JWT
