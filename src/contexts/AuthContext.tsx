@@ -45,36 +45,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [subscription, setSubscription] = useState<SubscriptionInfo>(defaultSubscription);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // We invalidate the cached `is_system_admin` lookup on every auth
   // transition so the next render of `<SystemAdminRoute>` (and any
   // consumer of `useIsSystemAdmin`) refetches against the fresh JWT
   // instead of serving the previous user's answer. The provider lives
   // inside `<QueryClientProvider>` (see App.tsx), so this hook is safe.
   const queryClient = useQueryClient();
-
-  // --- Idle timeout: sign out after 30 min of inactivity ---
-  const resetIdleTimer = useCallback(() => {
-    if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
-    idleTimerRef.current = setTimeout(async () => {
-      const { data: { session: s } } = await supabase.auth.getSession();
-      if (s) {
-        console.info("[AuthContext] Session idle timeout — signing out");
-        await supabase.auth.signOut();
-      }
-    }, IDLE_TIMEOUT_MS);
-  }, []);
-
-  useEffect(() => {
-    const events = ["mousedown", "keydown", "touchstart", "scroll"];
-    const handler = () => resetIdleTimer();
-    events.forEach((e) => window.addEventListener(e, handler, { passive: true }));
-    resetIdleTimer();
-    return () => {
-      events.forEach((e) => window.removeEventListener(e, handler));
-      if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
-    };
-  }, [resetIdleTimer]);
 
   const checkSubscription = useCallback(async () => {
     try {
