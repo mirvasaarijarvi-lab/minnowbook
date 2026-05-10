@@ -1,0 +1,44 @@
+name: Lockfile sync (npm)
+
+# External pipelines that still use `npm ci` need a `package-lock.json`
+# that matches `package.json` exactly. Bun is the local source of
+# truth (`bun.lockb`), so this guard runs `npm install
+# --package-lock-only` and fails the PR if `package-lock.json` would
+# change. That keeps the npm lockfile committed and in sync without
+# requiring contributors to run npm locally.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: lockfile-sync-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify-package-lock:
+    name: package-lock.json is in sync with package.json
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        with:
+          node-version: 22
+
+      - name: Regenerate package-lock.json
+        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+
+      - name: Fail if package-lock.json drifted
+        run: |
+          if ! git diff --quiet -- package-lock.json; then
+            echo "::error::package-lock.json is out of sync with package.json."
+            echo "Run \`npm install --package-lock-only --ignore-scripts\` locally and commit the result."
+            git --no-pager diff -- package-lock.json | head -200
+            exit 1
+          fi
+          echo "package-lock.json is in sync."
