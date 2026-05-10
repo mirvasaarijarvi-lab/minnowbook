@@ -151,6 +151,62 @@ export function clearBrandingFallback(path: string, ttlSeconds = BRANDING_SIGNED
   fallbackCache.delete(fallbackKey(path, ttlSeconds));
 }
 
+/**
+ * Per-path shared retry coordination. When a signed URL fails, the
+ * first hook instance to schedule a backoff timer registers a lock
+ * keyed by `path::ttl`. Subsequent failing instances (e.g. another
+ * `<img>` on the page that consumed the same now-stale URL) subscribe
+ * to that lock's promise instead of starting their own overlapping
+ * `setTimeout`. This guarantees a single timer + single re-mint per
+ * path even when many components reference the same logo/hero.
+ *
+ * The shared `attemptCounters` map enforces the global retry budget
+ * across all instances so MAX_AUTOMATIC_RETRIES is a per-path cap, not
+ * a per-instance one.
+ */
+interface RetryLock {
+  attempt: number;
+  promise: Promise<void>;
+}
+const retryLocks = new Map<string, RetryLock>();
+const attemptCounters = new Map<string, number>();
+
+function retryKey(path: string, ttlSeconds: number): string {
+  return `${path}::${ttlSeconds}`;
+}
+function getSharedAttempt(path: string, ttlSeconds: number): number {
+  return attemptCounters.get(retryKey(path, ttlSeconds)) ?? 0;
+}
+function consumeSharedAttempt(path: string, ttlSeconds: number): number {
+  const key = retryKey(path, ttlSeconds);
+  const current = attemptCounters.get(key) ?? 0;
+  attemptCounters.set(key, current + 1);
+  return current;
+}
+function resetSharedRetry(path: string, ttlSeconds: number): void {
+  attemptCounters.delete(retryKey(path, ttlSeconds));
+}
+/**
+ * Acquire (or join) the shared backoff timer for `path`. Returns a
+ * promise that resolves once the timer fires and the cached signed
+ * URL has been invalidated, signalling subscribers it's safe to
+ * re-mint.
+ */
+function acquireRetryLock(path: string, ttlSeconds: number, attempt: number): Promise<void> {
+  const key = retryKey(path, ttlSeconds);
+  const existing = retryLocks.get(key);
+  if (existing) return existing.promise;
+  const promise = new Promise<void>((resolve) => {
+    setTimeout(() => {
+      invalidateBrandingSignedUrl(path, ttlSeconds);
+      retryLocks.delete(key);
+      resolve();
+    }, backoffDelay(attempt));
+  });
+  retryLocks.set(key, { attempt, promise });
+  return promise;
+}
+
 export type BrandingUrlStatus = "idle" | "loading" | "ready" | "error";
 
 export interface BrandingUrlState {
