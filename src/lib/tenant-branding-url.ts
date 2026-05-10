@@ -239,10 +239,22 @@ export interface BrandingUrlState {
  * you want to render a fallback UI (initials, plain background, etc.)
  * if the signed URL ever fails to load.
  */
+export interface BrandingUrlOptions {
+  /**
+   * Tenant the path belongs to. Used to scope the fallback decision
+   * cache and shared retry coordination so a "fallback exhausted"
+   * verdict for one tenant never bleeds into another tenant's
+   * booking page on the same browser session.
+   */
+  tenantId?: string | null;
+}
+
 export function useBrandingSignedUrlState(
   storedUrl: string | null | undefined,
   ttlSeconds: number = BRANDING_SIGNED_URL_TTL_SECONDS,
+  options?: BrandingUrlOptions,
 ): BrandingUrlState {
+  const tenantId = options?.tenantId ?? null;
   const [url, setUrl] = useState<string>("");
   const [status, setStatus] = useState<BrandingUrlStatus>("idle");
   const reqIdRef = useRef(0);
@@ -256,10 +268,10 @@ export function useBrandingSignedUrlState(
         setStatus("idle");
         return;
       }
-      // Skip the mint entirely if a recent run for this path already
-      // exhausted retries; the visitor would only see a flash of
-      // "loading" before falling back to the same UI anyway.
-      if (!forceRefresh && isFallbackCached(path, ttlSeconds)) {
+      // Skip the mint entirely if a recent run for this (tenant, path)
+      // already exhausted retries; the visitor would only see a flash
+      // of "loading" before falling back to the same UI anyway.
+      if (!forceRefresh && isFallbackCached(tenantId, path, ttlSeconds)) {
         setUrl("");
         setStatus("error");
         return;
@@ -269,32 +281,32 @@ export function useBrandingSignedUrlState(
       getOrMint(path, ttlSeconds, forceRefresh)
         .then((signed) => {
           if (id !== reqIdRef.current) return;
-          resetSharedRetry(path, ttlSeconds);
-          clearBrandingFallback(path, ttlSeconds);
+          resetSharedRetry(tenantId, path, ttlSeconds);
+          clearBrandingFallback(path, ttlSeconds, tenantId);
           setUrl(signed);
           setStatus("ready");
         })
         .catch(() => {
           if (id !== reqIdRef.current) return;
           // Mint itself failed (network, 5xx, RLS). Join (or create)
-          // the per-path shared backoff lock so multiple components
-          // referencing the same path don't schedule overlapping
-          // retry timers.
-          const attempt = getSharedAttempt(path, ttlSeconds);
+          // the per-(tenant, path) shared backoff lock so multiple
+          // components referencing the same path don't schedule
+          // overlapping retry timers.
+          const attempt = getSharedAttempt(tenantId, path, ttlSeconds);
           if (attempt >= MAX_AUTOMATIC_RETRIES) {
-            rememberFallback(path, ttlSeconds);
+            rememberFallback(tenantId, path, ttlSeconds);
             setUrl("");
             setStatus("error");
             return;
           }
-          consumeSharedAttempt(path, ttlSeconds);
-          acquireRetryLock(path, ttlSeconds, attempt).then(() => {
+          consumeSharedAttempt(tenantId, path, ttlSeconds);
+          acquireRetryLock(tenantId, path, ttlSeconds, attempt).then(() => {
             if (id !== reqIdRef.current) return;
             load(true);
           });
         });
     },
-    [path, ttlSeconds],
+    [path, ttlSeconds, tenantId],
   );
 
   useEffect(() => {
@@ -311,34 +323,34 @@ export function useBrandingSignedUrlState(
       setStatus("error");
       return;
     }
-    const attempt = getSharedAttempt(path, ttlSeconds);
+    const attempt = getSharedAttempt(tenantId, path, ttlSeconds);
     if (attempt >= MAX_AUTOMATIC_RETRIES) {
-      rememberFallback(path, ttlSeconds);
+      rememberFallback(tenantId, path, ttlSeconds);
       setUrl("");
       setStatus("error");
       return;
     }
-    consumeSharedAttempt(path, ttlSeconds);
+    consumeSharedAttempt(tenantId, path, ttlSeconds);
     setStatus("loading");
     const id = ++reqIdRef.current;
     // The lock owner will invalidate the cached URL once its timer
     // fires, so we don't need to drop it here. This avoids a race
     // where this instance invalidates while another instance is
     // mid-mint against the same path.
-    acquireRetryLock(path, ttlSeconds, attempt).then(() => {
+    acquireRetryLock(tenantId, path, ttlSeconds, attempt).then(() => {
       if (id !== reqIdRef.current) return;
       load(true);
     });
-  }, [path, ttlSeconds, load]);
+  }, [path, ttlSeconds, tenantId, load]);
 
   const retry = useCallback(() => {
     if (path) {
-      resetSharedRetry(path, ttlSeconds);
-      clearBrandingFallback(path, ttlSeconds);
+      resetSharedRetry(tenantId, path, ttlSeconds);
+      clearBrandingFallback(path, ttlSeconds, tenantId);
       invalidateBrandingSignedUrl(path, ttlSeconds);
     }
     load(true);
-  }, [path, ttlSeconds, load]);
+  }, [path, ttlSeconds, tenantId, load]);
 
   return { url, status, handleImgError, retry };
 }
@@ -351,6 +363,7 @@ export function useBrandingSignedUrlState(
 export function useBrandingSignedUrl(
   storedUrl: string | null | undefined,
   ttlSeconds: number = BRANDING_SIGNED_URL_TTL_SECONDS,
+  options?: BrandingUrlOptions,
 ): string {
-  return useBrandingSignedUrlState(storedUrl, ttlSeconds).url;
+  return useBrandingSignedUrlState(storedUrl, ttlSeconds, options).url;
 }
