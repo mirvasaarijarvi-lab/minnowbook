@@ -27,6 +27,7 @@ import PublicReviews from "@/components/public/PublicReviews";
 import WaitlistButton from "@/components/public/WaitlistButton";
 import React from "react";
 import { buildTypeTiles } from "@/lib/booking-tiles";
+import { useBrandingSignedUrl } from "@/lib/tenant-branding-url";
 
 // Types for public views (not in auto-generated types)
 interface PublicTenant {
@@ -374,6 +375,12 @@ const PublicBookingInner = () => {
       ),
     };
   }, [tenantSettings, siteSettings]);
+
+  // Resolve branding URLs to short-lived signed URLs at render time so
+  // we don't depend on the persisted public-bucket URL surviving any
+  // future flip of `tenant-branding` to private.
+  const logoSignedUrl = useBrandingSignedUrl(settings?.logo_url);
+  const heroSignedUrl = useBrandingSignedUrl(settings?.hero_image_url);
 
   // The resolved site ID for filtering queries
   const activeSiteId = siteLockedByUrl ? (site?.id ?? null) : pickedSiteId;
@@ -1076,7 +1083,7 @@ const PublicBookingInner = () => {
       {settings?.hero_image_url ? (
         <header className="relative overflow-hidden" style={{ backgroundColor: primaryColor }}>
           <img
-            src={settings.hero_image_url}
+            src={heroSignedUrl || undefined}
             alt=""
             className="absolute inset-0 w-full h-full object-cover opacity-40"
           />
@@ -1084,8 +1091,8 @@ const PublicBookingInner = () => {
             <div className="border-b border-white/20 py-4 px-4 sm:px-6">
               <div className="max-w-3xl mx-auto flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  {settings?.logo_url && (
-                    <img src={settings.logo_url} alt="" className="h-8 w-8 rounded-full object-cover" />
+                  {settings?.logo_url && logoSignedUrl && (
+                    <img src={logoSignedUrl} alt="" className="h-8 w-8 rounded-full object-cover" />
                   )}
                   <h1 className="text-xl font-serif font-bold text-white">{displayName}</h1>
                 </div>
@@ -1130,8 +1137,8 @@ const PublicBookingInner = () => {
         <header className="border-b py-4 px-4 sm:px-6" style={{ backgroundColor: primaryColor }}>
           <div className="max-w-3xl mx-auto flex items-center justify-between">
             <div className="flex items-center gap-3">
-              {settings?.logo_url && (
-                <img src={settings.logo_url} alt="" className="h-8 w-8 rounded-full object-cover" />
+              {settings?.logo_url && logoSignedUrl && (
+                <img src={logoSignedUrl} alt="" className="h-8 w-8 rounded-full object-cover" />
               )}
               <h1 className="text-xl font-serif font-bold text-white">{displayName}</h1>
             </div>
