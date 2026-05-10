@@ -93,6 +93,22 @@ const ConfirmationEmailPreview = ({
   const accentColor = business.accent_color || "#d4a853";
   const businessName = business.business_name || "Business";
 
+  // Validate that the logo URL passed in is a persisted public URL, not a
+  // short-lived signed URL. Signed URLs would expire in the recipient's inbox
+  // and render as a broken image. We warn loudly in development so callers
+  // (e.g. dashboard previews) catch this before it ships to production.
+  useEffect(() => {
+    if (import.meta.env.DEV && !isPersistedPublicBrandingUrl(business.logo_url)) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        "[ConfirmationEmailPreview] business.logo_url looks like a signed/expiring URL. " +
+          "Emails must use the persisted public tenant-assets URL so the logo keeps " +
+          "rendering after delivery. Received:",
+        business.logo_url,
+      );
+    }
+  }, [business.logo_url]);
+
   const isAccommodation =
     reservation.reservation_type === "hotel" ||
     reservation.reservation_type === "guesthouse";
