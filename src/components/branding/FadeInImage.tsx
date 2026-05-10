@@ -20,6 +20,11 @@ export interface FadeInImageProps extends ImgHTMLAttributes<HTMLImageElement> {
   wrapperClassName?: string;
   /** Fade duration in ms. Defaults to 300. */
   fadeDurationMs?: number;
+  /**
+   * Final opacity once the image has loaded. Use a value below 1 for
+   * decorative overlays (e.g. a hero behind tinted text). Defaults to 1.
+   */
+  loadedOpacity?: number;
 }
 
 export function FadeInImage({
