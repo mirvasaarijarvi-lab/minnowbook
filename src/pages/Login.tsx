@@ -13,6 +13,7 @@ import LanguageSwitcher from "@/components/LanguageSwitcher";
 import PasswordInput from "@/components/PasswordInput";
 import MfaVerify from "@/components/MfaVerify";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { useAuth } from "@/contexts/AuthContext";
 
 const PENDING_CODE_KEY = "mimmobook_pending_code";
 
@@ -53,6 +54,7 @@ const setAttemptState = (count: number, lockedUntil: number) => {
 
 const Login = () => {
   const navigate = useNavigate();
+  const { signOut } = useAuth();
   const [loading, setLoading] = useState(false);
   const [oauthLoading, setOauthLoading] = useState<string | null>(null);
   const [email, setEmail] = useState("");
@@ -164,7 +166,7 @@ const Login = () => {
           navigate("/dashboard");
         }}
         onCancel={async () => {
-          await supabase.auth.signOut();
+          await signOut("mfa_cancel");
           setMfaFactorId(null);
         }}
       />

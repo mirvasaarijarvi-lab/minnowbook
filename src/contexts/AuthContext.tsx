@@ -12,13 +12,26 @@ interface SubscriptionInfo {
   subscriptionStatus: string | null;
 }
 
+/**
+ * Reasons why the app may intentionally call `signOut`. Every caller MUST pass
+ * one of these so we can distinguish a *user-initiated* logout from a
+ * *background* `SIGNED_OUT` event emitted by the Supabase SDK (e.g. a failed
+ * silent token refresh, a tab waking up after a long sleep, etc.).
+ *
+ * Sessions must persist until the user explicitly logs out, so background
+ * `SIGNED_OUT` events that arrive without one of these reasons are logged as
+ * unexpected and surface in monitoring.
+ */
+export type SignOutReason = "user_logout" | "mfa_cancel" | "no_tenant";
+
 interface AuthContextType {
   session: Session | null;
   user: User | null;
   loading: boolean;
   subscription: SubscriptionInfo;
   refreshSubscription: () => Promise<void>;
-  signOut: () => Promise<void>;
+  /** Sign the user out. A reason is REQUIRED so we can audit the call site. */
+  signOut: (reason: SignOutReason) => Promise<void>;
 }
 
 const defaultSubscription: SubscriptionInfo = {
@@ -45,6 +58,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [subscription, setSubscription] = useState<SubscriptionInfo>(defaultSubscription);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  // Tracks the reason for the most recent *intentional* signOut call. Set
+  // synchronously by `signOut(reason)` immediately before invoking
+  // `supabase.auth.signOut()`, then read and cleared by the `SIGNED_OUT`
+  // branch of `onAuthStateChange`. If a `SIGNED_OUT` event arrives while
+  // this ref is `null`, the sign-out was NOT user-initiated (typically a
+  // failed silent token refresh) and we surface a warning so it shows up
+  // in monitoring. The user must press the explicit Logout button for the
+  // session to be cleared "on purpose".
+  const intentionalSignOutRef = useRef<SignOutReason | null>(null);
   // We invalidate the cached `is_system_admin` lookup on every auth
   // transition so the next render of `<SystemAdminRoute>` (and any
   // consumer of `useIsSystemAdmin`) refetches against the fresh JWT
@@ -115,6 +137,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
 
         if (event === "SIGNED_OUT") {
+          const reason = intentionalSignOutRef.current;
+          intentionalSignOutRef.current = null;
+          if (!reason) {
+            // The Supabase SDK cleared the session WITHOUT us calling
+            // `signOut(reason)`. This usually means a silent token
+            // refresh failed (network blip, revoked refresh token, etc.).
+            // We log it so it surfaces in monitoring; the design contract
+            // is that only the explicit Logout button may end a session.
+            console.warn(
+              "[AuthContext] Unexpected SIGNED_OUT event (not user-initiated). " +
+                "Most likely a background token refresh failed. The user did NOT " +
+                "click Logout."
+            );
+          }
           setSubscription(defaultSubscription);
           // Drop EVERY cached `is-system-admin` entry. Without this, a
           // shared device that goes user A -> sign out -> user B could
@@ -154,8 +190,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
   }, [checkSubscription, queryClient]);
 
-  const signOut = async () => {
-    await supabase.auth.signOut();
+  const signOut = async (reason: SignOutReason) => {
+    // Mark this sign-out as intentional BEFORE calling the SDK so the
+    // `SIGNED_OUT` listener above sees the reason and skips the
+    // unexpected-sign-out warning.
+    intentionalSignOutRef.current = reason;
+    try {
+      await supabase.auth.signOut();
+    } catch (err) {
+      // If the SDK call throws, no SIGNED_OUT will fire and the ref would
+      // leak into the next (unrelated) sign-out, so clear it here.
+      intentionalSignOutRef.current = null;
+      throw err;
+    }
   };
 
   return (

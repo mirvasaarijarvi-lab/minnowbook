@@ -103,7 +103,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
         factorId={mfaFactorId}
         onSuccess={() => setMfaFactorId(null)}
         onCancel={async () => {
-          await signOut();
+          await signOut("mfa_cancel");
           setMfaFactorId(null);
         }}
       />

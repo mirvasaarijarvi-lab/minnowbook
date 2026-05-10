@@ -93,7 +93,7 @@ const NoTenantState = ({ attemptedArea = "generic" }: NoTenantStateProps) => {
             variant="outline"
             size="sm"
             onClick={async () => {
-              await signOut();
+              await signOut("no_tenant");
               navigate("/");
             }}
             className="gap-1.5 border-destructive/30 text-destructive hover:bg-destructive/10"
