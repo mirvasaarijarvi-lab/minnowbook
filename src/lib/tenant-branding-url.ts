@@ -255,6 +255,84 @@ function isFallbackCached(tenantId: string | null | undefined, path: string, ttl
   }
   return true;
 }
+/**
+ * Remaining TTL (ms) for a cached fallback decision, or 0 if the entry
+ * is missing or expired. Exposed primarily for structured logging so
+ * callers can report "X seconds left on the fallback verdict" without
+ * needing access to the cache internals.
+ */
+export function getBrandingFallbackRemainingTtlMs(
+  tenantId: string | null | undefined,
+  path: string,
+  ttlSeconds: number = BRANDING_SIGNED_URL_TTL_SECONDS,
+): number {
+  const expiresAt = fallbackCache.get(scopedKey(tenantId, path, ttlSeconds));
+  if (!expiresAt) return 0;
+  return Math.max(0, expiresAt - Date.now());
+}
+
+/**
+ * Structured log payload emitted whenever the hook short-circuits to
+ * the fallback UI because a recent run for the same (tenant, path)
+ * already exhausted its retry budget. Wired through a swappable
+ * logger so apps can pipe it into Sentry / Datadog / console without
+ * the hook taking a hard dep on any specific transport.
+ */
+export interface BrandingFallbackShortCircuitLog {
+  event: "branding.fallback.short_circuit";
+  tenantId: string | null;
+  path: string;
+  ttlSeconds: number;
+  /** Milliseconds remaining on the cached fallback verdict. */
+  remainingTtlMs: number;
+  /** Same value in seconds, rounded, for easier human reading. */
+  remainingTtlSeconds: number;
+  /** Where the short-circuit happened: initial mount/load vs manual retry attempt. */
+  source: "load" | "retry";
+  timestamp: string;
+}
+
+export type BrandingLogger = (entry: BrandingFallbackShortCircuitLog) => void;
+
+const defaultBrandingLogger: BrandingLogger = (entry) => {
+  if (typeof console === "undefined") return;
+  // `console.info` keeps these out of the error channel: they describe
+  // an expected, working code path (cached fallback hit), not a bug.
+  console.info("[tenant-branding]", entry);
+};
+
+let brandingLogger: BrandingLogger = defaultBrandingLogger;
+
+/**
+ * Swap the logger used for fallback short-circuit events. Pass `null`
+ * or `undefined` to restore the default `console.info` logger.
+ */
+export function setBrandingLogger(logger: BrandingLogger | null | undefined): void {
+  brandingLogger = logger ?? defaultBrandingLogger;
+}
+
+function logFallbackShortCircuit(
+  tenantId: string | null | undefined,
+  path: string,
+  ttlSeconds: number,
+  source: BrandingFallbackShortCircuitLog["source"],
+): void {
+  const remainingTtlMs = getBrandingFallbackRemainingTtlMs(tenantId, path, ttlSeconds);
+  try {
+    brandingLogger({
+      event: "branding.fallback.short_circuit",
+      tenantId: tenantId ?? null,
+      path,
+      ttlSeconds,
+      remainingTtlMs,
+      remainingTtlSeconds: Math.round(remainingTtlMs / 1000),
+      source,
+      timestamp: new Date().toISOString(),
+    });
+  } catch {
+    // A misbehaving custom logger must never break rendering.
+  }
+}
 function rememberFallback(
   tenantId: string | null | undefined,
   path: string,
