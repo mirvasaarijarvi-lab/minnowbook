@@ -379,8 +379,8 @@ const PublicBookingInner = () => {
   // Resolve branding URLs to short-lived signed URLs at render time, with
   // a graceful fallback path if the signed URL ever fails (e.g. expired
   // or revoked) so the booking page still renders without broken images.
-  const logoBranding = useBrandingSignedUrlState(settings?.logo_url);
-  const heroBranding = useBrandingSignedUrlState(settings?.hero_image_url);
+  const logoBranding = useBrandingSignedUrlState(settings?.logo_url, undefined, { tenantId: tenant?.id });
+  const heroBranding = useBrandingSignedUrlState(settings?.hero_image_url, undefined, { tenantId: tenant?.id });
   const logoSignedUrl = logoBranding.url;
   const heroSignedUrl = heroBranding.url;
   const logoFailed = logoBranding.status === "error";
