@@ -1,0 +1,108 @@
+name: Automated Security Scan
+
+# Runs on every PR + push to main, plus a weekly schedule so freshly
+# disclosed advisories are caught even without code changes. The job
+# blocks deployment by failing the workflow when:
+#   1. `bun audit` reports any high or critical npm advisory, OR
+#   2. The Supabase advisors API reports any new ERROR-level finding
+#      (only checked when SUPABASE_ACCESS_TOKEN + SUPABASE_PROJECT_REF
+#      are configured at the repo level).
+#
+# WARN-level Supabase findings are reported as annotations only, in
+# line with the project maintenance policy (remediate ERROR only).
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Mondays at 06:00 UTC
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  npm-audit:
+    name: NPM dependency audit (high/critical)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Audit dependencies
+        run: |
+          set +e
+          bun audit --audit-level=high
+          status=$?
+          if [ "$status" -ne 0 ]; then
+            echo "::error::High or critical dependency vulnerabilities detected. Run 'bun update' or override the affected versions in package.json."
+            exit "$status"
+          fi
+          echo "✅ No high/critical npm advisories."
+
+  supabase-advisors:
+    name: Supabase advisors (security lints)
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Check prerequisites
+        id: check
+        run: |
+          if [ -n "$SUPABASE_ACCESS_TOKEN" ] && [ -n "$SUPABASE_PROJECT_REF" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Skipping Supabase advisors scan. Add SUPABASE_ACCESS_TOKEN and SUPABASE_PROJECT_REF repo secrets to enable."
+          fi
+
+      - name: Fetch advisors and gate on ERRORs
+        if: steps.check.outputs.enabled == 'true'
+        run: |
+          set -euo pipefail
+          api="https://api.supabase.com/v1/projects/${SUPABASE_PROJECT_REF}/advisors/security"
+          resp=$(curl -sS -H "Authorization: Bearer ${SUPABASE_ACCESS_TOKEN}" "$api")
+
+          # Pretty-print a short summary
+          echo "$resp" | jq '{
+            errors:   ([.lints[]? | select(.level=="ERROR")] | length),
+            warnings: ([.lints[]? | select(.level=="WARN")]  | length),
+            info:     ([.lints[]? | select(.level=="INFO")]  | length)
+          }'
+
+          # WARN -> annotation only (per maintenance policy)
+          echo "$resp" | jq -r '.lints[]? | select(.level=="WARN") | "::warning title=Supabase advisor (WARN)::\(.name) — \(.description)"'
+
+          # ERROR -> annotation + fail the job
+          err_count=$(echo "$resp" | jq '[.lints[]? | select(.level=="ERROR")] | length')
+          echo "$resp" | jq -r '.lints[]? | select(.level=="ERROR") | "::error title=Supabase advisor (ERROR)::\(.name) — \(.description)"'
+
+          if [ "$err_count" -gt 0 ]; then
+            echo "❌ $err_count ERROR-level Supabase finding(s) detected. Fix before merging."
+            exit 1
+          fi
+          echo "✅ No ERROR-level Supabase findings."
+
+  summary:
+    name: Security scan summary
+    needs: [npm-audit, supabase-advisors]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "npm-audit:          ${{ needs.npm-audit.result }}"
+          echo "supabase-advisors:  ${{ needs.supabase-advisors.result }}"
+          if [ "${{ needs.npm-audit.result }}" = "failure" ] || [ "${{ needs.supabase-advisors.result }}" = "failure" ]; then
+            exit 1
+          fi
