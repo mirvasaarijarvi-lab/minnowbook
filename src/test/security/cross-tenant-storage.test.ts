@@ -3946,16 +3946,12 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         );
       });
 
-      // ---------- Public CDN: anonymous fetch must succeed ----------
-      // The whole point of `tenant-assets` being public is that an
-      // unauthenticated browser GET to the CDN URL returns the bytes.
-      // We use raw fetch() (no SDK auth headers) and assert HTTP 200
-      // plus byte equality so a regression that flips the bucket to
-      // private — or tightens RLS to block anon SELECT — is caught.
-      it("anonymous fetch() of public CDN URL returns the file bytes for both tenants", async () => {
-        const expectedA = fileText("a-public-cdn-seed");
-        const expectedB = fileText("b-public-cdn-seed");
-
+      // ---------- Public CDN: anonymous fetch must be denied ----------
+      // `tenant-assets` is intentionally private. getPublicUrl() only
+      // builds a URL, it must not make tenant files publicly readable.
+      // Anonymous fetches should be denied while authenticated tenant
+      // members continue using regular download() and signed URLs.
+      it("anonymous fetch() of public CDN URL is denied for both tenants", async () => {
         const aPath = `${runRootFor(liveCreds.a.tenantId!)}/a-public-cdn-seed.txt`;
         const bPath = `${runRootFor(liveCreds.b.tenantId!)}/b-public-cdn-seed.txt`;
 
@@ -3966,19 +3962,15 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         const urlB = clientB.storage.from(ASSETS_BUCKET).getPublicUrl(bPath).data.publicUrl;
 
         // Strip any session cookies/headers by using a fresh global
-        // fetch with no Authorization header. The CDN must serve
-        // these regardless of caller identity.
+        // fetch with no Authorization header. Private storage must
+        // deny direct public-object reads.
         const [respA, respB] = await Promise.all([
           fetch(urlA, { headers: { "cache-control": "no-cache" } }),
           fetch(urlB, { headers: { "cache-control": "no-cache" } }),
         ]);
 
-        expect(respA.status, `expected 200 from CDN URL ${urlA}`).toBe(200);
-        expect(respB.status, `expected 200 from CDN URL ${urlB}`).toBe(200);
-
-        const [bodyA, bodyB] = await Promise.all([respA.text(), respB.text()]);
-        expect(bodyA).toBe(expectedA);
-        expect(bodyB).toBe(expectedB);
+        expect(respA.status, `expected 400 from private CDN URL ${urlA}`).toBe(400);
+        expect(respB.status, `expected 400 from private CDN URL ${urlB}`).toBe(400);
       });
 
       // ---------- Anon enumeration: list() must NOT reveal entries ----------
