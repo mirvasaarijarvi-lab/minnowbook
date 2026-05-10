@@ -546,6 +546,7 @@ const guideContent: Record<Language, GuideContent> = {
           "Reservation counts are broken down by type.",
           "Compare mode lets you view two periods side by side.",
           "Pro & Business: Export CSV and Print report features are available.",
+          "Offers to Reservations: see total offers, how many became reservations, and the conversion rate, with a dedicated CSV export button on the card.",
         ],
         tip: "All plans can view reports. CSV export and printing require Pro or Business.",
       },
