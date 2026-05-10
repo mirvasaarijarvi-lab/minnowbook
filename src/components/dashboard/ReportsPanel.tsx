@@ -918,9 +918,14 @@ const ReportsPanel = () => {
           {offerConversion.total > 0 && (
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium flex items-center gap-2">
-                  <FileText className="h-4 w-4" />{t("reports.offerConversion")}
-                </CardTitle>
+                <div className="flex items-center justify-between gap-2">
+                  <CardTitle className="text-sm font-medium flex items-center gap-2">
+                    <FileText className="h-4 w-4" />{t("reports.offerConversion")}
+                  </CardTitle>
+                  <Button variant="outline" size="sm" onClick={handleExportOfferConversionCSV} className="gap-1.5 h-8">
+                    <Download className="h-3.5 w-3.5" /><span className="hidden sm:inline">{t("reports.exportCsv")}</span><span className="sm:hidden">CSV</span>
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-3">
