@@ -232,7 +232,6 @@ export function useBrandingSignedUrlState(
   const [url, setUrl] = useState<string>("");
   const [status, setStatus] = useState<BrandingUrlStatus>("idle");
   const reqIdRef = useRef(0);
-  const retryTimerActiveRef = useRef(false);
 
   const path = extractBrandingObjectPath(storedUrl);
 
@@ -275,9 +274,7 @@ export function useBrandingSignedUrlState(
             return;
           }
           consumeSharedAttempt(path, ttlSeconds);
-          retryTimerActiveRef.current = true;
           acquireRetryLock(path, ttlSeconds, attempt).then(() => {
-            retryTimerActiveRef.current = false;
             if (id !== reqIdRef.current) return;
             load(true);
           });
@@ -310,13 +307,11 @@ export function useBrandingSignedUrlState(
     consumeSharedAttempt(path, ttlSeconds);
     setStatus("loading");
     const id = ++reqIdRef.current;
-    retryTimerActiveRef.current = true;
     // The lock owner will invalidate the cached URL once its timer
     // fires, so we don't need to drop it here. This avoids a race
     // where this instance invalidates while another instance is
     // mid-mint against the same path.
     acquireRetryLock(path, ttlSeconds, attempt).then(() => {
-      retryTimerActiveRef.current = false;
       if (id !== reqIdRef.current) return;
       load(true);
     });
