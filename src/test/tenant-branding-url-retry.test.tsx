@@ -223,7 +223,7 @@ describe("useBrandingSignedUrlState retry policy", () => {
 
     // Manual retry mints immediately (call #2) and succeeds.
     expect(createSignedUrlMock).toHaveBeenCalledTimes(2);
-    await waitFor(() => expect(states.at(-1)?.status).toBe("ready"));
+    expect(states.at(-1)?.status).toBe("ready");
     expect(states.at(-1)?.url).toBe("https://signed/ok");
 
     // Advancing past the original 400ms timer must NOT cause a third
