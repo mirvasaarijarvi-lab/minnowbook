@@ -22,7 +22,7 @@ interface SubscriptionInfo {
  * `SIGNED_OUT` events that arrive without one of these reasons are logged as
  * unexpected and surface in monitoring.
  */
-export type SignOutReason = "user_logout" | "mfa_cancel" | "no_tenant";
+export type SignOutReason = "user_logout" | "mfa_cancel" | "no_tenant" | "corrupted_session";
 
 interface AuthContextType {
   session: Session | null;
