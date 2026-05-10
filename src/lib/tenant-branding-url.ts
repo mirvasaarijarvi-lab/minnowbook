@@ -26,8 +26,26 @@ export const TENANT_BRANDING_BUCKET = "tenant-branding";
 /** 24h, mirrors the private-bucket TTL used elsewhere in the app. */
 export const BRANDING_SIGNED_URL_TTL_SECONDS = 24 * 60 * 60;
 const RENEWAL_WINDOW_SECONDS = 5 * 60;
-/** How many automatic retries we attempt after a signed URL fails to load. */
-const MAX_AUTOMATIC_RETRIES = 1;
+/**
+ * How many automatic retries we attempt after a signed URL fails to
+ * mint or load. With the backoff schedule below this caps the total
+ * recovery window at ~7.5s and 4 mint attempts, so a transient network
+ * blip recovers quickly without spamming `createSignedUrl`.
+ */
+const MAX_AUTOMATIC_RETRIES = 4;
+/**
+ * Exponential backoff schedule (ms) used between retry attempts. Index
+ * 0 is the delay before retry #1, index 1 before retry #2, etc. We cap
+ * at 4s and add a small jitter so multiple components sharing the same
+ * path don't stampede the storage API at the same instant.
+ */
+const RETRY_BACKOFF_MS = [400, 800, 1600, 3200];
+const RETRY_JITTER_MS = 200;
+
+function backoffDelay(attempt: number): number {
+  const base = RETRY_BACKOFF_MS[Math.min(attempt, RETRY_BACKOFF_MS.length - 1)];
+  return base + Math.floor(Math.random() * RETRY_JITTER_MS);
+}
 
 interface CacheEntry {
   url: string;
