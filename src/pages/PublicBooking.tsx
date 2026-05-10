@@ -1098,7 +1098,8 @@ const PublicBookingInner = () => {
             alt=""
             onError={heroBranding.handleImgError}
             wrapperClassName="absolute inset-0 w-full h-full block"
-            className="absolute inset-0 w-full h-full object-cover opacity-40"
+            className="absolute inset-0 w-full h-full object-cover"
+            loadedOpacity={0.4}
             placeholder={
               <span className="absolute inset-0 w-full h-full bg-white/10 animate-pulse" />
             }
