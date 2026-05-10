@@ -193,17 +193,9 @@ describe.runIf(Boolean(admin))(
       await res.text();
     });
 
-    afterAllCleanup();
-
-    function afterAllCleanup() {
-      // Vitest's afterAll must be called inside the describe; using a helper
-      // keeps the cleanup co-located with the planted-object lifecycle.
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const { afterAll } = require("vitest");
-      afterAll(async () => {
-        if (!admin) return;
-        await admin.storage.from("tenant-assets").remove([objectPath]);
-      });
-    }
+    afterAll(async () => {
+      if (!admin) return;
+      await admin.storage.from("tenant-assets").remove([objectPath]);
+    });
   },
 );
