@@ -163,7 +163,83 @@ export function getDefaultBrandingFallbackCacheTtlMs(): number {
   return defaultFallbackCacheTtlMs;
 }
 
+/**
+ * The fallback cache is mirrored to `localStorage` so a hard refresh
+ * (or a tab restored from the back/forward cache after a navigation)
+ * does NOT re-trigger the full mint+retry cycle within the TTL
+ * window. The serialized shape is intentionally trivial:
+ *
+ *   { "<tenantId>::<path>::<ttlSeconds>": <expiresAtMs>, ... }
+ *
+ * On boot we load + prune expired entries. Writes are best-effort:
+ * any storage failure (quota, disabled storage, private mode, SSR)
+ * is swallowed because the in-memory `fallbackCache` is still the
+ * source of truth for the current page lifetime.
+ */
+const FALLBACK_STORAGE_KEY = "mimmobook.brandingFallback.v1";
 const fallbackCache = new Map<string, number>();
+
+function safeLocalStorage(): Storage | null {
+  try {
+    if (typeof window === "undefined") return null;
+    return window.localStorage ?? null;
+  } catch {
+    return null;
+  }
+}
+
+function hydrateFallbackCacheFromStorage(): void {
+  const storage = safeLocalStorage();
+  if (!storage) return;
+  let raw: string | null = null;
+  try {
+    raw = storage.getItem(FALLBACK_STORAGE_KEY);
+  } catch {
+    return;
+  }
+  if (!raw) return;
+  try {
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object") return;
+    const now = Date.now();
+    for (const [key, value] of Object.entries(parsed as Record<string, unknown>)) {
+      if (typeof value !== "number" || !Number.isFinite(value)) continue;
+      if (value <= now) continue;
+      fallbackCache.set(key, value);
+    }
+  } catch {
+    // Corrupted JSON: drop the blob so we start clean next time.
+    try {
+      storage.removeItem(FALLBACK_STORAGE_KEY);
+    } catch {
+      /* ignore */
+    }
+  }
+}
+
+function persistFallbackCacheToStorage(): void {
+  const storage = safeLocalStorage();
+  if (!storage) return;
+  try {
+    if (fallbackCache.size === 0) {
+      storage.removeItem(FALLBACK_STORAGE_KEY);
+      return;
+    }
+    const serializable: Record<string, number> = {};
+    const now = Date.now();
+    for (const [key, expiresAt] of fallbackCache.entries()) {
+      if (expiresAt > now) serializable[key] = expiresAt;
+    }
+    storage.setItem(FALLBACK_STORAGE_KEY, JSON.stringify(serializable));
+  } catch {
+    // Quota exceeded / disabled storage / SSR: ignore. In-memory
+    // cache still works for this page lifetime.
+  }
+}
+
+// Load any persisted entries at module init so the very first hook
+// mount on a fresh page can short-circuit straight to the fallback UI.
+hydrateFallbackCacheFromStorage();
 
 function scopedKey(tenantId: string | null | undefined, path: string, ttlSeconds: number): string {
   return `${tenantId ?? "_"}::${path}::${ttlSeconds}`;
@@ -174,6 +250,7 @@ function isFallbackCached(tenantId: string | null | undefined, path: string, ttl
   if (!expiresAt) return false;
   if (expiresAt <= Date.now()) {
     fallbackCache.delete(key);
+    persistFallbackCacheToStorage();
     return false;
   }
   return true;
@@ -185,13 +262,16 @@ function rememberFallback(
   fallbackCacheTtlMs: number,
 ): void {
   fallbackCache.set(scopedKey(tenantId, path, ttlSeconds), Date.now() + fallbackCacheTtlMs);
+  persistFallbackCacheToStorage();
 }
 export function clearBrandingFallback(
   path: string,
   ttlSeconds: number = BRANDING_SIGNED_URL_TTL_SECONDS,
   tenantId?: string | null,
 ): void {
-  fallbackCache.delete(scopedKey(tenantId, path, ttlSeconds));
+  if (fallbackCache.delete(scopedKey(tenantId, path, ttlSeconds))) {
+    persistFallbackCacheToStorage();
+  }
 }
 
 /**
