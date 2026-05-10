@@ -376,6 +376,12 @@ const PublicBookingInner = () => {
     };
   }, [tenantSettings, siteSettings]);
 
+  // Resolve branding URLs to short-lived signed URLs at render time so
+  // we don't depend on the persisted public-bucket URL surviving any
+  // future flip of `tenant-branding` to private.
+  const logoSignedUrl = useBrandingSignedUrl(settings?.logo_url);
+  const heroSignedUrl = useBrandingSignedUrl(settings?.hero_image_url);
+
   // The resolved site ID for filtering queries
   const activeSiteId = siteLockedByUrl ? (site?.id ?? null) : pickedSiteId;
 
