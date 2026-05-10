@@ -2727,7 +2727,7 @@ const en: TranslationKeys = {
   "help.guide5Q": "How do I add or edit resources?",
   "help.guide5A": "Go to **Dashboard → Resources** to create rooms, tables, or venues. You can set capacity, pricing, upload up to 5 images, and toggle active/inactive status.",
   "help.guide6Q": "What's new in MimmoBook?",
-  "help.guide6A": "Recent additions: **Guest Portal** (magic-link booking management), **Waitlist** with auto-notify, **Google Calendar sync** via iCal feed, **CSV/PDF export**, **dark mode**, **keyboard shortcuts** (press `?`), **Quick Actions FAB** on mobile, **onboarding checklist**, **audit-log filters**, **analytics charts**, **public reviews/testimonials**, **Kitchen orders** for restaurant and venue reservations, and a **Stripe revenue dashboard** for superadmins.",
+  "help.guide6A": "Recent additions: **Guest Portal** (magic-link booking management), **Waitlist** with auto-notify, **Google Calendar sync** via iCal feed, **CSV/PDF export**, **dark mode**, **keyboard shortcuts** (press `?`), **Quick Actions FAB** on mobile, **onboarding checklist**, **audit-log filters**, **analytics charts**, **public reviews/testimonials**, **Kitchen orders** for restaurant and venue reservations, **Offers to Reservations conversion report** with CSV export, and a **Stripe revenue dashboard** for superadmins.",
 
   // MimmoAid
   "aid.title": "MimmoAid",
@@ -4390,7 +4390,7 @@ const fi: TranslationKeys = {
   "help.guide5Q": "Miten lisään tai muokkaan resursseja?",
   "help.guide5A": "Siirry kohtaan **Hallintapaneeli → Resurssit** luodaksesi huoneita, pöytiä tai tiloja.",
   "help.guide6Q": "Mitä uutta MimmoBookissa?",
-  "help.guide6A": "Viimeisimmät lisäykset: **Vierasportaali** (varauksen hallinta maagisella linkillä), **jonotuslista** automaattisilla ilmoituksilla, **Google-kalenterisynkronointi** iCal-syötteellä, **CSV/PDF-vienti**, **tumma teema**, **pikanäppäimet** (paina `?`), **pikatoimintojen FAB** mobiilissa, **käyttöönoton tarkistuslista**, **audit-lokin suodattimet**, **analytiikkakaaviot**, **julkiset arvostelut/suosittelut**, **keittiötilaukset** ravintola- ja tilavarauksille, ja **Stripe-tulospaneeli** pääkäyttäjille.",
+  "help.guide6A": "Viimeisimmät lisäykset: **Vierasportaali** (varauksen hallinta maagisella linkillä), **jonotuslista** automaattisilla ilmoituksilla, **Google-kalenterisynkronointi** iCal-syötteellä, **CSV/PDF-vienti**, **tumma teema**, **pikanäppäimet** (paina `?`), **pikatoimintojen FAB** mobiilissa, **käyttöönoton tarkistuslista**, **audit-lokin suodattimet**, **analytiikkakaaviot**, **julkiset arvostelut/suosittelut**, **keittiötilaukset** ravintola- ja tilavarauksille, **Tarjouksista varauksiin -konversioraportti** CSV-vientillä, ja **Stripe-tulospaneeli** pääkäyttäjille.",
 
   // MimmoAid
   "aid.title": "MimmoAid",
@@ -6052,7 +6052,7 @@ const sv: TranslationKeys = {
   "help.guide5Q": "Hur lägger jag till eller redigerar resurser?",
   "help.guide5A": "Gå till **Instrumentpanel → Resurser** för att skapa rum, bord eller lokaler.",
   "help.guide6Q": "Vad är nytt i MimmoBook?",
-  "help.guide6A": "Senaste tilläggen: **Gästportal** (bokningshantering via magisk länk), **väntelista** med automatiska aviseringar, **Google Kalender-synk** via iCal-flöde, **CSV/PDF-export**, **mörkt läge**, **kortkommandon** (tryck `?`), **Snabbåtgärds-FAB** på mobil, **introduktionscheckslista**, **granskningsloggfilter**, **analysdiagram**, **publika omdömen/recensioner**, **kökets beställningar** för restaurang- och lokalbokningar, och en **Stripe-intäktspanel** för superadmins.",
+  "help.guide6A": "Senaste tilläggen: **Gästportal** (bokningshantering via magisk länk), **väntelista** med automatiska aviseringar, **Google Kalender-synk** via iCal-flöde, **CSV/PDF-export**, **mörkt läge**, **kortkommandon** (tryck `?`), **Snabbåtgärds-FAB** på mobil, **introduktionscheckslista**, **granskningsloggfilter**, **analysdiagram**, **publika omdömen/recensioner**, **kökets beställningar** för restaurang- och lokalbokningar, **Offerter till bokningar konverteringsrapport** med CSV-export, och en **Stripe-intäktspanel** för superadmins.",
 
   // MimmoAid
   "aid.title": "MimmoAid",

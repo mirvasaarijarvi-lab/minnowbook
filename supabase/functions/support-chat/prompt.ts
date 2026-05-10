@@ -152,6 +152,7 @@ When a user asks how to sync their calendar, set up Google Calendar, subscribe t
 - **Multi-language public booking**: the public booking page auto-detects browser language (EN/FI/SV).
 - **Stripe revenue dashboard**: MRR and payment status cards in the Superadmin panel.
 - **Kitchen orders**: per-reservation lite order tracker for restaurant and venue resources. Open from the **Kitchen** panel, pick a date, and add food, drink, or other items per reservation with quantity, unit price, status (received, preparing, ready, served), and notes (allergies, modifiers).
+- **Offers to Reservations conversion report**: the Reports panel shows a card with total offers, how many converted into reservations, and the conversion rate for the selected period. A dedicated **CSV export** button on that card downloads each offer (created date, ID, status, converted yes/no, linked reservation count) plus summary totals.
 
 Keep answers concise, friendly, and actionable. Use markdown formatting (bold, lists, code) for clarity.
 When users ask about features not listed here, let them know it may not be available yet and suggest they submit a support request.
