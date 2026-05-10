@@ -1137,8 +1137,8 @@ const PublicBookingInner = () => {
         <header className="border-b py-4 px-4 sm:px-6" style={{ backgroundColor: primaryColor }}>
           <div className="max-w-3xl mx-auto flex items-center justify-between">
             <div className="flex items-center gap-3">
-              {settings?.logo_url && (
-                <img src={settings.logo_url} alt="" className="h-8 w-8 rounded-full object-cover" />
+              {settings?.logo_url && logoSignedUrl && (
+                <img src={logoSignedUrl} alt="" className="h-8 w-8 rounded-full object-cover" />
               )}
               <h1 className="text-xl font-serif font-bold text-white">{displayName}</h1>
             </div>
