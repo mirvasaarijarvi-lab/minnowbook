@@ -2727,7 +2727,7 @@ const en: TranslationKeys = {
   "help.guide5Q": "How do I add or edit resources?",
   "help.guide5A": "Go to **Dashboard → Resources** to create rooms, tables, or venues. You can set capacity, pricing, upload up to 5 images, and toggle active/inactive status.",
   "help.guide6Q": "What's new in MimmoBook?",
-  "help.guide6A": "Recent additions: **Guest Portal** (magic-link booking management), **Waitlist** with auto-notify, **Google Calendar sync** via iCal feed, **CSV/PDF export**, **dark mode**, **keyboard shortcuts** (press `?`), **Quick Actions FAB** on mobile, **onboarding checklist**, **audit-log filters**, **analytics charts**, **public reviews/testimonials**, **Kitchen orders** for restaurant and venue reservations, and a **Stripe revenue dashboard** for superadmins.",
+  "help.guide6A": "Recent additions: **Guest Portal** (magic-link booking management), **Waitlist** with auto-notify, **Google Calendar sync** via iCal feed, **CSV/PDF export**, **dark mode**, **keyboard shortcuts** (press `?`), **Quick Actions FAB** on mobile, **onboarding checklist**, **audit-log filters**, **analytics charts**, **public reviews/testimonials**, **Kitchen orders** for restaurant and venue reservations, **Offers to Reservations conversion report** with CSV export, and a **Stripe revenue dashboard** for superadmins.",
 
   // MimmoAid
   "aid.title": "MimmoAid",
