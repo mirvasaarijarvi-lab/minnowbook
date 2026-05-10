@@ -47,6 +47,7 @@ const RECENT_FEATURES: Array<{ name: string; keywords: RegExp }> = [
   { name: "Multi-language public booking", keywords: /Multi-language public booking|multi-language/i },
   { name: "Stripe revenue dashboard", keywords: /Stripe revenue/i },
   { name: "Kitchen orders", keywords: /Kitchen orders|keittiötilaukset|kökets beställningar/i },
+  { name: "Offers to Reservations conversion report", keywords: /Offers to Reservations|offer.*conversion|tarjouksista varauksiin|offerter till bokningar/i },
 ];
 
 describe("'Recent additions' prompt section ↔ dashboard UI parity", () => {
