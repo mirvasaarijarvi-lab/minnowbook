@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-04-22T15:43:45.804Z",
+  "generatedAt": "2026-05-10T15:33:23.216Z",
   "flavor": "default",
-  "runId": "1776872472551-jxy1rx",
+  "runId": "1778427199905-agif8b",
   "tenants": {
     "a": null,
     "b": null
@@ -20,30 +20,30 @@
     {
       "kind": "upload",
       "bucket": "tenant-private",
-      "path": "00000000-0000-0000-0000-000000000000/__rls_test__/1776872472551-jxy1rx/anon.txt",
+      "path": "00000000-0000-0000-0000-000000000000/__rls_test__/1778427199905-agif8b/anon.txt",
       "attacker": "anon",
       "owner": "fake-tenant",
       "expected": "denied",
       "outcome": "denied",
-      "errorMessage": "network-timeout",
-      "httpStatus": null,
-      "errorCode": "Error",
+      "errorMessage": "new row violates row-level security policy",
+      "httpStatus": 400,
+      "errorCode": "StorageApiError",
       "scenario": "anon-upload",
-      "recordedAt": "2026-04-22T15:41:16.663Z"
+      "recordedAt": "2026-05-10T15:33:20.219Z"
     },
     {
       "kind": "upload",
       "bucket": "tenant-assets",
-      "path": "00000000-0000-0000-0000-000000000000/__rls_test__/1776872472551-jxy1rx/anon.txt",
+      "path": "00000000-0000-0000-0000-000000000000/__rls_test__/1778427199905-agif8b/anon.txt",
       "attacker": "anon",
       "owner": "fake-tenant",
       "expected": "denied",
       "outcome": "denied",
-      "errorMessage": "network-timeout",
-      "httpStatus": null,
-      "errorCode": "Error",
+      "errorMessage": "new row violates row-level security policy",
+      "httpStatus": 400,
+      "errorCode": "StorageApiError",
       "scenario": "anon-upload",
-      "recordedAt": "2026-04-22T15:41:20.685Z"
+      "recordedAt": "2026-05-10T15:33:20.321Z"
     },
     {
       "kind": "upload",
@@ -53,11 +53,11 @@
       "owner": "fake-tenant",
       "expected": "denied",
       "outcome": "denied",
-      "errorMessage": "network-timeout",
-      "httpStatus": null,
-      "errorCode": "Error",
+      "errorMessage": "new row violates row-level security policy",
+      "httpStatus": 400,
+      "errorCode": "StorageApiError",
       "scenario": "adversarial:double-slash",
-      "recordedAt": "2026-04-22T15:41:49.679Z"
+      "recordedAt": "2026-05-10T15:33:21.429Z"
     },
     {
       "kind": "upload",
@@ -67,11 +67,11 @@
       "owner": "fake-tenant",
       "expected": "denied",
       "outcome": "denied",
-      "errorMessage": "network-timeout",
-      "httpStatus": null,
-      "errorCode": "Error",
+      "errorMessage": "new row violates row-level security policy",
+      "httpStatus": 400,
+      "errorCode": "StorageApiError",
       "scenario": "adversarial:leading-slash",
-      "recordedAt": "2026-04-22T15:41:53.682Z"
+      "recordedAt": "2026-05-10T15:33:21.487Z"
     },
     {
       "kind": "upload",
@@ -81,11 +81,11 @@
       "owner": "fake-tenant",
       "expected": "denied",
       "outcome": "denied",
-      "errorMessage": "network-timeout",
-      "httpStatus": null,
-      "errorCode": "Error",
+      "errorMessage": "new row violates row-level security policy",
+      "httpStatus": 400,
+      "errorCode": "StorageApiError",
       "scenario": "adversarial:trailing-slash",
-      "recordedAt": "2026-04-22T15:41:57.684Z"
+      "recordedAt": "2026-05-10T15:33:21.581Z"
     },
     {
       "kind": "upload",
@@ -95,11 +95,11 @@
       "owner": "fake-tenant",
       "expected": "denied",
       "outcome": "denied",
-      "errorMessage": "network-timeout",
-      "httpStatus": null,
-      "errorCode": "Error",
+      "errorMessage": "new row violates row-level security policy",
+      "httpStatus": 400,
+      "errorCode": "StorageApiError",
       "scenario": "adversarial:dot-segment-traversal",
-      "recordedAt": "2026-04-22T15:42:01.685Z"
+      "recordedAt": "2026-05-10T15:33:21.641Z"
     },
     {
       "kind": "upload",
@@ -109,11 +109,11 @@
       "owner": "fake-tenant",
       "expected": "denied",
       "outcome": "denied",
-      "errorMessage": "network-timeout",
-      "httpStatus": null,
-      "errorCode": "Error",
+      "errorMessage": "new row violates row-level security policy",
+      "httpStatus": 400,
+      "errorCode": "StorageApiError",
       "scenario": "adversarial:url-encoded-slash",
-      "recordedAt": "2026-04-22T15:42:05.689Z"
+      "recordedAt": "2026-05-10T15:33:21.705Z"
     },
     {
       "kind": "upload",
@@ -123,11 +123,11 @@
       "owner": "fake-tenant",
       "expected": "denied",
       "outcome": "denied",
-      "errorMessage": "network-timeout",
-      "httpStatus": null,
-      "errorCode": "Error",
+      "errorMessage": "Invalid key: {11111111-1111-1111-1111-111111111111}/file.txt",
+      "httpStatus": 400,
+      "errorCode": "StorageApiError",
       "scenario": "adversarial:url-encoded-tenant-wrappers",
-      "recordedAt": "2026-04-22T15:42:09.690Z"
+      "recordedAt": "2026-05-10T15:33:21.759Z"
     },
     {
       "kind": "upload",
@@ -137,11 +137,11 @@
       "owner": "fake-tenant",
       "expected": "denied",
       "outcome": "denied",
-      "errorMessage": "network-timeout",
-      "httpStatus": null,
-      "errorCode": "Error",
+      "errorMessage": "new row violates row-level security policy",
+      "httpStatus": 400,
+      "errorCode": "StorageApiError",
       "scenario": "adversarial:backslash-separators",
-      "recordedAt": "2026-04-22T15:42:13.692Z"
+      "recordedAt": "2026-05-10T15:33:21.807Z"
     },
     {
       "kind": "upload",
@@ -155,7 +155,7 @@
       "httpStatus": 400,
       "errorCode": "StorageApiError",
       "scenario": "adversarial:null-byte-truncation",
-      "recordedAt": "2026-04-22T15:42:13.723Z"
+      "recordedAt": "2026-05-10T15:33:21.814Z"
     },
     {
       "kind": "upload",
@@ -165,11 +165,11 @@
       "owner": "fake-tenant",
       "expected": "denied",
       "outcome": "denied",
-      "errorMessage": "network-timeout",
-      "httpStatus": null,
-      "errorCode": "Error",
+      "errorMessage": "Invalid key: 00000000-0000-0000-0000-000000000000%2F..%2F11111111-1111-1111-1111-111111111111/file.txt",
+      "httpStatus": 400,
+      "errorCode": "StorageApiError",
       "scenario": "adversarial:double-encoded-slash",
-      "recordedAt": "2026-04-22T15:42:17.723Z"
+      "recordedAt": "2026-05-10T15:33:21.856Z"
     },
     {
       "kind": "upload",
@@ -179,11 +179,11 @@
       "owner": "fake-tenant",
       "expected": "denied",
       "outcome": "denied",
-      "errorMessage": "network-timeout",
-      "httpStatus": null,
-      "errorCode": "Error",
+      "errorMessage": "new row violates row-level security policy",
+      "httpStatus": 400,
+      "errorCode": "StorageApiError",
       "scenario": "adversarial:url-encoded-dot-dot",
-      "recordedAt": "2026-04-22T15:42:21.725Z"
+      "recordedAt": "2026-05-10T15:33:21.940Z"
     },
     {
       "kind": "upload",
@@ -193,11 +193,11 @@
       "owner": "fake-tenant",
       "expected": "denied",
       "outcome": "denied",
-      "errorMessage": "network-timeout",
-      "httpStatus": null,
-      "errorCode": "Error",
+      "errorMessage": "new row violates row-level security policy",
+      "httpStatus": 400,
+      "errorCode": "StorageApiError",
       "scenario": "adversarial:url-encoded-slash-plus-dot-dot",
-      "recordedAt": "2026-04-22T15:42:25.728Z"
+      "recordedAt": "2026-05-10T15:33:21.989Z"
     },
     {
       "kind": "upload",
@@ -207,11 +207,11 @@
       "owner": "fake-tenant",
       "expected": "denied",
       "outcome": "denied",
-      "errorMessage": "network-timeout",
-      "httpStatus": null,
-      "errorCode": "Error",
+      "errorMessage": "new row violates row-level security policy",
+      "httpStatus": 400,
+      "errorCode": "StorageApiError",
       "scenario": "adversarial:double-slash",
-      "recordedAt": "2026-04-22T15:42:29.730Z"
+      "recordedAt": "2026-05-10T15:33:22.050Z"
     },
     {
       "kind": "upload",
@@ -221,11 +221,11 @@
       "owner": "fake-tenant",
       "expected": "denied",
       "outcome": "denied",
-      "errorMessage": "network-timeout",
-      "httpStatus": null,
-      "errorCode": "Error",
+      "errorMessage": "new row violates row-level security policy",
+      "httpStatus": 400,
+      "errorCode": "StorageApiError",
       "scenario": "adversarial:leading-slash",
-      "recordedAt": "2026-04-22T15:42:33.731Z"
+      "recordedAt": "2026-05-10T15:33:22.093Z"
     },
     {
       "kind": "upload",
@@ -235,11 +235,11 @@
       "owner": "fake-tenant",
       "expected": "denied",
       "outcome": "denied",
-      "errorMessage": "network-timeout",
-      "httpStatus": null,
-      "errorCode": "Error",
+      "errorMessage": "new row violates row-level security policy",
+      "httpStatus": 400,
+      "errorCode": "StorageApiError",
       "scenario": "adversarial:trailing-slash",
-      "recordedAt": "2026-04-22T15:42:37.733Z"
+      "recordedAt": "2026-05-10T15:33:22.164Z"
     },
     {
       "kind": "upload",
@@ -249,11 +249,11 @@
       "owner": "fake-tenant",
       "expected": "denied",
       "outcome": "denied",
-      "errorMessage": "network-timeout",
-      "httpStatus": null,
-      "errorCode": "Error",
+      "errorMessage": "new row violates row-level security policy",
+      "httpStatus": 400,
+      "errorCode": "StorageApiError",
       "scenario": "adversarial:dot-segment-traversal",
-      "recordedAt": "2026-04-22T15:42:41.734Z"
+      "recordedAt": "2026-05-10T15:33:22.213Z"
     },
     {
       "kind": "upload",
@@ -263,11 +263,11 @@
       "owner": "fake-tenant",
       "expected": "denied",
       "outcome": "denied",
-      "errorMessage": "network-timeout",
-      "httpStatus": null,
-      "errorCode": "Error",
+      "errorMessage": "new row violates row-level security policy",
+      "httpStatus": 400,
+      "errorCode": "StorageApiError",
       "scenario": "adversarial:url-encoded-slash",
-      "recordedAt": "2026-04-22T15:42:45.736Z"
+      "recordedAt": "2026-05-10T15:33:22.272Z"
     },
     {
       "kind": "upload",
@@ -277,11 +277,11 @@
       "owner": "fake-tenant",
       "expected": "denied",
       "outcome": "denied",
-      "errorMessage": "network-timeout",
-      "httpStatus": null,
-      "errorCode": "Error",
+      "errorMessage": "Invalid key: {11111111-1111-1111-1111-111111111111}/file.txt",
+      "httpStatus": 400,
+      "errorCode": "StorageApiError",
       "scenario": "adversarial:url-encoded-tenant-wrappers",
-      "recordedAt": "2026-04-22T15:42:49.739Z"
+      "recordedAt": "2026-05-10T15:33:22.317Z"
     },
     {
       "kind": "upload",
@@ -291,11 +291,11 @@
       "owner": "fake-tenant",
       "expected": "denied",
       "outcome": "denied",
-      "errorMessage": "network-timeout",
-      "httpStatus": null,
-      "errorCode": "Error",
+      "errorMessage": "new row violates row-level security policy",
+      "httpStatus": 400,
+      "errorCode": "StorageApiError",
       "scenario": "adversarial:backslash-separators",
-      "recordedAt": "2026-04-22T15:42:53.740Z"
+      "recordedAt": "2026-05-10T15:33:22.392Z"
     },
     {
       "kind": "upload",
@@ -309,7 +309,7 @@
       "httpStatus": 400,
       "errorCode": "StorageApiError",
       "scenario": "adversarial:null-byte-truncation",
-      "recordedAt": "2026-04-22T15:42:53.774Z"
+      "recordedAt": "2026-05-10T15:33:22.400Z"
     },
     {
       "kind": "upload",
@@ -319,11 +319,11 @@
       "owner": "fake-tenant",
       "expected": "denied",
       "outcome": "denied",
-      "errorMessage": "network-timeout",
-      "httpStatus": null,
-      "errorCode": "Error",
+      "errorMessage": "Invalid key: 00000000-0000-0000-0000-000000000000%2F..%2F11111111-1111-1111-1111-111111111111/file.txt",
+      "httpStatus": 400,
+      "errorCode": "StorageApiError",
       "scenario": "adversarial:double-encoded-slash",
-      "recordedAt": "2026-04-22T15:42:57.776Z"
+      "recordedAt": "2026-05-10T15:33:22.448Z"
     },
     {
       "kind": "upload",
@@ -333,11 +333,11 @@
       "owner": "fake-tenant",
       "expected": "denied",
       "outcome": "denied",
-      "errorMessage": "network-timeout",
-      "httpStatus": null,
-      "errorCode": "Error",
+      "errorMessage": "new row violates row-level security policy",
+      "httpStatus": 400,
+      "errorCode": "StorageApiError",
       "scenario": "adversarial:url-encoded-dot-dot",
-      "recordedAt": "2026-04-22T15:43:01.777Z"
+      "recordedAt": "2026-05-10T15:33:22.529Z"
     },
     {
       "kind": "upload",
@@ -347,11 +347,11 @@
       "owner": "fake-tenant",
       "expected": "denied",
       "outcome": "denied",
-      "errorMessage": "network-timeout",
-      "httpStatus": null,
-      "errorCode": "Error",
+      "errorMessage": "new row violates row-level security policy",
+      "httpStatus": 400,
+      "errorCode": "StorageApiError",
       "scenario": "adversarial:url-encoded-slash-plus-dot-dot",
-      "recordedAt": "2026-04-22T15:43:05.778Z"
+      "recordedAt": "2026-05-10T15:33:22.586Z"
     },
     {
       "kind": "upload",
@@ -361,11 +361,11 @@
       "owner": "fake-tenant",
       "expected": "denied",
       "outcome": "denied",
-      "errorMessage": "network-timeout",
-      "httpStatus": null,
-      "errorCode": "Error",
+      "errorMessage": "new row violates row-level security policy",
+      "httpStatus": 400,
+      "errorCode": "StorageApiError",
       "scenario": "late-segment:victim-as-segment-2",
-      "recordedAt": "2026-04-22T15:43:09.784Z"
+      "recordedAt": "2026-05-10T15:33:22.647Z"
     },
     {
       "kind": "upload",
@@ -375,11 +375,11 @@
       "owner": "fake-tenant",
       "expected": "denied",
       "outcome": "denied",
-      "errorMessage": "network-timeout",
-      "httpStatus": null,
-      "errorCode": "Error",
+      "errorMessage": "new row violates row-level security policy",
+      "httpStatus": 400,
+      "errorCode": "StorageApiError",
       "scenario": "late-segment:victim-as-segment-3",
-      "recordedAt": "2026-04-22T15:43:13.785Z"
+      "recordedAt": "2026-05-10T15:33:22.727Z"
     },
     {
       "kind": "upload",
@@ -389,11 +389,11 @@
       "owner": "fake-tenant",
       "expected": "denied",
       "outcome": "denied",
-      "errorMessage": "network-timeout",
-      "httpStatus": null,
-      "errorCode": "Error",
+      "errorMessage": "new row violates row-level security policy",
+      "httpStatus": 400,
+      "errorCode": "StorageApiError",
       "scenario": "late-segment:victim-as-segment-4",
-      "recordedAt": "2026-04-22T15:43:17.787Z"
+      "recordedAt": "2026-05-10T15:33:22.783Z"
     },
     {
       "kind": "upload",
@@ -403,25 +403,25 @@
       "owner": "fake-tenant",
       "expected": "denied",
       "outcome": "denied",
-      "errorMessage": "network-timeout",
-      "httpStatus": null,
-      "errorCode": "Error",
+      "errorMessage": "new row violates row-level security policy",
+      "httpStatus": 400,
+      "errorCode": "StorageApiError",
       "scenario": "late-segment:victim-embedded-in-filename",
-      "recordedAt": "2026-04-22T15:43:21.789Z"
+      "recordedAt": "2026-05-10T15:33:22.868Z"
     },
     {
       "kind": "upload",
       "bucket": "tenant-private",
-      "path": "22222222-2222-2222-2222-222222222222/33333333-3333-3333-3333-333333333333/__rls_test__/1776872472551-jxy1rx/late-seg.txt",
+      "path": "22222222-2222-2222-2222-222222222222/33333333-3333-3333-3333-333333333333/__rls_test__/1778427199905-agif8b/late-seg.txt",
       "attacker": "anon",
       "owner": "fake-tenant",
       "expected": "denied",
       "outcome": "denied",
-      "errorMessage": "network-timeout",
-      "httpStatus": null,
-      "errorCode": "Error",
+      "errorMessage": "new row violates row-level security policy",
+      "httpStatus": 400,
+      "errorCode": "StorageApiError",
       "scenario": "late-segment:victim-mimicking-rls-test-root",
-      "recordedAt": "2026-04-22T15:43:25.791Z"
+      "recordedAt": "2026-05-10T15:33:22.925Z"
     },
     {
       "kind": "upload",
@@ -431,11 +431,11 @@
       "owner": "fake-tenant",
       "expected": "denied",
       "outcome": "denied",
-      "errorMessage": "network-timeout",
-      "httpStatus": null,
-      "errorCode": "Error",
+      "errorMessage": "new row violates row-level security policy",
+      "httpStatus": 400,
+      "errorCode": "StorageApiError",
       "scenario": "late-segment:victim-as-segment-2",
-      "recordedAt": "2026-04-22T15:43:29.793Z"
+      "recordedAt": "2026-05-10T15:33:22.985Z"
     },
     {
       "kind": "upload",
@@ -445,11 +445,11 @@
       "owner": "fake-tenant",
       "expected": "denied",
       "outcome": "denied",
-      "errorMessage": "network-timeout",
-      "httpStatus": null,
-      "errorCode": "Error",
+      "errorMessage": "new row violates row-level security policy",
+      "httpStatus": 400,
+      "errorCode": "StorageApiError",
       "scenario": "late-segment:victim-as-segment-3",
-      "recordedAt": "2026-04-22T15:43:33.796Z"
+      "recordedAt": "2026-05-10T15:33:23.050Z"
     },
     {
       "kind": "upload",
@@ -459,11 +459,11 @@
       "owner": "fake-tenant",
       "expected": "denied",
       "outcome": "denied",
-      "errorMessage": "network-timeout",
-      "httpStatus": null,
-      "errorCode": "Error",
+      "errorMessage": "new row violates row-level security policy",
+      "httpStatus": 400,
+      "errorCode": "StorageApiError",
       "scenario": "late-segment:victim-as-segment-4",
-      "recordedAt": "2026-04-22T15:43:37.797Z"
+      "recordedAt": "2026-05-10T15:33:23.105Z"
     },
     {
       "kind": "upload",
@@ -473,47 +473,47 @@
       "owner": "fake-tenant",
       "expected": "denied",
       "outcome": "denied",
-      "errorMessage": "network-timeout",
-      "httpStatus": null,
-      "errorCode": "Error",
+      "errorMessage": "new row violates row-level security policy",
+      "httpStatus": 400,
+      "errorCode": "StorageApiError",
       "scenario": "late-segment:victim-embedded-in-filename",
-      "recordedAt": "2026-04-22T15:43:41.800Z"
+      "recordedAt": "2026-05-10T15:33:23.156Z"
     },
     {
       "kind": "upload",
       "bucket": "tenant-assets",
-      "path": "22222222-2222-2222-2222-222222222222/33333333-3333-3333-3333-333333333333/__rls_test__/1776872472551-jxy1rx/late-seg.txt",
+      "path": "22222222-2222-2222-2222-222222222222/33333333-3333-3333-3333-333333333333/__rls_test__/1778427199905-agif8b/late-seg.txt",
       "attacker": "anon",
       "owner": "fake-tenant",
       "expected": "denied",
       "outcome": "denied",
-      "errorMessage": "network-timeout",
-      "httpStatus": null,
-      "errorCode": "Error",
+      "errorMessage": "new row violates row-level security policy",
+      "httpStatus": 400,
+      "errorCode": "StorageApiError",
       "scenario": "late-segment:victim-mimicking-rls-test-root",
-      "recordedAt": "2026-04-22T15:43:45.803Z"
+      "recordedAt": "2026-05-10T15:33:23.214Z"
     }
   ],
   "cleanups": [
     {
       "bucket": "tenant-private",
-      "path": "00000000-0000-0000-0000-000000000000/__rls_test__/1776872472551-jxy1rx/anon.txt",
+      "path": "00000000-0000-0000-0000-000000000000/__rls_test__/1778427199905-agif8b/anon.txt",
       "role": "attacker",
       "removed": false,
       "httpStatus": null,
       "errorCode": null,
       "note": "negative-control: anon DELETE denied (empty rows)",
-      "recordedAt": "2026-04-22T15:41:20.952Z"
+      "recordedAt": "2026-05-10T15:33:20.566Z"
     },
     {
       "bucket": "tenant-assets",
-      "path": "00000000-0000-0000-0000-000000000000/__rls_test__/1776872472551-jxy1rx/anon.txt",
+      "path": "00000000-0000-0000-0000-000000000000/__rls_test__/1778427199905-agif8b/anon.txt",
       "role": "attacker",
       "removed": false,
       "httpStatus": null,
       "errorCode": null,
       "note": "negative-control: anon DELETE denied (empty rows)",
-      "recordedAt": "2026-04-22T15:41:21.024Z"
+      "recordedAt": "2026-05-10T15:33:20.610Z"
     }
   ]
 }
