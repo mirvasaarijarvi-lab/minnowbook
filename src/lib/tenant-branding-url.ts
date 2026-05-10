@@ -127,15 +127,22 @@ export function invalidateBrandingSignedUrl(path: string, ttlSeconds = BRANDING_
  * tenant logo) skip the mint+retry dance and render the fallback UI
  * immediately. Cleared on manual `retry()` or via
  * `clearBrandingFallback()`.
+ *
+ * Keys are scoped by `tenantId` (when known) in addition to path/ttl
+ * so a visitor who hits Tenant A's broken logo and later opens
+ * Tenant B's booking page does NOT inherit Tenant A's "fallback
+ * exhausted" decision. The path itself usually already starts with
+ * the tenant id, but explicit scoping protects against future bucket
+ * layouts and against any path that doesn't include it.
  */
 const FALLBACK_CACHE_TTL_MS = 5 * 60 * 1000;
 const fallbackCache = new Map<string, number>();
 
-function fallbackKey(path: string, ttlSeconds: number): string {
-  return `${path}::${ttlSeconds}`;
+function scopedKey(tenantId: string | null | undefined, path: string, ttlSeconds: number): string {
+  return `${tenantId ?? "_"}::${path}::${ttlSeconds}`;
 }
-function isFallbackCached(path: string, ttlSeconds: number): boolean {
-  const key = fallbackKey(path, ttlSeconds);
+function isFallbackCached(tenantId: string | null | undefined, path: string, ttlSeconds: number): boolean {
+  const key = scopedKey(tenantId, path, ttlSeconds);
   const expiresAt = fallbackCache.get(key);
   if (!expiresAt) return false;
   if (expiresAt <= Date.now()) {
@@ -144,25 +151,30 @@ function isFallbackCached(path: string, ttlSeconds: number): boolean {
   }
   return true;
 }
-function rememberFallback(path: string, ttlSeconds: number): void {
-  fallbackCache.set(fallbackKey(path, ttlSeconds), Date.now() + FALLBACK_CACHE_TTL_MS);
+function rememberFallback(tenantId: string | null | undefined, path: string, ttlSeconds: number): void {
+  fallbackCache.set(scopedKey(tenantId, path, ttlSeconds), Date.now() + FALLBACK_CACHE_TTL_MS);
 }
-export function clearBrandingFallback(path: string, ttlSeconds = BRANDING_SIGNED_URL_TTL_SECONDS): void {
-  fallbackCache.delete(fallbackKey(path, ttlSeconds));
+export function clearBrandingFallback(
+  path: string,
+  ttlSeconds: number = BRANDING_SIGNED_URL_TTL_SECONDS,
+  tenantId?: string | null,
+): void {
+  fallbackCache.delete(scopedKey(tenantId, path, ttlSeconds));
 }
 
 /**
- * Per-path shared retry coordination. When a signed URL fails, the
- * first hook instance to schedule a backoff timer registers a lock
- * keyed by `path::ttl`. Subsequent failing instances (e.g. another
- * `<img>` on the page that consumed the same now-stale URL) subscribe
- * to that lock's promise instead of starting their own overlapping
- * `setTimeout`. This guarantees a single timer + single re-mint per
- * path even when many components reference the same logo/hero.
+ * Per-(tenant, path) shared retry coordination. When a signed URL
+ * fails, the first hook instance to schedule a backoff timer
+ * registers a lock keyed by `tenant::path::ttl`. Subsequent failing
+ * instances (e.g. another `<img>` on the page that consumed the same
+ * now-stale URL) subscribe to that lock's promise instead of starting
+ * their own overlapping `setTimeout`. This guarantees a single timer
+ * + single re-mint per path even when many components reference the
+ * same logo/hero.
  *
  * The shared `attemptCounters` map enforces the global retry budget
- * across all instances so MAX_AUTOMATIC_RETRIES is a per-path cap, not
- * a per-instance one.
+ * across all instances so MAX_AUTOMATIC_RETRIES is a per-(tenant,
+ * path) cap, not a per-instance one, and never bleeds across tenants.
  */
 interface RetryLock {
   attempt: number;
@@ -171,29 +183,31 @@ interface RetryLock {
 const retryLocks = new Map<string, RetryLock>();
 const attemptCounters = new Map<string, number>();
 
-function retryKey(path: string, ttlSeconds: number): string {
-  return `${path}::${ttlSeconds}`;
+function getSharedAttempt(tenantId: string | null | undefined, path: string, ttlSeconds: number): number {
+  return attemptCounters.get(scopedKey(tenantId, path, ttlSeconds)) ?? 0;
 }
-function getSharedAttempt(path: string, ttlSeconds: number): number {
-  return attemptCounters.get(retryKey(path, ttlSeconds)) ?? 0;
-}
-function consumeSharedAttempt(path: string, ttlSeconds: number): number {
-  const key = retryKey(path, ttlSeconds);
+function consumeSharedAttempt(tenantId: string | null | undefined, path: string, ttlSeconds: number): number {
+  const key = scopedKey(tenantId, path, ttlSeconds);
   const current = attemptCounters.get(key) ?? 0;
   attemptCounters.set(key, current + 1);
   return current;
 }
-function resetSharedRetry(path: string, ttlSeconds: number): void {
-  attemptCounters.delete(retryKey(path, ttlSeconds));
+function resetSharedRetry(tenantId: string | null | undefined, path: string, ttlSeconds: number): void {
+  attemptCounters.delete(scopedKey(tenantId, path, ttlSeconds));
 }
 /**
- * Acquire (or join) the shared backoff timer for `path`. Returns a
- * promise that resolves once the timer fires and the cached signed
- * URL has been invalidated, signalling subscribers it's safe to
- * re-mint.
+ * Acquire (or join) the shared backoff timer for `(tenant, path)`.
+ * Returns a promise that resolves once the timer fires and the cached
+ * signed URL has been invalidated, signalling subscribers it's safe
+ * to re-mint.
  */
-function acquireRetryLock(path: string, ttlSeconds: number, attempt: number): Promise<void> {
-  const key = retryKey(path, ttlSeconds);
+function acquireRetryLock(
+  tenantId: string | null | undefined,
+  path: string,
+  ttlSeconds: number,
+  attempt: number,
+): Promise<void> {
+  const key = scopedKey(tenantId, path, ttlSeconds);
   const existing = retryLocks.get(key);
   if (existing) return existing.promise;
   const promise = new Promise<void>((resolve) => {
