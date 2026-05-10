@@ -11,14 +11,23 @@
  *
  * Signed URLs are cached in-memory per (path, ttl) and renewed shortly
  * before expiry so <img> elements keep loading without flicker.
+ *
+ * Failure handling:
+ *  - The richer `useBrandingSignedUrlState` hook exposes `status`
+ *    ("loading" | "ready" | "error" | "idle") plus a `handleImgError`
+ *    callback that invalidates the cache and retries once before giving
+ *    up. Callers use `status === "error"` to render a graceful
+ *    fallback instead of a broken image.
  */
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 export const TENANT_BRANDING_BUCKET = "tenant-branding";
 /** 24h, mirrors the private-bucket TTL used elsewhere in the app. */
 export const BRANDING_SIGNED_URL_TTL_SECONDS = 24 * 60 * 60;
 const RENEWAL_WINDOW_SECONDS = 5 * 60;
+/** How many automatic retries we attempt after a signed URL fails to load. */
+const MAX_AUTOMATIC_RETRIES = 1;
 
 interface CacheEntry {
   url: string;
@@ -61,11 +70,11 @@ async function mintSignedUrl(path: string, ttl: number): Promise<string> {
   return data.signedUrl;
 }
 
-async function getOrMint(path: string, ttl: number): Promise<string> {
+async function getOrMint(path: string, ttl: number, forceRefresh = false): Promise<string> {
   const key = `${path}::${ttl}`;
   const now = Date.now();
   const existing = cache.get(key);
-  if (existing) {
+  if (!forceRefresh && existing) {
     if (existing.inFlight) return existing.inFlight;
     if (existing.expiresAtMs - RENEWAL_WINDOW_SECONDS * 1000 > now) return existing.url;
   }
@@ -87,44 +96,101 @@ async function getOrMint(path: string, ttl: number): Promise<string> {
   }
 }
 
+/** Drop a single cached entry (e.g., after a 403 from an expired URL). */
+export function invalidateBrandingSignedUrl(path: string, ttlSeconds = BRANDING_SIGNED_URL_TTL_SECONDS): void {
+  cache.delete(`${path}::${ttlSeconds}`);
+}
+
+export type BrandingUrlStatus = "idle" | "loading" | "ready" | "error";
+
+export interface BrandingUrlState {
+  /** Signed URL when ready, otherwise empty string. */
+  url: string;
+  status: BrandingUrlStatus;
+  /** Wire this to `<img onError>` to invalidate + auto-retry once, then mark errored. */
+  handleImgError: () => void;
+  /** Manual retry trigger. Resets retry counter. */
+  retry: () => void;
+}
+
 /**
- * Resolve a stored branding URL (or path) into a signed URL.
- * Returns the empty string while loading or on failure so callers can
- * keep their existing falsy checks.
+ * Resolve a stored branding URL (or path) into a signed URL with full
+ * status reporting and a built-in retry-on-error path. Use this when
+ * you want to render a fallback UI (initials, plain background, etc.)
+ * if the signed URL ever fails to load.
+ */
+export function useBrandingSignedUrlState(
+  storedUrl: string | null | undefined,
+  ttlSeconds: number = BRANDING_SIGNED_URL_TTL_SECONDS,
+): BrandingUrlState {
+  const [url, setUrl] = useState<string>("");
+  const [status, setStatus] = useState<BrandingUrlStatus>("idle");
+  const retriesRef = useRef(0);
+  const reqIdRef = useRef(0);
+
+  const path = extractBrandingObjectPath(storedUrl);
+
+  const load = useCallback(
+    (forceRefresh: boolean) => {
+      if (!path) {
+        setUrl("");
+        setStatus("idle");
+        return;
+      }
+      const id = ++reqIdRef.current;
+      setStatus("loading");
+      getOrMint(path, ttlSeconds, forceRefresh)
+        .then((signed) => {
+          if (id !== reqIdRef.current) return;
+          setUrl(signed);
+          setStatus("ready");
+        })
+        .catch(() => {
+          if (id !== reqIdRef.current) return;
+          setUrl("");
+          setStatus("error");
+        });
+    },
+    [path, ttlSeconds],
+  );
+
+  useEffect(() => {
+    retriesRef.current = 0;
+    load(false);
+  }, [load]);
+
+  const handleImgError = useCallback(() => {
+    if (!path) {
+      setStatus("error");
+      return;
+    }
+    if (retriesRef.current >= MAX_AUTOMATIC_RETRIES) {
+      setUrl("");
+      setStatus("error");
+      return;
+    }
+    retriesRef.current += 1;
+    invalidateBrandingSignedUrl(path, ttlSeconds);
+    load(true);
+  }, [path, ttlSeconds, load]);
+
+  const retry = useCallback(() => {
+    retriesRef.current = 0;
+    if (path) invalidateBrandingSignedUrl(path, ttlSeconds);
+    load(true);
+  }, [path, ttlSeconds, load]);
+
+  return { url, status, handleImgError, retry };
+}
+
+/**
+ * Back-compat string-only variant. Returns the empty string while
+ * loading or on failure so callers can keep their existing falsy
+ * checks. Prefer `useBrandingSignedUrlState` when you need a fallback.
  */
 export function useBrandingSignedUrl(
   storedUrl: string | null | undefined,
   ttlSeconds: number = BRANDING_SIGNED_URL_TTL_SECONDS,
 ): string {
-  const [url, setUrl] = useState<string>("");
-  const lastKey = useRef<string>("");
-
-  useEffect(() => {
-    const path = extractBrandingObjectPath(storedUrl);
-    const key = path ? `${path}::${ttlSeconds}` : "";
-
-    if (!path) {
-      lastKey.current = "";
-      setUrl("");
-      return;
-    }
-    if (key === lastKey.current && url) return;
-    lastKey.current = key;
-
-    let cancelled = false;
-    getOrMint(path, ttlSeconds)
-      .then((signed) => {
-        if (!cancelled) setUrl(signed);
-      })
-      .catch(() => {
-        if (!cancelled) setUrl("");
-      });
-    return () => {
-      cancelled = true;
-    };
-    // url intentionally excluded: we only re-run on input change
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [storedUrl, ttlSeconds]);
-
-  return url;
+  return useBrandingSignedUrlState(storedUrl, ttlSeconds).url;
 }
