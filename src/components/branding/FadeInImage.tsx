@@ -82,12 +82,12 @@ export function FadeInImage({
           setLoaded(false);
           onError?.(e);
         }}
-        className={cn(
-          "transition-opacity ease-out",
-          loaded ? "opacity-100" : "opacity-0",
-          className,
-        )}
-        style={transitionStyle}
+        className={cn("transition-opacity ease-out", className)}
+        style={{
+          ...style,
+          transitionDuration: `${fadeDurationMs}ms`,
+          opacity: loaded ? loadedOpacity : 0,
+        }}
       />
     </span>
   );
