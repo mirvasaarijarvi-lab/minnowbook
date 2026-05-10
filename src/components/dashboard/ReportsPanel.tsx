@@ -431,6 +431,39 @@ const ReportsPanel = () => {
     URL.revokeObjectURL(url);
   };
 
+  const handleExportOfferConversionCSV = () => {
+    const headers = [t("common.date"), "Offer ID", t("common.status"), t("reports.convertedOffers"), t("reports.totalOffers")];
+    const rows = offersInPeriod.map((o: any) => {
+      const isConverted = o.status === "confirmed" || (Array.isArray(o.reservation_ids) && o.reservation_ids.length > 0);
+      const resCount = Array.isArray(o.reservation_ids) ? o.reservation_ids.length : 0;
+      return [
+        format(new Date(o.created_at), "d.M.yyyy"),
+        String(o.id),
+        String(o.status ?? ""),
+        isConverted ? t("reports.yes") : t("reports.no"),
+        String(resCount),
+      ];
+    });
+    rows.push(["", "", t("reports.totalOffers"), String(offerConversion.total), ""]);
+    rows.push(["", "", t("reports.convertedOffers"), String(offerConversion.converted), ""]);
+    rows.push(["", "", t("reports.conversionRate"), `${offerConversion.rate}%`, ""]);
+
+    const sanitize = (v: string) => String(v).replace(/"/g, '""').replace(/[\r\n]+/g, " ").replace(/\u2014/g, "-").replace(/\u20AC/g, "EUR");
+    const csvContent = "sep=;\n" + [headers, ...rows].map((row) => row.map((c) => `"${sanitize(c)}"`).join(";")).join("\r\n");
+    const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
+    const csvBytes = new TextEncoder().encode(csvContent);
+    const blob = new Blob([bom, csvBytes], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `offer_conversion_${periodLabel.replace(/\s/g, "_")}${effectiveSiteName ? `_${effectiveSiteName.replace(/\s/g, "_")}` : ""}.csv`;
+    a.style.display = "none";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   /* ── Print ───────────────────────────────────────────── */
   const handlePrint = () => {
     const pw = window.open("", "_blank");
