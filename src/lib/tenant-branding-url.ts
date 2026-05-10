@@ -231,23 +231,14 @@ export function useBrandingSignedUrlState(
 ): BrandingUrlState {
   const [url, setUrl] = useState<string>("");
   const [status, setStatus] = useState<BrandingUrlStatus>("idle");
-  const retriesRef = useRef(0);
   const reqIdRef = useRef(0);
-  const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const retryTimerActiveRef = useRef(false);
 
   const path = extractBrandingObjectPath(storedUrl);
-
-  const clearRetryTimer = useCallback(() => {
-    if (retryTimerRef.current !== null) {
-      clearTimeout(retryTimerRef.current);
-      retryTimerRef.current = null;
-    }
-  }, []);
 
   const load = useCallback(
     (forceRefresh: boolean) => {
       if (!path) {
-        clearRetryTimer();
         setUrl("");
         setStatus("idle");
         return;
@@ -265,76 +256,80 @@ export function useBrandingSignedUrlState(
       getOrMint(path, ttlSeconds, forceRefresh)
         .then((signed) => {
           if (id !== reqIdRef.current) return;
-          retriesRef.current = 0;
+          resetSharedRetry(path, ttlSeconds);
           clearBrandingFallback(path, ttlSeconds);
           setUrl(signed);
           setStatus("ready");
         })
         .catch(() => {
           if (id !== reqIdRef.current) return;
-          // Mint itself failed (network, 5xx, RLS). Schedule a backoff
-          // retry rather than immediately re-hitting createSignedUrl.
-          if (retriesRef.current >= MAX_AUTOMATIC_RETRIES) {
+          // Mint itself failed (network, 5xx, RLS). Join (or create)
+          // the per-path shared backoff lock so multiple components
+          // referencing the same path don't schedule overlapping
+          // retry timers.
+          const attempt = getSharedAttempt(path, ttlSeconds);
+          if (attempt >= MAX_AUTOMATIC_RETRIES) {
             rememberFallback(path, ttlSeconds);
             setUrl("");
             setStatus("error");
             return;
           }
-          const attempt = retriesRef.current;
-          retriesRef.current += 1;
-          clearRetryTimer();
-          retryTimerRef.current = setTimeout(() => {
-            retryTimerRef.current = null;
-            invalidateBrandingSignedUrl(path, ttlSeconds);
+          consumeSharedAttempt(path, ttlSeconds);
+          retryTimerActiveRef.current = true;
+          acquireRetryLock(path, ttlSeconds, attempt).then(() => {
+            retryTimerActiveRef.current = false;
+            if (id !== reqIdRef.current) return;
             load(true);
-          }, backoffDelay(attempt));
+          });
         });
     },
-    [path, ttlSeconds, clearRetryTimer],
+    [path, ttlSeconds],
   );
 
   useEffect(() => {
-    retriesRef.current = 0;
-    clearRetryTimer();
     load(false);
-    return clearRetryTimer;
-  }, [load, clearRetryTimer]);
+    return () => {
+      // Bump the request id so any in-flight retry subscription
+      // resolves into a no-op for this unmounted instance.
+      reqIdRef.current += 1;
+    };
+  }, [load]);
 
   const handleImgError = useCallback(() => {
     if (!path) {
       setStatus("error");
       return;
     }
-    if (retriesRef.current >= MAX_AUTOMATIC_RETRIES) {
+    const attempt = getSharedAttempt(path, ttlSeconds);
+    if (attempt >= MAX_AUTOMATIC_RETRIES) {
       rememberFallback(path, ttlSeconds);
       setUrl("");
       setStatus("error");
       return;
     }
-    const attempt = retriesRef.current;
-    retriesRef.current += 1;
-    clearRetryTimer();
-    // Drop the cached (likely-expired or rejected) URL immediately so a
-    // parallel hook instance won't reuse it, but wait the backoff
-    // window before re-minting to avoid spamming the storage API when
-    // many <img> tags fail in quick succession.
-    invalidateBrandingSignedUrl(path, ttlSeconds);
+    consumeSharedAttempt(path, ttlSeconds);
     setStatus("loading");
-    retryTimerRef.current = setTimeout(() => {
-      retryTimerRef.current = null;
+    const id = ++reqIdRef.current;
+    retryTimerActiveRef.current = true;
+    // The lock owner will invalidate the cached URL once its timer
+    // fires, so we don't need to drop it here. This avoids a race
+    // where this instance invalidates while another instance is
+    // mid-mint against the same path.
+    acquireRetryLock(path, ttlSeconds, attempt).then(() => {
+      retryTimerActiveRef.current = false;
+      if (id !== reqIdRef.current) return;
       load(true);
-    }, backoffDelay(attempt));
-  }, [path, ttlSeconds, load, clearRetryTimer]);
+    });
+  }, [path, ttlSeconds, load]);
 
   const retry = useCallback(() => {
-    retriesRef.current = 0;
-    clearRetryTimer();
     if (path) {
+      resetSharedRetry(path, ttlSeconds);
       clearBrandingFallback(path, ttlSeconds);
       invalidateBrandingSignedUrl(path, ttlSeconds);
     }
     load(true);
-  }, [path, ttlSeconds, load, clearRetryTimer]);
+  }, [path, ttlSeconds, load]);
 
   return { url, status, handleImgError, retry };
 }
