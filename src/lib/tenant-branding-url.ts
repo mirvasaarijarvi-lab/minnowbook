@@ -135,7 +135,34 @@ export function invalidateBrandingSignedUrl(path: string, ttlSeconds = BRANDING_
  * the tenant id, but explicit scoping protects against future bucket
  * layouts and against any path that doesn't include it.
  */
-const FALLBACK_CACHE_TTL_MS = 5 * 60 * 1000;
+/**
+ * Default TTL for the fallback decision cache. Tunable per-instance
+ * via `BrandingUrlOptions.fallbackCacheTtlMs`, or globally via
+ * `setDefaultBrandingFallbackCacheTtlMs()` (useful for tests and for
+ * environments with shorter signed-URL lifetimes).
+ *
+ * 5 minutes is short enough that a transient outage doesn't keep
+ * users on the fallback UI long after recovery, and long enough that
+ * navigating between booking steps doesn't re-trigger the full
+ * mint+retry cycle on every page.
+ */
+export const DEFAULT_FALLBACK_CACHE_TTL_MS = 5 * 60 * 1000;
+let defaultFallbackCacheTtlMs = DEFAULT_FALLBACK_CACHE_TTL_MS;
+
+/**
+ * Override the global default fallback cache TTL. Pass `null` or
+ * `undefined` to restore the built-in default. Already-cached entries
+ * keep their original expiry; only new `rememberFallback()` calls
+ * pick up the new value.
+ */
+export function setDefaultBrandingFallbackCacheTtlMs(ttlMs: number | null | undefined): void {
+  defaultFallbackCacheTtlMs =
+    typeof ttlMs === "number" && ttlMs > 0 ? ttlMs : DEFAULT_FALLBACK_CACHE_TTL_MS;
+}
+export function getDefaultBrandingFallbackCacheTtlMs(): number {
+  return defaultFallbackCacheTtlMs;
+}
+
 const fallbackCache = new Map<string, number>();
 
 function scopedKey(tenantId: string | null | undefined, path: string, ttlSeconds: number): string {
@@ -151,8 +178,13 @@ function isFallbackCached(tenantId: string | null | undefined, path: string, ttl
   }
   return true;
 }
-function rememberFallback(tenantId: string | null | undefined, path: string, ttlSeconds: number): void {
-  fallbackCache.set(scopedKey(tenantId, path, ttlSeconds), Date.now() + FALLBACK_CACHE_TTL_MS);
+function rememberFallback(
+  tenantId: string | null | undefined,
+  path: string,
+  ttlSeconds: number,
+  fallbackCacheTtlMs: number,
+): void {
+  fallbackCache.set(scopedKey(tenantId, path, ttlSeconds), Date.now() + fallbackCacheTtlMs);
 }
 export function clearBrandingFallback(
   path: string,
