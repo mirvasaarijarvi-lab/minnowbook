@@ -76,6 +76,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // structured log can report which user was logged in, when their token
   // would have expired, and how stale it was at the moment of sign-out.
   const lastSessionRef = useRef<Session | null>(null);
+  // Pathname captured at the most recent successful auth event
+  // (SIGNED_IN / TOKEN_REFRESHED / USER_UPDATED). Used in the
+  // unexpected-SIGNED_OUT diagnostic so monitoring can see "the user
+  // was on /dashboard/reservations when their session vanished".
+  const lastAuthEventPathRef = useRef<string | null>(null);
+  const lastAuthEventAtRef = useRef<number | null>(null);
   // We invalidate the cached `is_system_admin` lookup on every auth
   // transition so the next render of `<SystemAdminRoute>` (and any
   // consumer of `useIsSystemAdmin`) refetches against the fresh JWT
