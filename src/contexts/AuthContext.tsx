@@ -323,16 +323,48 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     );
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
+    supabase.auth
+      .getSession()
+      .then(({ data: { session } }) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        setLoading(false);
 
-      // Check subscription on initial load
-      if (session) {
-        setTimeout(() => checkSubscription(), 100);
-      }
-    });
+        // Check subscription on initial load
+        if (session) {
+          setTimeout(() => checkSubscription(), 100);
+        }
+      })
+      .catch((err) => {
+        // Corrupted or incompatible persisted session: the SDK can throw
+        // when it tries to parse an unreadable payload from localStorage
+        // (e.g. partial write, schema mismatch after an SDK upgrade,
+        // browser-storage corruption). Without this catch the promise
+        // rejects, `loading` stays true forever, and the app renders a
+        // blank screen instead of the login form. Wipe the unusable
+        // session synchronously, drop the persisted blob, and surface
+        // the unauthenticated state so the route guard sends the user
+        // to /login.
+        // eslint-disable-next-line no-console
+        console.warn("[AuthContext] initial getSession() failed, clearing persisted session", {
+          error: err instanceof Error ? err.message : String(err),
+        });
+        setSession(null);
+        setUser(null);
+        setLoading(false);
+        // Best-effort wipe of the corrupted token so the next reload
+        // starts clean. Tagged `corrupted_session` so the sign-out log
+        // shows why this happened (and the unexpected-SIGNED_OUT
+        // warning is suppressed by the intentional-reason ref).
+        intentionalSignOutRef.current = "corrupted_session" as SignOutReason;
+        void supabase.auth
+          .signOut()
+          .catch(() => {
+            // If even signOut throws (storage really is gone), the
+            // state above already shows the login screen, so swallow.
+            intentionalSignOutRef.current = null;
+          });
+      });
 
     // Periodic sync every 60 seconds
     intervalRef.current = setInterval(() => {
