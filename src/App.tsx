@@ -34,6 +34,7 @@ import BlogPost from "./pages/BlogPost";
 import BetaGuide from "./pages/BetaGuide";
 import CookieConsent from "./components/CookieConsent";
 import AccessibilityWidget from "./components/AccessibilityWidget";
+import SessionStatusIndicator from "./components/SessionStatusIndicator";
 import { ImpersonationProvider } from "./contexts/ImpersonationContext";
 import SystemAdminRoute from "./components/SystemAdminRoute";
 import RequireTenant from "./components/RequireTenant";
