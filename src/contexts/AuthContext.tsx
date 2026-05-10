@@ -238,8 +238,46 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             cause = "unknown_background_event";
           }
 
+          // Best-guess "what likely caused this" string for monitoring.
+          // Same inputs as `cause`, but phrased as an action verb so log
+          // dashboards can pivot on it without parsing free text.
+          let suspectedTrigger: string;
+          if (reason) {
+            suspectedTrigger = `explicit_logout_button:${reason}`;
+          } else if (serverError && /missing sub claim/i.test(serverError)) {
+            suspectedTrigger = "server_rejected_jwt_sub_claim";
+          } else if (serverError && /bad[_ ]?jwt|invalid[_ ]?jwt/i.test(serverError)) {
+            suspectedTrigger = "server_rejected_jwt";
+          } else if (tokenWasStale && lastRefreshAgoMs === null) {
+            suspectedTrigger = "session_expired_without_refresh_attempt";
+          } else if (tokenWasStale) {
+            suspectedTrigger = "silent_token_refresh_failed";
+          } else if (lastRefreshAgoMs !== null && lastRefreshAgoMs > 60_000) {
+            suspectedTrigger = "stale_refresh_loop";
+          } else if (serverError) {
+            suspectedTrigger = "supabase_sdk_reported_error";
+          } else {
+            suspectedTrigger = "background_sdk_event_no_signal_available";
+          }
+
+          const route = currentPath;
+          const lastHealthyPath = lastAuthEventPathRef.current;
+          const msSinceLastAuthEvent = lastAuthEventAtRef.current
+            ? nowMs - lastAuthEventAtRef.current
+            : null;
+
           const diagnostic = {
             cause,
+            suspectedTrigger,
+            // Hoist userId to the top level (in addition to
+            // previousUserId) so log filters can group by user without
+            // a nested-field query.
+            userId: previousSession?.user?.id ?? null,
+            route,
+            lastHealthyRoute: lastHealthyPath,
+            msSinceLastHealthyAuthEvent: msSinceLastAuthEvent,
+            referrer:
+              typeof document !== "undefined" ? document.referrer || null : null,
             intentionalReason: reason,
             previousUserId: previousSession?.user?.id ?? null,
             previousExpiresAt: prevExpiresAt
