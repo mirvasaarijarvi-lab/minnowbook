@@ -69,7 +69,8 @@ async function flushMicrotasks() {
 
 describe("useBrandingSignedUrlState retry policy", () => {
   beforeEach(() => {
-    vi.resetModules();
+    testCounter += 1;
+    PATH = `tenant-${testCounter}/logo.png`;
     createSignedUrlMock.mockReset();
     vi.useFakeTimers();
     vi.spyOn(Math, "random").mockReturnValue(0);
