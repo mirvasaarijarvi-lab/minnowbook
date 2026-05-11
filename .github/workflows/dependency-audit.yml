@@ -92,6 +92,10 @@ jobs:
       # Required so the PR-comment step can upsert the audit summary
       # comment on pull requests. Scoped to this job only.
       pull-requests: write
+      # Required so the dedicated Check Run we create for the
+      # severity breakdown can show up in the PR's "Checks" sidebar
+      # alongside the job-level check.
+      checks: write
     steps:
       - name: Checkout
         # actions/checkout@v4.2.2
