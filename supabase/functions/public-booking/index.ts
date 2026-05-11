@@ -47,7 +47,7 @@ export function assertServiceRoleKey(
       error:
         "Booking service is not fully configured (missing service-role key). " +
         "Please contact the venue.",
-      error_code: "SERVICE_ROLE_KEY_MISSING",
+      error_code: BOOKING_ERROR_CODES.SERVICE_ROLE_KEY_MISSING,
     }),
     {
       status: 400,
