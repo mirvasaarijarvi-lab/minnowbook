@@ -28,23 +28,35 @@ describe("reservationFilters", () => {
       expect(buildGuestSearchOrClause("   ")).toBeNull();
     });
 
-    it("targets the three guest columns", () => {
-      const clause = buildGuestSearchOrClause("alice");
-      expect(clause).toBe(
-        "guest_name.ilike.%alice%,guest_email.ilike.%alice%,guest_phone.ilike.%alice%",
+    it("targets the combined guest_search_text column", () => {
+      expect(buildGuestSearchOrClause("alice")).toBe(
+        "guest_search_text.ilike.%alice%",
+      );
+    });
+
+    it("lowercases the term to match the generated column", () => {
+      // Column is `lower(name||email||phone)`, so the search term must
+      // also be lowercased or the trigram index won't help.
+      expect(buildGuestSearchOrClause("Alice@Example.COM")).toBe(
+        "guest_search_text.ilike.%alice@example.com%",
+      );
+    });
+
+    it("supports cross-field matches like 'john gmail'", () => {
+      // The generated column joins name+email+phone with spaces, so
+      // 'john gmail' is a valid substring against e.g. 'john doe john@gmail.com'.
+      expect(buildGuestSearchOrClause("John Gmail")).toBe(
+        "guest_search_text.ilike.%john gmail%",
       );
     });
 
     it("sanitizes injection-like chars before wildcarding", () => {
       const clause = buildGuestSearchOrClause("a),b%c")!;
-      // Must still produce exactly three filter expressions
-      const parts = clause.split(/,(?=guest_)/);
-      expect(parts.length).toBe(3);
-      // Each filter should reference the same sanitized term
-      const terms = parts.map((p) => p.split(".ilike.")[1]);
-      expect(new Set(terms).size).toBe(1);
-      // The inner term must be %...% with no parens, commas, or extra %
-      const inner = terms[0].slice(1, -1); // strip leading/trailing %
+      // Single filter expression, not three.
+      expect(clause.split(",").length).toBe(1);
+      expect(clause.startsWith("guest_search_text.ilike.")).toBe(true);
+      const term = clause.split(".ilike.")[1];
+      const inner = term.slice(1, -1); // strip leading/trailing %
       expect(inner).not.toMatch(/[%(),]/);
     });
   });

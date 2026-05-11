@@ -33,6 +33,7 @@ const EXPECTED_INDEXES = [
   "idx_reservations_tenant_checkout",
   "idx_reservations_tenant_email",
   "idx_reservations_capacity_lookup",
+  "idx_reservations_guest_search_trgm",
 ];
 
 async function rpc(name: string, body: Record<string, unknown>) {
