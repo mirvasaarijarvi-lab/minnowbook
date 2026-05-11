@@ -40,34 +40,80 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v5
 
-      # Fail fast (before expensive Bun install / Playwright browser
-      # download / Vite build) when the Supabase secrets that the Deno
-      # edge function tests need aren't wired up. scripts/test-ci.sh
-      # also re-validates these right before invoking deno, but doing
-      # it here means a misconfigured fork or a rotated/missing secret
-      # surfaces in seconds with a clear message instead of ~5 minutes
-      # in.
+      # Precheck Supabase secrets BEFORE the expensive Bun install /
+      # Playwright browser download / Vite build, so a misconfigured fork
+      # or a rotated/missing secret surfaces in seconds with a clear,
+      # actionable message instead of ~5 minutes in.
+      #
+      # Behaviour matrix:
+      #   * SUPABASE_URL (or VITE_SUPABASE_URL) is REQUIRED. Without it,
+      #     no Deno edge test can hit the function endpoints at all, so
+      #     we fail the job up front.
+      #   * SUPABASE_SERVICE_ROLE_KEY is RECOMMENDED but not strictly
+      #     required. When it's missing the Deno tests gracefully
+      #     degrade:
+      #       - the end-to-end "creates a pending reservation" test
+      #         skips its DB-verification step;
+      #       - the "no data leak when service role key missing" test
+      #         runs in validate-only mode (sends an invalid payload
+      #         that the function rejects with 400 before any insert);
+      #       - the "validation-only request leaves row count unchanged"
+      #         test is ignored because it needs the service role to
+      #         issue an authoritative count query.
+      #     We surface this as a ::warning:: + a GitHub step summary so
+      #     reviewers know the suite ran in degraded mode.
+      #   * Set REQUIRE_SERVICE_ROLE_KEY=1 in repo/org variables to
+      #     promote the warning to a hard failure (recommended for the
+      #     main branch's required check).
       - name: Validate required Supabase env vars
+        env:
+          REQUIRE_SERVICE_ROLE_KEY: ${{ vars.REQUIRE_SERVICE_ROLE_KEY }}
         run: |
-          # SUPABASE_URL falls back to VITE_SUPABASE_URL inside
-          # scripts/test-ci.sh, so accept either here too.
+          set -u
           effective_url="${SUPABASE_URL:-${VITE_SUPABASE_URL:-}}"
-          missing=()
+          summary="${GITHUB_STEP_SUMMARY:-/dev/stdout}"
+
+          {
+            echo "## Supabase env precheck"
+            echo ""
+          } >> "$summary"
+
+          # ---- Critical: SUPABASE_URL ----
           if [ -z "$effective_url" ]; then
-            missing+=("SUPABASE_URL (or VITE_SUPABASE_URL)")
-          fi
-          if [ -z "${SUPABASE_SERVICE_ROLE_KEY:-}" ]; then
-            missing+=("SUPABASE_SERVICE_ROLE_KEY")
-          fi
-          if [ "${#missing[@]}" -gt 0 ]; then
-            echo "::error title=Missing Supabase secrets::The Deno edge function tests require the following secret(s) to be configured on this repository before test:ci can run:"
-            for var in "${missing[@]}"; do
-              echo "::error::  - $var"
-            done
-            echo "::error::Add them under Settings → Secrets and variables → Actions. SUPABASE_SERVICE_ROLE_KEY must be the service-role key from Lovable Cloud (Backend → API keys)."
+            echo "::error title=Missing Supabase URL::SUPABASE_URL (or VITE_SUPABASE_URL) is required for the Deno edge function tests. Add it under Settings → Secrets and variables → Actions."
+            {
+              echo "- ❌ **SUPABASE_URL** (or VITE_SUPABASE_URL): missing — cannot run any edge function test."
+              echo ""
+              echo "Add the secret under **Settings → Secrets and variables → Actions** and re-run the workflow."
+            } >> "$summary"
             exit 1
           fi
-          echo "Supabase env vars present (URL + service-role key). Proceeding."
+          echo "- ✅ **SUPABASE_URL**: present"  >> "$summary"
+
+          # ---- Recommended: SUPABASE_SERVICE_ROLE_KEY ----
+          if [ -z "${SUPABASE_SERVICE_ROLE_KEY:-}" ]; then
+            {
+              echo "- ⚠️ **SUPABASE_SERVICE_ROLE_KEY**: missing — Deno tests will run in **degraded mode**:"
+              echo "    - End-to-end reservation test will skip the DB-verification step."
+              echo "    - 'No data leak when service role key missing' test will run in validate-only mode (no insert)."
+              echo "    - 'Validation-only request leaves row count unchanged' test will be ignored (needs service role for count)."
+              echo ""
+              echo "Add SUPABASE_SERVICE_ROLE_KEY under **Settings → Secrets and variables → Actions** to run the full suite. Use the service-role key from Lovable Cloud (Backend → API keys)."
+            } >> "$summary"
+
+            if [ "${REQUIRE_SERVICE_ROLE_KEY:-0}" = "1" ]; then
+              echo "::error title=Missing service-role key::SUPABASE_SERVICE_ROLE_KEY is missing and REQUIRE_SERVICE_ROLE_KEY=1 is set. Failing the job. See the step summary for the affected tests."
+              exit 1
+            fi
+
+            echo "::warning title=Degraded test mode::SUPABASE_SERVICE_ROLE_KEY is not configured. Deno edge tests will skip cleanup/DB-verification and run validation-only fallbacks. Set REQUIRE_SERVICE_ROLE_KEY=1 in repo variables to make this a hard failure."
+            echo "Supabase URL present; service-role key MISSING — proceeding in degraded mode."
+            exit 0
+          fi
+
+          echo "- ✅ **SUPABASE_SERVICE_ROLE_KEY**: present" >> "$summary"
+          echo "Supabase env vars present (URL + service-role key). Proceeding with the full suite."
+
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
