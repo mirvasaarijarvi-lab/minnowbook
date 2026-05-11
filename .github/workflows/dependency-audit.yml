@@ -252,3 +252,121 @@ jobs:
             audit-all.json
           if-no-files-found: ignore
           retention-days: 14
+
+      # ---------------------------------------------------------------
+      # SARIF emission for GitHub code scanning.
+      #
+      # Why we do this here instead of relying on Dependabot alerts:
+      # SARIF uploads surface advisories inline on the PR's "Files
+      # changed" tab and in the Security tab, with one entry per
+      # vulnerable package and a stable rule id (`<advisory-id>` from
+      # the GitHub Advisory Database). That is materially better PR
+      # signal than the JSON artifact alone, especially when the
+      # `Run npm audit` gate above has already failed and a reviewer
+      # wants to see WHICH package is the culprit without unzipping
+      # the artifact.
+      #
+      # `audit-all.json` is the broader (low+) scan that runs with
+      # `if: always()`, so it exists even when the gate failed. We
+      # convert it inline with `node -e` (no extra dep) into the
+      # minimal SARIF 2.1.0 shape that code-scanning accepts.
+      # `continue-on-error` on the upload prevents a SARIF parse
+      # mishap from masking the real audit verdict above.
+      # ---------------------------------------------------------------
+      - name: Convert npm audit JSON to SARIF
+        if: always() && (steps.detect.outputs.manager == 'npm' || steps.detect.outputs.manager == 'bun-via-npm')
+        run: |
+          set -euo pipefail
+          if [ ! -s audit-all.json ]; then
+            echo "audit-all.json missing or empty, skipping SARIF conversion."
+            exit 0
+          fi
+          node --input-type=module -e '
+            import fs from "node:fs";
+            const raw = fs.readFileSync("audit-all.json", "utf8");
+            let report;
+            try { report = JSON.parse(raw); } catch { report = {}; }
+            const vulns = report.vulnerabilities || {};
+
+            // npm severity to SARIF level mapping. Critical and high
+            // surface as "error" so they are visually loud on the PR.
+            const sevToLevel = {
+              critical: "error",
+              high: "error",
+              moderate: "warning",
+              low: "note",
+              info: "note",
+            };
+
+            const rules = new Map();
+            const results = [];
+
+            for (const [pkgName, info] of Object.entries(vulns)) {
+              const via = Array.isArray(info.via) ? info.via : [];
+              for (const v of via) {
+                // `via` entries are either advisory objects or names of
+                // upstream vulnerable packages. We only emit a SARIF
+                // result for the advisory objects.
+                if (typeof v !== "object" || v === null) continue;
+                const ruleId = String(v.source ?? v.url ?? `${pkgName}:${v.title ?? "unknown"}`);
+                const severity = String(v.severity || info.severity || "info").toLowerCase();
+                const level = sevToLevel[severity] || "note";
+                const title = String(v.title || `Vulnerability in ${pkgName}`);
+                const url = String(v.url || `https://github.com/advisories/${ruleId}`);
+
+                if (!rules.has(ruleId)) {
+                  rules.set(ruleId, {
+                    id: ruleId,
+                    name: title.replace(/[^A-Za-z0-9_]/g, "_").slice(0, 80) || "advisory",
+                    shortDescription: { text: title.slice(0, 120) },
+                    fullDescription: { text: title },
+                    helpUri: url,
+                    help: { text: `${title}\nSee: ${url}`, markdown: `**${title}**\n\nSee: [${url}](${url})` },
+                    defaultConfiguration: { level },
+                    properties: { "security-severity": ({ critical: "9.5", high: "8.0", moderate: "5.5", low: "3.5", info: "1.0" })[severity] || "1.0", tags: ["security", "dependency", severity] },
+                  });
+                }
+
+                results.push({
+                  ruleId,
+                  level,
+                  message: { text: `${pkgName}: ${title} (range ${v.range || "unknown"})` },
+                  locations: [{
+                    physicalLocation: {
+                      artifactLocation: { uri: "package-lock.json" },
+                      region: { startLine: 1 },
+                    },
+                  }],
+                  partialFingerprints: { advisory: ruleId, package: pkgName },
+                });
+              }
+            }
+
+            const sarif = {
+              $schema: "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json",
+              version: "2.1.0",
+              runs: [{
+                tool: {
+                  driver: {
+                    name: "npm-audit",
+                    informationUri: "https://docs.npmjs.com/cli/v10/commands/npm-audit",
+                    version: "1.0",
+                    rules: Array.from(rules.values()),
+                  },
+                },
+                results,
+              }],
+            };
+            fs.writeFileSync("npm-audit.sarif", JSON.stringify(sarif));
+            console.log(`Wrote npm-audit.sarif with ${results.length} result(s) across ${rules.size} rule(s).`);
+          '
+
+      - name: Upload SARIF to GitHub code scanning
+        if: always() && (steps.detect.outputs.manager == 'npm' || steps.detect.outputs.manager == 'bun-via-npm') && hashFiles('npm-audit.sarif') != ''
+        continue-on-error: true
+        # github/codeql-action/upload-sarif@v3.27.5
+        uses: github/codeql-action/upload-sarif@f09c1c0a94de965c15400f5634aa42fac8fb8f88
+        with:
+          sarif_file: npm-audit.sarif
+          category: npm-audit
+
