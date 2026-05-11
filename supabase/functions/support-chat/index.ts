@@ -2,50 +2,15 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { SUPPORT_CHAT_SYSTEM_PROMPT } from "./prompt.ts";
 
-// --- CORS with origin allowlist ---
-const ALLOWED_ORIGINS = [
-  "https://minnowbook.lovable.app",
-  "https://mimmobook.com",
-  "https://www.mimmobook.com",
-  // Subdomain pattern: only DNS-safe chars (letters, digits, dots, hyphens)
-  // Rejects userinfo (`@`), ports (`:`), paths (`/`), queries (`?`), etc.
-  /^https:\/\/[a-zA-Z0-9.-]+\.lovable\.app$/,
-  /^https:\/\/[a-zA-Z0-9.-]+\.lovableproject\.com$/,
-];
+// CORS + transport-security headers come from the shared module so the
+// triad cannot drift across edge functions. We re-import the allowlist
+// for the rejection-alert payload below.
+import {
+  getCorsHeaders,
+  isOriginAllowed,
+  DEFAULT_ALLOWED_ORIGINS as ALLOWED_ORIGINS,
+} from "../_shared/http-headers.ts";
 
-function isOriginAllowed(origin: string): boolean {
-  if (!origin) return true; // server-to-server / no Origin header
-  return ALLOWED_ORIGINS.some((o) =>
-    typeof o === "string" ? o === origin : o.test(origin)
-  );
-}
-
-function getCorsHeaders(req: Request): Record<string, string> {
-  const origin = req.headers.get("Origin") || "";
-  const allowed = origin !== "" && isOriginAllowed(origin);
-  const headers: Record<string, string> = {
-    "Access-Control-Allow-Headers":
-      "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Access-Control-Allow-Credentials": "false",
-    "X-Content-Type-Options": "nosniff",
-    "X-Frame-Options": "DENY",
-    "X-XSS-Protection": "1; mode=block",
-    "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
-    "Referrer-Policy": "strict-origin-when-cross-origin",
-    "Content-Security-Policy": "default-src 'none'; frame-ancestors 'none'",
-    "Cache-Control": "no-store, no-cache, must-revalidate, private",
-    "Pragma": "no-cache",
-    "Vary": "Origin",
-  };
-  // Only echo the Origin when it's on the allowlist. For disallowed or
-  // missing origins, omit Access-Control-Allow-Origin entirely so the
-  // browser blocks the response instead of trusting a fallback value.
-  if (allowed) {
-    headers["Access-Control-Allow-Origin"] = origin;
-  }
-  return headers;
-}
 
 function getJwtPayload(token: string): Record<string, unknown> | null {
   try {
@@ -85,7 +50,7 @@ setInterval(() => {
 }, 300_000);
 
 serve(async (req) => {
-  const corsHeaders = getCorsHeaders(req);
+  const corsHeaders = getCorsHeaders(req, { allowMethods: "POST, OPTIONS" });
   const reqOrigin = req.headers.get("Origin") || "";
   const referer = req.headers.get("Referer") || "";
   const userAgent = req.headers.get("User-Agent") || "";

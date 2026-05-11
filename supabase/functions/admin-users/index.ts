@@ -1,42 +1,12 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-// --- CORS with origin allowlist ---
-const ALLOWED_ORIGINS = [
-  "https://minnowbook.lovable.app",
-  // Subdomain pattern: only DNS-safe chars (letters, digits, dots, hyphens)
-  // Rejects userinfo (`@`), ports (`:`), paths (`/`), queries (`?`), etc.
-  /^https:\/\/[a-zA-Z0-9.-]+\.lovable\.app$/,
-];
+// CORS + transport-security headers come from the shared module so the
+// triad cannot drift across edge functions.
+import {
+  getCorsHeaders,
+  isOriginAllowed,
+} from "../_shared/http-headers.ts";
 
-const SECURITY_HEADERS = {
-  "X-Content-Type-Options": "nosniff",
-  "X-Frame-Options": "DENY",
-  "X-XSS-Protection": "1; mode=block",
-  "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
-  "Referrer-Policy": "strict-origin-when-cross-origin",
-  "Content-Security-Policy": "default-src 'none'; frame-ancestors 'none'",
-  "Cache-Control": "no-store, no-cache, must-revalidate, private",
-  "Pragma": "no-cache",
-  "Vary": "Origin",
-};
-
-function isOriginAllowed(origin: string): boolean {
-  if (!origin) return true; // server-to-server / curl with no Origin
-  return ALLOWED_ORIGINS.some((o) =>
-    typeof o === "string" ? o === origin : o.test(origin)
-  );
-}
-
-function getCorsHeaders(req: Request): Record<string, string> {
-  const origin = req.headers.get("Origin") || "";
-  const allowed = isOriginAllowed(origin) && origin !== "";
-  return {
-    "Access-Control-Allow-Origin": allowed ? origin : ALLOWED_ORIGINS[0] as string,
-    "Access-Control-Allow-Headers":
-      "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-    ...SECURITY_HEADERS,
-  };
-}
 
 // --- Safe error messages (prevent schema leakage) ---
 // Implementation extracted to ./sanitize-error.ts so it can be unit-tested

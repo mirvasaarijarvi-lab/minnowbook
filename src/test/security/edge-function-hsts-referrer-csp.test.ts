@@ -53,8 +53,37 @@ function listFunctionDirs(): string[] {
     .sort();
 }
 
+/**
+ * Read a function's `index.ts`, plus any sibling `_shared/*.ts`
+ * modules it imports. The transport-security header literals were
+ * historically copy-pasted into every function; they now live in a
+ * single `_shared/http-headers.ts` module that all functions import.
+ * To keep the regex extractor honest we concatenate the imported
+ * shared sources before scanning, so the literal strings are still
+ * "in scope" from the test's point of view.
+ */
 function readFn(name: string): string {
-  return readFileSync(join(FUNCTIONS_DIR, name, "index.ts"), "utf8");
+  const indexPath = join(FUNCTIONS_DIR, name, "index.ts");
+  const indexSrc = readFileSync(indexPath, "utf8");
+  // Match `from "../_shared/<file>"` or `from "../_shared/<file>.ts"`.
+  const importRe = /from\s+["']\.\.\/_shared\/([A-Za-z0-9._-]+?)(?:\.ts)?["']/g;
+  const seen = new Set<string>();
+  let combined = indexSrc;
+  for (const m of indexSrc.matchAll(importRe)) {
+    const file = m[1];
+    if (seen.has(file)) continue;
+    seen.add(file);
+    for (const ext of [".ts", ".tsx", ""]) {
+      const path = join(FUNCTIONS_DIR, "_shared", `${file}${ext}`);
+      try {
+        if (statSync(path).isFile()) {
+          combined += "\n/* ---- " + path + " ---- */\n" + readFileSync(path, "utf8");
+          break;
+        }
+      } catch { /* fall through */ }
+    }
+  }
+  return combined;
 }
 
 /**

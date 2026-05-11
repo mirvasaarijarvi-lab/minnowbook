@@ -1,3 +1,4 @@
+import { corsHeaders } from "../_shared/http-headers.ts";
 /**
  * Always-403 endpoint.
  *
@@ -14,15 +15,6 @@
  *   - No DB calls: must stay fast and side-effect free.
  *   - CORS open: the SPA calls it from any tenant subdomain.
  */
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-  "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
-  "Referrer-Policy": "strict-origin-when-cross-origin",
-  "Content-Security-Policy": "default-src 'none'; frame-ancestors 'none'",
-};
 
 Deno.serve((req) => {
   if (req.method === "OPTIONS") {

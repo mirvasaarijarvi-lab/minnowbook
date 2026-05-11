@@ -7,15 +7,7 @@
  * already exist in the destination.
  */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-  "Strict-Transport-Security": "max-age=63072000; includeSubDomains; preload",
-  "Referrer-Policy": "no-referrer",
-  "Content-Security-Policy": "default-src 'none'; frame-ancestors 'none'",
-};
+import { corsHeaders } from "../_shared/http-headers.ts";
 
 const SOURCE = "tenant-assets";
 const DEST = "tenant-branding";

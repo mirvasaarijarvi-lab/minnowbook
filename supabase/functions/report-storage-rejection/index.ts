@@ -26,6 +26,7 @@
 //     JSON body so the browser never bubbles it up.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { corsHeaders } from "../_shared/http-headers.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -39,16 +40,6 @@ const CALLSITE_THRESHOLD = Number(Deno.env.get("STORAGE_REJ_CALLSITE_THRESHOLD")
 const TENANT_CALLSITE_THRESHOLD = Number(
   Deno.env.get("STORAGE_REJ_TENANT_CALLSITE_THRESHOLD") ?? "25",
 );
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
-  "Referrer-Policy": "strict-origin-when-cross-origin",
-  "Content-Security-Policy": "default-src 'none'; frame-ancestors 'none'",
-};
 
 // ---------------------------------------------------------------------------
 // Validation. We intentionally accept ONLY the safe-shape fields. Any
