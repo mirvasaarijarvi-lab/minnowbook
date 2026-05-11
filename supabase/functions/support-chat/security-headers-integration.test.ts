@@ -58,11 +58,11 @@ Deno.test(
 Deno.test(
   "support-chat: 429 rate-limit response carries SECURITY_HEADERS",
   withStubSupabaseEnv(async () => {
-    // Default RATE_LIMIT_MAX is 10 in support-chat. Drive 11 requests
-    // from the same IP; the last one MUST come back 429.
+    // RATE_LIMIT_MAX is 20 in support-chat. Drive 21 requests from
+    // the same IP; the last one MUST come back 429.
     const ip = `10.99.0.${Math.floor(Math.random() * 250) + 1}`;
     let last: Response | undefined;
-    for (let i = 0; i < 11; i++) {
+    for (let i = 0; i < 21; i++) {
       const req = new Request("https://example.test/support-chat", {
         method: "POST",
         headers: {
@@ -78,7 +78,7 @@ Deno.test(
     }
     if (!last || last.status !== 429) {
       throw new Error(
-        `expected a 429 within 11 requests, last status=${last?.status}`,
+        `expected a 429 within 21 requests, last status=${last?.status}`,
       );
     }
     await drainBody(last);
