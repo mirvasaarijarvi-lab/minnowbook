@@ -289,6 +289,28 @@ const StorageRejectionPanel = () => {
             <RefreshCw className="h-3.5 w-3.5" />
             Refresh
           </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleExport("csv")}
+            disabled={total === 0}
+            className="gap-1.5"
+            title="Download safe-shape telemetry as CSV"
+          >
+            <Download className="h-3.5 w-3.5" />
+            CSV
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleExport("json")}
+            disabled={total === 0}
+            className="gap-1.5"
+            title="Download safe-shape telemetry as JSON"
+          >
+            <Download className="h-3.5 w-3.5" />
+            JSON
+          </Button>
         </div>
 
         <div className="text-sm text-muted-foreground">
@@ -298,6 +320,10 @@ const StorageRejectionPanel = () => {
               (callsiteFilter ? ` matching "${callsiteFilter}"` : "") +
               (total >= 2000 ? " (capped at 2000, narrow filter for full view)" : "")}
         </div>
+        <p className="text-xs text-muted-foreground">
+          Exports contain only safe shape metadata (reason, callsite, tenantId, lengths,
+          flags). No raw paths, filenames, emails, or tokens are included.
+        </p>
 
         {/* Time series chart */}
         {timeSeries.length > 0 && (
