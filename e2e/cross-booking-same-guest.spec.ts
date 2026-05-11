@@ -92,6 +92,143 @@ const browserLogs = new Map<string, BrowserLogEntry[]>();
 const browserErrors = new Map<string, BrowserErrorEntry[]>();
 const correlationByTest = new Map<string, string[]>();
 
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function formatBytes(n: number): string {
+  if (n < 1024) return `${n} B`;
+  if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
+  return `${(n / 1024 / 1024).toFixed(2)} MB`;
+}
+
+interface IndexArtifact {
+  name: string;
+  contentType: string;
+  sizeBytes: number;
+  description: string;
+  dataUri?: string;
+  inlineText?: string;
+}
+
+/**
+ * Render a single self-contained HTML page that previews the failure
+ * screenshot inline, summarises the run, and lists every other artifact
+ * (video, trace, HAR, HTML dump, browser logs) with size + description.
+ *
+ * Note: Playwright stores attachments under hashed filenames so we cannot
+ * link directly between attachments. Instead we surface the artifact NAME
+ * the reviewer should look for in the same report panel.
+ */
+function renderFailureIndexHtml(
+  testInfo: { title: string; retry: number; duration: number; outputDir: string },
+  summary: Record<string, unknown>,
+  artifacts: IndexArtifact[],
+): string {
+  const screenshot = artifacts.find((a) => a.name === "failure-screenshot.png");
+  const others = artifacts.filter((a) => a.name !== "failure-screenshot.png");
+  const correlationIds = (summary.correlation_ids as string[] | undefined) ?? [];
+
+  const summaryRows = Object.entries(summary)
+    .filter(([k]) => k !== "correlation_ids")
+    .map(
+      ([k, v]) =>
+        `<tr><th>${escapeHtml(k)}</th><td><code>${escapeHtml(
+          typeof v === "string" ? v : JSON.stringify(v),
+        )}</code></td></tr>`,
+    )
+    .join("");
+
+  const artifactRows = others
+    .map(
+      (a) =>
+        `<tr><td><code>${escapeHtml(a.name)}</code></td>` +
+        `<td>${escapeHtml(a.contentType)}</td>` +
+        `<td>${formatBytes(a.sizeBytes)}</td>` +
+        `<td>${escapeHtml(a.description)}</td></tr>`,
+    )
+    .join("");
+
+  const inlineSummary = artifacts.find((a) => a.name === "failure-summary.json");
+
+  return `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Failure summary: ${escapeHtml(testInfo.title)}</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+           margin: 24px; color: #1a1a1a; max-width: 1100px; }
+    h1 { margin-top: 0; }
+    h2 { margin-top: 32px; border-bottom: 1px solid #ddd; padding-bottom: 4px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 8px; }
+    th, td { text-align: left; padding: 6px 10px; border-bottom: 1px solid #eee;
+             vertical-align: top; }
+    th { background: #f6f6f6; font-weight: 600; width: 220px; }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+           font-size: 12px; word-break: break-all; }
+    img.screenshot { max-width: 100%; border: 1px solid #ddd; border-radius: 4px; }
+    .pill { display: inline-block; padding: 2px 8px; border-radius: 10px;
+            background: #fde2e1; color: #8a1f1a; font-size: 12px; font-weight: 600; }
+    pre { background: #fafafa; border: 1px solid #eee; padding: 12px;
+          overflow: auto; max-height: 300px; font-size: 12px; }
+    .muted { color: #666; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <h1>Cross-booking failure <span class="pill">${escapeHtml(String(summary.status ?? "failed"))}</span></h1>
+  <p class="muted">Test: <strong>${escapeHtml(testInfo.title)}</strong>
+    (retry ${testInfo.retry}, duration ${Math.round(testInfo.duration)} ms)</p>
+
+  <h2>Summary</h2>
+  <table>${summaryRows}</table>
+
+  ${
+    correlationIds.length
+      ? `<h2>Correlation IDs</h2><ul>${correlationIds
+          .map((id) => `<li><code>${escapeHtml(id)}</code></li>`)
+          .join("")}</ul>`
+      : ""
+  }
+
+  ${
+    screenshot?.dataUri
+      ? `<h2>Screenshot at failure</h2>
+         <img class="screenshot" src="${screenshot.dataUri}" alt="failure screenshot" />
+         <p class="muted">Also attached as <code>failure-screenshot.png</code> (${formatBytes(
+           screenshot.sizeBytes,
+         )}).</p>`
+      : `<h2>Screenshot</h2><p class="muted">No screenshot captured (api-only test or page already closed).</p>`
+  }
+
+  <h2>All artifacts</h2>
+  <p class="muted">Each row below is attached to the same Playwright report
+    panel as this page. Click the matching attachment name in the report
+    sidebar to download or preview.</p>
+  <table>
+    <thead><tr><th>Attachment</th><th>Type</th><th>Size</th><th>Description</th></tr></thead>
+    <tbody>${artifactRows}</tbody>
+  </table>
+
+  ${
+    inlineSummary?.inlineText
+      ? `<h2>failure-summary.json</h2><pre>${escapeHtml(inlineSummary.inlineText)}</pre>`
+      : ""
+  }
+
+  <p class="muted">Output directory on the runner: <code>${escapeHtml(
+    testInfo.outputDir,
+  )}</code></p>
+</body>
+</html>`;
+}
+
+
 test.describe("Cross-booking: same guest, multiple resources/services", () => {
   test.beforeEach(async ({ page }, testInfo) => {
     const logs: BrowserLogEntry[] = [];
