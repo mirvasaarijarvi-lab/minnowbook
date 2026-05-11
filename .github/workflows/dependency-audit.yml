@@ -189,7 +189,7 @@ jobs:
           fi
 
       - name: Run pnpm audit (all deps, informational)
-        if: steps.detect.outputs.manager == 'pnpm' && always()
+        if: always() && steps.detect.outputs.manager == 'pnpm'
         continue-on-error: true
         run: pnpm audit --json | tee audit-all.json || true
 
