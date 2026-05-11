@@ -233,6 +233,7 @@ type TranslationKeys = {
   "booking.reservations": string;
   "booking.submitting": string;
   "booking.submitError": string;
+  "booking.serviceMisconfigured": string;
   "booking.dateBlocked": string;
   "booking.timeBlocked": string;
   "booking.blocked": string;
@@ -1921,6 +1922,7 @@ const en: TranslationKeys = {
   "booking.reservations": "reservations",
   "booking.submitting": "Submitting...",
   "booking.submitError": "Failed to submit reservation. Please try again.",
+  "booking.serviceMisconfigured": "Online booking is temporarily unavailable due to a server configuration issue. No reservation was created. Please contact the venue directly or try again later.",
   "booking.dateBlocked": "This date is not available for booking.",
   "booking.timeBlocked": "This time slot is not available for booking.",
   "booking.blocked": "Blocked",
@@ -3586,6 +3588,7 @@ const fi: TranslationKeys = {
   "booking.reservations": "varausta",
   "booking.submitting": "Lähetetään...",
   "booking.submitError": "Varauksen lähetys epäonnistui. Yritä uudelleen.",
+  "booking.serviceMisconfigured": "Verkkovaraus ei ole tilapäisesti käytettävissä palvelimen määritysvirheen vuoksi. Varausta ei luotu. Ota yhteyttä toimipaikkaan suoraan tai yritä myöhemmin uudelleen.",
   "booking.dateBlocked": "Tämä päivä ei ole varattavissa.",
   "booking.timeBlocked": "Tämä aikaväli ei ole varattavissa.",
   "booking.blocked": "Estetty",
@@ -5249,6 +5252,7 @@ const sv: TranslationKeys = {
   "booking.reservations": "bokningar",
   "booking.submitting": "Skickar...",
   "booking.submitError": "Kunde inte skicka bokningen. Försök igen.",
+  "booking.serviceMisconfigured": "Onlinebokning är tillfälligt otillgänglig på grund av ett serverkonfigurationsfel. Ingen bokning skapades. Kontakta verksamheten direkt eller försök igen senare.",
   "booking.dateBlocked": "Detta datum är inte tillgängligt för bokning.",
   "booking.timeBlocked": "Denna tidslucka är inte tillgänglig för bokning.",
   "booking.blocked": "Blockerad",
