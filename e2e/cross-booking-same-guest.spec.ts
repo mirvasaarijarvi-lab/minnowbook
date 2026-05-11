@@ -14,6 +14,7 @@ import {
   type HarEntry,
   type PublicBookingResult,
 } from "./fixtures/public-booking-client";
+import { captureCheckpoint } from "./fixtures/checkpoints";
 
 /**
  * End-to-end cross-booking test.
