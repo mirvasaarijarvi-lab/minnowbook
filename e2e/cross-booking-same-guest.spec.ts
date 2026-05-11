@@ -14,6 +14,7 @@ import {
   type HarEntry,
   type PublicBookingResult,
 } from "./fixtures/public-booking-client";
+import { captureCheckpoint } from "./fixtures/checkpoints";
 
 /**
  * End-to-end cross-booking test.
@@ -106,9 +107,13 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
     console.error(`${LOG_PREFIX} FAILURE ${JSON.stringify(failureSummary)}`);
   });
 
-  test("public booking page for the test tenant loads", async ({ page, tenant }) => {
+  test("public booking page for the test tenant loads", async ({ page, tenant }, testInfo) => {
     test.setTimeout(60_000);
+    await captureCheckpoint(page, testInfo, "smoke: before goto", { screenshot: false });
     await gotoAndWaitForSpa(page, `/book/${tenant.slug}`);
+    await captureCheckpoint(page, testInfo, "smoke: after SPA hydrate", {
+      probeSelectors: ["#root", "main", "h1"],
+    });
   });
 
   test("creates restaurant + guesthouse + venue reservations for the same guest", async ({ request, page, tenant }, testInfo) => {
@@ -180,7 +185,15 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
         `${label}: capacity.current_load=${cap.current_load} must be >= just-booked guests_count=${guestsCount} ` +
           `so the public booking UI shows the reservation as taken`,
       ).toBeGreaterThanOrEqual(guestsCount);
+      await captureCheckpoint(page, testInfo, `${label}: before SPA reload`, {
+        screenshot: false,
+        extra: { current_load: cap.current_load, capacity_total: cap.capacity_total ?? null },
+      });
       await gotoAndWaitForSpa(page, `/book/${tenant.slug}`);
+      await captureCheckpoint(page, testInfo, `${label}: after SPA reload`, {
+        probeSelectors: ["#root", "main", "h1"],
+        extra: { current_load: cap.current_load, capacity_total: cap.capacity_total ?? null },
+      });
       // eslint-disable-next-line no-console
       console.log(
         `${LOG_PREFIX} ${label}: verified in public booking UI ` +
@@ -228,6 +241,11 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
       ["ok", "http_error", "threw"],
       "warmup outcome must be one of the known observable states",
     ).toContain(warmupOutcome);
+
+    await captureCheckpoint(page, testInfo, "post-warmup", {
+      screenshot: false,
+      extra: warmupSummary,
+    });
 
     try {
       const restaurant = await callLeg("restaurant", {
