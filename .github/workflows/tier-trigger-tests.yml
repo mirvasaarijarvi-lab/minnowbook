@@ -18,11 +18,15 @@ on:
     branches: [main]
   workflow_dispatch:
 
+permissions: {}
+
 jobs:
   trigger-tests:
     name: Reservation type limit trigger
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout code
