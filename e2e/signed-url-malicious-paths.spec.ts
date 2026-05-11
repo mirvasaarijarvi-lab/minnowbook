@@ -46,14 +46,29 @@ const MALICIOUS_PATHS: Array<{ label: string; path: string }> = [
   { label: "overly long path", path: `${"a/".repeat(600)}file.png` },
 ];
 
-// Mirrors the i18n translator the upload UIs pass into
-// getFriendlyStoragePathErrorMessage. We hard-code the EN copy so the
-// test fails if the translation key is renamed without updating the
-// friendly path.
-const FRIENDLY_EN =
-  "This file's name contains characters we can't safely store. Please rename it and try again.";
-const t = (key: string): string =>
-  key === "common.invalidFileName" ? FRIENDLY_EN : `[missing:${key}]`;
+// Per-locale friendly copies. The project ships EN, FI, and SV (see
+// src/i18n/translations.ts under the `common.invalidFileName` key, and
+// the [Localization](mem://features/localization) memory). We hard-code
+// each translation here so a rename, deletion, or accidental edit of
+// the key in any shipped locale fails this gate, not just EN.
+//
+// If the project adds a new locale, mirror the value in
+// src/i18n/translations.ts here. The unit suite
+// `src/i18n/translations.test.ts` guards key parity across locales;
+// this spec guards the user-facing wording for the rejection path.
+const FRIENDLY_BY_LOCALE = {
+  en: "This file's name contains characters we can't safely store. Please rename it and try again.",
+  fi: "Tiedoston nimi sisältää merkkejä, joita emme voi turvallisesti tallentaa. Nimeä tiedosto uudelleen ja yritä uudelleen.",
+  sv: "Filens namn innehåller tecken som vi inte kan lagra säkert. Byt namn på filen och försök igen.",
+} as const;
+
+type Locale = keyof typeof FRIENDLY_BY_LOCALE;
+const LOCALES = Object.keys(FRIENDLY_BY_LOCALE) as Locale[];
+
+const makeTranslator = (locale: Locale) => (key: string): string =>
+  key === "common.invalidFileName"
+    ? FRIENDLY_BY_LOCALE[locale]
+    : `[missing:${key}]`;
 
 /**
  * Stand-in for the production `mintSignedUrl()` body. It MUST stay
@@ -74,27 +89,35 @@ async function callSignedUrlEndpoint(path: string): Promise<string> {
 
 test.describe("Signed URL endpoint: malicious paths surface friendly message", () => {
   for (const { label, path } of MALICIOUS_PATHS) {
-    test(`rejects ${label} with InvalidStoragePathError + friendly copy`, async () => {
-      let caught: unknown;
-      try {
-        await callSignedUrlEndpoint(path);
-      } catch (err) {
-        caught = err;
-      }
-      expect(caught, "expected the signed-URL endpoint to reject").toBeDefined();
-      expect(
-        isInvalidStoragePathError(caught),
-        "rejection must be the typed InvalidStoragePathError, not a generic Error",
-      ).toBe(true);
+    for (const locale of LOCALES) {
+      test(`[${locale}] rejects ${label} with InvalidStoragePathError + friendly copy`, async () => {
+        let caught: unknown;
+        try {
+          await callSignedUrlEndpoint(path);
+        } catch (err) {
+          caught = err;
+        }
+        expect(caught, "expected the signed-URL endpoint to reject").toBeDefined();
+        expect(
+          isInvalidStoragePathError(caught),
+          "rejection must be the typed InvalidStoragePathError, not a generic Error",
+        ).toBe(true);
 
-      const friendly = getFriendlyStoragePathErrorMessage(
-        caught,
-        t,
-        "Generic upload failure (this fallback should NOT be used)",
-      );
-      expect(friendly).toBe(FRIENDLY_EN);
-    });
+        const friendly = getFriendlyStoragePathErrorMessage(
+          caught,
+          makeTranslator(locale),
+          "Generic upload failure (this fallback should NOT be used)",
+        );
+        expect(friendly).toBe(FRIENDLY_BY_LOCALE[locale]);
+      });
+    }
   }
+
+  test("locale copies are distinct (guards against accidental EN-only fallback)", () => {
+    const values = LOCALES.map((l) => FRIENDLY_BY_LOCALE[l]);
+    const unique = new Set(values);
+    expect(unique.size).toBe(LOCALES.length);
+  });
 
   test("well-formed tenant-scoped keys still succeed", async () => {
     const url = await callSignedUrlEndpoint("tenant-id/offers/2026/offer-123.pdf");
@@ -117,7 +140,7 @@ test.describe("Signed URL endpoint: malicious paths surface friendly message", (
     const generic = new Error("Network down");
     const friendly = getFriendlyStoragePathErrorMessage(
       generic,
-      t,
+      makeTranslator("en"),
       "Could not load image",
     );
     // Friendly copy must NOT mask unrelated errors.
