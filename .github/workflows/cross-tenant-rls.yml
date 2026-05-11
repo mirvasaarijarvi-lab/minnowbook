@@ -290,6 +290,7 @@ jobs:
     needs: check-secrets
     if: needs.check-secrets.outputs.enabled == 'false'
     runs-on: ubuntu-latest
+    permissions: {}
     steps:
       - run: |
           echo "::notice::Live-mode cross-tenant tests against the REMOTE staging project were skipped — RLS_TEST_TENANT_A/B secrets are not configured."
