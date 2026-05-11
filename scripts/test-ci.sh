@@ -60,16 +60,22 @@ if command -v deno >/dev/null 2>&1; then
     exit 1
   fi
 
+  # Deno's --junit-path emits a JUnit XML alongside the normal console output,
+  # giving CI a structured report with per-test stack traces.
   run_step "Edge function tests (Deno)" \
-    deno test --allow-net --allow-env --allow-read supabase/functions/
+    deno test --allow-net --allow-env --allow-read \
+      --junit-path="$REPORTS_DIR/deno/junit.xml" \
+      supabase/functions/
 else
   echo "⚠ Deno not installed — skipping edge function tests"
   echo "  Install: https://docs.deno.com/runtime/getting_started/installation/"
   exit 1
 fi
 
-# 3. Playwright e2e
+# 3. Playwright e2e (junit + json reporters configured in playwright.config.ts;
+#    html report stays under playwright-report/, traces/screenshots/videos
+#    under test-results/).
 run_step "E2E tests (Playwright)" npx playwright test
 
 echo ""
-echo "🎉 All test suites passed"
+echo "🎉 All test suites passed (reports in $REPORTS_DIR)"
