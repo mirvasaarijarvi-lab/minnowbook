@@ -271,3 +271,92 @@ Deno.test({
   },
 });
 
+// Quantitative companion to "no data leak when SUPABASE_SERVICE_ROLE_KEY is
+// missing": queries the reservations table with the service role BEFORE and
+// AFTER the same validation-failing request, then asserts the row count is
+// byte-for-byte unchanged. This catches a subtler regression than just
+// asserting `res.status === 400`: if the function ever started writing a
+// row before validation (or as part of an error path), the status check
+// would still pass but the count would tick up by one.
+//
+// We need the service role to issue an authoritative `count=exact` query,
+// so this test is ignored when the key isn't configured. The key isn't
+// passed into `callFn` itself — the function call uses the anon key
+// exactly like a real public booking request would, mirroring the
+// "missing service key" production scenario.
+Deno.test({
+  name: "public-booking: validation-only request leaves reservations row count unchanged",
+  ignore: SERVICE_KEY.length === 0,
+  sanitizeOps: true,
+  sanitizeResources: true,
+  sanitizeExit: true,
+  fn: async () => {
+    // Use HEAD + Prefer: count=exact so we get the authoritative total in
+    // the Content-Range header without paying for a full row payload (the
+    // table may have many rows on shared CI tenants).
+    async function tenantReservationCount(): Promise<number> {
+      const res = await fetch(
+        `${REST_URL}/reservations?tenant_id=eq.${TEST_TENANT_ID}&select=id`,
+        {
+          method: "HEAD",
+          headers: {
+            apikey: SERVICE_KEY,
+            Authorization: `Bearer ${SERVICE_KEY}`,
+            Prefer: "count=exact",
+            // Range: 0-0 keeps PostgREST from streaming any rows back even
+            // though HEAD already drops the body; belt and suspenders.
+            Range: "0-0",
+          },
+        },
+      );
+      // HEAD responses have no body, but call .body?.cancel() defensively
+      // to keep Deno's resource sanitizer happy across runtimes.
+      if (res.body && !res.bodyUsed) {
+        try { await res.body.cancel(); } catch { /* ignore */ }
+      }
+      assert(
+        res.status === 200 || res.status === 206,
+        `count query failed: status=${res.status}`,
+      );
+      // Content-Range looks like "0-0/1234" or "*/1234" when no rows match.
+      const range = res.headers.get("content-range") ?? "";
+      const total = range.split("/").pop();
+      const n = total && total !== "*" ? Number.parseInt(total, 10) : NaN;
+      assert(
+        Number.isFinite(n) && n >= 0,
+        `unparseable Content-Range: "${range}"`,
+      );
+      return n;
+    }
+
+    const before = await tenantReservationCount();
+
+    // Same validation-failing payload as the "missing service key" test
+    // above: the bad email triggers the function's input validation and
+    // MUST short-circuit before any DB write.
+    const result = await callFn({
+      tenant_id: TEST_TENANT_ID,
+      guest_name: "Count-Invariant Test",
+      guest_email: "not-an-email",
+      reservation_type: "restaurant",
+      date: isoFutureDate(),
+      guests_count: 2,
+    });
+
+    assertFunctionError(result, {
+      status: 400,
+      label: "validation-only request",
+    });
+
+    const after = await tenantReservationCount();
+
+    assertEquals(
+      after,
+      before,
+      `reservations row count changed across a validation-only request: ` +
+        `before=${before}, after=${after}. The function MUST NOT insert a ` +
+        `row when input validation fails (or when SUPABASE_SERVICE_ROLE_KEY ` +
+        `is missing in production).`,
+    );
+  },
+});
