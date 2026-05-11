@@ -556,6 +556,67 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
     corrIds.push(flowCorrelationId);
     correlationByTest.set(testInfo.testId, corrIds);
 
+    // Inject a timestamped marker into the page so the silent video and the
+    // captured browser console line up. Each call:
+    //   1. console.log()s a tagged marker (captured by the page.on("console")
+    //      listener in beforeEach with ISO timestamp + correlation id), AND
+    //   2. flashes a fixed-position pill in the top-right of the page for
+    //      ~1.5s so the same label is visible in the recorded .webm.
+    // Best-effort: if the page is closed or evaluate throws, swallow the
+    // error so a failed marker never masks the real test failure.
+    const markStartedAt = Date.now();
+    const mark = async (label: string, extra?: Record<string, unknown>) => {
+      const elapsedMs = Date.now() - markStartedAt;
+      const payload = {
+        marker: label,
+        elapsed_ms: elapsedMs,
+        correlation_id: flowCorrelationId,
+        ...(extra ?? {}),
+      };
+      try {
+        if (page.isClosed()) return;
+        await page.evaluate(
+          ({ prefix, payload, label }) => {
+            // eslint-disable-next-line no-console
+            console.log(`${prefix} MARK ${JSON.stringify(payload)}`);
+            try {
+              const id = "__mimmobook_e2e_marker__";
+              let el = document.getElementById(id) as HTMLDivElement | null;
+              if (!el) {
+                el = document.createElement("div");
+                el.id = id;
+                el.style.cssText = [
+                  "position:fixed",
+                  "top:8px",
+                  "right:8px",
+                  "z-index:2147483647",
+                  "padding:4px 10px",
+                  "background:rgba(220,38,38,0.92)",
+                  "color:#fff",
+                  "font:600 12px/1.2 ui-monospace,monospace",
+                  "border-radius:10px",
+                  "box-shadow:0 2px 6px rgba(0,0,0,0.25)",
+                  "pointer-events:none",
+                ].join(";");
+                document.body.appendChild(el);
+              }
+              el.textContent = `${label} +${payload.elapsed_ms}ms`;
+              const w = window as unknown as { __mimmobook_marker_t?: number };
+              if (w.__mimmobook_marker_t) clearTimeout(w.__mimmobook_marker_t);
+              w.__mimmobook_marker_t = window.setTimeout(() => {
+                el?.remove();
+              }, 1500);
+            } catch {
+              /* DOM not ready, console marker is enough */
+            }
+          },
+          { prefix: LOG_PREFIX, payload, label },
+        );
+      } catch {
+        /* page closed mid-test; never let a marker fail the run */
+      }
+    };
+
     const callLeg = (label: string, body: Record<string, unknown>) =>
       callPublicBooking({
         request,
@@ -624,6 +685,11 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
     // Warmup is best-effort; failures here must NOT fail the test (cold
     // edge nodes are expected), but the outcome MUST be observable in CI
     // so we can correlate slow first legs with cold-start latency.
+    // Land on the booking page once before the markers start, otherwise
+    // the very first mark() has no DOM to attach the overlay to.
+    await gotoAndWaitForSpa(page, `/book/${tenant.slug}`);
+    await assertPublicBookingReady(page);
+    await mark("warmup:start");
     const warmupStartedAt = Date.now();
     let warmupOutcome: "ok" | "http_error" | "threw" | "skipped" = "skipped";
     let warmupStatus: number | undefined;
@@ -666,8 +732,10 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
       screenshot: false,
       extra: warmupSummary,
     });
+    await mark("warmup:done", { outcome: warmupOutcome, status: warmupStatus });
 
     try {
+      await mark("restaurant:start");
       const restaurant = await callLeg("restaurant", {
         tenant_id: tenant.id,
         ...GUEST,
@@ -681,8 +749,11 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
       expectLegSuccess(restaurant, "restaurant", (body) => {
         expect(body?.capacity, "restaurant capacity payload").toBeTruthy();
       });
+      await mark("restaurant:booked", { status: restaurant.status });
       await verifyLegInUi("restaurant", restaurant, 2);
+      await mark("restaurant:verified");
 
+      await mark("guesthouse:start");
       const guesthouse = await callLeg("guesthouse", {
         tenant_id: tenant.id,
         ...GUEST,
@@ -694,8 +765,11 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
         special_requests: "TEST: cross-booking guesthouse leg",
       });
       expectLegSuccess(guesthouse, "guesthouse");
+      await mark("guesthouse:booked", { status: guesthouse.status });
       await verifyLegInUi("guesthouse", guesthouse, 2);
+      await mark("guesthouse:verified");
 
+      await mark("venue:start");
       const venue = await callLeg("venue", {
         tenant_id: tenant.id,
         ...GUEST,
@@ -708,8 +782,11 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
         special_requests: "TEST: cross-booking venue leg",
       });
       expectLegSuccess(venue, "venue");
+      await mark("venue:booked", { status: venue.status });
       await verifyLegInUi("venue", venue, 30);
+      await mark("venue:verified");
 
+      await mark("negative:start");
       // Negative check: foreign tenant_id MUST be rejected, and the error
       // body MUST conform to the documented `{ error: string }` contract.
       const FAKE_TENANT_ID = "00000000-0000-0000-0000-000000000000";
