@@ -43,7 +43,18 @@ const SystemAdminRoute = ({
 }: SystemAdminRouteProps) => {
   const { isSystemAdmin, isLoading, cacheState } = useIsSystemAdmin();
 
-  if (isLoading) {
+  // Show the spinner not just while React Query reports `isLoading`, but
+  // also during the brief render window where the query is still
+  // `pending` with `fetchStatus: 'idle'` (i.e. the subscription was set
+  // up this render but the fetch effect hasn't kicked off yet). Without
+  // this, the guard would momentarily render `<Forbidden>` for a real
+  // admin — firing the always-403 status beacon and the audit log
+  // beacon before the RPC resolves to `true`. Treat any not-yet-resolved
+  // state as "still loading" so the denial path is only ever taken on a
+  // genuine `false` answer (or a failed lookup, which fails closed).
+  const hasResolved =
+    cacheState.status === "success" || cacheState.status === "error";
+  if (isLoading || !hasResolved) {
     return (
       <div
         className="min-h-screen bg-background flex items-center justify-center"
