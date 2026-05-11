@@ -1876,7 +1876,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         });
 
         it(`user A cannot UPLOAD to tenant B's nested '${scenario.name}' in tenant-assets`, async () => {
-          const path = nestedOwnPath(
+          const path = assetsNestedOwnPath(
             liveCreds.b.tenantId!,
             scenario.segments,
             "a-cross-nested-assets",
