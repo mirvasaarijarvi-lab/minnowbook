@@ -135,27 +135,51 @@ async function callPublicBooking(
   body: Record<string, unknown>,
   label: string,
   harEntries?: HarEntry[],
+  parentCorrelationId?: string,
 ) {
   const url = `${SUPABASE_URL}/functions/v1/public-booking`;
-  // Real headers actually sent on the wire (used for the HAR).
-  const wireHeaders = {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-    apikey: SUPABASE_ANON_KEY,
-  };
-  // Redacted copy used for diagnostics/console output only.
-  const redactedHeaders = {
-    ...wireHeaders,
-    Authorization: "Bearer <redacted>",
-    apikey: "<redacted>",
-  };
+  // One correlation id per logical leg, generated up-front and reused on
+  // every retry. Each physical attempt also gets its own attempt id appended
+  // (`<correlation>/<attempt>`) so a single retried leg can still be unwound
+  // from the logs without losing the parent grouping. Callers can pass a
+  // `parentCorrelationId` (e.g. a per-test "trace id") to chain everything
+  // in one cross-booking flow under one umbrella.
+  const correlationId =
+    (globalThis.crypto?.randomUUID?.() ??
+      `corr-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`);
+  const fullCorrelationId = parentCorrelationId
+    ? `${parentCorrelationId}/${label}/${correlationId}`
+    : `${label}/${correlationId}`;
 
   let lastError: unknown = null;
   let res: import("@playwright/test").APIResponse | null = null;
   let durationMs = 0;
   let startedAt = Date.now();
+  let attemptCorrelationId = fullCorrelationId;
+  let wireHeaders: Record<string, string> = {};
+  let redactedHeaders: Record<string, string> = {};
   for (let attempt = 1; attempt <= PUBLIC_BOOKING_MAX_ATTEMPTS; attempt++) {
     startedAt = Date.now();
+    attemptCorrelationId = `${fullCorrelationId}/attempt-${attempt}`;
+    // Real headers actually sent on the wire (used for the HAR). The
+    // correlation id flows through three header names so it shows up in:
+    //   - our own server-side logs (`x-correlation-id`)
+    //   - Supabase's request-id propagation (`x-request-id`)
+    //   - W3C tracing infra that downstream tooling may sniff (`traceparent`)
+    wireHeaders = {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+      apikey: SUPABASE_ANON_KEY,
+      "x-correlation-id": attemptCorrelationId,
+      "x-request-id": attemptCorrelationId,
+      // Minimal valid W3C traceparent: version-traceid(32hex)-spanid(16hex)-flags
+      traceparent: buildTraceparent(attemptCorrelationId),
+    };
+    redactedHeaders = {
+      ...wireHeaders,
+      Authorization: "Bearer <redacted>",
+      apikey: "<redacted>",
+    };
     try {
       res = await request.post(url, {
         headers: wireHeaders,
@@ -184,7 +208,7 @@ async function callPublicBooking(
       );
       // eslint-disable-next-line no-console
       console.warn(
-        `[cross-booking] ${label} attempt ${attempt}/${PUBLIC_BOOKING_MAX_ATTEMPTS} threw after ${durationMs}ms: ${(err as Error)?.message ?? err}`,
+        `[cross-booking] ${label} attempt ${attempt}/${PUBLIC_BOOKING_MAX_ATTEMPTS} threw after ${durationMs}ms (correlation_id=${attemptCorrelationId}): ${(err as Error)?.message ?? err}`,
       );
       if (attempt === PUBLIC_BOOKING_MAX_ATTEMPTS) throw err;
       await new Promise((r) => setTimeout(r, 750));
