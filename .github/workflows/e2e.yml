@@ -3,6 +3,12 @@ name: E2E Tests
 on:
   workflow_dispatch:
 
+# Default-deny. The job below re-grants only `contents: read`. The
+# Playwright report is uploaded via actions/upload-artifact which
+# uses the per-run artifact endpoint and does not require additional
+# token scopes.
+permissions: {}
+
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 
@@ -10,6 +16,8 @@ jobs:
   e2e:
     name: Playwright E2E
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout code
