@@ -41,13 +41,9 @@ import {
 function ToastHarness({ language }: { language: Language }) {
   const { setLanguage } = useI18n();
   const t = useT();
-  // Set the requested language on first render so the harness toast
-  // is fired against the locale the test asked for.
-  if (typeof window !== "undefined") {
-    // setLanguage is idempotent and safe to call in render for the test.
-    // eslint-disable-next-line react-hooks/rules-of-hooks
+  useEffect(() => {
     setLanguage(language);
-  }
+  }, [language, setLanguage]);
   return (
     <>
       <button
