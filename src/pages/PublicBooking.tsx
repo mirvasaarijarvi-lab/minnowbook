@@ -29,6 +29,7 @@ import React from "react";
 import { buildTypeTiles } from "@/lib/booking-tiles";
 import { useBrandingSignedUrlState } from "@/lib/tenant-branding-url";
 import { BOOKING_ERROR_CODES } from "../../supabase/functions/_shared/booking-error-codes";
+import { getBookingErrorToastKey, getBookingErrorToastOptions } from "@/lib/booking-error-toast";
 import { FadeInImage } from "@/components/branding/FadeInImage";
 
 // Types for public views (not in auto-generated types)
