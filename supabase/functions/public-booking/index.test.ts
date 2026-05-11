@@ -7,6 +7,10 @@
 import "https://deno.land/std@0.224.0/dotenv/load.ts";
 import { assertEquals, assert } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import { makeReservationCleanup } from "../_shared/test-cleanup.ts";
+import {
+  assertFunctionError,
+  assertMissingServiceKeyResponse,
+} from "../_shared/test-assert.ts";
 
 function requireEnv(...names: string[]): string {
   for (const n of names) {
