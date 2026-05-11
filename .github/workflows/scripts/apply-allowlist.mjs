@@ -278,6 +278,63 @@ const commentPath = process.env.AUDIT_COMMENT_PATH || "audit-comment.md";
 fs.writeFileSync(commentPath, lines.join("\n") + "\n");
 console.log(`Wrote PR comment payload to ${commentPath} (${lines.length} lines).`);
 
+// ---------------------------------------------------------------
+// GitHub PR check integration.
+//
+// The job already shows up as a single required check
+// ("dependency-audit"), but its title is just the job name. To make
+// the gate result legible from the PR's "Checks" sidebar without
+// expanding the run, we:
+//
+//   1. Emit step outputs (`audit_level`, `blocking_count`, the
+//      per-severity tallies, etc.) so a downstream `actions/github-
+//      script` step can create a sibling Check Run titled
+//      "AUDIT_LEVEL=high — 3 blocking (critical=1, high=2)".
+//
+//   2. Append a Markdown summary to $GITHUB_STEP_SUMMARY with the
+//      same severity breakdown that lands in the PR comment, so the
+//      Actions run page surfaces it in-line.
+//
+//   3. Print a single ::notice:: with the headline. PR reviewers
+//      who are already in the run log see the same one-liner.
+// ---------------------------------------------------------------
+const breakdownParts = SEVERITIES
+  .filter((s) => severityRank(s) >= minRank)
+  .map((s) => `${s}=${blockingBySeverity[s]}`);
+const headline = `AUDIT_LEVEL=${level} — ${blocking.length} blocking (${breakdownParts.join(", ") || "none"}), ${waivedEntries.length} waived, ${expiredEntries.length} expired`;
+
+function appendKV(target, key, value) {
+  if (!target) return;
+  // Use the heredoc form so multi-line values (none here, but safe)
+  // never collide with the GitHub Actions parser.
+  const delim = `EOF_${Math.random().toString(36).slice(2)}`;
+  fs.appendFileSync(target, `${key}<<${delim}\n${value}\n${delim}\n`);
+}
+
+const ghOutput = process.env.GITHUB_OUTPUT;
+if (ghOutput) {
+  appendKV(ghOutput, "audit_level", level);
+  appendKV(ghOutput, "manager", manager);
+  appendKV(ghOutput, "blocking_count", String(blocking.length));
+  appendKV(ghOutput, "waived_count", String(waivedEntries.length));
+  appendKV(ghOutput, "expired_count", String(expiredEntries.length));
+  for (const sev of SEVERITIES) {
+    appendKV(ghOutput, `blocking_${sev}`, String(blockingBySeverity[sev]));
+    appendKV(ghOutput, `waived_${sev}`, String(waivedBySeverity[sev]));
+    appendKV(ghOutput, `total_${sev}`, String(totalBySeverity[sev]));
+  }
+  appendKV(ghOutput, "headline", headline);
+  // Used as the Check Run conclusion downstream.
+  appendKV(ghOutput, "conclusion", blocking.length > 0 ? "failure" : "success");
+}
+
+const ghSummary = process.env.GITHUB_STEP_SUMMARY;
+if (ghSummary) {
+  fs.appendFileSync(ghSummary, lines.join("\n") + "\n");
+}
+
+console.log(`::notice title=Dependency audit::${headline}`);
+
 if (blocking.length > 0) {
   console.error(
     `::error::${blocking.length} dependency advisory/advisories at severity '${level}' or higher are not on the allowlist.`,
