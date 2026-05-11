@@ -176,6 +176,7 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
         /* warmup is best-effort; ignore */
       });
 
+    try {
     // 1. Restaurant
     const restaurant = await callPublicBooking(
       request,
