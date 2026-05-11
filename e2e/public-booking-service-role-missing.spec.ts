@@ -119,7 +119,7 @@ test.describe("public-booking: SUPABASE_SERVICE_ROLE_KEY missing", () => {
     expect(publicBookingHits.length).toBe(1);
     expect(invokeResult.status).toBe(400);
     expect(invokeResult.body).toMatchObject({
-      error_code: "SERVICE_ROLE_KEY_MISSING",
+      error_code: BOOKING_ERROR_CODES.SERVICE_ROLE_KEY_MISSING,
     });
     const errStr = ((invokeResult.body as any)?.error ?? "") as string;
     expect(typeof errStr).toBe("string");
