@@ -195,6 +195,29 @@ const StorageRejectionPanel = () => {
     setCallsiteFilter("");
   };
 
+  const handleExport = (kind: "csv" | "json") => {
+    const safe = toSafeEvents(events);
+    const filename = makeFilename(windowKey, kind);
+    if (kind === "csv") {
+      downloadBlob(filename, "text/csv;charset=utf-8", buildCsv(safe));
+      return;
+    }
+    const ctx: ExportContext = {
+      generatedAt: new Date().toISOString(),
+      windowKey,
+      windowStartIso: sinceIso,
+      callsiteFilter: callsiteFilter || null,
+      totalEvents: safe.length,
+      truncated: safe.length >= 2000,
+      breakdowns: {
+        byTenant: tenantBreakdown,
+        byCallsite: callsiteBreakdown,
+        byReason: reasonBreakdown,
+      },
+    };
+    downloadBlob(filename, "application/json", buildJson(safe, ctx));
+  };
+
   return (
     <Card>
       <CardHeader>
