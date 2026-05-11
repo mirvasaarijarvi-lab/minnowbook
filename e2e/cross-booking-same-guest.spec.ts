@@ -41,7 +41,7 @@ const test = baseTest.extend({
 });
 
 import { createClient } from "@supabase/supabase-js";
-import { gotoAndWaitForSpa } from "./fixtures/spa-waits";
+import { gotoAndWaitForSpa, assertPublicBookingReady } from "./fixtures/spa-waits";
 import {
   callPublicBooking,
   validatePublicBookingErrorShape,
@@ -319,8 +319,9 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
     test.setTimeout(60_000);
     await captureCheckpoint(page, testInfo, "smoke: before goto", { screenshot: false });
     await gotoAndWaitForSpa(page, `/book/${tenant.slug}`);
-    await captureCheckpoint(page, testInfo, "smoke: after SPA hydrate", {
-      probeSelectors: ["#root", "main", "h1"],
+    await assertPublicBookingReady(page);
+    await captureCheckpoint(page, testInfo, "smoke: after booking form ready", {
+      probeSelectors: ["#root", "main", "h1", "#guest_name", "form"],
     });
   });
 
@@ -403,8 +404,9 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
         extra: { current_load: cap.current_load, capacity_total: cap.capacity_total ?? null },
       });
       await gotoAndWaitForSpa(page, `/book/${tenant.slug}`);
-      await captureCheckpoint(page, testInfo, `${label}: after SPA reload`, {
-        probeSelectors: ["#root", "main", "h1"],
+      await assertPublicBookingReady(page);
+      await captureCheckpoint(page, testInfo, `${label}: after booking form ready`, {
+        probeSelectors: ["#root", "main", "h1", "#guest_name", "form"],
         extra: { current_load: cap.current_load, capacity_total: cap.capacity_total ?? null },
       });
       // eslint-disable-next-line no-console
