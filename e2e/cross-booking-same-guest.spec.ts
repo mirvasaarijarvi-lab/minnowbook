@@ -138,9 +138,27 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
     await expect(page.locator("body")).not.toContainText(/not found|404/i, { timeout: 5_000 });
   });
 
-  test("creates restaurant + guesthouse + venue reservations for the same guest", async ({ request, tenant }) => {
+  test("creates restaurant + guesthouse + venue reservations for the same guest", async ({ playwright, tenant }, testInfo) => {
     const date = futureDate(60);
     const checkOut = futureDate(62);
+
+    // Record EVERY public-booking HTTP call into a HAR file so failures can
+    // be replayed in a browser (Chrome DevTools "Import HAR file") or with
+    // `npx playwright show-trace`. Saved per-attempt so retries don't clobber.
+    const harDir = `${testInfo.project.outputDir}/cross-booking-har`;
+    const harPath = `${harDir}/public-booking-attempt-${testInfo.retry + 1}.har`;
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const fs = await import("node:fs");
+    fs.mkdirSync(harDir, { recursive: true });
+
+    const request = await playwright.request.newContext({
+      recordHar: {
+        path: harPath,
+        mode: "full",
+        content: "embed",
+        urlFilter: "**/functions/v1/public-booking**",
+      },
+    });
 
     // Warm the edge function so the first real leg doesn't pay the cold-start penalty
     // (and so any platform 5xx during cold-start surfaces as a clear, single failure here).
