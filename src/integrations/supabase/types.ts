@@ -2989,6 +2989,10 @@ export type Database = {
       }
     }
     Functions: {
+      analyze_reservations_dashboard: {
+        Args: { p_limit?: number; p_tenant_id: string }
+        Returns: Json
+      }
       cleanup_expired_redemption_idempotency: {
         Args: never
         Returns: undefined
