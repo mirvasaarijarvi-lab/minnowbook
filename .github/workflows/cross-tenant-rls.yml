@@ -69,6 +69,8 @@ jobs:
     needs: check-secrets
     if: needs.check-secrets.outputs.enabled == 'true'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout code
