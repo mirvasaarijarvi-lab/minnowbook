@@ -212,7 +212,7 @@ if (waivedEntries.length > 0) {
   lines.push("| --- | --- | --- | --- | --- | --- | --- |");
   for (const { adv, waiver } of waivedEntries) {
     const reason = (waiver.reason || "").replace(/\|/g, "\\|");
-    lines.push(`${row(adv, "").slice(0, -1)} ${waiver.expires} | ${reason} |`);
+    lines.push(`${row(adv)} ${waiver.expires} | ${reason} |`);
   }
   lines.push("");
 }
