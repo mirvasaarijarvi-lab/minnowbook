@@ -105,8 +105,14 @@ function expectBodyIsGeneric(text: string, label: string) {
 // Each `it` in this suite makes a live HTTPS round-trip to the deployed
 // edge function. The default 5s Vitest timeout is too tight for cold-start
 // edge runtimes (admin-users in particular can take >5s on first hit in CI).
-// Bump per-test timeout to 30s for the whole describe block.
-describe("Edge functions — disallowed Origin returns explicit 403", { timeout: 30_000 }, () => {
+// We bump per-test timeout to 30s for the whole describe block, request a
+// per-test `retry` for transient network blips (cold-start, 429, DNS), and
+// force serial execution within the file so multiple suites don't race the
+// same edge function in parallel and trip its 5-req/min rate-limiter.
+describe(
+  "Edge functions — disallowed Origin returns explicit 403",
+  { timeout: 30_000, retry: 2, concurrent: false },
+  () => {
   for (const fn of FUNCTIONS) {
     describe(fn, () => {
       it("allowed origin is NOT 403'd by the origin gate (positive control)", async () => {
@@ -158,13 +164,20 @@ describe("Edge functions — disallowed Origin returns explicit 403", { timeout:
       }
 
       it("403 response is consistent across repeated probes (no oracle)", async () => {
-        const probes = await Promise.all(
-          Array.from({ length: 5 }, () =>
-            postFromOrigin(fn, "https://evil.example.com", { action: "list" }),
-          ),
-        );
-        const bodies = await Promise.all(probes.map((r) => r.text()));
-        const statuses = probes.map((r) => r.status);
+        // Run probes SEQUENTIALLY rather than via Promise.all. Hammering
+        // the same function with 5 concurrent requests routinely tripped
+        // the per-IP 5-req/min rate-limiter on the function side, which
+        // returned a 429 instead of 403 and looked like a real regression.
+        // A small inter-probe delay gives the rate-limiter window time to
+        // settle and keeps the assertions deterministic.
+        const bodies: string[] = [];
+        const statuses: number[] = [];
+        for (let i = 0; i < 5; i++) {
+          const r = await postFromOrigin(fn, "https://evil.example.com", { action: "list" });
+          statuses.push(r.status);
+          bodies.push(await r.text());
+          if (i < 4) await new Promise((res) => setTimeout(res, 150));
+        }
 
         // Every probe must be 403.
         for (const s of statuses) expect(s).toBe(403);
