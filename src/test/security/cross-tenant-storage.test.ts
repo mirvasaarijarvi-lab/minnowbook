@@ -1641,7 +1641,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
 
       it("user A cannot DELETE tenant B's tenant-assets file", async () => {
         // Upload a file as B first so there's something to attempt deletion on.
-        const path = ownPath(liveCreds.b.tenantId!, "b-own-assets-for-delete");
+        const path = assetsOwnPath(liveCreds.b.tenantId!, "b-own-assets-for-delete");
         const { error: upErr } = await allowedStorageCall(
           () => clientB.storage
             .from(ASSETS_BUCKET)
