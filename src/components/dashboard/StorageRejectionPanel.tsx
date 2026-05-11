@@ -196,7 +196,7 @@ const StorageRejectionPanel = () => {
   };
 
   const handleExport = (kind: "csv" | "json") => {
-    const safe = toSafeEvents(events);
+    const safe = toSafeEvents(events as unknown as Record<string, unknown>[]);
     const filename = makeFilename(windowKey, kind);
     if (kind === "csv") {
       downloadBlob(filename, "text/csv;charset=utf-8", buildCsv(safe));
