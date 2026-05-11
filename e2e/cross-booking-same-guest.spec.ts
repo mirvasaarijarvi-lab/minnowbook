@@ -34,6 +34,41 @@ const PUBLIC_BOOKING_TIMEOUT_MS = 30_000;
 // One transparent retry on transient network errors (cold start, dropped connection)
 const PUBLIC_BOOKING_MAX_ATTEMPTS = 2;
 
+// Expected error response shape from the `public-booking` edge function.
+// Source of truth: supabase/functions/public-booking/index.ts always
+// responds with `{ error: string }` for any non-2xx outcome (rate limit,
+// payload too large, invalid tenant, validation failure, internal throw).
+type PublicBookingErrorBody = { error: string };
+
+/**
+ * Validate that an error body matches `{ error: string }`. Returns a list of
+ * human-readable problems (empty array means the body conforms). Used to
+ * fail the test with a precise, actionable message instead of a generic
+ * `expect(...).toMatchObject` diff.
+ */
+function validatePublicBookingErrorShape(body: unknown): string[] {
+  const problems: string[] = [];
+  if (body === null || body === undefined) {
+    problems.push("response body is null/undefined (expected JSON object)");
+    return problems;
+  }
+  if (typeof body !== "object" || Array.isArray(body)) {
+    problems.push(
+      `response body is ${Array.isArray(body) ? "an array" : typeof body}, expected a JSON object`,
+    );
+    return problems;
+  }
+  const obj = body as Record<string, unknown>;
+  if (!("error" in obj)) {
+    problems.push(`response body is missing required "error" field (got keys: ${Object.keys(obj).join(", ") || "<none>"})`);
+  } else if (typeof obj.error !== "string") {
+    problems.push(`"error" field is ${typeof obj.error}, expected string`);
+  } else if (obj.error.trim() === "") {
+    problems.push(`"error" field is an empty string`);
+  }
+  return problems;
+}
+
 // HAR 1.2 entry shape (subset). Browsers (Chrome/Firefox DevTools) and
 // `npx playwright show-trace` can import any spec-conformant HAR file.
 type HarEntry = Record<string, any>;
@@ -213,7 +248,14 @@ async function callPublicBooking(
     /* test.info() unavailable outside test scope */
   }
 
-  return { status, body: json ?? text, diagnostic };
+  // For any non-2xx response, surface schema problems on the diagnostic so
+  // callers (and the HTML report attachment) make it obvious WHY the body
+  // didn't match the documented `{ error: string }` contract.
+  const errorShapeProblems =
+    status >= 400 ? validatePublicBookingErrorShape(json ?? text) : [];
+  (diagnostic as any).errorShapeProblems = errorShapeProblems;
+
+  return { status, body: json ?? text, diagnostic, errorShapeProblems };
 }
 
 test.describe("Cross-booking: same guest, multiple resources/services", () => {
@@ -356,6 +398,18 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
       rejected.status,
       `foreign tenant_id should be rejected by public-booking but got HTTP ${rejected.status}`,
     ).toBeGreaterThanOrEqual(400);
+
+    // Validate the error response shape against the documented contract
+    // ({ error: string }). A drift here (e.g. `{ message: "..." }` or
+    // `{ error: { code, detail } }`) would silently break every UI that
+    // surfaces server-side error copy via FunctionsHttpError decoding.
+    const rejectedShapeProblems = validatePublicBookingErrorShape(rejected.body);
+    expect(
+      rejectedShapeProblems,
+      `foreign-tenant-negative error body does not match expected schema { error: string }.\n` +
+        `Problems:\n  - ${rejectedShapeProblems.join("\n  - ")}\n` +
+        `Received body:\n${JSON.stringify(rejected.body, null, 2)}`,
+    ).toEqual([]);
 
     // 5. RLS / tenant-isolation verification (best-effort).
     // When a service-role key is provided, query reservations directly and
