@@ -52,6 +52,7 @@ const FNS = ["has_permission", "has_tenant_role"];
 const ALLOWLIST = [
   "scripts/ci/check-permission-arity.mjs",
   "supabase/functions/_shared/permission-checks-rls.test.ts",
+  "src/test/security/has-permission-tenant-scope.test.ts",
 ];
 
 function* walk(dir) {
