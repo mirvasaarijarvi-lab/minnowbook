@@ -89,6 +89,9 @@ jobs:
       # publish findings to GitHub code scanning, where they render
       # inline on PRs and feed into the security tab.
       security-events: write
+      # Required so the PR-comment step can upsert the audit summary
+      # comment on pull requests. Scoped to this job only.
+      pull-requests: write
     steps:
       - name: Checkout
         # actions/checkout@v4.2.2
