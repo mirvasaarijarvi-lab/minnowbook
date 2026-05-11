@@ -89,6 +89,9 @@ jobs:
       # publish findings to GitHub code scanning, where they render
       # inline on PRs and feed into the security tab.
       security-events: write
+      # Required so the PR-comment step can upsert the audit summary
+      # comment on pull requests. Scoped to this job only.
+      pull-requests: write
     steps:
       - name: Checkout
         # actions/checkout@v4.2.2
@@ -312,6 +315,40 @@ jobs:
           esac
           node .github/workflows/scripts/apply-allowlist.mjs "$gate_manager" audit-prod.json .github/dependency-audit-allowlist.json "$AUDIT_LEVEL"
 
+      # ---------------------------------------------------------------
+      # Upsert a PR comment summarising the audit. Sticky via the
+      # marker embedded in audit-comment.md, so repeat runs replace
+      # the previous summary instead of stacking new comments.
+      #
+      # Runs with `if: always()` so the comment lands on both PASS
+      # and FAIL outcomes, giving reviewers a single place to see
+      # exactly which advisories tripped the threshold and which are
+      # waived. Restricted to pull_request events because the
+      # GITHUB_TOKEN cannot post issue comments on push or schedule.
+      # ---------------------------------------------------------------
+      - name: Post audit summary as PR comment
+        if: always() && github.event_name == 'pull_request' && hashFiles('audit-comment.md') != ''
+        # actions/github-script@v7.0.1
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea
+        with:
+          script: |
+            const fs = require('fs');
+            const body = fs.readFileSync('audit-comment.md', 'utf8');
+            const marker = '<!-- mimmobook:dependency-audit-comment -->';
+            const { owner, repo } = context.repo;
+            const issue_number = context.payload.pull_request.number;
+            const { data: comments } = await github.rest.issues.listComments({
+              owner, repo, issue_number, per_page: 100,
+            });
+            const existing = comments.find((c) => c.body && c.body.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
+              core.info(`Updated existing audit comment ${existing.id}.`);
+            } else {
+              const { data: created } = await github.rest.issues.createComment({ owner, repo, issue_number, body });
+              core.info(`Created audit comment ${created.id}.`);
+            }
+
       - name: Upload audit reports
         if: always()
         # actions/upload-artifact@v4.4.3
@@ -324,6 +361,7 @@ jobs:
             npm-audit.sarif
             pnpm-audit.sarif
             yarn-audit.sarif
+            audit-comment.md
           if-no-files-found: ignore
           retention-days: 14
 
