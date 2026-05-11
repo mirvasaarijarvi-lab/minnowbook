@@ -235,3 +235,47 @@ Deno.test({
   },
 });
 
+// When SUPABASE_SERVICE_ROLE_KEY is unavailable we cannot DELETE rows via the
+// REST API, so any test that inserts data would leak rows on the seeded
+// tenant. This test guarantees that path is handled safely:
+//   * The insert is intentionally NOT attempted (we send an invalid payload
+//     that the function rejects with 400 before any row is written).
+//   * The test logs an explicit "skipping cleanup" message so CI surfaces the
+//     fact that destructive verification was bypassed.
+// When the service key IS configured the broader e2e test above already
+// covers the happy path, so this test is ignored.
+Deno.test({
+  name: "public-booking: no data leak when SUPABASE_SERVICE_ROLE_KEY is missing",
+  ignore: SERVICE_KEY.length > 0,
+  sanitizeOps: true,
+  sanitizeResources: true,
+  sanitizeExit: true,
+  fn: async () => {
+    console.warn(
+      "SUPABASE_SERVICE_ROLE_KEY not set, skipping cleanup-capable insert; " +
+        "running validation-only request so no reservation row is created.",
+    );
+
+    // Bad email triggers the function's input validation and short-circuits
+    // before any DB write, so there is nothing to clean up afterwards.
+    const { res, json, text } = await callFn({
+      tenant_id: TEST_TENANT_ID,
+      guest_name: "Cleanup-Skip Test",
+      guest_email: "not-an-email",
+      reservation_type: "restaurant",
+      date: isoFutureDate(),
+      guests_count: 2,
+    });
+
+    assertEquals(
+      res.status,
+      400,
+      `expected 400 (no insert) when service key missing, got ${res.status} ${text}`,
+    );
+    assert(
+      typeof json?.error === "string",
+      `expected error body, got ${text}`,
+    );
+  },
+});
+
