@@ -7,10 +7,16 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# Default-deny at the workflow level. Each job re-grants only the
+# scopes it actually needs (here: read-only checkout).
+permissions: {}
+
 jobs:
   build:
     name: Type-check & Build
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout code

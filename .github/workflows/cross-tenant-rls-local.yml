@@ -19,11 +19,15 @@ on:
     branches: [main]
   workflow_dispatch:
 
+permissions: {}
+
 jobs:
   rls-local:
     name: Cross-Tenant RLS (local stack, ${{ matrix.label }})
     runs-on: ubuntu-latest
     timeout-minutes: 25
+    permissions:
+      contents: read
     strategy:
       fail-fast: false
       matrix:

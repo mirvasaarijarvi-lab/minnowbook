@@ -19,11 +19,15 @@ on:
     branches: [main]
   workflow_dispatch:
 
+permissions: {}
+
 jobs:
   live-cap-tests:
     name: Reservation-type cap (live Postgres)
     runs-on: ubuntu-latest
     timeout-minutes: 25
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout code
