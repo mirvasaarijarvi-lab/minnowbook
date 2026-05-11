@@ -201,6 +201,18 @@ beforeEach(() => {
   mockInvoke.mockClear();
 });
 
+afterEach(() => {
+  // The toast singleton (`memoryState` in src/hooks/use-toast.ts) survives
+  // RTL's `cleanup()` because it lives at module scope. Without an explicit
+  // wipe, a destructive toast queued by the previous test would still be in
+  // `useToast().toasts` for the next render and trip up `lastToasts.find()`.
+  // `toast.dismiss()` (no id) marks every active toast as closed; we then
+  // unmount React first so its scheduled REMOVE_TOAST timers don't fire
+  // mid-next-test.
+  cleanup();
+  toast.dismiss();
+});
+
 // --- Tests ---------------------------------------------------------------
 
 describe("AdminPanel: tier-limit enforcement (Basic = 5 staff users)", () => {
