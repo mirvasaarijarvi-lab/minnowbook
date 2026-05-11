@@ -318,18 +318,22 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
       // can be replayed in a browser via Chrome DevTools "Import HAR file"
       // or inspected from the Playwright HTML report.
       try {
-        await request.dispose();
-      } catch {
-        /* ignore */
+        // dispose() flushes the HAR to disk in Playwright >= 1.32.
+        await request.dispose({ reason: "test finished, flush HAR" });
+      } catch (disposeErr) {
+        // eslint-disable-next-line no-console
+        console.warn(`[cross-booking] request.dispose failed: ${(disposeErr as Error)?.message}`);
       }
       try {
-        if (fs.existsSync(harPath)) {
+        const exists = fs.existsSync(harPath);
+        const size = exists ? fs.statSync(harPath).size : 0;
+        // eslint-disable-next-line no-console
+        console.log(`[cross-booking] HAR file exists=${exists} size=${size} path=${harPath}`);
+        if (exists && size > 0) {
           await testInfo.attach(`public-booking-attempt-${testInfo.retry + 1}.har`, {
             path: harPath,
             contentType: "application/json",
           });
-          // eslint-disable-next-line no-console
-          console.log(`[cross-booking] HAR exported to ${harPath}`);
         }
       } catch (attachErr) {
         // eslint-disable-next-line no-console
