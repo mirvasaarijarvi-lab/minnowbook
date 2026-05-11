@@ -15,9 +15,11 @@ export default defineConfig({
     baseURL: "http://localhost:4173",
     // Capture diagnostics on failure so booking, offer, and reservation
     // regressions are easy to triage from the HTML report.
-    trace: "retain-on-failure",
-    screenshot: "only-on-failure",
-    video: "retain-on-failure",
+    // Always capture trace + video on the first attempt and on every retry,
+    // so cross-booking divergences between attempts can be compared side by side.
+    trace: "on",
+    screenshot: "on",
+    video: "on",
   },
   webServer: {
     command: "bunx vite preview --port 4173",
