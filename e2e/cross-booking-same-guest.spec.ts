@@ -205,6 +205,37 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
         err instanceof Error ? err.message : String(err);
     }
 
+    // HAR (network log): the overridden `context` fixture records every
+    // request/response into <outputDir>/network.har. The HAR is only
+    // flushed when the BrowserContext is closed, so close it here BEFORE
+    // attaching, then read the resulting file.
+    try {
+      const harPath = harPathByTest.get(testInfo.testId);
+      if (harPath) {
+        try {
+          // page.context() works even after page.close(); the context
+          // outlives its pages. Closing it triggers HAR finalization.
+          await page.context().close();
+        } catch {
+          /* context may already be closed */
+        }
+        const fs = await import("node:fs/promises");
+        const harBytes = await fs.readFile(harPath);
+        await testInfo.attach("failure-network.har", {
+          body: harBytes,
+          contentType: "application/json",
+        });
+        failureSummary.har_path = harPath;
+        failureSummary.har_bytes = harBytes.byteLength;
+      } else {
+        failureSummary.har_capture = "skipped: no HAR path registered";
+      }
+    } catch (err) {
+      failureSummary.har_capture_error =
+        err instanceof Error ? err.message : String(err);
+    }
+    harPathByTest.delete(testInfo.testId);
+
     // Trace is captured for every test by playwright.config.ts (`trace: "on"`)
     // and lives at testInfo.outputDir/trace.zip. Attach it explicitly so the
     // HTML report links it directly under the failing test, instead of the
