@@ -200,7 +200,9 @@ export async function handleProcessEmailQueueRequest(req: Request): Promise<Resp
             text: textContent,
             purpose: payload.purpose,
             label: payload.label,
-            external_id: payload.external_id,
+            // `external_id` was removed from EmailSendRequest in
+            // @lovable.dev/email-js; `idempotency_key` already covers
+            // server-side deduplication, so we no longer forward it.
             idempotency_key: payload.idempotency_key,
             unsubscribe_token: payload.unsubscribe_token,
             reply_to: payload.reply_to,
