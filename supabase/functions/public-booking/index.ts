@@ -12,6 +12,50 @@ const corsHeaders = {
   "Content-Security-Policy": "default-src 'none'; frame-ancestors 'none'",
 };
 
+/**
+ * Result of {@link assertServiceRoleKey}. Either the key is present
+ * (so the caller can proceed) or it is missing and the helper has
+ * built the exact `Response` the function should return immediately,
+ * before any DB work. Exposed so unit tests can assert the contract
+ * without spinning up Deno.serve.
+ */
+export type ServiceRoleKeyCheck =
+  | { ok: true; serviceRoleKey: string }
+  | { ok: false; response: Response };
+
+/**
+ * Guard executed at the top of the request handler, BEFORE createClient
+ * and BEFORE any DB write. Returns a 400 with `error_code:
+ * "SERVICE_ROLE_KEY_MISSING"` when the env var is absent or empty so
+ * the public booking UI can surface a precise misconfig message
+ * instead of a generic 500.
+ *
+ * Pure: takes the raw env value as input rather than reading
+ * `Deno.env` so tests can drive every branch deterministically.
+ */
+export function assertServiceRoleKey(
+  rawKey: string | undefined,
+  cors: HeadersInit = corsHeaders,
+): ServiceRoleKeyCheck {
+  const trimmed = typeof rawKey === "string" ? rawKey.trim() : "";
+  if (trimmed.length > 0) {
+    return { ok: true, serviceRoleKey: trimmed };
+  }
+  const response = new Response(
+    JSON.stringify({
+      error:
+        "Booking service is not fully configured (missing service-role key). " +
+        "Please contact the venue.",
+      error_code: "SERVICE_ROLE_KEY_MISSING",
+    }),
+    {
+      status: 400,
+      headers: { ...cors, "Content-Type": "application/json" },
+    },
+  );
+  return { ok: false, response };
+}
+
 // --- Rate limiting: 5 bookings per IP per minute ---
 const RATE_LIMIT_WINDOW_MS = 60_000;
 const RATE_LIMIT_MAX = 5;
