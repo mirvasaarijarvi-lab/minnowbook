@@ -35,11 +35,76 @@ import { captureCheckpoint } from "./fixtures/checkpoints";
 const GUEST = makeTestGuest("Cross");
 const LOG_PREFIX = "[cross-booking]";
 
+interface BrowserLogEntry {
+  timestamp: string;
+  type: string;
+  text: string;
+  location?: { url?: string; lineNumber?: number; columnNumber?: number };
+  correlation_id?: string;
+}
+
+interface BrowserErrorEntry {
+  timestamp: string;
+  message: string;
+  stack?: string;
+  correlation_id?: string;
+}
+
+// Per-test buffers for console + pageerror, keyed by Playwright testId.
+// We populate these in beforeEach (so listeners are attached before any
+// page navigation) and drain them in afterEach to attach to the report.
+const browserLogs = new Map<string, BrowserLogEntry[]>();
+const browserErrors = new Map<string, BrowserErrorEntry[]>();
+const correlationByTest = new Map<string, string[]>();
+
 test.describe("Cross-booking: same guest, multiple resources/services", () => {
+  test.beforeEach(async ({ page }, testInfo) => {
+    const logs: BrowserLogEntry[] = [];
+    const errors: BrowserErrorEntry[] = [];
+    browserLogs.set(testInfo.testId, logs);
+    browserErrors.set(testInfo.testId, errors);
+
+    const currentCorrelationId = () => {
+      const ids = correlationByTest.get(testInfo.testId);
+      return ids && ids.length ? ids[ids.length - 1] : undefined;
+    };
+
+    page.on("console", (msg) => {
+      let location: BrowserLogEntry["location"];
+      try {
+        location = msg.location();
+      } catch {
+        location = undefined;
+      }
+      logs.push({
+        timestamp: new Date().toISOString(),
+        type: msg.type(),
+        text: msg.text(),
+        location,
+        correlation_id: currentCorrelationId(),
+      });
+    });
+
+    page.on("pageerror", (err) => {
+      errors.push({
+        timestamp: new Date().toISOString(),
+        message: err.message,
+        stack: err.stack,
+        correlation_id: currentCorrelationId(),
+      });
+    });
+  });
+
   // On any failure inside this describe, snapshot every diagnostic we can
   // reach (screenshot + HTML for page-driven tests, trace pointer for both)
   // so flakiness can be triaged from a single Playwright report entry.
   test.afterEach(async ({ page }, testInfo) => {
+    const logs = browserLogs.get(testInfo.testId) ?? [];
+    const errors = browserErrors.get(testInfo.testId) ?? [];
+    browserLogs.delete(testInfo.testId);
+    browserErrors.delete(testInfo.testId);
+    correlationByTest.delete(testInfo.testId);
+
     if (testInfo.status === testInfo.expectedStatus) return;
 
     const failureSummary: Record<string, unknown> = {
@@ -127,6 +192,55 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
           : "unavailable";
     }
 
+    // Browser console + pageerror capture. We attach BOTH a structured
+    // JSON file (machine-readable, includes correlation IDs and locations)
+    // and a flat .log file (skim-friendly), so reviewers can pick whichever
+    // format helps them spot the divergence faster.
+    try {
+      const errorCount = errors.length;
+      const errorLogCount = logs.filter((l) => l.type === "error").length;
+      const warningLogCount = logs.filter((l) => l.type === "warning").length;
+      const correlationIds = (failureSummary.correlation_ids as string[]) ?? [];
+      const browserDiagnostics = {
+        correlation_ids: correlationIds,
+        page_errors: errors,
+        console_logs: logs,
+        counts: {
+          page_errors: errorCount,
+          console_errors: errorLogCount,
+          console_warnings: warningLogCount,
+          console_total: logs.length,
+        },
+      };
+      await testInfo.attach("failure-browser-diagnostics.json", {
+        body: JSON.stringify(browserDiagnostics, null, 2),
+        contentType: "application/json",
+      });
+      const flatLines = [
+        `# Page errors (${errors.length})`,
+        ...errors.map(
+          (e) =>
+            `[${e.timestamp}] correlation_id=${e.correlation_id ?? "-"} ${e.message}` +
+            (e.stack ? `\n${e.stack}` : ""),
+        ),
+        "",
+        `# Console messages (${logs.length})`,
+        ...logs.map(
+          (l) =>
+            `[${l.timestamp}] [${l.type}] correlation_id=${l.correlation_id ?? "-"} ${l.text}` +
+            (l.location?.url ? ` (${l.location.url}:${l.location.lineNumber ?? "?"})` : ""),
+        ),
+      ];
+      await testInfo.attach("failure-browser.log", {
+        body: flatLines.join("\n"),
+        contentType: "text/plain",
+      });
+      failureSummary.browser_diagnostics = browserDiagnostics.counts;
+    } catch (err) {
+      failureSummary.browser_diagnostics_error =
+        err instanceof Error ? err.message : String(err);
+    }
+
     await testInfo.attach("failure-summary.json", {
       body: JSON.stringify(failureSummary, null, 2),
       contentType: "application/json",
@@ -164,6 +278,11 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
     // eslint-disable-next-line no-console
     console.log(`${LOG_PREFIX} flow correlation_id=${flowCorrelationId}`);
     testInfo.annotations.push({ type: "correlation_id", description: flowCorrelationId });
+    // Register so any subsequent browser console message / pageerror is
+    // tagged with this id in the failure-browser-diagnostics attachment.
+    const corrIds = correlationByTest.get(testInfo.testId) ?? [];
+    corrIds.push(flowCorrelationId);
+    correlationByTest.set(testInfo.testId, corrIds);
 
     const callLeg = (label: string, body: Record<string, unknown>) =>
       callPublicBooking({
