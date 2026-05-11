@@ -234,6 +234,10 @@ type TranslationKeys = {
   "booking.submitting": string;
   "booking.submitError": string;
   "booking.serviceMisconfigured": string;
+  "booking.misconfigBannerTitle": string;
+  "booking.misconfigBannerNoReservation": string;
+  "booking.misconfigBannerDisabled": string;
+  "booking.misconfigBannerTryAgain": string;
   "booking.dateBlocked": string;
   "booking.timeBlocked": string;
   "booking.blocked": string;
