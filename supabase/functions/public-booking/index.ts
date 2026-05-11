@@ -232,28 +232,17 @@ Deno.serve(async (req) => {
   // return 400 with a clear, machine-readable `error_code` so the
   // dashboard / public booking UI can surface a precise misconfig
   // message instead of a generic 500.
-  const serviceRoleKeyRaw = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-  const serviceRoleKey = typeof serviceRoleKeyRaw === "string"
-    ? serviceRoleKeyRaw.trim()
-    : "";
-  if (serviceRoleKey.length === 0) {
+  const keyCheck = assertServiceRoleKey(
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY"),
+  );
+  if (!keyCheck.ok) {
     console.error(
       "[public-booking] SUPABASE_SERVICE_ROLE_KEY is missing or empty. " +
         "Refusing to proceed: no DB write will be attempted.",
     );
-    return new Response(
-      JSON.stringify({
-        error:
-          "Booking service is not fully configured (missing service-role key). " +
-          "Please contact the venue.",
-        error_code: "SERVICE_ROLE_KEY_MISSING",
-      }),
-      {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      },
-    );
+    return keyCheck.response;
   }
+  const serviceRoleKey = keyCheck.serviceRoleKey;
   const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
 
