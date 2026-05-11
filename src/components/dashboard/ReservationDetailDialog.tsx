@@ -61,7 +61,7 @@ const ReservationDetailDialog = ({ reservation, open, onOpenChange, onEdit, canE
             )}
           </div>
           <DialogDescription>
-            {t("dashboard.reservationId") ? `${t("dashboard.reservationId")}: ` : "ID: "}
+            {"ID: "}
             <span className="font-mono text-xs">{r.id}</span>
           </DialogDescription>
         </DialogHeader>
@@ -74,15 +74,15 @@ const ReservationDetailDialog = ({ reservation, open, onOpenChange, onEdit, canE
                 {format(new Date(r.date), "PPPP", { locale: dateFnsLocale })}
               </Field>
               {timeRange && (
-                <Field icon={Clock} label={t("common.time") || "Time"}>{timeRange}</Field>
+                <Field icon={Clock} label={"Time"}>{timeRange}</Field>
               )}
               {r.check_out_date && (
-                <Field icon={CalendarDays} label={t("dashboard.checkoutDate") || "Check out"}>
+                <Field icon={CalendarDays} label={"Check out"}>
                   {format(new Date(r.check_out_date), "PPPP", { locale: dateFnsLocale })}
                 </Field>
               )}
               {siteName && (
-                <Field icon={Building2} label={t("nav.sites") || "Site"}>{siteName}</Field>
+                <Field icon={Building2} label={"Site"}>{siteName}</Field>
               )}
             </div>
           </section>
@@ -90,19 +90,19 @@ const ReservationDetailDialog = ({ reservation, open, onOpenChange, onEdit, canE
           <Separator />
 
           <section>
-            <h3 className="text-sm font-semibold text-foreground mb-3">{t("dashboard.customerInfo") || "Customer"}</h3>
+            <h3 className="text-sm font-semibold text-foreground mb-3">{"Customer"}</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Field icon={User} label={t("common.name") || "Name"}>{r.guest_name}</Field>
-              <Field icon={Mail} label={t("common.email") || "Email"}>
+              <Field icon={User} label={"Name"}>{r.guest_name}</Field>
+              <Field icon={Mail} label={"Email"}>
                 <a href={`mailto:${r.guest_email}`} className="hover:underline">{r.guest_email}</a>
               </Field>
               {r.guest_phone && (
-                <Field icon={Phone} label={t("common.phone") || "Phone"}>
+                <Field icon={Phone} label={"Phone"}>
                   <a href={`tel:${r.guest_phone}`} className="hover:underline">{r.guest_phone}</a>
                 </Field>
               )}
               {(r.guests_count != null || r.estimated_guests != null) && (
-                <Field icon={Users} label={t("common.guests") || "Guests"}>
+                <Field icon={Users} label={"Guests"}>
                   {r.guests_count ?? r.estimated_guests}
                 </Field>
               )}
@@ -113,7 +113,7 @@ const ReservationDetailDialog = ({ reservation, open, onOpenChange, onEdit, canE
             <>
               <Separator />
               <section>
-                <h3 className="text-sm font-semibold text-foreground mb-3">{t("dashboard.bookingDetails") || "Booking details"}</h3>
+                <h3 className="text-sm font-semibold text-foreground mb-3">{"Booking details"}</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {r.event_type && <Field icon={FileText} label="Event type">{r.event_type}</Field>}
                   {r.room_type && <Field icon={FileText} label="Room type">{r.room_type}</Field>}
@@ -123,7 +123,7 @@ const ReservationDetailDialog = ({ reservation, open, onOpenChange, onEdit, canE
                   )}
                   {r.special_requests && (
                     <div className="sm:col-span-2">
-                      <Field icon={StickyNote} label={t("dashboard.specialRequests") || "Special requests"}>
+                      <Field icon={StickyNote} label={"Special requests"}>
                         <p className="whitespace-pre-wrap">{r.special_requests}</p>
                       </Field>
                     </div>
@@ -144,7 +144,7 @@ const ReservationDetailDialog = ({ reservation, open, onOpenChange, onEdit, canE
             <>
               <Separator />
               <section>
-                <h3 className="text-sm font-semibold text-foreground mb-3">{t("dashboard.statusAndBilling") || "Status & billing"}</h3>
+                <h3 className="text-sm font-semibold text-foreground mb-3">{"Status and billing"}</h3>
                 <div className="flex flex-wrap items-center gap-2">
                   {r.price_eur != null && (
                     <Badge variant="outline" className="text-sm">€{Number(r.price_eur).toFixed(2)}</Badge>
@@ -174,7 +174,7 @@ const ReservationDetailDialog = ({ reservation, open, onOpenChange, onEdit, canE
             <>
               <Separator />
               <section>
-                <h3 className="text-sm font-semibold text-foreground mb-3">{t("dashboard.internalNotes") || "Internal notes"}</h3>
+                <h3 className="text-sm font-semibold text-foreground mb-3">{"Internal notes"}</h3>
                 {r.internal_notes && <p className="text-sm whitespace-pre-wrap text-foreground mb-2">{r.internal_notes}</p>}
                 {r.staff_notes && <p className="text-sm whitespace-pre-wrap text-muted-foreground">{r.staff_notes}</p>}
               </section>
@@ -182,12 +182,12 @@ const ReservationDetailDialog = ({ reservation, open, onOpenChange, onEdit, canE
           )}
 
           <div className="text-xs text-muted-foreground">
-            {t("dashboard.created") || "Created"}: {r.created_at ? format(new Date(r.created_at), "PPp", { locale: dateFnsLocale }) : "—"}
+            {"Created"}: {r.created_at ? format(new Date(r.created_at), "PPp", { locale: dateFnsLocale }) : "—"}
           </div>
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>{t("common.close") || "Close"}</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>{"Close"}</Button>
           {canEdit && onEdit && (
             <Button onClick={() => { onOpenChange(false); onEdit(r); }} className="gap-1.5">
               <Pencil className="h-4 w-4" />
