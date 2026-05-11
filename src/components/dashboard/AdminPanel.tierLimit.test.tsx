@@ -207,11 +207,12 @@ afterEach(() => {
   // RTL's `cleanup()` because it lives at module scope. Without an explicit
   // wipe, a destructive toast queued by the previous test would still be in
   // `useToast().toasts` for the next render and trip up `lastToasts.find()`.
-  // `toast.dismiss()` (no id) marks every active toast as closed; we then
-  // unmount React first so its scheduled REMOVE_TOAST timers don't fire
-  // mid-next-test.
+  // Mount a throwaway hook to reach `dismiss()` (the only public path that
+  // accepts an undefined id, which dismisses every active toast at once).
   cleanup();
-  toast.dismiss();
+  const { result, unmount } = renderHook(() => useToast());
+  actHook(() => result.current.dismiss());
+  unmount();
 });
 
 // --- Tests ---------------------------------------------------------------
