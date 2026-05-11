@@ -492,7 +492,22 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
           {reservations.map((r) => (
             <Card
               key={r.id}
-              className="hover:shadow-hover transition-shadow"
+              className="hover:shadow-hover transition-shadow cursor-pointer"
+              role="button"
+              tabIndex={0}
+              onClick={(e) => {
+                const target = e.target as HTMLElement;
+                if (target.closest('button,input,a,[role="menuitem"],[role="checkbox"],label')) return;
+                setDetailReservation(r);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  const target = e.target as HTMLElement;
+                  if (target.closest('button,input,a,[role="menuitem"],[role="checkbox"],label')) return;
+                  e.preventDefault();
+                  setDetailReservation(r);
+                }
+              }}
             >
               <CardContent className="p-4">
                 <div className="flex items-start justify-between gap-2 sm:gap-4">
