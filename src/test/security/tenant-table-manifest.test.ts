@@ -73,6 +73,10 @@ const EXCLUDED_TABLES: Record<string, string> = {
   // public booking flow with no expectation of tenant-private isolation.
   waitlist:
     "Public marketing signup table — no tenant-private data; intentionally readable by service role only.",
+  storage_rejection_events:
+    "Service-role-only telemetry table populated by the report-storage-rejection edge function. RLS denies all anon/authenticated access; superadmin reads via SECURITY DEFINER views. No client-side cross-tenant surface to test.",
+  storage_rejection_alerts:
+    "Service-role-only alert table written by report-storage-rejection. RLS denies all anon/authenticated access; superadmin reads via SECURITY DEFINER views. No client-side cross-tenant surface to test.",
 };
 
 describe("Tenant Table Manifest — Coverage Guard", () => {
