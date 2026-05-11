@@ -3588,7 +3588,7 @@ const fi: TranslationKeys = {
   "booking.reservations": "varausta",
   "booking.submitting": "Lähetetään...",
   "booking.submitError": "Varauksen lähetys epäonnistui. Yritä uudelleen.",
-  "booking.serviceMisconfigured": "Verkkovaraus ei ole tilapäisesti käytettävissä palvelimen määritysvirheen vuoksi. Varausta ei luotu. Ota yhteyttä toimipaikkaan suoraan tai yritä myöhemmin uudelleen.",
+  "booking.serviceMisconfigured": "Verkkovaraus ei ole tilapäisesti käytettävissä, koska palvelimelta puuttuu sen service role -avain. Varausta ei luotu, joten sinua ei ole veloitettu eikä varausta tehty. Jos olet asiakas, ota yhteyttä toimipaikkaan suoraan puhelimitse tai sähköpostilla, tai yritä uudelleen muutaman minuutin kuluttua. Jos hallinnoit tätä toimipaikkaa: avaa Lovable Cloud, mene kohtaan Backend, sitten API keys, kopioi service_role-avain, mene sen jälkeen Backend, Edge Functions, Secrets, ja lisää avain nimellä SUPABASE_SERVICE_ROLE_KEY. Verkkovaraus alkaa toimia heti, kun salaisuus on tallennettu.",
   "booking.dateBlocked": "Tämä päivä ei ole varattavissa.",
   "booking.timeBlocked": "Tämä aikaväli ei ole varattavissa.",
   "booking.blocked": "Estetty",
