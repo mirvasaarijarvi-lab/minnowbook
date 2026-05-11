@@ -80,7 +80,9 @@ export function extractBrandingObjectPath(input: string | null | undefined): str
 }
 
 async function mintSignedUrl(path: string, ttl: number): Promise<string> {
-  const safePath = assertSafeStorageObjectPath(path);
+  const safePath = assertSafeStorageObjectPath(path, {
+    callsite: "tenant-branding:mintSignedUrl",
+  });
   const { data, error } = await supabase.storage
     .from(TENANT_BRANDING_BUCKET)
     .createSignedUrl(safePath, ttl);
