@@ -111,13 +111,8 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
       }
       if (invoicedFilter === "uninvoiced") query = query.eq("is_invoiced", false);
       if (invoicedFilter === "invoiced") query = query.eq("is_invoiced", true);
-      if (debouncedSearch) {
-        const escaped = debouncedSearch.replace(/[%,()]/g, " ");
-        const term = `%${escaped}%`;
-        query = query.or(
-          `guest_name.ilike.${term},guest_email.ilike.${term},guest_phone.ilike.${term}`
-        );
-      }
+      const searchClause = buildGuestSearchOrClause(debouncedSearch);
+      if (searchClause) query = query.or(searchClause);
       const { data, error } = await query.limit(100);
       if (error) throw error;
       return data;
