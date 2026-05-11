@@ -36,7 +36,7 @@ test.describe("Offer confirm creates main + linked cross reservations", () => {
     "Set E2E_STAFF_EMAIL / E2E_STAFF_PASSWORD to run this spec.",
   );
 
-  test("confirms offer and produces main + 2 linked reservations", async () => {
+  test("confirms offer and produces main + 2 linked reservations", async ({ tenant }) => {
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
       auth: { persistSession: false, autoRefreshToken: false },
     });
@@ -49,14 +49,20 @@ test.describe("Offer confirm creates main + linked cross reservations", () => {
     expect(signInErr, `sign-in failed: ${signInErr?.message}`).toBeNull();
     expect(signIn?.user?.id).toBeTruthy();
 
-    // Resolve tenant id for the signed-in user
+    // Resolve tenant id for the signed-in user and assert it matches the
+    // shared fixture so guest, offer, and linked reservations all stay
+    // aligned under the same tenant_id (RLS-safe).
     const { data: tenantRow, error: tenantErr } = await supabase
       .from("tenants")
       .select("id")
-      .eq("slug", TENANT_SLUG)
+      .eq("slug", tenant.slug)
       .maybeSingle();
     expect(tenantErr, tenantErr?.message).toBeNull();
-    expect(tenantRow?.id, `tenant '${TENANT_SLUG}' not visible to this user`).toBeTruthy();
+    expect(tenantRow?.id, `tenant '${tenant.slug}' not visible to this user`).toBeTruthy();
+    expect(
+      tenantRow!.id,
+      `signed-in user resolves a different tenant than the shared fixture (${tenant.id})`,
+    ).toBe(tenant.id);
     const tenantId = tenantRow!.id as string;
 
     const eventDate = futureDate(75);
