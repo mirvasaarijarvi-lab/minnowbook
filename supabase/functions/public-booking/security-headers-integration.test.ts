@@ -215,3 +215,146 @@ Deno.test(
     }
   }),
 );
+
+// ---------------------------------------------------------------------------
+// 2xx success path
+// ---------------------------------------------------------------------------
+//
+// The 4xx/5xx assertions above only prove the security headers ride
+// along when the handler short-circuits. They cannot catch a regression
+// where the *success* response (the only one a real guest ever sees)
+// silently drops the bag — e.g. a refactor that builds the 200 body via
+// `new Response(body, { headers: { "Content-Type": "application/json" } })`
+// without spreading `corsHeaders`. This test installs a fake
+// service-role Supabase client so the entire happy path runs in-process,
+// and asserts the resulting 2xx response carries the same SECURITY_HEADERS
+// triad + bag as every error path.
+
+/** Build a chainable fake Postgrest builder. Every chain method
+ *  returns the same proxy; awaiting the proxy (or calling `.single()`
+ *  / `.maybeSingle()`) resolves to the supplied fixture. */
+function makeBuilder(fixture: { data: any; error: any }) {
+  const proxy: any = new Proxy(function () {}, {
+    get(_t, prop) {
+      if (prop === "then") {
+        return (resolve: (v: any) => void) => resolve(fixture);
+      }
+      if (prop === "single" || prop === "maybeSingle") {
+        return () => {
+          const data = Array.isArray(fixture.data)
+            ? (fixture.data[0] ?? null)
+            : fixture.data;
+          return Promise.resolve({ data, error: fixture.error });
+        };
+      }
+      // Any other chain method (select / eq / in / neq / not / order /
+      // limit / etc.) just returns the same proxy so awaits at the end
+      // of any chain length resolve identically.
+      return () => proxy;
+    },
+    apply() {
+      return proxy;
+    },
+  });
+  return proxy;
+}
+
+/** Minimal stub of the createClient return value covering only the
+ *  shape that public-booking touches on the success path. */
+function makeFakeAdminClient(reservationId: string) {
+  return {
+    from(table: string) {
+      const fixtures: Record<string, { data: any; error: any }> = {
+        // computeCapacity reads resources, then the existing-bookings
+        // count. Empty arrays mean capacity_total = 0, current_load = 0
+        // and the function falls into the "capacity undefined" branch
+        // which permits the booking unconditionally.
+        resources: { data: [], error: null },
+        reservations: { data: [], error: null },
+        // Tenant must exist and be active.
+        tenants: {
+          data: {
+            id: "00000000-0000-0000-0000-000000000001",
+            name: "Test Tenant",
+            is_active: true,
+            allowed_reservation_types: [],
+          },
+          error: null,
+        },
+        booking_validation_log: { data: null, error: null },
+        tenant_settings: { data: null, error: null },
+        site_settings: { data: null, error: null },
+        email_unsubscribe_tokens: {
+          data: { token: "stub-unsub-token" },
+          error: null,
+        },
+      };
+
+      return {
+        select: (..._a: unknown[]) => makeBuilder(fixtures[table] ?? { data: [], error: null }),
+        // The reservations insert is the one place we MUST return a row
+        // with `id` so the rest of the success path can read it.
+        insert: (..._a: unknown[]) =>
+          makeBuilder(
+            table === "reservations"
+              ? { data: { id: reservationId }, error: null }
+              : (fixtures[table] ?? { data: null, error: null }),
+          ),
+        update: (..._a: unknown[]) => makeBuilder(fixtures[table] ?? { data: null, error: null }),
+        upsert: (..._a: unknown[]) => makeBuilder(fixtures[table] ?? { data: null, error: null }),
+      };
+    },
+    // enqueue_email RPC is awaited but its return is ignored.
+    rpc: (..._a: unknown[]) => Promise.resolve({ data: null, error: null }),
+  };
+}
+
+Deno.test(
+  "security headers: 200 success response carries SECURITY_HEADERS",
+  withServiceRoleKey(async () => {
+    const RESERVATION_ID = "11111111-2222-3333-4444-555555555555";
+    const original = _publicBookingTestHooks.createClient;
+    _publicBookingTestHooks.createClient = (() =>
+      makeFakeAdminClient(RESERVATION_ID)) as any;
+    try {
+      const req = new Request("https://example.test/public-booking", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          // Use a fresh IP so the in-memory rate-limiter (shared across
+          // tests in this file) doesn't 429 us on the way in.
+          "x-forwarded-for": "10.0.0.200",
+        },
+        body: JSON.stringify({
+          tenant_id: "00000000-0000-0000-0000-000000000001",
+          guest_name: "Success Guest",
+          guest_email: "success@example.com",
+          reservation_type: "restaurant",
+          date: "2099-01-01",
+        }),
+      });
+      const res = await handlePublicBookingRequest(req);
+      const body = await res.json();
+
+      assertEquals(res.status, 200, `expected 200 success, got ${res.status}`);
+      assertEquals(
+        body.success,
+        true,
+        `expected success body, got ${JSON.stringify(body)}`,
+      );
+
+      // Same exhaustive assertions used on every error path: the
+      // success response must ship the FULL SECURITY_HEADERS bag, and
+      // CSP + HSTS must match SECURITY_HEADERS byte-for-byte.
+      assertSecurityHeaders(res, "200 success");
+      assertCspAndHsts(res, "200 success");
+
+      // And the Content-Type must still be JSON, so the security
+      // headers are coexisting with the real success payload (not
+      // accidentally overwriting it).
+      assertEquals(res.headers.get("Content-Type"), "application/json");
+    } finally {
+      _publicBookingTestHooks.createClient = original;
+    }
+  }),
+);
