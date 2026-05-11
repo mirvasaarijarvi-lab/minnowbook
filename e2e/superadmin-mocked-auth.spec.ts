@@ -165,8 +165,20 @@ async function mockAuditLogBeacon(page: Page) {
  */
 async function stubOtherRestCalls(page: Page) {
   await page.route(/\/rest\/v1\//, async (route: Route) => {
-    // Only intercept calls that haven't already been handled (system_admins
-    // is more specific and registered first, so it wins).
+    // Playwright runs route handlers in reverse-registration order, so
+    // this catch-all would otherwise shadow the more-specific
+    // `is_system_admin` RPC and `system_admins` table mocks registered
+    // earlier — turning a mocked admin into a non-admin and firing the
+    // Forbidden beacons we assert against. Fall through for those URLs
+    // so the specific mocks above get a chance to handle them.
+    const url = route.request().url();
+    if (
+      url.includes("/rest/v1/rpc/is_system_admin") ||
+      url.includes("/rest/v1/system_admins")
+    ) {
+      await route.fallback();
+      return;
+    }
     await route.fulfill({
       status: 200,
       contentType: "application/json",
