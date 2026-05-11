@@ -27,3 +27,8 @@ project_id = "lsgznskkxadplwnxplhd"
     verify_jwt = false
   [functions.log-forbidden-access]
     verify_jwt = true
+  [functions.mint-tenant-private-url]
+    # Path validation runs BEFORE auth so the e2e malicious-paths gate
+    # can exercise the contract anonymously. The function itself
+    # enforces the bearer-token check before minting.
+    verify_jwt = false
