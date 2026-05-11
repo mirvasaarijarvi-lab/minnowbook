@@ -208,11 +208,27 @@ const sarif = {
         informationUri: driverInfoUri,
         version: "1.0",
         rules: Array.from(rules.values()),
+        // Mirrored on the driver so tools that only render
+        // tool.driver.properties (some SARIF viewers) still expose
+        // the gate level next to the tool name.
+        properties: {
+          auditLevel,
+          manager,
+        },
       },
+    },
+    // run.properties is the canonical place for run-scoped metadata
+    // in SARIF 2.1.0. Code scanning preserves these fields and they
+    // appear in the alert details payload.
+    properties: {
+      auditLevel,
+      auditLevelDescription: `Minimum severity that fails the dependency-audit gate. Advisories below '${auditLevel}' are present in the report but do not block the PR.`,
+      manager,
+      generatedAt: new Date().toISOString(),
     },
     results,
   }],
 };
 
 fs.writeFileSync(outputPath, JSON.stringify(sarif));
-console.log(`Wrote ${outputPath} with ${results.length} result(s) across ${rules.size} rule(s) for ${manager}.`);
+console.log(`Wrote ${outputPath} with ${results.length} result(s) across ${rules.size} rule(s) for ${manager} at AUDIT_LEVEL=${auditLevel}.`);
