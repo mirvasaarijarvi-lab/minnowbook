@@ -7,13 +7,32 @@
 import "https://deno.land/std@0.224.0/dotenv/load.ts";
 import { assertEquals, assert } from "https://deno.land/std@0.224.0/assert/mod.ts";
 
-const SUPABASE_URL =
-  Deno.env.get("SUPABASE_URL") ?? Deno.env.get("VITE_SUPABASE_URL")!;
-const ANON_KEY =
-  Deno.env.get("SUPABASE_ANON_KEY") ??
-  Deno.env.get("SUPABASE_PUBLISHABLE_KEY") ??
-  Deno.env.get("VITE_SUPABASE_PUBLISHABLE_KEY")!;
-const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+function requireEnv(...names: string[]): string {
+  for (const n of names) {
+    const v = Deno.env.get(n);
+    if (typeof v === "string" && v.trim().length > 0) return v;
+  }
+  throw new Error(
+    `Missing required env var. Set one of: ${names.join(", ")} ` +
+      `(check your .env file is loaded and the value is non-empty).`,
+  );
+}
+
+const SUPABASE_URL = requireEnv("SUPABASE_URL", "VITE_SUPABASE_URL");
+const ANON_KEY = requireEnv(
+  "SUPABASE_ANON_KEY",
+  "SUPABASE_PUBLISHABLE_KEY",
+  "VITE_SUPABASE_PUBLISHABLE_KEY",
+);
+
+// Service role key is optional: tests that need DB verification will skip
+// when it is absent. We still trim and treat empty strings as "missing"
+// so we never pass an empty supabaseKey into createClient or REST headers.
+const SERVICE_KEY = (() => {
+  const raw = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  const trimmed = typeof raw === "string" ? raw.trim() : "";
+  return trimmed.length > 0 ? trimmed : "";
+})();
 
 // The seeded "mimmin-testi" tenant from the production schema.
 const TEST_TENANT_ID = "9ac05fbf-0834-44fd-a52a-d030b7074a30";
