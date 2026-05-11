@@ -385,7 +385,7 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
               type="search"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={t("dashboard.searchGuests") || "Search name, email, phone"}
+              placeholder="Search name, email, phone"
               className="pl-8 h-9"
               aria-label="Search reservations"
             />
