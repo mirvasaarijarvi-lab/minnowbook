@@ -1,0 +1,106 @@
+name: Dependency audit
+
+# Runs npm audit on every pull request and blocks merge when any
+# vulnerability at or above the configured severity threshold is found.
+#
+# How this blocks Dependabot auto-merge:
+#   The Dependabot auto-merge workflow uses `gh pr merge --auto`, which
+#   waits for ALL required status checks (configured under branch
+#   protection) to go green before actually merging. As long as
+#   "Dependency audit / npm-audit" is listed as a required check on the
+#   default branch, a failing audit run here will hold the PR open even
+#   after Dependabot has approved auto-merge.
+#
+# Severity threshold:
+#   AUDIT_LEVEL controls the minimum severity that fails the job.
+#   `high` means: fail on any high or critical advisory, ignore
+#   moderate / low / info. Bump to `moderate` once the project is at
+#   zero high+critical to ratchet protection upwards.
+#
+# Why npm and not bun:
+#   The repo ships a package-lock.json alongside bun.lock so that
+#   `npm audit` and Dependabot have an authoritative dependency graph
+#   to scan. We deliberately do NOT install with bun here, this job
+#   should stay scoped to the SCA check.
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review]
+    paths:
+      - "package.json"
+      - "package-lock.json"
+      - "bun.lock"
+      - ".github/workflows/dependency-audit.yml"
+  push:
+    branches: [main]
+  schedule:
+    # Daily catch-all so newly published advisories are caught even
+    # without dependency churn in the repo.
+    - cron: "17 6 * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: dependency-audit-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Minimum severity that fails the build. Allowed: low | moderate | high | critical.
+  AUDIT_LEVEL: high
+
+jobs:
+  npm-audit:
+    name: npm-audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        # actions/checkout@v4.2.2
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        # actions/setup-node@v4.1.0
+        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Run npm audit (production deps)
+        id: audit
+        env:
+          AUDIT_LEVEL: ${{ env.AUDIT_LEVEL }}
+        run: |
+          set -o pipefail
+          # `--omit=dev` keeps the gate focused on what actually ships
+          # to production. A separate informational step below scans
+          # devDependencies without failing the job.
+          npm audit --omit=dev --audit-level="$AUDIT_LEVEL" --json \
+            | tee npm-audit-prod.json
+          status=${PIPESTATUS[0]}
+          if [ "$status" -ne 0 ]; then
+            echo "::error title=Vulnerable production dependency::npm audit found one or more advisories at severity '$AUDIT_LEVEL' or higher in production dependencies. See the npm-audit-prod.json artifact for details."
+            exit "$status"
+          fi
+
+      - name: Run npm audit (all deps, informational)
+        if: always()
+        continue-on-error: true
+        run: |
+          npm audit --audit-level=low --json | tee npm-audit-all.json || true
+
+      - name: Upload audit reports
+        if: always()
+        # actions/upload-artifact@v4.4.3
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882
+        with:
+          name: npm-audit-reports
+          path: |
+            npm-audit-prod.json
+            npm-audit-all.json
+          if-no-files-found: ignore
+          retention-days: 14
