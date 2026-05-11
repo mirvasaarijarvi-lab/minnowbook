@@ -425,6 +425,7 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
       },
       "restaurant",
       harEntries,
+      flowCorrelationId,
     );
     expect(
       restaurant.status,
@@ -448,6 +449,7 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
       },
       "guesthouse",
       harEntries,
+      flowCorrelationId,
     );
     expect(
       guesthouse.status,
@@ -471,6 +473,7 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
       },
       "venue",
       harEntries,
+      flowCorrelationId,
     );
     expect(
       venue.status,
@@ -496,6 +499,7 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
       },
       "foreign-tenant-negative",
       harEntries,
+      flowCorrelationId,
     );
     expect(
       rejected.status,
