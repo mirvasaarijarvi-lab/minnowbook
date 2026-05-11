@@ -1,0 +1,80 @@
+name: Signed-URL Malicious Paths
+
+# Required PR gate. Runs the Playwright spec
+# `e2e/signed-url-malicious-paths.spec.ts`, which asserts that every
+# known malicious storage object key is rejected by
+# `assertSafeStorageObjectPath` BEFORE reaching Supabase, throws
+# `InvalidStoragePathError`, and resolves to the localised friendly
+# message contract used across the UI.
+#
+# This file is intentionally separate from the broader `e2e.yml`
+# (which is `workflow_dispatch`-only) so the malicious-paths contract
+# is enforced on every pull request and blocks merges on failure.
+# To make this a HARD merge gate, add "Signed-URL Malicious Paths /
+# malicious-paths" to the branch protection rules for `main` as a
+# required status check.
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Default-deny. The job re-grants only `contents: read`.
+permissions: {}
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+# Cancel superseded runs on the same PR so a fast-follow push doesn't
+# burn CI minutes finishing a stale verification.
+concurrency:
+  group: signed-url-malicious-paths-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  malicious-paths:
+    name: malicious-paths
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        # Chromium only. The spec drives the sanitiser via a Node-side
+        # stand-in for `mintSignedUrl`, but Playwright still requires
+        # at least one browser binary to be installed.
+        run: bunx playwright install --with-deps chromium
+
+      - name: Build app
+        # `playwright.config.ts` boots `vite preview` as a `webServer`
+        # for E2E specs. We build once up front so the preview server
+        # has something to serve when Playwright launches it.
+        run: bunx vite build
+
+      - name: Run signed-URL malicious-paths spec
+        run: bunx playwright test e2e/signed-url-malicious-paths.spec.ts --reporter=list
+
+      - name: Upload Playwright report on failure
+        if: failure()
+        uses: actions/upload-artifact@v5
+        with:
+          name: signed-url-malicious-paths-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 14
+          if-no-files-found: ignore
