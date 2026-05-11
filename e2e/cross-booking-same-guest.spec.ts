@@ -192,15 +192,20 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
     try {
       if (page && !page.isClosed()) {
         const buffer = await page.screenshot({ fullPage: true });
-        await testInfo.attach("failure-screenshot.png", {
-          body: buffer,
-          contentType: "image/png",
-        });
+        await attachArtifact(
+          "failure-screenshot.png",
+          buffer,
+          "image/png",
+          "Full-page screenshot taken at the moment of failure.",
+          { embedAsDataUri: true },
+        );
         const html = await page.content();
-        await testInfo.attach("failure-page.html", {
-          body: html,
-          contentType: "text/html",
-        });
+        await attachArtifact(
+          "failure-page.html",
+          html,
+          "text/html",
+          "Live DOM dump of the page at the moment of failure.",
+        );
         failureSummary.url = page.url();
       } else {
         failureSummary.page_capture = "skipped: no open page (api-only test)";
@@ -222,10 +227,12 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
           const videoPath = await video.path();
           const fs = await import("node:fs/promises");
           const videoBytes = await fs.readFile(videoPath);
-          await testInfo.attach("failure-video.webm", {
-            body: videoBytes,
-            contentType: "video/webm",
-          });
+          await attachArtifact(
+            "failure-video.webm",
+            videoBytes,
+            "video/webm",
+            "Recording of the entire test run from start to failure.",
+          );
           failureSummary.video_path = videoPath;
         } else {
           failureSummary.video_capture = "skipped: no video recorder on page";
@@ -246,18 +253,18 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
       const harPath = harPathByTest.get(testInfo.testId);
       if (harPath) {
         try {
-          // page.context() works even after page.close(); the context
-          // outlives its pages. Closing it triggers HAR finalization.
           await page.context().close();
         } catch {
           /* context may already be closed */
         }
         const fs = await import("node:fs/promises");
         const harBytes = await fs.readFile(harPath);
-        await testInfo.attach("failure-network.har", {
-          body: harBytes,
-          contentType: "application/json",
-        });
+        await attachArtifact(
+          "failure-network.har",
+          harBytes,
+          "application/json",
+          "Browser HAR: every request and response captured during the test.",
+        );
         failureSummary.har_path = harPath;
         failureSummary.har_bytes = harBytes.byteLength;
       } else {
@@ -279,10 +286,12 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
       const tracePath = path.resolve(testInfo.outputDir, "trace.zip");
       await fs.access(tracePath);
       const traceBytes = await fs.readFile(tracePath);
-      await testInfo.attach("failure-trace.zip", {
-        body: traceBytes,
-        contentType: "application/zip",
-      });
+      await attachArtifact(
+        "failure-trace.zip",
+        traceBytes,
+        "application/zip",
+        "Playwright trace: open with `npx playwright show-trace failure-trace.zip`.",
+      );
       failureSummary.trace_path = tracePath;
     } catch (err) {
       failureSummary.trace_capture =
@@ -311,10 +320,12 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
           console_total: logs.length,
         },
       };
-      await testInfo.attach("failure-browser-diagnostics.json", {
-        body: JSON.stringify(browserDiagnostics, null, 2),
-        contentType: "application/json",
-      });
+      await attachArtifact(
+        "failure-browser-diagnostics.json",
+        JSON.stringify(browserDiagnostics, null, 2),
+        "application/json",
+        `Structured browser diagnostics: ${errorCount} pageerror(s), ${errorLogCount} console error(s), ${warningLogCount} warning(s).`,
+      );
       const flatLines = [
         `# Page errors (${errors.length})`,
         ...errors.map(
@@ -330,20 +341,44 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
             (l.location?.url ? ` (${l.location.url}:${l.location.lineNumber ?? "?"})` : ""),
         ),
       ];
-      await testInfo.attach("failure-browser.log", {
-        body: flatLines.join("\n"),
-        contentType: "text/plain",
-      });
+      await attachArtifact(
+        "failure-browser.log",
+        flatLines.join("\n"),
+        "text/plain",
+        "Flat browser log: skim-friendly view of all console messages and page errors.",
+      );
       failureSummary.browser_diagnostics = browserDiagnostics.counts;
     } catch (err) {
       failureSummary.browser_diagnostics_error =
         err instanceof Error ? err.message : String(err);
     }
 
-    await testInfo.attach("failure-summary.json", {
-      body: JSON.stringify(failureSummary, null, 2),
-      contentType: "application/json",
-    });
+    const summaryJson = JSON.stringify(failureSummary, null, 2);
+    await attachArtifact(
+      "failure-summary.json",
+      summaryJson,
+      "application/json",
+      "Machine-readable failure summary (status, error, correlation IDs, artifact pointers).",
+      { embedAsText: true },
+    );
+
+    // Self-contained HTML index: one page that links + previews every
+    // artifact above. Open it from the Playwright HTML report and you
+    // get a single dashboard for triaging the failure.
+    try {
+      const indexHtml = renderFailureIndexHtml(testInfo, failureSummary, artifacts);
+      await testInfo.attach("failure-index.html", {
+        body: indexHtml,
+        contentType: "text/html",
+      });
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(
+        `${LOG_PREFIX} failed to render failure-index.html: ${
+          err instanceof Error ? err.message : String(err)
+        }`,
+      );
+    }
     // eslint-disable-next-line no-console
     console.error(`${LOG_PREFIX} FAILURE ${JSON.stringify(failureSummary)}`);
   });
