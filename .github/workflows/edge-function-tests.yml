@@ -150,3 +150,12 @@ jobs:
           path: /tmp/edge-test-logs/
           if-no-files-found: warn
           retention-days: 14
+
+      - name: Upload Deno junit reports
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: edge-test-junit-run-${{ github.run_id }}
+          path: test-reports/deno/
+          if-no-files-found: warn
+          retention-days: 14
