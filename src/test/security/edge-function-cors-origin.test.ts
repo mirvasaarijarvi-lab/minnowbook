@@ -87,7 +87,7 @@ async function preflight(name: string, origin: string) {
 }
 
 async function postCall(name: string, origin: string, body: unknown) {
-  return await fetch(fnUrl(name), {
+  return await fetchWithRetry(fnUrl(name), {
     method: "POST",
     headers: {
       Origin: origin,
