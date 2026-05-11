@@ -19,6 +19,7 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { CalendarDays, CalendarIcon, User, Mail, Phone, MoreVertical, CheckCircle2, XCircle, Pencil, Receipt, PackageCheck, Coffee, Plus, Building2, Tag, Bell, MailCheck, MailX, Search } from "lucide-react";
 import EditReservationDialog from "./EditReservationDialog";
+import ReservationDetailDialog from "./ReservationDetailDialog";
 import ManualReservationDialog from "./ManualReservationDialog";
 import ConfirmationEmailPreview from "@/components/ConfirmationEmailPreview";
 import { useT, useTDynamic } from "@/contexts/I18nContext";
