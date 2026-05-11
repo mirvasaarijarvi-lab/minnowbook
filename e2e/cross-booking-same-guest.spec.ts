@@ -319,8 +319,9 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
     test.setTimeout(60_000);
     await captureCheckpoint(page, testInfo, "smoke: before goto", { screenshot: false });
     await gotoAndWaitForSpa(page, `/book/${tenant.slug}`);
-    await captureCheckpoint(page, testInfo, "smoke: after SPA hydrate", {
-      probeSelectors: ["#root", "main", "h1"],
+    await assertPublicBookingReady(page);
+    await captureCheckpoint(page, testInfo, "smoke: after booking form ready", {
+      probeSelectors: ["#root", "main", "h1", "#guest_name", "form"],
     });
   });
 
