@@ -694,9 +694,10 @@ const SettingsPanel = () => {
     setUploadingHero(true);
     try {
       const { sanitizeFileExtension, sanitizePathSegment } = await import("@/lib/sanitize-path");
+      const { assertSafeStorageObjectPath } = await import("@/lib/storage-path");
       const ext = sanitizeFileExtension(file.name.split(".").pop());
       const safeTenant = sanitizePathSegment(tenantId!);
-      const filePath = `${safeTenant}/hero.${ext}`;
+      const filePath = assertSafeStorageObjectPath(`${safeTenant}/hero.${ext}`);
 
       const { error: uploadError } = await supabase.storage
         .from("tenant-branding")
