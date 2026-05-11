@@ -3122,7 +3122,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         // list/download attempts have something real to find — otherwise
         // an empty result could mask a leak (we wouldn't be able to tell
         // "nothing to see" from "policy hid it").
-        const aPath = ownPath(liveCreds.a.tenantId!, "a-assets-isolation-seed");
+        const aPath = assetsOwnPath(liveCreds.a.tenantId!, "a-assets-isolation-seed");
         const { error: aErr } = await allowedStorageCall(
           () => clientA.storage
             .from(ASSETS_BUCKET)
@@ -3132,7 +3132,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         if (aErr) throw new Error(`Seed upload for tenant A failed: ${aErr.message}`);
         seededAssets.push({ path: aPath, client: "a" });
 
-        const bPath = ownPath(liveCreds.b.tenantId!, "b-assets-isolation-seed");
+        const bPath = assetsOwnPath(liveCreds.b.tenantId!, "b-assets-isolation-seed");
         const { error: bErr } = await allowedStorageCall(
           () => clientB.storage
             .from(ASSETS_BUCKET)
@@ -3175,7 +3175,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       it("user A CAN list their own tenant-assets per-run folder", async () => {
         const { data, error } = await clientA.storage
           .from(ASSETS_BUCKET)
-          .list(runRootFor(liveCreds.a.tenantId!), { limit: 50 });
+          .list(assetsRunRootFor(liveCreds.a.tenantId!), { limit: 50 });
         expect(error).toBeNull();
         expect(data).toBeTruthy();
         // Must include the seed we just uploaded.
@@ -3184,7 +3184,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       });
 
       it("user A CAN download their own tenant-assets file via authenticated client", async () => {
-        const path = ownPath(liveCreds.a.tenantId!, "a-assets-isolation-seed");
+        const path = assetsOwnPath(liveCreds.a.tenantId!, "a-assets-isolation-seed");
         const { data, error } = await clientA.storage.from(ASSETS_BUCKET).download(path);
         expect(error).toBeNull();
         expect(data).toBeTruthy();
@@ -3208,7 +3208,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       it("user A cannot LIST tenant B's per-run tenant-assets folder", async () => {
         const { data, error } = await clientA.storage
           .from(ASSETS_BUCKET)
-          .list(runRootFor(liveCreds.b.tenantId!), { limit: 50 });
+          .list(assetsRunRootFor(liveCreds.b.tenantId!), { limit: 50 });
         const leaked =
           Array.isArray(data) &&
           data.some((entry) => entry.name && entry.name.includes("b-assets-isolation-seed"));
@@ -3232,7 +3232,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       it("user B cannot LIST tenant A's per-run tenant-assets folder", async () => {
         const { data, error } = await clientB.storage
           .from(ASSETS_BUCKET)
-          .list(runRootFor(liveCreds.a.tenantId!), { limit: 50 });
+          .list(assetsRunRootFor(liveCreds.a.tenantId!), { limit: 50 });
         const leaked =
           Array.isArray(data) &&
           data.some((entry) => entry.name && entry.name.includes("a-assets-isolation-seed"));
@@ -3248,14 +3248,14 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       // via that channel — that would imply the SELECT policy is keyed on
       // bucket alone instead of `foldername(name)[1] = tenant_id`.
       it.skip("user A cannot DOWNLOAD tenant B's tenant-assets file via authenticated client", async () => {
-        const path = ownPath(liveCreds.b.tenantId!, "b-assets-isolation-seed");
+        const path = assetsOwnPath(liveCreds.b.tenantId!, "b-assets-isolation-seed");
         const { data, error } = await clientA.storage.from(ASSETS_BUCKET).download(path);
         const denied = Boolean(error) || !data;
         expect(denied).toBe(true);
       });
 
       it.skip("user B cannot DOWNLOAD tenant A's tenant-assets file via authenticated client", async () => {
-        const path = ownPath(liveCreds.a.tenantId!, "a-assets-isolation-seed");
+        const path = assetsOwnPath(liveCreds.a.tenantId!, "a-assets-isolation-seed");
         const { data, error } = await clientB.storage.from(ASSETS_BUCKET).download(path);
         const denied = Boolean(error) || !data;
         expect(denied).toBe(true);
@@ -3286,7 +3286,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         const anonClient = newAnonClient();
         const { data, error } = await anonClient.storage
           .from(ASSETS_BUCKET)
-          .list(runRootFor(liveCreds.b.tenantId!), { limit: 50 });
+          .list(assetsRunRootFor(liveCreds.b.tenantId!), { limit: 50 });
         const leaked =
           Array.isArray(data) &&
           data.some((entry) => entry.name && entry.name.includes("b-assets-isolation-seed"));
@@ -3297,7 +3297,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
 
       it.skip("anon cannot DOWNLOAD tenant A's seeded tenant-assets file via authenticated client", async () => {
         const anonClient = newAnonClient();
-        const path = ownPath(liveCreds.a.tenantId!, "a-assets-isolation-seed");
+        const path = assetsOwnPath(liveCreds.a.tenantId!, "a-assets-isolation-seed");
         const { data, error } = await anonClient.storage.from(ASSETS_BUCKET).download(path);
         const denied = Boolean(error) || !data;
         expect(denied).toBe(true);
@@ -3305,7 +3305,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
 
       it.skip("anon cannot DOWNLOAD tenant B's seeded tenant-assets file via authenticated client", async () => {
         const anonClient = newAnonClient();
-        const path = ownPath(liveCreds.b.tenantId!, "b-assets-isolation-seed");
+        const path = assetsOwnPath(liveCreds.b.tenantId!, "b-assets-isolation-seed");
         const { data, error } = await anonClient.storage.from(ASSETS_BUCKET).download(path);
         const denied = Boolean(error) || !data;
         expect(denied).toBe(true);
@@ -3366,7 +3366,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         // Seed one distinctively-named asset per tenant so prefix/search
         // probes have a real target. Names embed a probe marker so a
         // leak is unambiguous in test output.
-        const aPath = ownPath(liveCreds.a.tenantId!, "a-probe-target-asset");
+        const aPath = assetsOwnPath(liveCreds.a.tenantId!, "a-probe-target-asset");
         const { error: aErr } = await allowedStorageCall(
           () => clientA.storage
             .from(ASSETS_BUCKET)
@@ -3376,7 +3376,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         if (aErr) throw new Error(`Probe seed for tenant A failed: ${aErr.message}`);
         seededAssets.push({ path: aPath, client: "a" });
 
-        const bPath = ownPath(liveCreds.b.tenantId!, "b-probe-target-asset");
+        const bPath = assetsOwnPath(liveCreds.b.tenantId!, "b-probe-target-asset");
         const { error: bErr } = await allowedStorageCall(
           () => clientB.storage
             .from(ASSETS_BUCKET)
@@ -3416,7 +3416,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       // granted — i.e. the attacker has just confirmed the file exists
       // AND has been handed a usable download URL. Either is fatal.
       it("user A cannot createSignedUrl for tenant B's seeded tenant-assets file", async () => {
-        const path = ownPath(liveCreds.b.tenantId!, "b-probe-target-asset");
+        const path = assetsOwnPath(liveCreds.b.tenantId!, "b-probe-target-asset");
         const { data, error } = await clientA.storage
           .from(ASSETS_BUCKET)
           .createSignedUrl(path, 60);
@@ -3425,7 +3425,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       });
 
       it("user B cannot createSignedUrl for tenant A's seeded tenant-assets file", async () => {
-        const path = ownPath(liveCreds.a.tenantId!, "a-probe-target-asset");
+        const path = assetsOwnPath(liveCreds.a.tenantId!, "a-probe-target-asset");
         const { data, error } = await clientB.storage
           .from(ASSETS_BUCKET)
           .createSignedUrl(path, 60);
@@ -3438,7 +3438,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       // `signedUrl` for the foreign-tenant path is a leak even if other
       // entries error out.
       it("user A cannot batch-sign URLs for tenant B's seeded tenant-assets file", async () => {
-        const path = ownPath(liveCreds.b.tenantId!, "b-probe-target-asset");
+        const path = assetsOwnPath(liveCreds.b.tenantId!, "b-probe-target-asset");
         const { data, error } = await clientA.storage
           .from(ASSETS_BUCKET)
           .createSignedUrls([path], 60);
@@ -3487,8 +3487,8 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       // exists. We point the destination at the attacker's OWN folder
       // so a hypothetical bypass would actually materialise the leak.
       it("user A cannot copy() tenant B's seeded tenant-assets file", async () => {
-        const sourcePath = ownPath(liveCreds.b.tenantId!, "b-probe-target-asset");
-        const destPath = ownPath(liveCreds.a.tenantId!, "a-copy-from-b-probe");
+        const sourcePath = assetsOwnPath(liveCreds.b.tenantId!, "b-probe-target-asset");
+        const destPath = assetsOwnPath(liveCreds.a.tenantId!, "a-copy-from-b-probe");
         const { data, error } = await clientA.storage
           .from(ASSETS_BUCKET)
           .copy(sourcePath, destPath);
@@ -3526,8 +3526,8 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       });
 
       it("user B cannot move() tenant A's seeded tenant-assets file", async () => {
-        const sourcePath = ownPath(liveCreds.a.tenantId!, "a-probe-target-asset");
-        const destPath = ownPath(liveCreds.b.tenantId!, "b-move-from-a-probe");
+        const sourcePath = assetsOwnPath(liveCreds.a.tenantId!, "a-probe-target-asset");
+        const destPath = assetsOwnPath(liveCreds.b.tenantId!, "b-move-from-a-probe");
         const { data, error } = await clientB.storage
           .from(ASSETS_BUCKET)
           .move(sourcePath, destPath);
@@ -3567,7 +3567,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       // assertion still holds vacuously (nothing to call → nothing to
       // leak). When present, it MUST refuse the foreign tenant.
       it.skip("user A cannot info()/stat tenant B's seeded tenant-assets file", async () => {
-        const path = ownPath(liveCreds.b.tenantId!, "b-probe-target-asset");
+        const path = assetsOwnPath(liveCreds.b.tenantId!, "b-probe-target-asset");
         const bucketApi = clientA.storage.from(ASSETS_BUCKET) as unknown as {
           info?: (p: string) => Promise<{ data: unknown; error: unknown }>;
         };
@@ -3581,7 +3581,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       });
 
       it.skip("user B cannot info()/stat tenant A's seeded tenant-assets file", async () => {
-        const path = ownPath(liveCreds.a.tenantId!, "a-probe-target-asset");
+        const path = assetsOwnPath(liveCreds.a.tenantId!, "a-probe-target-asset");
         const bucketApi = clientB.storage.from(ASSETS_BUCKET) as unknown as {
           info?: (p: string) => Promise<{ data: unknown; error: unknown }>;
         };
@@ -3601,7 +3601,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       // both technically "fail"). The expectation: both paths produce
       // the same shape of denial and never one-hit/one-miss.
       it.skip("user A's foreign-tenant download() failures are indistinguishable for existing vs. missing paths", async () => {
-        const existingForeign = ownPath(liveCreds.b.tenantId!, "b-probe-target-asset");
+        const existingForeign = assetsOwnPath(liveCreds.b.tenantId!, "b-probe-target-asset");
         const missingForeign = ownPath(
           liveCreds.b.tenantId!,
           `definitely-missing-${Math.random().toString(36).slice(2, 10)}`,
@@ -3666,7 +3666,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       // so any of these that resolves server-side back to victim's
       // file would constitute a bypass.
       const buildTrickyPaths = (attackerTenant: string, victimTenant: string) => {
-        const victimLeaf = `${runRootFor(victimTenant)}/b-traversal-target.txt`;
+        const victimLeaf = `${assetsRunRootFor(victimTenant)}/b-traversal-target.txt`;
         return [
           // Classic `..` traversal out of attacker's folder into victim's.
           `${attackerTenant}/../${victimLeaf}`,
@@ -3725,7 +3725,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         // tricky paths point at REAL victim objects. We deliberately
         // use the literal leaf name `b-traversal-target.txt` (and
         // mirror for A) so `buildTrickyPaths` can reconstruct it.
-        const aPath = `${runRootFor(liveCreds.a.tenantId!)}/a-traversal-target.txt`;
+        const aPath = `${assetsRunRootFor(liveCreds.a.tenantId!)}/a-traversal-target.txt`;
         const { error: aErr } = await allowedStorageCall(
           () => clientA.storage
             .from(ASSETS_BUCKET)
@@ -3735,7 +3735,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         if (aErr) throw new Error(`Traversal seed for tenant A failed: ${aErr.message}`);
         seededAssets.push({ path: aPath, client: "a" });
 
-        const bPath = `${runRootFor(liveCreds.b.tenantId!)}/b-traversal-target.txt`;
+        const bPath = `${assetsRunRootFor(liveCreds.b.tenantId!)}/b-traversal-target.txt`;
         const { error: bErr } = await allowedStorageCall(
           () => clientB.storage
             .from(ASSETS_BUCKET)
@@ -3828,7 +3828,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       // attacker-crafted prefixes that try to escape into B's run
       // root, and assert no entries from B's seed surface.
       it("user A cannot list() tenant B's run-root via tricky parent prefixes", async () => {
-        const victimPrefix = runRootFor(liveCreds.b.tenantId!);
+        const victimPrefix = assetsRunRootFor(liveCreds.b.tenantId!);
         const trickyParents = [
           `${liveCreds.a.tenantId!}/../${victimPrefix}`,
           `/${victimPrefix}`,
@@ -3941,7 +3941,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         // Seed one publicly addressable asset per tenant. The leaf
         // names are distinctive so leak detection in list() can
         // unambiguously flag them.
-        const aPath = `${runRootFor(liveCreds.a.tenantId!)}/a-public-cdn-seed.txt`;
+        const aPath = `${assetsRunRootFor(liveCreds.a.tenantId!)}/a-public-cdn-seed.txt`;
         const { error: aErr } = await allowedStorageCall(
           () => clientA.storage
             .from(ASSETS_BUCKET)
@@ -3951,7 +3951,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         if (aErr) throw new Error(`Seed for tenant A failed: ${aErr.message}`);
         seededAssets.push({ path: aPath, client: "a" });
 
-        const bPath = `${runRootFor(liveCreds.b.tenantId!)}/b-public-cdn-seed.txt`;
+        const bPath = `${assetsRunRootFor(liveCreds.b.tenantId!)}/b-public-cdn-seed.txt`;
         const { error: bErr } = await allowedStorageCall(
           () => clientB.storage
             .from(ASSETS_BUCKET)
@@ -3991,8 +3991,8 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       // Anonymous fetches should be denied while authenticated tenant
       // members continue using regular download() and signed URLs.
       it("anonymous fetch() of public CDN URL is denied for both tenants", async () => {
-        const aPath = `${runRootFor(liveCreds.a.tenantId!)}/a-public-cdn-seed.txt`;
-        const bPath = `${runRootFor(liveCreds.b.tenantId!)}/b-public-cdn-seed.txt`;
+        const aPath = `${assetsRunRootFor(liveCreds.a.tenantId!)}/a-public-cdn-seed.txt`;
+        const bPath = `${assetsRunRootFor(liveCreds.b.tenantId!)}/b-public-cdn-seed.txt`;
 
         // getPublicUrl() is a pure URL builder — no network, no auth
         // — so this is equivalent to constructing the CDN path by
@@ -4039,7 +4039,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
           // a more targeted enumeration attempt.
           const { data: subData, error: subError } = await anon.storage
             .from(ASSETS_BUCKET)
-            .list(runRootFor(folder), { limit: 100 });
+            .list(assetsRunRootFor(folder), { limit: 100 });
           const subLeaked =
             Array.isArray(subData) &&
             subData.some((entry) => entry.name && entry.name.includes("public-cdn-seed"));
