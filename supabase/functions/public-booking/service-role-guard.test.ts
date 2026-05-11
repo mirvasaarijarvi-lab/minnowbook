@@ -9,7 +9,7 @@
 //   * status MUST be 400 (NOT 500), so the SPA renders an actionable
 //     misconfig message instead of a generic "system error";
 //   * body MUST include the machine-readable `error_code:
-//     BOOKING_ERROR_CODES.SERVICE_ROLE_KEY_MISSING` so the SPA can route to a precise
+//     "SERVICE_ROLE_KEY_MISSING"` so the SPA can route to a precise
 //     copy string;
 //   * the guard MUST treat empty / whitespace-only env values the
 //     same as a fully missing var (production has been bitten by
