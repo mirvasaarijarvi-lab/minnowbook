@@ -50,7 +50,7 @@ setInterval(() => {
 }, 300_000);
 
 serve(async (req) => {
-  const corsHeaders = getCorsHeaders(req);
+  const corsHeaders = getCorsHeaders(req, { allowMethods: "POST, OPTIONS" });
   const reqOrigin = req.headers.get("Origin") || "";
   const referer = req.headers.get("Referer") || "";
   const userAgent = req.headers.get("User-Agent") || "";
