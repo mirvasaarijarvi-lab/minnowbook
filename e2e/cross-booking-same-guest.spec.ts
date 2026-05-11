@@ -77,6 +77,34 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
         err instanceof Error ? err.message : String(err);
     }
 
+    // Video clip: playwright.config.ts records video for every test
+    // (`video: "on"`). The file is only finalized after the page closes,
+    // so we explicitly close the page first, then attach the resulting
+    // .webm so reviewers can scrub the failing run frame by frame.
+    try {
+      if (page && !page.isClosed()) {
+        const video = page.video();
+        await page.close();
+        if (video) {
+          const videoPath = await video.path();
+          const fs = await import("node:fs/promises");
+          const videoBytes = await fs.readFile(videoPath);
+          await testInfo.attach("failure-video.webm", {
+            body: videoBytes,
+            contentType: "video/webm",
+          });
+          failureSummary.video_path = videoPath;
+        } else {
+          failureSummary.video_capture = "skipped: no video recorder on page";
+        }
+      } else {
+        failureSummary.video_capture = "skipped: page already closed";
+      }
+    } catch (err) {
+      failureSummary.video_capture_error =
+        err instanceof Error ? err.message : String(err);
+    }
+
     // Trace is captured for every test by playwright.config.ts (`trace: "on"`)
     // and lives at testInfo.outputDir/trace.zip. Attach it explicitly so the
     // HTML report links it directly under the failing test, instead of the
