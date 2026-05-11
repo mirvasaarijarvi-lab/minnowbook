@@ -18,7 +18,18 @@ import { corsHeaders } from "../_shared/http-headers.ts";
 
 export function handleForbiddenStatusRequest(req: Request): Response {
   if (req.method === "OPTIONS") {
-    return new Response(null, { status: 204, headers: corsHeaders });
+    // Explicitly advertise the methods this endpoint accepts so browser
+    // preflights (which send `Access-Control-Request-Method: GET`) get a
+    // matching `Access-Control-Allow-Methods` back. The shared
+    // `corsHeaders` bag intentionally omits this so each function can
+    // declare its own allowed verbs.
+    return new Response(null, {
+      status: 204,
+      headers: {
+        ...corsHeaders,
+        "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+      },
+    });
   }
 
   const url = new URL(req.url);
