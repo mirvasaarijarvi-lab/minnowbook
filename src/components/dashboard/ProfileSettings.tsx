@@ -82,7 +82,7 @@ const ProfileSettings = () => {
       const ext = sanitizeFileExtension(file.name.split(".").pop());
       const safeTenant = sanitizePathSegment(tenantId!);
       const safeUser = sanitizePathSegment(user.id);
-      const path = assertSafeStorageObjectPath(`${safeTenant}/avatars/${safeUser}.${ext}`, { callsite: "profile:avatar-upload" });
+      const path = assertSafeStorageObjectPath(`${safeTenant}/avatars/${safeUser}.${ext}`, { callsite: "profile:avatar-upload", tenantId: tenantId ?? undefined });
 
       const { error: uploadError } = await supabase.storage
         .from("tenant-assets")
