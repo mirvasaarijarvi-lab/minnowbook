@@ -3,10 +3,14 @@ name: Edge Function Tests
 on:
   workflow_dispatch:
 
+permissions: {}
+
 jobs:
   edge-tests:
     name: Deno Edge Function Tests
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout code
