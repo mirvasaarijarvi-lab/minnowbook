@@ -214,6 +214,23 @@ lines.push(`- Waived by allowlist: **${waivedEntries.length}**`);
 lines.push(`- Expired allowlist entries: **${expiredEntries.length}**`);
 lines.push("");
 
+// Severity breakdown table. Mirrors the data published to the
+// GitHub PR check run / step summary so a reviewer reading just the
+// PR comment still sees how findings map onto the configured gate.
+lines.push("### Severity breakdown");
+lines.push("");
+lines.push("| Severity | Blocking | Waived | Total at or above gate | Gate? |");
+lines.push("| --- | ---: | ---: | ---: | :---: |");
+for (const sev of SEVERITIES) {
+  const atOrAboveGate = severityRank(sev) >= minRank;
+  lines.push(
+    `| ${sevBadge(sev)} | ${blockingBySeverity[sev]} | ${waivedBySeverity[sev]} | ${atOrAboveGate ? totalBySeverity[sev] : "—"} | ${atOrAboveGate ? "✅" : "·"} |`,
+  );
+}
+lines.push("");
+lines.push(`<sub>"Gate?" marks severities at or above \`AUDIT_LEVEL=${level}\` that count toward the pass/fail decision.</sub>`);
+lines.push("");
+
 if (blocking.length > 0) {
   lines.push(`### Failing against \`AUDIT_LEVEL=${level}\``);
   lines.push("");
