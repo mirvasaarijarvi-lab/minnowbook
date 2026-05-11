@@ -22,7 +22,8 @@
     "test:rls-report:storage-multipart": "vitest run --testTimeout=120000 --hookTimeout=120000 --reporter=default --reporter=./src/test/security/rls-report-reporter.ts src/test/security/cross-tenant-storage.test.ts -t \"multipart|Multipart\"",
     "e2e:install": "playwright install chromium",
     "e2e": "playwright install chromium && playwright test",
-    "e2e:ui": "playwright install chromium && playwright test --ui"
+    "e2e:ui": "playwright install chromium && playwright test --ui",
+    "test:ci": "bash scripts/test-ci.sh"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
