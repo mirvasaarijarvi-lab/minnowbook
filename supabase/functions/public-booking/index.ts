@@ -787,4 +787,6 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
-});
+};
+
+Deno.serve(handlePublicBookingRequest);
