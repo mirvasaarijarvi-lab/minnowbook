@@ -2365,7 +2365,7 @@ const PublicBooking = () => {
   return (
     <BookingErrorBoundary
       fallback={
-        <div className="min-h-screen flex items-center justify-center bg-background">
+        <main className="min-h-screen flex items-center justify-center bg-background">
           <div className="text-center space-y-2">
             <h1 className="text-2xl font-serif font-bold text-foreground">
               {t("booking.notFound")}
@@ -2374,7 +2374,7 @@ const PublicBooking = () => {
               Something went wrong. Please try refreshing the page.
             </p>
           </div>
-        </div>
+        </main>
       }
     >
       <PublicBookingInner />
