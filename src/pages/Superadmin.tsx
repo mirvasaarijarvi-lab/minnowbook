@@ -41,6 +41,7 @@ import StripeRevenuePanel from "@/components/dashboard/StripeRevenuePanel";
 import TenantMembershipCheckPanel from "@/components/dashboard/TenantMembershipCheckPanel";
 import RlsManifestDebugPanel from "@/components/dashboard/RlsManifestDebugPanel";
 import ForbiddenAccessLogPanel from "@/components/dashboard/ForbiddenAccessLogPanel";
+import StorageRejectionPanel from "@/components/dashboard/StorageRejectionPanel";
 import NoTenantState from "@/components/NoTenantState";
 import { useTenant } from "@/hooks/useTenant";
 
