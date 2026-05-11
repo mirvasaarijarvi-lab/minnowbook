@@ -13,7 +13,7 @@ import {
   corsHeaders,
   getCorsHeaders,
   isOriginAllowed,
-} from "./http-headers.ts";
+} from "../../../supabase/functions/_shared/http-headers.ts";
 
 function reqWith(origin: string): Request {
   return new Request("https://example.test/", {
