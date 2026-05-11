@@ -17,8 +17,9 @@ run_step() {
   echo "✅ $name passed"
 }
 
-# 1. Vitest unit tests
-run_step "Unit tests (Vitest)" npx vitest run
+# 1. Vitest unit tests (fail fast on first failing file, no watch, minimal reporter)
+run_step "Unit tests (Vitest)" \
+  node --no-warnings ./node_modules/vitest/vitest.mjs run --bail=1 --reporter=dot
 
 # 2. Deno tests for Supabase edge functions
 if command -v deno >/dev/null 2>&1; then
