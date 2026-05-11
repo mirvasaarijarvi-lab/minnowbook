@@ -1,8 +1,9 @@
 // Vitest unit tests for the quarantine hygiene rules. Runs under the
 // existing schema gate so the CI-tooling itself can't silently break.
 import { describe, it, expect } from "vitest";
-// @ts-expect-error — pure ESM script, no .d.ts; types not needed for tests.
-import { validateManifest } from "../../../scripts/ci/check-quarantine.mjs";
+// Pure ESM script, no .d.ts; cast to any to avoid the TS resolver.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const { validateManifest } = (await import("../../../scripts/ci/check-quarantine.mjs" as any)) as any;
 
 const NOW = new Date("2026-05-11T00:00:00Z");
 
