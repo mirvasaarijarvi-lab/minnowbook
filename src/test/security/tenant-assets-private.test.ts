@@ -56,8 +56,19 @@ beforeAll(() => {
 /** Hit the *public-object* HTTP endpoint directly. Private buckets return 400. */
 async function fetchPublicObject(bucket: string, path: string): Promise<Response> {
   const url = `${SUPABASE_URL}/storage/v1/object/public/${bucket}/${path}`;
-  return fetch(url, { method: "GET" });
+  // Bound each request so a slow/hung edge can't blow the whole test budget.
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), 8000);
+  try {
+    return await fetch(url, { method: "GET", signal: ctrl.signal });
+  } finally {
+    clearTimeout(t);
+  }
 }
+
+// Network-bound suite hitting live Supabase storage; default 5s isn't enough
+// when 4 sequential probes per bucket race cold connections in CI.
+const NET_TIMEOUT_MS = 60_000;
 
 describe("tenant-assets is private (regression)", () => {
   for (const bucket of PRIVATE_BUCKETS) {
