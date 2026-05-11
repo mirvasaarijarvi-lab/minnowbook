@@ -37,11 +37,10 @@ export type BookingTelemetryEvent = {
   ts: string;
 };
 
-declare global {
-  interface Window {
-    dataLayer?: Array<Record<string, unknown>>;
-  }
-}
+// `Window.dataLayer` is already declared globally in `src/lib/gtm.ts`
+// as `unknown[]`. We reuse that declaration here rather than redeclaring
+// it (which would conflict on type/modifiers) and just push our event
+// objects into it.
 
 function safePagePath(): string | undefined {
   try {
