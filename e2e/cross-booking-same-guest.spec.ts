@@ -1,10 +1,45 @@
 import {
-  test,
+  test as baseTest,
   expect,
   SUPABASE_URL,
   futureDate,
   makeTestGuest,
 } from "./fixtures/test-tenant";
+import path from "node:path";
+
+// Per-test browser HAR file path, populated when the overridden `context`
+// fixture creates the BrowserContext with `recordHar` enabled.
+const harPathByTest = new Map<string, string>();
+
+/**
+ * Local test variant that records a full browser HAR (network log) per test.
+ * The HAR is written to `<testInfo.outputDir>/network.har` and is only
+ * finalized when the BrowserContext is closed, so afterEach must close the
+ * context before attaching it to the report.
+ */
+const test = baseTest.extend({
+  // eslint-disable-next-line no-empty-pattern
+  context: async ({ browser }, useFixture, testInfo) => {
+    const harPath = path.join(testInfo.outputDir, "network.har");
+    const context = await browser.newContext({
+      baseURL: "http://localhost:4173",
+      recordHar: { path: harPath, mode: "minimal", content: "embed" },
+      recordVideo: { dir: testInfo.outputDir },
+    });
+    harPathByTest.set(testInfo.testId, harPath);
+    await useFixture(context);
+    // Closing here is a no-op when afterEach already closed the context,
+    // and a safety net otherwise so the HAR file is always flushed.
+    if (!(context as any)._closedPromise) {
+      try {
+        await context.close();
+      } catch {
+        /* already closed */
+      }
+    }
+  },
+});
+
 import { createClient } from "@supabase/supabase-js";
 import { gotoAndWaitForSpa } from "./fixtures/spa-waits";
 import {
