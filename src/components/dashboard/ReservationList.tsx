@@ -33,6 +33,7 @@ import {
   PERM_RESERVATIONS_EDIT,
   PERM_RESERVATIONS_DELETE,
 } from "@/lib/permissions";
+import { buildGuestSearchOrClause } from "@/lib/reservationFilters";
 
 const statusColors: Record<string, string> = {
   pending: "bg-warning/10 text-warning-foreground border-warning/20",
@@ -111,13 +112,8 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
       }
       if (invoicedFilter === "uninvoiced") query = query.eq("is_invoiced", false);
       if (invoicedFilter === "invoiced") query = query.eq("is_invoiced", true);
-      if (debouncedSearch) {
-        const escaped = debouncedSearch.replace(/[%,()]/g, " ");
-        const term = `%${escaped}%`;
-        query = query.or(
-          `guest_name.ilike.${term},guest_email.ilike.${term},guest_phone.ilike.${term}`
-        );
-      }
+      const searchClause = buildGuestSearchOrClause(debouncedSearch);
+      if (searchClause) query = query.or(searchClause);
       const { data, error } = await query.limit(100);
       if (error) throw error;
       return data;
