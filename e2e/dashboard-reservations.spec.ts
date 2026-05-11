@@ -9,7 +9,11 @@ test.describe("Dashboard reservations route", () => {
   });
 
   test("login page exposes the email/password fields used to reach dashboard", async ({ page }) => {
-    await page.goto("/auth");
+    // The app's auth route is /login. The companion test above tolerates
+    // either /auth or /login because we used to support both; this one was
+    // pinned to /auth which now falls through to NotFound and never renders
+    // the form. Hit /login directly.
+    await page.goto("/login");
     await expect(page.locator("input[type='email']")).toBeVisible();
     await expect(page.locator("input[type='password']").first()).toBeVisible();
   });
