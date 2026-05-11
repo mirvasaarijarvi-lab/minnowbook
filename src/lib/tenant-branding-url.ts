@@ -21,6 +21,7 @@
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { assertSafeStorageObjectPath } from "@/lib/storage-path";
 
 export const TENANT_BRANDING_BUCKET = "tenant-branding";
 /** 24h, mirrors the private-bucket TTL used elsewhere in the app. */
