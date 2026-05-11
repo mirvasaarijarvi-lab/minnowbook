@@ -164,8 +164,16 @@ Deno.serve(async (req) => {
     .from(SOURCE)
     .list("email-assets", { limit: 1000 });
   for (const f of emailFiles ?? []) {
-    const srcPath = `email-assets/${f.name}`;
-    const dstPath = srcPath;
+    let srcPath: string;
+    let dstPath: string;
+    try {
+      srcPath = assertSafeStoragePath(`email-assets/${f.name}`);
+      dstPath = srcPath;
+    } catch (err) {
+      summary.files_failed++;
+      summary.errors.push(`unsafe path email-assets/${f.name}: ${(err as Error).message}`);
+      continue;
+    }
     const { data: existing } = await admin.storage
       .from(DEST)
       .list("email-assets", { limit: 1000, search: f.name });
