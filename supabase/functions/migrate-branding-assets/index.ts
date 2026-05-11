@@ -21,6 +21,29 @@ const SOURCE = "tenant-assets";
 const DEST = "tenant-branding";
 const BRANDING_RE = /^(logo|hero)\.[A-Za-z0-9]+$/;
 
+/**
+ * Defence-in-depth guard for any object key passed to the Storage SDK.
+ * Even though paths here are derived from server-side `list()` results
+ * (not direct user input), a malicious or corrupted listing entry could
+ * still smuggle traversal sequences through download/getPublicUrl. We
+ * reject anything outside a strict charset before touching the bucket.
+ */
+function assertSafeStoragePath(path: string): string {
+  if (
+    !path ||
+    path.length > 512 ||
+    path.startsWith("/") ||
+    path.includes("..") ||
+    path.includes("\\") ||
+    path.includes("\0") ||
+    path.includes("//") ||
+    /[^a-zA-Z0-9._\-/]/.test(path)
+  ) {
+    throw new Error("Refused to use unsafe storage path");
+  }
+  return path;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
@@ -83,8 +106,16 @@ Deno.serve(async (req) => {
 
     for (const f of files ?? []) {
       if (!BRANDING_RE.test(f.name)) continue;
-      const srcPath = `${tenantId}/${f.name}`;
-      const dstPath = srcPath;
+      let srcPath: string;
+      let dstPath: string;
+      try {
+        srcPath = assertSafeStoragePath(`${tenantId}/${f.name}`);
+        dstPath = srcPath;
+      } catch (err) {
+        summary.files_failed++;
+        summary.errors.push(`unsafe path ${tenantId}/${f.name}: ${(err as Error).message}`);
+        continue;
+      }
 
       // Skip if already migrated.
       const { data: existing } = await admin.storage
@@ -133,8 +164,16 @@ Deno.serve(async (req) => {
     .from(SOURCE)
     .list("email-assets", { limit: 1000 });
   for (const f of emailFiles ?? []) {
-    const srcPath = `email-assets/${f.name}`;
-    const dstPath = srcPath;
+    let srcPath: string;
+    let dstPath: string;
+    try {
+      srcPath = assertSafeStoragePath(`email-assets/${f.name}`);
+      dstPath = srcPath;
+    } catch (err) {
+      summary.files_failed++;
+      summary.errors.push(`unsafe path email-assets/${f.name}: ${(err as Error).message}`);
+      continue;
+    }
     const { data: existing } = await admin.storage
       .from(DEST)
       .list("email-assets", { limit: 1000, search: f.name });
