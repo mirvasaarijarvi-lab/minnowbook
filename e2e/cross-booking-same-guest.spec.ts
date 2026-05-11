@@ -34,26 +34,96 @@ const PUBLIC_BOOKING_TIMEOUT_MS = 30_000;
 // One transparent retry on transient network errors (cold start, dropped connection)
 const PUBLIC_BOOKING_MAX_ATTEMPTS = 2;
 
+// HAR 1.2 entry shape (subset). Browsers (Chrome/Firefox DevTools) and
+// `npx playwright show-trace` can import any spec-conformant HAR file.
+type HarEntry = Record<string, any>;
+
+function buildHarEntry(args: {
+  startedAt: number;
+  durationMs: number;
+  url: string;
+  reqHeaders: Record<string, string>;
+  reqBody: unknown;
+  status: number;
+  statusText: string;
+  resHeaders: Record<string, string>;
+  resBodyText: string;
+  resContentType: string;
+}): HarEntry {
+  const reqBodyText =
+    typeof args.reqBody === "string" ? args.reqBody : JSON.stringify(args.reqBody);
+  const toHeaderArray = (h: Record<string, string>) =>
+    Object.entries(h).map(([name, value]) => ({ name, value }));
+  return {
+    startedDateTime: new Date(args.startedAt).toISOString(),
+    time: args.durationMs,
+    request: {
+      method: "POST",
+      url: args.url,
+      httpVersion: "HTTP/1.1",
+      headers: toHeaderArray(args.reqHeaders),
+      queryString: [],
+      cookies: [],
+      headersSize: -1,
+      bodySize: Buffer.byteLength(reqBodyText, "utf-8"),
+      postData: {
+        mimeType: args.reqHeaders["Content-Type"] ?? "application/json",
+        text: reqBodyText,
+      },
+    },
+    response: {
+      status: args.status,
+      statusText: args.statusText,
+      httpVersion: "HTTP/1.1",
+      headers: toHeaderArray(args.resHeaders),
+      cookies: [],
+      content: {
+        size: Buffer.byteLength(args.resBodyText, "utf-8"),
+        mimeType: args.resContentType || "application/json",
+        text: args.resBodyText,
+      },
+      redirectURL: "",
+      headersSize: -1,
+      bodySize: Buffer.byteLength(args.resBodyText, "utf-8"),
+    },
+    cache: {},
+    timings: {
+      send: 0,
+      wait: args.durationMs,
+      receive: 0,
+    },
+  };
+}
+
 async function callPublicBooking(
   request: import("@playwright/test").APIRequestContext,
   body: Record<string, unknown>,
   label: string,
+  harEntries?: HarEntry[],
 ) {
   const url = `${SUPABASE_URL}/functions/v1/public-booking`;
-  const requestHeaders = {
+  // Real headers actually sent on the wire (used for the HAR).
+  const wireHeaders = {
     "Content-Type": "application/json",
     Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
     apikey: SUPABASE_ANON_KEY,
+  };
+  // Redacted copy used for diagnostics/console output only.
+  const redactedHeaders = {
+    ...wireHeaders,
+    Authorization: "Bearer <redacted>",
+    apikey: "<redacted>",
   };
 
   let lastError: unknown = null;
   let res: import("@playwright/test").APIResponse | null = null;
   let durationMs = 0;
+  let startedAt = Date.now();
   for (let attempt = 1; attempt <= PUBLIC_BOOKING_MAX_ATTEMPTS; attempt++) {
-    const startedAt = Date.now();
+    startedAt = Date.now();
     try {
       res = await request.post(url, {
-        headers: requestHeaders,
+        headers: wireHeaders,
         data: body,
         timeout: PUBLIC_BOOKING_TIMEOUT_MS,
       });
@@ -62,18 +132,31 @@ async function callPublicBooking(
     } catch (err) {
       durationMs = Date.now() - startedAt;
       lastError = err;
+      // Capture the failed attempt in the HAR so retries are visible.
+      harEntries?.push(
+        buildHarEntry({
+          startedAt,
+          durationMs,
+          url,
+          reqHeaders: wireHeaders,
+          reqBody: body,
+          status: 0,
+          statusText: `network error: ${(err as Error)?.message ?? err}`,
+          resHeaders: {},
+          resBodyText: "",
+          resContentType: "",
+        }),
+      );
       // eslint-disable-next-line no-console
       console.warn(
         `[cross-booking] ${label} attempt ${attempt}/${PUBLIC_BOOKING_MAX_ATTEMPTS} threw after ${durationMs}ms: ${(err as Error)?.message ?? err}`,
       );
       if (attempt === PUBLIC_BOOKING_MAX_ATTEMPTS) throw err;
-      // Brief backoff before the retry to let any cold-start finish
       await new Promise((r) => setTimeout(r, 750));
     }
   }
   if (!res) throw lastError ?? new Error(`public-booking ${label} produced no response`);
 
-  
   const status = res.status();
   const responseHeaders = res.headers();
   const text = await res.text();
@@ -84,15 +167,25 @@ async function callPublicBooking(
     /* leave as text */
   }
 
+  // Push the successful (or 4xx/5xx) attempt into the HAR collector.
+  harEntries?.push(
+    buildHarEntry({
+      startedAt,
+      durationMs,
+      url,
+      reqHeaders: wireHeaders,
+      reqBody: body,
+      status,
+      statusText: res.statusText() || "",
+      resHeaders: responseHeaders,
+      resBodyText: text,
+      resContentType: responseHeaders["content-type"] || "application/json",
+    }),
+  );
+
   const diagnostic = {
     label,
-    request: {
-      method: "POST",
-      url,
-      // Redact bearer tokens; keep payload for debugging
-      headers: { ...requestHeaders, Authorization: "Bearer <redacted>", apikey: "<redacted>" },
-      body,
-    },
+    request: { method: "POST", url, headers: redactedHeaders, body },
     response: { status, durationMs, headers: responseHeaders, body: json ?? text },
   };
 
@@ -104,7 +197,6 @@ async function callPublicBooking(
         "\n",
     );
     try {
-      // Attach to the Playwright HTML report so each retry has its own artifact
       await test.info().attach(`public-booking-${label}-failure.json`, {
         body: Buffer.from(JSON.stringify(diagnostic, null, 2), "utf-8"),
         contentType: "application/json",
@@ -138,26 +230,37 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
     await expect(page.locator("body")).not.toContainText(/not found|404/i, { timeout: 5_000 });
   });
 
-  test("creates restaurant + guesthouse + venue reservations for the same guest", async ({ request, tenant }) => {
+  test("creates restaurant + guesthouse + venue reservations for the same guest", async ({ request, tenant }, testInfo) => {
     const date = futureDate(60);
     const checkOut = futureDate(62);
 
-    // Warm the edge function so the first real leg doesn't pay the cold-start penalty
-    // (and so any platform 5xx during cold-start surfaces as a clear, single failure here).
-    await request
-      .post(`${SUPABASE_URL}/functions/v1/public-booking`, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-          apikey: SUPABASE_ANON_KEY,
-        },
-        data: { warmup: true },
-        timeout: PUBLIC_BOOKING_TIMEOUT_MS,
-      })
-      .catch(() => {
-        /* warmup is best-effort; ignore */
-      });
+    // Build a HAR 1.2 file from every public-booking call (warmup + 3 legs +
+    // negative-tenant probe + any retried attempts) so failures can be
+    // replayed in a browser (Chrome/Firefox DevTools "Import HAR file"),
+    // diff'd between retries, and shared with backend owners. We assemble
+    // the HAR by hand because Playwright's `recordHar` option is browser-
+    // context only and is NOT supported on `apiRequest.newContext`.
+    const path = await import("node:path");
+    const fs = await import("node:fs");
+    const harDir = path.resolve(testInfo.outputDir, "har");
+    const harPath = path.join(harDir, `public-booking-attempt-${testInfo.retry + 1}.har`);
+    fs.mkdirSync(harDir, { recursive: true });
+    const harEntries: Array<Record<string, any>> = [];
+    // eslint-disable-next-line no-console
+    console.log(`[cross-booking] HAR will be written to ${harPath}`);
 
+    // Warm the edge function so the first real leg doesn't pay the cold-start
+    // penalty. Recorded into the HAR as a normal entry.
+    await callPublicBooking(
+      request,
+      { warmup: true },
+      "warmup",
+      harEntries,
+    ).catch(() => {
+      /* warmup is best-effort; ignore */
+    });
+
+    try {
     // 1. Restaurant
     const restaurant = await callPublicBooking(
       request,
@@ -172,6 +275,7 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
         special_requests: "TEST: cross-booking restaurant leg",
       },
       "restaurant",
+      harEntries,
     );
     expect(
       restaurant.status,
@@ -194,6 +298,7 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
         special_requests: "TEST: cross-booking guesthouse leg",
       },
       "guesthouse",
+      harEntries,
     );
     expect(
       guesthouse.status,
@@ -216,6 +321,7 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
         special_requests: "TEST: cross-booking venue leg",
       },
       "venue",
+      harEntries,
     );
     expect(
       venue.status,
@@ -240,6 +346,7 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
         special_requests: "TEST: cross-booking foreign-tenant negative",
       },
       "foreign-tenant-negative",
+      harEntries,
     );
     expect(
       rejected.status,
@@ -287,5 +394,40 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
 
     // Surface guest identifier so manual cleanup is easy after the run
     console.log(`[cross-booking] created reservations for guest "${GUEST.guest_name}" (${GUEST.guest_email})`);
+    } finally {
+      // Always write + attach the HAR (success OR failure) so the exact
+      // public-booking traffic for this run can be replayed in a browser via
+      // Chrome/Firefox DevTools "Import HAR file" or inspected from the
+      // Playwright HTML report.
+      try {
+        const har = {
+          log: {
+            version: "1.2",
+            creator: {
+              name: "mimmobook-cross-booking-spec",
+              version: "1.0.0",
+              comment:
+                "Manually assembled HAR (Playwright apiRequest contexts do not support recordHar)",
+            },
+            browser: { name: "playwright-apirequest", version: "1" },
+            pages: [],
+            entries: harEntries,
+          },
+        };
+        fs.writeFileSync(harPath, JSON.stringify(har, null, 2), "utf-8");
+        const size = fs.statSync(harPath).size;
+        // eslint-disable-next-line no-console
+        console.log(
+          `[cross-booking] HAR exported (${harEntries.length} entries, ${size} bytes) at ${harPath}`,
+        );
+        await testInfo.attach(`public-booking-attempt-${testInfo.retry + 1}.har`, {
+          path: harPath,
+          contentType: "application/json",
+        });
+      } catch (harErr) {
+        // eslint-disable-next-line no-console
+        console.warn(`[cross-booking] failed to write/attach HAR: ${(harErr as Error)?.message}`);
+      }
+    }
   });
 });
