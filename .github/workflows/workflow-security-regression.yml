@@ -1,50 +1,36 @@
 name: Workflow security regression
 
 # Guards against re-introducing privilege-escalation footguns in
-# Dependabot / auto-merge workflows. Three classes of regression are
-# blocked:
+# Dependabot / auto-merge workflows. The actual gate logic lives in
+# .github/scripts/scan-automerge-workflows.py so it can be unit-
+# tested by the `self-test` job below against synthetic fixtures.
 #
-#   1. `pull_request_target` trigger
-#      Runs in the BASE branch context with read/write secrets even
-#      for PRs from forks. Aikido and the GitHub Advisory DB flag this
-#      as a high-severity issue.
+# Checks enforced (see the script's docstring for the full list):
+#   1. No `pull_request_target` trigger.
+#   2. No `workflow_run` / `repository_dispatch` triggers.
+#   3. Trigger allowlist: pull_request (required), plus optionally
+#      workflow_dispatch and schedule.
+#   4. No wildcard write permissions (`permissions: write-all`) at
+#      the workflow or job level, and no broad scope set to write at
+#      the workflow level.
+#   5. Every actions/checkout step must set
+#      with.persist-credentials: false.
 #
-#   2. `workflow_run` trigger
-#      Triggered by another workflow's completion and ALWAYS runs
-#      from the default branch with the default `GITHUB_TOKEN` and
-#      access to secrets, regardless of where the original PR came
-#      from. Combined with auto-merge that lets a malicious PR
-#      indirectly trigger a privileged run; same blast radius as
-#      pull_request_target. Banned outright in this class of workflow.
-#      (Also flag `repository_dispatch` for the same reason.)
-#
-#   3. `actions/checkout` without `persist-credentials: false`
-#      The checkout action defaults to leaving the
-#      `GITHUB_TOKEN` configured in the local git config of the
-#      runner. Any later `run:` step (or compromised action) can use
-#      it to push to the repo. For auto-merge workflows we want the
-#      checkout to be strictly read-only, so an explicit
-#      `persist-credentials: false` is required on every checkout
-#      step.
-#
-# Scope:
-#   - Any workflow file under .github/workflows/ whose name contains
-#     "dependabot" or "auto-merge".
-#   - All other workflows are unaffected so legitimate uses elsewhere
-#     remain possible.
-#
-# This job is intentionally a single bash step plus checkout — no
-# third-party actions — so it cannot itself become a supply-chain risk.
+# The job has no third-party action dependencies beyond
+# actions/checkout and actions/setup-python (both pinned to commit
+# SHAs) so the gate itself cannot become a supply-chain risk.
 
 on:
   pull_request:
     paths:
       - ".github/workflows/**"
+      - ".github/scripts/scan-automerge-workflows.py"
       - ".github/workflows/workflow-security-regression.yml"
   push:
     branches: [main]
     paths:
       - ".github/workflows/**"
+      - ".github/scripts/scan-automerge-workflows.py"
   workflow_dispatch:
 
 permissions: {}
@@ -67,248 +53,155 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Scan auto-merge workflows for forbidden patterns
+      - name: Set up Python
+        # actions/setup-python@v5.3.0
+        uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b
+        with:
+          python-version: "3.11"
+
+      - name: Install scanner dependencies
+        run: pip install --no-deps "pyyaml==6.0.2"
+
+      - name: Scan auto-merge workflows
+        run: python3 .github/scripts/scan-automerge-workflows.py --dir .github/workflows
+
+  self-test:
+    name: Scanner self-test (passing + failing fixtures)
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        # actions/checkout@v4.2.2
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        # actions/setup-python@v5.3.0
+        uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b
+        with:
+          python-version: "3.11"
+
+      - name: Install scanner dependencies
+        run: pip install --no-deps "pyyaml==6.0.2"
+
+      # ---------------------------------------------------------------
+      # Build two temporary fixture directories on disk:
+      #
+      #   pass/   -> a workflow that mirrors the hardened pattern in
+      #              .github/workflows/dependabot-auto-merge.yml.
+      #              The scanner MUST exit 0 for this directory.
+      #
+      #   fail/   -> a workflow that intentionally trips every check
+      #              (forbidden trigger, wildcard write perms, unsafe
+      #              checkout). The scanner MUST exit non-zero AND
+      #              print an annotation for each violation class.
+      #
+      # We assert both outcomes explicitly so a regression in the
+      # scanner (e.g. silently exiting 0 because a check was deleted)
+      # also fails this job, not just a regression in real workflows.
+      # ---------------------------------------------------------------
+      - name: Materialise passing fixture
         run: |
           set -euo pipefail
-          shopt -s nullglob
+          mkdir -p /tmp/wfsec-fixtures/pass
+          cat > /tmp/wfsec-fixtures/pass/dependabot-auto-merge.yml <<'YML'
+          name: Pass fixture (dependabot auto-merge)
+          on:
+            pull_request:
+              types: [opened, reopened, synchronize, ready_for_review]
+            workflow_dispatch:
+          permissions: {}
+          jobs:
+            auto-merge:
+              if: github.actor == 'dependabot[bot]'
+              runs-on: ubuntu-latest
+              permissions:
+                contents: write
+                pull-requests: write
+              steps:
+                - name: Checkout
+                  uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+                  with:
+                    persist-credentials: false
+                - name: Merge
+                  run: echo "would gh pr merge --auto here"
+          YML
 
-          # Collect candidate workflow files. Match on filename so we
-          # catch renames like "dependabot-auto-merge.yml",
-          # "auto-merge.yml", or future variants.
-          mapfile -t files < <(
-            find .github/workflows -maxdepth 1 -type f \
-              \( -iname "*dependabot*.yml" -o -iname "*dependabot*.yaml" \
-                 -o -iname "*auto-merge*.yml" -o -iname "*auto-merge*.yaml" \) \
-              | sort
-          )
+      - name: Materialise failing fixture
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/wfsec-fixtures/fail
+          # This file intentionally trips every check the scanner
+          # enforces. Do NOT add it to .github/workflows/, it lives
+          # only inside /tmp during this job.
+          cat > /tmp/wfsec-fixtures/fail/auto-merge-bad.yml <<'YML'
+          name: Fail fixture (intentionally insecure auto-merge)
+          on:
+            pull_request_target:
+              types: [opened]
+            workflow_run:
+              workflows: ["CI"]
+              types: [completed]
+          permissions: write-all
+          jobs:
+            merge:
+              runs-on: ubuntu-latest
+              permissions: write-all
+              steps:
+                - name: Checkout (unsafe, no persist-credentials)
+                  uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+                - name: Pretend to merge
+                  run: echo "this would auto-merge with full secrets"
+          YML
 
-          if [ "${#files[@]}" -eq 0 ]; then
-            echo "No dependabot/auto-merge workflows found, nothing to scan."
-            exit 0
-          fi
-
-          echo "Scanning the following workflows:"
-          printf '  - %s\n' "${files[@]}"
-
-          violations=0
-
-          # Helper: strip full-line YAML comments before pattern-match
-          # so documenting mentions stay legal. We do NOT strip inline
-          # comments — a YAML inline comment after a real key is rare
-          # and we'd rather over-report than miss a live regression.
-          strip_comments() {
-            sed -E 's/^[[:space:]]*#.*$//' "$1"
-          }
-
-          # ---------------------------------------------------------
-          # Check 1: forbidden trigger `pull_request_target`
-          # ---------------------------------------------------------
-          for f in "${files[@]}"; do
-            if strip_comments "$f" \
-                 | grep -nE '(^|[^A-Za-z0-9_-])pull_request_target([^A-Za-z0-9_-]|$)' \
-                 > /tmp/hits.txt; then
-              echo "::error file=$f::Forbidden trigger 'pull_request_target' detected. Use 'pull_request' instead — Dependabot PRs originate from in-repo branches and the default GITHUB_TOKEN is sufficient. See .github/workflows/dependabot-auto-merge.yml for the hardened pattern."
-              sed "s|^|$f:|" /tmp/hits.txt
-              violations=$((violations + 1))
-            fi
-          done
-
-          # ---------------------------------------------------------
-          # Check 2: forbidden triggers `workflow_run` and
-          # `repository_dispatch` (both run with default-branch
-          # privileges and full secrets, same blast radius as
-          # pull_request_target when chained with auto-merge).
-          # ---------------------------------------------------------
-          for f in "${files[@]}"; do
-            if strip_comments "$f" \
-                 | grep -nE '(^|[^A-Za-z0-9_-])(workflow_run|repository_dispatch)([^A-Za-z0-9_-]|$)' \
-                 > /tmp/hits.txt; then
-              # Pull out the matched trigger name(s) for a clear error.
-              triggers=$(awk -F: '{print $NF}' /tmp/hits.txt \
-                | grep -oE '(workflow_run|repository_dispatch)' \
-                | sort -u | paste -sd, -)
-              echo "::error file=$f::Forbidden trigger(s) detected: ${triggers}. These run from the default branch with full secrets and bypass the safety of 'pull_request' for an auto-merge workflow. Trigger from 'pull_request' (and check 'github.actor == \"dependabot[bot]\"') instead."
-              sed "s|^|$f:|" /tmp/hits.txt
-              violations=$((violations + 1))
-            fi
-          done
-
-          # ---------------------------------------------------------
-          # Check 3: every actions/checkout invocation must set
-          # `persist-credentials: false`. Without it, the GITHUB_TOKEN
-          # is left in the runner's git config and any subsequent
-          # step (or compromised action) can push to the repo using
-          # the auto-merge job's elevated `contents: write` scope.
-          #
-          # Implementation: parse with python (already on ubuntu
-          # runners) so we can walk steps[] reliably instead of
-          # regexing YAML. Fail when a step `uses: actions/checkout@*`
-          # is missing `with.persist-credentials: false`.
-          # ---------------------------------------------------------
-          python3 - "${files[@]}" <<'PY' || violations=$((violations + $?))
-          import sys, yaml, pathlib
-          violations = 0
-
-          # Triggers we accept on an auto-merge workflow. `pull_request`
-          # is the only one that actually drives the merge; the others
-          # are a narrow allowlist for legitimate operator escape
-          # hatches. Anything else (notably `pull_request_target`,
-          # `workflow_run`, `repository_dispatch`) is rejected here in
-          # addition to the regex checks above so the structural and
-          # textual checks stay redundant.
-          ALLOWED_TRIGGERS = {"pull_request", "workflow_dispatch", "schedule"}
-
-          # Scopes that, if set to `write` at the workflow level, are
-          # effectively wildcard write because they grant tokens that
-          # can mutate the repo or its security posture. Per-job
-          # writes are still allowed (and expected for the merge job).
-          BROAD_SCOPE_WRITES_AT_WORKFLOW = {
-              "contents", "pull-requests", "issues", "actions",
-              "deployments", "packages", "id-token", "security-events",
-              "statuses", "checks", "pages", "discussions",
-              "repository-projects",
-          }
-
-          def is_wildcard_write(perms):
-              # `permissions: write-all` (string form) grants every
-              # scope at write, which is the literal wildcard we want
-              # to ban. `permissions: read-all` is fine.
-              if isinstance(perms, str):
-                  return perms.strip() == "write-all"
-              return False
-
-          for path in sys.argv[1:]:
-              try:
-                  doc = yaml.safe_load(pathlib.Path(path).read_text())
-              except Exception as e:
-                  print(f"::error file={path}::Failed to parse YAML: {e}")
-                  violations += 1
-                  continue
-              doc = doc or {}
-
-              # -------------------------------------------------
-              # Check 3a: trigger allowlist (pull_request only,
-              # plus the narrow operator escape hatches above).
-              # YAML quirk: a top-level key named `on` is parsed as
-              # the boolean True, so we look up both forms.
-              # -------------------------------------------------
-              triggers = doc.get("on", doc.get(True, {}))
-              if isinstance(triggers, str):
-                  trigger_names = {triggers}
-              elif isinstance(triggers, list):
-                  trigger_names = {str(t) for t in triggers}
-              elif isinstance(triggers, dict):
-                  trigger_names = {str(k) for k in triggers.keys()}
-              else:
-                  trigger_names = set()
-              if not trigger_names:
-                  print(
-                      f"::error file={path}::Auto-merge workflow has no "
-                      f"detectable trigger. Use 'on: pull_request:' with "
-                      f"types [opened, reopened, synchronize, ready_for_review]."
-                  )
-                  violations += 1
-              else:
-                  if "pull_request" not in trigger_names:
-                      print(
-                          f"::error file={path}::Auto-merge workflow must "
-                          f"include the 'pull_request' trigger. Found: "
-                          f"{sorted(trigger_names)}."
-                      )
-                      violations += 1
-                  bad = trigger_names - ALLOWED_TRIGGERS
-                  if bad:
-                      print(
-                          f"::error file={path}::Auto-merge workflow uses "
-                          f"disallowed trigger(s): {sorted(bad)}. Allowed: "
-                          f"{sorted(ALLOWED_TRIGGERS)}. In particular, "
-                          f"'pull_request_target' / 'workflow_run' / "
-                          f"'repository_dispatch' grant default-branch "
-                          f"secrets to a fork PR and must never appear here."
-                      )
-                      violations += 1
-
-              # -------------------------------------------------
-              # Check 3b: no wildcard write permissions. Banned
-              # at both workflow and job level. Also flag any
-              # individual broad scope being set to 'write' at
-              # the WORKFLOW level (per-job grants are still OK,
-              # and required for the actual merge job).
-              # -------------------------------------------------
-              top_perms = doc.get("permissions")
-              if is_wildcard_write(top_perms):
-                  print(
-                      f"::error file={path}::Workflow-level 'permissions: "
-                      f"write-all' grants every scope at write. Replace "
-                      f"with 'permissions: {{}}' at the top level and "
-                      f"re-grant only the scopes each job needs."
-                  )
-                  violations += 1
-              elif isinstance(top_perms, dict):
-                  for scope, level in top_perms.items():
-                      if (
-                          str(scope) in BROAD_SCOPE_WRITES_AT_WORKFLOW
-                          and str(level).strip() == "write"
-                      ):
-                          print(
-                              f"::error file={path}::Workflow-level "
-                              f"permission '{scope}: write' is too broad "
-                              f"(applies to every job). Move this grant "
-                              f"into the specific job that needs it and "
-                              f"keep top-level permissions empty."
-                          )
-                          violations += 1
-
-              jobs = doc.get("jobs", {}) or {}
-              for job_name, job in jobs.items():
-                  if not isinstance(job, dict):
-                      continue
-                  job_perms = job.get("permissions")
-                  if is_wildcard_write(job_perms):
-                      print(
-                          f"::error file={path}::Job '{job_name}' uses "
-                          f"'permissions: write-all', which is a wildcard "
-                          f"write grant. List the specific scopes the job "
-                          f"needs (e.g. 'contents: write', "
-                          f"'pull-requests: write')."
-                      )
-                      violations += 1
-
-                  # -------------------------------------------------
-                  # Check 3c (existing): every actions/checkout
-                  # invocation must set persist-credentials: false.
-                  # -------------------------------------------------
-                  for idx, step in enumerate(job.get("steps", []) or []):
-                      if not isinstance(step, dict):
-                          continue
-                      uses = str(step.get("uses", ""))
-                      if not uses.startswith("actions/checkout@"):
-                          continue
-                      with_block = step.get("with") or {}
-                      pc = with_block.get("persist-credentials")
-                      if pc is not False:
-                          step_label = step.get("name") or f"step #{idx}"
-                          print(
-                              f"::error file={path}::Job '{job_name}' "
-                              f"step '{step_label}' uses '{uses}' without "
-                              f"'with.persist-credentials: false'. "
-                              f"Auto-merge workflows must do read-only "
-                              f"checkouts so the GITHUB_TOKEN is not left "
-                              f"in the runner's git config for later steps "
-                              f"to abuse."
-                          )
-                          violations += 1
-          # Exit with the number of violations, capped at 125 (max
-          # meaningful POSIX exit). The bash wrapper adds it to the
-          # running total.
-          sys.exit(min(violations, 125))
-          PY
-
-          if [ "$violations" -gt 0 ]; then
-            echo
-            echo "Failing build: $violations regression(s) detected in dependabot/auto-merge workflows."
+      - name: Scanner must accept the passing fixture
+        run: |
+          set -euo pipefail
+          if ! python3 .github/scripts/scan-automerge-workflows.py \
+                 --dir /tmp/wfsec-fixtures/pass; then
+            echo "::error::Self-test FAILED: scanner rejected the passing fixture."
             exit 1
           fi
+          echo "Passing fixture accepted as expected."
 
-          echo "OK: no auto-merge workflow uses pull_request_target, workflow_run, repository_dispatch, a disallowed trigger, a wildcard write permission, or an unsafe checkout."
-
+      - name: Scanner must reject the failing fixture
+        run: |
+          set -euo pipefail
+          # Capture stdout so we can also assert that each violation
+          # class produced a distinct error annotation. We expect
+          # the script to exit non-zero, so disable -e around the run.
+          set +e
+          python3 .github/scripts/scan-automerge-workflows.py \
+            --dir /tmp/wfsec-fixtures/fail \
+            > /tmp/wfsec-fixtures/fail.out 2>&1
+          status=$?
+          set -e
+          cat /tmp/wfsec-fixtures/fail.out
+          if [ "$status" -eq 0 ]; then
+            echo "::error::Self-test FAILED: scanner accepted the failing fixture (expected non-zero exit)."
+            exit 1
+          fi
+          # Each of these substrings corresponds to one of the five
+          # check classes. If any go missing, a check has silently
+          # been removed or weakened.
+          required_substrings=(
+            "pull_request_target"
+            "workflow_run"
+            "write-all"
+            "persist-credentials"
+            "disallowed trigger"
+          )
+          missing=0
+          for needle in "${required_substrings[@]}"; do
+            if ! grep -qF "$needle" /tmp/wfsec-fixtures/fail.out; then
+              echo "::error::Self-test FAILED: expected substring not found in scanner output: $needle"
+              missing=$((missing + 1))
+            fi
+          done
+          if [ "$missing" -gt 0 ]; then
+            exit 1
+          fi
+          echo "Failing fixture rejected as expected, all violation classes reported."
