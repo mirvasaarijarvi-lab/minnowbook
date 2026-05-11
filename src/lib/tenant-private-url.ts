@@ -61,7 +61,9 @@ async function mintSignedUrl(
   // assertSafeStorageObjectPath throws InvalidStoragePathError which is
   // intentionally allowed to propagate so callers can detect it via
   // isInvalidStoragePathError() and surface a friendly message.
-  const safePath = assertSafeStorageObjectPath(path);
+  const safePath = assertSafeStorageObjectPath(path, {
+    callsite: "tenant-private:mintSignedUrl",
+  });
   const { data, error } = await supabase.storage
     .from(TENANT_PRIVATE_BUCKET)
     .createSignedUrl(safePath, ttl, { download });
