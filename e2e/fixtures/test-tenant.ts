@@ -79,8 +79,10 @@ type Fixtures = {
  * get a `tenant` fixture wired to the same shared tenant_id everywhere.
  */
 export const test = base.extend<Fixtures>({
-  // eslint-disable-next-line no-empty-pattern
+  // Playwright fixture: `use` here is the fixture-callback, NOT React's `use` hook.
+  // eslint-disable-next-line no-empty-pattern, react-hooks/rules-of-hooks
   tenant: async ({}, use) => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     await use(TEST_TENANT);
   },
 });
