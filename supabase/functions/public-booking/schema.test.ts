@@ -80,7 +80,7 @@ Deno.test({
 });
 
 Deno.test({
-  name: "schema: dashboard query plan uses tenant+date index (no seq scan)",
+  name: "schema: dashboard query plan uses idx_reservations_tenant_date for tenant filter + date ordering",
   sanitizeOps: true,
   sanitizeResources: true,
   fn: async () => {
@@ -94,15 +94,38 @@ Deno.test({
     const rows = JSON.parse(text) as Array<{ plan_line: string }>;
     const plan = rows.map((r) => r.plan_line).join("\n");
 
-    // Should reference the tenant+date index (or a tenant-scoped one) and
-    // must NOT fall back to a sequential scan over all reservations.
-    assert(
-      /idx_reservations_tenant/i.test(plan),
-      `plan does not mention any tenant index:\n${plan}`,
-    );
+    // Must NOT fall back to a sequential scan over all reservations.
     assert(
       !/Seq Scan on (public\.)?reservations/i.test(plan),
       `plan contains a sequential scan on reservations:\n${plan}`,
     );
+
+    // The dashboard query is `WHERE tenant_id = $1 ORDER BY date DESC LIMIT $2`,
+    // which is exactly what idx_reservations_tenant_date (tenant_id, date DESC)
+    // was built to satisfy. The planner should choose an Index Scan (not a
+    // Bitmap Index Scan, which can't preserve the ORDER BY and would force a
+    // Sort node before the Limit).
+    //
+    // Acceptable plan shapes (any one of these on a line of the plan):
+    //   "Index Scan ... using idx_reservations_tenant_date on ... reservations"
+    //   "Index Only Scan ... using idx_reservations_tenant_date on ... reservations"
+    const indexScanPattern =
+      /Index(?:\s+Only)?\s+Scan\b[^\n]*\busing\s+idx_reservations_tenant_date\b[^\n]*\bon\s+(?:public\.)?reservations\b/i;
+    assert(
+      indexScanPattern.test(plan),
+      `plan does not use Index Scan on idx_reservations_tenant_date for the tenant filter + ORDER BY date.\n` +
+        `Expected a line matching: Index [Only] Scan ... using idx_reservations_tenant_date ... on reservations\n` +
+        `Full plan:\n${plan}`,
+    );
+
+    // Defense in depth: if the planner chose idx_reservations_tenant_date but
+    // somehow needed to re-sort (e.g. an unrelated ORDER BY column slipped in),
+    // a Sort node would appear above the Limit. The whole point of the
+    // (tenant_id, date DESC) composite is to avoid that.
+    assert(
+      !/^\s*Sort\b/im.test(plan),
+      `plan contains a Sort node, which means idx_reservations_tenant_date is not satisfying ORDER BY date DESC:\n${plan}`,
+    );
   },
 });
+
