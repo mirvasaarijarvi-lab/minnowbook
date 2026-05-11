@@ -42,6 +42,8 @@ jobs:
           echo "combined_log=$COMBINED" >> "$GITHUB_OUTPUT"
 
           STATUS=0
+          JUNIT_DIR="test-reports/deno"
+          mkdir -p "$JUNIT_DIR"
           for test_file in $(find supabase/functions -name '*_test.ts' -o -name '*.test.ts' 2>/dev/null); do
             # Sanitize: drop the leading "supabase/functions/" prefix and
             # replace path separators / unsafe chars so the filename is
@@ -49,6 +51,7 @@ jobs:
             rel="${test_file#supabase/functions/}"
             safe_name=$(echo "$rel" | sed -E 's#[/ ]+#__#g; s#[^A-Za-z0-9._-]+#_#g')
             per_test_log="$LOG_DIR/run-${GITHUB_RUN_ID}__${safe_name}.log"
+            junit_file="$JUNIT_DIR/${safe_name}.junit.xml"
 
             {
               echo "===== test_file: $test_file ====="
@@ -56,8 +59,10 @@ jobs:
               echo "===== started:   $(date -u +%FT%TZ) ====="
             } | tee -a "$per_test_log" "$COMBINED" > /dev/null
 
-            echo "Running $test_file (log: $per_test_log)"
-            if ! deno test --allow-net --allow-env --allow-read "$test_file" 2>&1 \
+            echo "Running $test_file (log: $per_test_log, junit: $junit_file)"
+            if ! deno test --allow-net --allow-env --allow-read \
+                  --junit-path="$junit_file" \
+                  "$test_file" 2>&1 \
                   | tee -a "$per_test_log" "$COMBINED"; then
               STATUS=1
               # Rename failing logs so they sort to the top of the
