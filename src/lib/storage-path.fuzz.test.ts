@@ -206,3 +206,149 @@ describe("assertSafeStorageObjectPath (property-based fuzz)", () => {
     expect(accepted).toBeGreaterThan(20);
   });
 });
+
+// ===========================================================================
+// PROPERTY: log-leakage invariants for rejected paths.
+//
+// `logRejectedStoragePath` is the structured sink fed by every reject().
+// The contract is that the event NEVER carries the raw payload, the
+// callsite's PII, or a malformed `tenantId`. A regression here would
+// burn the rejection log into a PII spill (filenames, customer emails,
+// signed tokens) the moment Aikido / Sentry started collecting it.
+//
+// We fuzz with a representative malicious corpus mixed with sentinel
+// markers (a fake email, a fake filename, a non-UUID tenant) and assert
+// that none of those sentinels ever appear anywhere in the serialised
+// event payload, regardless of the rejection branch taken.
+// ===========================================================================
+
+const SENTINELS = {
+  // Looks like a real email so a regex-based scrubber would have to
+  // recognise it. We include it inside random inputs and as a tenantId.
+  email: "victim+leak@example.com",
+  // Looks like a customer-uploaded file with PII in the basename.
+  filename: "Invoice-Jane-Doe-2026.pdf",
+  // Opaque token shape (e.g. a session id, signed-url fragment).
+  token: "tok_LEAK_5f9c1d2eA9bX7QzPmK0vRtUiOpLwSeDfGhJk",
+  // A non-UUID "tenantId" we deliberately pass to confirm safeTenantId
+  // strips it before logging.
+  badTenantId: "tenant-victim+leak@example.com",
+};
+
+function randomPathLikeWithSentinels(rng: () => number): string {
+  const base = randomPathLike(rng);
+  // Roughly 40% of inputs splice a sentinel into a random offset so
+  // both the "secret on its own" and "secret hidden in junk" cases
+  // get coverage.
+  if (rng() > 0.6) return base;
+  const choices = [SENTINELS.email, SENTINELS.filename, SENTINELS.token];
+  const inject = choices[Math.floor(rng() * choices.length)];
+  if (base.length === 0) return inject;
+  const cut = Math.floor(rng() * base.length);
+  return base.slice(0, cut) + inject + base.slice(cut);
+}
+
+describe("assertSafeStorageObjectPath (rejection log leakage invariants)", () => {
+  // Buffer every rejection event so we can inspect the serialised
+  // payload after the run.
+  const events: unknown[] = [];
+
+  beforeEach(() => {
+    events.length = 0;
+    setRejectedStoragePathLogger((event) => {
+      events.push(event);
+    });
+  });
+  afterEach(() => {
+    setRejectedStoragePathLogger(null);
+  });
+
+  it("never echoes raw input, sentinel PII, or non-UUID tenantId in the logged event", () => {
+    const rng = mulberry32(0xb1ade);
+    const ITERATIONS = 5_000;
+    let rejectionsObserved = 0;
+
+    for (let i = 0; i < ITERATIONS; i++) {
+      const input = randomPathLikeWithSentinels(rng);
+      // Use a callsite that itself contains a sentinel-looking token to
+      // confirm callers cannot accidentally launder PII through it.
+      const callsite = `fuzz:${SENTINELS.token.slice(0, 6)}`;
+      try {
+        assertSafeStorageObjectPath(input, {
+          callsite,
+          // Intentionally pass a NON-UUID tenantId that contains an
+          // email. safeTenantId() must strip it before the event is
+          // serialised. This is the highest-value invariant in the
+          // suite, a regression here directly causes PII to leak.
+          tenantId: SENTINELS.badTenantId,
+        });
+      } catch (err) {
+        if (!isInvalidStoragePathError(err)) throw err;
+        // Expected: rejected, log event recorded.
+      }
+    }
+
+    // The corpus is dominated by malformed inputs, but assert the
+    // logger fired at all so we don't silently green-light an empty
+    // run (e.g. if reject() ever stopped calling the logger).
+    expect(events.length).toBeGreaterThan(100);
+    rejectionsObserved = events.length;
+
+    // Forbidden substrings: anything that, if leaked, would constitute
+    // a PII / secret spill in the rejection log.
+    const forbidden = [
+      SENTINELS.email,
+      SENTINELS.filename,
+      SENTINELS.token,
+      SENTINELS.badTenantId,
+      // Common payload markers that should never appear: even when an
+      // input happens to be a valid scheme/path, the event only carries
+      // shape metadata, never the textual content.
+      "javascript:",
+      "file://",
+      "C:\\Users",
+      "../",
+    ];
+
+    // Assert per event so the failure message points at the offending
+    // record, not just "something somewhere leaked".
+    for (let i = 0; i < events.length; i++) {
+      const ev = events[i] as Record<string, unknown>;
+      const serialised = JSON.stringify(ev);
+      for (const needle of forbidden) {
+        expect(
+          serialised.includes(needle),
+          `event #${i} leaked forbidden substring "${needle}": ${serialised}`,
+        ).toBe(false);
+      }
+      // Structural invariants on every event:
+      //   - tenantId field is either absent or a real UUID (the
+      //     non-UUID we passed in must have been stripped).
+      const tenantId = ev.tenantId;
+      if (typeof tenantId === "string") {
+        expect(
+          /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(tenantId),
+          `event #${i} carried a non-UUID tenantId: ${String(tenantId)}`,
+        ).toBe(true);
+      }
+      //   - The event must NOT contain a key that smells like raw
+      //     payload storage (path / input / value / raw / payload).
+      //     Shape metadata uses other names (inputLength, inputType).
+      const forbiddenKeys = ["path", "input", "value", "raw", "payload"];
+      for (const k of forbiddenKeys) {
+        expect(
+          Object.prototype.hasOwnProperty.call(ev, k),
+          `event #${i} exposes a raw-payload key "${k}"`,
+        ).toBe(false);
+      }
+      //   - reason must be one of the known stable tags, never
+      //     anything reflecting the input itself.
+      expect(typeof ev.reason).toBe("string");
+      expect((ev.reason as string).length).toBeLessThan(64);
+    }
+
+    // Sanity: the corpus must have actually rejected things, otherwise
+    // we'd be asserting nothing.
+    expect(rejectionsObserved).toBeGreaterThan(100);
+  });
+});
