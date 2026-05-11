@@ -102,7 +102,11 @@ function expectBodyIsGeneric(text: string, label: string) {
   expect((err as string).length).toBeLessThan(64);
 }
 
-describe("Edge functions — disallowed Origin returns explicit 403", () => {
+// Each `it` in this suite makes a live HTTPS round-trip to the deployed
+// edge function. The default 5s Vitest timeout is too tight for cold-start
+// edge runtimes (admin-users in particular can take >5s on first hit in CI).
+// Bump per-test timeout to 30s for the whole describe block.
+describe("Edge functions — disallowed Origin returns explicit 403", { timeout: 30_000 }, () => {
   for (const fn of FUNCTIONS) {
     describe(fn, () => {
       it("allowed origin is NOT 403'd by the origin gate (positive control)", async () => {
