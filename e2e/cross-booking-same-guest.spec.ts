@@ -218,22 +218,48 @@ async function callPublicBooking(
     }),
   );
 
+  // Capture Supabase / Cloudflare trace identifiers from the response headers.
+  // These are what backend owners need to grep for in `supabase functions
+  // logs public-booking` (or the Edge Function Logs panel) to find the
+  // exact invocation that produced this response. Header names are
+  // case-insensitive on the wire; Playwright already lower-cases them.
+  const traceIds = {
+    sb_request_id:
+      responseHeaders["sb-request-id"] ?? responseHeaders["x-sb-request-id"] ?? null,
+    cf_ray: responseHeaders["cf-ray"] ?? null,
+    deno_execution_id:
+      responseHeaders["x-deno-execution-id"] ??
+      responseHeaders["x-deno-ray"] ??
+      null,
+    deployment_id: responseHeaders["x-sb-deployment-id"] ?? null,
+  };
+
   const diagnostic = {
     label,
+    traceIds,
     request: { method: "POST", url, headers: redactedHeaders, body },
     response: { status, durationMs, headers: responseHeaders, body: json ?? text },
   };
+
+  const traceLine =
+    `sb-request-id=${traceIds.sb_request_id ?? "<none>"} ` +
+    `cf-ray=${traceIds.cf_ray ?? "<none>"} ` +
+    `deno-execution-id=${traceIds.deno_execution_id ?? "<none>"}`;
 
   if (status >= 400) {
     // eslint-disable-next-line no-console
     console.error(
       `\n[cross-booking] ${label} FAILED (HTTP ${status}, ${durationMs}ms)\n` +
+        `[cross-booking] ${label} edge-function trace: ${traceLine}\n` +
+        `[cross-booking] grep edge logs with: supabase functions logs public-booking | grep ${traceIds.sb_request_id ?? "<sb-request-id>"}\n` +
         JSON.stringify(diagnostic, null, 2) +
         "\n",
     );
   } else {
     // eslint-disable-next-line no-console
-    console.log(`[cross-booking] ${label} OK (HTTP ${status}, ${durationMs}ms)`);
+    console.log(
+      `[cross-booking] ${label} OK (HTTP ${status}, ${durationMs}ms) trace: ${traceLine}`,
+    );
   }
 
   // Always attach the per-leg request/response JSON (success AND failure) so
