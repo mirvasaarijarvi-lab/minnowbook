@@ -31,6 +31,7 @@ import { useBrandingSignedUrlState } from "@/lib/tenant-branding-url";
 import { BOOKING_ERROR_CODES } from "../../supabase/functions/_shared/booking-error-codes";
 import { resolveBookingError } from "@/lib/booking-error-registry";
 import { trackBookingError } from "@/lib/booking-telemetry";
+import { useAuth } from "@/contexts/AuthContext";
 import { FadeInImage } from "@/components/branding/FadeInImage";
 
 // Types for public views (not in auto-generated types)
@@ -220,6 +221,12 @@ const PublicBookingInner = () => {
   const t = useT();
   const tDynamic = useTDynamic();
   const { language } = useLanguage();
+  // Show the detailed admin remediation copy only when a staff member
+  // is logged in. Guests get a short, reassuring message with no
+  // internal jargon. PublicBooking is wrapped by AuthProvider, so
+  // `user` is null for unauthenticated visitors.
+  const { user } = useAuth();
+  const isStaff = !!user;
   const dateFnsLocale = useDateLocale();
   const [submitted, setSubmitted] = useState(false);
   // Sticky flag set when the public-booking edge function reports
@@ -808,7 +815,7 @@ const PublicBookingInner = () => {
     onError: (err: any) => {
       // All branching for booking errors lives in the central
       // registry. PublicBooking just consumes the resolved descriptor.
-      const descriptor = resolveBookingError(err);
+      const descriptor = resolveBookingError(err, { isStaff });
       if (descriptor.pinMisconfigBanner) {
         // Pin the inline confirmation. The toast disappears after
         // toastDuration ms but the banner stays until the guest
@@ -838,7 +845,9 @@ const PublicBookingInner = () => {
     // reservation can be created. Refuse to even hit the network and
     // re-surface the toast so the guest gets immediate feedback.
     if (serviceMisconfigured) {
-      toast.error(t("booking.serviceMisconfigured"), { duration: 10000 });
+      // Re-surface the same staff-aware copy as the original toast.
+      const key = isStaff ? "booking.serviceMisconfiguredAdmin" : "booking.serviceMisconfigured";
+      toast.error(t(key), { duration: 10000 });
       return;
     }
 
