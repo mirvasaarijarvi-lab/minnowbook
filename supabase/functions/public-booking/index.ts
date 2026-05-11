@@ -208,7 +208,16 @@ async function computeCapacity(
   return { capacity_total, current_load };
 }
 
-Deno.serve(async (req) => {
+/**
+ * The actual request handler for the public-booking edge function.
+ *
+ * Exported (rather than inlined into `Deno.serve`) so integration tests
+ * can drive it in-process with a controlled environment, e.g. with
+ * `SUPABASE_SERVICE_ROLE_KEY` deliberately unset, and assert the
+ * resulting DB-state invariants without going through the deployed
+ * function URL.
+ */
+export const handlePublicBookingRequest = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
