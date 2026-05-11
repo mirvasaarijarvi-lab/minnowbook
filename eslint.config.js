@@ -5,7 +5,17 @@ import reactRefresh from "eslint-plugin-react-refresh";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-  { ignores: ["dist", "supabase/functions/**"] },
+  {
+    ignores: [
+      "dist",
+      "supabase/functions/**",
+      // Deno populates `.deno-cache/` inside the workspace when the
+      // edge-function tests run in CI. Those vendored `@types/node`
+      // declarations are not our code and trip dozens of lint rules.
+      ".deno-cache/**",
+      "**/.deno-cache/**",
+    ],
+  },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ["**/*.{ts,tsx}"],
