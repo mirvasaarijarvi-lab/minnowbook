@@ -35,6 +35,77 @@ const GUEST = makeTestGuest("Cross");
 const LOG_PREFIX = "[cross-booking]";
 
 test.describe("Cross-booking: same guest, multiple resources/services", () => {
+  // On any failure inside this describe, snapshot every diagnostic we can
+  // reach (screenshot + HTML for page-driven tests, trace pointer for both)
+  // so flakiness can be triaged from a single Playwright report entry.
+  test.afterEach(async ({ page }, testInfo) => {
+    if (testInfo.status === testInfo.expectedStatus) return;
+
+    const failureSummary: Record<string, unknown> = {
+      title: testInfo.title,
+      status: testInfo.status,
+      expected_status: testInfo.expectedStatus,
+      retry: testInfo.retry,
+      duration_ms: testInfo.duration,
+      error: testInfo.error?.message,
+      correlation_ids: testInfo.annotations
+        .filter((a) => a.type === "correlation_id")
+        .map((a) => a.description),
+    };
+
+    // Page-driven diagnostics: only meaningful if a real page exists and is
+    // still open. The API-only test never opens a page so these are skipped.
+    try {
+      if (page && !page.isClosed()) {
+        const buffer = await page.screenshot({ fullPage: true });
+        await testInfo.attach("failure-screenshot.png", {
+          body: buffer,
+          contentType: "image/png",
+        });
+        const html = await page.content();
+        await testInfo.attach("failure-page.html", {
+          body: html,
+          contentType: "text/html",
+        });
+        failureSummary.url = page.url();
+      } else {
+        failureSummary.page_capture = "skipped: no open page (api-only test)";
+      }
+    } catch (err) {
+      failureSummary.page_capture_error =
+        err instanceof Error ? err.message : String(err);
+    }
+
+    // Trace is captured for every test by playwright.config.ts (`trace: "on"`)
+    // and lives at testInfo.outputDir/trace.zip. Attach it explicitly so the
+    // HTML report links it directly under the failing test, instead of the
+    // user having to dig through the output directory.
+    try {
+      const path = await import("node:path");
+      const fs = await import("node:fs/promises");
+      const tracePath = path.resolve(testInfo.outputDir, "trace.zip");
+      await fs.access(tracePath);
+      const traceBytes = await fs.readFile(tracePath);
+      await testInfo.attach("failure-trace.zip", {
+        body: traceBytes,
+        contentType: "application/zip",
+      });
+      failureSummary.trace_path = tracePath;
+    } catch (err) {
+      failureSummary.trace_capture =
+        err instanceof Error
+          ? `unavailable: ${err.message}`
+          : "unavailable";
+    }
+
+    await testInfo.attach("failure-summary.json", {
+      body: JSON.stringify(failureSummary, null, 2),
+      contentType: "application/json",
+    });
+    // eslint-disable-next-line no-console
+    console.error(`${LOG_PREFIX} FAILURE ${JSON.stringify(failureSummary)}`);
+  });
+
   test("public booking page for the test tenant loads", async ({ page, tenant }) => {
     test.setTimeout(60_000);
     await gotoAndWaitForSpa(page, `/book/${tenant.slug}`);
