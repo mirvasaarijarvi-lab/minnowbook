@@ -49,8 +49,34 @@ function fnUrl(name: string) {
   return `${SUPABASE_URL}/functions/v1/${name}`;
 }
 
+// Per-test timeout (ms) for live deployed-function calls. Cold boots
+// of edge functions can routinely exceed vitest's 5s default, which
+// caused intermittent CI timeouts on the forbidden-origin matrix.
+const REQUEST_TIMEOUT_MS = 15_000;
+const TEST_TIMEOUT_MS = 30_000;
+
+async function fetchWithRetry(
+  url: string,
+  init: RequestInit,
+  attempts = 3,
+): Promise<Response> {
+  let lastErr: unknown;
+  for (let i = 0; i < attempts; i++) {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), REQUEST_TIMEOUT_MS);
+    try {
+      return await fetch(url, { ...init, signal: ctrl.signal });
+    } catch (err) {
+      lastErr = err;
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+  throw lastErr;
+}
+
 async function preflight(name: string, origin: string) {
-  return await fetch(fnUrl(name), {
+  return await fetchWithRetry(fnUrl(name), {
     method: "OPTIONS",
     headers: {
       Origin: origin,
