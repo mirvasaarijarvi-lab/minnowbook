@@ -34,26 +34,96 @@ const PUBLIC_BOOKING_TIMEOUT_MS = 30_000;
 // One transparent retry on transient network errors (cold start, dropped connection)
 const PUBLIC_BOOKING_MAX_ATTEMPTS = 2;
 
+// HAR 1.2 entry shape (subset). Browsers (Chrome/Firefox DevTools) and
+// `npx playwright show-trace` can import any spec-conformant HAR file.
+type HarEntry = Record<string, any>;
+
+function buildHarEntry(args: {
+  startedAt: number;
+  durationMs: number;
+  url: string;
+  reqHeaders: Record<string, string>;
+  reqBody: unknown;
+  status: number;
+  statusText: string;
+  resHeaders: Record<string, string>;
+  resBodyText: string;
+  resContentType: string;
+}): HarEntry {
+  const reqBodyText =
+    typeof args.reqBody === "string" ? args.reqBody : JSON.stringify(args.reqBody);
+  const toHeaderArray = (h: Record<string, string>) =>
+    Object.entries(h).map(([name, value]) => ({ name, value }));
+  return {
+    startedDateTime: new Date(args.startedAt).toISOString(),
+    time: args.durationMs,
+    request: {
+      method: "POST",
+      url: args.url,
+      httpVersion: "HTTP/1.1",
+      headers: toHeaderArray(args.reqHeaders),
+      queryString: [],
+      cookies: [],
+      headersSize: -1,
+      bodySize: Buffer.byteLength(reqBodyText, "utf-8"),
+      postData: {
+        mimeType: args.reqHeaders["Content-Type"] ?? "application/json",
+        text: reqBodyText,
+      },
+    },
+    response: {
+      status: args.status,
+      statusText: args.statusText,
+      httpVersion: "HTTP/1.1",
+      headers: toHeaderArray(args.resHeaders),
+      cookies: [],
+      content: {
+        size: Buffer.byteLength(args.resBodyText, "utf-8"),
+        mimeType: args.resContentType || "application/json",
+        text: args.resBodyText,
+      },
+      redirectURL: "",
+      headersSize: -1,
+      bodySize: Buffer.byteLength(args.resBodyText, "utf-8"),
+    },
+    cache: {},
+    timings: {
+      send: 0,
+      wait: args.durationMs,
+      receive: 0,
+    },
+  };
+}
+
 async function callPublicBooking(
   request: import("@playwright/test").APIRequestContext,
   body: Record<string, unknown>,
   label: string,
+  harEntries?: HarEntry[],
 ) {
   const url = `${SUPABASE_URL}/functions/v1/public-booking`;
-  const requestHeaders = {
+  // Real headers actually sent on the wire (used for the HAR).
+  const wireHeaders = {
     "Content-Type": "application/json",
     Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
     apikey: SUPABASE_ANON_KEY,
+  };
+  // Redacted copy used for diagnostics/console output only.
+  const redactedHeaders = {
+    ...wireHeaders,
+    Authorization: "Bearer <redacted>",
+    apikey: "<redacted>",
   };
 
   let lastError: unknown = null;
   let res: import("@playwright/test").APIResponse | null = null;
   let durationMs = 0;
+  let startedAt = Date.now();
   for (let attempt = 1; attempt <= PUBLIC_BOOKING_MAX_ATTEMPTS; attempt++) {
-    const startedAt = Date.now();
+    startedAt = Date.now();
     try {
       res = await request.post(url, {
-        headers: requestHeaders,
+        headers: wireHeaders,
         data: body,
         timeout: PUBLIC_BOOKING_TIMEOUT_MS,
       });
@@ -62,18 +132,31 @@ async function callPublicBooking(
     } catch (err) {
       durationMs = Date.now() - startedAt;
       lastError = err;
+      // Capture the failed attempt in the HAR so retries are visible.
+      harEntries?.push(
+        buildHarEntry({
+          startedAt,
+          durationMs,
+          url,
+          reqHeaders: wireHeaders,
+          reqBody: body,
+          status: 0,
+          statusText: `network error: ${(err as Error)?.message ?? err}`,
+          resHeaders: {},
+          resBodyText: "",
+          resContentType: "",
+        }),
+      );
       // eslint-disable-next-line no-console
       console.warn(
         `[cross-booking] ${label} attempt ${attempt}/${PUBLIC_BOOKING_MAX_ATTEMPTS} threw after ${durationMs}ms: ${(err as Error)?.message ?? err}`,
       );
       if (attempt === PUBLIC_BOOKING_MAX_ATTEMPTS) throw err;
-      // Brief backoff before the retry to let any cold-start finish
       await new Promise((r) => setTimeout(r, 750));
     }
   }
   if (!res) throw lastError ?? new Error(`public-booking ${label} produced no response`);
 
-  
   const status = res.status();
   const responseHeaders = res.headers();
   const text = await res.text();
@@ -84,15 +167,25 @@ async function callPublicBooking(
     /* leave as text */
   }
 
+  // Push the successful (or 4xx/5xx) attempt into the HAR collector.
+  harEntries?.push(
+    buildHarEntry({
+      startedAt,
+      durationMs,
+      url,
+      reqHeaders: wireHeaders,
+      reqBody: body,
+      status,
+      statusText: res.statusText() || "",
+      resHeaders: responseHeaders,
+      resBodyText: text,
+      resContentType: responseHeaders["content-type"] || "application/json",
+    }),
+  );
+
   const diagnostic = {
     label,
-    request: {
-      method: "POST",
-      url,
-      // Redact bearer tokens; keep payload for debugging
-      headers: { ...requestHeaders, Authorization: "Bearer <redacted>", apikey: "<redacted>" },
-      body,
-    },
+    request: { method: "POST", url, headers: redactedHeaders, body },
     response: { status, durationMs, headers: responseHeaders, body: json ?? text },
   };
 
@@ -104,7 +197,6 @@ async function callPublicBooking(
         "\n",
     );
     try {
-      // Attach to the Playwright HTML report so each retry has its own artifact
       await test.info().attach(`public-booking-${label}-failure.json`, {
         body: Buffer.from(JSON.stringify(diagnostic, null, 2), "utf-8"),
         contentType: "application/json",
