@@ -118,52 +118,64 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
     const checkOut = futureDate(62);
 
     // 1. Restaurant
-    const restaurant = await callPublicBooking(request, {
-      tenant_id: TENANT_ID,
-      ...GUEST,
-      guests_count: 2,
-      reservation_type: "restaurant",
-      resource_id: RESOURCES.restaurant,
-      date,
-      start_time: "19:00",
-      special_requests: "TEST: cross-booking restaurant leg",
-    });
+    const restaurant = await callPublicBooking(
+      request,
+      {
+        tenant_id: TENANT_ID,
+        ...GUEST,
+        guests_count: 2,
+        reservation_type: "restaurant",
+        resource_id: RESOURCES.restaurant,
+        date,
+        start_time: "19:00",
+        special_requests: "TEST: cross-booking restaurant leg",
+      },
+      "restaurant",
+    );
     expect(
       restaurant.status,
-      `restaurant booking failed: ${JSON.stringify(restaurant.body)}`,
+      `restaurant booking failed: ${JSON.stringify(restaurant.diagnostic, null, 2)}`,
     ).toBeLessThan(400);
 
     // 2. Guesthouse (overnight)
-    const guesthouse = await callPublicBooking(request, {
-      tenant_id: TENANT_ID,
-      ...GUEST,
-      guests_count: 2,
-      reservation_type: "guesthouse",
-      resource_id: RESOURCES.guesthouse,
-      date,
-      check_out_date: checkOut,
-      special_requests: "TEST: cross-booking guesthouse leg",
-    });
+    const guesthouse = await callPublicBooking(
+      request,
+      {
+        tenant_id: TENANT_ID,
+        ...GUEST,
+        guests_count: 2,
+        reservation_type: "guesthouse",
+        resource_id: RESOURCES.guesthouse,
+        date,
+        check_out_date: checkOut,
+        special_requests: "TEST: cross-booking guesthouse leg",
+      },
+      "guesthouse",
+    );
     expect(
       guesthouse.status,
-      `guesthouse booking failed: ${JSON.stringify(guesthouse.body)}`,
+      `guesthouse booking failed: ${JSON.stringify(guesthouse.diagnostic, null, 2)}`,
     ).toBeLessThan(400);
 
     // 3. Venue
-    const venue = await callPublicBooking(request, {
-      tenant_id: TENANT_ID,
-      ...GUEST,
-      guests_count: 30,
-      reservation_type: "venue",
-      resource_id: RESOURCES.venue,
-      date,
-      start_time: "12:00",
-      event_type: "corporate",
-      special_requests: "TEST: cross-booking venue leg",
-    });
+    const venue = await callPublicBooking(
+      request,
+      {
+        tenant_id: TENANT_ID,
+        ...GUEST,
+        guests_count: 30,
+        reservation_type: "venue",
+        resource_id: RESOURCES.venue,
+        date,
+        start_time: "12:00",
+        event_type: "corporate",
+        special_requests: "TEST: cross-booking venue leg",
+      },
+      "venue",
+    );
     expect(
       venue.status,
-      `venue booking failed: ${JSON.stringify(venue.body)}`,
+      `venue booking failed: ${JSON.stringify(venue.diagnostic, null, 2)}`,
     ).toBeLessThan(400);
 
     // Surface guest identifier so cleanup is easy after the run
