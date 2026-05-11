@@ -69,6 +69,28 @@ function validatePublicBookingErrorShape(body: unknown): string[] {
   return problems;
 }
 
+/**
+ * Build a W3C-compatible traceparent header from a correlation id.
+ * Format: `00-<32hex traceid>-<16hex spanid>-01`. We hash the correlation
+ * id with a tiny, deterministic FNV-style fold so the same correlation id
+ * always produces the same traceparent (useful for grepping logs across
+ * retries) without pulling in a crypto dependency.
+ */
+function buildTraceparent(correlationId: string): string {
+  const hex = (n: number, len: number) =>
+    (n >>> 0).toString(16).padStart(len, "0").slice(-len);
+  let h1 = 0x811c9dc5;
+  let h2 = 0x01000193;
+  for (let i = 0; i < correlationId.length; i++) {
+    const c = correlationId.charCodeAt(i);
+    h1 = Math.imul(h1 ^ c, 16777619);
+    h2 = Math.imul(h2 ^ c, 2246822519);
+  }
+  const traceId = (hex(h1, 8) + hex(h2, 8) + hex(h1 ^ h2, 8) + hex(h1 + h2, 8)).slice(0, 32);
+  const spanId = (hex(h2, 8) + hex(h1, 8)).slice(0, 16);
+  return `00-${traceId}-${spanId}-01`;
+}
+
 // HAR 1.2 entry shape (subset). Browsers (Chrome/Firefox DevTools) and
 // `npx playwright show-trace` can import any spec-conformant HAR file.
 type HarEntry = Record<string, any>;
