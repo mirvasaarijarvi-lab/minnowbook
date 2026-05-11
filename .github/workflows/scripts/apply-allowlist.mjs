@@ -118,6 +118,24 @@ const blocking = [];
 const waivedEntries = [];
 const reportedRules = new Set();
 
+// Per-severity tallies fed into the GitHub PR check summary so the
+// check title can read e.g. "AUDIT_LEVEL=high — 3 blocking
+// (critical=1, high=2)" without the reviewer having to expand the
+// step log. We track all four buckets even when they are below the
+// gate threshold so the informational rows in the summary still
+// show what is lurking in the dependency graph.
+const SEVERITIES = ["critical", "high", "moderate", "low"];
+const zeroCounts = () => Object.fromEntries(SEVERITIES.map((s) => [s, 0]));
+const blockingBySeverity = zeroCounts();
+const waivedBySeverity = zeroCounts();
+const totalBySeverity = zeroCounts();
+
+function bumpSeverity(bucket, sev) {
+  const key = String(sev || "").toLowerCase();
+  const normalised = key === "medium" ? "moderate" : key;
+  if (bucket[normalised] !== undefined) bucket[normalised] += 1;
+}
+
 for (const adv of advisories) {
   if (severityRank(adv.severity) < minRank) continue;
   // Dedup notifications so the same advisory does not annotate the
