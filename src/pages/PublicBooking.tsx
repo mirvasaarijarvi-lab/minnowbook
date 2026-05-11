@@ -817,6 +817,15 @@ const PublicBookingInner = () => {
     e.preventDefault();
     setErrors({});
 
+    // Hard block: if the server is in the SERVICE_ROLE_KEY_MISSING
+    // state we already know the next call will fail and that no
+    // reservation can be created. Refuse to even hit the network and
+    // re-surface the toast so the guest gets immediate feedback.
+    if (serviceMisconfigured) {
+      toast.error(t("booking.serviceMisconfigured"), { duration: 10000 });
+      return;
+    }
+
     // Bot protection checks
     if (honeypot) {
       // Silently reject - honeypot was filled (likely a bot)
