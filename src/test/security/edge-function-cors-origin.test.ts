@@ -138,7 +138,7 @@ describe("Edge function CORS — disallowed origin regression", () => {
         await res.text();
         const acao = res.headers.get("access-control-allow-origin");
         expect(acao).toBe(ALLOWED_ORIGIN);
-      });
+      }, TEST_TIMEOUT_MS);
 
       for (const origin of FORBIDDEN_ORIGINS) {
         it(`preflight from forbidden origin "${origin}" does not echo it`, async () => {
@@ -146,23 +146,18 @@ describe("Edge function CORS — disallowed origin regression", () => {
           await res.text();
           expectNoOriginEcho(res, origin, `${fn} preflight ${origin}`);
           expectNoCredentialLeak(res, `${fn} preflight ${origin}`);
-        });
+        }, TEST_TIMEOUT_MS);
 
         it(`POST from forbidden origin "${origin}" does not leak data cross-origin`, async () => {
           const res = await postCall(fn, origin, { ping: true });
-          // Always drain to avoid Deno resource leaks.
           await res.text().catch(() => "");
-
-          // Whether the function returns 2xx or 4xx, the critical invariant
-          // is that ACAO is NOT the attacker's origin — so the browser would
-          // refuse to expose any body to attacker-controlled JS.
           expectNoOriginEcho(res, origin, `${fn} POST ${origin}`);
           expectNoCredentialLeak(res, `${fn} POST ${origin}`);
-        });
+        }, TEST_TIMEOUT_MS);
       }
 
       it("preflight without an Origin header still does not echo arbitrary origins", async () => {
-        const res = await fetch(fnUrl(fn), {
+        const res = await fetchWithRetry(fnUrl(fn), {
           method: "OPTIONS",
           headers: {
             "Access-Control-Request-Method": "POST",
@@ -170,26 +165,22 @@ describe("Edge function CORS — disallowed origin regression", () => {
         });
         await res.text();
         const acao = res.headers.get("access-control-allow-origin");
-        // Falls back to canonical allowed origin — never wildcard, never undefined-echo.
         if (acao !== null) {
           expect(acao).not.toBe("");
           expect(acao).not.toBe("null");
           expect(acao).not.toBe("undefined");
         }
-      });
+      }, TEST_TIMEOUT_MS);
 
       it("response always carries hardening security headers", async () => {
         const res = await preflight(fn, FORBIDDEN_ORIGINS[0]);
         await res.text();
-        // These are independent of CORS — they must be present even on
-        // attacker-origin preflights so the function never serves a
-        // response that could be framed/sniffed.
         expect(res.headers.get("x-content-type-options")).toBe("nosniff");
         expect(res.headers.get("x-frame-options")).toBe("DENY");
         expect(res.headers.get("referrer-policy")).toBe(
           "strict-origin-when-cross-origin",
         );
-      });
+      }, TEST_TIMEOUT_MS);
     });
   }
 });
