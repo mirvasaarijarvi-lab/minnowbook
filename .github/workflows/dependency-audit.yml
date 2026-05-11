@@ -30,6 +30,8 @@ on:
       - "package.json"
       - "package-lock.json"
       - "bun.lock"
+      - "pnpm-lock.yaml"
+      - "yarn.lock"
       - ".github/workflows/dependency-audit.yml"
   push:
     branches: [main]
@@ -50,10 +52,10 @@ env:
   AUDIT_LEVEL: high
 
 jobs:
-  npm-audit:
-    name: npm-audit
+  audit:
+    name: dependency-audit
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 8
     permissions:
       contents: read
     steps:
@@ -63,15 +65,124 @@ jobs:
         with:
           persist-credentials: false
 
+      # ---------------------------------------------------------------
+      # Detect which package manager owns the dependency graph based on
+      # the lockfile that is present. This avoids gaps where a repo
+      # ships, say, a pnpm-lock.yaml that npm audit would silently
+      # ignore (npm audit refuses to run without a package-lock.json
+      # and would otherwise print a confusing error and fail open).
+      # Precedence is "most authoritative for the resolved graph
+      # first": pnpm > yarn > npm > bun. We never run two audits, the
+      # detected manager owns the gate so the result is unambiguous.
+      # ---------------------------------------------------------------
+      - name: Detect package manager from lockfile
+        id: detect
+        run: |
+          set -euo pipefail
+          if [ -f pnpm-lock.yaml ]; then
+            echo "manager=pnpm" >> "$GITHUB_OUTPUT"
+            echo "lockfile=pnpm-lock.yaml" >> "$GITHUB_OUTPUT"
+          elif [ -f yarn.lock ]; then
+            echo "manager=yarn" >> "$GITHUB_OUTPUT"
+            echo "lockfile=yarn.lock" >> "$GITHUB_OUTPUT"
+          elif [ -f package-lock.json ]; then
+            echo "manager=npm" >> "$GITHUB_OUTPUT"
+            echo "lockfile=package-lock.json" >> "$GITHUB_OUTPUT"
+          elif [ -f bun.lock ] || [ -f bun.lockb ]; then
+            # Bun has no first-party audit. We fall through to npm by
+            # generating a package-lock.json on the fly so we never
+            # silently skip the SCA gate just because the repo runs on
+            # bun in dev. The generated lockfile is throwaway.
+            echo "manager=bun-via-npm" >> "$GITHUB_OUTPUT"
+            echo "lockfile=bun.lock" >> "$GITHUB_OUTPUT"
+          else
+            echo "::error title=No lockfile found::Cannot run a dependency audit because no supported lockfile is present (pnpm-lock.yaml, yarn.lock, package-lock.json, bun.lock)."
+            exit 1
+          fi
+          echo "Detected package manager: $(cat "$GITHUB_OUTPUT" | grep '^manager=' | cut -d= -f2)"
+
       - name: Set up Node.js
         # actions/setup-node@v4.1.0
         uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af
         with:
           node-version: "20"
-          cache: "npm"
+          # Use the manager-specific cache key only when npm owns the
+          # lockfile. For pnpm / yarn we let their own setup actions
+          # handle caching below.
+          cache: ${{ steps.detect.outputs.manager == 'npm' && 'npm' || '' }}
+
+      # ---------------------------------------------------------------
+      # pnpm path. `pnpm audit --prod --audit-level=high --json` exits
+      # non-zero on any advisory at or above the threshold, mirroring
+      # `npm audit` semantics so the gate behaves identically.
+      # ---------------------------------------------------------------
+      - name: Set up pnpm
+        if: steps.detect.outputs.manager == 'pnpm'
+        # pnpm/action-setup@v4.0.0
+        uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2
+        with:
+          run_install: false
+
+      - name: Run pnpm audit (production deps)
+        if: steps.detect.outputs.manager == 'pnpm'
+        env:
+          AUDIT_LEVEL: ${{ env.AUDIT_LEVEL }}
+        run: |
+          set -o pipefail
+          pnpm audit --prod --audit-level "$AUDIT_LEVEL" --json \
+            | tee audit-prod.json
+          status=${PIPESTATUS[0]}
+          if [ "$status" -ne 0 ]; then
+            echo "::error title=Vulnerable production dependency::pnpm audit found one or more advisories at severity '$AUDIT_LEVEL' or higher in production dependencies."
+            exit "$status"
+          fi
+
+      - name: Run pnpm audit (all deps, informational)
+        if: steps.detect.outputs.manager == 'pnpm' && always()
+        continue-on-error: true
+        run: pnpm audit --json | tee audit-all.json || true
+
+      # ---------------------------------------------------------------
+      # yarn path. `yarn npm audit` (Berry) and `yarn audit` (classic)
+      # both honour --severity. We pick the right one by sniffing the
+      # yarn version reported by the installed CLI.
+      # ---------------------------------------------------------------
+      - name: Run yarn audit (production deps)
+        if: steps.detect.outputs.manager == 'yarn'
+        env:
+          AUDIT_LEVEL: ${{ env.AUDIT_LEVEL }}
+        run: |
+          set -o pipefail
+          yarn_version="$(yarn --version || echo 1.0.0)"
+          major="${yarn_version%%.*}"
+          if [ "$major" -ge 2 ]; then
+            yarn npm audit --environment production --severity "$AUDIT_LEVEL" --json \
+              | tee audit-prod.json
+          else
+            yarn audit --groups dependencies --level "$AUDIT_LEVEL" --json \
+              | tee audit-prod.json
+          fi
+          status=${PIPESTATUS[0]}
+          if [ "$status" -ne 0 ]; then
+            echo "::error title=Vulnerable production dependency::yarn audit found one or more advisories at severity '$AUDIT_LEVEL' or higher in production dependencies."
+            exit "$status"
+          fi
+
+      # ---------------------------------------------------------------
+      # npm path (and the bun fallback that synthesises a package-lock).
+      # ---------------------------------------------------------------
+      - name: Synthesise package-lock.json from bun lockfile
+        if: steps.detect.outputs.manager == 'bun-via-npm' && hashFiles('package-lock.json') == ''
+        run: |
+          # `npm install --package-lock-only` resolves the graph from
+          # package.json without touching node_modules, giving npm
+          # audit a lockfile to scan. Safe because we never publish
+          # this file from CI.
+          npm install --package-lock-only --ignore-scripts --no-audit --no-fund
 
       - name: Run npm audit (production deps)
-        id: audit
+        if: steps.detect.outputs.manager == 'npm' || steps.detect.outputs.manager == 'bun-via-npm'
+        id: npm_audit
         env:
           AUDIT_LEVEL: ${{ env.AUDIT_LEVEL }}
         run: |
@@ -80,27 +191,27 @@ jobs:
           # to production. A separate informational step below scans
           # devDependencies without failing the job.
           npm audit --omit=dev --audit-level="$AUDIT_LEVEL" --json \
-            | tee npm-audit-prod.json
+            | tee audit-prod.json
           status=${PIPESTATUS[0]}
           if [ "$status" -ne 0 ]; then
-            echo "::error title=Vulnerable production dependency::npm audit found one or more advisories at severity '$AUDIT_LEVEL' or higher in production dependencies. See the npm-audit-prod.json artifact for details."
+            echo "::error title=Vulnerable production dependency::npm audit found one or more advisories at severity '$AUDIT_LEVEL' or higher in production dependencies. See the audit-prod.json artifact for details."
             exit "$status"
           fi
 
       - name: Run npm audit (all deps, informational)
-        if: always()
+        if: (steps.detect.outputs.manager == 'npm' || steps.detect.outputs.manager == 'bun-via-npm') && always()
         continue-on-error: true
         run: |
-          npm audit --audit-level=low --json | tee npm-audit-all.json || true
+          npm audit --audit-level=low --json | tee audit-all.json || true
 
       - name: Upload audit reports
         if: always()
         # actions/upload-artifact@v4.4.3
         uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882
         with:
-          name: npm-audit-reports
+          name: dependency-audit-reports-${{ steps.detect.outputs.manager }}
           path: |
-            npm-audit-prod.json
-            npm-audit-all.json
+            audit-prod.json
+            audit-all.json
           if-no-files-found: ignore
           retention-days: 14
