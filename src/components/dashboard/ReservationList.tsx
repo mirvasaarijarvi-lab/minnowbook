@@ -19,6 +19,7 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { CalendarDays, CalendarIcon, User, Mail, Phone, MoreVertical, CheckCircle2, XCircle, Pencil, Receipt, PackageCheck, Coffee, Plus, Building2, Tag, Bell, MailCheck, MailX, Search } from "lucide-react";
 import EditReservationDialog from "./EditReservationDialog";
+import ReservationDetailDialog from "./ReservationDetailDialog";
 import ManualReservationDialog from "./ManualReservationDialog";
 import ConfirmationEmailPreview from "@/components/ConfirmationEmailPreview";
 import { useT, useTDynamic } from "@/contexts/I18nContext";
@@ -64,6 +65,7 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
   const [confirmDialog, setConfirmDialog] = useState<{ id: string; action: "confirmed" | "cancelled" } | null>(null);
   const [reminderDialog, setReminderDialog] = useState<string | null>(null);
   const [editingReservation, setEditingReservation] = useState<any | null>(null);
+  const [detailReservation, setDetailReservation] = useState<any | null>(null);
   const [newReservationOpen, setNewReservationOpen] = useState(false);
   const [linkedUsedPrompt, setLinkedUsedPrompt] = useState<{ reservationId: string; linkedIds: string[]; linkedNames: string[] } | null>(null);
   const [linkedInvoicedPrompt, setLinkedInvoicedPrompt] = useState<{ reservationId: string; linkedIds: string[]; linkedNames: string[] } | null>(null);
@@ -490,7 +492,22 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
           {reservations.map((r) => (
             <Card
               key={r.id}
-              className="hover:shadow-hover transition-shadow"
+              className="hover:shadow-hover transition-shadow cursor-pointer"
+              role="button"
+              tabIndex={0}
+              onClick={(e) => {
+                const target = e.target as HTMLElement;
+                if (target.closest('button,input,a,[role="menuitem"],[role="checkbox"],label')) return;
+                setDetailReservation(r);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  const target = e.target as HTMLElement;
+                  if (target.closest('button,input,a,[role="menuitem"],[role="checkbox"],label')) return;
+                  e.preventDefault();
+                  setDetailReservation(r);
+                }
+              }}
             >
               <CardContent className="p-4">
                 <div className="flex items-start justify-between gap-2 sm:gap-4">
@@ -778,6 +795,15 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
         reservation={editingReservation}
         open={!!editingReservation}
         onOpenChange={(open) => !open && setEditingReservation(null)}
+      />
+
+      <ReservationDetailDialog
+        reservation={detailReservation}
+        open={!!detailReservation}
+        onOpenChange={(open) => !open && setDetailReservation(null)}
+        onEdit={(r) => setEditingReservation(r)}
+        canEdit={canEdit}
+        siteName={detailReservation?.site_id ? siteMap[detailReservation.site_id] : null}
       />
 
       {/* New reservation dialog */}
