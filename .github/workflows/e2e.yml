@@ -57,10 +57,42 @@ jobs:
             bunx playwright install --with-deps chromium
           fi
 
+      # The Vite client at src/integrations/supabase/client.ts reads
+      # VITE_SUPABASE_URL / VITE_SUPABASE_PUBLISHABLE_KEY at BUILD time
+      # (they are inlined into the bundle by Vite). The CI checkout has no
+      # .env, so without these secrets the built bundle ships with
+      # `createClient(undefined, undefined, ...)` and every public booking
+      # / tenant lookup silently returns null. The whole app then renders
+      # "Business not found", masking real regressions.
+      #
+      # If the secrets aren't configured (e.g. forks), self-skip with a
+      # clear notice rather than running a guaranteed-red E2E suite.
+      - name: Verify build-time Supabase env
+        id: env-check
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          missing=()
+          [ -z "$VITE_SUPABASE_URL" ]            && missing+=("VITE_SUPABASE_URL")
+          [ -z "$VITE_SUPABASE_PUBLISHABLE_KEY" ] && missing+=("VITE_SUPABASE_PUBLISHABLE_KEY")
+          if [ ${#missing[@]} -gt 0 ]; then
+            echo "::notice::E2E skipped — missing build-time secrets: ${missing[*]}. Configure under Settings > Secrets and variables > Actions."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Build app
+        if: steps.env-check.outputs.ready == 'true'
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          VITE_SUPABASE_PROJECT_ID: ${{ secrets.VITE_SUPABASE_PROJECT_ID }}
         run: bunx vite build
 
       - name: Run E2E tests
+        if: steps.env-check.outputs.ready == 'true'
         run: bunx playwright test
 
       - name: Upload Playwright HTML report
