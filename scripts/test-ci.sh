@@ -23,6 +23,33 @@ run_step "Unit tests (Vitest)" \
 
 # 2. Deno tests for Supabase edge functions
 if command -v deno >/dev/null 2>&1; then
+  # Allow VITE_SUPABASE_URL to satisfy SUPABASE_URL for local/CI parity.
+  if [ -z "${SUPABASE_URL:-}" ] && [ -n "${VITE_SUPABASE_URL:-}" ]; then
+    export SUPABASE_URL="$VITE_SUPABASE_URL"
+  fi
+
+  # Required env vars for Deno edge function tests. Fail fast with a clear list
+  # of what's missing so CI logs explain the failure without diving into Deno output.
+  required_env=(SUPABASE_URL SUPABASE_SERVICE_ROLE_KEY)
+  missing_env=()
+  for var in "${required_env[@]}"; do
+    if [ -z "${!var:-}" ]; then
+      missing_env+=("$var")
+    fi
+  done
+  if [ "${#missing_env[@]}" -gt 0 ]; then
+    echo ""
+    echo "❌ Edge function tests (Deno) cannot run: missing required env var(s):"
+    for var in "${missing_env[@]}"; do
+      echo "   - $var"
+    done
+    echo ""
+    echo "Set these in your CI environment (e.g. GitHub Actions secrets) before"
+    echo "running scripts/test-ci.sh. SUPABASE_SERVICE_ROLE_KEY must be the"
+    echo "service-role key from Lovable Cloud (Backend → API keys)."
+    exit 1
+  fi
+
   run_step "Edge function tests (Deno)" \
     deno test --allow-net --allow-env --allow-read supabase/functions/
 else
