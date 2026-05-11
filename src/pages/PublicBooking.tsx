@@ -220,6 +220,12 @@ const PublicBookingInner = () => {
   const t = useT();
   const tDynamic = useTDynamic();
   const { language } = useLanguage();
+  // Show the detailed admin remediation copy only when a staff member
+  // is logged in. Guests get a short, reassuring message with no
+  // internal jargon. PublicBooking is wrapped by AuthProvider, so
+  // `user` is null for unauthenticated visitors.
+  const { user } = useAuth();
+  const isStaff = !!user;
   const dateFnsLocale = useDateLocale();
   const [submitted, setSubmitted] = useState(false);
   // Sticky flag set when the public-booking edge function reports
