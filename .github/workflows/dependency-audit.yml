@@ -350,8 +350,19 @@ jobs:
         if: always() && (steps.detect.outputs.manager == 'npm' || steps.detect.outputs.manager == 'bun-via-npm')
         run: node .github/workflows/scripts/audit-to-sarif.mjs npm audit-all.json npm-audit.sarif package-lock.json
 
-      - name: Upload npm SARIF to GitHub code scanning
+      # Pre-flight SARIF health check. Fails the step (and therefore
+      # skips the upload below via hashFiles+success() guarding) if
+      # the produced file is not valid SARIF 2.1.0. Without this the
+      # only signal would be a confusing 4xx from the code-scanning
+      # API after the fact, and the artifact would still get
+      # uploaded with the broken file.
+      - name: Validate npm SARIF
+        id: validate_npm_sarif
         if: always() && (steps.detect.outputs.manager == 'npm' || steps.detect.outputs.manager == 'bun-via-npm') && hashFiles('npm-audit.sarif') != ''
+        run: node .github/workflows/scripts/validate-sarif.mjs npm-audit.sarif
+
+      - name: Upload npm SARIF to GitHub code scanning
+        if: always() && (steps.detect.outputs.manager == 'npm' || steps.detect.outputs.manager == 'bun-via-npm') && hashFiles('npm-audit.sarif') != '' && steps.validate_npm_sarif.outcome == 'success'
         continue-on-error: true
         # github/codeql-action/upload-sarif@v3.27.5
         uses: github/codeql-action/upload-sarif@f09c1c0a94de965c15400f5634aa42fac8fb8f88
@@ -363,8 +374,13 @@ jobs:
         if: always() && steps.detect.outputs.manager == 'pnpm'
         run: node .github/workflows/scripts/audit-to-sarif.mjs pnpm audit-all.json pnpm-audit.sarif pnpm-lock.yaml
 
-      - name: Upload pnpm SARIF to GitHub code scanning
+      - name: Validate pnpm SARIF
+        id: validate_pnpm_sarif
         if: always() && steps.detect.outputs.manager == 'pnpm' && hashFiles('pnpm-audit.sarif') != ''
+        run: node .github/workflows/scripts/validate-sarif.mjs pnpm-audit.sarif
+
+      - name: Upload pnpm SARIF to GitHub code scanning
+        if: always() && steps.detect.outputs.manager == 'pnpm' && hashFiles('pnpm-audit.sarif') != '' && steps.validate_pnpm_sarif.outcome == 'success'
         continue-on-error: true
         # github/codeql-action/upload-sarif@v3.27.5
         uses: github/codeql-action/upload-sarif@f09c1c0a94de965c15400f5634aa42fac8fb8f88
@@ -386,8 +402,13 @@ jobs:
             node .github/workflows/scripts/audit-to-sarif.mjs yarn-classic audit-all.json yarn-audit.sarif yarn.lock
           fi
 
-      - name: Upload yarn SARIF to GitHub code scanning
+      - name: Validate yarn SARIF
+        id: validate_yarn_sarif
         if: always() && steps.detect.outputs.manager == 'yarn' && hashFiles('yarn-audit.sarif') != ''
+        run: node .github/workflows/scripts/validate-sarif.mjs yarn-audit.sarif
+
+      - name: Upload yarn SARIF to GitHub code scanning
+        if: always() && steps.detect.outputs.manager == 'yarn' && hashFiles('yarn-audit.sarif') != '' && steps.validate_yarn_sarif.outcome == 'success'
         continue-on-error: true
         # github/codeql-action/upload-sarif@v3.27.5
         uses: github/codeql-action/upload-sarif@f09c1c0a94de965c15400f5634aa42fac8fb8f88
