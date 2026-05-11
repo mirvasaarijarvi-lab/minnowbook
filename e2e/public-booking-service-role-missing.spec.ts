@@ -19,6 +19,7 @@
  */
 import { test, expect, SUPABASE_URL, TEST_TENANT } from "./fixtures/test-tenant";
 import { gotoAndWaitForSpa, assertPublicBookingReady } from "./fixtures/spa-waits";
+import { BOOKING_ERROR_CODES } from "../supabase/functions/_shared/booking-error-codes";
 
 const PUBLIC_BOOKING_URL_RE = /\/functions\/v1\/public-booking(\?|$)/;
 const RESERVATIONS_REST_RE = /\/rest\/v1\/reservations(\?|$|\/)/;
@@ -63,7 +64,7 @@ test.describe("public-booking: SUPABASE_SERVICE_ROLE_KEY missing", () => {
             "authorization, x-client-info, apikey, content-type",
         },
         body: JSON.stringify({
-          error_code: "SERVICE_ROLE_KEY_MISSING",
+          error_code: BOOKING_ERROR_CODES.SERVICE_ROLE_KEY_MISSING,
           error:
             "Server is misconfigured: SUPABASE_SERVICE_ROLE_KEY is not set.",
         }),
@@ -118,7 +119,7 @@ test.describe("public-booking: SUPABASE_SERVICE_ROLE_KEY missing", () => {
     expect(publicBookingHits.length).toBe(1);
     expect(invokeResult.status).toBe(400);
     expect(invokeResult.body).toMatchObject({
-      error_code: "SERVICE_ROLE_KEY_MISSING",
+      error_code: BOOKING_ERROR_CODES.SERVICE_ROLE_KEY_MISSING,
     });
     const errStr = ((invokeResult.body as any)?.error ?? "") as string;
     expect(typeof errStr).toBe("string");
@@ -174,7 +175,7 @@ test.describe("public-booking: SUPABASE_SERVICE_ROLE_KEY missing", () => {
     //    the end user.
     for (const msg of Object.values(safeMessages)) {
       expect(msg).not.toContain("SUPABASE_SERVICE_ROLE_KEY");
-      expect(msg).not.toContain("SERVICE_ROLE_KEY_MISSING");
+      expect(msg).not.toContain(BOOKING_ERROR_CODES.SERVICE_ROLE_KEY_MISSING);
     }
   });
 });

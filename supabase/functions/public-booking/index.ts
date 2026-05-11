@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { computeReservationPrice } from "../_shared/reservation-pricing.ts";
+import { BOOKING_ERROR_CODES } from "../_shared/booking-error-codes.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -46,7 +47,7 @@ export function assertServiceRoleKey(
       error:
         "Booking service is not fully configured (missing service-role key). " +
         "Please contact the venue.",
-      error_code: "SERVICE_ROLE_KEY_MISSING",
+      error_code: BOOKING_ERROR_CODES.SERVICE_ROLE_KEY_MISSING,
     }),
     {
       status: 400,

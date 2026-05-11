@@ -23,6 +23,7 @@ import {
   assertEquals,
 } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import { assertServiceRoleKey } from "./index.ts";
+import { BOOKING_ERROR_CODES } from "../_shared/booking-error-codes.ts";
 
 Deno.test("assertServiceRoleKey: returns ok=true with trimmed key when present", () => {
   const result = assertServiceRoleKey("  real-service-role-key  ");
@@ -42,7 +43,7 @@ Deno.test("assertServiceRoleKey: rejects undefined env value with 400 + error_co
   if (result.ok) return; // type narrowing
   assertEquals(result.response.status, 400);
   const body = await result.response.json();
-  assertEquals(body.error_code, "SERVICE_ROLE_KEY_MISSING");
+  assertEquals(body.error_code, BOOKING_ERROR_CODES.SERVICE_ROLE_KEY_MISSING);
   assert(
     typeof body.error === "string" && body.error.length > 0,
     "expected non-empty human-readable `error` string",
@@ -55,7 +56,7 @@ Deno.test("assertServiceRoleKey: rejects empty string with 400", async () => {
   if (result.ok) return;
   assertEquals(result.response.status, 400);
   const body = await result.response.json();
-  assertEquals(body.error_code, "SERVICE_ROLE_KEY_MISSING");
+  assertEquals(body.error_code, BOOKING_ERROR_CODES.SERVICE_ROLE_KEY_MISSING);
 });
 
 Deno.test("assertServiceRoleKey: rejects whitespace-only value with 400", async () => {
@@ -67,7 +68,7 @@ Deno.test("assertServiceRoleKey: rejects whitespace-only value with 400", async 
   if (result.ok) return;
   assertEquals(result.response.status, 400);
   const body = await result.response.json();
-  assertEquals(body.error_code, "SERVICE_ROLE_KEY_MISSING");
+  assertEquals(body.error_code, BOOKING_ERROR_CODES.SERVICE_ROLE_KEY_MISSING);
 });
 
 Deno.test("assertServiceRoleKey: missing-key response carries CORS + JSON headers so the browser can read the body", async () => {
