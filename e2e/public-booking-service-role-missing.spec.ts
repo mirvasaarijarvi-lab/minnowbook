@@ -64,7 +64,7 @@ test.describe("public-booking: SUPABASE_SERVICE_ROLE_KEY missing", () => {
             "authorization, x-client-info, apikey, content-type",
         },
         body: JSON.stringify({
-          error_code: "SERVICE_ROLE_KEY_MISSING",
+          error_code: BOOKING_ERROR_CODES.SERVICE_ROLE_KEY_MISSING,
           error:
             "Server is misconfigured: SUPABASE_SERVICE_ROLE_KEY is not set.",
         }),
