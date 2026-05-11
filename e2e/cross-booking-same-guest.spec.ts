@@ -107,9 +107,13 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
     console.error(`${LOG_PREFIX} FAILURE ${JSON.stringify(failureSummary)}`);
   });
 
-  test("public booking page for the test tenant loads", async ({ page, tenant }) => {
+  test("public booking page for the test tenant loads", async ({ page, tenant }, testInfo) => {
     test.setTimeout(60_000);
+    await captureCheckpoint(page, testInfo, "smoke: before goto", { screenshot: false });
     await gotoAndWaitForSpa(page, `/book/${tenant.slug}`);
+    await captureCheckpoint(page, testInfo, "smoke: after SPA hydrate", {
+      probeSelectors: ["#root", "main", "h1"],
+    });
   });
 
   test("creates restaurant + guesthouse + venue reservations for the same guest", async ({ request, page, tenant }, testInfo) => {
