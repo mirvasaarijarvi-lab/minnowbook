@@ -156,7 +156,11 @@ interface ScopeCheck {
 }
 
 async function evaluateScope(
-  sb: SupabaseClient,
+  // Use the loose `any` schema variant so the caller's
+  // `SupabaseClient<any, "public", any>` (created via createClient without an
+  // explicit Database type) is assignable. The function only reads from a
+  // single known table, so we don't lose any meaningful type safety.
+  sb: SupabaseClient<any, "public", any>,
   check: ScopeCheck,
 ): Promise<{ raised: boolean; count: number }> {
   const since = new Date(Date.now() - SPIKE_WINDOW_MINUTES * 60_000).toISOString();
