@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-05-11T12:17:48.663Z",
+  "generatedAt": "2026-05-11T12:19:03.878Z",
   "flavor": "default",
-  "runId": "1778501863327-jevzqq",
+  "runId": "1778501938865-iuj9yy",
   "tenants": {
     "a": null,
     "b": null
@@ -20,7 +20,7 @@
     {
       "kind": "upload",
       "bucket": "tenant-private",
-      "path": "00000000-0000-0000-0000-000000000000/__rls_test__/1778501863327-jevzqq/anon.txt",
+      "path": "00000000-0000-0000-0000-000000000000/__rls_test__/1778501938865-iuj9yy/anon.txt",
       "attacker": "anon",
       "owner": "fake-tenant",
       "expected": "denied",
@@ -29,12 +29,12 @@
       "httpStatus": 400,
       "errorCode": "StorageApiError",
       "scenario": "anon-upload",
-      "recordedAt": "2026-05-11T12:17:43.783Z"
+      "recordedAt": "2026-05-11T12:18:59.385Z"
     },
     {
       "kind": "upload",
       "bucket": "tenant-assets",
-      "path": "00000000-0000-0000-0000-000000000000/__rls_test__/1778501863327-jevzqq/anon.txt",
+      "path": "00000000-0000-0000-0000-000000000000/__rls_test__/1778501938865-iuj9yy/anon.txt",
       "attacker": "anon",
       "owner": "fake-tenant",
       "expected": "denied",
@@ -43,7 +43,7 @@
       "httpStatus": 400,
       "errorCode": "StorageApiError",
       "scenario": "anon-upload",
-      "recordedAt": "2026-05-11T12:17:43.957Z"
+      "recordedAt": "2026-05-11T12:18:59.479Z"
     },
     {
       "kind": "upload",
@@ -57,7 +57,7 @@
       "httpStatus": 400,
       "errorCode": "StorageApiError",
       "scenario": "adversarial:double-slash",
-      "recordedAt": "2026-05-11T12:17:46.290Z"
+      "recordedAt": "2026-05-11T12:19:01.209Z"
     },
     {
       "kind": "upload",
@@ -71,7 +71,7 @@
       "httpStatus": 400,
       "errorCode": "StorageApiError",
       "scenario": "adversarial:leading-slash",
-      "recordedAt": "2026-05-11T12:17:46.413Z"
+      "recordedAt": "2026-05-11T12:19:01.269Z"
     },
     {
       "kind": "upload",
@@ -85,7 +85,7 @@
       "httpStatus": 400,
       "errorCode": "StorageApiError",
       "scenario": "adversarial:trailing-slash",
-      "recordedAt": "2026-05-11T12:17:46.495Z"
+      "recordedAt": "2026-05-11T12:19:01.320Z"
     },
     {
       "kind": "upload",
@@ -99,7 +99,7 @@
       "httpStatus": 400,
       "errorCode": "StorageApiError",
       "scenario": "adversarial:dot-segment-traversal",
-      "recordedAt": "2026-05-11T12:17:46.561Z"
+      "recordedAt": "2026-05-11T12:19:01.400Z"
     },
     {
       "kind": "upload",
@@ -113,7 +113,7 @@
       "httpStatus": 400,
       "errorCode": "StorageApiError",
       "scenario": "adversarial:url-encoded-slash",
-      "recordedAt": "2026-05-11T12:17:46.637Z"
+      "recordedAt": "2026-05-11T12:19:01.479Z"
     },
     {
       "kind": "upload",
@@ -127,7 +127,7 @@
       "httpStatus": 400,
       "errorCode": "StorageApiError",
       "scenario": "adversarial:url-encoded-tenant-wrappers",
-      "recordedAt": "2026-05-11T12:17:46.688Z"
+      "recordedAt": "2026-05-11T12:19:01.553Z"
     },
     {
       "kind": "upload",
@@ -141,7 +141,7 @@
       "httpStatus": 400,
       "errorCode": "StorageApiError",
       "scenario": "adversarial:backslash-separators",
-      "recordedAt": "2026-05-11T12:17:46.741Z"
+      "recordedAt": "2026-05-11T12:19:01.756Z"
     },
     {
       "kind": "upload",
@@ -155,7 +155,7 @@
       "httpStatus": 400,
       "errorCode": "StorageApiError",
       "scenario": "adversarial:null-byte-truncation",
-      "recordedAt": "2026-05-11T12:17:46.751Z"
+      "recordedAt": "2026-05-11T12:19:01.781Z"
     },
     {
       "kind": "upload",
@@ -169,7 +169,7 @@
       "httpStatus": 400,
       "errorCode": "StorageApiError",
       "scenario": "adversarial:double-encoded-slash",
-      "recordedAt": "2026-05-11T12:17:46.813Z"
+      "recordedAt": "2026-05-11T12:19:01.842Z"
     },
     {
       "kind": "upload",
@@ -183,7 +183,7 @@
       "httpStatus": 400,
       "errorCode": "StorageApiError",
       "scenario": "adversarial:url-encoded-dot-dot",
-      "recordedAt": "2026-05-11T12:17:46.912Z"
+      "recordedAt": "2026-05-11T12:19:01.937Z"
     },
     {
       "kind": "upload",
@@ -197,7 +197,7 @@
       "httpStatus": 400,
       "errorCode": "StorageApiError",
       "scenario": "adversarial:url-encoded-slash-plus-dot-dot",
-      "recordedAt": "2026-05-11T12:17:47.354Z"
+      "recordedAt": "2026-05-11T12:19:02.000Z"
     },
     {
       "kind": "upload",
@@ -211,7 +211,7 @@
       "httpStatus": 400,
       "errorCode": "StorageApiError",
       "scenario": "adversarial:double-slash",
-      "recordedAt": "2026-05-11T12:17:47.416Z"
+      "recordedAt": "2026-05-11T12:19:02.129Z"
     },
     {
       "kind": "upload",
@@ -225,7 +225,7 @@
       "httpStatus": 400,
       "errorCode": "StorageApiError",
       "scenario": "adversarial:leading-slash",
-      "recordedAt": "2026-05-11T12:17:47.478Z"
+      "recordedAt": "2026-05-11T12:19:02.242Z"
     },
     {
       "kind": "upload",
@@ -239,7 +239,7 @@
       "httpStatus": 400,
       "errorCode": "StorageApiError",
       "scenario": "adversarial:trailing-slash",
-      "recordedAt": "2026-05-11T12:17:47.530Z"
+      "recordedAt": "2026-05-11T12:19:02.328Z"
     },
     {
       "kind": "upload",
@@ -253,7 +253,7 @@
       "httpStatus": 400,
       "errorCode": "StorageApiError",
       "scenario": "adversarial:dot-segment-traversal",
-      "recordedAt": "2026-05-11T12:17:47.637Z"
+      "recordedAt": "2026-05-11T12:19:02.395Z"
     },
     {
       "kind": "upload",
@@ -267,7 +267,7 @@
       "httpStatus": 400,
       "errorCode": "StorageApiError",
       "scenario": "adversarial:url-encoded-slash",
-      "recordedAt": "2026-05-11T12:17:47.711Z"
+      "recordedAt": "2026-05-11T12:19:02.453Z"
     },
     {
       "kind": "upload",
@@ -281,7 +281,7 @@
       "httpStatus": 400,
       "errorCode": "StorageApiError",
       "scenario": "adversarial:url-encoded-tenant-wrappers",
-      "recordedAt": "2026-05-11T12:17:47.771Z"
+      "recordedAt": "2026-05-11T12:19:02.503Z"
     },
     {
       "kind": "upload",
@@ -295,7 +295,7 @@
       "httpStatus": 400,
       "errorCode": "StorageApiError",
       "scenario": "adversarial:backslash-separators",
-      "recordedAt": "2026-05-11T12:17:47.823Z"
+      "recordedAt": "2026-05-11T12:19:02.627Z"
     },
     {
       "kind": "upload",
@@ -309,7 +309,7 @@
       "httpStatus": 400,
       "errorCode": "StorageApiError",
       "scenario": "adversarial:null-byte-truncation",
-      "recordedAt": "2026-05-11T12:17:47.831Z"
+      "recordedAt": "2026-05-11T12:19:02.674Z"
     },
     {
       "kind": "upload",
@@ -323,7 +323,7 @@
       "httpStatus": 400,
       "errorCode": "StorageApiError",
       "scenario": "adversarial:double-encoded-slash",
-      "recordedAt": "2026-05-11T12:17:47.890Z"
+      "recordedAt": "2026-05-11T12:19:02.769Z"
     },
     {
       "kind": "upload",
@@ -337,7 +337,7 @@
       "httpStatus": 400,
       "errorCode": "StorageApiError",
       "scenario": "adversarial:url-encoded-dot-dot",
-      "recordedAt": "2026-05-11T12:17:47.973Z"
+      "recordedAt": "2026-05-11T12:19:02.884Z"
     },
     {
       "kind": "upload",
@@ -351,7 +351,7 @@
       "httpStatus": 400,
       "errorCode": "StorageApiError",
       "scenario": "adversarial:url-encoded-slash-plus-dot-dot",
-      "recordedAt": "2026-05-11T12:17:48.038Z"
+      "recordedAt": "2026-05-11T12:19:03.011Z"
     },
     {
       "kind": "upload",
@@ -365,7 +365,7 @@
       "httpStatus": 400,
       "errorCode": "StorageApiError",
       "scenario": "late-segment:victim-as-segment-2",
-      "recordedAt": "2026-05-11T12:17:48.105Z"
+      "recordedAt": "2026-05-11T12:19:03.175Z"
     },
     {
       "kind": "upload",
@@ -379,7 +379,7 @@
       "httpStatus": 400,
       "errorCode": "StorageApiError",
       "scenario": "late-segment:victim-as-segment-3",
-      "recordedAt": "2026-05-11T12:17:48.182Z"
+      "recordedAt": "2026-05-11T12:19:03.267Z"
     },
     {
       "kind": "upload",
@@ -393,7 +393,7 @@
       "httpStatus": 400,
       "errorCode": "StorageApiError",
       "scenario": "late-segment:victim-as-segment-4",
-      "recordedAt": "2026-05-11T12:17:48.241Z"
+      "recordedAt": "2026-05-11T12:19:03.328Z"
     },
     {
       "kind": "upload",
@@ -407,12 +407,12 @@
       "httpStatus": 400,
       "errorCode": "StorageApiError",
       "scenario": "late-segment:victim-embedded-in-filename",
-      "recordedAt": "2026-05-11T12:17:48.308Z"
+      "recordedAt": "2026-05-11T12:19:03.401Z"
     },
     {
       "kind": "upload",
       "bucket": "tenant-private",
-      "path": "22222222-2222-2222-2222-222222222222/33333333-3333-3333-3333-333333333333/__rls_test__/1778501863327-jevzqq/late-seg.txt",
+      "path": "22222222-2222-2222-2222-222222222222/33333333-3333-3333-3333-333333333333/__rls_test__/1778501938865-iuj9yy/late-seg.txt",
       "attacker": "anon",
       "owner": "fake-tenant",
       "expected": "denied",
@@ -421,7 +421,7 @@
       "httpStatus": 400,
       "errorCode": "StorageApiError",
       "scenario": "late-segment:victim-mimicking-rls-test-root",
-      "recordedAt": "2026-05-11T12:17:48.368Z"
+      "recordedAt": "2026-05-11T12:19:03.499Z"
     },
     {
       "kind": "upload",
@@ -435,7 +435,7 @@
       "httpStatus": 400,
       "errorCode": "StorageApiError",
       "scenario": "late-segment:victim-as-segment-2",
-      "recordedAt": "2026-05-11T12:17:48.431Z"
+      "recordedAt": "2026-05-11T12:19:03.612Z"
     },
     {
       "kind": "upload",
@@ -449,7 +449,7 @@
       "httpStatus": 400,
       "errorCode": "StorageApiError",
       "scenario": "late-segment:victim-as-segment-3",
-      "recordedAt": "2026-05-11T12:17:48.479Z"
+      "recordedAt": "2026-05-11T12:19:03.679Z"
     },
     {
       "kind": "upload",
@@ -463,7 +463,7 @@
       "httpStatus": 400,
       "errorCode": "StorageApiError",
       "scenario": "late-segment:victim-as-segment-4",
-      "recordedAt": "2026-05-11T12:17:48.542Z"
+      "recordedAt": "2026-05-11T12:19:03.765Z"
     },
     {
       "kind": "upload",
@@ -477,12 +477,12 @@
       "httpStatus": 400,
       "errorCode": "StorageApiError",
       "scenario": "late-segment:victim-embedded-in-filename",
-      "recordedAt": "2026-05-11T12:17:48.610Z"
+      "recordedAt": "2026-05-11T12:19:03.821Z"
     },
     {
       "kind": "upload",
       "bucket": "tenant-assets",
-      "path": "22222222-2222-2222-2222-222222222222/33333333-3333-3333-3333-333333333333/__rls_test__/1778501863327-jevzqq/late-seg.txt",
+      "path": "22222222-2222-2222-2222-222222222222/33333333-3333-3333-3333-333333333333/__rls_test__/1778501938865-iuj9yy/late-seg.txt",
       "attacker": "anon",
       "owner": "fake-tenant",
       "expected": "denied",
@@ -491,29 +491,29 @@
       "httpStatus": 400,
       "errorCode": "StorageApiError",
       "scenario": "late-segment:victim-mimicking-rls-test-root",
-      "recordedAt": "2026-05-11T12:17:48.662Z"
+      "recordedAt": "2026-05-11T12:19:03.875Z"
     }
   ],
   "cleanups": [
     {
       "bucket": "tenant-private",
-      "path": "00000000-0000-0000-0000-000000000000/__rls_test__/1778501863327-jevzqq/anon.txt",
+      "path": "00000000-0000-0000-0000-000000000000/__rls_test__/1778501938865-iuj9yy/anon.txt",
       "role": "attacker",
       "removed": false,
       "httpStatus": null,
       "errorCode": null,
       "note": "negative-control: anon DELETE denied (empty rows)",
-      "recordedAt": "2026-05-11T12:17:44.949Z"
+      "recordedAt": "2026-05-11T12:18:59.902Z"
     },
     {
       "bucket": "tenant-assets",
-      "path": "00000000-0000-0000-0000-000000000000/__rls_test__/1778501863327-jevzqq/anon.txt",
+      "path": "00000000-0000-0000-0000-000000000000/__rls_test__/1778501938865-iuj9yy/anon.txt",
       "role": "attacker",
       "removed": false,
       "httpStatus": null,
       "errorCode": null,
       "note": "negative-control: anon DELETE denied (empty rows)",
-      "recordedAt": "2026-05-11T12:17:45.012Z"
+      "recordedAt": "2026-05-11T12:19:00.040Z"
     }
   ]
 }
