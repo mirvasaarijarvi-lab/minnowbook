@@ -1,0 +1,102 @@
+{
+  "indexes": {
+    "idx_reservations_capacity_lookup": {
+      "definition": "CREATE INDEX IF NOT EXISTS idx_reservations_capacity_lookup ON public.reservations (tenant_id, reservation_type, date) WHERE status <> 'cancelled'",
+      "columns": [
+        "tenant_id",
+        "reservation_type",
+        "date"
+      ],
+      "where": "status <> 'cancelled'"
+    },
+    "idx_reservations_discount_code_id": {
+      "definition": "CREATE INDEX IF NOT EXISTS idx_reservations_discount_code_id ON public.reservations(discount_code_id) WHERE discount_code_id IS NOT NULL",
+      "columns": [
+        "discount_code_id"
+      ],
+      "where": "discount_code_id IS NOT NULL"
+    },
+    "idx_reservations_guest_search_trgm": {
+      "definition": "CREATE INDEX IF NOT EXISTS idx_reservations_guest_search_trgm ON public.reservations USING GIN (guest_search_text gin_trgm_ops)",
+      "columns": [
+        "guest_search_text"
+      ],
+      "where": null
+    },
+    "idx_reservations_linked_group_id": {
+      "definition": "CREATE INDEX IF NOT EXISTS idx_reservations_linked_group_id ON public.reservations(linked_group_id) WHERE linked_group_id IS NOT NULL",
+      "columns": [
+        "linked_group_id"
+      ],
+      "where": "linked_group_id IS NOT NULL"
+    },
+    "idx_reservations_site_id": {
+      "definition": "CREATE INDEX IF NOT EXISTS idx_reservations_site_id ON public.reservations(site_id) WHERE site_id IS NOT NULL",
+      "columns": [
+        "site_id"
+      ],
+      "where": "site_id IS NOT NULL"
+    },
+    "idx_reservations_tenant_checkout": {
+      "definition": "CREATE INDEX IF NOT EXISTS idx_reservations_tenant_checkout ON public.reservations (tenant_id, check_out_date) WHERE check_out_date IS NOT NULL",
+      "columns": [
+        "tenant_id",
+        "check_out_date"
+      ],
+      "where": "check_out_date IS NOT NULL"
+    },
+    "idx_reservations_tenant_date": {
+      "definition": "CREATE INDEX IF NOT EXISTS idx_reservations_tenant_date ON public.reservations (tenant_id, date DESC)",
+      "columns": [
+        "tenant_id",
+        "date"
+      ],
+      "where": null
+    },
+    "idx_reservations_tenant_email": {
+      "definition": "CREATE INDEX IF NOT EXISTS idx_reservations_tenant_email ON public.reservations (tenant_id, guest_email)",
+      "columns": [
+        "tenant_id",
+        "guest_email"
+      ],
+      "where": null
+    },
+    "idx_reservations_tenant_invoiced": {
+      "definition": "CREATE INDEX IF NOT EXISTS idx_reservations_tenant_invoiced ON public.reservations (tenant_id, is_invoiced)",
+      "columns": [
+        "tenant_id",
+        "is_invoiced"
+      ],
+      "where": null
+    },
+    "idx_reservations_tenant_status": {
+      "definition": "CREATE INDEX IF NOT EXISTS idx_reservations_tenant_status ON public.reservations (tenant_id, status)",
+      "columns": [
+        "tenant_id",
+        "status"
+      ],
+      "where": null
+    },
+    "idx_reservations_tenant_type": {
+      "definition": "CREATE INDEX IF NOT EXISTS idx_reservations_tenant_type ON public.reservations (tenant_id, reservation_type)",
+      "columns": [
+        "tenant_id",
+        "reservation_type"
+      ],
+      "where": null
+    }
+  },
+  "indexed_columns": [
+    "check_out_date",
+    "date",
+    "discount_code_id",
+    "guest_email",
+    "guest_search_text",
+    "is_invoiced",
+    "linked_group_id",
+    "reservation_type",
+    "site_id",
+    "status",
+    "tenant_id"
+  ]
+}
