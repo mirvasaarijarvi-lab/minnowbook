@@ -114,9 +114,13 @@ describe("public booking SERVICE_ROLE_KEY_MISSING toast", () => {
       expect(toastEl).toBeInTheDocument();
 
       // Defense in depth: the rendered copy MUST NOT leak the literal
-      // env var name or machine-readable error_code to end users.
+      // The misconfig copy intentionally includes admin facing setup
+      // steps (Lovable Cloud, Backend, Edge Functions, Secrets, and
+      // the literal SUPABASE_SERVICE_ROLE_KEY name) so a venue
+      // operator who triggers the error knows exactly what to fix.
+      // We DO assert the raw machine error_code never reaches the
+      // user, since that is implementation detail.
       const html = document.body.innerHTML;
-      expect(html).not.toContain("SUPABASE_SERVICE_ROLE_KEY");
       expect(html).not.toContain("SERVICE_ROLE_KEY_MISSING");
     });
   }
