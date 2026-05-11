@@ -49,7 +49,13 @@ setInterval(() => {
   }
 }, 300_000);
 
-serve(async (req) => {
+/**
+ * Exported so integration tests can drive every request branch
+ * in-process (OPTIONS, 403, 413, 429, catch-block 500, etc.) and
+ * assert that the shared SECURITY_HEADERS are present on every
+ * Response.
+ */
+export const handleSupportChatRequest = async (req: Request): Promise<Response> => {
   const corsHeaders = getCorsHeaders(req, { allowMethods: "POST, OPTIONS" });
   const reqOrigin = req.headers.get("Origin") || "";
   const referer = req.headers.get("Referer") || "";
@@ -271,4 +277,6 @@ serve(async (req) => {
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
-});
+};
+
+serve(handleSupportChatRequest);
