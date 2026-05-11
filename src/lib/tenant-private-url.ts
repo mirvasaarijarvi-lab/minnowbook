@@ -14,6 +14,7 @@
  * loading smoothly without callers having to manage TTLs.
  */
 import { supabase } from "@/integrations/supabase/client";
+import { assertSafeStorageObjectPath } from "@/lib/storage-path";
 
 /** 24 hours, in seconds. Matches the chosen TTL for shared private assets. */
 export const PRIVATE_SIGNED_URL_TTL_SECONDS = 24 * 60 * 60;
