@@ -145,11 +145,14 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
     // Record EVERY public-booking HTTP call into a HAR file so failures can
     // be replayed in a browser (Chrome DevTools "Import HAR file") or with
     // `npx playwright show-trace`. Saved per-attempt so retries don't clobber.
-    const harDir = `${testInfo.project.outputDir}/cross-booking-har`;
-    const harPath = `${harDir}/public-booking-attempt-${testInfo.retry + 1}.har`;
+    const path = await import("node:path");
+    const harDir = path.resolve(testInfo.outputDir, "har");
+    const harPath = path.join(harDir, `public-booking-attempt-${testInfo.retry + 1}.har`);
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const fs = await import("node:fs");
     fs.mkdirSync(harDir, { recursive: true });
+    // eslint-disable-next-line no-console
+    console.log(`[cross-booking] HAR will be written to ${harPath}`);
 
     const request = await playwright.request.newContext({
       recordHar: {
