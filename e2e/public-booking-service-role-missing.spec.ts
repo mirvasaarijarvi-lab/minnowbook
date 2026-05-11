@@ -175,7 +175,7 @@ test.describe("public-booking: SUPABASE_SERVICE_ROLE_KEY missing", () => {
     //    the end user.
     for (const msg of Object.values(safeMessages)) {
       expect(msg).not.toContain("SUPABASE_SERVICE_ROLE_KEY");
-      expect(msg).not.toContain("SERVICE_ROLE_KEY_MISSING");
+      expect(msg).not.toContain(BOOKING_ERROR_CODES.SERVICE_ROLE_KEY_MISSING);
     }
   });
 });
