@@ -117,7 +117,7 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
       resource_id: RESOURCES.venue,
       date,
       start_time: "12:00",
-      event_type: "Workshop",
+      event_type: "corporate",
       special_requests: "TEST: cross-booking venue leg",
     });
     expect(
