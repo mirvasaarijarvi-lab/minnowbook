@@ -3027,6 +3027,12 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      explain_reservations_dashboard: {
+        Args: { p_limit?: number; p_tenant_id: string }
+        Returns: {
+          plan_line: string
+        }[]
+      }
       find_users_with_multiple_tenants: {
         Args: never
         Returns: {
@@ -3115,6 +3121,13 @@ export type Database = {
       is_valid_review_token_for_reservation: {
         Args: { p_reservation_id: string; p_tenant_id: string; p_token: string }
         Returns: boolean
+      }
+      list_reservations_indexes: {
+        Args: never
+        Returns: {
+          indexdef: string
+          indexname: string
+        }[]
       }
       list_tenant_scoped_tables: {
         Args: never
