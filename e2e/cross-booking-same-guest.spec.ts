@@ -275,6 +275,7 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
         special_requests: "TEST: cross-booking restaurant leg",
       },
       "restaurant",
+      harEntries,
     );
     expect(
       restaurant.status,
@@ -297,6 +298,7 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
         special_requests: "TEST: cross-booking guesthouse leg",
       },
       "guesthouse",
+      harEntries,
     );
     expect(
       guesthouse.status,
@@ -319,6 +321,7 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
         special_requests: "TEST: cross-booking venue leg",
       },
       "venue",
+      harEntries,
     );
     expect(
       venue.status,
@@ -343,6 +346,7 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
         special_requests: "TEST: cross-booking foreign-tenant negative",
       },
       "foreign-tenant-negative",
+      harEntries,
     );
     expect(
       rejected.status,
