@@ -14,6 +14,7 @@
  * loading smoothly without callers having to manage TTLs.
  */
 import { supabase } from "@/integrations/supabase/client";
+import { assertSafeStorageObjectPath } from "@/lib/storage-path";
 
 /** 24 hours, in seconds. Matches the chosen TTL for shared private assets. */
 export const PRIVATE_SIGNED_URL_TTL_SECONDS = 24 * 60 * 60;
@@ -57,13 +58,14 @@ async function mintSignedUrl(
   ttl: number,
   download: SignedUrlOptions["download"],
 ): Promise<string> {
+  const safePath = assertSafeStorageObjectPath(path);
   const { data, error } = await supabase.storage
     .from(TENANT_PRIVATE_BUCKET)
-    .createSignedUrl(path, ttl, { download });
+    .createSignedUrl(safePath, ttl, { download });
 
   if (error || !data?.signedUrl) {
     throw new Error(
-      `Failed to create signed URL for ${path}: ${error?.message ?? "unknown error"}`,
+      `Failed to create signed URL for ${safePath}: ${error?.message ?? "unknown error"}`,
     );
   }
   return data.signedUrl;
