@@ -65,7 +65,7 @@ export function assertServiceRoleKey(
     }),
     {
       status: 400,
-      headers: { ...cors, "Content-Type": "application/json" },
+      headers: { ...corsHeaders, ...cors, "Content-Type": "application/json" },
     },
   );
   return { ok: false, response };
