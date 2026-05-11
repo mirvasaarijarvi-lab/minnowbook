@@ -234,6 +234,10 @@ type TranslationKeys = {
   "booking.submitting": string;
   "booking.submitError": string;
   "booking.serviceMisconfigured": string;
+  "booking.misconfigBannerTitle": string;
+  "booking.misconfigBannerNoReservation": string;
+  "booking.misconfigBannerDisabled": string;
+  "booking.misconfigBannerTryAgain": string;
   "booking.dateBlocked": string;
   "booking.timeBlocked": string;
   "booking.blocked": string;
@@ -1923,6 +1927,10 @@ const en: TranslationKeys = {
   "booking.submitting": "Submitting...",
   "booking.submitError": "Failed to submit reservation. Please try again.",
   "booking.serviceMisconfigured": "Online booking is temporarily unavailable because the server is missing its service role key. No reservation was created, so you have not been charged or booked. If you are a guest, please contact the venue directly by phone or email, or try again in a few minutes. If you manage this venue: open Lovable Cloud, go to Backend, then API keys, copy the service_role key, then go to Backend, Edge Functions, Secrets, and add it as SUPABASE_SERVICE_ROLE_KEY. Public booking will start working again right after the secret is saved.",
+  "booking.misconfigBannerTitle": "Booking is temporarily unavailable",
+  "booking.misconfigBannerNoReservation": "No reservation was created. Your details have not been saved and you have not been charged.",
+  "booking.misconfigBannerDisabled": "Submitting again will not work until the venue restores the server configuration.",
+  "booking.misconfigBannerTryAgain": "Try again",
   "booking.dateBlocked": "This date is not available for booking.",
   "booking.timeBlocked": "This time slot is not available for booking.",
   "booking.blocked": "Blocked",
@@ -3589,6 +3597,10 @@ const fi: TranslationKeys = {
   "booking.submitting": "Lähetetään...",
   "booking.submitError": "Varauksen lähetys epäonnistui. Yritä uudelleen.",
   "booking.serviceMisconfigured": "Verkkovaraus ei ole tilapäisesti käytettävissä, koska palvelimelta puuttuu sen service role -avain. Varausta ei luotu, joten sinua ei ole veloitettu eikä varausta tehty. Jos olet asiakas, ota yhteyttä toimipaikkaan suoraan puhelimitse tai sähköpostilla, tai yritä uudelleen muutaman minuutin kuluttua. Jos hallinnoit tätä toimipaikkaa: avaa Lovable Cloud, mene kohtaan Backend, sitten API keys, kopioi service_role-avain, mene sen jälkeen Backend, Edge Functions, Secrets, ja lisää avain nimellä SUPABASE_SERVICE_ROLE_KEY. Verkkovaraus alkaa toimia heti, kun salaisuus on tallennettu.",
+  "booking.misconfigBannerTitle": "Varaus ei ole tilapäisesti käytettävissä",
+  "booking.misconfigBannerNoReservation": "Varausta ei luotu. Tietojasi ei ole tallennettu eikä sinua ole veloitettu.",
+  "booking.misconfigBannerDisabled": "Uusi lähetys ei toimi ennen kuin toimipaikka on korjannut palvelimen asetukset.",
+  "booking.misconfigBannerTryAgain": "Yritä uudelleen",
   "booking.dateBlocked": "Tämä päivä ei ole varattavissa.",
   "booking.timeBlocked": "Tämä aikaväli ei ole varattavissa.",
   "booking.blocked": "Estetty",
@@ -5253,6 +5265,10 @@ const sv: TranslationKeys = {
   "booking.submitting": "Skickar...",
   "booking.submitError": "Kunde inte skicka bokningen. Försök igen.",
   "booking.serviceMisconfigured": "Onlinebokning är tillfälligt otillgänglig eftersom servern saknar sin service role-nyckel. Ingen bokning skapades, så du har inte debiterats och ingen plats är reserverad. Om du är gäst, kontakta verksamheten direkt via telefon eller e-post, eller försök igen om några minuter. Om du administrerar verksamheten: öppna Lovable Cloud, gå till Backend, sedan API keys, kopiera service_role-nyckeln, gå därefter till Backend, Edge Functions, Secrets, och lägg till den som SUPABASE_SERVICE_ROLE_KEY. Onlinebokningen börjar fungera så snart hemligheten har sparats.",
+  "booking.misconfigBannerTitle": "Bokning är tillfälligt otillgänglig",
+  "booking.misconfigBannerNoReservation": "Ingen bokning skapades. Dina uppgifter har inte sparats och du har inte debiterats.",
+  "booking.misconfigBannerDisabled": "Att skicka igen fungerar inte förrän verksamheten har återställt serverkonfigurationen.",
+  "booking.misconfigBannerTryAgain": "Försök igen",
   "booking.dateBlocked": "Detta datum är inte tillgängligt för bokning.",
   "booking.timeBlocked": "Denna tidslucka är inte tillgänglig för bokning.",
   "booking.blocked": "Blockerad",

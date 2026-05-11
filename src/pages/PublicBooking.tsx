@@ -220,6 +220,12 @@ const PublicBookingInner = () => {
   const tDynamic = useTDynamic();
   const dateFnsLocale = useDateLocale();
   const [submitted, setSubmitted] = useState(false);
+  // Sticky flag set when the public-booking edge function reports
+  // SERVICE_ROLE_KEY_MISSING. While set, the form blocks resubmits
+  // and renders an inline confirmation that NO reservation was
+  // created, so the guest does not retry blindly until an admin
+  // restores the secret. Cleared by the explicit "Try again" action.
+  const [serviceMisconfigured, setServiceMisconfigured] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -793,8 +799,16 @@ const PublicBookingInner = () => {
       }
       if (data?.error) throw new Error(data.error);
     },
-    onSuccess: () => setSubmitted(true),
+    onSuccess: () => {
+      setServiceMisconfigured(false);
+      setSubmitted(true);
+    },
     onError: (err: any) => {
+      if (err?.code === BOOKING_ERROR_CODES.SERVICE_ROLE_KEY_MISSING) {
+        // Pin the inline confirmation. The toast disappears after 10s
+        // but the inline banner stays until the guest acknowledges.
+        setServiceMisconfigured(true);
+      }
       toast.error(t(getBookingErrorToastKey(err)), getBookingErrorToastOptions(err));
     },
   });
@@ -802,6 +816,15 @@ const PublicBookingInner = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
+
+    // Hard block: if the server is in the SERVICE_ROLE_KEY_MISSING
+    // state we already know the next call will fail and that no
+    // reservation can be created. Refuse to even hit the network and
+    // re-surface the toast so the guest gets immediate feedback.
+    if (serviceMisconfigured) {
+      toast.error(t("booking.serviceMisconfigured"), { duration: 10000 });
+      return;
+    }
 
     // Bot protection checks
     if (honeypot) {
@@ -2357,13 +2380,47 @@ const PublicBookingInner = () => {
             </CardContent>
           </Card>
 
+          {/* Inline misconfig banner: stays visible after the toast
+              fades so the guest has unambiguous confirmation that
+              NO reservation was created and that resubmitting will
+              not work until the venue restores the server config. */}
+          {serviceMisconfigured && (
+            <div
+              role="alert"
+              aria-live="assertive"
+              data-testid="booking-misconfig-banner"
+              className="rounded-md border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive space-y-2"
+            >
+              <p className="font-semibold">{t("booking.misconfigBannerTitle")}</p>
+              <p>{t("booking.misconfigBannerNoReservation")}</p>
+              <p className="text-destructive/80">{t("booking.misconfigBannerDisabled")}</p>
+              <div className="pt-1">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setServiceMisconfigured(false)}
+                >
+                  {t("booking.misconfigBannerTryAgain")}
+                </Button>
+              </div>
+            </div>
+          )}
+
           {/* Submit */}
           <Button
             type="submit"
             size="lg"
             className="w-full text-white font-medium"
             style={{ backgroundColor: accentColor }}
-            disabled={submitMutation.isPending || !selectedDate || !form.reservation_type || !form.guests_count || (isAccommodationType && !form.check_out_date)}
+            disabled={
+              submitMutation.isPending ||
+              serviceMisconfigured ||
+              !selectedDate ||
+              !form.reservation_type ||
+              !form.guests_count ||
+              (isAccommodationType && !form.check_out_date)
+            }
           >
             {submitMutation.isPending ? (
               <>
