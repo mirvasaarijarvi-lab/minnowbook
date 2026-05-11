@@ -25,7 +25,7 @@ describe("BOOKING_ERROR_REGISTRY", () => {
     }
   });
 
-  it("maps SERVICE_ROLE_KEY_MISSING to the misconfig descriptor", () => {
+  it("maps SERVICE_ROLE_KEY_MISSING to the guest descriptor by default", () => {
     const desc = resolveBookingError({
       code: BOOKING_ERROR_CODES.SERVICE_ROLE_KEY_MISSING,
     });
@@ -36,6 +36,24 @@ describe("BOOKING_ERROR_REGISTRY", () => {
       pinMisconfigBanner: true,
       emitTelemetry: true,
     });
+  });
+
+  it("swaps to the admin copy when isStaff=true", () => {
+    const desc = resolveBookingError(
+      { code: BOOKING_ERROR_CODES.SERVICE_ROLE_KEY_MISSING },
+      { isStaff: true },
+    );
+    expect(desc.i18nKey).toBe("booking.serviceMisconfiguredAdmin");
+    // All other fields stay identical so the banner / duration /
+    // telemetry behaviour does not depend on who is logged in.
+    expect(desc.toastDuration).toBe(10000);
+    expect(desc.pinMisconfigBanner).toBe(true);
+    expect(desc.emitTelemetry).toBe(true);
+  });
+
+  it("ignores isStaff for entries without a staff-specific key", () => {
+    const desc = resolveBookingError({ code: "SOMETHING_NEW" }, { isStaff: true });
+    expect(desc.i18nKey).toBe("booking.submitError");
   });
 
   it("falls back to the generic submit error for unknown codes", () => {
