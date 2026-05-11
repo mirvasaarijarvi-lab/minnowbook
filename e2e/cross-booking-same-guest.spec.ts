@@ -69,6 +69,28 @@ function validatePublicBookingErrorShape(body: unknown): string[] {
   return problems;
 }
 
+/**
+ * Build a W3C-compatible traceparent header from a correlation id.
+ * Format: `00-<32hex traceid>-<16hex spanid>-01`. We hash the correlation
+ * id with a tiny, deterministic FNV-style fold so the same correlation id
+ * always produces the same traceparent (useful for grepping logs across
+ * retries) without pulling in a crypto dependency.
+ */
+function buildTraceparent(correlationId: string): string {
+  const hex = (n: number, len: number) =>
+    (n >>> 0).toString(16).padStart(len, "0").slice(-len);
+  let h1 = 0x811c9dc5;
+  let h2 = 0x01000193;
+  for (let i = 0; i < correlationId.length; i++) {
+    const c = correlationId.charCodeAt(i);
+    h1 = Math.imul(h1 ^ c, 16777619);
+    h2 = Math.imul(h2 ^ c, 2246822519);
+  }
+  const traceId = (hex(h1, 8) + hex(h2, 8) + hex(h1 ^ h2, 8) + hex(h1 + h2, 8)).slice(0, 32);
+  const spanId = (hex(h2, 8) + hex(h1, 8)).slice(0, 16);
+  return `00-${traceId}-${spanId}-01`;
+}
+
 // HAR 1.2 entry shape (subset). Browsers (Chrome/Firefox DevTools) and
 // `npx playwright show-trace` can import any spec-conformant HAR file.
 type HarEntry = Record<string, any>;
@@ -135,27 +157,51 @@ async function callPublicBooking(
   body: Record<string, unknown>,
   label: string,
   harEntries?: HarEntry[],
+  parentCorrelationId?: string,
 ) {
   const url = `${SUPABASE_URL}/functions/v1/public-booking`;
-  // Real headers actually sent on the wire (used for the HAR).
-  const wireHeaders = {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-    apikey: SUPABASE_ANON_KEY,
-  };
-  // Redacted copy used for diagnostics/console output only.
-  const redactedHeaders = {
-    ...wireHeaders,
-    Authorization: "Bearer <redacted>",
-    apikey: "<redacted>",
-  };
+  // One correlation id per logical leg, generated up-front and reused on
+  // every retry. Each physical attempt also gets its own attempt id appended
+  // (`<correlation>/<attempt>`) so a single retried leg can still be unwound
+  // from the logs without losing the parent grouping. Callers can pass a
+  // `parentCorrelationId` (e.g. a per-test "trace id") to chain everything
+  // in one cross-booking flow under one umbrella.
+  const correlationId =
+    (globalThis.crypto?.randomUUID?.() ??
+      `corr-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`);
+  const fullCorrelationId = parentCorrelationId
+    ? `${parentCorrelationId}/${label}/${correlationId}`
+    : `${label}/${correlationId}`;
 
   let lastError: unknown = null;
   let res: import("@playwright/test").APIResponse | null = null;
   let durationMs = 0;
   let startedAt = Date.now();
+  let attemptCorrelationId = fullCorrelationId;
+  let wireHeaders: Record<string, string> = {};
+  let redactedHeaders: Record<string, string> = {};
   for (let attempt = 1; attempt <= PUBLIC_BOOKING_MAX_ATTEMPTS; attempt++) {
     startedAt = Date.now();
+    attemptCorrelationId = `${fullCorrelationId}/attempt-${attempt}`;
+    // Real headers actually sent on the wire (used for the HAR). The
+    // correlation id flows through three header names so it shows up in:
+    //   - our own server-side logs (`x-correlation-id`)
+    //   - Supabase's request-id propagation (`x-request-id`)
+    //   - W3C tracing infra that downstream tooling may sniff (`traceparent`)
+    wireHeaders = {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+      apikey: SUPABASE_ANON_KEY,
+      "x-correlation-id": attemptCorrelationId,
+      "x-request-id": attemptCorrelationId,
+      // Minimal valid W3C traceparent: version-traceid(32hex)-spanid(16hex)-flags
+      traceparent: buildTraceparent(attemptCorrelationId),
+    };
+    redactedHeaders = {
+      ...wireHeaders,
+      Authorization: "Bearer <redacted>",
+      apikey: "<redacted>",
+    };
     try {
       res = await request.post(url, {
         headers: wireHeaders,
@@ -184,7 +230,7 @@ async function callPublicBooking(
       );
       // eslint-disable-next-line no-console
       console.warn(
-        `[cross-booking] ${label} attempt ${attempt}/${PUBLIC_BOOKING_MAX_ATTEMPTS} threw after ${durationMs}ms: ${(err as Error)?.message ?? err}`,
+        `[cross-booking] ${label} attempt ${attempt}/${PUBLIC_BOOKING_MAX_ATTEMPTS} threw after ${durationMs}ms (correlation_id=${attemptCorrelationId}): ${(err as Error)?.message ?? err}`,
       );
       if (attempt === PUBLIC_BOOKING_MAX_ATTEMPTS) throw err;
       await new Promise((r) => setTimeout(r, 750));
@@ -234,14 +280,26 @@ async function callPublicBooking(
     deployment_id: responseHeaders["x-sb-deployment-id"] ?? null,
   };
 
+  // Some backends echo the correlation id back; capture both sides so logs
+  // can be cross-referenced even if the server rewrites it.
+  const echoedCorrelationId =
+    responseHeaders["x-correlation-id"] ??
+    responseHeaders["x-request-id"] ??
+    null;
+
   const diagnostic = {
     label,
+    correlationId: fullCorrelationId,
+    attemptCorrelationId,
+    echoedCorrelationId,
     traceIds,
     request: { method: "POST", url, headers: redactedHeaders, body },
     response: { status, durationMs, headers: responseHeaders, body: json ?? text },
   };
 
   const traceLine =
+    `correlation_id=${attemptCorrelationId} ` +
+    `echoed=${echoedCorrelationId ?? "<none>"} ` +
     `sb-request-id=${traceIds.sb_request_id ?? "<none>"} ` +
     `cf-ray=${traceIds.cf_ray ?? "<none>"} ` +
     `deno-execution-id=${traceIds.deno_execution_id ?? "<none>"}`;
@@ -251,7 +309,7 @@ async function callPublicBooking(
     console.error(
       `\n[cross-booking] ${label} FAILED (HTTP ${status}, ${durationMs}ms)\n` +
         `[cross-booking] ${label} edge-function trace: ${traceLine}\n` +
-        `[cross-booking] grep edge logs with: supabase functions logs public-booking | grep ${traceIds.sb_request_id ?? "<sb-request-id>"}\n` +
+        `[cross-booking] grep edge logs with: supabase functions logs public-booking | grep -E '${attemptCorrelationId}|${traceIds.sb_request_id ?? "<sb-request-id>"}'\n` +
         JSON.stringify(diagnostic, null, 2) +
         "\n",
     );
@@ -281,7 +339,14 @@ async function callPublicBooking(
     status >= 400 ? validatePublicBookingErrorShape(json ?? text) : [];
   (diagnostic as any).errorShapeProblems = errorShapeProblems;
 
-  return { status, body: json ?? text, diagnostic, errorShapeProblems };
+  return {
+    status,
+    body: json ?? text,
+    diagnostic,
+    errorShapeProblems,
+    correlationId: fullCorrelationId,
+    attemptCorrelationId,
+  };
 }
 
 test.describe("Cross-booking: same guest, multiple resources/services", () => {
@@ -318,8 +383,19 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
     const harPath = path.join(harDir, `public-booking-attempt-${testInfo.retry + 1}.har`);
     fs.mkdirSync(harDir, { recursive: true });
     const harEntries: Array<Record<string, any>> = [];
+    // One umbrella correlation id for the entire cross-booking flow. Every
+    // leg's per-attempt correlation id is namespaced under it
+    // (`<flow>/<leg>/<uuid>/attempt-N`) so a grep on the flow id surfaces
+    // the warmup, all 3 legs, the negative probe, and every retry as one
+    // contiguous trace in the edge-function logs.
+    const flowCorrelationId = `cross-booking/${testInfo.project.name || "default"}/retry-${testInfo.retry}/${
+      globalThis.crypto?.randomUUID?.() ?? Date.now().toString(36)
+    }`;
     // eslint-disable-next-line no-console
     console.log(`[cross-booking] HAR will be written to ${harPath}`);
+    // eslint-disable-next-line no-console
+    console.log(`[cross-booking] flow correlation_id=${flowCorrelationId}`);
+    testInfo.annotations.push({ type: "correlation_id", description: flowCorrelationId });
 
     // Warm the edge function so the first real leg doesn't pay the cold-start
     // penalty. Recorded into the HAR as a normal entry.
@@ -328,6 +404,7 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
       { warmup: true },
       "warmup",
       harEntries,
+      flowCorrelationId,
     ).catch(() => {
       /* warmup is best-effort; ignore */
     });
@@ -348,6 +425,7 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
       },
       "restaurant",
       harEntries,
+      flowCorrelationId,
     );
     expect(
       restaurant.status,
@@ -371,6 +449,7 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
       },
       "guesthouse",
       harEntries,
+      flowCorrelationId,
     );
     expect(
       guesthouse.status,
@@ -394,6 +473,7 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
       },
       "venue",
       harEntries,
+      flowCorrelationId,
     );
     expect(
       venue.status,
@@ -419,6 +499,7 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
       },
       "foreign-tenant-negative",
       harEntries,
+      flowCorrelationId,
     );
     expect(
       rejected.status,
