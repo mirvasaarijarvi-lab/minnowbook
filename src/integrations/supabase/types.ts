@@ -2073,6 +2073,87 @@ export type Database = {
           },
         ]
       }
+      storage_rejection_alerts: {
+        Row: {
+          callsite: string | null
+          created_at: string
+          event_count: number
+          id: string
+          resolved_at: string | null
+          scope: string
+          tenant_id: string | null
+          threshold: number
+          window_end: string
+          window_start: string
+        }
+        Insert: {
+          callsite?: string | null
+          created_at?: string
+          event_count: number
+          id?: string
+          resolved_at?: string | null
+          scope: string
+          tenant_id?: string | null
+          threshold: number
+          window_end: string
+          window_start: string
+        }
+        Update: {
+          callsite?: string | null
+          created_at?: string
+          event_count?: number
+          id?: string
+          resolved_at?: string | null
+          scope?: string
+          tenant_id?: string | null
+          threshold?: number
+          window_end?: string
+          window_start?: string
+        }
+        Relationships: []
+      }
+      storage_rejection_events: {
+        Row: {
+          callsite: string | null
+          created_at: string
+          has_backslash: boolean
+          has_control_char: boolean
+          has_scheme_shape: boolean
+          id: string
+          input_length: number
+          leading_char_class: string
+          reason: string
+          segment_count: number | null
+          tenant_id: string | null
+        }
+        Insert: {
+          callsite?: string | null
+          created_at?: string
+          has_backslash?: boolean
+          has_control_char?: boolean
+          has_scheme_shape?: boolean
+          id?: string
+          input_length?: number
+          leading_char_class?: string
+          reason: string
+          segment_count?: number | null
+          tenant_id?: string | null
+        }
+        Update: {
+          callsite?: string | null
+          created_at?: string
+          has_backslash?: boolean
+          has_control_char?: boolean
+          has_scheme_shape?: boolean
+          id?: string
+          input_length?: number
+          leading_char_class?: string
+          reason?: string
+          segment_count?: number | null
+          tenant_id?: string | null
+        }
+        Relationships: []
+      }
       support_requests: {
         Row: {
           admin_response: string | null
@@ -2904,6 +2985,7 @@ export type Database = {
       }
       cleanup_old_audit_logs: { Args: never; Returns: undefined }
       cleanup_old_booking_validation_logs: { Args: never; Returns: undefined }
+      cleanup_storage_rejection_telemetry: { Args: never; Returns: undefined }
       copy_tenant_defaults_to_site: {
         Args: { p_site_id: string; p_tenant_id: string }
         Returns: undefined
