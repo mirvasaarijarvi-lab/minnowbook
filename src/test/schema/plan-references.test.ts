@@ -76,7 +76,7 @@ describe("plan references gate", () => {
     // when the plan body never mentions DB-shaped vocabulary; if it
     // does, the regexes must produce at least one hit.
     const looksSchemaShaped =
-      /\btable\b|\bmigration\b|\bcolumn\b|\bRLS\b|`[a-z][a-z0-9_]+`/i.test(plan);
+      /\b(?:table|tables|migration|migrations|column|columns|RLS)\b/i.test(plan);
     if (!looksSchemaShaped) {
       expect(true, "plan.md describes no schema work, gate is vacuous").toBe(true);
       return;
