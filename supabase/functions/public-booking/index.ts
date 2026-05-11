@@ -180,8 +180,38 @@ Deno.serve(async (req) => {
   }
 
   const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  // Hard-fail BEFORE any DB work (and before createClient) when the
+  // service-role key is not configured. The function relies on the
+  // service role to bypass RLS for the reservations insert and for the
+  // booking_validation_log write; without it we'd either crash mid-write
+  // (potentially after partial side effects) or silently no-op. We
+  // return 400 with a clear, machine-readable `error_code` so the
+  // dashboard / public booking UI can surface a precise misconfig
+  // message instead of a generic 500.
+  const serviceRoleKeyRaw = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  const serviceRoleKey = typeof serviceRoleKeyRaw === "string"
+    ? serviceRoleKeyRaw.trim()
+    : "";
+  if (serviceRoleKey.length === 0) {
+    console.error(
+      "[public-booking] SUPABASE_SERVICE_ROLE_KEY is missing or empty. " +
+        "Refusing to proceed: no DB write will be attempted.",
+    );
+    return new Response(
+      JSON.stringify({
+        error:
+          "Booking service is not fully configured (missing service-role key). " +
+          "Please contact the venue.",
+        error_code: "SERVICE_ROLE_KEY_MISSING",
+      }),
+      {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
+    );
+  }
   const adminClient = createClient(supabaseUrl, serviceRoleKey);
+
 
   try {
     const contentLength = parseInt(req.headers.get("content-length") || "0", 10);
