@@ -1463,7 +1463,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       });
 
       it("user A CAN upload to their own tenant-assets folder (sanity)", async () => {
-        const path = ownPath(liveCreds.a.tenantId!, "a-own-assets");
+        const path = assetsOwnPath(liveCreds.a.tenantId!, "a-own-assets");
         const { error } = await allowedStorageCall(
           () => clientA.storage
             .from(ASSETS_BUCKET)
