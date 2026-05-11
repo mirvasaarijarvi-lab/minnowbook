@@ -1,0 +1,91 @@
+name: Test CI (test:ci)
+
+# Runs the full `npm run test:ci` pipeline (Vitest unit tests, Deno edge
+# function tests, and Playwright e2e tests) on every push and pull request
+# against main. The script itself lives in scripts/test-ci.sh and fails
+# fast on the first failing suite.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  test-ci:
+    name: npm run test:ci
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    env:
+      # Required by the Deno edge function tests. SUPABASE_URL falls back to
+      # VITE_SUPABASE_URL inside scripts/test-ci.sh, but we set it explicitly
+      # here so the precheck has a clear value.
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@667a34cdef165d8d2b2e98dde39547c9daac7282 # v2.0.4
+        with:
+          deno-version: v1.x
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Resolve Playwright version
+        id: pw
+        run: |
+          version=$(node -p "require('./node_modules/@playwright/test/package.json').version")
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Playwright browsers
+        id: pw-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.pw.outputs.version }}
+          restore-keys: |
+            playwright-${{ runner.os }}-
+
+      - name: Install Playwright browsers
+        run: |
+          if [ "${{ steps.pw-cache.outputs.cache-hit }}" = "true" ]; then
+            bunx playwright install-deps chromium
+          else
+            bunx playwright install --with-deps chromium
+          fi
+
+      - name: Build app (needed by Playwright preview server)
+        run: bunx vite build
+
+      - name: Run npm run test:ci
+        run: npm run test:ci
+
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: test-ci-reports-run-${{ github.run_id }}
+          path: |
+            test-reports/
+            playwright-report/
+            test-results/
+          if-no-files-found: warn
+          retention-days: 14
