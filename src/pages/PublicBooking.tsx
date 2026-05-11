@@ -219,6 +219,7 @@ const PublicBookingInner = () => {
   const [searchParams] = useSearchParams();
   const t = useT();
   const tDynamic = useTDynamic();
+  const { language } = useLanguage();
   const dateFnsLocale = useDateLocale();
   const [submitted, setSubmitted] = useState(false);
   // Sticky flag set when the public-booking edge function reports
