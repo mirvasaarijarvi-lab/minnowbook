@@ -92,6 +92,143 @@ const browserLogs = new Map<string, BrowserLogEntry[]>();
 const browserErrors = new Map<string, BrowserErrorEntry[]>();
 const correlationByTest = new Map<string, string[]>();
 
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function formatBytes(n: number): string {
+  if (n < 1024) return `${n} B`;
+  if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
+  return `${(n / 1024 / 1024).toFixed(2)} MB`;
+}
+
+interface IndexArtifact {
+  name: string;
+  contentType: string;
+  sizeBytes: number;
+  description: string;
+  dataUri?: string;
+  inlineText?: string;
+}
+
+/**
+ * Render a single self-contained HTML page that previews the failure
+ * screenshot inline, summarises the run, and lists every other artifact
+ * (video, trace, HAR, HTML dump, browser logs) with size + description.
+ *
+ * Note: Playwright stores attachments under hashed filenames so we cannot
+ * link directly between attachments. Instead we surface the artifact NAME
+ * the reviewer should look for in the same report panel.
+ */
+function renderFailureIndexHtml(
+  testInfo: { title: string; retry: number; duration: number; outputDir: string },
+  summary: Record<string, unknown>,
+  artifacts: IndexArtifact[],
+): string {
+  const screenshot = artifacts.find((a) => a.name === "failure-screenshot.png");
+  const others = artifacts.filter((a) => a.name !== "failure-screenshot.png");
+  const correlationIds = (summary.correlation_ids as string[] | undefined) ?? [];
+
+  const summaryRows = Object.entries(summary)
+    .filter(([k]) => k !== "correlation_ids")
+    .map(
+      ([k, v]) =>
+        `<tr><th>${escapeHtml(k)}</th><td><code>${escapeHtml(
+          typeof v === "string" ? v : JSON.stringify(v),
+        )}</code></td></tr>`,
+    )
+    .join("");
+
+  const artifactRows = others
+    .map(
+      (a) =>
+        `<tr><td><code>${escapeHtml(a.name)}</code></td>` +
+        `<td>${escapeHtml(a.contentType)}</td>` +
+        `<td>${formatBytes(a.sizeBytes)}</td>` +
+        `<td>${escapeHtml(a.description)}</td></tr>`,
+    )
+    .join("");
+
+  const inlineSummary = artifacts.find((a) => a.name === "failure-summary.json");
+
+  return `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Failure summary: ${escapeHtml(testInfo.title)}</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+           margin: 24px; color: #1a1a1a; max-width: 1100px; }
+    h1 { margin-top: 0; }
+    h2 { margin-top: 32px; border-bottom: 1px solid #ddd; padding-bottom: 4px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 8px; }
+    th, td { text-align: left; padding: 6px 10px; border-bottom: 1px solid #eee;
+             vertical-align: top; }
+    th { background: #f6f6f6; font-weight: 600; width: 220px; }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+           font-size: 12px; word-break: break-all; }
+    img.screenshot { max-width: 100%; border: 1px solid #ddd; border-radius: 4px; }
+    .pill { display: inline-block; padding: 2px 8px; border-radius: 10px;
+            background: #fde2e1; color: #8a1f1a; font-size: 12px; font-weight: 600; }
+    pre { background: #fafafa; border: 1px solid #eee; padding: 12px;
+          overflow: auto; max-height: 300px; font-size: 12px; }
+    .muted { color: #666; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <h1>Cross-booking failure <span class="pill">${escapeHtml(String(summary.status ?? "failed"))}</span></h1>
+  <p class="muted">Test: <strong>${escapeHtml(testInfo.title)}</strong>
+    (retry ${testInfo.retry}, duration ${Math.round(testInfo.duration)} ms)</p>
+
+  <h2>Summary</h2>
+  <table>${summaryRows}</table>
+
+  ${
+    correlationIds.length
+      ? `<h2>Correlation IDs</h2><ul>${correlationIds
+          .map((id) => `<li><code>${escapeHtml(id)}</code></li>`)
+          .join("")}</ul>`
+      : ""
+  }
+
+  ${
+    screenshot?.dataUri
+      ? `<h2>Screenshot at failure</h2>
+         <img class="screenshot" src="${screenshot.dataUri}" alt="failure screenshot" />
+         <p class="muted">Also attached as <code>failure-screenshot.png</code> (${formatBytes(
+           screenshot.sizeBytes,
+         )}).</p>`
+      : `<h2>Screenshot</h2><p class="muted">No screenshot captured (api-only test or page already closed).</p>`
+  }
+
+  <h2>All artifacts</h2>
+  <p class="muted">Each row below is attached to the same Playwright report
+    panel as this page. Click the matching attachment name in the report
+    sidebar to download or preview.</p>
+  <table>
+    <thead><tr><th>Attachment</th><th>Type</th><th>Size</th><th>Description</th></tr></thead>
+    <tbody>${artifactRows}</tbody>
+  </table>
+
+  ${
+    inlineSummary?.inlineText
+      ? `<h2>failure-summary.json</h2><pre>${escapeHtml(inlineSummary.inlineText)}</pre>`
+      : ""
+  }
+
+  <p class="muted">Output directory on the runner: <code>${escapeHtml(
+    testInfo.outputDir,
+  )}</code></p>
+</body>
+</html>`;
+}
+
+
 test.describe("Cross-booking: same guest, multiple resources/services", () => {
   test.beforeEach(async ({ page }, testInfo) => {
     const logs: BrowserLogEntry[] = [];
@@ -142,6 +279,39 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
 
     if (testInfo.status === testInfo.expectedStatus) return;
 
+    // Track every artifact we attach so we can render a single index.html
+    // at the end that points at all of them. The screenshot is also kept
+    // as a data URI so the index page renders a thumbnail inline even
+    // when the reviewer hasn't downloaded the .png yet.
+    interface ArtifactRecord {
+      name: string;
+      contentType: string;
+      sizeBytes: number;
+      description: string;
+      dataUri?: string;
+      inlineText?: string;
+    }
+    const artifacts: ArtifactRecord[] = [];
+    const attachArtifact = async (
+      name: string,
+      body: Buffer | string,
+      contentType: string,
+      description: string,
+      opts: { embedAsDataUri?: boolean; embedAsText?: boolean } = {},
+    ) => {
+      await testInfo.attach(name, { body, contentType });
+      const sizeBytes = typeof body === "string" ? Buffer.byteLength(body) : body.byteLength;
+      const record: ArtifactRecord = { name, contentType, sizeBytes, description };
+      if (opts.embedAsDataUri) {
+        const buf = typeof body === "string" ? Buffer.from(body) : body;
+        record.dataUri = `data:${contentType};base64,${buf.toString("base64")}`;
+      }
+      if (opts.embedAsText) {
+        record.inlineText = typeof body === "string" ? body : body.toString("utf8");
+      }
+      artifacts.push(record);
+    };
+
     const failureSummary: Record<string, unknown> = {
       title: testInfo.title,
       status: testInfo.status,
@@ -159,15 +329,20 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
     try {
       if (page && !page.isClosed()) {
         const buffer = await page.screenshot({ fullPage: true });
-        await testInfo.attach("failure-screenshot.png", {
-          body: buffer,
-          contentType: "image/png",
-        });
+        await attachArtifact(
+          "failure-screenshot.png",
+          buffer,
+          "image/png",
+          "Full-page screenshot taken at the moment of failure.",
+          { embedAsDataUri: true },
+        );
         const html = await page.content();
-        await testInfo.attach("failure-page.html", {
-          body: html,
-          contentType: "text/html",
-        });
+        await attachArtifact(
+          "failure-page.html",
+          html,
+          "text/html",
+          "Live DOM dump of the page at the moment of failure.",
+        );
         failureSummary.url = page.url();
       } else {
         failureSummary.page_capture = "skipped: no open page (api-only test)";
@@ -189,10 +364,12 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
           const videoPath = await video.path();
           const fs = await import("node:fs/promises");
           const videoBytes = await fs.readFile(videoPath);
-          await testInfo.attach("failure-video.webm", {
-            body: videoBytes,
-            contentType: "video/webm",
-          });
+          await attachArtifact(
+            "failure-video.webm",
+            videoBytes,
+            "video/webm",
+            "Recording of the entire test run from start to failure.",
+          );
           failureSummary.video_path = videoPath;
         } else {
           failureSummary.video_capture = "skipped: no video recorder on page";
@@ -213,18 +390,18 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
       const harPath = harPathByTest.get(testInfo.testId);
       if (harPath) {
         try {
-          // page.context() works even after page.close(); the context
-          // outlives its pages. Closing it triggers HAR finalization.
           await page.context().close();
         } catch {
           /* context may already be closed */
         }
         const fs = await import("node:fs/promises");
         const harBytes = await fs.readFile(harPath);
-        await testInfo.attach("failure-network.har", {
-          body: harBytes,
-          contentType: "application/json",
-        });
+        await attachArtifact(
+          "failure-network.har",
+          harBytes,
+          "application/json",
+          "Browser HAR: every request and response captured during the test.",
+        );
         failureSummary.har_path = harPath;
         failureSummary.har_bytes = harBytes.byteLength;
       } else {
@@ -246,10 +423,12 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
       const tracePath = path.resolve(testInfo.outputDir, "trace.zip");
       await fs.access(tracePath);
       const traceBytes = await fs.readFile(tracePath);
-      await testInfo.attach("failure-trace.zip", {
-        body: traceBytes,
-        contentType: "application/zip",
-      });
+      await attachArtifact(
+        "failure-trace.zip",
+        traceBytes,
+        "application/zip",
+        "Playwright trace: open with `npx playwright show-trace failure-trace.zip`.",
+      );
       failureSummary.trace_path = tracePath;
     } catch (err) {
       failureSummary.trace_capture =
@@ -278,10 +457,12 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
           console_total: logs.length,
         },
       };
-      await testInfo.attach("failure-browser-diagnostics.json", {
-        body: JSON.stringify(browserDiagnostics, null, 2),
-        contentType: "application/json",
-      });
+      await attachArtifact(
+        "failure-browser-diagnostics.json",
+        JSON.stringify(browserDiagnostics, null, 2),
+        "application/json",
+        `Structured browser diagnostics: ${errorCount} pageerror(s), ${errorLogCount} console error(s), ${warningLogCount} warning(s).`,
+      );
       const flatLines = [
         `# Page errors (${errors.length})`,
         ...errors.map(
@@ -297,20 +478,44 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
             (l.location?.url ? ` (${l.location.url}:${l.location.lineNumber ?? "?"})` : ""),
         ),
       ];
-      await testInfo.attach("failure-browser.log", {
-        body: flatLines.join("\n"),
-        contentType: "text/plain",
-      });
+      await attachArtifact(
+        "failure-browser.log",
+        flatLines.join("\n"),
+        "text/plain",
+        "Flat browser log: skim-friendly view of all console messages and page errors.",
+      );
       failureSummary.browser_diagnostics = browserDiagnostics.counts;
     } catch (err) {
       failureSummary.browser_diagnostics_error =
         err instanceof Error ? err.message : String(err);
     }
 
-    await testInfo.attach("failure-summary.json", {
-      body: JSON.stringify(failureSummary, null, 2),
-      contentType: "application/json",
-    });
+    const summaryJson = JSON.stringify(failureSummary, null, 2);
+    await attachArtifact(
+      "failure-summary.json",
+      summaryJson,
+      "application/json",
+      "Machine-readable failure summary (status, error, correlation IDs, artifact pointers).",
+      { embedAsText: true },
+    );
+
+    // Self-contained HTML index: one page that links + previews every
+    // artifact above. Open it from the Playwright HTML report and you
+    // get a single dashboard for triaging the failure.
+    try {
+      const indexHtml = renderFailureIndexHtml(testInfo, failureSummary, artifacts);
+      await testInfo.attach("failure-index.html", {
+        body: indexHtml,
+        contentType: "text/html",
+      });
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(
+        `${LOG_PREFIX} failed to render failure-index.html: ${
+          err instanceof Error ? err.message : String(err)
+        }`,
+      );
+    }
     // eslint-disable-next-line no-console
     console.error(`${LOG_PREFIX} FAILURE ${JSON.stringify(failureSummary)}`);
   });
