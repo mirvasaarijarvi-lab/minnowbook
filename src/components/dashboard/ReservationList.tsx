@@ -9,11 +9,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { format } from "date-fns";
-import { CalendarDays, User, Mail, Phone, MoreVertical, CheckCircle2, XCircle, Pencil, Receipt, PackageCheck, Coffee, Plus, Building2, Tag, Bell, MailCheck, MailX } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { CalendarDays, CalendarIcon, User, Mail, Phone, MoreVertical, CheckCircle2, XCircle, Pencil, Receipt, PackageCheck, Coffee, Plus, Building2, Tag, Bell, MailCheck, MailX, Search } from "lucide-react";
 import EditReservationDialog from "./EditReservationDialog";
 import ManualReservationDialog from "./ManualReservationDialog";
 import ConfirmationEmailPreview from "@/components/ConfirmationEmailPreview";
@@ -50,6 +54,13 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
   const [dateFilter, setDateFilter] = useState<string>(initialCheckoutToday ? "all" : "all");
   const [invoicedFilter, setInvoicedFilter] = useState<string>(initialInvoicedFilter === false ? "uninvoiced" : "all");
   const [checkoutTodayFilter, setCheckoutTodayFilter] = useState<boolean>(!!initialCheckoutToday);
+  const [specificDate, setSpecificDate] = useState<Date | undefined>(undefined);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [debouncedSearch, setDebouncedSearch] = useState<string>("");
+  useEffect(() => {
+    const handle = setTimeout(() => setDebouncedSearch(searchQuery.trim()), 300);
+    return () => clearTimeout(handle);
+  }, [searchQuery]);
   const [confirmDialog, setConfirmDialog] = useState<{ id: string; action: "confirmed" | "cancelled" } | null>(null);
   const [reminderDialog, setReminderDialog] = useState<string | null>(null);
   const [editingReservation, setEditingReservation] = useState<any | null>(null);
@@ -82,7 +93,7 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
   const showSiteLabel = (sites?.length ?? 0) > 0 && !selectedSiteId;
 
   const { data: reservations, isLoading } = useQuery({
-    queryKey: ["reservations", tenantId, selectedSiteId, siteIds, statusFilter, typeFilter, dateFilter, invoicedFilter, checkoutTodayFilter],
+    queryKey: ["reservations", tenantId, selectedSiteId, siteIds, statusFilter, typeFilter, dateFilter, invoicedFilter, checkoutTodayFilter, specificDate ? format(specificDate, "yyyy-MM-dd") : null, debouncedSearch],
     queryFn: async () => {
       if (!tenantId) return [];
       let query = supabase.from("reservations").select("*").eq("tenant_id", tenantId).order("date", { ascending: false });
@@ -91,11 +102,20 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
       if (typeFilter !== "all") query = query.eq("reservation_type", typeFilter);
       if (checkoutTodayFilter) {
         query = query.eq("check_out_date", today);
+      } else if (specificDate) {
+        query = query.eq("date", format(specificDate, "yyyy-MM-dd"));
       } else if (dateFilter === "today") {
         query = query.eq("date", today);
       }
       if (invoicedFilter === "uninvoiced") query = query.eq("is_invoiced", false);
       if (invoicedFilter === "invoiced") query = query.eq("is_invoiced", true);
+      if (debouncedSearch) {
+        const escaped = debouncedSearch.replace(/[%,()]/g, " ");
+        const term = `%${escaped}%`;
+        query = query.or(
+          `guest_name.ilike.${term},guest_email.ilike.${term},guest_phone.ilike.${term}`
+        );
+      }
       const { data, error } = await query.limit(100);
       if (error) throw error;
       return data;
@@ -359,10 +379,54 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
               {t("dashboard.newReservation")}
             </Button>
           )}
+          <div className="relative w-full sm:w-[220px]">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+            <Input
+              type="search"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search name, email, phone"
+              className="pl-8 h-9"
+              aria-label="Search reservations"
+            />
+          </div>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant={specificDate ? "default" : "outline"}
+                size="sm"
+                className={cn("gap-1.5", !specificDate && "text-muted-foreground")}
+              >
+                <CalendarIcon className="h-4 w-4" />
+                {specificDate ? format(specificDate, "PP") : (t("common.date") || "Date")}
+                {specificDate && (
+                  <span
+                    role="button"
+                    tabIndex={0}
+                    onClick={(e) => { e.stopPropagation(); setSpecificDate(undefined); }}
+                    onKeyDown={(e) => { if (e.key === "Enter") { e.stopPropagation(); setSpecificDate(undefined); } }}
+                    className="ml-1 rounded-full hover:bg-muted-foreground/20 p-0.5"
+                    aria-label="Clear date"
+                  >
+                    <XCircle className="h-3.5 w-3.5" />
+                  </span>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="end">
+              <Calendar
+                mode="single"
+                selected={specificDate}
+                onSelect={(d) => { setSpecificDate(d ?? undefined); if (d) setDateFilter("all"); }}
+                initialFocus
+                className={cn("p-3 pointer-events-auto")}
+              />
+            </PopoverContent>
+          </Popover>
           <Button
-            variant={dateFilter === "today" ? "default" : "outline"}
+            variant={dateFilter === "today" && !specificDate ? "default" : "outline"}
             size="sm"
-            onClick={() => setDateFilter(dateFilter === "today" ? "all" : "today")}
+            onClick={() => { setSpecificDate(undefined); setDateFilter(dateFilter === "today" ? "all" : "today"); }}
           >
             {t("dashboard.todayFilter")}
           </Button>
