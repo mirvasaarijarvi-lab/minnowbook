@@ -815,7 +815,7 @@ const PublicBookingInner = () => {
     onError: (err: any) => {
       // All branching for booking errors lives in the central
       // registry. PublicBooking just consumes the resolved descriptor.
-      const descriptor = resolveBookingError(err);
+      const descriptor = resolveBookingError(err, { isStaff });
       if (descriptor.pinMisconfigBanner) {
         // Pin the inline confirmation. The toast disappears after
         // toastDuration ms but the banner stays until the guest
