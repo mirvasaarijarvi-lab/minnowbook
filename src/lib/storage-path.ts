@@ -229,13 +229,13 @@ export function assertSafeStorageObjectPath(
   }
   // No absolute paths.
   if (trimmed.startsWith("/")) {
-    reject("absolute", path, callsite);
+    reject("absolute", path, callsite, tenantId);
   }
   // No traversal segments anywhere in the path.
   const segments = trimmed.split("/");
   for (const seg of segments) {
     if (seg === "" || seg === "." || seg === "..") {
-      reject("traversal_or_empty_segment", path, callsite);
+      reject("traversal_or_empty_segment", path, callsite, tenantId);
     }
   }
   return trimmed;
