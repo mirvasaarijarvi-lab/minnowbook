@@ -192,6 +192,55 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
           : "unavailable";
     }
 
+    // Browser console + pageerror capture. We attach BOTH a structured
+    // JSON file (machine-readable, includes correlation IDs and locations)
+    // and a flat .log file (skim-friendly), so reviewers can pick whichever
+    // format helps them spot the divergence faster.
+    try {
+      const errorCount = errors.length;
+      const errorLogCount = logs.filter((l) => l.type === "error").length;
+      const warningLogCount = logs.filter((l) => l.type === "warning").length;
+      const correlationIds = (failureSummary.correlation_ids as string[]) ?? [];
+      const browserDiagnostics = {
+        correlation_ids: correlationIds,
+        page_errors: errors,
+        console_logs: logs,
+        counts: {
+          page_errors: errorCount,
+          console_errors: errorLogCount,
+          console_warnings: warningLogCount,
+          console_total: logs.length,
+        },
+      };
+      await testInfo.attach("failure-browser-diagnostics.json", {
+        body: JSON.stringify(browserDiagnostics, null, 2),
+        contentType: "application/json",
+      });
+      const flatLines = [
+        `# Page errors (${errors.length})`,
+        ...errors.map(
+          (e) =>
+            `[${e.timestamp}] correlation_id=${e.correlation_id ?? "-"} ${e.message}` +
+            (e.stack ? `\n${e.stack}` : ""),
+        ),
+        "",
+        `# Console messages (${logs.length})`,
+        ...logs.map(
+          (l) =>
+            `[${l.timestamp}] [${l.type}] correlation_id=${l.correlation_id ?? "-"} ${l.text}` +
+            (l.location?.url ? ` (${l.location.url}:${l.location.lineNumber ?? "?"})` : ""),
+        ),
+      ];
+      await testInfo.attach("failure-browser.log", {
+        body: flatLines.join("\n"),
+        contentType: "text/plain",
+      });
+      failureSummary.browser_diagnostics = browserDiagnostics.counts;
+    } catch (err) {
+      failureSummary.browser_diagnostics_error =
+        err instanceof Error ? err.message : String(err);
+    }
+
     await testInfo.attach("failure-summary.json", {
       body: JSON.stringify(failureSummary, null, 2),
       contentType: "application/json",
