@@ -92,6 +92,10 @@ jobs:
       # Required so the PR-comment step can upsert the audit summary
       # comment on pull requests. Scoped to this job only.
       pull-requests: write
+      # Required so the dedicated Check Run we create for the
+      # severity breakdown can show up in the PR's "Checks" sidebar
+      # alongside the job-level check.
+      checks: write
     steps:
       - name: Checkout
         # actions/checkout@v4.2.2
@@ -298,6 +302,7 @@ jobs:
       # surface as warnings so they get cleaned up.
       # ---------------------------------------------------------------
       - name: Apply audit allowlist gate
+        id: gate
         if: always() && hashFiles('audit-prod.json') != ''
         env:
           AUDIT_LEVEL: ${{ env.AUDIT_LEVEL }}
@@ -314,6 +319,102 @@ jobs:
             *) echo "::error::Unsupported manager for allowlist gate: ${{ steps.detect.outputs.manager }}"; exit 1 ;;
           esac
           node .github/workflows/scripts/apply-allowlist.mjs "$gate_manager" audit-prod.json .github/dependency-audit-allowlist.json "$AUDIT_LEVEL"
+
+      # ---------------------------------------------------------------
+      # Publish a dedicated GitHub Check Run for the dependency audit
+      # so the PR's "Checks" sidebar shows the resolved AUDIT_LEVEL
+      # and the number of findings that triggered the block, without
+      # the reviewer having to expand the workflow run.
+      #
+      # The job itself already produces a check, but its title is
+      # just the job name. This sibling check carries the severity
+      # mapping in its title (e.g. "AUDIT_LEVEL=high — 3 blocking
+      # (critical=1, high=2)") and a Markdown summary with the
+      # per-severity table. Conclusion mirrors the gate verdict so
+      # branch protection can require this check by name.
+      #
+      # Runs on `if: always()` so the check is published on both PASS
+      # and FAIL outcomes. Skipped when the gate step did not run
+      # (e.g. lockfile detection failed) because there is nothing
+      # meaningful to report.
+      # ---------------------------------------------------------------
+      - name: Publish dependency audit check run
+        if: always() && steps.gate.outcome != 'skipped' && steps.gate.outputs.audit_level != ''
+        # actions/github-script@v7.0.1
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea
+        env:
+          GATE_AUDIT_LEVEL: ${{ steps.gate.outputs.audit_level }}
+          GATE_MANAGER: ${{ steps.gate.outputs.manager }}
+          GATE_HEADLINE: ${{ steps.gate.outputs.headline }}
+          GATE_CONCLUSION: ${{ steps.gate.outputs.conclusion }}
+          GATE_BLOCKING: ${{ steps.gate.outputs.blocking_count }}
+          GATE_WAIVED: ${{ steps.gate.outputs.waived_count }}
+          GATE_EXPIRED: ${{ steps.gate.outputs.expired_count }}
+          GATE_BLOCKING_CRITICAL: ${{ steps.gate.outputs.blocking_critical }}
+          GATE_BLOCKING_HIGH: ${{ steps.gate.outputs.blocking_high }}
+          GATE_BLOCKING_MODERATE: ${{ steps.gate.outputs.blocking_moderate }}
+          GATE_BLOCKING_LOW: ${{ steps.gate.outputs.blocking_low }}
+          GATE_WAIVED_CRITICAL: ${{ steps.gate.outputs.waived_critical }}
+          GATE_WAIVED_HIGH: ${{ steps.gate.outputs.waived_high }}
+          GATE_WAIVED_MODERATE: ${{ steps.gate.outputs.waived_moderate }}
+          GATE_WAIVED_LOW: ${{ steps.gate.outputs.waived_low }}
+        with:
+          script: |
+            const env = process.env;
+            const level = env.GATE_AUDIT_LEVEL;
+            const manager = env.GATE_MANAGER;
+            const blocking = parseInt(env.GATE_BLOCKING || '0', 10);
+            const waived = parseInt(env.GATE_WAIVED || '0', 10);
+            const expired = parseInt(env.GATE_EXPIRED || '0', 10);
+            const conclusion = env.GATE_CONCLUSION === 'failure' ? 'failure' : 'success';
+            const headline = env.GATE_HEADLINE || `AUDIT_LEVEL=${level} — ${blocking} blocking`;
+
+            // Severities at or above the gate floor. Map matches
+            // the order the script writes outputs in.
+            const order = ['critical', 'high', 'moderate', 'low'];
+            const rank = { low: 1, moderate: 2, high: 3, critical: 4 };
+            const minRank = rank[level] || 3;
+            const rows = order.map((sev) => {
+              const above = rank[sev] >= minRank;
+              const b = parseInt(env[`GATE_BLOCKING_${sev.toUpperCase()}`] || '0', 10);
+              const w = parseInt(env[`GATE_WAIVED_${sev.toUpperCase()}`] || '0', 10);
+              return `| ${sev} | ${b} | ${w} | ${above ? 'yes' : 'no'} |`;
+            });
+
+            const summary = [
+              `**Manager:** \`${manager}\``,
+              `**Threshold:** \`AUDIT_LEVEL=${level}\``,
+              `**Blocking:** ${blocking}  ·  **Waived:** ${waived}  ·  **Expired allowlist entries:** ${expired}`,
+              '',
+              '| Severity | Blocking | Waived | At or above gate |',
+              '| --- | ---: | ---: | :---: |',
+              ...rows,
+              '',
+              blocking > 0
+                ? 'Add a time-boxed entry in `.github/dependency-audit-allowlist.json` to waive a finding while a fix is in flight.'
+                : 'No findings at or above the configured threshold.',
+            ].join('\n');
+
+            const { owner, repo } = context.repo;
+            // Use the head SHA of the PR when available so the check
+            // attaches to the PR branch instead of the merge commit.
+            const head_sha = context.payload.pull_request
+              ? context.payload.pull_request.head.sha
+              : context.sha;
+
+            await github.rest.checks.create({
+              owner,
+              repo,
+              name: `Dependency audit (AUDIT_LEVEL=${level})`,
+              head_sha,
+              status: 'completed',
+              conclusion,
+              output: {
+                title: headline,
+                summary,
+              },
+            });
+            core.info(`Published check run: ${headline} (${conclusion}).`);
 
       # ---------------------------------------------------------------
       # Upsert a PR comment summarising the audit. Sticky via the
