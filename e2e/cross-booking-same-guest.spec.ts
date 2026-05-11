@@ -23,7 +23,7 @@ const SUPABASE_ANON_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxzZ3puc2treGFkcGx3bnhwbGhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5MTkyODAsImV4cCI6MjA4NzQ5NTI4MH0.v6DlzrUsFu_fpTIcWcSzz1Zyqbl_ZwF9v54TrW_yWtM";
 
 const TENANT_SLUG = "mimmin-testi";
-const TENANT_ID = "";
+const TENANT_ID = "9ac05fbf-0834-44fd-a52a-d030b7074a30";
 
 // Real, active resources in `mimmin-testi`
 const RESOURCES = {
