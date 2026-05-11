@@ -685,6 +685,11 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
     // Warmup is best-effort; failures here must NOT fail the test (cold
     // edge nodes are expected), but the outcome MUST be observable in CI
     // so we can correlate slow first legs with cold-start latency.
+    // Land on the booking page once before the markers start, otherwise
+    // the very first mark() has no DOM to attach the overlay to.
+    await gotoAndWaitForSpa(page, `/book/${tenant.slug}`);
+    await assertPublicBookingReady(page);
+    await mark("warmup:start");
     const warmupStartedAt = Date.now();
     let warmupOutcome: "ok" | "http_error" | "threw" | "skipped" = "skipped";
     let warmupStatus: number | undefined;
