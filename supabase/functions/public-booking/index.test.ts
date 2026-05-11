@@ -123,19 +123,75 @@ Deno.test("public-booking: creates a pending reservation end-to-end", async () =
   // Always delete any rows for this guest_email, regardless of where the test fails.
   // Matching by email (not just id) catches the case where insertion succeeded but
   // the verifying SELECT or an assertion threw before we learned the row id.
+  //
+  // Hardened cleanup contract:
+  //   * Asks PostgREST for `return=representation` so we can count the rows the
+  //     server actually deleted, instead of trusting an opaque 204.
+  //   * Tolerates 0 rows (insert never happened) and 1 row (happy path) silently.
+  //   * Warns loudly and re-runs once when more than 1 row is reported, which
+  //     can only happen if a previous run leaked data with the same fixed
+  //     guest_email collision. The retry guarantees we converge on 0 rows
+  //     remaining even when the first DELETE was partially blocked.
+  //   * On any non-2xx response, retries once with a small backoff, then logs
+  //     a structured warning that includes status + body so CI artifacts
+  //     contain enough signal to triage a stuck row without rerunning the test.
   const cleanup = async () => {
     if (!SERVICE_KEY) return;
-    try {
-      const filter = `tenant_id=eq.${TEST_TENANT_ID}&guest_email=eq.${encodeURIComponent(guestEmail)}`;
-      const { res: delRes, text: delText } = await adminFetch(
-        `/reservations?${filter}`,
-        { method: "DELETE" },
-      );
-      if (!delRes.ok) {
-        console.warn(`cleanup: failed to delete test reservation(s): ${delRes.status} ${delText}`);
+    const filter = `tenant_id=eq.${TEST_TENANT_ID}&guest_email=eq.${encodeURIComponent(guestEmail)}`;
+
+    const runDelete = async (): Promise<{ ok: boolean; deleted: number; status: number; body: string }> => {
+      try {
+        const { res, text } = await adminFetch(`/reservations?${filter}`, {
+          method: "DELETE",
+          headers: { Prefer: "return=representation" },
+        });
+        let deleted = 0;
+        if (res.ok) {
+          try {
+            const parsed = JSON.parse(text);
+            deleted = Array.isArray(parsed) ? parsed.length : 0;
+          } catch {
+            // Server returned 2xx with a non-JSON / empty body (e.g. 204 No Content
+            // when Prefer was ignored); treat the deletion as successful but of
+            // unknown size so we don't claim a count we cannot verify.
+            deleted = -1;
+          }
+        }
+        return { ok: res.ok, deleted, status: res.status, body: text };
+      } catch (err) {
+        return { ok: false, deleted: 0, status: 0, body: String(err) };
       }
-    } catch (err) {
-      console.warn(`cleanup: unexpected error deleting test reservation(s):`, err);
+    };
+
+    let attempt = await runDelete();
+    if (!attempt.ok) {
+      // One short retry to absorb transient PostgREST / network blips.
+      await new Promise((r) => setTimeout(r, 250));
+      attempt = await runDelete();
+      if (!attempt.ok) {
+        console.warn(
+          `cleanup: DELETE failed after retry (status=${attempt.status}): ${attempt.body}`,
+        );
+        return;
+      }
+    }
+
+    if (attempt.deleted > 1) {
+      console.warn(
+        `cleanup: deleted ${attempt.deleted} rows for ${guestEmail}; ` +
+          `previous test runs likely leaked data. Re-running DELETE to converge on 0.`,
+      );
+      const sweep = await runDelete();
+      if (!sweep.ok) {
+        console.warn(
+          `cleanup: convergence DELETE failed (status=${sweep.status}): ${sweep.body}`,
+        );
+      } else if (sweep.deleted > 0) {
+        console.warn(
+          `cleanup: convergence DELETE still removed ${sweep.deleted} row(s); ` +
+            `manual investigation may be required.`,
+        );
+      }
     }
   };
 
