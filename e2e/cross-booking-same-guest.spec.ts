@@ -383,8 +383,19 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
     const harPath = path.join(harDir, `public-booking-attempt-${testInfo.retry + 1}.har`);
     fs.mkdirSync(harDir, { recursive: true });
     const harEntries: Array<Record<string, any>> = [];
+    // One umbrella correlation id for the entire cross-booking flow. Every
+    // leg's per-attempt correlation id is namespaced under it
+    // (`<flow>/<leg>/<uuid>/attempt-N`) so a grep on the flow id surfaces
+    // the warmup, all 3 legs, the negative probe, and every retry as one
+    // contiguous trace in the edge-function logs.
+    const flowCorrelationId = `cross-booking/${testInfo.project.name || "default"}/retry-${testInfo.retry}/${
+      globalThis.crypto?.randomUUID?.() ?? Date.now().toString(36)
+    }`;
     // eslint-disable-next-line no-console
     console.log(`[cross-booking] HAR will be written to ${harPath}`);
+    // eslint-disable-next-line no-console
+    console.log(`[cross-booking] flow correlation_id=${flowCorrelationId}`);
+    testInfo.annotations.push({ type: "correlation_id", description: flowCorrelationId });
 
     // Warm the edge function so the first real leg doesn't pay the cold-start
     // penalty. Recorded into the HAR as a normal entry.
@@ -393,6 +404,7 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
       { warmup: true },
       "warmup",
       harEntries,
+      flowCorrelationId,
     ).catch(() => {
       /* warmup is best-effort; ignore */
     });
