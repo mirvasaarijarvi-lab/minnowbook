@@ -806,23 +806,26 @@ const PublicBookingInner = () => {
       setSubmitted(true);
     },
     onError: (err: any) => {
-      const errCode = (err as { code?: string } | null | undefined)?.code;
-      if (errCode === BOOKING_ERROR_CODES.SERVICE_ROLE_KEY_MISSING) {
-        // Pin the inline confirmation. The toast disappears after 10s
-        // but the inline banner stays until the guest acknowledges.
+      // All branching for booking errors lives in the central
+      // registry. PublicBooking just consumes the resolved descriptor.
+      const descriptor = resolveBookingError(err);
+      if (descriptor.pinMisconfigBanner) {
+        // Pin the inline confirmation. The toast disappears after
+        // toastDuration ms but the banner stays until the guest
+        // acknowledges.
         setServiceMisconfigured(true);
       }
-      // Fire-and-forget telemetry. Only the machine-readable error
-      // code and coarse context are emitted, never form values or
-      // server messages, so no secrets can leak.
-      if (errCode) {
-        trackBookingError(errCode, {
+      if (descriptor.emitTelemetry && descriptor.code) {
+        // Fire-and-forget. Only the machine-readable error code and
+        // coarse context are emitted, never form values or server
+        // messages, so no secrets can leak.
+        trackBookingError(descriptor.code, {
           tenantSlug: slug ?? null,
           resourceId: form.resource_id || null,
           locale: language,
         });
       }
-      toast.error(t(getBookingErrorToastKey(err)), getBookingErrorToastOptions(err));
+      toast.error(t(descriptor.i18nKey), { duration: descriptor.toastDuration });
     },
   });
 
