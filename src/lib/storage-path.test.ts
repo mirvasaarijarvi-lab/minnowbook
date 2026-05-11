@@ -121,5 +121,34 @@ describe("assertSafeStorageObjectPath", () => {
       });
       expect(() => assertSafeStorageObjectPath("../bad")).toThrowError(InvalidStoragePathError);
     });
+
+    describe("tenantId telemetry", () => {
+      const VALID_UUID = "11111111-2222-4333-8444-555555555555";
+
+      it("includes valid UUID tenantId in the event", () => {
+        expect(() => assertSafeStorageObjectPath("../bad", { tenantId: VALID_UUID })).toThrow();
+        expect(events.at(-1)?.tenantId).toBe(VALID_UUID);
+      });
+
+      it("normalises UUID casing and trims whitespace", () => {
+        expect(() => assertSafeStorageObjectPath("../bad", { tenantId: `  ${VALID_UUID.toUpperCase()}  ` })).toThrow();
+        expect(events.at(-1)?.tenantId).toBe(VALID_UUID);
+      });
+
+      it("drops non-UUID tenantId so PII can't leak through", () => {
+        for (const bad of ["alice@example.com", "tenant-slug", "12345", "../etc/passwd", ""]) {
+          events.length = 0;
+          expect(() => assertSafeStorageObjectPath("../bad", { tenantId: bad })).toThrow();
+          expect(events).toHaveLength(1);
+          expect(events[0].tenantId).toBeUndefined();
+          expect(JSON.stringify(events[0])).not.toContain(bad || "__never__");
+        }
+      });
+
+      it("omits tenantId when the caller did not provide one", () => {
+        expect(() => assertSafeStorageObjectPath("../bad")).toThrow();
+        expect(events.at(-1)?.tenantId).toBeUndefined();
+      });
+    });
   });
 });
