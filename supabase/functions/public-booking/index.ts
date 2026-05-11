@@ -1,6 +1,20 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient as _createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { computeReservationPrice } from "../_shared/reservation-pricing.ts";
 import { BOOKING_ERROR_CODES } from "../_shared/booking-error-codes.ts";
+
+/**
+ * Indirection layer around external dependencies the handler reaches
+ * for AFTER the service-role-key guard. Exported so unit tests can
+ * swap `createClient` for a spy and assert that the guard refuses to
+ * proceed: any call to `createClient` past the guard would mean a DB
+ * path is executable without a service-role key, which is exactly the
+ * regression we want to fail loudly on.
+ */
+export const _publicBookingTestHooks: {
+  createClient: typeof _createClient;
+} = {
+  createClient: _createClient,
+};
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -253,7 +267,7 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
     return keyCheck.response;
   }
   const serviceRoleKey = keyCheck.serviceRoleKey;
-  const adminClient = createClient(supabaseUrl, serviceRoleKey);
+  const adminClient = _publicBookingTestHooks.createClient(supabaseUrl, serviceRoleKey);
 
 
   try {
