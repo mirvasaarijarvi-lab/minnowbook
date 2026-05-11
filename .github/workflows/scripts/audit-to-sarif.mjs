@@ -68,14 +68,41 @@ function pushAdvisory({ ruleId, pkg, severity, title, url, range }) {
 
 function parseNpm(report) {
   // npm v7+ shape: { vulnerabilities: { <pkg>: { severity, via: [...] } } }
+  //
+  // Each entry's `via` array can mix two element kinds:
+  //   1. Advisory objects: { source, name, title, url, severity, range }
+  //      where `name` is the package the advisory directly targets.
+  //   2. Strings: the name of an upstream package (also present as a
+  //      key in `vulnerabilities`) that transitively pulls in the
+  //      vulnerable code. The actual advisory data for those lives on
+  //      the upstream entry, not here.
+  //
+  // Naive iteration emits one SARIF result per (consumer-package,
+  // advisory) pair, which produces N copies of the same advisory when
+  // N packages depend on the vulnerable one. We only want one result
+  // per (advisory, root-vulnerable-package), so:
+  //   - Skip string `via` entries (the advisory is reachable via the
+  //     upstream entry that owns the object form).
+  //   - Use `v.name` (the package the advisory actually targets) as
+  //     the canonical pkg, falling back to the current key.
+  //   - Dedup on `${ruleId}::${canonicalPkg}` so multiple consumers of
+  //     the same upstream do not multiply results.
+  //   - Dedup advisory objects within a single via[] by ruleId too,
+  //     in case npm lists the same source twice with different ranges.
   const vulns = report.vulnerabilities || {};
+  const seen = new Set();
   for (const [pkgName, info] of Object.entries(vulns)) {
     const via = Array.isArray(info.via) ? info.via : [];
     for (const v of via) {
       if (typeof v !== "object" || v === null) continue;
+      const canonicalPkg = String(v.name || pkgName);
+      const ruleId = String(v.source ?? v.url ?? `${canonicalPkg}:${v.title ?? "unknown"}`);
+      const dedupKey = `${ruleId}::${canonicalPkg}`;
+      if (seen.has(dedupKey)) continue;
+      seen.add(dedupKey);
       pushAdvisory({
-        ruleId: v.source ?? v.url,
-        pkg: pkgName,
+        ruleId,
+        pkg: canonicalPkg,
         severity: v.severity || info.severity,
         title: v.title,
         url: v.url,
