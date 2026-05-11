@@ -145,7 +145,7 @@ vi.mock("@/integrations/supabase/client", () => {
 // --- Imports under test (after mocks are registered) --------------------
 
 import AdminPanel from "./AdminPanel";
-import { useToast } from "@/hooks/use-toast";
+import { useToast, toast } from "@/hooks/use-toast";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
 // Render harness. AdminPanel relies on React Query but no other providers
