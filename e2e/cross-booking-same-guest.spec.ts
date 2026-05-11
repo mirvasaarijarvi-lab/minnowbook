@@ -196,17 +196,21 @@ async function callPublicBooking(
         JSON.stringify(diagnostic, null, 2) +
         "\n",
     );
-    try {
-      await test.info().attach(`public-booking-${label}-failure.json`, {
-        body: Buffer.from(JSON.stringify(diagnostic, null, 2), "utf-8"),
-        contentType: "application/json",
-      });
-    } catch {
-      /* test.info() unavailable outside test scope */
-    }
   } else {
     // eslint-disable-next-line no-console
     console.log(`[cross-booking] ${label} OK (HTTP ${status}, ${durationMs}ms)`);
+  }
+
+  // Always attach the per-leg request/response JSON (success AND failure) so
+  // we can diff successful legs against failing ones to spot divergence in
+  // request shape, headers, or response payload between runs.
+  try {
+    await test.info().attach(`public-booking-${label}-${status}.json`, {
+      body: Buffer.from(JSON.stringify(diagnostic, null, 2), "utf-8"),
+      contentType: "application/json",
+    });
+  } catch {
+    /* test.info() unavailable outside test scope */
   }
 
   return { status, body: json ?? text, diagnostic };
