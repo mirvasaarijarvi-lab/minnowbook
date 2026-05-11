@@ -2,7 +2,7 @@ import { useState, useMemo, useCallback, useEffect } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useT, useTDynamic } from "@/contexts/I18nContext";
+import { useT, useTDynamic, useLanguage } from "@/contexts/I18nContext";
 import type { TranslationKey } from "@/i18n/translations";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -30,6 +30,7 @@ import { buildTypeTiles } from "@/lib/booking-tiles";
 import { useBrandingSignedUrlState } from "@/lib/tenant-branding-url";
 import { BOOKING_ERROR_CODES } from "../../supabase/functions/_shared/booking-error-codes";
 import { getBookingErrorToastKey, getBookingErrorToastOptions } from "@/lib/booking-error-toast";
+import { trackBookingError } from "@/lib/booking-telemetry";
 import { FadeInImage } from "@/components/branding/FadeInImage";
 
 // Types for public views (not in auto-generated types)
@@ -218,6 +219,7 @@ const PublicBookingInner = () => {
   const [searchParams] = useSearchParams();
   const t = useT();
   const tDynamic = useTDynamic();
+  const { language } = useLanguage();
   const dateFnsLocale = useDateLocale();
   const [submitted, setSubmitted] = useState(false);
   // Sticky flag set when the public-booking edge function reports
@@ -804,10 +806,21 @@ const PublicBookingInner = () => {
       setSubmitted(true);
     },
     onError: (err: any) => {
-      if (err?.code === BOOKING_ERROR_CODES.SERVICE_ROLE_KEY_MISSING) {
+      const errCode = (err as { code?: string } | null | undefined)?.code;
+      if (errCode === BOOKING_ERROR_CODES.SERVICE_ROLE_KEY_MISSING) {
         // Pin the inline confirmation. The toast disappears after 10s
         // but the inline banner stays until the guest acknowledges.
         setServiceMisconfigured(true);
+      }
+      // Fire-and-forget telemetry. Only the machine-readable error
+      // code and coarse context are emitted, never form values or
+      // server messages, so no secrets can leak.
+      if (errCode) {
+        trackBookingError(errCode, {
+          tenantSlug: slug ?? null,
+          resourceId: form.resource_id || null,
+          locale: language,
+        });
       }
       toast.error(t(getBookingErrorToastKey(err)), getBookingErrorToastOptions(err));
     },
