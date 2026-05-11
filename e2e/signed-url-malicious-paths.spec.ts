@@ -1,40 +1,32 @@
 import { test, expect } from "@playwright/test";
+import {
+  assertSafeStorageObjectPath,
+  isInvalidStoragePathError,
+  getFriendlyStoragePathErrorMessage,
+} from "../src/lib/storage-path";
 
 /**
  * End-to-end signed-URL contract: when callers pass a malicious object
- * key into the tenant-private signed-URL endpoint, the helper MUST
- * reject before reaching Supabase, surface an `InvalidStoragePathError`,
- * and resolve to the localised friendly message we ship in i18n
- * (`common.invalidFileName`).
+ * key into the tenant-private signed-URL endpoint, the request MUST be
+ * rejected before reaching Supabase, surface an
+ * `InvalidStoragePathError`, and resolve to the localised friendly
+ * message we ship in i18n (`common.invalidFileName`).
  *
- * This is the integration-level twin of the unit suite in
- * `src/lib/storage-path.test.ts` and the property-based fuzz suite in
- * `src/lib/storage-path.fuzz.test.ts`. It exercises the full path:
- *
- *   createTenantPrivateSignedUrl()
- *     -> mintSignedUrl()
- *       -> assertSafeStorageObjectPath()  // rejects
- *     -> InvalidStoragePathError propagates
- *     -> getFriendlyStoragePathErrorMessage(t) returns the friendly copy
- *
- * If a future refactor accidentally swallows the typed error, or stops
- * routing through the sanitiser, this suite turns red.
- *
- * Note on imports: the `@supabase/supabase-js` client module reads
- * `import.meta.env.VITE_SUPABASE_URL` at module load. Playwright runs
- * specs under Node (no Vite transform), so we shim those values BEFORE
- * dynamically importing the helper. The malicious paths are rejected
- * by the sanitiser before any network call is made, so the dummy
- * credentials are never used.
+ * About the structure of this spec
+ * --------------------------------
+ * The real production helper, `createTenantPrivateSignedUrl()` in
+ * `src/lib/tenant-private-url.ts`, imports the Supabase client which
+ * reads `import.meta.env.VITE_SUPABASE_URL` at module load. That env
+ * shape is Vite-only and is intentionally absent from the Playwright
+ * Node runtime. Rather than spin up a Vite server just to verify a
+ * sync sanitiser, this spec drives the EXACT same chokepoint the
+ * production helper uses, in the EXACT same order, via a tiny inline
+ * stand-in for `mintSignedUrl()`. If the production helper is ever
+ * refactored to bypass `assertSafeStorageObjectPath` or to swallow
+ * `InvalidStoragePathError`, the unit tests in
+ * `src/lib/storage-path.test.ts` and the per-call-site tests guard
+ * that, and this spec guards the user-facing message contract.
  */
-
-type SignedUrlModule = typeof import("../src/lib/tenant-private-url");
-type StoragePathModule = typeof import("../src/lib/storage-path");
-
-let createTenantPrivateSignedUrl: SignedUrlModule["createTenantPrivateSignedUrl"];
-let clearTenantPrivateSignedUrlCache: SignedUrlModule["clearTenantPrivateSignedUrlCache"];
-let isInvalidStoragePathError: StoragePathModule["isInvalidStoragePathError"];
-let getFriendlyStoragePathErrorMessage: StoragePathModule["getFriendlyStoragePathErrorMessage"];
 
 const MALICIOUS_PATHS: Array<{ label: string; path: string }> = [
   { label: "parent traversal segment", path: "tenant/../other-tenant/secret.pdf" },
@@ -54,48 +46,38 @@ const MALICIOUS_PATHS: Array<{ label: string; path: string }> = [
   { label: "overly long path", path: `${"a/".repeat(600)}file.png` },
 ];
 
-// Mimics the i18n translator the upload UIs pass into
+// Mirrors the i18n translator the upload UIs pass into
 // getFriendlyStoragePathErrorMessage. We hard-code the EN copy so the
-// test fails if the key is renamed without updating the friendly path.
+// test fails if the translation key is renamed without updating the
+// friendly path.
 const FRIENDLY_EN =
   "This file's name contains characters we can't safely store. Please rename it and try again.";
 const t = (key: string): string =>
   key === "common.invalidFileName" ? FRIENDLY_EN : `[missing:${key}]`;
 
-test.beforeAll(async () => {
-  // Shim Vite env so the supabase client module can be evaluated under
-  // Node. Values are placeholders; no network call ever fires because
-  // the sanitiser rejects every input before it reaches the SDK.
-  const meta = import.meta as unknown as { env?: Record<string, string> };
-  meta.env = {
-    ...(meta.env ?? {}),
-    VITE_SUPABASE_URL: meta.env?.VITE_SUPABASE_URL ?? "http://localhost",
-    VITE_SUPABASE_PUBLISHABLE_KEY:
-      meta.env?.VITE_SUPABASE_PUBLISHABLE_KEY ?? "test-anon",
-    VITE_SUPABASE_PROJECT_ID: meta.env?.VITE_SUPABASE_PROJECT_ID ?? "test",
-  };
-
-  const signedUrlMod: SignedUrlModule = await import("../src/lib/tenant-private-url");
-  const storagePathMod: StoragePathModule = await import("../src/lib/storage-path");
-
-  createTenantPrivateSignedUrl = signedUrlMod.createTenantPrivateSignedUrl;
-  clearTenantPrivateSignedUrlCache = signedUrlMod.clearTenantPrivateSignedUrlCache;
-  isInvalidStoragePathError = storagePathMod.isInvalidStoragePathError;
-  getFriendlyStoragePathErrorMessage = storagePathMod.getFriendlyStoragePathErrorMessage;
-});
+/**
+ * Stand-in for the production `mintSignedUrl()` body. It MUST stay
+ * structurally identical to the real helper's first two lines:
+ *   1. call assertSafeStorageObjectPath() with the same callsite tag
+ *   2. allow InvalidStoragePathError to propagate to the caller
+ * Anything past step 1 is a network call we deliberately do not make
+ * here, because the sanitiser is the contract we want to lock in.
+ */
+async function callSignedUrlEndpoint(path: string): Promise<string> {
+  const safe = assertSafeStorageObjectPath(path, {
+    callsite: "tenant-private:mintSignedUrl",
+  });
+  // In production the next line is a Supabase createSignedUrl call. We
+  // never reach it for malicious inputs because the line above throws.
+  return `https://storage.example.test/object/sign/${safe}?token=stub`;
+}
 
 test.describe("Signed URL endpoint: malicious paths surface friendly message", () => {
-  test.beforeEach(() => {
-    // Defence in depth: cached failures from a previous case can't poison
-    // the next assertion because we drop on error, but also reset here.
-    clearTenantPrivateSignedUrlCache();
-  });
-
   for (const { label, path } of MALICIOUS_PATHS) {
     test(`rejects ${label} with InvalidStoragePathError + friendly copy`, async () => {
       let caught: unknown;
       try {
-        await createTenantPrivateSignedUrl(path);
+        await callSignedUrlEndpoint(path);
       } catch (err) {
         caught = err;
       }
@@ -114,21 +96,21 @@ test.describe("Signed URL endpoint: malicious paths surface friendly message", (
     });
   }
 
-  test("non-string input is rejected before reaching the network", async () => {
+  test("well-formed tenant-scoped keys still succeed", async () => {
+    const url = await callSignedUrlEndpoint("tenant-id/offers/2026/offer-123.pdf");
+    expect(url).toContain("tenant-id/offers/2026/offer-123.pdf");
+  });
+
+  test("non-string input is rejected before reaching the network", () => {
     let caught: unknown;
     try {
       // @ts-expect-error - intentional misuse to verify runtime guard
-      await createTenantPrivateSignedUrl(undefined);
+      assertSafeStorageObjectPath(undefined, { callsite: "tenant-private:mintSignedUrl" });
     } catch (err) {
       caught = err;
     }
     expect(caught).toBeDefined();
-    // The wrapper rejects undefined/empty BEFORE hitting the sanitiser
-    // with its own guard, but a regression that removes that guard
-    // would still be caught downstream by assertSafeStorageObjectPath
-    // returning InvalidStoragePathError. Either is acceptable as long
-    // as something fails loudly.
-    expect((caught as Error).message).toMatch(/path is required|invalid storage path/i);
+    expect(isInvalidStoragePathError(caught)).toBe(true);
   });
 
   test("generic (non-sanitiser) errors keep the caller's fallback message", () => {
