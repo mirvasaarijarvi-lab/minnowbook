@@ -16,6 +16,12 @@ jobs:
     permissions:
       contents: read
 
+    env:
+      # Pin Deno's module cache to a stable path so actions/cache can
+      # restore it across runs. Deno reads DENO_DIR for its global cache
+      # (downloaded modules, transpiled output, type-check info).
+      DENO_DIR: ${{ github.workspace }}/.deno-cache
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
@@ -24,6 +30,14 @@ jobs:
         uses: denoland/setup-deno@667a34cdef165d8d2b2e98dde39547c9daac7282 # v2.0.4
         with:
           deno-version: v1.x
+
+      - name: Cache Deno modules
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.DENO_DIR }}
+          key: deno-${{ runner.os }}-${{ hashFiles('supabase/functions/**/*.ts', 'deno.json', 'deno.jsonc', 'deno.lock', 'import_map.json') }}
+          restore-keys: |
+            deno-${{ runner.os }}-
 
       - name: Run edge function tests
         id: deno-tests
