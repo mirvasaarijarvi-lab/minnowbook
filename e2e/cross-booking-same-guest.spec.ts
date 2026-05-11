@@ -351,20 +351,55 @@ async function callPublicBooking(
 
 test.describe("Cross-booking: same guest, multiple resources/services", () => {
   test("public booking page for the test tenant loads", async ({ page, tenant }) => {
-    // Wait for the SPA shell + initial XHRs to settle, not just DOMContentLoaded.
-    const response = await page.goto(`/book/${tenant.slug}`, { waitUntil: "networkidle" });
+    // Sandbox-tolerant timeouts. The shared default (5s) is too aggressive
+    // for cold dev-server starts; bump per-step explicitly so a slow CI
+    // worker or first-render Vite compile doesn't flake the test.
+    test.setTimeout(60_000);
+    const NAV_TIMEOUT_MS = 30_000;
+    const ELEMENT_TIMEOUT_MS = 20_000;
+
+    // Step 1: navigate. Use `domcontentloaded` (not `networkidle`) because
+    // the public booking page keeps long-lived realtime + analytics XHRs
+    // open, so `networkidle` can never resolve and just times out.
+    const response = await page.goto(`/book/${tenant.slug}`, {
+      waitUntil: "domcontentloaded",
+      timeout: NAV_TIMEOUT_MS,
+    });
     expect(response, "navigation produced no response").not.toBeNull();
-    expect(response!.status(), `unexpected HTTP status for /book/${tenant.slug}`).toBeLessThan(400);
+    expect(
+      response!.status(),
+      `unexpected HTTP status for /book/${tenant.slug}`,
+    ).toBeLessThan(400);
 
-    // Hard-fail fast if the SPA rendered the not-found view
-    await expect(page.getByRole("heading", { name: "404" })).toHaveCount(0);
+    // Step 2: wait for the SPA bundle to actually mount. Vite injects
+    // `<div id="root">` empty; React only paints children once hydrated.
+    await page.waitForFunction(
+      () => {
+        const root = document.querySelector("#root");
+        return !!root && root.childElementCount > 0;
+      },
+      undefined,
+      { timeout: ELEMENT_TIMEOUT_MS },
+    );
 
-    // Wait for the booking shell to actually be visible. The public booking
-    // page always renders a <main> region once the tenant has loaded.
-    await expect(page.locator("main")).toBeVisible({ timeout: 15_000 });
+    // Step 3: hard-fail fast if the SPA rendered the not-found view.
+    await expect(
+      page.getByRole("heading", { name: "404" }),
+      "tenant slug rendered the 404 view instead of the booking shell",
+    ).toHaveCount(0, { timeout: ELEMENT_TIMEOUT_MS });
 
-    // And the not-found copy must not appear anywhere on the page
-    await expect(page.locator("body")).not.toContainText(/not found|404/i, { timeout: 5_000 });
+    // Step 4: the booking shell must render a visible <main> region.
+    await expect(
+      page.locator("main"),
+      "booking shell <main> never became visible",
+    ).toBeVisible({ timeout: ELEMENT_TIMEOUT_MS });
+
+    // Step 5: explicit not-found-copy guard, scoped to <main> so transient
+    // toast/cookie-banner copy elsewhere on the page can't false-positive.
+    await expect(
+      page.locator("main"),
+      "booking shell rendered not-found copy",
+    ).not.toContainText(/not found|404/i, { timeout: ELEMENT_TIMEOUT_MS });
   });
 
   test("creates restaurant + guesthouse + venue reservations for the same guest", async ({ request, tenant }, testInfo) => {
