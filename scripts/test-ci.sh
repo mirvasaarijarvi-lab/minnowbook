@@ -38,26 +38,43 @@ if command -v deno >/dev/null 2>&1; then
     export SUPABASE_URL="$VITE_SUPABASE_URL"
   fi
 
-  # Required env vars for Deno edge function tests. Fail fast with a clear list
-  # of what's missing so CI logs explain the failure without diving into Deno output.
-  required_env=(SUPABASE_URL SUPABASE_SERVICE_ROLE_KEY)
-  missing_env=()
-  for var in "${required_env[@]}"; do
-    if [ -z "${!var:-}" ]; then
-      missing_env+=("$var")
-    fi
-  done
-  if [ "${#missing_env[@]}" -gt 0 ]; then
+  # Env var policy (must match .github/workflows/test-ci.yml precheck):
+  #   * SUPABASE_URL is REQUIRED. Without it the Deno edge tests cannot
+  #     reach any function endpoint, so we fail fast.
+  #   * SUPABASE_SERVICE_ROLE_KEY is RECOMMENDED. When missing, the Deno
+  #     suite gracefully degrades (skips DB-verification, runs validate
+  #     only no-leak path, ignores the row-count test). We warn and
+  #     continue so forks/PRs without the secret still get useful signal.
+  #     Set REQUIRE_SERVICE_ROLE_KEY=1 to promote the warning to a hard
+  #     failure (recommended for the main branch's required check).
+  if [ -z "${SUPABASE_URL:-}" ]; then
     echo ""
-    echo "❌ Edge function tests (Deno) cannot run: missing required env var(s):"
-    for var in "${missing_env[@]}"; do
-      echo "   - $var"
-    done
+    echo "Edge function tests (Deno) cannot run: missing required env var:"
+    echo "   - SUPABASE_URL (or VITE_SUPABASE_URL)"
     echo ""
-    echo "Set these in your CI environment (e.g. GitHub Actions secrets) before"
-    echo "running scripts/test-ci.sh. SUPABASE_SERVICE_ROLE_KEY must be the"
-    echo "service-role key from Lovable Cloud (Backend → API keys)."
+    echo "Set it in your CI environment (e.g. GitHub Actions secrets) before"
+    echo "running scripts/test-ci.sh."
     exit 1
+  fi
+
+  if [ -z "${SUPABASE_SERVICE_ROLE_KEY:-}" ]; then
+    if [ "${REQUIRE_SERVICE_ROLE_KEY:-0}" = "1" ]; then
+      echo ""
+      echo "SUPABASE_SERVICE_ROLE_KEY is missing and REQUIRE_SERVICE_ROLE_KEY=1."
+      echo "   Add the service-role key from Lovable Cloud (Backend > API keys)"
+      echo "   under Settings > Secrets and variables > Actions, then re-run."
+      exit 1
+    fi
+    echo ""
+    echo "WARNING: SUPABASE_SERVICE_ROLE_KEY is not set. Running Deno edge"
+    echo "  tests in DEGRADED mode:"
+    echo "    - End-to-end reservation test skips its DB-verification step."
+    echo "    - 'No data leak' test runs in validate-only mode (no insert)."
+    echo "    - 'Validation-only row count unchanged' test is ignored."
+    echo "  Add the service-role key from Lovable Cloud (Backend > API keys)"
+    echo "  to run the full suite. Set REQUIRE_SERVICE_ROLE_KEY=1 to make"
+    echo "  the missing key a hard failure."
+    echo ""
   fi
 
   # Deno's --junit-path emits a JUnit XML alongside the normal console output,
