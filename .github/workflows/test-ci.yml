@@ -82,7 +82,7 @@ jobs:
           if [ -z "$effective_url" ]; then
             echo "::error title=Missing Supabase URL::SUPABASE_URL (or VITE_SUPABASE_URL) is required for the Deno edge function tests. Add it under Settings → Secrets and variables → Actions."
             {
-              echo "- ❌ **SUPABASE_URL** (or VITE_SUPABASE_URL): missing — cannot run any edge function test."
+              echo "- ❌ **SUPABASE_URL** (or VITE_SUPABASE_URL): missing , cannot run any edge function test."
               echo ""
               echo "Add the secret under **Settings → Secrets and variables → Actions** and re-run the workflow."
             } >> "$summary"
@@ -93,7 +93,7 @@ jobs:
           # ---- Recommended: SUPABASE_SERVICE_ROLE_KEY ----
           if [ -z "${SUPABASE_SERVICE_ROLE_KEY:-}" ]; then
             {
-              echo "- ⚠️ **SUPABASE_SERVICE_ROLE_KEY**: missing — Deno tests will run in **degraded mode**:"
+              echo "- ⚠️ **SUPABASE_SERVICE_ROLE_KEY**: missing , Deno tests will run in **degraded mode**:"
               echo "    - End-to-end reservation test will skip the DB-verification step."
               echo "    - 'No data leak when service role key missing' test will run in validate-only mode (no insert)."
               echo "    - 'Validation-only request leaves row count unchanged' test will be ignored (needs service role for count)."
@@ -107,7 +107,7 @@ jobs:
             fi
 
             echo "::warning title=Degraded test mode::SUPABASE_SERVICE_ROLE_KEY is not configured. Deno edge tests will skip cleanup/DB-verification and run validation-only fallbacks. Set REQUIRE_SERVICE_ROLE_KEY=1 in repo variables to make this a hard failure."
-            echo "Supabase URL present; service-role key MISSING — proceeding in degraded mode."
+            echo "Supabase URL present; service-role key MISSING , proceeding in degraded mode."
             exit 0
           fi
 
