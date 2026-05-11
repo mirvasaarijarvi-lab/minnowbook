@@ -21,7 +21,9 @@
  * tests in this repo).
  */
 
-import "https://deno.land/std@0.224.0/dotenv/load.ts";
+// Env vars are exported by scripts/test-ci.sh (or by the developer's shell).
+// We deliberately do NOT import dotenv/load.ts here because the project's
+// .env.example lists SUPABASE_ANON_KEY which not every dev .env defines.
 import {
   assert,
   assertEquals,
