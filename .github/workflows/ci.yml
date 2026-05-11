@@ -53,6 +53,7 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Run schema/index + plan-references tests
+        id: schema_tests
         # --bail=1 surfaces the first failing assertion immediately; the
         # tests are deterministic file parsers so a retry won't help.
         run: |
@@ -62,6 +63,47 @@ jobs:
             --reporter=dot \
             --reporter=junit \
             --outputFile.junit=test-reports/vitest-schema/junit.xml
+
+      # When the plan-references gate fails the most useful debugging
+      # signal is the actual plan.md content the extractor saw: usually
+      # zero signals means the plan body was rewritten in a shape the
+      # regexes don't cover (no backticks around the table name, no
+      # "table" keyword, or a migration filename with the wrong digit
+      # count). Print it inline AND copy it into the uploaded artifact
+      # so we don't need to re-run the job to inspect it.
+      - name: Dump plan.md on schema-gate failure
+        if: failure() && steps.schema_tests.outcome == 'failure'
+        run: |
+          {
+            echo "## Schema-gate failure: .lovable/plan.md snapshot"
+            echo ""
+            if [ -f .lovable/plan.md ]; then
+              wc -c .lovable/plan.md | awk '{print "**Size:** " $1 " bytes"}'
+              echo ""
+              echo "### Extractor probe"
+              echo '```'
+              echo -n "table-shaped matches: "
+              grep -coE '`[a-z][a-z0-9_]+`[[:space:]]+([a-z]+[[:space:]]+)?table\b' .lovable/plan.md || true
+              echo -n "migration-path matches: "
+              grep -coE 'supabase/migrations/' .lovable/plan.md || true
+              echo -n "timestamped .sql matches: "
+              grep -coE '\b[0-9]{14}[A-Za-z0-9_-]*\.sql\b' .lovable/plan.md || true
+              echo '```'
+              echo ""
+              echo "### plan.md (full)"
+              echo '```markdown'
+              cat .lovable/plan.md
+              echo '```'
+            else
+              echo "_.lovable/plan.md does not exist in the checkout._"
+            fi
+          } | tee -a "${GITHUB_STEP_SUMMARY:-/dev/stderr}"
+
+          # Stage the file alongside the junit report so the artifact
+          # upload below picks it up without a second upload step.
+          if [ -f .lovable/plan.md ]; then
+            cp .lovable/plan.md test-reports/vitest-schema/plan.md
+          fi
 
       - name: Upload schema-gate report
         if: always()
