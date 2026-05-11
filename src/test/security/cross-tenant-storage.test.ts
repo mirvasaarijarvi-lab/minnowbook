@@ -1500,7 +1500,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       });
 
       it("user A cannot UPLOAD to tenant B's tenant-assets folder", async () => {
-        const path = ownPath(liveCreds.b.tenantId!, "a-cross-assets");
+        const path = assetsOwnPath(liveCreds.b.tenantId!, "a-cross-assets");
         const result = await storageCall(
           () => clientA.storage
             .from(ASSETS_BUCKET)
