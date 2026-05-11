@@ -1,4 +1,11 @@
-import { test, expect } from "@playwright/test";
+import {
+  test,
+  expect,
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY,
+  futureDate,
+  makeTestGuest,
+} from "./fixtures/test-tenant";
 
 /**
  * End-to-end cross-booking test.
@@ -12,39 +19,13 @@ import { test, expect } from "@playwright/test";
  * a real reservation row in the connected backend. Guest name is prefixed
  * with `TEST Lovable` so rows can be cleaned up after the run.
  *
- * Run locally:
- *   bunx playwright test e2e/cross-booking-same-guest.spec.ts
- *
- * Tenant used: `mimmin-testi` (multi-site test tenant).
+ * Tenant identity, resource ids, and the SUPABASE_* constants come from the
+ * shared `test-tenant` fixture so this spec stays aligned with every other
+ * booking-related spec under the same tenant_id.
  */
 
-const SUPABASE_URL = "https://lsgznskkxadplwnxplhd.supabase.co";
-const SUPABASE_ANON_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxzZ3puc2treGFkcGx3bnhwbGhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5MTkyODAsImV4cCI6MjA4NzQ5NTI4MH0.v6DlzrUsFu_fpTIcWcSzz1Zyqbl_ZwF9v54TrW_yWtM";
-
-const TENANT_SLUG = "mimmin-testi";
-const TENANT_ID = "9ac05fbf-0834-44fd-a52a-d030b7074a30";
-
-// Real, active resources in `mimmin-testi`
-const RESOURCES = {
-  restaurant: "63137f6d-4da6-4128-b43b-0901771f2137", // Another restaurant (no site)
-  guesthouse: "741ae83b-e626-4def-a6c0-27377de3ff28", // Single Room 1
-  venue: "3c5f9fc2-39f7-4e07-b45e-972e6afc9427", // Eventos Mimmilitos
-};
-
 // Shared guest profile used across every booking in this flow
-const GUEST = {
-  guest_name: `TEST Lovable Cross ${Date.now()}`,
-  guest_email: `test-cross-${Date.now()}@example.com`,
-  guest_phone: "+358 40 0000000",
-};
-
-// Far-future date so we never collide with real bookings or block windows
-function futureDate(offsetDays = 60): string {
-  const d = new Date();
-  d.setUTCDate(d.getUTCDate() + offsetDays);
-  return d.toISOString().slice(0, 10);
-}
+const GUEST = makeTestGuest("Cross");
 
 // Per-call HTTP timeout. Edge functions can cold-start (~1.5s typical, up to ~5s)
 // so we give each call a generous explicit budget instead of relying on defaults.
@@ -139,11 +120,11 @@ async function callPublicBooking(
 }
 
 test.describe("Cross-booking: same guest, multiple resources/services", () => {
-  test("public booking page for the test tenant loads", async ({ page }) => {
+  test("public booking page for the test tenant loads", async ({ page, tenant }) => {
     // Wait for the SPA shell + initial XHRs to settle, not just DOMContentLoaded.
-    const response = await page.goto(`/book/${TENANT_SLUG}`, { waitUntil: "networkidle" });
+    const response = await page.goto(`/book/${tenant.slug}`, { waitUntil: "networkidle" });
     expect(response, "navigation produced no response").not.toBeNull();
-    expect(response!.status(), `unexpected HTTP status for /book/${TENANT_SLUG}`).toBeLessThan(400);
+    expect(response!.status(), `unexpected HTTP status for /book/${tenant.slug}`).toBeLessThan(400);
 
     // Hard-fail fast if the SPA rendered the not-found view
     await expect(page.getByRole("heading", { name: "404" })).toHaveCount(0);
@@ -156,7 +137,7 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
     await expect(page.locator("body")).not.toContainText(/not found|404/i, { timeout: 5_000 });
   });
 
-  test("creates restaurant + guesthouse + venue reservations for the same guest", async ({ request }) => {
+  test("creates restaurant + guesthouse + venue reservations for the same guest", async ({ request, tenant }) => {
     const date = futureDate(60);
     const checkOut = futureDate(62);
 
@@ -180,11 +161,11 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
     const restaurant = await callPublicBooking(
       request,
       {
-        tenant_id: TENANT_ID,
+        tenant_id: tenant.id,
         ...GUEST,
         guests_count: 2,
         reservation_type: "restaurant",
-        resource_id: RESOURCES.restaurant,
+        resource_id: tenant.resources.restaurant,
         date,
         start_time: "19:00",
         special_requests: "TEST: cross-booking restaurant leg",
@@ -200,11 +181,11 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
     const guesthouse = await callPublicBooking(
       request,
       {
-        tenant_id: TENANT_ID,
+        tenant_id: tenant.id,
         ...GUEST,
         guests_count: 2,
         reservation_type: "guesthouse",
-        resource_id: RESOURCES.guesthouse,
+        resource_id: tenant.resources.guesthouse,
         date,
         check_out_date: checkOut,
         special_requests: "TEST: cross-booking guesthouse leg",
@@ -220,11 +201,11 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
     const venue = await callPublicBooking(
       request,
       {
-        tenant_id: TENANT_ID,
+        tenant_id: tenant.id,
         ...GUEST,
         guests_count: 30,
         reservation_type: "venue",
-        resource_id: RESOURCES.venue,
+        resource_id: tenant.resources.venue,
         date,
         start_time: "12:00",
         event_type: "corporate",

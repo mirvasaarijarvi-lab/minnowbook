@@ -1,4 +1,10 @@
-import { test, expect } from "@playwright/test";
+import {
+  test,
+  expect,
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY,
+  futureDate,
+} from "./fixtures/test-tenant";
 import { createClient } from "@supabase/supabase-js";
 
 /**
@@ -8,32 +14,21 @@ import { createClient } from "@supabase/supabase-js";
  * Mirrors the exact business logic in
  * `src/components/dashboard/OffersManager.tsx#handleConfirm`.
  *
- * Requires real staff credentials for the `mimmin-testi` test tenant,
+ * Tenant identity (slug + id) and resource ids come from the shared
+ * `test-tenant` fixture so this spec stays aligned with the cross-booking
+ * spec under the same tenant_id and satisfies RLS.
+ *
+ * Requires real owner/admin credentials for the shared test tenant,
  * provided via env vars. The spec is skipped when they are missing so
  * CI never blocks on missing secrets:
  *
- *   E2E_STAFF_EMAIL=...        # staff/admin/owner of mimmin-testi
+ *   E2E_STAFF_EMAIL=...        # owner/admin of the shared test tenant
  *   E2E_STAFF_PASSWORD=...
- *
- * Run:
- *   E2E_STAFF_EMAIL=... E2E_STAFF_PASSWORD=... \
- *     bunx playwright test e2e/offer-confirm-creates-reservations.spec.ts
  */
-
-const SUPABASE_URL = "https://lsgznskkxadplwnxplhd.supabase.co";
-const SUPABASE_ANON_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxzZ3puc2treGFkcGx3bnhwbGhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5MTkyODAsImV4cCI6MjA4NzQ5NTI4MH0.v6DlzrUsFu_fpTIcWcSzz1Zyqbl_ZwF9v54TrW_yWtM";
-
-const TENANT_SLUG = "mimmin-testi";
 
 const STAFF_EMAIL = process.env.E2E_STAFF_EMAIL;
 const STAFF_PASSWORD = process.env.E2E_STAFF_PASSWORD;
 
-function futureDate(offsetDays = 75): string {
-  const d = new Date();
-  d.setUTCDate(d.getUTCDate() + offsetDays);
-  return d.toISOString().slice(0, 10);
-}
 
 test.describe("Offer confirm creates main + linked cross reservations", () => {
   test.skip(
@@ -41,7 +36,7 @@ test.describe("Offer confirm creates main + linked cross reservations", () => {
     "Set E2E_STAFF_EMAIL / E2E_STAFF_PASSWORD to run this spec.",
   );
 
-  test("confirms offer and produces main + 2 linked reservations", async () => {
+  test("confirms offer and produces main + 2 linked reservations", async ({ tenant }) => {
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
       auth: { persistSession: false, autoRefreshToken: false },
     });
@@ -54,14 +49,20 @@ test.describe("Offer confirm creates main + linked cross reservations", () => {
     expect(signInErr, `sign-in failed: ${signInErr?.message}`).toBeNull();
     expect(signIn?.user?.id).toBeTruthy();
 
-    // Resolve tenant id for the signed-in user
+    // Resolve tenant id for the signed-in user and assert it matches the
+    // shared fixture so guest, offer, and linked reservations all stay
+    // aligned under the same tenant_id (RLS-safe).
     const { data: tenantRow, error: tenantErr } = await supabase
       .from("tenants")
       .select("id")
-      .eq("slug", TENANT_SLUG)
+      .eq("slug", tenant.slug)
       .maybeSingle();
     expect(tenantErr, tenantErr?.message).toBeNull();
-    expect(tenantRow?.id, `tenant '${TENANT_SLUG}' not visible to this user`).toBeTruthy();
+    expect(tenantRow?.id, `tenant '${tenant.slug}' not visible to this user`).toBeTruthy();
+    expect(
+      tenantRow!.id,
+      `signed-in user resolves a different tenant than the shared fixture (${tenant.id})`,
+    ).toBe(tenant.id);
     const tenantId = tenantRow!.id as string;
 
     const eventDate = futureDate(75);
