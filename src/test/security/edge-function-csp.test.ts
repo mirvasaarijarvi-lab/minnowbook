@@ -44,7 +44,25 @@ const FIXTURES: FunctionFixture[] = [
 ];
 
 function loadSource(fixture: FunctionFixture): string {
-  return readFileSync(fixture.path, "utf-8");
+  // Follow imports into `_shared/*.ts` so we still see the helper body
+  // and SECURITY_HEADERS literal after the cross-function refactor that
+  // moved them out of every function's index.ts.
+  const indexSrc = readFileSync(fixture.path, "utf-8");
+  const sharedDir = resolve(fixture.path, "..", "..", "_shared");
+  const importRe = /from\s+["']\.\.\/_shared\/([A-Za-z0-9._-]+?)(?:\.ts)?["']/g;
+  let combined = indexSrc;
+  const seen = new Set<string>();
+  for (const m of indexSrc.matchAll(importRe)) {
+    if (seen.has(m[1])) continue;
+    seen.add(m[1]);
+    for (const ext of [".ts", ".tsx", ""]) {
+      try {
+        combined += "\n" + readFileSync(resolve(sharedDir, `${m[1]}${ext}`), "utf-8");
+        break;
+      } catch { /* not this extension */ }
+    }
+  }
+  return combined;
 }
 
 /**
