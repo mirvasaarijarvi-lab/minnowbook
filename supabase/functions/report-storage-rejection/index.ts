@@ -156,11 +156,11 @@ interface ScopeCheck {
 }
 
 async function evaluateScope(
-  // Use the loose `any` schema variant so the caller's
-  // `SupabaseClient<any, "public", any>` (created via createClient without an
-  // explicit Database type) is assignable. The function only reads from a
-  // single known table, so we don't lose any meaningful type safety.
-  sb: SupabaseClient<any, "public", any>,
+  // The esm.sh build of @supabase/supabase-js doesn't expose `SupabaseClient`
+  // as a generic type, so we type the client as `any` here. The function only
+  // reads from a single known table, so we don't lose meaningful type safety.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  sb: any,
   check: ScopeCheck,
 ): Promise<{ raised: boolean; count: number }> {
   const since = new Date(Date.now() - SPIKE_WINDOW_MINUTES * 60_000).toISOString();
