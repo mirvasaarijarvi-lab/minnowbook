@@ -229,6 +229,39 @@ Deno.test("public-booking: creates a pending reservation end-to-end", async () =
     assertEquals(row.guest_name, guestName);
   } finally {
     await cleanup();
+
+    // Post-cleanup assertion: confirm the guest_email no longer resolves to
+    // any reservation row. Runs in `finally` so it executes even if an
+    // earlier assertion failed, and uses a separate try/catch so a verify
+    // failure surfaces a clear error instead of being swallowed by the
+    // outer assertion that already threw.
+    if (SERVICE_KEY) {
+      const verifyFilter =
+        `tenant_id=eq.${TEST_TENANT_ID}&guest_email=eq.${encodeURIComponent(guestEmail)}`;
+      const { res: verifyRes, text: verifyText } = await adminFetch(
+        `/reservations?${verifyFilter}&select=id`,
+      );
+      assertEquals(
+        verifyRes.status,
+        200,
+        `cleanup verify SELECT failed: ${verifyRes.status} ${verifyText}`,
+      );
+      let remaining: any[] = [];
+      try {
+        remaining = JSON.parse(verifyText);
+      } catch {
+        throw new Error(
+          `cleanup verify: non-JSON response from PostgREST: ${verifyText}`,
+        );
+      }
+      assertEquals(
+        Array.isArray(remaining) ? remaining.length : -1,
+        0,
+        `cleanup verify: expected 0 rows for ${guestEmail} after cleanup, ` +
+          `found ${Array.isArray(remaining) ? remaining.length : "non-array"} ` +
+          `(${verifyText})`,
+      );
+    }
   }
 });
 
