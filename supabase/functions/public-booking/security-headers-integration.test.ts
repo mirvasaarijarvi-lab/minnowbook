@@ -21,6 +21,7 @@ import {
   handlePublicBookingRequest,
 } from "./index.ts";
 import { SECURITY_HEADERS } from "../_shared/http-headers.ts";
+import { assertCspAndHsts } from "../_shared/test-security-headers.ts";
 
 /** Headers that MUST appear on every Response, success or error. */
 const REQUIRED_HEADER_ENTRIES = Object.entries(SECURITY_HEADERS);
