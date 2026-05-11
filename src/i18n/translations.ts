@@ -1922,7 +1922,7 @@ const en: TranslationKeys = {
   "booking.reservations": "reservations",
   "booking.submitting": "Submitting...",
   "booking.submitError": "Failed to submit reservation. Please try again.",
-  "booking.serviceMisconfigured": "Online booking is temporarily unavailable due to a server configuration issue. No reservation was created. Please contact the venue directly or try again later.",
+  "booking.serviceMisconfigured": "Online booking is temporarily unavailable because the server is missing its service role key. No reservation was created, so you have not been charged or booked. If you are a guest, please contact the venue directly by phone or email, or try again in a few minutes. If you manage this venue: open Lovable Cloud, go to Backend, then API keys, copy the service_role key, then go to Backend, Edge Functions, Secrets, and add it as SUPABASE_SERVICE_ROLE_KEY. Public booking will start working again right after the secret is saved.",
   "booking.dateBlocked": "This date is not available for booking.",
   "booking.timeBlocked": "This time slot is not available for booking.",
   "booking.blocked": "Blocked",
