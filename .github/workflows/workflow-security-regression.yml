@@ -1,21 +1,40 @@
 name: Workflow security regression
 
-# Guards against re-introducing the privilege-escalation footgun where
-# Dependabot auto-merge workflows run with `pull_request_target`, which
-# executes in the context of the BASE branch with read/write secrets
-# even for PRs from forks. Aikido (and the GitHub security advisory
-# database) flag this as a high-severity issue, so we lock it down with
-# a static check that fails CI if the pattern reappears.
+# Guards against re-introducing privilege-escalation footguns in
+# Dependabot / auto-merge workflows. Three classes of regression are
+# blocked:
+#
+#   1. `pull_request_target` trigger
+#      Runs in the BASE branch context with read/write secrets even
+#      for PRs from forks. Aikido and the GitHub Advisory DB flag this
+#      as a high-severity issue.
+#
+#   2. `workflow_run` trigger
+#      Triggered by another workflow's completion and ALWAYS runs
+#      from the default branch with the default `GITHUB_TOKEN` and
+#      access to secrets, regardless of where the original PR came
+#      from. Combined with auto-merge that lets a malicious PR
+#      indirectly trigger a privileged run; same blast radius as
+#      pull_request_target. Banned outright in this class of workflow.
+#      (Also flag `repository_dispatch` for the same reason.)
+#
+#   3. `actions/checkout` without `persist-credentials: false`
+#      The checkout action defaults to leaving the
+#      `GITHUB_TOKEN` configured in the local git config of the
+#      runner. Any later `run:` step (or compromised action) can use
+#      it to push to the repo. For auto-merge workflows we want the
+#      checkout to be strictly read-only, so an explicit
+#      `persist-credentials: false` is required on every checkout
+#      step.
 #
 # Scope:
 #   - Any workflow file under .github/workflows/ whose name contains
-#     "dependabot" or "auto-merge" must NOT use `pull_request_target`.
+#     "dependabot" or "auto-merge".
 #   - All other workflows are unaffected so legitimate uses elsewhere
-#     (e.g. labelling forked PRs) remain possible if ever needed.
+#     remain possible.
 #
-# This job is intentionally a single bash step with no third-party
-# actions beyond actions/checkout so it cannot itself become a
-# supply-chain risk.
+# This job is intentionally a single bash step plus checkout — no
+# third-party actions — so it cannot itself become a supply-chain risk.
 
 on:
   pull_request:
@@ -35,8 +54,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  forbid-pull-request-target-in-automerge:
-    name: No pull_request_target in auto-merge workflows
+  forbid-high-risk-patterns-in-automerge:
+    name: No high-risk triggers or unsafe checkout in auto-merge workflows
     runs-on: ubuntu-latest
     timeout-minutes: 2
     permissions:
@@ -48,7 +67,7 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Scan auto-merge workflows
+      - name: Scan auto-merge workflows for forbidden patterns
         run: |
           set -euo pipefail
           shopt -s nullglob
@@ -72,24 +91,108 @@ jobs:
           printf '  - %s\n' "${files[@]}"
 
           violations=0
+
+          # Helper: strip full-line YAML comments before pattern-match
+          # so documenting mentions stay legal. We do NOT strip inline
+          # comments — a YAML inline comment after a real key is rare
+          # and we'd rather over-report than miss a live regression.
+          strip_comments() {
+            sed -E 's/^[[:space:]]*#.*$//' "$1"
+          }
+
+          # ---------------------------------------------------------
+          # Check 1: forbidden trigger `pull_request_target`
+          # ---------------------------------------------------------
           for f in "${files[@]}"; do
-            # Strip full-line comments before grepping so a documenting
-            # mention like "# do NOT use pull_request_target" stays
-            # legal. We still flag inline comments after a colon to be
-            # safe.
-            if sed -E 's/^[[:space:]]*#.*$//' "$f" \
+            if strip_comments "$f" \
                  | grep -nE '(^|[^A-Za-z0-9_-])pull_request_target([^A-Za-z0-9_-]|$)' \
                  > /tmp/hits.txt; then
-              echo "::error file=$f::Forbidden trigger 'pull_request_target' detected. Use 'pull_request' instead, Dependabot PRs originate from in-repo branches and the default GITHUB_TOKEN is sufficient. See .github/workflows/dependabot-auto-merge.yml for the hardened pattern."
+              echo "::error file=$f::Forbidden trigger 'pull_request_target' detected. Use 'pull_request' instead — Dependabot PRs originate from in-repo branches and the default GITHUB_TOKEN is sufficient. See .github/workflows/dependabot-auto-merge.yml for the hardened pattern."
               sed "s|^|$f:|" /tmp/hits.txt
               violations=$((violations + 1))
             fi
           done
 
+          # ---------------------------------------------------------
+          # Check 2: forbidden triggers `workflow_run` and
+          # `repository_dispatch` (both run with default-branch
+          # privileges and full secrets, same blast radius as
+          # pull_request_target when chained with auto-merge).
+          # ---------------------------------------------------------
+          for f in "${files[@]}"; do
+            if strip_comments "$f" \
+                 | grep -nE '(^|[^A-Za-z0-9_-])(workflow_run|repository_dispatch)([^A-Za-z0-9_-]|$)' \
+                 > /tmp/hits.txt; then
+              # Pull out the matched trigger name(s) for a clear error.
+              triggers=$(awk -F: '{print $NF}' /tmp/hits.txt \
+                | grep -oE '(workflow_run|repository_dispatch)' \
+                | sort -u | paste -sd, -)
+              echo "::error file=$f::Forbidden trigger(s) detected: ${triggers}. These run from the default branch with full secrets and bypass the safety of 'pull_request' for an auto-merge workflow. Trigger from 'pull_request' (and check 'github.actor == \"dependabot[bot]\"') instead."
+              sed "s|^|$f:|" /tmp/hits.txt
+              violations=$((violations + 1))
+            fi
+          done
+
+          # ---------------------------------------------------------
+          # Check 3: every actions/checkout invocation must set
+          # `persist-credentials: false`. Without it, the GITHUB_TOKEN
+          # is left in the runner's git config and any subsequent
+          # step (or compromised action) can push to the repo using
+          # the auto-merge job's elevated `contents: write` scope.
+          #
+          # Implementation: parse with python (already on ubuntu
+          # runners) so we can walk steps[] reliably instead of
+          # regexing YAML. Fail when a step `uses: actions/checkout@*`
+          # is missing `with.persist-credentials: false`.
+          # ---------------------------------------------------------
+          python3 - "${files[@]}" <<'PY' || violations=$((violations + $?))
+          import sys, yaml, pathlib
+          violations = 0
+          for path in sys.argv[1:]:
+              try:
+                  doc = yaml.safe_load(pathlib.Path(path).read_text())
+              except Exception as e:
+                  print(f"::error file={path}::Failed to parse YAML: {e}")
+                  violations += 1
+                  continue
+              jobs = (doc or {}).get("jobs", {}) or {}
+              for job_name, job in jobs.items():
+                  if not isinstance(job, dict):
+                      continue
+                  for idx, step in enumerate(job.get("steps", []) or []):
+                      if not isinstance(step, dict):
+                          continue
+                      uses = str(step.get("uses", ""))
+                      # Match actions/checkout regardless of ref pin
+                      # (semver tag or commit SHA after the @).
+                      if not uses.startswith("actions/checkout@"):
+                          continue
+                      with_block = step.get("with") or {}
+                      pc = with_block.get("persist-credentials")
+                      # YAML loader gives us bool False for `false`.
+                      if pc is not False:
+                          step_label = step.get("name") or f"step #{idx}"
+                          print(
+                              f"::error file={path}::Job '{job_name}' "
+                              f"step '{step_label}' uses '{uses}' without "
+                              f"'with.persist-credentials: false'. "
+                              f"Auto-merge workflows must do read-only "
+                              f"checkouts so the GITHUB_TOKEN is not left "
+                              f"in the runner's git config for later steps "
+                              f"to abuse."
+                          )
+                          violations += 1
+          # Exit with the number of violations, capped at 125 (max
+          # meaningful POSIX exit). The bash wrapper adds it to the
+          # running total.
+          sys.exit(min(violations, 125))
+          PY
+
           if [ "$violations" -gt 0 ]; then
             echo
-            echo "Failing build: $violations workflow(s) reintroduced 'pull_request_target' in an auto-merge context."
+            echo "Failing build: $violations regression(s) detected in dependabot/auto-merge workflows."
             exit 1
           fi
 
-          echo "OK: no auto-merge workflow uses pull_request_target."
+          echo "OK: no auto-merge workflow uses pull_request_target, workflow_run, repository_dispatch, or an unsafe checkout."
+
