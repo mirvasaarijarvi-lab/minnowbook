@@ -23,7 +23,8 @@
     "e2e:install": "playwright install chromium",
     "e2e": "playwright install chromium && playwright test",
     "e2e:ui": "playwright install chromium && playwright test --ui",
-    "test:ci": "bash scripts/test-ci.sh"
+    "test:ci": "bash scripts/test-ci.sh",
+    "check:permission-arity": "node scripts/ci/check-permission-arity.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

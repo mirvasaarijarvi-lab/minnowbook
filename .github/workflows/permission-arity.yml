@@ -1,0 +1,52 @@
+name: Permission Arity Smoke Check
+
+# Fails the build if any 2-arg overload of public.has_permission /
+# public.has_tenant_role reappears in a NEW migration, in current source
+# (src/, supabase/functions/, scripts/), or in the live database.
+#
+# Background: the cross-tenant 2-arg overloads were dropped in migration
+# 20260511132118 because they granted permissions/roles held in ANY
+# tenant. All callers must use the 3-arg, tenant-scoped signature.
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  arity-check:
+    name: Forbid 2-arg has_permission / has_tenant_role
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # Optional: install pg only if a DB URL is provided. Without it,
+      # the script self-skips the live probe and still enforces the
+      # static (repo) checks, which is the primary CI gate.
+      - name: Install pg (optional, for live DB probe)
+        if: env.SUPABASE_DB_URL != ''
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: npm install --no-save pg@8
+
+      - name: Run smoke check
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: node scripts/ci/check-permission-arity.mjs
