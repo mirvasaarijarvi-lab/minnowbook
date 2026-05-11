@@ -3,6 +3,11 @@
 # Fails fast on the first failing suite (set -e) and prints which suite broke.
 set -euo pipefail
 
+# All machine-readable test reports land here; CI uploads this folder as an
+# artifact so failures include junit XML, JSON results, and full stack traces.
+REPORTS_DIR="${REPORTS_DIR:-test-reports}"
+mkdir -p "$REPORTS_DIR/vitest" "$REPORTS_DIR/deno" "$REPORTS_DIR/playwright"
+
 run_step() {
   local name="$1"; shift
   echo ""
@@ -11,15 +16,20 @@ run_step() {
   echo "=============================================="
   if ! "$@"; then
     echo ""
-    echo "❌ $name FAILED — aborting CI run"
+    echo "❌ $name FAILED — aborting CI run (reports in $REPORTS_DIR)"
     exit 1
   fi
   echo "✅ $name passed"
 }
 
-# 1. Vitest unit tests (fail fast on first failing file, no watch, minimal reporter)
+# 1. Vitest unit tests (fail fast on first failing file, dot reporter to keep
+#    console quiet, junit + json reporters write into $REPORTS_DIR/vitest/).
 run_step "Unit tests (Vitest)" \
-  node --no-warnings ./node_modules/vitest/vitest.mjs run --bail=1 --reporter=dot
+  node --no-warnings ./node_modules/vitest/vitest.mjs run \
+    --bail=1 \
+    --reporter=dot \
+    --reporter=junit \
+    --reporter=json
 
 # 2. Deno tests for Supabase edge functions
 if command -v deno >/dev/null 2>&1; then
