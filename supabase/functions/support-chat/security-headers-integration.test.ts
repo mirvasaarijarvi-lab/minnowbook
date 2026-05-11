@@ -64,7 +64,12 @@ Deno.test(
   withStubSupabaseEnv(async () => {
     // RATE_LIMIT_MAX is 20 in support-chat. Drive 21 requests from
     // the same IP; the last one MUST come back 429.
-    const ip = `10.99.0.${Math.floor(Math.random() * 250) + 1}`;
+    //
+    // Use a FIXED, namespaced IP rather than `Math.random()` so the
+    // test is fully deterministic. No other test in this file shares
+    // the 10.99.x.x range, so a leaked rate-limit bucket from a
+    // previous test cannot inflate this counter.
+    const ip = "10.99.0.1";
     let last: Response | undefined;
     for (let i = 0; i < 21; i++) {
       const req = new Request("https://example.test/support-chat", {

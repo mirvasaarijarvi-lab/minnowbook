@@ -184,7 +184,14 @@ Deno.test(
       // The rate-limit check runs BEFORE the service-role-key guard and
       // BEFORE any DB work. Drive 6 requests from the same IP; the 6th
       // one MUST come back as 429.
-      const ip = `10.0.0.${Math.floor(Math.random() * 250) + 4}`;
+      //
+      // Use a FIXED, namespaced IP rather than `Math.random()` so the
+      // test is fully deterministic. The other tests in this file use
+      // 10.0.0.1 to 10.0.0.3; this one is pinned to 10.0.0.250 to stay
+      // out of that range and to keep its own rate-limit bucket
+      // isolated even if the in-memory limiter state leaks across
+      // tests in the same Deno process.
+      const ip = "10.0.0.250";
       let last: Response | undefined;
       for (let i = 0; i < 6; i++) {
         const req = new Request("https://example.test/public-booking", {
