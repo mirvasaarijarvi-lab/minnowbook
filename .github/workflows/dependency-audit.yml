@@ -198,20 +198,13 @@ jobs:
         env:
           AUDIT_LEVEL: ${{ env.AUDIT_LEVEL }}
         run: |
-          set -o pipefail
+          # Capture-only: the allowlist gate below decides pass/fail.
           yarn_version="$(yarn --version || echo 1.0.0)"
           major="${yarn_version%%.*}"
           if [ "$major" -ge 2 ]; then
-            yarn npm audit --environment production --severity "$AUDIT_LEVEL" --json \
-              | tee audit-prod.json
+            yarn npm audit --environment production --severity "$AUDIT_LEVEL" --json | tee audit-prod.json || true
           else
-            yarn audit --groups dependencies --level "$AUDIT_LEVEL" --json \
-              | tee audit-prod.json
-          fi
-          status=${PIPESTATUS[0]}
-          if [ "$status" -ne 0 ]; then
-            echo "::error title=Vulnerable production dependency::yarn audit found one or more advisories at severity '$AUDIT_LEVEL' or higher in production dependencies."
-            exit "$status"
+            yarn audit --groups dependencies --level "$AUDIT_LEVEL" --json | tee audit-prod.json || true
           fi
 
       - name: Run yarn audit (all deps, informational)
