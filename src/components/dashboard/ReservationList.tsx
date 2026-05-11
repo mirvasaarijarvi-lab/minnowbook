@@ -797,6 +797,15 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
         onOpenChange={(open) => !open && setEditingReservation(null)}
       />
 
+      <ReservationDetailDialog
+        reservation={detailReservation}
+        open={!!detailReservation}
+        onOpenChange={(open) => !open && setDetailReservation(null)}
+        onEdit={(r) => setEditingReservation(r)}
+        canEdit={canEdit}
+        siteName={detailReservation?.site_id ? siteMap[detailReservation.site_id] : null}
+      />
+
       {/* New reservation dialog */}
       <ManualReservationDialog
         open={newReservationOpen}
