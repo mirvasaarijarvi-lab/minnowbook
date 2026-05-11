@@ -12,6 +12,10 @@ name: Down Migrations
 # any PR touching the reservations indexes migration must keep the rollback
 # pathway working.
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   push:
     branches: [main]

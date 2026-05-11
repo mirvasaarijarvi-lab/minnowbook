@@ -11,6 +11,10 @@ name: Automated Security Scan
 # WARN-level Supabase findings are reported as annotations only, in
 # line with the project maintenance policy (remediate ERROR only).
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   push:
     branches: [main]

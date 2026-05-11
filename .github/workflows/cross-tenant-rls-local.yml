@@ -12,6 +12,10 @@ name: Cross-Tenant RLS (Local Supabase)
 # job emits a clear skip notice and exits 0 so it doesn't block PRs that
 # are otherwise green.
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   push:
     branches: [main]

@@ -30,6 +30,10 @@ name: Cross-Tenant RLS (Live Mode)
 # tests create + delete files in the storage buckets and never touch production
 # customer data, but using staging keeps the blast radius zero.
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   push:
     branches: [main]
