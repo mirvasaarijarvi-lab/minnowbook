@@ -194,7 +194,10 @@ describe("edge-function transport-security header consistency", () => {
         const looksLikePreflight = /new Response\s*\(\s*null/.test(slice);
         const hasCorsSpread =
           /\.\.\.\s*corsHeaders/.test(slice) ||
-          /\.\.\.\s*getCorsHeaders\s*\(/.test(slice);
+          /\.\.\.\s*getCorsHeaders\s*\(/.test(slice) ||
+          // Local rebindings of the shared header bag (e.g. a `cors`
+          // parameter that defaults to `corsHeaders`) are equivalent.
+          /\.\.\.\s*cors\b/.test(slice);
         if (!looksLikePreflight && !hasCorsSpread) {
           offenders.push(slice.split("\n")[0]);
         }
