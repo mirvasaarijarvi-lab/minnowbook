@@ -242,6 +242,11 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
       "warmup outcome must be one of the known observable states",
     ).toContain(warmupOutcome);
 
+    await captureCheckpoint(page, testInfo, "post-warmup", {
+      screenshot: false,
+      extra: warmupSummary,
+    });
+
     try {
       const restaurant = await callLeg("restaurant", {
         tenant_id: tenant.id,
