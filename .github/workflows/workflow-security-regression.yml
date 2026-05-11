@@ -21,16 +21,34 @@ name: Workflow security regression
 # SHAs) so the gate itself cannot become a supply-chain risk.
 
 on:
+  # Fire on every PR that adds or modifies a Dependabot / auto-merge
+  # workflow file, plus changes to the scanner itself or this gate
+  # workflow. The path globs cover all common naming variants
+  # (`dependabot-*`, `*-dependabot*`, `auto-merge*`, `automerge*`)
+  # so a new file added in any of those shapes is caught
+  # automatically without having to remember to extend this list.
   pull_request:
     paths:
-      - ".github/workflows/**"
+      - ".github/workflows/*dependabot*.yml"
+      - ".github/workflows/*dependabot*.yaml"
+      - ".github/workflows/*auto-merge*.yml"
+      - ".github/workflows/*auto-merge*.yaml"
+      - ".github/workflows/*automerge*.yml"
+      - ".github/workflows/*automerge*.yaml"
       - ".github/scripts/scan-automerge-workflows.py"
       - ".github/workflows/workflow-security-regression.yml"
+      - "scripts/scan-workflow-security.sh"
   push:
     branches: [main]
     paths:
-      - ".github/workflows/**"
+      - ".github/workflows/*dependabot*.yml"
+      - ".github/workflows/*dependabot*.yaml"
+      - ".github/workflows/*auto-merge*.yml"
+      - ".github/workflows/*auto-merge*.yaml"
+      - ".github/workflows/*automerge*.yml"
+      - ".github/workflows/*automerge*.yaml"
       - ".github/scripts/scan-automerge-workflows.py"
+      - ".github/workflows/workflow-security-regression.yml"
   workflow_dispatch:
 
 permissions: {}
@@ -51,6 +69,10 @@ jobs:
         # actions/checkout@v4.2.2
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
+          # Need full history so we can diff against the PR base ref
+          # to enumerate which dependabot/auto-merge files actually
+          # changed in this PR. `0` = unshallow.
+          fetch-depth: 0
           persist-credentials: false
 
       - name: Set up Python
@@ -62,8 +84,43 @@ jobs:
       - name: Install scanner dependencies
         run: pip install --no-deps "pyyaml==6.0.2"
 
+      # ---------------------------------------------------------------
+      # Audit trail: print the set of dependabot/auto-merge workflow
+      # files that this PR actually touches. This makes the gate
+      # output self-explanatory ("the scanner ran because you added
+      # X.yml") instead of forcing a reviewer to cross-reference the
+      # PR's Files changed tab. On push events we skip this and just
+      # run the scanner over the whole directory.
+      # ---------------------------------------------------------------
+      - name: Enumerate touched auto-merge workflows
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          # Match the same globs as the trigger path filter above.
+          # `git diff --name-only` lists adds + modifies + renames,
+          # which is exactly the set we want to flag.
+          mapfile -t changed < <(git diff --name-only "$BASE_SHA" "$HEAD_SHA" -- \
+            '.github/workflows/*dependabot*.yml' \
+            '.github/workflows/*dependabot*.yaml' \
+            '.github/workflows/*auto-merge*.yml' \
+            '.github/workflows/*auto-merge*.yaml' \
+            '.github/workflows/*automerge*.yml' \
+            '.github/workflows/*automerge*.yaml' || true)
+          if [ "${#changed[@]}" -eq 0 ]; then
+            echo "::notice title=Workflow security gate::No dependabot/auto-merge workflow file changed; running scanner over the whole directory anyway because the scanner or gate workflow itself changed."
+          else
+            echo "::notice title=Workflow security gate::Scanning ${#changed[@]} touched auto-merge workflow file(s):"
+            for f in "${changed[@]}"; do
+              echo "  - $f"
+            done
+          fi
+
       - name: Scan auto-merge workflows
         run: python3 .github/scripts/scan-automerge-workflows.py --dir .github/workflows
+
 
   self-test:
     name: Scanner self-test (passing + failing fixtures)
