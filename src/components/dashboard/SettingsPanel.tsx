@@ -652,7 +652,7 @@ const SettingsPanel = () => {
       const { assertSafeStorageObjectPath } = await import("@/lib/storage-path");
       const ext = sanitizeFileExtension(file.name.split(".").pop());
       const safeTenant = sanitizePathSegment(tenantId!);
-      const filePath = assertSafeStorageObjectPath(`${safeTenant}/logo.${ext}`, { callsite: "settings:logo-upload" });
+      const filePath = assertSafeStorageObjectPath(`${safeTenant}/logo.${ext}`, { callsite: "settings:logo-upload", tenantId: tenantId ?? undefined });
 
       const { error: uploadError } = await supabase.storage
         .from("tenant-branding")
@@ -702,7 +702,7 @@ const SettingsPanel = () => {
       const { assertSafeStorageObjectPath } = await import("@/lib/storage-path");
       const ext = sanitizeFileExtension(file.name.split(".").pop());
       const safeTenant = sanitizePathSegment(tenantId!);
-      const filePath = assertSafeStorageObjectPath(`${safeTenant}/hero.${ext}`, { callsite: "settings:hero-upload" });
+      const filePath = assertSafeStorageObjectPath(`${safeTenant}/hero.${ext}`, { callsite: "settings:hero-upload", tenantId: tenantId ?? undefined });
 
       const { error: uploadError } = await supabase.storage
         .from("tenant-branding")

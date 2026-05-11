@@ -74,6 +74,13 @@ export interface RejectedStoragePathEvent {
   hasControlChar: boolean;
   /** Optional caller-provided tag for log triage (e.g. "logo-upload"). */
   callsite?: string;
+  /**
+   * Tenant the rejection happened in, when known. Tenant IDs are
+   * UUIDs and not sensitive on their own, so they are safe to log
+   * and they make per-tenant abuse spikes detectable. Never include
+   * user IDs, emails, file names, or other PII here.
+   */
+  tenantId?: string;
   /** ISO timestamp of the rejection. */
   rejectedAt: string;
 }
@@ -110,10 +117,24 @@ function classifyLeadingChar(ch: string | undefined): RejectedStoragePathEvent["
   return "other";
 }
 
+/**
+ * Tenant IDs in this app are v4 UUIDs. We refuse to log anything that
+ * doesn't match that shape, defence-in-depth against a future caller
+ * accidentally passing an email or filename through `tenantId`.
+ */
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function safeTenantId(raw: unknown): string | undefined {
+  if (typeof raw !== "string") return undefined;
+  const trimmed = raw.trim();
+  return UUID_RE.test(trimmed) ? trimmed.toLowerCase() : undefined;
+}
+
 function buildEvent(
   reason: StoragePathRejectionReason,
   rawInput: unknown,
   callsite: string | undefined,
+  tenantId: string | undefined,
 ): RejectedStoragePathEvent {
   const isString = typeof rawInput === "string";
   const asString = isString ? (rawInput as string) : "";
@@ -132,22 +153,23 @@ function buildEvent(
     // eslint-disable-next-line no-control-regex
     hasControlChar: isString && /[\u0000-\u001f\u007f]/.test(asString),
     callsite,
+    tenantId: safeTenantId(tenantId),
     rejectedAt: new Date().toISOString(),
   };
 }
 
 /**
  * Emit a structured rejection event. Exposed so wrappers (e.g. signed
- * URL helpers) can attach a `callsite` tag while still routing through
- * the same sink. The raw payload is never forwarded to the logger.
+ * URL helpers) can attach `callsite` / `tenantId` while still routing
+ * through the same sink. The raw payload is never forwarded.
  */
 export function logRejectedStoragePath(
   reason: StoragePathRejectionReason,
   rawInput: unknown,
-  callsite?: string,
+  context: { callsite?: string; tenantId?: string } = {},
 ): void {
   try {
-    activeLogger(buildEvent(reason, rawInput, callsite));
+    activeLogger(buildEvent(reason, rawInput, context.callsite, context.tenantId));
   } catch {
     // Logging must never break the calling code path.
   }
@@ -157,8 +179,9 @@ function reject(
   reason: StoragePathRejectionReason,
   rawInput: unknown,
   callsite: string | undefined,
+  tenantId: string | undefined,
 ): never {
-  logRejectedStoragePath(reason, rawInput, callsite);
+  logRejectedStoragePath(reason, rawInput, { callsite, tenantId });
   throw new InvalidStoragePathError(reason);
 }
 
@@ -169,44 +192,50 @@ export interface AssertSafeStorageObjectPathOptions {
    * structured logs to make Aikido regression triage easier.
    */
   callsite?: string;
+  /**
+   * Tenant context for the rejection, when the caller knows it.
+   * Must be a v4 UUID, anything else is dropped before logging so we
+   * never accidentally emit emails / filenames / opaque tokens.
+   */
+  tenantId?: string;
 }
 
 export function assertSafeStorageObjectPath(
   path: string,
   options: AssertSafeStorageObjectPathOptions = {},
 ): string {
-  const callsite = options.callsite;
+  const { callsite, tenantId } = options;
   if (typeof path !== "string") {
-    reject("not_a_string", path, callsite);
+    reject("not_a_string", path, callsite, tenantId);
   }
   const trimmed = path.trim();
   if (!trimmed) {
-    reject("empty", path, callsite);
+    reject("empty", path, callsite, tenantId);
   }
   if (trimmed.length > 1024) {
-    reject("too_long", path, callsite);
+    reject("too_long", path, callsite, tenantId);
   }
   // No NUL or other ASCII control characters.
   // eslint-disable-next-line no-control-regex
   if (/[\u0000-\u001f\u007f]/.test(trimmed)) {
-    reject("control_char", path, callsite);
+    reject("control_char", path, callsite, tenantId);
   }
   // No backslashes, no scheme/host fragments.
   if (trimmed.includes("\\")) {
-    reject("backslash", path, callsite);
+    reject("backslash", path, callsite, tenantId);
   }
   if (/^[a-z][a-z0-9+.-]*:\/\//i.test(trimmed)) {
-    reject("scheme", path, callsite);
+    reject("scheme", path, callsite, tenantId);
   }
   // No absolute paths.
   if (trimmed.startsWith("/")) {
-    reject("absolute", path, callsite);
+    reject("absolute", path, callsite, tenantId);
   }
   // No traversal segments anywhere in the path.
   const segments = trimmed.split("/");
   for (const seg of segments) {
     if (seg === "" || seg === "." || seg === "..") {
-      reject("traversal_or_empty_segment", path, callsite);
+      reject("traversal_or_empty_segment", path, callsite, tenantId);
     }
   }
   return trimmed;

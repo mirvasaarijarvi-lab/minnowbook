@@ -49,7 +49,7 @@ const ResourceImageGallery = ({ resourceId, tenantId }: Props) => {
       const fileName = `gallery-${Date.now()}.${ext}`;
       const safeTenant = sanitizePathSegment(tenantId);
       const safeResource = sanitizePathSegment(resourceId);
-      const filePath = assertSafeStorageObjectPath(`${safeTenant}/resources/${safeResource}/${fileName}`, { callsite: "resource-gallery:upload" });
+      const filePath = assertSafeStorageObjectPath(`${safeTenant}/resources/${safeResource}/${fileName}`, { callsite: "resource-gallery:upload", tenantId: tenantId ?? undefined });
 
       const { error: uploadError } = await supabase.storage
         .from("tenant-assets")
