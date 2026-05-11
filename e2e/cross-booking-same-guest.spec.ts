@@ -280,14 +280,26 @@ async function callPublicBooking(
     deployment_id: responseHeaders["x-sb-deployment-id"] ?? null,
   };
 
+  // Some backends echo the correlation id back; capture both sides so logs
+  // can be cross-referenced even if the server rewrites it.
+  const echoedCorrelationId =
+    responseHeaders["x-correlation-id"] ??
+    responseHeaders["x-request-id"] ??
+    null;
+
   const diagnostic = {
     label,
+    correlationId: fullCorrelationId,
+    attemptCorrelationId,
+    echoedCorrelationId,
     traceIds,
     request: { method: "POST", url, headers: redactedHeaders, body },
     response: { status, durationMs, headers: responseHeaders, body: json ?? text },
   };
 
   const traceLine =
+    `correlation_id=${attemptCorrelationId} ` +
+    `echoed=${echoedCorrelationId ?? "<none>"} ` +
     `sb-request-id=${traceIds.sb_request_id ?? "<none>"} ` +
     `cf-ray=${traceIds.cf_ray ?? "<none>"} ` +
     `deno-execution-id=${traceIds.deno_execution_id ?? "<none>"}`;
@@ -297,7 +309,7 @@ async function callPublicBooking(
     console.error(
       `\n[cross-booking] ${label} FAILED (HTTP ${status}, ${durationMs}ms)\n` +
         `[cross-booking] ${label} edge-function trace: ${traceLine}\n` +
-        `[cross-booking] grep edge logs with: supabase functions logs public-booking | grep ${traceIds.sb_request_id ?? "<sb-request-id>"}\n` +
+        `[cross-booking] grep edge logs with: supabase functions logs public-booking | grep -E '${attemptCorrelationId}|${traceIds.sb_request_id ?? "<sb-request-id>"}'\n` +
         JSON.stringify(diagnostic, null, 2) +
         "\n",
     );
