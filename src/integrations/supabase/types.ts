@@ -1518,6 +1518,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "reservations_discount_code_id_fkey"
+            columns: ["discount_code_id"]
+            isOneToOne: false
+            referencedRelation: "discount_codes"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "reservations_site_id_fkey"
             columns: ["site_id"]
             isOneToOne: false
