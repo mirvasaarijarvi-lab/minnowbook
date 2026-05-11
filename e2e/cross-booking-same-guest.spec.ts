@@ -395,31 +395,38 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
     // Surface guest identifier so manual cleanup is easy after the run
     console.log(`[cross-booking] created reservations for guest "${GUEST.guest_name}" (${GUEST.guest_email})`);
     } finally {
-      // Closing the request context flushes the HAR to disk. Always attach it
-      // (success OR failure) so the exact public-booking traffic for this run
-      // can be replayed in a browser via Chrome DevTools "Import HAR file"
-      // or inspected from the Playwright HTML report.
+      // Always write + attach the HAR (success OR failure) so the exact
+      // public-booking traffic for this run can be replayed in a browser via
+      // Chrome/Firefox DevTools "Import HAR file" or inspected from the
+      // Playwright HTML report.
       try {
-        // dispose() flushes the HAR to disk in Playwright >= 1.32.
-        await request.dispose({ reason: "test finished, flush HAR" });
-      } catch (disposeErr) {
+        const har = {
+          log: {
+            version: "1.2",
+            creator: {
+              name: "mimmobook-cross-booking-spec",
+              version: "1.0.0",
+              comment:
+                "Manually assembled HAR (Playwright apiRequest contexts do not support recordHar)",
+            },
+            browser: { name: "playwright-apirequest", version: "1" },
+            pages: [],
+            entries: harEntries,
+          },
+        };
+        fs.writeFileSync(harPath, JSON.stringify(har, null, 2), "utf-8");
+        const size = fs.statSync(harPath).size;
         // eslint-disable-next-line no-console
-        console.warn(`[cross-booking] request.dispose failed: ${(disposeErr as Error)?.message}`);
-      }
-      try {
-        const exists = fs.existsSync(harPath);
-        const size = exists ? fs.statSync(harPath).size : 0;
+        console.log(
+          `[cross-booking] HAR exported (${harEntries.length} entries, ${size} bytes) at ${harPath}`,
+        );
+        await testInfo.attach(`public-booking-attempt-${testInfo.retry + 1}.har`, {
+          path: harPath,
+          contentType: "application/json",
+        });
+      } catch (harErr) {
         // eslint-disable-next-line no-console
-        console.log(`[cross-booking] HAR file exists=${exists} size=${size} path=${harPath}`);
-        if (exists && size > 0) {
-          await testInfo.attach(`public-booking-attempt-${testInfo.retry + 1}.har`, {
-            path: harPath,
-            contentType: "application/json",
-          });
-        }
-      } catch (attachErr) {
-        // eslint-disable-next-line no-console
-        console.warn(`[cross-booking] failed to attach HAR: ${(attachErr as Error)?.message}`);
+        console.warn(`[cross-booking] failed to write/attach HAR: ${(harErr as Error)?.message}`);
       }
     }
   });
