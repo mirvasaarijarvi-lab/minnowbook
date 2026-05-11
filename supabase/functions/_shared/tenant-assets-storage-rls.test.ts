@@ -103,7 +103,8 @@ async function provisionTenantAndStaff(admin: any) {
 }
 
 async function cleanup(
-  admin: ReturnType<typeof createClient>,
+  // deno-lint-ignore no-explicit-any
+  admin: any,
   ctx: { userId: string; tenantId: string; otherTenantId: string },
 ) {
   // Best-effort: empty bucket folders, drop memberships/tenants, delete user.
