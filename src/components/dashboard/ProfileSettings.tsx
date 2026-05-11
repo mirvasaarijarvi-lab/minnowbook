@@ -96,8 +96,13 @@ const ProfileSettings = () => {
       const newUrl = `${urlData.publicUrl}?t=${Date.now()}`;
       setAvatarUrl(newUrl);
       await updateProfile.mutateAsync({ display_name: displayName, avatar_url: newUrl });
-    } catch {
-      toast.error("Failed to upload avatar");
+    } catch (err) {
+      const { isInvalidStoragePathError } = await import("@/lib/storage-path");
+      toast.error(
+        isInvalidStoragePathError(err)
+          ? "This file's name contains characters we can't safely store. Please rename it and try again."
+          : "Failed to upload avatar",
+      );
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";

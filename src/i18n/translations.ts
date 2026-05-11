@@ -37,6 +37,7 @@ type TranslationKeys = {
   "common.date": string;
   "common.noResults": string;
   "common.selectAll": string;
+  "common.invalidFileName": string;
 
   // Nav
   "nav.home": string;
@@ -1725,6 +1726,7 @@ const en: TranslationKeys = {
   "common.date": "Date",
   "common.noResults": "No results found.",
   "common.selectAll": "Select all",
+  "common.invalidFileName": "This file's name contains characters we can't safely store. Please rename it and try again.",
 
   // Nav
   "nav.home": "Home",
@@ -3389,6 +3391,7 @@ const fi: TranslationKeys = {
   "common.date": "Päivämäärä",
   "common.noResults": "Ei tuloksia.",
   "common.selectAll": "Valitse kaikki",
+  "common.invalidFileName": "Tiedoston nimi sisältää merkkejä, joita emme voi turvallisesti tallentaa. Nimeä tiedosto uudelleen ja yritä uudelleen.",
 
   // Nav
   "nav.home": "Etusivu",
@@ -5051,6 +5054,7 @@ const sv: TranslationKeys = {
   "common.date": "Datum",
   "common.noResults": "Inga resultat hittades.",
   "common.selectAll": "Välj alla",
+  "common.invalidFileName": "Filens namn innehåller tecken som vi inte kan lagra säkert. Byt namn på filen och försök igen.",
 
   // Nav
   "nav.home": "Hem",
