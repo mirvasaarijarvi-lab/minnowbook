@@ -7,7 +7,35 @@
  * without duplicating timeouts/selectors.
  */
 
-import { expect, type Page } from "@playwright/test";
+import { expect, type Page, type Locator } from "@playwright/test";
+
+/**
+ * Assert that the public booking page is fully interactive, not just shell-
+ * hydrated. We wait for the guest_name input (a top-of-form, always-rendered
+ * field) AND a submit-capable form to be present. This replaces brittle
+ * "wait until <main> renders" assertions which can pass before React has
+ * mounted the booking form, leading to race conditions in subsequent steps.
+ */
+export async function assertPublicBookingReady(
+  page: Page,
+  options: { timeoutMs?: number } = {},
+): Promise<void> {
+  const timeout = options.timeoutMs ?? 20_000;
+  const guestName: Locator = page.locator("#guest_name");
+  const form: Locator = page.locator("form");
+  await expect(
+    form,
+    "public booking <form> element never rendered",
+  ).toHaveCount(1, { timeout });
+  await expect(
+    guestName,
+    "public booking guest_name input never rendered (form did not hydrate)",
+  ).toBeVisible({ timeout });
+  await expect(
+    guestName,
+    "public booking guest_name input rendered but is disabled (form not interactive yet)",
+  ).toBeEnabled({ timeout });
+}
 
 export interface SpaLoadOptions {
   /** Total navigation timeout (page.goto). Default 30s. */
