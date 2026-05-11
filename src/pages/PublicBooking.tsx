@@ -887,26 +887,26 @@ const PublicBookingInner = () => {
 
   if (loadingTenant) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: secondaryColor }}>
+      <main className="min-h-screen flex items-center justify-center" style={{ backgroundColor: secondaryColor }}>
         <Loader2 className="h-8 w-8 animate-spin" style={{ color: primaryColor }} />
-      </div>
+      </main>
     );
   }
 
   if (!tenant) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <main className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center space-y-2">
           <h1 className="text-2xl font-serif font-bold text-foreground">{t("booking.notFound")}</h1>
           <p className="text-muted-foreground">{t("booking.notFoundDesc")}</p>
         </div>
-      </div>
+      </main>
     );
   }
 
   if (submitted) {
     return (
-        <div className="min-h-screen p-4 sm:p-8" style={{ backgroundColor: secondaryColor }}>
+        <main className="min-h-screen p-4 sm:p-8" style={{ backgroundColor: secondaryColor }}>
           <div className="flex justify-end mb-4 max-w-2xl mx-auto">
             <LanguageSwitcher />
           </div>
@@ -1084,7 +1084,7 @@ const PublicBookingInner = () => {
             />
           </div>
         </div>
-      </div>
+      </main>
     );
   }
 
@@ -2365,7 +2365,7 @@ const PublicBooking = () => {
   return (
     <BookingErrorBoundary
       fallback={
-        <div className="min-h-screen flex items-center justify-center bg-background">
+        <main className="min-h-screen flex items-center justify-center bg-background">
           <div className="text-center space-y-2">
             <h1 className="text-2xl font-serif font-bold text-foreground">
               {t("booking.notFound")}
@@ -2374,7 +2374,7 @@ const PublicBooking = () => {
               Something went wrong. Please try refreshing the page.
             </p>
           </div>
-        </div>
+        </main>
       }
     >
       <PublicBookingInner />
