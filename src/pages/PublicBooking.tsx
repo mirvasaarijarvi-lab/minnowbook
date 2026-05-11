@@ -31,6 +31,7 @@ import { useBrandingSignedUrlState } from "@/lib/tenant-branding-url";
 import { BOOKING_ERROR_CODES } from "../../supabase/functions/_shared/booking-error-codes";
 import { resolveBookingError } from "@/lib/booking-error-registry";
 import { trackBookingError } from "@/lib/booking-telemetry";
+import { useAuth } from "@/contexts/AuthContext";
 import { FadeInImage } from "@/components/branding/FadeInImage";
 
 // Types for public views (not in auto-generated types)
