@@ -65,6 +65,7 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
   const [confirmDialog, setConfirmDialog] = useState<{ id: string; action: "confirmed" | "cancelled" } | null>(null);
   const [reminderDialog, setReminderDialog] = useState<string | null>(null);
   const [editingReservation, setEditingReservation] = useState<any | null>(null);
+  const [detailReservation, setDetailReservation] = useState<any | null>(null);
   const [newReservationOpen, setNewReservationOpen] = useState(false);
   const [linkedUsedPrompt, setLinkedUsedPrompt] = useState<{ reservationId: string; linkedIds: string[]; linkedNames: string[] } | null>(null);
   const [linkedInvoicedPrompt, setLinkedInvoicedPrompt] = useState<{ reservationId: string; linkedIds: string[]; linkedNames: string[] } | null>(null);
