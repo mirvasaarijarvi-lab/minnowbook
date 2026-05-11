@@ -230,59 +230,67 @@ describe("Edge function CORS — disallowed origin × custom-header preflights",
       }
 
       // -------- preflight WITHOUT Origin (e.g. some non-browser callers) --------
-      it("preflight with custom headers but NO Origin still does not return wildcard ACAO", async () => {
-        const res = await fetch(fnUrl(fn), {
-          method: "OPTIONS",
-          headers: {
-            "Access-Control-Request-Method": "POST",
-            "Access-Control-Request-Headers":
-              "authorization, content-type, apikey, x-client-info",
-          },
-        });
-        await res.text();
-        const acao = res.headers.get("access-control-allow-origin");
-        if (acao !== null) {
-          expect(acao).not.toBe("*");
-          expect(acao).not.toBe("");
-          expect(acao).not.toBe("null");
-          expect(acao).not.toBe("undefined");
-        }
-        expectNoCredentialsEnabled(res, `${fn} no-origin preflight`);
-      });
+      it(
+        "preflight with custom headers but NO Origin still does not return wildcard ACAO",
+        async () => {
+          const res = await fetch(fnUrl(fn), {
+            method: "OPTIONS",
+            headers: {
+              "Access-Control-Request-Method": "POST",
+              "Access-Control-Request-Headers":
+                "authorization, content-type, apikey, x-client-info",
+            },
+          });
+          await res.text();
+          const acao = res.headers.get("access-control-allow-origin");
+          if (acao !== null) {
+            expect(acao).not.toBe("*");
+            expect(acao).not.toBe("");
+            expect(acao).not.toBe("null");
+            expect(acao).not.toBe("undefined");
+          }
+          expectNoCredentialsEnabled(res, `${fn} no-origin preflight`);
+        },
+        NETWORK_TIMEOUT_MS,
+      );
 
       // -------- consistency: same disallowed origin probed many times yields uniform headers --------
-      it("repeated preflights from the same disallowed origin are header-consistent (no oracle)", async () => {
-        const probes = await Promise.all(
-          Array.from({ length: 5 }, () =>
-            preflight(
-              fn,
-              "https://evil.example.com",
-              "POST",
-              "authorization, content-type, apikey",
+      it(
+        "repeated preflights from the same disallowed origin are header-consistent (no oracle)",
+        async () => {
+          const probes = await Promise.all(
+            Array.from({ length: 5 }, () =>
+              preflight(
+                fn,
+                "https://evil.example.com",
+                "POST",
+                "authorization, content-type, apikey",
+              ),
             ),
-          ),
-        );
-        await Promise.all(probes.map((r) => r.text()));
+          );
+          await Promise.all(probes.map((r) => r.text()));
 
-        const fingerprints = probes.map((r) =>
-          JSON.stringify({
-            acao: r.headers.get("access-control-allow-origin"),
-            acac: r.headers.get("access-control-allow-credentials"),
-            acah: (
-              r.headers.get("access-control-allow-headers") || ""
-            ).toLowerCase(),
-          }),
-        );
-        // Every probe should expose an identical CORS fingerprint —
-        // variation would leak request-handling state to attackers.
-        expect(new Set(fingerprints).size).toBe(1);
+          const fingerprints = probes.map((r) =>
+            JSON.stringify({
+              acao: r.headers.get("access-control-allow-origin"),
+              acac: r.headers.get("access-control-allow-credentials"),
+              acah: (
+                r.headers.get("access-control-allow-headers") || ""
+              ).toLowerCase(),
+            }),
+          );
+          // Every probe should expose an identical CORS fingerprint —
+          // variation would leak request-handling state to attackers.
+          expect(new Set(fingerprints).size).toBe(1);
 
-        // And critically, none echoes the attacker origin.
-        for (const r of probes) {
-          expectNoOriginEcho(r, "https://evil.example.com", `${fn} repeat probe`);
-          expectNoCredentialsEnabled(r, `${fn} repeat probe`);
-        }
-      });
+          // And critically, none echoes the attacker origin.
+          for (const r of probes) {
+            expectNoOriginEcho(r, "https://evil.example.com", `${fn} repeat probe`);
+            expectNoCredentialsEnabled(r, `${fn} repeat probe`);
+          }
+        },
+        NETWORK_TIMEOUT_MS,
+      );
     });
   }
 });
