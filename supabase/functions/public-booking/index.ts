@@ -267,7 +267,7 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
     return keyCheck.response;
   }
   const serviceRoleKey = keyCheck.serviceRoleKey;
-  const adminClient = createClient(supabaseUrl, serviceRoleKey);
+  const adminClient = _publicBookingTestHooks.createClient(supabaseUrl, serviceRoleKey);
 
 
   try {
