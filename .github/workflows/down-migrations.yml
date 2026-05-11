@@ -1,0 +1,83 @@
+name: Down Migrations
+
+# Verifies that every forward migration with a paired rollback file in
+# db/rollback/ can be cleanly rolled back AND re-applied. This catches:
+#   * Down files that drift out of sync with their forward counterpart
+#     (e.g. a new index added forward but not added to the down file).
+#   * Forward migrations that aren't actually idempotent on re-apply.
+#   * Down files that accidentally drop shared dependencies (extensions,
+#     tables) that other migrations rely on.
+#
+# Required by branch protection alongside `schema-gate` and `build` so that
+# any PR touching the reservations indexes migration must keep the rollback
+# pathway working.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  rollback:
+    name: Reservations indexes rollback regression
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: rollback_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d rollback_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/rollback_test
+      PGPASSWORD: postgres
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Install psql client
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y --no-install-recommends postgresql-client
+          psql --version
+
+      - name: Wait for Postgres
+        run: |
+          for _ in $(seq 1 30); do
+            if pg_isready -h localhost -p 5432 -U postgres -d rollback_test >/dev/null 2>&1; then
+              echo "Postgres is ready."
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "::error::Postgres service did not become ready in 30s"
+          exit 1
+
+      - name: Verify rollback pairing exists
+        # Hard fail if anyone deletes the down file without removing the
+        # forward migration. Keeps the assumption explicit.
+        run: |
+          test -f supabase/migrations/20260511101454_05115563-3e3d-4403-8e0f-5979fca38544.sql \
+            || { echo "::error::Forward migration missing"; exit 1; }
+          test -f db/rollback/20260511101454_05115563-3e3d-4403-8e0f-5979fca38544.down.sql \
+            || { echo "::error::Down migration missing — see db/rollback/README.md"; exit 1; }
+
+      - name: Run rollback regression script
+        run: bash scripts/test-down-migrations.sh
