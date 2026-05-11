@@ -1,13 +1,5 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers':
-    'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
-  'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
-  'Referrer-Policy': 'strict-origin-when-cross-origin',
-  'Content-Security-Policy': "default-src 'none'; frame-ancestors 'none'",
-}
+import { corsHeaders } from "../_shared/http-headers.ts";
 
 // Resend confirmation emails to users who signed up but never confirmed.
 // Runs every 6 hours via pg_cron. Resends up to 3 times over 5 days, then stops.

@@ -1,6 +1,7 @@
 import { createClient as _createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { computeReservationPrice } from "../_shared/reservation-pricing.ts";
 import { BOOKING_ERROR_CODES } from "../_shared/booking-error-codes.ts";
+import { corsHeaders } from "../_shared/http-headers.ts";
 
 /**
  * Indirection layer around external dependencies the handler reaches
@@ -14,17 +15,6 @@ export const _publicBookingTestHooks: {
   createClient: typeof _createClient;
 } = {
   createClient: _createClient,
-};
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-  "X-Content-Type-Options": "nosniff",
-  "X-Frame-Options": "DENY",
-  "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
-  "Referrer-Policy": "strict-origin-when-cross-origin",
-  "Content-Security-Policy": "default-src 'none'; frame-ancestors 'none'",
 };
 
 /**
