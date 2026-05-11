@@ -157,26 +157,62 @@ Deno.test("public-booking: creates a pending reservation end-to-end", async () =
   }
 });
 
-Deno.test("schema: anon role cannot SELECT reservations directly (RLS)", async () => {
-  const res = await fetch(
-    `${REST_URL}/reservations?tenant_id=eq.${TEST_TENANT_ID}&select=id&limit=1`,
-    {
-      headers: {
-        apikey: ANON_KEY,
-        Authorization: `Bearer ${ANON_KEY}`,
-      },
-    },
-  );
-  const text = await res.text();
-  // RLS should yield either an error response OR an empty array; never any rows.
-  if (res.ok) {
-    const rows = JSON.parse(text);
-    assertEquals(
-      Array.isArray(rows) ? rows.length : -1,
-      0,
-      "anon must not read reservations",
-    );
-  } else {
-    assert(res.status >= 400, `expected RLS-style failure, got ${res.status}`);
-  }
+Deno.test({
+  name: "schema: anon role cannot SELECT reservations directly (RLS)",
+  // Be explicit so any future supabase-js usage (which spawns auth-refresh
+  // intervals) trips the leak detector immediately.
+  sanitizeOps: true,
+  sanitizeResources: true,
+  sanitizeExit: true,
+  fn: async () => {
+    // Use AbortController so the underlying connection is torn down
+    // deterministically even if an assertion throws below.
+    const controller = new AbortController();
+    let res: Response | undefined;
+    let text = "";
+    try {
+      res = await fetch(
+        `${REST_URL}/reservations?tenant_id=eq.${TEST_TENANT_ID}&select=id&limit=1`,
+        {
+          headers: {
+            apikey: ANON_KEY,
+            Authorization: `Bearer ${ANON_KEY}`,
+          },
+          signal: controller.signal,
+        },
+      );
+      // Always drain the body, in both ok and error branches, before asserting.
+      text = await res.text();
+
+      // RLS should yield either an error response OR an empty array; never any rows.
+      if (res.ok) {
+        let rows: unknown;
+        try {
+          rows = JSON.parse(text);
+        } catch {
+          rows = null;
+        }
+        assertEquals(
+          Array.isArray(rows) ? rows.length : -1,
+          0,
+          `anon must not read reservations, body=${text}`,
+        );
+      } else {
+        assert(res.status >= 400, `expected RLS-style failure, got ${res.status}`);
+      }
+    } finally {
+      // If fetch threw mid-flight, make sure the request is cancelled and any
+      // unread body is dropped so Deno's resource sanitizer stays clean.
+      if (!res) {
+        controller.abort();
+      } else if (res.body && !res.bodyUsed) {
+        try {
+          await res.body.cancel();
+        } catch {
+          /* ignore */
+        }
+      }
+    }
+  },
 });
+
