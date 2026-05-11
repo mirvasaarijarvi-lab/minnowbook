@@ -29,8 +29,33 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      - name: Resolve Playwright version
+        id: pw
+        # Read the version actually resolved in node_modules so the cache key
+        # tracks the lockfile, not just the package.json range.
+        run: |
+          version=$(node -p "require('./node_modules/@playwright/test/package.json').version")
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Playwright browsers
+        id: pw-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.pw.outputs.version }}
+          restore-keys: |
+            playwright-${{ runner.os }}-
+
       - name: Install Playwright browsers
-        run: bunx playwright install --with-deps chromium
+        # On a cache hit we still need OS-level shared libs but not the
+        # browser binaries themselves; --with-deps is a no-op for already
+        # downloaded browsers, so this stays cheap when warm.
+        run: |
+          if [ "${{ steps.pw-cache.outputs.cache-hit }}" = "true" ]; then
+            bunx playwright install-deps chromium
+          else
+            bunx playwright install --with-deps chromium
+          fi
 
       - name: Build app
         run: bunx vite build
