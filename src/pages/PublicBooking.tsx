@@ -220,6 +220,12 @@ const PublicBookingInner = () => {
   const tDynamic = useTDynamic();
   const dateFnsLocale = useDateLocale();
   const [submitted, setSubmitted] = useState(false);
+  // Sticky flag set when the public-booking edge function reports
+  // SERVICE_ROLE_KEY_MISSING. While set, the form blocks resubmits
+  // and renders an inline confirmation that NO reservation was
+  // created, so the guest does not retry blindly until an admin
+  // restores the secret. Cleared by the explicit "Try again" action.
+  const [serviceMisconfigured, setServiceMisconfigured] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [errors, setErrors] = useState<Record<string, string>>({});
 
