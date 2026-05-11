@@ -23,7 +23,7 @@ const SUPABASE_ANON_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxzZ3puc2treGFkcGx3bnhwbGhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5MTkyODAsImV4cCI6MjA4NzQ5NTI4MH0.v6DlzrUsFu_fpTIcWcSzz1Zyqbl_ZwF9v54TrW_yWtM";
 
 const TENANT_SLUG = "mimmin-testi";
-const TENANT_ID = "";
+const TENANT_ID = "9ac05fbf-0834-44fd-a52a-d030b7074a30";
 
 // Real, active resources in `mimmin-testi`
 const RESOURCES = {
@@ -78,7 +78,7 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
 
     // 1. Restaurant
     const restaurant = await callPublicBooking(request, {
-      tenant_slug: TENANT_SLUG,
+      tenant_id: TENANT_ID,
       ...GUEST,
       guests_count: 2,
       reservation_type: "restaurant",
@@ -94,7 +94,7 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
 
     // 2. Guesthouse (overnight)
     const guesthouse = await callPublicBooking(request, {
-      tenant_slug: TENANT_SLUG,
+      tenant_id: TENANT_ID,
       ...GUEST,
       guests_count: 2,
       reservation_type: "guesthouse",
@@ -110,7 +110,7 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
 
     // 3. Venue
     const venue = await callPublicBooking(request, {
-      tenant_slug: TENANT_SLUG,
+      tenant_id: TENANT_ID,
       ...GUEST,
       guests_count: 30,
       reservation_type: "venue",
