@@ -291,7 +291,11 @@ async function handleWebhook(req: Request): Promise<Response> {
   )
 }
 
-Deno.serve(async (req) => {
+/**
+ * Exported so integration tests can drive request branches in-process
+ * and assert the transport-security headers on every Response.
+ */
+export const handleAuthEmailHookRequest = async (req: Request): Promise<Response> => {
   const url = new URL(req.url)
 
   // Handle CORS preflight for main endpoint
@@ -315,4 +319,6 @@ Deno.serve(async (req) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   }
-})
+}
+
+Deno.serve(handleAuthEmailHookRequest)

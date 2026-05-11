@@ -26,7 +26,12 @@ async function hashCode(code: string): Promise<string> {
     .join("");
 }
 
-Deno.serve(async (req: Request) => {
+/**
+ * Exported so integration tests can drive request branches in-process
+ * and assert response-header invariants (shared SECURITY_HEADERS) on
+ * every error path.
+ */
+export const handleMfaRecoveryRequest = async (req: Request): Promise<Response> => {
   const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -186,7 +191,9 @@ Deno.serve(async (req: Request) => {
       }
     );
   }
-});
+};
+
+Deno.serve(handleMfaRecoveryRequest);
 
 async function getRemainingCount(
   client: any,

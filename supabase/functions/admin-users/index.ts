@@ -87,7 +87,13 @@ setInterval(() => {
   }
 }, 300_000);
 
-Deno.serve(async (req) => {
+/**
+ * Exported (rather than inlined into `Deno.serve`) so integration tests
+ * can drive every request branch in-process and assert response-header
+ * invariants (e.g. shared SECURITY_HEADERS) without spinning up the
+ * deployed function.
+ */
+export const handleAdminUsersRequest = async (req: Request): Promise<Response> => {
   const corsHeaders = getCorsHeaders(req);
 
   if (req.method === "OPTIONS") {
@@ -503,4 +509,6 @@ Deno.serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
-});
+};
+
+Deno.serve(handleAdminUsersRequest);
