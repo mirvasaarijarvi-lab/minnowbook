@@ -8,7 +8,7 @@ const logStep = (step: string, details?: any) => {
   console.log(`[CUSTOMER-PORTAL] ${step}${d}`);
 };
 
-serve(async (req) => {
+export async function handleCustomerPortalRequest(req: Request): Promise<Response> {
   const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -72,4 +72,5 @@ serve(async (req) => {
       status: 500,
     });
   }
-});
+}
+Deno.serve(handleCustomerPortalRequest);

@@ -68,7 +68,7 @@ function sanitise(path: unknown): { ok: true; safe: string } | { ok: false; reas
 const MAX_TTL = 7 * 24 * 60 * 60;
 const DEFAULT_TTL = 24 * 60 * 60;
 
-Deno.serve(async (req) => {
+export async function handleMintTenantPrivateUrlRequest(req: Request): Promise<Response> {
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 204, headers: corsHeaders });
   }
@@ -160,4 +160,5 @@ Deno.serve(async (req) => {
   }
 
   return json(200, { url: data.signedUrl, expires_in: expiresIn });
-});
+}
+Deno.serve(handleMintTenantPrivateUrlRequest);

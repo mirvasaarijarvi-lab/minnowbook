@@ -242,7 +242,7 @@ function buildEmailHtml(reservation: any, business: any, lang: string, emailType
 </html>`;
 }
 
-Deno.serve(async (req) => {
+export async function handleSendReminderRequest(req: Request): Promise<Response> {
   const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -473,4 +473,5 @@ Deno.serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
-});
+}
+Deno.serve(handleSendReminderRequest);

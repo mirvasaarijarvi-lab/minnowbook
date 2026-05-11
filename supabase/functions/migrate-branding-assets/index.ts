@@ -36,7 +36,7 @@ function assertSafeStoragePath(path: string): string {
   return path;
 }
 
-Deno.serve(async (req) => {
+export async function handleMigrateBrandingAssetsRequest(req: Request): Promise<Response> {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
@@ -199,4 +199,5 @@ Deno.serve(async (req) => {
     status: 200,
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
-});
+}
+Deno.serve(handleMigrateBrandingAssetsRequest);
