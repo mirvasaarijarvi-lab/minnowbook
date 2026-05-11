@@ -6,6 +6,7 @@ import {
   futureDate,
   makeTestGuest,
 } from "./fixtures/test-tenant";
+import { createClient } from "@supabase/supabase-js";
 
 /**
  * End-to-end cross-booking test.
@@ -176,6 +177,8 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
       restaurant.status,
       `restaurant booking failed: ${JSON.stringify(restaurant.diagnostic, null, 2)}`,
     ).toBeLessThan(400);
+    expect(restaurant.body, "restaurant response shape").toMatchObject({ success: true });
+    expect(restaurant.body?.capacity, "restaurant capacity payload").toBeTruthy();
 
     // 2. Guesthouse (overnight)
     const guesthouse = await callPublicBooking(
@@ -196,6 +199,7 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
       guesthouse.status,
       `guesthouse booking failed: ${JSON.stringify(guesthouse.diagnostic, null, 2)}`,
     ).toBeLessThan(400);
+    expect(guesthouse.body, "guesthouse response shape").toMatchObject({ success: true });
 
     // 3. Venue
     const venue = await callPublicBooking(
@@ -217,8 +221,71 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
       venue.status,
       `venue booking failed: ${JSON.stringify(venue.diagnostic, null, 2)}`,
     ).toBeLessThan(400);
+    expect(venue.body, "venue response shape").toMatchObject({ success: true });
 
-    // Surface guest identifier so cleanup is easy after the run
+    // 4. Negative check: edge function MUST reject an unknown tenant_id.
+    // Confirms tenant_id is actually validated server-side instead of being
+    // silently ignored, which would otherwise mask cross-tenant leaks.
+    const FAKE_TENANT_ID = "00000000-0000-0000-0000-000000000000";
+    const rejected = await callPublicBooking(
+      request,
+      {
+        tenant_id: FAKE_TENANT_ID,
+        ...GUEST,
+        guests_count: 2,
+        reservation_type: "restaurant",
+        resource_id: tenant.resources.restaurant,
+        date,
+        start_time: "19:30",
+        special_requests: "TEST: cross-booking foreign-tenant negative",
+      },
+      "foreign-tenant-negative",
+    );
+    expect(
+      rejected.status,
+      `foreign tenant_id should be rejected by public-booking but got HTTP ${rejected.status}`,
+    ).toBeGreaterThanOrEqual(400);
+
+    // 5. RLS / tenant-isolation verification (best-effort).
+    // When a service-role key is provided, query reservations directly and
+    // assert every row this test created is bound to the active tenant_id
+    // (mimmin-testi) and that NO row leaked into any other tenant.
+    const serviceRoleKey = process.env.E2E_SUPABASE_SERVICE_ROLE_KEY;
+    if (serviceRoleKey) {
+      const admin = createClient(SUPABASE_URL, serviceRoleKey, {
+        auth: { persistSession: false, autoRefreshToken: false },
+      });
+
+      const { data: rows, error: queryErr } = await admin
+        .from("reservations")
+        .select("id, tenant_id, reservation_type, resource_id, guest_email")
+        .eq("guest_email", GUEST.guest_email);
+
+      expect(queryErr, `reservations lookup failed: ${queryErr?.message}`).toBeNull();
+      expect(
+        rows?.length,
+        `expected exactly 3 reservations for ${GUEST.guest_email}, got ${rows?.length}`,
+      ).toBe(3);
+
+      for (const row of rows ?? []) {
+        expect(
+          row.tenant_id,
+          `reservation ${row.id} (${row.reservation_type}) wrote tenant_id=${row.tenant_id}, expected ${tenant.id}`,
+        ).toBe(tenant.id);
+      }
+
+      const types = (rows ?? []).map((r) => r.reservation_type).sort();
+      expect(types).toEqual(["guesthouse", "restaurant", "venue"]);
+
+      // Cleanup test rows so reruns stay deterministic.
+      await admin.from("reservations").delete().eq("guest_email", GUEST.guest_email);
+    } else {
+      console.warn(
+        "[cross-booking] E2E_SUPABASE_SERVICE_ROLE_KEY not set; skipping RLS / tenant-isolation DB verification.",
+      );
+    }
+
+    // Surface guest identifier so manual cleanup is easy after the run
     console.log(`[cross-booking] created reservations for guest "${GUEST.guest_name}" (${GUEST.guest_email})`);
   });
 });
