@@ -156,7 +156,10 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
         path: harPath,
         mode: "full",
         content: "embed",
-        urlFilter: "**/functions/v1/public-booking**",
+        // Match every public-booking edge function call (warmup + 3 legs +
+        // negative-tenant probe). RegExp avoids glob ambiguity across
+        // Playwright versions.
+        urlFilter: /\/functions\/v1\/public-booking/,
       },
     });
 
