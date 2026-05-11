@@ -2768,34 +2768,6 @@ export type Database = {
           tenant_id: string | null
           updated_at: string | null
         }
-        Insert: {
-          accent_color?: string | null
-          business_description?: string | null
-          business_name?: string | null
-          created_at?: string | null
-          hero_image_url?: string | null
-          id?: string | null
-          logo_url?: string | null
-          primary_color?: string | null
-          secondary_color?: string | null
-          site_id?: string | null
-          tenant_id?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          accent_color?: string | null
-          business_description?: string | null
-          business_name?: string | null
-          created_at?: string | null
-          hero_image_url?: string | null
-          id?: string | null
-          logo_url?: string | null
-          primary_color?: string | null
-          secondary_color?: string | null
-          site_id?: string | null
-          tenant_id?: string | null
-          updated_at?: string | null
-        }
         Relationships: [
           {
             foreignKeyName: "site_settings_site_id_fkey"
@@ -2844,40 +2816,6 @@ export type Database = {
           tenant_id: string | null
           timezone: string | null
           updated_at: string | null
-        }
-        Insert: {
-          accent_color?: string | null
-          business_description?: string | null
-          business_name?: string | null
-          created_at?: string | null
-          default_language?: string | null
-          hero_image_url?: string | null
-          id?: string | null
-          logo_url?: string | null
-          primary_color?: string | null
-          resource_type_descriptions?: Json | null
-          resource_type_names?: Json | null
-          secondary_color?: string | null
-          tenant_id?: string | null
-          timezone?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          accent_color?: string | null
-          business_description?: string | null
-          business_name?: string | null
-          created_at?: string | null
-          default_language?: string | null
-          hero_image_url?: string | null
-          id?: string | null
-          logo_url?: string | null
-          primary_color?: string | null
-          resource_type_descriptions?: Json | null
-          resource_type_names?: Json | null
-          secondary_color?: string | null
-          tenant_id?: string | null
-          timezone?: string | null
-          updated_at?: string | null
         }
         Relationships: [
           {
