@@ -6,6 +6,7 @@
 import { assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import { handleAuthEmailHookRequest } from "./index.ts";
 import {
+  assertCspAndHsts,
   assertSecurityTriad,
   drainBody,
   withStubSupabaseEnv,
@@ -18,6 +19,7 @@ Deno.test("auth-email-hook: OPTIONS preflight carries security triad", async () 
   const res = await handleAuthEmailHookRequest(req);
   await drainBody(res);
   assertSecurityTriad(res, "OPTIONS preflight (main)");
+  assertCspAndHsts(res, "OPTIONS preflight (main)");
 });
 
 Deno.test("auth-email-hook: /preview OPTIONS preflight carries security triad", async () => {
@@ -27,6 +29,7 @@ Deno.test("auth-email-hook: /preview OPTIONS preflight carries security triad", 
   const res = await handleAuthEmailHookRequest(req);
   await drainBody(res);
   assertSecurityTriad(res, "OPTIONS preflight (preview)");
+  assertCspAndHsts(res, "OPTIONS preflight (preview)");
 });
 
 Deno.test(
@@ -42,6 +45,7 @@ Deno.test(
     await drainBody(res);
     assertEquals(res.status, 401);
     assertSecurityTriad(res, "401 missing auth (main)");
+    assertCspAndHsts(res, "401 missing auth (main)");
   }),
 );
 
@@ -57,6 +61,7 @@ Deno.test(
     await drainBody(res);
     assertEquals(res.status, 401);
     assertSecurityTriad(res, "401 missing auth (preview)");
+    assertCspAndHsts(res, "401 missing auth (preview)");
   }),
 );
 
@@ -75,5 +80,6 @@ Deno.test(
     await drainBody(res);
     assertEquals(res.status, 400);
     assertSecurityTriad(res, "400 invalid JSON (preview)");
+    assertCspAndHsts(res, "400 invalid JSON (preview)");
   }),
 );

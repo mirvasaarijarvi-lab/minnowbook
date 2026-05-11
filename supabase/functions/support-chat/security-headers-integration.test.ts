@@ -3,6 +3,7 @@
 import { assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import { handleSupportChatRequest } from "./index.ts";
 import {
+  assertCspAndHsts,
   assertSharedHeaders,
   drainBody,
   withStubSupabaseEnv,
@@ -16,6 +17,7 @@ Deno.test("support-chat: OPTIONS preflight carries SECURITY_HEADERS", async () =
   const res = await handleSupportChatRequest(req);
   await drainBody(res);
   assertSharedHeaders(res, "OPTIONS preflight");
+  assertCspAndHsts(res, "OPTIONS preflight");
 });
 
 Deno.test(
@@ -33,6 +35,7 @@ Deno.test(
     await drainBody(res);
     assertEquals(res.status, 403);
     assertSharedHeaders(res, "403 disallowed origin");
+    assertCspAndHsts(res, "403 disallowed origin");
   }),
 );
 
@@ -52,6 +55,7 @@ Deno.test(
     await drainBody(res);
     assertEquals(res.status, 413);
     assertSharedHeaders(res, "413 oversize body");
+    assertCspAndHsts(res, "413 oversize body");
   }),
 );
 
@@ -83,5 +87,6 @@ Deno.test(
     }
     await drainBody(last);
     assertSharedHeaders(last, "429 rate-limit");
+    assertCspAndHsts(last, "429 rate-limit");
   }),
 );

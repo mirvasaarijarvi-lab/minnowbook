@@ -21,6 +21,7 @@ import {
   handlePublicBookingRequest,
 } from "./index.ts";
 import { SECURITY_HEADERS } from "../_shared/http-headers.ts";
+import { assertCspAndHsts } from "../_shared/test-security-headers.ts";
 
 /** Headers that MUST appear on every Response, success or error. */
 const REQUIRED_HEADER_ENTRIES = Object.entries(SECURITY_HEADERS);
@@ -95,6 +96,7 @@ Deno.test(
     const res = await handlePublicBookingRequest(req);
     await drainBody(res);
     assertSecurityHeaders(res, "OPTIONS preflight");
+    assertCspAndHsts(res, "OPTIONS preflight");
   },
 );
 
@@ -120,6 +122,7 @@ Deno.test(
     assertEquals(res.status, 400);
     assertEquals(body.error_code, "SERVICE_ROLE_KEY_MISSING");
     assertSecurityHeaders(res, "400 SERVICE_ROLE_KEY_MISSING");
+    assertCspAndHsts(res, "400 SERVICE_ROLE_KEY_MISSING");
   }),
 );
 
@@ -141,6 +144,7 @@ Deno.test(
       await drainBody(res);
       assertEquals(res.status, 413);
       assertSecurityHeaders(res, "413 Request too large");
+      assertCspAndHsts(res, "413 Request too large");
     } finally {
       restore();
     }
@@ -165,6 +169,7 @@ Deno.test(
       assertEquals(res.status, 400);
       assert(text.length > 0, "expected error JSON body, got empty");
       assertSecurityHeaders(res, "400 invalid JSON");
+      assertCspAndHsts(res, "400 invalid JSON");
     } finally {
       restore();
     }
@@ -197,6 +202,7 @@ Deno.test(
       assertEquals(last!.status, 429, "6th request from same IP must be rate-limited");
       await drainBody(last!);
       assertSecurityHeaders(last!, "429 rate-limit");
+      assertCspAndHsts(last!, "429 rate-limit");
     } finally {
       restore();
     }
