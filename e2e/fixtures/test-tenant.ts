@@ -72,6 +72,13 @@ export function futureDate(offsetDays = 60): string {
 // --- Playwright fixture -----------------------------------------------------
 type Fixtures = {
   tenant: TestTenant;
+  /**
+   * Auto-attached per-test capture of browser console messages and uncaught
+   * page errors. On failure, both streams are dumped into the HTML report
+   * as text attachments so timing/UI regressions can be triaged without
+   * re-running the spec locally.
+   */
+  consoleCapture: void;
 };
 
 /**
@@ -87,6 +94,59 @@ export const test = base.extend<Fixtures>({
   tenant: async ({}, use) => {
     await use(TEST_TENANT);
   },
+  consoleCapture: [
+    async ({ page }, use, testInfo) => {
+      const consoleLines: string[] = [];
+      const errorLines: string[] = [];
+
+      const onConsole = (msg: import("@playwright/test").ConsoleMessage) => {
+        const loc = msg.location();
+        const where = loc.url
+          ? ` (${loc.url}:${loc.lineNumber}:${loc.columnNumber})`
+          : "";
+        consoleLines.push(
+          `[${new Date().toISOString()}] [${msg.type()}] ${msg.text()}${where}`,
+        );
+      };
+      const onPageError = (err: Error) => {
+        errorLines.push(
+          `[${new Date().toISOString()}] ${err.name}: ${err.message}\n${err.stack ?? ""}`,
+        );
+      };
+      const onRequestFailed = (
+        req: import("@playwright/test").Request,
+      ) => {
+        errorLines.push(
+          `[${new Date().toISOString()}] requestfailed ${req.method()} ${req.url()} -- ${req.failure()?.errorText ?? "unknown"}`,
+        );
+      };
+
+      page.on("console", onConsole);
+      page.on("pageerror", onPageError);
+      page.on("requestfailed", onRequestFailed);
+
+      await use();
+
+      page.off("console", onConsole);
+      page.off("pageerror", onPageError);
+      page.off("requestfailed", onRequestFailed);
+
+      const failed =
+        testInfo.status !== undefined &&
+        testInfo.status !== testInfo.expectedStatus;
+      if (failed) {
+        await testInfo.attach("browser-console.log", {
+          body: consoleLines.join("\n") || "(no console output)",
+          contentType: "text/plain",
+        });
+        await testInfo.attach("page-errors.log", {
+          body: errorLines.join("\n") || "(no page errors)",
+          contentType: "text/plain",
+        });
+      }
+    },
+    { auto: true },
+  ],
 });
 
 export { expect };
