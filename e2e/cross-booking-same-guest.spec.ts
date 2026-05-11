@@ -1,10 +1,45 @@
 import {
-  test,
+  test as baseTest,
   expect,
   SUPABASE_URL,
   futureDate,
   makeTestGuest,
 } from "./fixtures/test-tenant";
+import path from "node:path";
+
+// Per-test browser HAR file path, populated when the overridden `context`
+// fixture creates the BrowserContext with `recordHar` enabled.
+const harPathByTest = new Map<string, string>();
+
+/**
+ * Local test variant that records a full browser HAR (network log) per test.
+ * The HAR is written to `<testInfo.outputDir>/network.har` and is only
+ * finalized when the BrowserContext is closed, so afterEach must close the
+ * context before attaching it to the report.
+ */
+const test = baseTest.extend({
+  // eslint-disable-next-line no-empty-pattern
+  context: async ({ browser }, useFixture, testInfo) => {
+    const harPath = path.join(testInfo.outputDir, "network.har");
+    const context = await browser.newContext({
+      baseURL: "http://localhost:4173",
+      recordHar: { path: harPath, mode: "minimal", content: "embed" },
+      recordVideo: { dir: testInfo.outputDir },
+    });
+    harPathByTest.set(testInfo.testId, harPath);
+    await useFixture(context);
+    // Closing here is a no-op when afterEach already closed the context,
+    // and a safety net otherwise so the HAR file is always flushed.
+    if (!(context as any)._closedPromise) {
+      try {
+        await context.close();
+      } catch {
+        /* already closed */
+      }
+    }
+  },
+});
+
 import { createClient } from "@supabase/supabase-js";
 import { gotoAndWaitForSpa } from "./fixtures/spa-waits";
 import {
@@ -169,6 +204,37 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
       failureSummary.video_capture_error =
         err instanceof Error ? err.message : String(err);
     }
+
+    // HAR (network log): the overridden `context` fixture records every
+    // request/response into <outputDir>/network.har. The HAR is only
+    // flushed when the BrowserContext is closed, so close it here BEFORE
+    // attaching, then read the resulting file.
+    try {
+      const harPath = harPathByTest.get(testInfo.testId);
+      if (harPath) {
+        try {
+          // page.context() works even after page.close(); the context
+          // outlives its pages. Closing it triggers HAR finalization.
+          await page.context().close();
+        } catch {
+          /* context may already be closed */
+        }
+        const fs = await import("node:fs/promises");
+        const harBytes = await fs.readFile(harPath);
+        await testInfo.attach("failure-network.har", {
+          body: harBytes,
+          contentType: "application/json",
+        });
+        failureSummary.har_path = harPath;
+        failureSummary.har_bytes = harBytes.byteLength;
+      } else {
+        failureSummary.har_capture = "skipped: no HAR path registered";
+      }
+    } catch (err) {
+      failureSummary.har_capture_error =
+        err instanceof Error ? err.message : String(err);
+    }
+    harPathByTest.delete(testInfo.testId);
 
     // Trace is captured for every test by playwright.config.ts (`trace: "on"`)
     // and lives at testInfo.outputDir/trace.zip. Attach it explicitly so the
