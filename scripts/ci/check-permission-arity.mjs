@@ -235,7 +235,7 @@ async function checkLiveDb() {
 
 (async () => {
   let offenders = scanRepo();
-  offenders = checkMigrationCreates(offenders);
+  offenders = checkNewMigrations(offenders);
   const liveOffenders = await checkLiveDb();
   offenders.push(...liveOffenders);
 
