@@ -799,8 +799,16 @@ const PublicBookingInner = () => {
       }
       if (data?.error) throw new Error(data.error);
     },
-    onSuccess: () => setSubmitted(true),
+    onSuccess: () => {
+      setServiceMisconfigured(false);
+      setSubmitted(true);
+    },
     onError: (err: any) => {
+      if (err?.code === BOOKING_ERROR_CODES.SERVICE_ROLE_KEY_MISSING) {
+        // Pin the inline confirmation. The toast disappears after 10s
+        // but the inline banner stays until the guest acknowledges.
+        setServiceMisconfigured(true);
+      }
       toast.error(t(getBookingErrorToastKey(err)), getBookingErrorToastOptions(err));
     },
   });
