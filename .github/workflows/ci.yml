@@ -105,19 +105,27 @@ jobs:
       - name: Type-check
         run: bunx tsc --noEmit
 
-      - name: Unit tests (Vitest)
+      - name: Quarantine manifest hygiene
+        run: node scripts/ci/check-quarantine.mjs
+
+      - name: Unit tests (Vitest, initial)
+        id: vitest
         # Includes the support-chat system prompt snapshot lock
         # (src/test/support-chat-prompt.snapshot.test.ts) and its
         # sibling export/diff tests. Pure Node + jsdom — no network
         # or Supabase env vars required.
-        # Emits junit + json reports into test-reports/vitest/ for
-        # the artifact upload step below.
+        # Emits junit into test-reports/vitest/ for the rerun helper
+        # and the artifact upload step below.
         run: |
           mkdir -p test-reports/vitest
-          bun run test -- \
+          bunx vitest run \
             --reporter=dot \
             --reporter=junit \
-            --reporter=json
+            --outputFile.junit=test-reports/vitest/junit.xml
+
+      - name: Unit tests (deterministic rerun of quarantined failures)
+        if: failure() && steps.vitest.outcome == 'failure'
+        run: node scripts/ci/rerun-flaky.mjs --suite=vitest --junit=test-reports/vitest/junit.xml
 
       - name: Build
         run: bunx vite build
