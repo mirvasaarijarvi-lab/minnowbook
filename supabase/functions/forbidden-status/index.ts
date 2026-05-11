@@ -16,7 +16,7 @@ import { corsHeaders } from "../_shared/http-headers.ts";
  *   - CORS open: the SPA calls it from any tenant subdomain.
  */
 
-Deno.serve((req) => {
+export function handleForbiddenStatusRequest(req: Request): Response {
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 204, headers: corsHeaders });
   }
@@ -40,4 +40,5 @@ Deno.serve((req) => {
       },
     },
   );
-});
+}
+Deno.serve(handleForbiddenStatusRequest);

@@ -17,7 +17,7 @@ function formatICalDate(dateStr: string, timeStr?: string | null): string {
   return d;
 }
 
-Deno.serve(async (req) => {
+export async function handleIcalFeedRequest(req: Request): Promise<Response> {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
@@ -128,4 +128,5 @@ Deno.serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
-});
+}
+Deno.serve(handleIcalFeedRequest);

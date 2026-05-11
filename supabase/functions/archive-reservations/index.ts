@@ -1,7 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { corsHeaders } from "../_shared/http-headers.ts";
 
-Deno.serve(async (req) => {
+export async function handleArchiveReservationsRequest(req: Request): Promise<Response> {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -144,4 +144,5 @@ Deno.serve(async (req) => {
       }
     );
   }
-});
+}
+Deno.serve(handleArchiveReservationsRequest);

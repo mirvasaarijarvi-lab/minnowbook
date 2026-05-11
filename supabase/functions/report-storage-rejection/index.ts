@@ -230,7 +230,7 @@ async function evaluateScope(
   return { raised: true, count: eventCount };
 }
 
-Deno.serve(async (req) => {
+export async function handleReportStorageRejectionRequest(req: Request): Promise<Response> {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
@@ -316,4 +316,5 @@ Deno.serve(async (req) => {
     }),
     { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
   );
-});
+}
+Deno.serve(handleReportStorageRejectionRequest);

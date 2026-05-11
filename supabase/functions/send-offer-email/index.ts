@@ -147,7 +147,7 @@ function buildOfferText(messageBody: string, downloadUrl?: string) {
     .join("\n\n");
 }
 
-Deno.serve(async (req) => {
+export async function handleSendOfferEmailRequest(req: Request): Promise<Response> {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: { ...corsHeaders } });
   }
@@ -311,4 +311,5 @@ Deno.serve(async (req) => {
     console.error("Error sending offer email:", err);
     return jsonResponse({ error: err instanceof Error ? err.message : String(err) }, 500);
   }
-});
+}
+Deno.serve(handleSendOfferEmailRequest);

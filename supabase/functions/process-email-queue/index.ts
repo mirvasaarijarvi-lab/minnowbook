@@ -29,7 +29,7 @@ function getRetryAfterSeconds(error: unknown): number {
   return 60
 }
 
-Deno.serve(async (req) => {
+export async function handleProcessEmailQueueRequest(req: Request): Promise<Response> {
   const apiKey = Deno.env.get('LOVABLE_API_KEY')
   const supabaseUrl = Deno.env.get('SUPABASE_URL')
   const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
@@ -278,4 +278,5 @@ Deno.serve(async (req) => {
     JSON.stringify({ processed: totalProcessed }),
     { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
   )
-})
+}
+Deno.serve(handleProcessEmailQueueRequest);

@@ -8,7 +8,7 @@ import { corsHeaders } from "../_shared/http-headers.ts";
 const RESEND_WINDOWS_HOURS = [24, 72, 120] // 1 day, 3 days, 5 days
 const MAX_RESENDS = 3
 
-Deno.serve(async (req) => {
+export async function handleResendConfirmationRequest(req: Request): Promise<Response> {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
@@ -139,4 +139,5 @@ Deno.serve(async (req) => {
     }),
     { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
   )
-})
+}
+Deno.serve(handleResendConfirmationRequest);

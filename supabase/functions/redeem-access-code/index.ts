@@ -102,7 +102,7 @@ async function persistIdempotentResponse(
   }
 }
 
-Deno.serve(async (req) => {
+export async function handleRedeemAccessCodeRequest(req: Request): Promise<Response> {
   const corsHeaders = getCorsHeaders(req, { extraAllowHeaders: "idempotency-key" });
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -318,4 +318,5 @@ Deno.serve(async (req) => {
     // Intentionally NOT cached — transient errors should be retryable.
     return errorResponse(corsHeaders, 500, ERROR_CODES.INTERNAL_ERROR, "Internal error");
   }
-});
+}
+Deno.serve(handleRedeemAccessCodeRequest);

@@ -20,7 +20,7 @@ const PRICE_TO_TIER: Record<string, string> = {
   "price_1T9LFNAi9C4ePV8hBMDXEnP5": "business",
 };
 
-serve(async (req) => {
+export async function handleCheckSubscriptionRequest(req: Request): Promise<Response> {
   const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -148,4 +148,5 @@ serve(async (req) => {
       status: 500,
     });
   }
-});
+}
+Deno.serve(handleCheckSubscriptionRequest);

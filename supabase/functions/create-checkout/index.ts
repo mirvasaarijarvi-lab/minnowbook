@@ -8,7 +8,7 @@ const logStep = (step: string, details?: any) => {
   console.log(`[CREATE-CHECKOUT] ${step}${d}`);
 };
 
-serve(async (req) => {
+export async function handleCreateCheckoutRequest(req: Request): Promise<Response> {
   const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -87,4 +87,5 @@ serve(async (req) => {
       status: 500,
     });
   }
-});
+}
+Deno.serve(handleCreateCheckoutRequest);
