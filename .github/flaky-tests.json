@@ -1,0 +1,6 @@
+{
+  "$schema": "./flaky-tests.schema.json",
+  "_doc": "Quarantine manifest for known-flaky tests. See scripts/ci/check-quarantine.mjs for the validation rules. Each entry MUST have an issue link and an `expires` date within 30 days of `added`. Manifest is empty by default; never add an entry without first opening a tracking issue.",
+  "vitest": [],
+  "playwright": []
+}
