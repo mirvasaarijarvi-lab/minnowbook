@@ -1,149 +1,141 @@
 import { test, expect } from "@playwright/test";
-import {
-  assertSafeStorageObjectPath,
-  isInvalidStoragePathError,
-  getFriendlyStoragePathErrorMessage,
-} from "../src/lib/storage-path";
 
 /**
- * End-to-end signed-URL contract: when callers pass a malicious object
- * key into the tenant-private signed-URL endpoint, the request MUST be
- * rejected before reaching Supabase, surface an
- * `InvalidStoragePathError`, and resolve to the localised friendly
- * message we ship in i18n (`common.invalidFileName`).
+ * End-to-end signed-URL contract: when a caller POSTs a malicious
+ * object key to the real `mint-tenant-private-url` edge function, the
+ * function MUST reject the request BEFORE it touches Supabase Storage,
+ * return HTTP 400 with `error_code: "invalid_storage_path"`, and
+ * include the stable rejection `reason` tag. Path validation is
+ * intentionally pre-auth so this gate can run anonymously in CI.
  *
- * About the structure of this spec
- * --------------------------------
- * The real production helper, `createTenantPrivateSignedUrl()` in
- * `src/lib/tenant-private-url.ts`, imports the Supabase client which
- * reads `import.meta.env.VITE_SUPABASE_URL` at module load. That env
- * shape is Vite-only and is intentionally absent from the Playwright
- * Node runtime. Rather than spin up a Vite server just to verify a
- * sync sanitiser, this spec drives the EXACT same chokepoint the
- * production helper uses, in the EXACT same order, via a tiny inline
- * stand-in for `mintSignedUrl()`. If the production helper is ever
- * refactored to bypass `assertSafeStorageObjectPath` or to swallow
- * `InvalidStoragePathError`, the unit tests in
- * `src/lib/storage-path.test.ts` and the per-call-site tests guard
- * that, and this spec guards the user-facing message contract.
+ * The browser's `getFriendlyStoragePathErrorMessage` helper maps the
+ * typed error to the localised `common.invalidFileName` copy. That
+ * client-side mapping is covered by `src/lib/storage-path.test.ts`
+ * and the unit tests for each call-site; this spec locks in the HTTP
+ * contract that those mappings depend on.
+ *
+ * Required env (resolved with sensible fallbacks):
+ *   - SUPABASE_URL or VITE_SUPABASE_URL
+ *   - optional SUPABASE_ANON_KEY / VITE_SUPABASE_PUBLISHABLE_KEY for
+ *     the `apikey` header (the Supabase gateway requires it on every
+ *     functions request even for `verify_jwt = false`).
  */
 
-const MALICIOUS_PATHS: Array<{ label: string; path: string }> = [
-  { label: "parent traversal segment", path: "tenant/../other-tenant/secret.pdf" },
-  { label: "leading parent traversal", path: "../etc/passwd" },
-  { label: "current-dir segment", path: "tenant/./logo.png" },
-  { label: "absolute unix path", path: "/etc/passwd" },
-  { label: "double slash empty segment", path: "tenant//logo.png" },
-  { label: "trailing slash empty segment", path: "tenant/logo.png/" },
-  { label: "windows backslash traversal", path: "tenant\\..\\other\\file" },
-  { label: "embedded NUL byte", path: "tenant/logo.png\u0000.jpg" },
-  { label: "ASCII control character", path: "tenant/\u0007bell.png" },
-  { label: "DEL control character", path: "tenant/\u007fdel.png" },
-  { label: "http scheme", path: "http://evil.example.com/x.png" },
-  { label: "https scheme", path: "https://evil.example.com/x.png" },
-  { label: "file scheme", path: "file:///etc/passwd" },
-  { label: "whitespace only", path: "   " },
-  { label: "overly long path", path: `${"a/".repeat(600)}file.png` },
-];
+const SUPABASE_URL =
+  process.env.SUPABASE_URL ?? process.env.VITE_SUPABASE_URL ?? "";
+const SUPABASE_ANON_KEY =
+  process.env.SUPABASE_ANON_KEY ??
+  process.env.VITE_SUPABASE_PUBLISHABLE_KEY ??
+  process.env.VITE_SUPABASE_ANON_KEY ??
+  "";
 
-// Per-locale friendly copies. The project ships EN, FI, and SV (see
-// src/i18n/translations.ts under the `common.invalidFileName` key, and
-// the [Localization](mem://features/localization) memory). We hard-code
-// each translation here so a rename, deletion, or accidental edit of
-// the key in any shipped locale fails this gate, not just EN.
-//
-// If the project adds a new locale, mirror the value in
-// src/i18n/translations.ts here. The unit suite
-// `src/i18n/translations.test.ts` guards key parity across locales;
-// this spec guards the user-facing wording for the rejection path.
-const FRIENDLY_BY_LOCALE = {
-  en: "This file's name contains characters we can't safely store. Please rename it and try again.",
-  fi: "Tiedoston nimi sisältää merkkejä, joita emme voi turvallisesti tallentaa. Nimeä tiedosto uudelleen ja yritä uudelleen.",
-  sv: "Filens namn innehåller tecken som vi inte kan lagra säkert. Byt namn på filen och försök igen.",
-} as const;
+const FUNCTION_URL = SUPABASE_URL
+  ? `${SUPABASE_URL.replace(/\/$/, "")}/functions/v1/mint-tenant-private-url`
+  : "";
 
-type Locale = keyof typeof FRIENDLY_BY_LOCALE;
-const LOCALES = Object.keys(FRIENDLY_BY_LOCALE) as Locale[];
+// If the env is not wired up (e.g. local dev without secrets), skip
+// the whole describe block with a clear reason rather than failing.
+const skipReason = !SUPABASE_URL
+  ? "SUPABASE_URL not set; cannot reach edge function"
+  : null;
 
-const makeTranslator = (locale: Locale) => (key: string): string =>
-  key === "common.invalidFileName"
-    ? FRIENDLY_BY_LOCALE[locale]
-    : `[missing:${key}]`;
-
-/**
- * Stand-in for the production `mintSignedUrl()` body. It MUST stay
- * structurally identical to the real helper's first two lines:
- *   1. call assertSafeStorageObjectPath() with the same callsite tag
- *   2. allow InvalidStoragePathError to propagate to the caller
- * Anything past step 1 is a network call we deliberately do not make
- * here, because the sanitiser is the contract we want to lock in.
- */
-async function callSignedUrlEndpoint(path: string): Promise<string> {
-  const safe = assertSafeStorageObjectPath(path, {
-    callsite: "tenant-private:mintSignedUrl",
-  });
-  // In production the next line is a Supabase createSignedUrl call. We
-  // never reach it for malicious inputs because the line above throws.
-  return `https://storage.example.test/object/sign/${safe}?token=stub`;
+interface RejectionResponse {
+  error_code: string;
+  reason?: string;
+  message?: string;
 }
 
-test.describe("Signed URL endpoint: malicious paths surface friendly message", () => {
-  for (const { label, path } of MALICIOUS_PATHS) {
-    for (const locale of LOCALES) {
-      test(`[${locale}] rejects ${label} with InvalidStoragePathError + friendly copy`, async () => {
-        let caught: unknown;
-        try {
-          await callSignedUrlEndpoint(path);
-        } catch (err) {
-          caught = err;
-        }
-        expect(caught, "expected the signed-URL endpoint to reject").toBeDefined();
-        expect(
-          isInvalidStoragePathError(caught),
-          "rejection must be the typed InvalidStoragePathError, not a generic Error",
-        ).toBe(true);
+const MALICIOUS_PATHS: Array<{
+  label: string;
+  path: string;
+  reason: string;
+}> = [
+  { label: "parent traversal segment", path: "tenant/../other-tenant/secret.pdf", reason: "traversal_or_empty_segment" },
+  { label: "leading parent traversal", path: "../etc/passwd", reason: "traversal_or_empty_segment" },
+  { label: "current-dir segment", path: "tenant/./logo.png", reason: "traversal_or_empty_segment" },
+  { label: "absolute unix path", path: "/etc/passwd", reason: "absolute" },
+  { label: "double slash empty segment", path: "tenant//logo.png", reason: "traversal_or_empty_segment" },
+  { label: "trailing slash empty segment", path: "tenant/logo.png/", reason: "traversal_or_empty_segment" },
+  { label: "windows backslash traversal", path: "tenant\\..\\other\\file", reason: "backslash" },
+  { label: "embedded NUL byte", path: "tenant/logo.png\u0000.jpg", reason: "control_char" },
+  { label: "ASCII control character", path: "tenant/\u0007bell.png", reason: "control_char" },
+  { label: "DEL control character", path: "tenant/\u007fdel.png", reason: "control_char" },
+  { label: "http scheme", path: "http://evil.example.com/x.png", reason: "scheme" },
+  { label: "https scheme", path: "https://evil.example.com/x.png", reason: "scheme" },
+  { label: "file scheme", path: "file:///etc/passwd", reason: "scheme" },
+  { label: "whitespace only", path: "   ", reason: "empty" },
+  { label: "overly long path", path: `${"a/".repeat(600)}file.png`, reason: "too_long" },
+];
 
-        const friendly = getFriendlyStoragePathErrorMessage(
-          caught,
-          makeTranslator(locale),
-          "Generic upload failure (this fallback should NOT be used)",
-        );
-        expect(friendly).toBe(FRIENDLY_BY_LOCALE[locale]);
-      });
-    }
+async function postPath(path: unknown): Promise<{ status: number; body: RejectionResponse }> {
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (SUPABASE_ANON_KEY) {
+    // Supabase functions gateway requires `apikey` even when
+    // `verify_jwt = false`. No Authorization is sent so the function
+    // exercises its pre-auth path-validation branch.
+    headers.apikey = SUPABASE_ANON_KEY;
+  }
+  const res = await fetch(FUNCTION_URL, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({ path }),
+  });
+  let body: RejectionResponse = { error_code: "" };
+  try {
+    body = (await res.json()) as RejectionResponse;
+  } catch {
+    /* leave body empty */
+  }
+  return { status: res.status, body };
+}
+
+test.describe("mint-tenant-private-url HTTP contract", () => {
+  test.skip(!!skipReason, skipReason ?? "");
+
+  for (const { label, path, reason } of MALICIOUS_PATHS) {
+    test(`rejects ${label} with 400 + invalid_storage_path/${reason}`, async () => {
+      const { status, body } = await postPath(path);
+      expect(status, `expected 400 for ${label}`).toBe(400);
+      expect(body.error_code).toBe("invalid_storage_path");
+      expect(body.reason).toBe(reason);
+      // Stable, non-localised server message. The client maps the
+      // typed error to common.invalidFileName for end users.
+      expect(body.message).toBe("Invalid storage path");
+    });
   }
 
-  test("locale copies are distinct (guards against accidental EN-only fallback)", () => {
-    const values = LOCALES.map((l) => FRIENDLY_BY_LOCALE[l]);
-    const unique = new Set(values);
-    expect(unique.size).toBe(LOCALES.length);
+  test("rejects non-string path with not_a_string", async () => {
+    const { status, body } = await postPath(42);
+    expect(status).toBe(400);
+    expect(body.error_code).toBe("invalid_storage_path");
+    expect(body.reason).toBe("not_a_string");
   });
 
-  test("well-formed tenant-scoped keys still succeed", async () => {
-    const url = await callSignedUrlEndpoint("tenant-id/offers/2026/offer-123.pdf");
-    expect(url).toContain("tenant-id/offers/2026/offer-123.pdf");
+  test("rejects non-JSON body with invalid_request", async () => {
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    if (SUPABASE_ANON_KEY) headers.apikey = SUPABASE_ANON_KEY;
+    const res = await fetch(FUNCTION_URL, {
+      method: "POST",
+      headers,
+      body: "not json",
+    });
+    const body = (await res.json().catch(() => ({}))) as RejectionResponse;
+    expect(res.status).toBe(400);
+    expect(body.error_code).toBe("invalid_request");
   });
 
-  test("non-string input is rejected before reaching the network", () => {
-    let caught: unknown;
-    try {
-      // @ts-expect-error - intentional misuse to verify runtime guard
-      assertSafeStorageObjectPath(undefined, { callsite: "tenant-private:mintSignedUrl" });
-    } catch (err) {
-      caught = err;
-    }
-    expect(caught).toBeDefined();
-    expect(isInvalidStoragePathError(caught)).toBe(true);
+  test("rejects GET with 405 method_not_allowed", async () => {
+    const headers: Record<string, string> = {};
+    if (SUPABASE_ANON_KEY) headers.apikey = SUPABASE_ANON_KEY;
+    const res = await fetch(FUNCTION_URL, { method: "GET", headers });
+    const body = (await res.json().catch(() => ({}))) as RejectionResponse;
+    expect(res.status).toBe(405);
+    expect(body.error_code).toBe("method_not_allowed");
   });
 
-  test("generic (non-sanitiser) errors keep the caller's fallback message", () => {
-    const generic = new Error("Network down");
-    const friendly = getFriendlyStoragePathErrorMessage(
-      generic,
-      makeTranslator("en"),
-      "Could not load image",
-    );
-    // Friendly copy must NOT mask unrelated errors.
-    expect(friendly).toBe("Could not load image");
+  test("well-formed path without auth returns 401 unauthenticated", async () => {
+    const { status, body } = await postPath("tenant-id/offers/2026/offer-123.pdf");
+    expect(status).toBe(401);
+    expect(body.error_code).toBe("unauthenticated");
   });
 });
