@@ -108,6 +108,12 @@ jobs:
       - name: Build app (needed by Playwright preview server)
         run: bunx vite build
 
+      - name: Lint (ESLint)
+        run: bun run lint
+
+      - name: Typecheck (tsc --noEmit)
+        run: bunx tsc --noEmit
+
       - name: Run npm run test:ci
         run: npm run test:ci
 
