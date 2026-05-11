@@ -6,6 +6,7 @@ import {
   futureDate,
   makeTestGuest,
 } from "./fixtures/test-tenant";
+import { createClient } from "@supabase/supabase-js";
 
 /**
  * End-to-end cross-booking test.
