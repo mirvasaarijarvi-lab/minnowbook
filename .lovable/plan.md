@@ -1,66 +1,103 @@
 ## Goal
 
-Eliminate per-function duplication of CORS + transport-security header objects so future drift (like the recent `public-booking` `cors` vs `corsHeaders` regression) becomes structurally impossible. Today the same `Strict-Transport-Security` / `Referrer-Policy` / `CSP` triad and origin allowlist are copy-pasted into 21 edge functions, in 3 slightly different shapes:
+Make the GitHub Actions test pipeline flake-resistant: known-flaky specs get a single deterministic rerun, real regressions still fail immediately, and the quarantine list cannot rot.
 
-- 13 functions inline a `const corsHeaders = { ... }` literal.
-- 8 functions define a local `function getCorsHeaders(req)` that returns the same shape (some with origin allowlisting).
-- `public-booking` adds a `cors` parameter rebinding for its service-role guard.
+## Pieces
 
-## What to build
+### 1. Quarantine manifest (new) — `.github/flaky-tests.json`
 
-1. **New shared module: `supabase/functions/_shared/http-headers.ts`**
+Single source of truth, machine-readable. Format:
 
-   Exports:
-   - `SECURITY_HEADERS` — the immutable transport-security triad + `X-Content-Type-Options`, `X-Frame-Options`, `Cache-Control`, `Pragma`, `Vary`.
-   - `DEFAULT_ALLOWED_ORIGINS` — the canonical Lovable / mimmobook list (string + regex entries).
-   - `isOriginAllowed(origin, allowlist?)`.
-   - `getCorsHeaders(req, opts?)` — single source of truth. Options cover the existing variations:
-     - `allowOrigins?: (string | RegExp)[]` (default `DEFAULT_ALLOWED_ORIGINS`)
-     - `allowHeaders?: string` (default current canonical list; redeem-access-code adds `idempotency-key`)
-     - `allowMethods?: string`
-     - `allowCredentials?: boolean`
-     - `extraHeaders?: Record<string, string>`
-   - `corsHeaders` — a static fallback bag for the rare functions that do not have a `Request` in scope (cron entrypoints, top-of-file constants). It is `{ "Access-Control-Allow-Origin": "*", ...SECURITY_HEADERS, ...defaultAllowHeaders }`.
+```json
+{
+  "vitest": [
+    {
+      "pattern": "src/test/security/edge-function-hsts-referrer-csp.test.ts > .* > resolved bag carries",
+      "reason": "Intermittent ENOENT when shared http-headers.ts is re-read mid-scan",
+      "owner": "@security",
+      "added": "2026-05-11",
+      "expires": "2026-06-10",
+      "issue": "https://github.com/<org>/<repo>/issues/1234"
+    }
+  ],
+  "playwright": [
+    {
+      "pattern": "e2e/superadmin-mocked-auth.spec.ts > .* > system admin: reaches Superadmin page",
+      "reason": "VITE_SUPABASE_URL race on cold cache",
+      "owner": "@platform",
+      "added": "2026-05-11",
+      "expires": "2026-06-10",
+      "issue": "..."
+    }
+  ]
+}
+```
 
-2. **Migrate all 21 edge functions to import from the shared module.**
+Rules enforced by `scripts/ci/check-quarantine.mjs`:
+- Every entry MUST have `pattern`, `reason`, `owner`, `added`, `expires`, `issue`.
+- `expires` MUST be within 30 days of `added` and not in the past.
+- Manifest is sorted, no duplicate patterns.
+- Total size capped (default 15 entries) to keep quarantine pressure honest.
 
-   Each `index.ts` keeps a tiny local re-export so the static security scanner still sees the literal symbol names it greps for:
+### 2. Rerun helper (new) — `scripts/ci/rerun-flaky.mjs`
 
-   ```ts
-   import { getCorsHeaders, corsHeaders } from "../_shared/http-headers.ts";
-   ```
+Pure Node (no extra deps). Inputs:
+- A junit XML path (Vitest or Playwright).
+- The manifest section name (`vitest` | `playwright`).
+- A rerun command template.
 
-   - The 13 inline-`corsHeaders` functions: delete the literal, keep `corsHeaders` import.
-   - The 8 `getCorsHeaders` functions: delete the local function + ALLOWED_ORIGINS, keep the import. Pass `{ allowHeaders: "...idempotency-key..." }` for `redeem-access-code` and `{ allowOrigins: [...with mimmobook + lovableproject] }` for `support-chat`.
-   - `public-booking`: replace the inline `corsHeaders` with the import. Keep the `cors` parameter on `assertServiceRoleKey` (defaults to `corsHeaders`) since the test already accepts that rebinding.
+Behaviour:
+1. Parse junit, collect every `<testcase>` with a `<failure>` or `<error>` child. Build full IDs (`classname > name`).
+2. Match each failed ID against the manifest patterns (regex, anchored).
+3. If any failed ID is NOT covered by quarantine: print the offenders and exit 2 (real regression).
+4. If all failures are quarantined: invoke the rerun command with deterministic env and only the failed test IDs scoped down (`--testNamePattern` for Vitest, `--grep` for Playwright). Exit 0 if rerun passes, exit 3 if it still fails.
 
-3. **Update the static scanner `src/test/security/edge-function-hsts-referrer-csp.test.ts`** so it remains the gatekeeper but follows the import.
+Deterministic env applied to reruns:
+- `TZ=UTC`, `LANG=C.UTF-8`, `LC_ALL=C.UTF-8`
+- `CI=true`, `FORCE_COLOR=0`
+- `VITEST_SEED=0`, `--sequence.shuffle=false`, `--no-isolate=false`, `--pool=forks`, `--poolOptions.forks.singleFork=true`
+- Playwright: `--workers=1 --retries=0 --repeat-each=1 --max-failures=10`, `PW_TEST_HTML_REPORT_OPEN=never`
+- `--reporter=junit` written to a separate `*-rerun.xml` so artifacts contain both attempts
 
-   - When an `index.ts` imports from `_shared/http-headers.ts`, concatenate that shared file's source into the scanned text before running the existing `Strict-Transport-Security` / `Referrer-Policy` / `Content-Security-Policy` regex assertions.
-   - Leave the `new Response(...)` spread heuristic unchanged. It already accepts `...corsHeaders`, `...getCorsHeaders(`, and `...cors`.
+### 3. Workflow integration
 
-4. **Lock it in with a new unit test: `supabase/functions/_shared/http-headers.test.ts`**
+Edit `.github/workflows/test-ci.yml` — split the single `npm run test:ci` step into three explicit steps so junit XML is available between attempts:
 
-   - `getCorsHeaders` returns HSTS ≥ 180 days with `includeSubDomains`.
-   - `Referrer-Policy` is `strict-origin-when-cross-origin`.
-   - CSP includes `default-src 'none'` and `frame-ancestors 'none'`.
-   - Allowed origin is echoed back; disallowed origin falls back to the first allowlist entry (or is omitted when the per-call policy says so).
-   - `idempotency-key` opt-in is honored.
+```text
+Lint → Typecheck → Vitest (initial) → Vitest rerun (if failed) →
+Deno tests → Playwright (initial) → Playwright rerun (if failed) →
+Quarantine hygiene check → Upload reports
+```
 
-## Out of scope
+Each rerun step uses `if: failure() && steps.<initial>.outcome == 'failure'`, calls `scripts/ci/rerun-flaky.mjs`, and either:
+- exits 0 (job continues, summary annotated `::warning::Flaky: N tests recovered on rerun`), or
+- exits non-zero (job fails with the offending test list pinned to the GitHub step summary).
 
-- No business-logic changes inside any edge function.
-- No changes to `supabase/config.toml` or function deployment settings.
-- No change to which origins are allowed in production (the canonical list is preserved exactly).
+The hygiene check runs on every push and fails if the manifest is malformed, expired, or oversized — so quarantine cannot silently pile up.
 
-## Validation
+Also add the same two-attempt pattern to `.github/workflows/ci.yml` for the unit-test step (schema gate keeps `--bail=1`, no rerun there since it's a deterministic file parser).
 
-- `bunx vitest run src/test/security/edge-function-hsts-referrer-csp.test.ts` — must stay green for all 21 functions.
-- `bunx vitest run supabase/functions/_shared/http-headers.test.ts` — new tests pass.
-- Spot-deploy `public-booking` and `admin-users` after the refactor and curl them to confirm headers are unchanged.
+### 4. Reporting
 
-## Technical notes
+- Step summary lists: passed, failed, quarantined-recovered, quarantined-still-failing, expired-quarantine-entries.
+- Artifacts now include `test-reports/<suite>/junit.xml` AND `test-reports/<suite>/junit-rerun.xml` so PR reviewers can see the diff between attempts.
 
-- The scanner currently reads only `index.ts` per function. Following the import is the smallest change that lets us actually delete the duplicated literals; the alternative (keeping the literals in every file "for the scanner") would defeat the entire refactor.
-- `public-booking` uses `Access-Control-Allow-Origin: *` today (no allowlist). The migration preserves that by passing `{ allowOrigins: "*" }` rather than silently tightening it; tightening is a separate decision.
-- The shared module lives under `_shared/`, which the scanner already excludes from its function discovery (`!name.startsWith("_")`), so it will not be scanned as a standalone function.
+## Files
+
+New:
+- `.github/flaky-tests.json` (empty list, schema documented in repo docs)
+- `scripts/ci/rerun-flaky.mjs`
+- `scripts/ci/check-quarantine.mjs`
+- `scripts/ci/parse-junit.mjs` (shared)
+- `src/test/ci/check-quarantine.test.ts` (Vitest unit tests for the parser + hygiene rules — runs under the existing schema gate so the tooling itself never silently breaks)
+
+Edited:
+- `.github/workflows/test-ci.yml` (split steps, add rerun + hygiene)
+- `.github/workflows/ci.yml` (add Vitest rerun for the unit-test step)
+- `playwright.config.ts` (drop the implicit `retries: 2` — reruns are now explicit and only for quarantined tests, so green CI never hides flake)
+
+## Non-goals
+
+- No change to Deno edge tests (already deterministic, no flake history).
+- No change to lint/typecheck/build (deterministic by construction).
+- No mass-quarantine; manifest ships empty and is opt-in per failing test with an expiry.

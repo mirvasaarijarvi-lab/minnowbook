@@ -4,7 +4,10 @@ export default defineConfig({
   testDir: "./e2e",
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
+  // Reruns are now driven by scripts/ci/rerun-flaky.mjs, which retries ONLY
+  // tests listed in .github/flaky-tests.json under deterministic settings.
+  // Keep retries=0 here so a green CI never silently masks new flake.
+  retries: 0,
   workers: process.env.CI ? 1 : undefined,
   reporter: [
     ["html", { open: "never", outputFolder: "playwright-report" }],
