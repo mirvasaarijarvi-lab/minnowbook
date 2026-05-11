@@ -1055,6 +1055,45 @@ const ownPath = (tenantId: string, label: string) =>
 const nestedOwnPath = (tenantId: string, segments: string[], label: string) =>
   `${runRootFor(tenantId)}/${segments.join("/")}/${label}.txt`;
 
+// `tenant-assets` is a branding-only bucket: the storage RLS policy only
+// permits writes when the second path segment is one of
+// {logo, hero, avatars, resources}. Tests that need a SUCCESSFUL own-tenant
+// upload into tenant-assets must therefore nest under a branding subfolder
+// (we use `avatars/` as the test sandbox). Cross-tenant denial assertions
+// still go through the same paths so the policy denial fires on the
+// foldername[1] != attacker's tenant clause, not on the branding clause.
+const assetsRunRootFor = (tenantId: string) =>
+  `${tenantId}/avatars/__rls_test__/${RUN_ID}`;
+
+const assetsOwnPath = (tenantId: string, label: string) =>
+  `${assetsRunRootFor(tenantId)}/${label}.txt`;
+
+const assetsNestedOwnPath = (
+  tenantId: string,
+  segments: string[],
+  label: string,
+) => `${assetsRunRootFor(tenantId)}/${segments.join("/")}/${label}.txt`;
+
+// Bucket-aware helpers so shared seed code (e.g. seedVictimFile) can pick
+// the right path shape without each call site having to branch.
+const ownPathFor = (bucket: string, tenantId: string, label: string) =>
+  bucket === "tenant-assets"
+    ? assetsOwnPath(tenantId, label)
+    : ownPath(tenantId, label);
+
+const nestedOwnPathFor = (
+  bucket: string,
+  tenantId: string,
+  segments: string[],
+  label: string,
+) =>
+  bucket === "tenant-assets"
+    ? assetsNestedOwnPath(tenantId, segments, label)
+    : nestedOwnPath(tenantId, segments, label);
+
+const runRootForBucket = (bucket: string, tenantId: string) =>
+  bucket === "tenant-assets" ? assetsRunRootFor(tenantId) : runRootFor(tenantId);
+
 const NESTED_SCENARIOS: Array<{ name: string; segments: string[] }> = [
   { name: "documents/2026/invoices", segments: ["documents", "2026", "invoices"] },
   { name: "uploads/avatars/user-123", segments: ["uploads", "avatars", "user-123"] },
