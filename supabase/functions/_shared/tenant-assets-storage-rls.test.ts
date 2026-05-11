@@ -112,13 +112,13 @@ async function cleanup(
     const { data: list } = await admin.storage.from(BUCKET).list(t, {
       limit: 1000,
     });
-    const paths = (list ?? []).map((o) => `${t}/${o.name}`);
+    const paths = (list ?? []).map((o: any) => `${t}/${o.name}`);
     // Also recurse one level for avatars/ and resources/
     for (const sub of ["avatars", "resources"]) {
       const { data: subList } = await admin.storage
         .from(BUCKET)
         .list(`${t}/${sub}`, { limit: 1000 });
-      for (const o of subList ?? []) paths.push(`${t}/${sub}/${o.name}`);
+      for (const o of (subList ?? []) as any[]) paths.push(`${t}/${sub}/${o.name}`);
     }
     if (paths.length) await admin.storage.from(BUCKET).remove(paths);
   }
@@ -218,7 +218,7 @@ Deno.test({
           .from(BUCKET)
           .list(T, { limit: 100, search: "server-only.txt" });
         assert(
-          (data ?? []).some((o) => o.name === "server-only.txt"),
+          (data ?? []).some((o: any) => o.name === "server-only.txt"),
           "non-branding file should still exist after blocked staff delete",
         );
       }
