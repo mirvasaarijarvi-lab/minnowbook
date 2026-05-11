@@ -82,6 +82,14 @@ jobs:
         with:
           deno-version: v1.x
 
+      - name: Cache Deno modules
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.DENO_DIR }}
+          key: deno-${{ runner.os }}-${{ hashFiles('supabase/functions/**/*.ts', 'deno.json', 'deno.jsonc', 'deno.lock', 'import_map.json') }}
+          restore-keys: |
+            deno-${{ runner.os }}-
+
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
