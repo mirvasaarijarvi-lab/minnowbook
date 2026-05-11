@@ -56,12 +56,9 @@ describe("assertSafeStorageObjectPath", () => {
     }
 
     it("rejects non-string input", () => {
-      // @ts-expect-error intentional misuse
-      expect(() => assertSafeStorageObjectPath(undefined)).toThrowError(InvalidStoragePathError);
-      // @ts-expect-error intentional misuse
-      expect(() => assertSafeStorageObjectPath(123)).toThrowError(InvalidStoragePathError);
-      // @ts-expect-error intentional misuse
-      expect(() => assertSafeStorageObjectPath(null)).toThrowError(InvalidStoragePathError);
+      expect(() => assertSafeStorageObjectPath(undefined as any)).toThrowError(InvalidStoragePathError);
+      expect(() => assertSafeStorageObjectPath(123 as any)).toThrowError(InvalidStoragePathError);
+      expect(() => assertSafeStorageObjectPath(null as any)).toThrowError(InvalidStoragePathError);
     });
   });
 
