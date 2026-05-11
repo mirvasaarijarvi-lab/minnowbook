@@ -179,14 +179,9 @@ jobs:
         env:
           AUDIT_LEVEL: ${{ env.AUDIT_LEVEL }}
         run: |
-          set -o pipefail
-          pnpm audit --prod --audit-level "$AUDIT_LEVEL" --json \
-            | tee audit-prod.json
-          status=${PIPESTATUS[0]}
-          if [ "$status" -ne 0 ]; then
-            echo "::error title=Vulnerable production dependency::pnpm audit found one or more advisories at severity '$AUDIT_LEVEL' or higher in production dependencies."
-            exit "$status"
-          fi
+          # Capture-only: the allowlist gate below decides pass/fail
+          # so per-advisory waivers can override the raw audit verdict.
+          pnpm audit --prod --audit-level "$AUDIT_LEVEL" --json | tee audit-prod.json || true
 
       - name: Run pnpm audit (all deps, informational)
         if: always() && steps.detect.outputs.manager == 'pnpm'
@@ -203,20 +198,13 @@ jobs:
         env:
           AUDIT_LEVEL: ${{ env.AUDIT_LEVEL }}
         run: |
-          set -o pipefail
+          # Capture-only: the allowlist gate below decides pass/fail.
           yarn_version="$(yarn --version || echo 1.0.0)"
           major="${yarn_version%%.*}"
           if [ "$major" -ge 2 ]; then
-            yarn npm audit --environment production --severity "$AUDIT_LEVEL" --json \
-              | tee audit-prod.json
+            yarn npm audit --environment production --severity "$AUDIT_LEVEL" --json | tee audit-prod.json || true
           else
-            yarn audit --groups dependencies --level "$AUDIT_LEVEL" --json \
-              | tee audit-prod.json
-          fi
-          status=${PIPESTATUS[0]}
-          if [ "$status" -ne 0 ]; then
-            echo "::error title=Vulnerable production dependency::yarn audit found one or more advisories at severity '$AUDIT_LEVEL' or higher in production dependencies."
-            exit "$status"
+            yarn audit --groups dependencies --level "$AUDIT_LEVEL" --json | tee audit-prod.json || true
           fi
 
       - name: Run yarn audit (all deps, informational)
@@ -286,23 +274,43 @@ jobs:
         env:
           AUDIT_LEVEL: ${{ env.AUDIT_LEVEL }}
         run: |
-          set -o pipefail
+          # Capture-only: the allowlist gate below decides pass/fail.
           # `--omit=dev` keeps the gate focused on what actually ships
           # to production. A separate informational step below scans
           # devDependencies without failing the job.
-          npm audit --omit=dev --audit-level="$AUDIT_LEVEL" --json \
-            | tee audit-prod.json
-          status=${PIPESTATUS[0]}
-          if [ "$status" -ne 0 ]; then
-            echo "::error title=Vulnerable production dependency::npm audit found one or more advisories at severity '$AUDIT_LEVEL' or higher in production dependencies. See the audit-prod.json artifact for details."
-            exit "$status"
-          fi
+          npm audit --omit=dev --audit-level="$AUDIT_LEVEL" --json | tee audit-prod.json || true
 
       - name: Run npm audit (all deps, informational)
         if: (steps.detect.outputs.manager == 'npm' || steps.detect.outputs.manager == 'bun-via-npm') && always()
         continue-on-error: true
         run: |
           npm audit --audit-level=low --json | tee audit-all.json || true
+
+      # ---------------------------------------------------------------
+      # Allowlist-aware gate. This is the real pass/fail step. It runs
+      # for every detected manager, parses audit-prod.json with the
+      # shared parser used by the SARIF converter, and lets specific
+      # advisory IDs in .github/dependency-audit-allowlist.json waive
+      # the gate until their `expires` date. Expired allowlist entries
+      # surface as warnings so they get cleaned up.
+      # ---------------------------------------------------------------
+      - name: Apply audit allowlist gate
+        if: always() && hashFiles('audit-prod.json') != ''
+        env:
+          AUDIT_LEVEL: ${{ env.AUDIT_LEVEL }}
+        run: |
+          set -euo pipefail
+          case "${{ steps.detect.outputs.manager }}" in
+            npm|bun-via-npm) gate_manager=npm ;;
+            pnpm)            gate_manager=pnpm ;;
+            yarn)
+              flavour="classic"
+              if [ -f yarn-flavour.txt ]; then flavour="$(cat yarn-flavour.txt)"; fi
+              if [ "$flavour" = "berry" ]; then gate_manager=yarn-berry; else gate_manager=yarn-classic; fi
+              ;;
+            *) echo "::error::Unsupported manager for allowlist gate: ${{ steps.detect.outputs.manager }}"; exit 1 ;;
+          esac
+          node .github/workflows/scripts/apply-allowlist.mjs "$gate_manager" audit-prod.json .github/dependency-audit-allowlist.json "$AUDIT_LEVEL"
 
       - name: Upload audit reports
         if: always()

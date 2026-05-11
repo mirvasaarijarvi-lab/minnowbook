@@ -1,0 +1,11 @@
+{
+  "$schema": "./dependency-audit-allowlist.schema.json",
+  "_doc": [
+    "Advisories listed here will NOT fail the dependency-audit job until their `expires` date.",
+    "After `expires` (UTC, YYYY-MM-DD), the entry is treated as inactive and the gate fails again.",
+    "An entry matches when its `id` equals any of the advisory's ruleId, GHSA id, or one of its CVE ids.",
+    "All fields except `id` and `expires` are documentation only.",
+    "Audit JSON parsing and matching live in .github/workflows/scripts/apply-allowlist.mjs."
+  ],
+  "entries": []
+}
