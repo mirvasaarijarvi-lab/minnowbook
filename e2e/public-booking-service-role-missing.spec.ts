@@ -19,6 +19,7 @@
  */
 import { test, expect, SUPABASE_URL, TEST_TENANT } from "./fixtures/test-tenant";
 import { gotoAndWaitForSpa, assertPublicBookingReady } from "./fixtures/spa-waits";
+import { BOOKING_ERROR_CODES } from "../supabase/functions/_shared/booking-error-codes";
 
 const PUBLIC_BOOKING_URL_RE = /\/functions\/v1\/public-booking(\?|$)/;
 const RESERVATIONS_REST_RE = /\/rest\/v1\/reservations(\?|$|\/)/;
