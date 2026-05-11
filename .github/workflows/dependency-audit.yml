@@ -97,6 +97,26 @@ jobs:
           persist-credentials: false
 
       # ---------------------------------------------------------------
+      # Validate the resolved AUDIT_LEVEL up front so a typo in the
+      # repo variable (e.g. "High", "med") does not silently get
+      # forwarded to npm/pnpm/yarn audit, which would either reject it
+      # with a confusing error mid-run or, worse, default to a more
+      # permissive level. We pin the allow-list here.
+      # ---------------------------------------------------------------
+      - name: Validate audit severity threshold
+        run: |
+          set -euo pipefail
+          case "${AUDIT_LEVEL:-}" in
+            low|moderate|high|critical)
+              echo "Using audit severity threshold: $AUDIT_LEVEL"
+              ;;
+            *)
+              echo "::error title=Invalid AUDIT_LEVEL::AUDIT_LEVEL='${AUDIT_LEVEL:-<empty>}' is not one of: low, moderate, high, critical. Set repo variable AUDIT_LEVEL or rerun via workflow_dispatch with a valid value."
+              exit 1
+              ;;
+          esac
+
+      # ---------------------------------------------------------------
       # Detect which package manager owns the dependency graph based on
       # the lockfile that is present. This avoids gaps where a repo
       # ships, say, a pnpm-lock.yaml that npm audit would silently
