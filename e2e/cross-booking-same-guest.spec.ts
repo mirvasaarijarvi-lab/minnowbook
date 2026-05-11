@@ -46,15 +46,22 @@ function futureDate(offsetDays = 60): string {
   return d.toISOString().slice(0, 10);
 }
 
-async function callPublicBooking(request: import("@playwright/test").APIRequestContext, body: Record<string, unknown>) {
-  const res = await request.post(`${SUPABASE_URL}/functions/v1/public-booking`, {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-      apikey: SUPABASE_ANON_KEY,
-    },
-    data: body,
-  });
+async function callPublicBooking(
+  request: import("@playwright/test").APIRequestContext,
+  body: Record<string, unknown>,
+  label: string,
+) {
+  const url = `${SUPABASE_URL}/functions/v1/public-booking`;
+  const requestHeaders = {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+    apikey: SUPABASE_ANON_KEY,
+  };
+  const startedAt = Date.now();
+  const res = await request.post(url, { headers: requestHeaders, data: body });
+  const durationMs = Date.now() - startedAt;
+  const status = res.status();
+  const responseHeaders = res.headers();
   const text = await res.text();
   let json: any = null;
   try {
@@ -62,7 +69,41 @@ async function callPublicBooking(request: import("@playwright/test").APIRequestC
   } catch {
     /* leave as text */
   }
-  return { status: res.status(), body: json ?? text };
+
+  const diagnostic = {
+    label,
+    request: {
+      method: "POST",
+      url,
+      // Redact bearer tokens; keep payload for debugging
+      headers: { ...requestHeaders, Authorization: "Bearer <redacted>", apikey: "<redacted>" },
+      body,
+    },
+    response: { status, durationMs, headers: responseHeaders, body: json ?? text },
+  };
+
+  if (status >= 400) {
+    // eslint-disable-next-line no-console
+    console.error(
+      `\n[cross-booking] ${label} FAILED (HTTP ${status}, ${durationMs}ms)\n` +
+        JSON.stringify(diagnostic, null, 2) +
+        "\n",
+    );
+    try {
+      // Attach to the Playwright HTML report so each retry has its own artifact
+      await test.info().attach(`public-booking-${label}-failure.json`, {
+        body: Buffer.from(JSON.stringify(diagnostic, null, 2), "utf-8"),
+        contentType: "application/json",
+      });
+    } catch {
+      /* test.info() unavailable outside test scope */
+    }
+  } else {
+    // eslint-disable-next-line no-console
+    console.log(`[cross-booking] ${label} OK (HTTP ${status}, ${durationMs}ms)`);
+  }
+
+  return { status, body: json ?? text, diagnostic };
 }
 
 test.describe("Cross-booking: same guest, multiple resources/services", () => {
