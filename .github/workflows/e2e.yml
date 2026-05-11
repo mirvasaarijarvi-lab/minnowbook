@@ -38,10 +38,24 @@ jobs:
       - name: Run E2E tests
         run: bunx playwright test
 
-      - name: Upload test report
+      - name: Upload Playwright HTML report
         if: always()
         uses: actions/upload-artifact@v5
         with:
-          name: playwright-report
+          name: playwright-report-run-${{ github.run_id }}
           path: playwright-report/
+          retention-days: 14
+
+      - name: Upload Playwright junit + traces
+        # test-reports/playwright/{junit.xml,results.json} are produced by
+        # playwright.config.ts; test-results/ holds traces, screenshots,
+        # videos, and stack-trace dumps for any failing test.
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: playwright-artifacts-run-${{ github.run_id }}
+          path: |
+            test-reports/playwright/
+            test-results/
+          if-no-files-found: warn
           retention-days: 14
