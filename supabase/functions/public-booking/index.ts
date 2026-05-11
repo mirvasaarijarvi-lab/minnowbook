@@ -12,6 +12,50 @@ const corsHeaders = {
   "Content-Security-Policy": "default-src 'none'; frame-ancestors 'none'",
 };
 
+/**
+ * Result of {@link assertServiceRoleKey}. Either the key is present
+ * (so the caller can proceed) or it is missing and the helper has
+ * built the exact `Response` the function should return immediately,
+ * before any DB work. Exposed so unit tests can assert the contract
+ * without spinning up Deno.serve.
+ */
+export type ServiceRoleKeyCheck =
+  | { ok: true; serviceRoleKey: string }
+  | { ok: false; response: Response };
+
+/**
+ * Guard executed at the top of the request handler, BEFORE createClient
+ * and BEFORE any DB write. Returns a 400 with `error_code:
+ * "SERVICE_ROLE_KEY_MISSING"` when the env var is absent or empty so
+ * the public booking UI can surface a precise misconfig message
+ * instead of a generic 500.
+ *
+ * Pure: takes the raw env value as input rather than reading
+ * `Deno.env` so tests can drive every branch deterministically.
+ */
+export function assertServiceRoleKey(
+  rawKey: string | undefined,
+  cors: HeadersInit = corsHeaders,
+): ServiceRoleKeyCheck {
+  const trimmed = typeof rawKey === "string" ? rawKey.trim() : "";
+  if (trimmed.length > 0) {
+    return { ok: true, serviceRoleKey: trimmed };
+  }
+  const response = new Response(
+    JSON.stringify({
+      error:
+        "Booking service is not fully configured (missing service-role key). " +
+        "Please contact the venue.",
+      error_code: "SERVICE_ROLE_KEY_MISSING",
+    }),
+    {
+      status: 400,
+      headers: { ...cors, "Content-Type": "application/json" },
+    },
+  );
+  return { ok: false, response };
+}
+
 // --- Rate limiting: 5 bookings per IP per minute ---
 const RATE_LIMIT_WINDOW_MS = 60_000;
 const RATE_LIMIT_MAX = 5;
@@ -180,8 +224,27 @@ Deno.serve(async (req) => {
   }
 
   const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  // Hard-fail BEFORE any DB work (and before createClient) when the
+  // service-role key is not configured. The function relies on the
+  // service role to bypass RLS for the reservations insert and for the
+  // booking_validation_log write; without it we'd either crash mid-write
+  // (potentially after partial side effects) or silently no-op. We
+  // return 400 with a clear, machine-readable `error_code` so the
+  // dashboard / public booking UI can surface a precise misconfig
+  // message instead of a generic 500.
+  const keyCheck = assertServiceRoleKey(
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY"),
+  );
+  if (!keyCheck.ok) {
+    console.error(
+      "[public-booking] SUPABASE_SERVICE_ROLE_KEY is missing or empty. " +
+        "Refusing to proceed: no DB write will be attempted.",
+    );
+    return keyCheck.response;
+  }
+  const serviceRoleKey = keyCheck.serviceRoleKey;
   const adminClient = createClient(supabaseUrl, serviceRoleKey);
+
 
   try {
     const contentLength = parseInt(req.headers.get("content-length") || "0", 10);
