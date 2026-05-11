@@ -33,6 +33,35 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v5
 
+      # Fail fast (before expensive Bun install / Playwright browser
+      # download / Vite build) when the Supabase secrets that the Deno
+      # edge function tests need aren't wired up. scripts/test-ci.sh
+      # also re-validates these right before invoking deno, but doing
+      # it here means a misconfigured fork or a rotated/missing secret
+      # surfaces in seconds with a clear message instead of ~5 minutes
+      # in.
+      - name: Validate required Supabase env vars
+        run: |
+          # SUPABASE_URL falls back to VITE_SUPABASE_URL inside
+          # scripts/test-ci.sh, so accept either here too.
+          effective_url="${SUPABASE_URL:-${VITE_SUPABASE_URL:-}}"
+          missing=()
+          if [ -z "$effective_url" ]; then
+            missing+=("SUPABASE_URL (or VITE_SUPABASE_URL)")
+          fi
+          if [ -z "${SUPABASE_SERVICE_ROLE_KEY:-}" ]; then
+            missing+=("SUPABASE_SERVICE_ROLE_KEY")
+          fi
+          if [ "${#missing[@]}" -gt 0 ]; then
+            echo "::error title=Missing Supabase secrets::The Deno edge function tests require the following secret(s) to be configured on this repository before test:ci can run:"
+            for var in "${missing[@]}"; do
+              echo "::error::  - $var"
+            done
+            echo "::error::Add them under Settings → Secrets and variables → Actions. SUPABASE_SERVICE_ROLE_KEY must be the service-role key from Lovable Cloud (Backend → API keys)."
+            exit 1
+          fi
+          echo "Supabase env vars present (URL + service-role key). Proceeding."
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
