@@ -103,6 +103,7 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
     } catch (err) {
       failureSummary.video_capture_error =
         err instanceof Error ? err.message : String(err);
+    }
 
     // Trace is captured for every test by playwright.config.ts (`trace: "on"`)
     // and lives at testInfo.outputDir/trace.zip. Attach it explicitly so the
