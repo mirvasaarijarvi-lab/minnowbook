@@ -77,7 +77,7 @@ function csvCell(value: unknown): string {
 export function buildCsv(events: SafeRejectionEvent[]): string {
   const header = SAFE_EVENT_FIELDS.join(",");
   const rows = events.map((e) =>
-    SAFE_EVENT_FIELDS.map((f) => csvCell((e as Record<string, unknown>)[f])).join(",")
+    SAFE_EVENT_FIELDS.map((f) => csvCell((e as unknown as Record<string, unknown>)[f])).join(",")
   );
   return [header, ...rows].join("\r\n") + "\r\n";
 }
