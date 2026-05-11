@@ -20,12 +20,19 @@ import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative, sep } from "node:path";
 
 const ROOT = process.cwd();
+// Current code is scanned in full. Migrations are append-only history
+// and historically contained 2-arg overloads/calls, so we only flag
+// migrations newer than the drop baseline below.
 const SCAN_DIRS = [
-  "supabase/migrations",
   "supabase/functions",
   "src",
   "scripts",
 ];
+
+// Migration filename (YYYYMMDDHHMMSS prefix) at which the legacy
+// 2-arg overloads were dropped. Any migration with a STRICTLY GREATER
+// timestamp must not reintroduce a 2-arg overload or call site.
+const MIGRATION_BASELINE = "20260511132118";
 const SKIP_DIR_NAMES = new Set([
   "node_modules",
   "dist",
