@@ -1,0 +1,31 @@
+# CodeQL configuration for MimmoBook.
+#
+# - Uses the security-and-quality query suite (set in the workflow).
+# - Excludes generated, vendored, and test fixtures so we don't waste
+#   analysis time or surface noisy alerts on code we don't ship.
+# - Excludes Supabase Edge Functions: they ship to Deno runtime and
+#   are covered by their own Deno test suite + edge-function lint
+#   exclusion already documented in the project memory.
+
+name: "MimmoBook CodeQL config"
+
+paths:
+  - "src"
+  - "e2e"
+  - "scripts"
+
+paths-ignore:
+  - "**/*.test.ts"
+  - "**/*.test.tsx"
+  - "**/*.spec.ts"
+  - "**/*.spec.tsx"
+  - "**/__fixtures__/**"
+  - "**/__mocks__/**"
+  - "src/integrations/supabase/types.ts"
+  - "src/integrations/supabase/client.ts"
+  - "supabase/functions/**"
+  - "dist/**"
+  - "build/**"
+  - "node_modules/**"
+  - "playwright-report/**"
+  - "test-results/**"
