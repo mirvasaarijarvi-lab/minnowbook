@@ -93,7 +93,7 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
   const showSiteLabel = (sites?.length ?? 0) > 0 && !selectedSiteId;
 
   const { data: reservations, isLoading } = useQuery({
-    queryKey: ["reservations", tenantId, selectedSiteId, siteIds, statusFilter, typeFilter, dateFilter, invoicedFilter, checkoutTodayFilter],
+    queryKey: ["reservations", tenantId, selectedSiteId, siteIds, statusFilter, typeFilter, dateFilter, invoicedFilter, checkoutTodayFilter, specificDate ? format(specificDate, "yyyy-MM-dd") : null, debouncedSearch],
     queryFn: async () => {
       if (!tenantId) return [];
       let query = supabase.from("reservations").select("*").eq("tenant_id", tenantId).order("date", { ascending: false });
@@ -102,11 +102,20 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
       if (typeFilter !== "all") query = query.eq("reservation_type", typeFilter);
       if (checkoutTodayFilter) {
         query = query.eq("check_out_date", today);
+      } else if (specificDate) {
+        query = query.eq("date", format(specificDate, "yyyy-MM-dd"));
       } else if (dateFilter === "today") {
         query = query.eq("date", today);
       }
       if (invoicedFilter === "uninvoiced") query = query.eq("is_invoiced", false);
       if (invoicedFilter === "invoiced") query = query.eq("is_invoiced", true);
+      if (debouncedSearch) {
+        const escaped = debouncedSearch.replace(/[%,()]/g, " ");
+        const term = `%${escaped}%`;
+        query = query.or(
+          `guest_name.ilike.${term},guest_email.ilike.${term},guest_phone.ilike.${term}`
+        );
+      }
       const { data, error } = await query.limit(100);
       if (error) throw error;
       return data;
