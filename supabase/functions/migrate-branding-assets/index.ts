@@ -106,8 +106,16 @@ Deno.serve(async (req) => {
 
     for (const f of files ?? []) {
       if (!BRANDING_RE.test(f.name)) continue;
-      const srcPath = `${tenantId}/${f.name}`;
-      const dstPath = srcPath;
+      let srcPath: string;
+      let dstPath: string;
+      try {
+        srcPath = assertSafeStoragePath(`${tenantId}/${f.name}`);
+        dstPath = srcPath;
+      } catch (err) {
+        summary.files_failed++;
+        summary.errors.push(`unsafe path ${tenantId}/${f.name}: ${(err as Error).message}`);
+        continue;
+      }
 
       // Skip if already migrated.
       const { data: existing } = await admin.storage
