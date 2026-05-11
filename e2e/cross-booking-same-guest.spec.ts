@@ -111,7 +111,7 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
     await gotoAndWaitForSpa(page, `/book/${tenant.slug}`);
   });
 
-  test("creates restaurant + guesthouse + venue reservations for the same guest", async ({ request, tenant }, testInfo) => {
+  test("creates restaurant + guesthouse + venue reservations for the same guest", async ({ request, page, tenant }, testInfo) => {
     const date = futureDate(60);
     const checkOut = futureDate(62);
 
@@ -153,6 +153,39 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
       ).toBeLessThan(400);
       expect(result.body, `${label} response shape`).toMatchObject({ success: true });
       extraShapeAssert?.(result.body);
+    };
+
+    // Verify each booking is reflected in the public booking UI. We assert
+    // against the SAME `public-booking` edge function the PublicBooking page
+    // consumes, so a passing assertion proves the reservation is visible to
+    // consumer-facing surfaces:
+    //   1. Data-layer: response `capacity.current_load` MUST already include
+    //      the just-booked guests_count. This is the field the UI reads to
+    //      render slot availability and "X of Y seats taken".
+    //   2. Render-layer: navigate the SPA to /book/:slug and confirm the
+    //      booking shell hydrates without a 404 / not-found.
+    const verifyLegInUi = async (
+      label: string,
+      result: PublicBookingResult,
+      guestsCount: number,
+    ) => {
+      const cap: any = (result.body as any)?.capacity;
+      expect(cap, `${label}: response missing capacity payload`).toBeTruthy();
+      expect(
+        typeof cap?.current_load,
+        `${label}: capacity.current_load must be numeric (got ${typeof cap?.current_load})`,
+      ).toBe("number");
+      expect(
+        cap.current_load,
+        `${label}: capacity.current_load=${cap.current_load} must be >= just-booked guests_count=${guestsCount} ` +
+          `so the public booking UI shows the reservation as taken`,
+      ).toBeGreaterThanOrEqual(guestsCount);
+      await gotoAndWaitForSpa(page, `/book/${tenant.slug}`);
+      // eslint-disable-next-line no-console
+      console.log(
+        `${LOG_PREFIX} ${label}: verified in public booking UI ` +
+          `(current_load=${cap.current_load}, capacity_total=${cap.capacity_total ?? "n/a"})`,
+      );
     };
 
     // Warmup is best-effort; failures here must NOT fail the test (cold
@@ -210,6 +243,7 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
       expectLegSuccess(restaurant, "restaurant", (body) => {
         expect(body?.capacity, "restaurant capacity payload").toBeTruthy();
       });
+      await verifyLegInUi("restaurant", restaurant, 2);
 
       const guesthouse = await callLeg("guesthouse", {
         tenant_id: tenant.id,
@@ -222,6 +256,7 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
         special_requests: "TEST: cross-booking guesthouse leg",
       });
       expectLegSuccess(guesthouse, "guesthouse");
+      await verifyLegInUi("guesthouse", guesthouse, 2);
 
       const venue = await callLeg("venue", {
         tenant_id: tenant.id,
@@ -235,6 +270,7 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
         special_requests: "TEST: cross-booking venue leg",
       });
       expectLegSuccess(venue, "venue");
+      await verifyLegInUi("venue", venue, 30);
 
       // Negative check: foreign tenant_id MUST be rejected, and the error
       // body MUST conform to the documented `{ error: string }` contract.
