@@ -756,7 +756,7 @@ const PublicBookingInner = () => {
       const { data, error } = await supabase.functions.invoke("public-booking", {
         body: payload,
       });
-      // The edge function returns 400 + { error_code: "SERVICE_ROLE_KEY_MISSING" }
+      // The edge function returns 400 + { error_code: SERVICE_ROLE_KEY_MISSING }
       // when SUPABASE_SERVICE_ROLE_KEY is not configured. supabase-js wraps
       // non-2xx responses in a FunctionsHttpError whose body must be parsed
       // out of `error.context` to recover the structured error_code.
@@ -778,23 +778,23 @@ const PublicBookingInner = () => {
             /* fall through to generic error */
           }
         }
-        if (errorCode === "SERVICE_ROLE_KEY_MISSING") {
+        if (errorCode === BOOKING_ERROR_CODES.SERVICE_ROLE_KEY_MISSING) {
           const e = new Error(serverMessage ?? "Service misconfigured");
-          (e as any).code = "SERVICE_ROLE_KEY_MISSING";
+          (e as any).code = BOOKING_ERROR_CODES.SERVICE_ROLE_KEY_MISSING;
           throw e;
         }
         throw error;
       }
-      if (data?.error_code === "SERVICE_ROLE_KEY_MISSING") {
+      if (data?.error_code === BOOKING_ERROR_CODES.SERVICE_ROLE_KEY_MISSING) {
         const e = new Error(data.error ?? "Service misconfigured");
-        (e as any).code = "SERVICE_ROLE_KEY_MISSING";
+        (e as any).code = BOOKING_ERROR_CODES.SERVICE_ROLE_KEY_MISSING;
         throw e;
       }
       if (data?.error) throw new Error(data.error);
     },
     onSuccess: () => setSubmitted(true),
     onError: (err: any) => {
-      if (err?.code === "SERVICE_ROLE_KEY_MISSING") {
+      if (err?.code === BOOKING_ERROR_CODES.SERVICE_ROLE_KEY_MISSING) {
         toast.error(t("booking.serviceMisconfigured"), { duration: 10000 });
         return;
       }
