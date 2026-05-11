@@ -43,6 +43,18 @@ on:
     # without dependency churn in the repo.
     - cron: "17 6 * * *"
   workflow_dispatch:
+    inputs:
+      audit_level:
+        description: "Minimum severity that fails the job (low | moderate | high | critical)."
+        required: false
+        default: ""
+        type: choice
+        options:
+          - ""
+          - low
+          - moderate
+          - high
+          - critical
 
 permissions: {}
 
@@ -50,9 +62,21 @@ concurrency:
   group: dependency-audit-${{ github.ref }}
   cancel-in-progress: true
 
+# ---------------------------------------------------------------
+# Severity threshold resolution (highest priority first):
+#   1. workflow_dispatch input `audit_level` (manual one-off override)
+#   2. repository / environment variable `AUDIT_LEVEL` (long-lived
+#      project default, set under Settings > Secrets and variables >
+#      Actions > Variables, no code change required)
+#   3. hardcoded fallback `high`
+#
+# This lets the team temporarily relax the gate to `critical` only
+# (e.g. during a known-vulnerable transitive that ships a fix in N
+# days) without editing the workflow, and ratchet it back up to
+# `moderate` once the project is clean, again without a PR.
+# ---------------------------------------------------------------
 env:
-  # Minimum severity that fails the build. Allowed: low | moderate | high | critical.
-  AUDIT_LEVEL: high
+  AUDIT_LEVEL: ${{ inputs.audit_level != '' && inputs.audit_level || vars.AUDIT_LEVEL || 'high' }}
 
 jobs:
   audit:
