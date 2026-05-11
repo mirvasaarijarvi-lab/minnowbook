@@ -404,8 +404,9 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
         extra: { current_load: cap.current_load, capacity_total: cap.capacity_total ?? null },
       });
       await gotoAndWaitForSpa(page, `/book/${tenant.slug}`);
-      await captureCheckpoint(page, testInfo, `${label}: after SPA reload`, {
-        probeSelectors: ["#root", "main", "h1"],
+      await assertPublicBookingReady(page);
+      await captureCheckpoint(page, testInfo, `${label}: after booking form ready`, {
+        probeSelectors: ["#root", "main", "h1", "#guest_name", "form"],
         extra: { current_load: cap.current_load, capacity_total: cap.capacity_total ?? null },
       });
       // eslint-disable-next-line no-console
