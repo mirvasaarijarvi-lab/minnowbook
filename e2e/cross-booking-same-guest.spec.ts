@@ -41,7 +41,7 @@ const test = baseTest.extend({
 });
 
 import { createClient } from "@supabase/supabase-js";
-import { gotoAndWaitForSpa } from "./fixtures/spa-waits";
+import { gotoAndWaitForSpa, assertPublicBookingReady } from "./fixtures/spa-waits";
 import {
   callPublicBooking,
   validatePublicBookingErrorShape,
