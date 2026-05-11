@@ -18,11 +18,18 @@
 import fs from "node:fs";
 import { parseAuditReport, DRIVERS } from "./parse-audit.mjs";
 
-const [, , manager, inputPath, outputPath, lockfile] = process.argv;
+const [, , manager, inputPath, outputPath, lockfile, levelArg] = process.argv;
 if (!manager || !inputPath || !outputPath || !lockfile) {
-  console.error("Usage: audit-to-sarif.mjs <manager> <input.json> <output.sarif> <lockfile>");
+  console.error("Usage: audit-to-sarif.mjs <manager> <input.json> <output.sarif> <lockfile> [audit_level]");
   process.exit(2);
 }
+
+// Resolved gate threshold for this run. Captured into SARIF metadata
+// (run.properties.auditLevel + driver.properties.auditLevel) so anyone
+// inspecting code-scanning alerts can see which severity floor was in
+// effect when the SARIF was produced. Falls back to env to keep call
+// sites in the workflow short, then to "unknown" if neither is set.
+const auditLevel = String(levelArg || process.env.AUDIT_LEVEL || "unknown").toLowerCase();
 
 if (!fs.existsSync(inputPath) || fs.statSync(inputPath).size === 0) {
   console.log(`${inputPath} missing or empty, skipping SARIF conversion.`);
@@ -201,11 +208,27 @@ const sarif = {
         informationUri: driverInfoUri,
         version: "1.0",
         rules: Array.from(rules.values()),
+        // Mirrored on the driver so tools that only render
+        // tool.driver.properties (some SARIF viewers) still expose
+        // the gate level next to the tool name.
+        properties: {
+          auditLevel,
+          manager,
+        },
       },
+    },
+    // run.properties is the canonical place for run-scoped metadata
+    // in SARIF 2.1.0. Code scanning preserves these fields and they
+    // appear in the alert details payload.
+    properties: {
+      auditLevel,
+      auditLevelDescription: `Minimum severity that fails the dependency-audit gate. Advisories below '${auditLevel}' are present in the report but do not block the PR.`,
+      manager,
+      generatedAt: new Date().toISOString(),
     },
     results,
   }],
 };
 
 fs.writeFileSync(outputPath, JSON.stringify(sarif));
-console.log(`Wrote ${outputPath} with ${results.length} result(s) across ${rules.size} rule(s) for ${manager}.`);
+console.log(`Wrote ${outputPath} with ${results.length} result(s) across ${rules.size} rule(s) for ${manager} at AUDIT_LEVEL=${auditLevel}.`);
