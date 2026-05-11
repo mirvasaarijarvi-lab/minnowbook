@@ -1,0 +1,95 @@
+name: Workflow security regression
+
+# Guards against re-introducing the privilege-escalation footgun where
+# Dependabot auto-merge workflows run with `pull_request_target`, which
+# executes in the context of the BASE branch with read/write secrets
+# even for PRs from forks. Aikido (and the GitHub security advisory
+# database) flag this as a high-severity issue, so we lock it down with
+# a static check that fails CI if the pattern reappears.
+#
+# Scope:
+#   - Any workflow file under .github/workflows/ whose name contains
+#     "dependabot" or "auto-merge" must NOT use `pull_request_target`.
+#   - All other workflows are unaffected so legitimate uses elsewhere
+#     (e.g. labelling forked PRs) remain possible if ever needed.
+#
+# This job is intentionally a single bash step with no third-party
+# actions beyond actions/checkout so it cannot itself become a
+# supply-chain risk.
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/**"
+      - ".github/workflows/workflow-security-regression.yml"
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/**"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: workflow-security-regression-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  forbid-pull-request-target-in-automerge:
+    name: No pull_request_target in auto-merge workflows
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        # actions/checkout@v4.2.2
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+
+      - name: Scan auto-merge workflows
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+
+          # Collect candidate workflow files. Match on filename so we
+          # catch renames like "dependabot-auto-merge.yml",
+          # "auto-merge.yml", or future variants.
+          mapfile -t files < <(
+            find .github/workflows -maxdepth 1 -type f \
+              \( -iname "*dependabot*.yml" -o -iname "*dependabot*.yaml" \
+                 -o -iname "*auto-merge*.yml" -o -iname "*auto-merge*.yaml" \) \
+              | sort
+          )
+
+          if [ "${#files[@]}" -eq 0 ]; then
+            echo "No dependabot/auto-merge workflows found, nothing to scan."
+            exit 0
+          fi
+
+          echo "Scanning the following workflows:"
+          printf '  - %s\n' "${files[@]}"
+
+          violations=0
+          for f in "${files[@]}"; do
+            # Strip full-line comments before grepping so a documenting
+            # mention like "# do NOT use pull_request_target" stays
+            # legal. We still flag inline comments after a colon to be
+            # safe.
+            if sed -E 's/^[[:space:]]*#.*$//' "$f" \
+                 | grep -nE '(^|[^A-Za-z0-9_-])pull_request_target([^A-Za-z0-9_-]|$)' \
+                 > /tmp/hits.txt; then
+              echo "::error file=$f::Forbidden trigger 'pull_request_target' detected. Use 'pull_request' instead, Dependabot PRs originate from in-repo branches and the default GITHUB_TOKEN is sufficient. See .github/workflows/dependabot-auto-merge.yml for the hardened pattern."
+              sed "s|^|$f:|" /tmp/hits.txt
+              violations=$((violations + 1))
+            fi
+          done
+
+          if [ "$violations" -gt 0 ]; then
+            echo
+            echo "Failing build: $violations workflow(s) reintroduced 'pull_request_target' in an auto-merge context."
+            exit 1
+          fi
+
+          echo "OK: no auto-merge workflow uses pull_request_target."
