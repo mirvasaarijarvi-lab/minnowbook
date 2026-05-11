@@ -137,17 +137,26 @@ function scanRepo() {
   return offenders;
 }
 
-function checkMigrationCreates(offenders) {
-  // Belt-and-braces: any migration that CREATEs a 2-arg overload, even if
-  // the call sites are clean, must fail. We detect it via the function
-  // signature pattern in CREATE FUNCTION / CREATE OR REPLACE FUNCTION blocks.
+function migrationTimestamp(name) {
+  const m = name.match(/^(\d{14})/);
+  return m ? m[1] : null;
+}
+
+function checkNewMigrations(offenders) {
+  // For migrations newer than the baseline (i.e. added after the
+  // legacy 2-arg overloads were dropped), forbid both CREATE of a 2-arg
+  // overload AND any 2-arg call site. Older migrations are immutable
+  // history and are not scanned here.
   const migDir = join(ROOT, "supabase/migrations");
   let entries;
   try { entries = readdirSync(migDir); } catch { return offenders; }
   for (const name of entries) {
     if (!name.endsWith(".sql")) continue;
+    const ts = migrationTimestamp(name);
+    if (!ts || ts <= MIGRATION_BASELINE) continue;
     const rel = `supabase/migrations/${name}`;
     const src = readFileSync(join(migDir, name), "utf8");
+
     for (const fn of FNS) {
       const re = new RegExp(
         String.raw`create\s+(?:or\s+replace\s+)?function\s+(?:public\.)?${fn}\s*\(([^)]*)\)`,
@@ -167,6 +176,17 @@ function checkMigrationCreates(offenders) {
             snippet: `CREATE FUNCTION ${fn}(${argList})  <-- 2-arg overload forbidden`,
           });
         }
+      }
+
+      if (!src.includes(fn + "(")) continue;
+      for (const h of findCallsWithArity(src, fn, 2)) {
+        offenders.push({
+          file: rel,
+          fn,
+          line: h.line,
+          col: h.col,
+          snippet: h.snippet.replace(/\s+/g, " ").slice(0, 160),
+        });
       }
     }
   }
