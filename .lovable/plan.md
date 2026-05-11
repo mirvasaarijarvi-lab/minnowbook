@@ -1,30 +1,66 @@
+## Goal
 
-## Implementation Plan: 15 Features & Improvements
+Eliminate per-function duplication of CORS + transport-security header objects so future drift (like the recent `public-booking` `cors` vs `corsHeaders` regression) becomes structurally impossible. Today the same `Strict-Transport-Security` / `Referrer-Policy` / `CSP` triad and origin allowlist are copy-pasted into 21 edge functions, in 3 slightly different shapes:
 
-### Phase 1: Feature Additions
-1. **Guest Portal** — Create a `/my-booking/:token` route with magic-link lookup. Add a `booking_tokens` table to map tokens to reservations. Guests can view details and cancel without logging in.
-2. **Dashboard Analytics Charts** — Add Recharts-based trend charts (occupancy over time, revenue, peak hours) to the Reports panel using existing reservation data.
-3. **Waitlist System** — Create a `waitlist` table. When a resource/slot is fully booked, show "Join waitlist" on the public booking page. Auto-notify via email when a slot opens.
-4. **Export to CSV/PDF** — Add export buttons to Reservations and Reports panels. CSV via client-side generation, PDF via browser print/jsPDF.
-5. **Google Calendar Sync** — Add iCal feed endpoint (Edge Function) that generates `.ics` format from reservations. Users can subscribe from Google Calendar.
+- 13 functions inline a `const corsHeaders = { ... }` literal.
+- 8 functions define a local `function getCorsHeaders(req)` that returns the same shape (some with origin allowlisting).
+- `public-booking` adds a `cors` parameter rebinding for its service-role guard.
 
-### Phase 2: UX Improvements
-6. **Onboarding Checklist** — Add a setup progress widget on Dashboard Overview showing completion % (has resource, has opening hours, has email template, etc.).
-7. **Quick Actions FAB** — Floating action button on mobile for "New Reservation" with smooth animation.
-8. **Dark Mode Toggle** — Add toggle in sidebar/settings using `next-themes` (already installed).
-9. **Keyboard Shortcuts Help Modal** — Add `?` shortcut to show a modal listing all available keyboard shortcuts.
+## What to build
 
-### Phase 3: Reliability & Security
-10. **Rate Limiting on Login** — Add client-side throttle (max 5 attempts/minute) with countdown timer on the login page.
-11. **Audit Log Viewer Filters** — Add filter controls (action type, date range, user) to the existing AuditLogPanel.
-12. **Database Backup Reminder** — Surface a backup status indicator in the HealthCheckPanel.
+1. **New shared module: `supabase/functions/_shared/http-headers.ts`**
 
-### Phase 4: Business Value
-13. **Public Reviews/Testimonials** — Create a `guest_reviews` table. Post-visit email with review link. Display on public booking page.
-14. **Multi-language Public Booking** — Auto-detect browser language on the public booking page and apply i18n translations.
-15. **Stripe Revenue Dashboard** — Add MRR and payment status cards to the Superadmin panel using existing Stripe integration.
+   Exports:
+   - `SECURITY_HEADERS` — the immutable transport-security triad + `X-Content-Type-Options`, `X-Frame-Options`, `Cache-Control`, `Pragma`, `Vary`.
+   - `DEFAULT_ALLOWED_ORIGINS` — the canonical Lovable / mimmobook list (string + regex entries).
+   - `isOriginAllowed(origin, allowlist?)`.
+   - `getCorsHeaders(req, opts?)` — single source of truth. Options cover the existing variations:
+     - `allowOrigins?: (string | RegExp)[]` (default `DEFAULT_ALLOWED_ORIGINS`)
+     - `allowHeaders?: string` (default current canonical list; redeem-access-code adds `idempotency-key`)
+     - `allowMethods?: string`
+     - `allowCredentials?: boolean`
+     - `extraHeaders?: Record<string, string>`
+   - `corsHeaders` — a static fallback bag for the rare functions that do not have a `Request` in scope (cron entrypoints, top-of-file constants). It is `{ "Access-Control-Allow-Origin": "*", ...SECURITY_HEADERS, ...defaultAllowHeaders }`.
 
-### Approach
-- Each feature will be implemented sequentially in the listed order
-- Database migrations will be proposed before code changes
-- Existing patterns (permissions, RLS, i18n, design tokens) will be followed throughout
+2. **Migrate all 21 edge functions to import from the shared module.**
+
+   Each `index.ts` keeps a tiny local re-export so the static security scanner still sees the literal symbol names it greps for:
+
+   ```ts
+   import { getCorsHeaders, corsHeaders } from "../_shared/http-headers.ts";
+   ```
+
+   - The 13 inline-`corsHeaders` functions: delete the literal, keep `corsHeaders` import.
+   - The 8 `getCorsHeaders` functions: delete the local function + ALLOWED_ORIGINS, keep the import. Pass `{ allowHeaders: "...idempotency-key..." }` for `redeem-access-code` and `{ allowOrigins: [...with mimmobook + lovableproject] }` for `support-chat`.
+   - `public-booking`: replace the inline `corsHeaders` with the import. Keep the `cors` parameter on `assertServiceRoleKey` (defaults to `corsHeaders`) since the test already accepts that rebinding.
+
+3. **Update the static scanner `src/test/security/edge-function-hsts-referrer-csp.test.ts`** so it remains the gatekeeper but follows the import.
+
+   - When an `index.ts` imports from `_shared/http-headers.ts`, concatenate that shared file's source into the scanned text before running the existing `Strict-Transport-Security` / `Referrer-Policy` / `Content-Security-Policy` regex assertions.
+   - Leave the `new Response(...)` spread heuristic unchanged. It already accepts `...corsHeaders`, `...getCorsHeaders(`, and `...cors`.
+
+4. **Lock it in with a new unit test: `supabase/functions/_shared/http-headers.test.ts`**
+
+   - `getCorsHeaders` returns HSTS ≥ 180 days with `includeSubDomains`.
+   - `Referrer-Policy` is `strict-origin-when-cross-origin`.
+   - CSP includes `default-src 'none'` and `frame-ancestors 'none'`.
+   - Allowed origin is echoed back; disallowed origin falls back to the first allowlist entry (or is omitted when the per-call policy says so).
+   - `idempotency-key` opt-in is honored.
+
+## Out of scope
+
+- No business-logic changes inside any edge function.
+- No changes to `supabase/config.toml` or function deployment settings.
+- No change to which origins are allowed in production (the canonical list is preserved exactly).
+
+## Validation
+
+- `bunx vitest run src/test/security/edge-function-hsts-referrer-csp.test.ts` — must stay green for all 21 functions.
+- `bunx vitest run supabase/functions/_shared/http-headers.test.ts` — new tests pass.
+- Spot-deploy `public-booking` and `admin-users` after the refactor and curl them to confirm headers are unchanged.
+
+## Technical notes
+
+- The scanner currently reads only `index.ts` per function. Following the import is the smallest change that lets us actually delete the duplicated literals; the alternative (keeping the literals in every file "for the scanner") would defeat the entire refactor.
+- `public-booking` uses `Access-Control-Allow-Origin: *` today (no allowlist). The migration preserves that by passing `{ allowOrigins: "*" }` rather than silently tightening it; tightening is a separate decision.
+- The shared module lives under `_shared/`, which the scanner already excludes from its function discovery (`!name.startsWith("_")`), so it will not be scanned as a standalone function.
