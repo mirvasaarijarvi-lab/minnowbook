@@ -54,6 +54,13 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
   const [dateFilter, setDateFilter] = useState<string>(initialCheckoutToday ? "all" : "all");
   const [invoicedFilter, setInvoicedFilter] = useState<string>(initialInvoicedFilter === false ? "uninvoiced" : "all");
   const [checkoutTodayFilter, setCheckoutTodayFilter] = useState<boolean>(!!initialCheckoutToday);
+  const [specificDate, setSpecificDate] = useState<Date | undefined>(undefined);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [debouncedSearch, setDebouncedSearch] = useState<string>("");
+  useEffect(() => {
+    const handle = setTimeout(() => setDebouncedSearch(searchQuery.trim()), 300);
+    return () => clearTimeout(handle);
+  }, [searchQuery]);
   const [confirmDialog, setConfirmDialog] = useState<{ id: string; action: "confirmed" | "cancelled" } | null>(null);
   const [reminderDialog, setReminderDialog] = useState<string | null>(null);
   const [editingReservation, setEditingReservation] = useState<any | null>(null);
