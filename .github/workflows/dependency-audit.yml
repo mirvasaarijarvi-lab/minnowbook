@@ -313,6 +313,9 @@ jobs:
           path: |
             audit-prod.json
             audit-all.json
+            npm-audit.sarif
+            pnpm-audit.sarif
+            yarn-audit.sarif
           if-no-files-found: ignore
           retention-days: 14
 
