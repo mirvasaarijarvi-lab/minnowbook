@@ -2371,13 +2371,47 @@ const PublicBookingInner = () => {
             </CardContent>
           </Card>
 
+          {/* Inline misconfig banner: stays visible after the toast
+              fades so the guest has unambiguous confirmation that
+              NO reservation was created and that resubmitting will
+              not work until the venue restores the server config. */}
+          {serviceMisconfigured && (
+            <div
+              role="alert"
+              aria-live="assertive"
+              data-testid="booking-misconfig-banner"
+              className="rounded-md border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive space-y-2"
+            >
+              <p className="font-semibold">{t("booking.misconfigBannerTitle")}</p>
+              <p>{t("booking.misconfigBannerNoReservation")}</p>
+              <p className="text-destructive/80">{t("booking.misconfigBannerDisabled")}</p>
+              <div className="pt-1">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setServiceMisconfigured(false)}
+                >
+                  {t("booking.misconfigBannerTryAgain")}
+                </Button>
+              </div>
+            </div>
+          )}
+
           {/* Submit */}
           <Button
             type="submit"
             size="lg"
             className="w-full text-white font-medium"
             style={{ backgroundColor: accentColor }}
-            disabled={submitMutation.isPending || !selectedDate || !form.reservation_type || !form.guests_count || (isAccommodationType && !form.check_out_date)}
+            disabled={
+              submitMutation.isPending ||
+              serviceMisconfigured ||
+              !selectedDate ||
+              !form.reservation_type ||
+              !form.guests_count ||
+              (isAccommodationType && !form.check_out_date)
+            }
           >
             {submitMutation.isPending ? (
               <>
