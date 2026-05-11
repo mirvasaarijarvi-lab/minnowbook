@@ -11,11 +11,27 @@ export default defineConfig({
     globals: true,
     setupFiles: ["./src/test/setup.ts"],
     include: ["src/**/*.{test,spec}.{ts,tsx}"],
-    // Faster startup than the default forks pool, and avoids per-file process boot.
-    pool: "threads",
+    // Use the forks pool so each worker is a real child process that gets
+    // killed when the run ends. The previous `threads` pool kept worker
+    // threads attached to the main Node process, which meant any leaked
+    // timer / fetch keep-alive socket / supabase realtime channel held the
+    // event loop open and made `vitest run` hang in CI past the job
+    // timeout. Forks trade a small startup cost for a guaranteed clean
+    // exit, which is the right call for CI.
+    pool: "forks",
     poolOptions: {
-      threads: { singleThread: false, isolate: true },
+      forks: {
+        // Keep parallelism — only force singleFork when explicitly debugging.
+        singleFork: false,
+        isolate: true,
+      },
     },
+    // Don't wait forever on a stuck afterAll/afterEach hook.
+    teardownTimeout: 10_000,
+    // Belt-and-braces: if a test still leaves a handle open after teardown,
+    // surface it as a hard failure instead of an indefinite hang. Vitest
+    // will print the offending handle and exit non-zero.
+    // (Reporter `hanging-process` can be added on the CLI when triaging.)
     // Don't scan node_modules or build output for tests.
     exclude: ["node_modules", "dist", ".idea", ".git", ".cache", "e2e", "playwright"],
     // Reduce reporter overhead in CI; scripts/test-ci.sh adds --bail=1 + --reporter=dot.
@@ -31,4 +47,3 @@ export default defineConfig({
     alias: { "@": path.resolve(__dirname, "./src") },
   },
 });
-
