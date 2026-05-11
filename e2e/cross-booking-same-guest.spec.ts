@@ -46,15 +46,22 @@ function futureDate(offsetDays = 60): string {
   return d.toISOString().slice(0, 10);
 }
 
-async function callPublicBooking(request: import("@playwright/test").APIRequestContext, body: Record<string, unknown>) {
-  const res = await request.post(`${SUPABASE_URL}/functions/v1/public-booking`, {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-      apikey: SUPABASE_ANON_KEY,
-    },
-    data: body,
-  });
+async function callPublicBooking(
+  request: import("@playwright/test").APIRequestContext,
+  body: Record<string, unknown>,
+  label: string,
+) {
+  const url = `${SUPABASE_URL}/functions/v1/public-booking`;
+  const requestHeaders = {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+    apikey: SUPABASE_ANON_KEY,
+  };
+  const startedAt = Date.now();
+  const res = await request.post(url, { headers: requestHeaders, data: body });
+  const durationMs = Date.now() - startedAt;
+  const status = res.status();
+  const responseHeaders = res.headers();
   const text = await res.text();
   let json: any = null;
   try {
@@ -62,7 +69,41 @@ async function callPublicBooking(request: import("@playwright/test").APIRequestC
   } catch {
     /* leave as text */
   }
-  return { status: res.status(), body: json ?? text };
+
+  const diagnostic = {
+    label,
+    request: {
+      method: "POST",
+      url,
+      // Redact bearer tokens; keep payload for debugging
+      headers: { ...requestHeaders, Authorization: "Bearer <redacted>", apikey: "<redacted>" },
+      body,
+    },
+    response: { status, durationMs, headers: responseHeaders, body: json ?? text },
+  };
+
+  if (status >= 400) {
+    // eslint-disable-next-line no-console
+    console.error(
+      `\n[cross-booking] ${label} FAILED (HTTP ${status}, ${durationMs}ms)\n` +
+        JSON.stringify(diagnostic, null, 2) +
+        "\n",
+    );
+    try {
+      // Attach to the Playwright HTML report so each retry has its own artifact
+      await test.info().attach(`public-booking-${label}-failure.json`, {
+        body: Buffer.from(JSON.stringify(diagnostic, null, 2), "utf-8"),
+        contentType: "application/json",
+      });
+    } catch {
+      /* test.info() unavailable outside test scope */
+    }
+  } else {
+    // eslint-disable-next-line no-console
+    console.log(`[cross-booking] ${label} OK (HTTP ${status}, ${durationMs}ms)`);
+  }
+
+  return { status, body: json ?? text, diagnostic };
 }
 
 test.describe("Cross-booking: same guest, multiple resources/services", () => {
@@ -77,52 +118,64 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
     const checkOut = futureDate(62);
 
     // 1. Restaurant
-    const restaurant = await callPublicBooking(request, {
-      tenant_id: TENANT_ID,
-      ...GUEST,
-      guests_count: 2,
-      reservation_type: "restaurant",
-      resource_id: RESOURCES.restaurant,
-      date,
-      start_time: "19:00",
-      special_requests: "TEST: cross-booking restaurant leg",
-    });
+    const restaurant = await callPublicBooking(
+      request,
+      {
+        tenant_id: TENANT_ID,
+        ...GUEST,
+        guests_count: 2,
+        reservation_type: "restaurant",
+        resource_id: RESOURCES.restaurant,
+        date,
+        start_time: "19:00",
+        special_requests: "TEST: cross-booking restaurant leg",
+      },
+      "restaurant",
+    );
     expect(
       restaurant.status,
-      `restaurant booking failed: ${JSON.stringify(restaurant.body)}`,
+      `restaurant booking failed: ${JSON.stringify(restaurant.diagnostic, null, 2)}`,
     ).toBeLessThan(400);
 
     // 2. Guesthouse (overnight)
-    const guesthouse = await callPublicBooking(request, {
-      tenant_id: TENANT_ID,
-      ...GUEST,
-      guests_count: 2,
-      reservation_type: "guesthouse",
-      resource_id: RESOURCES.guesthouse,
-      date,
-      check_out_date: checkOut,
-      special_requests: "TEST: cross-booking guesthouse leg",
-    });
+    const guesthouse = await callPublicBooking(
+      request,
+      {
+        tenant_id: TENANT_ID,
+        ...GUEST,
+        guests_count: 2,
+        reservation_type: "guesthouse",
+        resource_id: RESOURCES.guesthouse,
+        date,
+        check_out_date: checkOut,
+        special_requests: "TEST: cross-booking guesthouse leg",
+      },
+      "guesthouse",
+    );
     expect(
       guesthouse.status,
-      `guesthouse booking failed: ${JSON.stringify(guesthouse.body)}`,
+      `guesthouse booking failed: ${JSON.stringify(guesthouse.diagnostic, null, 2)}`,
     ).toBeLessThan(400);
 
     // 3. Venue
-    const venue = await callPublicBooking(request, {
-      tenant_id: TENANT_ID,
-      ...GUEST,
-      guests_count: 30,
-      reservation_type: "venue",
-      resource_id: RESOURCES.venue,
-      date,
-      start_time: "12:00",
-      event_type: "corporate",
-      special_requests: "TEST: cross-booking venue leg",
-    });
+    const venue = await callPublicBooking(
+      request,
+      {
+        tenant_id: TENANT_ID,
+        ...GUEST,
+        guests_count: 30,
+        reservation_type: "venue",
+        resource_id: RESOURCES.venue,
+        date,
+        start_time: "12:00",
+        event_type: "corporate",
+        special_requests: "TEST: cross-booking venue leg",
+      },
+      "venue",
+    );
     expect(
       venue.status,
-      `venue booking failed: ${JSON.stringify(venue.body)}`,
+      `venue booking failed: ${JSON.stringify(venue.diagnostic, null, 2)}`,
     ).toBeLessThan(400);
 
     // Surface guest identifier so cleanup is easy after the run
