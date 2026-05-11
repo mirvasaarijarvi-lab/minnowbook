@@ -76,8 +76,14 @@ const ResourceImageGallery = ({ resourceId, tenantId }: Props) => {
       queryClient.invalidateQueries({ queryKey: ["resource-images", resourceId] });
       toast({ title: t("dashboard.imageUploaded") });
     },
-    onError: () => {
-      toast({ title: t("dashboard.imageUploadError"), variant: "destructive" });
+    onError: async (err) => {
+      const { isInvalidStoragePathError } = await import("@/lib/storage-path");
+      toast({
+        title: isInvalidStoragePathError(err)
+          ? t("common.invalidFileName")
+          : t("dashboard.imageUploadError"),
+        variant: "destructive",
+      });
     },
   });
 

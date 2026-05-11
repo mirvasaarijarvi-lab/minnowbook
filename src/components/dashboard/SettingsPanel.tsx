@@ -669,7 +669,12 @@ const SettingsPanel = () => {
       setForm((prev) => ({ ...prev, logo_url: publicUrl }));
       toast.success(t("settings.logoUploaded"));
     } catch (err) {
-      toast.error(t("settings.logoUploadError"));
+      const { isInvalidStoragePathError } = await import("@/lib/storage-path");
+      toast.error(
+        isInvalidStoragePathError(err)
+          ? t("common.invalidFileName")
+          : t("settings.logoUploadError"),
+      );
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -712,7 +717,12 @@ const SettingsPanel = () => {
       setForm((prev) => ({ ...prev, hero_image_url: publicUrl }));
       toast.success(t("settings.heroImageUploaded"));
     } catch (err) {
-      toast.error(t("settings.heroImageUploadError"));
+      const { isInvalidStoragePathError } = await import("@/lib/storage-path");
+      toast.error(
+        isInvalidStoragePathError(err)
+          ? t("common.invalidFileName")
+          : t("settings.heroImageUploadError"),
+      );
     } finally {
       setUploadingHero(false);
       if (heroInputRef.current) heroInputRef.current.value = "";

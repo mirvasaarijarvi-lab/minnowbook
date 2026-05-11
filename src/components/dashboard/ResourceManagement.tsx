@@ -187,7 +187,13 @@ const ResourceManagement = () => {
       setForm((prev) => ({ ...prev, image_url: publicUrl }));
       toast({ title: t("dashboard.imageUploaded") });
     } catch (err) {
-      toast({ title: t("dashboard.imageUploadError"), variant: "destructive" });
+      const { isInvalidStoragePathError } = await import("@/lib/storage-path");
+      toast({
+        title: isInvalidStoragePathError(err)
+          ? t("common.invalidFileName")
+          : t("dashboard.imageUploadError"),
+        variant: "destructive",
+      });
     } finally {
       setUploading(false);
       if (imageInputRef.current) imageInputRef.current.value = "";
