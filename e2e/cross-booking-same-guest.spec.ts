@@ -34,6 +34,41 @@ const PUBLIC_BOOKING_TIMEOUT_MS = 30_000;
 // One transparent retry on transient network errors (cold start, dropped connection)
 const PUBLIC_BOOKING_MAX_ATTEMPTS = 2;
 
+// Expected error response shape from the `public-booking` edge function.
+// Source of truth: supabase/functions/public-booking/index.ts always
+// responds with `{ error: string }` for any non-2xx outcome (rate limit,
+// payload too large, invalid tenant, validation failure, internal throw).
+type PublicBookingErrorBody = { error: string };
+
+/**
+ * Validate that an error body matches `{ error: string }`. Returns a list of
+ * human-readable problems (empty array means the body conforms). Used to
+ * fail the test with a precise, actionable message instead of a generic
+ * `expect(...).toMatchObject` diff.
+ */
+function validatePublicBookingErrorShape(body: unknown): string[] {
+  const problems: string[] = [];
+  if (body === null || body === undefined) {
+    problems.push("response body is null/undefined (expected JSON object)");
+    return problems;
+  }
+  if (typeof body !== "object" || Array.isArray(body)) {
+    problems.push(
+      `response body is ${Array.isArray(body) ? "an array" : typeof body}, expected a JSON object`,
+    );
+    return problems;
+  }
+  const obj = body as Record<string, unknown>;
+  if (!("error" in obj)) {
+    problems.push(`response body is missing required "error" field (got keys: ${Object.keys(obj).join(", ") || "<none>"})`);
+  } else if (typeof obj.error !== "string") {
+    problems.push(`"error" field is ${typeof obj.error}, expected string`);
+  } else if (obj.error.trim() === "") {
+    problems.push(`"error" field is an empty string`);
+  }
+  return problems;
+}
+
 // HAR 1.2 entry shape (subset). Browsers (Chrome/Firefox DevTools) and
 // `npx playwright show-trace` can import any spec-conformant HAR file.
 type HarEntry = Record<string, any>;
