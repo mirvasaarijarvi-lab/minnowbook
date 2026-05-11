@@ -32,6 +32,9 @@ jobs:
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
       VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+      # Pin Deno's module cache so actions/cache can restore it across runs.
+      DENO_DIR: ${{ github.workspace }}/.deno-cache
+
 
     steps:
       - name: Checkout code
@@ -78,6 +81,14 @@ jobs:
         uses: denoland/setup-deno@667a34cdef165d8d2b2e98dde39547c9daac7282 # v2.0.4
         with:
           deno-version: v1.x
+
+      - name: Cache Deno modules
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.DENO_DIR }}
+          key: deno-${{ runner.os }}-${{ hashFiles('supabase/functions/**/*.ts', 'deno.json', 'deno.jsonc', 'deno.lock', 'import_map.json') }}
+          restore-keys: |
+            deno-${{ runner.os }}-
 
       - name: Install dependencies
         run: bun install --frozen-lockfile
