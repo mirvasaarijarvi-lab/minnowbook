@@ -1,15 +1,16 @@
 name: Dependency audit
 
-# Runs npm audit on every pull request and blocks merge when any
-# vulnerability at or above the configured severity threshold is found.
+# Runs a software-composition-analysis (SCA) scan on every pull
+# request and blocks merge when any vulnerability at or above the
+# configured severity threshold is found.
 #
 # How this blocks Dependabot auto-merge:
-#   The Dependabot auto-merge workflow uses `gh pr merge --auto`, which
-#   waits for ALL required status checks (configured under branch
-#   protection) to go green before actually merging. As long as
-#   "Dependency audit / npm-audit" is listed as a required check on the
-#   default branch, a failing audit run here will hold the PR open even
-#   after Dependabot has approved auto-merge.
+#   The Dependabot auto-merge workflow uses `gh pr merge --auto`,
+#   which waits for ALL required status checks (configured under
+#   branch protection) to go green before actually merging. As long
+#   as "Dependency audit / dependency-audit" is listed as a required
+#   check on the default branch, a failing audit run here will hold
+#   the PR open even after Dependabot has approved auto-merge.
 #
 # Severity threshold:
 #   AUDIT_LEVEL controls the minimum severity that fails the job.
@@ -17,11 +18,13 @@ name: Dependency audit
 #   moderate / low / info. Bump to `moderate` once the project is at
 #   zero high+critical to ratchet protection upwards.
 #
-# Why npm and not bun:
-#   The repo ships a package-lock.json alongside bun.lock so that
-#   `npm audit` and Dependabot have an authoritative dependency graph
-#   to scan. We deliberately do NOT install with bun here, this job
-#   should stay scoped to the SCA check.
+# Lockfile-aware:
+#   The job auto-detects which package manager owns the resolved
+#   dependency graph (pnpm > yarn > npm > bun) and runs that
+#   manager's native audit. This avoids gaps where, for example, a
+#   repo migrating to pnpm would otherwise have its npm-only audit
+#   scan a stale package-lock.json. Only one audit runs per job so
+#   the gate result is unambiguous.
 
 on:
   pull_request:
