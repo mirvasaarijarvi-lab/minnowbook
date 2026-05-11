@@ -24,12 +24,20 @@ run_step() {
 
 # 1. Vitest unit tests (fail fast on first failing file, dot reporter to keep
 #    console quiet, junit + json reporters write into $REPORTS_DIR/vitest/).
+#    Set DEBUG_HANGING_PROCESS=1 locally to add the hanging-process reporter,
+#    which prints any open handles when the run finishes.
+VITEST_EXTRA_REPORTERS=()
+if [ "${DEBUG_HANGING_PROCESS:-0}" = "1" ]; then
+  VITEST_EXTRA_REPORTERS+=("--reporter=hanging-process")
+fi
+
 run_step "Unit tests (Vitest)" \
   node --no-warnings ./node_modules/vitest/vitest.mjs run \
     --bail=1 \
     --reporter=dot \
     --reporter=junit \
-    --reporter=json
+    --reporter=json \
+    "${VITEST_EXTRA_REPORTERS[@]}"
 
 # 2. Deno tests for Supabase edge functions
 if command -v deno >/dev/null 2>&1; then
