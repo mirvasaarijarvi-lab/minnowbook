@@ -278,6 +278,11 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
     // eslint-disable-next-line no-console
     console.log(`${LOG_PREFIX} flow correlation_id=${flowCorrelationId}`);
     testInfo.annotations.push({ type: "correlation_id", description: flowCorrelationId });
+    // Register so any subsequent browser console message / pageerror is
+    // tagged with this id in the failure-browser-diagnostics attachment.
+    const corrIds = correlationByTest.get(testInfo.testId) ?? [];
+    corrIds.push(flowCorrelationId);
+    correlationByTest.set(testInfo.testId, corrIds);
 
     const callLeg = (label: string, body: Record<string, unknown>) =>
       callPublicBooking({
