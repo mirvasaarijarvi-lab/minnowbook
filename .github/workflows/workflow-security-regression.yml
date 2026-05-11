@@ -148,6 +148,35 @@ jobs:
           python3 - "${files[@]}" <<'PY' || violations=$((violations + $?))
           import sys, yaml, pathlib
           violations = 0
+
+          # Triggers we accept on an auto-merge workflow. `pull_request`
+          # is the only one that actually drives the merge; the others
+          # are a narrow allowlist for legitimate operator escape
+          # hatches. Anything else (notably `pull_request_target`,
+          # `workflow_run`, `repository_dispatch`) is rejected here in
+          # addition to the regex checks above so the structural and
+          # textual checks stay redundant.
+          ALLOWED_TRIGGERS = {"pull_request", "workflow_dispatch", "schedule"}
+
+          # Scopes that, if set to `write` at the workflow level, are
+          # effectively wildcard write because they grant tokens that
+          # can mutate the repo or its security posture. Per-job
+          # writes are still allowed (and expected for the merge job).
+          BROAD_SCOPE_WRITES_AT_WORKFLOW = {
+              "contents", "pull-requests", "issues", "actions",
+              "deployments", "packages", "id-token", "security-events",
+              "statuses", "checks", "pages", "discussions",
+              "repository-projects",
+          }
+
+          def is_wildcard_write(perms):
+              # `permissions: write-all` (string form) grants every
+              # scope at write, which is the literal wildcard we want
+              # to ban. `permissions: read-all` is fine.
+              if isinstance(perms, str):
+                  return perms.strip() == "write-all"
+              return False
+
           for path in sys.argv[1:]:
               try:
                   doc = yaml.safe_load(pathlib.Path(path).read_text())
@@ -155,21 +184,108 @@ jobs:
                   print(f"::error file={path}::Failed to parse YAML: {e}")
                   violations += 1
                   continue
-              jobs = (doc or {}).get("jobs", {}) or {}
+              doc = doc or {}
+
+              # -------------------------------------------------
+              # Check 3a: trigger allowlist (pull_request only,
+              # plus the narrow operator escape hatches above).
+              # YAML quirk: a top-level key named `on` is parsed as
+              # the boolean True, so we look up both forms.
+              # -------------------------------------------------
+              triggers = doc.get("on", doc.get(True, {}))
+              if isinstance(triggers, str):
+                  trigger_names = {triggers}
+              elif isinstance(triggers, list):
+                  trigger_names = {str(t) for t in triggers}
+              elif isinstance(triggers, dict):
+                  trigger_names = {str(k) for k in triggers.keys()}
+              else:
+                  trigger_names = set()
+              if not trigger_names:
+                  print(
+                      f"::error file={path}::Auto-merge workflow has no "
+                      f"detectable trigger. Use 'on: pull_request:' with "
+                      f"types [opened, reopened, synchronize, ready_for_review]."
+                  )
+                  violations += 1
+              else:
+                  if "pull_request" not in trigger_names:
+                      print(
+                          f"::error file={path}::Auto-merge workflow must "
+                          f"include the 'pull_request' trigger. Found: "
+                          f"{sorted(trigger_names)}."
+                      )
+                      violations += 1
+                  bad = trigger_names - ALLOWED_TRIGGERS
+                  if bad:
+                      print(
+                          f"::error file={path}::Auto-merge workflow uses "
+                          f"disallowed trigger(s): {sorted(bad)}. Allowed: "
+                          f"{sorted(ALLOWED_TRIGGERS)}. In particular, "
+                          f"'pull_request_target' / 'workflow_run' / "
+                          f"'repository_dispatch' grant default-branch "
+                          f"secrets to a fork PR and must never appear here."
+                      )
+                      violations += 1
+
+              # -------------------------------------------------
+              # Check 3b: no wildcard write permissions. Banned
+              # at both workflow and job level. Also flag any
+              # individual broad scope being set to 'write' at
+              # the WORKFLOW level (per-job grants are still OK,
+              # and required for the actual merge job).
+              # -------------------------------------------------
+              top_perms = doc.get("permissions")
+              if is_wildcard_write(top_perms):
+                  print(
+                      f"::error file={path}::Workflow-level 'permissions: "
+                      f"write-all' grants every scope at write. Replace "
+                      f"with 'permissions: {{}}' at the top level and "
+                      f"re-grant only the scopes each job needs."
+                  )
+                  violations += 1
+              elif isinstance(top_perms, dict):
+                  for scope, level in top_perms.items():
+                      if (
+                          str(scope) in BROAD_SCOPE_WRITES_AT_WORKFLOW
+                          and str(level).strip() == "write"
+                      ):
+                          print(
+                              f"::error file={path}::Workflow-level "
+                              f"permission '{scope}: write' is too broad "
+                              f"(applies to every job). Move this grant "
+                              f"into the specific job that needs it and "
+                              f"keep top-level permissions empty."
+                          )
+                          violations += 1
+
+              jobs = doc.get("jobs", {}) or {}
               for job_name, job in jobs.items():
                   if not isinstance(job, dict):
                       continue
+                  job_perms = job.get("permissions")
+                  if is_wildcard_write(job_perms):
+                      print(
+                          f"::error file={path}::Job '{job_name}' uses "
+                          f"'permissions: write-all', which is a wildcard "
+                          f"write grant. List the specific scopes the job "
+                          f"needs (e.g. 'contents: write', "
+                          f"'pull-requests: write')."
+                      )
+                      violations += 1
+
+                  # -------------------------------------------------
+                  # Check 3c (existing): every actions/checkout
+                  # invocation must set persist-credentials: false.
+                  # -------------------------------------------------
                   for idx, step in enumerate(job.get("steps", []) or []):
                       if not isinstance(step, dict):
                           continue
                       uses = str(step.get("uses", ""))
-                      # Match actions/checkout regardless of ref pin
-                      # (semver tag or commit SHA after the @).
                       if not uses.startswith("actions/checkout@"):
                           continue
                       with_block = step.get("with") or {}
                       pc = with_block.get("persist-credentials")
-                      # YAML loader gives us bool False for `false`.
                       if pc is not False:
                           step_label = step.get("name") or f"step #{idx}"
                           print(
@@ -194,5 +310,5 @@ jobs:
             exit 1
           fi
 
-          echo "OK: no auto-merge workflow uses pull_request_target, workflow_run, repository_dispatch, or an unsafe checkout."
+          echo "OK: no auto-merge workflow uses pull_request_target, workflow_run, repository_dispatch, a disallowed trigger, a wildcard write permission, or an unsafe checkout."
 
