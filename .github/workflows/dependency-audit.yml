@@ -61,6 +61,10 @@ jobs:
     timeout-minutes: 8
     permissions:
       contents: read
+      # Required so the SARIF upload step at the end of the job can
+      # publish findings to GitHub code scanning, where they render
+      # inline on PRs and feed into the security tab.
+      security-events: write
     steps:
       - name: Checkout
         # actions/checkout@v4.2.2
