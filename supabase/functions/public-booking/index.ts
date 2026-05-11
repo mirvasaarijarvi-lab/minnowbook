@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { computeReservationPrice } from "../_shared/reservation-pricing.ts";
+import { BOOKING_ERROR_CODES } from "../_shared/booking-error-codes.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
