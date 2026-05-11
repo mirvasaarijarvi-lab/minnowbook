@@ -248,7 +248,14 @@ async function callPublicBooking(
     /* test.info() unavailable outside test scope */
   }
 
-  return { status, body: json ?? text, diagnostic };
+  // For any non-2xx response, surface schema problems on the diagnostic so
+  // callers (and the HTML report attachment) make it obvious WHY the body
+  // didn't match the documented `{ error: string }` contract.
+  const errorShapeProblems =
+    status >= 400 ? validatePublicBookingErrorShape(json ?? text) : [];
+  (diagnostic as any).errorShapeProblems = errorShapeProblems;
+
+  return { status, body: json ?? text, diagnostic, errorShapeProblems };
 }
 
 test.describe("Cross-booking: same guest, multiple resources/services", () => {
