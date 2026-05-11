@@ -183,6 +183,36 @@ jobs:
           # this file from CI.
           npm install --package-lock-only --ignore-scripts --no-audit --no-fund
 
+      # ---------------------------------------------------------------
+      # Lockfile freshness guard. A stale package-lock.json means npm
+      # audit is scanning yesterday's dependency graph, so a brand-new
+      # advisory against a freshly bumped package can slip through. We
+      # regenerate the lockfile from package.json and fail the job if
+      # the on-disk file would change. This runs only when npm owns
+      # the gate (the bun-via-npm path already regenerated above).
+      # ---------------------------------------------------------------
+      - name: Verify package-lock.json is in sync with package.json
+        if: steps.detect.outputs.manager == 'npm'
+        run: |
+          set -euo pipefail
+          if [ ! -f package-lock.json ]; then
+            echo "::error file=package-lock.json::package-lock.json is missing from the checkout. Regenerate locally with 'npm install --package-lock-only --ignore-scripts' and commit the result."
+            exit 1
+          fi
+          # Snapshot the committed lockfile so we can diff after the
+          # regenerate step rewrites it in place.
+          cp package-lock.json package-lock.committed.json
+          npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+          if ! diff -q package-lock.committed.json package-lock.json >/dev/null; then
+            echo "::error file=package-lock.json::package-lock.json is out of sync with package.json. The dependency-audit gate would scan a stale graph."
+            echo "Fix locally with: npm install --package-lock-only --ignore-scripts && git add package-lock.json"
+            diff -u package-lock.committed.json package-lock.json | head -200 || true
+            exit 1
+          fi
+          echo "package-lock.json is in sync with package.json."
+          rm -f package-lock.committed.json
+
+
       - name: Run npm audit (production deps)
         if: steps.detect.outputs.manager == 'npm' || steps.detect.outputs.manager == 'bun-via-npm'
         id: npm_audit
