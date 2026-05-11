@@ -142,6 +142,39 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
 
     if (testInfo.status === testInfo.expectedStatus) return;
 
+    // Track every artifact we attach so we can render a single index.html
+    // at the end that points at all of them. The screenshot is also kept
+    // as a data URI so the index page renders a thumbnail inline even
+    // when the reviewer hasn't downloaded the .png yet.
+    interface ArtifactRecord {
+      name: string;
+      contentType: string;
+      sizeBytes: number;
+      description: string;
+      dataUri?: string;
+      inlineText?: string;
+    }
+    const artifacts: ArtifactRecord[] = [];
+    const attachArtifact = async (
+      name: string,
+      body: Buffer | string,
+      contentType: string,
+      description: string,
+      opts: { embedAsDataUri?: boolean; embedAsText?: boolean } = {},
+    ) => {
+      await testInfo.attach(name, { body, contentType });
+      const sizeBytes = typeof body === "string" ? Buffer.byteLength(body) : body.byteLength;
+      const record: ArtifactRecord = { name, contentType, sizeBytes, description };
+      if (opts.embedAsDataUri) {
+        const buf = typeof body === "string" ? Buffer.from(body) : body;
+        record.dataUri = `data:${contentType};base64,${buf.toString("base64")}`;
+      }
+      if (opts.embedAsText) {
+        record.inlineText = typeof body === "string" ? body : body.toString("utf8");
+      }
+      artifacts.push(record);
+    };
+
     const failureSummary: Record<string, unknown> = {
       title: testInfo.title,
       status: testInfo.status,
