@@ -361,6 +361,7 @@ jobs:
             npm-audit.sarif
             pnpm-audit.sarif
             yarn-audit.sarif
+            audit-comment.md
           if-no-files-found: ignore
           retention-days: 14
 
