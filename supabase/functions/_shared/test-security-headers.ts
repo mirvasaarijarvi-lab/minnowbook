@@ -36,6 +36,39 @@ export function assertSecurityTriad(res: Response, label: string) {
   }
 }
 
+/** Targeted CSP + HSTS exact-match assertion.
+ *
+ *  Browsers tolerate a surprising amount of CSP/HSTS weakening
+ *  silently (e.g. dropping `frame-ancestors 'none'`, shortening
+ *  `max-age`, removing `includeSubDomains`), and a generic
+ *  "header is present" check would let any of those slip through.
+ *  This helper compares each value byte-for-byte against the canonical
+ *  SECURITY_HEADERS values and produces a scenario-tagged failure
+ *  message so a regression points at the exact error path that
+ *  shipped the weaker bag.
+ *
+ *  Use INSIDE each error-scenario test (one call per status code) in
+ *  addition to `assertSecurityTriad` / `assertSharedHeaders`, so that
+ *  the diff in CI output names the offending status. */
+export function assertCspAndHsts(res: Response, scenario: string) {
+  const csp = res.headers.get("Content-Security-Policy");
+  const hsts = res.headers.get("Strict-Transport-Security");
+  assertEquals(
+    csp,
+    SECURITY_HEADERS["Content-Security-Policy"],
+    `[${scenario}] Content-Security-Policy must match SECURITY_HEADERS exactly. ` +
+      `expected=${JSON.stringify(SECURITY_HEADERS["Content-Security-Policy"])} ` +
+      `actual=${JSON.stringify(csp)}`,
+  );
+  assertEquals(
+    hsts,
+    SECURITY_HEADERS["Strict-Transport-Security"],
+    `[${scenario}] Strict-Transport-Security must match SECURITY_HEADERS exactly. ` +
+      `expected=${JSON.stringify(SECURITY_HEADERS["Strict-Transport-Security"])} ` +
+      `actual=${JSON.stringify(hsts)}`,
+  );
+}
+
 /** Assert the FULL SECURITY_HEADERS bag (triad + X-Content-Type-Options,
  *  X-Frame-Options, X-XSS-Protection, Cache-Control, Pragma, Vary).
  *  Use this for functions that import `corsHeaders` / `getCorsHeaders`
