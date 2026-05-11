@@ -49,7 +49,22 @@ export type BookingErrorDescriptor = {
   emitTelemetry: boolean;
 };
 
-type RegistryEntry = Omit<BookingErrorDescriptor, "code">;
+type RegistryEntry = Omit<BookingErrorDescriptor, "code"> & {
+  /**
+   * Optional alternate i18n key shown only to logged-in staff.
+   * For misconfiguration errors this carries the longer admin
+   * remediation text. Falls back to `i18nKey` when undefined.
+   */
+  staffI18nKey?: TranslationKey;
+};
+
+/**
+ * Context passed to `resolveBookingError`. Used to swap to the
+ * staff-facing copy when an authenticated user is present.
+ */
+export type ResolveBookingErrorContext = {
+  isStaff?: boolean;
+};
 
 /**
  * Default descriptor used when the error has no recognised
@@ -68,8 +83,13 @@ const FALLBACK_ENTRY: RegistryEntry = {
  */
 export const BOOKING_ERROR_REGISTRY: Record<BookingErrorCode, RegistryEntry> = {
   [BOOKING_ERROR_CODES.SERVICE_ROLE_KEY_MISSING]: {
+    // Guests see a short, reassuring message with no internal jargon.
     i18nKey: "booking.serviceMisconfigured",
-    // Long duration so the guest has time to read the admin steps.
+    // Logged-in staff see the detailed remediation steps so the
+    // venue admin can fix the misconfiguration without digging
+    // through docs.
+    staffI18nKey: "booking.serviceMisconfiguredAdmin",
+    // Long duration so the reader has time to act on the message.
     toastDuration: 10000,
     pinMisconfigBanner: true,
     emitTelemetry: true,
@@ -93,11 +113,25 @@ export function extractBookingErrorCode(err: unknown): BookingErrorCode | null {
 /**
  * Resolve the full descriptor for an error thrown by the public
  * booking mutation. Always returns something usable, never throws.
+ *
+ * Pass `{ isStaff: true }` (typically `!!user` from the auth context)
+ * to opt into the staff-facing variant of the message when an entry
+ * provides one.
  */
-export function resolveBookingError(err: unknown): BookingErrorDescriptor {
+export function resolveBookingError(
+  err: unknown,
+  ctx: ResolveBookingErrorContext = {},
+): BookingErrorDescriptor {
   const code = extractBookingErrorCode(err);
   const entry = code ? BOOKING_ERROR_REGISTRY[code] : FALLBACK_ENTRY;
-  return { code, ...entry };
+  const i18nKey = ctx.isStaff && entry.staffI18nKey ? entry.staffI18nKey : entry.i18nKey;
+  return {
+    code,
+    i18nKey,
+    toastDuration: entry.toastDuration,
+    pinMisconfigBanner: entry.pinMisconfigBanner,
+    emitTelemetry: entry.emitTelemetry,
+  };
 }
 
 export { BOOKING_ERROR_CODES };
