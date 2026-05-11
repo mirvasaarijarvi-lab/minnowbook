@@ -219,6 +219,25 @@ jobs:
             exit "$status"
           fi
 
+      - name: Run yarn audit (all deps, informational)
+        if: always() && steps.detect.outputs.manager == 'yarn'
+        continue-on-error: true
+        env:
+          # Captured so the SARIF step downstream can pick the right
+          # parser without re-sniffing the yarn version.
+          YARN_FLAVOUR_FILE: yarn-flavour.txt
+        run: |
+          set -o pipefail
+          yarn_version="$(yarn --version || echo 1.0.0)"
+          major="${yarn_version%%.*}"
+          if [ "$major" -ge 2 ]; then
+            echo "berry" > "$YARN_FLAVOUR_FILE"
+            yarn npm audit --all --recursive --json | tee audit-all.json || true
+          else
+            echo "classic" > "$YARN_FLAVOUR_FILE"
+            yarn audit --json | tee audit-all.json || true
+          fi
+
       # ---------------------------------------------------------------
       # npm path (and the bun fallback that synthesises a package-lock).
       # ---------------------------------------------------------------
