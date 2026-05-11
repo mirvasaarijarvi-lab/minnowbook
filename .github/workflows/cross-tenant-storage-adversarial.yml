@@ -26,6 +26,8 @@ on:
     branches: [main]
   workflow_dispatch:
 
+permissions: {}
+
 concurrency:
   group: cross-tenant-storage-adversarial-${{ github.ref }}
   cancel-in-progress: true
@@ -34,6 +36,7 @@ jobs:
   check-secrets:
     name: Check live-mode secrets
     runs-on: ubuntu-latest
+    permissions: {}
     outputs:
       enabled: ${{ steps.check.outputs.enabled }}
     steps:
@@ -56,6 +59,8 @@ jobs:
     if: needs.check-secrets.outputs.enabled == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout code
