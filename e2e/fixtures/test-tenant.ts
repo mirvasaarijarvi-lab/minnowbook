@@ -72,6 +72,13 @@ export function futureDate(offsetDays = 60): string {
 // --- Playwright fixture -----------------------------------------------------
 type Fixtures = {
   tenant: TestTenant;
+  /**
+   * Auto-attached per-test capture of browser console messages and uncaught
+   * page errors. On failure, both streams are dumped into the HTML report
+   * as text attachments so timing/UI regressions can be triaged without
+   * re-running the spec locally.
+   */
+  consoleCapture: void;
 };
 
 /**
