@@ -50,7 +50,8 @@ function tinyPng(): Uint8Array {
   );
 }
 
-async function provisionTenantAndStaff(admin: ReturnType<typeof createClient>) {
+// deno-lint-ignore no-explicit-any
+async function provisionTenantAndStaff(admin: any) {
   const slug = `rls-test-${crypto.randomUUID().slice(0, 8)}`;
   const email = `${slug}@example.test`;
   const password = `Pw_${crypto.randomUUID()}_Aa1!`;
