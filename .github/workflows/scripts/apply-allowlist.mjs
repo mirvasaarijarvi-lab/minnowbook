@@ -143,15 +143,19 @@ for (const adv of advisories) {
   if (reportedRules.has(adv.ruleId)) continue;
   reportedRules.add(adv.ruleId);
 
+  bumpSeverity(totalBySeverity, adv.severity);
+
   const waiver = matchAllowlist(adv);
   if (waiver) {
     waivedEntries.push({ adv, waiver });
+    bumpSeverity(waivedBySeverity, adv.severity);
     const reason = waiver.reason ? ` Reason: ${waiver.reason}` : "";
     console.log(
       `::warning title=Allowlisted advisory::${adv.pkg} ${adv.ruleId} (${adv.severity}) waived until ${waiver.expires}.${reason}`,
     );
   } else {
     blocking.push(adv);
+    bumpSeverity(blockingBySeverity, adv.severity);
     console.log(
       `::error title=Vulnerable dependency::${adv.pkg} ${adv.ruleId} (${adv.severity}): ${adv.title}. See ${adv.url}`,
     );
