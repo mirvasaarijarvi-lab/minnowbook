@@ -6,10 +6,18 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
-  reporter: "html",
+  reporter: [
+    ["html", { open: "never", outputFolder: "playwright-report" }],
+    ["list"],
+  ],
+  outputDir: "test-results",
   use: {
     baseURL: "http://localhost:4173",
-    trace: "on-first-retry",
+    // Capture diagnostics on failure so booking, offer, and reservation
+    // regressions are easy to triage from the HTML report.
+    trace: "retain-on-failure",
+    screenshot: "only-on-failure",
+    video: "retain-on-failure",
   },
   webServer: {
     command: "bunx vite preview --port 4173",
