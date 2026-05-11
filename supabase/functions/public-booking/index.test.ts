@@ -82,13 +82,12 @@ async function adminFetch(path: string, init: RequestInit = {}) {
 }
 
 Deno.test("public-booking: rejects missing required fields", async () => {
-  const { res, json } = await callFn({ tenant_id: TEST_TENANT_ID });
-  assertEquals(res.status, 400, "expected 400 for missing required fields");
-  assert(json?.error, "expected error message in response body");
+  const result = await callFn({ tenant_id: TEST_TENANT_ID });
+  assertFunctionError(result, { status: 400, label: "missing required fields" });
 });
 
 Deno.test("public-booking: rejects bad email format", async () => {
-  const { res, json } = await callFn({
+  const result = await callFn({
     tenant_id: TEST_TENANT_ID,
     guest_name: "Test User",
     guest_email: "not-an-email",
@@ -96,15 +95,15 @@ Deno.test("public-booking: rejects bad email format", async () => {
     date: isoFutureDate(),
     guests_count: 2,
   });
-  assertEquals(res.status, 400);
-  assert(
-    typeof json?.error === "string" && json.error.toLowerCase().includes("email"),
-    `expected email error, got ${JSON.stringify(json)}`,
-  );
+  assertFunctionError(result, {
+    status: 400,
+    errorIncludes: "email",
+    label: "bad email format",
+  });
 });
 
 Deno.test("public-booking: rejects unknown tenant", async () => {
-  const { res, json } = await callFn({
+  const result = await callFn({
     tenant_id: "00000000-0000-0000-0000-000000000000",
     guest_name: "Test User",
     guest_email: "ok@example.com",
@@ -112,11 +111,11 @@ Deno.test("public-booking: rejects unknown tenant", async () => {
     date: isoFutureDate(),
     guests_count: 2,
   });
-  assertEquals(res.status, 400);
-  assert(
-    typeof json?.error === "string" && /tenant/i.test(json.error),
-    `expected tenant error, got ${JSON.stringify(json)}`,
-  );
+  assertFunctionError(result, {
+    status: 400,
+    errorMatch: /tenant/i,
+    label: "unknown tenant",
+  });
 });
 
 Deno.test("public-booking: creates a pending reservation end-to-end", async () => {
