@@ -458,6 +458,9 @@ const Superadmin = () => {
         {/* Cross-tenant view of all route-guard denials (action='forbidden_access'). */}
         <ForbiddenAccessLogPanel />
 
+        {/* Storage path rejection telemetry + spike alerts */}
+        <StorageRejectionPanel />
+
         {/* RLS Manifest Debug — exact SQL/filters used by manifest tests */}
         <RlsManifestDebugPanel />
       </main>
