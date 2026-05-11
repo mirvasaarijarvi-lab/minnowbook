@@ -90,6 +90,18 @@ async function seedFakeSession(page: Page, ref: string) {
  * `system_admins` table.
  */
 async function mockSystemAdminLookup(page: Page, isAdmin: boolean) {
+  // The app checks system-admin status via the SECURITY DEFINER RPC
+  // `is_system_admin(p_user_id)` (see src/hooks/useIsSystemAdmin.ts), not
+  // by selecting from the `system_admins` table directly. Mock the RPC
+  // endpoint so the role gate sees the answer we want. The legacy table
+  // route is also mocked for any defence-in-depth callers.
+  await page.route(/\/rest\/v1\/rpc\/is_system_admin/, async (route: Route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(isAdmin),
+    });
+  });
   await page.route(/\/rest\/v1\/system_admins/, async (route: Route) => {
     await route.fulfill({
       status: 200,
