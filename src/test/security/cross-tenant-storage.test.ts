@@ -1963,7 +1963,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
           bucket: string,
           label: string,
         ): Promise<{ path: string; originalBytes: ArrayBuffer } | null> => {
-          const path = nestedOwnPath(ownerTenantId, scenario.segments, label);
+          const path = nestedOwnPathFor(bucket, ownerTenantId, scenario.segments, label);
           const originalContent = `victim-original-${label}-${scenario.name}-${Date.now()}`;
           const { error: seedErr } = await allowedStorageCall(
             () => ownerClient.storage
