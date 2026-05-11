@@ -191,6 +191,103 @@ function safeJson(text) {
   try { return JSON.parse(text); } catch { return {}; }
 }
 
+// ---------------------------------------------------------------
+// Lockfile -> line-number index.
+//
+// SARIF results need a physical location to render inline on the
+// "Files changed" tab. A fixed startLine=1 collapses every advisory
+// onto the first line of the lockfile, which is useless. We scan the
+// lockfile once and build a map { packageName -> [lineNumber, ...] }
+// covering the three formats we emit SARIF for:
+//
+//   - npm package-lock.json v2/v3: keys like
+//       "node_modules/lodash":   { ... }
+//       "node_modules/@scope/x": { ... }
+//     and v1's nested "<name>": { "version": ... } form.
+//   - yarn.lock (v1): block headers like
+//       "lodash@^4.17.0", "lodash@^4.17.21":
+//   - pnpm-lock.yaml (v6+): keys like
+//       /lodash@4.17.21:
+//       '/@scope/x@1.0.0':
+//
+// Each result then emits one location per occurrence (capped at 10
+// to keep payloads small for packages with many install paths). When
+// no match is found we fall back to startLine=1 with a comment in
+// the message so reviewers can spot the misindex.
+// ---------------------------------------------------------------
+function buildLockfileIndex(lockfilePath) {
+  const map = new Map();
+  if (!lockfilePath || !fs.existsSync(lockfilePath)) return map;
+  const text = fs.readFileSync(lockfilePath, "utf8");
+  const lines = text.split(/\r?\n/);
+
+  const extractors = [
+    // npm package-lock v2/v3
+    (line) => {
+      const m = /^\s*"node_modules\/((?:@[^"/]+\/)?[^"]+)"\s*:/.exec(line);
+      return m ? [m[1]] : [];
+    },
+    // npm package-lock v1 / generic JSON object key opening a block
+    (line) => {
+      const m = /^\s*"((?:@[^"/]+\/)?[A-Za-z0-9._-]+)"\s*:\s*\{/.exec(line);
+      return m ? [m[1]] : [];
+    },
+    // yarn.lock v1 block header: one or more "<pkg>@<range>" comma-
+    // separated, line ends with `:`. We extract every name in the
+    // header so a single advisory points at all version-range groups.
+    (line) => {
+      if (!/:\s*$/.test(line)) return [];
+      const names = [];
+      const re = /"?((?:@[^@",]+\/)?[A-Za-z0-9._-]+)@[^",:]+"?/g;
+      let m;
+      while ((m = re.exec(line)) !== null) names.push(m[1]);
+      return names;
+    },
+    // pnpm-lock.yaml v6+
+    (line) => {
+      const m = /^\s*'?\/((?:@[^/@]+\/)?[A-Za-z0-9._-]+)@[^':\s]+'?\s*:/.exec(line);
+      return m ? [m[1]] : [];
+    },
+  ];
+
+  for (let i = 0; i < lines.length; i++) {
+    for (const fn of extractors) {
+      const names = fn(lines[i]);
+      for (const name of names) {
+        const arr = map.get(name) || [];
+        if (!arr.includes(i + 1)) arr.push(i + 1);
+        map.set(name, arr);
+      }
+    }
+  }
+  return map;
+}
+
+const MAX_LOCATIONS_PER_RESULT = 10;
+const lockfileIndex = buildLockfileIndex(lockfile);
+
+function locationsFor(pkg) {
+  const lines = lockfileIndex.get(pkg) || [];
+  if (lines.length === 0) {
+    // Last-resort fallback: anchor at the top of the lockfile so the
+    // SARIF stays valid and the result still surfaces. This typically
+    // means the advisory targets a virtual / metapackage that is not
+    // a real key in the lockfile.
+    return [{
+      physicalLocation: {
+        artifactLocation: { uri: lockfile },
+        region: { startLine: 1 },
+      },
+    }];
+  }
+  return lines.slice(0, MAX_LOCATIONS_PER_RESULT).map((ln) => ({
+    physicalLocation: {
+      artifactLocation: { uri: lockfile },
+      region: { startLine: ln },
+    },
+  }));
+}
+
 const rules = new Map();
 const results = [];
 for (const a of advisories) {
@@ -210,16 +307,17 @@ for (const a of advisories) {
       },
     });
   }
+  const locs = locationsFor(a.pkg);
+  const anchored = locs.length > 0 && (lockfileIndex.get(a.pkg)?.length || 0) > 0;
   results.push({
     ruleId: a.ruleId,
     level,
-    message: { text: `${a.pkg}: ${a.title} (range ${a.range})` },
-    locations: [{
-      physicalLocation: {
-        artifactLocation: { uri: lockfile },
-        region: { startLine: 1 },
-      },
-    }],
+    message: {
+      text: anchored
+        ? `${a.pkg}: ${a.title} (range ${a.range})`
+        : `${a.pkg}: ${a.title} (range ${a.range}) [lockfile entry not located, anchored at line 1]`,
+    },
+    locations: locs,
     partialFingerprints: { advisory: a.ruleId, package: a.pkg },
   });
 }
