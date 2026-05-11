@@ -806,10 +806,21 @@ const PublicBookingInner = () => {
       setSubmitted(true);
     },
     onError: (err: any) => {
-      if (err?.code === BOOKING_ERROR_CODES.SERVICE_ROLE_KEY_MISSING) {
+      const errCode = (err as { code?: string } | null | undefined)?.code;
+      if (errCode === BOOKING_ERROR_CODES.SERVICE_ROLE_KEY_MISSING) {
         // Pin the inline confirmation. The toast disappears after 10s
         // but the inline banner stays until the guest acknowledges.
         setServiceMisconfigured(true);
+      }
+      // Fire-and-forget telemetry. Only the machine-readable error
+      // code and coarse context are emitted, never form values or
+      // server messages, so no secrets can leak.
+      if (errCode) {
+        trackBookingError(errCode, {
+          tenantSlug: slug ?? null,
+          resourceId: form.resource_id || null,
+          locale: language,
+        });
       }
       toast.error(t(getBookingErrorToastKey(err)), getBookingErrorToastOptions(err));
     },
