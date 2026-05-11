@@ -243,6 +243,7 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
       expectLegSuccess(restaurant, "restaurant", (body) => {
         expect(body?.capacity, "restaurant capacity payload").toBeTruthy();
       });
+      await verifyLegInUi("restaurant", restaurant, 2);
 
       const guesthouse = await callLeg("guesthouse", {
         tenant_id: tenant.id,
@@ -255,6 +256,7 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
         special_requests: "TEST: cross-booking guesthouse leg",
       });
       expectLegSuccess(guesthouse, "guesthouse");
+      await verifyLegInUi("guesthouse", guesthouse, 2);
 
       const venue = await callLeg("venue", {
         tenant_id: tenant.id,
@@ -268,6 +270,7 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
         special_requests: "TEST: cross-booking venue leg",
       });
       expectLegSuccess(venue, "venue");
+      await verifyLegInUi("venue", venue, 30);
 
       // Negative check: foreign tenant_id MUST be rejected, and the error
       // body MUST conform to the documented `{ error: string }` contract.
