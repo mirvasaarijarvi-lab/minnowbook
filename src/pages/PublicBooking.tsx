@@ -29,7 +29,7 @@ import React from "react";
 import { buildTypeTiles } from "@/lib/booking-tiles";
 import { useBrandingSignedUrlState } from "@/lib/tenant-branding-url";
 import { BOOKING_ERROR_CODES } from "../../supabase/functions/_shared/booking-error-codes";
-import { getBookingErrorToastKey, getBookingErrorToastOptions } from "@/lib/booking-error-toast";
+import { resolveBookingError } from "@/lib/booking-error-registry";
 import { trackBookingError } from "@/lib/booking-telemetry";
 import { FadeInImage } from "@/components/branding/FadeInImage";
 
