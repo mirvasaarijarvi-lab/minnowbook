@@ -5,6 +5,10 @@ name: Test CI (test:ci)
 # against main. The script itself lives in scripts/test-ci.sh and fails
 # fast on the first failing suite.
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   push:
     branches: [main]

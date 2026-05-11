@@ -11,6 +11,10 @@ name: SQL Trigger Tests
 # exits 0 to avoid blocking PRs on infra issues. The same pattern is used
 # by .github/workflows/cross-tenant-rls-local.yml.
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   push:
     branches: [main]

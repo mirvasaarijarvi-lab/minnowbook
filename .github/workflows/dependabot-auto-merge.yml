@@ -22,6 +22,10 @@ name: Dependabot auto-merge
 #   - Minimal permissions, scoped per-job.
 #   - Third-party actions pinned to commit SHAs.
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   pull_request:
     types: [opened, reopened, synchronize, ready_for_review]
