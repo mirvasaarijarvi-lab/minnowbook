@@ -728,12 +728,10 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
       "warmup outcome must be one of the known observable states",
     ).toContain(warmupOutcome);
 
-    await captureCheckpoint(page, testInfo, "post-warmup", {
-      screenshot: false,
-      extra: warmupSummary,
-    });
+    await mark("warmup:done", { outcome: warmupOutcome, status: warmupStatus });
 
     try {
+      await mark("restaurant:start");
       const restaurant = await callLeg("restaurant", {
         tenant_id: tenant.id,
         ...GUEST,
@@ -747,8 +745,11 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
       expectLegSuccess(restaurant, "restaurant", (body) => {
         expect(body?.capacity, "restaurant capacity payload").toBeTruthy();
       });
+      await mark("restaurant:booked", { status: restaurant.status });
       await verifyLegInUi("restaurant", restaurant, 2);
+      await mark("restaurant:verified");
 
+      await mark("guesthouse:start");
       const guesthouse = await callLeg("guesthouse", {
         tenant_id: tenant.id,
         ...GUEST,
@@ -760,8 +761,11 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
         special_requests: "TEST: cross-booking guesthouse leg",
       });
       expectLegSuccess(guesthouse, "guesthouse");
+      await mark("guesthouse:booked", { status: guesthouse.status });
       await verifyLegInUi("guesthouse", guesthouse, 2);
+      await mark("guesthouse:verified");
 
+      await mark("venue:start");
       const venue = await callLeg("venue", {
         tenant_id: tenant.id,
         ...GUEST,
@@ -774,8 +778,11 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
         special_requests: "TEST: cross-booking venue leg",
       });
       expectLegSuccess(venue, "venue");
+      await mark("venue:booked", { status: venue.status });
       await verifyLegInUi("venue", venue, 30);
+      await mark("venue:verified");
 
+      await mark("negative:start");
       // Negative check: foreign tenant_id MUST be rejected, and the error
       // body MUST conform to the documented `{ error: string }` contract.
       const FAKE_TENANT_ID = "00000000-0000-0000-0000-000000000000";
