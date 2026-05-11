@@ -306,5 +306,29 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
 
     // Surface guest identifier so manual cleanup is easy after the run
     console.log(`[cross-booking] created reservations for guest "${GUEST.guest_name}" (${GUEST.guest_email})`);
+    } finally {
+      // Closing the request context flushes the HAR to disk. Always attach it
+      // (success OR failure) so the exact public-booking traffic for this run
+      // can be replayed in a browser via Chrome DevTools "Import HAR file"
+      // or inspected from the Playwright HTML report.
+      try {
+        await request.dispose();
+      } catch {
+        /* ignore */
+      }
+      try {
+        if (fs.existsSync(harPath)) {
+          await testInfo.attach(`public-booking-attempt-${testInfo.retry + 1}.har`, {
+            path: harPath,
+            contentType: "application/json",
+          });
+          // eslint-disable-next-line no-console
+          console.log(`[cross-booking] HAR exported to ${harPath}`);
+        }
+      } catch (attachErr) {
+        // eslint-disable-next-line no-console
+        console.warn(`[cross-booking] failed to attach HAR: ${(attachErr as Error)?.message}`);
+      }
+    }
   });
 });
