@@ -16,7 +16,10 @@
  * The function is intentionally fire-and-forget and never throws.
  */
 
-import { BOOKING_ERROR_CODES, type BookingErrorCode } from "@/lib/booking-error-codes";
+import {
+  BOOKING_ERROR_CODES,
+  type BookingErrorCode,
+} from "../../supabase/functions/_shared/booking-error-codes";
 
 export type BookingTelemetryContext = {
   tenantSlug?: string | null;
