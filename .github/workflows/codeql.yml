@@ -1,0 +1,110 @@
+name: CodeQL
+
+# Static analysis for JS/TS using GitHub's CodeQL engine.
+#
+# - Runs on every pull request and on pushes to main.
+# - Uploads SARIF to GitHub Code Scanning so alerts show up in the
+#   Security tab and inline on the PR diff.
+# - Fails the workflow when the PR introduces NEW alerts at severity
+#   "high" or "critical", which (once this job is marked required in
+#   branch protection) blocks merging until they are resolved or
+#   explicitly dismissed.
+#
+# Why a custom severity gate instead of GitHub's default behaviour:
+#   The default Code Scanning check only fails on errors/critical
+#   severity, and only after configuring branch protection thresholds
+#   in the UI. Doing the gate in-workflow keeps the policy in code,
+#   reviewable via PR, and consistent across forks.
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, reopened, synchronize, ready_for_review]
+  push:
+    branches: [main]
+  schedule:
+    # Weekly full scan to catch newly published CodeQL queries even
+    # when the repo is quiet.
+    - cron: "23 4 * * 1"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: codeql-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      # Required for github/codeql-action to upload results.
+      security-events: write
+      # Required to read the repo and PR metadata.
+      contents: read
+      actions: read
+      # Required so the gate step can query Code Scanning alerts.
+      pull-requests: read
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: ["javascript-typescript"]
+
+    steps:
+      - name: Checkout
+        # actions/checkout@v4.2.2
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+
+      - name: Initialize CodeQL
+        # github/codeql-action/init@v3.27.5
+        uses: github/codeql-action/init@f09c1c0a94de965c15400f5634aa42fac8fb8f88
+        with:
+          languages: ${{ matrix.language }}
+          queries: security-and-quality
+          config-file: ./.github/codeql/codeql-config.yml
+
+      - name: Perform CodeQL Analysis
+        id: analyze
+        # github/codeql-action/analyze@v3.27.5
+        uses: github/codeql-action/analyze@f09c1c0a94de965c15400f5634aa42fac8fb8f88
+        with:
+          category: "/language:${{ matrix.language }}"
+          upload: always
+
+      # Severity gate. Runs only on PRs because main / scheduled runs
+      # publish results without blocking. We query the PR's open Code
+      # Scanning alerts (filtered to this run's tool) and fail if any
+      # have security-severity >= 7.0 (i.e. high / critical CVSS).
+      - name: Fail on new high-severity alerts (PR only)
+        if: github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_REF: ${{ github.event.pull_request.head.sha }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          # Give Code Scanning a moment to ingest the SARIF that
+          # `analyze` just uploaded before we query alerts.
+          sleep 15
+          alerts_json=$(gh api \
+            --paginate \
+            -H "Accept: application/vnd.github+json" \
+            "/repos/${REPO}/code-scanning/alerts?tool_name=CodeQL&state=open&ref=refs/pull/${{ github.event.pull_request.number }}/head&per_page=100" \
+            || echo "[]")
+          # Count alerts whose CVSS-style security-severity is >= 7.0
+          # (GitHub's threshold for "high"). Critical is >= 9.0 and
+          # therefore also caught.
+          high_count=$(echo "$alerts_json" \
+            | jq '[.[] | select(.rule.security_severity_level == "high" or .rule.security_severity_level == "critical")] | length')
+          echo "Open high+critical CodeQL alerts on this PR: $high_count"
+          if [ "${high_count:-0}" -gt 0 ]; then
+            echo "::error title=CodeQL::This PR introduces ${high_count} high or critical security alert(s). Resolve them or dismiss with justification before merging."
+            echo "$alerts_json" \
+              | jq -r '.[] | select(.rule.security_severity_level == "high" or .rule.security_severity_level == "critical") | "- [\(.rule.security_severity_level)] \(.rule.id): \(.most_recent_instance.message.text) (\(.html_url))"'
+            exit 1
+          fi
