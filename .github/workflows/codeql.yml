@@ -70,6 +70,11 @@ jobs:
 
       - name: Perform CodeQL Analysis
         id: analyze
+        # Tolerate SARIF upload failures so the job does not fail when
+        # Code Scanning is disabled at the repo level (e.g. private repo
+        # without GitHub Advanced Security). Analysis still runs and the
+        # SARIF artifact is produced; only the upload step is best-effort.
+        continue-on-error: true
         # github/codeql-action/analyze@v3.27.5
         uses: github/codeql-action/analyze@f09c1c0a94de965c15400f5634aa42fac8fb8f88
         with:
