@@ -23,6 +23,7 @@ import {
   assertEquals,
 } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import { assertServiceRoleKey } from "./index.ts";
+import { BOOKING_ERROR_CODES } from "../_shared/booking-error-codes.ts";
 
 Deno.test("assertServiceRoleKey: returns ok=true with trimmed key when present", () => {
   const result = assertServiceRoleKey("  real-service-role-key  ");
