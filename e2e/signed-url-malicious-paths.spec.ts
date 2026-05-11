@@ -140,7 +140,7 @@ test.describe("Signed URL endpoint: malicious paths surface friendly message", (
     const generic = new Error("Network down");
     const friendly = getFriendlyStoragePathErrorMessage(
       generic,
-      t,
+      makeTranslator("en"),
       "Could not load image",
     );
     // Friendly copy must NOT mask unrelated errors.
