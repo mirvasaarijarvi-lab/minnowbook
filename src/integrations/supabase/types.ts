@@ -1361,6 +1361,7 @@ export type Database = {
           guest_email: string
           guest_name: string
           guest_phone: string | null
+          guest_search_text: string | null
           guests_count: number | null
           id: string
           internal_notes: string | null
@@ -1421,6 +1422,7 @@ export type Database = {
           guest_email: string
           guest_name: string
           guest_phone?: string | null
+          guest_search_text?: string | null
           guests_count?: number | null
           id?: string
           internal_notes?: string | null
@@ -1481,6 +1483,7 @@ export type Database = {
           guest_email?: string
           guest_name?: string
           guest_phone?: string | null
+          guest_search_text?: string | null
           guests_count?: number | null
           id?: string
           internal_notes?: string | null
