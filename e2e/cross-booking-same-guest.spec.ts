@@ -91,7 +91,7 @@ async function callPublicBooking(
   }
   if (!res) throw lastError ?? new Error(`public-booking ${label} produced no response`);
 
-  const durationMs = Date.now() - startedAt;
+  
   const status = res.status();
   const responseHeaders = res.headers();
   const text = await res.text();
