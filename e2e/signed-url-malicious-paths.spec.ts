@@ -1,12 +1,4 @@
 import { test, expect } from "@playwright/test";
-import {
-  createTenantPrivateSignedUrl,
-  clearTenantPrivateSignedUrlCache,
-} from "../src/lib/tenant-private-url";
-import {
-  isInvalidStoragePathError,
-  getFriendlyStoragePathErrorMessage,
-} from "../src/lib/storage-path";
 
 /**
  * End-to-end signed-URL contract: when callers pass a malicious object
@@ -27,7 +19,22 @@ import {
  *
  * If a future refactor accidentally swallows the typed error, or stops
  * routing through the sanitiser, this suite turns red.
+ *
+ * Note on imports: the `@supabase/supabase-js` client module reads
+ * `import.meta.env.VITE_SUPABASE_URL` at module load. Playwright runs
+ * specs under Node (no Vite transform), so we shim those values BEFORE
+ * dynamically importing the helper. The malicious paths are rejected
+ * by the sanitiser before any network call is made, so the dummy
+ * credentials are never used.
  */
+
+type SignedUrlModule = typeof import("../src/lib/tenant-private-url");
+type StoragePathModule = typeof import("../src/lib/storage-path");
+
+let createTenantPrivateSignedUrl: SignedUrlModule["createTenantPrivateSignedUrl"];
+let clearTenantPrivateSignedUrlCache: SignedUrlModule["clearTenantPrivateSignedUrlCache"];
+let isInvalidStoragePathError: StoragePathModule["isInvalidStoragePathError"];
+let getFriendlyStoragePathErrorMessage: StoragePathModule["getFriendlyStoragePathErrorMessage"];
 
 const MALICIOUS_PATHS: Array<{ label: string; path: string }> = [
   { label: "parent traversal segment", path: "tenant/../other-tenant/secret.pdf" },
@@ -54,6 +61,28 @@ const FRIENDLY_EN =
   "This file's name contains characters we can't safely store. Please rename it and try again.";
 const t = (key: string): string =>
   key === "common.invalidFileName" ? FRIENDLY_EN : `[missing:${key}]`;
+
+test.beforeAll(async () => {
+  // Shim Vite env so the supabase client module can be evaluated under
+  // Node. Values are placeholders; no network call ever fires because
+  // the sanitiser rejects every input before it reaches the SDK.
+  const meta = import.meta as unknown as { env?: Record<string, string> };
+  meta.env = {
+    ...(meta.env ?? {}),
+    VITE_SUPABASE_URL: meta.env?.VITE_SUPABASE_URL ?? "http://localhost",
+    VITE_SUPABASE_PUBLISHABLE_KEY:
+      meta.env?.VITE_SUPABASE_PUBLISHABLE_KEY ?? "test-anon",
+    VITE_SUPABASE_PROJECT_ID: meta.env?.VITE_SUPABASE_PROJECT_ID ?? "test",
+  };
+
+  const signedUrlMod: SignedUrlModule = await import("../src/lib/tenant-private-url");
+  const storagePathMod: StoragePathModule = await import("../src/lib/storage-path");
+
+  createTenantPrivateSignedUrl = signedUrlMod.createTenantPrivateSignedUrl;
+  clearTenantPrivateSignedUrlCache = signedUrlMod.clearTenantPrivateSignedUrlCache;
+  isInvalidStoragePathError = storagePathMod.isInvalidStoragePathError;
+  getFriendlyStoragePathErrorMessage = storagePathMod.getFriendlyStoragePathErrorMessage;
+});
 
 test.describe("Signed URL endpoint: malicious paths surface friendly message", () => {
   test.beforeEach(() => {
@@ -97,8 +126,8 @@ test.describe("Signed URL endpoint: malicious paths surface friendly message", (
     // The wrapper rejects undefined/empty BEFORE hitting the sanitiser
     // with its own guard, but a regression that removes that guard
     // would still be caught downstream by assertSafeStorageObjectPath
-    // returning InvalidStoragePathError. Either is acceptable, as long
-    // as something fails.
+    // returning InvalidStoragePathError. Either is acceptable as long
+    // as something fails loudly.
     expect((caught as Error).message).toMatch(/path is required|invalid storage path/i);
   });
 
@@ -109,7 +138,7 @@ test.describe("Signed URL endpoint: malicious paths surface friendly message", (
       t,
       "Could not load image",
     );
-    // Important: friendly copy must NOT mask unrelated errors.
+    // Friendly copy must NOT mask unrelated errors.
     expect(friendly).toBe("Could not load image");
   });
 });
