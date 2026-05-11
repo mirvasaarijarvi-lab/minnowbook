@@ -49,8 +49,13 @@ export const useTenant = () => {
       }, 300);
     };
 
+    // Unique suffix per effect run: supabase.channel(name) returns an existing
+    // channel if one with the same name is still registered (common under React
+    // StrictMode double-invoke or rapid re-renders), and calling .on() on an
+    // already-subscribed channel throws "cannot add postgres_changes callbacks
+    // ... after subscribe()".
     const channel = supabase
-      .channel(`tenant-membership-${user.id}`)
+      .channel(`tenant-membership-${user.id}-${Math.random().toString(36).slice(2)}`)
       .on(
         "postgres_changes",
         {
