@@ -795,11 +795,7 @@ const PublicBookingInner = () => {
     },
     onSuccess: () => setSubmitted(true),
     onError: (err: any) => {
-      if (err?.code === BOOKING_ERROR_CODES.SERVICE_ROLE_KEY_MISSING) {
-        toast.error(t("booking.serviceMisconfigured"), { duration: 10000 });
-        return;
-      }
-      toast.error(t("booking.submitError"));
+      toast.error(t(getBookingErrorToastKey(err)), getBookingErrorToastOptions(err));
     },
   });
 
