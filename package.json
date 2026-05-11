@@ -19,7 +19,10 @@
     "test:rls-report:storage-nested-assets": "vitest run --testTimeout=120000 --hookTimeout=120000 --reporter=default --reporter=./src/test/security/rls-report-reporter.ts src/test/security/cross-tenant-storage.test.ts -t \"Live cross-tenant nested-path denial.*tenant-assets\"",
     "test:rls-report:storage-adversarial": "vitest run --testTimeout=120000 --hookTimeout=120000 --reporter=default --reporter=./src/test/security/rls-report-reporter.ts src/test/security/cross-tenant-storage.test.ts -t \"adversarial path normalization|victim tenant_id in later path segments\"",
     "test:rls-report:storage-assets": "vitest run --testTimeout=120000 --hookTimeout=120000 --reporter=default --reporter=./src/test/security/rls-report-reporter.ts src/test/security/cross-tenant-storage.test.ts -t \"tenant-assets public bucket: cross-tenant list/download isolation|tenant-assets: cross-tenant existence-probe denial|tenant-assets: path-traversal bypass denial|tenant-assets: public CDN read works, anon enumeration denied\"",
-    "test:rls-report:storage-multipart": "vitest run --testTimeout=120000 --hookTimeout=120000 --reporter=default --reporter=./src/test/security/rls-report-reporter.ts src/test/security/cross-tenant-storage.test.ts -t \"multipart|Multipart\""
+    "test:rls-report:storage-multipart": "vitest run --testTimeout=120000 --hookTimeout=120000 --reporter=default --reporter=./src/test/security/rls-report-reporter.ts src/test/security/cross-tenant-storage.test.ts -t \"multipart|Multipart\"",
+    "e2e:install": "playwright install chromium",
+    "e2e": "playwright install chromium && playwright test",
+    "e2e:ui": "playwright install chromium && playwright test --ui"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
