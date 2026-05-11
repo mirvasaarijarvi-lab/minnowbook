@@ -185,7 +185,15 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
         `${label}: capacity.current_load=${cap.current_load} must be >= just-booked guests_count=${guestsCount} ` +
           `so the public booking UI shows the reservation as taken`,
       ).toBeGreaterThanOrEqual(guestsCount);
+      await captureCheckpoint(page, testInfo, `${label}: before SPA reload`, {
+        screenshot: false,
+        extra: { current_load: cap.current_load, capacity_total: cap.capacity_total ?? null },
+      });
       await gotoAndWaitForSpa(page, `/book/${tenant.slug}`);
+      await captureCheckpoint(page, testInfo, `${label}: after SPA reload`, {
+        probeSelectors: ["#root", "main", "h1"],
+        extra: { current_load: cap.current_load, capacity_total: cap.capacity_total ?? null },
+      });
       // eslint-disable-next-line no-console
       console.log(
         `${LOG_PREFIX} ${label}: verified in public booking UI ` +
