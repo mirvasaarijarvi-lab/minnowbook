@@ -255,7 +255,7 @@ Deno.test({
 
     // Bad email triggers the function's input validation and short-circuits
     // before any DB write, so there is nothing to clean up afterwards.
-    const { res, json, text } = await callFn({
+    const result = await callFn({
       tenant_id: TEST_TENANT_ID,
       guest_name: "Cleanup-Skip Test",
       guest_email: "not-an-email",
@@ -264,14 +264,9 @@ Deno.test({
       guests_count: 2,
     });
 
-    assertEquals(
-      res.status,
-      400,
-      `expected 400 (no insert) when service key missing, got ${res.status} ${text}`,
-    );
-    assert(
-      typeof json?.error === "string",
-      `expected error body, got ${text}`,
+    assertMissingServiceKeyResponse(
+      result,
+      "no data leak when service role key missing",
     );
   },
 });
