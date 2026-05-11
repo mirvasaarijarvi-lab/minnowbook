@@ -5252,7 +5252,7 @@ const sv: TranslationKeys = {
   "booking.reservations": "bokningar",
   "booking.submitting": "Skickar...",
   "booking.submitError": "Kunde inte skicka bokningen. Försök igen.",
-  "booking.serviceMisconfigured": "Onlinebokning är tillfälligt otillgänglig på grund av ett serverkonfigurationsfel. Ingen bokning skapades. Kontakta verksamheten direkt eller försök igen senare.",
+  "booking.serviceMisconfigured": "Onlinebokning är tillfälligt otillgänglig eftersom servern saknar sin service role-nyckel. Ingen bokning skapades, så du har inte debiterats och ingen plats är reserverad. Om du är gäst, kontakta verksamheten direkt via telefon eller e-post, eller försök igen om några minuter. Om du administrerar verksamheten: öppna Lovable Cloud, gå till Backend, sedan API keys, kopiera service_role-nyckeln, gå därefter till Backend, Edge Functions, Secrets, och lägg till den som SUPABASE_SERVICE_ROLE_KEY. Onlinebokningen börjar fungera så snart hemligheten har sparats.",
   "booking.dateBlocked": "Detta datum är inte tillgängligt för bokning.",
   "booking.timeBlocked": "Denna tidslucka är inte tillgänglig för bokning.",
   "booking.blocked": "Blockerad",
