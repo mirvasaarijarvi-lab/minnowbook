@@ -1,7 +1,15 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { format, subHours } from "date-fns";
-import { ShieldAlert, Search, X, RefreshCw } from "lucide-react";
+import { ShieldAlert, Search, X, RefreshCw, Download } from "lucide-react";
+import {
+  buildCsv,
+  buildJson,
+  downloadBlob,
+  makeFilename,
+  toSafeEvents,
+  type ExportContext,
+} from "@/lib/storage-rejection-export";
 import {
   ResponsiveContainer,
   BarChart,
@@ -187,6 +195,29 @@ const StorageRejectionPanel = () => {
     setCallsiteFilter("");
   };
 
+  const handleExport = (kind: "csv" | "json") => {
+    const safe = toSafeEvents(events as unknown as Record<string, unknown>[]);
+    const filename = makeFilename(windowKey, kind);
+    if (kind === "csv") {
+      downloadBlob(filename, "text/csv;charset=utf-8", buildCsv(safe));
+      return;
+    }
+    const ctx: ExportContext = {
+      generatedAt: new Date().toISOString(),
+      windowKey,
+      windowStartIso: sinceIso,
+      callsiteFilter: callsiteFilter || null,
+      totalEvents: safe.length,
+      truncated: safe.length >= 2000,
+      breakdowns: {
+        byTenant: tenantBreakdown,
+        byCallsite: callsiteBreakdown,
+        byReason: reasonBreakdown,
+      },
+    };
+    downloadBlob(filename, "application/json", buildJson(safe, ctx));
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -281,6 +312,28 @@ const StorageRejectionPanel = () => {
             <RefreshCw className="h-3.5 w-3.5" />
             Refresh
           </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleExport("csv")}
+            disabled={total === 0}
+            className="gap-1.5"
+            title="Download safe-shape telemetry as CSV"
+          >
+            <Download className="h-3.5 w-3.5" />
+            CSV
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleExport("json")}
+            disabled={total === 0}
+            className="gap-1.5"
+            title="Download safe-shape telemetry as JSON"
+          >
+            <Download className="h-3.5 w-3.5" />
+            JSON
+          </Button>
         </div>
 
         <div className="text-sm text-muted-foreground">
@@ -290,6 +343,10 @@ const StorageRejectionPanel = () => {
               (callsiteFilter ? ` matching "${callsiteFilter}"` : "") +
               (total >= 2000 ? " (capped at 2000, narrow filter for full view)" : "")}
         </div>
+        <p className="text-xs text-muted-foreground">
+          Exports contain only safe shape metadata (reason, callsite, tenantId, lengths,
+          flags). No raw paths, filenames, emails, or tokens are included.
+        </p>
 
         {/* Time series chart */}
         {timeSeries.length > 0 && (
