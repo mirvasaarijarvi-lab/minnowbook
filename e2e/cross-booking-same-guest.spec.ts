@@ -230,49 +230,35 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
     await expect(page.locator("body")).not.toContainText(/not found|404/i, { timeout: 5_000 });
   });
 
-  test("creates restaurant + guesthouse + venue reservations for the same guest", async ({ playwright, tenant }, testInfo) => {
+  test("creates restaurant + guesthouse + venue reservations for the same guest", async ({ request, tenant }, testInfo) => {
     const date = futureDate(60);
     const checkOut = futureDate(62);
 
-    // Record EVERY public-booking HTTP call into a HAR file so failures can
-    // be replayed in a browser (Chrome DevTools "Import HAR file") or with
-    // `npx playwright show-trace`. Saved per-attempt so retries don't clobber.
+    // Build a HAR 1.2 file from every public-booking call (warmup + 3 legs +
+    // negative-tenant probe + any retried attempts) so failures can be
+    // replayed in a browser (Chrome/Firefox DevTools "Import HAR file"),
+    // diff'd between retries, and shared with backend owners. We assemble
+    // the HAR by hand because Playwright's `recordHar` option is browser-
+    // context only and is NOT supported on `apiRequest.newContext`.
     const path = await import("node:path");
+    const fs = await import("node:fs");
     const harDir = path.resolve(testInfo.outputDir, "har");
     const harPath = path.join(harDir, `public-booking-attempt-${testInfo.retry + 1}.har`);
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const fs = await import("node:fs");
     fs.mkdirSync(harDir, { recursive: true });
+    const harEntries: Array<Record<string, any>> = [];
     // eslint-disable-next-line no-console
     console.log(`[cross-booking] HAR will be written to ${harPath}`);
 
-    const request = await playwright.request.newContext({
-      recordHar: {
-        path: harPath,
-        mode: "full",
-        content: "embed",
-        // Match every public-booking edge function call (warmup + 3 legs +
-        // negative-tenant probe). RegExp avoids glob ambiguity across
-        // Playwright versions.
-        urlFilter: /\/functions\/v1\/public-booking/,
-      },
+    // Warm the edge function so the first real leg doesn't pay the cold-start
+    // penalty. Recorded into the HAR as a normal entry.
+    await callPublicBooking(
+      request,
+      { warmup: true },
+      "warmup",
+      harEntries,
+    ).catch(() => {
+      /* warmup is best-effort; ignore */
     });
-
-    // Warm the edge function so the first real leg doesn't pay the cold-start penalty
-    // (and so any platform 5xx during cold-start surfaces as a clear, single failure here).
-    await request
-      .post(`${SUPABASE_URL}/functions/v1/public-booking`, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-          apikey: SUPABASE_ANON_KEY,
-        },
-        data: { warmup: true },
-        timeout: PUBLIC_BOOKING_TIMEOUT_MS,
-      })
-      .catch(() => {
-        /* warmup is best-effort; ignore */
-      });
 
     try {
     // 1. Restaurant
