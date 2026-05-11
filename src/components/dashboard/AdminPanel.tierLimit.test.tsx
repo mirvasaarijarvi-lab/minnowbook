@@ -33,10 +33,25 @@
  *   `useToast().toasts` after the mutation settles.
  */
 
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor, within, act } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { render, screen, waitFor, within, act, cleanup } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+// Stub the HaveIBeenPwned breach check so the PasswordInput's debounced
+// network probe never escapes jsdom. Without this stub the real fetch fires
+// ~600ms after typing, occasionally landing AFTER the test's act() boundary
+// and racing with the next test's render in the same worker, which surfaced
+// as intermittent "5 staff users" toast misses on full-suite runs.
+vi.mock("@/lib/password-validation", async () => {
+  const actual = await vi.importActual<typeof import("@/lib/password-validation")>(
+    "@/lib/password-validation",
+  );
+  return {
+    ...actual,
+    checkPasswordBreach: vi.fn(async () => ({ isBreached: false, count: 0 })),
+  };
+});
 
 // --- Mocks: hooks AdminPanel depends on ---------------------------------
 
@@ -131,6 +146,7 @@ vi.mock("@/integrations/supabase/client", () => {
 
 import AdminPanel from "./AdminPanel";
 import { useToast } from "@/hooks/use-toast";
+import { renderHook, act as actHook } from "@testing-library/react";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
 // Render harness. AdminPanel relies on React Query but no other providers
@@ -184,6 +200,19 @@ beforeEach(() => {
   // Use mockClear (not mockReset) so per-test mockImplementation calls
   // remain in effect for the duration of the test.
   mockInvoke.mockClear();
+});
+
+afterEach(() => {
+  // The toast singleton (`memoryState` in src/hooks/use-toast.ts) survives
+  // RTL's `cleanup()` because it lives at module scope. Without an explicit
+  // wipe, a destructive toast queued by the previous test would still be in
+  // `useToast().toasts` for the next render and trip up `lastToasts.find()`.
+  // Mount a throwaway hook to reach `dismiss()` (the only public path that
+  // accepts an undefined id, which dismisses every active toast at once).
+  cleanup();
+  const { result, unmount } = renderHook(() => useToast());
+  actHook(() => result.current.dismiss());
+  unmount();
 });
 
 // --- Tests ---------------------------------------------------------------
