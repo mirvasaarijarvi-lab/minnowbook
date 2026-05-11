@@ -184,6 +184,18 @@ jobs:
         run: bunx tsc --noEmit
 
       - name: Run npm run test:ci
+        # Re-state the Supabase env vars at step scope so the Deno edge
+        # function tests pick them up explicitly. Job-level `env:` is
+        # already inherited, but listing them here documents the
+        # contract and protects against a future refactor that scopes
+        # the job env differently. Both legacy and `VITE_`-prefixed
+        # names are exported so any test file can read either.
+        env:
+          SUPABASE_URL: ${{ env.SUPABASE_URL }}
+          VITE_SUPABASE_URL: ${{ env.VITE_SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ env.SUPABASE_ANON_KEY }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ env.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ env.SUPABASE_SERVICE_ROLE_KEY }}
         run: npm run test:ci
 
       - name: Upload test reports
