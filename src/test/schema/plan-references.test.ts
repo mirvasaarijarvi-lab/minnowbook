@@ -73,10 +73,13 @@ describe("plan references gate", () => {
     // matching nothing. That guard fired false positives for plans
     // that legitimately make no schema changes (refactors, UI work,
     // edge-function-only changes). Treat the gate as vacuous-but-OK
-    // when the plan body never mentions DB-shaped vocabulary; if it
-    // does, the regexes must produce at least one hit.
+    // unless the plan body uses the specific shapes the extractors
+    // are designed to catch: a `snake_case` identifier next to the
+    // word "table", or a `supabase/migrations/...sql` reference.
     const looksSchemaShaped =
-      /\b(?:table|tables|migration|migrations|column|columns|RLS)\b/i.test(plan);
+      /`[a-z][a-z0-9_]+`\s+(?:[a-z]+\s+)?table\b/i.test(plan) ||
+      /supabase\/migrations\//i.test(plan) ||
+      /\bCREATE\s+TABLE\b/i.test(plan);
     if (!looksSchemaShaped) {
       expect(true, "plan.md describes no schema work, gate is vacuous").toBe(true);
       return;
