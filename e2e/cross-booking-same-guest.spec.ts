@@ -78,7 +78,7 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
 
     // 1. Restaurant
     const restaurant = await callPublicBooking(request, {
-      tenant_slug: TENANT_SLUG,
+      tenant_id: TENANT_ID,
       ...GUEST,
       guests_count: 2,
       reservation_type: "restaurant",
@@ -94,7 +94,7 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
 
     // 2. Guesthouse (overnight)
     const guesthouse = await callPublicBooking(request, {
-      tenant_slug: TENANT_SLUG,
+      tenant_id: TENANT_ID,
       ...GUEST,
       guests_count: 2,
       reservation_type: "guesthouse",
@@ -110,7 +110,7 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
 
     // 3. Venue
     const venue = await callPublicBooking(request, {
-      tenant_slug: TENANT_SLUG,
+      tenant_id: TENANT_ID,
       ...GUEST,
       guests_count: 30,
       reservation_type: "venue",
