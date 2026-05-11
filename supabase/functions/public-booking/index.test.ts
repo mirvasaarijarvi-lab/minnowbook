@@ -7,6 +7,10 @@
 import "https://deno.land/std@0.224.0/dotenv/load.ts";
 import { assertEquals, assert } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import { makeReservationCleanup } from "../_shared/test-cleanup.ts";
+import {
+  assertFunctionError,
+  assertMissingServiceKeyResponse,
+} from "../_shared/test-assert.ts";
 
 function requireEnv(...names: string[]): string {
   for (const n of names) {
@@ -78,13 +82,12 @@ async function adminFetch(path: string, init: RequestInit = {}) {
 }
 
 Deno.test("public-booking: rejects missing required fields", async () => {
-  const { res, json } = await callFn({ tenant_id: TEST_TENANT_ID });
-  assertEquals(res.status, 400, "expected 400 for missing required fields");
-  assert(json?.error, "expected error message in response body");
+  const result = await callFn({ tenant_id: TEST_TENANT_ID });
+  assertFunctionError(result, { status: 400, label: "missing required fields" });
 });
 
 Deno.test("public-booking: rejects bad email format", async () => {
-  const { res, json } = await callFn({
+  const result = await callFn({
     tenant_id: TEST_TENANT_ID,
     guest_name: "Test User",
     guest_email: "not-an-email",
@@ -92,15 +95,15 @@ Deno.test("public-booking: rejects bad email format", async () => {
     date: isoFutureDate(),
     guests_count: 2,
   });
-  assertEquals(res.status, 400);
-  assert(
-    typeof json?.error === "string" && json.error.toLowerCase().includes("email"),
-    `expected email error, got ${JSON.stringify(json)}`,
-  );
+  assertFunctionError(result, {
+    status: 400,
+    errorIncludes: "email",
+    label: "bad email format",
+  });
 });
 
 Deno.test("public-booking: rejects unknown tenant", async () => {
-  const { res, json } = await callFn({
+  const result = await callFn({
     tenant_id: "00000000-0000-0000-0000-000000000000",
     guest_name: "Test User",
     guest_email: "ok@example.com",
@@ -108,11 +111,11 @@ Deno.test("public-booking: rejects unknown tenant", async () => {
     date: isoFutureDate(),
     guests_count: 2,
   });
-  assertEquals(res.status, 400);
-  assert(
-    typeof json?.error === "string" && /tenant/i.test(json.error),
-    `expected tenant error, got ${JSON.stringify(json)}`,
-  );
+  assertFunctionError(result, {
+    status: 400,
+    errorMatch: /tenant/i,
+    label: "unknown tenant",
+  });
 });
 
 Deno.test("public-booking: creates a pending reservation end-to-end", async () => {
@@ -252,7 +255,7 @@ Deno.test({
 
     // Bad email triggers the function's input validation and short-circuits
     // before any DB write, so there is nothing to clean up afterwards.
-    const { res, json, text } = await callFn({
+    const result = await callFn({
       tenant_id: TEST_TENANT_ID,
       guest_name: "Cleanup-Skip Test",
       guest_email: "not-an-email",
@@ -261,14 +264,9 @@ Deno.test({
       guests_count: 2,
     });
 
-    assertEquals(
-      res.status,
-      400,
-      `expected 400 (no insert) when service key missing, got ${res.status} ${text}`,
-    );
-    assert(
-      typeof json?.error === "string",
-      `expected error body, got ${text}`,
+    assertMissingServiceKeyResponse(
+      result,
+      "no data leak when service role key missing",
     );
   },
 });
