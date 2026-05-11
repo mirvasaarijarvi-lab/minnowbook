@@ -60,7 +60,7 @@ jobs:
 
       - name: Wait for Postgres
         run: |
-          for i in $(seq 1 30); do
+          for _ in $(seq 1 30); do
             if pg_isready -h localhost -p 5432 -U postgres -d rollback_test >/dev/null 2>&1; then
               echo "Postgres is ready."
               exit 0
