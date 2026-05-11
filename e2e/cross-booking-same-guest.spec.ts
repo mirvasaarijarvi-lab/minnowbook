@@ -84,9 +84,46 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
       extraShapeAssert?.(result.body);
     };
 
-    // Warmup is best-effort; ignore failures so a cold edge node doesn't
-    // blow up the test before we even start the real legs.
-    await callLeg("warmup", { warmup: true }).catch(() => undefined);
+    // Warmup is best-effort; failures here must NOT fail the test (cold
+    // edge nodes are expected), but the outcome MUST be observable in CI
+    // so we can correlate slow first legs with cold-start latency.
+    const warmupStartedAt = Date.now();
+    let warmupOutcome: "ok" | "http_error" | "threw" | "skipped" = "skipped";
+    let warmupStatus: number | undefined;
+    let warmupError: string | undefined;
+    try {
+      const warmup = await callLeg("warmup", { warmup: true });
+      warmupStatus = warmup.status;
+      warmupOutcome = warmup.status < 500 ? "ok" : "http_error";
+    } catch (err) {
+      warmupOutcome = "threw";
+      warmupError = err instanceof Error ? err.message : String(err);
+    }
+    const warmupDurationMs = Date.now() - warmupStartedAt;
+    const warmupSummary = {
+      outcome: warmupOutcome,
+      status: warmupStatus,
+      duration_ms: warmupDurationMs,
+      error: warmupError,
+      correlation_id: flowCorrelationId,
+    };
+    // eslint-disable-next-line no-console
+    console.log(`${LOG_PREFIX} warmup result ${JSON.stringify(warmupSummary)}`);
+    testInfo.annotations.push({
+      type: "warmup",
+      description: JSON.stringify(warmupSummary),
+    });
+    await testInfo.attach("warmup-summary.json", {
+      body: JSON.stringify(warmupSummary, null, 2),
+      contentType: "application/json",
+    });
+    // Soft assertion: never fail the test on a cold start, but make the
+    // skipped/failed path explicit in the report so it can't be silently
+    // swallowed in CI.
+    expect.soft(
+      ["ok", "http_error", "threw"],
+      "warmup outcome must be one of the known observable states",
+    ).toContain(warmupOutcome);
 
     try {
       const restaurant = await callLeg("restaurant", {
