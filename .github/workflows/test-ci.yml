@@ -183,20 +183,75 @@ jobs:
       - name: Typecheck (tsc --noEmit)
         run: bunx tsc --noEmit
 
-      - name: Run npm run test:ci
-        # Re-state the Supabase env vars at step scope so the Deno edge
-        # function tests pick them up explicitly. Job-level `env:` is
-        # already inherited, but listing them here documents the
-        # contract and protects against a future refactor that scopes
-        # the job env differently. Both legacy and `VITE_`-prefixed
-        # names are exported so any test file can read either.
+      # ---------------------------------------------------------------------
+      # Split the previous monolithic `npm run test:ci` into discrete steps
+      # so each suite emits a junit XML the rerun helper can parse between
+      # attempts. Quarantined-flaky tests get exactly ONE deterministic
+      # rerun; non-quarantined failures still fail the job immediately.
+      # The quarantine manifest lives in `.github/flaky-tests.json` and is
+      # validated up-front by the hygiene check below.
+      # ---------------------------------------------------------------------
+
+      - name: Quarantine manifest hygiene
+        # Runs FIRST so a malformed/expired manifest is loud and fast,
+        # before the suites even start. Failure here is a real regression
+        # (a stale quarantine entry is worse than no quarantine).
+        run: node scripts/ci/check-quarantine.mjs
+
+      - name: Vitest (initial)
+        id: vitest
         env:
           SUPABASE_URL: ${{ env.SUPABASE_URL }}
           VITE_SUPABASE_URL: ${{ env.VITE_SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ env.SUPABASE_ANON_KEY }}
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ env.VITE_SUPABASE_PUBLISHABLE_KEY }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ env.SUPABASE_SERVICE_ROLE_KEY }}
-        run: npm run test:ci
+        run: |
+          mkdir -p test-reports/vitest
+          bunx vitest run \
+            --reporter=dot \
+            --reporter=junit \
+            --outputFile.junit=test-reports/vitest/junit.xml
+
+      - name: Vitest (deterministic rerun of quarantined failures)
+        if: failure() && steps.vitest.outcome == 'failure'
+        env:
+          SUPABASE_URL: ${{ env.SUPABASE_URL }}
+          VITE_SUPABASE_URL: ${{ env.VITE_SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ env.SUPABASE_ANON_KEY }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ env.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ env.SUPABASE_SERVICE_ROLE_KEY }}
+        run: node scripts/ci/rerun-flaky.mjs --suite=vitest --junit=test-reports/vitest/junit.xml
+
+      - name: Deno edge function tests
+        # No rerun: these are deterministic, no flake history. If they fail
+        # it's a real regression every time.
+        if: success() || (failure() && steps.vitest.conclusion == 'success')
+        env:
+          SUPABASE_URL: ${{ env.SUPABASE_URL }}
+          VITE_SUPABASE_URL: ${{ env.VITE_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ env.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          mkdir -p test-reports/deno
+          deno test --allow-net --allow-env --allow-read \
+            --junit-path=test-reports/deno/junit.xml \
+            supabase/functions/
+
+      - name: Playwright (initial)
+        id: playwright
+        env:
+          SUPABASE_URL: ${{ env.SUPABASE_URL }}
+          VITE_SUPABASE_URL: ${{ env.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ env.VITE_SUPABASE_PUBLISHABLE_KEY }}
+        run: bunx playwright test
+
+      - name: Playwright (deterministic rerun of quarantined failures)
+        if: failure() && steps.playwright.outcome == 'failure'
+        env:
+          SUPABASE_URL: ${{ env.SUPABASE_URL }}
+          VITE_SUPABASE_URL: ${{ env.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ env.VITE_SUPABASE_PUBLISHABLE_KEY }}
+        run: node scripts/ci/rerun-flaky.mjs --suite=playwright --junit=test-reports/playwright/junit.xml
 
       - name: Upload test reports
         if: always()
@@ -207,5 +262,7 @@ jobs:
             test-reports/
             playwright-report/
             test-results/
+            .github/flaky-tests.json
           if-no-files-found: warn
           retention-days: 14
+
