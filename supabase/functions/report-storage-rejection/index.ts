@@ -115,7 +115,10 @@ function parseBody(body: unknown): { event: SafeEvent } | { error: string } {
     const trimmed = b.callsite.trim().slice(0, 80);
     // Restrict to a printable, ascii-ish tag set so an attacker cannot
     // smuggle PII or control bytes via this field.
-    if (/^[A-Za-z0-9._:\\-/+]{1,80}$/.test(trimmed)) callsite = trimmed;
+    // Hyphen placed at end of class to avoid being parsed as a range
+    // start (the previous `\\-/` was rejected by stricter regex engines
+    // because the backslash-to-slash code-point range is reversed).
+    if (/^[A-Za-z0-9._:/+-]{1,80}$/.test(trimmed)) callsite = trimmed;
   }
 
   return {
