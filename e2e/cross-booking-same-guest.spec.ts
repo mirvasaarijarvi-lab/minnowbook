@@ -339,7 +339,14 @@ async function callPublicBooking(
     status >= 400 ? validatePublicBookingErrorShape(json ?? text) : [];
   (diagnostic as any).errorShapeProblems = errorShapeProblems;
 
-  return { status, body: json ?? text, diagnostic, errorShapeProblems };
+  return {
+    status,
+    body: json ?? text,
+    diagnostic,
+    errorShapeProblems,
+    correlationId: fullCorrelationId,
+    attemptCorrelationId,
+  };
 }
 
 test.describe("Cross-booking: same guest, multiple resources/services", () => {
