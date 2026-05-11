@@ -392,6 +392,18 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
       `foreign tenant_id should be rejected by public-booking but got HTTP ${rejected.status}`,
     ).toBeGreaterThanOrEqual(400);
 
+    // Validate the error response shape against the documented contract
+    // ({ error: string }). A drift here (e.g. `{ message: "..." }` or
+    // `{ error: { code, detail } }`) would silently break every UI that
+    // surfaces server-side error copy via FunctionsHttpError decoding.
+    const rejectedShapeProblems = validatePublicBookingErrorShape(rejected.body);
+    expect(
+      rejectedShapeProblems,
+      `foreign-tenant-negative error body does not match expected schema { error: string }.\n` +
+        `Problems:\n  - ${rejectedShapeProblems.join("\n  - ")}\n` +
+        `Received body:\n${JSON.stringify(rejected.body, null, 2)}`,
+    ).toEqual([]);
+
     // 5. RLS / tenant-isolation verification (best-effort).
     // When a service-role key is provided, query reservations directly and
     // assert every row this test created is bound to the active tenant_id
