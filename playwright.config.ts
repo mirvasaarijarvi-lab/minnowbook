@@ -8,6 +8,8 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter: [
     ["html", { open: "never", outputFolder: "playwright-report" }],
+    ["junit", { outputFile: "test-reports/playwright/junit.xml" }],
+    ["json", { outputFile: "test-reports/playwright/results.json" }],
     ["list"],
   ],
   outputDir: "test-results",
