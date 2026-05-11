@@ -19,6 +19,7 @@
  * with zero of that overhead.
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { useEffect } from "react";
 import { render, screen, act, cleanup } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Toaster, toast } from "sonner";
