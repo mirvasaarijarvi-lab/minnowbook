@@ -379,10 +379,54 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
               {t("dashboard.newReservation")}
             </Button>
           )}
+          <div className="relative w-full sm:w-[220px]">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+            <Input
+              type="search"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder={t("dashboard.searchGuests") || "Search name, email, phone"}
+              className="pl-8 h-9"
+              aria-label="Search reservations"
+            />
+          </div>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant={specificDate ? "default" : "outline"}
+                size="sm"
+                className={cn("gap-1.5", !specificDate && "text-muted-foreground")}
+              >
+                <CalendarIcon className="h-4 w-4" />
+                {specificDate ? format(specificDate, "PP") : (t("common.date") || "Date")}
+                {specificDate && (
+                  <span
+                    role="button"
+                    tabIndex={0}
+                    onClick={(e) => { e.stopPropagation(); setSpecificDate(undefined); }}
+                    onKeyDown={(e) => { if (e.key === "Enter") { e.stopPropagation(); setSpecificDate(undefined); } }}
+                    className="ml-1 rounded-full hover:bg-muted-foreground/20 p-0.5"
+                    aria-label="Clear date"
+                  >
+                    <XCircle className="h-3.5 w-3.5" />
+                  </span>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="end">
+              <Calendar
+                mode="single"
+                selected={specificDate}
+                onSelect={(d) => { setSpecificDate(d ?? undefined); if (d) setDateFilter("all"); }}
+                initialFocus
+                className={cn("p-3 pointer-events-auto")}
+              />
+            </PopoverContent>
+          </Popover>
           <Button
-            variant={dateFilter === "today" ? "default" : "outline"}
+            variant={dateFilter === "today" && !specificDate ? "default" : "outline"}
             size="sm"
-            onClick={() => setDateFilter(dateFilter === "today" ? "all" : "today")}
+            onClick={() => { setSpecificDate(undefined); setDateFilter(dateFilter === "today" ? "all" : "today"); }}
           >
             {t("dashboard.todayFilter")}
           </Button>
