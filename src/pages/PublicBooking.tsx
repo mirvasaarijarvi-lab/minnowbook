@@ -845,7 +845,9 @@ const PublicBookingInner = () => {
     // reservation can be created. Refuse to even hit the network and
     // re-surface the toast so the guest gets immediate feedback.
     if (serviceMisconfigured) {
-      toast.error(t("booking.serviceMisconfigured"), { duration: 10000 });
+      // Re-surface the same staff-aware copy as the original toast.
+      const key = isStaff ? "booking.serviceMisconfiguredAdmin" : "booking.serviceMisconfigured";
+      toast.error(t(key), { duration: 10000 });
       return;
     }
 
