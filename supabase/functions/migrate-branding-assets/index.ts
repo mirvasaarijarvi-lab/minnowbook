@@ -21,6 +21,29 @@ const SOURCE = "tenant-assets";
 const DEST = "tenant-branding";
 const BRANDING_RE = /^(logo|hero)\.[A-Za-z0-9]+$/;
 
+/**
+ * Defence-in-depth guard for any object key passed to the Storage SDK.
+ * Even though paths here are derived from server-side `list()` results
+ * (not direct user input), a malicious or corrupted listing entry could
+ * still smuggle traversal sequences through download/getPublicUrl. We
+ * reject anything outside a strict charset before touching the bucket.
+ */
+function assertSafeStoragePath(path: string): string {
+  if (
+    !path ||
+    path.length > 512 ||
+    path.startsWith("/") ||
+    path.includes("..") ||
+    path.includes("\\") ||
+    path.includes("\0") ||
+    path.includes("//") ||
+    /[^a-zA-Z0-9._\-/]/.test(path)
+  ) {
+    throw new Error("Refused to use unsafe storage path");
+  }
+  return path;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
