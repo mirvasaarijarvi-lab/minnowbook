@@ -37,15 +37,15 @@ describe("reservationFilters", () => {
 
     it("sanitizes injection-like chars before wildcarding", () => {
       const clause = buildGuestSearchOrClause("a),b%c")!;
-      expect(clause).not.toMatch(/[%(),]/g.constructor === RegExp ? /[()%]/ : /./);
       // Must still produce exactly three filter expressions
-      expect(clause.split(/,(?=guest_)/).length).toBe(3);
+      const parts = clause.split(/,(?=guest_)/);
+      expect(parts.length).toBe(3);
       // Each filter should reference the same sanitized term
-      const terms = clause
-        .split(/,(?=guest_)/)
-        .map((part) => part.split(".ilike.")[1]);
+      const terms = parts.map((p) => p.split(".ilike.")[1]);
       expect(new Set(terms).size).toBe(1);
-      expect(terms[0]).not.toMatch(/[()]/);
+      // The inner term must be %...% with no parens, commas, or extra %
+      const inner = terms[0].slice(1, -1); // strip leading/trailing %
+      expect(inner).not.toMatch(/[%(),]/);
     });
   });
 });
