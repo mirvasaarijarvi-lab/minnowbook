@@ -83,7 +83,7 @@ describe("tenant-assets is private (regression)", () => {
           // Drain the body to keep the runtime tidy.
           await res.text();
         }
-      });
+      }, NET_TIMEOUT_MS);
 
       it("denies anon list at the bucket root", async () => {
         const { data, error } = await anon.storage.from(bucket).list("", {
@@ -98,7 +98,7 @@ describe("tenant-assets is private (regression)", () => {
         } else {
           expect(data ?? []).toEqual([]);
         }
-      });
+      }, NET_TIMEOUT_MS);
 
       it("denies anon list inside a tenant prefix", async () => {
         for (const path of PROBE_PATHS) {
@@ -110,7 +110,7 @@ describe("tenant-assets is private (regression)", () => {
             expect(data ?? []).toEqual([]);
           }
         }
-      });
+      }, NET_TIMEOUT_MS);
 
       it("denies anon createSignedUrl (only tenant members may sign)", async () => {
         for (const path of PROBE_PATHS) {
@@ -124,7 +124,7 @@ describe("tenant-assets is private (regression)", () => {
             expect(error.message).toMatch(/not found|denied|permission|policy/i);
           }
         }
-      });
+      }, NET_TIMEOUT_MS);
 
       it("denies anon download (direct API)", async () => {
         for (const path of PROBE_PATHS) {
@@ -134,7 +134,7 @@ describe("tenant-assets is private (regression)", () => {
             expect(data?.size ?? 0).toBe(0);
           }
         }
-      });
+      }, NET_TIMEOUT_MS);
     });
   }
 });
@@ -150,7 +150,7 @@ describe("tenant-branding stays publicly readable (positive control)", () => {
     expect(res.status).not.toBe(401);
     expect(res.status).not.toBe(403);
     await res.text();
-  });
+  }, NET_TIMEOUT_MS);
 });
 
 // Positive proof that signed URLs actually unlock objects, and that they
@@ -178,7 +178,7 @@ describe.runIf(Boolean(admin))(
       const res = await fetchPublicObject("tenant-assets", objectPath);
       expect(res.status).not.toBe(200);
       await res.text();
-    });
+    }, NET_TIMEOUT_MS);
 
     it("a service-role-minted signed URL DOES return the file content", async () => {
       const { data, error } = await admin!.storage
@@ -191,7 +191,7 @@ describe.runIf(Boolean(admin))(
       expect(res.status).toBe(200);
       const text = await res.text();
       expect(text).toBe(objectBody);
-    });
+    }, NET_TIMEOUT_MS);
 
     it("tampering with the signed token breaks access", async () => {
       const { data } = await admin!.storage
@@ -204,7 +204,7 @@ describe.runIf(Boolean(admin))(
       const res = await fetch(tampered);
       expect(res.status).not.toBe(200);
       await res.text();
-    });
+    }, NET_TIMEOUT_MS);
 
     afterAll(async () => {
       if (!admin) return;
