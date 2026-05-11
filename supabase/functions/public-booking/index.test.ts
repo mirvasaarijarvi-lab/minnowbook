@@ -101,40 +101,60 @@ Deno.test("public-booking: creates a pending reservation end-to-end", async () =
   const guestEmail = `e2e+${stamp}@mimmobook.test`;
   const date = isoFutureDate(21);
 
-  const { res, json } = await callFn({
-    tenant_id: TEST_TENANT_ID,
-    guest_name: guestName,
-    guest_email: guestEmail,
-    reservation_type: "restaurant",
-    date,
-    start_time: "18:30",
-    guests_count: 2,
-  });
+  // Always delete any rows for this guest_email, regardless of where the test fails.
+  // Matching by email (not just id) catches the case where insertion succeeded but
+  // the verifying SELECT or an assertion threw before we learned the row id.
+  const cleanup = async () => {
+    if (!SERVICE_KEY) return;
+    try {
+      const filter = `tenant_id=eq.${TEST_TENANT_ID}&guest_email=eq.${encodeURIComponent(guestEmail)}`;
+      const { res: delRes, text: delText } = await adminFetch(
+        `/reservations?${filter}`,
+        { method: "DELETE" },
+      );
+      if (!delRes.ok) {
+        console.warn(`cleanup: failed to delete test reservation(s): ${delRes.status} ${delText}`);
+      }
+    } catch (err) {
+      console.warn(`cleanup: unexpected error deleting test reservation(s):`, err);
+    }
+  };
 
-  assertEquals(res.status, 200, `unexpected status: ${res.status} ${JSON.stringify(json)}`);
-  assertEquals(json?.success, true);
+  try {
+    const { res, json } = await callFn({
+      tenant_id: TEST_TENANT_ID,
+      guest_name: guestName,
+      guest_email: guestEmail,
+      reservation_type: "restaurant",
+      date,
+      start_time: "18:30",
+      guests_count: 2,
+    });
 
-  if (!SERVICE_KEY) {
-    console.warn("SUPABASE_SERVICE_ROLE_KEY not set — skipping DB verification step.");
-    return;
+    assertEquals(res.status, 200, `unexpected status: ${res.status} ${JSON.stringify(json)}`);
+    assertEquals(json?.success, true);
+
+    if (!SERVICE_KEY) {
+      console.warn("SUPABASE_SERVICE_ROLE_KEY not set, skipping DB verification step.");
+      return;
+    }
+
+    // Verify the row landed with the expected defaults.
+    const filter = `tenant_id=eq.${TEST_TENANT_ID}&guest_email=eq.${encodeURIComponent(guestEmail)}`;
+    const { res: getRes, text: getText } = await adminFetch(
+      `/reservations?${filter}&select=id,status,reservation_type,date,guest_name`,
+    );
+    assertEquals(getRes.status, 200, `select failed: ${getText}`);
+    const rows = JSON.parse(getText) as any[];
+    assertEquals(rows.length, 1, `expected 1 row, got ${rows.length}`);
+    const row = rows[0];
+    assertEquals(row.status, "pending");
+    assertEquals(row.reservation_type, "restaurant");
+    assertEquals(row.date, date);
+    assertEquals(row.guest_name, guestName);
+  } finally {
+    await cleanup();
   }
-
-  // Verify the row landed with the expected defaults.
-  const filter = `tenant_id=eq.${TEST_TENANT_ID}&guest_email=eq.${encodeURIComponent(guestEmail)}`;
-  const { res: getRes, text: getText } = await adminFetch(
-    `/reservations?${filter}&select=id,status,reservation_type,date,guest_name`,
-  );
-  assertEquals(getRes.status, 200, `select failed: ${getText}`);
-  const rows = JSON.parse(getText) as any[];
-  assertEquals(rows.length, 1, `expected 1 row, got ${rows.length}`);
-  const row = rows[0];
-  assertEquals(row.status, "pending");
-  assertEquals(row.reservation_type, "restaurant");
-  assertEquals(row.date, date);
-  assertEquals(row.guest_name, guestName);
-
-  // Cleanup so reruns stay isolated.
-  await adminFetch(`/reservations?id=eq.${row.id}`, { method: "DELETE" });
 });
 
 Deno.test("schema: anon role cannot SELECT reservations directly (RLS)", async () => {
