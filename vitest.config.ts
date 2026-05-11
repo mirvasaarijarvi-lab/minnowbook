@@ -20,6 +20,12 @@ export default defineConfig({
     exclude: ["node_modules", "dist", ".idea", ".git", ".cache", "e2e", "playwright"],
     // Reduce reporter overhead in CI; scripts/test-ci.sh adds --bail=1 + --reporter=dot.
     passWithNoTests: false,
+    // CI-friendly report files. The dot reporter is added on the CLI in
+    // scripts/test-ci.sh so local `vitest` runs stay quiet.
+    outputFile: {
+      junit: "test-reports/vitest/junit.xml",
+      json: "test-reports/vitest/results.json",
+    },
   },
   resolve: {
     alias: { "@": path.resolve(__dirname, "./src") },
