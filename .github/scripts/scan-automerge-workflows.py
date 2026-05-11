@@ -47,7 +47,7 @@ BROAD_SCOPE_WRITES_AT_WORKFLOW = {
     "repository-projects",
 }
 
-COMMENT_RE = re.compile(r"^[[:space:]]*#.*$", re.MULTILINE)
+
 PRT_RE = re.compile(
     r"(^|[^A-Za-z0-9_-])pull_request_target([^A-Za-z0-9_-]|$)"
 )
