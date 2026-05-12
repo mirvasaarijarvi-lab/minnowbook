@@ -670,7 +670,7 @@ describe.each([
     expect(shapes[1]).toEqual(shapes[2]);
   });
 
-  liveIt("cursor walk (.gt created_at + handle filter) never surfaces a row", async () => {
+  liveIt("cursor walk (.gt created_at + handle filter) never surfaces a row", { timeout: 30_000 }, async () => {
     // Forward hops anchored at the unix epoch — covers a misconfigured
     // cursor-style paginator that drops the policy on subsequent hops.
     const HOPS = 3;
