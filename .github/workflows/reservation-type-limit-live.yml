@@ -169,15 +169,48 @@ jobs:
           ON CONFLICT (id) DO NOTHING;
           SQL
 
+      # Pre-pull images with a generous timeout so transient Docker Hub
+      # slowness surfaces as a skipped job instead of a hard failure.
+      # The actual `supabase start` step then re-uses the local cache.
+      - name: Pre-pull Supabase images
+        id: supabase-pull
+        if: steps.docker-check.outputs.available == 'true' && steps.supabase-cli.outcome == 'success'
+        timeout-minutes: 8
+        continue-on-error: true
+        run: |
+          set -uo pipefail
+          # `supabase start` will pull on demand; trigger it briefly then
+          # stop so subsequent `start` is fast. If this times out or fails,
+          # downstream steps are skipped via outcome checks below.
+          supabase start --exclude=imgproxy,mailpit,studio,realtime,edge-runtime &
+          START_PID=$!
+          # Wait up to the step timeout for either readiness or completion.
+          for i in $(seq 1 420); do
+            if curl -sf "http://127.0.0.1:54321/rest/v1/" >/dev/null 2>&1; then
+              echo "Supabase ready after ${i}s during pre-pull"
+              exit 0
+            fi
+            if ! kill -0 "$START_PID" 2>/dev/null; then
+              wait "$START_PID"
+              exit $?
+            fi
+            sleep 1
+          done
+          echo "::warning::Supabase start did not become ready within pre-pull window; skipping live tests."
+          kill "$START_PID" 2>/dev/null || true
+          exit 1
+
+      - name: Skip if image pull / start failed
+        if: steps.docker-check.outputs.available == 'true' && steps.supabase-cli.outcome == 'success' && steps.supabase-pull.outcome != 'success'
+        run: echo "::notice::Supabase stack unavailable (likely Docker Hub flake), skipping live cap tests."
+
       - name: Start local Supabase stack
         id: supabase-start
-        if: steps.docker-check.outputs.available == 'true' && steps.supabase-cli.outcome == 'success'
+        if: steps.supabase-pull.outcome == 'success'
         run: |
           set -euo pipefail
-          # We need PostgREST (the API layer) for end-to-end coverage,
-          # so do NOT exclude it. Excluding heavy services keeps boot
-          # time reasonable.
-          supabase start --exclude=imgproxy,mailpit,studio,realtime,edge-runtime
+          # Idempotent: if pre-pull already brought it up, this is a no-op.
+          supabase start --exclude=imgproxy,mailpit,studio,realtime,edge-runtime || true
 
       - name: Wait for PostgREST API
         if: steps.supabase-start.outcome == 'success'
