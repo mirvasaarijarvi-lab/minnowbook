@@ -152,9 +152,11 @@ describe("Edge function CORS — disallowed origin × custom-header preflights",
     describe(fn, () => {
       // Live network calls into deployed edge functions can occasionally
       // exceed the default 5s on a cold start (especially the very first
-      // OPTIONS hit per worker). Use a 15s per-test timeout instead of
-      // bumping the global default — only this suite is network-bound.
-      const NETWORK_TIMEOUT_MS = 15_000;
+      // OPTIONS / POST hit per worker, and most reliably for support-chat
+      // which boots the AI gateway client). Use a 30s per-test timeout
+      // instead of bumping the global default — only this suite is
+      // network-bound.
+      const NETWORK_TIMEOUT_MS = 30_000;
 
       // -------- positive control --------
       for (const set of CUSTOM_HEADER_SETS) {
