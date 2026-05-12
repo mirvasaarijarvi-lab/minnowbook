@@ -169,6 +169,26 @@ jobs:
           ON CONFLICT (id) DO NOTHING;
           SQL
 
+      # GitHub-hosted runners ship with a Postgres service bound to 5432
+      # and may have leftover containers binding 54322. Free the Supabase
+      # default ports before starting so we do not hit "address already in use".
+      - name: Free Supabase ports
+        if: steps.docker-check.outputs.available == 'true' && steps.supabase-cli.outcome == 'success'
+        run: |
+          set +e
+          sudo systemctl stop postgresql || true
+          sudo service postgresql stop || true
+          for port in 54321 54322 54323 54324 54327 54328; do
+            pids=$(sudo lsof -ti tcp:"$port" 2>/dev/null || true)
+            if [ -n "$pids" ]; then
+              echo "Killing PIDs on port $port: $pids"
+              sudo kill -9 $pids || true
+            fi
+          done
+          # Also clean any leftover supabase containers from prior runs.
+          docker ps -aq --filter "name=supabase_" | xargs -r docker rm -f || true
+          exit 0
+
       # Pre-pull images with a generous timeout so transient Docker Hub
       # slowness surfaces as a skipped job instead of a hard failure.
       # The actual `supabase start` step then re-uses the local cache.
