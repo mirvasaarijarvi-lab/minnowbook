@@ -148,9 +148,11 @@ const AUTH_REJECTION_CODES = new Set([
 ]);
 
 describe("redeem-access-code: brute-force & replay resilience", () => {
-  beforeAll(() => {
+  beforeAll(async () => {
     expect(SUPABASE_URL).toBeTruthy();
     expect(SUPABASE_PUBLISHABLE_KEY).toBeTruthy();
+    // Ensure the edge function is warm before any burst-style test runs.
+    await warmupPromise;
   });
 
   it("sanity: anon client has no session", async () => {
