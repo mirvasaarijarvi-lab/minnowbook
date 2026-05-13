@@ -451,10 +451,13 @@ jobs:
       # policy mismatches deep inside the test run. We block here until:
       #   1. supabase_migrations.schema_migrations exists (the CLI's own
       #      tracking table — proof the migration runner has initialised),
-      #   2. the count of applied versions is >= the number of .sql files in
-      #      supabase/migrations/ (proof every project migration ran),
+      #   2. every migration version from supabase/migrations/ is present in
+      #      supabase_migrations.schema_migrations, not just a matching count
+      #      from a reused local Docker volume,
       #   3. a representative set of tenant-scoped tables the RLS sweep
-      #      depends on are actually present in the public schema.
+      #      depends on are actually present in the public schema,
+      #   4. the tenant-table manifest RPC has the anon/authenticated EXECUTE
+      #      grant that tenant-table-manifest.test.ts asserts through PostgREST.
       # Each check is polled with the same backoff as the TCP gate so a
       # slow runner doesn't spuriously fail; on timeout we dump diagnostic
       # state to make triage obvious.
@@ -473,13 +476,15 @@ jobs:
           # Count migration files shipped in the repo. The CLI applies one
           # row per file in supabase_migrations.schema_migrations, so this
           # gives us the exact target version count to wait for.
-          expected=$(find supabase/migrations -maxdepth 1 -type f -name '*.sql' \
-            2>/dev/null | wc -l | tr -d ' ')
+          expected_versions=$(find supabase/migrations -maxdepth 1 -type f -name '*.sql' \
+            -printf '%f\n' 2>/dev/null | sed -E 's/^([0-9]{14})_.*/\1/' | sort)
+          expected=$(printf '%s\n' "$expected_versions" | sed '/^$/d' | wc -l | tr -d ' ')
           if [ -z "$expected" ] || [ "$expected" = "0" ]; then
             echo "::warning::No .sql files found under supabase/migrations/ — skipping version-count check."
             expected=0
           fi
-          echo "Expecting at least ${expected} migration(s) to be applied."
+          latest_expected_version=$(printf '%s\n' "$expected_versions" | sed '/^$/d' | tail -n 1)
+          echo "Expecting ${expected} migration version(s) to be applied. Latest expected: ${latest_expected_version:-none}."
 
           # Tables the cross-tenant RLS sweep + seed script touch directly.
           # If any of these is missing after migrations, seeding will fail
@@ -497,6 +502,7 @@ jobs:
           tracking_ready=false
           version_ready=false
           tables_ready=false
+          rpc_ready=false
 
           for i in $(seq 1 "$MAX_ATTEMPTS"); do
             if [ "$tracking_ready" != "true" ]; then
