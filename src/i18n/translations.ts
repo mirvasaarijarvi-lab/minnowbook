@@ -1698,6 +1698,7 @@ type TranslationKeys = {
   "offers.linkedRowDate": string;
   "offers.linkedRowGuests": string;
   "offers.linkedRowPrice": string;
+  "offers.linkedRowOpen": string;
 
   // Tier limit errors (raised by backend triggers / RPCs)
   "tierError.STAFF_USER_LIMIT_REACHED": string;
@@ -3378,6 +3379,7 @@ const en: TranslationKeys = {
   "offers.linkedRowDate": "Date",
   "offers.linkedRowGuests": "Guests",
   "offers.linkedRowPrice": "Price",
+  "offers.linkedRowOpen": "Open this linked reservation",
 
   // Tier limit errors
   "tierError.STAFF_USER_LIMIT_REACHED": "Your plan allows up to {limit} staff users. Upgrade to add more team members.",
@@ -5054,6 +5056,7 @@ const fi: TranslationKeys = {
   "offers.linkedRowDate": "Päivämäärä",
   "offers.linkedRowGuests": "Vieraat",
   "offers.linkedRowPrice": "Hinta",
+  "offers.linkedRowOpen": "Avaa linkitetty varaus",
 
   // Tier-rajojen virheet
   "tierError.STAFF_USER_LIMIT_REACHED": "Tilauksesi sallii enintään {limit} käyttäjää. Päivitä lisätäksesi tiimiläisiä.",
@@ -6730,6 +6733,7 @@ const sv: TranslationKeys = {
   "offers.linkedRowDate": "Datum",
   "offers.linkedRowGuests": "Gäster",
   "offers.linkedRowPrice": "Pris",
+  "offers.linkedRowOpen": "Öppna länkad bokning",
 
   // Tier-gränsfel
   "tierError.STAFF_USER_LIMIT_REACHED": "Din plan tillåter upp till {limit} användare. Uppgradera för att lägga till fler teammedlemmar.",

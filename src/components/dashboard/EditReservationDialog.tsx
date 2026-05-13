@@ -69,6 +69,8 @@ interface EditReservationDialogProps {
   reservation: Reservation | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /** Open another reservation from the linked group (cross-booking jump). */
+  onSelectLinked?: (linked: { id: string; [key: string]: any }) => void;
 }
 
 const RESERVATION_TYPES = ["restaurant", "venue", "guesthouse", "hotel"] as const;
@@ -77,6 +79,7 @@ const EditReservationDialog = ({
   reservation,
   open,
   onOpenChange,
+  onSelectLinked,
 }: EditReservationDialogProps) => {
   const t = useT();
   const tDynamic = useTDynamic();
@@ -609,11 +612,31 @@ const EditReservationDialog = ({
                     const checkOutStr = lr.check_out_date
                       ? format(new Date(lr.check_out_date + "T00:00:00"), "PPP", { locale: dateFnsLocale })
                       : null;
+                    const clickable = !isCurrent && !!onSelectLinked;
                     return (
-                      <div key={lr.id} className={cn(
-                        "rounded px-3 py-2 text-sm space-y-1",
-                        isCurrent ? "bg-accent/10 border border-accent/30" : "bg-muted/50 border border-transparent",
-                      )}>
+                      <div
+                        key={lr.id}
+                        role={clickable ? "button" : undefined}
+                        tabIndex={clickable ? 0 : undefined}
+                        onClick={clickable ? () => onSelectLinked!(lr) : undefined}
+                        onKeyDown={
+                          clickable
+                            ? (e) => {
+                                if (e.key === "Enter" || e.key === " ") {
+                                  e.preventDefault();
+                                  onSelectLinked!(lr);
+                                }
+                              }
+                            : undefined
+                        }
+                        title={clickable ? t("offers.linkedRowOpen") : undefined}
+                        className={cn(
+                          "rounded px-3 py-2 text-sm space-y-1",
+                          isCurrent ? "bg-accent/10 border border-accent/30" : "bg-muted/50 border border-transparent",
+                          clickable &&
+                            "cursor-pointer hover:bg-muted hover:border-border focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1 transition-colors",
+                        )}
+                      >
                         <div className="flex items-center justify-between gap-2 flex-wrap">
                           <div className="flex items-center gap-1.5 flex-wrap">
                             <span className="font-medium">

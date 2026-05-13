@@ -22,6 +22,8 @@ interface Props {
   onEdit?: (reservation: any) => void;
   canEdit?: boolean;
   siteName?: string | null;
+  /** Open another reservation from the linked group (cross-booking jump). */
+  onSelectLinked?: (linked: { id: string; [key: string]: any }) => void;
 }
 
 const Field = ({ icon: Icon, label, children }: { icon: any; label: string; children: React.ReactNode }) => (
@@ -34,7 +36,7 @@ const Field = ({ icon: Icon, label, children }: { icon: any; label: string; chil
   </div>
 );
 
-const ReservationDetailDialog = ({ reservation, open, onOpenChange, onEdit, canEdit, siteName }: Props) => {
+const ReservationDetailDialog = ({ reservation, open, onOpenChange, onEdit, canEdit, siteName, onSelectLinked }: Props) => {
   const t = useT();
   const tDynamic = useTDynamic();
   const dateFnsLocale = useDateLocale();
@@ -182,7 +184,7 @@ const ReservationDetailDialog = ({ reservation, open, onOpenChange, onEdit, canE
             </>
           )}
 
-          <LinkedReservationsPanel reservation={r} headingAs="h3" />
+          <LinkedReservationsPanel reservation={r} headingAs="h3" onSelectLinked={onSelectLinked} />
 
           <div className="text-xs text-muted-foreground">
             {"Created"}: {r.created_at ? format(new Date(r.created_at), "PPp", { locale: dateFnsLocale }) : "—"}

@@ -17,6 +17,14 @@ interface Props {
   } | null;
   /** Heading variant: Label (edit dialog) or h3 (detail dialog). */
   headingAs?: "label" | "h3";
+  /**
+   * Optional callback fired when a sibling row is clicked. Used to jump
+   * from the currently-open reservation to a linked one (e.g. when a
+   * customer changes time on one leg of a cross-booking, staff can hop
+   * to the sibling and update it without closing/reopening dialogs).
+   * Current row is never invoked.
+   */
+  onSelectLinked?: (linked: { id: string; [key: string]: any }) => void;
 }
 
 /**
@@ -24,7 +32,7 @@ interface Props {
  * ReservationDetailDialog so both views render cross-bookings identically.
  * Pulls siblings via legacy offers.reservation_ids AND modern linked_group_id.
  */
-const LinkedReservationsPanel = ({ reservation, headingAs = "label" }: Props) => {
+const LinkedReservationsPanel = ({ reservation, headingAs = "label", onSelectLinked }: Props) => {
   const t = useT();
   const dateFnsLocale = useDateLocale();
   const { typeLabel } = useResourceTypeLabel();
@@ -123,14 +131,31 @@ const LinkedReservationsPanel = ({ reservation, headingAs = "label" }: Props) =>
           const checkOutStr = lr.check_out_date
             ? format(new Date(lr.check_out_date + "T00:00:00"), "PPP", { locale: dateFnsLocale })
             : null;
+          const clickable = !isCurrent && !!onSelectLinked;
           return (
             <div
               key={lr.id}
+              role={clickable ? "button" : undefined}
+              tabIndex={clickable ? 0 : undefined}
+              onClick={clickable ? () => onSelectLinked!(lr) : undefined}
+              onKeyDown={
+                clickable
+                  ? (e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        onSelectLinked!(lr);
+                      }
+                    }
+                  : undefined
+              }
+              title={clickable ? t("offers.linkedRowOpen") : undefined}
               className={cn(
                 "rounded px-3 py-2 text-sm space-y-1",
                 isCurrent
                   ? "bg-accent/10 border border-accent/30"
                   : "bg-muted/50 border border-transparent",
+                clickable &&
+                  "cursor-pointer hover:bg-muted hover:border-border focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1 transition-colors",
               )}
             >
               <div className="flex items-center justify-between gap-2 flex-wrap">
