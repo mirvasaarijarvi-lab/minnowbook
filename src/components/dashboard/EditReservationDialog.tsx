@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useDateLocale } from "@/hooks/useDateLocale";
+import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -80,6 +81,7 @@ const EditReservationDialog = ({
   const t = useT();
   const tDynamic = useTDynamic();
   const dateFnsLocale = useDateLocale();
+  const { typeLabel } = useResourceTypeLabel();
   const queryClient = useQueryClient();
   const { tenant, tenantId } = useTenant();
   const { isGated } = useTierGate();
@@ -139,7 +141,7 @@ const EditReservationDialog = ({
       if (!siblingIds.length) return [];
       const { data, error } = await supabase
         .from("reservations")
-        .select("id, guest_name, reservation_type, date, start_time, room_type, price_eur, status, is_used")
+        .select("id, guest_name, reservation_type, date, start_time, room_type, price_eur, status, is_used, guests_count, check_out_date")
         .in("id", siblingIds);
       if (error) throw error;
       return data ?? [];
@@ -155,7 +157,7 @@ const EditReservationDialog = ({
       if (!reservation?.linked_group_id) return [];
       const { data, error } = await supabase
         .from("reservations")
-        .select("id, guest_name, reservation_type, date, start_time, room_type, price_eur, status, is_used")
+        .select("id, guest_name, reservation_type, date, start_time, room_type, price_eur, status, is_used, guests_count, check_out_date")
         .eq("linked_group_id", reservation.linked_group_id)
         .neq("status", "cancelled");
       if (error) throw error;
@@ -558,28 +560,54 @@ const EditReservationDialog = ({
                   {linkedReservations.map((lr) => {
                     const isCurrent = lr.id === reservation?.id;
                     const time = lr.start_time ? lr.start_time.slice(0, 5) : null;
+                    const dateStr = lr.date
+                      ? format(new Date(lr.date + "T00:00:00"), "PPP", { locale: dateFnsLocale })
+                      : null;
+                    const checkOutStr = lr.check_out_date
+                      ? format(new Date(lr.check_out_date + "T00:00:00"), "PPP", { locale: dateFnsLocale })
+                      : null;
                     return (
                       <div key={lr.id} className={cn(
-                        "flex items-center justify-between gap-2 text-sm px-2 py-1.5 rounded",
-                        isCurrent ? "bg-accent/10 border border-accent/30" : "bg-muted/50",
+                        "rounded px-3 py-2 text-sm space-y-1",
+                        isCurrent ? "bg-accent/10 border border-accent/30" : "bg-muted/50 border border-transparent",
                       )}>
-                        <div className="flex items-center gap-2 min-w-0 flex-1">
-                          <Badge variant="outline" className="text-[10px] capitalize shrink-0">{lr.reservation_type}</Badge>
-                          {lr.room_type && <span className="text-xs text-muted-foreground truncate">{lr.room_type}</span>}
-                          {time && <span className="text-xs text-muted-foreground shrink-0">{time}</span>}
-                          {isCurrent && (
-                            <Badge className="text-[10px] bg-accent/20 text-accent-foreground border-accent/40 shrink-0">
-                              {t("offers.linkedGroupCurrent")}
-                            </Badge>
+                        <div className="flex items-center justify-between gap-2 flex-wrap">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="font-medium">
+                              {t("offers.linkedRowService")}: {typeLabel(lr.reservation_type)}
+                            </span>
+                            {lr.room_type && (
+                              <span className="text-muted-foreground">· {lr.room_type}</span>
+                            )}
+                            {isCurrent && (
+                              <Badge className="text-[10px] bg-accent/20 text-accent-foreground border-accent/40">
+                                {t("offers.linkedGroupCurrent")}
+                              </Badge>
+                            )}
+                            {lr.is_used && (
+                              <Badge variant="secondary" className="text-[10px]">{t("dashboard.used")}</Badge>
+                            )}
+                          </div>
+                          {lr.price_eur != null && (
+                            <span className="font-semibold tabular-nums">
+                              {t("offers.linkedRowPrice")}: {Number(lr.price_eur).toFixed(2)} €
+                            </span>
                           )}
-                          {lr.is_used && <Badge variant="secondary" className="text-[10px] shrink-0">{t("dashboard.used")}</Badge>}
-                          <span className="text-[10px] font-mono text-muted-foreground shrink-0">{lr.id.slice(0, 8)}</span>
                         </div>
-                        {lr.price_eur != null && (
-                          <span className="text-sm font-medium tabular-nums shrink-0">
-                            {Number(lr.price_eur).toFixed(2)} €
-                          </span>
-                        )}
+                        <div className="text-xs text-muted-foreground flex flex-wrap gap-x-3 gap-y-0.5">
+                          {dateStr && (
+                            <span>
+                              {t("offers.linkedRowDate")}: {dateStr}
+                              {time && ` ${t("email.at")} ${time}`}
+                              {checkOutStr && ` → ${checkOutStr}`}
+                            </span>
+                          )}
+                          {lr.guests_count != null && (
+                            <span>
+                              {t("offers.linkedRowGuests")}: {lr.guests_count}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     );
                   })}

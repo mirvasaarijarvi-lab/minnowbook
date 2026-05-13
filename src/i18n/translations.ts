@@ -1693,6 +1693,11 @@ type TranslationKeys = {
   "offers.crossBookingRemoveError": string;
   "offers.linkedGroupCurrent": string;
   "offers.linkedGroupTotal": string;
+  "offers.linkedBadge": string;
+  "offers.linkedRowService": string;
+  "offers.linkedRowDate": string;
+  "offers.linkedRowGuests": string;
+  "offers.linkedRowPrice": string;
 
   // Tier limit errors (raised by backend triggers / RPCs)
   "tierError.STAFF_USER_LIMIT_REACHED": string;
@@ -3368,6 +3373,11 @@ const en: TranslationKeys = {
   "offers.crossBookingRemoveError": "Error unlinking reservation",
   "offers.linkedGroupCurrent": "Current",
   "offers.linkedGroupTotal": "Total",
+  "offers.linkedBadge": "Cross-booking",
+  "offers.linkedRowService": "Service",
+  "offers.linkedRowDate": "Date",
+  "offers.linkedRowGuests": "Guests",
+  "offers.linkedRowPrice": "Price",
 
   // Tier limit errors
   "tierError.STAFF_USER_LIMIT_REACHED": "Your plan allows up to {limit} staff users. Upgrade to add more team members.",
@@ -5039,6 +5049,11 @@ const fi: TranslationKeys = {
   "offers.crossBookingRemoveError": "Virhe varauksen linkityksen poistamisessa",
   "offers.linkedGroupCurrent": "Nykyinen",
   "offers.linkedGroupTotal": "Yhteensä",
+  "offers.linkedBadge": "Ristivaraus",
+  "offers.linkedRowService": "Palvelu",
+  "offers.linkedRowDate": "Päivämäärä",
+  "offers.linkedRowGuests": "Vieraat",
+  "offers.linkedRowPrice": "Hinta",
 
   // Tier-rajojen virheet
   "tierError.STAFF_USER_LIMIT_REACHED": "Tilauksesi sallii enintään {limit} käyttäjää. Päivitä lisätäksesi tiimiläisiä.",
@@ -6710,6 +6725,11 @@ const sv: TranslationKeys = {
   "offers.crossBookingRemoveError": "Fel vid avlänkning av bokning",
   "offers.linkedGroupCurrent": "Aktuell",
   "offers.linkedGroupTotal": "Totalt",
+  "offers.linkedBadge": "Korsbokning",
+  "offers.linkedRowService": "Tjänst",
+  "offers.linkedRowDate": "Datum",
+  "offers.linkedRowGuests": "Gäster",
+  "offers.linkedRowPrice": "Pris",
 
   // Tier-gränsfel
   "tierError.STAFF_USER_LIMIT_REACHED": "Din plan tillåter upp till {limit} användare. Uppgradera för att lägga till fler teammedlemmar.",
