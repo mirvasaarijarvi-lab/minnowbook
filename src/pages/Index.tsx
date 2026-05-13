@@ -80,7 +80,7 @@ const Index = () => {
     <div className="min-h-screen bg-background flex flex-col">
       <SEOHead
         title="MimmoBook – Reservation Management for Hospitality"
-        description="Cloud-based reservation management for restaurants, venues, hotels and guesthouses. Multi-site support, branded booking pages, automated emails and real-time reporting."
+        description="Cloud-based reservations for restaurants, venues, hotels and guesthouses. Multi-site, branded booking pages and automated emails."
         path="/"
         jsonLd={[
           organizationSchema,
@@ -96,10 +96,11 @@ const Index = () => {
       />
       <MarketingHeader />
 
+      <main id="main-content">
       {/* Hero Section */}
       <section className="relative overflow-hidden py-16 sm:py-24 md:py-32">
         <div className="absolute inset-0">
-          <img src={heroBg} alt="" className="w-full h-full object-cover" aria-hidden="true" />
+          <img src={heroBg} alt="" className="w-full h-full object-cover" aria-hidden="true" fetchPriority="high" decoding="async" width="1920" height="1080" />
           <div className="absolute inset-0 bg-gradient-to-b from-primary/60 via-primary/30 to-primary/60" />
         </div>
         <div className="container mx-auto px-4 relative">
@@ -226,6 +227,7 @@ const Index = () => {
           </Link>
         </div>
       </section>
+      </main>
 
       <MarketingFooter />
       <SupportChatWidget />
