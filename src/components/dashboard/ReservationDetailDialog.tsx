@@ -36,7 +36,7 @@ const Field = ({ icon: Icon, label, children }: { icon: any; label: string; chil
   </div>
 );
 
-const ReservationDetailDialog = ({ reservation, open, onOpenChange, onEdit, canEdit, siteName }: Props) => {
+const ReservationDetailDialog = ({ reservation, open, onOpenChange, onEdit, canEdit, siteName, onSelectLinked }: Props) => {
   const t = useT();
   const tDynamic = useTDynamic();
   const dateFnsLocale = useDateLocale();
