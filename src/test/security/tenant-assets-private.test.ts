@@ -151,19 +151,16 @@ d("tenant-assets is private (regression)", () => {
 
       it("denies anon createSignedUrl (only tenant members may sign)", async () => {
         for (const path of PROBE_PATHS) {
-          const { data, error } = await anon.storage
-            .from(bucket)
-            .createSignedUrl(path, 60);
+          const { data, error } = await safeAnonCreateSignedUrl(anon, bucket, path, 60);
           // Either an explicit error, or a null URL — never a usable URL.
           if (!error) {
             expect(data?.signedUrl ?? null).toBeNull();
           } else {
-            // `fetch failed` is a transient network/CI error — not a
-            // security regression. The invariant we actually care about
-            // is "anon never receives a usable signedUrl", which is
-            // already satisfied when `error` is set (data is null).
+            // Transport-level "fetch failed" is normalized by
+            // safeAnonCreateSignedUrl into an explicit 403-shaped denial,
+            // so the assertion can stay strict on real RLS messaging.
             expect(error.message).toMatch(
-              /not found|denied|permission|policy|fetch failed|network|timeout/i,
+              /not found|denied|permission|policy|normalized/i,
             );
           }
         }
