@@ -10,7 +10,7 @@
 //
 // This test creates two legs (restaurant + venue) under one shared
 // linked_group_id and verifies all three contracts above.
-import "https://deno.land/std@0.224.0/dotenv/load.ts";
+import "../_shared/load-env.ts";
 import { assertEquals, assert } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import { makeReservationCleanup } from "../_shared/test-cleanup.ts";
 

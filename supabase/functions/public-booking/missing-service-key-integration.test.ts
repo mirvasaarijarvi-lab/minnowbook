@@ -26,7 +26,7 @@
 // `Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")` lookup returns
 // undefined, exactly mirroring the production misconfig scenario.
 // The original env value is restored in a `finally` block.
-import "https://deno.land/std@0.224.0/dotenv/load.ts";
+import "../_shared/load-env.ts";
 import {
   assert,
   assertEquals,
