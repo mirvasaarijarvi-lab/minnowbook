@@ -202,9 +202,18 @@ describe("ReservationList: cross-booking UI", () => {
     expect(linkedLabel).toBe("Cross-booking");
 
     // Both legs must show the badge — separate rows, but discoverable as
-    // a pair via the shared `linked_group_id`.
-    const badges = screen.getAllByText(linkedLabel);
-    expect(badges).toHaveLength(2);
+    // a pair via the shared `linked_group_id`. The badge text also includes
+    // a per-group short id suffix (e.g. "Cross-booking #AB12"), so match
+    // any element whose text starts with the localized label.
+    const badges = screen.getAllByText(
+      (_, node) => !!node?.textContent?.trim().startsWith(linkedLabel),
+      { selector: "[class*='Badge'], .inline-flex, span, div" },
+    );
+    // Filter to the actual <Badge> nodes (avoid ancestor matches inflating count).
+    const badgeNodes = badges.filter(
+      (el) => !badges.some((other) => other !== el && other.contains(el)),
+    );
+    expect(badgeNodes).toHaveLength(2);
 
     // And the unrelated solo reservation must not get a badge.
     const soloCard = screen.getByText("Bob Solo").closest("[class*='Card'], div");
