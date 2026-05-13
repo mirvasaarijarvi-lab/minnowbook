@@ -48,6 +48,37 @@ const FAKE_CODES = [
   "TEST-0002-CODE",
 ];
 
+/**
+ * Shared, module-level warmup. The first call to a Supabase Edge Function
+ * pays a cold-start cost (container boot + V8 isolate + module graph load)
+ * that can be several seconds. Subsequent calls also benefit from a warm
+ * TLS session and DNS cache on the test runner.
+ *
+ * We trigger a couple of sequential warm hits BEFORE any test in this file
+ * fires its parallel burst, so the burst test only measures steady-state
+ * latency rather than cold-start + burst combined. The promise is awaited
+ * by every test via `beforeAll`, so the cost is paid exactly once per
+ * worker regardless of test ordering.
+ */
+const warmupPromise: Promise<void> = (async () => {
+  // Two sequential calls: first absorbs cold-start, second confirms the
+  // function is hot and the connection is keep-alive ready.
+  for (let i = 0; i < 2; i++) {
+    try {
+      await fetch(FUNCTION_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          apikey: SUPABASE_PUBLISHABLE_KEY,
+        },
+        body: JSON.stringify({ code: "WARM-UP-PROBE" }),
+      }).then((r) => r.text().catch(() => null));
+    } catch {
+      // Warmup is best-effort; tests will still run and assert behavior.
+    }
+  }
+})();
+
 type Attempt = { status: number; body: unknown; error?: unknown };
 
 async function callRedeem(code: string, withAuth: boolean): Promise<Attempt> {
