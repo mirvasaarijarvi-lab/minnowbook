@@ -70,6 +70,30 @@ jobs:
       SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Detect migration changes
+        id: migrations
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            base="${{ github.event.pull_request.base.sha }}"
+            head="${{ github.event.pull_request.head.sha }}"
+            changed=$(git diff --name-only "$base" "$head" -- 'supabase/migrations/**' | wc -l | tr -d ' ')
+          elif [ "${{ github.event_name }}" = "push" ]; then
+            before="${{ github.event.before }}"
+            after="${{ github.sha }}"
+            if [ -z "$before" ] || [ "$before" = "0000000000000000000000000000000000000000" ]; then
+              changed=1
+            else
+              changed=$(git diff --name-only "$before" "$after" -- 'supabase/migrations/**' | wc -l | tr -d ' ')
+            fi
+          else
+            changed=1
+          fi
+          echo "changed=$changed" >> "$GITHUB_OUTPUT"
+          echo "Migration files changed in this event: $changed"
 
       - name: Check prerequisites
         id: check
@@ -78,7 +102,11 @@ jobs:
             echo "enabled=true" >> "$GITHUB_OUTPUT"
           else
             echo "enabled=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::Skipping Supabase advisors scan. Add SUPABASE_ACCESS_TOKEN and SUPABASE_PROJECT_REF repo secrets to enable."
+            if [ "${{ steps.migrations.outputs.changed }}" != "0" ]; then
+              echo "::error::Migration files changed but SUPABASE_ACCESS_TOKEN / SUPABASE_PROJECT_REF repo secrets are not configured. Cannot run mandatory security scan on migrations."
+              exit 1
+            fi
+            echo "::notice::Skipping Supabase advisors scan (no migration changes and credentials not configured)."
           fi
 
       - name: Fetch advisors and gate on ERRORs
@@ -88,7 +116,6 @@ jobs:
           api="https://api.supabase.com/v1/projects/${SUPABASE_PROJECT_REF}/advisors/security"
           resp=$(curl -sS -H "Authorization: Bearer ${SUPABASE_ACCESS_TOKEN}" "$api")
 
-          # Pretty-print a short summary
           echo "$resp" | jq '{
             errors:   ([.lints[]? | select(.level=="ERROR")] | length),
             warnings: ([.lints[]? | select(.level=="WARN")]  | length),
@@ -98,12 +125,15 @@ jobs:
           # WARN -> annotation only (per maintenance policy)
           echo "$resp" | jq -r '.lints[]? | select(.level=="WARN") | "::warning title=Supabase advisor (WARN)::\(.name) — \(.description)"'
 
-          # ERROR -> annotation + fail the job
+          # ERROR -> annotation + fail the job (any ERROR is a new ERROR; baseline is zero)
           err_count=$(echo "$resp" | jq '[.lints[]? | select(.level=="ERROR")] | length')
           echo "$resp" | jq -r '.lints[]? | select(.level=="ERROR") | "::error title=Supabase advisor (ERROR)::\(.name) — \(.description)"'
 
           if [ "$err_count" -gt 0 ]; then
             echo "❌ $err_count ERROR-level Supabase finding(s) detected. Fix before merging."
+            if [ "${{ steps.migrations.outputs.changed }}" != "0" ]; then
+              echo "::error::This PR modifies supabase/migrations/** and introduced or left unresolved ERROR-level findings. Merge blocked."
+            fi
             exit 1
           fi
           echo "✅ No ERROR-level Supabase findings."
