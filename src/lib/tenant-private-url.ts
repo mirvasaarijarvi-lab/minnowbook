@@ -15,6 +15,9 @@
  */
 import { supabase } from "@/integrations/supabase/client";
 import { assertSafeStorageObjectPath } from "@/lib/storage-path";
+import { classifySignedUrlFailure, SignedUrlError } from "@/lib/signed-url-error";
+
+export { SignedUrlError, isSignedUrlError, type SignedUrlErrorCode } from "@/lib/signed-url-error";
 
 /** 24 hours, in seconds. Matches the chosen TTL for shared private assets. */
 export const PRIVATE_SIGNED_URL_TTL_SECONDS = 24 * 60 * 60;
