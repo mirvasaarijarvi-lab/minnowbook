@@ -116,7 +116,6 @@ jobs:
           api="https://api.supabase.com/v1/projects/${SUPABASE_PROJECT_REF}/advisors/security"
           resp=$(curl -sS -H "Authorization: Bearer ${SUPABASE_ACCESS_TOKEN}" "$api")
 
-          # Pretty-print a short summary
           echo "$resp" | jq '{
             errors:   ([.lints[]? | select(.level=="ERROR")] | length),
             warnings: ([.lints[]? | select(.level=="WARN")]  | length),
@@ -126,12 +125,15 @@ jobs:
           # WARN -> annotation only (per maintenance policy)
           echo "$resp" | jq -r '.lints[]? | select(.level=="WARN") | "::warning title=Supabase advisor (WARN)::\(.name) — \(.description)"'
 
-          # ERROR -> annotation + fail the job
+          # ERROR -> annotation + fail the job (any ERROR is a new ERROR; baseline is zero)
           err_count=$(echo "$resp" | jq '[.lints[]? | select(.level=="ERROR")] | length')
           echo "$resp" | jq -r '.lints[]? | select(.level=="ERROR") | "::error title=Supabase advisor (ERROR)::\(.name) — \(.description)"'
 
           if [ "$err_count" -gt 0 ]; then
             echo "❌ $err_count ERROR-level Supabase finding(s) detected. Fix before merging."
+            if [ "${{ steps.migrations.outputs.changed }}" != "0" ]; then
+              echo "::error::This PR modifies supabase/migrations/** and introduced or left unresolved ERROR-level findings. Merge blocked."
+            fi
             exit 1
           fi
           echo "✅ No ERROR-level Supabase findings."
