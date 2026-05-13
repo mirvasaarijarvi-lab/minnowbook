@@ -159,9 +159,41 @@ async function persistIdempotentResponse(
 }
 
 export async function handleRedeemAccessCodeRequest(req: Request): Promise<Response> {
+  const startedAt = Date.now();
+  const requestId =
+    req.headers.get("x-request-id") ||
+    (globalThis.crypto?.randomUUID?.() ?? `${startedAt}-${Math.random().toString(36).slice(2, 10)}`);
   const corsHeaders = getCorsHeaders(req, { extraAllowHeaders: "idempotency-key" });
+
+  // Single source of truth for emitting the per-request telemetry line.
+  // Every return path goes through `respond()` so dashboards see exactly
+  // one log entry per request and bursts can be aggregated reliably.
+  let userIdHash: string | null = null;
+  let hadIdempotencyKey = false;
+  let replayed = false;
+
+  const respond = (
+    response: Response,
+    outcome: Outcome,
+    errorMessage?: string,
+  ): Response => {
+    logRequest({
+      requestId,
+      outcome,
+      status: response.status,
+      durationMs: Date.now() - startedAt,
+      userIdHash,
+      hadIdempotencyKey,
+      replayed,
+      errorMessage,
+    });
+    // Echo the request id so callers can correlate client + server logs.
+    response.headers.set("x-request-id", requestId);
+    return response;
+  };
+
   if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+    return respond(new Response(null, { headers: corsHeaders }), "preflight");
   }
 
   try {
@@ -169,7 +201,10 @@ export async function handleRedeemAccessCodeRequest(req: Request): Promise<Respo
     const MAX_BODY_SIZE = 50 * 1024;
     const contentLength = parseInt(req.headers.get("content-length") || "0", 10);
     if (contentLength > MAX_BODY_SIZE) {
-      return errorResponse(corsHeaders, 413, ERROR_CODES.REQUEST_TOO_LARGE, "Request too large");
+      return respond(
+        errorResponse(corsHeaders, 413, ERROR_CODES.REQUEST_TOO_LARGE, "Request too large"),
+        "request_too_large",
+      );
     }
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
@@ -180,7 +215,10 @@ export async function handleRedeemAccessCodeRequest(req: Request): Promise<Respo
     // Authenticate the calling user
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
-      return errorResponse(corsHeaders, 401, ERROR_CODES.NOT_AUTHENTICATED, "Not authenticated");
+      return respond(
+        errorResponse(corsHeaders, 401, ERROR_CODES.NOT_AUTHENTICATED, "Not authenticated"),
+        "not_authenticated",
+      );
     }
 
     const userClient = createClient(supabaseUrl, anonKey, {
@@ -189,10 +227,14 @@ export async function handleRedeemAccessCodeRequest(req: Request): Promise<Respo
     const token = authHeader.replace("Bearer ", "");
     const { data: claimsData, error: claimsError } = await userClient.auth.getClaims(token);
     if (claimsError || !claimsData?.claims) {
-      return errorResponse(corsHeaders, 401, ERROR_CODES.NOT_AUTHENTICATED, "Not authenticated");
+      return respond(
+        errorResponse(corsHeaders, 401, ERROR_CODES.NOT_AUTHENTICATED, "Not authenticated"),
+        "not_authenticated",
+      );
     }
 
     const userId = claimsData.claims.sub as string;
+    userIdHash = shortHash(userId);
 
     const body = await req.json();
     const code = (body.code ?? "").trim().toUpperCase();
@@ -206,17 +248,21 @@ export async function handleRedeemAccessCodeRequest(req: Request): Promise<Respo
 
     let idempotencyKey: string | null = null;
     if (rawKey !== null && rawKey !== undefined && rawKey !== "") {
+      hadIdempotencyKey = true;
       if (!isValidIdempotencyKey(rawKey)) {
-        return errorResponse(
-          corsHeaders,
-          400,
-          ERROR_CODES.INVALID_IDEMPOTENCY_KEY,
-          "idempotency_key must be 16-128 ASCII characters with no whitespace",
+        return respond(
+          errorResponse(
+            corsHeaders,
+            400,
+            ERROR_CODES.INVALID_IDEMPOTENCY_KEY,
+            "idempotency_key must be 16-128 ASCII characters with no whitespace",
+          ),
+          "invalid_idempotency_key",
         );
       }
       idempotencyKey = rawKey;
 
-      // Replay check — if we've seen this (user, key) before, return the
+      // Replay check, if we've seen this (user, key) before, return the
       // cached response verbatim so a second redemption is never recorded.
       const { data: cached } = await adminClient
         .from("redemption_idempotency")
@@ -227,11 +273,15 @@ export async function handleRedeemAccessCodeRequest(req: Request): Promise<Respo
         .maybeSingle();
 
       if (cached) {
-        return jsonResponse(
-          cached.response_status,
-          cached.response_body as Record<string, unknown>,
-          corsHeaders,
-          { [IDEMPOTENCY_REPLAY_HEADER]: "true" },
+        replayed = true;
+        return respond(
+          jsonResponse(
+            cached.response_status,
+            cached.response_body as Record<string, unknown>,
+            corsHeaders,
+            { [IDEMPOTENCY_REPLAY_HEADER]: "true" },
+          ),
+          "idempotent_replay",
         );
       }
     }
@@ -239,7 +289,7 @@ export async function handleRedeemAccessCodeRequest(req: Request): Promise<Respo
     // Helper that ALSO writes the response to the idempotency cache when
     // a key is present, so retries replay the same outcome. We only cache
     // deterministic outcomes (anything we explicitly produced here) and
-    // never the catch-block 500 — which could be a transient DB error
+    // never the catch-block 500, which could be a transient DB error
     // and we want the client to be free to retry without a poisoned cache.
     const finalize = async (
       status: number,
@@ -252,10 +302,13 @@ export async function handleRedeemAccessCodeRequest(req: Request): Promise<Respo
     };
 
     if (!code || code.length < 3 || code.length > 50) {
-      return await finalize(400, {
-        error: "Invalid access code format",
-        code: ERROR_CODES.INVALID_CODE_FORMAT,
-      });
+      return respond(
+        await finalize(400, {
+          error: "Invalid access code format",
+          code: ERROR_CODES.INVALID_CODE_FORMAT,
+        }),
+        "invalid_code_format",
+      );
     }
 
     // Get the user's tenant
@@ -266,21 +319,24 @@ export async function handleRedeemAccessCodeRequest(req: Request): Promise<Respo
       .maybeSingle();
 
     if (!tenantUser) {
-      return await finalize(400, {
-        error: "You must have a workspace before redeeming a code. Complete onboarding first.",
-        code: ERROR_CODES.NO_WORKSPACE,
-      });
+      return respond(
+        await finalize(400, {
+          error: "You must have a workspace before redeeming a code. Complete onboarding first.",
+          code: ERROR_CODES.NO_WORKSPACE,
+        }),
+        "no_workspace",
+      );
     }
 
     // Look up the access code by hash via SECURITY DEFINER RPC.
-    // Plaintext is never stored — only SHA-256 hash. Service role required.
+    // Plaintext is never stored, only SHA-256 hash. Service role required.
     const { data: lookupRows, error: codeError } = await adminClient
       .rpc("lookup_access_code_by_plaintext", { p_code: code });
 
     if (codeError) throw codeError;
     const accessCode = Array.isArray(lookupRows) ? lookupRows[0] : lookupRows;
 
-    // Generic "invalid or unavailable" payload — intentionally collapses
+    // Generic "invalid or unavailable" payload, intentionally collapses
     // several distinguishable conditions (not found, inactive, revoked,
     // expired, out of uses, already redeemed) into one error so attackers
     // cannot classify codes via the response.
@@ -288,24 +344,26 @@ export async function handleRedeemAccessCodeRequest(req: Request): Promise<Respo
       error: "This access code is invalid or no longer available",
       code: ERROR_CODES.INVALID_OR_UNAVAILABLE_CODE,
     };
+    const respondInvalid = async () =>
+      respond(await finalize(400, invalidPayload), "invalid_or_unavailable_code");
 
-    if (!accessCode) return await finalize(400, invalidPayload);
-    if (!accessCode.is_active) return await finalize(400, invalidPayload);
-    if (accessCode.is_revoked) return await finalize(400, invalidPayload);
+    if (!accessCode) return await respondInvalid();
+    if (!accessCode.is_active) return await respondInvalid();
+    if (accessCode.is_revoked) return await respondInvalid();
 
     // Check date validity
     const now = new Date();
     now.setHours(0, 0, 0, 0);
     if (accessCode.valid_from && new Date(accessCode.valid_from) > now) {
-      return await finalize(400, invalidPayload);
+      return await respondInvalid();
     }
     if (accessCode.valid_until && new Date(accessCode.valid_until) < now) {
-      return await finalize(400, invalidPayload);
+      return await respondInvalid();
     }
 
     // Check usage limits
     if (accessCode.max_uses !== null && accessCode.used_count >= accessCode.max_uses) {
-      return await finalize(400, invalidPayload);
+      return await respondInvalid();
     }
 
     // Check if this user already redeemed this code for their tenant
@@ -316,7 +374,7 @@ export async function handleRedeemAccessCodeRequest(req: Request): Promise<Respo
       .eq("tenant_id", tenantUser.tenant_id)
       .maybeSingle();
 
-    if (existing) return await finalize(400, invalidPayload);
+    if (existing) return await respondInvalid();
 
     // Calculate granted_until
     const grantedUntil = new Date();
@@ -362,17 +420,25 @@ export async function handleRedeemAccessCodeRequest(req: Request): Promise<Respo
       console.warn("used_count update may have raced:", countError.message);
     }
 
-    return await finalize(200, {
-      success: true,
-      tier: accessCode.tier,
-      granted_until: grantedUntilStr,
-      duration_days: accessCode.duration_days,
-    });
+    return respond(
+      await finalize(200, {
+        success: true,
+        tier: accessCode.tier,
+        granted_until: grantedUntilStr,
+        duration_days: accessCode.duration_days,
+      }),
+      "success",
+    );
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Internal error";
     console.error("redeem-access-code unexpected error:", message);
-    // Intentionally NOT cached — transient errors should be retryable.
-    return errorResponse(corsHeaders, 500, ERROR_CODES.INTERNAL_ERROR, "Internal error");
+    // Intentionally NOT cached, transient errors should be retryable.
+    return respond(
+      errorResponse(corsHeaders, 500, ERROR_CODES.INTERNAL_ERROR, "Internal error"),
+      "internal_error",
+      message,
+    );
   }
 }
 Deno.serve(handleRedeemAccessCodeRequest);
+
