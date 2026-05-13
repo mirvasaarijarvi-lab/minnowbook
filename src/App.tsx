@@ -46,12 +46,15 @@ const AnalyticsPageView = () => {
   const location = useLocation();
 
   useEffect(() => {
-    if (localStorage.getItem("cookie-consent") === "accepted") {
-      import("@/lib/gtm").then(({ gtm }) => {
+    // Always fire a virtual page_view on every route change. With
+    // Consent Mode v2 defaults set in index.html, GTM/GA4 will send
+    // cookieless pings before consent and full hits after acceptance.
+    import("@/lib/gtm").then(({ gtm }) => {
+      if (localStorage.getItem("cookie-consent") === "accepted") {
         gtm.updateConsent(true);
-        gtm.pageView("route_change");
-      });
-    }
+      }
+      gtm.pageView("route_change");
+    });
   }, [location.pathname, location.search]);
 
   return null;
