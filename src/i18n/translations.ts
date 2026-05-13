@@ -1736,7 +1736,7 @@ const en: TranslationKeys = {
   "common.status": "Status",
   "common.type": "Type",
   "common.price": "Price",
-  "common.guests": "guests",
+  "common.guests": "Guests",
   "common.date": "Date",
   "common.noResults": "No results found.",
   "common.selectAll": "Select all",
