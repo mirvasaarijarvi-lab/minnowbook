@@ -71,11 +71,13 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
   }, [searchQuery]);
   const [confirmDialog, setConfirmDialog] = useState<{ id: string; action: "confirmed" | "cancelled" } | null>(null);
   const [sendCancelEmail, setSendCancelEmail] = useState(true);
+  const [sendConfirmEmail, setSendConfirmEmail] = useState(true);
   useEffect(() => {
-    // Default the "send cancellation email" toggle back to ON each time the
-    // cancel dialog opens, so a previous "skip email" choice doesn't silently
-    // carry over to the next reservation.
+    // Default the "send email" toggles back to ON each time the dialog
+    // opens so a previous "skip email" choice doesn't silently carry over
+    // to the next reservation.
     if (confirmDialog?.action === "cancelled") setSendCancelEmail(true);
+    if (confirmDialog?.action === "confirmed") setSendConfirmEmail(true);
   }, [confirmDialog]);
   const [reminderDialog, setReminderDialog] = useState<string | null>(null);
   const [editingReservation, setEditingReservation] = useState<any | null>(null);
