@@ -524,6 +524,7 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
         </div>
       )}
 
+      {checkoutTodayFilter && (
         <div className="flex items-center gap-2">
           <Badge variant="secondary" className="gap-1.5 px-3 py-1 text-sm">
             <CalendarDays className="h-3.5 w-3.5" />
