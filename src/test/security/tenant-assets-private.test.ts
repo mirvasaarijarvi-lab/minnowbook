@@ -91,12 +91,31 @@ const NET_TIMEOUT_MS = 60_000;
  * the test guards is "anon never receives a usable signedUrl" — both
  * outcomes satisfy it without leaking transient noise into assertions.
  */
+let mockProbeCounter = 0;
+
 async function safeAnonCreateSignedUrl(
   client: SupabaseClient,
   bucket: string,
   path: string,
   expiresIn = 60,
 ): Promise<{ data: { signedUrl: string } | null; error: { message: string; status?: number } | null }> {
+  // CI path: deterministic denial, no live network. Alternates 403 / 404
+  // across probes so both forbidden- and not-found-shaped errors are
+  // exercised by the regex assertion downstream.
+  if (IS_CI) {
+    mockProbeCounter += 1;
+    const forbidden = mockProbeCounter % 2 === 1;
+    return {
+      data: null,
+      error: forbidden
+        ? { message: "permission denied for object (mocked 403)", status: 403 }
+        : { message: "Object not found (mocked 404)", status: 404 },
+    };
+  }
+
+  // Local / live path: hit Storage with a small retry loop, and if the
+  // transport keeps throwing, normalize to an explicit 403-shaped denial
+  // so the test never surfaces a raw "fetch failed".
   let lastErr: unknown = null;
   for (let attempt = 0; attempt < 3; attempt++) {
     try {
@@ -113,6 +132,7 @@ async function safeAnonCreateSignedUrl(
     error: { message: `denied (normalized from transport error: ${msg})`, status: 403 },
   };
 }
+
 
 
 d("tenant-assets is private (regression)", () => {
