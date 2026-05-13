@@ -2993,6 +2993,17 @@ export type Database = {
         Args: { p_limit?: number; p_tenant_id: string }
         Returns: Json
       }
+      audit_anon_access: {
+        Args: never
+        Returns: {
+          is_base_table: boolean
+          is_flagged: boolean
+          object_kind: string
+          object_name: string
+          object_schema: string
+          privilege: string
+        }[]
+      }
       cleanup_expired_redemption_idempotency: {
         Args: never
         Returns: undefined
