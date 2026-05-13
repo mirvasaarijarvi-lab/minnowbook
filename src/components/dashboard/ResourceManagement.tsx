@@ -55,7 +55,7 @@ const ResourceManagement = () => {
   const { selectedSiteId } = useSiteContext();
   const { applySiteFilter, siteIds } = useUserSites();
   const { can } = usePermissions();
-  const { canCreateResourceCheck } = useTierGate();
+  const { canCreateResourceCheck, effectiveTier, isSystemAdmin } = useTierGate();
   const canManage = can(PERM_RESOURCES_MANAGE);
   const { isPrivileged, getApprovalStatus } = useAutoApproval();
   const queryClient = useQueryClient();
