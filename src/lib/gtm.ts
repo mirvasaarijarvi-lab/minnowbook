@@ -15,6 +15,11 @@ declare global {
 // double-count every page_view. Instead we push virtual events into the
 // dataLayer and let GTM fire the GA4 tags.
 
+const GA4_MEASUREMENT_ID = "G-C7CJERJ7BR";
+const GA4_DEBUG_SCRIPT_ID = "mimmobook-ga4-debug-bridge";
+
+let ga4DebugConfigured = false;
+
 function ensureTrackingGlobals() {
   window.dataLayer = window.dataLayer || [];
   if (typeof window.gtag !== "function") {
@@ -30,6 +35,71 @@ function ensureTrackingGlobals() {
 function push(event: string, params?: Record<string, unknown>) {
   ensureTrackingGlobals();
   window.dataLayer.push({ event, ...params });
+}
+
+function hasAnalyticsConsent() {
+  try {
+    return localStorage.getItem("cookie-consent") === "accepted";
+  } catch {
+    return false;
+  }
+}
+
+function isGa4DebugBridgeEnabled() {
+  const params = new URLSearchParams(window.location.search);
+  const hostname = window.location.hostname;
+  const isTagAssistantSession =
+    params.has("gtm_debug") ||
+    params.has("gtm_auth") ||
+    params.has("gtm_preview") ||
+    document.cookie.includes("TAG_ASSISTANT");
+
+  return (
+    isTagAssistantSession ||
+    hostname.endsWith(".lovableproject.com") ||
+    hostname.includes("-preview--") ||
+    hostname === "localhost" ||
+    hostname === "127.0.0.1"
+  );
+}
+
+function loadGa4DebugScript() {
+  if (document.getElementById(GA4_DEBUG_SCRIPT_ID)) return;
+
+  const script = document.createElement("script");
+  script.id = GA4_DEBUG_SCRIPT_ID;
+  script.async = true;
+  script.src = `https://www.googletagmanager.com/gtag/js?id=${GA4_MEASUREMENT_ID}`;
+  document.head.appendChild(script);
+}
+
+function sendGa4DebugPageView(params: Record<string, unknown>) {
+  if (!isGa4DebugBridgeEnabled() || !hasAnalyticsConsent()) return;
+
+  ensureTrackingGlobals();
+  loadGa4DebugScript();
+
+  if (!ga4DebugConfigured) {
+    window.gtag("js", new Date());
+    window.gtag("config", GA4_MEASUREMENT_ID, {
+      send_page_view: false,
+      debug_mode: true,
+    });
+    ga4DebugConfigured = true;
+  }
+
+  window.gtag("event", "page_view", {
+    ...params,
+    debug_mode: true,
+    transport_type: "beacon",
+  });
+
+  window.gtag("event", "mimmobook_debug_probe", {
+    source: params.source,
+    page_location: params.page_location,
+    debug_mode: true,
+    transport_type: "beacon",
+  });
 }
 
 export const gtm = {
@@ -56,12 +126,16 @@ export const gtm = {
     // listening for the `page_view` event and forwarding to the configured
     // GA4 property. Do NOT call gtag('config', ...) here — that loads
     // gtag.js a second time and double-counts hits.
-    push("page_view", {
+    const pageParams = {
       page_title: document.title,
       page_location: window.location.href,
       page_path: `${window.location.pathname}${window.location.search}`,
       source,
-    });
+      ...(isGa4DebugBridgeEnabled() ? { debug_mode: true } : {}),
+    };
+
+    push("page_view", pageParams);
+    sendGa4DebugPageView(pageParams);
     push("mimmobook_alive", { source });
   },
 
