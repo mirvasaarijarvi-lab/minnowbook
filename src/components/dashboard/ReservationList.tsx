@@ -66,6 +66,13 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
     return () => clearTimeout(handle);
   }, [searchQuery]);
   const [confirmDialog, setConfirmDialog] = useState<{ id: string; action: "confirmed" | "cancelled" } | null>(null);
+  const [sendCancelEmail, setSendCancelEmail] = useState(true);
+  useEffect(() => {
+    // Default the "send cancellation email" toggle back to ON each time the
+    // cancel dialog opens, so a previous "skip email" choice doesn't silently
+    // carry over to the next reservation.
+    if (confirmDialog?.action === "cancelled") setSendCancelEmail(true);
+  }, [confirmDialog]);
   const [reminderDialog, setReminderDialog] = useState<string | null>(null);
   const [editingReservation, setEditingReservation] = useState<any | null>(null);
   const [detailReservation, setDetailReservation] = useState<any | null>(null);
@@ -161,7 +168,7 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
   });
 
   const updateStatus = useMutation({
-    mutationFn: async ({ id, status }: { id: string; status: string }) => {
+    mutationFn: async ({ id, status, suppressEmail }: { id: string; status: string; suppressEmail?: boolean }) => {
       const reservation = reservations?.find((r) => r.id === id);
       const { error } = await supabase
         .from("reservations")
@@ -170,13 +177,21 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
         .eq("tenant_id", tenantId!);
       if (error) throw error;
 
-      // Send confirmation or cancellation email (fire-and-forget, don't block status change)
+      // Send confirmation or cancellation email (fire-and-forget, don't block status change).
+      // `suppressEmail` lets staff cancel without notifying the guest, e.g. for
+      // duplicate bookings, internal test rows, or guests who already cancelled
+      // out of band by phone.
       if (reservation && !reservation.no_email_confirm && status === "confirmed") {
         supabase.functions.invoke("send-reminder", {
           body: { reservationId: id, emailType: "confirmation" },
         }).catch((err) => console.error("Failed to send confirmation email:", err));
       }
-      if (reservation && !reservation.no_email_cancel && status === "cancelled") {
+      if (
+        reservation &&
+        !reservation.no_email_cancel &&
+        !suppressEmail &&
+        status === "cancelled"
+      ) {
         supabase.functions.invoke("send-reminder", {
           body: { reservationId: id, emailType: "cancellation" },
         }).catch((err) => console.error("Failed to send cancellation email:", err));
@@ -366,7 +381,11 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
 
   const handleAction = () => {
     if (!confirmDialog) return;
-    updateStatus.mutate({ id: confirmDialog.id, status: confirmDialog.action });
+    updateStatus.mutate({
+      id: confirmDialog.id,
+      status: confirmDialog.action,
+      suppressEmail: confirmDialog.action === "cancelled" ? !sendCancelEmail : undefined,
+    });
   };
 
   const sendReminder = useMutation({
@@ -793,6 +812,27 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
                   logo_url: settings?.logo_url ?? "",
                 }}
               />
+            );
+          })()}
+          {confirmDialog?.action === "cancelled" && (() => {
+            const r = reservations?.find((res) => res.id === confirmDialog.id);
+            // If the reservation was already flagged "no cancellation email"
+            // (e.g. internal booking), there's nothing to toggle, hide the row.
+            if (!r || r.no_email_cancel) return null;
+            return (
+              <label className="flex items-start gap-2 rounded-md border border-border bg-muted/30 px-3 py-2 text-sm cursor-pointer select-none">
+                <Checkbox
+                  checked={sendCancelEmail}
+                  onCheckedChange={(checked) => setSendCancelEmail(!!checked)}
+                  className="mt-0.5"
+                />
+                <span>
+                  <span className="font-medium text-foreground">Send cancellation email to guest</span>
+                  <span className="block text-xs text-muted-foreground">
+                    Uncheck to cancel silently without notifying {r.guest_name || "the guest"}.
+                  </span>
+                </span>
+              </label>
             );
           })()}
           <DialogFooter>
