@@ -375,7 +375,11 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
 
   const handleAction = () => {
     if (!confirmDialog) return;
-    updateStatus.mutate({ id: confirmDialog.id, status: confirmDialog.action });
+    updateStatus.mutate({
+      id: confirmDialog.id,
+      status: confirmDialog.action,
+      suppressEmail: confirmDialog.action === "cancelled" ? !sendCancelEmail : undefined,
+    });
   };
 
   const sendReminder = useMutation({
