@@ -133,19 +133,44 @@ const EditReservationDialog = ({
 
   // Fetch sibling reservations from the same offer
   const siblingIds = (linkedOffer?.reservation_ids as string[] | null)?.filter((id) => id !== reservation?.id) ?? [];
-  const { data: linkedReservations = [] } = useQuery({
+  const { data: offerSiblings = [] } = useQuery({
     queryKey: ["linked-reservations", siblingIds],
     queryFn: async () => {
       if (!siblingIds.length) return [];
       const { data, error } = await supabase
         .from("reservations")
-        .select("id, guest_name, reservation_type, date, status, is_used")
+        .select("id, guest_name, reservation_type, date, start_time, room_type, price_eur, status, is_used")
         .in("id", siblingIds);
       if (error) throw error;
       return data ?? [];
     },
     enabled: siblingIds.length > 0,
   });
+
+  // Fetch siblings sharing the same linked_group_id (manual cross-bookings).
+  // Includes the current reservation so the panel can flag it as "Current".
+  const { data: groupMembers = [] } = useQuery({
+    queryKey: ["linked-group-reservations", reservation?.linked_group_id],
+    queryFn: async () => {
+      if (!reservation?.linked_group_id) return [];
+      const { data, error } = await supabase
+        .from("reservations")
+        .select("id, guest_name, reservation_type, date, start_time, room_type, price_eur, status, is_used")
+        .eq("linked_group_id", reservation.linked_group_id)
+        .neq("status", "cancelled");
+      if (error) throw error;
+      return data ?? [];
+    },
+    enabled: !!reservation?.linked_group_id,
+  });
+
+  // Merge offer siblings + group members + current; dedupe by id.
+  const linkedReservations = (() => {
+    const map = new Map<string, any>();
+    for (const r of offerSiblings) map.set(r.id, r);
+    for (const r of groupMembers) map.set(r.id, r);
+    return Array.from(map.values());
+  })();
 
   // Fetch tenant settings for email preview branding
   const { data: settings } = useQuery({
