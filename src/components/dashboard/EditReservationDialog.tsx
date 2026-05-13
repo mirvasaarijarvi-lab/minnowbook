@@ -261,6 +261,9 @@ const EditReservationDialog = ({
     mutationFn: async () => {
       if (!reservation) throw new Error("No reservation");
 
+      const willConfirm =
+        markAsConfirmed && reservation.status !== "confirmed";
+
       const updatePayload: Record<string, unknown> = {
         guest_name: form.guest_name.trim(),
         guest_email: form.guest_email.trim(),
@@ -283,6 +286,7 @@ const EditReservationDialog = ({
         discount_value: form.discount_value ? parseFloat(form.discount_value) : null,
         discount_reason: form.discount_reason.trim() || null,
         updated_at: new Date().toISOString(),
+        ...(willConfirm ? { status: "confirmed" } : {}),
       };
 
       // Defensive guard: a future refactor that adds one of these keys to
