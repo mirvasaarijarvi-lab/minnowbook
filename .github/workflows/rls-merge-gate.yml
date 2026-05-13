@@ -1,0 +1,85 @@
+name: RLS Merge Gate
+
+# Hard gate: any failure in RLS leak or permission-denied expectation tests
+# blocks the PR from merging. Mark this job as a required status check on
+# the protected branch in the repo settings to enforce the gate.
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  rls-gate:
+    name: RLS leak & permission-denied gate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    env:
+      VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+      VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      RLS_TEST_TENANT_A_ID: ${{ secrets.RLS_TEST_TENANT_A_ID }}
+      RLS_TEST_TENANT_B_ID: ${{ secrets.RLS_TEST_TENANT_B_ID }}
+      RLS_TEST_THIRD_TENANT_ID: ${{ secrets.RLS_TEST_THIRD_TENANT_ID }}
+      RLS_TEST_TENANT_A_EMAIL: ${{ secrets.RLS_TEST_TENANT_A_EMAIL }}
+      RLS_TEST_TENANT_A_PASSWORD: ${{ secrets.RLS_TEST_TENANT_A_PASSWORD }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+
+      - name: Cache Bun dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.bun/install/cache
+            node_modules
+          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock', 'bun.lockb', 'package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      # Run the focused suite of RLS leak and permission-denied expectation
+      # tests. Failure here = a real or potential cross-tenant leak, an
+      # unexpectedly-passing anon read, or a regressed "permission denied"
+      # contract. Do NOT add `continue-on-error` to this step.
+      - name: Run RLS leak & permission-denied tests
+        run: |
+          bunx vitest run \
+            --config vitest.security.config.ts \
+            --reporter=verbose \
+            src/test/security/cross-tenant-rls.test.ts \
+            src/test/security/cross-tenant-storage.test.ts \
+            src/test/security/cross-tenant-log-isolation.test.ts \
+            src/test/security/guest-reviews-and-tenants-rls.test.ts \
+            src/test/security/tenant-scoped-anon-vs-auth.test.ts \
+            src/test/security/pagination-negative-rls.test.ts \
+            src/test/security/tenant-table-manifest.test.ts \
+            src/test/security/tenant-assets-private.test.ts \
+            src/test/security/anon-access-audit.test.ts \
+            src/test/security/has-permission-tenant-scope.test.ts \
+            src/test/security/privilege-escalation.test.ts \
+            src/test/security/duplicate-tenant-membership.test.ts
+
+      # Explicit fail-closed marker. If any prior step fails the job fails
+      # and this never runs; if all pass we record an explicit success line
+      # so reviewers can see the gate actually executed (and didn't just
+      # skip every test silently because secrets were missing).
+      - name: Gate passed
+        if: success()
+        run: echo "RLS leak & permission-denied gate passed."
