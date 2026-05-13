@@ -558,6 +558,10 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
       status: "pending",
     };
 
+    if (linked_group_id) {
+      insertData.linked_group_id = linked_group_id;
+    }
+
     if (discount_type && discount_value) {
       insertData.discount_type = discount_type;
       insertData.discount_value = discount_value;
