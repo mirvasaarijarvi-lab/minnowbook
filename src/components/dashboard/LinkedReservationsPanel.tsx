@@ -17,6 +17,14 @@ interface Props {
   } | null;
   /** Heading variant: Label (edit dialog) or h3 (detail dialog). */
   headingAs?: "label" | "h3";
+  /**
+   * Optional callback fired when a sibling row is clicked. Used to jump
+   * from the currently-open reservation to a linked one (e.g. when a
+   * customer changes time on one leg of a cross-booking, staff can hop
+   * to the sibling and update it without closing/reopening dialogs).
+   * Current row is never invoked.
+   */
+  onSelectLinked?: (linked: { id: string; [key: string]: any }) => void;
 }
 
 /**
