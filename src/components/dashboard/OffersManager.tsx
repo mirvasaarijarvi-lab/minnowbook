@@ -71,6 +71,11 @@ const OffersManager = () => {
 
   const handleConfirm = async (offer: Offer) => {
     try {
+      // Stamp every reservation created from this offer with a shared
+      // linked_group_id so the edit dialog can show them as one bundle even
+      // if the offer row is later archived.
+      const linkedGroupId = crypto.randomUUID();
+
       // Create main reservation
       const { data: mainRes, error: mainErr } = await supabase
         .from("reservations")
@@ -90,6 +95,7 @@ const OffersManager = () => {
           special_requests: offer.special_requests || null,
           staff_notes: "Offer → Reservation",
           language: offer.language || "en",
+          linked_group_id: linkedGroupId,
         } as any)
         .select()
         .single();
@@ -121,6 +127,7 @@ const OffersManager = () => {
             special_requests: lr.special_requests ? `Cross-reservation – via offer\n${lr.special_requests}` : "Cross-reservation – via offer",
             staff_notes: "Cross-reservation – offer",
             language: offer.language || "en",
+            linked_group_id: linkedGroupId,
           } as any)
           .select()
           .single();

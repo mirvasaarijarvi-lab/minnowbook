@@ -1691,6 +1691,8 @@ type TranslationKeys = {
   "offers.crossBookingAddError": string;
   "offers.crossBookingRemoved": string;
   "offers.crossBookingRemoveError": string;
+  "offers.linkedGroupCurrent": string;
+  "offers.linkedGroupTotal": string;
 
   // Tier limit errors (raised by backend triggers / RPCs)
   "tierError.STAFF_USER_LIMIT_REACHED": string;
@@ -3364,6 +3366,8 @@ const en: TranslationKeys = {
   "offers.crossBookingAddError": "Error linking reservation",
   "offers.crossBookingRemoved": "Reservation unlinked",
   "offers.crossBookingRemoveError": "Error unlinking reservation",
+  "offers.linkedGroupCurrent": "Current",
+  "offers.linkedGroupTotal": "Total",
 
   // Tier limit errors
   "tierError.STAFF_USER_LIMIT_REACHED": "Your plan allows up to {limit} staff users. Upgrade to add more team members.",
@@ -5033,6 +5037,8 @@ const fi: TranslationKeys = {
   "offers.crossBookingAddError": "Virhe varauksen linkittämisessä",
   "offers.crossBookingRemoved": "Varauksen linkitys poistettu",
   "offers.crossBookingRemoveError": "Virhe varauksen linkityksen poistamisessa",
+  "offers.linkedGroupCurrent": "Nykyinen",
+  "offers.linkedGroupTotal": "Yhteensä",
 
   // Tier-rajojen virheet
   "tierError.STAFF_USER_LIMIT_REACHED": "Tilauksesi sallii enintään {limit} käyttäjää. Päivitä lisätäksesi tiimiläisiä.",
@@ -6702,6 +6708,8 @@ const sv: TranslationKeys = {
   "offers.crossBookingAddError": "Fel vid länkning av bokning",
   "offers.crossBookingRemoved": "Bokning avlänkad",
   "offers.crossBookingRemoveError": "Fel vid avlänkning av bokning",
+  "offers.linkedGroupCurrent": "Aktuell",
+  "offers.linkedGroupTotal": "Totalt",
 
   // Tier-gränsfel
   "tierError.STAFF_USER_LIMIT_REACHED": "Din plan tillåter upp till {limit} användare. Uppgradera för att lägga till fler teammedlemmar.",

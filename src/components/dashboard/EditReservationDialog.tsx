@@ -61,6 +61,7 @@ interface Reservation {
   discount_type?: string | null;
   discount_value?: number | null;
   discount_reason?: string | null;
+  linked_group_id?: string | null;
 }
 
 interface EditReservationDialogProps {
@@ -132,19 +133,44 @@ const EditReservationDialog = ({
 
   // Fetch sibling reservations from the same offer
   const siblingIds = (linkedOffer?.reservation_ids as string[] | null)?.filter((id) => id !== reservation?.id) ?? [];
-  const { data: linkedReservations = [] } = useQuery({
+  const { data: offerSiblings = [] } = useQuery({
     queryKey: ["linked-reservations", siblingIds],
     queryFn: async () => {
       if (!siblingIds.length) return [];
       const { data, error } = await supabase
         .from("reservations")
-        .select("id, guest_name, reservation_type, date, status, is_used")
+        .select("id, guest_name, reservation_type, date, start_time, room_type, price_eur, status, is_used")
         .in("id", siblingIds);
       if (error) throw error;
       return data ?? [];
     },
     enabled: siblingIds.length > 0,
   });
+
+  // Fetch siblings sharing the same linked_group_id (manual cross-bookings).
+  // Includes the current reservation so the panel can flag it as "Current".
+  const { data: groupMembers = [] } = useQuery({
+    queryKey: ["linked-group-reservations", reservation?.linked_group_id],
+    queryFn: async () => {
+      if (!reservation?.linked_group_id) return [];
+      const { data, error } = await supabase
+        .from("reservations")
+        .select("id, guest_name, reservation_type, date, start_time, room_type, price_eur, status, is_used")
+        .eq("linked_group_id", reservation.linked_group_id)
+        .neq("status", "cancelled");
+      if (error) throw error;
+      return data ?? [];
+    },
+    enabled: !!reservation?.linked_group_id,
+  });
+
+  // Merge offer siblings + group members + current; dedupe by id.
+  const linkedReservations = (() => {
+    const map = new Map<string, any>();
+    for (const r of offerSiblings) map.set(r.id, r);
+    for (const r of groupMembers) map.set(r.id, r);
+    return Array.from(map.values());
+  })();
 
   // Fetch tenant settings for email preview branding
   const { data: settings } = useQuery({
@@ -513,28 +539,61 @@ const EditReservationDialog = ({
               <Textarea id="edit-staff-notes" rows={2} value={form.staff_notes} onChange={(e) => updateField("staff_notes", e.target.value)} maxLength={1000} />
             </div>
 
-            {/* Cross-reservation linking */}
-            {canCrossReserve && linkedOffer && linkedReservations.length > 0 && (
+            {/* Cross-reservation / linked group panel.
+                Shows all reservations sharing the same offer or linked_group_id
+                so staff see the full bundle (with per-row price + total) when
+                editing any one of them. */}
+            {canCrossReserve && linkedReservations.length > 0 && (
               <div className="space-y-2 rounded-lg border border-border p-3">
                 <Label className="font-medium flex items-center gap-1.5">
                   <Link2 className="h-3.5 w-3.5 text-accent" />
-                  {t("offers.linkedReservations")}
+                  {t("offers.linkedReservations")} ({linkedReservations.length})
                 </Label>
-                <p className="text-xs text-muted-foreground">
-                  {t("offers.crossBookingTitle")} – {linkedOffer.guest_name} ({linkedOffer.event_date})
-                </p>
+                {linkedOffer && (
+                  <p className="text-xs text-muted-foreground">
+                    {t("offers.crossBookingTitle")} – {linkedOffer.guest_name} ({linkedOffer.event_date})
+                  </p>
+                )}
                 <div className="space-y-1">
-                  {linkedReservations.map((lr) => (
-                    <div key={lr.id} className="flex items-center justify-between text-sm px-2 py-1.5 rounded bg-muted/50">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <span className="font-medium truncate">{lr.guest_name}</span>
-                        <Badge variant="outline" className="text-[10px]">{lr.reservation_type}</Badge>
-                        <span className="text-xs text-muted-foreground">{lr.date}</span>
-                        {lr.is_used && <Badge variant="secondary" className="text-[10px]">{t("dashboard.used")}</Badge>}
+                  {linkedReservations.map((lr) => {
+                    const isCurrent = lr.id === reservation?.id;
+                    const time = lr.start_time ? lr.start_time.slice(0, 5) : null;
+                    return (
+                      <div key={lr.id} className={cn(
+                        "flex items-center justify-between gap-2 text-sm px-2 py-1.5 rounded",
+                        isCurrent ? "bg-accent/10 border border-accent/30" : "bg-muted/50",
+                      )}>
+                        <div className="flex items-center gap-2 min-w-0 flex-1">
+                          <Badge variant="outline" className="text-[10px] capitalize shrink-0">{lr.reservation_type}</Badge>
+                          {lr.room_type && <span className="text-xs text-muted-foreground truncate">{lr.room_type}</span>}
+                          {time && <span className="text-xs text-muted-foreground shrink-0">{time}</span>}
+                          {isCurrent && (
+                            <Badge className="text-[10px] bg-accent/20 text-accent-foreground border-accent/40 shrink-0">
+                              {t("offers.linkedGroupCurrent")}
+                            </Badge>
+                          )}
+                          {lr.is_used && <Badge variant="secondary" className="text-[10px] shrink-0">{t("dashboard.used")}</Badge>}
+                          <span className="text-[10px] font-mono text-muted-foreground shrink-0">{lr.id.slice(0, 8)}</span>
+                        </div>
+                        {lr.price_eur != null && (
+                          <span className="text-sm font-medium tabular-nums shrink-0">
+                            {Number(lr.price_eur).toFixed(2)} €
+                          </span>
+                        )}
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
+                {linkedReservations.some((lr) => lr.price_eur != null) && (
+                  <div className="flex items-center justify-between pt-1.5 mt-1 border-t border-border text-sm font-semibold">
+                    <span>{t("offers.linkedGroupTotal")}</span>
+                    <span className="tabular-nums">
+                      {linkedReservations
+                        .reduce((sum, lr) => sum + (Number(lr.price_eur) || 0), 0)
+                        .toFixed(2)} €
+                    </span>
+                  </div>
+                )}
               </div>
             )}
           </TabsContent>
