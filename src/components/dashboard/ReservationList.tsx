@@ -480,13 +480,12 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
           >
             {t("dashboard.todayFilter")}
           </Button>
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <Select value={statusFilter} onValueChange={setStatusFilter} disabled={viewTab === "cancelled"}>
             <SelectTrigger className="w-full sm:w-[140px]"><SelectValue placeholder={t("common.status")} /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{t("dashboard.allStatuses")}</SelectItem>
               <SelectItem value="pending">{t("dashboard.pending")}</SelectItem>
               <SelectItem value="confirmed">{t("dashboard.confirmed")}</SelectItem>
-              <SelectItem value="cancelled">{t("dashboard.cancelled")}</SelectItem>
             </SelectContent>
           </Select>
           <Select value={typeFilter} onValueChange={setTypeFilter}>
