@@ -116,17 +116,72 @@ async function safeAnonCreateSignedUrl(
   // Local / live path: hit Storage with a small retry loop, and if the
   // transport keeps throwing, normalize to an explicit 403-shaped denial
   // so the test never surfaces a raw "fetch failed".
+  //
+  // On every failure (transport error OR Storage returning a non-2xx),
+  // we log the request URL, HTTP status, and response body so CI logs
+  // give us something actionable instead of a bare "fetch failed".
+  const requestUrl = `${SUPABASE_URL}/storage/v1/object/sign/${bucket}/${path}`;
   let lastErr: unknown = null;
   for (let attempt = 0; attempt < 3; attempt++) {
     try {
       const res = await client.storage.from(bucket).createSignedUrl(path, expiresIn);
+      if (res.error) {
+        // SDK-shaped error: try to surface the underlying HTTP status &
+        // body by re-issuing the same request directly. This is best-
+        // effort diagnostics and never alters the returned result.
+        let httpStatus: number | string = "unknown";
+        let httpBody = "";
+        try {
+          const probe = await fetch(requestUrl, {
+            method: "POST",
+            headers: {
+              apikey: SUPABASE_ANON_KEY!,
+              Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ expiresIn }),
+          });
+          httpStatus = probe.status;
+          httpBody = (await probe.text()).slice(0, 500);
+        } catch (probeErr) {
+          httpBody = `probe failed: ${probeErr instanceof Error ? probeErr.message : String(probeErr)}`;
+        }
+        // eslint-disable-next-line no-console
+        console.warn(
+          `[tenant-assets-private] createSignedUrl returned error`,
+          {
+            bucket,
+            path,
+            attempt,
+            requestUrl,
+            sdkError: res.error.message,
+            httpStatus,
+            httpBody,
+          },
+        );
+      }
       return res as any;
     } catch (e) {
       lastErr = e;
+      // eslint-disable-next-line no-console
+      console.warn(
+        `[tenant-assets-private] createSignedUrl threw on attempt ${attempt}`,
+        {
+          bucket,
+          path,
+          requestUrl,
+          error: e instanceof Error ? `${e.name}: ${e.message}` : String(e),
+        },
+      );
       await new Promise((r) => setTimeout(r, 250 * (attempt + 1)));
     }
   }
   const msg = lastErr instanceof Error ? lastErr.message : String(lastErr);
+  // eslint-disable-next-line no-console
+  console.error(
+    `[tenant-assets-private] createSignedUrl exhausted retries, normalizing to 403`,
+    { bucket, path, requestUrl, lastError: msg },
+  );
   return {
     data: null,
     error: { message: `denied (normalized from transport error: ${msg})`, status: 403 },
