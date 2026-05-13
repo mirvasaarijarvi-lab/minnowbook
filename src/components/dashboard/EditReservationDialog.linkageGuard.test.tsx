@@ -136,6 +136,8 @@ const renderDialog = () => {
 beforeEach(() => {
   updateCalls.length = 0;
   groupIdAfterUpdate = SHARED_GROUP_ID;
+  toastSuccess.mockClear();
+  toastError.mockClear();
   vi.clearAllMocks();
 });
 afterEach(() => cleanup());
@@ -144,11 +146,11 @@ describe("EditReservationDialog: cross-booking linkage guard", () => {
   it("updates only the current row and never touches linked_group_id", async () => {
     renderDialog();
 
-    // Form is hydrated from the prop; clicking Save is enough.
     const saveBtn = await screen.findByRole("button", { name: /save/i });
     await userEvent.click(saveBtn);
 
-    await waitFor(() => expect(updateCalls.length).toBeGreaterThan(0));
+    await waitFor(() => expect(toastSuccess).toHaveBeenCalled());
+    expect(updateCalls.length).toBe(1);
     const call = updateCalls[0];
 
     // The payload must NOT carry id, tenant_id, or linked_group_id; those
@@ -164,6 +166,21 @@ describe("EditReservationDialog: cross-booking linkage guard", () => {
     expect(eqMap.tenant_id).toBe(RESERVATION.tenant_id);
     expect(eqMap).not.toHaveProperty("linked_group_id");
   });
+
+  it("surfaces an error and skips the success toast when the linkage check fails", async () => {
+    // Simulate a concurrent writer wiping the linkage between our update
+    // and the verification read. The mutation must throw, so the success
+    // toast never fires and the error toast does.
+    groupIdAfterUpdate = null;
+
+    renderDialog();
+    const saveBtn = await screen.findByRole("button", { name: /save/i });
+    await userEvent.click(saveBtn);
+
+    await waitFor(() => expect(toastError).toHaveBeenCalled());
+    expect(toastSuccess).not.toHaveBeenCalled();
+  });
+});
 
   it("throws when the post-update verification finds linked_group_id changed", async () => {
     // Simulate a concurrent writer wiping the linkage between our update
