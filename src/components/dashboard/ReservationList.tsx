@@ -396,7 +396,12 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
     updateStatus.mutate({
       id: confirmDialog.id,
       status: confirmDialog.action,
-      suppressEmail: confirmDialog.action === "cancelled" ? !sendCancelEmail : undefined,
+      suppressEmail:
+        confirmDialog.action === "cancelled"
+          ? !sendCancelEmail
+          : confirmDialog.action === "confirmed"
+          ? !sendConfirmEmail
+          : undefined,
     });
   };
 
