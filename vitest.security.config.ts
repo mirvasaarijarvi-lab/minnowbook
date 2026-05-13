@@ -34,6 +34,14 @@ export default defineConfig({
     environment: "jsdom",
     globals: true,
     setupFiles: ["./src/test/setup.ts"],
+    // Security tests routinely hit live Edge Functions, the Supabase
+    // REST gateway, and auth endpoints. A single cold-start or transient
+    // network blip can easily blow past Vitest's default 5s timeout, so
+    // raise the default for this runner instead of sprinkling per-test
+    // `{ timeout: ... }` overrides across the suite. Individual tests
+    // can still tighten the budget when they assert on latency.
+    testTimeout: 60_000,
+    hookTimeout: 60_000,
     include: [
       // Primary security regression suite.
       "src/test/security/**/*.{test,spec}.{ts,tsx}",
