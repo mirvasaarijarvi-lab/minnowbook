@@ -6708,6 +6708,8 @@ const sv: TranslationKeys = {
   "offers.crossBookingAddError": "Fel vid länkning av bokning",
   "offers.crossBookingRemoved": "Bokning avlänkad",
   "offers.crossBookingRemoveError": "Fel vid avlänkning av bokning",
+  "offers.linkedGroupCurrent": "Aktuell",
+  "offers.linkedGroupTotal": "Totalt",
 
   // Tier-gränsfel
   "tierError.STAFF_USER_LIMIT_REACHED": "Din plan tillåter upp till {limit} användare. Uppgradera för att lägga till fler teammedlemmar.",
