@@ -10,25 +10,21 @@ declare global {
   }
 }
 
-const GA_MEASUREMENT_ID = "G-C7CJERJ7BR";
+// GA4 is loaded and configured by the "MimmoBook" Google Tag inside the
+// GTM container (GTM-P75VPD5G). We do NOT load gtag.js here — that would
+// double-count every page_view. Instead we push virtual events into the
+// dataLayer and let GTM fire the GA4 tags.
 
 function ensureTrackingGlobals() {
   window.dataLayer = window.dataLayer || [];
   if (typeof window.gtag !== "function") {
-    window.gtag = (...args: unknown[]) => {
-      window.dataLayer.push(args);
+    // Standard Google snippet: gtag() forwards its arguments object into
+    // the dataLayer so Consent Mode signals are recognized by GTM/GA4.
+    window.gtag = function gtag() {
+      // eslint-disable-next-line prefer-rest-params
+      window.dataLayer.push(arguments);
     };
   }
-}
-
-function ensureGtagScript() {
-  const src = `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`;
-  if (document.querySelector(`script[src="${src}"]`)) return;
-
-  const script = document.createElement("script");
-  script.async = true;
-  script.src = src;
-  document.head.appendChild(script);
 }
 
 function push(event: string, params?: Record<string, unknown>) {
@@ -56,15 +52,16 @@ export const gtm = {
   },
 
   pageView: (source: "stored_consent" | "banner_accept" | "route_change" = "route_change") => {
-    ensureTrackingGlobals();
-    ensureGtagScript();
-
-    window.gtag("config", GA_MEASUREMENT_ID, {
+    // SPA virtual page_view. The GTM container has a GA4 Event tag
+    // listening for the `page_view` event and forwarding to the configured
+    // GA4 property. Do NOT call gtag('config', ...) here — that loads
+    // gtag.js a second time and double-counts hits.
+    push("page_view", {
       page_title: document.title,
       page_location: window.location.href,
       page_path: `${window.location.pathname}${window.location.search}`,
+      source,
     });
-
     push("mimmobook_alive", { source });
   },
 
