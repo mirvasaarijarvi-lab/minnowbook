@@ -73,7 +73,7 @@ async function fetchPublicObject(bucket: string, path: string): Promise<Response
 // when 4 sequential probes per bucket race cold connections in CI.
 const NET_TIMEOUT_MS = 60_000;
 
-describe("tenant-assets is private (regression)", () => {
+d("tenant-assets is private (regression)", () => {
   for (const bucket of PRIVATE_BUCKETS) {
     describe(`bucket: ${bucket}`, () => {
       it("rejects requests to the public-object endpoint", async () => {
@@ -142,7 +142,7 @@ describe("tenant-assets is private (regression)", () => {
   }
 });
 
-describe("tenant-branding stays publicly readable (positive control)", () => {
+d("tenant-branding stays publicly readable (positive control)", () => {
   it("public-object endpoint is reachable (200 or 400/404 for missing keys, never 401/403)", async () => {
     // We don't know real branding paths; what we DO know is the bucket
     // itself is reachable. A missing key returns 400 with "Object not found";
