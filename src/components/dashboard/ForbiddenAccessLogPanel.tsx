@@ -144,12 +144,12 @@ const ForbiddenAccessLogPanel = () => {
     queryKey: ["forbidden-access-tenant-options"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("tenants")
+        .from("tenants_public" as any)
         .select("id, name, slug")
         .order("name", { ascending: true })
         .limit(500);
       if (error) throw error;
-      return data ?? [];
+      return ((data as any[]) ?? []) as { id: string; name: string; slug: string }[];
     },
     enabled: isSystemAdmin,
     staleTime: 5 * 60_000,

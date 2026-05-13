@@ -45,8 +45,8 @@ const SuperadminLoginHistory = () => {
   const { data: tenantMap } = useQuery({
     queryKey: ["superadmin-tenant-names"],
     queryFn: async () => {
-      const { data } = await supabase.from("tenants").select("id, name");
-      return new Map((data ?? []).map((t) => [t.id, t.name]));
+      const { data } = await supabase.from("tenants_public" as any).select("id, name");
+      return new Map(((data as any[]) ?? []).map((t) => [t.id as string, t.name as string]));
     },
   });
 
