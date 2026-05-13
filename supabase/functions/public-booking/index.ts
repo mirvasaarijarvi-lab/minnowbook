@@ -782,7 +782,19 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
     }
 
     return new Response(
-      JSON.stringify({ success: true, warning, capacity: { current_load, capacity_total, requested: requestedGuests } }),
+      // `current_load` reported back to the caller is the POST-booking load
+      // (pre-existing load + the just-inserted reservation's guest count) so
+      // consumer-facing surfaces — and the cross-booking E2E — see the new
+      // reservation reflected in capacity immediately, without a re-query.
+      JSON.stringify({
+        success: true,
+        warning,
+        capacity: {
+          current_load: current_load + requestedGuests,
+          capacity_total,
+          requested: requestedGuests,
+        },
+      }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (error: any) {
