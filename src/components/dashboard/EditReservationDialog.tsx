@@ -368,6 +368,114 @@ const EditReservationDialog = ({
 
           {/* ── Details Tab ── */}
           <TabsContent value="details" className="space-y-4 pt-2">
+            {/* Cross-reservation / linked group panel.
+                Surfaced at the top of the edit dialog so staff can see, jump
+                to, and modify any sibling leg of a cross-booking without
+                hunting for it at the bottom of the form. */}
+            {canCrossReserve && linkedReservations.length > 0 && (
+              <div className="space-y-2 rounded-lg border border-accent/30 bg-accent/5 p-3">
+                <Label className="font-medium flex items-center gap-1.5">
+                  <Link2 className="h-3.5 w-3.5 text-accent" />
+                  {t("offers.linkedReservations")} ({linkedReservations.length})
+                </Label>
+                {linkedOffer && (
+                  <p className="text-xs text-muted-foreground">
+                    {t("offers.crossBookingTitle")}, {linkedOffer.guest_name} ({linkedOffer.event_date})
+                  </p>
+                )}
+                <div className="space-y-1">
+                  {linkedReservations.map((lr) => {
+                    const isCurrent = lr.id === reservation?.id;
+                    const time = lr.start_time ? lr.start_time.slice(0, 5) : null;
+                    const dateStr = lr.date
+                      ? format(new Date(lr.date + "T00:00:00"), "PPP", { locale: dateFnsLocale })
+                      : null;
+                    const checkOutStr = lr.check_out_date
+                      ? format(new Date(lr.check_out_date + "T00:00:00"), "PPP", { locale: dateFnsLocale })
+                      : null;
+                    const clickable = !isCurrent && !!onSelectLinked;
+                    return (
+                      <div
+                        key={lr.id}
+                        role={clickable ? "button" : undefined}
+                        tabIndex={clickable ? 0 : undefined}
+                        onClick={clickable ? () => onSelectLinked!(lr) : undefined}
+                        onKeyDown={
+                          clickable
+                            ? (e) => {
+                                if (e.key === "Enter" || e.key === " ") {
+                                  e.preventDefault();
+                                  onSelectLinked!(lr);
+                                }
+                              }
+                            : undefined
+                        }
+                        title={clickable ? t("offers.linkedRowOpen") : undefined}
+                        className={cn(
+                          "rounded px-3 py-2 text-sm space-y-1",
+                          isCurrent ? "bg-accent/20 border border-accent/50" : "bg-background border border-border",
+                          clickable &&
+                            "cursor-pointer hover:bg-muted hover:border-accent focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1 transition-colors",
+                        )}
+                      >
+                        <div className="flex items-center justify-between gap-2 flex-wrap">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="font-medium">
+                              {t("offers.linkedRowService")}: {typeLabel(lr.reservation_type)}
+                            </span>
+                            {lr.room_type && (
+                              <span className="text-muted-foreground">· {lr.room_type}</span>
+                            )}
+                            {isCurrent ? (
+                              <Badge className="text-[10px] bg-accent/30 text-accent-foreground border-accent/50">
+                                {t("offers.linkedGroupCurrent")}
+                              </Badge>
+                            ) : (
+                              <Badge variant="outline" className="text-[10px]">
+                                {t("offers.linkedRowOpen")}
+                              </Badge>
+                            )}
+                            {lr.is_used && (
+                              <Badge variant="secondary" className="text-[10px]">{t("dashboard.used")}</Badge>
+                            )}
+                          </div>
+                          {lr.price_eur != null && (
+                            <span className="font-semibold tabular-nums">
+                              {t("offers.linkedRowPrice")}: {Number(lr.price_eur).toFixed(2)} €
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-xs text-muted-foreground flex flex-wrap gap-x-3 gap-y-0.5">
+                          {dateStr && (
+                            <span>
+                              {t("offers.linkedRowDate")}: {dateStr}
+                              {time && ` ${t("email.at")} ${time}`}
+                              {checkOutStr && ` to ${checkOutStr}`}
+                            </span>
+                          )}
+                          {lr.guests_count != null && (
+                            <span>
+                              {t("offers.linkedRowGuests")}: {lr.guests_count}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                {linkedReservations.some((lr) => lr.price_eur != null) && (
+                  <div className="flex items-center justify-between pt-1.5 mt-1 border-t border-border text-sm font-semibold">
+                    <span>{t("offers.linkedGroupTotal")}</span>
+                    <span className="tabular-nums">
+                      {linkedReservations
+                        .reduce((sum, lr) => sum + (Number(lr.price_eur) || 0), 0)
+                        .toFixed(2)} €
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Reservation type & resource */}
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="space-y-1.5">
