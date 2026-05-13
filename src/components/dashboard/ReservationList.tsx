@@ -521,6 +521,15 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
                     <div className="flex flex-wrap items-center gap-1.5 mb-1">
                       <span className="font-semibold text-foreground">{r.guest_name}</span>
                       <Badge variant="outline" className="text-xs capitalize">{typeLabel(r.reservation_type)}</Badge>
+                      {(r as any).linked_group_id && (
+                        <Badge
+                          className="text-xs gap-1 bg-accent/15 text-accent-foreground border-accent/30"
+                          title={t("offers.linkedReservations")}
+                        >
+                          <Link2 className="h-3 w-3" />
+                          {t("offers.linkedBadge")}
+                        </Badge>
+                      )}
                         <Badge className={`text-xs ${statusColors[r.status ?? "pending"] ?? ""}`}>{tDynamic(`dashboard.${r.status ?? "pending"}`)}</Badge>
                         {showSiteLabel && r.site_id && siteMap[r.site_id] && (
                           <Badge variant="outline" className="text-xs font-normal gap-1">
