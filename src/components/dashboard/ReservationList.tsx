@@ -655,7 +655,7 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
                     ) : null}
                     <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-1.5 mb-1">
-                      <span className="font-semibold text-foreground">{r.guest_name}</span>
+                      <span className="font-semibold text-foreground break-words min-w-0">{r.guest_name}</span>
                       <Badge variant="outline" className="text-xs capitalize">{typeLabel(r.reservation_type)}</Badge>
                       {groupColor && (
                         <Badge
