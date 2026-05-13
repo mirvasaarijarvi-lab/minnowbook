@@ -54,8 +54,35 @@ const setAttemptState = (count: number, lockedUntil: number) => {
 
 const Login = () => {
   const navigate = useNavigate();
-  const { signOut } = useAuth();
+  const { signOut, user, loading: authLoading } = useAuth();
   const [loading, setLoading] = useState(false);
+
+  // If a session is already restored (e.g. after refresh or reopening the
+  // browser), send the user straight to the dashboard instead of showing
+  // the login form. If they have a verified MFA factor but the current
+  // session is still aal1, prompt for the TOTP code first.
+  useEffect(() => {
+    if (authLoading || !user) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data: factorsData } = await supabase.auth.mfa.listFactors();
+        const verifiedFactor = factorsData?.totp?.find((f: any) => f.status === "verified");
+        if (verifiedFactor) {
+          const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+          if (aal && aal.currentLevel !== aal.nextLevel) {
+            if (!cancelled) setMfaFactorId(verifiedFactor.id);
+            return;
+          }
+        }
+        if (!cancelled) navigate("/dashboard", { replace: true });
+      } catch {
+        if (!cancelled) navigate("/dashboard", { replace: true });
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [authLoading, user, navigate]);
+
   const [oauthLoading, setOauthLoading] = useState<string | null>(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
