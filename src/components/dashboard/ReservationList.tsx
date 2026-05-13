@@ -814,6 +814,21 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
         reservation={editingReservation}
         open={!!editingReservation}
         onOpenChange={(open) => !open && setEditingReservation(null)}
+        onSelectLinked={async (lr) => {
+          // Hop to a sibling reservation in the same cross-booking group.
+          // Fetch the full row (panel only carries display-subset columns)
+          // and swap it into the edit dialog without an intermediate close.
+          const { data, error } = await supabase
+            .from("reservations")
+            .select("*")
+            .eq("id", lr.id)
+            .maybeSingle();
+          if (error || !data) {
+            toast.error(t("common.error"));
+            return;
+          }
+          setEditingReservation(data as any);
+        }}
       />
 
       <ReservationDetailDialog
@@ -823,6 +838,21 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
         onEdit={(r) => setEditingReservation(r)}
         canEdit={canEdit}
         siteName={detailReservation?.site_id ? siteMap[detailReservation.site_id] : null}
+        onSelectLinked={async (lr) => {
+          // Jump from the read-only detail of one cross-booking leg to
+          // another. We close the detail dialog and open the new leg's
+          // detail so staff can review before editing.
+          const { data, error } = await supabase
+            .from("reservations")
+            .select("*")
+            .eq("id", lr.id)
+            .maybeSingle();
+          if (error || !data) {
+            toast.error(t("common.error"));
+            return;
+          }
+          setDetailReservation(data as any);
+        }}
       />
 
       {/* New reservation dialog */}
