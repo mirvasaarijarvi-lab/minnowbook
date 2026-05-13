@@ -1698,6 +1698,7 @@ type TranslationKeys = {
   "offers.linkedRowDate": string;
   "offers.linkedRowGuests": string;
   "offers.linkedRowPrice": string;
+  "offers.linkedRowOpen": string;
 
   // Tier limit errors (raised by backend triggers / RPCs)
   "tierError.STAFF_USER_LIMIT_REACHED": string;
