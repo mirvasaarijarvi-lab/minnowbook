@@ -328,6 +328,16 @@ const EditReservationDialog = ({
           );
         }
       }
+
+      // If we just transitioned this reservation to confirmed, optionally
+      // send the confirmation email (fire-and-forget, mirrors ReservationList).
+      if (willConfirm && sendConfirmEmail && !reservation.no_email_confirm) {
+        supabase.functions
+          .invoke("send-reminder", {
+            body: { reservationId: reservation.id, emailType: "confirmation" },
+          })
+          .catch((err) => console.error("Failed to send confirmation email:", err));
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["reservations"] });
