@@ -582,15 +582,22 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
               <CardContent className="p-4">
                 <div className="flex items-start justify-between gap-2 sm:gap-4">
                   <div className="flex items-start gap-3">
-                    {canEdit && (
-                    <Checkbox
-                      checked={(r as any).is_checked_in ?? false}
-                      className="mt-1"
-                      onCheckedChange={(checked) => {
-                        toggleCheckIn.mutate({ id: r.id, checked: !!checked });
-                      }}
-                    />
-                    )}
+                    {bulkMode && isSystemAdmin ? (
+                      <Checkbox
+                        checked={selectedIds.has(r.id)}
+                        className="mt-1"
+                        aria-label="Select reservation for deletion"
+                        onCheckedChange={(checked) => toggleSelected(r.id, !!checked)}
+                      />
+                    ) : canEdit ? (
+                      <Checkbox
+                        checked={(r as any).is_checked_in ?? false}
+                        className="mt-1"
+                        onCheckedChange={(checked) => {
+                          toggleCheckIn.mutate({ id: r.id, checked: !!checked });
+                        }}
+                      />
+                    ) : null}
                     <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-1.5 mb-1">
                       <span className="font-semibold text-foreground">{r.guest_name}</span>
