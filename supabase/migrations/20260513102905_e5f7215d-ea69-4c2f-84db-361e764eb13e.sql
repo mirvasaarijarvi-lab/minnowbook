@@ -1,0 +1,1 @@
+GRANT EXECUTE ON FUNCTION public.list_tenant_scoped_tables() TO anon, authenticated;
