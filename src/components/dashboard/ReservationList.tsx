@@ -17,7 +17,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { CalendarDays, CalendarIcon, User, Mail, Phone, MoreVertical, CheckCircle2, XCircle, Pencil, Receipt, PackageCheck, Coffee, Plus, Building2, Tag, Bell, MailCheck, MailX, Search, Link2 } from "lucide-react";
+import { CalendarDays, CalendarIcon, User, Mail, Phone, MoreVertical, CheckCircle2, XCircle, Pencil, Receipt, PackageCheck, Coffee, Plus, Building2, Tag, Bell, MailCheck, MailX, Search, Link2, Trash2, ShieldAlert } from "lucide-react";
+import { useIsSystemAdmin } from "@/hooks/useIsSystemAdmin";
 import EditReservationDialog from "./EditReservationDialog";
 import ReservationDetailDialog from "./ReservationDetailDialog";
 import ManualReservationDialog from "./ManualReservationDialog";
