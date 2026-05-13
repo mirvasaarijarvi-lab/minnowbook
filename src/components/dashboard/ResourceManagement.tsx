@@ -809,7 +809,7 @@ const ResourceManagement = () => {
                   <TableHead>{t("common.name")}</TableHead>
                   <TableHead>{t("common.type")}</TableHead>
                   {showSiteColumn && <TableHead>Site</TableHead>}
-                  <TableHead>{t("common.description")}</TableHead>
+                  <TableHead className="hidden xl:table-cell">{t("common.description")}</TableHead>
                   <TableHead className="text-center">{t("dashboard.capacity")}</TableHead>
                   <TableHead className="text-right">{t("common.price")}</TableHead>
                   <TableHead>{t("resourceHours.title")}</TableHead>
