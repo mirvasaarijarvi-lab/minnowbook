@@ -807,7 +807,7 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
 
       {/* Confirmation dialog */}
       <Dialog open={!!confirmDialog} onOpenChange={(open) => !open && setConfirmDialog(null)}>
-        <DialogContent className={confirmDialog?.action === "cancelled" ? "sm:max-w-2xl max-h-[90vh] overflow-y-auto" : ""}>
+        <DialogContent className={confirmDialog?.action === "cancelled" || confirmDialog?.action === "confirmed" ? "sm:max-w-2xl max-h-[90vh] overflow-y-auto" : ""}>
           <DialogHeader>
             <DialogTitle>
               {confirmDialog?.action === "confirmed" ? t("dashboard.confirmReservation") : t("dashboard.cancelReservation")}
