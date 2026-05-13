@@ -1,15 +1,6 @@
 {
   "$schema": "./flaky-tests.schema.json",
   "_doc": "Quarantine manifest for known-flaky tests. See scripts/ci/check-quarantine.mjs for the validation rules. Each entry MUST have an issue link and an `expires` date within 30 days of `added`. Manifest is empty by default; never add an entry without first opening a tracking issue.",
-  "vitest": [
-    {
-      "pattern": "code-redemption-rate-limit\\.test\\.ts.*burst of 30 parallel calls",
-      "reason": "Burst of 30 parallel Edge Function calls intermittently exceeds the per-test timeout in CI even after raising it to 60s. Network latency to the Supabase Edge runtime is the dominant factor; logic-level assertions (zero leaks, zero 5xx, stable error codes) are stable when the test does complete.",
-      "owner": "platform-security",
-      "added": "2026-05-13",
-      "expires": "2026-06-12",
-      "issue": "https://github.com/mimmobook/mimmobook/issues/flaky-redeem-access-code-burst"
-    }
-  ],
+  "vitest": [],
   "playwright": []
 }
