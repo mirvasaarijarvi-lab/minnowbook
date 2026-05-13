@@ -160,7 +160,7 @@ describe("redeem-access-code: brute-force & replay resilience", () => {
     expect(data.session).toBeNull();
   });
 
-  it("20 parallel attempts with the same fake code: zero successes, all known error codes", { timeout: 60000 }, async () => {
+  it("20 parallel attempts with the same fake code: zero successes, all known error codes", async () => {
     const N = 20;
     const results = await Promise.all(
       Array.from({ length: N }, () => callRedeem(FAKE_CODES[0], false)),
@@ -183,7 +183,7 @@ describe("redeem-access-code: brute-force & replay resilience", () => {
     }
   });
 
-  it("repeated serial attempts return the same generic error code (no validity leak)", { timeout: 60000 }, async () => {
+  it("repeated serial attempts return the same generic error code (no validity leak)", async () => {
     const ITER = 6;
     const codes: string[] = [];
     const messages: string[] = [];
@@ -204,7 +204,7 @@ describe("redeem-access-code: brute-force & replay resilience", () => {
     expect(AUTH_REJECTION_CODES.has(codes[0]), `expected auth-rejection code, got: ${codes[0]}`).toBe(true);
   });
 
-  it("varied fake codes do NOT produce distinguishable error codes vs. malformed input", { timeout: 60000 }, async () => {
+  it("varied fake codes do NOT produce distinguishable error codes vs. malformed input", async () => {
     // Probe matrix: shapes that should all surface as an auth-rejection
     // code (since no auth is supplied) — never a code-specific error
     // that would let an attacker classify the input.
@@ -244,7 +244,7 @@ describe("redeem-access-code: brute-force & replay resilience", () => {
     expect(AUTH_REJECTION_CODES.has(only), `expected auth-rejection code, got: ${only}`).toBe(true);
   });
 
-  it("burst of 30 parallel calls across many distinct fake codes: zero leaks, zero 5xx, stable codes", { timeout: 60000 }, async () => {
+  it("burst of 30 parallel calls across many distinct fake codes: zero leaks, zero 5xx, stable codes", async () => {
     const codes = Array.from(
       { length: 30 },
       (_, i) => `BURST-${i.toString().padStart(4, "0")}-XYZW`,
