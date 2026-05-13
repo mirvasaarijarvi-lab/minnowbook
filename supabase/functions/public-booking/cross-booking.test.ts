@@ -229,3 +229,92 @@ Deno.test("public-booking: rejects malformed linked_group_id", async () => {
     `expected validation error mentioning linked_group_id, got: ${JSON.stringify(json)}`,
   );
 });
+
+// Regression: capacity.current_load returned by public-booking MUST reflect
+// the POST-booking load (pre-existing load + just-inserted guests). Cross-
+// booking flows rely on this so leg N+1 sees leg N's guests immediately
+// without a re-query, otherwise capacity drifts and over-booking is possible.
+Deno.test({
+  name: "public-booking: capacity.current_load reflects post-booking load (cross-booking regression)",
+  ignore: SERVICE_KEY.length === 0,
+  sanitizeOps: true,
+  sanitizeResources: true,
+  sanitizeExit: true,
+  fn: async () => {
+    const stamp = Date.now();
+    const guestEmail = `caploadr+${stamp}@mimmobook.test`;
+    const guestName = `CapLoad Regress ${stamp}`;
+    const date = isoFutureDate(35);
+
+    const { cleanup, assertEmpty } = makeReservationCleanup({
+      adminFetch,
+      tenantId: TEST_TENANT_ID,
+      guestEmail,
+      hasServiceKey: true,
+    });
+
+    try {
+      // Leg 1: restaurant, 2 guests.
+      const leg1 = await callFn({
+        tenant_id: TEST_TENANT_ID,
+        guest_name: guestName,
+        guest_email: guestEmail,
+        reservation_type: "restaurant",
+        date,
+        start_time: "18:00",
+        guests_count: 2,
+      });
+      assertEquals(
+        leg1.res.status,
+        200,
+        `leg1 status ${leg1.res.status}: ${JSON.stringify(leg1.json)}`,
+      );
+      const cap1 = leg1.json?.capacity;
+      assert(cap1, `leg1 must return capacity; got ${JSON.stringify(leg1.json)}`);
+      assertEquals(cap1.requested, 2, "leg1 requested must echo guests_count");
+      // POST-booking load must be at least the just-inserted guest count.
+      assert(
+        typeof cap1.current_load === "number" && cap1.current_load >= 2,
+        `leg1 current_load must include just-inserted 2 guests; got ${JSON.stringify(cap1)}`,
+      );
+      const baseline = cap1.current_load; // pre-existing + 2
+
+      // Leg 2: same resource type + date, 3 guests. The function should
+      // see leg1's guests already counted, so leg2.current_load ===
+      // leg1.current_load + 3.
+      const leg2 = await callFn({
+        tenant_id: TEST_TENANT_ID,
+        guest_name: guestName,
+        guest_email: guestEmail,
+        reservation_type: "restaurant",
+        date,
+        start_time: "20:00",
+        guests_count: 3,
+      });
+      assertEquals(
+        leg2.res.status,
+        200,
+        `leg2 status ${leg2.res.status}: ${JSON.stringify(leg2.json)}`,
+      );
+      const cap2 = leg2.json?.capacity;
+      assert(cap2, `leg2 must return capacity; got ${JSON.stringify(leg2.json)}`);
+      assertEquals(cap2.requested, 3);
+      assertEquals(
+        cap2.current_load,
+        baseline + 3,
+        `leg2 current_load must equal leg1 (${baseline}) + 3; got ${cap2.current_load}`,
+      );
+      // capacity_total stays stable across the two calls (same resource/date).
+      if (cap1.capacity_total != null || cap2.capacity_total != null) {
+        assertEquals(
+          cap2.capacity_total,
+          cap1.capacity_total,
+          "capacity_total must not change between sibling bookings",
+        );
+      }
+    } finally {
+      await cleanup();
+      await assertEmpty();
+    }
+  },
+});
