@@ -82,7 +82,7 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
   const canDelete = can(PERM_RESERVATIONS_DELETE);
   const queryClient = useQueryClient();
   const today = format(new Date(), "yyyy-MM-dd");
-  const { data: isSystemAdmin = false } = useIsSystemAdmin();
+  const { isSystemAdmin } = useIsSystemAdmin();
 
   // Superadmin-only bulk delete mode. Hard-deletes rows from the
   // reservations table (RLS already permits system admins to manage
