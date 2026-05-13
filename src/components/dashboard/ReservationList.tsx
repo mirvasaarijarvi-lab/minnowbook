@@ -824,7 +824,7 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
             .eq("id", lr.id)
             .maybeSingle();
           if (error || !data) {
-            toast.error(t("common.error"));
+            toast.error("Failed to load reservation");
             return;
           }
           setEditingReservation(data as any);
@@ -848,7 +848,7 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
             .eq("id", lr.id)
             .maybeSingle();
           if (error || !data) {
-            toast.error(t("common.error"));
+            toast.error("Failed to load reservation");
             return;
           }
           setDetailReservation(data as any);
