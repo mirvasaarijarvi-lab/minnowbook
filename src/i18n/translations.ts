@@ -6733,6 +6733,7 @@ const sv: TranslationKeys = {
   "offers.linkedRowDate": "Datum",
   "offers.linkedRowGuests": "Gäster",
   "offers.linkedRowPrice": "Pris",
+  "offers.linkedRowOpen": "Öppna länkad bokning",
 
   // Tier-gränsfel
   "tierError.STAFF_USER_LIMIT_REACHED": "Din plan tillåter upp till {limit} användare. Uppgradera för att lägga till fler teammedlemmar.",
