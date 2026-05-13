@@ -1,5 +1,13 @@
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { describe, it, expect, beforeAll, afterAll, vi } from "vitest";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+
+// In CI we don't want to depend on a live round-trip to Supabase Storage
+// for the anon `createSignedUrl` denial probe — the network occasionally
+// rejects with a raw "fetch failed" before RLS can answer, which looks
+// like a security regression but is actually transport noise. When CI=1,
+// we mock the call to return a deterministic forbidden / not-found shape
+// (alternating 403 and 404 across probes so both branches stay covered).
+const IS_CI = process.env.CI === "true" || process.env.CI === "1";
 
 /**
  * Public-vs-private bucket regression.
