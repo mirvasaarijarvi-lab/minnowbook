@@ -4,7 +4,7 @@
 // verifies the resulting reservation row via the service role when
 // available. Uses raw fetch (not the supabase-js client) to avoid the
 // auth-refresh interval that triggers Deno test "leaks detected".
-import "https://deno.land/std@0.224.0/dotenv/load.ts";
+import "../_shared/load-env.ts";
 import { assertEquals, assert } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import { makeReservationCleanup } from "../_shared/test-cleanup.ts";
 import {

@@ -22,7 +22,7 @@
  * pipelines depend on that 403 staying truthful.
  */
 
-import "https://deno.land/std@0.224.0/dotenv/load.ts";
+import "../_shared/load-env.ts";
 import {
   assert,
   assertEquals,

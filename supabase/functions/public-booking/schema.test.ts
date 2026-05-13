@@ -5,7 +5,7 @@
 // expected (tenant_id, date) index. Uses raw fetch + service role so we
 // don't pull in supabase-js (which spawns auth-refresh intervals that
 // trip Deno's leak detector).
-import "https://deno.land/std@0.224.0/dotenv/load.ts";
+import "../_shared/load-env.ts";
 import { assert, assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
 
 function requireEnv(...names: string[]): string {
