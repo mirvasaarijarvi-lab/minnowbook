@@ -388,6 +388,47 @@ const EditReservationDialog = ({
 
           {/* ── Details Tab ── */}
           <TabsContent value="details" className="space-y-4 pt-2">
+            {/* Mark as confirmed (only when not already confirmed). Lets staff
+                confirm the reservation while editing, with an optional toggle
+                to suppress the confirmation email (e.g. internal bookings or
+                guests already notified by phone). */}
+            {reservation && reservation.status !== "confirmed" && (
+              <div className="space-y-2 rounded-lg border border-success/30 bg-success/5 p-3">
+                <label className="flex items-start gap-2 text-sm cursor-pointer select-none">
+                  <Checkbox
+                    checked={markAsConfirmed}
+                    onCheckedChange={(checked) => setMarkAsConfirmed(!!checked)}
+                    className="mt-0.5"
+                  />
+                  <span>
+                    <span className="font-medium text-foreground">
+                      Mark reservation as confirmed
+                    </span>
+                    <span className="block text-xs text-muted-foreground">
+                      Status will change to confirmed when you save.
+                    </span>
+                  </span>
+                </label>
+                {markAsConfirmed && !reservation.no_email_confirm && (
+                  <label className="flex items-start gap-2 pl-6 text-sm cursor-pointer select-none">
+                    <Checkbox
+                      checked={sendConfirmEmail}
+                      onCheckedChange={(checked) => setSendConfirmEmail(!!checked)}
+                      className="mt-0.5"
+                    />
+                    <span>
+                      <span className="font-medium text-foreground">
+                        Send confirmation email to guest
+                      </span>
+                      <span className="block text-xs text-muted-foreground">
+                        Uncheck to confirm silently without notifying{" "}
+                        {form.guest_name || "the guest"}.
+                      </span>
+                    </span>
+                  </label>
+                )}
+              </div>
+            )}
             {/* Cross-reservation / linked group panel.
                 Surfaced at the top of the edit dialog so staff can see, jump
                 to, and modify any sibling leg of a cross-booking without
