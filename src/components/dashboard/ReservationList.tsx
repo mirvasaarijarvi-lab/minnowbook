@@ -570,7 +570,7 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
 
       <Tabs value={viewTab} onValueChange={(v) => { setViewTab(v as "active" | "cancelled"); exitBulkMode(); }}>
         <TabsList>
-          <TabsTrigger value="active">{t("dashboard.activeReservations") || "Active"}</TabsTrigger>
+          <TabsTrigger value="active">Active</TabsTrigger>
           <TabsTrigger value="cancelled">{t("dashboard.cancelled")}</TabsTrigger>
         </TabsList>
       </Tabs>
