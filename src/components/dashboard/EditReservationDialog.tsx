@@ -63,6 +63,8 @@ interface Reservation {
   discount_value?: number | null;
   discount_reason?: string | null;
   linked_group_id?: string | null;
+  status?: string | null;
+  no_email_confirm?: boolean | null;
 }
 
 interface EditReservationDialogProps {
@@ -93,6 +95,8 @@ const EditReservationDialog = ({
   const [activeTab, setActiveTab] = useState("details");
   const [customMessage, setCustomMessage] = useState("");
   const [cancelCustomMessage, setCancelCustomMessage] = useState("");
+  const [markAsConfirmed, setMarkAsConfirmed] = useState(false);
+  const [sendConfirmEmail, setSendConfirmEmail] = useState(true);
 
   const [form, setForm] = useState({
     guest_name: "",
@@ -239,6 +243,8 @@ const EditReservationDialog = ({
       setCustomMessage("");
       setCancelCustomMessage("");
       setActiveTab("details");
+      setMarkAsConfirmed(false);
+      setSendConfirmEmail(!reservation.no_email_confirm);
     }
   }, [reservation]);
 
@@ -254,6 +260,9 @@ const EditReservationDialog = ({
   const mutation = useMutation({
     mutationFn: async () => {
       if (!reservation) throw new Error("No reservation");
+
+      const willConfirm =
+        markAsConfirmed && reservation.status !== "confirmed";
 
       const updatePayload: Record<string, unknown> = {
         guest_name: form.guest_name.trim(),
@@ -277,6 +286,7 @@ const EditReservationDialog = ({
         discount_value: form.discount_value ? parseFloat(form.discount_value) : null,
         discount_reason: form.discount_reason.trim() || null,
         updated_at: new Date().toISOString(),
+        ...(willConfirm ? { status: "confirmed" } : {}),
       };
 
       // Defensive guard: a future refactor that adds one of these keys to
@@ -317,6 +327,16 @@ const EditReservationDialog = ({
               `got ${verify?.linked_group_id ?? "null"}.`,
           );
         }
+      }
+
+      // If we just transitioned this reservation to confirmed, optionally
+      // send the confirmation email (fire-and-forget, mirrors ReservationList).
+      if (willConfirm && sendConfirmEmail && !reservation.no_email_confirm) {
+        supabase.functions
+          .invoke("send-reminder", {
+            body: { reservationId: reservation.id, emailType: "confirmation" },
+          })
+          .catch((err) => console.error("Failed to send confirmation email:", err));
       }
     },
     onSuccess: () => {
@@ -368,6 +388,47 @@ const EditReservationDialog = ({
 
           {/* ── Details Tab ── */}
           <TabsContent value="details" className="space-y-4 pt-2">
+            {/* Mark as confirmed (only when not already confirmed). Lets staff
+                confirm the reservation while editing, with an optional toggle
+                to suppress the confirmation email (e.g. internal bookings or
+                guests already notified by phone). */}
+            {reservation && reservation.status !== "confirmed" && (
+              <div className="space-y-2 rounded-lg border border-success/30 bg-success/5 p-3">
+                <label className="flex items-start gap-2 text-sm cursor-pointer select-none">
+                  <Checkbox
+                    checked={markAsConfirmed}
+                    onCheckedChange={(checked) => setMarkAsConfirmed(!!checked)}
+                    className="mt-0.5"
+                  />
+                  <span>
+                    <span className="font-medium text-foreground">
+                      Mark reservation as confirmed
+                    </span>
+                    <span className="block text-xs text-muted-foreground">
+                      Status will change to confirmed when you save.
+                    </span>
+                  </span>
+                </label>
+                {markAsConfirmed && !reservation.no_email_confirm && (
+                  <label className="flex items-start gap-2 pl-6 text-sm cursor-pointer select-none">
+                    <Checkbox
+                      checked={sendConfirmEmail}
+                      onCheckedChange={(checked) => setSendConfirmEmail(!!checked)}
+                      className="mt-0.5"
+                    />
+                    <span>
+                      <span className="font-medium text-foreground">
+                        Send confirmation email to guest
+                      </span>
+                      <span className="block text-xs text-muted-foreground">
+                        Uncheck to confirm silently without notifying{" "}
+                        {form.guest_name || "the guest"}.
+                      </span>
+                    </span>
+                  </label>
+                )}
+              </div>
+            )}
             {/* Cross-reservation / linked group panel.
                 Surfaced at the top of the edit dialog so staff can see, jump
                 to, and modify any sibling leg of a cross-booking without
