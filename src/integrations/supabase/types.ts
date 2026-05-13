@@ -3110,6 +3110,7 @@ export type Database = {
         Returns: boolean
       }
       is_system_admin: { Args: { p_user_id: string }; Returns: boolean }
+      is_tenant_active: { Args: { p_tenant_id: string }; Returns: boolean }
       is_user_tenant_member: {
         Args: { p_tenant_id: string; p_user_id: string }
         Returns: boolean
