@@ -281,6 +281,12 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
     const start_time = validateTime(body.start_time, "start_time");
     const special_requests = validateString(body.special_requests, "special_requests", 500);
 
+    // Optional cross-booking link. When the same guest is booked across
+    // multiple resources/services in one flow, the caller passes a single
+    // shared `linked_group_id` (UUID) on every leg. Each leg is still its
+    // own row, but they're discoverable as siblings via this column.
+    const linked_group_id = validateUuid(body.linked_group_id, "linked_group_id", false);
+
     const reservation_type = validateString(body.reservation_type, "reservation_type", 20, true)!;
     if (!VALID_TYPES.includes(reservation_type)) throw new Error("Invalid reservation type");
 
