@@ -871,6 +871,27 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
               </label>
             );
           })()}
+          {confirmDialog?.action === "confirmed" && (() => {
+            const r = reservations?.find((res) => res.id === confirmDialog.id);
+            // If the reservation was already flagged "no confirmation email"
+            // (e.g. internal booking), there's nothing to toggle, hide the row.
+            if (!r || r.no_email_confirm) return null;
+            return (
+              <label className="flex items-start gap-2 rounded-md border border-border bg-muted/30 px-3 py-2 text-sm cursor-pointer select-none">
+                <Checkbox
+                  checked={sendConfirmEmail}
+                  onCheckedChange={(checked) => setSendConfirmEmail(!!checked)}
+                  className="mt-0.5"
+                />
+                <span>
+                  <span className="font-medium text-foreground">Send confirmation email to guest</span>
+                  <span className="block text-xs text-muted-foreground">
+                    Uncheck to confirm silently without notifying {r.guest_name || "the guest"}.
+                  </span>
+                </span>
+              </label>
+            );
+          })()}
           <DialogFooter>
             <Button variant="outline" onClick={() => setConfirmDialog(null)}>{t("common.cancel")}</Button>
             <Button
