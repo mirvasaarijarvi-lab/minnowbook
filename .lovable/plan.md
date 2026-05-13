@@ -1,103 +1,87 @@
-## Goal
+# Signed URL Error Contract
 
-Make the GitHub Actions test pipeline flake-resistant: known-flaky specs get a single deterministic rerun, real regressions still fail immediately, and the quarantine list cannot rot.
+## What this is (plain English)
 
-## Pieces
+Right now, when something goes wrong while creating a signed URL for a private file (offer PDF, attachment, branding asset, etc.), the code throws a generic `Error` with a free-form message like "Failed to create signed URL for foo: fetch failed". That's a problem because:
 
-### 1. Quarantine manifest (new) — `.github/flaky-tests.json`
+- The UI can't tell the difference between "user is logged out" (403), "file doesn't exist" (404), "bad path" (400), and "Storage is having a bad day" (transport error).
+- The security tests can only do fuzzy regex matching on error messages, which is why we keep tweaking that regex every time CI gets flaky.
+- We can't show the user a friendly, actionable message.
 
-Single source of truth, machine-readable. Format:
+An "error contract" means: every signed URL failure returns the same shape with a stable machine-readable `code` (e.g. `"forbidden"`, `"not_found"`, `"invalid_path"`, `"transport"`, `"unknown"`) plus a human message. Production code switches on the `code`, tests assert on the `code`, and the message is free to change without breaking anything.
 
-```json
-{
-  "vitest": [
-    {
-      "pattern": "src/test/security/edge-function-hsts-referrer-csp.test.ts > .* > resolved bag carries",
-      "reason": "Intermittent ENOENT when shared http-headers.ts is re-read mid-scan",
-      "owner": "@security",
-      "added": "2026-05-11",
-      "expires": "2026-06-10",
-      "issue": "https://github.com/<org>/<repo>/issues/1234"
-    }
-  ],
-  "playwright": [
-    {
-      "pattern": "e2e/superadmin-mocked-auth.spec.ts > .* > system admin: reaches Superadmin page",
-      "reason": "VITE_SUPABASE_URL race on cold cache",
-      "owner": "@platform",
-      "added": "2026-05-11",
-      "expires": "2026-06-10",
-      "issue": "..."
-    }
-  ]
+## Files to change
+
+### 1. `src/lib/signed-url-error.ts` (new)
+
+Define the contract in one place:
+
+```ts
+export type SignedUrlErrorCode =
+  | "invalid_path"     // assertSafeStorageObjectPath rejected the input
+  | "forbidden"        // RLS denial, anon, non-member
+  | "not_found"        // bucket / object missing
+  | "transport"        // fetch failed, timeout, DNS, etc.
+  | "unknown";         // anything we couldn't classify
+
+export class SignedUrlError extends Error {
+  readonly code: SignedUrlErrorCode;
+  readonly httpStatus?: number;
+  readonly cause?: unknown;
+  constructor(code, message, opts?: { httpStatus?; cause? }) { ... }
 }
+
+export function isSignedUrlError(e: unknown): e is SignedUrlError;
+export function classifySignedUrlFailure(input: {
+  sdkError?: { message?: string; status?: number } | null;
+  thrown?: unknown;
+}): SignedUrlError;
 ```
 
-Rules enforced by `scripts/ci/check-quarantine.mjs`:
-- Every entry MUST have `pattern`, `reason`, `owner`, `added`, `expires`, `issue`.
-- `expires` MUST be within 30 days of `added` and not in the past.
-- Manifest is sorted, no duplicate patterns.
-- Total size capped (default 15 entries) to keep quarantine pressure honest.
+Classification rules:
+- Thrown with `name === "InvalidStoragePathError"` -> `invalid_path`
+- HTTP 401/403 OR message matches `/permission|denied|policy|not allowed|unauthor/i` -> `forbidden`
+- HTTP 404 OR message matches `/not\s*found|object.*missing|no such/i` -> `not_found`
+- Thrown `TypeError` / message matches `/fetch failed|network|timeout|abort|ECONN/i` -> `transport`
+- Else -> `unknown`
 
-### 2. Rerun helper (new) — `scripts/ci/rerun-flaky.mjs`
+### 2. `src/lib/tenant-private-url.ts`
 
-Pure Node (no extra deps). Inputs:
-- A junit XML path (Vitest or Playwright).
-- The manifest section name (`vitest` | `playwright`).
-- A rerun command template.
+Replace the generic throw in `mintSignedUrl` with `classifySignedUrlFailure(...)`. Wrap the `assertSafeStorageObjectPath` call in a try/catch that re-throws as `SignedUrlError("invalid_path", ...)`. Wrap the `createSignedUrl` call in try/catch so transport throws are classified instead of propagated raw.
 
-Behaviour:
-1. Parse junit, collect every `<testcase>` with a `<failure>` or `<error>` child. Build full IDs (`classname > name`).
-2. Match each failed ID against the manifest patterns (regex, anchored).
-3. If any failed ID is NOT covered by quarantine: print the offenders and exit 2 (real regression).
-4. If all failures are quarantined: invoke the rerun command with deterministic env and only the failed test IDs scoped down (`--testNamePattern` for Vitest, `--grep` for Playwright). Exit 0 if rerun passes, exit 3 if it still fails.
+### 3. `src/lib/tenant-private-url.test.ts`
 
-Deterministic env applied to reruns:
-- `TZ=UTC`, `LANG=C.UTF-8`, `LC_ALL=C.UTF-8`
-- `CI=true`, `FORCE_COLOR=0`
-- `VITEST_SEED=0`, `--sequence.shuffle=false`, `--no-isolate=false`, `--pool=forks`, `--poolOptions.forks.singleFork=true`
-- Playwright: `--workers=1 --retries=0 --repeat-each=1 --max-failures=10`, `PW_TEST_HTML_REPORT_OPEN=never`
-- `--reporter=junit` written to a separate `*-rerun.xml` so artifacts contain both attempts
+Add cases asserting:
+- Bad path -> `SignedUrlError` with `code === "invalid_path"`
+- Mocked SDK 403 -> `code === "forbidden"`, `httpStatus === 403`
+- Mocked SDK 404 -> `code === "not_found"`
+- Mocked thrown `TypeError("fetch failed")` -> `code === "transport"`
+- Cache is dropped after a classified failure (existing invariant, just re-asserted)
 
-### 3. Workflow integration
+### 4. `src/test/security/tenant-assets-private.test.ts`
 
-Edit `.github/workflows/test-ci.yml` — split the single `npm run test:ci` step into three explicit steps so junit XML is available between attempts:
+Replace the regex-on-message assertion in the `createSignedUrl` denial test with an assertion on the new contract:
 
-```text
-Lint → Typecheck → Vitest (initial) → Vitest rerun (if failed) →
-Deno tests → Playwright (initial) → Playwright rerun (if failed) →
-Quarantine hygiene check → Upload reports
+```ts
+const err = await safeAnonCreateSignedUrl(...);
+// We don't care about wording; we care that it's a known-denied code.
+expect(["forbidden", "not_found"]).toContain(classifySignedUrlFailure({ sdkError: err.error }).code);
 ```
 
-Each rerun step uses `if: failure() && steps.<initial>.outcome == 'failure'`, calls `scripts/ci/rerun-flaky.mjs`, and either:
-- exits 0 (job continues, summary annotated `::warning::Flaky: N tests recovered on rerun`), or
-- exits non-zero (job fails with the offending test list pinned to the GitHub step summary).
+The CI-mock branch in `safeAnonCreateSignedUrl` keeps alternating `403`/`404` so both `forbidden` and `not_found` are exercised. The diagnostic logging stays.
 
-The hygiene check runs on every push and fails if the manifest is malformed, expired, or oversized — so quarantine cannot silently pile up.
+### 5. Callers (UI surface for the new code)
 
-Also add the same two-attempt pattern to `.github/workflows/ci.yml` for the unit-test step (schema gate keeps `--bail=1`, no rerun there since it's a deterministic file parser).
+Search-and-update the small number of `catch (e)` sites that consume `createTenantPrivateSignedUrl` so they branch on `isSignedUrlError(e) && e.code === "forbidden"` to show "You don't have access to this file" vs. `"transport"` to show "Network problem, try again". No new translations in this PR — strings stay in English at the call site, slotted into the existing toast helpers. (I'll list the exact files after grepping in implementation; expected: `OffersManager`, anywhere using `createTenantPrivateSignedUrl(s)`.)
 
-### 4. Reporting
+## Out of scope
 
-- Step summary lists: passed, failed, quarantined-recovered, quarantined-still-failing, expired-quarantine-entries.
-- Artifacts now include `test-reports/<suite>/junit.xml` AND `test-reports/<suite>/junit-rerun.xml` so PR reviewers can see the diff between attempts.
+- Renaming the bucket helpers.
+- Changing the cache behavior.
+- New i18n keys (can follow up).
+- The `tenant-branding` (public) bucket — it has no signed URL flow.
 
-## Files
+## Risk / rollout
 
-New:
-- `.github/flaky-tests.json` (empty list, schema documented in repo docs)
-- `scripts/ci/rerun-flaky.mjs`
-- `scripts/ci/check-quarantine.mjs`
-- `scripts/ci/parse-junit.mjs` (shared)
-- `src/test/ci/check-quarantine.test.ts` (Vitest unit tests for the parser + hygiene rules — runs under the existing schema gate so the tooling itself never silently breaks)
-
-Edited:
-- `.github/workflows/test-ci.yml` (split steps, add rerun + hygiene)
-- `.github/workflows/ci.yml` (add Vitest rerun for the unit-test step)
-- `playwright.config.ts` (drop the implicit `retries: 2` — reruns are now explicit and only for quarantined tests, so green CI never hides flake)
-
-## Non-goals
-
-- No change to Deno edge tests (already deterministic, no flake history).
-- No change to lint/typecheck/build (deterministic by construction).
-- No mass-quarantine; manifest ships empty and is opt-in per failing test with an expiry.
+- Pure additive: existing `try/catch (e)` sites that only read `e.message` keep working because `SignedUrlError extends Error`.
+- Tests get stricter (assert on `code`, not regex), so a future regression that changes wording won't silently pass.
