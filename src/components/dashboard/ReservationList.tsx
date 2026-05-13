@@ -82,6 +82,28 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
   const canDelete = can(PERM_RESERVATIONS_DELETE);
   const queryClient = useQueryClient();
   const today = format(new Date(), "yyyy-MM-dd");
+  const { data: isSystemAdmin = false } = useIsSystemAdmin();
+
+  // Superadmin-only bulk delete mode. Hard-deletes rows from the
+  // reservations table (RLS already permits system admins to manage
+  // every tenant's reservations). Tenant staff never see these
+  // controls; cancellation remains the right tool for their workflow.
+  const [bulkMode, setBulkMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkConfirmOpen, setBulkConfirmOpen] = useState(false);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
+  const exitBulkMode = () => {
+    setBulkMode(false);
+    setSelectedIds(new Set());
+  };
+  const toggleSelected = (id: string, checked: boolean) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (checked) next.add(id);
+      else next.delete(id);
+      return next;
+    });
+  };
 
   const { data: sites } = useQuery({
     queryKey: ["sites", tenantId],
