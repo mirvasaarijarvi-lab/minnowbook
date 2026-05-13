@@ -634,8 +634,8 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
               }}
             >
               <CardContent className="p-4">
-                <div className="flex items-start justify-between gap-2 sm:gap-4">
-                  <div className="flex items-start gap-3">
+                <div className="flex items-start justify-between gap-2 sm:gap-4 min-w-0">
+                  <div className="flex items-start gap-3 flex-1 min-w-0">
                     {bulkMode && isSystemAdmin ? (
                       <Checkbox
                         checked={selectedIds.has(r.id)}
@@ -655,7 +655,7 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
                     ) : null}
                     <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-1.5 mb-1">
-                      <span className="font-semibold text-foreground">{r.guest_name}</span>
+                      <span className="font-semibold text-foreground break-words min-w-0">{r.guest_name}</span>
                       <Badge variant="outline" className="text-xs capitalize">{typeLabel(r.reservation_type)}</Badge>
                       {groupColor && (
                         <Badge
