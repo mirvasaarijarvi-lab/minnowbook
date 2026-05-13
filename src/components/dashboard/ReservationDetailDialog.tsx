@@ -22,6 +22,8 @@ interface Props {
   onEdit?: (reservation: any) => void;
   canEdit?: boolean;
   siteName?: string | null;
+  /** Open another reservation from the linked group (cross-booking jump). */
+  onSelectLinked?: (linked: { id: string; [key: string]: any }) => void;
 }
 
 const Field = ({ icon: Icon, label, children }: { icon: any; label: string; children: React.ReactNode }) => (
