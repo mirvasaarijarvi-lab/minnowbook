@@ -1013,17 +1013,25 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
               disabled={bulkDeleting || selectedIds.size === 0}
               onClick={async () => {
                 const ids = Array.from(selectedIds);
+                console.log("[bulk-delete] starting", { count: ids.length, ids });
                 setBulkDeleting(true);
-                const { error, count } = await supabase
+                const { data, error, count, status, statusText } = await supabase
                   .from("reservations")
                   .delete({ count: "exact" })
-                  .in("id", ids);
+                  .in("id", ids)
+                  .select("id");
                 setBulkDeleting(false);
+                console.log("[bulk-delete] response", { count, status, statusText, returned: data?.length, error });
                 if (error) {
                   toast.error(`Bulk delete failed: ${error.message}`);
                   return;
                 }
-                toast.success(`Deleted ${count ?? ids.length} reservation${(count ?? ids.length) === 1 ? "" : "s"}`);
+                const deleted = data?.length ?? count ?? 0;
+                if (deleted === 0) {
+                  toast.error("No reservations were deleted. RLS may be blocking access.");
+                  return;
+                }
+                toast.success(`Deleted ${deleted} reservation${deleted === 1 ? "" : "s"}`);
                 setBulkConfirmOpen(false);
                 exitBulkMode();
                 queryClient.invalidateQueries({ queryKey: ["reservations"] });
