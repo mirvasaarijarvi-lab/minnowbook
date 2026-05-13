@@ -519,15 +519,20 @@ jobs:
             fi
 
             if [ "$tracking_ready" = "true" ] && [ "$version_ready" != "true" ]; then
-              applied=$("${PSQL[@]}" -c \
-                "SELECT count(*) FROM supabase_migrations.schema_migrations;" \
-                2>/dev/null | tr -d ' ')
-              applied="${applied:-0}"
-              if [ "$applied" -ge "$expected" ]; then
+              applied_versions=$("${PSQL[@]}" -c \
+                "SELECT version::text FROM supabase_migrations.schema_migrations ORDER BY version;" \
+                2>/dev/null | sort)
+              applied=$(printf '%s\n' "$applied_versions" | sed '/^$/d' | wc -l | tr -d ' ')
+              missing_versions=$(comm -23 \
+                <(printf '%s\n' "$expected_versions" | sed '/^$/d') \
+                <(printf '%s\n' "$applied_versions" | sed '/^$/d'))
+              missing_count=$(printf '%s\n' "$missing_versions" | sed '/^$/d' | wc -l | tr -d ' ')
+              if [ "$expected" = "0" ] || [ "$missing_count" = "0" ]; then
                 version_ready=true
-                echo "[$i/${MAX_ATTEMPTS}] ✅ ${applied}/${expected} migrations applied"
+                echo "[$i/${MAX_ATTEMPTS}] ✅ ${applied}/${expected} expected migration version(s) present"
               else
-                echo "[$i/${MAX_ATTEMPTS}] ⏳ ${applied}/${expected} migrations applied"
+                echo "[$i/${MAX_ATTEMPTS}] ⏳ ${applied}/${expected} migration version(s) present, ${missing_count} expected version(s) missing"
+                printf '%s\n' "$missing_versions" | sed '/^$/d' | tail -n 5 | sed 's/^/  missing: /'
               fi
             fi
 
@@ -548,9 +553,24 @@ jobs:
               fi
             fi
 
+            if [ "$version_ready" = "true" ] && [ "$tables_ready" = "true" ] && [ "$rpc_ready" != "true" ]; then
+              rpc_grants=$("${PSQL[@]}" -c "
+                SELECT
+                  has_function_privilege('anon', 'public.list_tenant_scoped_tables()', 'EXECUTE')::text || '|' ||
+                  has_function_privilege('authenticated', 'public.list_tenant_scoped_tables()', 'EXECUTE')::text;
+              " 2>/dev/null | tr -d ' ')
+              if [ "$rpc_grants" = "true|true" ]; then
+                rpc_ready=true
+                echo "[$i/${MAX_ATTEMPTS}] ✅ list_tenant_scoped_tables() executable by anon and authenticated"
+              else
+                echo "[$i/${MAX_ATTEMPTS}] ⏳ list_tenant_scoped_tables() grants not ready (anon|authenticated=${rpc_grants:-unknown})"
+              fi
+            fi
+
             if [ "$tracking_ready" = "true" ] \
               && [ "$version_ready" = "true" ] \
-              && [ "$tables_ready" = "true" ]; then
+              && [ "$tables_ready" = "true" ] \
+              && [ "$rpc_ready" = "true" ]; then
               echo "Migrations ready after $((i * SLEEP_SECS))s"
               exit 0
             fi
