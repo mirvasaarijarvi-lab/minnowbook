@@ -139,7 +139,7 @@ const EditReservationDialog = ({
       if (!siblingIds.length) return [];
       const { data, error } = await supabase
         .from("reservations")
-        .select("id, guest_name, reservation_type, date, start_time, room_type, price_eur, status, is_used")
+        .select("id, guest_name, reservation_type, date, start_time, room_type, price_eur, status, is_used, guests_count, check_out_date")
         .in("id", siblingIds);
       if (error) throw error;
       return data ?? [];
@@ -155,7 +155,7 @@ const EditReservationDialog = ({
       if (!reservation?.linked_group_id) return [];
       const { data, error } = await supabase
         .from("reservations")
-        .select("id, guest_name, reservation_type, date, start_time, room_type, price_eur, status, is_used")
+        .select("id, guest_name, reservation_type, date, start_time, room_type, price_eur, status, is_used, guests_count, check_out_date")
         .eq("linked_group_id", reservation.linked_group_id)
         .neq("status", "cancelled");
       if (error) throw error;
