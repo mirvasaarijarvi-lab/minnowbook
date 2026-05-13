@@ -843,8 +843,17 @@ const ResourceManagement = () => {
                           )}
                         </TableCell>
                       )}
-                      <TableCell className="text-muted-foreground max-w-[260px]">
-                        <div className="truncate">{r.description ?? "–"}</div>
+                      <TableCell className="text-muted-foreground hidden xl:table-cell max-w-[280px] align-top">
+                        {r.description ? (
+                          <div
+                            className="line-clamp-3 whitespace-pre-line text-sm leading-snug"
+                            title={r.description}
+                          >
+                            {r.description}
+                          </div>
+                        ) : (
+                          <span>–</span>
+                        )}
                       </TableCell>
                       <TableCell className="text-center">{r.capacity ?? "–"}</TableCell>
                       <TableCell className="text-right">
