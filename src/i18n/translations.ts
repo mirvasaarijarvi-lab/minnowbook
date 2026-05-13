@@ -3379,6 +3379,7 @@ const en: TranslationKeys = {
   "offers.linkedRowDate": "Date",
   "offers.linkedRowGuests": "Guests",
   "offers.linkedRowPrice": "Price",
+  "offers.linkedRowOpen": "Open this linked reservation",
 
   // Tier limit errors
   "tierError.STAFF_USER_LIMIT_REACHED": "Your plan allows up to {limit} staff users. Upgrade to add more team members.",
