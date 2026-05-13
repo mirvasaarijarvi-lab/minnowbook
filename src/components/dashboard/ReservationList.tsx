@@ -34,6 +34,7 @@ import {
   PERM_RESERVATIONS_DELETE,
 } from "@/lib/permissions";
 import { buildGuestSearchOrClause } from "@/lib/reservationFilters";
+import { linkedGroupColor } from "@/lib/linkedGroupColor";
 
 const statusColors: Record<string, string> = {
   pending: "bg-warning/10 text-warning-foreground border-warning/20",
