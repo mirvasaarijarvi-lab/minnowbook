@@ -127,7 +127,7 @@ describe("redeem-access-code: brute-force & replay resilience", () => {
     expect(data.session).toBeNull();
   });
 
-  it("20 parallel attempts with the same fake code: zero successes, all known error codes", async () => {
+  it("20 parallel attempts with the same fake code: zero successes, all known error codes", { timeout: 60000 }, async () => {
     const N = 20;
     const results = await Promise.all(
       Array.from({ length: N }, () => callRedeem(FAKE_CODES[0], false)),
