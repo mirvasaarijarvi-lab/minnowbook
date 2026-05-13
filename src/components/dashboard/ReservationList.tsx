@@ -672,7 +672,8 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
                 </div>
               </CardContent>
             </Card>
-          ))}
+            );
+          })}
         </div>
       )}
 
