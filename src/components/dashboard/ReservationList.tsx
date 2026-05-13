@@ -933,6 +933,51 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
         open={newReservationOpen}
         onOpenChange={setNewReservationOpen}
       />
+
+      {/* Superadmin bulk delete confirmation */}
+      <Dialog open={bulkConfirmOpen} onOpenChange={(open) => !bulkDeleting && setBulkConfirmOpen(open)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-destructive">
+              <ShieldAlert className="h-5 w-5" />
+              Permanently delete {selectedIds.size} reservation{selectedIds.size === 1 ? "" : "s"}?
+            </DialogTitle>
+            <DialogDescription>
+              This action cannot be undone. Selected rows will be removed from the
+              reservations table immediately. Linked cross-booking siblings are not
+              auto-included; select them explicitly if you want to remove the whole group.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setBulkConfirmOpen(false)} disabled={bulkDeleting}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={bulkDeleting || selectedIds.size === 0}
+              onClick={async () => {
+                const ids = Array.from(selectedIds);
+                setBulkDeleting(true);
+                const { error, count } = await supabase
+                  .from("reservations")
+                  .delete({ count: "exact" })
+                  .in("id", ids);
+                setBulkDeleting(false);
+                if (error) {
+                  toast.error(`Bulk delete failed: ${error.message}`);
+                  return;
+                }
+                toast.success(`Deleted ${count ?? ids.length} reservation${(count ?? ids.length) === 1 ? "" : "s"}`);
+                setBulkConfirmOpen(false);
+                exitBulkMode();
+                queryClient.invalidateQueries({ queryKey: ["reservations"] });
+              }}
+            >
+              {bulkDeleting ? "Deleting..." : `Delete ${selectedIds.size}`}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
