@@ -161,7 +161,7 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
   });
 
   const updateStatus = useMutation({
-    mutationFn: async ({ id, status }: { id: string; status: string }) => {
+    mutationFn: async ({ id, status, suppressEmail }: { id: string; status: string; suppressEmail?: boolean }) => {
       const reservation = reservations?.find((r) => r.id === id);
       const { error } = await supabase
         .from("reservations")
@@ -170,13 +170,21 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
         .eq("tenant_id", tenantId!);
       if (error) throw error;
 
-      // Send confirmation or cancellation email (fire-and-forget, don't block status change)
+      // Send confirmation or cancellation email (fire-and-forget, don't block status change).
+      // `suppressEmail` lets staff cancel without notifying the guest, e.g. for
+      // duplicate bookings, internal test rows, or guests who already cancelled
+      // out of band by phone.
       if (reservation && !reservation.no_email_confirm && status === "confirmed") {
         supabase.functions.invoke("send-reminder", {
           body: { reservationId: id, emailType: "confirmation" },
         }).catch((err) => console.error("Failed to send confirmation email:", err));
       }
-      if (reservation && !reservation.no_email_cancel && status === "cancelled") {
+      if (
+        reservation &&
+        !reservation.no_email_cancel &&
+        !suppressEmail &&
+        status === "cancelled"
+      ) {
         supabase.functions.invoke("send-reminder", {
           body: { reservationId: id, emailType: "cancellation" },
         }).catch((err) => console.error("Failed to send cancellation email:", err));
