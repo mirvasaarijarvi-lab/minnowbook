@@ -5056,6 +5056,7 @@ const fi: TranslationKeys = {
   "offers.linkedRowDate": "Päivämäärä",
   "offers.linkedRowGuests": "Vieraat",
   "offers.linkedRowPrice": "Hinta",
+  "offers.linkedRowOpen": "Avaa linkitetty varaus",
 
   // Tier-rajojen virheet
   "tierError.STAFF_USER_LIMIT_REACHED": "Tilauksesi sallii enintään {limit} käyttäjää. Päivitä lisätäksesi tiimiläisiä.",
