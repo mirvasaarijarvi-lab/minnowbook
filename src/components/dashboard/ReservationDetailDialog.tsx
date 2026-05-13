@@ -7,6 +7,7 @@ import { CalendarDays, Clock, Mail, Phone, User, Users, MapPin, Receipt, Package
 import { useT, useTDynamic } from "@/contexts/I18nContext";
 import { useDateLocale } from "@/hooks/useDateLocale";
 import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
+import LinkedReservationsPanel from "./LinkedReservationsPanel";
 
 const statusColors: Record<string, string> = {
   pending: "bg-warning/10 text-warning-foreground border-warning/20",
