@@ -801,7 +801,7 @@ const ResourceManagement = () => {
         <Card><CardContent className="p-8 text-center text-muted-foreground">{t("dashboard.noResources")}</CardContent></Card>
       ) : (
         <Card data-tour="resources-grid">
-          <CardContent className="p-0">
+          <CardContent className="p-0 overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -809,7 +809,7 @@ const ResourceManagement = () => {
                   <TableHead>{t("common.name")}</TableHead>
                   <TableHead>{t("common.type")}</TableHead>
                   {showSiteColumn && <TableHead>Site</TableHead>}
-                  <TableHead>{t("common.description")}</TableHead>
+                  <TableHead className="hidden xl:table-cell">{t("common.description")}</TableHead>
                   <TableHead className="text-center">{t("dashboard.capacity")}</TableHead>
                   <TableHead className="text-right">{t("common.price")}</TableHead>
                   <TableHead>{t("resourceHours.title")}</TableHead>
@@ -843,8 +843,17 @@ const ResourceManagement = () => {
                           )}
                         </TableCell>
                       )}
-                      <TableCell className="text-muted-foreground max-w-[260px]">
-                        <div className="truncate">{r.description ?? "–"}</div>
+                      <TableCell className="text-muted-foreground hidden xl:table-cell max-w-[280px] align-top">
+                        {r.description ? (
+                          <div
+                            className="line-clamp-3 whitespace-pre-line text-sm leading-snug"
+                            title={r.description}
+                          >
+                            {r.description}
+                          </div>
+                        ) : (
+                          <span>–</span>
+                        )}
                       </TableCell>
                       <TableCell className="text-center">{r.capacity ?? "–"}</TableCell>
                       <TableCell className="text-right">
