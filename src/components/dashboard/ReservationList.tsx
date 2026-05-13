@@ -481,7 +481,49 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
         </div>
       </div>
 
-      {checkoutTodayFilter && (
+      {isSystemAdmin && (
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2">
+          <div className="flex items-center gap-2 text-sm text-destructive">
+            <ShieldAlert className="h-4 w-4" />
+            <span className="font-medium">Superadmin tools</span>
+            <span className="text-muted-foreground">
+              {bulkMode
+                ? `${selectedIds.size} selected for deletion`
+                : "Bulk-delete reservations across any tenant"}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            {!bulkMode ? (
+              <Button
+                size="sm"
+                variant="outline"
+                className="gap-1.5"
+                onClick={() => setBulkMode(true)}
+              >
+                <Trash2 className="h-4 w-4" />
+                Bulk delete
+              </Button>
+            ) : (
+              <>
+                <Button size="sm" variant="ghost" onClick={exitBulkMode}>
+                  Cancel
+                </Button>
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  className="gap-1.5"
+                  disabled={selectedIds.size === 0}
+                  onClick={() => setBulkConfirmOpen(true)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Delete selected ({selectedIds.size})
+                </Button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
         <div className="flex items-center gap-2">
           <Badge variant="secondary" className="gap-1.5 px-3 py-1 text-sm">
             <CalendarDays className="h-3.5 w-3.5" />
