@@ -15,6 +15,9 @@
  */
 import { supabase } from "@/integrations/supabase/client";
 import { assertSafeStorageObjectPath } from "@/lib/storage-path";
+import { classifySignedUrlFailure, SignedUrlError } from "@/lib/signed-url-error";
+
+export { SignedUrlError, isSignedUrlError, type SignedUrlErrorCode } from "@/lib/signed-url-error";
 
 /** 24 hours, in seconds. Matches the chosen TTL for shared private assets. */
 export const PRIVATE_SIGNED_URL_TTL_SECONDS = 24 * 60 * 60;
@@ -58,20 +61,41 @@ async function mintSignedUrl(
   ttl: number,
   download: SignedUrlOptions["download"],
 ): Promise<string> {
-  // assertSafeStorageObjectPath throws InvalidStoragePathError which is
-  // intentionally allowed to propagate so callers can detect it via
-  // isInvalidStoragePathError() and surface a friendly message.
-  const safePath = assertSafeStorageObjectPath(path, {
-    callsite: "tenant-private:mintSignedUrl",
-  });
-  const { data, error } = await supabase.storage
-    .from(TENANT_PRIVATE_BUCKET)
-    .createSignedUrl(safePath, ttl, { download });
+  // assertSafeStorageObjectPath throws InvalidStoragePathError. Convert
+  // it (and any other failure below) into the stable SignedUrlError
+  // contract so callers and tests can branch on `code` rather than
+  // free-form messages.
+  let safePath: string;
+  try {
+    safePath = assertSafeStorageObjectPath(path, {
+      callsite: "tenant-private:mintSignedUrl",
+    });
+  } catch (e) {
+    throw classifySignedUrlFailure({
+      thrown: e,
+      contextMessage: `Failed to create signed URL for ${path}`,
+    });
+  }
 
+  let result;
+  try {
+    result = await supabase.storage
+      .from(TENANT_PRIVATE_BUCKET)
+      .createSignedUrl(safePath, ttl, { download });
+  } catch (e) {
+    // Transport-level failure (fetch failed, abort, DNS, ...).
+    throw classifySignedUrlFailure({
+      thrown: e,
+      contextMessage: `Failed to create signed URL for ${safePath}`,
+    });
+  }
+
+  const { data, error } = result;
   if (error || !data?.signedUrl) {
-    throw new Error(
-      `Failed to create signed URL for ${safePath}: ${error?.message ?? "unknown error"}`,
-    );
+    throw classifySignedUrlFailure({
+      sdkError: error ?? { message: "Storage returned no signed URL" },
+      contextMessage: `Failed to create signed URL for ${safePath}`,
+    });
   }
   return data.signedUrl;
 }
