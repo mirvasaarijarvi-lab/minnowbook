@@ -17,7 +17,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { CalendarDays, CalendarIcon, User, Mail, Phone, MoreVertical, CheckCircle2, XCircle, Pencil, Receipt, PackageCheck, Coffee, Plus, Building2, Tag, Bell, MailCheck, MailX, Search, Link2 } from "lucide-react";
+import { CalendarDays, CalendarIcon, User, Mail, Phone, MoreVertical, CheckCircle2, XCircle, Pencil, Receipt, PackageCheck, Coffee, Plus, Building2, Tag, Bell, MailCheck, MailX, Search, Link2, Trash2, ShieldAlert } from "lucide-react";
+import { useIsSystemAdmin } from "@/hooks/useIsSystemAdmin";
 import EditReservationDialog from "./EditReservationDialog";
 import ReservationDetailDialog from "./ReservationDetailDialog";
 import ManualReservationDialog from "./ManualReservationDialog";
@@ -81,6 +82,28 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
   const canDelete = can(PERM_RESERVATIONS_DELETE);
   const queryClient = useQueryClient();
   const today = format(new Date(), "yyyy-MM-dd");
+  const { isSystemAdmin } = useIsSystemAdmin();
+
+  // Superadmin-only bulk delete mode. Hard-deletes rows from the
+  // reservations table (RLS already permits system admins to manage
+  // every tenant's reservations). Tenant staff never see these
+  // controls; cancellation remains the right tool for their workflow.
+  const [bulkMode, setBulkMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkConfirmOpen, setBulkConfirmOpen] = useState(false);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
+  const exitBulkMode = () => {
+    setBulkMode(false);
+    setSelectedIds(new Set());
+  };
+  const toggleSelected = (id: string, checked: boolean) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (checked) next.add(id);
+      else next.delete(id);
+      return next;
+    });
+  };
 
   const { data: sites } = useQuery({
     queryKey: ["sites", tenantId],
@@ -458,6 +481,49 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
         </div>
       </div>
 
+      {isSystemAdmin && (
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2">
+          <div className="flex items-center gap-2 text-sm text-destructive">
+            <ShieldAlert className="h-4 w-4" />
+            <span className="font-medium">Superadmin tools</span>
+            <span className="text-muted-foreground">
+              {bulkMode
+                ? `${selectedIds.size} selected for deletion`
+                : "Bulk-delete reservations across any tenant"}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            {!bulkMode ? (
+              <Button
+                size="sm"
+                variant="outline"
+                className="gap-1.5"
+                onClick={() => setBulkMode(true)}
+              >
+                <Trash2 className="h-4 w-4" />
+                Bulk delete
+              </Button>
+            ) : (
+              <>
+                <Button size="sm" variant="ghost" onClick={exitBulkMode}>
+                  Cancel
+                </Button>
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  className="gap-1.5"
+                  disabled={selectedIds.size === 0}
+                  onClick={() => setBulkConfirmOpen(true)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Delete selected ({selectedIds.size})
+                </Button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
       {checkoutTodayFilter && (
         <div className="flex items-center gap-2">
           <Badge variant="secondary" className="gap-1.5 px-3 py-1 text-sm">
@@ -516,15 +582,22 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
               <CardContent className="p-4">
                 <div className="flex items-start justify-between gap-2 sm:gap-4">
                   <div className="flex items-start gap-3">
-                    {canEdit && (
-                    <Checkbox
-                      checked={(r as any).is_checked_in ?? false}
-                      className="mt-1"
-                      onCheckedChange={(checked) => {
-                        toggleCheckIn.mutate({ id: r.id, checked: !!checked });
-                      }}
-                    />
-                    )}
+                    {bulkMode && isSystemAdmin ? (
+                      <Checkbox
+                        checked={selectedIds.has(r.id)}
+                        className="mt-1"
+                        aria-label="Select reservation for deletion"
+                        onCheckedChange={(checked) => toggleSelected(r.id, !!checked)}
+                      />
+                    ) : canEdit ? (
+                      <Checkbox
+                        checked={(r as any).is_checked_in ?? false}
+                        className="mt-1"
+                        onCheckedChange={(checked) => {
+                          toggleCheckIn.mutate({ id: r.id, checked: !!checked });
+                        }}
+                      />
+                    ) : null}
                     <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-1.5 mb-1">
                       <span className="font-semibold text-foreground">{r.guest_name}</span>
@@ -860,6 +933,51 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
         open={newReservationOpen}
         onOpenChange={setNewReservationOpen}
       />
+
+      {/* Superadmin bulk delete confirmation */}
+      <Dialog open={bulkConfirmOpen} onOpenChange={(open) => !bulkDeleting && setBulkConfirmOpen(open)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-destructive">
+              <ShieldAlert className="h-5 w-5" />
+              Permanently delete {selectedIds.size} reservation{selectedIds.size === 1 ? "" : "s"}?
+            </DialogTitle>
+            <DialogDescription>
+              This action cannot be undone. Selected rows will be removed from the
+              reservations table immediately. Linked cross-booking siblings are not
+              auto-included; select them explicitly if you want to remove the whole group.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setBulkConfirmOpen(false)} disabled={bulkDeleting}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={bulkDeleting || selectedIds.size === 0}
+              onClick={async () => {
+                const ids = Array.from(selectedIds);
+                setBulkDeleting(true);
+                const { error, count } = await supabase
+                  .from("reservations")
+                  .delete({ count: "exact" })
+                  .in("id", ids);
+                setBulkDeleting(false);
+                if (error) {
+                  toast.error(`Bulk delete failed: ${error.message}`);
+                  return;
+                }
+                toast.success(`Deleted ${count ?? ids.length} reservation${(count ?? ids.length) === 1 ? "" : "s"}`);
+                setBulkConfirmOpen(false);
+                exitBulkMode();
+                queryClient.invalidateQueries({ queryKey: ["reservations"] });
+              }}
+            >
+              {bulkDeleting ? "Deleting..." : `Delete ${selectedIds.size}`}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
