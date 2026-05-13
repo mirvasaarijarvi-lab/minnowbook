@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
@@ -53,7 +54,10 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
   const { tenantId, tenant } = useTenant();
   const { selectedSiteId } = useSiteContext();
   const { applySiteFilter, siteIds } = useUserSites();
-  const [statusFilter, setStatusFilter] = useState<string>(initialStatusFilter || "all");
+  const [viewTab, setViewTab] = useState<"active" | "cancelled">(initialStatusFilter === "cancelled" ? "cancelled" : "active");
+  const [statusFilter, setStatusFilter] = useState<string>(
+    initialStatusFilter && initialStatusFilter !== "cancelled" ? initialStatusFilter : "all"
+  );
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [dateFilter, setDateFilter] = useState<string>(initialCheckoutToday ? "all" : "all");
   const [invoicedFilter, setInvoicedFilter] = useState<string>(initialInvoicedFilter === false ? "uninvoiced" : "all");
@@ -127,12 +131,18 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
   const showSiteLabel = (sites?.length ?? 0) > 0 && !selectedSiteId;
 
   const { data: reservations, isLoading } = useQuery({
-    queryKey: ["reservations", tenantId, selectedSiteId, siteIds, statusFilter, typeFilter, dateFilter, invoicedFilter, checkoutTodayFilter, specificDate ? format(specificDate, "yyyy-MM-dd") : null, debouncedSearch],
+    queryKey: ["reservations", tenantId, selectedSiteId, siteIds, viewTab, statusFilter, typeFilter, dateFilter, invoicedFilter, checkoutTodayFilter, specificDate ? format(specificDate, "yyyy-MM-dd") : null, debouncedSearch],
     queryFn: async () => {
       if (!tenantId) return [];
       let query = supabase.from("reservations").select("*").eq("tenant_id", tenantId).order("date", { ascending: false });
       query = applySiteFilter(query, selectedSiteId);
-      if (statusFilter !== "all") query = query.eq("status", statusFilter);
+      if (viewTab === "cancelled") {
+        query = query.eq("status", "cancelled");
+      } else if (statusFilter !== "all") {
+        query = query.eq("status", statusFilter);
+      } else {
+        query = query.neq("status", "cancelled");
+      }
       if (typeFilter !== "all") query = query.eq("reservation_type", typeFilter);
       if (checkoutTodayFilter) {
         query = query.eq("check_out_date", today);
@@ -471,13 +481,12 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
           >
             {t("dashboard.todayFilter")}
           </Button>
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <Select value={statusFilter} onValueChange={setStatusFilter} disabled={viewTab === "cancelled"}>
             <SelectTrigger className="w-full sm:w-[140px]"><SelectValue placeholder={t("common.status")} /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{t("dashboard.allStatuses")}</SelectItem>
               <SelectItem value="pending">{t("dashboard.pending")}</SelectItem>
               <SelectItem value="confirmed">{t("dashboard.confirmed")}</SelectItem>
-              <SelectItem value="cancelled">{t("dashboard.cancelled")}</SelectItem>
             </SelectContent>
           </Select>
           <Select value={typeFilter} onValueChange={setTypeFilter}>
@@ -558,6 +567,13 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
           </Badge>
         </div>
       )}
+
+      <Tabs value={viewTab} onValueChange={(v) => { setViewTab(v as "active" | "cancelled"); exitBulkMode(); }}>
+        <TabsList>
+          <TabsTrigger value="active">Active</TabsTrigger>
+          <TabsTrigger value="cancelled">{t("dashboard.cancelled")}</TabsTrigger>
+        </TabsList>
+      </Tabs>
 
       <SiteTabs />
 
