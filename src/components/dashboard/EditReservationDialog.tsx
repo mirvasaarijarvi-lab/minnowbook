@@ -95,6 +95,8 @@ const EditReservationDialog = ({
   const [activeTab, setActiveTab] = useState("details");
   const [customMessage, setCustomMessage] = useState("");
   const [cancelCustomMessage, setCancelCustomMessage] = useState("");
+  const [markAsConfirmed, setMarkAsConfirmed] = useState(false);
+  const [sendConfirmEmail, setSendConfirmEmail] = useState(true);
 
   const [form, setForm] = useState({
     guest_name: "",
