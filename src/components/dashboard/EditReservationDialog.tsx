@@ -69,6 +69,8 @@ interface EditReservationDialogProps {
   reservation: Reservation | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /** Open another reservation from the linked group (cross-booking jump). */
+  onSelectLinked?: (linked: { id: string; [key: string]: any }) => void;
 }
 
 const RESERVATION_TYPES = ["restaurant", "venue", "guesthouse", "hotel"] as const;
@@ -77,6 +79,7 @@ const EditReservationDialog = ({
   reservation,
   open,
   onOpenChange,
+  onSelectLinked,
 }: EditReservationDialogProps) => {
   const t = useT();
   const tDynamic = useTDynamic();
