@@ -801,7 +801,7 @@ const ResourceManagement = () => {
         <Card><CardContent className="p-8 text-center text-muted-foreground">{t("dashboard.noResources")}</CardContent></Card>
       ) : (
         <Card data-tour="resources-grid">
-          <CardContent className="p-0">
+          <CardContent className="p-0 overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
