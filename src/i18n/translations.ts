@@ -5049,6 +5049,11 @@ const fi: TranslationKeys = {
   "offers.crossBookingRemoveError": "Virhe varauksen linkityksen poistamisessa",
   "offers.linkedGroupCurrent": "Nykyinen",
   "offers.linkedGroupTotal": "Yhteensä",
+  "offers.linkedBadge": "Ristivaraus",
+  "offers.linkedRowService": "Palvelu",
+  "offers.linkedRowDate": "Päivämäärä",
+  "offers.linkedRowGuests": "Vieraat",
+  "offers.linkedRowPrice": "Hinta",
 
   // Tier-rajojen virheet
   "tierError.STAFF_USER_LIMIT_REACHED": "Tilauksesi sallii enintään {limit} käyttäjää. Päivitä lisätäksesi tiimiläisiä.",
