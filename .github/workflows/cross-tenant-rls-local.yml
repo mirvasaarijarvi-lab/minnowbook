@@ -578,7 +578,22 @@ jobs:
           done
 
           echo "::error::Migrations did not finish applying within $((MAX_ATTEMPTS * SLEEP_SECS))s"
-          echo "  tracking_ready=$tracking_ready version_ready=$version_ready tables_ready=$tables_ready"
+          echo "  tracking_ready=$tracking_ready version_ready=$version_ready tables_ready=$tables_ready rpc_ready=$rpc_ready"
+          if [ -n "${missing_versions:-}" ]; then
+            echo "Missing expected migration versions:"
+            printf '%s\n' "$missing_versions" | sed '/^$/d' | sed 's/^/  /'
+          fi
+          echo "list_tenant_scoped_tables() privileges:"
+          "${PSQL[@]}" -c "
+            SELECT
+              p.proacl::text AS acl,
+              has_function_privilege('anon', p.oid, 'EXECUTE') AS anon_execute,
+              has_function_privilege('authenticated', p.oid, 'EXECUTE') AS authenticated_execute
+            FROM pg_proc p
+            JOIN pg_namespace n ON n.oid = p.pronamespace
+            WHERE n.nspname = 'public'
+              AND p.proname = 'list_tenant_scoped_tables';
+          " 2>&1 || true
           echo "Applied versions:"
           "${PSQL[@]}" -c "SELECT version FROM supabase_migrations.schema_migrations \
             ORDER BY version;" 2>&1 || true
