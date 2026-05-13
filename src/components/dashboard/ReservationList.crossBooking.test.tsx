@@ -147,10 +147,14 @@ function makeChain(table: string) {
   const passthrough = () => chain;
   chain.select = passthrough;
   chain.eq = passthrough;
+  chain.neq = passthrough;
   chain.in = passthrough;
   chain.or = passthrough;
   chain.order = passthrough;
   chain.contains = passthrough;
+  chain.gte = passthrough;
+  chain.lte = passthrough;
+  chain.is = passthrough;
   chain.limit = () => Promise.resolve(payload);
   chain.maybeSingle = () => Promise.resolve({ data: payload.data ?? null, error: null });
   chain.then = (resolve: (v: any) => void) => resolve(payload);
