@@ -135,3 +135,57 @@ describe("tenant-private-url helper", () => {
     expect(createSignedUrl).toHaveBeenCalledTimes(2);
   });
 });
+
+describe("tenant-private-url SignedUrlError contract", () => {
+  beforeEach(() => {
+    createSignedUrl.mockReset();
+    clearTenantPrivateSignedUrlCache();
+  });
+
+  it("invalid path -> code 'invalid_path'", async () => {
+    // path-traversal style input is rejected by assertSafeStorageObjectPath
+    await expect(
+      createTenantPrivateSignedUrl("../etc/passwd"),
+    ).rejects.toMatchObject({ name: "SignedUrlError", code: "invalid_path" });
+    expect(createSignedUrl).not.toHaveBeenCalled();
+  });
+
+  it("SDK 403 -> code 'forbidden' with httpStatus 403", async () => {
+    createSignedUrl.mockResolvedValue({
+      data: null,
+      error: { message: "permission denied for object", status: 403 },
+    });
+    await expect(
+      createTenantPrivateSignedUrl("tenant-1/secret.bin"),
+    ).rejects.toMatchObject({ name: "SignedUrlError", code: "forbidden", httpStatus: 403 });
+  });
+
+  it("SDK 404 -> code 'not_found'", async () => {
+    createSignedUrl.mockResolvedValue({
+      data: null,
+      error: { message: "Object not found", status: 404 },
+    });
+    await expect(
+      createTenantPrivateSignedUrl("tenant-1/missing.bin"),
+    ).rejects.toMatchObject({ name: "SignedUrlError", code: "not_found", httpStatus: 404 });
+  });
+
+  it("thrown TypeError('fetch failed') -> code 'transport'", async () => {
+    createSignedUrl.mockRejectedValue(new TypeError("fetch failed"));
+    await expect(
+      createTenantPrivateSignedUrl("tenant-1/transport.bin"),
+    ).rejects.toMatchObject({ name: "SignedUrlError", code: "transport" });
+  });
+
+  it("dropped cache after a classified failure (next call retries)", async () => {
+    createSignedUrl
+      .mockResolvedValueOnce({ data: null, error: { message: "permission denied", status: 403 } })
+      .mockResolvedValueOnce({ data: { signedUrl: "https://example/recovered" }, error: null });
+    await expect(
+      createTenantPrivateSignedUrl("tenant-1/retry.bin"),
+    ).rejects.toMatchObject({ code: "forbidden" });
+    const ok = await createTenantPrivateSignedUrl("tenant-1/retry.bin");
+    expect(ok).toBe("https://example/recovered");
+    expect(createSignedUrl).toHaveBeenCalledTimes(2);
+  });
+});
