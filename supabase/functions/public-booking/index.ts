@@ -281,6 +281,12 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
     const start_time = validateTime(body.start_time, "start_time");
     const special_requests = validateString(body.special_requests, "special_requests", 500);
 
+    // Optional cross-booking link. When the same guest is booked across
+    // multiple resources/services in one flow, the caller passes a single
+    // shared `linked_group_id` (UUID) on every leg. Each leg is still its
+    // own row, but they're discoverable as siblings via this column.
+    const linked_group_id = validateUuid(body.linked_group_id, "linked_group_id", false);
+
     const reservation_type = validateString(body.reservation_type, "reservation_type", 20, true)!;
     if (!VALID_TYPES.includes(reservation_type)) throw new Error("Invalid reservation type");
 
@@ -552,6 +558,10 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
       status: "pending",
     };
 
+    if (linked_group_id) {
+      insertData.linked_group_id = linked_group_id;
+    }
+
     if (discount_type && discount_value) {
       insertData.discount_type = discount_type;
       insertData.discount_value = discount_value;
@@ -781,6 +791,33 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
       console.error("Failed to enqueue acknowledgment email:", ackErr);
     }
 
+    // Cross-booking siblings: when this reservation is part of a shared
+    // `linked_group_id`, fetch every other non-cancelled row in that group
+    // (scoped by tenant_id for isolation) so the API caller can render the
+    // full bundle without a second round trip. Best-effort, never fatal.
+    let linked_siblings: Array<Record<string, unknown>> = [];
+    if (linked_group_id) {
+      try {
+        const { data: siblings, error: sibErr } = await adminClient
+          .from("reservations")
+          .select(
+            "id, reservation_type, date, start_time, check_out_date, room_type, guests_count, price_eur, status",
+          )
+          .eq("tenant_id", tenant_id)
+          .eq("linked_group_id", linked_group_id)
+          .neq("status", "cancelled");
+        if (sibErr) {
+          console.warn(
+            `[CROSS_BOOKING_SIBLINGS_FAILED] ${sibErr.message} (group=${linked_group_id})`,
+          );
+        } else {
+          linked_siblings = siblings ?? [];
+        }
+      } catch (sibCatch) {
+        console.warn("[CROSS_BOOKING_SIBLINGS_THREW]", sibCatch);
+      }
+    }
+
     return new Response(
       // `current_load` reported back to the caller is the POST-booking load
       // (pre-existing load + the just-inserted reservation's guest count) so
@@ -789,6 +826,9 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
       JSON.stringify({
         success: true,
         warning,
+        reservation: { id: insertedRes.id, linked_group_id: linked_group_id ?? null },
+        linked_group_id: linked_group_id ?? null,
+        linked_siblings,
         capacity: {
           current_load: current_load + requestedGuests,
           capacity_total,
