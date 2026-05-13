@@ -1691,6 +1691,8 @@ type TranslationKeys = {
   "offers.crossBookingAddError": string;
   "offers.crossBookingRemoved": string;
   "offers.crossBookingRemoveError": string;
+  "offers.linkedGroupCurrent": string;
+  "offers.linkedGroupTotal": string;
 
   // Tier limit errors (raised by backend triggers / RPCs)
   "tierError.STAFF_USER_LIMIT_REACHED": string;
