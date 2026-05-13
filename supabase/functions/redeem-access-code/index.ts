@@ -28,6 +28,62 @@ type ErrorCode = typeof ERROR_CODES[keyof typeof ERROR_CODES];
 const ENDPOINT_NAME = "redeem-access-code";
 const IDEMPOTENCY_REPLAY_HEADER = "Idempotent-Replay";
 
+/**
+ * Structured request log. Emitted exactly ONCE per request from the
+ * top-level handler so dashboards can aggregate burst behaviour:
+ *   - count by `outcome` to see the rate-limit decision distribution
+ *   - filter `status >= 500` to verify zero 5xx during bursts
+ *   - p50/p95 of `duration_ms` to track tail latency under load
+ *
+ * Every field is redacted: no plaintext code, no idempotency key, no JWT.
+ * Tag is a literal string so log shipping pipelines can pin a regex.
+ */
+type Outcome =
+  | "preflight"
+  | "request_too_large"
+  | "not_authenticated"
+  | "invalid_idempotency_key"
+  | "invalid_code_format"
+  | "no_workspace"
+  | "invalid_or_unavailable_code"
+  | "idempotent_replay"
+  | "success"
+  | "internal_error";
+
+const LOG_TAG = "[redeem-access-code][telemetry]";
+
+function logRequest(entry: {
+  requestId: string;
+  outcome: Outcome;
+  status: number;
+  durationMs: number;
+  userIdHash: string | null;
+  hadIdempotencyKey: boolean;
+  replayed: boolean;
+  errorMessage?: string;
+}) {
+  const line = JSON.stringify({ tag: "redeem-access-code", ...entry, at: new Date().toISOString() });
+  if (entry.status >= 500) {
+    // Use console.error so the 5xx assertion in burst tests can grep on
+    // log level without parsing the JSON payload.
+    console.error(`${LOG_TAG} 5xx`, line);
+  } else {
+    console.info(LOG_TAG, line);
+  }
+}
+
+/**
+ * Cheap non-cryptographic hash of the user id so logs can correlate
+ * concurrent calls from the same caller without exposing the raw uuid.
+ */
+function shortHash(input: string): string {
+  let h = 5381;
+  for (let i = 0; i < input.length; i++) h = ((h << 5) + h + input.charCodeAt(i)) | 0;
+  return (h >>> 0).toString(16).padStart(8, "0");
+}
+
+
+
 function jsonResponse(
   status: number,
   body: Record<string, unknown>,
