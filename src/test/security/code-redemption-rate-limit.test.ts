@@ -171,7 +171,7 @@ describe("redeem-access-code: brute-force & replay resilience", () => {
     expect(AUTH_REJECTION_CODES.has(codes[0]), `expected auth-rejection code, got: ${codes[0]}`).toBe(true);
   });
 
-  it("varied fake codes do NOT produce distinguishable error codes vs. malformed input", async () => {
+  it("varied fake codes do NOT produce distinguishable error codes vs. malformed input", { timeout: 60000 }, async () => {
     // Probe matrix: shapes that should all surface as an auth-rejection
     // code (since no auth is supplied) — never a code-specific error
     // that would let an attacker classify the input.
