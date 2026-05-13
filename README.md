@@ -136,3 +136,5 @@ exercise the redirect path; the Vitest edge-function tests in
 assert the always-403 behavior. Run `bun test` and
 `npx playwright test` to validate end-to-end.
 
+
+<!-- ci: trigger 2026-05-13T16:28:42Z -->
