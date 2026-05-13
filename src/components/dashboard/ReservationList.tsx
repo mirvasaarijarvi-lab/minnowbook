@@ -53,7 +53,10 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
   const { tenantId, tenant } = useTenant();
   const { selectedSiteId } = useSiteContext();
   const { applySiteFilter, siteIds } = useUserSites();
-  const [statusFilter, setStatusFilter] = useState<string>(initialStatusFilter || "all");
+  const [viewTab, setViewTab] = useState<"active" | "cancelled">(initialStatusFilter === "cancelled" ? "cancelled" : "active");
+  const [statusFilter, setStatusFilter] = useState<string>(
+    initialStatusFilter && initialStatusFilter !== "cancelled" ? initialStatusFilter : "all"
+  );
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [dateFilter, setDateFilter] = useState<string>(initialCheckoutToday ? "all" : "all");
   const [invoicedFilter, setInvoicedFilter] = useState<string>(initialInvoicedFilter === false ? "uninvoiced" : "all");
