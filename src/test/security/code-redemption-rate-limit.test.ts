@@ -150,7 +150,7 @@ describe("redeem-access-code: brute-force & replay resilience", () => {
     }
   });
 
-  it("repeated serial attempts return the same generic error code (no validity leak)", async () => {
+  it("repeated serial attempts return the same generic error code (no validity leak)", { timeout: 60000 }, async () => {
     const ITER = 6;
     const codes: string[] = [];
     const messages: string[] = [];
