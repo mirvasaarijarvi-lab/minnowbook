@@ -32,7 +32,7 @@ interface Props {
  * ReservationDetailDialog so both views render cross-bookings identically.
  * Pulls siblings via legacy offers.reservation_ids AND modern linked_group_id.
  */
-const LinkedReservationsPanel = ({ reservation, headingAs = "label" }: Props) => {
+const LinkedReservationsPanel = ({ reservation, headingAs = "label", onSelectLinked }: Props) => {
   const t = useT();
   const dateFnsLocale = useDateLocale();
   const { typeLabel } = useResourceTypeLabel();
