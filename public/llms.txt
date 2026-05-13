@@ -1,0 +1,24 @@
+# MimmoBook
+
+> Cloud-based reservation management for restaurants, venues, hotels and guesthouses. Multi-site support, branded booking pages, automated emails and real-time reporting.
+
+MimmoBook is a multi-tenant SaaS platform that helps hospitality businesses manage online reservations across one or many sites. Each tenant gets a branded public booking page, automated guest emails, team roles and permissions, and real-time analytics.
+
+## Pages
+
+- [Home](/): Product overview, key features and pricing summary.
+- [What is MimmoBook](/what-is-mimmobook): Plain-language introduction to the platform and who it serves.
+- [Features](/features): Full list of capabilities including multi-site management, branded booking pages, automated emails, and reporting.
+- [Use Cases](/use-cases): Examples for restaurants, event venues, hotels, guesthouses, catering and pop-ups.
+- [Pricing](/pricing): Plans (Basic, Professional, Business), VAT-inclusive prices and free trial details.
+- [Blog](/blog): Articles on hospitality reservations, multi-site operations and booking workflows.
+- [About](/about): Company information and mission.
+- [Support](/support): Help center and contact form.
+- [Beta Guide](/beta-guide): Onboarding guide for beta tester accounts.
+- [Sign up](/signup): Create a new tenant account and start a free trial.
+- [Log in](/login): Sign in to an existing account.
+
+## Optional
+
+- [Privacy Policy](/privacy): GDPR and data protection terms.
+- [Accessibility](/accessibility): Accessibility commitment and supported assistive technology.
