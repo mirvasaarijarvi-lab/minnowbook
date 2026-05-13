@@ -51,7 +51,7 @@ const GuestPortal = () => {
 
       // Fetch tenant settings for branding
       const { data: tenantSettings } = await supabase
-        .from("tenant_settings" as any)
+        .from("tenant_settings_public" as any)
         .select("business_name, primary_color, logo_url")
         .eq("tenant_id", tokenData.tenant_id)
         .maybeSingle();
