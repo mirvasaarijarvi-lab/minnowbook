@@ -241,37 +241,80 @@ const EditReservationDialog = ({
 
   const allowedTypes = (tenant?.allowed_reservation_types as string[]) ?? [];
 
+  // Fields that MUST NEVER appear in the edit payload. Editing one leg of
+  // a cross-booking must update only that booking and keep the linkage to
+  // its siblings intact, so `linked_group_id` is forbidden here. The row
+  // identity columns (`id`, `tenant_id`) are also forbidden because they
+  // are matched in the WHERE clause, never overwritten.
+  const FORBIDDEN_UPDATE_KEYS = ["id", "tenant_id", "linked_group_id"] as const;
+
   const mutation = useMutation({
     mutationFn: async () => {
       if (!reservation) throw new Error("No reservation");
+
+      const updatePayload: Record<string, unknown> = {
+        guest_name: form.guest_name.trim(),
+        guest_email: form.guest_email.trim(),
+        guest_phone: form.guest_phone.trim() || null,
+        guests_count: form.guests_count ? parseInt(form.guests_count) : null,
+        date: form.date,
+        start_time: form.start_time || null,
+        check_out_date: form.check_out_date || null,
+        price_eur: form.price_eur ? parseFloat(form.price_eur) : null,
+        special_requests: form.special_requests.trim() || null,
+        internal_notes: form.internal_notes.trim() || null,
+        staff_notes: form.staff_notes.trim() || null,
+        reservation_type: form.reservation_type,
+        room_type: form.room_type || null,
+        breakfast_included: form.breakfast_included,
+        event_type: form.event_type || null,
+        estimated_guests: form.estimated_guests ? parseInt(form.estimated_guests) : null,
+        catering_needed: form.catering_needed,
+        discount_type: form.discount_type || null,
+        discount_value: form.discount_value ? parseFloat(form.discount_value) : null,
+        discount_reason: form.discount_reason.trim() || null,
+        updated_at: new Date().toISOString(),
+      };
+
+      // Defensive guard: a future refactor that adds one of these keys to
+      // the form would silently break cross-booking linkage. Fail loud
+      // before the network call so the bug is impossible to ship.
+      for (const key of FORBIDDEN_UPDATE_KEYS) {
+        if (key in updatePayload) {
+          throw new Error(
+            `Refusing to update reservation: payload includes forbidden key "${key}". ` +
+              `Cross-booking linkage and row identity must not be mutated by the edit flow.`,
+          );
+        }
+      }
+
       const { error } = await supabase
         .from("reservations")
-        .update({
-          guest_name: form.guest_name.trim(),
-          guest_email: form.guest_email.trim(),
-          guest_phone: form.guest_phone.trim() || null,
-          guests_count: form.guests_count ? parseInt(form.guests_count) : null,
-          date: form.date,
-          start_time: form.start_time || null,
-          check_out_date: form.check_out_date || null,
-          price_eur: form.price_eur ? parseFloat(form.price_eur) : null,
-          special_requests: form.special_requests.trim() || null,
-          internal_notes: form.internal_notes.trim() || null,
-          staff_notes: form.staff_notes.trim() || null,
-          reservation_type: form.reservation_type,
-          room_type: form.room_type || null,
-          breakfast_included: form.breakfast_included,
-          event_type: form.event_type || null,
-          estimated_guests: form.estimated_guests ? parseInt(form.estimated_guests) : null,
-          catering_needed: form.catering_needed,
-          discount_type: form.discount_type || null,
-          discount_value: form.discount_value ? parseFloat(form.discount_value) : null,
-          discount_reason: form.discount_reason.trim() || null,
-          updated_at: new Date().toISOString(),
-        })
+        .update(updatePayload)
         .eq("id", reservation.id)
         .eq("tenant_id", reservation.tenant_id);
       if (error) throw error;
+
+      // Post-write verification: re-read the row's linkage marker and
+      // confirm it still matches what we opened the dialog with. If it
+      // does not, something else mutated the row mid-flight; surface a
+      // hard error rather than silently breaking the cross-booking group.
+      if (reservation.linked_group_id) {
+        const { data: verify, error: verifyErr } = await supabase
+          .from("reservations")
+          .select("id, linked_group_id")
+          .eq("id", reservation.id)
+          .eq("tenant_id", reservation.tenant_id)
+          .maybeSingle();
+        if (verifyErr) throw verifyErr;
+        if (!verify || verify.linked_group_id !== reservation.linked_group_id) {
+          throw new Error(
+            "Cross-booking linkage check failed after update: " +
+              `expected linked_group_id=${reservation.linked_group_id}, ` +
+              `got ${verify?.linked_group_id ?? "null"}.`,
+          );
+        }
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["reservations"] });
