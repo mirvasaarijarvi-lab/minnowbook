@@ -791,6 +791,33 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
       console.error("Failed to enqueue acknowledgment email:", ackErr);
     }
 
+    // Cross-booking siblings: when this reservation is part of a shared
+    // `linked_group_id`, fetch every other non-cancelled row in that group
+    // (scoped by tenant_id for isolation) so the API caller can render the
+    // full bundle without a second round trip. Best-effort, never fatal.
+    let linked_siblings: Array<Record<string, unknown>> = [];
+    if (linked_group_id) {
+      try {
+        const { data: siblings, error: sibErr } = await adminClient
+          .from("reservations")
+          .select(
+            "id, reservation_type, date, start_time, check_out_date, room_type, guests_count, price_eur, status",
+          )
+          .eq("tenant_id", tenant_id)
+          .eq("linked_group_id", linked_group_id)
+          .neq("status", "cancelled");
+        if (sibErr) {
+          console.warn(
+            `[CROSS_BOOKING_SIBLINGS_FAILED] ${sibErr.message} (group=${linked_group_id})`,
+          );
+        } else {
+          linked_siblings = siblings ?? [];
+        }
+      } catch (sibCatch) {
+        console.warn("[CROSS_BOOKING_SIBLINGS_THREW]", sibCatch);
+      }
+    }
+
     return new Response(
       // `current_load` reported back to the caller is the POST-booking load
       // (pre-existing load + the just-inserted reservation's guest count) so
@@ -799,6 +826,9 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
       JSON.stringify({
         success: true,
         warning,
+        reservation: { id: insertedRes.id, linked_group_id: linked_group_id ?? null },
+        linked_group_id: linked_group_id ?? null,
+        linked_siblings,
         capacity: {
           current_load: current_load + requestedGuests,
           capacity_total,
