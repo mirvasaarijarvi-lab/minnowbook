@@ -602,6 +602,53 @@ jobs:
             WHERE table_schema = 'public' ORDER BY table_name;" 2>&1 || true
           exit 1
 
+      - name: Reload and verify PostgREST RPC grants
+        if: steps.supabase-ready.outcome == 'success' && steps.migrations-ready.outcome == 'success'
+        env:
+          PGPASSWORD: postgres
+          SUPABASE_URL: ${{ env.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ env.SUPABASE_ANON_KEY }}
+        run: |
+          set -uo pipefail
+          PSQL=(psql -h 127.0.0.1 -p 54322 -U postgres -d postgres -At)
+          "${PSQL[@]}" -c "NOTIFY pgrst, 'reload schema';" >/dev/null 2>&1 || true
+
+          last_body=""
+          last_code="000"
+          for i in $(seq 1 30); do
+            body_file="/tmp/list-tenant-scoped-tables-${i}.json"
+            last_code=$(curl -sS -o "$body_file" -w '%{http_code}' \
+              -X POST \
+              -H "apikey: ${SUPABASE_ANON_KEY}" \
+              -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" \
+              -H "Content-Type: application/json" \
+              -d '{}' \
+              "${SUPABASE_URL%/}/rest/v1/rpc/list_tenant_scoped_tables" || echo "000")
+            last_body=$(cat "$body_file" 2>/dev/null || true)
+            if [ "$last_code" = "200" ]; then
+              echo "✅ list_tenant_scoped_tables() reachable through PostgREST with anon key"
+              exit 0
+            fi
+            echo "[$i/30] ⏳ RPC not reachable yet via PostgREST (HTTP ${last_code})"
+            sleep 2
+          done
+
+          echo "::error::list_tenant_scoped_tables() is not callable through PostgREST with anon key after schema reload."
+          echo "Last HTTP status: ${last_code}"
+          echo "Last response: ${last_body}"
+          echo "Database privileges:"
+          "${PSQL[@]}" -c "
+            SELECT
+              p.proacl::text AS acl,
+              has_function_privilege('anon', p.oid, 'EXECUTE') AS anon_execute,
+              has_function_privilege('authenticated', p.oid, 'EXECUTE') AS authenticated_execute
+            FROM pg_proc p
+            JOIN pg_namespace n ON n.oid = p.pronamespace
+            WHERE n.nspname = 'public'
+              AND p.proname = 'list_tenant_scoped_tables';
+          " 2>&1 || true
+          exit 1
+
       # Some late regression-test migrations create temporary auth.users rows
       # directly in SQL. GoTrue's admin listUsers endpoint expects token text
       # columns to be strings, so normalize after every migration has run and
