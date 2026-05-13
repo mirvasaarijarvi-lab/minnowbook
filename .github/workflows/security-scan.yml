@@ -70,6 +70,30 @@ jobs:
       SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Detect migration changes
+        id: migrations
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            base="${{ github.event.pull_request.base.sha }}"
+            head="${{ github.event.pull_request.head.sha }}"
+            changed=$(git diff --name-only "$base" "$head" -- 'supabase/migrations/**' | wc -l | tr -d ' ')
+          elif [ "${{ github.event_name }}" = "push" ]; then
+            before="${{ github.event.before }}"
+            after="${{ github.sha }}"
+            if [ -z "$before" ] || [ "$before" = "0000000000000000000000000000000000000000" ]; then
+              changed=1
+            else
+              changed=$(git diff --name-only "$before" "$after" -- 'supabase/migrations/**' | wc -l | tr -d ' ')
+            fi
+          else
+            changed=1
+          fi
+          echo "changed=$changed" >> "$GITHUB_OUTPUT"
+          echo "Migration files changed in this event: $changed"
 
       - name: Check prerequisites
         id: check
@@ -78,7 +102,11 @@ jobs:
             echo "enabled=true" >> "$GITHUB_OUTPUT"
           else
             echo "enabled=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::Skipping Supabase advisors scan. Add SUPABASE_ACCESS_TOKEN and SUPABASE_PROJECT_REF repo secrets to enable."
+            if [ "${{ steps.migrations.outputs.changed }}" != "0" ]; then
+              echo "::error::Migration files changed but SUPABASE_ACCESS_TOKEN / SUPABASE_PROJECT_REF repo secrets are not configured. Cannot run mandatory security scan on migrations."
+              exit 1
+            fi
+            echo "::notice::Skipping Supabase advisors scan (no migration changes and credentials not configured)."
           fi
 
       - name: Fetch advisors and gate on ERRORs
