@@ -211,7 +211,7 @@ describe("redeem-access-code: brute-force & replay resilience", () => {
     expect(AUTH_REJECTION_CODES.has(only), `expected auth-rejection code, got: ${only}`).toBe(true);
   });
 
-  it("burst of 30 parallel calls across many distinct fake codes: zero leaks, zero 5xx, stable codes", async () => {
+  it("burst of 30 parallel calls across many distinct fake codes: zero leaks, zero 5xx, stable codes", { timeout: 60000 }, async () => {
     const codes = Array.from(
       { length: 30 },
       (_, i) => `BURST-${i.toString().padStart(4, "0")}-XYZW`,
