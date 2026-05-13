@@ -236,17 +236,18 @@ d("tenant-assets is private (regression)", () => {
       it("denies anon createSignedUrl (only tenant members may sign)", async () => {
         for (const path of PROBE_PATHS) {
           const { data, error } = await safeAnonCreateSignedUrl(anon, bucket, path, 60);
-          // Either an explicit error, or a null URL — never a usable URL.
+          // Invariant: anon NEVER receives a usable signedUrl.
           if (!error) {
             expect(data?.signedUrl ?? null).toBeNull();
-          } else {
-            // Transport-level "fetch failed" is normalized by
-            // safeAnonCreateSignedUrl into an explicit 403-shaped denial,
-            // so the assertion can stay strict on real RLS messaging.
-            expect(error.message).toMatch(
-              /not found|denied|permission|policy|normalized/i,
-            );
+            continue;
           }
+          // Stable contract assertion: classify the SDK error and require
+          // it lands in one of the known-denied codes. We don't regex on
+          // wording anymore. Transport-shaped errors are surfaced through
+          // safeAnonCreateSignedUrl's normalization, so they classify as
+          // "forbidden" too.
+          const classified = classifySignedUrlFailure({ sdkError: error });
+          expect(["forbidden", "not_found"]).toContain(classified.code);
         }
       }, NET_TIMEOUT_MS);
 
