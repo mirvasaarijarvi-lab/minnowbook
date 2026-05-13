@@ -55,7 +55,7 @@ const ResourceManagement = () => {
   const { selectedSiteId } = useSiteContext();
   const { applySiteFilter, siteIds } = useUserSites();
   const { can } = usePermissions();
-  const { canCreateResourceCheck } = useTierGate();
+  const { canCreateResourceCheck, effectiveTier, isSystemAdmin } = useTierGate();
   const canManage = can(PERM_RESOURCES_MANAGE);
   const { isPrivileged, getApprovalStatus } = useAutoApproval();
   const queryClient = useQueryClient();
@@ -426,8 +426,9 @@ const ResourceManagement = () => {
             <h2 className="text-xl sm:text-2xl font-serif font-bold text-foreground">{t("dashboard.resourceManagement")}</h2>
             <DashboardTooltip text="Add rooms, tables, or venues here. Set capacity, pricing, and upload photos. Toggle resources active/inactive to control booking availability." />
             {(() => {
+              if (isSystemAdmin) return null;
               const allowed: string[] = (tenant as any)?.allowed_reservation_types ?? [];
-              const max = getTierLimits((tenant as any)?.tier).maxReservationTypes;
+              const max = getTierLimits(effectiveTier).maxReservationTypes;
               if (max === null) return null;
               const used = allowed.length;
               const remaining = Math.max(0, max - used);
