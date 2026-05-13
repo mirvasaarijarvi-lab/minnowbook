@@ -243,6 +243,8 @@ const EditReservationDialog = ({
       setCustomMessage("");
       setCancelCustomMessage("");
       setActiveTab("details");
+      setMarkAsConfirmed(false);
+      setSendConfirmEmail(!reservation.no_email_confirm);
     }
   }, [reservation]);
 
