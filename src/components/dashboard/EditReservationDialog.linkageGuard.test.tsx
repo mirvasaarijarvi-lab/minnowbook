@@ -40,6 +40,15 @@ vi.mock("@/hooks/useResourceTypeLabel", () => ({
 }));
 vi.mock("@/components/ConfirmationEmailPreview", () => ({ default: () => null }));
 
+const toastSuccess = vi.fn();
+const toastError = vi.fn();
+vi.mock("sonner", () => ({
+  toast: {
+    success: (...args: any[]) => toastSuccess(...args),
+    error: (...args: any[]) => toastError(...args),
+  },
+}));
+
 const SHARED_GROUP_ID = "11111111-1111-1111-1111-111111111111";
 const RESERVATION = {
   id: "res-leg-1",
