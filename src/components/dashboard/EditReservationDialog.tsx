@@ -81,6 +81,7 @@ const EditReservationDialog = ({
   const t = useT();
   const tDynamic = useTDynamic();
   const dateFnsLocale = useDateLocale();
+  const { typeLabel } = useResourceTypeLabel();
   const queryClient = useQueryClient();
   const { tenant, tenantId } = useTenant();
   const { isGated } = useTierGate();
