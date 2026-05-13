@@ -66,6 +66,7 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
     return () => clearTimeout(handle);
   }, [searchQuery]);
   const [confirmDialog, setConfirmDialog] = useState<{ id: string; action: "confirmed" | "cancelled" } | null>(null);
+  const [sendCancelEmail, setSendCancelEmail] = useState(true);
   const [reminderDialog, setReminderDialog] = useState<string | null>(null);
   const [editingReservation, setEditingReservation] = useState<any | null>(null);
   const [detailReservation, setDetailReservation] = useState<any | null>(null);
