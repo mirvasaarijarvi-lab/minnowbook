@@ -193,7 +193,7 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
       // `suppressEmail` lets staff cancel without notifying the guest, e.g. for
       // duplicate bookings, internal test rows, or guests who already cancelled
       // out of band by phone.
-      if (reservation && !reservation.no_email_confirm && status === "confirmed") {
+      if (reservation && !reservation.no_email_confirm && !suppressEmail && status === "confirmed") {
         supabase.functions.invoke("send-reminder", {
           body: { reservationId: id, emailType: "confirmation" },
         }).catch((err) => console.error("Failed to send confirmation email:", err));
