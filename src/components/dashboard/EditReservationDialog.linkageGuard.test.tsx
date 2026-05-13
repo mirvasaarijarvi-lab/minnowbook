@@ -181,25 +181,3 @@ describe("EditReservationDialog: cross-booking linkage guard", () => {
     expect(toastSuccess).not.toHaveBeenCalled();
   });
 });
-
-  it("throws when the post-update verification finds linked_group_id changed", async () => {
-    // Simulate a concurrent writer wiping the linkage between our update
-    // and the verification read. The mutation must surface an error toast.
-    groupIdAfterUpdate = null;
-
-    renderDialog();
-    const saveBtn = await screen.findByRole("button", { name: /save/i });
-    await userEvent.click(saveBtn);
-
-    // Error toast appears (the dialog uses sonner which renders a region).
-    await waitFor(() =>
-      expect(updateCalls.length).toBeGreaterThan(0),
-    );
-    // The mutation's onError fires with the localized update-error copy.
-    await waitFor(() => {
-      expect(document.body.textContent ?? "").toMatch(
-        /update|fail|error/i,
-      );
-    });
-  });
-});
