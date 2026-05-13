@@ -184,7 +184,7 @@ const ReservationDetailDialog = ({ reservation, open, onOpenChange, onEdit, canE
             </>
           )}
 
-          <LinkedReservationsPanel reservation={r} headingAs="h3" />
+          <LinkedReservationsPanel reservation={r} headingAs="h3" onSelectLinked={onSelectLinked} />
 
           <div className="text-xs text-muted-foreground">
             {"Created"}: {r.created_at ? format(new Date(r.created_at), "PPp", { locale: dateFnsLocale }) : "—"}
