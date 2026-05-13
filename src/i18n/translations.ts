@@ -3366,6 +3366,8 @@ const en: TranslationKeys = {
   "offers.crossBookingAddError": "Error linking reservation",
   "offers.crossBookingRemoved": "Reservation unlinked",
   "offers.crossBookingRemoveError": "Error unlinking reservation",
+  "offers.linkedGroupCurrent": "Current",
+  "offers.linkedGroupTotal": "Total",
 
   // Tier limit errors
   "tierError.STAFF_USER_LIMIT_REACHED": "Your plan allows up to {limit} staff users. Upgrade to add more team members.",
