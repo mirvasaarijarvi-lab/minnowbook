@@ -63,6 +63,8 @@ interface Reservation {
   discount_value?: number | null;
   discount_reason?: string | null;
   linked_group_id?: string | null;
+  status?: string | null;
+  no_email_confirm?: boolean | null;
 }
 
 interface EditReservationDialogProps {
