@@ -71,11 +71,13 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
   }, [searchQuery]);
   const [confirmDialog, setConfirmDialog] = useState<{ id: string; action: "confirmed" | "cancelled" } | null>(null);
   const [sendCancelEmail, setSendCancelEmail] = useState(true);
+  const [sendConfirmEmail, setSendConfirmEmail] = useState(true);
   useEffect(() => {
-    // Default the "send cancellation email" toggle back to ON each time the
-    // cancel dialog opens, so a previous "skip email" choice doesn't silently
-    // carry over to the next reservation.
+    // Default the "send email" toggles back to ON each time the dialog
+    // opens so a previous "skip email" choice doesn't silently carry over
+    // to the next reservation.
     if (confirmDialog?.action === "cancelled") setSendCancelEmail(true);
+    if (confirmDialog?.action === "confirmed") setSendConfirmEmail(true);
   }, [confirmDialog]);
   const [reminderDialog, setReminderDialog] = useState<string | null>(null);
   const [editingReservation, setEditingReservation] = useState<any | null>(null);
@@ -191,7 +193,7 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
       // `suppressEmail` lets staff cancel without notifying the guest, e.g. for
       // duplicate bookings, internal test rows, or guests who already cancelled
       // out of band by phone.
-      if (reservation && !reservation.no_email_confirm && status === "confirmed") {
+      if (reservation && !reservation.no_email_confirm && !suppressEmail && status === "confirmed") {
         supabase.functions.invoke("send-reminder", {
           body: { reservationId: id, emailType: "confirmation" },
         }).catch((err) => console.error("Failed to send confirmation email:", err));
@@ -394,7 +396,12 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
     updateStatus.mutate({
       id: confirmDialog.id,
       status: confirmDialog.action,
-      suppressEmail: confirmDialog.action === "cancelled" ? !sendCancelEmail : undefined,
+      suppressEmail:
+        confirmDialog.action === "cancelled"
+          ? !sendCancelEmail
+          : confirmDialog.action === "confirmed"
+          ? !sendConfirmEmail
+          : undefined,
     });
   };
 
@@ -800,7 +807,7 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
 
       {/* Confirmation dialog */}
       <Dialog open={!!confirmDialog} onOpenChange={(open) => !open && setConfirmDialog(null)}>
-        <DialogContent className={confirmDialog?.action === "cancelled" ? "sm:max-w-2xl max-h-[90vh] overflow-y-auto" : ""}>
+        <DialogContent className={confirmDialog?.action === "cancelled" || confirmDialog?.action === "confirmed" ? "sm:max-w-2xl max-h-[90vh] overflow-y-auto" : ""}>
           <DialogHeader>
             <DialogTitle>
               {confirmDialog?.action === "confirmed" ? t("dashboard.confirmReservation") : t("dashboard.cancelReservation")}
@@ -859,6 +866,27 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
                   <span className="font-medium text-foreground">Send cancellation email to guest</span>
                   <span className="block text-xs text-muted-foreground">
                     Uncheck to cancel silently without notifying {r.guest_name || "the guest"}.
+                  </span>
+                </span>
+              </label>
+            );
+          })()}
+          {confirmDialog?.action === "confirmed" && (() => {
+            const r = reservations?.find((res) => res.id === confirmDialog.id);
+            // If the reservation was already flagged "no confirmation email"
+            // (e.g. internal booking), there's nothing to toggle, hide the row.
+            if (!r || r.no_email_confirm) return null;
+            return (
+              <label className="flex items-start gap-2 rounded-md border border-border bg-muted/30 px-3 py-2 text-sm cursor-pointer select-none">
+                <Checkbox
+                  checked={sendConfirmEmail}
+                  onCheckedChange={(checked) => setSendConfirmEmail(!!checked)}
+                  className="mt-0.5"
+                />
+                <span>
+                  <span className="font-medium text-foreground">Send confirmation email to guest</span>
+                  <span className="block text-xs text-muted-foreground">
+                    Uncheck to confirm silently without notifying {r.guest_name || "the guest"}.
                   </span>
                 </span>
               </label>
