@@ -113,7 +113,7 @@ async function rowCountAnon(table: string, tenantId: string): Promise<number> {
   return count ?? 0;
 }
 
-describe("tenant_settings — fully private to anon", () => {
+d("tenant_settings — fully private to anon", () => {
   it("anon SELECT * returns no rows", async () => {
     const result = await anon.from("tenant_settings").select("*").limit(50);
     expectReadDeniedOrEmpty(result, "tenant_settings select *");
@@ -147,7 +147,7 @@ describe("tenant_settings — fully private to anon", () => {
   });
 });
 
-describe("tenant_opening_hours — anon read for active tenants only, no writes", () => {
+d("tenant_opening_hours — anon read for active tenants only, no writes", () => {
   it("anon SELECT does not error (public-read policy is intentional)", async () => {
     const { error } = await anon
       .from("tenant_opening_hours")
@@ -194,7 +194,7 @@ describe("tenant_opening_hours — anon read for active tenants only, no writes"
   });
 });
 
-describe("blocked_slots — anon read for active tenants only, no writes", () => {
+d("blocked_slots — anon read for active tenants only, no writes", () => {
   it("anon SELECT is permitted by policy and does not error on auth", async () => {
     const { error } = await anon
       .from("blocked_slots")
@@ -234,7 +234,7 @@ describe("blocked_slots — anon read for active tenants only, no writes", () =>
   });
 });
 
-describe("recurring_blocked_slots — anon read for active tenants only, no writes", () => {
+d("recurring_blocked_slots — anon read for active tenants only, no writes", () => {
   it("anon SELECT is permitted by policy and does not error on auth", async () => {
     const { error } = await anon
       .from("recurring_blocked_slots")
@@ -274,7 +274,7 @@ describe("recurring_blocked_slots — anon read for active tenants only, no writ
   });
 });
 
-describe("resource_images — anon read public, no writes", () => {
+d("resource_images — anon read public, no writes", () => {
   it("anon SELECT does not error (public-read policy is intentional)", async () => {
     const { error } = await anon
       .from("resource_images")
@@ -314,7 +314,7 @@ describe("resource_images — anon read public, no writes", () => {
   });
 });
 
-describe("Test sanity — anon client is truly unauthenticated", () => {
+d("Test sanity — anon client is truly unauthenticated", () => {
   // If a future setup accidentally injected a service-role key, every
   // assertion above would pass for the wrong reason. This guard makes that
   // impossible.
