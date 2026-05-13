@@ -14,6 +14,7 @@ import PasswordInput from "@/components/PasswordInput";
 import MfaVerify from "@/components/MfaVerify";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useAuth } from "@/contexts/AuthContext";
+import SEOHead from "@/components/SEOHead";
 
 const PENDING_CODE_KEY = "mimmobook_pending_code";
 
@@ -202,6 +203,11 @@ const Login = () => {
 
   return (
     <div className="min-h-screen bg-background flex">
+      <SEOHead
+        title="Log in to MimmoBook – Reservation Management"
+        description="Sign in to your MimmoBook account to manage reservations, sites, team and branded booking pages."
+        path="/login"
+      />
       <div className="hidden lg:flex lg:w-1/2 gradient-hero items-center justify-center p-12">
         <div className="max-w-md text-center">
           <Logo variant="negative" size="lg" className="justify-center mb-8" />

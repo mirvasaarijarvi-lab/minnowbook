@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { useT } from "@/contexts/I18nContext";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import PasswordInput from "@/components/PasswordInput";
+import SEOHead from "@/components/SEOHead";
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -80,6 +81,11 @@ const Signup = () => {
 
   return (
     <div className="min-h-screen bg-background flex">
+      <SEOHead
+        title="Sign up for MimmoBook – Start your free trial"
+        description="Create your MimmoBook account and start a 30-day free trial. Branded booking pages, multi-site support and automated guest emails."
+        path="/signup"
+      />
       <div className="hidden lg:flex lg:w-1/2 gradient-hero items-center justify-center p-12">
         <div className="max-w-md text-center">
           <Logo variant="negative" size="lg" className="justify-center mb-8" />

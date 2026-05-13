@@ -33,6 +33,7 @@ import { resolveBookingError } from "@/lib/booking-error-registry";
 import { trackBookingError } from "@/lib/booking-telemetry";
 import { useAuth } from "@/contexts/AuthContext";
 import { FadeInImage } from "@/components/branding/FadeInImage";
+import SEOHead from "@/components/SEOHead";
 
 // Types for public views (not in auto-generated types)
 interface PublicTenant {
