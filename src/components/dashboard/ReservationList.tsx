@@ -592,8 +592,12 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
             return (
             <Card
               key={r.id}
-              className="hover:shadow-hover transition-shadow cursor-pointer"
-              role="button"
+              className={cn(
+                "hover:shadow-hover transition-shadow cursor-pointer",
+                bulkMode && isSystemAdmin && selectedIds.has(r.id) && "border-destructive bg-destructive/5"
+              )}
+              role={bulkMode && isSystemAdmin ? "checkbox" : "button"}
+              aria-checked={bulkMode && isSystemAdmin ? selectedIds.has(r.id) : undefined}
               tabIndex={0}
               style={
                 groupColor
@@ -603,6 +607,10 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
               onClick={(e) => {
                 const target = e.target as HTMLElement;
                 if (target.closest('button,input,a,[role="menuitem"],[role="checkbox"],label')) return;
+                if (bulkMode && isSystemAdmin) {
+                  toggleSelected(r.id, !selectedIds.has(r.id));
+                  return;
+                }
                 setDetailReservation(r);
               }}
               onKeyDown={(e) => {
@@ -610,6 +618,10 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
                   const target = e.target as HTMLElement;
                   if (target.closest('button,input,a,[role="menuitem"],[role="checkbox"],label')) return;
                   e.preventDefault();
+                  if (bulkMode && isSystemAdmin) {
+                    toggleSelected(r.id, !selectedIds.has(r.id));
+                    return;
+                  }
                   setDetailReservation(r);
                 }
               }}
@@ -622,6 +634,7 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
                         checked={selectedIds.has(r.id)}
                         className="mt-1"
                         aria-label="Select reservation for deletion"
+                        onClick={(e) => e.stopPropagation()}
                         onCheckedChange={(checked) => toggleSelected(r.id, !!checked)}
                       />
                     ) : canEdit ? (
@@ -700,7 +713,7 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
                     </div>
 
                     {/* Used & Invoiced toggles */}
-                    {canEdit && (
+                    {canEdit && !bulkMode && (
                     <div className="flex items-center gap-4 mt-2 pt-2 border-t border-border">
                       <label
                         className="flex items-center gap-1.5 text-xs cursor-pointer select-none"
@@ -741,7 +754,7 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
                     ) : r.price_eur != null ? (
                       <span className="text-sm font-semibold text-foreground whitespace-nowrap">€{Number(r.price_eur).toFixed(2)}</span>
                     ) : null}
-                    {(canEdit || canDelete) && (
+                    {(canEdit || canDelete) && !bulkMode && (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon" className="h-8 w-8">
