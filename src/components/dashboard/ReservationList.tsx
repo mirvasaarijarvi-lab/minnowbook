@@ -634,8 +634,8 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
               }}
             >
               <CardContent className="p-4">
-                <div className="flex items-start justify-between gap-2 sm:gap-4">
-                  <div className="flex items-start gap-3">
+                <div className="flex items-start justify-between gap-2 sm:gap-4 min-w-0">
+                  <div className="flex items-start gap-3 flex-1 min-w-0">
                     {bulkMode && isSystemAdmin ? (
                       <Checkbox
                         checked={selectedIds.has(r.id)}
