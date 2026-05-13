@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { classifySignedUrlFailure } from "@/lib/signed-url-error";
 
 // In CI we don't want to depend on a live round-trip to Supabase Storage
 // for the anon `createSignedUrl` denial probe — the network occasionally
