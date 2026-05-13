@@ -130,12 +130,18 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
   const showSiteLabel = (sites?.length ?? 0) > 0 && !selectedSiteId;
 
   const { data: reservations, isLoading } = useQuery({
-    queryKey: ["reservations", tenantId, selectedSiteId, siteIds, statusFilter, typeFilter, dateFilter, invoicedFilter, checkoutTodayFilter, specificDate ? format(specificDate, "yyyy-MM-dd") : null, debouncedSearch],
+    queryKey: ["reservations", tenantId, selectedSiteId, siteIds, viewTab, statusFilter, typeFilter, dateFilter, invoicedFilter, checkoutTodayFilter, specificDate ? format(specificDate, "yyyy-MM-dd") : null, debouncedSearch],
     queryFn: async () => {
       if (!tenantId) return [];
       let query = supabase.from("reservations").select("*").eq("tenant_id", tenantId).order("date", { ascending: false });
       query = applySiteFilter(query, selectedSiteId);
-      if (statusFilter !== "all") query = query.eq("status", statusFilter);
+      if (viewTab === "cancelled") {
+        query = query.eq("status", "cancelled");
+      } else if (statusFilter !== "all") {
+        query = query.eq("status", statusFilter);
+      } else {
+        query = query.neq("status", "cancelled");
+      }
       if (typeFilter !== "all") query = query.eq("reservation_type", typeFilter);
       if (checkoutTodayFilter) {
         query = query.eq("check_out_date", today);
