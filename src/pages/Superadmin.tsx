@@ -355,7 +355,7 @@ const Superadmin = () => {
                           </Badge>
                         )}
                       </div>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-muted-foreground break-words">
                         /{t.slug} · {t.userCount} users · {t.reservationCount} reservations · {t.resourceCount} resources
                       </p>
                       {(t.stripe_customer_id || t.stripe_subscription_id) && (
