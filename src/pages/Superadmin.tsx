@@ -323,10 +323,10 @@ const Superadmin = () => {
                 {filtered.map((t) => (
                   <div
                     key={t.id}
-                    className="flex items-center justify-between p-4 rounded-lg border border-border bg-card hover:shadow-card transition-shadow"
+                    className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 rounded-lg border border-border bg-card hover:shadow-card transition-shadow"
                   >
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
+                      <div className="flex flex-wrap items-center gap-2 mb-1">
                         <h3 className="font-semibold text-foreground truncate">{t.name}</h3>
                         <Badge
                           variant={t.is_active ? "default" : "destructive"}
