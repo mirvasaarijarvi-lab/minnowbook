@@ -359,7 +359,7 @@ const Superadmin = () => {
                         /{t.slug} · {t.userCount} users · {t.reservationCount} reservations · {t.resourceCount} resources
                       </p>
                       {(t.stripe_customer_id || t.stripe_subscription_id) && (
-                        <div className="flex items-center gap-3 mt-1">
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1">
                           <CreditCard className="h-3 w-3 text-muted-foreground shrink-0" />
                           {t.stripe_customer_id && (
                             <button
@@ -367,11 +367,11 @@ const Superadmin = () => {
                                 navigator.clipboard.writeText(t.stripe_customer_id!);
                                 toast({ title: "Copied", description: "Stripe Customer ID copied" });
                               }}
-                              className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 font-mono"
+                              className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 font-mono max-w-full break-all text-left"
                               title="Click to copy"
                             >
-                              {t.stripe_customer_id}
-                              <Copy className="h-2.5 w-2.5" />
+                              <span className="break-all">{t.stripe_customer_id}</span>
+                              <Copy className="h-2.5 w-2.5 shrink-0" />
                             </button>
                           )}
                           {t.stripe_subscription_id && (
@@ -380,11 +380,11 @@ const Superadmin = () => {
                                 navigator.clipboard.writeText(t.stripe_subscription_id!);
                                 toast({ title: "Copied", description: "Stripe Subscription ID copied" });
                               }}
-                              className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 font-mono"
+                              className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 font-mono max-w-full break-all text-left"
                               title="Click to copy"
                             >
-                              {t.stripe_subscription_id}
-                              <Copy className="h-2.5 w-2.5" />
+                              <span className="break-all">{t.stripe_subscription_id}</span>
+                              <Copy className="h-2.5 w-2.5 shrink-0" />
                             </button>
                           )}
                         </div>
