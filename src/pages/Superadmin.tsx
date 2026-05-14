@@ -401,7 +401,7 @@ const Superadmin = () => {
                         </p>
                       )}
                     </div>
-                    <div className="flex items-center gap-2 ml-4">
+                    <div className="flex flex-wrap items-center gap-2 sm:ml-4 shrink-0">
                       <Button
                         variant="ghost"
                         size="sm"
