@@ -323,10 +323,10 @@ const Superadmin = () => {
                 {filtered.map((t) => (
                   <div
                     key={t.id}
-                    className="flex items-center justify-between p-4 rounded-lg border border-border bg-card hover:shadow-card transition-shadow"
+                    className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 rounded-lg border border-border bg-card hover:shadow-card transition-shadow"
                   >
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
+                      <div className="flex flex-wrap items-center gap-2 mb-1">
                         <h3 className="font-semibold text-foreground truncate">{t.name}</h3>
                         <Badge
                           variant={t.is_active ? "default" : "destructive"}
@@ -355,11 +355,11 @@ const Superadmin = () => {
                           </Badge>
                         )}
                       </div>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-muted-foreground break-words">
                         /{t.slug} · {t.userCount} users · {t.reservationCount} reservations · {t.resourceCount} resources
                       </p>
                       {(t.stripe_customer_id || t.stripe_subscription_id) && (
-                        <div className="flex items-center gap-3 mt-1">
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1">
                           <CreditCard className="h-3 w-3 text-muted-foreground shrink-0" />
                           {t.stripe_customer_id && (
                             <button
@@ -367,11 +367,11 @@ const Superadmin = () => {
                                 navigator.clipboard.writeText(t.stripe_customer_id!);
                                 toast({ title: "Copied", description: "Stripe Customer ID copied" });
                               }}
-                              className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 font-mono"
+                              className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 font-mono max-w-full break-all text-left"
                               title="Click to copy"
                             >
-                              {t.stripe_customer_id}
-                              <Copy className="h-2.5 w-2.5" />
+                              <span className="break-all">{t.stripe_customer_id}</span>
+                              <Copy className="h-2.5 w-2.5 shrink-0" />
                             </button>
                           )}
                           {t.stripe_subscription_id && (
@@ -380,11 +380,11 @@ const Superadmin = () => {
                                 navigator.clipboard.writeText(t.stripe_subscription_id!);
                                 toast({ title: "Copied", description: "Stripe Subscription ID copied" });
                               }}
-                              className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 font-mono"
+                              className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 font-mono max-w-full break-all text-left"
                               title="Click to copy"
                             >
-                              {t.stripe_subscription_id}
-                              <Copy className="h-2.5 w-2.5" />
+                              <span className="break-all">{t.stripe_subscription_id}</span>
+                              <Copy className="h-2.5 w-2.5 shrink-0" />
                             </button>
                           )}
                         </div>
@@ -401,7 +401,7 @@ const Superadmin = () => {
                         </p>
                       )}
                     </div>
-                    <div className="flex items-center gap-2 ml-4">
+                    <div className="flex flex-wrap items-center gap-2 sm:ml-4 shrink-0">
                       <Button
                         variant="ghost"
                         size="sm"
