@@ -545,6 +545,23 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
                 </Button>
                 <Button
                   size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    const visibleIds = (reservations ?? []).map((r: any) => r.id);
+                    const allSelected =
+                      visibleIds.length > 0 &&
+                      visibleIds.every((id) => selectedIds.has(id));
+                    setSelectedIds(allSelected ? new Set() : new Set(visibleIds));
+                  }}
+                  disabled={(reservations?.length ?? 0) === 0}
+                >
+                  {(reservations ?? []).length > 0 &&
+                  (reservations ?? []).every((r: any) => selectedIds.has(r.id))
+                    ? "Deselect all"
+                    : `Select all visible (${reservations?.length ?? 0})`}
+                </Button>
+                <Button
+                  size="sm"
                   variant="destructive"
                   className="gap-1.5"
                   disabled={selectedIds.size === 0}
