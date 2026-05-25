@@ -142,8 +142,17 @@ const BlockedSlotsPanel = () => {
       const from = dateRange.from;
       const to = dateRange.to ?? dateRange.from;
       const days = eachDayOfInterval({ start: from, end: to });
+      // Resolve the site_id to stamp on each row. If a specific resource is
+      // chosen, inherit its site so the block lives with that resource;
+      // otherwise fall back to the active site context (may be null for
+      // owners/admins viewing "all sites").
+      const chosenResource = blockSpecificResource && form.resource_id
+        ? (resources ?? []).find((r: any) => r.id === form.resource_id)
+        : null;
+      const siteIdForRows = (chosenResource as any)?.site_id ?? selectedSiteId ?? null;
       const rows = days.map((day) => ({
         tenant_id: tenantId,
+        site_id: siteIdForRows,
         date: format(day, "yyyy-MM-dd"),
         resource_type: form.resource_type,
         resource_id: blockSpecificResource && form.resource_id ? form.resource_id : null,
