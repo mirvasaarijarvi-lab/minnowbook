@@ -3,6 +3,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import RecurringBlocksPanel from "./RecurringBlocksPanel";
 import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/hooks/useTenant";
+import { useSiteContext } from "@/hooks/useSiteContext";
+import { useUserSites } from "@/hooks/useUserSites";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -42,6 +44,8 @@ interface BlockedSlot {
 
 const BlockedSlotsPanel = () => {
   const { tenantId } = useTenant();
+  const { selectedSiteId } = useSiteContext();
+  const { applySiteFilter } = useUserSites();
   const { isPrivileged, getApprovalStatus } = useAutoApproval();
   const queryClient = useQueryClient();
   const t = useT();
@@ -82,24 +86,27 @@ const BlockedSlotsPanel = () => {
   };
 
   const { data: resources } = useQuery({
-    queryKey: ["resources", tenantId],
+    queryKey: ["resources", tenantId, selectedSiteId],
     queryFn: async () => {
       if (!tenantId) return [];
-      const { data } = await supabase.from("resources").select("id, name, resource_type").eq("tenant_id", tenantId).order("name");
+      let q = supabase.from("resources").select("id, name, resource_type, site_id").eq("tenant_id", tenantId);
+      q = applySiteFilter(q, selectedSiteId);
+      const { data } = await q.order("name");
       return data ?? [];
     },
     enabled: !!tenantId,
   });
 
   const { data: blockedSlots, isLoading } = useQuery({
-    queryKey: ["blocked-slots", tenantId],
+    queryKey: ["blocked-slots", tenantId, selectedSiteId],
     queryFn: async () => {
       if (!tenantId) return [];
-      const { data, error } = await supabase
+      let q = supabase
         .from("blocked_slots")
         .select("*, resource:resources(name)")
-        .eq("tenant_id", tenantId)
-        .order("date", { ascending: false });
+        .eq("tenant_id", tenantId);
+      q = applySiteFilter(q, selectedSiteId);
+      const { data, error } = await q.order("date", { ascending: false });
       if (error) throw error;
       return (data ?? []) as BlockedSlot[];
     },
@@ -135,8 +142,17 @@ const BlockedSlotsPanel = () => {
       const from = dateRange.from;
       const to = dateRange.to ?? dateRange.from;
       const days = eachDayOfInterval({ start: from, end: to });
+      // Resolve the site_id to stamp on each row. If a specific resource is
+      // chosen, inherit its site so the block lives with that resource;
+      // otherwise fall back to the active site context (may be null for
+      // owners/admins viewing "all sites").
+      const chosenResource = blockSpecificResource && form.resource_id
+        ? (resources ?? []).find((r: any) => r.id === form.resource_id)
+        : null;
+      const siteIdForRows = (chosenResource as any)?.site_id ?? selectedSiteId ?? null;
       const rows = days.map((day) => ({
         tenant_id: tenantId,
+        site_id: siteIdForRows,
         date: format(day, "yyyy-MM-dd"),
         resource_type: form.resource_type,
         resource_id: blockSpecificResource && form.resource_id ? form.resource_id : null,
@@ -180,12 +196,16 @@ const BlockedSlotsPanel = () => {
       if (!tenantId || !bulkDeleteRange?.from) throw new Error("Select a date range");
       const from = format(bulkDeleteRange.from, "yyyy-MM-dd");
       const to = format(bulkDeleteRange.to ?? bulkDeleteRange.from, "yyyy-MM-dd");
-      const { error } = await supabase
+      // Restrict bulk delete to the currently viewed site so an admin
+      // clearing one site's blocks doesn't accidentally wipe another's.
+      let q = supabase
         .from("blocked_slots")
         .delete()
         .eq("tenant_id", tenantId)
         .gte("date", from)
         .lte("date", to);
+      q = applySiteFilter(q, selectedSiteId);
+      const { error } = await q;
       if (error) throw error;
     },
     onSuccess: () => {

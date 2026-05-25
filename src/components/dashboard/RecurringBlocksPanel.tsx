@@ -2,6 +2,8 @@ import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/hooks/useTenant";
+import { useSiteContext } from "@/hooks/useSiteContext";
+import { useUserSites } from "@/hooks/useUserSites";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -47,6 +49,8 @@ const getDayName = (dayOfWeek: number, locale: Locale) => {
 
 const RecurringBlocksPanel = () => {
   const { tenantId } = useTenant();
+  const { selectedSiteId } = useSiteContext();
+  const { applySiteFilter } = useUserSites();
   const { isPrivileged, getApprovalStatus } = useAutoApproval();
   const queryClient = useQueryClient();
   const t = useT();
@@ -82,24 +86,27 @@ const RecurringBlocksPanel = () => {
   };
 
   const { data: resources } = useQuery({
-    queryKey: ["resources", tenantId],
+    queryKey: ["resources", tenantId, selectedSiteId],
     queryFn: async () => {
       if (!tenantId) return [];
-      const { data } = await supabase.from("resources").select("id, name, resource_type").eq("tenant_id", tenantId).order("name");
+      let q = supabase.from("resources").select("id, name, resource_type, site_id").eq("tenant_id", tenantId);
+      q = applySiteFilter(q, selectedSiteId);
+      const { data } = await q.order("name");
       return data ?? [];
     },
     enabled: !!tenantId,
   });
 
   const { data: recurringBlocks, isLoading } = useQuery({
-    queryKey: ["recurring-blocked-slots", tenantId],
+    queryKey: ["recurring-blocked-slots", tenantId, selectedSiteId],
     queryFn: async () => {
       if (!tenantId) return [];
-      const { data, error } = await supabase
+      let q = supabase
         .from("recurring_blocked_slots")
         .select("*, resource:resources(name)")
-        .eq("tenant_id", tenantId)
-        .order("day_of_week");
+        .eq("tenant_id", tenantId);
+      q = applySiteFilter(q, selectedSiteId);
+      const { data, error } = await q.order("day_of_week");
       if (error) throw error;
       return (data ?? []) as RecurringBlock[];
     },
@@ -120,8 +127,16 @@ const RecurringBlocksPanel = () => {
   const createMutation = useMutation({
     mutationFn: async () => {
       if (!tenantId || selectedDays.length === 0) throw new Error("Select at least one day");
+      // Inherit site from the chosen resource when present, otherwise fall
+      // back to the active site context. Keeps recurring blocks aligned with
+      // the site filter applied elsewhere in the dashboard.
+      const chosenResource = blockSpecificResource && form.resource_id
+        ? (resources ?? []).find((r: any) => r.id === form.resource_id)
+        : null;
+      const siteIdForRows = (chosenResource as any)?.site_id ?? selectedSiteId ?? null;
       const rows = selectedDays.map((day) => ({
         tenant_id: tenantId,
+        site_id: siteIdForRows,
         day_of_week: day,
         resource_type: form.resource_type,
         resource_id: blockSpecificResource && form.resource_id ? form.resource_id : null,

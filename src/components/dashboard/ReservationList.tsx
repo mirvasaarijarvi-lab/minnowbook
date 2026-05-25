@@ -85,6 +85,7 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
   const [newReservationOpen, setNewReservationOpen] = useState(false);
   const [linkedUsedPrompt, setLinkedUsedPrompt] = useState<{ reservationId: string; linkedIds: string[]; linkedNames: string[]; value: boolean } | null>(null);
   const [linkedInvoicedPrompt, setLinkedInvoicedPrompt] = useState<{ reservationId: string; linkedIds: string[]; linkedNames: string[]; value: boolean } | null>(null);
+  const [linkedCancelPrompt, setLinkedCancelPrompt] = useState<{ reservationId: string; linkedIds: string[]; linkedNames: string[]; suppressEmail: boolean } | null>(null);
   const t = useT();
   const tDynamic = useTDynamic();
   const dateFnsLocale = useDateLocale();
@@ -244,13 +245,76 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
         }).catch((err) => console.error("Failed to send cancellation email:", err));
       }
     },
-    onSuccess: () => {
+    onSuccess: async (_data, vars) => {
       queryClient.invalidateQueries({ queryKey: ["reservations"] });
       toast.success(t("dashboard.statusUpdated"));
       setConfirmDialog(null);
+
+      // When cancelling a leg of a cross-booking, prompt to cancel the
+      // siblings too so the linked group doesn't end up half-cancelled.
+      if (vars.status === "cancelled" && tenantId) {
+        try {
+          const siblingIds = await collectLinkedSiblingIds(vars.id);
+          if (siblingIds.length === 0) return;
+          const { data: linkedReservations } = await supabase
+            .from("reservations")
+            .select("id, guest_name, reservation_type, status")
+            .in("id", siblingIds)
+            .eq("tenant_id", tenantId);
+          const stillActive = (linkedReservations || []).filter((r: any) => r.status !== "cancelled");
+          if (stillActive.length > 0) {
+            setLinkedCancelPrompt({
+              reservationId: vars.id,
+              linkedIds: stillActive.map((r: any) => r.id),
+              linkedNames: stillActive.map((r: any) => `${r.guest_name} (${r.reservation_type})`),
+              suppressEmail: !!vars.suppressEmail,
+            });
+          }
+        } catch (err) {
+          console.error("Failed to check linked siblings for cancel propagation:", err);
+        }
+      }
     },
     onError: () => {
       toast.error("Error updating status");
+    },
+  });
+
+  // Cancel every still-active sibling in a linked cross-booking group.
+  // Mirrors the cancellation email behaviour of the single-row updateStatus.
+  const cancelLinkedSiblings = useMutation({
+    mutationFn: async ({ ids, suppressEmail }: { ids: string[]; suppressEmail: boolean }) => {
+      // Fetch rows up-front so we know which ones opted out of cancellation emails.
+      const { data: rows, error: fetchErr } = await supabase
+        .from("reservations")
+        .select("id, no_email_cancel")
+        .in("id", ids)
+        .eq("tenant_id", tenantId!);
+      if (fetchErr) throw fetchErr;
+
+      const { error } = await supabase
+        .from("reservations")
+        .update({ status: "cancelled", updated_at: new Date().toISOString() })
+        .in("id", ids)
+        .eq("tenant_id", tenantId!);
+      if (error) throw error;
+
+      if (!suppressEmail) {
+        for (const r of rows ?? []) {
+          if ((r as any).no_email_cancel) continue;
+          supabase.functions
+            .invoke("send-reminder", { body: { reservationId: r.id, emailType: "cancellation" } })
+            .catch((err) => console.error("Failed to send sibling cancellation email:", err));
+        }
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["reservations"] });
+      toast.success(t("dashboard.statusUpdated"));
+      setLinkedCancelPrompt(null);
+    },
+    onError: (err: any) => {
+      toast.error(err?.message || "Error cancelling linked reservations");
     },
   });
 
@@ -1121,6 +1185,47 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Linked cancel prompt dialog: keep cross-booking groups in sync */}
+      <Dialog open={!!linkedCancelPrompt} onOpenChange={(open) => !open && setLinkedCancelPrompt(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Cancel linked reservations?</DialogTitle>
+            <DialogDescription>
+              This reservation is part of a cross-booking group. The following linked
+              reservations are still active. Cancel them as well so the group stays consistent?
+            </DialogDescription>
+          </DialogHeader>
+          {linkedCancelPrompt && (
+            <ul className="text-sm space-y-1 pl-4 list-disc text-muted-foreground">
+              {linkedCancelPrompt.linkedNames.map((name, i) => (
+                <li key={i}>{name}</li>
+              ))}
+            </ul>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setLinkedCancelPrompt(null)}>
+              Keep them active
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() =>
+                linkedCancelPrompt &&
+                cancelLinkedSiblings.mutate({
+                  ids: linkedCancelPrompt.linkedIds,
+                  suppressEmail: linkedCancelPrompt.suppressEmail,
+                })
+              }
+              disabled={cancelLinkedSiblings.isPending}
+            >
+              <XCircle className="h-4 w-4 mr-1.5" />
+              Cancel all linked
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+
 
 
       <EditReservationDialog
