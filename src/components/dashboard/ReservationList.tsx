@@ -103,13 +103,18 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
   // controls; cancellation remains the right tool for their workflow.
   const [bulkMode, setBulkMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [selectAllAcrossPages, setSelectAllAcrossPages] = useState(false);
   const [bulkConfirmOpen, setBulkConfirmOpen] = useState(false);
   const [bulkDeleting, setBulkDeleting] = useState(false);
+  const [page, setPage] = useState(0);
+  const PAGE_SIZE = 25;
   const exitBulkMode = () => {
     setBulkMode(false);
     setSelectedIds(new Set());
+    setSelectAllAcrossPages(false);
   };
   const toggleSelected = (id: string, checked: boolean) => {
+    setSelectAllAcrossPages(false);
     setSelectedIds((prev) => {
       const next = new Set(prev);
       if (checked) next.add(id);
