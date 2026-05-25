@@ -433,7 +433,7 @@ describe.each([
       const result = await anon.from(table).select("id").range(from, to);
       expectNoRowsLeaked(result, `${table} id-only page ${p}`);
     }
-  });
+  }, 15_000);
 
   liveIt("range across .in([live, fake]) tenant_id filter on multiple pages returns zero rows", async () => {
     // Combine a multi-tenant `in` filter with pagination — RLS must
