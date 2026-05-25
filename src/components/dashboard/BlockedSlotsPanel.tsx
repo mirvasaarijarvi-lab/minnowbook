@@ -196,12 +196,16 @@ const BlockedSlotsPanel = () => {
       if (!tenantId || !bulkDeleteRange?.from) throw new Error("Select a date range");
       const from = format(bulkDeleteRange.from, "yyyy-MM-dd");
       const to = format(bulkDeleteRange.to ?? bulkDeleteRange.from, "yyyy-MM-dd");
-      const { error } = await supabase
+      // Restrict bulk delete to the currently viewed site so an admin
+      // clearing one site's blocks doesn't accidentally wipe another's.
+      let q = supabase
         .from("blocked_slots")
         .delete()
         .eq("tenant_id", tenantId)
         .gte("date", from)
         .lte("date", to);
+      q = applySiteFilter(q, selectedSiteId);
+      const { error } = await q;
       if (error) throw error;
     },
     onSuccess: () => {
