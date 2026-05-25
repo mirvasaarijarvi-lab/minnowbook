@@ -261,6 +261,11 @@ const OffersManager = () => {
                         {isArchived && (
                           <Badge variant="outline" className="text-[10px]">{t("offers.archived")}</Badge>
                         )}
+                        {isOfferStale(offer) && (
+                          <Badge variant="destructive" className="text-[10px]" title="All linked reservations have been cancelled">
+                            All bookings cancelled
+                          </Badge>
+                        )}
                       </div>
                       <p className="text-xs text-muted-foreground">
                         {format(parseISO(offer.event_date), "PPP", { locale: dateLocale })} • {offer.start_time}{offer.end_time ? ` – ${offer.end_time}` : ""} • {offer.guests_count} {t("common.guests").toLowerCase()} • {offer.event_space}
