@@ -916,6 +916,38 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
         </div>
       )}
 
+      {totalMatching > PAGE_SIZE && (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-2 pt-2">
+          <p className="text-sm text-muted-foreground">
+            Showing {page * PAGE_SIZE + 1}
+            {"–"}
+            {Math.min((page + 1) * PAGE_SIZE, totalMatching)} of {totalMatching}
+          </p>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page === 0}
+              onClick={() => setPage((p) => Math.max(0, p - 1))}
+            >
+              Previous
+            </Button>
+            <span className="text-sm text-muted-foreground">
+              Page {page + 1} of {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page + 1 >= totalPages}
+              onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+            >
+              Next
+            </Button>
+          </div>
+        </div>
+      )}
+
+
       {/* Confirmation dialog */}
       <Dialog open={!!confirmDialog} onOpenChange={(open) => !open && setConfirmDialog(null)}>
         <DialogContent className={confirmDialog?.action === "cancelled" || confirmDialog?.action === "confirmed" ? "sm:max-w-2xl max-h-[90vh] overflow-y-auto" : ""}>
