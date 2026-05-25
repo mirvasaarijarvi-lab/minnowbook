@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useT } from "@/contexts/I18nContext";
 import { useOffers, useUpdateOffer, type Offer } from "@/hooks/useOffers";
 import { useTenant } from "@/hooks/useTenant";
