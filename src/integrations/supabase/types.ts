@@ -2630,6 +2630,69 @@ export type Database = {
         }
         Relationships: []
       }
+      test_reservation_cleanup_config: {
+        Row: {
+          cutoff_date: string | null
+          id: string
+          is_enabled: boolean
+          name_pattern: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          cutoff_date?: string | null
+          id?: string
+          is_enabled?: boolean
+          name_pattern?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          cutoff_date?: string | null
+          id?: string
+          is_enabled?: boolean
+          name_pattern?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      test_reservation_cleanup_log: {
+        Row: {
+          cutoff_date: string | null
+          deleted_count: number
+          deleted_rows: Json
+          id: string
+          name_pattern: string
+          notes: string | null
+          trigger_source: string
+          triggered_at: string
+          triggered_by: string | null
+        }
+        Insert: {
+          cutoff_date?: string | null
+          deleted_count?: number
+          deleted_rows?: Json
+          id?: string
+          name_pattern: string
+          notes?: string | null
+          trigger_source?: string
+          triggered_at?: string
+          triggered_by?: string | null
+        }
+        Update: {
+          cutoff_date?: string | null
+          deleted_count?: number
+          deleted_rows?: Json
+          id?: string
+          name_pattern?: string
+          notes?: string | null
+          trigger_source?: string
+          triggered_at?: string
+          triggered_by?: string | null
+        }
+        Relationships: []
+      }
       waitlist: {
         Row: {
           created_at: string
@@ -3200,6 +3263,14 @@ export type Database = {
           msg_id: number
           read_ct: number
         }[]
+      }
+      run_test_reservation_cleanup: {
+        Args: {
+          p_override_cutoff?: string
+          p_override_pattern?: string
+          p_source?: string
+        }
+        Returns: number
       }
       seed_tenant_roles_and_permissions: {
         Args: { p_tenant_id: string }

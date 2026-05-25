@@ -42,6 +42,7 @@ import TenantMembershipCheckPanel from "@/components/dashboard/TenantMembershipC
 import RlsManifestDebugPanel from "@/components/dashboard/RlsManifestDebugPanel";
 import ForbiddenAccessLogPanel from "@/components/dashboard/ForbiddenAccessLogPanel";
 import StorageRejectionPanel from "@/components/dashboard/StorageRejectionPanel";
+import TestReservationCleanupPanel from "@/components/dashboard/TestReservationCleanupPanel";
 import NoTenantState from "@/components/NoTenantState";
 import { useTenant } from "@/hooks/useTenant";
 
@@ -460,6 +461,9 @@ const Superadmin = () => {
 
         {/* Storage path rejection telemetry + spike alerts */}
         <StorageRejectionPanel />
+
+        {/* Automated cleanup of test/synthetic reservations (e.g. TEST Lovable Cross) */}
+        <TestReservationCleanupPanel />
 
         {/* RLS Manifest Debug — exact SQL/filters used by manifest tests */}
         <RlsManifestDebugPanel />
