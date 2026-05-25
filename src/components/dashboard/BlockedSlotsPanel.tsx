@@ -86,24 +86,27 @@ const BlockedSlotsPanel = () => {
   };
 
   const { data: resources } = useQuery({
-    queryKey: ["resources", tenantId],
+    queryKey: ["resources", tenantId, selectedSiteId],
     queryFn: async () => {
       if (!tenantId) return [];
-      const { data } = await supabase.from("resources").select("id, name, resource_type").eq("tenant_id", tenantId).order("name");
+      let q = supabase.from("resources").select("id, name, resource_type, site_id").eq("tenant_id", tenantId);
+      q = applySiteFilter(q, selectedSiteId);
+      const { data } = await q.order("name");
       return data ?? [];
     },
     enabled: !!tenantId,
   });
 
   const { data: blockedSlots, isLoading } = useQuery({
-    queryKey: ["blocked-slots", tenantId],
+    queryKey: ["blocked-slots", tenantId, selectedSiteId],
     queryFn: async () => {
       if (!tenantId) return [];
-      const { data, error } = await supabase
+      let q = supabase
         .from("blocked_slots")
         .select("*, resource:resources(name)")
-        .eq("tenant_id", tenantId)
-        .order("date", { ascending: false });
+        .eq("tenant_id", tenantId);
+      q = applySiteFilter(q, selectedSiteId);
+      const { data, error } = await q.order("date", { ascending: false });
       if (error) throw error;
       return (data ?? []) as BlockedSlot[];
     },
