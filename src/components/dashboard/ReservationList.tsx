@@ -83,8 +83,8 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
   const [editingReservation, setEditingReservation] = useState<any | null>(null);
   const [detailReservation, setDetailReservation] = useState<any | null>(null);
   const [newReservationOpen, setNewReservationOpen] = useState(false);
-  const [linkedUsedPrompt, setLinkedUsedPrompt] = useState<{ reservationId: string; linkedIds: string[]; linkedNames: string[] } | null>(null);
-  const [linkedInvoicedPrompt, setLinkedInvoicedPrompt] = useState<{ reservationId: string; linkedIds: string[]; linkedNames: string[] } | null>(null);
+  const [linkedUsedPrompt, setLinkedUsedPrompt] = useState<{ reservationId: string; linkedIds: string[]; linkedNames: string[]; value: boolean } | null>(null);
+  const [linkedInvoicedPrompt, setLinkedInvoicedPrompt] = useState<{ reservationId: string; linkedIds: string[]; linkedNames: string[]; value: boolean } | null>(null);
   const t = useT();
   const tDynamic = useTDynamic();
   const dateFnsLocale = useDateLocale();
@@ -254,17 +254,17 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
   });
 
   const markLinkedUsed = useMutation({
-    mutationFn: async (ids: string[]) => {
+    mutationFn: async ({ ids, value }: { ids: string[]; value: boolean }) => {
       const { error } = await supabase
         .from("reservations")
-        .update({ is_used: true, updated_at: new Date().toISOString() } as any)
+        .update({ is_used: value, updated_at: new Date().toISOString() } as any)
         .in("id", ids)
         .eq("tenant_id", tenantId!);
       if (error) throw error;
     },
-    onSuccess: () => {
+    onSuccess: (_data, vars) => {
       queryClient.invalidateQueries({ queryKey: ["reservations"] });
-      toast.success(t("dashboard.used"));
+      toast.success(vars.value ? t("dashboard.used") : t("dashboard.statusUpdated"));
       setLinkedUsedPrompt(null);
     },
     onError: () => {
@@ -313,39 +313,42 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
     // Always toggle the current reservation first
     toggleUsed.mutate({ id, checked });
 
-    if (checked && tenantId) {
-      const linkedIdsArray = await collectLinkedSiblingIds(id);
-      if (linkedIdsArray.length > 0) {
-        const { data: linkedReservations } = await supabase
-          .from("reservations")
-          .select("id, guest_name, reservation_type, is_used")
-          .in("id", linkedIdsArray)
-          .eq("tenant_id", tenantId);
+    // Prompt for sibling propagation in BOTH directions so unchecking one
+    // leg doesn't silently leave linked rows stuck in the old state.
+    if (!tenantId) return;
+    const linkedIdsArray = await collectLinkedSiblingIds(id);
+    if (linkedIdsArray.length === 0) return;
 
-        const unmarked = (linkedReservations || []).filter((r) => !r.is_used);
-        if (unmarked.length > 0) {
-          setLinkedUsedPrompt({
-            reservationId: id,
-            linkedIds: unmarked.map((r) => r.id),
-            linkedNames: unmarked.map((r) => `${r.guest_name} (${r.reservation_type})`),
-          });
-        }
-      }
+    const { data: linkedReservations } = await supabase
+      .from("reservations")
+      .select("id, guest_name, reservation_type, is_used")
+      .in("id", linkedIdsArray)
+      .eq("tenant_id", tenantId);
+
+    // Show siblings whose current value differs from the new value.
+    const mismatched = (linkedReservations || []).filter((r) => !!r.is_used !== checked);
+    if (mismatched.length > 0) {
+      setLinkedUsedPrompt({
+        reservationId: id,
+        linkedIds: mismatched.map((r) => r.id),
+        linkedNames: mismatched.map((r) => `${r.guest_name} (${r.reservation_type})`),
+        value: checked,
+      });
     }
   };
 
   const markLinkedInvoiced = useMutation({
-    mutationFn: async (ids: string[]) => {
+    mutationFn: async ({ ids, value }: { ids: string[]; value: boolean }) => {
       const { error } = await supabase
         .from("reservations")
-        .update({ is_invoiced: true, updated_at: new Date().toISOString() } as any)
+        .update({ is_invoiced: value, updated_at: new Date().toISOString() } as any)
         .in("id", ids)
         .eq("tenant_id", tenantId!);
       if (error) throw error;
     },
-    onSuccess: () => {
+    onSuccess: (_data, vars) => {
       queryClient.invalidateQueries({ queryKey: ["reservations"] });
-      toast.success(t("dashboard.invoiced"));
+      toast.success(vars.value ? t("dashboard.invoiced") : t("dashboard.statusUpdated"));
       setLinkedInvoicedPrompt(null);
     },
     onError: () => {
@@ -370,27 +373,54 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
     },
   });
 
+  // Returns true when the row OR any linked sibling carries a non-zero price.
+  // Used to block marking a 0/null-price reservation as invoiced (which
+  // pollutes revenue reports) while still allowing the common case where
+  // one leg of a bundle holds the package total.
+  const linkedGroupHasPrice = async (id: string): Promise<boolean> => {
+    const current: any = reservations?.find((r) => r.id === id);
+    if (current && current.price_eur != null && Number(current.price_eur) > 0) return true;
+    const siblingIds = await collectLinkedSiblingIds(id);
+    if (siblingIds.length === 0) return false;
+    const { data } = await supabase
+      .from("reservations")
+      .select("price_eur")
+      .in("id", siblingIds)
+      .eq("tenant_id", tenantId!);
+    return (data ?? []).some((r: any) => r.price_eur != null && Number(r.price_eur) > 0);
+  };
+
   const handleToggleInvoiced = async (id: string, checked: boolean) => {
+    // Guard: can't invoice a 0/null-price reservation unless a linked
+    // sibling carries the price for the bundle.
+    if (checked) {
+      const hasPrice = await linkedGroupHasPrice(id);
+      if (!hasPrice) {
+        toast.error("Add a price before marking this reservation as invoiced.");
+        return;
+      }
+    }
+
     toggleInvoiced.mutate({ id, checked });
 
-    if (checked && tenantId) {
-      const linkedIdsArray = await collectLinkedSiblingIds(id);
-      if (linkedIdsArray.length > 0) {
-        const { data: linkedReservations } = await supabase
-          .from("reservations")
-          .select("id, guest_name, reservation_type, is_invoiced")
-          .in("id", linkedIdsArray)
-          .eq("tenant_id", tenantId);
+    if (!tenantId) return;
+    const linkedIdsArray = await collectLinkedSiblingIds(id);
+    if (linkedIdsArray.length === 0) return;
 
-        const unmarked = (linkedReservations || []).filter((r) => !r.is_invoiced);
-        if (unmarked.length > 0) {
-          setLinkedInvoicedPrompt({
-            reservationId: id,
-            linkedIds: unmarked.map((r) => r.id),
-            linkedNames: unmarked.map((r) => `${r.guest_name} (${r.reservation_type})`),
-          });
-        }
-      }
+    const { data: linkedReservations } = await supabase
+      .from("reservations")
+      .select("id, guest_name, reservation_type, is_invoiced")
+      .in("id", linkedIdsArray)
+      .eq("tenant_id", tenantId);
+
+    const mismatched = (linkedReservations || []).filter((r) => !!r.is_invoiced !== checked);
+    if (mismatched.length > 0) {
+      setLinkedInvoicedPrompt({
+        reservationId: id,
+        linkedIds: mismatched.map((r) => r.id),
+        linkedNames: mismatched.map((r) => `${r.guest_name} (${r.reservation_type})`),
+        value: checked,
+      });
     }
   };
 
@@ -962,7 +992,7 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
           <DialogFooter>
             <Button variant="outline" onClick={() => setLinkedUsedPrompt(null)}>{t("common.cancel")}</Button>
             <Button
-              onClick={() => linkedUsedPrompt && markLinkedUsed.mutate(linkedUsedPrompt.linkedIds)}
+              onClick={() => linkedUsedPrompt && markLinkedUsed.mutate({ ids: linkedUsedPrompt.linkedIds, value: linkedUsedPrompt.value })}
               disabled={markLinkedUsed.isPending}
             >
               <PackageCheck className="h-4 w-4 mr-1.5" />
@@ -989,7 +1019,7 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
           <DialogFooter>
             <Button variant="outline" onClick={() => setLinkedInvoicedPrompt(null)}>{t("common.cancel")}</Button>
             <Button
-              onClick={() => linkedInvoicedPrompt && markLinkedInvoiced.mutate(linkedInvoicedPrompt.linkedIds)}
+              onClick={() => linkedInvoicedPrompt && markLinkedInvoiced.mutate({ ids: linkedInvoicedPrompt.linkedIds, value: linkedInvoicedPrompt.value })}
               disabled={markLinkedInvoiced.isPending}
             >
               <Receipt className="h-4 w-4 mr-1.5" />
