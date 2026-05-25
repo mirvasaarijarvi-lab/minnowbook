@@ -49,6 +49,8 @@ const getDayName = (dayOfWeek: number, locale: Locale) => {
 
 const RecurringBlocksPanel = () => {
   const { tenantId } = useTenant();
+  const { selectedSiteId } = useSiteContext();
+  const { applySiteFilter } = useUserSites();
   const { isPrivileged, getApprovalStatus } = useAutoApproval();
   const queryClient = useQueryClient();
   const t = useT();
