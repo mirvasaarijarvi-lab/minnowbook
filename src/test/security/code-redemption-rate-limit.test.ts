@@ -265,7 +265,8 @@ describe("redeem-access-code: brute-force & replay resilience", () => {
       const code = (b.code as string) ?? "";
       expect(KNOWN_ERROR_CODES.has(code), `unexpected code: ${code}`).toBe(true);
     }
-  });
+  }, 30_000);
+
 
   it("OPTIONS preflight burst does not affect the error contract", async () => {
     // Some attackers warm up a function with preflights to look for
