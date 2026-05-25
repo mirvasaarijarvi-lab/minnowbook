@@ -1186,6 +1186,47 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
         </DialogContent>
       </Dialog>
 
+      {/* Linked cancel prompt dialog: keep cross-booking groups in sync */}
+      <Dialog open={!!linkedCancelPrompt} onOpenChange={(open) => !open && setLinkedCancelPrompt(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Cancel linked reservations?</DialogTitle>
+            <DialogDescription>
+              This reservation is part of a cross-booking group. The following linked
+              reservations are still active. Cancel them as well so the group stays consistent?
+            </DialogDescription>
+          </DialogHeader>
+          {linkedCancelPrompt && (
+            <ul className="text-sm space-y-1 pl-4 list-disc text-muted-foreground">
+              {linkedCancelPrompt.linkedNames.map((name, i) => (
+                <li key={i}>{name}</li>
+              ))}
+            </ul>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setLinkedCancelPrompt(null)}>
+              Keep them active
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() =>
+                linkedCancelPrompt &&
+                cancelLinkedSiblings.mutate({
+                  ids: linkedCancelPrompt.linkedIds,
+                  suppressEmail: linkedCancelPrompt.suppressEmail,
+                })
+              }
+              disabled={cancelLinkedSiblings.isPending}
+            >
+              <XCircle className="h-4 w-4 mr-1.5" />
+              Cancel all linked
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+
+
 
       <EditReservationDialog
         reservation={editingReservation}
