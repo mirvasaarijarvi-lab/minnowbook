@@ -103,13 +103,18 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
   // controls; cancellation remains the right tool for their workflow.
   const [bulkMode, setBulkMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [selectAllAcrossPages, setSelectAllAcrossPages] = useState(false);
   const [bulkConfirmOpen, setBulkConfirmOpen] = useState(false);
   const [bulkDeleting, setBulkDeleting] = useState(false);
+  const [page, setPage] = useState(0);
+  const PAGE_SIZE = 25;
   const exitBulkMode = () => {
     setBulkMode(false);
     setSelectedIds(new Set());
+    setSelectAllAcrossPages(false);
   };
   const toggleSelected = (id: string, checked: boolean) => {
+    setSelectAllAcrossPages(false);
     setSelectedIds((prev) => {
       const next = new Set(prev);
       if (checked) next.add(id);
@@ -132,37 +137,67 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
   const siteMap = Object.fromEntries((sites ?? []).map((s) => [s.id, s.name]));
   const showSiteLabel = (sites?.length ?? 0) > 0 && !selectedSiteId;
 
-  const { data: reservations, isLoading } = useQuery({
-    queryKey: ["reservations", tenantId, selectedSiteId, siteIds, viewTab, statusFilter, typeFilter, dateFilter, invoicedFilter, checkoutTodayFilter, specificDate ? format(specificDate, "yyyy-MM-dd") : null, debouncedSearch],
+  // Shared filter application so the paginated list query, the count, and the
+  // "select all across pages" ID fetch all use the exact same WHERE clauses.
+  const applyReservationFilters = (q: any) => {
+    q = applySiteFilter(q, selectedSiteId);
+    if (viewTab === "cancelled") {
+      q = q.eq("status", "cancelled");
+    } else if (statusFilter !== "all") {
+      q = q.eq("status", statusFilter);
+    } else {
+      q = q.neq("status", "cancelled");
+    }
+    if (typeFilter !== "all") q = q.eq("reservation_type", typeFilter);
+    if (checkoutTodayFilter) {
+      q = q.eq("check_out_date", today);
+    } else if (specificDate) {
+      q = q.eq("date", format(specificDate, "yyyy-MM-dd"));
+    } else if (dateFilter === "today") {
+      q = q.eq("date", today);
+    }
+    if (invoicedFilter === "uninvoiced") q = q.eq("is_invoiced", false);
+    if (invoicedFilter === "invoiced") q = q.eq("is_invoiced", true);
+    const searchClause = buildGuestSearchOrClause(debouncedSearch);
+    if (searchClause) q = q.or(searchClause);
+    return q;
+  };
+
+  // Reset page + selection whenever the active filter set changes.
+  useEffect(() => {
+    setPage(0);
+    setSelectAllAcrossPages(false);
+    setSelectedIds(new Set());
+  }, [tenantId, selectedSiteId, viewTab, statusFilter, typeFilter, dateFilter, invoicedFilter, checkoutTodayFilter, specificDate, debouncedSearch]);
+
+  const { data: reservationsPage, isLoading } = useQuery({
+    queryKey: ["reservations", tenantId, selectedSiteId, siteIds, viewTab, statusFilter, typeFilter, dateFilter, invoicedFilter, checkoutTodayFilter, specificDate ? format(specificDate, "yyyy-MM-dd") : null, debouncedSearch, page],
     queryFn: async () => {
-      if (!tenantId) return [];
-      let query = supabase.from("reservations").select("*").eq("tenant_id", tenantId).order("date", { ascending: false });
-      query = applySiteFilter(query, selectedSiteId);
-      if (viewTab === "cancelled") {
-        query = query.eq("status", "cancelled");
-      } else if (statusFilter !== "all") {
-        query = query.eq("status", statusFilter);
-      } else {
-        query = query.neq("status", "cancelled");
-      }
-      if (typeFilter !== "all") query = query.eq("reservation_type", typeFilter);
-      if (checkoutTodayFilter) {
-        query = query.eq("check_out_date", today);
-      } else if (specificDate) {
-        query = query.eq("date", format(specificDate, "yyyy-MM-dd"));
-      } else if (dateFilter === "today") {
-        query = query.eq("date", today);
-      }
-      if (invoicedFilter === "uninvoiced") query = query.eq("is_invoiced", false);
-      if (invoicedFilter === "invoiced") query = query.eq("is_invoiced", true);
-      const searchClause = buildGuestSearchOrClause(debouncedSearch);
-      if (searchClause) query = query.or(searchClause);
-      const { data, error } = await query.limit(100);
+      if (!tenantId) return { rows: [], total: 0 };
+      let query = supabase.from("reservations").select("*", { count: "exact" }).eq("tenant_id", tenantId).order("date", { ascending: false });
+      query = applyReservationFilters(query);
+      const from = page * PAGE_SIZE;
+      const to = from + PAGE_SIZE - 1;
+      const { data, error, count } = await query.range(from, to);
       if (error) throw error;
-      return data;
+      return { rows: data ?? [], total: count ?? 0 };
     },
     enabled: !!tenantId,
   });
+  const reservations = reservationsPage?.rows;
+  const totalMatching = reservationsPage?.total ?? 0;
+  const totalPages = Math.max(1, Math.ceil(totalMatching / PAGE_SIZE));
+
+  // Fetch every matching reservation ID across all pages (used for
+  // "Select all N matching" + bulk delete across the entire result set).
+  const fetchAllMatchingIds = async (): Promise<string[]> => {
+    if (!tenantId) return [];
+    let query = supabase.from("reservations").select("id").eq("tenant_id", tenantId);
+    query = applyReservationFilters(query);
+    const { data, error } = await query.limit(10000);
+    if (error) throw error;
+    return (data ?? []).map((r: any) => r.id);
+  };
 
   const { data: settings } = useQuery({
     queryKey: ["tenant-settings", tenantId],
@@ -556,11 +591,13 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
             <span className="font-medium">Superadmin tools</span>
             <span className="text-muted-foreground">
               {bulkMode
-                ? `${selectedIds.size} selected for deletion`
+                ? selectAllAcrossPages
+                  ? `All ${totalMatching} matching reservation${totalMatching === 1 ? "" : "s"} selected`
+                  : `${selectedIds.size} selected for deletion`
                 : "Bulk-delete reservations across any tenant"}
             </span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             {!bulkMode ? (
               <Button
                 size="sm"
@@ -580,6 +617,7 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
                   size="sm"
                   variant="outline"
                   onClick={() => {
+                    setSelectAllAcrossPages(false);
                     const visibleIds = (reservations ?? []).map((r: any) => r.id);
                     const allSelected =
                       visibleIds.length > 0 &&
@@ -588,20 +626,43 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
                   }}
                   disabled={(reservations?.length ?? 0) === 0}
                 >
-                  {(reservations ?? []).length > 0 &&
+                  {!selectAllAcrossPages &&
+                  (reservations ?? []).length > 0 &&
                   (reservations ?? []).every((r: any) => selectedIds.has(r.id))
-                    ? "Deselect all"
-                    : `Select all visible (${reservations?.length ?? 0})`}
+                    ? "Deselect page"
+                    : `Select page (${reservations?.length ?? 0})`}
                 </Button>
+                {totalMatching > (reservations?.length ?? 0) && (
+                  <Button
+                    size="sm"
+                    variant={selectAllAcrossPages ? "default" : "outline"}
+                    onClick={() => {
+                      if (selectAllAcrossPages) {
+                        setSelectAllAcrossPages(false);
+                        setSelectedIds(new Set());
+                      } else {
+                        setSelectAllAcrossPages(true);
+                        // Mirror visible IDs locally so the page checkboxes
+                        // appear ticked; the delete handler still re-fetches
+                        // the full ID set from the server at submit time.
+                        setSelectedIds(new Set((reservations ?? []).map((r: any) => r.id)));
+                      }
+                    }}
+                  >
+                    {selectAllAcrossPages
+                      ? "Clear all-page selection"
+                      : `Select all ${totalMatching} matching`}
+                  </Button>
+                )}
                 <Button
                   size="sm"
                   variant="destructive"
                   className="gap-1.5"
-                  disabled={selectedIds.size === 0}
+                  disabled={selectAllAcrossPages ? totalMatching === 0 : selectedIds.size === 0}
                   onClick={() => setBulkConfirmOpen(true)}
                 >
                   <Trash2 className="h-4 w-4" />
-                  Delete selected ({selectedIds.size})
+                  Delete {selectAllAcrossPages ? `all ${totalMatching}` : `selected (${selectedIds.size})`}
                 </Button>
               </>
             )}
@@ -855,6 +916,38 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
         </div>
       )}
 
+      {totalMatching > PAGE_SIZE && (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-2 pt-2">
+          <p className="text-sm text-muted-foreground">
+            Showing {page * PAGE_SIZE + 1}
+            {"–"}
+            {Math.min((page + 1) * PAGE_SIZE, totalMatching)} of {totalMatching}
+          </p>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page === 0}
+              onClick={() => setPage((p) => Math.max(0, p - 1))}
+            >
+              Previous
+            </Button>
+            <span className="text-sm text-muted-foreground">
+              Page {page + 1} of {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page + 1 >= totalPages}
+              onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+            >
+              Next
+            </Button>
+          </div>
+        </div>
+      )}
+
+
       {/* Confirmation dialog */}
       <Dialog open={!!confirmDialog} onOpenChange={(open) => !open && setConfirmDialog(null)}>
         <DialogContent className={confirmDialog?.action === "cancelled" || confirmDialog?.action === "confirmed" ? "sm:max-w-2xl max-h-[90vh] overflow-y-auto" : ""}>
@@ -1087,12 +1180,12 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-destructive">
               <ShieldAlert className="h-5 w-5" />
-              Permanently delete {selectedIds.size} reservation{selectedIds.size === 1 ? "" : "s"}?
+              Permanently delete {selectAllAcrossPages ? totalMatching : selectedIds.size} reservation{(selectAllAcrossPages ? totalMatching : selectedIds.size) === 1 ? "" : "s"}?
             </DialogTitle>
             <DialogDescription>
-              This action cannot be undone. Selected rows will be removed from the
-              reservations table immediately. Linked cross-booking siblings are not
-              auto-included; select them explicitly if you want to remove the whole group.
+              This action cannot be undone. {selectAllAcrossPages
+                ? `All ${totalMatching} reservations matching the current filters and search will be removed across every page.`
+                : "Selected rows will be removed from the reservations table immediately."} Linked cross-booking siblings are not auto-included; select them explicitly if you want to remove the whole group.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -1101,34 +1194,58 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
             </Button>
             <Button
               variant="destructive"
-              disabled={bulkDeleting || selectedIds.size === 0}
+              disabled={bulkDeleting || (selectAllAcrossPages ? totalMatching === 0 : selectedIds.size === 0)}
               onClick={async () => {
-                const ids = Array.from(selectedIds);
-                console.log("[bulk-delete] starting", { count: ids.length, ids });
                 setBulkDeleting(true);
-                const { data, error, count, status, statusText } = await supabase
-                  .from("reservations")
-                  .delete({ count: "exact" })
-                  .in("id", ids)
-                  .select("id");
-                setBulkDeleting(false);
-                console.log("[bulk-delete] response", { count, status, statusText, returned: data?.length, error });
-                if (error) {
-                  toast.error(`Bulk delete failed: ${error.message}`);
+                let ids: string[] = [];
+                try {
+                  ids = selectAllAcrossPages
+                    ? await fetchAllMatchingIds()
+                    : Array.from(selectedIds);
+                } catch (err: any) {
+                  setBulkDeleting(false);
+                  toast.error(`Could not load matching reservations: ${err?.message ?? err}`);
                   return;
                 }
-                const deleted = data?.length ?? count ?? 0;
-                if (deleted === 0) {
+                console.log("[bulk-delete] starting", { count: ids.length, acrossPages: selectAllAcrossPages });
+                if (ids.length === 0) {
+                  setBulkDeleting(false);
+                  toast.error("No reservations matched the current filters.");
+                  return;
+                }
+                // Delete in chunks to stay well under PostgREST URL length limits
+                // when "select all across pages" returns thousands of IDs.
+                const CHUNK = 200;
+                let totalDeleted = 0;
+                let lastError: any = null;
+                for (let i = 0; i < ids.length; i += CHUNK) {
+                  const chunk = ids.slice(i, i + CHUNK);
+                  const { data, error, count } = await supabase
+                    .from("reservations")
+                    .delete({ count: "exact" })
+                    .in("id", chunk)
+                    .select("id");
+                  if (error) { lastError = error; break; }
+                  totalDeleted += data?.length ?? count ?? 0;
+                }
+                setBulkDeleting(false);
+                console.log("[bulk-delete] response", { totalDeleted, requested: ids.length, lastError });
+                if (lastError) {
+                  toast.error(`Bulk delete failed: ${lastError.message}`);
+                  return;
+                }
+                if (totalDeleted === 0) {
                   toast.error("No reservations were deleted. RLS may be blocking access.");
                   return;
                 }
-                toast.success(`Deleted ${deleted} reservation${deleted === 1 ? "" : "s"}`);
+                toast.success(`Deleted ${totalDeleted} reservation${totalDeleted === 1 ? "" : "s"}`);
                 setBulkConfirmOpen(false);
                 exitBulkMode();
+                setPage(0);
                 queryClient.invalidateQueries({ queryKey: ["reservations"] });
               }}
             >
-              {bulkDeleting ? "Deleting..." : `Delete ${selectedIds.size}`}
+              {bulkDeleting ? "Deleting..." : `Delete ${selectAllAcrossPages ? totalMatching : selectedIds.size}`}
             </Button>
           </DialogFooter>
         </DialogContent>
