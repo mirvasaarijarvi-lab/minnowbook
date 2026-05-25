@@ -32,3 +32,12 @@ project_id = "lsgznskkxadplwnxplhd"
     # can exercise the contract anonymously. The function itself
     # enforces the bearer-token check before minting.
     verify_jwt = false
+  [functions.admin-users]
+    # CORS preflights must reach the function so it can apply the
+    # request-aware origin allowlist + SECURITY_HEADERS. With the
+    # default verify_jwt=true the gateway occasionally returns its
+    # own response (with ACAO: *) under burst load, which breaks the
+    # disallowed-origin CORS regression suite. The function itself
+    # enforces the bearer-token check before any privileged work.
+    verify_jwt = false
+
