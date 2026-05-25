@@ -1180,12 +1180,12 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-destructive">
               <ShieldAlert className="h-5 w-5" />
-              Permanently delete {selectedIds.size} reservation{selectedIds.size === 1 ? "" : "s"}?
+              Permanently delete {selectAllAcrossPages ? totalMatching : selectedIds.size} reservation{(selectAllAcrossPages ? totalMatching : selectedIds.size) === 1 ? "" : "s"}?
             </DialogTitle>
             <DialogDescription>
-              This action cannot be undone. Selected rows will be removed from the
-              reservations table immediately. Linked cross-booking siblings are not
-              auto-included; select them explicitly if you want to remove the whole group.
+              This action cannot be undone. {selectAllAcrossPages
+                ? `All ${totalMatching} reservations matching the current filters and search will be removed across every page.`
+                : "Selected rows will be removed from the reservations table immediately."} Linked cross-booking siblings are not auto-included; select them explicitly if you want to remove the whole group.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -1194,34 +1194,58 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
             </Button>
             <Button
               variant="destructive"
-              disabled={bulkDeleting || selectedIds.size === 0}
+              disabled={bulkDeleting || (selectAllAcrossPages ? totalMatching === 0 : selectedIds.size === 0)}
               onClick={async () => {
-                const ids = Array.from(selectedIds);
-                console.log("[bulk-delete] starting", { count: ids.length, ids });
                 setBulkDeleting(true);
-                const { data, error, count, status, statusText } = await supabase
-                  .from("reservations")
-                  .delete({ count: "exact" })
-                  .in("id", ids)
-                  .select("id");
-                setBulkDeleting(false);
-                console.log("[bulk-delete] response", { count, status, statusText, returned: data?.length, error });
-                if (error) {
-                  toast.error(`Bulk delete failed: ${error.message}`);
+                let ids: string[] = [];
+                try {
+                  ids = selectAllAcrossPages
+                    ? await fetchAllMatchingIds()
+                    : Array.from(selectedIds);
+                } catch (err: any) {
+                  setBulkDeleting(false);
+                  toast.error(`Could not load matching reservations: ${err?.message ?? err}`);
                   return;
                 }
-                const deleted = data?.length ?? count ?? 0;
-                if (deleted === 0) {
+                console.log("[bulk-delete] starting", { count: ids.length, acrossPages: selectAllAcrossPages });
+                if (ids.length === 0) {
+                  setBulkDeleting(false);
+                  toast.error("No reservations matched the current filters.");
+                  return;
+                }
+                // Delete in chunks to stay well under PostgREST URL length limits
+                // when "select all across pages" returns thousands of IDs.
+                const CHUNK = 200;
+                let totalDeleted = 0;
+                let lastError: any = null;
+                for (let i = 0; i < ids.length; i += CHUNK) {
+                  const chunk = ids.slice(i, i + CHUNK);
+                  const { data, error, count } = await supabase
+                    .from("reservations")
+                    .delete({ count: "exact" })
+                    .in("id", chunk)
+                    .select("id");
+                  if (error) { lastError = error; break; }
+                  totalDeleted += data?.length ?? count ?? 0;
+                }
+                setBulkDeleting(false);
+                console.log("[bulk-delete] response", { totalDeleted, requested: ids.length, lastError });
+                if (lastError) {
+                  toast.error(`Bulk delete failed: ${lastError.message}`);
+                  return;
+                }
+                if (totalDeleted === 0) {
                   toast.error("No reservations were deleted. RLS may be blocking access.");
                   return;
                 }
-                toast.success(`Deleted ${deleted} reservation${deleted === 1 ? "" : "s"}`);
+                toast.success(`Deleted ${totalDeleted} reservation${totalDeleted === 1 ? "" : "s"}`);
                 setBulkConfirmOpen(false);
                 exitBulkMode();
+                setPage(0);
                 queryClient.invalidateQueries({ queryKey: ["reservations"] });
               }}
             >
-              {bulkDeleting ? "Deleting..." : `Delete ${selectedIds.size}`}
+              {bulkDeleting ? "Deleting..." : `Delete ${selectAllAcrossPages ? totalMatching : selectedIds.size}`}
             </Button>
           </DialogFooter>
         </DialogContent>
