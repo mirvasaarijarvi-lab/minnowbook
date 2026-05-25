@@ -591,11 +591,13 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
             <span className="font-medium">Superadmin tools</span>
             <span className="text-muted-foreground">
               {bulkMode
-                ? `${selectedIds.size} selected for deletion`
+                ? selectAllAcrossPages
+                  ? `All ${totalMatching} matching reservation${totalMatching === 1 ? "" : "s"} selected`
+                  : `${selectedIds.size} selected for deletion`
                 : "Bulk-delete reservations across any tenant"}
             </span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             {!bulkMode ? (
               <Button
                 size="sm"
@@ -615,6 +617,7 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
                   size="sm"
                   variant="outline"
                   onClick={() => {
+                    setSelectAllAcrossPages(false);
                     const visibleIds = (reservations ?? []).map((r: any) => r.id);
                     const allSelected =
                       visibleIds.length > 0 &&
@@ -623,20 +626,43 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
                   }}
                   disabled={(reservations?.length ?? 0) === 0}
                 >
-                  {(reservations ?? []).length > 0 &&
+                  {!selectAllAcrossPages &&
+                  (reservations ?? []).length > 0 &&
                   (reservations ?? []).every((r: any) => selectedIds.has(r.id))
-                    ? "Deselect all"
-                    : `Select all visible (${reservations?.length ?? 0})`}
+                    ? "Deselect page"
+                    : `Select page (${reservations?.length ?? 0})`}
                 </Button>
+                {totalMatching > (reservations?.length ?? 0) && (
+                  <Button
+                    size="sm"
+                    variant={selectAllAcrossPages ? "default" : "outline"}
+                    onClick={() => {
+                      if (selectAllAcrossPages) {
+                        setSelectAllAcrossPages(false);
+                        setSelectedIds(new Set());
+                      } else {
+                        setSelectAllAcrossPages(true);
+                        // Mirror visible IDs locally so the page checkboxes
+                        // appear ticked; the delete handler still re-fetches
+                        // the full ID set from the server at submit time.
+                        setSelectedIds(new Set((reservations ?? []).map((r: any) => r.id)));
+                      }
+                    }}
+                  >
+                    {selectAllAcrossPages
+                      ? "Clear all-page selection"
+                      : `Select all ${totalMatching} matching`}
+                  </Button>
+                )}
                 <Button
                   size="sm"
                   variant="destructive"
                   className="gap-1.5"
-                  disabled={selectedIds.size === 0}
+                  disabled={selectAllAcrossPages ? totalMatching === 0 : selectedIds.size === 0}
                   onClick={() => setBulkConfirmOpen(true)}
                 >
                   <Trash2 className="h-4 w-4" />
-                  Delete selected ({selectedIds.size})
+                  Delete {selectAllAcrossPages ? `all ${totalMatching}` : `selected (${selectedIds.size})`}
                 </Button>
               </>
             )}
