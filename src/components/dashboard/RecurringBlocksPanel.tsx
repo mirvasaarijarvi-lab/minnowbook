@@ -127,8 +127,16 @@ const RecurringBlocksPanel = () => {
   const createMutation = useMutation({
     mutationFn: async () => {
       if (!tenantId || selectedDays.length === 0) throw new Error("Select at least one day");
+      // Inherit site from the chosen resource when present, otherwise fall
+      // back to the active site context. Keeps recurring blocks aligned with
+      // the site filter applied elsewhere in the dashboard.
+      const chosenResource = blockSpecificResource && form.resource_id
+        ? (resources ?? []).find((r: any) => r.id === form.resource_id)
+        : null;
+      const siteIdForRows = (chosenResource as any)?.site_id ?? selectedSiteId ?? null;
       const rows = selectedDays.map((day) => ({
         tenant_id: tenantId,
+        site_id: siteIdForRows,
         day_of_week: day,
         resource_type: form.resource_type,
         resource_id: blockSpecificResource && form.resource_id ? form.resource_id : null,
