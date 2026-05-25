@@ -513,10 +513,27 @@ const EditReservationDialog = ({
                 hunting for it at the bottom of the form. */}
             {canCrossReserve && linkedReservations.length > 0 && (
               <div className="space-y-2 rounded-lg border border-accent/30 bg-accent/5 p-3">
-                <Label className="font-medium flex items-center gap-1.5">
-                  <Link2 className="h-3.5 w-3.5 text-accent" />
-                  {t("offers.linkedReservations")} ({linkedReservations.length})
-                </Label>
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <Label className="font-medium flex items-center gap-1.5">
+                    <Link2 className="h-3.5 w-3.5 text-accent" />
+                    {t("offers.linkedReservations")} ({linkedReservations.length})
+                  </Label>
+                  {reservation?.linked_group_id && reservation?.date && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="h-7 gap-1.5 text-xs"
+                      onClick={() => {
+                        setRescheduleNewDate(reservation.date);
+                        setRescheduleOpen(true);
+                      }}
+                    >
+                      <CalendarClock className="h-3.5 w-3.5" />
+                      Reschedule group
+                    </Button>
+                  )}
+                </div>
                 {linkedOffer && (
                   <p className="text-xs text-muted-foreground">
                     {t("offers.crossBookingTitle")}, {linkedOffer.guest_name} ({linkedOffer.event_date})
