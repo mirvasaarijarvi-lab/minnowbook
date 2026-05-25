@@ -85,6 +85,7 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
   const [newReservationOpen, setNewReservationOpen] = useState(false);
   const [linkedUsedPrompt, setLinkedUsedPrompt] = useState<{ reservationId: string; linkedIds: string[]; linkedNames: string[]; value: boolean } | null>(null);
   const [linkedInvoicedPrompt, setLinkedInvoicedPrompt] = useState<{ reservationId: string; linkedIds: string[]; linkedNames: string[]; value: boolean } | null>(null);
+  const [linkedCancelPrompt, setLinkedCancelPrompt] = useState<{ reservationId: string; linkedIds: string[]; linkedNames: string[]; suppressEmail: boolean } | null>(null);
   const t = useT();
   const tDynamic = useTDynamic();
   const dateFnsLocale = useDateLocale();
