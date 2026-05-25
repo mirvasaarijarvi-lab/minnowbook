@@ -134,14 +134,17 @@ const RESERVATION_ROWS = [
 // Every chainable method returns the chain itself; awaiting the chain
 // (or calling `.maybeSingle()`) resolves to the configured payload.
 function makeChain(table: string) {
-  const payload =
+  const rows =
     table === "reservations"
-      ? { data: RESERVATION_ROWS, error: null }
-      : table === "sites"
-        ? { data: [], error: null }
-        : table === "tenant_settings"
-          ? { data: null, error: null }
-          : { data: [], error: null };
+      ? RESERVATION_ROWS
+      : table === "tenant_settings"
+        ? null
+        : [];
+  const payload: any = {
+    data: rows,
+    error: null,
+    count: Array.isArray(rows) ? rows.length : 0,
+  };
 
   const chain: any = {};
   const passthrough = () => chain;
@@ -156,6 +159,7 @@ function makeChain(table: string) {
   chain.lte = passthrough;
   chain.is = passthrough;
   chain.limit = () => Promise.resolve(payload);
+  chain.range = () => Promise.resolve(payload);
   chain.maybeSingle = () => Promise.resolve({ data: payload.data ?? null, error: null });
   chain.then = (resolve: (v: any) => void) => resolve(payload);
   return chain;
