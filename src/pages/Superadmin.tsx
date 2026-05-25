@@ -462,6 +462,9 @@ const Superadmin = () => {
         {/* Storage path rejection telemetry + spike alerts */}
         <StorageRejectionPanel />
 
+        {/* Automated cleanup of test/synthetic reservations (e.g. TEST Lovable Cross) */}
+        <TestReservationCleanupPanel />
+
         {/* RLS Manifest Debug — exact SQL/filters used by manifest tests */}
         <RlsManifestDebugPanel />
       </main>
