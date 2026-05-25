@@ -272,44 +272,63 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
     },
   });
 
+  // Collect sibling reservation IDs from BOTH linkage sources:
+  // legacy offers.reservation_ids (cross-bookings created via the Offers flow)
+  // AND modern linked_group_id (manual cross-bookings via ManualReservationDialog).
+  // LinkedReservationsPanel unions both; the used/invoiced propagation prompts
+  // must do the same or manual cross-bookings silently get orphaned.
+  const collectLinkedSiblingIds = async (id: string): Promise<string[]> => {
+    if (!tenantId) return [];
+    const current = reservations?.find((r) => r.id === id) as any;
+    const siblings = new Set<string>();
+
+    const { data: offers } = await supabase
+      .from("offers")
+      .select("reservation_ids")
+      .eq("tenant_id", tenantId)
+      .contains("reservation_ids", [id]);
+    (offers ?? []).forEach((o) => {
+      ((o.reservation_ids as string[]) || []).forEach((rid) => {
+        if (rid !== id) siblings.add(rid);
+      });
+    });
+
+    const groupId = current?.linked_group_id as string | null | undefined;
+    if (groupId) {
+      const { data: groupRows } = await supabase
+        .from("reservations")
+        .select("id")
+        .eq("tenant_id", tenantId)
+        .eq("linked_group_id", groupId)
+        .neq("status", "cancelled");
+      (groupRows ?? []).forEach((r) => {
+        if (r.id !== id) siblings.add(r.id);
+      });
+    }
+
+    return Array.from(siblings);
+  };
+
   const handleToggleUsed = async (id: string, checked: boolean) => {
     // Always toggle the current reservation first
     toggleUsed.mutate({ id, checked });
 
-    // If marking as used, check for linked reservations via offers
     if (checked && tenantId) {
-      const { data: offers } = await supabase
-        .from("offers")
-        .select("reservation_ids")
-        .eq("tenant_id", tenantId)
-        .contains("reservation_ids", [id]);
+      const linkedIdsArray = await collectLinkedSiblingIds(id);
+      if (linkedIdsArray.length > 0) {
+        const { data: linkedReservations } = await supabase
+          .from("reservations")
+          .select("id, guest_name, reservation_type, is_used")
+          .in("id", linkedIdsArray)
+          .eq("tenant_id", tenantId);
 
-      if (offers && offers.length > 0) {
-        const allLinkedIds = new Set<string>();
-        offers.forEach((offer) => {
-          const ids = (offer.reservation_ids as string[]) || [];
-          ids.forEach((rid) => {
-            if (rid !== id) allLinkedIds.add(rid);
+        const unmarked = (linkedReservations || []).filter((r) => !r.is_used);
+        if (unmarked.length > 0) {
+          setLinkedUsedPrompt({
+            reservationId: id,
+            linkedIds: unmarked.map((r) => r.id),
+            linkedNames: unmarked.map((r) => `${r.guest_name} (${r.reservation_type})`),
           });
-        });
-
-        if (allLinkedIds.size > 0) {
-          // Check which linked reservations are not yet marked as used
-          const linkedIdsArray = Array.from(allLinkedIds);
-          const { data: linkedReservations } = await supabase
-            .from("reservations")
-            .select("id, guest_name, reservation_type, is_used")
-            .in("id", linkedIdsArray)
-            .eq("tenant_id", tenantId);
-
-          const unmarked = (linkedReservations || []).filter((r) => !r.is_used);
-          if (unmarked.length > 0) {
-            setLinkedUsedPrompt({
-              reservationId: id,
-              linkedIds: unmarked.map((r) => r.id),
-              linkedNames: unmarked.map((r) => `${r.guest_name} (${r.reservation_type})`),
-            });
-          }
         }
       }
     }
@@ -355,37 +374,21 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
     toggleInvoiced.mutate({ id, checked });
 
     if (checked && tenantId) {
-      const { data: offers } = await supabase
-        .from("offers")
-        .select("reservation_ids")
-        .eq("tenant_id", tenantId)
-        .contains("reservation_ids", [id]);
+      const linkedIdsArray = await collectLinkedSiblingIds(id);
+      if (linkedIdsArray.length > 0) {
+        const { data: linkedReservations } = await supabase
+          .from("reservations")
+          .select("id, guest_name, reservation_type, is_invoiced")
+          .in("id", linkedIdsArray)
+          .eq("tenant_id", tenantId);
 
-      if (offers && offers.length > 0) {
-        const allLinkedIds = new Set<string>();
-        offers.forEach((offer) => {
-          const ids = (offer.reservation_ids as string[]) || [];
-          ids.forEach((rid) => {
-            if (rid !== id) allLinkedIds.add(rid);
+        const unmarked = (linkedReservations || []).filter((r) => !r.is_invoiced);
+        if (unmarked.length > 0) {
+          setLinkedInvoicedPrompt({
+            reservationId: id,
+            linkedIds: unmarked.map((r) => r.id),
+            linkedNames: unmarked.map((r) => `${r.guest_name} (${r.reservation_type})`),
           });
-        });
-
-        if (allLinkedIds.size > 0) {
-          const linkedIdsArray = Array.from(allLinkedIds);
-          const { data: linkedReservations } = await supabase
-            .from("reservations")
-            .select("id, guest_name, reservation_type, is_invoiced")
-            .in("id", linkedIdsArray)
-            .eq("tenant_id", tenantId);
-
-          const unmarked = (linkedReservations || []).filter((r) => !r.is_invoiced);
-          if (unmarked.length > 0) {
-            setLinkedInvoicedPrompt({
-              reservationId: id,
-              linkedIds: unmarked.map((r) => r.id),
-              linkedNames: unmarked.map((r) => `${r.guest_name} (${r.reservation_type})`),
-            });
-          }
         }
       }
     }
