@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useT } from "@/contexts/I18nContext";
 import { useOffers, useUpdateOffer, type Offer } from "@/hooks/useOffers";
 import { useTenant } from "@/hooks/useTenant";
@@ -40,6 +41,51 @@ const OffersManager = () => {
       return nameMatch || dateMatch || spaceMatch;
     });
   }, [offers, searchQuery]);
+
+  // Derive a "stale" map for confirmed offers: when every linked reservation
+  // has been cancelled, surface a badge so staff can see the offer is no
+  // longer backing any active booking. We don't mutate offer.status because
+  // the schema constrains it (draft|sent|confirmed|expired) and a soft
+  // signal is enough for the UI.
+  const offerResIds = useMemo(() => {
+    const ids = new Set<string>();
+    for (const o of filteredOffers) {
+      if (o.status !== "confirmed") continue;
+      for (const id of o.reservation_ids ?? []) ids.add(id);
+    }
+    return Array.from(ids);
+  }, [filteredOffers]);
+
+  const { data: resStatuses = [] } = useQuery({
+    queryKey: ["offer-linked-reservation-statuses", tenantId, offerResIds],
+    queryFn: async () => {
+      if (!tenantId || offerResIds.length === 0) return [];
+      const { data, error } = await supabase
+        .from("reservations")
+        .select("id, status")
+        .eq("tenant_id", tenantId)
+        .in("id", offerResIds);
+      if (error) throw error;
+      return data ?? [];
+    },
+    enabled: !!tenantId && offerResIds.length > 0,
+  });
+
+  const statusById = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const r of resStatuses as any[]) m.set(r.id, r.status);
+    return m;
+  }, [resStatuses]);
+
+  const isOfferStale = useCallback(
+    (offer: Offer) => {
+      if (offer.status !== "confirmed") return false;
+      const ids = offer.reservation_ids ?? [];
+      if (ids.length === 0) return false;
+      return ids.every((id) => statusById.get(id) === "cancelled");
+    },
+    [statusById],
+  );
 
   const statusColor = (s: string) => {
     switch (s) {
@@ -214,6 +260,11 @@ const OffersManager = () => {
                         </Badge>
                         {isArchived && (
                           <Badge variant="outline" className="text-[10px]">{t("offers.archived")}</Badge>
+                        )}
+                        {isOfferStale(offer) && (
+                          <Badge variant="destructive" className="text-[10px]" title="All linked reservations have been cancelled">
+                            All bookings cancelled
+                          </Badge>
                         )}
                       </div>
                       <p className="text-xs text-muted-foreground">

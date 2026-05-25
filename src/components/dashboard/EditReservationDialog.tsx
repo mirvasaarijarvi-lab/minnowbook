@@ -11,6 +11,16 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -34,7 +44,7 @@ import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { format } from "date-fns";
-import { CalendarIcon, Loader2, Mail, Pencil, XCircle, Tag, Link2, Unlink } from "lucide-react";
+import { CalendarIcon, Loader2, Mail, Pencil, XCircle, Tag, Link2, Unlink, CalendarClock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import ConfirmationEmailPreview from "@/components/ConfirmationEmailPreview";
 import { Badge } from "@/components/ui/badge";
@@ -97,6 +107,8 @@ const EditReservationDialog = ({
   const [cancelCustomMessage, setCancelCustomMessage] = useState("");
   const [markAsConfirmed, setMarkAsConfirmed] = useState(false);
   const [sendConfirmEmail, setSendConfirmEmail] = useState(true);
+  const [rescheduleOpen, setRescheduleOpen] = useState(false);
+  const [rescheduleNewDate, setRescheduleNewDate] = useState<string>("");
 
   const [form, setForm] = useState({
     guest_name: "",
@@ -349,6 +361,72 @@ const EditReservationDialog = ({
     },
   });
 
+  // Reschedule the entire linked cross-booking group by the same day delta.
+  // Anchored on the CURRENT leg's existing date so siblings stay in their
+  // original relative positions (e.g. accommodation that ran from event day
+  // to event day + 1 stays that way after the shift). Each sibling's
+  // check_out_date is shifted by the same delta when present.
+  const rescheduleGroupMutation = useMutation({
+    mutationFn: async (newDateIso: string) => {
+      if (!reservation?.linked_group_id) throw new Error("No linked group");
+      if (!reservation.date) throw new Error("Current reservation has no date");
+      const oldAnchor = new Date(reservation.date + "T00:00:00");
+      const newAnchor = new Date(newDateIso + "T00:00:00");
+      const deltaMs = newAnchor.getTime() - oldAnchor.getTime();
+      const deltaDays = Math.round(deltaMs / (1000 * 60 * 60 * 24));
+      if (deltaDays === 0) return { shifted: 0 };
+
+      const shiftIso = (iso: string | null | undefined) => {
+        if (!iso) return null;
+        const d = new Date(iso + "T00:00:00");
+        d.setDate(d.getDate() + deltaDays);
+        return format(d, "yyyy-MM-dd");
+      };
+
+      // Fetch all siblings in the group (including current) so we shift them
+      // in one batch and keep the group's internal date relationships intact.
+      const { data: groupRows, error: fetchErr } = await supabase
+        .from("reservations")
+        .select("id, date, check_out_date, linked_group_id")
+        .eq("linked_group_id", reservation.linked_group_id)
+        .eq("tenant_id", reservation.tenant_id);
+      if (fetchErr) throw fetchErr;
+      if (!groupRows || groupRows.length === 0) return { shifted: 0 };
+
+      const nowIso = new Date().toISOString();
+      let shifted = 0;
+      for (const row of groupRows) {
+        const newDate = shiftIso(row.date);
+        const newCheckOut = shiftIso(row.check_out_date);
+        const payload: Record<string, unknown> = { updated_at: nowIso };
+        if (newDate && newDate !== row.date) payload.date = newDate;
+        if (newCheckOut !== row.check_out_date) payload.check_out_date = newCheckOut;
+        if (Object.keys(payload).length === 1) continue; // only updated_at
+        const { error: updErr } = await supabase
+          .from("reservations")
+          .update(payload)
+          .eq("id", row.id)
+          .eq("tenant_id", reservation.tenant_id)
+          .eq("linked_group_id", reservation.linked_group_id);
+        if (updErr) throw updErr;
+        shifted += 1;
+      }
+      return { shifted };
+    },
+    onSuccess: (res) => {
+      queryClient.invalidateQueries({ queryKey: ["reservations"] });
+      queryClient.invalidateQueries({ queryKey: ["linked-reservations"] });
+      queryClient.invalidateQueries({ queryKey: ["linked-group-reservations"] });
+      toast.success(`Rescheduled ${res?.shifted ?? 0} linked reservation(s)`);
+      setRescheduleOpen(false);
+      setRescheduleNewDate("");
+      onOpenChange(false);
+    },
+    onError: (err: any) => {
+      toast.error(err?.message || "Failed to reschedule linked group");
+    },
+  });
+
   const updateField = (key: string, value: string) => {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
@@ -435,10 +513,27 @@ const EditReservationDialog = ({
                 hunting for it at the bottom of the form. */}
             {canCrossReserve && linkedReservations.length > 0 && (
               <div className="space-y-2 rounded-lg border border-accent/30 bg-accent/5 p-3">
-                <Label className="font-medium flex items-center gap-1.5">
-                  <Link2 className="h-3.5 w-3.5 text-accent" />
-                  {t("offers.linkedReservations")} ({linkedReservations.length})
-                </Label>
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <Label className="font-medium flex items-center gap-1.5">
+                    <Link2 className="h-3.5 w-3.5 text-accent" />
+                    {t("offers.linkedReservations")} ({linkedReservations.length})
+                  </Label>
+                  {reservation?.linked_group_id && reservation?.date && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="h-7 gap-1.5 text-xs"
+                      onClick={() => {
+                        setRescheduleNewDate(reservation.date);
+                        setRescheduleOpen(true);
+                      }}
+                    >
+                      <CalendarClock className="h-3.5 w-3.5" />
+                      Reschedule group
+                    </Button>
+                  )}
+                </div>
                 {linkedOffer && (
                   <p className="text-xs text-muted-foreground">
                     {t("offers.crossBookingTitle")}, {linkedOffer.guest_name} ({linkedOffer.event_date})
@@ -864,6 +959,75 @@ const EditReservationDialog = ({
           </Button>
         </DialogFooter>
       </DialogContent>
+
+      <AlertDialog open={rescheduleOpen} onOpenChange={setRescheduleOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Reschedule entire linked group</AlertDialogTitle>
+            <AlertDialogDescription>
+              Pick a new date for this leg. Every linked sibling in the cross-booking
+              group will shift by the same number of days, preserving their relative
+              positions (including any check-out dates).
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-2 py-2">
+            <Label>New date for this leg</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !rescheduleNewDate && "text-muted-foreground")}>
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {rescheduleNewDate
+                    ? format(new Date(rescheduleNewDate + "T00:00:00"), "PPP", { locale: dateFnsLocale })
+                    : t("dashboard.selectDate")}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={rescheduleNewDate ? new Date(rescheduleNewDate + "T00:00:00") : undefined}
+                  onSelect={(d) => d && setRescheduleNewDate(format(d, "yyyy-MM-dd"))}
+                  className={cn("p-3 pointer-events-auto")}
+                />
+              </PopoverContent>
+            </Popover>
+            {reservation?.date && rescheduleNewDate && rescheduleNewDate !== reservation.date && (() => {
+              const delta = Math.round(
+                (new Date(rescheduleNewDate + "T00:00:00").getTime() -
+                  new Date(reservation.date + "T00:00:00").getTime()) / 86400000,
+              );
+              return (
+                <p className="text-xs text-muted-foreground">
+                  Shifts all {linkedReservations.length} linked reservation(s) by{" "}
+                  <strong>{delta > 0 ? `+${delta}` : delta} day(s)</strong>.
+                </p>
+              );
+            })()}
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={
+                rescheduleGroupMutation.isPending ||
+                !rescheduleNewDate ||
+                rescheduleNewDate === reservation?.date
+              }
+              onClick={(e) => {
+                e.preventDefault();
+                rescheduleGroupMutation.mutate(rescheduleNewDate);
+              }}
+            >
+              {rescheduleGroupMutation.isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Rescheduling...
+                </>
+              ) : (
+                "Reschedule group"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Dialog>
   );
 };
