@@ -137,37 +137,67 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
   const siteMap = Object.fromEntries((sites ?? []).map((s) => [s.id, s.name]));
   const showSiteLabel = (sites?.length ?? 0) > 0 && !selectedSiteId;
 
-  const { data: reservations, isLoading } = useQuery({
-    queryKey: ["reservations", tenantId, selectedSiteId, siteIds, viewTab, statusFilter, typeFilter, dateFilter, invoicedFilter, checkoutTodayFilter, specificDate ? format(specificDate, "yyyy-MM-dd") : null, debouncedSearch],
+  // Shared filter application so the paginated list query, the count, and the
+  // "select all across pages" ID fetch all use the exact same WHERE clauses.
+  const applyReservationFilters = (q: any) => {
+    q = applySiteFilter(q, selectedSiteId);
+    if (viewTab === "cancelled") {
+      q = q.eq("status", "cancelled");
+    } else if (statusFilter !== "all") {
+      q = q.eq("status", statusFilter);
+    } else {
+      q = q.neq("status", "cancelled");
+    }
+    if (typeFilter !== "all") q = q.eq("reservation_type", typeFilter);
+    if (checkoutTodayFilter) {
+      q = q.eq("check_out_date", today);
+    } else if (specificDate) {
+      q = q.eq("date", format(specificDate, "yyyy-MM-dd"));
+    } else if (dateFilter === "today") {
+      q = q.eq("date", today);
+    }
+    if (invoicedFilter === "uninvoiced") q = q.eq("is_invoiced", false);
+    if (invoicedFilter === "invoiced") q = q.eq("is_invoiced", true);
+    const searchClause = buildGuestSearchOrClause(debouncedSearch);
+    if (searchClause) q = q.or(searchClause);
+    return q;
+  };
+
+  // Reset page + selection whenever the active filter set changes.
+  useEffect(() => {
+    setPage(0);
+    setSelectAllAcrossPages(false);
+    setSelectedIds(new Set());
+  }, [tenantId, selectedSiteId, viewTab, statusFilter, typeFilter, dateFilter, invoicedFilter, checkoutTodayFilter, specificDate, debouncedSearch]);
+
+  const { data: reservationsPage, isLoading } = useQuery({
+    queryKey: ["reservations", tenantId, selectedSiteId, siteIds, viewTab, statusFilter, typeFilter, dateFilter, invoicedFilter, checkoutTodayFilter, specificDate ? format(specificDate, "yyyy-MM-dd") : null, debouncedSearch, page],
     queryFn: async () => {
-      if (!tenantId) return [];
-      let query = supabase.from("reservations").select("*").eq("tenant_id", tenantId).order("date", { ascending: false });
-      query = applySiteFilter(query, selectedSiteId);
-      if (viewTab === "cancelled") {
-        query = query.eq("status", "cancelled");
-      } else if (statusFilter !== "all") {
-        query = query.eq("status", statusFilter);
-      } else {
-        query = query.neq("status", "cancelled");
-      }
-      if (typeFilter !== "all") query = query.eq("reservation_type", typeFilter);
-      if (checkoutTodayFilter) {
-        query = query.eq("check_out_date", today);
-      } else if (specificDate) {
-        query = query.eq("date", format(specificDate, "yyyy-MM-dd"));
-      } else if (dateFilter === "today") {
-        query = query.eq("date", today);
-      }
-      if (invoicedFilter === "uninvoiced") query = query.eq("is_invoiced", false);
-      if (invoicedFilter === "invoiced") query = query.eq("is_invoiced", true);
-      const searchClause = buildGuestSearchOrClause(debouncedSearch);
-      if (searchClause) query = query.or(searchClause);
-      const { data, error } = await query.limit(100);
+      if (!tenantId) return { rows: [], total: 0 };
+      let query = supabase.from("reservations").select("*", { count: "exact" }).eq("tenant_id", tenantId).order("date", { ascending: false });
+      query = applyReservationFilters(query);
+      const from = page * PAGE_SIZE;
+      const to = from + PAGE_SIZE - 1;
+      const { data, error, count } = await query.range(from, to);
       if (error) throw error;
-      return data;
+      return { rows: data ?? [], total: count ?? 0 };
     },
     enabled: !!tenantId,
   });
+  const reservations = reservationsPage?.rows;
+  const totalMatching = reservationsPage?.total ?? 0;
+  const totalPages = Math.max(1, Math.ceil(totalMatching / PAGE_SIZE));
+
+  // Fetch every matching reservation ID across all pages (used for
+  // "Select all N matching" + bulk delete across the entire result set).
+  const fetchAllMatchingIds = async (): Promise<string[]> => {
+    if (!tenantId) return [];
+    let query = supabase.from("reservations").select("id").eq("tenant_id", tenantId);
+    query = applyReservationFilters(query);
+    const { data, error } = await query.limit(10000);
+    if (error) throw error;
+    return (data ?? []).map((r: any) => r.id);
+  };
 
   const { data: settings } = useQuery({
     queryKey: ["tenant-settings", tenantId],
