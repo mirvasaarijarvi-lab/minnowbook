@@ -396,10 +396,7 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
     if (checked) {
       const hasPrice = await linkedGroupHasPrice(id);
       if (!hasPrice) {
-        toast.error(
-          t("dashboard.invoiceRequiresPrice") ||
-            "Add a price before marking this reservation as invoiced.",
-        );
+        toast.error("Add a price before marking this reservation as invoiced.");
         return;
       }
     }
