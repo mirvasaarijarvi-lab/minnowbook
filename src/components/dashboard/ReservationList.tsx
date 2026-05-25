@@ -254,17 +254,17 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
   });
 
   const markLinkedUsed = useMutation({
-    mutationFn: async (ids: string[]) => {
+    mutationFn: async ({ ids, value }: { ids: string[]; value: boolean }) => {
       const { error } = await supabase
         .from("reservations")
-        .update({ is_used: true, updated_at: new Date().toISOString() } as any)
+        .update({ is_used: value, updated_at: new Date().toISOString() } as any)
         .in("id", ids)
         .eq("tenant_id", tenantId!);
       if (error) throw error;
     },
-    onSuccess: () => {
+    onSuccess: (_data, vars) => {
       queryClient.invalidateQueries({ queryKey: ["reservations"] });
-      toast.success(t("dashboard.used"));
+      toast.success(vars.value ? t("dashboard.used") : t("dashboard.statusUpdated"));
       setLinkedUsedPrompt(null);
     },
     onError: () => {
