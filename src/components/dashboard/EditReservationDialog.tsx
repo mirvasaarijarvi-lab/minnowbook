@@ -11,6 +11,16 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -34,7 +44,7 @@ import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { format } from "date-fns";
-import { CalendarIcon, Loader2, Mail, Pencil, XCircle, Tag, Link2, Unlink } from "lucide-react";
+import { CalendarIcon, Loader2, Mail, Pencil, XCircle, Tag, Link2, Unlink, CalendarClock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import ConfirmationEmailPreview from "@/components/ConfirmationEmailPreview";
 import { Badge } from "@/components/ui/badge";
