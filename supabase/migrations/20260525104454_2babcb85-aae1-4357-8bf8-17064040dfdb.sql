@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "Anyone can see active tenants (public columns)" ON public.tenants;
