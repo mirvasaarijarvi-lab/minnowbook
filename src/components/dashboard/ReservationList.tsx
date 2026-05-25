@@ -992,7 +992,7 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
           <DialogFooter>
             <Button variant="outline" onClick={() => setLinkedUsedPrompt(null)}>{t("common.cancel")}</Button>
             <Button
-              onClick={() => linkedUsedPrompt && markLinkedUsed.mutate(linkedUsedPrompt.linkedIds)}
+              onClick={() => linkedUsedPrompt && markLinkedUsed.mutate({ ids: linkedUsedPrompt.linkedIds, value: linkedUsedPrompt.value })}
               disabled={markLinkedUsed.isPending}
             >
               <PackageCheck className="h-4 w-4 mr-1.5" />
