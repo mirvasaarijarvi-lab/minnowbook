@@ -959,6 +959,75 @@ const EditReservationDialog = ({
           </Button>
         </DialogFooter>
       </DialogContent>
+
+      <AlertDialog open={rescheduleOpen} onOpenChange={setRescheduleOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Reschedule entire linked group</AlertDialogTitle>
+            <AlertDialogDescription>
+              Pick a new date for this leg. Every linked sibling in the cross-booking
+              group will shift by the same number of days, preserving their relative
+              positions (including any check-out dates).
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-2 py-2">
+            <Label>New date for this leg</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !rescheduleNewDate && "text-muted-foreground")}>
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {rescheduleNewDate
+                    ? format(new Date(rescheduleNewDate + "T00:00:00"), "PPP", { locale: dateFnsLocale })
+                    : t("dashboard.selectDate")}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={rescheduleNewDate ? new Date(rescheduleNewDate + "T00:00:00") : undefined}
+                  onSelect={(d) => d && setRescheduleNewDate(format(d, "yyyy-MM-dd"))}
+                  className={cn("p-3 pointer-events-auto")}
+                />
+              </PopoverContent>
+            </Popover>
+            {reservation?.date && rescheduleNewDate && rescheduleNewDate !== reservation.date && (() => {
+              const delta = Math.round(
+                (new Date(rescheduleNewDate + "T00:00:00").getTime() -
+                  new Date(reservation.date + "T00:00:00").getTime()) / 86400000,
+              );
+              return (
+                <p className="text-xs text-muted-foreground">
+                  Shifts all {linkedReservations.length} linked reservation(s) by{" "}
+                  <strong>{delta > 0 ? `+${delta}` : delta} day(s)</strong>.
+                </p>
+              );
+            })()}
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={
+                rescheduleGroupMutation.isPending ||
+                !rescheduleNewDate ||
+                rescheduleNewDate === reservation?.date
+              }
+              onClick={(e) => {
+                e.preventDefault();
+                rescheduleGroupMutation.mutate(rescheduleNewDate);
+              }}
+            >
+              {rescheduleGroupMutation.isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Rescheduling...
+                </>
+              ) : (
+                "Reschedule group"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Dialog>
   );
 };
