@@ -107,6 +107,8 @@ const EditReservationDialog = ({
   const [cancelCustomMessage, setCancelCustomMessage] = useState("");
   const [markAsConfirmed, setMarkAsConfirmed] = useState(false);
   const [sendConfirmEmail, setSendConfirmEmail] = useState(true);
+  const [rescheduleOpen, setRescheduleOpen] = useState(false);
+  const [rescheduleNewDate, setRescheduleNewDate] = useState<string>("");
 
   const [form, setForm] = useState({
     guest_name: "",
