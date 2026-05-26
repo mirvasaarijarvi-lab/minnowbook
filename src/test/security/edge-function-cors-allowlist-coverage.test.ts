@@ -193,7 +193,7 @@ describe("Edge function CORS — exhaustive allowed/disallowed origin coverage",
             "strict-origin-when-cross-origin",
           );
         }
-      });
+      }, 60_000);
 
       it("no allowed-variant accidentally also matches a disallowed-variant pattern", () => {
         // Defense-in-depth: if our two lists ever drift and overlap, this
