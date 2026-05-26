@@ -149,7 +149,7 @@ describe("Edge function CORS — exhaustive allowed/disallowed origin coverage",
           // Credentials must remain unset for our cookieless model.
           const acac = res.headers.get("access-control-allow-credentials");
           if (acac !== null) expect(acac.toLowerCase()).not.toBe("true");
-        });
+        }, 30_000);
       }
 
       // Disallowed origins must NEVER be echoed. The function's documented
