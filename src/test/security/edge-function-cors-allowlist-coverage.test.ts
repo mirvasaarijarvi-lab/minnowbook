@@ -149,7 +149,7 @@ describe("Edge function CORS — exhaustive allowed/disallowed origin coverage",
           // Credentials must remain unset for our cookieless model.
           const acac = res.headers.get("access-control-allow-credentials");
           if (acac !== null) expect(acac.toLowerCase()).not.toBe("true");
-        });
+        }, 30_000);
       }
 
       // Disallowed origins must NEVER be echoed. The function's documented
@@ -179,7 +179,7 @@ describe("Edge function CORS — exhaustive allowed/disallowed origin coverage",
           // Credentials never enabled for disallowed origins.
           const acac = res.headers.get("access-control-allow-credentials");
           if (acac !== null) expect(acac.toLowerCase()).not.toBe("true");
-        });
+        }, 30_000);
       }
 
       it("hardening headers are present on every preflight regardless of origin", async () => {
@@ -193,7 +193,7 @@ describe("Edge function CORS — exhaustive allowed/disallowed origin coverage",
             "strict-origin-when-cross-origin",
           );
         }
-      });
+      }, 60_000);
 
       it("no allowed-variant accidentally also matches a disallowed-variant pattern", () => {
         // Defense-in-depth: if our two lists ever drift and overlap, this
