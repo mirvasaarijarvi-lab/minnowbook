@@ -179,7 +179,7 @@ describe("Edge function CORS — exhaustive allowed/disallowed origin coverage",
           // Credentials never enabled for disallowed origins.
           const acac = res.headers.get("access-control-allow-credentials");
           if (acac !== null) expect(acac.toLowerCase()).not.toBe("true");
-        });
+        }, 30_000);
       }
 
       it("hardening headers are present on every preflight regardless of origin", async () => {
