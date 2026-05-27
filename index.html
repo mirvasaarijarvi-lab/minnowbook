@@ -15,11 +15,15 @@
       window.dataLayer = window.dataLayer || [];
       function gtag(){window.dataLayer.push(arguments);}
       window.gtag = window.gtag || gtag;
+      var analyticsConsent = 'denied';
+      try {
+        analyticsConsent = localStorage.getItem('cookie-consent') === 'accepted' ? 'granted' : 'denied';
+      } catch (e) {}
       gtag('consent', 'default', {
         ad_storage: 'denied',
         ad_user_data: 'denied',
         ad_personalization: 'denied',
-        analytics_storage: 'denied',
+        analytics_storage: analyticsConsent,
         functionality_storage: 'granted',
         security_storage: 'granted',
         wait_for_update: 500
