@@ -177,6 +177,19 @@ const App = () => (
                   </ProtectedRoute>
                 }
               />
+              <Route
+                path="/superadmin/ga-debug"
+                element={
+                  <ProtectedRoute>
+                    <SystemAdminRoute
+                      attemptedArea="the GA4 diagnostics panel"
+                      areaSlug="superadmin"
+                    >
+                      <GaDebug />
+                    </SystemAdminRoute>
+                  </ProtectedRoute>
+                }
+              />
               <Route path="/book/:slug" element={<PublicBooking />} />
               <Route path="/my-booking/:token" element={<GuestPortal />} />
               <Route
