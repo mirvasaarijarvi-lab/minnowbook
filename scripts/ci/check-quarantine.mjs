@@ -11,6 +11,7 @@
 
 import { readFileSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
+import { safeResolveWithin } from "./safe-path.mjs";
 
 export const MANIFEST_PATH = resolve(
   process.env.QUARANTINE_PATH ?? ".github/flaky-tests.json",
@@ -22,10 +23,11 @@ const REQUIRED_KEYS = ["pattern", "reason", "owner", "added", "expires", "issue"
 const SECTIONS = ["vitest", "playwright"];
 
 export function loadManifest(path = MANIFEST_PATH) {
-  if (!existsSync(path)) {
+  const safe = safeResolveWithin(path);
+  if (!existsSync(safe)) {
     return { vitest: [], playwright: [] };
   }
-  const raw = readFileSync(path, "utf8");
+  const raw = readFileSync(safe, "utf8");
   let json;
   try {
     json = JSON.parse(raw);
