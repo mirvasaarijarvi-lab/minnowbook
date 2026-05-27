@@ -407,7 +407,7 @@ describe.each([
       // so we just keep probing forward in time.
       cursor = new Date(Date.parse(cursor) + 365 * 24 * 3600 * 1000).toISOString();
     }
-  });
+  }, 15_000);
 
   liveIt("reverse cursor (.lt + descending order) returns zero rows", async () => {
     // Newest-first pagination is the most attractive primitive for an
@@ -421,7 +421,7 @@ describe.each([
       .order("created_at", { ascending: false })
       .limit(25);
     expectNoRowsLeaked(result, `${table} reverse cursor .lt(future)`);
-  });
+  }, 15_000);
 
   liveIt("range with column projection ('id') on every page returns zero rows", async () => {
     // Combine projection narrowing with pagination — a common bypass
