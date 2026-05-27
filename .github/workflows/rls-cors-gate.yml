@@ -1,0 +1,138 @@
+name: RLS / CORS Security Gate
+
+# Hard gate dedicated to two attack-surface classes that are easy to
+# regress silently and hardest to recover from in production:
+#
+#   1. Row-Level Security — any cross-tenant data leak.
+#   2. CORS / preflight    — any browser-trust downgrade on an edge
+#      function (missing Allow-Headers, wildcard on a credentialed
+#      route, missing security triad on error paths, etc).
+#
+# The other security workflows (security-scan.yml, security-tests.yml,
+# cross-tenant-rls.yml) still run the full matrix on a slower cadence.
+# This one runs the RLS- and CORS-specific subset on EVERY push/PR so
+# a regression in either class blocks merge with a clearly-named gate.
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rls-cors-tests:
+    name: RLS + CORS regression tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+
+      - name: Cache Bun dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.bun/install/cache
+            node_modules
+          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock', 'bun.lockb', 'package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      # Run only the RLS + CORS slices of the security suite. Each
+      # `-t` pattern is a literal substring of a `describe`/`it` name
+      # in the existing security tests; vitest treats them as a union.
+      # Listing them explicitly (rather than `--config + grep`) keeps
+      # the gate readable in CI logs.
+      - name: Run RLS regression tests
+        run: |
+          bunx vitest run \
+            --config vitest.security.config.ts \
+            --reporter=verbose \
+            src/test/security/cross-tenant-rls.test.ts \
+            src/test/security/cross-tenant-log-isolation.test.ts \
+            src/test/security/cross-tenant-storage.test.ts \
+            src/test/security/pagination-negative-rls.test.ts \
+            src/test/security/tenant-table-manifest.test.ts \
+            src/test/security/guest-reviews-and-tenants-rls.test.ts \
+            src/test/security/code-redemption-cross-tenant.test.ts \
+            src/test/security/duplicate-tenant-membership.test.ts \
+            src/test/security/storage-offer-pdf-isolation.test.ts
+
+      - name: Run CORS regression tests
+        run: |
+          bunx vitest run \
+            --config vitest.security.config.ts \
+            --reporter=verbose \
+            src/test/security/cors-validation.test.ts \
+            src/test/security/edge-function-cors-custom-headers.test.ts \
+            src/test/security/edge-function-hsts-referrer-csp.test.ts \
+            src/test/security/edge-function-csp.test.ts \
+            src/test/security/public-booking-response-headers.test.ts
+
+  rls-advisor-gate:
+    name: Supabase RLS advisor gate
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+    steps:
+      - uses: actions/checkout@v5
+
+      # Fail the build if the Supabase advisors API reports any
+      # RLS-class finding at WARN or ERROR. Unlike the general
+      # security-scan.yml (which only blocks on ERROR per the
+      # maintenance policy), the RLS gate is stricter: any policy
+      # gap — disabled RLS, policy referencing a mutable function,
+      # missing policy for an operation — fails the job.
+      - name: Fetch advisors and gate on RLS findings
+        run: |
+          set -euo pipefail
+          if [ -z "${SUPABASE_ACCESS_TOKEN:-}" ] || [ -z "${SUPABASE_PROJECT_REF:-}" ]; then
+            echo "::warning::SUPABASE_ACCESS_TOKEN / SUPABASE_PROJECT_REF not configured — skipping advisor RLS gate."
+            exit 0
+          fi
+          api="https://api.supabase.com/v1/projects/${SUPABASE_PROJECT_REF}/advisors/security"
+          resp=$(curl -sS -H "Authorization: Bearer ${SUPABASE_ACCESS_TOKEN}" "$api")
+
+          # Match any lint whose name or category mentions RLS / policy.
+          rls=$(echo "$resp" | jq '[.lints[]? | select(
+            (.name // "" | test("rls|policy"; "i")) or
+            (.categories // [] | any(. | test("rls|policy"; "i")))
+          )]')
+
+          count=$(echo "$rls" | jq 'length')
+          echo "$rls" | jq -r '.[] | "::error title=Supabase RLS advisor (\(.level))::\(.name) — \(.description)"'
+
+          if [ "$count" -gt 0 ]; then
+            echo "❌ $count RLS-class Supabase finding(s). Fix before merging."
+            exit 1
+          fi
+          echo "✅ No RLS-class Supabase advisor findings."
+
+  gate-summary:
+    name: RLS/CORS gate summary
+    needs: [rls-cors-tests, rls-advisor-gate]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "rls-cors-tests:    ${{ needs.rls-cors-tests.result }}"
+          echo "rls-advisor-gate:  ${{ needs.rls-advisor-gate.result }}"
+          if [ "${{ needs.rls-cors-tests.result }}" != "success" ] \
+             || [ "${{ needs.rls-advisor-gate.result }}" != "success" ]; then
+            echo "::error::RLS/CORS gate failed. See job logs above."
+            exit 1
+          fi
+          echo "✅ RLS/CORS gate passed."
