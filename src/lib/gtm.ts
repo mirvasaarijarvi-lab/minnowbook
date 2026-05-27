@@ -80,6 +80,11 @@ function sendGa4Event(event: string, params?: Record<string, unknown>) {
   });
 }
 
+function track(event: string, params?: Record<string, unknown>) {
+  push(event, params);
+  sendGa4Event(event, params);
+}
+
 export const gtm = {
   updateConsent: (accepted: boolean) => {
     ensureTrackingGlobals();
@@ -100,10 +105,8 @@ export const gtm = {
   },
 
   pageView: (source: "stored_consent" | "banner_accept" | "route_change" = "route_change") => {
-    // SPA virtual page_view. The GTM container has a GA4 Event tag
-    // listening for the `page_view` event and forwarding to the configured
-    // GA4 property. Do NOT call gtag('config', ...) here — that loads
-    // gtag.js a second time and double-counts hits.
+    // SPA virtual page_view. Send directly to GA4 and also to GTM so the
+    // reporting path works even when the GTM container is missing a GA4 tag.
     const pageParams = {
       page_title: document.title,
       page_location: window.location.href,
@@ -112,19 +115,18 @@ export const gtm = {
       ...(isGa4DebugBridgeEnabled() ? { debug_mode: true } : {}),
     };
 
-    push("page_view", pageParams);
-    sendGa4DebugPageView(pageParams);
+    track("page_view", pageParams);
     push("mimmobook_alive", { source });
   },
 
   signUp: (method: "email" | "google" | "apple" = "email") =>
-    push("sign_up", { method }),
+    track("sign_up", { method }),
 
   login: (method: "email" | "google" | "apple" = "email") =>
-    push("login", { method }),
+    track("login", { method }),
 
   reservationCreated: (type: string) =>
-    push("reservation_created", { reservation_type: type }),
+    track("reservation_created", { reservation_type: type }),
 
   /**
    * Fired when a user clicks a checkout/upgrade CTA, BEFORE we redirect
