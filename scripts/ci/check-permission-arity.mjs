@@ -56,6 +56,12 @@ const ALLOWLIST = [
 ];
 
 function* walk(dir) {
+  // Defense-in-depth: refuse to walk outside the repo root. All callers
+  // pass paths derived from SCAN_DIRS (compile-time constants) joined
+  // with readdirSync entry names, so this should never trigger in CI;
+  // it exists to satisfy static analysis and guard against future misuse.
+  const abs = join(ROOT, relative(ROOT, dir));
+  if (relative(ROOT, abs).startsWith("..")) return;
   let entries;
   try {
     entries = readdirSync(dir, { withFileTypes: true });

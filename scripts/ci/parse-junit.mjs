@@ -11,6 +11,7 @@
 // against the quarantine manifest.
 
 import { readFileSync, existsSync } from "node:fs";
+import { safeResolveWithin } from "./safe-path.mjs";
 
 const ATTR = (s, k) => {
   const m = s.match(new RegExp(`\\b${k}="([^"]*)"`));
@@ -28,8 +29,9 @@ function decodeXmlEntities(s) {
 
 /** Parse a single junit.xml path. Missing file → []. */
 export function parseJunit(path) {
-  if (!existsSync(path)) return [];
-  const xml = readFileSync(path, "utf8");
+  const safe = safeResolveWithin(path);
+  if (!existsSync(safe)) return [];
+  const xml = readFileSync(safe, "utf8");
   const failures = [];
   // Match every <testcase ...> ... </testcase> OR self-closing.
   const caseRe = /<testcase\b([^>]*)(\/>|>([\s\S]*?)<\/testcase>)/g;

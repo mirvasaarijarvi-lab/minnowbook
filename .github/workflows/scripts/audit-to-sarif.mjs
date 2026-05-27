@@ -16,13 +16,31 @@
 //   so code-scanning de-duplicates advisories across runs cleanly.
 
 import fs from "node:fs";
+import { resolve, relative, isAbsolute } from "node:path";
 import { parseAuditReport, DRIVERS } from "./parse-audit.mjs";
 
-const [, , manager, inputPath, outputPath, lockfile, levelArg] = process.argv;
-if (!manager || !inputPath || !outputPath || !lockfile) {
+// Defense-in-depth: this script only runs in CI on workflow-supplied
+// paths (audit JSON + lockfile inside the checkout), but we still
+// refuse to read anything outside the repo root in case a workflow is
+// ever misconfigured to pass an absolute or traversal path.
+function safeResolveWithin(input, root = process.cwd()) {
+  const absRoot = resolve(root);
+  const absPath = resolve(absRoot, input);
+  const rel = relative(absRoot, absPath);
+  if (rel.startsWith("..") || isAbsolute(rel)) {
+    throw new Error(`Refusing to read path outside repo root: ${input}`);
+  }
+  return absPath;
+}
+
+const [, , manager, inputPathArg, outputPathArg, lockfileArg, levelArg] = process.argv;
+if (!manager || !inputPathArg || !outputPathArg || !lockfileArg) {
   console.error("Usage: audit-to-sarif.mjs <manager> <input.json> <output.sarif> <lockfile> [audit_level]");
   process.exit(2);
 }
+const inputPath = safeResolveWithin(inputPathArg);
+const outputPath = safeResolveWithin(outputPathArg);
+const lockfile = safeResolveWithin(lockfileArg);
 
 // Resolved gate threshold for this run. Captured into SARIF metadata
 // (run.properties.auditLevel + driver.properties.auditLevel) so anyone
