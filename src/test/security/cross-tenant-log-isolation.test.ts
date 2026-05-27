@@ -421,7 +421,7 @@ describe.each([
       .order("created_at", { ascending: false })
       .limit(25);
     expectNoRowsLeaked(result, `${table} reverse cursor .lt(future)`);
-  });
+  }, 15_000);
 
   liveIt("range with column projection ('id') on every page returns zero rows", async () => {
     // Combine projection narrowing with pagination — a common bypass
