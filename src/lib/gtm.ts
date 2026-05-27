@@ -10,15 +10,12 @@ declare global {
   }
 }
 
-// GA4 is loaded and configured by the "MimmoBook" Google Tag inside the
-// GTM container (GTM-P75VPD5G). We do NOT load gtag.js here — that would
-// double-count every page_view. Instead we push virtual events into the
-// dataLayer and let GTM fire the GA4 tags.
+// GA4 is loaded directly in index.html and GTM also receives each event via
+// dataLayer. Direct gtag calls keep reporting working even if the GTM
+// container has no published GA4 tag.
 
 const GA4_MEASUREMENT_ID = "G-C7CJERJ7BR";
-const GA4_DEBUG_SCRIPT_ID = "mimmobook-ga4-debug-bridge";
-
-let ga4DebugConfigured = false;
+let ga4Configured = false;
 
 function ensureTrackingGlobals() {
   window.dataLayer = window.dataLayer || [];
@@ -63,43 +60,29 @@ function isGa4DebugBridgeEnabled() {
   );
 }
 
-function loadGa4DebugScript() {
-  if (document.getElementById(GA4_DEBUG_SCRIPT_ID)) return;
+function ensureGa4Configured() {
+  ensureTrackingGlobals();
+  if (ga4Configured) return;
 
-  const script = document.createElement("script");
-  script.id = GA4_DEBUG_SCRIPT_ID;
-  script.async = true;
-  script.src = `https://www.googletagmanager.com/gtag/js?id=${GA4_MEASUREMENT_ID}`;
-  document.head.appendChild(script);
+  window.gtag("js", new Date());
+  window.gtag("config", GA4_MEASUREMENT_ID, { send_page_view: false });
+  ga4Configured = true;
 }
 
-function sendGa4DebugPageView(params: Record<string, unknown>) {
-  if (!isGa4DebugBridgeEnabled() || !hasAnalyticsConsent()) return;
+function sendGa4Event(event: string, params?: Record<string, unknown>) {
+  if (!hasAnalyticsConsent()) return;
 
-  ensureTrackingGlobals();
-  loadGa4DebugScript();
-
-  if (!ga4DebugConfigured) {
-    window.gtag("js", new Date());
-    window.gtag("config", GA4_MEASUREMENT_ID, {
-      send_page_view: false,
-      debug_mode: true,
-    });
-    ga4DebugConfigured = true;
-  }
-
-  window.gtag("event", "page_view", {
+  ensureGa4Configured();
+  window.gtag("event", event, {
     ...params,
-    debug_mode: true,
+    ...(isGa4DebugBridgeEnabled() ? { debug_mode: true } : {}),
     transport_type: "beacon",
   });
+}
 
-  window.gtag("event", "mimmobook_debug_probe", {
-    source: params.source,
-    page_location: params.page_location,
-    debug_mode: true,
-    transport_type: "beacon",
-  });
+function track(event: string, params?: Record<string, unknown>) {
+  push(event, params);
+  sendGa4Event(event, params);
 }
 
 export const gtm = {
@@ -122,10 +105,8 @@ export const gtm = {
   },
 
   pageView: (source: "stored_consent" | "banner_accept" | "route_change" = "route_change") => {
-    // SPA virtual page_view. The GTM container has a GA4 Event tag
-    // listening for the `page_view` event and forwarding to the configured
-    // GA4 property. Do NOT call gtag('config', ...) here — that loads
-    // gtag.js a second time and double-counts hits.
+    // SPA virtual page_view. Send directly to GA4 and also to GTM so the
+    // reporting path works even when the GTM container is missing a GA4 tag.
     const pageParams = {
       page_title: document.title,
       page_location: window.location.href,
@@ -134,19 +115,18 @@ export const gtm = {
       ...(isGa4DebugBridgeEnabled() ? { debug_mode: true } : {}),
     };
 
-    push("page_view", pageParams);
-    sendGa4DebugPageView(pageParams);
+    track("page_view", pageParams);
     push("mimmobook_alive", { source });
   },
 
   signUp: (method: "email" | "google" | "apple" = "email") =>
-    push("sign_up", { method }),
+    track("sign_up", { method }),
 
   login: (method: "email" | "google" | "apple" = "email") =>
-    push("login", { method }),
+    track("login", { method }),
 
   reservationCreated: (type: string) =>
-    push("reservation_created", { reservation_type: type }),
+    track("reservation_created", { reservation_type: type }),
 
   /**
    * Fired when a user clicks a checkout/upgrade CTA, BEFORE we redirect
@@ -159,7 +139,7 @@ export const gtm = {
     value?: number;
     currency?: string;
   }) =>
-    push("begin_checkout", {
+    track("begin_checkout", {
       currency: params.currency ?? "EUR",
       value: params.value,
       tier: params.tier,
@@ -177,7 +157,7 @@ export const gtm = {
     product_id?: string;
     subscription_end?: string | null;
   }) =>
-    push("subscription_started", {
+    track("subscription_started", {
       tier: params.tier,
       product_id: params.product_id,
       subscription_end: params.subscription_end ?? undefined,
@@ -193,5 +173,5 @@ export const gtm = {
     user_id?: string | null;
     previous_tenant_id?: string | null;
     pathname?: string;
-  }) => push("tenant_lost", params),
+  }) => track("tenant_lost", params),
 };
