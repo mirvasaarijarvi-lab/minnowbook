@@ -139,7 +139,7 @@ export const gtm = {
     value?: number;
     currency?: string;
   }) =>
-    push("begin_checkout", {
+    track("begin_checkout", {
       currency: params.currency ?? "EUR",
       value: params.value,
       tier: params.tier,
@@ -157,7 +157,7 @@ export const gtm = {
     product_id?: string;
     subscription_end?: string | null;
   }) =>
-    push("subscription_started", {
+    track("subscription_started", {
       tier: params.tier,
       product_id: params.product_id,
       subscription_end: params.subscription_end ?? undefined,
@@ -173,5 +173,5 @@ export const gtm = {
     user_id?: string | null;
     previous_tenant_id?: string | null;
     pathname?: string;
-  }) => push("tenant_lost", params),
+  }) => track("tenant_lost", params),
 };
