@@ -36,8 +36,18 @@
     })(window,document,'script','dataLayer','GTM-P75VPD5G');</script>
     <!-- End Google Tag Manager -->
 
-    <!-- GA4 is fired by the "MimmoBook" Google Tag inside the GTM container above. -->
-    <!-- Do NOT also load gtag.js here, it would double-count every page_view. -->
+    <!-- GA4 direct loader (fallback so hits arrive even if the GTM container -->
+    <!-- has no published GA4 tag). If you later add a GA4 Configuration tag -->
+    <!-- in GTM that points to the SAME measurement ID, set `send_page_view: false` -->
+    <!-- below to avoid double-counting page_view. -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-C7CJERJ7BR"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      window.gtag = window.gtag || gtag;
+      gtag('js', new Date());
+      gtag('config', 'G-C7CJERJ7BR', { send_page_view: true });
+    </script>
 
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="/favicon.png" />
