@@ -149,6 +149,41 @@ export const gtm = {
     push("reservation_created", { reservation_type: type }),
 
   /**
+   * Fired when a user clicks a checkout/upgrade CTA, BEFORE we redirect
+   * them to Stripe Checkout. Uses the GA4 recommended ecommerce event
+   * name so it auto-maps when marked as a key event in GA4 Admin.
+   */
+  beginCheckout: (params: {
+    tier: string;
+    price_id?: string;
+    value?: number;
+    currency?: string;
+  }) =>
+    push("begin_checkout", {
+      currency: params.currency ?? "EUR",
+      value: params.value,
+      tier: params.tier,
+      price_id: params.price_id,
+    }),
+
+  /**
+   * Fired client-side when `check-subscription` first reports an active
+   * subscription for the current session (i.e. the user just returned
+   * from a successful Stripe Checkout). Mark `subscription_started` as
+   * a key event in GA4 Admin to count it as a conversion.
+   */
+  subscriptionStarted: (params: {
+    tier: string;
+    product_id?: string;
+    subscription_end?: string | null;
+  }) =>
+    push("subscription_started", {
+      tier: params.tier,
+      product_id: params.product_id,
+      subscription_end: params.subscription_end ?? undefined,
+    }),
+
+  /**
    * Fired when a user's active tenant becomes null mid-session.
    * Used to track how often membership removals or other state changes
    * cause an unexpected redirect to /onboarding.
