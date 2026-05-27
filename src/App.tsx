@@ -25,6 +25,7 @@ import About from "./pages/About";
 import Privacy from "./pages/Privacy";
 import Accessibility from "./pages/Accessibility";
 import Superadmin from "./pages/Superadmin";
+import GaDebug from "./pages/GaDebug";
 import StaffGuide from "./pages/StaffGuide";
 import WhatIsMimmobook from "./pages/WhatIsMimmobook";
 import Features from "./pages/Features";
@@ -172,6 +173,19 @@ const App = () => (
                       areaSlug="superadmin"
                     >
                       <Superadmin />
+                    </SystemAdminRoute>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/superadmin/ga-debug"
+                element={
+                  <ProtectedRoute>
+                    <SystemAdminRoute
+                      attemptedArea="the GA4 diagnostics panel"
+                      areaSlug="superadmin"
+                    >
+                      <GaDebug />
                     </SystemAdminRoute>
                   </ProtectedRoute>
                 }
