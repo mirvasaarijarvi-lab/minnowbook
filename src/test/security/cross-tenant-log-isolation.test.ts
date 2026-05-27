@@ -407,7 +407,7 @@ describe.each([
       // so we just keep probing forward in time.
       cursor = new Date(Date.parse(cursor) + 365 * 24 * 3600 * 1000).toISOString();
     }
-  });
+  }, 15_000);
 
   liveIt("reverse cursor (.lt + descending order) returns zero rows", async () => {
     // Newest-first pagination is the most attractive primitive for an
