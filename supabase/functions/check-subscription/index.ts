@@ -142,8 +142,9 @@ export async function handleCheckSubscriptionRequest(req: Request): Promise<Resp
     );
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error("[check-subscription] Internal error:", errorMessage);
     logStep("ERROR", { message: errorMessage });
-    return new Response(JSON.stringify({ error: errorMessage }), {
+    return new Response(JSON.stringify({ error: "Subscription service temporarily unavailable." }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
     });

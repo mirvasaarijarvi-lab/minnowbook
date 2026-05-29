@@ -1,7 +1,10 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
-import { getCorsHeaders } from "../_shared/http-headers.ts";
+import { getCorsHeaders, isOriginAllowed } from "../_shared/http-headers.ts";
+
+const SAFE_ORIGIN_FALLBACK = "https://mimmobook.com";
+const GENERIC_ERROR = "Payment service temporarily unavailable.";
 
 const logStep = (step: string, details?: any) => {
   const d = details ? ` - ${JSON.stringify(details)}` : "";
@@ -59,7 +62,8 @@ export async function handleCreateCheckoutRequest(req: Request): Promise<Respons
       logStep("Existing customer found", { customerId });
     }
 
-    const origin = req.headers.get("origin") || "https://mimmobook.lovable.app";
+    const rawOrigin = req.headers.get("origin") ?? "";
+    const origin = isOriginAllowed(rawOrigin) ? rawOrigin : SAFE_ORIGIN_FALLBACK;
 
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
@@ -81,8 +85,9 @@ export async function handleCreateCheckoutRequest(req: Request): Promise<Respons
     });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error("[create-checkout] Internal error:", errorMessage);
     logStep("ERROR", { message: errorMessage });
-    return new Response(JSON.stringify({ error: errorMessage }), {
+    return new Response(JSON.stringify({ error: GENERIC_ERROR }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
     });
