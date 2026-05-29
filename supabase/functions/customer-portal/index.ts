@@ -1,7 +1,10 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
-import { getCorsHeaders } from "../_shared/http-headers.ts";
+import { getCorsHeaders, isOriginAllowed } from "../_shared/http-headers.ts";
+
+const SAFE_ORIGIN_FALLBACK = "https://mimmobook.com";
+const GENERIC_ERROR = "Payment service temporarily unavailable.";
 
 const logStep = (step: string, details?: any) => {
   const d = details ? ` - ${JSON.stringify(details)}` : "";
