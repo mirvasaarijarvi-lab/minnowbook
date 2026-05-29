@@ -127,9 +127,17 @@ export async function handleSendAutoRemindersRequest(req: Request): Promise<Resp
     return new Response(null, { headers: corsHeaders });
   }
 
+  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  const authHeader = req.headers.get("Authorization");
+  if (authHeader !== `Bearer ${serviceRoleKey}`) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
     // Find reservations happening in the next 20-28 hours that haven't been reminded yet
@@ -321,10 +329,10 @@ export async function handleSendAutoRemindersRequest(req: Request): Promise<Resp
       JSON.stringify({ success: true, enqueued: enqueuedCount, errors: errorCount, total: reservations.length }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
-  } catch (error: any) {
+  } catch (error) {
     console.error("Auto-reminder error:", error);
     return new Response(
-      JSON.stringify({ error: error.message || "Failed to process auto-reminders" }),
+      JSON.stringify({ error: "Failed to process auto-reminders" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

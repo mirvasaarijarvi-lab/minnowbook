@@ -2577,6 +2577,7 @@ export type Database = {
           discount_granted_by: string | null
           discount_percentage: number | null
           discount_reason: string | null
+          ical_feed_token: string | null
           id: string
           is_active: boolean | null
           name: string
@@ -2596,6 +2597,7 @@ export type Database = {
           discount_granted_by?: string | null
           discount_percentage?: number | null
           discount_reason?: string | null
+          ical_feed_token?: string | null
           id?: string
           is_active?: boolean | null
           name: string
@@ -2615,6 +2617,7 @@ export type Database = {
           discount_granted_by?: string | null
           discount_percentage?: number | null
           discount_reason?: string | null
+          ical_feed_token?: string | null
           id?: string
           is_active?: boolean | null
           name?: string

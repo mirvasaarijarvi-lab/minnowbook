@@ -837,8 +837,9 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
-  } catch (error: any) {
-    return new Response(JSON.stringify({ error: error.message || "Invalid request" }), {
+  } catch (error) {
+    console.error("[public-booking] unexpected error:", error);
+    return new Response(JSON.stringify({ error: "Invalid request" }), {
       status: 400,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
