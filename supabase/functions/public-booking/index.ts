@@ -3,6 +3,15 @@ import { computeReservationPrice } from "../_shared/reservation-pricing.ts";
 import { BOOKING_ERROR_CODES } from "../_shared/booking-error-codes.ts";
 import { corsHeaders } from "../_shared/http-headers.ts";
 
+function escapeHtml(str: string): string {
+  return String(str ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 /**
  * Indirection layer around external dependencies the handler reaches
  * for AFTER the service-role-key guard. Exported so unit tests can
