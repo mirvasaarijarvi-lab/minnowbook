@@ -191,6 +191,19 @@ const App = () => (
                   </ProtectedRoute>
                 }
               />
+              <Route
+                path="/superadmin/ga-validate"
+                element={
+                  <ProtectedRoute>
+                    <SystemAdminRoute
+                      attemptedArea="the GA4 event validation panel"
+                      areaSlug="superadmin"
+                    >
+                      <GaValidate />
+                    </SystemAdminRoute>
+                  </ProtectedRoute>
+                }
+              />
               <Route path="/book/:slug" element={<PublicBooking />} />
               <Route path="/my-booking/:token" element={<GuestPortal />} />
               <Route
