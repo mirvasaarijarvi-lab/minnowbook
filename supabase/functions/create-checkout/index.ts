@@ -85,8 +85,9 @@ export async function handleCreateCheckoutRequest(req: Request): Promise<Respons
     });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error("[create-checkout] Internal error:", errorMessage);
     logStep("ERROR", { message: errorMessage });
-    return new Response(JSON.stringify({ error: errorMessage }), {
+    return new Response(JSON.stringify({ error: GENERIC_ERROR }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
     });
