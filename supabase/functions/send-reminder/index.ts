@@ -467,8 +467,9 @@ export async function handleSendReminderRequest(req: Request): Promise<Response>
     return new Response(JSON.stringify({ success: true, emailType }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
-  } catch (error: any) {
-    return new Response(JSON.stringify({ error: error.message || "Failed to send email" }), {
+  } catch (error) {
+    console.error("[send-reminder] internal error:", error);
+    return new Response(JSON.stringify({ error: "Failed to send email" }), {
       status: 400,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

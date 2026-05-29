@@ -177,11 +177,16 @@ export async function handleSendOfferEmailRequest(req: Request): Promise<Respons
 
     const { data: tenantUser } = await supabaseAdmin
       .from("tenant_users")
-      .select("role, tenant_id")
+      .select("role, tenant_id, is_approved")
       .eq("user_id", user.id)
       .maybeSingle();
 
-    if (!tenantUser?.tenant_id) {
+    const ALLOWED_ROLES = ["owner", "admin", "superadmin"];
+    if (
+      !tenantUser?.tenant_id ||
+      !tenantUser?.is_approved ||
+      !ALLOWED_ROLES.includes(tenantUser.role)
+    ) {
       return jsonResponse({ error: "Forbidden" }, 403);
     }
 
@@ -308,8 +313,8 @@ export async function handleSendOfferEmailRequest(req: Request): Promise<Respons
 
     return jsonResponse({ success: true, emailSent: true, queued: true, providerId: messageId });
   } catch (err) {
-    console.error("Error sending offer email:", err);
-    return jsonResponse({ error: err instanceof Error ? err.message : String(err) }, 500);
+    console.error("[send-offer-email] internal error:", err);
+    return jsonResponse({ error: "Internal server error" }, 500);
   }
 }
 Deno.serve(handleSendOfferEmailRequest);
