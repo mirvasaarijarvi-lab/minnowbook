@@ -3146,6 +3146,10 @@ export type Database = {
           tenant_id: string
         }[]
       }
+      get_tenant_ical_feed_token: {
+        Args: { p_tenant_id: string }
+        Returns: string
+      }
       get_tenant_membership_health: {
         Args: never
         Returns: {
