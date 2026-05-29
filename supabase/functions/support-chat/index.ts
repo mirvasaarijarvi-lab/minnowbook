@@ -273,7 +273,7 @@ export const handleSupportChatRequest = async (req: Request): Promise<Response> 
   } catch (e) {
     console.error("support-chat error:", e);
     return new Response(
-      JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }),
+      JSON.stringify({ error: "Support chat is temporarily unavailable." }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

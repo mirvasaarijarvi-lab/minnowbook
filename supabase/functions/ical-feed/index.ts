@@ -26,10 +26,18 @@ export async function handleIcalFeedRequest(req: Request): Promise<Response> {
     const url = new URL(req.url);
     const tenantSlug = url.searchParams.get("tenant");
     const siteSlug = url.searchParams.get("site");
+    const token = url.searchParams.get("token");
 
     if (!tenantSlug) {
       return new Response("Missing tenant parameter", {
         status: 400,
+        headers: { ...corsHeaders, "Content-Type": "text/plain" },
+      });
+    }
+
+    if (!token) {
+      return new Response("Unauthorized: missing token", {
+        status: 401,
         headers: { ...corsHeaders, "Content-Type": "text/plain" },
       });
     }
@@ -39,7 +47,7 @@ export async function handleIcalFeedRequest(req: Request): Promise<Response> {
     // Find tenant
     const { data: tenant, error: tenantErr } = await supabase
       .from("tenants")
-      .select("id, name")
+      .select("id, name, ical_feed_token")
       .eq("slug", tenantSlug)
       .eq("is_active", true)
       .single();
@@ -51,7 +59,26 @@ export async function handleIcalFeedRequest(req: Request): Promise<Response> {
       });
     }
 
-    // Fetch upcoming reservations
+    // Verify the per-tenant feed token (constant-time comparison)
+    const expected = (tenant as any).ical_feed_token as string | null;
+    if (!expected || expected.length !== token.length) {
+      return new Response("Unauthorized", {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "text/plain" },
+      });
+    }
+    let diff = 0;
+    for (let i = 0; i < expected.length; i++) {
+      diff |= expected.charCodeAt(i) ^ token.charCodeAt(i);
+    }
+    if (diff !== 0) {
+      return new Response("Unauthorized", {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "text/plain" },
+      });
+    }
+
+    // Fetch upcoming reservations (PII intentionally included; auth verified above)
     const today = new Date().toISOString().split("T")[0];
     let query = supabase
       .from("reservations")
@@ -122,8 +149,9 @@ export async function handleIcalFeedRequest(req: Request): Promise<Response> {
         "Cache-Control": "public, max-age=300",
       },
     });
-  } catch (e: any) {
-    return new Response(JSON.stringify({ error: e.message }), {
+  } catch (e) {
+    console.error("[ical-feed] unexpected error:", e);
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

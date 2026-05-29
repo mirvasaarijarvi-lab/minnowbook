@@ -321,10 +321,10 @@ export async function handleSendAutoRemindersRequest(req: Request): Promise<Resp
       JSON.stringify({ success: true, enqueued: enqueuedCount, errors: errorCount, total: reservations.length }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
-  } catch (error: any) {
+  } catch (error) {
     console.error("Auto-reminder error:", error);
     return new Response(
-      JSON.stringify({ error: error.message || "Failed to process auto-reminders" }),
+      JSON.stringify({ error: "Failed to process auto-reminders" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
