@@ -26,6 +26,7 @@ import Privacy from "./pages/Privacy";
 import Accessibility from "./pages/Accessibility";
 import Superadmin from "./pages/Superadmin";
 import GaDebug from "./pages/GaDebug";
+import GaValidate from "./pages/GaValidate";
 import StaffGuide from "./pages/StaffGuide";
 import WhatIsMimmobook from "./pages/WhatIsMimmobook";
 import Features from "./pages/Features";
@@ -186,6 +187,19 @@ const App = () => (
                       areaSlug="superadmin"
                     >
                       <GaDebug />
+                    </SystemAdminRoute>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/superadmin/ga-validate"
+                element={
+                  <ProtectedRoute>
+                    <SystemAdminRoute
+                      attemptedArea="the GA4 event validation panel"
+                      areaSlug="superadmin"
+                    >
+                      <GaValidate />
                     </SystemAdminRoute>
                   </ProtectedRoute>
                 }
