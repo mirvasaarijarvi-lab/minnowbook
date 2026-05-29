@@ -24,6 +24,15 @@ export async function handleResendConfirmationRequest(req: Request): Promise<Res
     )
   }
 
+  // Restrict to service-role callers (pg_cron). Reject anonymous/public invocations.
+  const authHeader = req.headers.get('Authorization')
+  if (authHeader !== `Bearer ${serviceRoleKey}`) {
+    return new Response(
+      JSON.stringify({ error: 'Unauthorized' }),
+      { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
+  }
+
   const supabase = createClient(supabaseUrl, serviceRoleKey, {
     auth: { autoRefreshToken: false, persistSession: false },
   })
