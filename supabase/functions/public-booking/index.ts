@@ -728,7 +728,7 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
             <div style="display:inline-block;width:48px;height:48px;line-height:48px;border-radius:50%;background-color:#f5f0fa;font-size:24px;text-align:center">📩</div>
             <h1 style="color:#1E1519;font-size:24px;font-family:'Playfair Display',Georgia,serif;font-weight:700;margin:12px 0 0">${tr.title}</h1>
           </div>
-          <p style="color:#63516E;font-size:15px;font-family:'Inter',Arial,sans-serif;line-height:1.6">${tr.greeting} <strong style="color:#1E1519">${guest_name}</strong>,</p>
+          <p style="color:#63516E;font-size:15px;font-family:'Inter',Arial,sans-serif;line-height:1.6">${tr.greeting} <strong style="color:#1E1519">${escapeHtml(guest_name)}</strong>,</p>
           <p style="color:#63516E;font-size:15px;font-family:'Inter',Arial,sans-serif;line-height:1.6">${tr.body}</p>
           <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e8e0d8;border-radius:10px;overflow:hidden;margin:20px 0;font-size:14px">
             ${rows.join("")}
