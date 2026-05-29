@@ -26,6 +26,7 @@ import Privacy from "./pages/Privacy";
 import Accessibility from "./pages/Accessibility";
 import Superadmin from "./pages/Superadmin";
 import GaDebug from "./pages/GaDebug";
+import GaValidate from "./pages/GaValidate";
 import StaffGuide from "./pages/StaffGuide";
 import WhatIsMimmobook from "./pages/WhatIsMimmobook";
 import Features from "./pages/Features";
