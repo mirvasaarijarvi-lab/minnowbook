@@ -62,7 +62,8 @@ export async function handleCreateCheckoutRequest(req: Request): Promise<Respons
       logStep("Existing customer found", { customerId });
     }
 
-    const origin = req.headers.get("origin") || "https://mimmobook.lovable.app";
+    const rawOrigin = req.headers.get("origin") ?? "";
+    const origin = isOriginAllowed(rawOrigin) ? rawOrigin : SAFE_ORIGIN_FALLBACK;
 
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
