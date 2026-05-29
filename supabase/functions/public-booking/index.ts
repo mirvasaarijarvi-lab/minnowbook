@@ -848,7 +848,14 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
     );
   } catch (error) {
     console.error("[public-booking] unexpected error:", error);
-    return new Response(JSON.stringify({ error: "Invalid request" }), {
+    // Forward validator-thrown messages (safe, user-facing copy) so the
+    // booking UI can surface a precise reason. Anything that isn't an
+    // Error instance is treated as opaque and replaced with a generic
+    // message to avoid leaking internal details.
+    const message = error instanceof Error && typeof error.message === "string" && error.message.length > 0
+      ? error.message
+      : "Invalid request";
+    return new Response(JSON.stringify({ error: message }), {
       status: 400,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
