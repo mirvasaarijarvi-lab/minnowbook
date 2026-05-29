@@ -146,7 +146,7 @@ export async function handleIcalFeedRequest(req: Request): Promise<Response> {
         ...corsHeaders,
         "Content-Type": "text/calendar; charset=utf-8",
         "Content-Disposition": `attachment; filename="${tenantSlug}-reservations.ics"`,
-        "Cache-Control": "public, max-age=300",
+        "Cache-Control": "private, max-age=300",
       },
     });
   } catch (e) {
