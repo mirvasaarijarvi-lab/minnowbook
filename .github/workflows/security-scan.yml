@@ -73,7 +73,7 @@ jobs:
             bun audit --audit-level=high
             status=$?
           else
-            status=$(node -e "
+            node -e "
               const data = JSON.parse(process.argv[1] || '{}');
               const allow = new Set(process.argv[2].split(',').filter(Boolean));
               const advisories = Object.values(data.advisories || data.vulnerabilities || {});
@@ -90,10 +90,13 @@ jobs:
                 }
                 process.exit(1);
               }
+              const skipped = advisories.length - blocking.length;
+              console.log('Allowlist applied: ' + skipped + ' advisor(y/ies) waived, 0 blocking.');
               process.exit(0);
-            " "$raw" "$ALLOWLIST")
+            " "$raw" "$ALLOWLIST"
             status=$?
           fi
+
 
           if [ "$status" -ne 0 ]; then
             echo "::error::High or critical dependency vulnerabilities detected outside of the documented allowlist. Run 'bun update' or override the affected versions in package.json."
