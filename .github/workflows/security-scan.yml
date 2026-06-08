@@ -54,13 +54,53 @@ jobs:
       - name: Audit dependencies
         run: |
           set +e
-          bun audit --audit-level=high
-          status=$?
+          # Allowlisted advisories (GHSA ids). Each entry MUST include a
+          # justification comment and an expiry date for human review.
+          # - GHSA-5xrq-8626-4rwp: vitest <4.1.0 — Vitest UI server arbitrary
+          #   file read/exec. We never run `vitest --ui` (CI and local both
+          #   use `vitest run`), vitest is a devDependency not shipped to
+          #   production, and the fix requires Vite 6 + a major vitest
+          #   upgrade. Re-evaluate after the Vite 6 migration. Expires:
+          #   2026-09-01.
+          ALLOWLIST="GHSA-5xrq-8626-4rwp"
+
+          raw=$(bun audit --json --audit-level=high 2>/dev/null || true)
+          # Re-run without --json to surface human-readable output in logs.
+          bun audit --audit-level=high || true
+
+          if [ -z "$raw" ]; then
+            echo "::warning::bun audit returned no JSON output; skipping allowlist filter."
+            bun audit --audit-level=high
+            status=$?
+          else
+            status=$(node -e "
+              const data = JSON.parse(process.argv[1] || '{}');
+              const allow = new Set(process.argv[2].split(',').filter(Boolean));
+              const advisories = Object.values(data.advisories || data.vulnerabilities || {});
+              const blocking = advisories.filter(a => {
+                const sev = (a.severity || '').toLowerCase();
+                if (sev !== 'high' && sev !== 'critical') return false;
+                const ids = [a.github_advisory_id, a.ghsa_id, ...(a.cves || []), a.url || ''].filter(Boolean);
+                return !ids.some(id => [...allow].some(w => String(id).includes(w)));
+              });
+              if (blocking.length) {
+                console.error('::error::High/critical advisories not in allowlist:');
+                for (const a of blocking) {
+                  console.error(' - ' + (a.module_name || a.name) + ': ' + (a.title || a.github_advisory_id));
+                }
+                process.exit(1);
+              }
+              process.exit(0);
+            " "$raw" "$ALLOWLIST")
+            status=$?
+          fi
+
           if [ "$status" -ne 0 ]; then
-            echo "::error::High or critical dependency vulnerabilities detected. Run 'bun update' or override the affected versions in package.json."
+            echo "::error::High or critical dependency vulnerabilities detected outside of the documented allowlist. Run 'bun update' or override the affected versions in package.json."
             exit "$status"
           fi
-          echo "✅ No high/critical npm advisories."
+          echo "✅ No high/critical npm advisories (allowlist applied)."
+
 
   supabase-advisors:
     name: Supabase advisors (security lints)
