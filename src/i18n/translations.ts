@@ -1423,6 +1423,8 @@ type TranslationKeys = {
   "whatIs.whoHotelsDesc": string;
   "whatIs.whoGuesthouses": string;
   "whatIs.whoGuesthousesDesc": string;
+  "whatIs.whoWellness": string;
+  "whatIs.whoWellnessDesc": string;
   "whatIs.howTitle": string;
   "whatIs.howSubtitle": string;
   "whatIs.howStep1": string;
