@@ -5531,7 +5531,7 @@ const sv: TranslationKeys = {
   "hero.badge": "Nu i beta. 30 dagars gratis provperiod",
   "hero.title": "Verktyg för hantering av bokning av boende, catering och\u00a0tjänstesektorn",
   "hero.titleHighlight": "bokning av boende och catering",
-  "hero.subtitle": "Bearbeta och hantera restaurangbokningar, förfrågningar om lokaler och hotell- eller gästhusbokningar från en enda instrumentpanel. Du kan skapa dina egna varumärkesbaserade bokningssidor, skicka automatiserade e-postmeddelanden för bekräftelser och användarhantering ingår.",
+  "hero.subtitle": "Bearbeta och hantera din service bokningar, restaurangbokningar, förfrågningar om lokaler och hotell- eller gästhusbokningar från en enda instrumentpanel. Du kan skapa dina egna varumärkesbaserade bokningssidor, skicka automatiserade e-postmeddelanden för bekräftelser och användarhantering ingår.",
   "hero.viewPricing": "Se priser",
 
   // Features
