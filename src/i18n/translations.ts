@@ -6591,7 +6591,7 @@ const sv: TranslationKeys = {
   // Use Cases
   "useCases.badge": "Användningsfall",
   "useCases.heroTitle": "Byggd för alla typer av besöksnäringsföretag",
-  "useCases.heroSubtitle": "Se hur MimmoBook löser bokningsutmaningar för restauranger, lokaler, hotell, gästhus, cateringföretag och popup-evenemang.",
+  "useCases.heroSubtitle": "Se hur MimmoBook löser bokningsutmaningar för restauranger, lokaler, hotell, gästhus, cateringföretag, popup-evenemang och friskvårdsleverantörer.",
   "useCases.challengesLabel": "Vanliga utmaningar",
   "useCases.solutionLabel": "Hur MimmoBook hjälper",
   "useCases.restaurant": "Restaurangbokningar",
