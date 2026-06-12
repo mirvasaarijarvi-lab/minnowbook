@@ -113,7 +113,7 @@ Deno.serve(async (req) => {
     if (upsertErr) {
       console.error("[request-account-deletion] upsert failed", upsertErr);
       return new Response(
-        JSON.stringify({ error: "internal_error", message: upsertErr.message }),
+        JSON.stringify({ error: "internal_error", message: "An internal error occurred. Please try again." }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
@@ -130,7 +130,7 @@ Deno.serve(async (req) => {
     );
   } catch (e) {
     console.error("[request-account-deletion] error", e);
-    return new Response(JSON.stringify({ error: (e as Error).message }), {
+    return new Response(JSON.stringify({ error: "An internal error occurred. Please try again." }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
