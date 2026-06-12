@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   ArrowRight, CalendarCheck, Globe, Users, BarChart3, Mail,
-  Palette, Building2, UtensilsCrossed, Hotel, Tent,
+  Palette, Building2, UtensilsCrossed, Hotel, Tent, HeartPulse,
 } from "lucide-react";
 import MarketingHeader from "@/components/MarketingHeader";
 import MarketingFooter from "@/components/MarketingFooter";
