@@ -39,7 +39,7 @@ const typeIcons: Record<string, React.ElementType> = {
   custom: Sparkles,
 };
 
-type SubService = { id: string; name: string; price_eur: number | null };
+type SubService = { id: string; name: string; price_eur: number | null; duration_min?: number | null };
 
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = ["image/png", "image/jpeg", "image/webp"];
@@ -237,10 +237,23 @@ const ResourceManagement = () => {
         approval_status: getApprovalStatus(),
         site_id: form.site_id || null,
         custom_type_label: form.resource_type === "custom" ? (form.custom_type_label.trim() || form.name.trim() || null) : null,
-        sub_services: form.resource_type === "custom"
+        sub_services: (form.resource_type === "custom" || form.resource_type === "wellness")
           ? subServices
               .filter((s) => s.name.trim().length > 0)
-              .map((s) => ({ id: s.id, name: s.name.trim().slice(0, 100), price_eur: s.price_eur }))
+              .map((s) => {
+                const base: any = {
+                  id: s.id,
+                  name: s.name.trim().slice(0, 100),
+                  price_eur: s.price_eur,
+                };
+                // duration_min is required for wellness, optional/ignored for custom.
+                if (form.resource_type === "wellness") {
+                  base.duration_min = s.duration_min ?? null;
+                } else if (s.duration_min != null) {
+                  base.duration_min = s.duration_min;
+                }
+                return base;
+              })
           : [],
       };
       if (editingId) {
@@ -389,6 +402,7 @@ const ResourceManagement = () => {
         id: s.id ?? crypto.randomUUID(),
         name: s.name ?? "",
         price_eur: s.price_eur != null ? Number(s.price_eur) : null,
+        duration_min: s.duration_min != null ? Number(s.duration_min) : null,
       }))
     );
     setForm({
