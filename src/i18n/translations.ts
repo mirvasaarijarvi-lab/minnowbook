@@ -807,6 +807,7 @@ type TranslationKeys = {
   "onboarding.guesthouseDesc": string;
   "onboarding.hotelDesc": string;
   "onboarding.customDesc": string;
+  "onboarding.wellnessDesc": string;
   "booking.subServices": string;
   "booking.subServiceQty": string;
   "dashboard.customTypeLabel": string;
@@ -2516,6 +2517,7 @@ const en: TranslationKeys = {
   "onboarding.guesthouseDesc": "Room bookings and accommodation",
   "onboarding.hotelDesc": "Hotel and gasthaus rooms.",
   "onboarding.customDesc": "Define your own type, like Spa or Workshops, with optional sub-services.",
+  "onboarding.wellnessDesc": "Hairdressers, masseurs, makeup artists. Customers pick services from your menu; bookings adjust to total time.",
   "booking.subServices": "Choose services",
   "booking.subServiceQty": "Quantity",
   "dashboard.customTypeLabel": "Type name",
@@ -4203,6 +4205,7 @@ const fi: TranslationKeys = {
   "onboarding.guesthouseDesc": "Huonevaraukset ja majoitus",
   "onboarding.hotelDesc": "Hotelli- ja majatalohuoneet.",
   "onboarding.customDesc": "Määritä oma tyyppi, kuten Spa tai Työpajat, ja valinnaiset alipalvelut.",
+  "onboarding.wellnessDesc": "Kampaajat, hierojat, meikkitaiteilijat. Asiakkaat valitsevat palvelut valikoimasta, varauksen kesto mukautuu.",
   "booking.subServices": "Valitse palvelut",
   "booking.subServiceQty": "Määrä",
   "dashboard.customTypeLabel": "Tyypin nimi",
@@ -5889,6 +5892,7 @@ const sv: TranslationKeys = {
   "onboarding.guesthouseDesc": "Rumsreservationer och boende",
   "onboarding.hotelDesc": "Hotell- och gästhusrump.",
   "onboarding.customDesc": "Definiera egen typ, t.ex. Spa eller Workshops, med valfria undertjänster.",
+  "onboarding.wellnessDesc": "Frisörer, massörer, makeupartister. Kunderna väljer tjänster ur menyn och bokningens längd anpassas.",
   "booking.subServices": "Välj tjänster",
   "booking.subServiceQty": "Antal",
   "dashboard.customTypeLabel": "Typnamn",
