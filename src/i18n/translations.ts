@@ -5538,7 +5538,7 @@ const sv: TranslationKeys = {
   "features.title": "Allt du behöver för att hantera dina bokningar",
   "features.subtitle": "Den kompletta bokningswebbplatsen för boende- och cateringföretag.",
   "features.smartReservations": "Bokningar",
-  "features.smartReservationsDesc": "Hantera restaurangbokningar, förfrågningar om lokaler och boende på värdshus från en enda instrumentpanel.",
+  "features.smartReservationsDesc": "Hantera restaurangbokningar, förfrågningar om lokaler, boende på värdshus och friskvårdstider från en enda instrumentpanel.",
   "features.customBranding": "Anpassa till ditt varumärke",
   "features.customBrandingDesc": "Din egen logotyp, färger och bilder. Varje bokningssida är varumärkesanpassad till ditt företag.",
   "features.teamManagement": "Användarhantering",
