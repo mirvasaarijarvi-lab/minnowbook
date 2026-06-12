@@ -181,4 +181,58 @@ describe("selectTile — clicking a tile sets booking form state", () => {
     expect(b.resource_id).toBe("rB");
     expect(a.reservation_type).toBe(b.reservation_type);
   });
+
+  it("selecting a wellness tile pins reservation_type='wellness' AND resource_id", () => {
+    const patch = selectTile({
+      kind: "wellness",
+      key: "wellness:r1",
+      resourceId: "r1",
+      label: "Salon",
+      subServices: [],
+    });
+    expect(patch).toEqual({
+      reservation_type: "wellness",
+      resource_id: "r1",
+      selected_sub_services: [],
+    });
+  });
+});
+
+describe("buildTypeTiles — wellness resources", () => {
+  it("renders one tile per wellness resource (skips the bare 'wellness' tile)", () => {
+    const tiles = buildTypeTiles(
+      ["restaurant", "wellness"],
+      [
+        { id: "r1", resource_type: "wellness", name: "Anna's Hair" },
+        { id: "r2", resource_type: "wellness", name: "Makeup by Mia" },
+        { id: "r3", resource_type: "restaurant", name: "Main Dining" },
+      ],
+    );
+    expect(tiles).toHaveLength(3);
+    expect(tiles.map((t) => t.key)).toEqual(["restaurant", "wellness:r1", "wellness:r2"]);
+    expect(tiles.find((t) => t.key === "wellness")).toBeUndefined();
+  });
+
+  it("preserves sub_services with duration_min on wellness tiles", () => {
+    const tiles = buildTypeTiles(
+      ["wellness"],
+      [
+        {
+          id: "r1",
+          resource_type: "wellness",
+          name: "Salon",
+          sub_services: [
+            { id: "s1", name: "Haircut", price_eur: 45, duration_min: 30 },
+            { id: "s2", name: "Color", price_eur: 95, duration_min: 90 },
+          ],
+        },
+      ],
+    );
+    const tile = tiles[0];
+    expect(tile.kind).toBe("wellness");
+    if (tile.kind === "wellness") {
+      expect(tile.subServices[0]).toMatchObject({ id: "s1", duration_min: 30 });
+      expect(tile.subServices[1]).toMatchObject({ id: "s2", duration_min: 90 });
+    }
+  });
 });

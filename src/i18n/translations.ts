@@ -575,6 +575,7 @@ type TranslationKeys = {
   "dashboard.venue": string;
   "dashboard.guesthouse": string;
   "dashboard.hotel": string;
+  "dashboard.wellness": string;
   "dashboard.custom": string;
   "dashboard.checkoutToday": string;
   "dashboard.editReservation": string;
@@ -806,6 +807,7 @@ type TranslationKeys = {
   "onboarding.guesthouseDesc": string;
   "onboarding.hotelDesc": string;
   "onboarding.customDesc": string;
+  "onboarding.wellnessDesc": string;
   "booking.subServices": string;
   "booking.subServiceQty": string;
   "dashboard.customTypeLabel": string;
@@ -814,6 +816,14 @@ type TranslationKeys = {
   "dashboard.addSubService": string;
   "dashboard.subServiceName": string;
   "dashboard.subServicePrice": string;
+  "dashboard.subServiceDuration": string;
+  "dashboard.wellnessServicesHint": string;
+  "blocking.wellness": string;
+  "booking.servicesMenu": string;
+  "booking.totalDuration": string;
+  "booking.totalPrice": string;
+  "booking.noServicesYet": string;
+  "booking.servicesMenuHelp": string;
 
   // Tiers
   "tier.basic": string;
@@ -2274,6 +2284,7 @@ const en: TranslationKeys = {
   "dashboard.venue": "Venue",
   "dashboard.guesthouse": "Hotel / Guesthouse",
   "dashboard.hotel": "Hotel",
+  "dashboard.wellness": "Wellness services",
   "dashboard.custom": "Add your own",
    "dashboard.checkoutToday": "Check-outs today",
    "dashboard.editReservation": "Edit Reservation",
@@ -2457,6 +2468,7 @@ const en: TranslationKeys = {
   "blocking.removeCount": "Remove {count} block(s)",
   "blocking.allDay": "All day",
   "blocking.hotelGuesthouse": "Hotel / Guesthouse",
+  "blocking.wellness": "Wellness services",
   "blocking.restaurant": "Restaurant",
   "blocking.venueEventSpace": "Venue / Event Space",
   "blocking.room": "room",
@@ -2505,6 +2517,7 @@ const en: TranslationKeys = {
   "onboarding.guesthouseDesc": "Room bookings and accommodation",
   "onboarding.hotelDesc": "Hotel and gasthaus rooms.",
   "onboarding.customDesc": "Define your own type, like Spa or Workshops, with optional sub-services.",
+  "onboarding.wellnessDesc": "Hairdressers, masseurs, makeup artists. Customers pick services from your menu; bookings adjust to total time.",
   "booking.subServices": "Choose services",
   "booking.subServiceQty": "Quantity",
   "dashboard.customTypeLabel": "Type name",
@@ -2513,6 +2526,13 @@ const en: TranslationKeys = {
   "dashboard.addSubService": "Add sub-service",
   "dashboard.subServiceName": "Name",
   "dashboard.subServicePrice": "Price (€)",
+  "dashboard.subServiceDuration": "Duration (min)",
+  "dashboard.wellnessServicesHint": "Customers can tick one or more of these when booking. Each service needs a duration in 5 minute steps (5 to 480 minutes).",
+  "booking.servicesMenu": "Choose your services",
+  "booking.servicesMenuHelp": "Tick everything you want. The total time and price update automatically.",
+  "booking.totalDuration": "Total time",
+  "booking.totalPrice": "Total price",
+  "booking.noServicesYet": "This provider has not published a services menu yet. You can still book a time slot below.",
   // Tiers
   "tier.basic": "Basic",
   "tier.basicDesc": "Perfect for a single hotel, restaurant or event venue.",
@@ -3952,6 +3972,7 @@ const fi: TranslationKeys = {
   "dashboard.venue": "Tila",
   "dashboard.guesthouse": "Hotelli / Majatalo",
   "dashboard.hotel": "Hotelli",
+  "dashboard.wellness": "Hyvinvointipalvelut",
   "dashboard.custom": "Lisää oma",
    "dashboard.checkoutToday": "Uloskirjaukset tänään",
    "dashboard.editReservation": "Muokkaa varausta",
@@ -4135,6 +4156,7 @@ const fi: TranslationKeys = {
   "blocking.removeCount": "Poista {count} esto(a)",
   "blocking.allDay": "Koko päivä",
   "blocking.hotelGuesthouse": "Hotelli / Majatalo",
+  "blocking.wellness": "Hyvinvointipalvelut",
   "blocking.restaurant": "Ravintola",
   "blocking.venueEventSpace": "Juhlatilat",
   "blocking.room": "huone",
@@ -4183,6 +4205,7 @@ const fi: TranslationKeys = {
   "onboarding.guesthouseDesc": "Huonevaraukset ja majoitus",
   "onboarding.hotelDesc": "Hotelli- ja majatalohuoneet.",
   "onboarding.customDesc": "Määritä oma tyyppi, kuten Spa tai Työpajat, ja valinnaiset alipalvelut.",
+  "onboarding.wellnessDesc": "Kampaajat, hierojat, meikkitaiteilijat. Asiakkaat valitsevat palvelut valikoimasta, varauksen kesto mukautuu.",
   "booking.subServices": "Valitse palvelut",
   "booking.subServiceQty": "Määrä",
   "dashboard.customTypeLabel": "Tyypin nimi",
@@ -4191,6 +4214,13 @@ const fi: TranslationKeys = {
   "dashboard.addSubService": "Lisää alipalvelu",
   "dashboard.subServiceName": "Nimi",
   "dashboard.subServicePrice": "Hinta (€)",
+  "dashboard.subServiceDuration": "Kesto (min)",
+  "dashboard.wellnessServicesHint": "Asiakkaat voivat valita yhden tai useamman palvelun varatessaan. Jokaisella palvelulla on kesto 5 minuutin välein (5 to 480 minuuttia).",
+  "booking.servicesMenu": "Valitse palvelut",
+  "booking.servicesMenuHelp": "Rastita haluamasi palvelut. Kokonaiskesto ja hinta päivittyvät automaattisesti.",
+  "booking.totalDuration": "Kokonaiskesto",
+  "booking.totalPrice": "Yhteensä",
+  "booking.noServicesYet": "Palveluntarjoaja ei ole vielä lisännyt palveluvalikoimaa. Voit silti varata ajan alta.",
   // Tiers
   "tier.basic": "Basic",
   "tier.basicDesc": "Täydellinen yhdelle hotellille, ravintolalle tai tapahtumapaikalle.",
@@ -5629,6 +5659,7 @@ const sv: TranslationKeys = {
   "dashboard.venue": "Lokal",
   "dashboard.guesthouse": "Hotell / Gästhus",
   "dashboard.hotel": "Hotell",
+  "dashboard.wellness": "Friskvårdstjänster",
   "dashboard.custom": "Lägg till egen",
    "dashboard.checkoutToday": "Utcheckningar idag",
    "dashboard.editReservation": "Redigera bokning",
@@ -5812,6 +5843,7 @@ const sv: TranslationKeys = {
   "blocking.removeCount": "Ta bort {count} blockering(ar)",
   "blocking.allDay": "Heldag",
   "blocking.hotelGuesthouse": "Hotell / Gästhus",
+  "blocking.wellness": "Friskvårdstjänster",
   "blocking.restaurant": "Restaurang",
   "blocking.venueEventSpace": "Festlokaler",
   "blocking.room": "rum",
@@ -5860,6 +5892,7 @@ const sv: TranslationKeys = {
   "onboarding.guesthouseDesc": "Rumsreservationer och boende",
   "onboarding.hotelDesc": "Hotell- och gästhusrump.",
   "onboarding.customDesc": "Definiera egen typ, t.ex. Spa eller Workshops, med valfria undertjänster.",
+  "onboarding.wellnessDesc": "Frisörer, massörer, makeupartister. Kunderna väljer tjänster ur menyn och bokningens längd anpassas.",
   "booking.subServices": "Välj tjänster",
   "booking.subServiceQty": "Antal",
   "dashboard.customTypeLabel": "Typnamn",
@@ -5868,6 +5901,13 @@ const sv: TranslationKeys = {
   "dashboard.addSubService": "Lägg till undertjänst",
   "dashboard.subServiceName": "Namn",
   "dashboard.subServicePrice": "Pris (€)",
+  "dashboard.subServiceDuration": "Längd (min)",
+  "dashboard.wellnessServicesHint": "Kunder kan kryssa i en eller flera av dessa när de bokar. Varje tjänst behöver en längd i 5 minuters steg (5 to 480 minuter).",
+  "booking.servicesMenu": "Välj tjänster",
+  "booking.servicesMenuHelp": "Bocka för det du vill ha. Total tid och pris uppdateras automatiskt.",
+  "booking.totalDuration": "Total tid",
+  "booking.totalPrice": "Totalt pris",
+  "booking.noServicesYet": "Leverantören har inte publicerat någon tjänstmeny ännu. Du kan ändå boka en tid nedan.",
   // Tiers
   "tier.basic": "Basic",
   "tier.basicDesc": "Perfekt för ett enskilt hotell, en restaurang eller en eventlokal.",

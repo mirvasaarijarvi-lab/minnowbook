@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Calendar } from "@/components/ui/calendar";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Loader2, CheckCircle, UtensilsCrossed, Building2, Home, Clock, CalendarDays, CalendarIcon, CalendarPlus, BedDouble, Coffee, Users, Truck, ShoppingBag, ChefHat, Plug, Droplets, Tag, Mail, Phone, MapPin, Sparkles, Minus, Plus } from "lucide-react";
+import { Loader2, CheckCircle, UtensilsCrossed, Building2, Home, Clock, CalendarDays, CalendarIcon, CalendarPlus, BedDouble, Coffee, Users, Truck, ShoppingBag, ChefHat, Plug, Droplets, Tag, Mail, Phone, MapPin, Sparkles, HeartPulse, Minus, Plus } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
 import { format, startOfMonth, endOfMonth, addMonths, subMonths, isSameDay } from "date-fns";
@@ -280,7 +280,7 @@ const PublicBookingInner = () => {
     food_permits: "",
     stall_fee: "",
     // Custom type sub-services: { id, name, qty }
-    selected_sub_services: [] as { id: string; name: string; price_eur?: number; qty: number }[],
+    selected_sub_services: [] as { id: string; name: string; price_eur?: number; qty: number; duration_min?: number }[],
   });
 
   // Pre-select booking type from URL query param (?type=venue, ?type=guesthouse, etc.)
@@ -724,12 +724,18 @@ const PublicBookingInner = () => {
         payload.resource_id = form.resource_id;
       }
 
-      if (parsed.reservation_type === "custom" && form.selected_sub_services.length > 0) {
+      if (
+        (parsed.reservation_type === "custom" || parsed.reservation_type === "wellness") &&
+        form.selected_sub_services.length > 0
+      ) {
         payload.selected_sub_services = form.selected_sub_services.map((s) => ({
           id: s.id,
           name: s.name,
           price_eur: s.price_eur ?? null,
           qty: s.qty,
+          // duration_min is required server-side for wellness; pass it through
+          // when present so the edge function can compute end_time.
+          duration_min: (s as any).duration_min ?? null,
         }));
       }
 
@@ -943,7 +949,8 @@ const PublicBookingInner = () => {
   // labelled with `custom_type_label` (or the resource name as fallback).
   type TypeTile =
     | { kind: "builtin"; key: string; type: string }
-    | { kind: "custom"; key: string; resourceId: string; label: string; subServices: { id: string; name: string; price_eur?: number }[] };
+    | { kind: "custom"; key: string; resourceId: string; label: string; subServices: { id: string; name: string; price_eur?: number; duration_min?: number }[] }
+    | { kind: "wellness"; key: string; resourceId: string; label: string; subServices: { id: string; name: string; price_eur?: number; duration_min?: number }[] };
 
   const typeTiles: TypeTile[] = useMemo(
     () => buildTypeTiles(allowedTypes, allSiteResources as any) as TypeTile[],
@@ -1411,18 +1418,25 @@ const PublicBookingInner = () => {
                 <div className="grid gap-4 sm:grid-cols-3">
                   {typeTiles.map((tile) => {
                     const isCustom = tile.kind === "custom";
-                    const Icon = isCustom ? Sparkles : (typeIcons[tile.type] ?? Building2);
-                    const isSelected = isCustom
-                      ? form.reservation_type === "custom" && form.resource_id === tile.resourceId
+                    const isWellness = tile.kind === "wellness";
+                    const isResourceTile = isCustom || isWellness;
+                    const tileResType = isCustom ? "custom" : isWellness ? "wellness" : tile.type;
+                    const Icon = isCustom
+                      ? Sparkles
+                      : isWellness
+                      ? HeartPulse
+                      : (typeIcons[tile.type] ?? Building2);
+                    const isSelected = isResourceTile
+                      ? form.reservation_type === tileResType && form.resource_id === (tile as any).resourceId
                       : form.reservation_type === tile.type && !form.resource_id?.startsWith?.("");
-                    // Built-in selection check (ignore resource_id specifics for non-custom)
-                    const isSelectedBuiltin = !isCustom && form.reservation_type === tile.type && form.reservation_type !== "custom";
-                    const tileSelected = isCustom ? isSelected : isSelectedBuiltin;
-                    const descKey = isCustom ? "" : (typeDescKeys[tile.type] ?? "");
-                    const label = isCustom
-                      ? tile.label
+                    // Built-in selection check (ignore resource_id specifics for non-resource tiles)
+                    const isSelectedBuiltin = !isResourceTile && form.reservation_type === tile.type;
+                    const tileSelected = isResourceTile ? isSelected : isSelectedBuiltin;
+                    const descKey = isResourceTile ? "" : (typeDescKeys[tile.type] ?? "");
+                    const label = isResourceTile
+                      ? (tile as any).label
                       : ((settings?.resource_type_names as Record<string, string>)?.[tile.type] || tDynamic(`dashboard.${tile.type}`));
-                    const desc = isCustom
+                    const desc = isResourceTile
                       ? ""
                       : ((settings?.resource_type_descriptions as Record<string, string>)?.[tile.type] || (descKey ? t(descKey) : ""));
                     return (
@@ -1433,9 +1447,9 @@ const PublicBookingInner = () => {
                           // Clear type-specific fields when switching booking types
                           setForm((prev) => ({
                             ...prev,
-                            reservation_type: isCustom ? "custom" : tile.type,
-                            resource_id: isCustom
-                              ? tile.resourceId
+                            reservation_type: isResourceTile ? tileResType : tile.type,
+                            resource_id: isResourceTile
+                              ? (tile as any).resourceId
                               : (tile.type === "restaurant" ? "" : prev.resource_id),
                             check_out_date: "",
                             room_type: "",
@@ -1500,17 +1514,50 @@ const PublicBookingInner = () => {
                 )}
 
                 {/* Sub-services picker for selected custom resource */}
-                {form.reservation_type === "custom" && form.resource_id && (() => {
-                  const tile = typeTiles.find((t) => t.kind === "custom" && (t as any).resourceId === form.resource_id) as
+                {(form.reservation_type === "custom" || form.reservation_type === "wellness") && form.resource_id && (() => {
+                  const isWellnessTile = form.reservation_type === "wellness";
+                  const tile = typeTiles.find(
+                    (t) => (t.kind === "custom" || t.kind === "wellness") && (t as any).resourceId === form.resource_id,
+                  ) as
                     | (Extract<TypeTile, { kind: "custom" }>)
+                    | (Extract<TypeTile, { kind: "wellness" }>)
                     | undefined;
                   const subs = tile?.subServices ?? [];
-                  if (subs.length === 0) return null;
+                  // Wellness with no services: friendly fallback, no menu.
+                  if (subs.length === 0) {
+                    if (isWellnessTile) {
+                      return (
+                        <div className="mt-6 p-3 rounded-md border bg-muted/30">
+                          <p className="text-xs text-muted-foreground">{t("booking.noServicesYet")}</p>
+                        </div>
+                      );
+                    }
+                    return null;
+                  }
+                  // Totals for the wellness summary line.
+                  const totals = form.selected_sub_services.reduce(
+                    (acc, x) => ({
+                      duration: acc.duration + ((x as any).duration_min ?? 0),
+                      price: acc.price + ((x.price_eur ?? 0) * (x.qty ?? 1)),
+                    }),
+                    { duration: 0, price: 0 },
+                  );
+                  const fmtDuration = (min: number) => {
+                    if (min <= 0) return "0 min";
+                    const h = Math.floor(min / 60);
+                    const m = min % 60;
+                    if (h > 0 && m > 0) return `${h} h ${m} min`;
+                    if (h > 0) return `${h} h`;
+                    return `${m} min`;
+                  };
                   return (
                     <div className="mt-6 space-y-3">
                       <Label className="text-sm font-semibold" style={{ color: primaryColor }}>
-                        {t("booking.subServices")}
+                        {isWellnessTile ? t("booking.servicesMenu") : t("booking.subServices")}
                       </Label>
+                      {isWellnessTile && (
+                        <p className="text-xs text-muted-foreground">{t("booking.servicesMenuHelp")}</p>
+                      )}
                       <div className="space-y-2">
                         {subs.map((s) => {
                           const sel = form.selected_sub_services.find((x) => x.id === s.id);
@@ -1524,19 +1571,31 @@ const PublicBookingInner = () => {
                                   onCheckedChange={(c) => {
                                     setForm((prev) => {
                                       const list = prev.selected_sub_services.filter((x) => x.id !== s.id);
-                                      if (c) list.push({ id: s.id, name: s.name, price_eur: s.price_eur, qty: 1 });
+                                      if (c) list.push({
+                                        id: s.id,
+                                        name: s.name,
+                                        price_eur: s.price_eur,
+                                        qty: 1,
+                                        duration_min: (s as any).duration_min,
+                                      });
                                       return { ...prev, selected_sub_services: list };
                                     });
                                   }}
                                 />
                                 <div className="min-w-0">
                                   <div className="text-sm font-medium truncate">{s.name}</div>
-                                  {s.price_eur != null && (
-                                    <div className="text-xs text-muted-foreground">€{Number(s.price_eur).toFixed(2)}</div>
-                                  )}
+                                  <div className="text-xs text-muted-foreground flex flex-wrap gap-x-3">
+                                    {(s as any).duration_min != null && (
+                                      <span>{fmtDuration(Number((s as any).duration_min))}</span>
+                                    )}
+                                    {s.price_eur != null && (
+                                      <span>€{Number(s.price_eur).toFixed(2)}</span>
+                                    )}
+                                  </div>
                                 </div>
                               </label>
-                              {checked && (
+                              {/* Quantity controls only for "custom" — wellness is single-tick. */}
+                              {checked && !isWellnessTile && (
                                 <div className="flex items-center gap-1 shrink-0">
                                   <Button
                                     type="button"
@@ -1579,6 +1638,21 @@ const PublicBookingInner = () => {
                           );
                         })}
                       </div>
+                      {isWellnessTile && form.selected_sub_services.length > 0 && (
+                        <div
+                          className="flex flex-wrap justify-between gap-2 p-3 rounded-md border text-sm font-medium"
+                          style={{ borderColor: primaryColor, color: primaryColor, backgroundColor: `${primaryColor}10` }}
+                        >
+                          <span>
+                            {t("booking.totalDuration")}: <strong>{fmtDuration(totals.duration)}</strong>
+                          </span>
+                          {totals.price > 0 && (
+                            <span>
+                              {t("booking.totalPrice")}: <strong>€{totals.price.toFixed(2)}</strong>
+                            </span>
+                          )}
+                        </div>
+                      )}
                     </div>
                   );
                 })()}

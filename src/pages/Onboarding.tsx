@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, ArrowLeft, Check, Crown, Zap, UtensilsCrossed, Building2, BedDouble, Palette, ShieldAlert, RefreshCw, Loader2, Sparkles } from "lucide-react";
+import { ArrowRight, ArrowLeft, Check, Crown, Zap, UtensilsCrossed, Building2, BedDouble, Palette, ShieldAlert, RefreshCw, Loader2, Sparkles, HeartPulse } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { canSelectMoreTypes, getTierLimits } from "@/lib/tier-limits";
 import { useT } from "@/contexts/I18nContext";
@@ -113,6 +113,7 @@ const Onboarding = () => {
     { id: "venue", labelKey: "dashboard.venue" as TranslationKey, icon: Building2, descKey: "onboarding.venueDesc" as TranslationKey },
     { id: "guesthouse", labelKey: "dashboard.guesthouse" as TranslationKey, icon: BedDouble, descKey: "onboarding.guesthouseDesc" as TranslationKey },
     { id: "hotel", labelKey: "dashboard.hotel" as TranslationKey, icon: BedDouble, descKey: "onboarding.hotelDesc" as TranslationKey },
+    { id: "wellness", labelKey: "dashboard.wellness" as TranslationKey, icon: HeartPulse, descKey: "onboarding.wellnessDesc" as TranslationKey },
     { id: "custom", labelKey: "dashboard.custom" as TranslationKey, icon: Sparkles, descKey: "onboarding.customDesc" as TranslationKey },
   ];
 

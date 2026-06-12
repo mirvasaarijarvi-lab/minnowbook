@@ -7,7 +7,13 @@
  * to the resource name, then "Custom").
  */
 
-export type CustomSubService = { id: string; name: string; price_eur?: number };
+export type CustomSubService = {
+  id: string;
+  name: string;
+  price_eur?: number;
+  /** Only present for wellness services; minutes in 5-minute steps (5 to 480). */
+  duration_min?: number;
+};
 
 export type SiteResource = {
   id: string;
@@ -25,6 +31,13 @@ export type TypeTile =
       resourceId: string;
       label: string;
       subServices: CustomSubService[];
+    }
+  | {
+      kind: "wellness";
+      key: string;
+      resourceId: string;
+      label: string;
+      subServices: CustomSubService[];
     };
 
 export function buildTypeTiles(
@@ -34,7 +47,9 @@ export function buildTypeTiles(
   const tiles: TypeTile[] = [];
 
   for (const type of allowedTypes) {
-    if (type === "custom") continue;
+    // Both "custom" and "wellness" are rendered as one tile per resource
+    // (each provider has their own services menu), not as a single shared tile.
+    if (type === "custom" || type === "wellness") continue;
     tiles.push({ kind: "builtin", key: type, type });
   }
 
@@ -48,6 +63,23 @@ export function buildTypeTiles(
         key: `custom:${r.id}`,
         resourceId: r.id,
         label: r.custom_type_label || r.name || "Custom",
+        subServices: Array.isArray(r.sub_services)
+          ? (r.sub_services as CustomSubService[])
+          : [],
+      });
+    }
+  }
+
+  if (allowedTypes.includes("wellness") && allSiteResources) {
+    const wellnessResources = allSiteResources.filter(
+      (r) => r.resource_type === "wellness",
+    );
+    for (const r of wellnessResources) {
+      tiles.push({
+        kind: "wellness",
+        key: `wellness:${r.id}`,
+        resourceId: r.id,
+        label: r.name || "Wellness",
         subServices: Array.isArray(r.sub_services)
           ? (r.sub_services as CustomSubService[])
           : [],
@@ -70,8 +102,9 @@ export function selectTile(tile: TypeTile): {
   if (tile.kind === "builtin") {
     return { reservation_type: tile.type, resource_id: "", selected_sub_services: [] };
   }
+  // custom + wellness both pin to a specific resource_id.
   return {
-    reservation_type: "custom",
+    reservation_type: tile.kind,
     resource_id: tile.resourceId,
     selected_sub_services: [],
   };

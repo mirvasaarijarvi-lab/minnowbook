@@ -34,6 +34,7 @@ export const useResourceTypeLabel = () => {
     venue: t("dashboard.venue"),
     guesthouse: t("dashboard.guesthouse"),
     hotel: t("dashboard.hotel"),
+    wellness: t("dashboard.wellness"),
   };
 
   /** Returns the custom name if set, otherwise the translated default */
@@ -54,6 +55,7 @@ export const useResourceTypeLabel = () => {
     hotel: customNames["hotel"] || customNames["guesthouse"] || t("blocking.hotelGuesthouse"),
     restaurant: customNames["restaurant"] || t("blocking.restaurant"),
     venue: customNames["venue"] || t("blocking.venueEventSpace"),
+    wellness: customNames["wellness"] || t("blocking.wellness"),
   };
 
   return { typeLabel, selectableTypeLabels, customNames };
