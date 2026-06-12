@@ -3123,6 +3123,8 @@ const en: TranslationKeys = {
   "whatIs.whoHotelsDesc": "Manage room reservations, check-in/check-out, breakfast options, and room-type pricing across your property.",
   "whatIs.whoGuesthouses": "Guesthouses",
   "whatIs.whoGuesthousesDesc": "Streamline guest stays with simple room booking, availability management, and personalized communication.",
+  "whatIs.whoWellness": "Wellness Services",
+  "whatIs.whoWellnessDesc": "Hairdressers, masseurs, makeup artists, and similar providers can publish a tickable services menu so customers book the right amount of time.",
   "whatIs.howTitle": "How Does MimmoBook Work?",
   "whatIs.howSubtitle": "Get started in four simple steps.",
   "whatIs.howStep1": "Sign Up",
