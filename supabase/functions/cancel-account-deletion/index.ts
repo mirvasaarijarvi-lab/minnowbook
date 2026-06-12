@@ -48,8 +48,9 @@ Deno.serve(async (req) => {
         .update({ status: "cancelled", cancelled_at: new Date().toISOString() })
         .eq("user_id", row.user_id);
       if (updErr) {
+        console.error("[cancel-account-deletion] token update failed", updErr);
         return new Response(
-          JSON.stringify({ error: "internal_error", message: updErr.message }),
+          JSON.stringify({ error: "internal_error", message: "An internal error occurred. Please try again." }),
           { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
         );
       }
@@ -85,8 +86,9 @@ Deno.serve(async (req) => {
       .eq("user_id", userId)
       .eq("status", "pending");
     if (updErr) {
+      console.error("[cancel-account-deletion] auth update failed", updErr);
       return new Response(
-        JSON.stringify({ error: "internal_error", message: updErr.message }),
+        JSON.stringify({ error: "internal_error", message: "An internal error occurred. Please try again." }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
@@ -96,7 +98,7 @@ Deno.serve(async (req) => {
     );
   } catch (e) {
     console.error("[cancel-account-deletion] error", e);
-    return new Response(JSON.stringify({ error: (e as Error).message }), {
+    return new Response(JSON.stringify({ error: "An internal error occurred. Please try again." }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
