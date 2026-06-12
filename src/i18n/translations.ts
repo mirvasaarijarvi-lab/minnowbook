@@ -575,6 +575,7 @@ type TranslationKeys = {
   "dashboard.venue": string;
   "dashboard.guesthouse": string;
   "dashboard.hotel": string;
+  "dashboard.wellness": string;
   "dashboard.custom": string;
   "dashboard.checkoutToday": string;
   "dashboard.editReservation": string;
