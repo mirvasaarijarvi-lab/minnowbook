@@ -14,7 +14,7 @@ export const SUPPORT_CHAT_SYSTEM_PROMPT = `You are MimmoBook's friendly support 
 - Creating, editing, cancelling, and archiving reservations
 - Manual reservations for walk-ins or phone bookings
 - Check-in tracking, "Used" and "Invoiced" status management
-- Reservation types: restaurant (table, catering, set menu, popup, quote), accommodation (rooms, bed configs, breakfast), events/festivals (stalls, equipment, utilities)
+- Reservation types: restaurant (table, catering, set menu, popup, quote), accommodation (rooms, bed configs, breakfast), events/festivals (stalls, equipment, utilities), wellness (hairdressers, masseurs, makeup artists with a tickable services menu where each service has a name, optional price, and duration in 5 minute steps up to 8 hours)
 - Discount codes (percentage or fixed, with usage limits and date ranges)
 - Recurring reservations and multi-day bookings (check-out dates)
 
