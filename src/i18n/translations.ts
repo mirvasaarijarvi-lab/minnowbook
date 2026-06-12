@@ -2144,7 +2144,7 @@ const en: TranslationKeys = {
   "hero.badge": "Now in beta. 30-day free trial",
   "hero.title": "Tool built to handle",
   "hero.titleHighlight": "hospitality and service industry reservations",
-  "hero.subtitle": "Process and manage restaurant bookings, venue inquiries, and hotel or guesthouse reservations from one dashboard. Create your own branded booking pages, send automated confirmation emails. User management included.",
+  "hero.subtitle": "Process and manage service and restaurant bookings, venue inquiries, and hotel or guesthouse reservations from one dashboard. Create your own branded booking pages, send automated confirmation emails. User management included.",
   "hero.viewPricing": "View Pricing",
 
   // Features
