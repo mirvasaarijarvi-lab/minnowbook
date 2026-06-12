@@ -3888,7 +3888,7 @@ const fi: TranslationKeys = {
 
   // CTA
   "cta.title": "Valmis modernisoimaan varauksesi?",
-  "cta.subtitle": "Liity majoitus- ja hyvinvointialan yrityksiin, jotka jo käyttävät MimmoBookia varausten sujuvoittamiseen.",
+  "cta.subtitle": "Liity hyvinvointi- ja majoitusalan yrityksiin, jotka jo käyttävät MimmoBookia varausten sujuvoittamiseen.",
 
   // Login
   "login.title": "Kirjaudu tilillesi",
