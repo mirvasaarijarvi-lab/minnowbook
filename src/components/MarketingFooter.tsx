@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import Logo from "@/components/Logo";
 import { useT } from "@/contexts/I18nContext";
+import { openCookieSettings } from "@/components/CookieConsent";
 
 const MarketingFooter = () => {
   const t = useT();
@@ -63,9 +64,33 @@ const MarketingFooter = () => {
                 </Link>
               </li>
               <li>
+                <Link to="/legal/retention" className="text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors">
+                  Data retention
+                </Link>
+              </li>
+              <li>
+                <Link to="/legal/subprocessors" className="text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors">
+                  Subprocessors
+                </Link>
+              </li>
+              <li>
+                <Link to="/legal/dpa" className="text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors">
+                  DPA
+                </Link>
+              </li>
+              <li>
                 <Link to="/accessibility" className="text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors">
                   {t("nav.accessibility")}
                 </Link>
+              </li>
+              <li>
+                <button
+                  type="button"
+                  onClick={openCookieSettings}
+                  className="text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors text-left"
+                >
+                  Manage cookies
+                </button>
               </li>
             </ul>
           </div>

@@ -1,70 +1,84 @@
-## Goal
+# GDPR Compliance Gap Closure Plan
 
-Add **Wellness Services** as a first-class resource type so hairdressers, makeup artists, masseurs, etc. can publish a tickable services menu and accept time-slot bookings (no payments).
+You already have a `Privacy` page and a basic `CookieConsent` component. The seven gaps below can be closed in three focused phases. Phase 1 is documentation-only (fast). Phase 2 upgrades cookie consent. Phase 3 adds user-facing rights (export + delete), which is the heaviest piece.
 
-## What the customer sees
+## Phase 1 — Legal/policy pages (low effort, high impact)
 
-On the public booking page, after picking a wellness resource:
-- A checkbox list of services (name + price + duration in minutes).
-- Ticking one or more services automatically sums the total duration and the booking length snaps to the nearest 5-minute interval (capped at 8 h).
-- "Total: 1 h 35 min, 65 €" summary shown above the time picker so the customer knows what slot length to look for.
-- Money is informational only: no payment, no Stripe call, identical confirmation email flow as today.
+Add four new static pages (EN/FI/SV) linked from the marketing footer and Privacy page.
 
-## What the operator sees
+1. **Retention Schedule** — `/legal/retention`
+   Table of data categories and how long MimmoBook keeps them:
+   - Reservations: active for tenant lifetime, archived after 30 days post-event, permanently deleted after 400 days (matches existing data archival memory).
+   - Audit log: 90 days (matches `cleanup_old_audit_logs`).
+   - Booking validation log: 30 days.
+   - Storage rejection events: 7 days; resolved alerts: 90 days.
+   - Email send log / suppressions / unsubscribe tokens: TTL per existing email infra.
+   - Account data: until account deletion + 30-day cancellation window.
+   - Backups: 30 days rolling.
 
-In **Dashboard > Resources**:
-- The "Tyyppi" dropdown gains a new option: **Hyvinvointipalvelut / Wellness services / Friskvårdstjänster** (between "Hotelli" and "Lisää oma").
-- When Wellness is selected, the form swaps in a **Services menu editor** (reuses the existing `sub_services` pattern that "Custom" already uses):
-  - Per row: Name, Price (€, optional), **Duration** (number input restricted to 5-min increments, 5 to 480), drag-to-reorder, delete.
-  - "Add service" button.
-  - Helper text: "Customers can tick one or more of these when booking."
-- A new dashboard panel (or existing booking detail dialog section) shows which services the customer ticked on each reservation.
+2. **Processor Inventory (Subprocessors)** — `/legal/subprocessors`
+   List with purpose, data categories, region:
+   - Supabase (Lovable Cloud) — DB, auth, storage, edge functions — EU.
+   - Resend — transactional + marketing email.
+   - Stripe — payments.
+   - Google (Search Console, Analytics, Tag Manager) — analytics/SEO.
+   - Lovable AI Gateway — AI features.
+
+3. **Data Processing Agreement (DPA)** — `/legal/dpa`
+   Standard controller↔processor DPA template covering Art. 28 GDPR: scope, duration, subject matter, processor obligations, subprocessor flow-down, SCCs reference, audit rights, breach notification, return/deletion on termination. Downloadable PDF version.
+
+4. **Records of Processing Activities (RoPA)** — internal markdown at `docs/ropa.md`
+   Per Art. 30 GDPR: processing activity, legal basis, data subjects, data categories, recipients, transfers, retention, technical/organisational measures. Not public, but available to DPA reviewers. Optional public summary on `/legal/processing`.
+
+## Phase 2 — Cookie consent upgrade
+
+Replace the current single-button banner with a category-based consent manager:
+
+- Categories: **Strictly necessary** (always on), **Analytics** (GA4, GTM), **Marketing** (none today, reserved).
+- Store consent in `localStorage` (`mimmobook-cookie-consent` JSON with version + timestamp + categories).
+- Gate GA4 + GTM initialisation on `analytics === true`; default DENIED before consent (Google Consent Mode v2: `ad_storage`, `analytics_storage`, `ad_user_data`, `ad_personalization`).
+- "Manage cookies" link in `MarketingFooter` that reopens the modal so users can withdraw consent.
+- 12-month re-consent prompt.
+
+## Phase 3 — User rights self-service
+
+Add a new "Privacy & Data" tab in `/settings/profile` (visible to every authenticated user, not just tenant owners).
+
+### 3a. Data export (Art. 15 + 20)
+- Button: **Download my data**.
+- New Edge Function `export-user-data` (`verify_jwt = false`, validates JWT in code):
+  - Reads the caller's `auth.uid()`.
+  - Aggregates: profile, tenant memberships, reservations the user created, audit log entries authored, login history, notifications, support requests, beta feedback.
+  - Returns a single ZIP containing JSON files + a human-readable `README.txt`.
+- Rate-limited (1 export per 24h per user) via `redemption_idempotency`-style table or a new `data_export_requests` table.
+- Tenant owners additionally see **Export tenant data** (CSV per table) reusing existing CSV export infrastructure.
+
+### 3b. Self-service account deletion (Art. 17)
+- Button: **Delete my account** with a typed-confirmation modal ("type DELETE to confirm").
+- New Edge Function `request-account-deletion`:
+  - If the user is the sole **owner** of any tenant with active members or future reservations, block deletion and instruct them to transfer ownership or close the tenant first.
+  - Otherwise mark `auth.users.deleted_at` (soft) and insert into a new `pending_account_deletions` table with `purge_after = now() + 30 days` (matches the 30-day cancellation window already documented).
+  - Send confirmation email with a "Cancel deletion" link valid for 30 days.
+- New cron job `purge-deleted-accounts` runs daily:
+  - Hard-deletes `auth.users` row (cascades to `tenant_users`, profile, etc.).
+  - Anonymises historic reservations the user authored (set `created_by = NULL`, scrub `guest_name`/`guest_email` where the user was also the guest).
+- Audit-logged via existing `audit_log_trigger`.
 
 ## Technical details
 
-### Database (single migration)
+- New tables (migration):
+  - `public.pending_account_deletions (user_id uuid pk, requested_at, purge_after, cancel_token text)` with GRANTs to `authenticated` (own row only) and `service_role`; RLS policy `user_id = auth.uid()`.
+  - `public.data_export_requests (id, user_id, created_at)` for rate limiting; same grant pattern.
+- Cron via `pg_cron` + `pg_net` calling the purge function daily at 03:00 UTC.
+- All new translations added to EN/FI/SV in `src/i18n/translations.ts`.
+- Footer additions in `MarketingHeader`/`MarketingFooter`: Retention, Subprocessors, DPA, Manage cookies.
+- No em/en-dashes in any copy (per project convention).
 
-- Extend `resources.sub_services` JSONB items with an optional `duration_min: int` field (5 to 480, multiple of 5). Already-stored items without the field stay valid.
-- No new table needed. `reservations.selected_sub_services` already exists for the tick selections.
-- Add a server-side validation trigger on `resources` that, when `resource_type = 'wellness'`, requires every `sub_services[i]` to have `name` (non-empty), `duration_min` (5 to 480, mod 5 = 0), and `price_eur` (>= 0 or null).
-- Add `'wellness'` to any existing resource-type allow-list (tier/limit triggers, public-booking RPCs). Audit the migrations grepped above for `resource_type IN (...)` and widen them.
-- No new GRANTs needed — the table already has them.
+## Suggested order of delivery
 
-### Frontend
+1. Phase 1 pages + footer links (1 shipment, no backend).
+2. Phase 2 cookie consent upgrade (1 shipment, frontend + GA gating).
+3. Phase 3a data export (backend + UI).
+4. Phase 3b account deletion + cron (backend + UI).
 
-- `useResourceTypeLabel.ts`: add `wellness` to `defaultLabels` and `selectableTypeLabels`.
-- `i18n/translations.ts`: add `dashboard.wellness`, `blocking.wellness`, plus `publicBooking.servicesMenu`, `publicBooking.totalDuration`, `publicBooking.totalPrice`, validation strings, in EN/FI/SV.
-- `components/dashboard/ResourceManagement.tsx`:
-  - Add the dropdown item.
-  - Render the existing sub-services editor for `wellness` AND add the duration input column.
-  - Reuse the same save path; just gate the duration field rendering on `resource_type === 'wellness' || === 'custom'` and require it for wellness.
-- `pages/PublicBooking.tsx`:
-  - When the selected resource is `wellness`, render the tick-list above the slot picker.
-  - Compute total duration, clamp to [5, 480] mod 5, feed it into the existing slot-length input (which today the customer or staff picks manually).
-  - Pass `selected_sub_services` through to the existing public-booking edge function (already supported).
-- `supabase/functions/public-booking/index.ts`: validate that, for wellness resources, the requested duration matches the sum of ticked services (defence in depth; the client already enforces it).
-
-### Out of scope (confirm before adding)
-
-- Per-service availability (different staff per service) — not requested.
-- Payments / deposits — explicitly excluded by you.
-- Wellness-specific email template wording — defaults to today's confirmation copy.
-
-## Files I will touch
-
-```text
-supabase/migrations/20260612143428_197d2262-d470-41e3-8715-8524f7bfaae1.sql  # widen allow-lists, validation trigger
-src/i18n/translations.ts               # FI/EN/SV strings
-src/hooks/useResourceTypeLabel.ts      # 'wellness' label
-src/components/dashboard/ResourceManagement.tsx   # dropdown + duration column
-src/pages/PublicBooking.tsx            # tick-list + auto duration
-supabase/functions/public-booking/index.ts        # server-side duration check
-src/pages/StaffGuide.tsx, UseCases.tsx, WhatIsMimmobook.tsx  # mention wellness (light)
-supabase/functions/support-chat/prompt.ts         # add wellness to the type list
-```
-
-## Open questions
-
-1. Should ticking services be **required** to book a wellness slot, or optional (customer can request "consultation" without picking anything)?
-2. When the operator hasn't added any services yet, should the customer see an empty menu with "Contact us" or just the normal duration picker?
-3. Tier-wise, does Wellness count toward the existing "resource type limit" the same way as Restaurant/Venue/Hotel (Basic = 1 type), or should it be free to add on any tier?
+Reply with which phase(s) to start with, or "all" to proceed top to bottom.

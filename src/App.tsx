@@ -23,6 +23,9 @@ import NotFound from "./pages/NotFound";
 import Support from "./pages/Support";
 import About from "./pages/About";
 import Privacy from "./pages/Privacy";
+import Retention from "./pages/legal/Retention";
+import Subprocessors from "./pages/legal/Subprocessors";
+import DPA from "./pages/legal/DPA";
 import Accessibility from "./pages/Accessibility";
 import Superadmin from "./pages/Superadmin";
 import GaDebug from "./pages/GaDebug";
@@ -136,6 +139,9 @@ const App = () => (
               <Route path="/support" element={<Support />} />
               <Route path="/about" element={<About />} />
               <Route path="/privacy" element={<Privacy />} />
+              <Route path="/legal/retention" element={<Retention />} />
+              <Route path="/legal/subprocessors" element={<Subprocessors />} />
+              <Route path="/legal/dpa" element={<DPA />} />
               <Route path="/accessibility" element={<Accessibility />} />
               <Route path="/what-is-mimmobook" element={<WhatIsMimmobook />} />
               <Route path="/features" element={<Features />} />
