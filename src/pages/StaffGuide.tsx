@@ -566,6 +566,7 @@ const guideContent: Record<Language, GuideContent> = {
           "Catering: guests can request food delivery to their event with details like delivery address, dietary notes, equipment and staffing needs.",
           "Pop-up restaurant: your restaurant serves food at a guest's event or festival — the booking form captures event name, setup size, permits, and setup fee.",
           "These options only appear on the public booking page when at least one restaurant resource has them enabled.",
+          "For wellness resources (hairdressers, masseurs, makeup artists and similar), fill in the Services menu: each row has a name, optional price in euros, and a duration in 5 minute steps (5 to 480 minutes, max 8 hours). Customers tick what they want on the public booking page and the booking length adjusts automatically.",
           "Edit or delete resources as needed.",
         ],
       },
