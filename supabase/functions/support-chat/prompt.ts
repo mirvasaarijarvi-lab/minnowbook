@@ -87,7 +87,7 @@ export const SUPPORT_CHAT_SYSTEM_PROMPT = `You are MimmoBook's friendly support 
 
 ### Billing & Tiers
 - Three tiers: Basic, Pro, Business
-- **Reservation type limits**: Basic = 1 type, Pro = up to 5 types in any combination (e.g. two restaurants and one hotel), Business = unlimited. The cap is enforced at the database level, attempts to save more than 5 types on Pro return "at most 5 reservation types".
+- **Reservation type limits**: Basic = 1 type, Pro = up to 5 types in any combination (e.g. two restaurants, one hotel, and one wellness), Business = unlimited. The cap is enforced at the database level, attempts to save more than 5 types on Pro return "at most 5 reservation types".
 - Tier-based feature gating (e.g., multi-site on Business, priority support on Business)
 - Access code redemption for tier upgrades
 - Stripe integration for checkout and customer portal
