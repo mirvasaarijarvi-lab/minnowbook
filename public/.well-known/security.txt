@@ -1,0 +1,7 @@
+Contact: mailto:security@mimmobook.com
+Contact: https://mimmobook.com/security
+Preferred-Languages: en, fi, sv
+Canonical: https://mimmobook.com/.well-known/security.txt
+Policy: https://mimmobook.com/security
+Acknowledgments: https://mimmobook.com/security#hall-of-fame
+Expires: 2027-06-12T00:00:00.000Z
