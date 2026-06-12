@@ -1046,6 +1046,7 @@ const guideContent: Record<Language, GuideContent> = {
           "Catering: gäster kan beställa matleverans till sitt evenemang med detaljer som leveransadress, kostinformation, utrustnings- och personalbehov.",
           "Pop-up-restaurang: din restaurang serverar mat på gästens evenemang eller festival — bokningsformuläret samlar in evenemangsnamn, uppställningsstorlek, tillstånd och uppställningsavgift.",
           "Dessa alternativ visas bara på den publika bokningssidan när minst en restaurangresurs har dem aktiverade.",
+          "För friskvårdsresurser (frisörer, massörer, makeupartister m.fl.), fyll i Tjänstemenyn: varje rad har ett namn, valfritt pris i euro och en tid i 5 minuters steg (5 to 480 minuter, max 8 timmar). Kunderna bockar i det de vill ha på den publika bokningssidan och bokningstiden anpassas automatiskt.",
           "Redigera eller ta bort resurser efter behov.",
         ],
       },
