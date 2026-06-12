@@ -85,12 +85,13 @@ const WhatIsMimmobook = () => {
             <h2 className="text-3xl md:text-4xl font-serif font-bold text-foreground mb-4">{t("whatIs.whoTitle")}</h2>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">{t("whatIs.whoSubtitle")}</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 max-w-6xl mx-auto">
             {[
               { icon: UtensilsCrossed, titleKey: "whatIs.whoRestaurants" as const, descKey: "whatIs.whoRestaurantsDesc" as const },
               { icon: Building2, titleKey: "whatIs.whoVenues" as const, descKey: "whatIs.whoVenuesDesc" as const },
               { icon: Hotel, titleKey: "whatIs.whoHotels" as const, descKey: "whatIs.whoHotelsDesc" as const },
               { icon: Tent, titleKey: "whatIs.whoGuesthouses" as const, descKey: "whatIs.whoGuesthousesDesc" as const },
+              { icon: HeartPulse, titleKey: "whatIs.whoWellness" as const, descKey: "whatIs.whoWellnessDesc" as const },
             ].map((item) => (
               <div key={item.titleKey} className="text-center p-6 rounded-xl border border-border bg-card shadow-card">
                 <div className="inline-flex items-center justify-center h-14 w-14 rounded-full bg-accent/10 mb-5">
