@@ -26,6 +26,7 @@ import Privacy from "./pages/Privacy";
 import Retention from "./pages/legal/Retention";
 import Subprocessors from "./pages/legal/Subprocessors";
 import DPA from "./pages/legal/DPA";
+import Security from "./pages/Security";
 import Accessibility from "./pages/Accessibility";
 import Superadmin from "./pages/Superadmin";
 import GaDebug from "./pages/GaDebug";
