@@ -34,6 +34,7 @@ export const useResourceTypeLabel = () => {
     venue: t("dashboard.venue"),
     guesthouse: t("dashboard.guesthouse"),
     hotel: t("dashboard.hotel"),
+    wellness: t("dashboard.wellness"),
   };
 
   /** Returns the custom name if set, otherwise the translated default */
