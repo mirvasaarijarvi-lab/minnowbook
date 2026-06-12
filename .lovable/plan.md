@@ -1,87 +1,70 @@
-# Signed URL Error Contract
+## Goal
 
-## What this is (plain English)
+Add **Wellness Services** as a first-class resource type so hairdressers, makeup artists, masseurs, etc. can publish a tickable services menu and accept time-slot bookings (no payments).
 
-Right now, when something goes wrong while creating a signed URL for a private file (offer PDF, attachment, branding asset, etc.), the code throws a generic `Error` with a free-form message like "Failed to create signed URL for foo: fetch failed". That's a problem because:
+## What the customer sees
 
-- The UI can't tell the difference between "user is logged out" (403), "file doesn't exist" (404), "bad path" (400), and "Storage is having a bad day" (transport error).
-- The security tests can only do fuzzy regex matching on error messages, which is why we keep tweaking that regex every time CI gets flaky.
-- We can't show the user a friendly, actionable message.
+On the public booking page, after picking a wellness resource:
+- A checkbox list of services (name + price + duration in minutes).
+- Ticking one or more services automatically sums the total duration and the booking length snaps to the nearest 5-minute interval (capped at 8 h).
+- "Total: 1 h 35 min, 65 €" summary shown above the time picker so the customer knows what slot length to look for.
+- Money is informational only: no payment, no Stripe call, identical confirmation email flow as today.
 
-An "error contract" means: every signed URL failure returns the same shape with a stable machine-readable `code` (e.g. `"forbidden"`, `"not_found"`, `"invalid_path"`, `"transport"`, `"unknown"`) plus a human message. Production code switches on the `code`, tests assert on the `code`, and the message is free to change without breaking anything.
+## What the operator sees
 
-## Files to change
+In **Dashboard > Resources**:
+- The "Tyyppi" dropdown gains a new option: **Hyvinvointipalvelut / Wellness services / Friskvårdstjänster** (between "Hotelli" and "Lisää oma").
+- When Wellness is selected, the form swaps in a **Services menu editor** (reuses the existing `sub_services` pattern that "Custom" already uses):
+  - Per row: Name, Price (€, optional), **Duration** (number input restricted to 5-min increments, 5 to 480), drag-to-reorder, delete.
+  - "Add service" button.
+  - Helper text: "Customers can tick one or more of these when booking."
+- A new dashboard panel (or existing booking detail dialog section) shows which services the customer ticked on each reservation.
 
-### 1. `src/lib/signed-url-error.ts` (new)
+## Technical details
 
-Define the contract in one place:
+### Database (single migration)
 
-```ts
-export type SignedUrlErrorCode =
-  | "invalid_path"     // assertSafeStorageObjectPath rejected the input
-  | "forbidden"        // RLS denial, anon, non-member
-  | "not_found"        // bucket / object missing
-  | "transport"        // fetch failed, timeout, DNS, etc.
-  | "unknown";         // anything we couldn't classify
+- Extend `resources.sub_services` JSONB items with an optional `duration_min: int` field (5 to 480, multiple of 5). Already-stored items without the field stay valid.
+- No new table needed. `reservations.selected_sub_services` already exists for the tick selections.
+- Add a server-side validation trigger on `resources` that, when `resource_type = 'wellness'`, requires every `sub_services[i]` to have `name` (non-empty), `duration_min` (5 to 480, mod 5 = 0), and `price_eur` (>= 0 or null).
+- Add `'wellness'` to any existing resource-type allow-list (tier/limit triggers, public-booking RPCs). Audit the migrations grepped above for `resource_type IN (...)` and widen them.
+- No new GRANTs needed — the table already has them.
 
-export class SignedUrlError extends Error {
-  readonly code: SignedUrlErrorCode;
-  readonly httpStatus?: number;
-  readonly cause?: unknown;
-  constructor(code, message, opts?: { httpStatus?; cause? }) { ... }
-}
+### Frontend
 
-export function isSignedUrlError(e: unknown): e is SignedUrlError;
-export function classifySignedUrlFailure(input: {
-  sdkError?: { message?: string; status?: number } | null;
-  thrown?: unknown;
-}): SignedUrlError;
+- `useResourceTypeLabel.ts`: add `wellness` to `defaultLabels` and `selectableTypeLabels`.
+- `i18n/translations.ts`: add `dashboard.wellness`, `blocking.wellness`, plus `publicBooking.servicesMenu`, `publicBooking.totalDuration`, `publicBooking.totalPrice`, validation strings, in EN/FI/SV.
+- `components/dashboard/ResourceManagement.tsx`:
+  - Add the dropdown item.
+  - Render the existing sub-services editor for `wellness` AND add the duration input column.
+  - Reuse the same save path; just gate the duration field rendering on `resource_type === 'wellness' || === 'custom'` and require it for wellness.
+- `pages/PublicBooking.tsx`:
+  - When the selected resource is `wellness`, render the tick-list above the slot picker.
+  - Compute total duration, clamp to [5, 480] mod 5, feed it into the existing slot-length input (which today the customer or staff picks manually).
+  - Pass `selected_sub_services` through to the existing public-booking edge function (already supported).
+- `supabase/functions/public-booking/index.ts`: validate that, for wellness resources, the requested duration matches the sum of ticked services (defence in depth; the client already enforces it).
+
+### Out of scope (confirm before adding)
+
+- Per-service availability (different staff per service) — not requested.
+- Payments / deposits — explicitly excluded by you.
+- Wellness-specific email template wording — defaults to today's confirmation copy.
+
+## Files I will touch
+
+```text
+supabase/migrations/<new>.sql          # widen allow-lists, validation trigger
+src/i18n/translations.ts               # FI/EN/SV strings
+src/hooks/useResourceTypeLabel.ts      # 'wellness' label
+src/components/dashboard/ResourceManagement.tsx   # dropdown + duration column
+src/pages/PublicBooking.tsx            # tick-list + auto duration
+supabase/functions/public-booking/index.ts        # server-side duration check
+src/pages/StaffGuide.tsx, UseCases.tsx, WhatIsMimmobook.tsx  # mention wellness (light)
+supabase/functions/support-chat/prompt.ts         # add wellness to the type list
 ```
 
-Classification rules:
-- Thrown with `name === "InvalidStoragePathError"` -> `invalid_path`
-- HTTP 401/403 OR message matches `/permission|denied|policy|not allowed|unauthor/i` -> `forbidden`
-- HTTP 404 OR message matches `/not\s*found|object.*missing|no such/i` -> `not_found`
-- Thrown `TypeError` / message matches `/fetch failed|network|timeout|abort|ECONN/i` -> `transport`
-- Else -> `unknown`
+## Open questions
 
-### 2. `src/lib/tenant-private-url.ts`
-
-Replace the generic throw in `mintSignedUrl` with `classifySignedUrlFailure(...)`. Wrap the `assertSafeStorageObjectPath` call in a try/catch that re-throws as `SignedUrlError("invalid_path", ...)`. Wrap the `createSignedUrl` call in try/catch so transport throws are classified instead of propagated raw.
-
-### 3. `src/lib/tenant-private-url.test.ts`
-
-Add cases asserting:
-- Bad path -> `SignedUrlError` with `code === "invalid_path"`
-- Mocked SDK 403 -> `code === "forbidden"`, `httpStatus === 403`
-- Mocked SDK 404 -> `code === "not_found"`
-- Mocked thrown `TypeError("fetch failed")` -> `code === "transport"`
-- Cache is dropped after a classified failure (existing invariant, just re-asserted)
-
-### 4. `src/test/security/tenant-assets-private.test.ts`
-
-Replace the regex-on-message assertion in the `createSignedUrl` denial test with an assertion on the new contract:
-
-```ts
-const err = await safeAnonCreateSignedUrl(...);
-// We don't care about wording; we care that it's a known-denied code.
-expect(["forbidden", "not_found"]).toContain(classifySignedUrlFailure({ sdkError: err.error }).code);
-```
-
-The CI-mock branch in `safeAnonCreateSignedUrl` keeps alternating `403`/`404` so both `forbidden` and `not_found` are exercised. The diagnostic logging stays.
-
-### 5. Callers (UI surface for the new code)
-
-Search-and-update the small number of `catch (e)` sites that consume `createTenantPrivateSignedUrl` so they branch on `isSignedUrlError(e) && e.code === "forbidden"` to show "You don't have access to this file" vs. `"transport"` to show "Network problem, try again". No new translations in this PR — strings stay in English at the call site, slotted into the existing toast helpers. (I'll list the exact files after grepping in implementation; expected: `OffersManager`, anywhere using `createTenantPrivateSignedUrl(s)`.)
-
-## Out of scope
-
-- Renaming the bucket helpers.
-- Changing the cache behavior.
-- New i18n keys (can follow up).
-- The `tenant-branding` (public) bucket — it has no signed URL flow.
-
-## Risk / rollout
-
-- Pure additive: existing `try/catch (e)` sites that only read `e.message` keep working because `SignedUrlError extends Error`.
-- Tests get stricter (assert on `code`, not regex), so a future regression that changes wording won't silently pass.
+1. Should ticking services be **required** to book a wellness slot, or optional (customer can request "consultation" without picking anything)?
+2. When the operator hasn't added any services yet, should the customer see an empty menu with "Contact us" or just the normal duration picker?
+3. Tier-wise, does Wellness count toward the existing "resource type limit" the same way as Restaurant/Venue/Hotel (Basic = 1 type), or should it be free to add on any tier?
