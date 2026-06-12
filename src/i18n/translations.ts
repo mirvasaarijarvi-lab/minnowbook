@@ -6618,6 +6618,10 @@ const sv: TranslationKeys = {
   "useCases.popupDesc": "Popup-arrangemang behöver hantera leverantörsansökningar, ståndstilldelning och evenemangslogistik på tillfälliga platser.",
   "useCases.popupChallenges": "Leverantörshantering via e-post är kaotisk. Ståndstilldelning spåras manuellt. Ingen centraliserad vy över leverantörsdetaljer. Avgiftsspårning är inkonsekvent.",
   "useCases.popupSolution": "MimmoBooks popup-bokningstyp samlar ståndstorlek, avgifter, utrustningsbehov och leverantörsdetaljer. Arrangörer ser alla ansökningar i en instrumentpanel med godkännandeflöden.",
+  "useCases.wellness": "Friskvårdsbokningar",
+  "useCases.wellnessDesc": "Frisörer, massörer, makeupartister och liknande leverantörer behöver att kunderna bokar rätt mängd tid, vilket varierar beroende på vilka tjänster de väljer.",
+  "useCases.wellnessChallenges": "Kunder vet inte alltid hur lång tid besöket tar. Att kombinera flera tjänster i ett besök är svårt att förklara via telefon. Att lägga ihop tjänstetider manuellt är felbenäget.",
+  "useCases.wellnessSolution": "MimmoBook låter dig publicera en bockbar tjänstemeny med pris och tid per tjänst (i 5 minuters steg, upp till 8 timmar). Kunden bockar i det de vill ha och bokningstiden anpassas automatiskt. Inga betalningar, bara tidsbokningen.",
   "useCases.ctaTitle": "Hittade du ditt användningsfall?",
   "useCases.ctaSubtitle": "Starta din 30-dagars gratis provperiod och skapa din första bokningssida på minuter.",
 
