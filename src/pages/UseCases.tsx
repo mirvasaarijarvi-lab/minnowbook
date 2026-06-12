@@ -16,6 +16,7 @@ const useCases = [
   { icon: Tent, titleKey: "useCases.guesthouse" as const, descKey: "useCases.guesthouseDesc" as const, challenges: "useCases.guesthouseChallenges" as const, solution: "useCases.guesthouseSolution" as const },
   { icon: Truck, titleKey: "useCases.catering" as const, descKey: "useCases.cateringDesc" as const, challenges: "useCases.cateringChallenges" as const, solution: "useCases.cateringSolution" as const },
   { icon: CalendarDays, titleKey: "useCases.popup" as const, descKey: "useCases.popupDesc" as const, challenges: "useCases.popupChallenges" as const, solution: "useCases.popupSolution" as const },
+  { icon: HeartPulse, titleKey: "useCases.wellness" as const, descKey: "useCases.wellnessDesc" as const, challenges: "useCases.wellnessChallenges" as const, solution: "useCases.wellnessSolution" as const },
 ];
 
 const UseCases = () => {
