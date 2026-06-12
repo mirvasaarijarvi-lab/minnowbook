@@ -15,7 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash2, BedDouble, UtensilsCrossed, Building2, Upload, X, Loader2, ExternalLink, Lock, Copy, Clock, PlusCircle, MinusCircle, Sparkles } from "lucide-react";
+import { Plus, Pencil, Trash2, BedDouble, UtensilsCrossed, Building2, Upload, X, Loader2, ExternalLink, Lock, Copy, Clock, PlusCircle, MinusCircle, Sparkles, HeartPulse } from "lucide-react";
 import { useState, useRef } from "react";
 import { useT } from "@/contexts/I18nContext";
 import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
@@ -36,6 +36,7 @@ const typeIcons: Record<string, React.ElementType> = {
   hotel: BedDouble,
   restaurant: UtensilsCrossed,
   venue: Building2,
+  wellness: HeartPulse,
   custom: Sparkles,
 };
 
