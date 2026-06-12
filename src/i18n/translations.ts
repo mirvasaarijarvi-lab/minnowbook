@@ -1574,6 +1574,13 @@ type TranslationKeys = {
   "blog.post4C2": string;
   "blog.post4C3": string;
   "blog.post4C4": string;
+  "blog.post5Title": string;
+  "blog.post5Excerpt": string;
+  "blog.post5C1": string;
+  "blog.post5C2": string;
+  "blog.post5C3": string;
+  "blog.post5C4": string;
+  "blog.post5C5": string;
 
   // Nav new pages
   "nav.features": string;
@@ -3274,6 +3281,13 @@ const en: TranslationKeys = {
   "blog.post4C2": "The challenge is maintaining consistency while respecting each location's unique needs. A centralized system lets you manage all locations from one dashboard while keeping separate booking pages, staff permissions, and reports per site.",
   "blog.post4C3": "MimmoBook's multi-site feature is designed for this. Each site gets its own branded booking page, its own staff assignments, and its own reporting. But owners and admins can switch between sites from a single account, compare performance, and manage settings centrally.",
   "blog.post4C4": "The key benefit is visibility. Instead of logging into separate systems or checking multiple spreadsheets, you see all your locations in one place. Reservation trends, revenue comparisons, and staffing needs become clear at a glance.",
+  "blog.post5Title": "Wellness Industry Bookings: How Ease of Use Drives Business Growth",
+  "blog.post5Excerpt": "Spas, salons, yoga studios and wellness clinics rely on smooth bookings to grow. Here's how a simple reservation system fuels repeat visits and revenue.",
+  "blog.post5C1": "The wellness industry is built on trust and atmosphere. From massage therapists and spas to yoga studios, beauty salons, physiotherapy clinics and meditation retreats, every guest interaction shapes how clients feel about returning. That experience does not start at the front desk. It starts the moment someone tries to book.",
+  "blog.post5C2": "Ease of use is the single biggest factor in turning a curious visitor into a paying client. Wellness clients often book on mobile, late in the evening, after a stressful day. If your booking page is slow, confusing or hidden behind a phone number and opening hours, they move on to a competitor whose page works in under a minute. A clean, branded booking flow with clear service descriptions, prices and real-time availability removes that friction and dramatically increases conversion.",
+  "blog.post5C3": "Repeat visits are where wellness businesses actually grow. A first-time client who books a 60 minute massage is only profitable if they come back. Automated confirmation and reminder emails reduce no-shows, while a saved profile, easy rebooking and a recognizable brand keep clients loyal. Studies across the wellness sector show that businesses with online self-service booking grow client retention by 20 to 35 percent compared to phone only bookings.",
+  "blog.post5C4": "Operationally, a modern reservation system frees wellness owners from the front desk. Instead of answering calls between treatments, staff focus on the client in the room. Multi-resource scheduling handles therapists, rooms and equipment in one view, so double bookings disappear. Reports show which services, time slots and staff drive the most revenue, so you can price, promote and staff with confidence.",
+  "blog.post5C5": "MimmoBook gives wellness businesses a branded booking page, automated client communication, multi-resource scheduling and clear reporting in one place. It is built for small and growing wellness brands that want to look professional online, reduce admin work and create the calm, effortless experience their clients expect, from the first click to the next visit.",
 
   // Nav new pages
   "nav.features": "Features",
@@ -4967,6 +4981,13 @@ const fi: TranslationKeys = {
   "blog.post4C2": "Haasteena on johdonmukaisuuden ylläpitäminen samalla kun kunnioitetaan jokaisen toimipisteen ainutlaatuisia tarpeita. Keskitetty järjestelmä mahdollistaa kaikkien toimipisteiden hallinnan yhdestä hallintapaneelista.",
   "blog.post4C3": "MimmoBookin usean toimipisteen ominaisuus on suunniteltu juuri tähän. Jokainen toimipiste saa oman brändätyn varaussivun, henkilökuntamäärityksensä ja raportointinsa.",
   "blog.post4C4": "Tärkein hyöty on näkyvyys. Sen sijaan, että kirjautuisit erillisiin järjestelmiin tai tarkistaisit useita taulukoita, näet kaikki toimipisteesi yhdessä paikassa.",
+  "blog.post5Title": "Hyvinvointialan varaukset: helppokäyttöisyys kasvattaa liiketoimintaa",
+  "blog.post5Excerpt": "Kylpylät, kauneushoitolat, joogastudiot ja hyvinvointiklinikat kasvavat sujuvilla varauksilla. Näin yksinkertainen varausjärjestelmä lisää asiakaskäyntejä ja liikevaihtoa.",
+  "blog.post5C1": "Hyvinvointiala rakentuu luottamukselle ja tunnelmalle. Hierojista ja kylpylöistä joogastudioihin, kauneushoitoloihin, fysioterapiaklinikoihin ja meditaatioretriitteihin saakka jokainen kohtaaminen vaikuttaa siihen, palaako asiakas. Kokemus ei ala vastaanottotiskillä vaan siitä hetkestä, kun asiakas yrittää tehdä varauksen.",
+  "blog.post5C2": "Helppokäyttöisyys on tärkein tekijä, kun kiinnostunut kävijä muutetaan maksavaksi asiakkaaksi. Hyvinvointiasiakkaat varaavat usein mobiililla myöhään illalla, stressaavan päivän jälkeen. Jos varaussivu on hidas, sekava tai piilossa puhelinnumeron ja aukioloaikojen takana, asiakas siirtyy kilpailijalle, jonka sivu toimii alle minuutissa. Selkeä, brändätty varauspolku, jossa on kuvaukset, hinnat ja reaaliaikainen saatavuus, poistaa kitkan ja nostaa konversiota merkittävästi.",
+  "blog.post5C3": "Toistuvat käynnit ovat hyvinvointialan todellinen kasvun lähde. Ensikertalainen, joka varaa 60 minuutin hieronnan, on kannattava vasta palatessaan. Automaattiset vahvistus- ja muistutusviestit vähentävät no-show-tapauksia, kun taas tallennettu profiili, helppo uudelleenvaraus ja tunnistettava brändi pitävät asiakkaat uskollisina. Tutkimukset osoittavat, että itsepalveluvarauksia käyttävien hyvinvointiyritysten asiakaspysyvyys kasvaa 20 to 35 prosenttia verrattuna pelkkään puhelinvaraukseen.",
+  "blog.post5C4": "Toiminnallisesti moderni varausjärjestelmä vapauttaa hyvinvointiyrittäjän vastaanotosta. Sen sijaan, että henkilökunta vastaa puheluihin hoitojen välissä, he keskittyvät asiakkaaseen. Moniresurssinen aikataulu hallitsee hoitajia, huoneita ja laitteita yhdessä näkymässä, jolloin tuplavaraukset jäävät pois. Raportit näyttävät, mitkä palvelut, ajat ja työntekijät tuottavat eniten, joten hinnoittelu, markkinointi ja vuorot voidaan suunnitella varmasti.",
+  "blog.post5C5": "MimmoBook tarjoaa hyvinvointiyrityksille brändätyn varaussivun, automaattisen asiakasviestinnän, moniresurssisen aikataulun ja selkeän raportoinnin yhdessä paikassa. Se on rakennettu pienille ja kasvaville hyvinvointibrändeille, jotka haluavat näyttää ammattimaisilta verkossa, vähentää hallinnollista työtä ja luoda rauhallisen, vaivattoman kokemuksen, jonka asiakas odottaa ensimmäisestä klikkauksesta seuraavaan käyntiin.",
 
   // Nav new pages
   "nav.features": "Ominaisuudet",
@@ -6660,6 +6681,13 @@ const sv: TranslationKeys = {
   "blog.post4C2": "Utmaningen är att upprätthålla konsekvens samtidigt som man respekterar varje plats unika behov. Ett centraliserat system låter dig hantera alla platser från en instrumentpanel med separata bokningssidor, personalbehörigheter och rapporter per plats.",
   "blog.post4C3": "MimmoBooks funktion för flera platser är designad för detta. Varje plats får sin egen varumärkesanpassade bokningssida, personaluppdrag och rapportering.",
   "blog.post4C4": "Den viktigaste fördelen är synlighet. Istället för att logga in på separata system eller kontrollera flera kalkylblad ser du alla dina platser på ett ställe.",
+  "blog.post5Title": "Bokningar inom friskvårdsbranschen: hur enkelhet driver tillväxt",
+  "blog.post5Excerpt": "Spa, salonger, yogastudios och friskvårdskliniker växer med smidiga bokningar. Så driver ett enkelt bokningssystem återbesök och intäkter.",
+  "blog.post5C1": "Friskvårdsbranschen bygger på förtroende och atmosfär. Från massörer och spa till yogastudios, skönhetssalonger, fysioterapikliniker och meditationsretreat formar varje gästmöte om kunden kommer tillbaka. Den upplevelsen börjar inte i receptionen utan i stunden då någon försöker boka.",
+  "blog.post5C2": "Enkelhet är den enskilt viktigaste faktorn för att förvandla en nyfiken besökare till en betalande kund. Friskvårdskunder bokar ofta i mobilen sent på kvällen efter en stressig dag. Om din bokningssida är långsam, rörig eller gömd bakom ett telefonnummer och öppettider går de vidare till en konkurrent vars sida fungerar på under en minut. Ett rent, varumärkesanpassat bokningsflöde med tydliga beskrivningar, priser och tillgänglighet i realtid tar bort friktionen och höjer konverteringen markant.",
+  "blog.post5C3": "Återbesök är där friskvårdsföretag faktiskt växer. En förstagångskund som bokar 60 minuters massage blir lönsam först när hen kommer tillbaka. Automatiska bekräftelser och påminnelser minskar uteblivanden, medan en sparad profil, enkel ombokning och ett igenkännbart varumärke håller kunderna lojala. Studier visar att friskvårdsföretag med självbetjäningsbokning ökar kundlojaliteten med 20 till 35 procent jämfört med enbart telefonbokning.",
+  "blog.post5C4": "Operativt frigör ett modernt bokningssystem friskvårdsägaren från receptionen. Istället för att svara i telefon mellan behandlingar kan personalen fokusera på kunden i rummet. Schemaläggning för flera resurser hanterar terapeuter, rum och utrustning i en vy så att dubbelbokningar försvinner. Rapporter visar vilka tjänster, tider och medarbetare som genererar mest intäkter så att du kan prissätta, marknadsföra och bemanna med säkerhet.",
+  "blog.post5C5": "MimmoBook ger friskvårdsföretag en varumärkesanpassad bokningssida, automatisk kundkommunikation, schemaläggning för flera resurser och tydlig rapportering på ett ställe. Det är byggt för små och växande friskvårdsvarumärken som vill se professionella ut online, minska administrationen och skapa den lugna, smidiga upplevelse kunderna förväntar sig, från första klicket till nästa besök.",
 
   // Nav new pages
   "nav.features": "Funktioner",

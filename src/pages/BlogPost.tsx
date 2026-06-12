@@ -54,6 +54,15 @@ const posts: Record<string, BlogPostData> = {
     seoTitle: "Multi-Site Management for Hospitality Businesses – MimmoBook",
     seoDescription: "Managing reservations across multiple locations? Learn how centralized multi-site management saves time and reduces errors.",
   },
+  "wellness-industry-bookings-growth": {
+    slug: "wellness-industry-bookings-growth",
+    titleKey: "blog.post5Title",
+    dateKey: "2026-06-12",
+    readTime: "6 min",
+    contentKeys: ["blog.post5C1", "blog.post5C2", "blog.post5C3", "blog.post5C4", "blog.post5C5"],
+    seoTitle: "Wellness Industry Bookings: Ease of Use Drives Growth – MimmoBook",
+    seoDescription: "Discover how easy online bookings help spas, salons, yoga studios and wellness clinics grow with higher conversion, fewer no-shows and loyal clients.",
+  },
 };
 
 const BlogPost = () => {
