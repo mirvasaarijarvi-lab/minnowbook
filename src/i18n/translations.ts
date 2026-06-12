@@ -6509,6 +6509,8 @@ const sv: TranslationKeys = {
   "whatIs.whoHotelsDesc": "Hantera rumsreserveringar, in-/utcheckning, frukost­alternativ och rumstyps­prissättning för din fastighet.",
   "whatIs.whoGuesthouses": "Gästhus",
   "whatIs.whoGuesthousesDesc": "Förenkla gästboende med enkel rumsbokning, tillgänglighetshantering och personlig kommunikation.",
+  "whatIs.whoWellness": "Friskvårdstjänster",
+  "whatIs.whoWellnessDesc": "Frisörer, massörer, makeupartister och liknande leverantörer kan publicera en bockbar tjänstemeny så att kunderna bokar rätt mängd tid.",
   "whatIs.howTitle": "Hur fungerar MimmoBook?",
   "whatIs.howSubtitle": "Kom igång på fyra enkla steg.",
   "whatIs.howStep1": "Registrera dig",
