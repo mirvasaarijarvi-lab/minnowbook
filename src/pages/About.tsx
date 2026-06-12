@@ -38,7 +38,7 @@ const About = () => {
     <div className="min-h-screen bg-background flex flex-col">
       <SEOHead
         title="About MimmoBook – Our Mission & Values"
-        description="Learn about MimmoBook, the reservation management platform built for hospitality. Our mission is to simplify bookings for restaurants, venues, hotels and guesthouses."
+        description="Learn about MimmoBook, the reservation management platform built for hospitality and wellness. Our mission is to simplify bookings for restaurants, venues, hotels, guesthouses, and wellness service providers."
         path="/about"
         jsonLd={breadcrumbSchema([
           { name: "Home", url: "https://mimmobook.com/" },
