@@ -96,8 +96,33 @@ runs:
           echo "Expected SHA-256: $EXPECTED"
         fi
 
+    - name: Restore Bun install cache
+      # Cache the installed Bun toolchain (~/.bun, where setup-bun
+      # installs the binary) AND the verification archive so warm
+      # runs skip both the ~30 MB GitHub release download and the
+      # zip re-download in the checksum step. Cache key includes
+      # the pinned version + OS + arch so a version bump in
+      # bun-pin.env naturally invalidates stale caches.
+      id: bun-cache
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.bun
+          ~/.bun-verify
+        key: bun-${{ runner.os }}-${{ runner.arch }}-v${{ steps.pin.outputs.version }}
+
+    - name: Use cached Bun
+      if: steps.bun-cache.outputs.cache-hit == 'true'
+      shell: bash
+      run: |
+        # setup-bun normally appends ~/.bun/bin to PATH for us; on a
+        # cache hit it never runs, so we mirror that behaviour here.
+        echo "$HOME/.bun/bin" >> "$GITHUB_PATH"
+        echo "✅ Bun cache hit — skipped re-download."
+
     - name: Setup Bun (attempt 1)
       id: bun1
+      if: steps.bun-cache.outputs.cache-hit != 'true'
       continue-on-error: true
       uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
       with:
@@ -159,7 +184,7 @@ runs:
 
     - name: Setup Bun (attempt 2)
       id: bun2
-      if: steps.bun1.outcome == 'failure' && inputs.max-attempts != '1'
+      if: steps.bun-cache.outputs.cache-hit != 'true' && steps.bun1.outcome == 'failure' && inputs.max-attempts != '1'
       continue-on-error: true
       uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
       with:
@@ -168,7 +193,8 @@ runs:
     - name: Setup Bun (attempt 3)
       id: bun3
       if: |
-        steps.bun1.outcome == 'failure'
+        steps.bun-cache.outputs.cache-hit != 'true'
+        && steps.bun1.outcome == 'failure'
         && steps.bun2.outcome == 'failure'
         && inputs.max-attempts == '3'
       uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
@@ -178,7 +204,8 @@ runs:
     - name: Bun setup result
       shell: bash
       run: |
-        if [ "${{ steps.bun1.outcome }}" = "success" ] \
+        if [ "${{ steps.bun-cache.outputs.cache-hit }}" = "true" ] \
+           || [ "${{ steps.bun1.outcome }}" = "success" ] \
            || [ "${{ steps.bun2.outcome }}" = "success" ] \
            || [ "${{ steps.bun3.outcome }}" = "success" ]; then
           echo "✅ Bun setup succeeded (version $(bun --version))."
@@ -188,10 +215,11 @@ runs:
         fi
 
     - name: Verify Bun archive checksum
-      # Re-download the same release zip the action installed and
-      # confirm SHA-256 matches bun-pin.env. Cheap (~30 MB) and makes
-      # any tampering or accidental drift an immediate hard failure
-      # rather than a silent supply-chain risk.
+      # Verify the release zip's SHA-256 matches bun-pin.env. On a
+      # warm cache the zip is reused from ~/.bun-verify (saved on
+      # the previous run alongside ~/.bun), so this step costs only
+      # a hash, not a re-download. On a cache miss we download once
+      # and persist into ~/.bun-verify so future runs are fast.
       if: inputs.verify-checksum == 'true' && steps.pin.outputs.pinned == 'true'
       shell: bash
       run: |
@@ -203,19 +231,26 @@ runs:
           echo "::warning::No pinned checksum for runner ${RUNNER_OS}/${RUNNER_ARCH}; skipping verification."
           exit 0
         fi
-        URL="https://github.com/oven-sh/bun/releases/download/bun-v${VERSION}/${ASSET}"
-        TMP="$(mktemp -d)"
-        echo "Downloading $URL for checksum verification..."
-        curl -sSL --retry 3 --retry-delay 5 --max-time 120 -o "$TMP/$ASSET" "$URL"
-        ACTUAL="$(sha256sum "$TMP/$ASSET" | awk '{print $1}')"
+        CACHE_DIR="$HOME/.bun-verify/v$VERSION"
+        CACHE_FILE="$CACHE_DIR/$ASSET"
+        mkdir -p "$CACHE_DIR"
+        if [ -f "$CACHE_FILE" ]; then
+          echo "Using cached verification archive: $CACHE_FILE"
+        else
+          URL="https://github.com/oven-sh/bun/releases/download/bun-v${VERSION}/${ASSET}"
+          echo "Downloading $URL for checksum verification..."
+          curl -sSL --retry 3 --retry-delay 5 --max-time 120 -o "$CACHE_FILE" "$URL"
+        fi
+        ACTUAL="$(sha256sum "$CACHE_FILE" | awk '{print $1}')"
         echo "Expected: $EXPECTED"
         echo "Actual:   $ACTUAL"
         if [ "$ACTUAL" != "$EXPECTED" ]; then
           echo "::error::Bun archive checksum mismatch for $ASSET v$VERSION. Expected $EXPECTED, got $ACTUAL. Refusing to use this Bun install."
-          rm -rf "$TMP"
+          # Drop the bad file so the next run re-downloads instead of
+          # serving the corrupt cached copy forever.
+          rm -f "$CACHE_FILE"
           exit 1
         fi
-        rm -rf "$TMP"
         echo "✅ Bun $ASSET v$VERSION SHA-256 verified."
 
     - name: Checksum verification skipped (unpinned override)
