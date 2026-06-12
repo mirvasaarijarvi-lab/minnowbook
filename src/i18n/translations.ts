@@ -2194,7 +2194,7 @@ const en: TranslationKeys = {
 
   // CTA
   "cta.title": "Ready to modernize your reservations?",
-  "cta.subtitle": "Join hospitality businesses already using MimmoBook to streamline their bookings.",
+  "cta.subtitle": "Join hospitality and wellness businesses already using MimmoBook to streamline their bookings.",
 
   // Login
   "login.title": "Log in to your account",
