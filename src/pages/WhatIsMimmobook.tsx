@@ -16,16 +16,16 @@ const WhatIsMimmobook = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <SEOHead
-        title="What Is MimmoBook? – Cloud Reservation Management for Hospitality"
-        description="MimmoBook is a cloud-based reservation management platform built for restaurants, venues, hotels and guesthouses. Learn how it works, who it's for, and why hospitality businesses choose MimmoBook."
+        title="What Is MimmoBook? – Cloud Reservation Management for Hospitality & Wellness"
+        description="MimmoBook is a cloud-based reservation management platform built for restaurants, venues, hotels, guesthouses, and wellness service providers like hairdressers, masseurs, and makeup artists. Learn how it works, who it's for, and why hospitality businesses choose MimmoBook."
         path="/what-is-mimmobook"
         jsonLd={[
           organizationSchema,
           softwareSchema,
           faqSchema([
-            { question: "What is MimmoBook?", answer: "MimmoBook is a cloud-based SaaS reservation management platform designed specifically for hospitality businesses including restaurants, event venues, hotels, and guesthouses." },
+            { question: "What is MimmoBook?", answer: "MimmoBook is a cloud-based SaaS reservation management platform designed for hospitality businesses, including restaurants, event venues, hotels, guesthouses, and wellness service providers (hairdressers, masseurs, makeup artists, and similar)." },
             { question: "How does MimmoBook work?", answer: "Sign up, configure your business settings and reservation types, share your branded booking page with guests, and manage all reservations from a centralized dashboard with automated email confirmations." },
-            { question: "Who is MimmoBook for?", answer: "MimmoBook is built for hospitality businesses of all sizes: restaurants managing table reservations, event venues handling space bookings, hotels managing room reservations, and guesthouses coordinating guest stays." },
+            { question: "Who is MimmoBook for?", answer: "MimmoBook is built for hospitality and personal-service businesses of all sizes: restaurants managing table reservations, event venues handling space bookings, hotels managing room reservations, guesthouses coordinating guest stays, and wellness providers letting customers book the right amount of time from a tickable services menu." },
             { question: "How much does MimmoBook cost?", answer: "MimmoBook starts at €19/month for Basic, €59/month for Professional, and €179/month for Business. All prices include VAT. All plans include a 30-day free trial with no credit card required." },
             { question: "Does MimmoBook support multiple locations?", answer: "Yes. The Business plan supports unlimited sites with centralized management, per-site branding, independent booking pages, and site-specific reporting." },
             { question: "What languages does MimmoBook support?", answer: "MimmoBook supports English, Finnish, and Swedish for both the management dashboard and public-facing booking pages." },
