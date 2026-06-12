@@ -2194,7 +2194,7 @@ const en: TranslationKeys = {
 
   // CTA
   "cta.title": "Ready to modernize your reservations?",
-  "cta.subtitle": "Join hospitality businesses already using MimmoBook to streamline their bookings.",
+  "cta.subtitle": "Join hospitality and wellness businesses already using MimmoBook to streamline their bookings.",
 
   // Login
   "login.title": "Log in to your account",
@@ -3888,7 +3888,7 @@ const fi: TranslationKeys = {
 
   // CTA
   "cta.title": "Valmis modernisoimaan varauksesi?",
-  "cta.subtitle": "Liity majoitusalan yrityksiin, jotka jo käyttävät MimmoBookia varausten sujuvoittamiseen.",
+  "cta.subtitle": "Liity majoitus- ja hyvinvointialan yrityksiin, jotka jo käyttävät MimmoBookia varausten sujuvoittamiseen.",
 
   // Login
   "login.title": "Kirjaudu tilillesi",
@@ -5581,7 +5581,7 @@ const sv: TranslationKeys = {
 
   // CTA
   "cta.title": "Redo att modernisera dina bokningar?",
-  "cta.subtitle": "Gå med besöksnäringsföretag som redan använder MimmoBook för att effektivisera sina bokningar.",
+  "cta.subtitle": "Gå med i besöksnärings- och friskvårdsföretag som redan använder MimmoBook för att effektivisera sina bokningar.",
 
   // Login
   "login.title": "Logga in på ditt konto",
