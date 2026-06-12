@@ -4720,7 +4720,7 @@ const fi: TranslationKeys = {
   "pricing.faqQ2": "Voinko vaihtaa suunnitelmaa myöhemmin?",
   "pricing.faqA2": "Kyllä! Voit päivittää tai alentaa suunnitelmasi milloin tahansa. Muutokset tulevat voimaan seuraavan laskutusjakson alussa.",
   "pricing.faqQ3": "Mitä varaustyyppejä voin valita?",
-  "pricing.faqA3": "Ravintola (pöytävaraukset), Tila (tilakatsaukset) ja Majatalo (huonevaraukset). Basic antaa valita yhden. Pro avaa kaikki tyypit, yhden kutakin, yhdellä toimipisteellä. Business lisää rajattomat toimipisteet.",
+  "pricing.faqA3": "Ravintola (pöytävaraukset), Tila (tilakatsaukset), Majatalo (huonevaraukset) ja Hyvinvointipalvelut (ajanvaraukset kampaajille, hierojille, meikkitaiteilijoille ja vastaaville). Basic antaa valita yhden. Pro avaa kaikki tyypit, yhden kutakin, yhdellä toimipisteellä. Business lisää rajattomat toimipisteet.",
   "pricing.faqQ4": "Voinko käyttää omaa domainia?",
   "pricing.faqA4": "Jokaiselle yritykselle tulee brändätty alidomain (esim. yrityksesi.mimmobook.com). Oman domainin tuki on tiekartalla ja tarjotaan enterprise-hinnoittelulla.",
   "pricing.faqQ5": "Mikä ero on AI-chatbot-tuella ja 24 tunnin vasteajatuella?",
