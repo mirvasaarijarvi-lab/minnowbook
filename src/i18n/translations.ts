@@ -815,6 +815,14 @@ type TranslationKeys = {
   "dashboard.addSubService": string;
   "dashboard.subServiceName": string;
   "dashboard.subServicePrice": string;
+  "dashboard.subServiceDuration": string;
+  "dashboard.wellnessServicesHint": string;
+  "blocking.wellness": string;
+  "booking.servicesMenu": string;
+  "booking.totalDuration": string;
+  "booking.totalPrice": string;
+  "booking.noServicesYet": string;
+  "booking.servicesMenuHelp": string;
 
   // Tiers
   "tier.basic": string;
