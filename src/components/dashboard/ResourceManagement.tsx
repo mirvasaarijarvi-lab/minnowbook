@@ -531,6 +531,9 @@ const ResourceManagement = () => {
                         {(tenant as any)?.allowed_reservation_types?.includes("hotel") && (
                           <SelectItem value="hotel">{typeLabel("hotel")}</SelectItem>
                         )}
+                        {(tenant as any)?.allowed_reservation_types?.includes("wellness") && (
+                          <SelectItem value="wellness">{typeLabel("wellness")}</SelectItem>
+                        )}
                         {(tenant as any)?.allowed_reservation_types?.includes("custom") && (
                           <SelectItem value="custom">{t("dashboard.custom")}</SelectItem>
                         )}
