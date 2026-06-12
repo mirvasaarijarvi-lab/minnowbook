@@ -724,12 +724,18 @@ const PublicBookingInner = () => {
         payload.resource_id = form.resource_id;
       }
 
-      if (parsed.reservation_type === "custom" && form.selected_sub_services.length > 0) {
+      if (
+        (parsed.reservation_type === "custom" || parsed.reservation_type === "wellness") &&
+        form.selected_sub_services.length > 0
+      ) {
         payload.selected_sub_services = form.selected_sub_services.map((s) => ({
           id: s.id,
           name: s.name,
           price_eur: s.price_eur ?? null,
           qty: s.qty,
+          // duration_min is required server-side for wellness; pass it through
+          // when present so the edge function can compute end_time.
+          duration_min: (s as any).duration_min ?? null,
         }));
       }
 
