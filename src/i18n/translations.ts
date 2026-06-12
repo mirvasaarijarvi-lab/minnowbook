@@ -3845,7 +3845,7 @@ const fi: TranslationKeys = {
   "features.title": "Kaikki mitä tarvitset varaustesi hallintaan",
   "features.subtitle": "Täydellinen varaussivusto majoitus- ja ravitsemusalan yrityksille.",
   "features.smartReservations": "Varaukset",
-  "features.smartReservationsDesc": "Hoida ravintolavaraukset, tapahtumapaikkojen tiedustelut ja majatalomajoituksia samassa hallintapaneelista.",
+  "features.smartReservationsDesc": "Hoida ravintolavaraukset, tilojen tiedustelut, majatalomajoituksia ja hyvinvointipalveluiden ajanvarauksia samasta hallintapaneelista.",
   "features.customBranding": "Räätälöi oman brändisi mukaiseksi",
   "features.customBrandingDesc": "Oma logosi, värisi, kuvasi. Jokainen varaussivu yrityksesi brändin mukaisena.",
   "features.teamManagement": "Käyttäjähallinta",
