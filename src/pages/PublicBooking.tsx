@@ -1514,17 +1514,50 @@ const PublicBookingInner = () => {
                 )}
 
                 {/* Sub-services picker for selected custom resource */}
-                {form.reservation_type === "custom" && form.resource_id && (() => {
-                  const tile = typeTiles.find((t) => t.kind === "custom" && (t as any).resourceId === form.resource_id) as
+                {(form.reservation_type === "custom" || form.reservation_type === "wellness") && form.resource_id && (() => {
+                  const isWellnessTile = form.reservation_type === "wellness";
+                  const tile = typeTiles.find(
+                    (t) => (t.kind === "custom" || t.kind === "wellness") && (t as any).resourceId === form.resource_id,
+                  ) as
                     | (Extract<TypeTile, { kind: "custom" }>)
+                    | (Extract<TypeTile, { kind: "wellness" }>)
                     | undefined;
                   const subs = tile?.subServices ?? [];
-                  if (subs.length === 0) return null;
+                  // Wellness with no services: friendly fallback, no menu.
+                  if (subs.length === 0) {
+                    if (isWellnessTile) {
+                      return (
+                        <div className="mt-6 p-3 rounded-md border bg-muted/30">
+                          <p className="text-xs text-muted-foreground">{t("booking.noServicesYet")}</p>
+                        </div>
+                      );
+                    }
+                    return null;
+                  }
+                  // Totals for the wellness summary line.
+                  const totals = form.selected_sub_services.reduce(
+                    (acc, x) => ({
+                      duration: acc.duration + ((x as any).duration_min ?? 0),
+                      price: acc.price + ((x.price_eur ?? 0) * (x.qty ?? 1)),
+                    }),
+                    { duration: 0, price: 0 },
+                  );
+                  const fmtDuration = (min: number) => {
+                    if (min <= 0) return "0 min";
+                    const h = Math.floor(min / 60);
+                    const m = min % 60;
+                    if (h > 0 && m > 0) return `${h} h ${m} min`;
+                    if (h > 0) return `${h} h`;
+                    return `${m} min`;
+                  };
                   return (
                     <div className="mt-6 space-y-3">
                       <Label className="text-sm font-semibold" style={{ color: primaryColor }}>
-                        {t("booking.subServices")}
+                        {isWellnessTile ? t("booking.servicesMenu") : t("booking.subServices")}
                       </Label>
+                      {isWellnessTile && (
+                        <p className="text-xs text-muted-foreground">{t("booking.servicesMenuHelp")}</p>
+                      )}
                       <div className="space-y-2">
                         {subs.map((s) => {
                           const sel = form.selected_sub_services.find((x) => x.id === s.id);
@@ -1538,19 +1571,31 @@ const PublicBookingInner = () => {
                                   onCheckedChange={(c) => {
                                     setForm((prev) => {
                                       const list = prev.selected_sub_services.filter((x) => x.id !== s.id);
-                                      if (c) list.push({ id: s.id, name: s.name, price_eur: s.price_eur, qty: 1 });
+                                      if (c) list.push({
+                                        id: s.id,
+                                        name: s.name,
+                                        price_eur: s.price_eur,
+                                        qty: 1,
+                                        duration_min: (s as any).duration_min,
+                                      });
                                       return { ...prev, selected_sub_services: list };
                                     });
                                   }}
                                 />
                                 <div className="min-w-0">
                                   <div className="text-sm font-medium truncate">{s.name}</div>
-                                  {s.price_eur != null && (
-                                    <div className="text-xs text-muted-foreground">€{Number(s.price_eur).toFixed(2)}</div>
-                                  )}
+                                  <div className="text-xs text-muted-foreground flex flex-wrap gap-x-3">
+                                    {(s as any).duration_min != null && (
+                                      <span>{fmtDuration(Number((s as any).duration_min))}</span>
+                                    )}
+                                    {s.price_eur != null && (
+                                      <span>€{Number(s.price_eur).toFixed(2)}</span>
+                                    )}
+                                  </div>
                                 </div>
                               </label>
-                              {checked && (
+                              {/* Quantity controls only for "custom" — wellness is single-tick. */}
+                              {checked && !isWellnessTile && (
                                 <div className="flex items-center gap-1 shrink-0">
                                   <Button
                                     type="button"
@@ -1593,6 +1638,21 @@ const PublicBookingInner = () => {
                           );
                         })}
                       </div>
+                      {isWellnessTile && form.selected_sub_services.length > 0 && (
+                        <div
+                          className="flex flex-wrap justify-between gap-2 p-3 rounded-md border text-sm font-medium"
+                          style={{ borderColor: primaryColor, color: primaryColor, backgroundColor: `${primaryColor}10` }}
+                        >
+                          <span>
+                            {t("booking.totalDuration")}: <strong>{fmtDuration(totals.duration)}</strong>
+                          </span>
+                          {totals.price > 0 && (
+                            <span>
+                              {t("booking.totalPrice")}: <strong>€{totals.price.toFixed(2)}</strong>
+                            </span>
+                          )}
+                        </div>
+                      )}
                     </div>
                   );
                 })()}
