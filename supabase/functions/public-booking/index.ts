@@ -442,32 +442,27 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
     let discount_code_id: string | null = null;
 
     if (promo_code) {
-      const { data: code, error: codeErr } = await adminClient
-        .from("discount_codes")
-        .select("*")
-        .eq("tenant_id", tenant_id)
-        .eq("code", promo_code.toUpperCase())
-        .eq("is_active", true)
-        .maybeSingle();
+      // Atomic claim: validates active/window/max_uses/applies_to and increments
+      // used_count in a single SQL statement, preventing concurrent overuse.
+      const { data: claimed, error: claimErr } = await adminClient.rpc("claim_discount_code", {
+        p_tenant_id: tenant_id,
+        p_code: promo_code.toUpperCase(),
+        p_reservation_type: reservation_type,
+      });
 
-      if (codeErr || !code) throw new Error("Invalid or expired promo code");
-
-      const today = new Date().toISOString().split("T")[0];
-      if (code.valid_from && today < code.valid_from) throw new Error("Promo code is not yet valid");
-      if (code.valid_until && today > code.valid_until) throw new Error("Promo code has expired");
-      if (code.max_uses && code.used_count >= code.max_uses) throw new Error("Promo code has reached its usage limit");
-      if (code.applies_to && code.applies_to.length > 0 && !code.applies_to.includes(reservation_type)) {
-        throw new Error("Promo code does not apply to this reservation type");
+      if (claimErr) {
+        console.error("[public-booking] claim_discount_code failed", claimErr);
+        throw new Error("Invalid or expired promo code");
       }
 
-      discount_type = code.discount_type;
-      discount_value = code.discount_value;
-      discount_code_id = code.id;
+      const claimedRow = Array.isArray(claimed) ? claimed[0] : claimed;
+      if (!claimedRow) {
+        throw new Error("Invalid or expired promo code");
+      }
 
-      await adminClient
-        .from("discount_codes")
-        .update({ used_count: code.used_count + 1 })
-        .eq("id", code.id);
+      discount_type = claimedRow.discount_type;
+      discount_value = claimedRow.discount_value;
+      discount_code_id = claimedRow.id;
     }
 
     // Resolve site_id
