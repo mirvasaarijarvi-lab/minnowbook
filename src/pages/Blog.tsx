@@ -40,6 +40,14 @@ const blogPosts = [
     readTime: "5 min",
     categoryKey: "blog.catGuides" as const,
   },
+  {
+    slug: "wellness-industry-bookings-growth",
+    titleKey: "blog.post5Title" as const,
+    excerptKey: "blog.post5Excerpt" as const,
+    date: "2026-06-12",
+    readTime: "6 min",
+    categoryKey: "blog.catInsights" as const,
+  },
 ];
 
 const Blog = () => {
