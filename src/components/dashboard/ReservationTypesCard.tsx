@@ -9,13 +9,14 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { UtensilsCrossed, Building2, BedDouble, Sparkles, Loader2 } from "lucide-react";
+import { UtensilsCrossed, Building2, BedDouble, HeartPulse, Sparkles, Loader2 } from "lucide-react";
 
 const TYPE_OPTIONS = [
   { id: "restaurant", icon: UtensilsCrossed },
   { id: "venue", icon: Building2 },
   { id: "guesthouse", icon: BedDouble },
   { id: "hotel", icon: BedDouble },
+  { id: "wellness", icon: HeartPulse },
   { id: "custom", icon: Sparkles },
 ] as const;
 
