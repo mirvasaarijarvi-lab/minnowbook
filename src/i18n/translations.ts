@@ -2283,6 +2283,7 @@ const en: TranslationKeys = {
   "dashboard.venue": "Venue",
   "dashboard.guesthouse": "Hotel / Guesthouse",
   "dashboard.hotel": "Hotel",
+  "dashboard.wellness": "Wellness services",
   "dashboard.custom": "Add your own",
    "dashboard.checkoutToday": "Check-outs today",
    "dashboard.editReservation": "Edit Reservation",
