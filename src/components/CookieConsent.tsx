@@ -5,6 +5,10 @@ import { Link } from "react-router-dom";
 import { useT } from "@/contexts/I18nContext";
 import { gtm } from "@/lib/gtm";
 
+export const openCookieSettings = () => {
+  window.dispatchEvent(new CustomEvent("mimmobook:open-cookie-settings"));
+};
+
 const CookieConsent = forwardRef<HTMLDivElement>(function CookieConsent(_props, ref) {
   const t = useT();
   const [visible, setVisible] = useState(false);
@@ -19,6 +23,12 @@ const CookieConsent = forwardRef<HTMLDivElement>(function CookieConsent(_props, 
       const timer = setTimeout(() => setVisible(true), 1200);
       return () => clearTimeout(timer);
     }
+  }, []);
+
+  useEffect(() => {
+    const open = () => setVisible(true);
+    window.addEventListener("mimmobook:open-cookie-settings", open);
+    return () => window.removeEventListener("mimmobook:open-cookie-settings", open);
   }, []);
 
   const handleAccept = useCallback(() => {
