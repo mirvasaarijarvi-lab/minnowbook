@@ -184,7 +184,7 @@ runs:
 
     - name: Setup Bun (attempt 2)
       id: bun2
-      if: steps.bun1.outcome == 'failure' && inputs.max-attempts != '1'
+      if: steps.bun-cache.outputs.cache-hit != 'true' && steps.bun1.outcome == 'failure' && inputs.max-attempts != '1'
       continue-on-error: true
       uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
       with:
@@ -193,7 +193,8 @@ runs:
     - name: Setup Bun (attempt 3)
       id: bun3
       if: |
-        steps.bun1.outcome == 'failure'
+        steps.bun-cache.outputs.cache-hit != 'true'
+        && steps.bun1.outcome == 'failure'
         && steps.bun2.outcome == 'failure'
         && inputs.max-attempts == '3'
       uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
@@ -203,7 +204,8 @@ runs:
     - name: Bun setup result
       shell: bash
       run: |
-        if [ "${{ steps.bun1.outcome }}" = "success" ] \
+        if [ "${{ steps.bun-cache.outputs.cache-hit }}" = "true" ] \
+           || [ "${{ steps.bun1.outcome }}" = "success" ] \
            || [ "${{ steps.bun2.outcome }}" = "success" ] \
            || [ "${{ steps.bun3.outcome }}" = "success" ]; then
           echo "✅ Bun setup succeeded (version $(bun --version))."
