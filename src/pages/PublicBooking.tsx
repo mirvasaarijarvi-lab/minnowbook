@@ -1411,18 +1411,25 @@ const PublicBookingInner = () => {
                 <div className="grid gap-4 sm:grid-cols-3">
                   {typeTiles.map((tile) => {
                     const isCustom = tile.kind === "custom";
-                    const Icon = isCustom ? Sparkles : (typeIcons[tile.type] ?? Building2);
-                    const isSelected = isCustom
-                      ? form.reservation_type === "custom" && form.resource_id === tile.resourceId
+                    const isWellness = tile.kind === "wellness";
+                    const isResourceTile = isCustom || isWellness;
+                    const tileResType = isCustom ? "custom" : isWellness ? "wellness" : tile.type;
+                    const Icon = isCustom
+                      ? Sparkles
+                      : isWellness
+                      ? HeartPulse
+                      : (typeIcons[tile.type] ?? Building2);
+                    const isSelected = isResourceTile
+                      ? form.reservation_type === tileResType && form.resource_id === (tile as any).resourceId
                       : form.reservation_type === tile.type && !form.resource_id?.startsWith?.("");
-                    // Built-in selection check (ignore resource_id specifics for non-custom)
-                    const isSelectedBuiltin = !isCustom && form.reservation_type === tile.type && form.reservation_type !== "custom";
-                    const tileSelected = isCustom ? isSelected : isSelectedBuiltin;
-                    const descKey = isCustom ? "" : (typeDescKeys[tile.type] ?? "");
-                    const label = isCustom
-                      ? tile.label
+                    // Built-in selection check (ignore resource_id specifics for non-resource tiles)
+                    const isSelectedBuiltin = !isResourceTile && form.reservation_type === tile.type;
+                    const tileSelected = isResourceTile ? isSelected : isSelectedBuiltin;
+                    const descKey = isResourceTile ? "" : (typeDescKeys[tile.type] ?? "");
+                    const label = isResourceTile
+                      ? (tile as any).label
                       : ((settings?.resource_type_names as Record<string, string>)?.[tile.type] || tDynamic(`dashboard.${tile.type}`));
-                    const desc = isCustom
+                    const desc = isResourceTile
                       ? ""
                       : ((settings?.resource_type_descriptions as Record<string, string>)?.[tile.type] || (descKey ? t(descKey) : ""));
                     return (
@@ -1433,9 +1440,9 @@ const PublicBookingInner = () => {
                           // Clear type-specific fields when switching booking types
                           setForm((prev) => ({
                             ...prev,
-                            reservation_type: isCustom ? "custom" : tile.type,
-                            resource_id: isCustom
-                              ? tile.resourceId
+                            reservation_type: isResourceTile ? tileResType : tile.type,
+                            resource_id: isResourceTile
+                              ? (tile as any).resourceId
                               : (tile.type === "restaurant" ? "" : prev.resource_id),
                             check_out_date: "",
                             room_type: "",
