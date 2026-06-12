@@ -51,8 +51,7 @@ jobs:
       - name: Setup Bun
         if: steps.docker-check.outputs.available == 'true'
         uses: ./.github/actions/setup-bun-with-diagnostics
-        with:
-          bun-version: latest
+
 
       - name: Cache Bun dependencies
         uses: actions/cache@v4
