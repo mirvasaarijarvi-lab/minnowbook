@@ -18,13 +18,25 @@ description: |
 
 inputs:
   bun-version:
-    description: Bun version to install (passed through to setup-bun).
+    description: |
+      Bun version to install. Defaults to the pinned version in
+      bun-pin.env so every CI run is byte-for-byte reproducible.
+      Override only for one-off experiments — production CI should
+      always run the pinned version (and its verified checksum).
     required: false
-    default: latest
+    default: ""
   max-attempts:
     description: How many times to retry setup-bun on failure.
     required: false
     default: "3"
+  verify-checksum:
+    description: |
+      Verify the installed `bun` binary's archive checksum against
+      the pinned SHA-256 in bun-pin.env. Set to "false" only when
+      the caller explicitly overrides bun-version with something
+      not listed in bun-pin.env.
+    required: false
+    default: "true"
 
 runs:
   using: composite
