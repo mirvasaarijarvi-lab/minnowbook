@@ -4925,6 +4925,10 @@ const fi: TranslationKeys = {
   "useCases.popupDesc": "Popup-tapahtumien järjestäjien on hallittava myyjähakemuksia, kojujen jakoa ja tapahtumien logistiikkaa tilapäisissä paikoissa.",
   "useCases.popupChallenges": "Myyjähallinta sähköpostilla on kaoottista. Kojujen jako tehdään manuaalisesti. Ei keskitettyä näkymää myyjätietoihin. Maksuseuranta on epäjohdonmukaista.",
   "useCases.popupSolution": "MimmoBookin popup-varaustyyppi tallentaa kojun koon, maksut, laitetarpeet ja myyjätiedot. Järjestäjät näkevät kaikki hakemukset yhdessä hallintapaneelissa hyväksyntätyönkulujen kanssa.",
+  "useCases.wellness": "Hyvinvointipalveluiden varaukset",
+  "useCases.wellnessDesc": "Kampaajat, hierojat, meikkitaiteilijat ja vastaavat palveluntarjoajat tarvitsevat asiakkailtaan oikean mittaisen ajanvarauksen, ja se vaihtelee valittujen palveluiden mukaan.",
+  "useCases.wellnessChallenges": "Asiakkaat eivät aina tiedä, kuinka kauan käynti kestää. Useiden palveluiden yhdistäminen samaan käyntiin on vaikea kertoa puhelimessa. Palveluiden kestojen laskeminen käsin on virhealtista.",
+  "useCases.wellnessSolution": "MimmoBookilla julkaiset valittavan palveluvalikon, jossa jokaisella palvelulla on hinta ja kesto (5 minuutin välein, korkeintaan 8 tuntia). Asiakas rastittaa haluamansa ja varauksen kesto mukautuu automaattisesti. Ei maksuja, vain ajanvaraus.",
   "useCases.ctaTitle": "Löysitkö käyttökohteesi?",
   "useCases.ctaSubtitle": "Aloita ilmainen 30 päivän kokeilu ja luo ensimmäinen varaussivusi minuuteissa.",
 
