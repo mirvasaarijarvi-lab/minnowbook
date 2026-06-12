@@ -3027,7 +3027,7 @@ const en: TranslationKeys = {
   "pricing.faqQ2": "Can I change my plan later?",
   "pricing.faqA2": "Yes! You can upgrade or downgrade your plan at any time. Changes take effect at the start of your next billing cycle.",
   "pricing.faqQ3": "What reservation types can I choose?",
-  "pricing.faqA3": "Restaurant (table bookings), Venue (event space inquiries), and Gasthaus/Guesthouse (room reservations). Basic lets you pick one. Pro unlocks all types, one per type, on a single site. Business adds unlimited sites.",
+  "pricing.faqA3": "Restaurant (table bookings), Venue (event space inquiries), Gasthaus/Guesthouse (room reservations), and Wellness Services (appointment bookings for hairdressers, masseurs, makeup artists, and similar providers). Basic lets you pick one. Pro unlocks all types, one per type, on a single site. Business adds unlimited sites.",
   "pricing.faqQ4": "Can I use my own domain?",
   "pricing.faqA4": "Each business gets a branded subdomain (e.g., yourbusiness.mimmobook.com). Custom domain support is on our roadmap and will be then offered with an enterprise pricing.",
   "pricing.faqQ5": "What's the difference between AI chatbot support and 24-hour response support?",
