@@ -4898,7 +4898,7 @@ const fi: TranslationKeys = {
   // Use Cases
   "useCases.badge": "Käyttökohteet",
   "useCases.heroTitle": "Rakennettu kaikenlaisille ravintola-alan yrityksille",
-  "useCases.heroSubtitle": "Katso miten MimmoBook ratkaisee varaushaasteet ravintoloille, tiloille, hotelleille, majataloille, cateringille ja popup-tapahtumille.",
+  "useCases.heroSubtitle": "Katso miten MimmoBook ratkaisee varaushaasteet ravintoloille, tiloille, hotelleille, majataloille, cateringille, popup-tapahtumille ja hyvinvointipalveluiden tarjoajille.",
   "useCases.challengesLabel": "Yleiset haasteet",
   "useCases.solutionLabel": "Miten MimmoBook auttaa",
   "useCases.restaurant": "Ravintolavaraukset",
