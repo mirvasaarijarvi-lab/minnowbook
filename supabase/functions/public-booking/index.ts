@@ -637,6 +637,28 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
       insertData.selected_sub_services = selected_sub_services;
     }
 
+    // Wellness: compute end_time = start_time + sum(duration_min) so the
+    // slot occupies the correct length on the calendar. Skipped silently
+    // when start_time or services are missing (no end_time recorded).
+    if (reservation_type === "wellness" && start_time && selected_sub_services) {
+      const totalMin = selected_sub_services.reduce(
+        (acc, s) => acc + (typeof s.duration_min === "number" ? s.duration_min : 0),
+        0,
+      );
+      if (totalMin > 0 && totalMin <= 480) {
+        // start_time is "HH:MM" or "HH:MM:SS"; build an end time that wraps
+        // safely within a 24h day. Wellness bookings can't exceed 8 hours
+        // so a same-day end is always valid for a same-day start <= 16:00.
+        const [hh, mm] = start_time.split(":").map((n) => parseInt(n, 10));
+        const startMin = hh * 60 + mm;
+        const endMin = Math.min(startMin + totalMin, 24 * 60 - 1);
+        const eh = Math.floor(endMin / 60).toString().padStart(2, "0");
+        const em = (endMin % 60).toString().padStart(2, "0");
+        insertData.end_time = `${eh}:${em}:00`;
+      }
+    }
+
+
     const { data: insertedRes, error: insertErr } = await adminClient
       .from("reservations")
       .insert(insertData)
