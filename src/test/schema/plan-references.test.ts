@@ -107,9 +107,36 @@ describe("plan references gate", () => {
 
   for (const file of referencedMigrations) {
     it(`plan-referenced migration ${file} exists on disk`, () => {
+      const fullPath = join(MIGRATIONS_DIR, file);
+      const exists = existsSync(fullPath);
+      if (!exists) {
+        const planLines = plan.split("\n");
+        const line56 = planLines[55] ?? "<plan.md has fewer than 56 lines>";
+        const available = existsSync(MIGRATIONS_DIR)
+          ? readdirSync(MIGRATIONS_DIR).filter((f) => f.endsWith(".sql")).sort().slice(-5)
+          : [];
+        // Diagnostic block: surfaced in CI logs when this assertion fails.
+        // eslint-disable-next-line no-console
+        console.error(
+          [
+            "",
+            "============================================================",
+            "[plan-references gate] migration mismatch",
+            "============================================================",
+            `Resolved migration filename: ${file}`,
+            `Resolved absolute path:      ${fullPath}`,
+            `plan.md line 56:             ${line56}`,
+            `Latest migrations on disk:`,
+            ...available.map((f) => `  - ${f}`),
+            "============================================================",
+            "",
+          ].join("\n"),
+        );
+      }
       expect(
-        existsSync(join(MIGRATIONS_DIR, file)),
-        `plan.md names migration ${file} but it does not exist under supabase/migrations/.`
+        exists,
+        `plan.md names migration ${file} but it does not exist under supabase/migrations/. ` +
+          `See CI stderr for the resolved filename, plan.md line 56, and the latest migrations on disk.`,
       ).toBe(true);
     });
   }
