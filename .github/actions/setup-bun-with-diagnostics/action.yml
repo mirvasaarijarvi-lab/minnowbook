@@ -41,12 +41,67 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Resolve pinned Bun version + checksum
+      id: pin
+      shell: bash
+      run: |
+        set -euo pipefail
+        # Load the pin file shipped alongside this composite action.
+        # GITHUB_ACTION_PATH points at the directory containing
+        # action.yml regardless of where the caller checked out.
+        PIN_FILE="${GITHUB_ACTION_PATH}/bun-pin.env"
+        if [ ! -f "$PIN_FILE" ]; then
+          echo "::error::Missing pin file: $PIN_FILE"
+          exit 1
+        fi
+        # shellcheck disable=SC1090
+        source "$PIN_FILE"
+
+        REQUESTED="${{ inputs.bun-version }}"
+        if [ -z "$REQUESTED" ]; then
+          RESOLVED="$BUN_VERSION"
+          PINNED="true"
+        else
+          RESOLVED="$REQUESTED"
+          # Only treat the install as "pinned + verifiable" when the
+          # caller's requested version matches the pin file.
+          if [ "$REQUESTED" = "$BUN_VERSION" ] || [ "$REQUESTED" = "v$BUN_VERSION" ]; then
+            PINNED="true"
+          else
+            PINNED="false"
+          fi
+        fi
+
+        # Pick the right checksum for this runner. The setup-bun
+        # action chooses platform by RUNNER_OS + RUNNER_ARCH.
+        OS="$(echo "${RUNNER_OS:-Linux}" | tr '[:upper:]' '[:lower:]')"
+        ARCH="${RUNNER_ARCH:-X64}"
+        case "$OS-$ARCH" in
+          linux-X64)     EXPECTED="$BUN_SHA256_LINUX_X64"; ASSET="bun-linux-x64.zip" ;;
+          linux-ARM64)   EXPECTED="$BUN_SHA256_LINUX_AARCH64"; ASSET="bun-linux-aarch64.zip" ;;
+          macos-X64)     EXPECTED="$BUN_SHA256_DARWIN_X64"; ASSET="bun-darwin-x64.zip" ;;
+          macos-ARM64)   EXPECTED="$BUN_SHA256_DARWIN_AARCH64"; ASSET="bun-darwin-aarch64.zip" ;;
+          *)             EXPECTED=""; ASSET="" ;;
+        esac
+
+        {
+          echo "version=$RESOLVED"
+          echo "pinned=$PINNED"
+          echo "expected_sha256=$EXPECTED"
+          echo "asset=$ASSET"
+        } >> "$GITHUB_OUTPUT"
+
+        echo "Bun pin: version=$RESOLVED pinned=$PINNED asset=$ASSET"
+        if [ -n "$EXPECTED" ]; then
+          echo "Expected SHA-256: $EXPECTED"
+        fi
+
     - name: Setup Bun (attempt 1)
       id: bun1
       continue-on-error: true
       uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
       with:
-        bun-version: ${{ inputs.bun-version }}
+        bun-version: ${{ steps.pin.outputs.version }}
 
     - name: Diagnose Bun setup failure (attempt 1)
       if: steps.bun1.outcome == 'failure'
