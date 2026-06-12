@@ -2151,7 +2151,7 @@ const en: TranslationKeys = {
   "features.title": "Everything you need to manage your reservations",
   "features.subtitle": "A complete booking site for hospitality businesses with user management.",
   "features.smartReservations": "Reservations",
-  "features.smartReservationsDesc": "Handle restaurant bookings, venue inquiries, and guesthouse stays, all from one dashboard.",
+  "features.smartReservationsDesc": "Handle restaurant bookings, venue inquiries, guesthouse stays, and wellness appointments, all from one dashboard.",
   "features.customBranding": "Custom Branding",
   "features.customBrandingDesc": "Your logo, your colors, your images. Every booking page matches your brand identity.",
   "features.teamManagement": "User Management",
