@@ -1423,6 +1423,8 @@ type TranslationKeys = {
   "whatIs.whoHotelsDesc": string;
   "whatIs.whoGuesthouses": string;
   "whatIs.whoGuesthousesDesc": string;
+  "whatIs.whoWellness": string;
+  "whatIs.whoWellnessDesc": string;
   "whatIs.howTitle": string;
   "whatIs.howSubtitle": string;
   "whatIs.howStep1": string;
@@ -1530,6 +1532,10 @@ type TranslationKeys = {
   "useCases.popupDesc": string;
   "useCases.popupChallenges": string;
   "useCases.popupSolution": string;
+  "useCases.wellness": string;
+  "useCases.wellnessDesc": string;
+  "useCases.wellnessChallenges": string;
+  "useCases.wellnessSolution": string;
   "useCases.ctaTitle": string;
   "useCases.ctaSubtitle": string;
 
@@ -2145,7 +2151,7 @@ const en: TranslationKeys = {
   "features.title": "Everything you need to manage your reservations",
   "features.subtitle": "A complete booking site for hospitality businesses with user management.",
   "features.smartReservations": "Reservations",
-  "features.smartReservationsDesc": "Handle restaurant bookings, venue inquiries, and guesthouse stays, all from one dashboard.",
+  "features.smartReservationsDesc": "Handle restaurant bookings, venue inquiries, guesthouse stays, and wellness appointments, all from one dashboard.",
   "features.customBranding": "Custom Branding",
   "features.customBrandingDesc": "Your logo, your colors, your images. Every booking page matches your brand identity.",
   "features.teamManagement": "User Management",
@@ -3021,7 +3027,7 @@ const en: TranslationKeys = {
   "pricing.faqQ2": "Can I change my plan later?",
   "pricing.faqA2": "Yes! You can upgrade or downgrade your plan at any time. Changes take effect at the start of your next billing cycle.",
   "pricing.faqQ3": "What reservation types can I choose?",
-  "pricing.faqA3": "Restaurant (table bookings), Venue (event space inquiries), and Gasthaus/Guesthouse (room reservations). Basic lets you pick one. Pro unlocks all types, one per type, on a single site. Business adds unlimited sites.",
+  "pricing.faqA3": "Restaurant (table bookings), Venue (event space inquiries), Gasthaus/Guesthouse (room reservations), and Wellness Services (appointment bookings for hairdressers, masseurs, makeup artists, and similar providers). Basic lets you pick one. Pro unlocks all types, one per type, on a single site. Business adds unlimited sites.",
   "pricing.faqQ4": "Can I use my own domain?",
   "pricing.faqA4": "Each business gets a branded subdomain (e.g., yourbusiness.mimmobook.com). Custom domain support is on our roadmap and will be then offered with an enterprise pricing.",
   "pricing.faqQ5": "What's the difference between AI chatbot support and 24-hour response support?",
@@ -3117,6 +3123,8 @@ const en: TranslationKeys = {
   "whatIs.whoHotelsDesc": "Manage room reservations, check-in/check-out, breakfast options, and room-type pricing across your property.",
   "whatIs.whoGuesthouses": "Guesthouses",
   "whatIs.whoGuesthousesDesc": "Streamline guest stays with simple room booking, availability management, and personalized communication.",
+  "whatIs.whoWellness": "Wellness Services",
+  "whatIs.whoWellnessDesc": "Hairdressers, masseurs, makeup artists, and similar providers can publish a tickable services menu so customers book the right amount of time.",
   "whatIs.howTitle": "How Does MimmoBook Work?",
   "whatIs.howSubtitle": "Get started in four simple steps.",
   "whatIs.howStep1": "Sign Up",
@@ -3197,7 +3205,7 @@ const en: TranslationKeys = {
   // Use Cases
   "useCases.badge": "Use Cases",
   "useCases.heroTitle": "Built for Every Type of Hospitality Business",
-  "useCases.heroSubtitle": "See how MimmoBook solves booking challenges for restaurants, venues, hotels, guesthouses, caterers, and popup events.",
+  "useCases.heroSubtitle": "See how MimmoBook solves booking challenges for restaurants, venues, hotels, guesthouses, caterers, popup events, and wellness service providers.",
   "useCases.challengesLabel": "Common Challenges",
   "useCases.solutionLabel": "How MimmoBook Helps",
   "useCases.restaurant": "Restaurant Reservations",
@@ -3224,6 +3232,10 @@ const en: TranslationKeys = {
   "useCases.popupDesc": "Popup event organizers need to manage vendor applications, stall assignments, and event logistics across temporary locations.",
   "useCases.popupChallenges": "Vendor management is chaotic via email. Stall assignments are tracked manually. No centralized view of vendor details and requirements. Fee tracking is inconsistent.",
   "useCases.popupSolution": "MimmoBook's popup reservation type captures stall size, fees, equipment needs, and vendor details. Organizers see all applications in one dashboard with approval workflows.",
+  "useCases.wellness": "Wellness Service Bookings",
+  "useCases.wellnessDesc": "Hairdressers, masseurs, makeup artists, and similar providers need customers to book the right amount of time, which varies by which services they pick.",
+  "useCases.wellnessChallenges": "Customers do not always know how long their visit will take. Mixing different services in one appointment is hard to communicate by phone. Manually adding service durations together is error-prone.",
+  "useCases.wellnessSolution": "MimmoBook lets you publish a tickable services menu with a price and duration per item (in 5 minute steps, up to 8 hours). The customer ticks what they want and the booking length adjusts automatically. No payments, only the time slot.",
   "useCases.ctaTitle": "Find Your Use Case?",
   "useCases.ctaSubtitle": "Start your free 30-day trial and set up your first booking page in minutes.",
 
@@ -3833,7 +3845,7 @@ const fi: TranslationKeys = {
   "features.title": "Kaikki mitä tarvitset varaustesi hallintaan",
   "features.subtitle": "Täydellinen varaussivusto majoitus- ja ravitsemusalan yrityksille.",
   "features.smartReservations": "Varaukset",
-  "features.smartReservationsDesc": "Hoida ravintolavaraukset, tapahtumapaikkojen tiedustelut ja majatalomajoituksia samassa hallintapaneelista.",
+  "features.smartReservationsDesc": "Hoida ravintolavaraukset, tilojen tiedustelut, majatalomajoituksia ja hyvinvointipalveluiden ajanvarauksia samasta hallintapaneelista.",
   "features.customBranding": "Räätälöi oman brändisi mukaiseksi",
   "features.customBrandingDesc": "Oma logosi, värisi, kuvasi. Jokainen varaussivu yrityksesi brändin mukaisena.",
   "features.teamManagement": "Käyttäjähallinta",
@@ -4708,7 +4720,7 @@ const fi: TranslationKeys = {
   "pricing.faqQ2": "Voinko vaihtaa suunnitelmaa myöhemmin?",
   "pricing.faqA2": "Kyllä! Voit päivittää tai alentaa suunnitelmasi milloin tahansa. Muutokset tulevat voimaan seuraavan laskutusjakson alussa.",
   "pricing.faqQ3": "Mitä varaustyyppejä voin valita?",
-  "pricing.faqA3": "Ravintola (pöytävaraukset), Tila (tilakatsaukset) ja Majatalo (huonevaraukset). Basic antaa valita yhden. Pro avaa kaikki tyypit, yhden kutakin, yhdellä toimipisteellä. Business lisää rajattomat toimipisteet.",
+  "pricing.faqA3": "Ravintola (pöytävaraukset), Tila (tilakatsaukset), Majatalo (huonevaraukset) ja Hyvinvointipalvelut (ajanvaraukset kampaajille, hierojille, meikkitaiteilijoille ja vastaaville). Basic antaa valita yhden. Pro avaa kaikki tyypit, yhden kutakin, yhdellä toimipisteellä. Business lisää rajattomat toimipisteet.",
   "pricing.faqQ4": "Voinko käyttää omaa domainia?",
   "pricing.faqA4": "Jokaiselle yritykselle tulee brändätty alidomain (esim. yrityksesi.mimmobook.com). Oman domainin tuki on tiekartalla ja tarjotaan enterprise-hinnoittelulla.",
   "pricing.faqQ5": "Mikä ero on AI-chatbot-tuella ja 24 tunnin vasteajatuella?",
@@ -4804,6 +4816,8 @@ const fi: TranslationKeys = {
   "whatIs.whoHotelsDesc": "Hallitse huonevarauksia, sisään-/uloskirjautumista, aamiaisvaihtoehtoja ja huonetyyppihinnoittelua.",
   "whatIs.whoGuesthouses": "Majatalot",
   "whatIs.whoGuesthousesDesc": "Yksinkertaista vierasmajoitusta helppokäyttöisellä huonevarauksella, saatavuuden hallinnalla ja henkilökohtaisella viestinnällä.",
+  "whatIs.whoWellness": "Hyvinvointipalvelut",
+  "whatIs.whoWellnessDesc": "Kampaajat, hierojat, meikkitaiteilijat ja vastaavat palveluntarjoajat voivat julkaista palveluvalikon, josta asiakas valitsee haluamansa, ja varauksen kesto mukautuu automaattisesti.",
   "whatIs.howTitle": "Miten MimmoBook toimii?",
   "whatIs.howSubtitle": "Aloita neljässä yksinkertaisessa vaiheessa.",
   "whatIs.howStep1": "Rekisteröidy",
@@ -4884,7 +4898,7 @@ const fi: TranslationKeys = {
   // Use Cases
   "useCases.badge": "Käyttökohteet",
   "useCases.heroTitle": "Rakennettu kaikenlaisille ravintola-alan yrityksille",
-  "useCases.heroSubtitle": "Katso miten MimmoBook ratkaisee varaushaasteet ravintoloille, tiloille, hotelleille, majataloille, cateringille ja popup-tapahtumille.",
+  "useCases.heroSubtitle": "Katso miten MimmoBook ratkaisee varaushaasteet ravintoloille, tiloille, hotelleille, majataloille, cateringille, popup-tapahtumille ja hyvinvointipalveluiden tarjoajille.",
   "useCases.challengesLabel": "Yleiset haasteet",
   "useCases.solutionLabel": "Miten MimmoBook auttaa",
   "useCases.restaurant": "Ravintolavaraukset",
@@ -4911,6 +4925,10 @@ const fi: TranslationKeys = {
   "useCases.popupDesc": "Popup-tapahtumien järjestäjien on hallittava myyjähakemuksia, kojujen jakoa ja tapahtumien logistiikkaa tilapäisissä paikoissa.",
   "useCases.popupChallenges": "Myyjähallinta sähköpostilla on kaoottista. Kojujen jako tehdään manuaalisesti. Ei keskitettyä näkymää myyjätietoihin. Maksuseuranta on epäjohdonmukaista.",
   "useCases.popupSolution": "MimmoBookin popup-varaustyyppi tallentaa kojun koon, maksut, laitetarpeet ja myyjätiedot. Järjestäjät näkevät kaikki hakemukset yhdessä hallintapaneelissa hyväksyntätyönkulujen kanssa.",
+  "useCases.wellness": "Hyvinvointipalveluiden varaukset",
+  "useCases.wellnessDesc": "Kampaajat, hierojat, meikkitaiteilijat ja vastaavat palveluntarjoajat tarvitsevat asiakkailtaan oikean mittaisen ajanvarauksen, ja se vaihtelee valittujen palveluiden mukaan.",
+  "useCases.wellnessChallenges": "Asiakkaat eivät aina tiedä, kuinka kauan käynti kestää. Useiden palveluiden yhdistäminen samaan käyntiin on vaikea kertoa puhelimessa. Palveluiden kestojen laskeminen käsin on virhealtista.",
+  "useCases.wellnessSolution": "MimmoBookilla julkaiset valittavan palveluvalikon, jossa jokaisella palvelulla on hinta ja kesto (5 minuutin välein, korkeintaan 8 tuntia). Asiakas rastittaa haluamansa ja varauksen kesto mukautuu automaattisesti. Ei maksuja, vain ajanvaraus.",
   "useCases.ctaTitle": "Löysitkö käyttökohteesi?",
   "useCases.ctaSubtitle": "Aloita ilmainen 30 päivän kokeilu ja luo ensimmäinen varaussivusi minuuteissa.",
 
@@ -5520,7 +5538,7 @@ const sv: TranslationKeys = {
   "features.title": "Allt du behöver för att hantera dina bokningar",
   "features.subtitle": "Den kompletta bokningswebbplatsen för boende- och cateringföretag.",
   "features.smartReservations": "Bokningar",
-  "features.smartReservationsDesc": "Hantera restaurangbokningar, förfrågningar om lokaler och boende på värdshus från en enda instrumentpanel.",
+  "features.smartReservationsDesc": "Hantera restaurangbokningar, förfrågningar om lokaler, boende på värdshus och friskvårdstider från en enda instrumentpanel.",
   "features.customBranding": "Anpassa till ditt varumärke",
   "features.customBrandingDesc": "Din egen logotyp, färger och bilder. Varje bokningssida är varumärkesanpassad till ditt företag.",
   "features.teamManagement": "Användarhantering",
@@ -6395,7 +6413,7 @@ const sv: TranslationKeys = {
   "pricing.faqQ2": "Kan jag ändra plan senare?",
   "pricing.faqA2": "Ja! Du kan uppgradera eller nedgradera din plan när som helst. Ändringar träder i kraft vid början av nästa faktureringsperiod.",
   "pricing.faqQ3": "Vilka bokningstyper kan jag välja?",
-  "pricing.faqA3": "Restaurang (bordsreservationer), Lokal (lokalförfrågningar) och Gästhus (rumsreservationer). Basic låter dig välja en. Pro låser upp alla typer, en av varje, på en plats. Business lägger till obegränsade platser.",
+  "pricing.faqA3": "Restaurang (bordsreservationer), Lokal (lokalförfrågningar), Gästhus (rumsreservationer) och Friskvårdstjänster (tidsbokningar för frisörer, massörer, makeupartister och liknande). Basic låter dig välja en. Pro låser upp alla typer, en av varje, på en plats. Business lägger till obegränsade platser.",
   "pricing.faqQ4": "Kan jag använda min egen domän?",
   "pricing.faqA4": "Varje företag får en varumärkt subdomän (t.ex. dittforetag.mimmobook.com). Stöd för egna domäner finns på vår roadmap och kommer att erbjudas med enterprise-prissättning.",
   "pricing.faqQ5": "Vad är skillnaden mellan AI-chatbot-support och 24-timmarssupport?",
@@ -6491,6 +6509,8 @@ const sv: TranslationKeys = {
   "whatIs.whoHotelsDesc": "Hantera rumsreserveringar, in-/utcheckning, frukost­alternativ och rumstyps­prissättning för din fastighet.",
   "whatIs.whoGuesthouses": "Gästhus",
   "whatIs.whoGuesthousesDesc": "Förenkla gästboende med enkel rumsbokning, tillgänglighetshantering och personlig kommunikation.",
+  "whatIs.whoWellness": "Friskvårdstjänster",
+  "whatIs.whoWellnessDesc": "Frisörer, massörer, makeupartister och liknande leverantörer kan publicera en bockbar tjänstemeny så att kunderna bokar rätt mängd tid.",
   "whatIs.howTitle": "Hur fungerar MimmoBook?",
   "whatIs.howSubtitle": "Kom igång på fyra enkla steg.",
   "whatIs.howStep1": "Registrera dig",
@@ -6571,7 +6591,7 @@ const sv: TranslationKeys = {
   // Use Cases
   "useCases.badge": "Användningsfall",
   "useCases.heroTitle": "Byggd för alla typer av besöksnäringsföretag",
-  "useCases.heroSubtitle": "Se hur MimmoBook löser bokningsutmaningar för restauranger, lokaler, hotell, gästhus, cateringföretag och popup-evenemang.",
+  "useCases.heroSubtitle": "Se hur MimmoBook löser bokningsutmaningar för restauranger, lokaler, hotell, gästhus, cateringföretag, popup-evenemang och friskvårdsleverantörer.",
   "useCases.challengesLabel": "Vanliga utmaningar",
   "useCases.solutionLabel": "Hur MimmoBook hjälper",
   "useCases.restaurant": "Restaurangbokningar",
@@ -6598,6 +6618,10 @@ const sv: TranslationKeys = {
   "useCases.popupDesc": "Popup-arrangemang behöver hantera leverantörsansökningar, ståndstilldelning och evenemangslogistik på tillfälliga platser.",
   "useCases.popupChallenges": "Leverantörshantering via e-post är kaotisk. Ståndstilldelning spåras manuellt. Ingen centraliserad vy över leverantörsdetaljer. Avgiftsspårning är inkonsekvent.",
   "useCases.popupSolution": "MimmoBooks popup-bokningstyp samlar ståndstorlek, avgifter, utrustningsbehov och leverantörsdetaljer. Arrangörer ser alla ansökningar i en instrumentpanel med godkännandeflöden.",
+  "useCases.wellness": "Friskvårdsbokningar",
+  "useCases.wellnessDesc": "Frisörer, massörer, makeupartister och liknande leverantörer behöver att kunderna bokar rätt mängd tid, vilket varierar beroende på vilka tjänster de väljer.",
+  "useCases.wellnessChallenges": "Kunder vet inte alltid hur lång tid besöket tar. Att kombinera flera tjänster i ett besök är svårt att förklara via telefon. Att lägga ihop tjänstetider manuellt är felbenäget.",
+  "useCases.wellnessSolution": "MimmoBook låter dig publicera en bockbar tjänstemeny med pris och tid per tjänst (i 5 minuters steg, upp till 8 timmar). Kunden bockar i det de vill ha och bokningstiden anpassas automatiskt. Inga betalningar, bara tidsbokningen.",
   "useCases.ctaTitle": "Hittade du ditt användningsfall?",
   "useCases.ctaSubtitle": "Starta din 30-dagars gratis provperiod och skapa din första bokningssida på minuter.",
 

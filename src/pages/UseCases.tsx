@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
-  ArrowRight, UtensilsCrossed, Building2, Hotel, Tent, Truck, CalendarDays,
+  ArrowRight, UtensilsCrossed, Building2, Hotel, Tent, Truck, CalendarDays, HeartPulse,
 } from "lucide-react";
 import MarketingHeader from "@/components/MarketingHeader";
 import MarketingFooter from "@/components/MarketingFooter";
@@ -16,6 +16,7 @@ const useCases = [
   { icon: Tent, titleKey: "useCases.guesthouse" as const, descKey: "useCases.guesthouseDesc" as const, challenges: "useCases.guesthouseChallenges" as const, solution: "useCases.guesthouseSolution" as const },
   { icon: Truck, titleKey: "useCases.catering" as const, descKey: "useCases.cateringDesc" as const, challenges: "useCases.cateringChallenges" as const, solution: "useCases.cateringSolution" as const },
   { icon: CalendarDays, titleKey: "useCases.popup" as const, descKey: "useCases.popupDesc" as const, challenges: "useCases.popupChallenges" as const, solution: "useCases.popupSolution" as const },
+  { icon: HeartPulse, titleKey: "useCases.wellness" as const, descKey: "useCases.wellnessDesc" as const, challenges: "useCases.wellnessChallenges" as const, solution: "useCases.wellnessSolution" as const },
 ];
 
 const UseCases = () => {
@@ -24,8 +25,8 @@ const UseCases = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <SEOHead
-        title="Use Cases – MimmoBook for Restaurants, Venues, Hotels & More"
-        description="Discover how MimmoBook helps restaurants manage table reservations, venues handle event bookings, hotels coordinate room stays, and guesthouses streamline guest management."
+        title="Use Cases – MimmoBook for Restaurants, Venues, Hotels, Wellness & More"
+        description="Discover how MimmoBook helps restaurants manage table reservations, venues handle event bookings, hotels coordinate room stays, guesthouses streamline guest management, and wellness providers (hairdressers, masseurs, makeup artists) accept appointment bookings."
         path="/use-cases"
         jsonLd={[
           organizationSchema,
