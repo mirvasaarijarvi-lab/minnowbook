@@ -3232,6 +3232,10 @@ const en: TranslationKeys = {
   "useCases.popupDesc": "Popup event organizers need to manage vendor applications, stall assignments, and event logistics across temporary locations.",
   "useCases.popupChallenges": "Vendor management is chaotic via email. Stall assignments are tracked manually. No centralized view of vendor details and requirements. Fee tracking is inconsistent.",
   "useCases.popupSolution": "MimmoBook's popup reservation type captures stall size, fees, equipment needs, and vendor details. Organizers see all applications in one dashboard with approval workflows.",
+  "useCases.wellness": "Wellness Service Bookings",
+  "useCases.wellnessDesc": "Hairdressers, masseurs, makeup artists, and similar providers need customers to book the right amount of time, which varies by which services they pick.",
+  "useCases.wellnessChallenges": "Customers do not always know how long their visit will take. Mixing different services in one appointment is hard to communicate by phone. Manually adding service durations together is error-prone.",
+  "useCases.wellnessSolution": "MimmoBook lets you publish a tickable services menu with a price and duration per item (in 5 minute steps, up to 8 hours). The customer ticks what they want and the booking length adjusts automatically. No payments, only the time slot.",
   "useCases.ctaTitle": "Find Your Use Case?",
   "useCases.ctaSubtitle": "Start your free 30-day trial and set up your first booking page in minutes.",
 
