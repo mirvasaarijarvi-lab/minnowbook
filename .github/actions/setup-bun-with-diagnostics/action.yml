@@ -96,8 +96,33 @@ runs:
           echo "Expected SHA-256: $EXPECTED"
         fi
 
+    - name: Restore Bun install cache
+      # Cache the installed Bun toolchain (~/.bun, where setup-bun
+      # installs the binary) AND the verification archive so warm
+      # runs skip both the ~30 MB GitHub release download and the
+      # zip re-download in the checksum step. Cache key includes
+      # the pinned version + OS + arch so a version bump in
+      # bun-pin.env naturally invalidates stale caches.
+      id: bun-cache
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.bun
+          ~/.bun-verify
+        key: bun-${{ runner.os }}-${{ runner.arch }}-v${{ steps.pin.outputs.version }}
+
+    - name: Use cached Bun
+      if: steps.bun-cache.outputs.cache-hit == 'true'
+      shell: bash
+      run: |
+        # setup-bun normally appends ~/.bun/bin to PATH for us; on a
+        # cache hit it never runs, so we mirror that behaviour here.
+        echo "$HOME/.bun/bin" >> "$GITHUB_PATH"
+        echo "✅ Bun cache hit — skipped re-download."
+
     - name: Setup Bun (attempt 1)
       id: bun1
+      if: steps.bun-cache.outputs.cache-hit != 'true'
       continue-on-error: true
       uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
       with:
