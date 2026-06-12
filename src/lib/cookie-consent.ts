@@ -56,7 +56,7 @@ export function readConsent(): ConsentRecord | null {
 
     const parsed = JSON.parse(raw) as Partial<ConsentRecord>;
     if (!parsed || typeof parsed !== "object") return null;
-    const cats = parsed.categories ?? {};
+    const cats = (parsed.categories ?? {}) as Partial<ConsentCategories>;
     return {
       version: 1,
       categories: {
