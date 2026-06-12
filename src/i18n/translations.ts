@@ -4816,6 +4816,8 @@ const fi: TranslationKeys = {
   "whatIs.whoHotelsDesc": "Hallitse huonevarauksia, sisään-/uloskirjautumista, aamiaisvaihtoehtoja ja huonetyyppihinnoittelua.",
   "whatIs.whoGuesthouses": "Majatalot",
   "whatIs.whoGuesthousesDesc": "Yksinkertaista vierasmajoitusta helppokäyttöisellä huonevarauksella, saatavuuden hallinnalla ja henkilökohtaisella viestinnällä.",
+  "whatIs.whoWellness": "Hyvinvointipalvelut",
+  "whatIs.whoWellnessDesc": "Kampaajat, hierojat, meikkitaiteilijat ja vastaavat palveluntarjoajat voivat julkaista palveluvalikon, josta asiakas valitsee haluamansa, ja varauksen kesto mukautuu automaattisesti.",
   "whatIs.howTitle": "Miten MimmoBook toimii?",
   "whatIs.howSubtitle": "Aloita neljässä yksinkertaisessa vaiheessa.",
   "whatIs.howStep1": "Rekisteröidy",
