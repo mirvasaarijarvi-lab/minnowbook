@@ -26,6 +26,7 @@ import Privacy from "./pages/Privacy";
 import Retention from "./pages/legal/Retention";
 import Subprocessors from "./pages/legal/Subprocessors";
 import DPA from "./pages/legal/DPA";
+import Security from "./pages/Security";
 import Accessibility from "./pages/Accessibility";
 import Superadmin from "./pages/Superadmin";
 import GaDebug from "./pages/GaDebug";
@@ -142,6 +143,7 @@ const App = () => (
               <Route path="/legal/retention" element={<Retention />} />
               <Route path="/legal/subprocessors" element={<Subprocessors />} />
               <Route path="/legal/dpa" element={<DPA />} />
+              <Route path="/security" element={<Security />} />
               <Route path="/accessibility" element={<Accessibility />} />
               <Route path="/what-is-mimmobook" element={<WhatIsMimmobook />} />
               <Route path="/features" element={<Features />} />

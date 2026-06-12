@@ -79,6 +79,11 @@ const MarketingFooter = () => {
                 </Link>
               </li>
               <li>
+                <Link to="/security" className="text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors">
+                  Security
+                </Link>
+              </li>
+              <li>
                 <Link to="/accessibility" className="text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors">
                   {t("nav.accessibility")}
                 </Link>

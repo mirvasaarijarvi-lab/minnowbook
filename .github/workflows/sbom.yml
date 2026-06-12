@@ -1,0 +1,71 @@
+name: SBOM
+
+# Regenerates docs/sbom.cdx.json (CycloneDX 1.5) and uploads it as a
+# build artifact whenever dependencies change or on demand.
+#
+# The committed copy under docs/ is what the public /security page links
+# to. CI re-generates and uploads on every dependency change so that a
+# reviewer can confirm the committed file matches the current lockfile.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "package.json"
+      - "package-lock.json"
+      - "bun.lock"
+      - "pnpm-lock.yaml"
+      - "yarn.lock"
+      - "scripts/generate-sbom.mjs"
+      - ".github/workflows/sbom.yml"
+  pull_request:
+    paths:
+      - "package.json"
+      - "package-lock.json"
+      - "bun.lock"
+      - "pnpm-lock.yaml"
+      - "yarn.lock"
+      - "scripts/generate-sbom.mjs"
+  workflow_dispatch:
+  schedule:
+    - cron: "30 6 * * 1"
+
+permissions: {}
+
+concurrency:
+  group: sbom-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  generate:
+    name: generate-sbom
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Setup Node
+        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af
+        with:
+          node-version: "20"
+      - name: Generate SBOM
+        run: node scripts/generate-sbom.mjs
+      - name: Verify committed SBOM matches lockfile
+        if: github.event_name == 'pull_request'
+        run: |
+          set -euo pipefail
+          if ! git diff --quiet -- docs/sbom.cdx.json docs/sbom.cdx.json.sha256; then
+            echo "::error::docs/sbom.cdx.json is out of date. Run 'node scripts/generate-sbom.mjs' and commit."
+            git diff -- docs/sbom.cdx.json | head -50
+            exit 1
+          fi
+      - name: Upload SBOM artifact
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882
+        with:
+          name: sbom-cyclonedx
+          path: docs/sbom.cdx.json
+          if-no-files-found: error
