@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import Logo from "@/components/Logo";
 import { useT } from "@/contexts/I18nContext";
+import { openCookieSettings } from "@/components/CookieConsent";
 
 const MarketingFooter = () => {
   const t = useT();
