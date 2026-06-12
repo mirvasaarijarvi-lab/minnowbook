@@ -3838,7 +3838,7 @@ const fi: TranslationKeys = {
   "hero.badge": "Nyt betassa. 30 päivän ilmainen kokeilu",
     "hero.title": "Majoitus- ja ravitsemus- ja palvelualan",
     "hero.titleHighlight": "varausten hallintatyökalu",
-  "hero.subtitle": "Käsittele ja hoida ravintolavarauksia, tapahtumapaikkojen tiedusteluja sekä hotelli- tai majatalovarauksia yhden hallintapaneelin avulla. Voit luoda omat brändätyt varaussivut, lähettää automaattisia sähköposteja vahvistuksiin. Hintaan sisältyy myös käyttäjähallinta.",
+  "hero.subtitle": "Käsittele ja hoida palvelusi varauksia, ravintolavarauksia, tapahtumapaikkojen tiedusteluja sekä hotelli- tai majatalovarauksia yhden hallintapaneelin avulla. Voit luoda omat brändätyt varaussivut, lähettää automaattisia sähköposteja vahvistuksiin. Hintaan sisältyy myös käyttäjähallinta.",
   "hero.viewPricing": "Näytä hinnat",
 
   // Features
