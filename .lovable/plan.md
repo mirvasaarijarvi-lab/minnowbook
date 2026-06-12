@@ -50,7 +50,7 @@ Add a new "Privacy & Data" tab in `/settings/profile` (visible to every authenti
   - Reads the caller's `auth.uid()`.
   - Aggregates: profile, tenant memberships, reservations the user created, audit log entries authored, login history, notifications, support requests, beta feedback.
   - Returns a single ZIP containing JSON files + a human-readable `README.txt`.
-- Rate-limited (1 export per 24h per user) via `redemption_idempotency`-style table or a new `data_export_requests` table.
+- Rate-limited (1 export per 24h per user) via a `redemption_idempotency`-style approach or a new rate-limit log (see Technical details below).
 - Tenant owners additionally see **Export tenant data** (CSV per table) reusing existing CSV export infrastructure.
 
 ### 3b. Self-service account deletion (Art. 17)
