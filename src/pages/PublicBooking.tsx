@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Calendar } from "@/components/ui/calendar";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Loader2, CheckCircle, UtensilsCrossed, Building2, Home, Clock, CalendarDays, CalendarIcon, CalendarPlus, BedDouble, Coffee, Users, Truck, ShoppingBag, ChefHat, Plug, Droplets, Tag, Mail, Phone, MapPin, Sparkles, Minus, Plus } from "lucide-react";
+import { Loader2, CheckCircle, UtensilsCrossed, Building2, Home, Clock, CalendarDays, CalendarIcon, CalendarPlus, BedDouble, Coffee, Users, Truck, ShoppingBag, ChefHat, Plug, Droplets, Tag, Mail, Phone, MapPin, Sparkles, HeartPulse, Minus, Plus } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
 import { format, startOfMonth, endOfMonth, addMonths, subMonths, isSameDay } from "date-fns";
@@ -943,7 +943,8 @@ const PublicBookingInner = () => {
   // labelled with `custom_type_label` (or the resource name as fallback).
   type TypeTile =
     | { kind: "builtin"; key: string; type: string }
-    | { kind: "custom"; key: string; resourceId: string; label: string; subServices: { id: string; name: string; price_eur?: number }[] };
+    | { kind: "custom"; key: string; resourceId: string; label: string; subServices: { id: string; name: string; price_eur?: number; duration_min?: number }[] }
+    | { kind: "wellness"; key: string; resourceId: string; label: string; subServices: { id: string; name: string; price_eur?: number; duration_min?: number }[] };
 
   const typeTiles: TypeTile[] = useMemo(
     () => buildTypeTiles(allowedTypes, allSiteResources as any) as TypeTile[],
