@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
-  ArrowRight, UtensilsCrossed, Building2, Hotel, Tent, Truck, CalendarDays,
+  ArrowRight, UtensilsCrossed, Building2, Hotel, Tent, Truck, CalendarDays, HeartPulse,
 } from "lucide-react";
 import MarketingHeader from "@/components/MarketingHeader";
 import MarketingFooter from "@/components/MarketingFooter";
