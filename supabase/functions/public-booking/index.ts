@@ -376,16 +376,26 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
     // Optional: explicit resource selection (used for custom-type bookings, etc.)
     const resource_id = validateUuid(body.resource_id, "resource_id");
 
-    // Optional: sub-services for custom type
-    let selected_sub_services: { id: string; name: string; price_eur: number | null; qty: number }[] | null = null;
-    if (reservation_type === "custom" && Array.isArray(body.selected_sub_services)) {
+    // Optional: sub-services for custom OR wellness type.
+    // For wellness, each selected service carries a duration_min in 5-min
+    // steps (5 to 480). Total duration is later used to compute end_time.
+    let selected_sub_services:
+      | { id: string; name: string; price_eur: number | null; qty: number; duration_min?: number | null }[]
+      | null = null;
+    if (
+      (reservation_type === "custom" || reservation_type === "wellness") &&
+      Array.isArray(body.selected_sub_services)
+    ) {
       if (body.selected_sub_services.length > 50) throw new Error("Too many sub-services");
-      const cleaned: { id: string; name: string; price_eur: number | null; qty: number }[] = [];
+      const cleaned: { id: string; name: string; price_eur: number | null; qty: number; duration_min?: number | null }[] = [];
       for (const raw of body.selected_sub_services) {
         if (!raw || typeof raw !== "object") continue;
         const id = validateString((raw as any).id, "sub_service.id", 64, true)!;
         const name = validateString((raw as any).name, "sub_service.name", 100, true)!;
-        const qtyN = validateInt((raw as any).qty, "sub_service.qty", 1, 99) ?? 1;
+        // Wellness services don't multiply: a customer either ticks a service or not.
+        const qtyN = reservation_type === "wellness"
+          ? 1
+          : (validateInt((raw as any).qty, "sub_service.qty", 1, 99) ?? 1);
         let price: number | null = null;
         const rawPrice = (raw as any).price_eur;
         if (rawPrice !== undefined && rawPrice !== null && rawPrice !== "") {
@@ -393,7 +403,19 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
           if (isNaN(p) || p < 0 || p > 999999) throw new Error("Invalid sub_service.price_eur");
           price = p;
         }
-        cleaned.push({ id, name, price_eur: price, qty: qtyN });
+        let duration: number | null = null;
+        const rawDur = (raw as any).duration_min;
+        if (rawDur !== undefined && rawDur !== null && rawDur !== "") {
+          const d = typeof rawDur === "number" ? rawDur : parseInt(String(rawDur), 10);
+          if (isNaN(d) || d < 5 || d > 480 || (d % 5) !== 0) {
+            throw new Error("sub_service.duration_min must be a multiple of 5 between 5 and 480");
+          }
+          duration = d;
+        }
+        if (reservation_type === "wellness" && duration === null) {
+          throw new Error("Wellness services require a duration_min");
+        }
+        cleaned.push({ id, name, price_eur: price, qty: qtyN, duration_min: duration });
       }
       if (cleaned.length > 0) selected_sub_services = cleaned;
     }
