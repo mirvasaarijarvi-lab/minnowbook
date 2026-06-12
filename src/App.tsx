@@ -139,6 +139,9 @@ const App = () => (
               <Route path="/support" element={<Support />} />
               <Route path="/about" element={<About />} />
               <Route path="/privacy" element={<Privacy />} />
+              <Route path="/legal/retention" element={<Retention />} />
+              <Route path="/legal/subprocessors" element={<Subprocessors />} />
+              <Route path="/legal/dpa" element={<DPA />} />
               <Route path="/accessibility" element={<Accessibility />} />
               <Route path="/what-is-mimmobook" element={<WhatIsMimmobook />} />
               <Route path="/features" element={<Features />} />
