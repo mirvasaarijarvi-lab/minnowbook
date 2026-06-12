@@ -1532,6 +1532,10 @@ type TranslationKeys = {
   "useCases.popupDesc": string;
   "useCases.popupChallenges": string;
   "useCases.popupSolution": string;
+  "useCases.wellness": string;
+  "useCases.wellnessDesc": string;
+  "useCases.wellnessChallenges": string;
+  "useCases.wellnessSolution": string;
   "useCases.ctaTitle": string;
   "useCases.ctaSubtitle": string;
 
