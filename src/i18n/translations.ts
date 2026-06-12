@@ -3205,7 +3205,7 @@ const en: TranslationKeys = {
   // Use Cases
   "useCases.badge": "Use Cases",
   "useCases.heroTitle": "Built for Every Type of Hospitality Business",
-  "useCases.heroSubtitle": "See how MimmoBook solves booking challenges for restaurants, venues, hotels, guesthouses, caterers, and popup events.",
+  "useCases.heroSubtitle": "See how MimmoBook solves booking challenges for restaurants, venues, hotels, guesthouses, caterers, popup events, and wellness service providers.",
   "useCases.challengesLabel": "Common Challenges",
   "useCases.solutionLabel": "How MimmoBook Helps",
   "useCases.restaurant": "Restaurant Reservations",
