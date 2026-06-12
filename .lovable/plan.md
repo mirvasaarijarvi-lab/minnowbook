@@ -53,7 +53,7 @@ In **Dashboard > Resources**:
 ## Files I will touch
 
 ```text
-supabase/migrations/<new>.sql          # widen allow-lists, validation trigger
+supabase/migrations/20260612143428_197d2262-d470-41e3-8715-8524f7bfaae1.sql  # widen allow-lists, validation trigger
 src/i18n/translations.ts               # FI/EN/SV strings
 src/hooks/useResourceTypeLabel.ts      # 'wellness' label
 src/components/dashboard/ResourceManagement.tsx   # dropdown + duration column
