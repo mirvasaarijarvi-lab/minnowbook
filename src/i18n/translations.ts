@@ -6413,7 +6413,7 @@ const sv: TranslationKeys = {
   "pricing.faqQ2": "Kan jag ändra plan senare?",
   "pricing.faqA2": "Ja! Du kan uppgradera eller nedgradera din plan när som helst. Ändringar träder i kraft vid början av nästa faktureringsperiod.",
   "pricing.faqQ3": "Vilka bokningstyper kan jag välja?",
-  "pricing.faqA3": "Restaurang (bordsreservationer), Lokal (lokalförfrågningar) och Gästhus (rumsreservationer). Basic låter dig välja en. Pro låser upp alla typer, en av varje, på en plats. Business lägger till obegränsade platser.",
+  "pricing.faqA3": "Restaurang (bordsreservationer), Lokal (lokalförfrågningar), Gästhus (rumsreservationer) och Friskvårdstjänster (tidsbokningar för frisörer, massörer, makeupartister och liknande). Basic låter dig välja en. Pro låser upp alla typer, en av varje, på en plats. Business lägger till obegränsade platser.",
   "pricing.faqQ4": "Kan jag använda min egen domän?",
   "pricing.faqA4": "Varje företag får en varumärkt subdomän (t.ex. dittforetag.mimmobook.com). Stöd för egna domäner finns på vår roadmap och kommer att erbjudas med enterprise-prissättning.",
   "pricing.faqQ5": "Vad är skillnaden mellan AI-chatbot-support och 24-timmarssupport?",
