@@ -266,7 +266,13 @@ runs:
         else
           URL="https://github.com/oven-sh/bun/releases/download/bun-v${VERSION}/${ASSET}"
           echo "Downloading $URL for checksum verification..."
-          curl -sSL --retry 3 --retry-delay 5 --max-time 120 -o "$CACHE_FILE" "$URL"
+          # curl uses exponential backoff for --retry when --retry-delay
+          # is NOT set (doubling from 1s, capped by --retry-max-time).
+          # --retry-all-errors covers transient 5xx like the GitHub
+          # release CDN 504s we've seen in CI.
+          curl -sSL --retry 5 --retry-all-errors --retry-max-time 90 \
+               --connect-timeout 15 --max-time 180 \
+               -o "$CACHE_FILE" "$URL"
         fi
         ACTUAL="$(sha256sum "$CACHE_FILE" | awk '{print $1}')"
         echo "Expected: $EXPECTED"
