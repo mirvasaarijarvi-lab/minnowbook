@@ -3139,6 +3139,18 @@ export type Database = {
           privilege: string
         }[]
       }
+      claim_discount_code: {
+        Args: {
+          p_code: string
+          p_reservation_type: string
+          p_tenant_id: string
+        }
+        Returns: {
+          discount_type: string
+          discount_value: number
+          id: string
+        }[]
+      }
       cleanup_expired_redemption_idempotency: {
         Args: never
         Returns: undefined
