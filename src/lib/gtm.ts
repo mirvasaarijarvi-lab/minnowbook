@@ -34,9 +34,19 @@ function push(event: string, params?: Record<string, unknown>) {
   window.dataLayer.push({ event, ...params });
 }
 
+import { readConsent } from "@/lib/cookie-consent";
+
 function hasAnalyticsConsent() {
   try {
-    return localStorage.getItem("cookie-consent") === "accepted";
+    return readConsent()?.categories.analytics === true;
+  } catch {
+    return false;
+  }
+}
+
+function hasMarketingConsent() {
+  try {
+    return readConsent()?.categories.marketing === true;
   } catch {
     return false;
   }
@@ -86,21 +96,25 @@ function track(event: string, params?: Record<string, unknown>) {
 }
 
 export const gtm = {
-  updateConsent: (accepted: boolean) => {
+  updateConsent: (accepted: boolean | { analytics: boolean; marketing: boolean }) => {
     ensureTrackingGlobals();
-    const analyticsStorage = accepted ? "granted" : "denied";
+    const analytics = typeof accepted === "boolean" ? accepted : accepted.analytics === true;
+    const marketing = typeof accepted === "boolean" ? false : accepted.marketing === true;
+    const analyticsStorage = analytics ? "granted" : "denied";
+    const adStorage = marketing ? "granted" : "denied";
 
     window.gtag("consent", "update", {
       analytics_storage: analyticsStorage,
-      ad_storage: "denied",
-      ad_user_data: "denied",
-      ad_personalization: "denied",
+      ad_storage: adStorage,
+      ad_user_data: adStorage,
+      ad_personalization: adStorage,
       functionality_storage: "granted",
       security_storage: "granted",
     });
 
     push("mimmobook_consent_update", {
       analytics_storage: analyticsStorage,
+      ad_storage: adStorage,
     });
   },
 
