@@ -1083,6 +1083,19 @@ type TranslationKeys = {
   "cookie.privacyPolicy": string;
   "cookie.accept": string;
   "cookie.reject": string;
+  "cookie.acceptAll": string;
+  "cookie.rejectAll": string;
+  "cookie.customize": string;
+  "cookie.savePreferences": string;
+  "cookie.title": string;
+  "cookie.description": string;
+  "cookie.category.necessary": string;
+  "cookie.category.necessaryDesc": string;
+  "cookie.category.analytics": string;
+  "cookie.category.analyticsDesc": string;
+  "cookie.category.marketing": string;
+  "cookie.category.marketingDesc": string;
+  "cookie.alwaysOn": string;
 
   // Password validation
   "password.minLength": string;
