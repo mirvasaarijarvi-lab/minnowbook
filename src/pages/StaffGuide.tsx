@@ -806,6 +806,7 @@ const guideContent: Record<Language, GuideContent> = {
           "Catering: asiakkaat voivat tilata ruokatoimituksen tapahtumaansa — lomake kerää toimitusosoitteen, ruokavaliotiedot, laitetarpeet ja henkilökuntatarpeet.",
           "Pop-up-ravintola: ravintolasi tarjoilee ruokaa asiakkaan tapahtumassa tai festivaalilla — lomake kerää tapahtuman nimen, pystytyskoon, luvat ja pystytysmaksun.",
           "Nämä vaihtoehdot näkyvät julkisella varaussivulla vain, kun vähintään yhdellä ravintolatyyppisellä resurssilla on ne käytössä.",
+          "Hyvinvointipalveluiden resursseille (kampaajat, hierojat, meikkitaiteilijat jne.) täytä Palveluvalikko: jokaisella rivillä on nimi, valinnainen hinta euroina ja kesto 5 minuutin välein (5 to 480 minuuttia, enintään 8 tuntia). Asiakkaat valitsevat haluamansa julkisella varaussivulla ja varauksen kesto mukautuu automaattisesti.",
           "Muokkaa tai poista resursseja tarpeen mukaan.",
         ],
       },
