@@ -1083,6 +1083,19 @@ type TranslationKeys = {
   "cookie.privacyPolicy": string;
   "cookie.accept": string;
   "cookie.reject": string;
+  "cookie.acceptAll": string;
+  "cookie.rejectAll": string;
+  "cookie.customize": string;
+  "cookie.savePreferences": string;
+  "cookie.title": string;
+  "cookie.description": string;
+  "cookie.category.necessary": string;
+  "cookie.category.necessaryDesc": string;
+  "cookie.category.analytics": string;
+  "cookie.category.analyticsDesc": string;
+  "cookie.category.marketing": string;
+  "cookie.category.marketingDesc": string;
+  "cookie.alwaysOn": string;
 
   // Password validation
   "password.minLength": string;
@@ -2667,6 +2680,19 @@ const en: TranslationKeys = {
   "cookie.privacyPolicy": "Privacy Policy",
   "cookie.accept": "Accept",
   "cookie.reject": "Reject",
+  "cookie.acceptAll": "Accept all",
+  "cookie.rejectAll": "Reject all",
+  "cookie.customize": "Customize",
+  "cookie.savePreferences": "Save preferences",
+  "cookie.title": "Cookie preferences",
+  "cookie.description": "Choose which categories of cookies you allow. Strictly necessary cookies are always active so the site can work.",
+  "cookie.category.necessary": "Strictly necessary",
+  "cookie.category.necessaryDesc": "Required for the site to function, including login, security, and language settings.",
+  "cookie.category.analytics": "Analytics",
+  "cookie.category.analyticsDesc": "Help us understand how visitors use MimmoBook so we can improve the product.",
+  "cookie.category.marketing": "Marketing",
+  "cookie.category.marketingDesc": "Used to measure the effectiveness of our marketing campaigns. Off by default.",
+  "cookie.alwaysOn": "Always on",
   "password.minLength": "At least 12 characters",
   "password.uppercase": "One uppercase letter",
   "password.lowercase": "One lowercase letter",
@@ -4368,6 +4394,19 @@ const fi: TranslationKeys = {
   "cookie.privacyPolicy": "Tietosuojakäytäntö",
   "cookie.accept": "Hyväksy",
   "cookie.reject": "Hylkää",
+  "cookie.acceptAll": "Hyväksy kaikki",
+  "cookie.rejectAll": "Hylkää kaikki",
+  "cookie.customize": "Mukauta",
+  "cookie.savePreferences": "Tallenna asetukset",
+  "cookie.title": "Evästeasetukset",
+  "cookie.description": "Valitse, mitä evästeluokkia sallit. Välttämättömät evästeet ovat aina käytössä, jotta sivusto toimii.",
+  "cookie.category.necessary": "Välttämättömät",
+  "cookie.category.necessaryDesc": "Tarvitaan sivuston toimintaan, kuten kirjautumiseen, turvallisuuteen ja kieliasetuksiin.",
+  "cookie.category.analytics": "Analytiikka",
+  "cookie.category.analyticsDesc": "Auttaa ymmärtämään, miten kävijät käyttävät MimmoBookia, jotta voimme parantaa palvelua.",
+  "cookie.category.marketing": "Markkinointi",
+  "cookie.category.marketingDesc": "Käytetään markkinointikampanjoiden tehokkuuden mittaamiseen. Pois päältä oletuksena.",
+  "cookie.alwaysOn": "Aina käytössä",
   "password.minLength": "Vähintään 12 merkkiä",
   "password.uppercase": "Yksi iso kirjain",
   "password.lowercase": "Yksi pieni kirjain",
@@ -6068,6 +6107,19 @@ const sv: TranslationKeys = {
   "cookie.privacyPolicy": "Integritetspolicy",
   "cookie.accept": "Acceptera",
   "cookie.reject": "Avvisa",
+  "cookie.acceptAll": "Acceptera alla",
+  "cookie.rejectAll": "Avvisa alla",
+  "cookie.customize": "Anpassa",
+  "cookie.savePreferences": "Spara inställningar",
+  "cookie.title": "Cookie-inställningar",
+  "cookie.description": "Välj vilka kategorier av cookies du tillåter. Nödvändiga cookies är alltid aktiva för att sajten ska fungera.",
+  "cookie.category.necessary": "Nödvändiga",
+  "cookie.category.necessaryDesc": "Krävs för att sajten ska fungera, inklusive inloggning, säkerhet och språkval.",
+  "cookie.category.analytics": "Analys",
+  "cookie.category.analyticsDesc": "Hjälper oss förstå hur besökare använder MimmoBook så att vi kan förbättra tjänsten.",
+  "cookie.category.marketing": "Marknadsföring",
+  "cookie.category.marketingDesc": "Används för att mäta effektiviteten av våra marknadsföringskampanjer. Av som standard.",
+  "cookie.alwaysOn": "Alltid på",
   "password.minLength": "Minst 12 tecken",
   "password.uppercase": "En stor bokstav",
   "password.lowercase": "En liten bokstav",

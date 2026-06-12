@@ -648,6 +648,36 @@ export type Database = {
         }
         Relationships: []
       }
+      data_export_requests: {
+        Row: {
+          byte_size: number | null
+          created_at: string
+          id: string
+          ip_address: string | null
+          status: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          byte_size?: number | null
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          status?: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          byte_size?: number | null
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          status?: string
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       discount_codes: {
         Row: {
           applies_to: string[] | null
@@ -1208,6 +1238,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      pending_account_deletions: {
+        Row: {
+          cancel_token: string
+          cancelled_at: string | null
+          created_at: string
+          purge_after: string
+          purged_at: string | null
+          reason: string | null
+          requested_at: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cancel_token: string
+          cancelled_at?: string | null
+          created_at?: string
+          purge_after?: string
+          purged_at?: string | null
+          reason?: string | null
+          requested_at?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cancel_token?: string
+          cancelled_at?: string | null
+          created_at?: string
+          purge_after?: string
+          purged_at?: string | null
+          reason?: string | null
+          requested_at?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       recurring_blocked_slots: {
         Row: {

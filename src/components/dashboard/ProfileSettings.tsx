@@ -11,6 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
 import { Loader2, Upload, X, User } from "lucide-react";
 import TwoFactorSettings from "./TwoFactorSettings";
+import PrivacyDataPanel from "./PrivacyDataPanel";
 
 const ProfileSettings = () => {
   const { user } = useAuth();
@@ -216,6 +217,8 @@ const ProfileSettings = () => {
       </Card>
 
       <TwoFactorSettings />
+
+      <PrivacyDataPanel />
     </div>
   );
 };
