@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, ReactNode } from "react";
+import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface ImpersonationState {
@@ -14,6 +14,23 @@ interface ImpersonationContextType {
 }
 
 const ImpersonationContext = createContext<ImpersonationContextType | null>(null);
+
+const STORAGE_KEY = "mimmobook-impersonation";
+
+function readStored(): ImpersonationState {
+  if (typeof window === "undefined") return { tenantId: null, tenantName: null };
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (!raw) return { tenantId: null, tenantName: null };
+    const parsed = JSON.parse(raw);
+    if (parsed && typeof parsed.tenantId === "string") {
+      return { tenantId: parsed.tenantId, tenantName: parsed.tenantName ?? null };
+    }
+  } catch {
+    /* ignore */
+  }
+  return { tenantId: null, tenantName: null };
+}
 
 /** Fire-and-forget audit log entry for impersonation events */
 async function logImpersonationEvent(
@@ -41,19 +58,48 @@ async function logImpersonationEvent(
 }
 
 export function ImpersonationProvider({ children }: { children: ReactNode }) {
-  const [impersonating, setImpersonating] = useState<ImpersonationState>({ tenantId: null, tenantName: null });
+  const [impersonating, setImpersonating] = useState<ImpersonationState>(() => readStored());
+
+  // Sync across tabs: when a superadmin clicks "Open Backend" in one tab,
+  // the new tab (or other open tabs) immediately picks up the impersonation.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const onStorage = (e: StorageEvent) => {
+      if (e.key !== STORAGE_KEY) return;
+      setImpersonating(readStored());
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
+
+  const persist = useCallback((next: ImpersonationState) => {
+    if (typeof window === "undefined") return;
+    try {
+      if (next.tenantId) {
+        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      } else {
+        window.localStorage.removeItem(STORAGE_KEY);
+      }
+    } catch {
+      /* ignore quota / privacy mode */
+    }
+  }, []);
 
   const startImpersonation = useCallback((tenantId: string, tenantName: string) => {
-    setImpersonating({ tenantId, tenantName });
+    const next = { tenantId, tenantName };
+    setImpersonating(next);
+    persist(next);
     logImpersonationEvent("START", tenantId, tenantName);
-  }, []);
+  }, [persist]);
 
   const stopImpersonation = useCallback(() => {
     if (impersonating.tenantId) {
       logImpersonationEvent("STOP", impersonating.tenantId, impersonating.tenantName);
     }
-    setImpersonating({ tenantId: null, tenantName: null });
-  }, [impersonating.tenantId, impersonating.tenantName]);
+    const next = { tenantId: null, tenantName: null };
+    setImpersonating(next);
+    persist(next);
+  }, [impersonating.tenantId, impersonating.tenantName, persist]);
 
   return (
     <ImpersonationContext.Provider
@@ -74,3 +120,4 @@ export function useImpersonation() {
   if (!ctx) throw new Error("useImpersonation must be used within ImpersonationProvider");
   return ctx;
 }
+
