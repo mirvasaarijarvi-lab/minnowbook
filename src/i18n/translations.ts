@@ -1741,6 +1741,25 @@ type TranslationKeys = {
   "tierError.SITE_LIMIT_REACHED": string;
   "tierError.RESERVATION_TYPE_LIMIT_REACHED": string;
   "tierError.RESOURCE_PER_TYPE_LIMIT_REACHED": string;
+
+  // Privacy & account deletion
+  "privacy.panel.title": string;
+  "privacy.panel.description": string;
+  "privacy.export.title": string;
+  "privacy.export.description": string;
+  "privacy.export.button": string;
+  "privacy.export.success": string;
+  "privacy.delete.title": string;
+  "privacy.delete.description": string;
+  "privacy.delete.button": string;
+  "privacy.delete.scheduled": string;
+  "privacy.delete.cancel": string;
+  "privacy.delete.cancelled": string;
+  "privacy.delete.confirmTitle": string;
+  "privacy.delete.confirmDescription": string;
+  "privacy.delete.confirmLabel": string;
+  "privacy.delete.confirmAction": string;
+  "privacy.delete.requested": string;
 };
 
 export type TranslationKey = keyof TranslationKeys;
