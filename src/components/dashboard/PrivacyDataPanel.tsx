@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useT } from "@/contexts/I18nContext";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -42,6 +43,7 @@ async function decodeFnError(err: unknown): Promise<string> {
 
 export default function PrivacyDataPanel() {
   const { user } = useAuth();
+  const t = useT();
   const queryClient = useQueryClient();
   const [confirmText, setConfirmText] = useState("");
 
@@ -81,7 +83,7 @@ export default function PrivacyDataPanel() {
       a.remove();
       URL.revokeObjectURL(url);
     },
-    onSuccess: () => toast.success("Your data export has been downloaded."),
+    onSuccess: () => toast.success(t("privacy.export.success")),
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -98,7 +100,7 @@ export default function PrivacyDataPanel() {
       return data;
     },
     onSuccess: () => {
-      toast.success("Account deletion scheduled. You have 30 days to cancel.");
+      toast.success(t("privacy.delete.requested"));
       queryClient.invalidateQueries({ queryKey: ["pending-account-deletion"] });
       setConfirmText("");
     },
@@ -116,7 +118,7 @@ export default function PrivacyDataPanel() {
       }
     },
     onSuccess: () => {
-      toast.success("Account deletion cancelled.");
+      toast.success(t("privacy.delete.cancelled"));
       queryClient.invalidateQueries({ queryKey: ["pending-account-deletion"] });
     },
     onError: (e: Error) => toast.error(e.message),
@@ -127,17 +129,13 @@ export default function PrivacyDataPanel() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Privacy and your data</CardTitle>
-        <CardDescription>
-          Export everything we hold about you, or close your account. These are your rights under GDPR (Art. 15, 17, 20).
-        </CardDescription>
+        <CardTitle>{t("privacy.panel.title")}</CardTitle>
+        <CardDescription>{t("privacy.panel.description")}</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-6">
         <section className="flex flex-col gap-2">
-          <h3 className="text-sm font-medium">Export my data</h3>
-          <p className="text-sm text-muted-foreground">
-            Download a JSON file containing your profile, reservations, audit log, and other data we hold about you. Limit: one export every 24 hours.
-          </p>
+          <h3 className="text-sm font-medium">{t("privacy.export.title")}</h3>
+          <p className="text-sm text-muted-foreground">{t("privacy.export.description")}</p>
           <div>
             <Button
               onClick={() => exportMutation.mutate()}
@@ -149,21 +147,22 @@ export default function PrivacyDataPanel() {
               ) : (
                 <Download className="h-4 w-4 mr-2" />
               )}
-              Download my data
+              {t("privacy.export.button")}
             </Button>
           </div>
         </section>
 
         <section className="flex flex-col gap-2 border-t border-border pt-6">
-          <h3 className="text-sm font-medium">Delete my account</h3>
-          <p className="text-sm text-muted-foreground">
-            Schedules your account for permanent deletion after a 30 day cancellation window. If you are the only owner of an organisation with other members, transfer ownership first.
-          </p>
+          <h3 className="text-sm font-medium">{t("privacy.delete.title")}</h3>
+          <p className="text-sm text-muted-foreground">{t("privacy.delete.description")}</p>
 
           {hasPending ? (
             <div className="rounded-md border border-destructive/40 bg-destructive/5 p-3 flex flex-col gap-2">
               <p className="text-sm">
-                Deletion scheduled. Final purge: <strong>{new Date(pending!.purge_after).toLocaleString()}</strong>
+                {t("privacy.delete.scheduled").replace(
+                  "{date}",
+                  new Date(pending!.purge_after).toLocaleString(),
+                )}
               </p>
               <div>
                 <Button
@@ -176,7 +175,7 @@ export default function PrivacyDataPanel() {
                   ) : (
                     <Undo2 className="h-4 w-4 mr-2" />
                   )}
-                  Cancel deletion
+                  {t("privacy.delete.cancel")}
                 </Button>
               </div>
             </div>
@@ -185,20 +184,18 @@ export default function PrivacyDataPanel() {
               <AlertDialogTrigger asChild>
                 <Button variant="destructive" className="w-fit">
                   <ShieldAlert className="h-4 w-4 mr-2" />
-                  Delete my account
+                  {t("privacy.delete.button")}
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Delete your account?</AlertDialogTitle>
+                  <AlertDialogTitle>{t("privacy.delete.confirmTitle")}</AlertDialogTitle>
                   <AlertDialogDescription>
-                    Your data will be permanently removed after 30 days. To confirm, type
-                    <strong> DELETE </strong>
-                    below.
+                    {t("privacy.delete.confirmDescription")}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="delete-confirm">Confirmation</Label>
+                  <Label htmlFor="delete-confirm">{t("privacy.delete.confirmLabel")}</Label>
                   <Input
                     id="delete-confirm"
                     value={confirmText}
@@ -208,7 +205,9 @@ export default function PrivacyDataPanel() {
                   />
                 </div>
                 <AlertDialogFooter>
-                  <AlertDialogCancel onClick={() => setConfirmText("")}>Cancel</AlertDialogCancel>
+                  <AlertDialogCancel onClick={() => setConfirmText("")}>
+                    {t("common.cancel")}
+                  </AlertDialogCancel>
                   <AlertDialogAction
                     disabled={confirmText.trim() !== "DELETE" || deleteMutation.isPending}
                     onClick={(e) => {
@@ -219,7 +218,7 @@ export default function PrivacyDataPanel() {
                     {deleteMutation.isPending ? (
                       <Loader2 className="h-4 w-4 animate-spin mr-2" />
                     ) : null}
-                    Schedule deletion
+                    {t("privacy.delete.confirmAction")}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
