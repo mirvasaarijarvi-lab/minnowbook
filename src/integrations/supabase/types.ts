@@ -870,7 +870,6 @@ export type Database = {
         Row: {
           comment: string | null
           created_at: string
-          guest_email: string
           guest_name: string
           id: string
           is_published: boolean
@@ -883,7 +882,6 @@ export type Database = {
         Insert: {
           comment?: string | null
           created_at?: string
-          guest_email: string
           guest_name: string
           id?: string
           is_published?: boolean
@@ -896,7 +894,6 @@ export type Database = {
         Update: {
           comment?: string | null
           created_at?: string
-          guest_email?: string
           guest_name?: string
           id?: string
           is_published?: boolean
