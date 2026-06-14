@@ -1741,6 +1741,25 @@ type TranslationKeys = {
   "tierError.SITE_LIMIT_REACHED": string;
   "tierError.RESERVATION_TYPE_LIMIT_REACHED": string;
   "tierError.RESOURCE_PER_TYPE_LIMIT_REACHED": string;
+
+  // Privacy & account deletion
+  "privacy.panel.title": string;
+  "privacy.panel.description": string;
+  "privacy.export.title": string;
+  "privacy.export.description": string;
+  "privacy.export.button": string;
+  "privacy.export.success": string;
+  "privacy.delete.title": string;
+  "privacy.delete.description": string;
+  "privacy.delete.button": string;
+  "privacy.delete.scheduled": string;
+  "privacy.delete.cancel": string;
+  "privacy.delete.cancelled": string;
+  "privacy.delete.confirmTitle": string;
+  "privacy.delete.confirmDescription": string;
+  "privacy.delete.confirmLabel": string;
+  "privacy.delete.confirmAction": string;
+  "privacy.delete.requested": string;
 };
 
 export type TranslationKey = keyof TranslationKeys;
@@ -3458,6 +3477,25 @@ const en: TranslationKeys = {
   "tierError.SITE_LIMIT_REACHED": "Your plan allows up to {limit} site. Upgrade to Business to manage multiple locations.",
   "tierError.RESERVATION_TYPE_LIMIT_REACHED": "Your plan allows up to {limit} reservation type. Upgrade to unlock additional booking categories.",
   "tierError.RESOURCE_PER_TYPE_LIMIT_REACHED": "Your plan allows only {limit} resource per type. Upgrade to Business for unlimited resources.",
+
+  // Privacy & account deletion
+  "privacy.panel.title": "Privacy and your data",
+  "privacy.panel.description": "Export everything we hold about you, or close your account. These are your rights under GDPR (Art. 15, 17, 20).",
+  "privacy.export.title": "Export my data",
+  "privacy.export.description": "Download a JSON file containing your profile, reservations, audit log, and other data we hold about you. Limit: one export every 24 hours.",
+  "privacy.export.button": "Download my data",
+  "privacy.export.success": "Your data export has been downloaded.",
+  "privacy.delete.title": "Delete my account",
+  "privacy.delete.description": "Schedules your account for permanent deletion after a 30 day cancellation window. If you are the only owner of an organisation with other members, transfer ownership first.",
+  "privacy.delete.button": "Delete my account",
+  "privacy.delete.scheduled": "Deletion scheduled. Final purge: {date}",
+  "privacy.delete.cancel": "Cancel deletion",
+  "privacy.delete.cancelled": "Account deletion cancelled.",
+  "privacy.delete.confirmTitle": "Delete your account?",
+  "privacy.delete.confirmDescription": "Your data will be permanently removed after 30 days. To confirm, type DELETE below.",
+  "privacy.delete.confirmLabel": "Confirmation",
+  "privacy.delete.confirmAction": "Schedule deletion",
+  "privacy.delete.requested": "Account deletion scheduled. You have 30 days to cancel.",
 };
 
 const fi: TranslationKeys = {
@@ -5171,6 +5209,25 @@ const fi: TranslationKeys = {
   "tierError.SITE_LIMIT_REACHED": "Tilauksesi sallii enintään {limit} toimipisteen. Päivitä Business-tasoon hallitaksesi useita.",
   "tierError.RESERVATION_TYPE_LIMIT_REACHED": "Tilauksesi sallii enintään {limit} varaustyypin. Päivitä lisätäksesi varauskategorioita.",
   "tierError.RESOURCE_PER_TYPE_LIMIT_REACHED": "Tilauksesi sallii vain {limit} resurssin per tyyppi. Päivitä Business-tasoon saadaksesi rajattomat resurssit.",
+
+  // Yksityisyys & tilin poisto
+  "privacy.panel.title": "Yksityisyys ja tietosi",
+  "privacy.panel.description": "Lataa kaikki sinusta säilytetyt tiedot tai sulje tilisi. Nämä ovat oikeuksiasi GDPR:n mukaan (Art. 15, 17, 20).",
+  "privacy.export.title": "Vie tietoni",
+  "privacy.export.description": "Lataa JSON-tiedosto, joka sisältää profiilisi, varauksesi, lokitietosi ja muut sinusta säilytetyt tiedot. Raja: yksi vienti 24 tunnin välein.",
+  "privacy.export.button": "Lataa tietoni",
+  "privacy.export.success": "Tietojesi vienti on ladattu.",
+  "privacy.delete.title": "Poista tilini",
+  "privacy.delete.description": "Asettaa tilisi pysyvästi poistettavaksi 30 päivän peruutusajan jälkeen. Jos olet ainoa omistaja organisaatiossa, jossa on muita jäseniä, siirrä omistajuus ensin.",
+  "privacy.delete.button": "Poista tilini",
+  "privacy.delete.scheduled": "Poisto on ajastettu. Lopullinen poisto: {date}",
+  "privacy.delete.cancel": "Peruuta poisto",
+  "privacy.delete.cancelled": "Tilin poisto peruutettu.",
+  "privacy.delete.confirmTitle": "Poistetaanko tilisi?",
+  "privacy.delete.confirmDescription": "Tietosi poistetaan pysyvästi 30 päivän kuluttua. Vahvista kirjoittamalla DELETE alle.",
+  "privacy.delete.confirmLabel": "Vahvistus",
+  "privacy.delete.confirmAction": "Ajasta poisto",
+  "privacy.delete.requested": "Tilin poisto on ajastettu. Sinulla on 30 päivää aikaa peruuttaa.",
 };
 
 const sv: TranslationKeys = {
@@ -6884,6 +6941,25 @@ const sv: TranslationKeys = {
   "tierError.SITE_LIMIT_REACHED": "Din plan tillåter upp till {limit} plats. Uppgradera till Business för att hantera flera platser.",
   "tierError.RESERVATION_TYPE_LIMIT_REACHED": "Din plan tillåter upp till {limit} bokningstyp. Uppgradera för fler bokningskategorier.",
   "tierError.RESOURCE_PER_TYPE_LIMIT_REACHED": "Din plan tillåter endast {limit} resurs per typ. Uppgradera till Business för obegränsade resurser.",
+
+  // Integritet & kontoradering
+  "privacy.panel.title": "Integritet och dina uppgifter",
+  "privacy.panel.description": "Exportera allt vi har om dig, eller stäng ditt konto. Detta är dina rättigheter enligt GDPR (Art. 15, 17, 20).",
+  "privacy.export.title": "Exportera mina uppgifter",
+  "privacy.export.description": "Ladda ner en JSON-fil med din profil, dina bokningar, granskningsloggar och andra uppgifter vi har om dig. Gräns: en export var 24:e timme.",
+  "privacy.export.button": "Ladda ner mina uppgifter",
+  "privacy.export.success": "Din dataexport har laddats ner.",
+  "privacy.delete.title": "Radera mitt konto",
+  "privacy.delete.description": "Schemalägger ditt konto för permanent radering efter en 30-dagars ångerperiod. Om du är den enda ägaren av en organisation med andra medlemmar, överför ägarskapet först.",
+  "privacy.delete.button": "Radera mitt konto",
+  "privacy.delete.scheduled": "Radering schemalagd. Slutgiltig radering: {date}",
+  "privacy.delete.cancel": "Avbryt radering",
+  "privacy.delete.cancelled": "Kontoradering avbruten.",
+  "privacy.delete.confirmTitle": "Radera ditt konto?",
+  "privacy.delete.confirmDescription": "Dina uppgifter kommer att raderas permanent efter 30 dagar. För att bekräfta, skriv DELETE nedan.",
+  "privacy.delete.confirmLabel": "Bekräftelse",
+  "privacy.delete.confirmAction": "Schemalägg radering",
+  "privacy.delete.requested": "Kontoradering schemalagd. Du har 30 dagar att avbryta.",
 };
 
 export const translations: Record<Language, TranslationKeys> = { en, fi, sv };
