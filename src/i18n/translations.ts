@@ -6941,6 +6941,25 @@ const sv: TranslationKeys = {
   "tierError.SITE_LIMIT_REACHED": "Din plan tillåter upp till {limit} plats. Uppgradera till Business för att hantera flera platser.",
   "tierError.RESERVATION_TYPE_LIMIT_REACHED": "Din plan tillåter upp till {limit} bokningstyp. Uppgradera för fler bokningskategorier.",
   "tierError.RESOURCE_PER_TYPE_LIMIT_REACHED": "Din plan tillåter endast {limit} resurs per typ. Uppgradera till Business för obegränsade resurser.",
+
+  // Integritet & kontoradering
+  "privacy.panel.title": "Integritet och dina uppgifter",
+  "privacy.panel.description": "Exportera allt vi har om dig, eller stäng ditt konto. Detta är dina rättigheter enligt GDPR (Art. 15, 17, 20).",
+  "privacy.export.title": "Exportera mina uppgifter",
+  "privacy.export.description": "Ladda ner en JSON-fil med din profil, dina bokningar, granskningsloggar och andra uppgifter vi har om dig. Gräns: en export var 24:e timme.",
+  "privacy.export.button": "Ladda ner mina uppgifter",
+  "privacy.export.success": "Din dataexport har laddats ner.",
+  "privacy.delete.title": "Radera mitt konto",
+  "privacy.delete.description": "Schemalägger ditt konto för permanent radering efter en 30-dagars ångerperiod. Om du är den enda ägaren av en organisation med andra medlemmar, överför ägarskapet först.",
+  "privacy.delete.button": "Radera mitt konto",
+  "privacy.delete.scheduled": "Radering schemalagd. Slutgiltig radering: {date}",
+  "privacy.delete.cancel": "Avbryt radering",
+  "privacy.delete.cancelled": "Kontoradering avbruten.",
+  "privacy.delete.confirmTitle": "Radera ditt konto?",
+  "privacy.delete.confirmDescription": "Dina uppgifter kommer att raderas permanent efter 30 dagar. För att bekräfta, skriv DELETE nedan.",
+  "privacy.delete.confirmLabel": "Bekräftelse",
+  "privacy.delete.confirmAction": "Schemalägg radering",
+  "privacy.delete.requested": "Kontoradering schemalagd. Du har 30 dagar att avbryta.",
 };
 
 export const translations: Record<Language, TranslationKeys> = { en, fi, sv };
