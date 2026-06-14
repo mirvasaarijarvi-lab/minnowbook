@@ -5209,6 +5209,25 @@ const fi: TranslationKeys = {
   "tierError.SITE_LIMIT_REACHED": "Tilauksesi sallii enintään {limit} toimipisteen. Päivitä Business-tasoon hallitaksesi useita.",
   "tierError.RESERVATION_TYPE_LIMIT_REACHED": "Tilauksesi sallii enintään {limit} varaustyypin. Päivitä lisätäksesi varauskategorioita.",
   "tierError.RESOURCE_PER_TYPE_LIMIT_REACHED": "Tilauksesi sallii vain {limit} resurssin per tyyppi. Päivitä Business-tasoon saadaksesi rajattomat resurssit.",
+
+  // Yksityisyys & tilin poisto
+  "privacy.panel.title": "Yksityisyys ja tietosi",
+  "privacy.panel.description": "Lataa kaikki sinusta säilytetyt tiedot tai sulje tilisi. Nämä ovat oikeuksiasi GDPR:n mukaan (Art. 15, 17, 20).",
+  "privacy.export.title": "Vie tietoni",
+  "privacy.export.description": "Lataa JSON-tiedosto, joka sisältää profiilisi, varauksesi, lokitietosi ja muut sinusta säilytetyt tiedot. Raja: yksi vienti 24 tunnin välein.",
+  "privacy.export.button": "Lataa tietoni",
+  "privacy.export.success": "Tietojesi vienti on ladattu.",
+  "privacy.delete.title": "Poista tilini",
+  "privacy.delete.description": "Asettaa tilisi pysyvästi poistettavaksi 30 päivän peruutusajan jälkeen. Jos olet ainoa omistaja organisaatiossa, jossa on muita jäseniä, siirrä omistajuus ensin.",
+  "privacy.delete.button": "Poista tilini",
+  "privacy.delete.scheduled": "Poisto on ajastettu. Lopullinen poisto: {date}",
+  "privacy.delete.cancel": "Peruuta poisto",
+  "privacy.delete.cancelled": "Tilin poisto peruutettu.",
+  "privacy.delete.confirmTitle": "Poistetaanko tilisi?",
+  "privacy.delete.confirmDescription": "Tietosi poistetaan pysyvästi 30 päivän kuluttua. Vahvista kirjoittamalla DELETE alle.",
+  "privacy.delete.confirmLabel": "Vahvistus",
+  "privacy.delete.confirmAction": "Ajasta poisto",
+  "privacy.delete.requested": "Tilin poisto on ajastettu. Sinulla on 30 päivää aikaa peruuttaa.",
 };
 
 const sv: TranslationKeys = {
