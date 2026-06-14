@@ -381,43 +381,28 @@ export async function handleRedeemAccessCodeRequest(req: Request): Promise<Respo
     grantedUntil.setDate(grantedUntil.getDate() + accessCode.duration_days);
     const grantedUntilStr = grantedUntil.toISOString().split("T")[0];
 
-    // Apply the code: update tenant tier and sample period
-    const today = new Date().toISOString().split("T")[0];
-
-    const { error: tenantError } = await adminClient
-      .from("tenants")
-      .update({
-        tier: accessCode.tier,
-        sample_start_date: today,
-        sample_end_date: grantedUntilStr,
-        subscription_status: "trialing",
-      })
-      .eq("id", tenantUser.tenant_id);
-
-    if (tenantError) throw tenantError;
-
-    // Record the redemption
-    const { error: redemptionError } = await adminClient
-      .from("access_code_redemptions")
-      .insert({
-        access_code_id: accessCode.id,
-        tenant_id: tenantUser.tenant_id,
-        redeemed_by: userId,
-        granted_tier: accessCode.tier,
-        granted_until: grantedUntilStr,
+    // Atomically claim the code: locks the access_codes row, re-checks
+    // limits, inserts the redemption, increments used_count, and updates
+    // the tenant tier inside one transaction. Prevents two tenants from
+    // over-redeeming a single-use code under concurrent requests.
+    const { data: claimResult, error: claimError } = await adminClient
+      .rpc("claim_access_code", {
+        p_access_code_id: accessCode.id,
+        p_tenant_id: tenantUser.tenant_id,
+        p_user_id: userId,
+        p_granted_tier: accessCode.tier,
+        p_granted_until: grantedUntilStr,
+        p_duration_days: accessCode.duration_days,
       });
 
-    if (redemptionError) throw redemptionError;
+    if (claimError) throw claimError;
+    const claim = Array.isArray(claimResult) ? claimResult[0] : claimResult;
 
-    // Atomically increment used_count using optimistic concurrency control.
-    const { error: countError } = await adminClient
-      .from("access_codes")
-      .update({ used_count: accessCode.used_count + 1, updated_at: new Date().toISOString() })
-      .eq("id", accessCode.id)
-      .eq("used_count", accessCode.used_count);
-
-    if (countError) {
-      console.warn("used_count update may have raced:", countError.message);
+    if (!claim?.success) {
+      // Collapse failure reasons (exhausted, already_redeemed, expired,
+      // etc.) into the generic invalid payload so attackers cannot
+      // classify codes via the response.
+      return await respondInvalid();
     }
 
     return respond(

@@ -125,7 +125,47 @@ export async function handleCheckSubscriptionRequest(req: Request): Promise<Resp
         logStep("Synced tier to tenant", { tenantId: tenantUser.tenant_id, tier });
       }
     } else {
-      logStep("No active subscription found");
+      logStep("No active subscription found, downgrading tenant if needed");
+
+      // Downgrade lapsed subscribers so tier-limit triggers stop enforcing
+      // higher-tier capabilities for new resources, sites, and staff users.
+      // Only downgrade tenants previously linked to Stripe (have customer id)
+      // and not currently on a sample/trial access-code period.
+      const { data: tenantUser } = await supabaseClient
+        .from("tenant_users")
+        .select("tenant_id")
+        .eq("user_id", user.id)
+        .limit(1)
+        .single();
+
+      if (tenantUser) {
+        const { data: tenantRow } = await supabaseClient
+          .from("tenants")
+          .select("tier, stripe_customer_id, sample_end_date")
+          .eq("id", tenantUser.tenant_id)
+          .single();
+
+        const today = new Date().toISOString().split("T")[0];
+        const onActiveSample =
+          tenantRow?.sample_end_date && tenantRow.sample_end_date >= today;
+
+        if (
+          tenantRow &&
+          tenantRow.stripe_customer_id === customerId &&
+          tenantRow.tier !== "basic" &&
+          !onActiveSample
+        ) {
+          await supabaseClient
+            .from("tenants")
+            .update({
+              tier: "basic",
+              subscription_status: "canceled",
+              stripe_subscription_id: null,
+            })
+            .eq("id", tenantUser.tenant_id);
+          logStep("Tenant downgraded to basic", { tenantId: tenantUser.tenant_id });
+        }
+      }
     }
 
     return new Response(
