@@ -427,6 +427,22 @@ const Superadmin = () => {
                         Impersonate
                       </Button>
                       <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          // Persist impersonation, then open the tenant's
+                          // backend dashboard in a new tab so the superadmin
+                          // can jump between tenants without signing out.
+                          startImpersonation(t.id, t.name);
+                          window.open("/dashboard", "_blank", "noopener");
+                        }}
+                        className="gap-1 text-muted-foreground hover:text-foreground"
+                        title="Open this tenant's backend in a new tab"
+                      >
+                        <ExternalLink className="h-3.5 w-3.5" />
+                        Open Backend
+                      </Button>
+                      <Button
                         variant={t.is_active ? "outline" : "default"}
                         size="sm"
                         onClick={() => toggleActiveMutation.mutate({ id: t.id, is_active: !t.is_active })}
