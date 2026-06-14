@@ -3139,6 +3139,21 @@ export type Database = {
           privilege: string
         }[]
       }
+      claim_access_code: {
+        Args: {
+          p_access_code_id: string
+          p_duration_days: number
+          p_granted_tier: string
+          p_granted_until: string
+          p_tenant_id: string
+          p_user_id: string
+        }
+        Returns: {
+          reason: string
+          redemption_id: string
+          success: boolean
+        }[]
+      }
       claim_discount_code: {
         Args: {
           p_code: string
