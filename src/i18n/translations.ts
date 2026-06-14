@@ -3477,6 +3477,25 @@ const en: TranslationKeys = {
   "tierError.SITE_LIMIT_REACHED": "Your plan allows up to {limit} site. Upgrade to Business to manage multiple locations.",
   "tierError.RESERVATION_TYPE_LIMIT_REACHED": "Your plan allows up to {limit} reservation type. Upgrade to unlock additional booking categories.",
   "tierError.RESOURCE_PER_TYPE_LIMIT_REACHED": "Your plan allows only {limit} resource per type. Upgrade to Business for unlimited resources.",
+
+  // Privacy & account deletion
+  "privacy.panel.title": "Privacy and your data",
+  "privacy.panel.description": "Export everything we hold about you, or close your account. These are your rights under GDPR (Art. 15, 17, 20).",
+  "privacy.export.title": "Export my data",
+  "privacy.export.description": "Download a JSON file containing your profile, reservations, audit log, and other data we hold about you. Limit: one export every 24 hours.",
+  "privacy.export.button": "Download my data",
+  "privacy.export.success": "Your data export has been downloaded.",
+  "privacy.delete.title": "Delete my account",
+  "privacy.delete.description": "Schedules your account for permanent deletion after a 30 day cancellation window. If you are the only owner of an organisation with other members, transfer ownership first.",
+  "privacy.delete.button": "Delete my account",
+  "privacy.delete.scheduled": "Deletion scheduled. Final purge: {date}",
+  "privacy.delete.cancel": "Cancel deletion",
+  "privacy.delete.cancelled": "Account deletion cancelled.",
+  "privacy.delete.confirmTitle": "Delete your account?",
+  "privacy.delete.confirmDescription": "Your data will be permanently removed after 30 days. To confirm, type DELETE below.",
+  "privacy.delete.confirmLabel": "Confirmation",
+  "privacy.delete.confirmAction": "Schedule deletion",
+  "privacy.delete.requested": "Account deletion scheduled. You have 30 days to cancel.",
 };
 
 const fi: TranslationKeys = {
