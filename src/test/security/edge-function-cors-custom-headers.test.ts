@@ -170,17 +170,25 @@ async function postRequest(
 }
 
 
-function expectNoOriginEcho(res: Response, forbidden: string, label: string) {
+function expectNoOriginEcho(
+  res: Response,
+  forbidden: string,
+  label: string,
+  opts: { allowWildcard?: boolean } = {},
+) {
   const acao = res.headers.get("access-control-allow-origin");
   expect(
     acao === forbidden,
     `${label}: ACAO must not echo forbidden origin "${forbidden}" (got "${acao}")`,
   ).toBe(false);
-  expect(
-    acao === "*",
-    `${label}: ACAO must not be wildcard (got "${acao}")`,
-  ).toBe(false);
+  if (!opts.allowWildcard) {
+    expect(
+      acao === "*",
+      `${label}: ACAO must not be wildcard (got "${acao}")`,
+    ).toBe(false);
+  }
 }
+
 
 function expectNoCredentialsEnabled(res: Response, label: string) {
   const acac = res.headers.get("access-control-allow-credentials");
