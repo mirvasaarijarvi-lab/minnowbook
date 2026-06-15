@@ -433,8 +433,17 @@ const Superadmin = () => {
                           // Persist impersonation, then open the tenant's
                           // backend dashboard in a new tab so the superadmin
                           // can jump between tenants without signing out.
+                          // Use an absolute URL on the current origin so this
+                          // works inside the Lovable preview iframe (a bare
+                          // "/dashboard" path can be resolved against the
+                          // wrong origin and drop the session).
                           startImpersonation(t.id, t.name);
-                          window.open("/dashboard", "_blank", "noopener");
+                          const url = `${window.location.origin}/dashboard`;
+                          const win = window.open(url, "_blank");
+                          if (!win) {
+                            // Popup blocked: fall back to same-tab navigation.
+                            navigate("/dashboard");
+                          }
                         }}
                         className="gap-1 text-muted-foreground hover:text-foreground"
                         title="Open this tenant's backend in a new tab"
