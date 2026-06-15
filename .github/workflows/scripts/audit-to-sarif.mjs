@@ -16,7 +16,7 @@
 //   so code-scanning de-duplicates advisories across runs cleanly.
 
 import fs from "node:fs";
-import { resolve, relative, isAbsolute } from "node:path";
+import { resolve, relative, isAbsolute, basename } from "node:path";
 import { parseAuditReport, DRIVERS } from "./parse-audit.mjs";
 
 // Defense-in-depth: this script only runs in CI on workflow-supplied
