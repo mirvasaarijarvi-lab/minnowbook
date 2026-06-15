@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useDateLocale } from "@/hooks/useDateLocale";
+import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
 
 const allTimes: string[] = [];
 for (let h = 6; h <= 23; h++) {
