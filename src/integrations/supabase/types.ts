@@ -3125,6 +3125,13 @@ export type Database = {
         Args: { p_limit?: number; p_tenant_id: string }
         Returns: Json
       }
+      assert_no_ci_leftover_rows: {
+        Args: never
+        Returns: {
+          check_name: string
+          leftover_count: number
+        }[]
+      }
       audit_anon_access: {
         Args: never
         Returns: {
