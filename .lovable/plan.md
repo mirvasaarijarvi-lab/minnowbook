@@ -1,35 +1,86 @@
-# Fix: Wellness reservation + resource-driven calendars
+## Goal
 
-## Problems found
+Stop CI flakes that come from stale logs or leftover DB rows. Every test that touches the DB owns its own tenant, owns its own users, and cleans up. CI fails if anything survives.
 
-1. **Calendar sections are hardcoded** to Hotel / Venue / Restaurant in `src/components/dashboard/CalendarView.tsx` (`SECTIONS` const). A wellness tenant has no hotel/venue/restaurant resources, so it still sees three empty calendars and never sees its actual resource types (e.g. massage, wellness, custom).
+## 1. Shared test infrastructure (new files)
 
-2. **"Create Reservation" button stays disabled on the wellness site.** In `ManualReservationDialog.tsx`:
-   - When `allowedTypes.length === 1`, `reservation_type` is auto-set, so the type dropdown is hidden. Good.
-   - But for a wellness tenant whose single allowed type is `"custom"` (or any non hotel/venue/restaurant), the dialog renders no service / sub-service picker unless a resource is selected, and the validation (`isValid`) does not require a resource. The button looks greyed because the primary button uses muted color in this state, and submitting still tries to insert a row with empty `start_time` and no resource link, which the DB validation trigger then rejects silently for "custom" type.
-   - Also: when the type is "custom" and the tenant has only one resource, the resource is not auto-selected, so the price stays at the resource default and submission can fail server-side on capacity/site resolution.
+```text
+src/test/
+  fixtures/
+    render.tsx            new — renderWithProviders(ui, { tenantId?, language?, queryClient? })
+    mock-supabase.ts      new — in-memory supabase mock for unit/security tests
+    branding.ts           new — canned persisted/signed URL samples
+  helpers/
+    ephemeral-tenant.ts   new — createEphemeralTenant() / dropEphemeralTenant() using service-role client
+    ephemeral-user.ts     new — createEphemeralUser({ tenantId, role }) with auth.admin
+    leftover-guard.ts     new — assertNoLeftoverTestRows() called in global afterAll
+```
 
-## Fix plan
+`renderWithProviders` wraps: `QueryClientProvider` (fresh client, retry: false), `I18nProvider`, `MemoryRouter`, `ImpersonationProvider`, `TenantProvider` (with injected tenantId). Components stop crashing on missing context and tests stop depending on test-file order.
 
-### A. Resource-driven calendars (`CalendarView.tsx`)
-- Replace the static `SECTIONS` constant with a query that loads the tenant's distinct active `resource_type` values from `resources` (scoped by the current site selection via `useUserSites` / `useSiteContext`).
-- Build one `<CalendarSection>` per distinct type returned. Pass `reservationTypes` and `resourceTypes` as `[type]` (keeping the existing "hotel + guesthouse" grouping as a special case).
-- Title each section with `useResourceTypeLabel().typeLabel(type)`, falling back to the resource's `custom_type_label` for custom types.
-- Render nothing (with a friendly empty state pointing to Resource Management) when the tenant has no active resources.
+`ephemeral-tenant.ts` creates rows with a deterministic prefix: `slug = `ci-${workerId}-${nanoid(6)}`` and `name = `TEST CI <suite> <nanoid>``. `dropEphemeralTenant` deletes the tenant; cascade handles tenant_users / settings / resources / reservations.
 
-### B. Wellness / custom reservation creation (`ManualReservationDialog.tsx`)
-- When `form.reservation_type` is set and `resources.length === 1`, auto-select that resource into `selectedResourceId`.
-- Tighten `isValid`: require `selectedResourceId` whenever `resources.length > 0`, so the button enables only when a resource is chosen and clearly disables otherwise (also add a small helper text under the resource field when empty).
-- For "custom" type, ensure the insert payload includes `resource_id` and `resource_type` derived from the selected resource (not from `form.reservation_type`), and default `start_time` to the entered "Preferred time" or `"12:00"` if blank, matching the public booking edge function.
-- Surface server errors from the insert via `FunctionsHttpError`-style decoding already used elsewhere, so the user sees the real reason instead of a silent no-op.
+## 2. Vitest unit/integration (`vitest.config.ts`)
 
-### C. Verification I will run after the edits
-- Browser-test the wellness tenant: open New Reservation, confirm the resource auto-selects, fill the form, submit, and confirm the new row appears in the list.
-- Confirm the Calendar tab shows only the sections matching that tenant's resources (no empty Hotel/Venue/Restaurant cards).
-- Spot-check a multi-type tenant (hotel + restaurant) to confirm both sections still render and group correctly.
+- Add `setupFiles: ["./src/test/setup.ts", "./src/test/setup-providers.ts"]`. The new file installs a default `QueryClient` and exposes `renderWithProviders`.
+- Migrate component tests that currently call `render()` directly to `renderWithProviders()` (codemod: ripgrep + sed against `src/**/*.test.tsx`). This eliminates the "useImpersonation must be used within ImpersonationProvider" class of failures permanently.
+- Add `globalTeardown` that asserts `process.env.CI_LEAK_CHECK !== "1" || noEphemeralFilesLeftover()`.
+
+## 3. Security tests (`vitest.security.config.ts`)
+
+- Default to `setupFiles: ["./src/test/setup.ts", "./src/test/security/setup-mocks.ts"]`.
+- `setup-mocks.ts` vi.mocks `@/integrations/supabase/client` with the in-memory mock from `fixtures/mock-supabase.ts` so XSS / branding URL tests never reach the network.
+- Cross-tenant storage tests stay live but now seed their own buckets via `ephemeral-tenant.ts` and clean up in `afterAll`.
+
+## 4. Live integration (`vitest.live.config.ts`, `supabase/tests/integration/*`)
+
+- New helper `withEphemeralTenant(testFn)` opens a tenant + users in `beforeAll`, exposes them via the test context, and drops them in `afterAll`. Failures inside the test still trigger cleanup (`try/finally`).
+- Rewrite `claim-discount-code.live.test.ts` and `reservation-type-limit.live.test.ts` to use it. No reliance on pre-existing tenant rows.
+- Replace any hardcoded UUIDs in `scripts/seed-rls-test-data.ts` callers with values returned from the helper.
+
+## 5. Playwright e2e (`e2e/fixtures/*`)
+
+- Extend `test-tenant.ts` into a Playwright fixture: `test.extend<{ ephemeralTenant: EphemeralTenant }>({...})`. Each spec receives its own tenant; the fixture tears down on `use` end.
+- `dashboard-reservations.spec.ts`, `cross-booking-same-guest.spec.ts`, `offer-confirm-creates-reservations.spec.ts`, `tenant-membership-removed.spec.ts` switch to the fixture. No spec reuses another spec's data.
+- `public-booking-client.ts` accepts the ephemeral slug instead of a hardcoded `serenity-wellness`.
+
+## 6. Strict leftover-row gate (new CI step)
+
+New SQL helper migration:
+
+```text
+public.assert_no_ci_leftover_rows() returns void
+  -- raises if any tenants.slug LIKE 'ci-%'
+  -- or reservations.guest_name ILIKE 'TEST CI %'
+  -- or auth.users.email LIKE 'ci+%@mimmobook.test'
+```
+
+New job `ci-leak-check` in `.github/workflows/ci.yml` runs after every test job:
+
+```text
+- psql -c "SELECT public.assert_no_ci_leftover_rows();"
+```
+
+Job fails the workflow if any leftover exists, so a forgotten cleanup is loud the first time it happens, not the tenth.
+
+## 7. Rollout order (PRs to keep diff reviewable)
+
+1. Shared providers + `renderWithProviders` + migrate component tests.
+2. Security test mocks.
+3. `withEphemeralTenant` helper + live tests.
+4. Playwright fixture conversion.
+5. Migration for `assert_no_ci_leftover_rows` + CI workflow gate.
+
+## Technical notes
+
+- Ephemeral users need the service-role key, already in CI as `SUPABASE_SERVICE_ROLE_KEY`. The helper refuses to run when the URL points at production (`assert(url.includes("supabase.co") && url.includes(EXPECTED_REF))`).
+- Worker ID comes from `process.env.VITEST_POOL_ID` / `process.env.TEST_WORKER_INDEX` so parallel workers never collide on slugs.
+- `QueryClient` in `renderWithProviders` uses `{ retries: false, gcTime: 0 }` to keep tests deterministic.
+- `leftover-guard.ts` only runs when `process.env.CI === "true"` so local dev isn't slowed.
+- No production code paths change. Only test infra, one new SQL helper, and one new CI job.
 
 ## Out of scope
-- No schema changes, no edge function changes, no styling redesign.
-- No changes to public booking flow (already resource-driven).
 
-Approve and I'll implement A and B, then run the browser verification in C.
+- Rewriting individual assertion logic inside tests (only their setup/teardown changes).
+- Edge function Deno tests (already isolated, no shared DB state).
+- Refactoring `scripts/seed-rls-test-data.ts` beyond making it idempotent.
