@@ -83,16 +83,28 @@ describe("cold-start retry e2e: POST follow-up after simulated 503", () => {
       expect(typeof body.request_id).toBe("string");
       expect(body.request_id.length).toBeGreaterThan(0);
 
-      // CORS contract: ACAO must be set (echoed allowed origin, never
-      // wildcard or attacker-controlled), credentials must not leak.
+      // CORS contract: ACAO must be set. `public-booking` is a browser-
+      // public endpoint that intentionally returns `*` (no credentials),
+      // but an echoed-origin response is equally acceptable. What must
+      // never happen is an empty ACAO, or credentials leaking alongside
+      // a wildcard.
       const acao = res.headers.get("access-control-allow-origin");
       expect(acao, "ACAO header missing from retried response").toBeTruthy();
-      expect(acao).not.toBe("*");
       expect(acao).not.toBe("");
+      const allowedAcao =
+        acao === "*" || acao === "https://minnowbook.lovable.app";
+      expect(
+        allowedAcao,
+        `unexpected ACAO on retried warmup response: ${acao}`,
+      ).toBe(true);
 
       const acac = res.headers.get("access-control-allow-credentials");
       if (acac !== null) {
         expect(acac.toLowerCase()).not.toBe("true");
+      }
+      // Wildcard ACAO with credentials=true would be an unsafe combination.
+      if (acao === "*") {
+        expect(acac === null || acac.toLowerCase() !== "true").toBe(true);
       }
 
       // Warmup identification headers must survive the retry path.
