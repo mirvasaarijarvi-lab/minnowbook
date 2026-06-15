@@ -92,9 +92,15 @@ async function preflight(
       Origin: origin,
       "Access-Control-Request-Method": method,
       "Access-Control-Request-Headers": headers,
+      // Force the Supabase functions gateway to route the preflight to
+      // the function itself instead of answering with its own fallback
+      // CORS response (which exposes `Access-Control-Allow-Origin: *`
+      // and masks whatever the function actually returns).
+      apikey: SUPABASE_PUBLISHABLE_KEY,
     },
   });
 }
+
 
 async function postRequest(
   name: string,
@@ -241,6 +247,10 @@ describe("Edge function CORS — disallowed origin × custom-header preflights",
               "Access-Control-Request-Method": "POST",
               "Access-Control-Request-Headers":
                 "authorization, content-type, apikey, x-client-info",
+              // See `preflight()` above: required so the Supabase
+              // functions gateway routes to the function instead of
+              // returning its own permissive default preflight.
+              apikey: SUPABASE_PUBLISHABLE_KEY,
             },
           });
           await res.text();
