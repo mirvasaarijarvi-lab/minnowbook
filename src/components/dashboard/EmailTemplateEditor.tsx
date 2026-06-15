@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { Loader2, Mail, Lock, Eye, EyeOff, RotateCcw, Info, MapPin, Trash2 } from "lucide-react";
 import DashboardTooltip from "./DashboardTooltip";
 import DOMPurify from "dompurify";
+import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
 
 const TEMPLATE_TYPES = ["confirmation", "reminder", "cancellation"] as const;
 type TemplateType = typeof TEMPLATE_TYPES[number];
