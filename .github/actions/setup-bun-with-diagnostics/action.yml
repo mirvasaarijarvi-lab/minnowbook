@@ -306,5 +306,7 @@ runs:
     - name: Checksum verification skipped (unpinned override)
       if: inputs.verify-checksum == 'true' && steps.pin.outputs.pinned != 'true'
       shell: bash
+      env:
+        INPUT_BUN_VERSION: ${{ inputs.bun-version }}
       run: |
-        echo "::warning::bun-version='${{ inputs.bun-version }}' does not match the pin in bun-pin.env; checksum verification skipped. Update bun-pin.env to make this install verifiable."
+        echo "::warning::bun-version='${INPUT_BUN_VERSION}' does not match the pin in bun-pin.env; checksum verification skipped. Update bun-pin.env to make this install verifiable."
