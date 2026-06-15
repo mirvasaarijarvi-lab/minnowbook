@@ -82,8 +82,9 @@ test.describe("Smoke: reservation submit + confirmation email preview", () => {
       "preview must echo the guest name we passed in",
     ).toBeVisible();
     await expect(
-      root.getByText(/MimmoBook Smoke Test/i),
+      root.getByRole("heading", { name: /MimmoBook Smoke Test/i }),
       "preview must render the mocked business name",
     ).toBeVisible();
+
   });
 });
