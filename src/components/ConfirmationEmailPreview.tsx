@@ -1,6 +1,7 @@
 import { useEffect, useMemo } from "react";
 import DOMPurify from "dompurify";
 import { useT, useLanguage } from "@/contexts/I18nContext";
+import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
 import { format } from "date-fns";
 import { fi as fiFns, enUS, sv as svFns, type Locale } from "date-fns/locale";
 
