@@ -517,8 +517,8 @@ const ReportsPanel = () => {
         tfoot td { font-weight: 700; border-top: 2px solid #999; background: #f5f5f5; }
         @media print { body { padding: 0; } }
       </style></head><body>
-      <h1>${t("reports.print.title")}${effectiveSiteName ? ` — ${effectiveSiteName}` : ""}</h1>
-      <p class="meta">${t("reports.print.period")}: ${periodLabel}${effectiveSiteName ? ` &nbsp;|&nbsp; Site: ${effectiveSiteName}` : ""} &nbsp;|&nbsp; ${t("reports.print.generated")}: ${format(new Date(), "d.M.yyyy HH:mm")}</p>
+      <h1>${esc(t("reports.print.title"))}${effectiveSiteName ? ` — ${esc(effectiveSiteName)}` : ""}</h1>
+      <p class="meta">${esc(t("reports.print.period"))}: ${esc(periodLabel)}${effectiveSiteName ? ` &nbsp;|&nbsp; Site: ${esc(effectiveSiteName)}` : ""} &nbsp;|&nbsp; ${esc(t("reports.print.generated"))}: ${esc(format(new Date(), "d.M.yyyy HH:mm"))}</p>
 
       <h2>${t("reports.print.summary")}</h2>
       <table>
