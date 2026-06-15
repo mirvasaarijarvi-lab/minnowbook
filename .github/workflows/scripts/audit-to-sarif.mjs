@@ -16,7 +16,7 @@
 //   so code-scanning de-duplicates advisories across runs cleanly.
 
 import fs from "node:fs";
-import { resolve, relative, isAbsolute } from "node:path";
+import { resolve, relative, isAbsolute, basename } from "node:path";
 import { parseAuditReport, DRIVERS } from "./parse-audit.mjs";
 
 // Defense-in-depth: this script only runs in CI on workflow-supplied
@@ -109,9 +109,39 @@ const driverInfoUri = driver.informationUri;
 // no match is found we fall back to startLine=1 with a comment in
 // the message so reviewers can spot the misindex.
 // ---------------------------------------------------------------
+// Allowlist of lockfile basenames we are willing to read. Defense-in-depth
+// against a misconfigured workflow passing an arbitrary file path: even
+// though safeResolveWithin() already confines reads to the repo root, we
+// additionally refuse anything that isn't a recognised lockfile name and
+// cap the read size so a hostile/oversized file can't exhaust memory.
+const ALLOWED_LOCKFILE_NAMES = new Set([
+  "package-lock.json",
+  "npm-shrinkwrap.json",
+  "yarn.lock",
+  "pnpm-lock.yaml",
+  "bun.lock",
+  "bun.lockb",
+]);
+const MAX_LOCKFILE_BYTES = 32 * 1024 * 1024; // 32 MiB
+
 function buildLockfileIndex(lockfilePath) {
   const map = new Map();
-  if (!lockfilePath || !fs.existsSync(lockfilePath)) return map;
+  if (!lockfilePath) return map;
+  const name = basename(lockfilePath);
+  if (!ALLOWED_LOCKFILE_NAMES.has(name)) {
+    console.warn(`Refusing to read non-lockfile path: ${name}`);
+    return map;
+  }
+  if (!fs.existsSync(lockfilePath)) return map;
+  const stat = fs.statSync(lockfilePath);
+  if (!stat.isFile()) {
+    console.warn(`Refusing to read non-regular lockfile: ${lockfilePath}`);
+    return map;
+  }
+  if (stat.size > MAX_LOCKFILE_BYTES) {
+    console.warn(`Lockfile exceeds size cap (${stat.size} bytes), skipping index.`);
+    return map;
+  }
   const text = fs.readFileSync(lockfilePath, "utf8");
   const lines = text.split(/\r?\n/);
 
