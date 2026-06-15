@@ -81,35 +81,42 @@ function fnUrl(name: string) {
 }
 
 /**
- * Wrap a fetch with a single retry on transient 5xx responses (502, 503,
- * 504). These are cold-start / upstream blips from the Supabase functions
- * gateway and are unrelated to the CORS invariants we are asserting; a
- * single retry collapses them without papering over real regressions
- * (which would fail twice in a row).
+ * Wrap a fetch with a bounded retry on transient 5xx responses (502,
+ * 503, 504). These are cold-start / upstream blips from the Supabase
+ * functions gateway and are unrelated to the CORS invariants we are
+ * asserting. We retry up to twice with a small exponential backoff
+ * (500ms, then 1500ms) plus jitter so concurrent probes don't all
+ * retry in lock-step under load. Real regressions still fail because
+ * they reproduce on every attempt.
  */
 async function fetchWithColdStartRetry(
   input: string,
   init: RequestInit,
 ): Promise<Response> {
   const method = (init.method ?? "GET").toUpperCase();
-  const res = await fetch(input, init);
-  if (res.status === 502 || res.status === 503 || res.status === 504) {
+  const maxAttempts = 3; // 1 initial + 2 retries
+  const baseDelayMs = 500;
+  let res = await fetch(input, init);
+  for (let attempt = 1; attempt < maxAttempts; attempt++) {
+    if (res.status !== 502 && res.status !== 503 && res.status !== 504) {
+      return res;
+    }
     // Drain the body so the connection can be reused.
     await res.text().catch(() => "");
-    // Log the transient failure so CI gate diagnostics show exactly
-    // which probe tripped a cold-start retry and at what status.
+    // Exponential backoff with small jitter: 500ms, 1500ms (+/- 25%).
+    const expDelay = baseDelayMs * Math.pow(3, attempt - 1);
+    const jitter = expDelay * 0.25 * (Math.random() * 2 - 1);
+    const delay = Math.max(0, Math.round(expDelay + jitter));
     // eslint-disable-next-line no-console
     console.warn(
-      `[cors-gate] transient ${res.status} on ${method} ${input} (attempt 1/2), retrying after 750ms backoff`,
+      `[cors-gate] transient ${res.status} on ${method} ${input} (attempt ${attempt}/${maxAttempts}), retrying after ${delay}ms backoff`,
     );
-    // Brief backoff to let a cold worker finish booting.
-    await new Promise((r) => setTimeout(r, 750));
-    const retry = await fetch(input, init);
+    await new Promise((r) => setTimeout(r, delay));
+    res = await fetch(input, init);
     // eslint-disable-next-line no-console
     console.warn(
-      `[cors-gate] retry result for ${method} ${input} (attempt 2/2): status=${retry.status}`,
+      `[cors-gate] retry result for ${method} ${input} (attempt ${attempt + 1}/${maxAttempts}): status=${res.status}`,
     );
-    return retry;
   }
   return res;
 }
