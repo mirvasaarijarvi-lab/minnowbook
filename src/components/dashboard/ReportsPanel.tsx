@@ -486,11 +486,11 @@ const ReportsPanel = () => {
         totalCell = total > 0 ? fmtEur(total) : "—";
       }
       return `<tr>
-        <td>${format(new Date(r.date + "T00:00:00"), "d.M.yyyy")}</td>
-        <td>${r.guest_name}</td>
-        <td>${r.reservation_type}</td>
-        <td>${r.guests_count || r.estimated_guests || "-"}</td>
-        <td>${r.status}</td>
+        <td>${esc(format(new Date(r.date + "T00:00:00"), "d.M.yyyy"))}</td>
+        <td>${esc(r.guest_name)}</td>
+        <td>${esc(r.reservation_type)}</td>
+        <td>${esc(r.guests_count || r.estimated_guests || "-")}</td>
+        <td>${esc(r.status)}</td>
         <td>${r.is_used ? "✓" : "✗"}</td>
         <td>${r.breakfast_included ? "✓" : "✗"}</td>
         <td>${r.is_invoiced ? "✓" : "✗"}</td>
