@@ -1,0 +1,58 @@
+name: CI Leak Check
+
+# Fails the build if any test left CI-created rows behind in the shared
+# Supabase project. Tests must create their own ephemeral tenants via
+# `src/test/helpers/ephemeral-tenant.ts` and drop them in `afterAll`.
+#
+# Runs:
+#   - on every push/PR to main (sentinel check, cheap and fast)
+#   - after the live integration workflows complete
+#   - on a daily schedule to catch leaks from canceled/aborted jobs
+#   - on demand via workflow_dispatch
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 4 * * *"
+  workflow_run:
+    workflows:
+      - "Live Reservation-Type Cap Tests"
+      - "E2E"
+      - "Cross-tenant RLS"
+      - "Cross-tenant storage adversarial"
+    types: [completed]
+
+concurrency:
+  group: ci-leak-check
+  cancel-in-progress: false
+
+permissions: {}
+
+jobs:
+  leak-check:
+    name: Verify no leftover CI rows
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Bun
+        uses: ./.github/actions/setup-bun-with-diagnostics
+
+      - name: Install minimal deps
+        run: bun install --frozen-lockfile
+
+      - name: Run leak check
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SERVICE_ROLE_KEY" ]; then
+            echo "::notice::Missing SUPABASE_URL or SERVICE_ROLE_KEY secret, skipping."
+            exit 0
+          fi
+          bun run .github/workflows/scripts/ci-leak-check.ts
