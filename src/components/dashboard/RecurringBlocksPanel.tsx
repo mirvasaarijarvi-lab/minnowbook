@@ -342,7 +342,7 @@ const RecurringBlocksPanel = () => {
                         <Badge variant="outline" className="text-xs">{t("blocking.allDay")}</Badge>
                       )}
                       <Badge variant="secondary" className="text-xs capitalize">
-                        {resourceTypeLabels[block.resource_type] ?? block.resource_type}
+                        {resourceTypeLabel(block.resource_type)}
                       </Badge>
                       {block.resource && (
                         <Badge variant="outline" className="text-xs">
