@@ -240,14 +240,20 @@ runs:
 
     - name: Bun setup result
       shell: bash
+      env:
+        BUN_CACHE_HIT: ${{ steps.bun-cache.outputs.cache-hit }}
+        BUN1_OUTCOME: ${{ steps.bun1.outcome }}
+        BUN2_OUTCOME: ${{ steps.bun2.outcome }}
+        BUN3_OUTCOME: ${{ steps.bun3.outcome }}
+        INPUT_MAX_ATTEMPTS: ${{ inputs.max-attempts }}
       run: |
-        if [ "${{ steps.bun-cache.outputs.cache-hit }}" = "true" ] \
-           || [ "${{ steps.bun1.outcome }}" = "success" ] \
-           || [ "${{ steps.bun2.outcome }}" = "success" ] \
-           || [ "${{ steps.bun3.outcome }}" = "success" ]; then
+        if [ "$BUN_CACHE_HIT" = "true" ] \
+           || [ "$BUN1_OUTCOME" = "success" ] \
+           || [ "$BUN2_OUTCOME" = "success" ] \
+           || [ "$BUN3_OUTCOME" = "success" ]; then
           echo "✅ Bun setup succeeded (version $(bun --version))."
         else
-          echo "::error::Bun setup failed after ${{ inputs.max-attempts }} attempt(s). See diagnostics above."
+          echo "::error::Bun setup failed after ${INPUT_MAX_ATTEMPTS} attempt(s). See diagnostics above."
           exit 1
         fi
 
@@ -259,11 +265,12 @@ runs:
       # and persist into ~/.bun-verify so future runs are fast.
       if: inputs.verify-checksum == 'true' && steps.pin.outputs.pinned == 'true'
       shell: bash
+      env:
+        VERSION: ${{ steps.pin.outputs.version }}
+        ASSET: ${{ steps.pin.outputs.asset }}
+        EXPECTED: ${{ steps.pin.outputs.expected_sha256 }}
       run: |
         set -euo pipefail
-        VERSION="${{ steps.pin.outputs.version }}"
-        ASSET="${{ steps.pin.outputs.asset }}"
-        EXPECTED="${{ steps.pin.outputs.expected_sha256 }}"
         if [ -z "$ASSET" ] || [ -z "$EXPECTED" ]; then
           echo "::warning::No pinned checksum for runner ${RUNNER_OS}/${RUNNER_ARCH}; skipping verification."
           exit 0
