@@ -1668,7 +1668,7 @@ const PublicBookingInner = () => {
                 siteId={activeSiteId}
                 primaryColor={primaryColor}
                 accentColor={accentColor}
-                thresholds={(settings?.availability_thresholds as Record<string, number>) ?? { restaurant: 5, venue: 5, guesthouse: 5, hotel: 5 }}
+                thresholds={(settings?.availability_thresholds as Record<string, number>) ?? { restaurant: 5, venue: 5, guesthouse: 5, hotel: 5, wellness: 5, custom: 5 }}
                 reservationType={form.reservation_type}
                 t={t}
               />
