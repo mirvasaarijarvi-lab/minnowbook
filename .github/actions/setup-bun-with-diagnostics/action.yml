@@ -44,6 +44,8 @@ runs:
     - name: Resolve pinned Bun version + checksum
       id: pin
       shell: bash
+      env:
+        INPUT_BUN_VERSION: ${{ inputs.bun-version }}
       run: |
         set -euo pipefail
         # Load the pin file shipped alongside this composite action.
@@ -57,7 +59,10 @@ runs:
         # shellcheck disable=SC1090
         source "$PIN_FILE"
 
-        REQUESTED="${{ inputs.bun-version }}"
+        # Read user-controlled input via env, never via ${{ }} expansion,
+        # to prevent GitHub Actions template injection through a crafted
+        # bun-version value.
+        REQUESTED="${INPUT_BUN_VERSION:-}"
         if [ -z "$REQUESTED" ]; then
           RESOLVED="$BUN_VERSION"
           PINNED="true"
@@ -96,6 +101,7 @@ runs:
           echo "Expected SHA-256: $EXPECTED"
         fi
 
+
     - name: Restore Bun install cache
       # Cache the installed Bun toolchain (~/.bun, where setup-bun
       # installs the binary) AND the verification archive so warm
@@ -131,10 +137,13 @@ runs:
     - name: Diagnose Bun setup failure (attempt 1)
       if: steps.bun1.outcome == 'failure'
       shell: bash
+      env:
+        INPUT_BUN_VERSION: ${{ inputs.bun-version }}
       run: |
         set +e
         echo "::group::Bun setup attempt 1 failed — collecting diagnostics"
-        VERSION="${{ inputs.bun-version }}"
+        # Read via env, not ${{ }}, to avoid template injection.
+        VERSION="${INPUT_BUN_VERSION:-}"
         # setup-bun resolves "latest" via the GitHub releases API and
         # then downloads bun-linux-x64.zip from the release. Probe both
         # so we can attribute the failure precisely.
@@ -181,6 +190,7 @@ runs:
           echo "and consider pinning an explicit \`bun-version\` to a"
           echo "known-good release."
         } >> "$GITHUB_STEP_SUMMARY"
+
 
     # Exponential backoff between retries: 5s before attempt 2,
     # 20s before attempt 3 (~4x growth + a small jitter window).
@@ -230,14 +240,20 @@ runs:
 
     - name: Bun setup result
       shell: bash
+      env:
+        BUN_CACHE_HIT: ${{ steps.bun-cache.outputs.cache-hit }}
+        BUN1_OUTCOME: ${{ steps.bun1.outcome }}
+        BUN2_OUTCOME: ${{ steps.bun2.outcome }}
+        BUN3_OUTCOME: ${{ steps.bun3.outcome }}
+        INPUT_MAX_ATTEMPTS: ${{ inputs.max-attempts }}
       run: |
-        if [ "${{ steps.bun-cache.outputs.cache-hit }}" = "true" ] \
-           || [ "${{ steps.bun1.outcome }}" = "success" ] \
-           || [ "${{ steps.bun2.outcome }}" = "success" ] \
-           || [ "${{ steps.bun3.outcome }}" = "success" ]; then
+        if [ "$BUN_CACHE_HIT" = "true" ] \
+           || [ "$BUN1_OUTCOME" = "success" ] \
+           || [ "$BUN2_OUTCOME" = "success" ] \
+           || [ "$BUN3_OUTCOME" = "success" ]; then
           echo "✅ Bun setup succeeded (version $(bun --version))."
         else
-          echo "::error::Bun setup failed after ${{ inputs.max-attempts }} attempt(s). See diagnostics above."
+          echo "::error::Bun setup failed after ${INPUT_MAX_ATTEMPTS} attempt(s). See diagnostics above."
           exit 1
         fi
 
@@ -249,11 +265,12 @@ runs:
       # and persist into ~/.bun-verify so future runs are fast.
       if: inputs.verify-checksum == 'true' && steps.pin.outputs.pinned == 'true'
       shell: bash
+      env:
+        VERSION: ${{ steps.pin.outputs.version }}
+        ASSET: ${{ steps.pin.outputs.asset }}
+        EXPECTED: ${{ steps.pin.outputs.expected_sha256 }}
       run: |
         set -euo pipefail
-        VERSION="${{ steps.pin.outputs.version }}"
-        ASSET="${{ steps.pin.outputs.asset }}"
-        EXPECTED="${{ steps.pin.outputs.expected_sha256 }}"
         if [ -z "$ASSET" ] || [ -z "$EXPECTED" ]; then
           echo "::warning::No pinned checksum for runner ${RUNNER_OS}/${RUNNER_ARCH}; skipping verification."
           exit 0
@@ -289,5 +306,7 @@ runs:
     - name: Checksum verification skipped (unpinned override)
       if: inputs.verify-checksum == 'true' && steps.pin.outputs.pinned != 'true'
       shell: bash
+      env:
+        INPUT_BUN_VERSION: ${{ inputs.bun-version }}
       run: |
-        echo "::warning::bun-version='${{ inputs.bun-version }}' does not match the pin in bun-pin.env; checksum verification skipped. Update bun-pin.env to make this install verifiable."
+        echo "::warning::bun-version='${INPUT_BUN_VERSION}' does not match the pin in bun-pin.env; checksum verification skipped. Update bun-pin.env to make this install verifiable."
