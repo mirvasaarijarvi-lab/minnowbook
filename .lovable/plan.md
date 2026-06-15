@@ -1,84 +1,35 @@
-# GDPR Compliance Gap Closure Plan
+# Fix: Wellness reservation + resource-driven calendars
 
-You already have a `Privacy` page and a basic `CookieConsent` component. The seven gaps below can be closed in three focused phases. Phase 1 is documentation-only (fast). Phase 2 upgrades cookie consent. Phase 3 adds user-facing rights (export + delete), which is the heaviest piece.
+## Problems found
 
-## Phase 1 — Legal/policy pages (low effort, high impact)
+1. **Calendar sections are hardcoded** to Hotel / Venue / Restaurant in `src/components/dashboard/CalendarView.tsx` (`SECTIONS` const). A wellness tenant has no hotel/venue/restaurant resources, so it still sees three empty calendars and never sees its actual resource types (e.g. massage, wellness, custom).
 
-Add four new static pages (EN/FI/SV) linked from the marketing footer and Privacy page.
+2. **"Create Reservation" button stays disabled on the wellness site.** In `ManualReservationDialog.tsx`:
+   - When `allowedTypes.length === 1`, `reservation_type` is auto-set, so the type dropdown is hidden. Good.
+   - But for a wellness tenant whose single allowed type is `"custom"` (or any non hotel/venue/restaurant), the dialog renders no service / sub-service picker unless a resource is selected, and the validation (`isValid`) does not require a resource. The button looks greyed because the primary button uses muted color in this state, and submitting still tries to insert a row with empty `start_time` and no resource link, which the DB validation trigger then rejects silently for "custom" type.
+   - Also: when the type is "custom" and the tenant has only one resource, the resource is not auto-selected, so the price stays at the resource default and submission can fail server-side on capacity/site resolution.
 
-1. **Retention Schedule** — `/legal/retention`
-   Table of data categories and how long MimmoBook keeps them:
-   - Reservations: active for tenant lifetime, archived after 30 days post-event, permanently deleted after 400 days (matches existing data archival memory).
-   - Audit log: 90 days (matches `cleanup_old_audit_logs`).
-   - Booking validation log: 30 days.
-   - Storage rejection events: 7 days; resolved alerts: 90 days.
-   - Email send log / suppressions / unsubscribe tokens: TTL per existing email infra.
-   - Account data: until account deletion + 30-day cancellation window.
-   - Backups: 30 days rolling.
+## Fix plan
 
-2. **Processor Inventory (Subprocessors)** — `/legal/subprocessors`
-   List with purpose, data categories, region:
-   - Supabase (Lovable Cloud) — DB, auth, storage, edge functions — EU.
-   - Resend — transactional + marketing email.
-   - Stripe — payments.
-   - Google (Search Console, Analytics, Tag Manager) — analytics/SEO.
-   - Lovable AI Gateway — AI features.
+### A. Resource-driven calendars (`CalendarView.tsx`)
+- Replace the static `SECTIONS` constant with a query that loads the tenant's distinct active `resource_type` values from `resources` (scoped by the current site selection via `useUserSites` / `useSiteContext`).
+- Build one `<CalendarSection>` per distinct type returned. Pass `reservationTypes` and `resourceTypes` as `[type]` (keeping the existing "hotel + guesthouse" grouping as a special case).
+- Title each section with `useResourceTypeLabel().typeLabel(type)`, falling back to the resource's `custom_type_label` for custom types.
+- Render nothing (with a friendly empty state pointing to Resource Management) when the tenant has no active resources.
 
-3. **Data Processing Agreement (DPA)** — `/legal/dpa`
-   Standard controller↔processor DPA template covering Art. 28 GDPR: scope, duration, subject matter, processor obligations, subprocessor flow-down, SCCs reference, audit rights, breach notification, return/deletion on termination. Downloadable PDF version.
+### B. Wellness / custom reservation creation (`ManualReservationDialog.tsx`)
+- When `form.reservation_type` is set and `resources.length === 1`, auto-select that resource into `selectedResourceId`.
+- Tighten `isValid`: require `selectedResourceId` whenever `resources.length > 0`, so the button enables only when a resource is chosen and clearly disables otherwise (also add a small helper text under the resource field when empty).
+- For "custom" type, ensure the insert payload includes `resource_id` and `resource_type` derived from the selected resource (not from `form.reservation_type`), and default `start_time` to the entered "Preferred time" or `"12:00"` if blank, matching the public booking edge function.
+- Surface server errors from the insert via `FunctionsHttpError`-style decoding already used elsewhere, so the user sees the real reason instead of a silent no-op.
 
-4. **Records of Processing Activities (RoPA)** — internal markdown at `docs/ropa.md`
-   Per Art. 30 GDPR: processing activity, legal basis, data subjects, data categories, recipients, transfers, retention, technical/organisational measures. Not public, but available to DPA reviewers. Optional public summary on `/legal/processing`.
+### C. Verification I will run after the edits
+- Browser-test the wellness tenant: open New Reservation, confirm the resource auto-selects, fill the form, submit, and confirm the new row appears in the list.
+- Confirm the Calendar tab shows only the sections matching that tenant's resources (no empty Hotel/Venue/Restaurant cards).
+- Spot-check a multi-type tenant (hotel + restaurant) to confirm both sections still render and group correctly.
 
-## Phase 2 — Cookie consent upgrade
+## Out of scope
+- No schema changes, no edge function changes, no styling redesign.
+- No changes to public booking flow (already resource-driven).
 
-Replace the current single-button banner with a category-based consent manager:
-
-- Categories: **Strictly necessary** (always on), **Analytics** (GA4, GTM), **Marketing** (none today, reserved).
-- Store consent in `localStorage` (`mimmobook-cookie-consent` JSON with version + timestamp + categories).
-- Gate GA4 + GTM initialisation on `analytics === true`; default DENIED before consent (Google Consent Mode v2: `ad_storage`, `analytics_storage`, `ad_user_data`, `ad_personalization`).
-- "Manage cookies" link in `MarketingFooter` that reopens the modal so users can withdraw consent.
-- 12-month re-consent prompt.
-
-## Phase 3 — User rights self-service
-
-Add a new "Privacy & Data" tab in `/settings/profile` (visible to every authenticated user, not just tenant owners).
-
-### 3a. Data export (Art. 15 + 20)
-- Button: **Download my data**.
-- New Edge Function `export-user-data` (`verify_jwt = false`, validates JWT in code):
-  - Reads the caller's `auth.uid()`.
-  - Aggregates: profile, tenant memberships, reservations the user created, audit log entries authored, login history, notifications, support requests, beta feedback.
-  - Returns a single ZIP containing JSON files + a human-readable `README.txt`.
-- Rate-limited (1 export per 24h per user) via a `redemption_idempotency`-style approach or a new rate-limit log (see Technical details below).
-- Tenant owners additionally see **Export tenant data** (CSV per table) reusing existing CSV export infrastructure.
-
-### 3b. Self-service account deletion (Art. 17)
-- Button: **Delete my account** with a typed-confirmation modal ("type DELETE to confirm").
-- New Edge Function `request-account-deletion`:
-  - If the user is the sole **owner** of any tenant with active members or future reservations, block deletion and instruct them to transfer ownership or close the tenant first.
-  - Otherwise mark `auth.users.deleted_at` (soft) and insert into a new `pending_account_deletions` table with `purge_after = now() + 30 days` (matches the 30-day cancellation window already documented).
-  - Send confirmation email with a "Cancel deletion" link valid for 30 days.
-- New cron job `purge-deleted-accounts` runs daily:
-  - Hard-deletes `auth.users` row (cascades to `tenant_users`, profile, etc.).
-  - Anonymises historic reservations the user authored (set `created_by = NULL`, scrub `guest_name`/`guest_email` where the user was also the guest).
-- Audit-logged via existing `audit_log_trigger`.
-
-## Technical details
-
-- New tables (migration):
-  - `public.pending_account_deletions (user_id uuid pk, requested_at, purge_after, cancel_token text)` with GRANTs to `authenticated` (own row only) and `service_role`; RLS policy `user_id = auth.uid()`.
-  - `public.data_export_requests (id, user_id, created_at)` for rate limiting; same grant pattern.
-- Cron via `pg_cron` + `pg_net` calling the purge function daily at 03:00 UTC.
-- All new translations added to EN/FI/SV in `src/i18n/translations.ts`.
-- Footer additions in `MarketingHeader`/`MarketingFooter`: Retention, Subprocessors, DPA, Manage cookies.
-- No em/en-dashes in any copy (per project convention).
-
-## Suggested order of delivery
-
-1. Phase 1 pages + footer links (1 shipment, no backend).
-2. Phase 2 cookie consent upgrade (1 shipment, frontend + GA gating).
-3. Phase 3a data export (backend + UI).
-4. Phase 3b account deletion + cron (backend + UI).
-
-Reply with which phase(s) to start with, or "all" to proceed top to bottom.
+Approve and I'll implement A and B, then run the browser verification in C.
