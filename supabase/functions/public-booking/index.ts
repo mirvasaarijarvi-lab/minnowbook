@@ -282,12 +282,48 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
 
     // Warmup ping: lets callers (CI smoke tests, schedulers) wake the worker
     // without performing a real booking. Returns 200 so logs read "warmup OK".
+    // We tag every log line with [public-booking][warmup] and echo back a
+    // request id so CI runs can correlate the client-side log with the
+    // server-side log when diagnosing cold-start latency.
     if (body && body.warmup === true && !body.tenant_id) {
-      return new Response(JSON.stringify({ ok: true, warmup: true }), {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      const warmupStartedAt = Date.now();
+      const requestId =
+        req.headers.get("x-request-id") ||
+        req.headers.get("cf-ray") ||
+        (globalThis.crypto?.randomUUID?.() ?? `warmup-${warmupStartedAt}`);
+      const source =
+        req.headers.get("x-warmup-source") ||
+        req.headers.get("user-agent") ||
+        "unknown";
+      console.log(
+        `[public-booking][warmup] received request_id=${requestId} ` +
+          `source="${source}" ip=${clientIp}`,
+      );
+      const durationMs = Date.now() - warmupStartedAt;
+      console.log(
+        `[public-booking][warmup] responding 200 request_id=${requestId} ` +
+          `duration_ms=${durationMs}`,
+      );
+      return new Response(
+        JSON.stringify({
+          ok: true,
+          warmup: true,
+          request_id: requestId,
+          duration_ms: durationMs,
+        }),
+        {
+          status: 200,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+            "x-request-id": requestId,
+            "x-warmup": "true",
+          },
+        },
+      );
     }
+
+
 
     const tenant_id = validateUuid(body.tenant_id, "tenant_id", true)!;
     const guest_name = validateString(body.guest_name, "guest_name", 100, true)!;
