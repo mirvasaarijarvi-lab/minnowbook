@@ -22,7 +22,7 @@ import DashboardTooltip from "./DashboardTooltip";
 const OffersManager = () => {
   const t = useT();
   const dateLocale = useDateLocale();
-  const { tenantId } = useTenant();
+  const { tenantId, tenant } = useTenant();
   const [showArchived, setShowArchived] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const { data: offers = [], isLoading } = useOffers(showArchived);
