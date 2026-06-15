@@ -66,24 +66,45 @@ test.describe("Smoke: reservation submit + confirmation email preview", () => {
     });
 
     // ----- 2) Verify the confirmation email preview renders ----------------
-    // Hit the dedicated smoke route which mounts ConfirmationEmailPreview
-    // against deterministic mock data. We pass the just-booked guest_name
-    // through the query string so a render failure stands out in the report.
+    // The smoke route reads every dynamic field from query params and forces
+    // a deterministic UI language, so we control 100% of the rendered DOM
+    // from this spec. We pin: lang=en, business_name, guest_name, variant.
+    const expectedBusinessName = "MimmoBook Smoke Test";
     const previewUrl =
       `/__e2e/email-preview?e2e=1` +
+      `&lang=en` +
+      `&variant=confirmation` +
       `&guest_name=${encodeURIComponent(guestName)}` +
+      `&business_name=${encodeURIComponent(expectedBusinessName)}` +
       `&reservation_type=restaurant`;
-    await page.goto(previewUrl, { waitUntil: "domcontentloaded" });
 
-    // Wait for React to finish hydrating + the smoke route to mount.
+    // Belt-and-suspenders: clear any stored language preference before the
+    // app boots so the I18nProvider initialiser cannot read a stale value.
+    await page.addInitScript(() => {
+      try {
+        window.localStorage.removeItem("mimmobook-lang");
+      } catch {
+        /* storage may be unavailable in some contexts; ignore */
+      }
+    });
+
+    await page.goto(previewUrl, { waitUntil: "domcontentloaded" });
     await page.waitForLoadState("networkidle");
 
     const root = page.getByTestId("email-preview-smoke-root");
     await expect(root, "email preview root must mount").toBeVisible({ timeout: 15_000 });
 
-    // Wait for the inner preview component to render (i18n + memoised
-    // derivations resolve on the next tick after mount), then for its
-    // heading subtree to be attached before asserting text content.
+    // Wait for the smoke route to apply the forced language. Only then does
+    // it mount <ConfirmationEmailPreview/>, guaranteeing the inner DOM is
+    // rendered with deterministic i18n strings.
+    await expect(
+      root,
+      "smoke route must finish applying the forced language before rendering",
+    ).toHaveAttribute("data-preview-ready", "true", { timeout: 15_000 });
+    await expect(root).toHaveAttribute("data-preview-lang", "en");
+    await expect(root).toHaveAttribute("data-preview-business-name", expectedBusinessName);
+    await expect(root).toHaveAttribute("data-preview-guest-name", guestName);
+
     const preview = root.getByTestId("confirmation-email-preview");
     await expect(preview, "confirmation email preview must mount").toBeVisible({ timeout: 15_000 });
 
@@ -101,7 +122,7 @@ test.describe("Smoke: reservation submit + confirmation email preview", () => {
     await expect(
       businessHeading,
       "preview header must render the mocked business name",
-    ).toHaveText("MimmoBook Smoke Test", { timeout: 10_000 });
+    ).toHaveText(expectedBusinessName, { timeout: 10_000 });
   });
 
 });
