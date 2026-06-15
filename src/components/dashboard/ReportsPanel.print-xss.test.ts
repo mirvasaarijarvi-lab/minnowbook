@@ -91,7 +91,7 @@ describe("ReportsPanel.handlePrint — source-level escaping guard", () => {
 
   // Extract just the handlePrint function body so we don't get false positives
   // from other parts of the file.
-  const handlePrintMatch = source.match(/const handlePrint = \(\) => \{[\s\S]*?\n  \};/);
+  const handlePrintMatch = source.match(/const handlePrint = \(\) => \{[\s\S]*?\n {2}\};/);
 
   it("contains a handlePrint definition", () => {
     expect(handlePrintMatch).not.toBeNull();
