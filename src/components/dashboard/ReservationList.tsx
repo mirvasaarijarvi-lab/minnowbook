@@ -632,9 +632,9 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
             <SelectTrigger className="w-full sm:w-[160px]"><SelectValue placeholder={t("common.type")} /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{t("dashboard.allTypes")}</SelectItem>
-              <SelectItem value="restaurant">{typeLabel("restaurant")}</SelectItem>
-              <SelectItem value="venue">{typeLabel("venue")}</SelectItem>
-              <SelectItem value="guesthouse">{typeLabel("guesthouse")}</SelectItem>
+              {((tenant?.allowed_reservation_types as string[] | undefined) ?? []).map((type) => (
+                <SelectItem key={type} value={type}>{typeLabel(type)}</SelectItem>
+              ))}
             </SelectContent>
           </Select>
           <Select value={invoicedFilter} onValueChange={setInvoicedFilter}>
