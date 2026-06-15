@@ -80,13 +80,35 @@ function fnUrl(name: string) {
   return `${SUPABASE_URL}/functions/v1/${name}`;
 }
 
+/**
+ * Wrap a fetch with a single retry on transient 5xx responses (502, 503,
+ * 504). These are cold-start / upstream blips from the Supabase functions
+ * gateway and are unrelated to the CORS invariants we are asserting; a
+ * single retry collapses them without papering over real regressions
+ * (which would fail twice in a row).
+ */
+async function fetchWithColdStartRetry(
+  input: string,
+  init: RequestInit,
+): Promise<Response> {
+  const res = await fetch(input, init);
+  if (res.status === 502 || res.status === 503 || res.status === 504) {
+    // Drain the body so the connection can be reused.
+    await res.text().catch(() => "");
+    // Brief backoff to let a cold worker finish booting.
+    await new Promise((r) => setTimeout(r, 750));
+    return await fetch(input, init);
+  }
+  return res;
+}
+
 async function preflight(
   name: string,
   origin: string,
   method: string,
   headers: string,
 ) {
-  return await fetch(fnUrl(name), {
+  return await fetchWithColdStartRetry(fnUrl(name), {
     method: "OPTIONS",
     headers: {
       Origin: origin,
@@ -107,7 +129,7 @@ async function postRequest(
   origin: string,
   extraHeaders: Record<string, string>,
 ) {
-  return await fetch(fnUrl(name), {
+  return await fetchWithColdStartRetry(fnUrl(name), {
     method: "POST",
     headers: {
       Origin: origin,
@@ -119,6 +141,7 @@ async function postRequest(
     body: JSON.stringify({ action: "list" }),
   });
 }
+
 
 function expectNoOriginEcho(res: Response, forbidden: string, label: string) {
   const acao = res.headers.get("access-control-allow-origin");
