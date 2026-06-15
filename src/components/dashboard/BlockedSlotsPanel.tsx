@@ -477,7 +477,7 @@ const BlockedSlotsPanel = () => {
                         </Badge>
                       )}
                       <Badge variant="secondary" className="text-xs capitalize">
-                        {resourceTypeLabels[slot.resource_type] ?? slot.resource_type}
+                        {resourceTypeLabel(slot.resource_type)}
                       </Badge>
                       {slot.resource && (
                         <Badge variant="outline" className="text-xs">
