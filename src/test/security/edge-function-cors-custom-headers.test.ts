@@ -102,26 +102,53 @@ async function fetchWithColdStartRetry(
   return res;
 }
 
+/**
+ * Two preflight "modes" exist in production:
+ *
+ *   - "with-apikey": the browser uses supabase-js, which sends an
+ *     `apikey` header on the actual request. Some browsers (and the
+ *     Supabase functions gateway) propagate that to the preflight as
+ *     well, so the gateway routes OPTIONS straight to the function.
+ *   - "no-apikey": a plain `fetch()` from page code, a curl probe, or a
+ *     non-supabase-js client. Preflights arrive at the gateway WITHOUT
+ *     credentials, and the Supabase gateway answers with its own
+ *     permissive default (often `Access-Control-Allow-Origin: *`)
+ *     before the function is invoked.
+ *
+ * Both paths are exercised because the security invariant we care
+ * about is the same: cross-origin callers must never be able to read
+ * credentialed responses. The gateway's `*` answer is browser-safe (a
+ * browser rejects `*` + credentials), so for `no-apikey` mode we drop
+ * the "never `*`" assertion and only check the credential / origin-echo
+ * invariants.
+ */
+type ApikeyMode = "with-apikey" | "no-apikey";
+
 async function preflight(
   name: string,
   origin: string,
   method: string,
   headers: string,
+  apikeyMode: ApikeyMode = "with-apikey",
 ) {
+  const requestHeaders: Record<string, string> = {
+    Origin: origin,
+    "Access-Control-Request-Method": method,
+    "Access-Control-Request-Headers": headers,
+  };
+  if (apikeyMode === "with-apikey") {
+    // Force the Supabase functions gateway to route the preflight to
+    // the function itself instead of answering with its own fallback
+    // CORS response (which exposes `Access-Control-Allow-Origin: *`
+    // and masks whatever the function actually returns).
+    requestHeaders.apikey = SUPABASE_PUBLISHABLE_KEY;
+  }
   return await fetchWithColdStartRetry(fnUrl(name), {
     method: "OPTIONS",
-    headers: {
-      Origin: origin,
-      "Access-Control-Request-Method": method,
-      "Access-Control-Request-Headers": headers,
-      // Force the Supabase functions gateway to route the preflight to
-      // the function itself instead of answering with its own fallback
-      // CORS response (which exposes `Access-Control-Allow-Origin: *`
-      // and masks whatever the function actually returns).
-      apikey: SUPABASE_PUBLISHABLE_KEY,
-    },
+    headers: requestHeaders,
   });
 }
+
 
 
 async function postRequest(
