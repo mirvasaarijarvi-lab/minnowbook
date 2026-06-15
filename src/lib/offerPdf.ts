@@ -279,7 +279,9 @@ export async function generateOfferPdf(
     y -= sectionLh;
     page.drawText(t("linked", lang), { x: ML, y, size: SECTION_SIZE, font: boldFont, color: TEXT_CLR });
     y -= lh;
-    for (const [key, lr] of enabledLinked) {
+    for (const entry of enabledLinked) {
+      const key = entry[0];
+      const lr = entry[1];
       if (y < MB + 120) break;
       page.drawText("• " + (lr.space || key), { x: ML + 8, y, size: BODY_SIZE, font: bodyFont, color: TEXT_CLR });
       y -= lh;
@@ -323,7 +325,9 @@ export async function generateOfferPdf(
   }
 
   // === LINKED RESERVATION DETAILS ===
-  for (const [key, lr] of enabledLinked) {
+  for (const entry of enabledLinked) {
+    const key = entry[0];
+    const lr = entry[1];
     const hasContent = lr.special_requests?.trim() || lr.menu?.trim();
     if (!hasContent || y < MB + 100) continue;
     y -= 6;
