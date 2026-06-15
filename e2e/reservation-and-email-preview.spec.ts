@@ -73,24 +73,35 @@ test.describe("Smoke: reservation submit + confirmation email preview", () => {
       `/__e2e/email-preview?e2e=1` +
       `&guest_name=${encodeURIComponent(guestName)}` +
       `&reservation_type=restaurant`;
-    await page.goto(previewUrl);
+    await page.goto(previewUrl, { waitUntil: "domcontentloaded" });
+
+    // Wait for React to finish hydrating + the smoke route to mount.
+    await page.waitForLoadState("networkidle");
 
     const root = page.getByTestId("email-preview-smoke-root");
-    await expect(root, "email preview root must mount").toBeVisible();
+    await expect(root, "email preview root must mount").toBeVisible({ timeout: 15_000 });
 
+    // Wait for the inner preview component to render (i18n + memoised
+    // derivations resolve on the next tick after mount), then for its
+    // heading subtree to be attached before asserting text content.
     const preview = root.getByTestId("confirmation-email-preview");
-    await expect(preview, "confirmation email preview must mount").toBeVisible();
+    await expect(preview, "confirmation email preview must mount").toBeVisible({ timeout: 15_000 });
+
+    const businessHeading = preview.getByTestId("email-preview-business-name");
+    await businessHeading.waitFor({ state: "visible", timeout: 15_000 });
+
+    const guestEl = preview.getByTestId("email-preview-guest-name");
+    await guestEl.waitFor({ state: "visible", timeout: 15_000 });
 
     await expect(
-      preview.getByTestId("email-preview-guest-name"),
+      guestEl,
       "preview must echo the guest name we passed in",
-    ).toHaveText(guestName);
+    ).toHaveText(guestName, { timeout: 10_000 });
 
     await expect(
-      preview.getByTestId("email-preview-business-name"),
+      businessHeading,
       "preview header must render the mocked business name",
-    ).toHaveText("MimmoBook Smoke Test");
-
-
+    ).toHaveText("MimmoBook Smoke Test", { timeout: 10_000 });
   });
+
 });
