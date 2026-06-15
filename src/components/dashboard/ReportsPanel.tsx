@@ -505,7 +505,22 @@ const ReportsPanel = () => {
       return `<tr><td><strong>${esc(label)}</strong></td><td>${s.total}</td><td>${s.confirmed}</td><td>${s.pending}</td></tr>`;
     }).join("");
 
-    pw.document.write(`<!DOCTYPE html><html><head><title>${t("reports.print.title")}</title>
+    pw.document.write(`<!DOCTYPE html><html><head>
+      <meta charset="utf-8" />
+      <!--
+        The print popup is an about:blank window so the opener's HTTP CSP
+        does not apply. We embed a strict CSP via <meta> as a defence in
+        depth on top of the HTML-escaping in this same function.
+        - No remote scripts, no inline scripts (the popup needs none).
+        - Styles are allowed inline because the print stylesheet below is
+          inline. No external stylesheets are loaded.
+        - Images are local-only to block tracking pixels from injected markup.
+      -->
+      <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'none'; script-src-attr 'none'; style-src 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; object-src 'none'" />
+      <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+      <meta name="referrer" content="no-referrer" />
+      <meta name="robots" content="noindex, nofollow" />
+      <title>${esc(t("reports.print.title"))}</title>
       <style>
         @page { size: A4 landscape; margin: 1.5cm; }
         body { font-family: system-ui, sans-serif; padding: 1rem; color: #1a1a1a; }
