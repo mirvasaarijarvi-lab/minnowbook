@@ -86,7 +86,20 @@ const ConfirmationEmailPreview = ({
   customMessage,
 }: ConfirmationEmailPreviewProps) => {
   const t = useT();
-  const { typeLabel: getTypeLabel } = useResourceTypeLabel();
+  const getTypeLabel = useCallback(
+    (type: string): string => {
+      const defaults: Record<string, string> = {
+        restaurant: t("dashboard.restaurant"),
+        venue: t("dashboard.venue"),
+        guesthouse: t("dashboard.guesthouse"),
+        hotel: t("dashboard.hotel"),
+        wellness: t("dashboard.wellness"),
+        custom: (t("dashboard.custom" as any) as string) || "Custom",
+      };
+      return defaults[type] ?? type;
+    },
+    [t]
+  );
   const { language } = useLanguage();
   const dateLocale: Locale = language === "fi" ? fiFns : language === "sv" ? svFns : enUS;
   const isCancellation = variant === "cancellation";
