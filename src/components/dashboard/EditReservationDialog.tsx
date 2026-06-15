@@ -85,7 +85,7 @@ interface EditReservationDialogProps {
   onSelectLinked?: (linked: { id: string; [key: string]: any }) => void;
 }
 
-const RESERVATION_TYPES = ["restaurant", "venue", "guesthouse", "hotel"] as const;
+
 
 const EditReservationDialog = ({
   reservation,
