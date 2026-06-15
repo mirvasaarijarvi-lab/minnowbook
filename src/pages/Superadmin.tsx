@@ -38,6 +38,7 @@ import { useImpersonation } from "@/contexts/ImpersonationContext";
 import AccessCodesPanel from "@/components/dashboard/AccessCodesPanel";
 import BetaFeedbackPanel from "@/components/dashboard/BetaFeedbackPanel";
 import SuperadminLoginHistory from "@/components/dashboard/SuperadminLoginHistory";
+import { CIStatusBadges } from "@/components/superadmin/CIStatusBadges";
 import StripeRevenuePanel from "@/components/dashboard/StripeRevenuePanel";
 import TenantMembershipCheckPanel from "@/components/dashboard/TenantMembershipCheckPanel";
 import RlsManifestDebugPanel from "@/components/dashboard/RlsManifestDebugPanel";
@@ -244,6 +245,9 @@ const Superadmin = () => {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        {/* CI status */}
+        <CIStatusBadges />
+
         {/* Platform stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Card>
