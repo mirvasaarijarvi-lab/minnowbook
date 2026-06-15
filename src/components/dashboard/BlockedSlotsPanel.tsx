@@ -100,6 +100,23 @@ const BlockedSlotsPanel = () => {
     enabled: !!tenantId,
   });
 
+  // Only show resource-type options the tenant actually has (collapse hotel+guesthouse into "hotel").
+  const availableTypes = useMemo(() => {
+    const present = new Set<string>();
+    (resources ?? []).forEach((r) => {
+      if (!r.resource_type) return;
+      present.add(r.resource_type === "guesthouse" ? "hotel" : r.resource_type);
+    });
+    return Array.from(present).filter((tp) => selectableTypes[tp]);
+  }, [resources, selectableTypes]);
+
+  // Default resource_type to the first available when resources load.
+  useMemo(() => {
+    if (!form.resource_type && availableTypes.length > 0) {
+      setForm((prev) => ({ ...prev, resource_type: availableTypes[0] }));
+    }
+  }, [availableTypes, form.resource_type]);
+
   const filteredResources = useMemo(() => {
     const types = form.resource_type === "hotel" ? ["hotel", "guesthouse"] : [form.resource_type];
     return (resources ?? []).filter((r) => types.includes(r.resource_type));
