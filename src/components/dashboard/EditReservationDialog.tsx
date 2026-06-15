@@ -647,7 +647,10 @@ const EditReservationDialog = ({
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {(allowedTypes.length > 0 ? allowedTypes : RESERVATION_TYPES).map((type) => (
+                    {(allowedTypes.length > 0
+                      ? allowedTypes
+                      : (reservation?.reservation_type ? [reservation.reservation_type] : [])
+                    ).map((type) => (
                       <SelectItem key={type} value={type}>
                         {tDynamic(`dashboard.${type}`)}
                       </SelectItem>
