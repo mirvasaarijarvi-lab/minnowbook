@@ -304,8 +304,11 @@ const ReportsPanel = () => {
     // Restaurant "according to menu" has no fixed price
     if (r.reservation_type === "restaurant" && r.pricing_type === "menu") return 0;
     if (r.reservation_type === "restaurant") return r.price_eur ?? 0;
-    return calcRoomPrice(r) + calcBreakfastPrice(r);
-  }, [calcRoomPrice, calcBreakfastPrice]);
+    // Accommodation: multiply per-night room price + breakfast by nights.
+    if (isAccommodation(r)) return calcRoomPrice(r) + calcBreakfastPrice(r);
+    // Everything else (wellness, custom, venue, etc.) uses the flat price.
+    return r.price_eur ?? 0;
+  }, [calcRoomPrice, calcBreakfastPrice, isAccommodation]);
 
   const stats = useMemo(() => {
     const calc = (items: ReservationRow[]) => ({
