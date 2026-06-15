@@ -210,6 +210,7 @@ const ManualReservationDialog = ({
       const gross = priced.gross_eur;
       const final = priced.final_eur;
 
+      const selectedResourceForInsert: any = resources.find((r: any) => r.id === selectedResourceId);
       const { data: inserted, error } = await supabase.from("reservations").insert({
         tenant_id: tenantId,
         site_id: resolvedSiteId,
@@ -218,6 +219,7 @@ const ManualReservationDialog = ({
         guest_phone: form.guest_phone.trim() || null,
         guests_count: form.guests_count ? parseInt(form.guests_count) : null,
         reservation_type: form.reservation_type,
+        ...(selectedResourceForInsert ? { resource_id: selectedResourceForInsert.id } : {}),
         date: dateStr,
         start_time: form.start_time || null,
         special_requests: form.special_requests.trim() || null,
