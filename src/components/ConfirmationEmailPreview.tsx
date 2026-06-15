@@ -253,14 +253,15 @@ const ConfirmationEmailPreview = ({
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3" data-testid="confirmation-email-preview">
       {/* Subject line */}
       <div className="rounded-md border border-border bg-muted/30 px-3 py-2">
         <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
           {t("email.subject")}
         </span>
-        <p className="text-sm font-medium text-foreground mt-0.5">{subject}</p>
+        <p className="text-sm font-medium text-foreground mt-0.5" data-testid="email-preview-subject">{subject}</p>
       </div>
+
 
       {/* Email body preview */}
       <div
