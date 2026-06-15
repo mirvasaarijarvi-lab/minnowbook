@@ -251,7 +251,7 @@ const EmailTemplateEditor = ({ siteId = null }: EmailTemplateEditorProps) => {
     .replace(/\{\{guest_email\}\}/g, "jane@example.com")
     .replace(/\{\{date\}\}/g, "2026-03-15")
     .replace(/\{\{start_time\}\}/g, "14:00")
-    .replace(/\{\{reservation_type\}\}/g, "Restaurant")
+    .replace(/\{\{reservation_type\}\}/g, typeLabel(((tenant?.allowed_reservation_types as string[] | undefined) ?? [])[0] ?? ""))
     .replace(/\{\{guests_count\}\}/g, "4")
     .replace(/\{\{price_eur\}\}/g, "120.00")
     .replace(/\{\{business_name\}\}/g, tenant?.name || "Your Business");
