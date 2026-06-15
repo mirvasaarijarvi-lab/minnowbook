@@ -177,13 +177,13 @@ function buildEmailHtml(reservation: any, business: any, lang: string, emailType
   const logoUrl = business.logo_url || "https://lsgznskkxadplwnxplhd.supabase.co/storage/v1/object/public/tenant-assets/email-assets%2Flogo-color.png";
 
   const rows: { label: string; value: string }[] = [];
-  rows.push({ label: dl.type, value: reservation.reservation_type });
-  rows.push({ label: dl.date, value: reservation.date + (reservation.start_time ? ` ${dl.at} ${reservation.start_time.slice(0, 5)}` : "") });
-  if (reservation.check_out_date) rows.push({ label: dl.checkOut, value: reservation.check_out_date });
-  if (reservation.room_type) rows.push({ label: dl.roomType, value: reservation.room_type });
-  if (reservation.event_type) rows.push({ label: dl.eventType, value: reservation.event_type });
-  if (reservation.guests_count) rows.push({ label: dl.guests, value: String(reservation.guests_count) });
-  if (reservation.price_eur != null) rows.push({ label: dl.price, value: `€${Number(reservation.price_eur).toFixed(2)}` });
+  rows.push({ label: dl.type, value: escapeHtml(reservation.reservation_type ?? "") });
+  rows.push({ label: dl.date, value: escapeHtml(reservation.date + (reservation.start_time ? ` ${dl.at} ${reservation.start_time.slice(0, 5)}` : "")) });
+  if (reservation.check_out_date) rows.push({ label: dl.checkOut, value: escapeHtml(reservation.check_out_date) });
+  if (reservation.room_type) rows.push({ label: dl.roomType, value: escapeHtml(reservation.room_type) });
+  if (reservation.event_type) rows.push({ label: dl.eventType, value: escapeHtml(reservation.event_type) });
+  if (reservation.guests_count) rows.push({ label: dl.guests, value: escapeHtml(String(reservation.guests_count)) });
+  if (reservation.price_eur != null) rows.push({ label: dl.price, value: escapeHtml(`€${Number(reservation.price_eur).toFixed(2)}`) });
 
   const detailsHtml = rows
     .map(
