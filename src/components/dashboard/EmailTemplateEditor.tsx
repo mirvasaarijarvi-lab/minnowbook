@@ -94,6 +94,7 @@ interface EmailTemplateEditorProps {
 const EmailTemplateEditor = ({ siteId = null }: EmailTemplateEditorProps) => {
   const t = useT();
   const { tenantId, tenant } = useTenant();
+  const { typeLabel } = useResourceTypeLabel();
   const queryClient = useQueryClient();
   const { isGated } = useTierGate();
 
