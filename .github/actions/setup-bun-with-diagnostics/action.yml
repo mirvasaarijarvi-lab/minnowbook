@@ -137,10 +137,13 @@ runs:
     - name: Diagnose Bun setup failure (attempt 1)
       if: steps.bun1.outcome == 'failure'
       shell: bash
+      env:
+        INPUT_BUN_VERSION: ${{ inputs.bun-version }}
       run: |
         set +e
         echo "::group::Bun setup attempt 1 failed — collecting diagnostics"
-        VERSION="${{ inputs.bun-version }}"
+        # Read via env, not ${{ }}, to avoid template injection.
+        VERSION="${INPUT_BUN_VERSION:-}"
         # setup-bun resolves "latest" via the GitHub releases API and
         # then downloads bun-linux-x64.zip from the release. Probe both
         # so we can attribute the failure precisely.
@@ -187,6 +190,7 @@ runs:
           echo "and consider pinning an explicit \`bun-version\` to a"
           echo "known-good release."
         } >> "$GITHUB_STEP_SUMMARY"
+
 
     # Exponential backoff between retries: 5s before attempt 2,
     # 20s before attempt 3 (~4x growth + a small jitter window).
