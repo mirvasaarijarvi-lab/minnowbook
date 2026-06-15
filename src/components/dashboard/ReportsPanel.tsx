@@ -471,6 +471,7 @@ const ReportsPanel = () => {
   const handlePrint = () => {
     const pw = window.open("", "_blank");
     if (!pw) return;
+    const esc = (s: unknown) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
     const fmtEur = (v: number) => v.toLocaleString("fi-FI", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
 
     const tableRows = reservations.map((r) => {
@@ -485,11 +486,11 @@ const ReportsPanel = () => {
         totalCell = total > 0 ? fmtEur(total) : "—";
       }
       return `<tr>
-        <td>${format(new Date(r.date + "T00:00:00"), "d.M.yyyy")}</td>
-        <td>${r.guest_name}</td>
-        <td>${r.reservation_type}</td>
-        <td>${r.guests_count || r.estimated_guests || "-"}</td>
-        <td>${r.status}</td>
+        <td>${esc(format(new Date(r.date + "T00:00:00"), "d.M.yyyy"))}</td>
+        <td>${esc(r.guest_name)}</td>
+        <td>${esc(r.reservation_type)}</td>
+        <td>${esc(r.guests_count || r.estimated_guests || "-")}</td>
+        <td>${esc(r.status)}</td>
         <td>${r.is_used ? "✓" : "✗"}</td>
         <td>${r.breakfast_included ? "✓" : "✗"}</td>
         <td>${r.is_invoiced ? "✓" : "✗"}</td>
@@ -500,7 +501,7 @@ const ReportsPanel = () => {
 
     const summaryRows = Object.entries(stats).map(([key, s]) => {
       const label = key === "all" ? t("reports.total") : key;
-      return `<tr><td><strong>${label}</strong></td><td>${s.total}</td><td>${s.confirmed}</td><td>${s.pending}</td></tr>`;
+      return `<tr><td><strong>${esc(label)}</strong></td><td>${s.total}</td><td>${s.confirmed}</td><td>${s.pending}</td></tr>`;
     }).join("");
 
     pw.document.write(`<!DOCTYPE html><html><head><title>${t("reports.print.title")}</title>
@@ -516,8 +517,8 @@ const ReportsPanel = () => {
         tfoot td { font-weight: 700; border-top: 2px solid #999; background: #f5f5f5; }
         @media print { body { padding: 0; } }
       </style></head><body>
-      <h1>${t("reports.print.title")}${effectiveSiteName ? ` — ${effectiveSiteName}` : ""}</h1>
-      <p class="meta">${t("reports.print.period")}: ${periodLabel}${effectiveSiteName ? ` &nbsp;|&nbsp; Site: ${effectiveSiteName}` : ""} &nbsp;|&nbsp; ${t("reports.print.generated")}: ${format(new Date(), "d.M.yyyy HH:mm")}</p>
+      <h1>${esc(t("reports.print.title"))}${effectiveSiteName ? ` — ${esc(effectiveSiteName)}` : ""}</h1>
+      <p class="meta">${esc(t("reports.print.period"))}: ${esc(periodLabel)}${effectiveSiteName ? ` &nbsp;|&nbsp; Site: ${esc(effectiveSiteName)}` : ""} &nbsp;|&nbsp; ${esc(t("reports.print.generated"))}: ${esc(format(new Date(), "d.M.yyyy HH:mm"))}</p>
 
       <h2>${t("reports.print.summary")}</h2>
       <table>
