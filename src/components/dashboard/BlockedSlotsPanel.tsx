@@ -111,7 +111,7 @@ const BlockedSlotsPanel = () => {
   }, [resources, selectableTypes]);
 
   // Default resource_type to the first available when resources load.
-  useMemo(() => {
+  useEffect(() => {
     if (!form.resource_type && availableTypes.length > 0) {
       setForm((prev) => ({ ...prev, resource_type: availableTypes[0] }));
     }
