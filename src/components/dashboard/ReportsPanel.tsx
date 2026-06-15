@@ -36,6 +36,7 @@ import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
+import { escapeHtml } from "@/lib/html-escape";
 import DashboardTooltip from "./DashboardTooltip";
 
 interface ReservationRow {
@@ -471,7 +472,7 @@ const ReportsPanel = () => {
   const handlePrint = () => {
     const pw = window.open("", "_blank");
     if (!pw) return;
-    const esc = (s: unknown) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+    const esc = escapeHtml;
     const fmtEur = (v: number) => v.toLocaleString("fi-FI", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
 
     const tableRows = reservations.map((r) => {
