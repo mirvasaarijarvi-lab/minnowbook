@@ -5,7 +5,7 @@ import { Activity, ExternalLink } from "lucide-react";
  * Reads the GitHub repo slug ("owner/name") from VITE_GITHUB_REPO.
  * Set it in your project's environment to enable live shields.io badges.
  */
-const REPO = (import.meta.env.VITE_GITHUB_REPO as string | undefined)?.trim();
+const REPO = "mirvasaarijarvi-lab/minnowbook";
 
 const WORKFLOWS: Array<{ file: string; label: string }> = [
   { file: "ci.yml", label: "CI" },
