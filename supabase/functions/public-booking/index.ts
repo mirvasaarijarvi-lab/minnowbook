@@ -285,13 +285,70 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
     // We tag every log line with [public-booking][warmup] and echo back a
     // request id so CI runs can correlate the client-side log with the
     // server-side log when diagnosing cold-start latency.
-    if (body && body.warmup === true && !body.tenant_id) {
+    //
+    // Detection is intentionally narrow: we only enter this branch when the
+    // body is a plain object that has a `warmup` key. That way real booking
+    // payloads (which never include `warmup`) fall straight through to the
+    // reservation validators below, and malformed warmup pings get a clear
+    // 400 instead of being silently treated as bookings.
+    const isPlainObject =
+      body !== null && typeof body === "object" && !Array.isArray(body);
+    const hasWarmupKey =
+      isPlainObject && Object.prototype.hasOwnProperty.call(body, "warmup");
+
+    if (hasWarmupKey) {
       const warmupStartedAt = Date.now();
       const requestId =
         req.headers.get("x-request-id") ||
         req.headers.get("cf-ray") ||
         (globalThis.crypto?.randomUUID?.() ?? `warmup-${warmupStartedAt}`);
+
+      // Strict shape: warmup must be boolean true, tenant_id must be absent,
+      // and no other reservation fields may be mixed in (ambiguous intent).
+      const allowedKeys = new Set(["warmup", "source"]);
+      const extraKeys = Object.keys(body).filter((k) => !allowedKeys.has(k));
+      const sourceRaw = (body as Record<string, unknown>).source;
+      const sourceFromBody =
+        typeof sourceRaw === "string" && sourceRaw.length > 0 && sourceRaw.length <= 100
+          ? sourceRaw
+          : undefined;
+
+      let shapeError: string | null = null;
+      if (body.warmup !== true) {
+        shapeError = "warmup must be the boolean value true";
+      } else if (extraKeys.length > 0) {
+        shapeError = `warmup payload must not include: ${extraKeys.join(", ")}`;
+      } else if (sourceRaw !== undefined && sourceFromBody === undefined) {
+        shapeError = "source must be a string of 1 to 100 chars when provided";
+      }
+
+      if (shapeError) {
+        console.warn(
+          `[public-booking][warmup] rejected request_id=${requestId} ` +
+            `reason="${shapeError}" ip=${clientIp}`,
+        );
+        return new Response(
+          JSON.stringify({
+            ok: false,
+            warmup: true,
+            error: shapeError,
+            error_code: "warmup_invalid_shape",
+            request_id: requestId,
+          }),
+          {
+            status: 400,
+            headers: {
+              ...corsHeaders,
+              "Content-Type": "application/json",
+              "x-request-id": requestId,
+              "x-warmup": "true",
+            },
+          },
+        );
+      }
+
       const source =
+        sourceFromBody ||
         req.headers.get("x-warmup-source") ||
         req.headers.get("user-agent") ||
         "unknown";
@@ -322,6 +379,7 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
         },
       );
     }
+
 
 
 
