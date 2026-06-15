@@ -117,7 +117,18 @@ export function ImpersonationProvider({ children }: { children: ReactNode }) {
 
 export function useImpersonation() {
   const ctx = useContext(ImpersonationContext);
-  if (!ctx) throw new Error("useImpersonation must be used within ImpersonationProvider");
+  if (!ctx) {
+    // Outside the provider (e.g. isolated component tests, email-preview
+    // rendering): fall back to a no-op state so leaf components that only
+    // need labels don't crash. Real app code is always wrapped by
+    // <ImpersonationProvider> at the root, so this branch is test-only.
+    return {
+      impersonating: { tenantId: null, tenantName: null } as ImpersonationState,
+      startImpersonation: () => {},
+      stopImpersonation: () => {},
+      isImpersonating: false,
+    } satisfies ImpersonationContextType;
+  }
   return ctx;
 }
 
