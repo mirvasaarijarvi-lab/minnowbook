@@ -2354,7 +2354,7 @@ const PublicBookingInner = () => {
           )}
 
           {/* Resource selection for venue (non-accommodation, non-restaurant) */}
-          {resources && resources.length > 0 && form.reservation_type && form.reservation_type !== "restaurant" && form.reservation_type !== "custom" && !isAccommodationType && (
+          {resources && resources.length > 0 && form.reservation_type && form.reservation_type !== "restaurant" && !isAccommodationType && (
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg font-serif" style={{ color: primaryColor }}>
