@@ -92,9 +92,15 @@ async function preflight(
       Origin: origin,
       "Access-Control-Request-Method": method,
       "Access-Control-Request-Headers": headers,
+      // Force the Supabase functions gateway to route the preflight to
+      // the function itself instead of answering with its own fallback
+      // CORS response (which exposes `Access-Control-Allow-Origin: *`
+      // and masks whatever the function actually returns).
+      apikey: SUPABASE_PUBLISHABLE_KEY,
     },
   });
 }
+
 
 async function postRequest(
   name: string,
