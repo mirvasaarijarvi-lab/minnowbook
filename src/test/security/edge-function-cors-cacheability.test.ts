@@ -55,8 +55,30 @@ function fnUrl(name: string) {
   return `${SUPABASE_URL}/functions/v1/${name}`;
 }
 
+async function fetchWithRetry(
+  input: string,
+  init: RequestInit,
+  { attempts = 3, perAttemptTimeoutMs = 15000 }: { attempts?: number; perAttemptTimeoutMs?: number } = {},
+): Promise<Response> {
+  let lastErr: unknown;
+  for (let i = 0; i < attempts; i++) {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), perAttemptTimeoutMs);
+    try {
+      return await fetch(input, { ...init, signal: ctrl.signal });
+    } catch (err) {
+      lastErr = err;
+    } finally {
+      clearTimeout(timer);
+    }
+    // Brief backoff before retry (cold-start tolerant).
+    await new Promise((r) => setTimeout(r, 500 * (i + 1)));
+  }
+  throw lastErr;
+}
+
 async function preflight(name: string, origin: string) {
-  return await fetch(fnUrl(name), {
+  return await fetchWithRetry(fnUrl(name), {
     method: "OPTIONS",
     headers: {
       Origin: origin,
@@ -67,7 +89,7 @@ async function preflight(name: string, origin: string) {
 }
 
 async function postCall(name: string, origin: string) {
-  return await fetch(fnUrl(name), {
+  return await fetchWithRetry(fnUrl(name), {
     method: "POST",
     headers: {
       Origin: origin,
@@ -78,6 +100,7 @@ async function postCall(name: string, origin: string) {
     body: JSON.stringify({ action: "list" }),
   });
 }
+
 
 function expectNonCacheable(res: Response, label: string) {
   // --- Cache-Control ---
