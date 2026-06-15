@@ -126,12 +126,19 @@ async function dropEphemeralTenantById(
 ) {
   // Belt-and-suspenders: explicitly clear tables that don't cascade or are
   // referenced by non-cascading FKs. tenants delete should cascade most rows.
-  await admin.from("reservations").delete().eq("tenant_id", tenantId).catch(() => {});
-  await admin.from("archived_reservations").delete().eq("tenant_id", tenantId).catch(() => {});
-  await admin.from("audit_log").delete().eq("tenant_id", tenantId).catch(() => {});
-  await admin.from("tenant_users").delete().eq("tenant_id", tenantId).catch(() => {});
-  await admin.from("tenants").delete().eq("id", tenantId).catch(() => {});
-  await admin.auth.admin.deleteUser(ownerUserId).catch(() => {});
+  const swallow = async (p: PromiseLike<unknown>) => {
+    try {
+      await p;
+    } catch {
+      /* ignore — best-effort cleanup */
+    }
+  };
+  await swallow(admin.from("reservations").delete().eq("tenant_id", tenantId));
+  await swallow(admin.from("archived_reservations").delete().eq("tenant_id", tenantId));
+  await swallow(admin.from("audit_log").delete().eq("tenant_id", tenantId));
+  await swallow(admin.from("tenant_users").delete().eq("tenant_id", tenantId));
+  await swallow(admin.from("tenants").delete().eq("id", tenantId));
+  await swallow(admin.auth.admin.deleteUser(ownerUserId));
 }
 
 /**
