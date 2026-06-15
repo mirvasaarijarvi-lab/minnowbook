@@ -1,4 +1,9 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useTenant } from "@/hooks/useTenant";
+import { useSiteContext } from "@/hooks/useSiteContext";
+import { useUserSites } from "@/hooks/useUserSites";
 import { useT } from "@/contexts/I18nContext";
 import DashboardTooltip from "./DashboardTooltip";
 import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
@@ -10,27 +15,6 @@ import { PERM_RESERVATIONS_CREATE } from "@/lib/permissions";
 import CalendarSection from "./CalendarSection";
 import SiteTabs from "./SiteTabs";
 
-const SECTIONS = [
-  {
-    key: "hotel",
-    labelKey: "dashboard.calendarHotel" as const,
-    reservationTypes: ["hotel", "guesthouse"],
-    resourceTypes: ["hotel", "guesthouse"],
-  },
-  {
-    key: "venue",
-    labelKey: "dashboard.calendarVenue" as const,
-    reservationTypes: ["venue"],
-    resourceTypes: ["venue"],
-  },
-  {
-    key: "restaurant",
-    labelKey: "dashboard.calendarRestaurant" as const,
-    reservationTypes: ["restaurant"],
-    resourceTypes: ["restaurant"],
-  },
-] as const;
-
 const CalendarView = () => {
   const [newReservationOpen, setNewReservationOpen] = useState(false);
   const [defaultDate, setDefaultDate] = useState<Date | undefined>(new Date());
@@ -38,6 +22,67 @@ const CalendarView = () => {
   const { typeLabel } = useResourceTypeLabel();
   const { can } = usePermissions();
   const canCreate = can(PERM_RESERVATIONS_CREATE);
+
+  const { tenantId } = useTenant();
+  const { selectedSiteId } = useSiteContext();
+  const { applySiteFilter, siteIds } = useUserSites();
+
+  // Load the tenant's actual active resource types so calendars only show
+  // sections relevant to what the tenant manages.
+  const { data: activeTypes = [] } = useQuery({
+    queryKey: ["calendar-active-resource-types", tenantId, selectedSiteId, siteIds],
+    queryFn: async () => {
+      if (!tenantId) return [] as { type: string; label: string | null }[];
+      let query = supabase
+        .from("resources")
+        .select("resource_type, custom_type_label")
+        .eq("tenant_id", tenantId)
+        .eq("is_active", true);
+      query = applySiteFilter(query, selectedSiteId);
+      const { data, error } = await query;
+      if (error) throw error;
+      const map = new Map<string, string | null>();
+      (data ?? []).forEach((r: any) => {
+        if (!r?.resource_type) return;
+        if (!map.has(r.resource_type)) {
+          map.set(r.resource_type, r.custom_type_label ?? null);
+        }
+      });
+      return Array.from(map.entries()).map(([type, label]) => ({ type, label }));
+    },
+    enabled: !!tenantId,
+  });
+
+  // Group hotel and guesthouse into a single "accommodation" section, since
+  // they share reservation logic. Everything else gets its own section.
+  const sections = useMemo(() => {
+    const present = new Set(activeTypes.map((x) => x.type));
+    const labelFor = (t: string) => {
+      const custom = activeTypes.find((x) => x.type === t)?.label;
+      return custom || typeLabel(t);
+    };
+    const out: { key: string; title: string; reservationTypes: string[]; resourceTypes: string[] }[] = [];
+    if (present.has("hotel") || present.has("guesthouse")) {
+      out.push({
+        key: "accommodation",
+        title: present.has("hotel") ? labelFor("hotel") : labelFor("guesthouse"),
+        reservationTypes: ["hotel", "guesthouse"],
+        resourceTypes: ["hotel", "guesthouse"],
+      });
+    }
+    activeTypes
+      .map((x) => x.type)
+      .filter((tp) => tp !== "hotel" && tp !== "guesthouse")
+      .forEach((tp) => {
+        out.push({
+          key: tp,
+          title: labelFor(tp),
+          reservationTypes: [tp],
+          resourceTypes: [tp],
+        });
+      });
+    return out;
+  }, [activeTypes, typeLabel]);
 
   return (
     <div className="space-y-8">
@@ -76,15 +121,21 @@ const CalendarView = () => {
         </div>
       </div>
 
-      {SECTIONS.map((section) => (
-        <CalendarSection
-          key={section.key}
-          title={section.key === "hotel" ? typeLabel("hotel") || typeLabel("guesthouse") : typeLabel(section.key)}
-          reservationTypes={section.reservationTypes as unknown as string[]}
-          resourceTypes={section.resourceTypes as unknown as string[]}
-          onSelectDate={setDefaultDate}
-        />
-      ))}
+      {sections.length === 0 ? (
+        <div className="rounded-md border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
+          {t("dashboard.noResourcesYet" as any) || "No active resources yet. Add resources in Resource Management to see calendars here."}
+        </div>
+      ) : (
+        sections.map((section) => (
+          <CalendarSection
+            key={section.key}
+            title={section.title}
+            reservationTypes={section.reservationTypes}
+            resourceTypes={section.resourceTypes}
+            onSelectDate={setDefaultDate}
+          />
+        ))
+      )}
 
       <ManualReservationDialog
         open={newReservationOpen}
