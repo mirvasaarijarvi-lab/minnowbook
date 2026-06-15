@@ -382,11 +382,20 @@ const ManualReservationDialog = ({
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
+  // Auto-select a resource when there is exactly one available for the chosen type.
+  useEffect(() => {
+    if (resources.length === 1 && !selectedResourceId) {
+      setSelectedResourceId(resources[0].id);
+    }
+  }, [resources, selectedResourceId]);
+
+  const needsResource = resources.length > 0;
   const isValid =
     form.guest_name.trim() &&
     form.guest_email.trim() &&
     selectedDate &&
-    form.reservation_type;
+    form.reservation_type &&
+    (!needsResource || !!selectedResourceId);
 
   const isHotelType = form.reservation_type === "guesthouse" || form.reservation_type === "hotel";
   const isVenueType = form.reservation_type === "venue";
