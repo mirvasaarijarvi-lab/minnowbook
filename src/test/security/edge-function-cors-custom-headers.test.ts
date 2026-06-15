@@ -91,13 +91,25 @@ async function fetchWithColdStartRetry(
   input: string,
   init: RequestInit,
 ): Promise<Response> {
+  const method = (init.method ?? "GET").toUpperCase();
   const res = await fetch(input, init);
   if (res.status === 502 || res.status === 503 || res.status === 504) {
     // Drain the body so the connection can be reused.
     await res.text().catch(() => "");
+    // Log the transient failure so CI gate diagnostics show exactly
+    // which probe tripped a cold-start retry and at what status.
+    // eslint-disable-next-line no-console
+    console.warn(
+      `[cors-gate] transient ${res.status} on ${method} ${input} (attempt 1/2), retrying after 750ms backoff`,
+    );
     // Brief backoff to let a cold worker finish booting.
     await new Promise((r) => setTimeout(r, 750));
-    return await fetch(input, init);
+    const retry = await fetch(input, init);
+    // eslint-disable-next-line no-console
+    console.warn(
+      `[cors-gate] retry result for ${method} ${input} (attempt 2/2): status=${retry.status}`,
+    );
+    return retry;
   }
   return res;
 }
