@@ -38,6 +38,7 @@ import UseCases from "./pages/UseCases";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import BetaGuide from "./pages/BetaGuide";
+import EmailPreviewSmoke from "./pages/EmailPreviewSmoke";
 import CookieConsent from "./components/CookieConsent";
 import AccessibilityWidget from "./components/AccessibilityWidget";
 import SessionStatusIndicator from "./components/SessionStatusIndicator";
@@ -224,6 +225,7 @@ const App = () => (
                   </ProtectedRoute>
                 }
               />
+              <Route path="/__e2e/email-preview" element={<EmailPreviewSmoke />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
             <CookieConsent />
