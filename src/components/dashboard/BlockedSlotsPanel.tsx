@@ -334,8 +334,8 @@ const BlockedSlotsPanel = () => {
                 }}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    {Object.entries(selectableTypes).map(([key, label]) => (
-                      <SelectItem key={key} value={key}>{label}</SelectItem>
+                    {availableTypes.map((key) => (
+                      <SelectItem key={key} value={key}>{selectableTypes[key]}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
