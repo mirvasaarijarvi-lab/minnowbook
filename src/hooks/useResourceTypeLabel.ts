@@ -67,5 +67,5 @@ export const useResourceTypeLabel = () => {
     return t("blocking.resource" as any) || "resource";
   };
 
-  return { typeLabel, selectableTypeLabels, customNames };
+  return { typeLabel, selectableTypeLabels, customNames, resourceNoun };
 };
