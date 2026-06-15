@@ -1,7 +1,6 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useCallback } from "react";
 import DOMPurify from "dompurify";
 import { useT, useLanguage } from "@/contexts/I18nContext";
-import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
 import { format } from "date-fns";
 import { fi as fiFns, enUS, sv as svFns, type Locale } from "date-fns/locale";
 
@@ -87,7 +86,20 @@ const ConfirmationEmailPreview = ({
   customMessage,
 }: ConfirmationEmailPreviewProps) => {
   const t = useT();
-  const { typeLabel: getTypeLabel } = useResourceTypeLabel();
+  const getTypeLabel = useCallback(
+    (type: string): string => {
+      const defaults: Record<string, string> = {
+        restaurant: t("dashboard.restaurant"),
+        venue: t("dashboard.venue"),
+        guesthouse: t("dashboard.guesthouse"),
+        hotel: t("dashboard.hotel"),
+        wellness: t("dashboard.wellness"),
+        custom: (t("dashboard.custom" as any) as string) || "Custom",
+      };
+      return defaults[type] ?? type;
+    },
+    [t]
+  );
   const { language } = useLanguage();
   const dateLocale: Locale = language === "fi" ? fiFns : language === "sv" ? svFns : enUS;
   const isCancellation = variant === "cancellation";
