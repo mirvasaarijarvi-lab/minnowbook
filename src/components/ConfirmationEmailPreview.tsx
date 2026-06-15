@@ -253,14 +253,15 @@ const ConfirmationEmailPreview = ({
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3" data-testid="confirmation-email-preview">
       {/* Subject line */}
       <div className="rounded-md border border-border bg-muted/30 px-3 py-2">
         <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
           {t("email.subject")}
         </span>
-        <p className="text-sm font-medium text-foreground mt-0.5">{subject}</p>
+        <p className="text-sm font-medium text-foreground mt-0.5" data-testid="email-preview-subject">{subject}</p>
       </div>
+
 
       {/* Email body preview */}
       <div
@@ -280,7 +281,7 @@ const ConfirmationEmailPreview = ({
               style={{ border: "2px solid rgba(255,255,255,0.3)" }}
             />
           )}
-          <h2 className="text-lg font-bold text-white font-serif">
+          <h2 className="text-lg font-bold text-white font-serif" data-testid="email-preview-business-name">
             {businessName}
           </h2>
         </div>
@@ -299,13 +300,15 @@ const ConfirmationEmailPreview = ({
             <h3
               className="text-xl font-serif font-bold"
               style={{ color: titleColor }}
+              data-testid="email-preview-title"
             >
               {title}
             </h3>
             <p className="text-sm text-gray-600">
               {t("email.greeting")}{" "}
-              <strong>{reservation.guest_name}</strong>,
+              <strong data-testid="email-preview-guest-name">{reservation.guest_name}</strong>,
             </p>
+
           </div>
 
           {/* Custom message */}

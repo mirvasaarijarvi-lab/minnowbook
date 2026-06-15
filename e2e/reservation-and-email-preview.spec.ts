@@ -77,14 +77,20 @@ test.describe("Smoke: reservation submit + confirmation email preview", () => {
 
     const root = page.getByTestId("email-preview-smoke-root");
     await expect(root, "email preview root must mount").toBeVisible();
+
+    const preview = root.getByTestId("confirmation-email-preview");
+    await expect(preview, "confirmation email preview must mount").toBeVisible();
+
     await expect(
-      root.getByText(guestName, { exact: false }),
+      preview.getByTestId("email-preview-guest-name"),
       "preview must echo the guest name we passed in",
-    ).toBeVisible();
+    ).toHaveText(guestName);
+
     await expect(
-      root.getByRole("heading", { name: /MimmoBook Smoke Test/i }),
-      "preview must render the mocked business name",
-    ).toBeVisible();
+      preview.getByTestId("email-preview-business-name"),
+      "preview header must render the mocked business name",
+    ).toHaveText("MimmoBook Smoke Test");
+
 
   });
 });
