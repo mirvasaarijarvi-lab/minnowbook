@@ -102,26 +102,53 @@ async function fetchWithColdStartRetry(
   return res;
 }
 
+/**
+ * Two preflight "modes" exist in production:
+ *
+ *   - "with-apikey": the browser uses supabase-js, which sends an
+ *     `apikey` header on the actual request. Some browsers (and the
+ *     Supabase functions gateway) propagate that to the preflight as
+ *     well, so the gateway routes OPTIONS straight to the function.
+ *   - "no-apikey": a plain `fetch()` from page code, a curl probe, or a
+ *     non-supabase-js client. Preflights arrive at the gateway WITHOUT
+ *     credentials, and the Supabase gateway answers with its own
+ *     permissive default (often `Access-Control-Allow-Origin: *`)
+ *     before the function is invoked.
+ *
+ * Both paths are exercised because the security invariant we care
+ * about is the same: cross-origin callers must never be able to read
+ * credentialed responses. The gateway's `*` answer is browser-safe (a
+ * browser rejects `*` + credentials), so for `no-apikey` mode we drop
+ * the "never `*`" assertion and only check the credential / origin-echo
+ * invariants.
+ */
+type ApikeyMode = "with-apikey" | "no-apikey";
+
 async function preflight(
   name: string,
   origin: string,
   method: string,
   headers: string,
+  apikeyMode: ApikeyMode = "with-apikey",
 ) {
+  const requestHeaders: Record<string, string> = {
+    Origin: origin,
+    "Access-Control-Request-Method": method,
+    "Access-Control-Request-Headers": headers,
+  };
+  if (apikeyMode === "with-apikey") {
+    // Force the Supabase functions gateway to route the preflight to
+    // the function itself instead of answering with its own fallback
+    // CORS response (which exposes `Access-Control-Allow-Origin: *`
+    // and masks whatever the function actually returns).
+    requestHeaders.apikey = SUPABASE_PUBLISHABLE_KEY;
+  }
   return await fetchWithColdStartRetry(fnUrl(name), {
     method: "OPTIONS",
-    headers: {
-      Origin: origin,
-      "Access-Control-Request-Method": method,
-      "Access-Control-Request-Headers": headers,
-      // Force the Supabase functions gateway to route the preflight to
-      // the function itself instead of answering with its own fallback
-      // CORS response (which exposes `Access-Control-Allow-Origin: *`
-      // and masks whatever the function actually returns).
-      apikey: SUPABASE_PUBLISHABLE_KEY,
-    },
+    headers: requestHeaders,
   });
 }
+
 
 
 async function postRequest(
@@ -143,17 +170,25 @@ async function postRequest(
 }
 
 
-function expectNoOriginEcho(res: Response, forbidden: string, label: string) {
+function expectNoOriginEcho(
+  res: Response,
+  forbidden: string,
+  label: string,
+  opts: { allowWildcard?: boolean } = {},
+) {
   const acao = res.headers.get("access-control-allow-origin");
   expect(
     acao === forbidden,
     `${label}: ACAO must not echo forbidden origin "${forbidden}" (got "${acao}")`,
   ).toBe(false);
-  expect(
-    acao === "*",
-    `${label}: ACAO must not be wildcard (got "${acao}")`,
-  ).toBe(false);
+  if (!opts.allowWildcard) {
+    expect(
+      acao === "*",
+      `${label}: ACAO must not be wildcard (got "${acao}")`,
+    ).toBe(false);
+  }
 }
+
 
 function expectNoCredentialsEnabled(res: Response, label: string) {
   const acac = res.headers.get("access-control-allow-credentials");
@@ -176,6 +211,8 @@ function expectNoMethodOverreach(res: Response, label: string) {
   }
 }
 
+const APIKEY_MODES: ApikeyMode[] = ["with-apikey", "no-apikey"];
+
 describe("Edge function CORS — disallowed origin × custom-header preflights", () => {
   for (const fn of FUNCTIONS) {
     describe(fn, () => {
@@ -188,53 +225,84 @@ describe("Edge function CORS — disallowed origin × custom-header preflights",
       const NETWORK_TIMEOUT_MS = 30_000;
 
       // -------- positive control --------
+      // Allowed-origin echo is a function-level guarantee, so it's only
+      // meaningful in `with-apikey` mode (the gateway fallback can't
+      // know which origin to echo). For `no-apikey` we just assert the
+      // gateway doesn't return a credentialed response.
       for (const set of CUSTOM_HEADER_SETS) {
-        it(
-          `preflight from allowed origin with "${set.label}" headers echoes the allowed origin`,
-          async () => {
-            const res = await preflight(fn, ALLOWED_ORIGIN, "POST", set.value);
-            await res.text();
-            const acao = res.headers.get("access-control-allow-origin");
-            expect(acao).toBe(ALLOWED_ORIGIN);
-            // The legitimate client must be told the headers are allowed,
-            // otherwise we're silently breaking it.
-            const allowedHdrs = (
-              res.headers.get("access-control-allow-headers") || ""
-            ).toLowerCase();
-            // Authorization is the one header every set above contains.
-            expect(allowedHdrs).toContain("authorization");
-            // Credentials must still not be enabled (we don't use cookies).
-            expectNoCredentialsEnabled(res, `${fn} allowed ${set.label}`);
-          },
-          NETWORK_TIMEOUT_MS,
-        );
+        for (const apikeyMode of APIKEY_MODES) {
+          it(
+            `preflight from allowed origin with "${set.label}" headers [${apikeyMode}] is safe`,
+            async () => {
+              const res = await preflight(
+                fn,
+                ALLOWED_ORIGIN,
+                "POST",
+                set.value,
+                apikeyMode,
+              );
+              await res.text();
+              const acao = res.headers.get("access-control-allow-origin");
+              if (apikeyMode === "with-apikey") {
+                expect(acao).toBe(ALLOWED_ORIGIN);
+                const allowedHdrs = (
+                  res.headers.get("access-control-allow-headers") || ""
+                ).toLowerCase();
+                expect(allowedHdrs).toContain("authorization");
+              } else {
+                // Gateway fallback is allowed to be `*` or to echo the
+                // origin; either way it must NOT enable credentials and
+                // must NOT return a value that breaks the legitimate
+                // client (empty / "null" / "undefined").
+                if (acao !== null) {
+                  expect(acao === "" || acao === "null" || acao === "undefined").toBe(false);
+                }
+              }
+              expectNoCredentialsEnabled(res, `${fn} allowed ${set.label} [${apikeyMode}]`);
+            },
+            NETWORK_TIMEOUT_MS,
+          );
+        }
       }
 
-      // -------- negative: every disallowed origin × every header set × every method --------
+      // -------- negative: every disallowed origin × every header set × every method × every apikey mode --------
       for (const origin of DISALLOWED_ORIGINS) {
         for (const set of CUSTOM_HEADER_SETS) {
           for (const method of PREFLIGHT_METHODS) {
-            it(
-              `preflight ${method} from "${origin}" with "${set.label}" headers does not reflect origin or enable credentials`,
-              async () => {
-                const res = await preflight(fn, origin, method, set.value);
-                await res.text();
-                const label = `${fn} ${method} ${origin} [${set.label}]`;
-                expectNoOriginEcho(res, origin, label);
-                expectNoCredentialsEnabled(res, label);
-                expectNoMethodOverreach(res, label);
+            for (const apikeyMode of APIKEY_MODES) {
+              it(
+                `preflight ${method} from "${origin}" with "${set.label}" headers [${apikeyMode}] does not reflect origin or enable credentials`,
+                async () => {
+                  const res = await preflight(fn, origin, method, set.value, apikeyMode);
+                  await res.text();
+                  const label = `${fn} ${method} ${origin} [${set.label}] [${apikeyMode}]`;
+                  // The Supabase gateway's fallback preflight (no-apikey
+                  // mode) legitimately returns `Access-Control-Allow-Origin: *`,
+                  // which is browser-safe because the same gateway never
+                  // sets `Access-Control-Allow-Credentials: true`. The
+                  // origin-echo check below is still strict — the gateway
+                  // must never echo the attacker origin verbatim.
+                  expectNoOriginEcho(res, origin, label, {
+                    allowWildcard: apikeyMode === "no-apikey",
+                  });
+                  expectNoCredentialsEnabled(res, label);
+                  expectNoMethodOverreach(res, label);
 
-                // Hardening headers must still be present even on a
-                // preflight from an attacker origin — the function should
-                // never serve a response that could be sniffed/framed.
-                expect(res.headers.get("x-content-type-options")).toBe("nosniff");
-                expect(res.headers.get("x-frame-options")).toBe("DENY");
-                expect(res.headers.get("referrer-policy")).toBe(
-                  "strict-origin-when-cross-origin",
-                );
-              },
-              NETWORK_TIMEOUT_MS,
-            );
+                  // Hardening headers must still be present on responses
+                  // the function itself produced (`with-apikey` mode).
+                  // The gateway fallback (no-apikey) does not run the
+                  // function, so we only assert these for with-apikey.
+                  if (apikeyMode === "with-apikey") {
+                    expect(res.headers.get("x-content-type-options")).toBe("nosniff");
+                    expect(res.headers.get("x-frame-options")).toBe("DENY");
+                    expect(res.headers.get("referrer-policy")).toBe(
+                      "strict-origin-when-cross-origin",
+                    );
+                  }
+                },
+                NETWORK_TIMEOUT_MS,
+              );
+            }
           }
         }
 
@@ -259,6 +327,7 @@ describe("Edge function CORS — disallowed origin × custom-header preflights",
           NETWORK_TIMEOUT_MS,
         );
       }
+
 
       // -------- preflight WITHOUT Origin (e.g. some non-browser callers) --------
       it(
