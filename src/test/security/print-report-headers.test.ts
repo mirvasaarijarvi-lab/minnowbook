@@ -38,7 +38,7 @@ function cspDirective(cspContent: string, directive: string): string | null {
 describe("Print-report popup: CSP and security meta tags", () => {
   // Isolate the handlePrint body so unrelated source doesn't create false hits.
   const handlePrintMatch = reportsPanelSrc.match(
-    /const handlePrint = \(\) => \{[\s\S]*?\n  \};/,
+    /const handlePrint = \(\) => \{[\s\S]*?\n {2}\};/,
   );
 
   it("locates handlePrint in the source", () => {
