@@ -280,6 +280,15 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
 
     const body = await req.json();
 
+    // Warmup ping: lets callers (CI smoke tests, schedulers) wake the worker
+    // without performing a real booking. Returns 200 so logs read "warmup OK".
+    if (body && body.warmup === true && !body.tenant_id) {
+      return new Response(JSON.stringify({ ok: true, warmup: true }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const tenant_id = validateUuid(body.tenant_id, "tenant_id", true)!;
     const guest_name = validateString(body.guest_name, "guest_name", 100, true)!;
     const guest_email = validateEmail(body.guest_email);
