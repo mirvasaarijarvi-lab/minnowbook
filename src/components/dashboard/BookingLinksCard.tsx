@@ -7,7 +7,7 @@ import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
 import { useTierGate } from "@/hooks/useTierGate";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Link2, Copy, ExternalLink, Building2, Home, UtensilsCrossed } from "lucide-react";
+import { Link2, Copy, ExternalLink, Building2, Home, UtensilsCrossed, HeartPulse, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import DashboardTooltip from "./DashboardTooltip";
 
@@ -16,6 +16,8 @@ const TYPE_ICONS: Record<string, React.ElementType> = {
   guesthouse: Home,
   hotel: Home,
   restaurant: UtensilsCrossed,
+  wellness: HeartPulse,
+  custom: Sparkles,
 };
 
 const LinkRow = ({ url, icon: Icon, copyLink }: { url: string; icon: React.ElementType; copyLink: (u: string) => void }) => (
