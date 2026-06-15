@@ -87,6 +87,7 @@ const ConfirmationEmailPreview = ({
   customMessage,
 }: ConfirmationEmailPreviewProps) => {
   const t = useT();
+  const { typeLabel: getTypeLabel } = useResourceTypeLabel();
   const { language } = useLanguage();
   const dateLocale: Locale = language === "fi" ? fiFns : language === "sv" ? svFns : enUS;
   const isCancellation = variant === "cancellation";
