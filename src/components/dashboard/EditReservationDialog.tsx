@@ -85,7 +85,7 @@ interface EditReservationDialogProps {
   onSelectLinked?: (linked: { id: string; [key: string]: any }) => void;
 }
 
-const RESERVATION_TYPES = ["restaurant", "venue", "guesthouse", "hotel"] as const;
+
 
 const EditReservationDialog = ({
   reservation,
@@ -647,7 +647,10 @@ const EditReservationDialog = ({
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {(allowedTypes.length > 0 ? allowedTypes : RESERVATION_TYPES).map((type) => (
+                    {(allowedTypes.length > 0
+                      ? allowedTypes
+                      : (reservation?.reservation_type ? [reservation.reservation_type] : [])
+                    ).map((type) => (
                       <SelectItem key={type} value={type}>
                         {tDynamic(`dashboard.${type}`)}
                       </SelectItem>

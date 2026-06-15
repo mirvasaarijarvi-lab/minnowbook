@@ -22,7 +22,7 @@ import DashboardTooltip from "./DashboardTooltip";
 const OffersManager = () => {
   const t = useT();
   const dateLocale = useDateLocale();
-  const { tenantId } = useTenant();
+  const { tenantId, tenant } = useTenant();
   const [showArchived, setShowArchived] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const { data: offers = [], isLoading } = useOffers(showArchived);
@@ -122,12 +122,34 @@ const OffersManager = () => {
       // if the offer row is later archived.
       const linkedGroupId = crypto.randomUUID();
 
+      // Resolve the main reservation_type: look up the resource by name,
+      // otherwise fall back to the tenant's first allowed type, then "venue".
+      let mainType = "venue";
+      if (offer.event_space) {
+        const { data: matchResource } = await supabase
+          .from("resources")
+          .select("resource_type")
+          .eq("tenant_id", offer.tenant_id)
+          .eq("name", offer.event_space)
+          .limit(1)
+          .maybeSingle();
+        if (matchResource?.resource_type) {
+          mainType = matchResource.resource_type;
+        }
+      }
+      if (mainType === "venue") {
+        const allowed = (tenant?.allowed_reservation_types as string[] | undefined) ?? [];
+        if (!allowed.includes("venue") && allowed.length > 0) {
+          mainType = allowed[0];
+        }
+      }
+
       // Create main reservation
       const { data: mainRes, error: mainErr } = await supabase
         .from("reservations")
         .insert({
           tenant_id: offer.tenant_id,
-          reservation_type: "venue",
+          reservation_type: mainType,
           status: "confirmed",
           date: offer.event_date,
           start_time: offer.start_time ? `${offer.start_time}:00` : null,
@@ -139,7 +161,7 @@ const OffersManager = () => {
           event_type: offer.event_type || null,
           room_type: offer.event_space,
           special_requests: offer.special_requests || null,
-          staff_notes: "Offer → Reservation",
+          staff_notes: "Offer to Reservation",
           language: offer.language || "en",
           linked_group_id: linkedGroupId,
         } as any)

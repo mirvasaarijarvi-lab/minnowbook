@@ -55,8 +55,17 @@ export const useResourceTypeLabel = () => {
     hotel: customNames["hotel"] || customNames["guesthouse"] || t("blocking.hotelGuesthouse"),
     restaurant: customNames["restaurant"] || t("blocking.restaurant"),
     venue: customNames["venue"] || t("blocking.venueEventSpace"),
-    wellness: customNames["wellness"] || t("blocking.wellness"),
+    wellness: customNames["wellness"] || t("blocking.wellness" as any) || t("dashboard.wellness"),
+    custom: customNames["custom"] || t("dashboard.custom" as any) || "Custom service",
   };
 
-  return { typeLabel, selectableTypeLabels, customNames };
+  /** Returns a generic noun for the resource of a given type (e.g. "room", "table", "event space"). */
+  const resourceNoun = (type: string): string => {
+    if (type === "restaurant") return t("blocking.tableArea");
+    if (type === "venue") return t("blocking.eventSpace");
+    if (type === "hotel" || type === "guesthouse") return t("blocking.room");
+    return t("blocking.resource" as any) || "resource";
+  };
+
+  return { typeLabel, selectableTypeLabels, customNames, resourceNoun };
 };

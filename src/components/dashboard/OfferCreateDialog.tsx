@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useDateLocale } from "@/hooks/useDateLocale";
+import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
 
 const allTimes: string[] = [];
 for (let h = 6; h <= 23; h++) {
@@ -44,9 +45,13 @@ const OfferCreateDialog = ({ open, onOpenChange, editOffer }: Props) => {
   const updateOffer = useUpdateOffer();
   const isEditing = !!editOffer;
 
-  // Fetch venue resources for event space dropdown
+  const { typeLabel } = useResourceTypeLabel();
+
+  // Fetch all active resources to populate the event-space dropdown. Offers
+  // are not strictly venue-only; a wellness or custom tenant should still
+  // see their own resources here.
   const { data: venues = [] } = useQuery({
-    queryKey: ["venue-resources", tenantId],
+    queryKey: ["offer-event-space-resources", tenantId],
     queryFn: async () => {
       if (!tenantId) return [];
       const { data } = await supabase
@@ -54,7 +59,7 @@ const OfferCreateDialog = ({ open, onOpenChange, editOffer }: Props) => {
         .select("name, resource_type")
         .eq("tenant_id", tenantId)
         .eq("is_active", true)
-        .in("resource_type", ["venue"]);
+        .order("name");
       return data?.map((r) => r.name) || [];
     },
     enabled: !!tenantId,
@@ -168,13 +173,10 @@ const OfferCreateDialog = ({ open, onOpenChange, editOffer }: Props) => {
 
   const enabledLinked = resourceTypes.filter((k) => linked[k]?.enabled);
 
-  // Resource type labels for linked reservations
-  const typeLabels: Record<string, string> = {
-    hotel: t("dashboard.hotel"),
-    guesthouse: t("dashboard.guesthouse"),
-    restaurant: t("dashboard.restaurant"),
-    venue: t("dashboard.venue"),
-  };
+  // Resource type labels for linked reservations (uses tenant's custom names where present).
+  const typeLabels: Record<string, string> = Object.fromEntries(
+    resourceTypes.map((tp) => [tp, typeLabel(tp)])
+  );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

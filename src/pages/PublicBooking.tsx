@@ -1668,7 +1668,7 @@ const PublicBookingInner = () => {
                 siteId={activeSiteId}
                 primaryColor={primaryColor}
                 accentColor={accentColor}
-                thresholds={(settings?.availability_thresholds as Record<string, number>) ?? { restaurant: 5, venue: 5, guesthouse: 5, hotel: 5 }}
+                thresholds={(settings?.availability_thresholds as Record<string, number>) ?? { restaurant: 5, venue: 5, guesthouse: 5, hotel: 5, wellness: 5, custom: 5 }}
                 reservationType={form.reservation_type}
                 t={t}
               />
@@ -2354,7 +2354,7 @@ const PublicBookingInner = () => {
           )}
 
           {/* Resource selection for venue (non-accommodation, non-restaurant) */}
-          {resources && resources.length > 0 && form.reservation_type && form.reservation_type !== "restaurant" && form.reservation_type !== "custom" && !isAccommodationType && (
+          {resources && resources.length > 0 && form.reservation_type && form.reservation_type !== "restaurant" && !isAccommodationType && (
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg font-serif" style={{ color: primaryColor }}>

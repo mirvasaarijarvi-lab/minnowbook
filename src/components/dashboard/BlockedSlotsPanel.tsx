@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import RecurringBlocksPanel from "./RecurringBlocksPanel";
 import { supabase } from "@/integrations/supabase/client";
@@ -65,25 +65,12 @@ const BlockedSlotsPanel = () => {
   const [form, setForm] = useState({
     start_time: "",
     end_time: "",
-    resource_type: "hotel",
+    resource_type: "",
     resource_id: "",
     reason: "",
   });
 
-  const { typeLabel: resourceTypeLabel, selectableTypeLabels: selectableTypes } = useResourceTypeLabel();
-
-  const resourceTypeLabels: Record<string, string> = {
-    hotel: selectableTypes["hotel"],
-    guesthouse: selectableTypes["hotel"],
-    restaurant: selectableTypes["restaurant"],
-    venue: selectableTypes["venue"],
-  };
-
-  const resourceNoun = (type: string) => {
-    if (type === "restaurant") return t("blocking.tableArea");
-    if (type === "venue") return t("blocking.eventSpace");
-    return t("blocking.room");
-  };
+  const { typeLabel: resourceTypeLabel, selectableTypeLabels: selectableTypes, resourceNoun } = useResourceTypeLabel();
 
   const { data: resources } = useQuery({
     queryKey: ["resources", tenantId, selectedSiteId],
@@ -112,6 +99,23 @@ const BlockedSlotsPanel = () => {
     },
     enabled: !!tenantId,
   });
+
+  // Only show resource-type options the tenant actually has (collapse hotel+guesthouse into "hotel").
+  const availableTypes = useMemo(() => {
+    const present = new Set<string>();
+    (resources ?? []).forEach((r) => {
+      if (!r.resource_type) return;
+      present.add(r.resource_type === "guesthouse" ? "hotel" : r.resource_type);
+    });
+    return Array.from(present).filter((tp) => selectableTypes[tp]);
+  }, [resources, selectableTypes]);
+
+  // Default resource_type to the first available when resources load.
+  useEffect(() => {
+    if (!form.resource_type && availableTypes.length > 0) {
+      setForm((prev) => ({ ...prev, resource_type: availableTypes[0] }));
+    }
+  }, [availableTypes, form.resource_type]);
 
   const filteredResources = useMemo(() => {
     const types = form.resource_type === "hotel" ? ["hotel", "guesthouse"] : [form.resource_type];
@@ -228,7 +232,7 @@ const BlockedSlotsPanel = () => {
 
   const resetForm = () => {
     setDateRange(undefined);
-    setForm({ start_time: "", end_time: "", resource_type: "hotel", resource_id: "", reason: "" });
+    setForm({ start_time: "", end_time: "", resource_type: availableTypes[0] ?? "", resource_id: "", reason: "" });
     setUseTimeRange(false);
     setBlockSpecificResource(false);
   };
@@ -330,8 +334,8 @@ const BlockedSlotsPanel = () => {
                 }}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    {Object.entries(selectableTypes).map(([key, label]) => (
-                      <SelectItem key={key} value={key}>{label}</SelectItem>
+                    {availableTypes.map((key) => (
+                      <SelectItem key={key} value={key}>{selectableTypes[key]}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -436,8 +440,8 @@ const BlockedSlotsPanel = () => {
             <SelectTrigger className="w-full sm:w-[160px] h-8 text-sm"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{t("blocking.allTypes")}</SelectItem>
-              {Object.entries(selectableTypes).map(([key, label]) => (
-                <SelectItem key={key} value={key}>{label}</SelectItem>
+              {availableTypes.map((key) => (
+                <SelectItem key={key} value={key}>{selectableTypes[key]}</SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -490,7 +494,7 @@ const BlockedSlotsPanel = () => {
                         </Badge>
                       )}
                       <Badge variant="secondary" className="text-xs capitalize">
-                        {resourceTypeLabels[slot.resource_type] ?? slot.resource_type}
+                        {resourceTypeLabel(slot.resource_type)}
                       </Badge>
                       {slot.resource && (
                         <Badge variant="outline" className="text-xs">

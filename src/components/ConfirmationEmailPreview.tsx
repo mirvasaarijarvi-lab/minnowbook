@@ -1,6 +1,7 @@
 import { useEffect, useMemo } from "react";
 import DOMPurify from "dompurify";
 import { useT, useLanguage } from "@/contexts/I18nContext";
+import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
 import { format } from "date-fns";
 import { fi as fiFns, enUS, sv as svFns, type Locale } from "date-fns/locale";
 
@@ -86,6 +87,7 @@ const ConfirmationEmailPreview = ({
   customMessage,
 }: ConfirmationEmailPreviewProps) => {
   const t = useT();
+  const { typeLabel: getTypeLabel } = useResourceTypeLabel();
   const { language } = useLanguage();
   const dateLocale: Locale = language === "fi" ? fiFns : language === "sv" ? svFns : enUS;
   const isCancellation = variant === "cancellation";
@@ -115,15 +117,10 @@ const ConfirmationEmailPreview = ({
 
   const isVenue = reservation.reservation_type === "venue";
 
-  const typeLabel = useMemo(() => {
-    const map: Record<string, string> = {
-      restaurant: t("dashboard.restaurant"),
-      venue: t("dashboard.venue"),
-      guesthouse: t("dashboard.guesthouse"),
-      hotel: t("dashboard.hotel"),
-    };
-    return map[reservation.reservation_type] || reservation.reservation_type;
-  }, [reservation.reservation_type, t]);
+  const typeLabel = useMemo(
+    () => getTypeLabel(reservation.reservation_type),
+    [reservation.reservation_type, getTypeLabel]
+  );
 
   const roomTypeLabel = useMemo(() => {
     if (!reservation.room_type) return null;
