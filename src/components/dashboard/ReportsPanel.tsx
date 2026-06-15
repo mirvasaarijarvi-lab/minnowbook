@@ -501,7 +501,7 @@ const ReportsPanel = () => {
 
     const summaryRows = Object.entries(stats).map(([key, s]) => {
       const label = key === "all" ? t("reports.total") : key;
-      return `<tr><td><strong>${label}</strong></td><td>${s.total}</td><td>${s.confirmed}</td><td>${s.pending}</td></tr>`;
+      return `<tr><td><strong>${esc(label)}</strong></td><td>${s.total}</td><td>${s.confirmed}</td><td>${s.pending}</td></tr>`;
     }).join("");
 
     pw.document.write(`<!DOCTYPE html><html><head><title>${t("reports.print.title")}</title>
