@@ -247,6 +247,10 @@ describe("Edge function CORS — disallowed origin × custom-header preflights",
               "Access-Control-Request-Method": "POST",
               "Access-Control-Request-Headers":
                 "authorization, content-type, apikey, x-client-info",
+              // See `preflight()` above: required so the Supabase
+              // functions gateway routes to the function instead of
+              // returning its own permissive default preflight.
+              apikey: SUPABASE_PUBLISHABLE_KEY,
             },
           });
           await res.text();
