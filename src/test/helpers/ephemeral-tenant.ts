@@ -97,7 +97,7 @@ export async function createEphemeralTenant(
     is_active: true,
   });
   if (te) {
-    await admin.auth.admin.deleteUser(ownerUserId).catch(() => {});
+    try { await admin.auth.admin.deleteUser(ownerUserId); } catch { /* ignore */ }
     throw te;
   }
 
