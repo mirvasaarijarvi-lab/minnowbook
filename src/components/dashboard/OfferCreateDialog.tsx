@@ -173,13 +173,10 @@ const OfferCreateDialog = ({ open, onOpenChange, editOffer }: Props) => {
 
   const enabledLinked = resourceTypes.filter((k) => linked[k]?.enabled);
 
-  // Resource type labels for linked reservations
-  const typeLabels: Record<string, string> = {
-    hotel: t("dashboard.hotel"),
-    guesthouse: t("dashboard.guesthouse"),
-    restaurant: t("dashboard.restaurant"),
-    venue: t("dashboard.venue"),
-  };
+  // Resource type labels for linked reservations (uses tenant's custom names where present).
+  const typeLabels: Record<string, string> = Object.fromEntries(
+    resourceTypes.map((tp) => [tp, typeLabel(tp)])
+  );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
