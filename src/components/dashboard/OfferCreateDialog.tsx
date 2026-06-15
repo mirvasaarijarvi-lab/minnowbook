@@ -45,9 +45,13 @@ const OfferCreateDialog = ({ open, onOpenChange, editOffer }: Props) => {
   const updateOffer = useUpdateOffer();
   const isEditing = !!editOffer;
 
-  // Fetch venue resources for event space dropdown
+  const { typeLabel } = useResourceTypeLabel();
+
+  // Fetch all active resources to populate the event-space dropdown. Offers
+  // are not strictly venue-only; a wellness or custom tenant should still
+  // see their own resources here.
   const { data: venues = [] } = useQuery({
-    queryKey: ["venue-resources", tenantId],
+    queryKey: ["offer-event-space-resources", tenantId],
     queryFn: async () => {
       if (!tenantId) return [];
       const { data } = await supabase
@@ -55,7 +59,7 @@ const OfferCreateDialog = ({ open, onOpenChange, editOffer }: Props) => {
         .select("name, resource_type")
         .eq("tenant_id", tenantId)
         .eq("is_active", true)
-        .in("resource_type", ["venue"]);
+        .order("name");
       return data?.map((r) => r.name) || [];
     },
     enabled: !!tenantId,
