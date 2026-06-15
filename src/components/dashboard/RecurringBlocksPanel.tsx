@@ -63,27 +63,14 @@ const RecurringBlocksPanel = () => {
   const [form, setForm] = useState({
     start_time: "",
     end_time: "",
-    resource_type: "hotel",
+    resource_type: "",
     resource_id: "",
     reason: "",
   });
 
   const dayAbbreviations = t("blocking.dayNames").split(",");
 
-  const { typeLabel: resourceTypeLabel, selectableTypeLabels: selectableTypes } = useResourceTypeLabel();
-
-  const resourceTypeLabels: Record<string, string> = {
-    hotel: selectableTypes["hotel"],
-    guesthouse: selectableTypes["hotel"],
-    restaurant: selectableTypes["restaurant"],
-    venue: selectableTypes["venue"],
-  };
-
-  const resourceNoun = (type: string) => {
-    if (type === "restaurant") return t("blocking.tableArea");
-    if (type === "venue") return t("blocking.eventSpace");
-    return t("blocking.room");
-  };
+  const { typeLabel: resourceTypeLabel, selectableTypeLabels: selectableTypes, resourceNoun } = useResourceTypeLabel();
 
   const { data: resources } = useQuery({
     queryKey: ["resources", tenantId, selectedSiteId],
