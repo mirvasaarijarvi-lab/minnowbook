@@ -232,7 +232,7 @@ const BlockedSlotsPanel = () => {
 
   const resetForm = () => {
     setDateRange(undefined);
-    setForm({ start_time: "", end_time: "", resource_type: "hotel", resource_id: "", reason: "" });
+    setForm({ start_time: "", end_time: "", resource_type: availableTypes[0] ?? "", resource_id: "", reason: "" });
     setUseTimeRange(false);
     setBlockSpecificResource(false);
   };
