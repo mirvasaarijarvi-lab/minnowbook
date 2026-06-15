@@ -440,8 +440,8 @@ const BlockedSlotsPanel = () => {
             <SelectTrigger className="w-full sm:w-[160px] h-8 text-sm"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{t("blocking.allTypes")}</SelectItem>
-              {Object.entries(selectableTypes).map(([key, label]) => (
-                <SelectItem key={key} value={key}>{label}</SelectItem>
+              {availableTypes.map((key) => (
+                <SelectItem key={key} value={key}>{selectableTypes[key]}</SelectItem>
               ))}
             </SelectContent>
           </Select>
