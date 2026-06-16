@@ -115,7 +115,7 @@ runs:
         path: |
           ~/.bun
           ~/.bun-verify
-        key: bun-${{ runner.os }}-${{ runner.arch }}-v${{ steps.pin.outputs.version }}
+        key: bun-${{ runner.os }}-${{ runner.arch }}-v${{ steps.pin.outputs.version }}-toolchain-v2
 
     - name: Use cached Bun
       if: steps.bun-cache.outputs.cache-hit == 'true'
@@ -125,6 +125,24 @@ runs:
         # cache hit it never runs, so we mirror that behaviour here.
         echo "$HOME/.bun/bin" >> "$GITHUB_PATH"
         echo "✅ Bun cache hit — skipped re-download."
+
+    - name: Validate cached Bun version
+      id: cached-bun-validation
+      if: steps.bun-cache.outputs.cache-hit == 'true'
+      shell: bash
+      env:
+        EXPECTED_VERSION: ${{ steps.pin.outputs.version }}
+      run: |
+        set -euo pipefail
+        ACTUAL_VERSION="$(bun --version 2>/dev/null || true)"
+        if [ "$ACTUAL_VERSION" = "${EXPECTED_VERSION#v}" ]; then
+          echo "valid=true" >> "$GITHUB_OUTPUT"
+          echo "✅ Cached Bun version verified: $ACTUAL_VERSION"
+          exit 0
+        fi
+        echo "::warning::Cached Bun version '$ACTUAL_VERSION' does not match expected '${EXPECTED_VERSION#v}'. Reinstalling pinned Bun."
+        rm -rf "$HOME/.bun"
+        echo "valid=false" >> "$GITHUB_OUTPUT"
 
     - name: Setup Bun (attempt 1)
       id: bun1
