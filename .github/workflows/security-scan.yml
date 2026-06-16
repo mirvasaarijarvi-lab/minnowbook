@@ -64,13 +64,13 @@ jobs:
           #   2026-09-01.
           ALLOWLIST="GHSA-5xrq-8626-4rwp"
 
-          raw=$(bun audit --json --audit-level=high 2>/dev/null || true)
+          raw=$(bun audit --json --audit-level=moderate 2>/dev/null || true)
           # Re-run without --json to surface human-readable output in logs.
-          bun audit --audit-level=high || true
+          bun audit --audit-level=moderate || true
 
           if [ -z "$raw" ]; then
             echo "::warning::bun audit returned no JSON output; skipping allowlist filter."
-            bun audit --audit-level=high
+            bun audit --audit-level=moderate
             status=$?
           else
             node -e "
