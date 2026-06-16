@@ -58,14 +58,13 @@ jobs:
         with:
           path: |
             ~/.bun/install/cache
-            node_modules
           key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock', 'bun.lockb', 'package.json') }}
-          restore-keys: |
-            ${{ runner.os }}-bun-
 
       - name: Install dependencies
         if: steps.docker-check.outputs.available == 'true'
-        run: bun install --frozen-lockfile
+        run: |
+          rm -rf node_modules
+          bun install --frozen-lockfile
 
       - name: Setup Supabase CLI
         id: supabase-cli
