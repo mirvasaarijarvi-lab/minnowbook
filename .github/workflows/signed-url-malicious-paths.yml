@@ -58,7 +58,9 @@ jobs:
           key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock', 'bun.lockb', 'package.json') }}
 
       - name: Install dependencies
-        run: bun install --frozen-lockfile
+        run: |
+          rm -rf node_modules
+          bun install --frozen-lockfile
 
       - name: Install Playwright browsers
         # Chromium only. The spec calls the deployed
