@@ -7,5 +7,20 @@
     "All fields except `id` and `expires` are documentation only.",
     "Audit JSON parsing and matching live in .github/workflows/scripts/apply-allowlist.mjs."
   ],
-  "entries": []
+  "entries": [
+    {
+      "id": "GHSA-9jcx-v3wj-wh4m",
+      "package": "react-router",
+      "severity": "moderate",
+      "expires": "2026-09-14",
+      "reason": "Project is pinned to react-router 6.30.1 (latest v6 patch); upstream fix is only in 7.x. Upgrade to v7 is intentionally deferred per project policy (see mem://architecture/dependency-pinning). Redirect surface is reviewed; no untrusted external redirects in app routes."
+    },
+    {
+      "id": "GHSA-2j2x-hqr9-3h42",
+      "package": "react-router",
+      "severity": "moderate",
+      "expires": "2026-09-14",
+      "reason": "Project is pinned to react-router 6.30.1 (latest v6 patch); upstream fix is only in 7.x. Upgrade to v7 is intentionally deferred per project policy (see mem://architecture/dependency-pinning). No same-origin redirects accept user-controlled paths starting with //."
+    }
+  ]
 }
