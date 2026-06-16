@@ -315,7 +315,7 @@ const EditReservationDialog = ({
 
       const { error } = await supabase
         .from("reservations")
-        .update(updatePayload)
+        .update(updatePayload as any)
         .eq("id", reservation.id)
         .eq("tenant_id", reservation.tenant_id);
       if (error) throw error;
@@ -404,7 +404,7 @@ const EditReservationDialog = ({
         if (Object.keys(payload).length === 1) continue; // only updated_at
         const { error: updErr } = await supabase
           .from("reservations")
-          .update(payload)
+          .update(payload as any)
           .eq("id", row.id)
           .eq("tenant_id", reservation.tenant_id)
           .eq("linked_group_id", reservation.linked_group_id);
