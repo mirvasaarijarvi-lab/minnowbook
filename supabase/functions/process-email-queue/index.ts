@@ -42,8 +42,20 @@ export async function handleProcessEmailQueueRequest(req: Request): Promise<Resp
     )
   }
 
-  // Auth: verify_jwt = true in config.toml — Supabase gateway validates the
-  // service role JWT from the pg_cron Authorization header before this runs.
+  // Auth guard: this function is invoked by pg_cron with the service role
+  // key in the Authorization header. Reject any caller that does not present
+  // the exact service-role bearer token, since config.toml sets
+  // verify_jwt = false (the Supabase gateway does not pre-validate here).
+  const authHeader = req.headers.get('Authorization') ?? ''
+  const expected = `Bearer ${supabaseServiceKey}`
+  if (authHeader.length !== expected.length || authHeader !== expected) {
+    return new Response(
+      JSON.stringify({ error: 'Unauthorized' }),
+      { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
+  }
+
+
 
   const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
