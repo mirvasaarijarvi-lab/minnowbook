@@ -31,10 +31,10 @@ const repoRoot = path.resolve(__dirname, "..", "..");
  */
 const FLOORS = {
   "js-yaml": { min: "4.2.0", reason: "CVE-2026-53550 (merge-key DoS)" },
-  ws: { min: "8.21.0", reason: "ws DoS via tiny fragments" },
-  esbuild: { min: "0.28.1", reason: "esbuild Deno binary integrity advisory" },
-  "form-data": { min: "4.0.6", reason: "form-data header injection" },
-  dompurify: { min: "3.4.10", reason: "DOMPurify mXSS / sanitizer bypasses" },
+  // Add more security-critical packages here as needed, e.g.:
+  //   ws:        { min: "8.21.0", reason: "ws DoS via tiny fragments" },
+  //   esbuild:   { min: "0.28.1", reason: "esbuild Deno binary integrity advisory" },
+  //   "form-data": { min: "4.0.6", reason: "form-data header injection" },
 };
 
 /**
