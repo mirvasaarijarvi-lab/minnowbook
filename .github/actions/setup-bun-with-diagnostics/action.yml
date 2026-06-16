@@ -115,7 +115,7 @@ runs:
         path: |
           ~/.bun
           ~/.bun-verify
-        key: bun-${{ runner.os }}-${{ runner.arch }}-v${{ steps.pin.outputs.version }}
+        key: bun-${{ runner.os }}-${{ runner.arch }}-v${{ steps.pin.outputs.version }}-toolchain-v2
 
     - name: Use cached Bun
       if: steps.bun-cache.outputs.cache-hit == 'true'
@@ -126,9 +126,27 @@ runs:
         echo "$HOME/.bun/bin" >> "$GITHUB_PATH"
         echo "✅ Bun cache hit — skipped re-download."
 
+    - name: Validate cached Bun version
+      id: cached-bun-validation
+      if: steps.bun-cache.outputs.cache-hit == 'true'
+      shell: bash
+      env:
+        EXPECTED_VERSION: ${{ steps.pin.outputs.version }}
+      run: |
+        set -euo pipefail
+        ACTUAL_VERSION="$(bun --version 2>/dev/null || true)"
+        if [ "$ACTUAL_VERSION" = "${EXPECTED_VERSION#v}" ]; then
+          echo "valid=true" >> "$GITHUB_OUTPUT"
+          echo "✅ Cached Bun version verified: $ACTUAL_VERSION"
+          exit 0
+        fi
+        echo "::warning::Cached Bun version '$ACTUAL_VERSION' does not match expected '${EXPECTED_VERSION#v}'. Reinstalling pinned Bun."
+        rm -rf "$HOME/.bun"
+        echo "valid=false" >> "$GITHUB_OUTPUT"
+
     - name: Setup Bun (attempt 1)
       id: bun1
-      if: steps.bun-cache.outputs.cache-hit != 'true'
+      if: steps.bun-cache.outputs.cache-hit != 'true' || steps.cached-bun-validation.outputs.valid != 'true'
       continue-on-error: true
       uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
       with:
@@ -198,7 +216,7 @@ runs:
     # typical GitHub CDN recovery time for transient 5xx but long
     # enough to let edge caches re-converge.
     - name: Backoff before attempt 2
-      if: steps.bun-cache.outputs.cache-hit != 'true' && steps.bun1.outcome == 'failure' && inputs.max-attempts != '1'
+      if: (steps.bun-cache.outputs.cache-hit != 'true' || steps.cached-bun-validation.outputs.valid != 'true') && steps.bun1.outcome == 'failure' && inputs.max-attempts != '1'
       shell: bash
       run: |
         JITTER=$(( RANDOM % 3 ))
@@ -208,7 +226,7 @@ runs:
 
     - name: Setup Bun (attempt 2)
       id: bun2
-      if: steps.bun-cache.outputs.cache-hit != 'true' && steps.bun1.outcome == 'failure' && inputs.max-attempts != '1'
+      if: (steps.bun-cache.outputs.cache-hit != 'true' || steps.cached-bun-validation.outputs.valid != 'true') && steps.bun1.outcome == 'failure' && inputs.max-attempts != '1'
       continue-on-error: true
       uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
       with:
@@ -216,7 +234,7 @@ runs:
 
     - name: Backoff before attempt 3
       if: |
-        steps.bun-cache.outputs.cache-hit != 'true'
+        (steps.bun-cache.outputs.cache-hit != 'true' || steps.cached-bun-validation.outputs.valid != 'true')
         && steps.bun1.outcome == 'failure'
         && steps.bun2.outcome == 'failure'
         && inputs.max-attempts == '3'
@@ -230,7 +248,7 @@ runs:
     - name: Setup Bun (attempt 3)
       id: bun3
       if: |
-        steps.bun-cache.outputs.cache-hit != 'true'
+        (steps.bun-cache.outputs.cache-hit != 'true' || steps.cached-bun-validation.outputs.valid != 'true')
         && steps.bun1.outcome == 'failure'
         && steps.bun2.outcome == 'failure'
         && inputs.max-attempts == '3'
@@ -242,12 +260,13 @@ runs:
       shell: bash
       env:
         BUN_CACHE_HIT: ${{ steps.bun-cache.outputs.cache-hit }}
+        CACHED_BUN_VALID: ${{ steps.cached-bun-validation.outputs.valid }}
         BUN1_OUTCOME: ${{ steps.bun1.outcome }}
         BUN2_OUTCOME: ${{ steps.bun2.outcome }}
         BUN3_OUTCOME: ${{ steps.bun3.outcome }}
         INPUT_MAX_ATTEMPTS: ${{ inputs.max-attempts }}
       run: |
-        if [ "$BUN_CACHE_HIT" = "true" ] \
+        if [ "$BUN_CACHE_HIT" = "true" ] && [ "$CACHED_BUN_VALID" = "true" ] \
            || [ "$BUN1_OUTCOME" = "success" ] \
            || [ "$BUN2_OUTCOME" = "success" ] \
            || [ "$BUN3_OUTCOME" = "success" ]; then
