@@ -76,7 +76,7 @@ concurrency:
 # `moderate` once the project is clean, again without a PR.
 # ---------------------------------------------------------------
 env:
-  AUDIT_LEVEL: ${{ inputs.audit_level != '' && inputs.audit_level || vars.AUDIT_LEVEL || 'high' }}
+  AUDIT_LEVEL: ${{ inputs.audit_level != '' && inputs.audit_level || vars.AUDIT_LEVEL || 'moderate' }}
 
 jobs:
   audit:
