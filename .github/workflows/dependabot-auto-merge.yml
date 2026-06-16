@@ -67,5 +67,17 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_URL: ${{ github.event.pull_request.html_url }}
+          REPO: ${{ github.repository }}
         run: |
-          gh pr edit "$PR_URL" --add-label "needs-human-review"
+          set -euo pipefail
+          LABEL="needs-human-review"
+          # Create the label if it does not exist yet (idempotent).
+          if ! gh label list --repo "$REPO" --limit 200 --json name -q '.[].name' | grep -Fxq "$LABEL"; then
+            gh label create "$LABEL" \
+              --repo "$REPO" \
+              --color "D93F0B" \
+              --description "Dependabot PR needs manual review before merging" \
+              || true
+          fi
+          gh pr edit "$PR_URL" --add-label "$LABEL"
+
