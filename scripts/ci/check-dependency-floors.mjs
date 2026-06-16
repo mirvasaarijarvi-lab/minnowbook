@@ -43,6 +43,8 @@ const FLOORS = {
   "brace-expansion": { min: "5.0.5", reason: "brace-expansion ReDoS" },
   picomatch: { min: "4.0.4", reason: "picomatch ReDoS" },
   browserslist: { min: "4.24.4", reason: "browserslist regex DoS in transitive consumers" },
+  postcss: { min: "8.4.31", reason: "GHSA-7fh5-64p2-3v2j (PostCSS line return parsing) / GHSA-qx2v-qp2m-jg93" },
+  "react-router": { min: "6.30.1", reason: "GHSA-9jcx-v3wj-wh4m + GHSA-2j2x-hqr9-3h42 (open redirect)" },
 };
 
 /**
