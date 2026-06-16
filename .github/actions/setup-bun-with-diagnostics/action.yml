@@ -234,7 +234,7 @@ runs:
 
     - name: Backoff before attempt 3
       if: |
-        steps.bun-cache.outputs.cache-hit != 'true'
+        (steps.bun-cache.outputs.cache-hit != 'true' || steps.cached-bun-validation.outputs.valid != 'true')
         && steps.bun1.outcome == 'failure'
         && steps.bun2.outcome == 'failure'
         && inputs.max-attempts == '3'
@@ -248,7 +248,7 @@ runs:
     - name: Setup Bun (attempt 3)
       id: bun3
       if: |
-        steps.bun-cache.outputs.cache-hit != 'true'
+        (steps.bun-cache.outputs.cache-hit != 'true' || steps.cached-bun-validation.outputs.valid != 'true')
         && steps.bun1.outcome == 'failure'
         && steps.bun2.outcome == 'failure'
         && inputs.max-attempts == '3'
@@ -260,12 +260,13 @@ runs:
       shell: bash
       env:
         BUN_CACHE_HIT: ${{ steps.bun-cache.outputs.cache-hit }}
+        CACHED_BUN_VALID: ${{ steps.cached-bun-validation.outputs.valid }}
         BUN1_OUTCOME: ${{ steps.bun1.outcome }}
         BUN2_OUTCOME: ${{ steps.bun2.outcome }}
         BUN3_OUTCOME: ${{ steps.bun3.outcome }}
         INPUT_MAX_ATTEMPTS: ${{ inputs.max-attempts }}
       run: |
-        if [ "$BUN_CACHE_HIT" = "true" ] \
+        if [ "$BUN_CACHE_HIT" = "true" ] && [ "$CACHED_BUN_VALID" = "true" ] \
            || [ "$BUN1_OUTCOME" = "success" ] \
            || [ "$BUN2_OUTCOME" = "success" ] \
            || [ "$BUN3_OUTCOME" = "success" ]; then
