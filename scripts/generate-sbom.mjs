@@ -12,7 +12,7 @@
  * /security page.
  */
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
-import { createHash, randomUUID } from "node:crypto";
+import { createHash } from "node:crypto";
 import { execSync } from "node:child_process";
 
 const ROOT = process.cwd();
@@ -23,10 +23,31 @@ function gitMeta() {
     try { return execSync(cmd, { stdio: ["ignore", "pipe", "ignore"] }).toString().trim(); }
     catch { return fallback; }
   };
-  return {
-    sha: safe("git rev-parse HEAD", "unknown"),
-    branch: safe("git rev-parse --abbrev-ref HEAD", "unknown"),
-  };
+  // Use the commit that last touched dependency manifests so the SBOM
+  // is deterministic across re-runs that don't actually change deps.
+  const sha = safe(
+    "git log -n 1 --pretty=format:%H -- package.json bun.lock bun.lockb",
+    "unknown",
+  );
+  const isoTs = safe(
+    "git log -n 1 --pretty=format:%cI -- package.json bun.lock bun.lockb",
+    "1970-01-01T00:00:00Z",
+  );
+  return { sha, isoTs };
+}
+
+// Deterministic UUID v5-ish derivation from a stable string. Avoids
+// pulling in a UUID library; format matches RFC 4122 v5 layout.
+function deterministicUuid(input) {
+  const h = createHash("sha1").update(input).digest("hex");
+  return (
+    h.substring(0, 8) + "-" +
+    h.substring(8, 12) + "-" +
+    "5" + h.substring(13, 16) + "-" +
+    ((parseInt(h.substring(16, 18), 16) & 0x3f) | 0x80).toString(16) +
+    h.substring(18, 20) + "-" +
+    h.substring(20, 32)
+  );
 }
 
 const allDeps = {
@@ -36,27 +57,30 @@ const allDeps = {
   ...(pkg.optionalDependencies ?? {}),
 };
 
-const components = Object.entries(allDeps).map(([name, version]) => {
-  const ver = String(version).replace(/^[\^~>=<]+/, "");
-  const purl = `pkg:npm/${encodeURIComponent(name).replace(/%40/g, "@")}@${ver}`;
-  return {
-    "bom-ref": purl,
-    type: "library",
-    name,
-    version: ver,
-    purl,
-    scope: (pkg.devDependencies ?? {})[name] ? "optional" : "required",
-  };
-});
+const components = Object.entries(allDeps)
+  .sort(([a], [b]) => a.localeCompare(b))
+  .map(([name, version]) => {
+    const ver = String(version).replace(/^[\^~>=<]+/, "");
+    const purl = `pkg:npm/${encodeURIComponent(name).replace(/%40/g, "@")}@${ver}`;
+    return {
+      "bom-ref": purl,
+      type: "library",
+      name,
+      version: ver,
+      purl,
+      scope: (pkg.devDependencies ?? {})[name] ? "optional" : "required",
+    };
+  });
 
 const meta = gitMeta();
+const stableSeed = JSON.stringify({ name: pkg.name, version: pkg.version, components });
 const sbom = {
   bomFormat: "CycloneDX",
   specVersion: "1.5",
-  serialNumber: `urn:uuid:${randomUUID()}`,
+  serialNumber: `urn:uuid:${deterministicUuid(stableSeed)}`,
   version: 1,
   metadata: {
-    timestamp: new Date().toISOString(),
+    timestamp: meta.isoTs,
     tools: [{ vendor: "MimmoBook", name: "generate-sbom", version: "1.0.0" }],
     component: {
       "bom-ref": `pkg:app/${pkg.name}@${pkg.version ?? "0.0.0"}`,
@@ -66,7 +90,6 @@ const sbom = {
       description: pkg.description ?? "MimmoBook reservation management SaaS",
       properties: [
         { name: "git:sha", value: meta.sha },
-        { name: "git:branch", value: meta.branch },
       ],
     },
   },
