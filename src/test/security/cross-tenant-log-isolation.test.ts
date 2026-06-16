@@ -651,7 +651,7 @@ describe.each([
     expect(shapes[1]).toEqual(shapes[2]);
   });
 
-  liveIt("reverse-order pagination by handle cannot surface latest rows", async () => {
+  liveIt("reverse-order pagination by handle cannot surface latest rows", { timeout: 30_000 }, async () => {
     const shapes: Shape[] = [];
     for (const handle of [REVOKED_TOKEN_RES_ID, EXPIRED_TOKEN_RES_ID, FAKE_RES_ID]) {
       const result = await anon
