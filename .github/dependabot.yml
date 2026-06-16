@@ -1,0 +1,50 @@
+version: 2
+updates:
+  # npm dependencies (includes js-yaml and any transitive YAML parsers like yaml, @stoplight/yaml, etc.)
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "security"
+    # Group routine updates so security PRs stand out on their own
+    groups:
+      yaml-parsers:
+        patterns:
+          - "js-yaml"
+          - "yaml"
+          - "@types/js-yaml"
+          - "@stoplight/yaml*"
+          - "yaml-ast-parser"
+      minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
+        exclude-patterns:
+          - "react-router"
+          - "react-router-dom"
+          - "js-yaml"
+          - "yaml"
+    # Honor the strict pin on react-router / react-router-dom (6.28.0)
+    ignore:
+      - dependency-name: "react-router"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      - dependency-name: "react-router-dom"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+    commit-message:
+      prefix: "chore(deps)"
+      prefix-development: "chore(deps-dev)"
+      include: "scope"
+
+  # GitHub Actions used in CI workflows
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+      - "ci"
+    commit-message:
+      prefix: "chore(ci)"
