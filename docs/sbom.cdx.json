@@ -1,10 +1,10 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
-  "serialNumber": "urn:uuid:5025dd57-4cc6-46f1-a762-579fe11eebf6",
+  "serialNumber": "urn:uuid:0cbbc963-787e-514e-8d85-5477ec5fef49",
   "version": 1,
   "metadata": {
-    "timestamp": "2026-06-16T08:05:02.638Z",
+    "timestamp": "2026-06-16T07:48:55Z",
     "tools": [
       {
         "vendor": "MimmoBook",
@@ -21,16 +21,20 @@
       "properties": [
         {
           "name": "git:sha",
-          "value": "a6a5e14f3ee456a74062c8972e972259d3c15088"
-        },
-        {
-          "name": "git:branch",
-          "value": "edit/edt-6eada7e0-ced9-4e8c-ae33-097f8674dfa0"
+          "value": "820a0f796c9c99148d65ea8d0e0bc41fde6b135e"
         }
       ]
     }
   },
   "components": [
+    {
+      "bom-ref": "pkg:npm/@eslint%2Fjs@9.32.0",
+      "type": "library",
+      "name": "@eslint/js",
+      "version": "9.32.0",
+      "purl": "pkg:npm/@eslint%2Fjs@9.32.0",
+      "scope": "optional"
+    },
     {
       "bom-ref": "pkg:npm/@hookform%2Fresolvers@3.10.0",
       "type": "library",
@@ -280,6 +284,14 @@
       "scope": "required"
     },
     {
+      "bom-ref": "pkg:npm/@tailwindcss%2Ftypography@0.5.16",
+      "type": "library",
+      "name": "@tailwindcss/typography",
+      "version": "0.5.16",
+      "purl": "pkg:npm/@tailwindcss%2Ftypography@0.5.16",
+      "scope": "optional"
+    },
+    {
       "bom-ref": "pkg:npm/@tanstack%2Freact-query@5.83.0",
       "type": "library",
       "name": "@tanstack/react-query",
@@ -296,6 +308,22 @@
       "scope": "required"
     },
     {
+      "bom-ref": "pkg:npm/@testing-library%2Fjest-dom@6.6.0",
+      "type": "library",
+      "name": "@testing-library/jest-dom",
+      "version": "6.6.0",
+      "purl": "pkg:npm/@testing-library%2Fjest-dom@6.6.0",
+      "scope": "optional"
+    },
+    {
+      "bom-ref": "pkg:npm/@testing-library%2Freact@16.0.0",
+      "type": "library",
+      "name": "@testing-library/react",
+      "version": "16.0.0",
+      "purl": "pkg:npm/@testing-library%2Freact@16.0.0",
+      "scope": "optional"
+    },
+    {
       "bom-ref": "pkg:npm/@testing-library%2Fuser-event@14.6.1",
       "type": "library",
       "name": "@testing-library/user-event",
@@ -310,6 +338,46 @@
       "version": "3.0.5",
       "purl": "pkg:npm/@types%2Fdompurify@3.0.5",
       "scope": "required"
+    },
+    {
+      "bom-ref": "pkg:npm/@types%2Fnode@22.16.5",
+      "type": "library",
+      "name": "@types/node",
+      "version": "22.16.5",
+      "purl": "pkg:npm/@types%2Fnode@22.16.5",
+      "scope": "optional"
+    },
+    {
+      "bom-ref": "pkg:npm/@types%2Freact@18.3.23",
+      "type": "library",
+      "name": "@types/react",
+      "version": "18.3.23",
+      "purl": "pkg:npm/@types%2Freact@18.3.23",
+      "scope": "optional"
+    },
+    {
+      "bom-ref": "pkg:npm/@types%2Freact-dom@18.3.7",
+      "type": "library",
+      "name": "@types/react-dom",
+      "version": "18.3.7",
+      "purl": "pkg:npm/@types%2Freact-dom@18.3.7",
+      "scope": "optional"
+    },
+    {
+      "bom-ref": "pkg:npm/@vitejs%2Fplugin-react-swc@3.11.0",
+      "type": "library",
+      "name": "@vitejs/plugin-react-swc",
+      "version": "3.11.0",
+      "purl": "pkg:npm/@vitejs%2Fplugin-react-swc@3.11.0",
+      "scope": "optional"
+    },
+    {
+      "bom-ref": "pkg:npm/autoprefixer@10.4.21",
+      "type": "library",
+      "name": "autoprefixer",
+      "version": "10.4.21",
+      "purl": "pkg:npm/autoprefixer@10.4.21",
+      "scope": "optional"
     },
     {
       "bom-ref": "pkg:npm/class-variance-authority@0.7.1",
@@ -360,6 +428,30 @@
       "scope": "required"
     },
     {
+      "bom-ref": "pkg:npm/eslint@9.32.0",
+      "type": "library",
+      "name": "eslint",
+      "version": "9.32.0",
+      "purl": "pkg:npm/eslint@9.32.0",
+      "scope": "optional"
+    },
+    {
+      "bom-ref": "pkg:npm/eslint-plugin-react-hooks@5.2.0",
+      "type": "library",
+      "name": "eslint-plugin-react-hooks",
+      "version": "5.2.0",
+      "purl": "pkg:npm/eslint-plugin-react-hooks@5.2.0",
+      "scope": "optional"
+    },
+    {
+      "bom-ref": "pkg:npm/eslint-plugin-react-refresh@0.4.20",
+      "type": "library",
+      "name": "eslint-plugin-react-refresh",
+      "version": "0.4.20",
+      "purl": "pkg:npm/eslint-plugin-react-refresh@0.4.20",
+      "scope": "optional"
+    },
+    {
       "bom-ref": "pkg:npm/flatted@3.4.2",
       "type": "library",
       "name": "flatted",
@@ -368,12 +460,36 @@
       "scope": "required"
     },
     {
+      "bom-ref": "pkg:npm/globals@15.15.0",
+      "type": "library",
+      "name": "globals",
+      "version": "15.15.0",
+      "purl": "pkg:npm/globals@15.15.0",
+      "scope": "optional"
+    },
+    {
       "bom-ref": "pkg:npm/input-otp@1.4.2",
       "type": "library",
       "name": "input-otp",
       "version": "1.4.2",
       "purl": "pkg:npm/input-otp@1.4.2",
       "scope": "required"
+    },
+    {
+      "bom-ref": "pkg:npm/jsdom@25.0.1",
+      "type": "library",
+      "name": "jsdom",
+      "version": "25.0.1",
+      "purl": "pkg:npm/jsdom@25.0.1",
+      "scope": "optional"
+    },
+    {
+      "bom-ref": "pkg:npm/lovable-tagger@1.1.13",
+      "type": "library",
+      "name": "lovable-tagger",
+      "version": "1.1.13",
+      "purl": "pkg:npm/lovable-tagger@1.1.13",
+      "scope": "optional"
     },
     {
       "bom-ref": "pkg:npm/lucide-react@0.462.0",
@@ -398,6 +514,14 @@
       "version": "1.17.1",
       "purl": "pkg:npm/pdf-lib@1.17.1",
       "scope": "required"
+    },
+    {
+      "bom-ref": "pkg:npm/postcss@8.5.6",
+      "type": "library",
+      "name": "postcss",
+      "version": "8.5.6",
+      "purl": "pkg:npm/postcss@8.5.6",
+      "scope": "optional"
     },
     {
       "bom-ref": "pkg:npm/react@18.3.1",
@@ -480,164 +604,20 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/tailwindcss-animate@1.0.7",
-      "type": "library",
-      "name": "tailwindcss-animate",
-      "version": "1.0.7",
-      "purl": "pkg:npm/tailwindcss-animate@1.0.7",
-      "scope": "required"
-    },
-    {
-      "bom-ref": "pkg:npm/vaul@0.9.9",
-      "type": "library",
-      "name": "vaul",
-      "version": "0.9.9",
-      "purl": "pkg:npm/vaul@0.9.9",
-      "scope": "required"
-    },
-    {
-      "bom-ref": "pkg:npm/zod@4.4.3",
-      "type": "library",
-      "name": "zod",
-      "version": "4.4.3",
-      "purl": "pkg:npm/zod@4.4.3",
-      "scope": "required"
-    },
-    {
-      "bom-ref": "pkg:npm/@eslint%2Fjs@9.32.0",
-      "type": "library",
-      "name": "@eslint/js",
-      "version": "9.32.0",
-      "purl": "pkg:npm/@eslint%2Fjs@9.32.0",
-      "scope": "optional"
-    },
-    {
-      "bom-ref": "pkg:npm/@tailwindcss%2Ftypography@0.5.16",
-      "type": "library",
-      "name": "@tailwindcss/typography",
-      "version": "0.5.16",
-      "purl": "pkg:npm/@tailwindcss%2Ftypography@0.5.16",
-      "scope": "optional"
-    },
-    {
-      "bom-ref": "pkg:npm/@testing-library%2Fjest-dom@6.6.0",
-      "type": "library",
-      "name": "@testing-library/jest-dom",
-      "version": "6.6.0",
-      "purl": "pkg:npm/@testing-library%2Fjest-dom@6.6.0",
-      "scope": "optional"
-    },
-    {
-      "bom-ref": "pkg:npm/@testing-library%2Freact@16.0.0",
-      "type": "library",
-      "name": "@testing-library/react",
-      "version": "16.0.0",
-      "purl": "pkg:npm/@testing-library%2Freact@16.0.0",
-      "scope": "optional"
-    },
-    {
-      "bom-ref": "pkg:npm/@types%2Fnode@22.16.5",
-      "type": "library",
-      "name": "@types/node",
-      "version": "22.16.5",
-      "purl": "pkg:npm/@types%2Fnode@22.16.5",
-      "scope": "optional"
-    },
-    {
-      "bom-ref": "pkg:npm/@types%2Freact@18.3.23",
-      "type": "library",
-      "name": "@types/react",
-      "version": "18.3.23",
-      "purl": "pkg:npm/@types%2Freact@18.3.23",
-      "scope": "optional"
-    },
-    {
-      "bom-ref": "pkg:npm/@types%2Freact-dom@18.3.7",
-      "type": "library",
-      "name": "@types/react-dom",
-      "version": "18.3.7",
-      "purl": "pkg:npm/@types%2Freact-dom@18.3.7",
-      "scope": "optional"
-    },
-    {
-      "bom-ref": "pkg:npm/@vitejs%2Fplugin-react-swc@3.11.0",
-      "type": "library",
-      "name": "@vitejs/plugin-react-swc",
-      "version": "3.11.0",
-      "purl": "pkg:npm/@vitejs%2Fplugin-react-swc@3.11.0",
-      "scope": "optional"
-    },
-    {
-      "bom-ref": "pkg:npm/autoprefixer@10.4.21",
-      "type": "library",
-      "name": "autoprefixer",
-      "version": "10.4.21",
-      "purl": "pkg:npm/autoprefixer@10.4.21",
-      "scope": "optional"
-    },
-    {
-      "bom-ref": "pkg:npm/eslint@9.32.0",
-      "type": "library",
-      "name": "eslint",
-      "version": "9.32.0",
-      "purl": "pkg:npm/eslint@9.32.0",
-      "scope": "optional"
-    },
-    {
-      "bom-ref": "pkg:npm/eslint-plugin-react-hooks@5.2.0",
-      "type": "library",
-      "name": "eslint-plugin-react-hooks",
-      "version": "5.2.0",
-      "purl": "pkg:npm/eslint-plugin-react-hooks@5.2.0",
-      "scope": "optional"
-    },
-    {
-      "bom-ref": "pkg:npm/eslint-plugin-react-refresh@0.4.20",
-      "type": "library",
-      "name": "eslint-plugin-react-refresh",
-      "version": "0.4.20",
-      "purl": "pkg:npm/eslint-plugin-react-refresh@0.4.20",
-      "scope": "optional"
-    },
-    {
-      "bom-ref": "pkg:npm/globals@15.15.0",
-      "type": "library",
-      "name": "globals",
-      "version": "15.15.0",
-      "purl": "pkg:npm/globals@15.15.0",
-      "scope": "optional"
-    },
-    {
-      "bom-ref": "pkg:npm/jsdom@25.0.1",
-      "type": "library",
-      "name": "jsdom",
-      "version": "25.0.1",
-      "purl": "pkg:npm/jsdom@25.0.1",
-      "scope": "optional"
-    },
-    {
-      "bom-ref": "pkg:npm/lovable-tagger@1.1.13",
-      "type": "library",
-      "name": "lovable-tagger",
-      "version": "1.1.13",
-      "purl": "pkg:npm/lovable-tagger@1.1.13",
-      "scope": "optional"
-    },
-    {
-      "bom-ref": "pkg:npm/postcss@8.5.6",
-      "type": "library",
-      "name": "postcss",
-      "version": "8.5.6",
-      "purl": "pkg:npm/postcss@8.5.6",
-      "scope": "optional"
-    },
-    {
       "bom-ref": "pkg:npm/tailwindcss@3.4.17",
       "type": "library",
       "name": "tailwindcss",
       "version": "3.4.17",
       "purl": "pkg:npm/tailwindcss@3.4.17",
       "scope": "optional"
+    },
+    {
+      "bom-ref": "pkg:npm/tailwindcss-animate@1.0.7",
+      "type": "library",
+      "name": "tailwindcss-animate",
+      "version": "1.0.7",
+      "purl": "pkg:npm/tailwindcss-animate@1.0.7",
+      "scope": "required"
     },
     {
       "bom-ref": "pkg:npm/typescript@5.8.3",
@@ -656,6 +636,14 @@
       "scope": "optional"
     },
     {
+      "bom-ref": "pkg:npm/vaul@0.9.9",
+      "type": "library",
+      "name": "vaul",
+      "version": "0.9.9",
+      "purl": "pkg:npm/vaul@0.9.9",
+      "scope": "required"
+    },
+    {
       "bom-ref": "pkg:npm/vite@5.4.19",
       "type": "library",
       "name": "vite",
@@ -670,6 +658,14 @@
       "version": "3.2.4",
       "purl": "pkg:npm/vitest@3.2.4",
       "scope": "optional"
+    },
+    {
+      "bom-ref": "pkg:npm/zod@4.4.3",
+      "type": "library",
+      "name": "zod",
+      "version": "4.4.3",
+      "purl": "pkg:npm/zod@4.4.3",
+      "scope": "required"
     }
   ]
 }
