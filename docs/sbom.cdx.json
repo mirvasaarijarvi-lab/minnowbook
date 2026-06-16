@@ -1,10 +1,10 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
-  "serialNumber": "urn:uuid:f9e3eb45-eccc-4b8b-950b-ce2d6ddaab6f",
+  "serialNumber": "urn:uuid:5025dd57-4cc6-46f1-a762-579fe11eebf6",
   "version": 1,
   "metadata": {
-    "timestamp": "2026-06-12T15:30:59.907Z",
+    "timestamp": "2026-06-16T08:05:02.638Z",
     "tools": [
       {
         "vendor": "MimmoBook",
@@ -21,11 +21,11 @@
       "properties": [
         {
           "name": "git:sha",
-          "value": "b95dc51139b29a3cdf231c058fe2f30a11288052"
+          "value": "a6a5e14f3ee456a74062c8972e972259d3c15088"
         },
         {
           "name": "git:branch",
-          "value": "edit/edt-8fc54ad9-ded5-4f89-8ddf-eb5a6d62e42c"
+          "value": "edit/edt-6eada7e0-ced9-4e8c-ae33-097f8674dfa0"
         }
       ]
     }
@@ -344,11 +344,11 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/dompurify@3.4.2",
+      "bom-ref": "pkg:npm/dompurify@3.4.10",
       "type": "library",
       "name": "dompurify",
-      "version": "3.4.2",
-      "purl": "pkg:npm/dompurify@3.4.2",
+      "version": "3.4.10",
+      "purl": "pkg:npm/dompurify@3.4.10",
       "scope": "required"
     },
     {
@@ -440,19 +440,19 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/react-router@6.28.0",
+      "bom-ref": "pkg:npm/react-router@6.30.1",
       "type": "library",
       "name": "react-router",
-      "version": "6.28.0",
-      "purl": "pkg:npm/react-router@6.28.0",
+      "version": "6.30.1",
+      "purl": "pkg:npm/react-router@6.30.1",
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/react-router-dom@6.28.0",
+      "bom-ref": "pkg:npm/react-router-dom@6.30.1",
       "type": "library",
       "name": "react-router-dom",
-      "version": "6.28.0",
-      "purl": "pkg:npm/react-router-dom@6.28.0",
+      "version": "6.30.1",
+      "purl": "pkg:npm/react-router-dom@6.30.1",
       "scope": "required"
     },
     {
