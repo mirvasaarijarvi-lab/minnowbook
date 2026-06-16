@@ -30,11 +30,19 @@ const repoRoot = path.resolve(__dirname, "..", "..");
  * Bump these when a new patched release ships.
  */
 const FLOORS = {
+  // Each entry locks in the patched floor for a security-critical
+  // dependency. Bump `min` whenever a new patched release ships and
+  // refresh lockfiles in the same commit.
   "js-yaml": { min: "4.2.0", reason: "CVE-2026-53550 (merge-key DoS)" },
-  // Add more security-critical packages here as needed, e.g.:
-  //   ws:        { min: "8.21.0", reason: "ws DoS via tiny fragments" },
-  //   esbuild:   { min: "0.28.1", reason: "esbuild Deno binary integrity advisory" },
-  //   "form-data": { min: "4.0.6", reason: "form-data header injection" },
+  dompurify: { min: "3.4.10", reason: "DOMPurify mXSS / sanitizer bypasses" },
+  ws: { min: "8.21.0", reason: "ws DoS via tiny fragments" },
+  esbuild: { min: "0.28.1", reason: "esbuild Deno binary integrity advisory" },
+  "form-data": { min: "4.0.6", reason: "form-data header injection (CR/LF/quote)" },
+  "@remix-run/router": { min: "1.23.2", reason: "react-router open-redirect via // paths" },
+  minimatch: { min: "9.0.6", reason: "minimatch ReDoS" },
+  "brace-expansion": { min: "5.0.5", reason: "brace-expansion ReDoS" },
+  picomatch: { min: "4.0.4", reason: "picomatch ReDoS" },
+  browserslist: { min: "4.24.4", reason: "browserslist regex DoS in transitive consumers" },
 };
 
 /**
