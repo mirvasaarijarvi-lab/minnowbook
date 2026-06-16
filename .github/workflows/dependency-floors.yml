@@ -1,0 +1,38 @@
+name: Dependency security floors
+
+# Guards against lockfile drift on security-critical packages. The
+# project pins ranges (e.g. js-yaml >= 4.2.0) in package.json
+# overrides, but the lockfile is what `npm ci` and
+# `bun install --frozen-lockfile` actually use. This job re-reads the
+# lockfile on every push/PR and fails if any tracked package resolves
+# below its documented minimum (e.g. js-yaml 4.2.0 for CVE-2026-53550).
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: dependency-floors-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check-floors:
+    name: Verify installed versions meet security floors
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        with:
+          node-version: 22
+
+      - name: Check security-floor versions in package-lock.json
+        run: node scripts/ci/check-dependency-floors.mjs
