@@ -14,7 +14,7 @@ override it for a one off run.
 
 - `low`
 - `moderate`
-- `high` (default)
+- `high`
 - `critical`
 
 The value is case sensitive (lowercase) and is validated by the workflow before
@@ -32,7 +32,7 @@ The workflow resolves `AUDIT_LEVEL` in this order, highest priority first:
    [Override for a one off run](#override-for-a-one-off-run))
 2. **Repository or environment variable `AUDIT_LEVEL`** (long lived project
    default, set in the GitHub UI, no code change required)
-3. **Hardcoded fallback `high`**
+3. **Hardcoded fallback `moderate`**
 
 The resolved value is also embedded in the SARIF metadata uploaded to GitHub
 code scanning, written to the PR comment, and surfaced as the title of the
@@ -85,7 +85,7 @@ changed.
 The same override is available via the GitHub CLI:
 
 ```bash
-# Use the project default (repo variable, or 'high' if unset)
+# Use the project default (repo variable, or 'moderate' if unset)
 gh workflow run "Dependency audit"
 
 # One off override at moderate
