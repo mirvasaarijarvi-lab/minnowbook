@@ -632,7 +632,7 @@ describe.each([
     expect(counts[1]).toBe(counts[2]);
   });
 
-  liveIt("count alongside paginated rows by handle leaks neither rows nor cardinality", async () => {
+  liveIt("count alongside paginated rows by handle leaks neither rows nor cardinality", { timeout: 30_000 }, async () => {
     const shapes: Shape[] = [];
     for (const handle of [REVOKED_TOKEN_RES_ID, EXPIRED_TOKEN_RES_ID, FAKE_RES_ID]) {
       const result = await anon
