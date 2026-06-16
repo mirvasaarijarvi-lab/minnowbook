@@ -75,10 +75,7 @@ jobs:
         with:
           path: |
             ~/.bun/install/cache
-            node_modules
           key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock', 'bun.lockb', 'package.json') }}
-          restore-keys: |
-            ${{ runner.os }}-bun-
 
       # Pre-flight: confirm Docker is actually usable on this runner BEFORE
       # invoking `supabase start`. When a hosted runner image lacks Docker
