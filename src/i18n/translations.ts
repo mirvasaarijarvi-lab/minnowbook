@@ -3736,6 +3736,7 @@ const fi: TranslationKeys = {
   "resourceHours.sameEveryDayDesc": "Samat ajat kaikille avoimille päiville. Voit sulkea yksittäisiä päiviä alla.",
   "resourceHours.removeHours": "Poista aukioloajat",
   "resourceHours.saveFirst": "Tallenna resurssi ensin, sitten voit muokata aukioloaikoja.",
+  "resourceHours.savedOnCreate": "Aukioloajat tallennetaan, kun luot resurssin.",
   "resourceHours.openingHoursLabel": "Aukioloajat",
   "occasionalSlots.title": "Satunnaiset työvuorot",
   "occasionalSlots.description": "Satunnaisille työntekijöille. Lisää yksittäisiä päivämääriä ja kellonaikoja, jolloin resurssi on varattavissa viikkoaikataulun lisäksi.",
