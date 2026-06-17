@@ -201,6 +201,7 @@ type TranslationKeys = {
   "resourceHours.sameEveryDayDesc": string;
   "resourceHours.removeHours": string;
   "resourceHours.saveFirst": string;
+  "resourceHours.savedOnCreate": string;
   "resourceHours.openingHoursLabel": string;
   "occasionalSlots.title": string;
   "occasionalSlots.description": string;
