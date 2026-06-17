@@ -160,28 +160,37 @@ describe("redeem-access-code: brute-force & replay resilience", () => {
     expect(data.session).toBeNull();
   });
 
-  it("20 parallel attempts with the same fake code: zero successes, all known error codes", async () => {
-    const N = 20;
-    const results = await Promise.all(
-      Array.from({ length: N }, () => callRedeem(FAKE_CODES[0], false)),
-    );
+  it(
+    "20 parallel attempts with the same fake code: zero successes, all known error codes",
+    async () => {
+      const N = 20;
+      const results = await Promise.all(
+        Array.from({ length: N }, () => callRedeem(FAKE_CODES[0], false)),
+      );
 
-    const successes = results.filter((r) => r.status >= 200 && r.status < 300);
-    expect(successes.length, "no parallel attempt may succeed").toBe(0);
+      const successes = results.filter((r) => r.status >= 200 && r.status < 300);
+      expect(successes.length, "no parallel attempt may succeed").toBe(0);
 
-    const serverErrors = results.filter((r) => r.status >= 500);
-    expect(
-      serverErrors.length,
-      "no 5xx allowed (would itself leak server state)",
-    ).toBe(0);
+      const serverErrors = results.filter((r) => r.status >= 500);
+      expect(
+        serverErrors.length,
+        "no 5xx allowed (would itself leak server state)",
+      ).toBe(0);
 
-    for (const r of results) {
-      expect(r.status, "each call must return a deterministic 4xx").toBeGreaterThanOrEqual(400);
-      expect(r.status).toBeLessThan(500);
-      const code = errorCode(r);
-      expect(KNOWN_ERROR_CODES.has(code), `unexpected error code: ${code}`).toBe(true);
-    }
-  });
+      for (const r of results) {
+        expect(r.status, "each call must return a deterministic 4xx").toBeGreaterThanOrEqual(400);
+        expect(r.status).toBeLessThan(500);
+        const code = errorCode(r);
+        expect(KNOWN_ERROR_CODES.has(code), `unexpected error code: ${code}`).toBe(true);
+      }
+    },
+    // Network-bound burst against a live edge function; CI cold paths can
+    // exceed the default 60s ceiling even after the module-level warmup.
+    // Raise the per-test budget so a slow network run is not reported as
+    // a security regression.
+    180_000,
+  );
+
 
   it("repeated serial attempts return the same generic error code (no validity leak)", async () => {
     const ITER = 6;
