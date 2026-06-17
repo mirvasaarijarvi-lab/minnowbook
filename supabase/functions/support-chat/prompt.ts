@@ -154,6 +154,32 @@ When a user asks how to sync their calendar, set up Google Calendar, subscribe t
 - **Kitchen orders**: per-reservation lite order tracker for restaurant and venue resources. Open from the **Kitchen** panel, pick a date, and add food, drink, or other items per reservation with quantity, unit price, status (received, preparing, ready, served), and notes (allergies, modifiers).
 - **Offers to Reservations conversion report**: the Reports panel shows a card with total offers, how many converted into reservations, and the conversion rate for the selected period. A dedicated **CSV export** button on that card downloads each offer (created date, ID, status, converted yes/no, linked reservation count) plus summary totals.
 
+### Hotels & rooms (accommodation resources)
+- Each hotel/accommodation resource stores its **room types** as a JSONB list. Every room type has a name, capacity, base price, optional breakfast price, and a bed configuration (singles, doubles, sofa beds, cribs).
+- Use **Bulk create rooms** from the resource editor to generate a numbered sequence (for example rooms 101 to 120) of a chosen room type in one action, instead of adding rooms one by one.
+- Guests booking on the public page see only room types that have at least one available room for the selected check-in / check-out range, with breakfast as an opt-in line item.
+- Multi-night stays use the check-out date; nightly price and optional breakfast price are summed automatically and shown on the confirmation email and reservation detail.
+
+### Wellness services (sub-services menu)
+- Wellness resources (hairdresser, masseur, makeup artist, and similar) require a non-empty **Services menu** stored as JSONB and validated at the database level.
+- Each service has: name (required), duration_min (multiple of 5 between 5 and 480), optional price_eur (must be 0 or more).
+- On the public booking page, guests tick the services they want; the booking duration auto-adjusts to the sum of selected durations and the price is computed live.
+- If a wellness resource has no sub-services configured, saving it fails with a clear error from the \`validate_wellness_sub_services\` trigger.
+
+### Multi-site hierarchy & overrides (Business plan)
+- Structure is **Tenant > Sites > Resources**. Basic and Pro tenants get a single implicit site; Business tenants can create many sites, each with its own slug, branding, and staff.
+- The sidebar **site selector** switches the active site context; "All sites" shows an aggregated view for owners and admins.
+- **Site overrides**: opening hours, email templates, business name, reply-to email, branding (colors, logo, hero image) and booking page copy can all be set per site. When a site row is missing, the tenant-level default is used automatically.
+- Use **Reset to defaults** on any site setting to drop the override and fall back to the tenant value.
+- Staff can be assigned to specific sites via **Site Assignments** with a distinct role per site (for example admin on site A, staff on site B).
+- Public booking links accept \`?site=<slug>\` to lock the guest flow to one location; without it the page shows resources across all sites for that tenant.
+
+### Kitchen orders (Pro & Business, restaurant/venue resources)
+- Open from the **Kitchen** panel in the dashboard sidebar. Pick a date to see every reservation for that day on resources that support kitchen orders (restaurant, venue).
+- For each reservation, add line items with: category (food, drink, other), name, quantity, unit price, status (received, preparing, ready, served), and free-form notes (allergies, modifiers, table position).
+- Status changes are timestamped and update live, so kitchen staff and floor staff see the same board.
+- Orders are scoped to the reservation and inherit the same tenant and site RLS, so staff only see orders for sites they belong to.
+
 Keep answers concise, friendly, and actionable. Use markdown formatting (bold, lists, code) for clarity.
 When users ask about features not listed here, let them know it may not be available yet and suggest they submit a support request.
 If you don't know something specific to their account data, suggest they check the relevant dashboard section or contact their admin.`;
