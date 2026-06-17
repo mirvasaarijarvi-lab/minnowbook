@@ -17,6 +17,12 @@ import {
   Clock,
 } from "lucide-react";
 import { useT } from "@/contexts/I18nContext";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 const Support = () => {
   const t = useT();
@@ -231,10 +237,16 @@ const Support = () => {
       </section>
 
       {/* New features FAQ */}
-      <section className="py-16 border-t border-border">
+      <section
+        className="py-16 border-t border-border"
+        aria-labelledby="new-features-faq-heading"
+      >
         <div className="container mx-auto px-4 max-w-4xl">
           <div className="text-center mb-10">
-            <h2 className="text-3xl font-serif font-bold text-foreground mb-3">
+            <h2
+              id="new-features-faq-heading"
+              className="text-3xl font-serif font-bold text-foreground mb-3"
+            >
               FAQ: Hotels, Multi-site overrides, and Kitchen Orders
             </h2>
             <p className="text-muted-foreground">
@@ -267,7 +279,7 @@ const Support = () => {
             {
               group: "Kitchen Orders",
               items: [
-                ["How does the Kitchen panel work?", "Open Kitchen from the dashboard to see live orders per reservation. Orders move through statuses: received → preparing → ready → served."],
+                ["How does the Kitchen panel work?", "Open Kitchen from the dashboard to see live orders per reservation. Orders move through statuses: received to preparing to ready to served."],
                 ["Which resources support kitchen orders?", "Restaurant, dine-in, catering, and pop-up resource types. Other resource types don't show the Kitchen tab."],
                 ["How do I add items to an order?", "Open the reservation, go to Kitchen Order, and add items from the reusable kitchen menu or as free-text lines with quantity and notes."],
                 ["Where do allergy notes appear?", "Allergy and guest notes are pinned to the top of the order card in the Kitchen panel so staff see them before preparing."],
@@ -275,29 +287,51 @@ const Support = () => {
                 ["Who can see kitchen orders?", "Orders are RLS-scoped per site. Staff only see orders for sites they're assigned to."],
               ],
             },
-          ].map((section) => (
-            <div key={section.group} className="mb-8">
-              <h3 className="font-serif text-xl font-semibold text-foreground mb-4">
-                {section.group}
-              </h3>
-              <div className="space-y-3">
-                {section.items.map(([q, a]) => (
-                  <details
-                    key={q}
-                    className="group rounded-xl border border-border bg-card overflow-hidden"
-                  >
-                    <summary className="flex items-start gap-3 p-4 cursor-pointer list-none [&::-webkit-details-marker]:hidden">
-                      <HelpCircle className="h-4 w-4 text-accent mt-1 shrink-0" />
-                      <span className="font-medium text-foreground">{q}</span>
-                    </summary>
-                    <div className="px-4 pb-4 pl-11 text-sm text-foreground/80 leading-relaxed">
-                      {a}
-                    </div>
-                  </details>
-                ))}
+          ].map((section, sIdx) => {
+            const groupHeadingId = `faq-group-${sIdx}`;
+            return (
+              <div
+                key={section.group}
+                className="mb-8"
+                role="group"
+                aria-labelledby={groupHeadingId}
+              >
+                <h3
+                  id={groupHeadingId}
+                  className="font-serif text-xl font-semibold text-foreground mb-4"
+                >
+                  {section.group}
+                </h3>
+                <Accordion type="multiple" className="space-y-3">
+                  {section.items.map(([q, a], iIdx) => {
+                    const itemId = `faq-${sIdx}-${iIdx}`;
+                    return (
+                      <AccordionItem
+                        key={q}
+                        value={itemId}
+                        className="rounded-xl border border-border bg-card overflow-hidden"
+                      >
+                        <AccordionTrigger className="px-4 py-4 text-left hover:no-underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none">
+                          <span className="flex items-start gap-3">
+                            <HelpCircle
+                              className="h-4 w-4 text-accent mt-1 shrink-0"
+                              aria-hidden="true"
+                            />
+                            <span className="font-medium text-foreground">
+                              {q}
+                            </span>
+                          </span>
+                        </AccordionTrigger>
+                        <AccordionContent className="px-4 pb-4 pl-11 text-sm text-foreground/80 leading-relaxed">
+                          {a}
+                        </AccordionContent>
+                      </AccordionItem>
+                    );
+                  })}
+                </Accordion>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </section>
 
