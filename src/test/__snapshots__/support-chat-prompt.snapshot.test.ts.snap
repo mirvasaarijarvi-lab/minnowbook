@@ -97,14 +97,19 @@ exports[`support-chat system prompt — snapshot lock > locks the full system pr
 ### Calendar & Scheduling
 - Calendar view with day/week/month modes and drag interactions
 - Blocked slots (one-time and recurring) with approval workflows
-- Resource-specific opening hours that override site-level defaults
+- Three-layer opening hours model:
+  1. Tenant-level weekly defaults per reservation type
+  2. Site-level overrides (Business plan, copied from tenant on site creation)
+  3. Per-resource weekly hours (any resource type, not just restaurants) that override site/tenant for that resource
+- Per-resource occasional working slots: positive availability windows on specific dates for sporadic workers (e.g. a wellness practitioner who only works some Saturdays). A date with an occasional slot is bookable even when the weekly schedule marks it closed; one-off and recurring blocked slots still apply.
+- Per-resource timezone override (IANA name); when unset the resource inherits the tenant timezone, which defaults to Europe/Helsinki. All wall-clock calculations (today, day-of-week, slot generation) respect the effective timezone.
 - Auto-reminder emails sent before reservation dates
 
 ### Resources & Sites
 - Multi-site management: create sites with slugs, assign users per site
 - Resource management: rooms, tables, event spaces with images, capacity, pricing
 - Resource image galleries with drag-and-drop reordering
-- Per-resource opening hours and availability settings
+- Per-resource opening hours, occasional availability slots, and timezone
 - Site-specific branding (logo, colors, hero image, business info)
 - Approval queues for resources and blocked slots
 

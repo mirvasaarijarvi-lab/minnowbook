@@ -952,6 +952,9 @@ type TranslationKeys = {
   "support.openingHoursC2": string;
   "support.openingHoursC3": string;
   "support.openingHoursC4": string;
+  "support.openingHoursC5": string;
+  "support.openingHoursC6": string;
+  "support.openingHoursC7": string;
   "support.resourcesTitle": string;
   "support.resourcesDesc": string;
   "support.resourcesC1": string;
@@ -3154,10 +3157,13 @@ const en: TranslationKeys = {
   "support.brandingC4": "",
   "support.openingHoursTitle": "Opening Hours",
   "support.openingHoursDesc": "Configure when your business accepts bookings for each type.",
-  "support.openingHoursC1": "Set opening hours per reservation type (restaurant, venue, hotel).",
+  "support.openingHoursC1": "Set opening hours per reservation type (restaurant, venue, hotel, wellness, custom).",
   "support.openingHoursC2": "Possibility to mark specific hours or days as closed.",
   "support.openingHoursC3": "Opening hours determine available time slots on the booking page.",
   "support.openingHoursC4": "Use blocked slots to temporarily close specific hours or dates.",
+  "support.openingHoursC5": "Three layers, finest wins: tenant defaults, then per-site overrides (Business plan), then per-resource hours. Any resource type can have its own weekly schedule, not just restaurants.",
+  "support.openingHoursC6": "Occasional working slots: open a specific date and time window for sporadic workers (e.g. a wellness practitioner who only works some Saturdays). The booking calendar enables that day even when the weekly schedule marks it closed; blocked slots still apply.",
+  "support.openingHoursC7": "Each resource can override its timezone (IANA name like Europe/Helsinki). When unset, it inherits the organization timezone. All wall-clock checks (today, weekday, slot generation) use the resource's effective timezone.",
   "support.resourcesTitle": "Resources & Rooms",
   "support.resourcesDesc": "Manage rooms, tables, and event spaces that can be booked.",
   "support.resourcesC1": "Add resources in the Resources section of your dashboard.",
@@ -4904,10 +4910,13 @@ const fi: TranslationKeys = {
   "support.brandingC4": "",
   "support.openingHoursTitle": "Aukioloajat",
   "support.openingHoursDesc": "Määritä, milloin yrityksesi hyväksyy varauksia kullekin varaustyypille.",
-  "support.openingHoursC1": "Aseta aukioloajat varaustyypeille (ravintola, tapahtumapaikka, hotelli).",
+  "support.openingHoursC1": "Aseta aukioloajat varaustyypeille (ravintola, tapahtumapaikka, hotelli, hyvinvointi, mukautettu).",
   "support.openingHoursC2": "Mahdollisuus merkitä tietyt tunnit tai päivät suljetuiksi.",
   "support.openingHoursC3": "Aukioloajat määrittävät käytettävissä olevat aikavälit varaussivulla.",
   "support.openingHoursC4": "Käytä suljettuja aikoja sulkeaksesi väliaikaisesti tietyt tunnit tai päivämäärät.",
+  "support.openingHoursC5": "Kolme tasoa, tarkin voittaa: organisaation oletukset, toimipistekohtaiset ohitukset (Business-tilaus) ja resurssikohtaiset aukioloajat. Mikä tahansa resurssityyppi voi saada oman viikko-ohjelmansa, ei vain ravintolat.",
+  "support.openingHoursC6": "Tilapäiset työajat: avaa tietty päivä ja kellonaika satunnaisille työntekijöille (esim. hyvinvointialan ammattilainen, joka työskentelee vain joinakin lauantaisin). Varauskalenteri avaa kyseisen päivän, vaikka viikko-ohjelma merkitsisi sen suljetuksi; estetyt ajat pätevät edelleen.",
+  "support.openingHoursC7": "Jokainen resurssi voi ohittaa aikavyöhykkeensä (IANA-nimi, esim. Europe/Helsinki). Jos jätetään tyhjäksi, käytetään organisaation aikavyöhykettä. Kaikki kellonaikatarkistukset (tämä päivä, viikonpäivä, aikavälit) käyttävät resurssin tehokasta aikavyöhykettä.",
   "support.resourcesTitle": "Resurssit ja huoneet",
   "support.resourcesDesc": "Hallinnoi varattavissa olevia huoneita, pöytiä ja tapahtumatiloja.",
   "support.resourcesC1": "Lisää resursseja kojelaudan Resurssit-osioon.",
@@ -6654,10 +6663,13 @@ const sv: TranslationKeys = {
   "support.brandingC4": "",
   "support.openingHoursTitle": "Öppettider",
   "support.openingHoursDesc": "Konfigurera när ditt företag accepterar bokningar för varje typ.",
-  "support.openingHoursC1": "Ställ in öppettider per bokningstyp (restaurang, lokal, hotell).",
+  "support.openingHoursC1": "Ställ in öppettider per bokningstyp (restaurang, lokal, hotell, friskvård, anpassad).",
   "support.openingHoursC2": "Möjlighet att markera specifika timmar eller dagar som stängda.",
   "support.openingHoursC3": "Öppettiderna avgör tillgängliga tidsluckor på bokningssidan.",
   "support.openingHoursC4": "Använd blockerade tidsluckor för att tillfälligt stänga specifika timmar eller datum.",
+  "support.openingHoursC5": "Tre lager, finast vinner: organisationens standard, platsspecifika åsidosättningar (Business-plan) och öppettider per resurs. Vilken resurstyp som helst kan ha sitt eget veckoschema, inte bara restauranger.",
+  "support.openingHoursC6": "Tillfälliga arbetstider: öppna ett specifikt datum och tidsfönster för sporadiska arbetare (t.ex. en friskvårdare som bara jobbar vissa lördagar). Bokningskalendern öppnar dagen även om veckoschemat markerar den stängd; blockerade tider gäller fortfarande.",
+  "support.openingHoursC7": "Varje resurs kan åsidosätta sin tidszon (IANA-namn som Europe/Helsinki). Om den inte är inställd används organisationens tidszon. Alla väggklocka-kontroller (idag, veckodag, tidsluckor) använder resursens effektiva tidszon.",
   "support.resourcesTitle": "Resurser och rum",
   "support.resourcesDesc": "Hantera rum, bord och evenemangsutrymmen som kan bokas.",
   "support.resourcesC1": "Lägg till resurser i avsnittet Resurser på din instrumentpanel.",

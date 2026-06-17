@@ -87,6 +87,9 @@ const Support = () => {
         t("support.openingHoursC2"),
         t("support.openingHoursC3"),
         t("support.openingHoursC4"),
+        t("support.openingHoursC5"),
+        t("support.openingHoursC6"),
+        t("support.openingHoursC7"),
       ],
     },
     {
