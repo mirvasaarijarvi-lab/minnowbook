@@ -56,6 +56,7 @@ type BedEntry = { type: string; count: number };
 
 const ResourceManagement = () => {
   const { tenantId, tenant, isAdmin } = useTenant();
+  const tenantTz = useEffectiveTimezone(null, tenantId);
   const { selectedSiteId } = useSiteContext();
   const { applySiteFilter, siteIds } = useUserSites();
   const { can } = usePermissions();
