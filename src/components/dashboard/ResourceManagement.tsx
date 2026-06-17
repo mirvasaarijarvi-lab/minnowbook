@@ -242,6 +242,7 @@ const ResourceManagement = () => {
         approval_status: getApprovalStatus(),
         site_id: form.site_id || null,
         custom_type_label: form.resource_type === "custom" ? (form.custom_type_label.trim() || form.name.trim() || null) : null,
+        timezone: form.timezone ? form.timezone : null,
         sub_services: (form.resource_type === "custom" || form.resource_type === "wellness")
           ? subServices
               .filter((s) => s.name.trim().length > 0)
