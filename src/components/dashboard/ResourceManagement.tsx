@@ -778,24 +778,26 @@ const ResourceManagement = () => {
                   )}
 
                   {/* Working hours: weekly schedule + occasional slots.
-                      Available for every resource type. Requires the resource
-                      to be saved first (we need an id for the FK + tenant
-                      pair), matching the existing pattern. */}
+                      Available for every resource type. Both editors
+                      work in "pending" mode when editingId is null —
+                      drafts are kept in their local state and flushed
+                      to the new resource id by upsertMutation right
+                      after the insert succeeds. This means staff can
+                      configure hours and one-off slots in the same
+                      dialog session they create the resource in. */}
                   {tenantId && (
-                    editingId ? (
-                      <>
-                        <ResourceOpeningHoursEditor resourceId={editingId} tenantId={tenantId} />
-                        <ResourceOccasionalSlotsEditor resourceId={editingId} tenantId={tenantId} />
-                      </>
-                    ) : (
-                      <div className="rounded-lg border border-border p-3 space-y-1">
-                         <Label className="flex items-center gap-1.5 font-medium text-sm">
-                           <Clock className="h-4 w-4 text-muted-foreground" />
-                           {t("resourceHours.title")}
-                         </Label>
-                         <p className="text-xs text-muted-foreground">{t("resourceHours.saveFirst")}</p>
-                      </div>
-                    )
+                    <>
+                      <ResourceOpeningHoursEditor
+                        ref={openingHoursRef}
+                        resourceId={editingId}
+                        tenantId={tenantId}
+                      />
+                      <ResourceOccasionalSlotsEditor
+                        ref={occasionalSlotsRef}
+                        resourceId={editingId}
+                        tenantId={tenantId}
+                      />
+                    </>
                   )}
 
 
