@@ -527,6 +527,58 @@ const PublicBookingInner = () => {
     return map;
   }, [resourceOpeningHours]);
 
+  // Fetch occasional availability slots (positive windows for sporadic workers).
+  // Scoped to currently visible resources and future dates only.
+  const { data: occasionalSlots } = useQuery({
+    queryKey: ["public-occasional-slots", tenant?.id, resourceIds, activeSiteId],
+    queryFn: async () => {
+      if (!tenant?.id || resourceIds.length === 0) return [];
+      const today = format(new Date(), "yyyy-MM-dd");
+      const { data, error } = await supabase
+        .from("resource_availability_slots")
+        .select("resource_id, slot_date, start_time, end_time")
+        .eq("tenant_id", tenant.id)
+        .in("resource_id", resourceIds)
+        .gte("slot_date", today);
+      if (error) throw error;
+      return data ?? [];
+    },
+    enabled: !!tenant?.id && resourceIds.length > 0,
+  });
+
+  // Index occasional slots by resource_id + date for O(1) lookups.
+  const occasionalSlotsByResourceDate = useMemo(() => {
+    const map: Record<string, Array<{ start_time: string; end_time: string }>> = {};
+    (occasionalSlots ?? []).forEach((s: any) => {
+      const key = `${s.resource_id}__${s.slot_date}`;
+      if (!map[key]) map[key] = [];
+      map[key].push({ start_time: s.start_time, end_time: s.end_time });
+    });
+    return map;
+  }, [occasionalSlots]);
+
+  // Get occasional slots applicable to a date given the current selection.
+  // If a specific resource is selected, only its slots apply; otherwise any
+  // resource of the chosen reservation_type with a slot counts as available.
+  const getOccasionalSlotsForDate = useCallback(
+    (date: Date): Array<{ start_time: string; end_time: string }> => {
+      const dateStr = format(date, "yyyy-MM-dd");
+      if (form.resource_id) {
+        return occasionalSlotsByResourceDate[`${form.resource_id}__${dateStr}`] ?? [];
+      }
+      const matchingResourceIds = (resources ?? [])
+        .filter((r: any) => !form.reservation_type || r.resource_type === form.reservation_type)
+        .map((r: any) => r.id);
+      const ranges: Array<{ start_time: string; end_time: string }> = [];
+      matchingResourceIds.forEach((rid: string) => {
+        const found = occasionalSlotsByResourceDate[`${rid}__${dateStr}`];
+        if (found) ranges.push(...found);
+      });
+      return ranges;
+    },
+    [occasionalSlotsByResourceDate, form.resource_id, form.reservation_type, resources],
+  );
+
   // Fetch blocked slots — filter by site
   const { data: blockedSlots } = useQuery({
     queryKey: ["public-blocked-slots", tenant?.id, activeSiteId],
@@ -567,24 +619,39 @@ const PublicBookingInner = () => {
     enabled: !!tenant?.id,
   });
 
-  // Generate time slots from opening hours for selected day
+  // Generate time slots from opening hours plus occasional availability slots for selected day
   const timeSlots = useMemo(() => {
-    if (!selectedDate || !openingHours?.length) return [];
-    const dayOfWeek = selectedDate.getDay();
-    const dayHours = openingHours.find((h) => h.day_of_week === dayOfWeek);
-    if (!dayHours || dayHours.is_closed || !dayHours.open_time || !dayHours.close_time) return [];
+    if (!selectedDate) return [];
+    const expand = (open: string, close: string): string[] => {
+      const out: string[] = [];
+      const [openH, openM] = open.slice(0, 5).split(":").map(Number);
+      const [closeH, closeM] = close.slice(0, 5).split(":").map(Number);
+      let h = openH;
+      let m = openM;
+      while (h < closeH || (h === closeH && m < closeM)) {
+        out.push(`${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`);
+        m += 30;
+        if (m >= 60) { h++; m = 0; }
+      }
+      return out;
+    };
 
-    const slots: string[] = [];
-    const [openH, openM] = dayHours.open_time.split(":").map(Number);
-    const [closeH, closeM] = dayHours.close_time.split(":").map(Number);
-    let h = openH, m = openM;
-    while (h < closeH || (h === closeH && m < closeM)) {
-      slots.push(`${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`);
-      m += 30;
-      if (m >= 60) { h++; m = 0; }
+    const merged = new Set<string>();
+
+    // Weekly recurring opening hours
+    const dayOfWeek = selectedDate.getDay();
+    const dayHours = openingHours?.find((h) => h.day_of_week === dayOfWeek);
+    if (dayHours && !dayHours.is_closed && dayHours.open_time && dayHours.close_time) {
+      expand(dayHours.open_time, dayHours.close_time).forEach((s) => merged.add(s));
     }
-    return slots;
-  }, [selectedDate, openingHours]);
+
+    // Occasional availability slots (positive windows, e.g. sporadic workers)
+    getOccasionalSlotsForDate(selectedDate).forEach((r) => {
+      expand(r.start_time, r.end_time).forEach((s) => merged.add(s));
+    });
+
+    return Array.from(merged).sort();
+  }, [selectedDate, openingHours, getOccasionalSlotsForDate]);
 
   // Check if a date is fully blocked for the selected resource type (and optionally specific resource)
   const isDateFullyBlocked = useCallback((date: Date) => {
@@ -676,6 +743,9 @@ const PublicBookingInner = () => {
   const isDateDisabled = (date: Date) => {
     if (date < new Date(new Date().setHours(0, 0, 0, 0))) return true;
     if (isDateFullyBlocked(date)) return true;
+    // Occasional availability slots can re-open an otherwise closed day.
+    const hasOccasional = getOccasionalSlotsForDate(date).length > 0;
+    if (hasOccasional) return false;
     if (!openingHours?.length) return false;
     const dayOfWeek = date.getDay();
     const dayHours = openingHours.find((h) => h.day_of_week === dayOfWeek);
