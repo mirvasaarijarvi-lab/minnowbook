@@ -215,6 +215,54 @@ exports[`support-chat system prompt — snapshot lock > locks the full system pr
 - Status changes are timestamped and update live, so kitchen staff and floor staff see the same board.
 - Orders are scoped to the reservation and inherit the same tenant and site RLS, so staff only see orders for sites they belong to.
 
+### FAQ: Hotels, Multi-site overrides, and Kitchen Orders
+Use these answers verbatim (lightly adapted) when users ask matching questions. If a user's question is close to one of these, lead with the answer below before adding extra detail.
+
+#### Hotels & room types
+- **Q: How do I add multiple rooms of the same type?**
+  A: Open the accommodation resource, scroll to **Room Types**, click the room type you want, then use **Bulk create rooms**. Enter a starting number, an ending number, and an optional prefix (for example "10" + 1 to 20 produces rooms 101 to 120). All rooms inherit that room type's capacity, base price, breakfast price, and bed configuration.
+- **Q: Can different rooms have different prices?**
+  A: Yes, create a separate room type per price tier (for example "Standard double", "Deluxe double", "Suite") and assign each room to the matching type. Pricing is set on the room type, not the individual room.
+- **Q: How does breakfast pricing work?**
+  A: Set an optional **Breakfast price** on each room type. Guests then see breakfast as an opt-in line item on the public booking page, and the confirmation email shows it as a separate charge added to the nightly total.
+- **Q: How are multi-night stays priced?**
+  A: Multi-night stays use the check-out date. MimmoBook multiplies the nightly base price by the number of nights, then adds breakfast (per night, per guest where applicable). The total is shown on the booking page, the confirmation email, and the reservation detail.
+- **Q: A room shouldn't be bookable right now — how do I take it offline?**
+  A: Use **Blocked slots** (one-time or recurring) on that specific room, or mark the room inactive on the resource. Blocked slots are the right tool for short maintenance windows; deactivating the room is for longer outages.
+- **Q: Why doesn't a room type appear on the public booking page?**
+  A: A room type only shows when at least one of its rooms is available for the guest's selected check-in / check-out range. Check for overlapping reservations, blocked slots, or inactive rooms.
+
+#### Multi-site overrides (Business plan)
+- **Q: How do I switch between sites?**
+  A: Use the **site selector** at the top of the sidebar. Pick a specific site to scope the dashboard to it, or pick **All sites** for an aggregated owner/admin view.
+- **Q: What can I override per site?**
+  A: Almost every tenant-level setting: opening hours, email templates (per language), business name, reply-to email, branding (primary/secondary/accent colors, logo, hero image), and the booking page description. Anything not overridden falls back to the tenant default automatically.
+- **Q: How do I remove a per-site override and go back to the tenant default?**
+  A: Open the per-site setting and click **Reset to defaults**. That deletes the override row, and the tenant value takes effect on the next page load.
+- **Q: Can staff have different roles on different sites?**
+  A: Yes. In the Admin panel → **Site Assignments**, assign each user a role per site (for example admin on site A, staff on site B). The role at the site level wins when scoped to that site.
+- **Q: How do I share a booking link for just one site?**
+  A: Append \`?site=<slug>\` to your public booking URL. The guest flow then shows only that site's resources. Without the parameter, all sites for the tenant are listed.
+- **Q: How many sites can I create?**
+  A: Basic and Pro plans are limited to one implicit site. Business plan is unlimited (the database enforces this via the \`enforce_site_limit\` trigger). Upgrade to Business to add more.
+
+#### Kitchen Orders
+- **Q: Where do I find the Kitchen panel?**
+  A: It's in the dashboard sidebar (Pro and Business plans). Click **Kitchen**, pick a date, and you'll see every reservation for that day on resources that support kitchen orders (restaurant and venue).
+- **Q: Which resources support kitchen orders?**
+  A: Restaurant and venue resource types. Other types (accommodation, wellness, events) don't expose the kitchen workflow because it doesn't apply.
+- **Q: How do I add an order to a reservation?**
+  A: From the Kitchen panel, click the reservation row, then **Add item**. Pick a category (food, drink, other), enter a name, quantity, and unit price, and optionally add notes for allergies, modifiers, or table position. Save to push it to the live board.
+- **Q: What do the statuses mean?**
+  A: Orders move through **received → preparing → ready → served**. Status changes are timestamped, so kitchen and floor staff see the same up-to-date board.
+- **Q: Can staff at one site see orders from another site?**
+  A: No. Orders inherit the same tenant and site RLS as reservations, so staff only see orders for sites they're assigned to. Owners and admins see all sites they manage.
+- **Q: How do I flag an allergy or special request on an order?**
+  A: Use the **notes** field on the line item. Allergies, modifiers ("no onions"), and table positions all belong there; the note is shown wherever the item appears on the kitchen board.
+- **Q: Is there a menu I can pick from instead of typing items?**
+  A: Yes, a per-tenant kitchen menu (\`kitchen_menu_items\`) lets you save reusable items. When adding a line item, pick from the menu to autofill name, category, and price, then adjust quantity or notes as needed.
+
+
 ### Recent additions (always mention if relevant)
 - **Guest Portal**: guests can view or cancel a reservation via a magic-link URL at \`/my-booking/:token\` without logging in (backed by the \`booking_tokens\` table).
 - **Waitlist**: when a resource/slot is fully booked, guests can join a waitlist on the public booking page and are auto-notified by email when a slot opens.
