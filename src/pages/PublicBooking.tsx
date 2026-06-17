@@ -527,6 +527,58 @@ const PublicBookingInner = () => {
     return map;
   }, [resourceOpeningHours]);
 
+  // Fetch occasional availability slots (positive windows for sporadic workers).
+  // Scoped to currently visible resources and future dates only.
+  const { data: occasionalSlots } = useQuery({
+    queryKey: ["public-occasional-slots", tenant?.id, resourceIds, activeSiteId],
+    queryFn: async () => {
+      if (!tenant?.id || resourceIds.length === 0) return [];
+      const today = format(new Date(), "yyyy-MM-dd");
+      const { data, error } = await supabase
+        .from("resource_availability_slots")
+        .select("resource_id, slot_date, start_time, end_time")
+        .eq("tenant_id", tenant.id)
+        .in("resource_id", resourceIds)
+        .gte("slot_date", today);
+      if (error) throw error;
+      return data ?? [];
+    },
+    enabled: !!tenant?.id && resourceIds.length > 0,
+  });
+
+  // Index occasional slots by resource_id + date for O(1) lookups.
+  const occasionalSlotsByResourceDate = useMemo(() => {
+    const map: Record<string, Array<{ start_time: string; end_time: string }>> = {};
+    (occasionalSlots ?? []).forEach((s: any) => {
+      const key = `${s.resource_id}__${s.slot_date}`;
+      if (!map[key]) map[key] = [];
+      map[key].push({ start_time: s.start_time, end_time: s.end_time });
+    });
+    return map;
+  }, [occasionalSlots]);
+
+  // Get occasional slots applicable to a date given the current selection.
+  // If a specific resource is selected, only its slots apply; otherwise any
+  // resource of the chosen reservation_type with a slot counts as available.
+  const getOccasionalSlotsForDate = useCallback(
+    (date: Date): Array<{ start_time: string; end_time: string }> => {
+      const dateStr = format(date, "yyyy-MM-dd");
+      if (form.resource_id) {
+        return occasionalSlotsByResourceDate[`${form.resource_id}__${dateStr}`] ?? [];
+      }
+      const matchingResourceIds = (resources ?? [])
+        .filter((r: any) => !form.reservation_type || r.resource_type === form.reservation_type)
+        .map((r: any) => r.id);
+      const ranges: Array<{ start_time: string; end_time: string }> = [];
+      matchingResourceIds.forEach((rid: string) => {
+        const found = occasionalSlotsByResourceDate[`${rid}__${dateStr}`];
+        if (found) ranges.push(...found);
+      });
+      return ranges;
+    },
+    [occasionalSlotsByResourceDate, form.resource_id, form.reservation_type, resources],
+  );
+
   // Fetch blocked slots — filter by site
   const { data: blockedSlots } = useQuery({
     queryKey: ["public-blocked-slots", tenant?.id, activeSiteId],
