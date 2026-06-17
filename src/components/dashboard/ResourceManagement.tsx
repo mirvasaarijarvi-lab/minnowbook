@@ -17,6 +17,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { toast } from "@/hooks/use-toast";
 import { Plus, Pencil, Trash2, BedDouble, UtensilsCrossed, Building2, Upload, X, Loader2, ExternalLink, Lock, Copy, Clock, PlusCircle, MinusCircle, Sparkles, HeartPulse } from "lucide-react";
 import { useState, useRef } from "react";
+import type { ResourceOpeningHoursEditorHandle } from "./ResourceOpeningHoursEditor";
+import type { ResourceOccasionalSlotsEditorHandle } from "./ResourceOccasionalSlotsEditor";
 import { useT } from "@/contexts/I18nContext";
 import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
 import DashboardTooltip from "./DashboardTooltip";
