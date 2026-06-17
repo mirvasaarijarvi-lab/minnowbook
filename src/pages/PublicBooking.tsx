@@ -743,6 +743,9 @@ const PublicBookingInner = () => {
   const isDateDisabled = (date: Date) => {
     if (date < new Date(new Date().setHours(0, 0, 0, 0))) return true;
     if (isDateFullyBlocked(date)) return true;
+    // Occasional availability slots can re-open an otherwise closed day.
+    const hasOccasional = getOccasionalSlotsForDate(date).length > 0;
+    if (hasOccasional) return false;
     if (!openingHours?.length) return false;
     const dayOfWeek = date.getDay();
     const dayHours = openingHours.find((h) => h.day_of_week === dayOfWeek);
