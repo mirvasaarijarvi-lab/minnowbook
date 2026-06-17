@@ -201,6 +201,7 @@ type TranslationKeys = {
   "resourceHours.sameEveryDayDesc": string;
   "resourceHours.removeHours": string;
   "resourceHours.saveFirst": string;
+  "resourceHours.savedOnCreate": string;
   "resourceHours.openingHoursLabel": string;
   "occasionalSlots.title": string;
   "occasionalSlots.description": string;
@@ -1979,6 +1980,7 @@ const en: TranslationKeys = {
   "resourceHours.sameEveryDayDesc": "Same hours apply to all open days. Toggle individual days closed below.",
   "resourceHours.removeHours": "Remove hours",
   "resourceHours.saveFirst": "Save the resource first, then edit it to set opening hours.",
+  "resourceHours.savedOnCreate": "Opening hours will be saved when you create the resource.",
   "resourceHours.openingHoursLabel": "Hours",
   "occasionalSlots.title": "Occasional working slots",
   "occasionalSlots.description": "For sporadic availability. Add one-off date and time ranges that make this resource bookable in addition to the weekly schedule.",
@@ -3734,6 +3736,7 @@ const fi: TranslationKeys = {
   "resourceHours.sameEveryDayDesc": "Samat ajat kaikille avoimille päiville. Voit sulkea yksittäisiä päiviä alla.",
   "resourceHours.removeHours": "Poista aukioloajat",
   "resourceHours.saveFirst": "Tallenna resurssi ensin, sitten voit muokata aukioloaikoja.",
+  "resourceHours.savedOnCreate": "Aukioloajat tallennetaan, kun luot resurssin.",
   "resourceHours.openingHoursLabel": "Aukioloajat",
   "occasionalSlots.title": "Satunnaiset työvuorot",
   "occasionalSlots.description": "Satunnaisille työntekijöille. Lisää yksittäisiä päivämääriä ja kellonaikoja, jolloin resurssi on varattavissa viikkoaikataulun lisäksi.",
@@ -5487,6 +5490,7 @@ const sv: TranslationKeys = {
   "resourceHours.sameEveryDayDesc": "Samma tider gäller alla öppna dagar. Stäng enskilda dagar nedan.",
   "resourceHours.removeHours": "Ta bort öppettider",
   "resourceHours.saveFirst": "Spara resursen först, redigera sedan för att ställa in öppettider.",
+  "resourceHours.savedOnCreate": "Öppettiderna sparas när du skapar resursen.",
   "resourceHours.openingHoursLabel": "Öppettider",
   "occasionalSlots.title": "Tillfälliga arbetspass",
   "occasionalSlots.description": "För sporadisk tillgänglighet. Lägg till enskilda datum och tider då resursen är bokningsbar utöver veckoschemat.",

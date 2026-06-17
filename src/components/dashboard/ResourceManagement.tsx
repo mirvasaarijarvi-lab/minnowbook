@@ -17,6 +17,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { toast } from "@/hooks/use-toast";
 import { Plus, Pencil, Trash2, BedDouble, UtensilsCrossed, Building2, Upload, X, Loader2, ExternalLink, Lock, Copy, Clock, PlusCircle, MinusCircle, Sparkles, HeartPulse } from "lucide-react";
 import { useState, useRef } from "react";
+import type { ResourceOpeningHoursEditorHandle } from "./ResourceOpeningHoursEditor";
+import type { ResourceOccasionalSlotsEditorHandle } from "./ResourceOccasionalSlotsEditor";
 import { useT } from "@/contexts/I18nContext";
 import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
 import DashboardTooltip from "./DashboardTooltip";
@@ -69,6 +71,11 @@ const ResourceManagement = () => {
   const [editingSiteId, setEditingSiteId] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const imageInputRef = useRef<HTMLInputElement>(null);
+  // Refs let the create dialog flush draft opening hours / occasional
+  // slots to the just-created resource id without forcing the user to
+  // save the resource first and re-open the form.
+  const openingHoursRef = useRef<ResourceOpeningHoursEditorHandle>(null);
+  const occasionalSlotsRef = useRef<ResourceOccasionalSlotsEditorHandle>(null);
   const t = useT();
   const formatTierError = useTierErrorMessage();
   // Centralized error -> toast helper. Tier-limit errors get a friendly,
@@ -263,12 +270,37 @@ const ResourceManagement = () => {
               })
           : [],
       };
+      let resolvedId = editingId as string | null;
       if (editingId) {
         const { error } = await supabase.from("resources").update(payload).eq("id", editingId);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from("resources").insert(payload);
+        // Need the new id back so we can flush draft opening hours and
+        // occasional slots that were authored in the same dialog session.
+        const { data, error } = await supabase
+          .from("resources")
+          .insert(payload)
+          .select("id")
+          .single();
         if (error) throw error;
+        resolvedId = (data as any)?.id ?? null;
+      }
+      // Flush any pending child-editor state. Failures here are
+      // surfaced but do not roll back the resource itself — the user
+      // still gets a resource they can re-open and finish configuring.
+      if (resolvedId) {
+        try {
+          await openingHoursRef.current?.flush(resolvedId);
+        } catch (e) {
+          console.error("Failed to save opening hours", e);
+          toast({ title: t("settings.saveError"), variant: "destructive" });
+        }
+        try {
+          await occasionalSlotsRef.current?.flush(resolvedId);
+        } catch (e) {
+          console.error("Failed to save occasional slots", e);
+          toast({ title: t("settings.saveError"), variant: "destructive" });
+        }
       }
     },
     onSuccess: () => {
@@ -746,24 +778,26 @@ const ResourceManagement = () => {
                   )}
 
                   {/* Working hours: weekly schedule + occasional slots.
-                      Available for every resource type. Requires the resource
-                      to be saved first (we need an id for the FK + tenant
-                      pair), matching the existing pattern. */}
+                      Available for every resource type. Both editors
+                      work in "pending" mode when editingId is null —
+                      drafts are kept in their local state and flushed
+                      to the new resource id by upsertMutation right
+                      after the insert succeeds. This means staff can
+                      configure hours and one-off slots in the same
+                      dialog session they create the resource in. */}
                   {tenantId && (
-                    editingId ? (
-                      <>
-                        <ResourceOpeningHoursEditor resourceId={editingId} tenantId={tenantId} />
-                        <ResourceOccasionalSlotsEditor resourceId={editingId} tenantId={tenantId} />
-                      </>
-                    ) : (
-                      <div className="rounded-lg border border-border p-3 space-y-1">
-                         <Label className="flex items-center gap-1.5 font-medium text-sm">
-                           <Clock className="h-4 w-4 text-muted-foreground" />
-                           {t("resourceHours.title")}
-                         </Label>
-                         <p className="text-xs text-muted-foreground">{t("resourceHours.saveFirst")}</p>
-                      </div>
-                    )
+                    <>
+                      <ResourceOpeningHoursEditor
+                        ref={openingHoursRef}
+                        resourceId={editingId}
+                        tenantId={tenantId}
+                      />
+                      <ResourceOccasionalSlotsEditor
+                        ref={occasionalSlotsRef}
+                        resourceId={editingId}
+                        tenantId={tenantId}
+                      />
+                    </>
                   )}
 
 

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, forwardRef, useImperativeHandle } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,6 +18,12 @@ import { tzNow, tzToday } from "@/lib/timezone";
  * letting staff add one-off bookable date/time ranges for sporadic
  * workers (e.g. a visiting therapist who works two Saturdays a month).
  *
+ * Supports a "pending" mode (resourceId === null) for use inside the
+ * create-resource dialog. In that mode draft slots accumulate in local
+ * state and are persisted by the parent calling `flush(newResourceId)`
+ * after the resource insert succeeds — so staff don't have to save the
+ * resource first and re-open it just to add slots.
+ *
  * Reads/writes the `resource_availability_slots` table — RLS confines
  * writes to tenant members with `resources.manage`. All date/time pickers
  * and validation are interpreted in the resource's effective timezone
@@ -26,8 +32,14 @@ import { tzNow, tzToday } from "@/lib/timezone";
  * create a slot on the wrong wall-clock day.
  */
 interface Props {
-  resourceId: string;
+  resourceId: string | null;
   tenantId: string;
+}
+
+export interface ResourceOccasionalSlotsEditorHandle {
+  /** Persist all pending draft slots against the given resource id. No-op
+   *  when there are no drafts. Safe to call after create OR update. */
+  flush: (resourceId: string) => Promise<void>;
 }
 
 interface SlotRow {
@@ -38,9 +50,16 @@ interface SlotRow {
   note: string | null;
 }
 
-const ResourceOccasionalSlotsEditor = ({ resourceId, tenantId }: Props) => {
+const ResourceOccasionalSlotsEditor = forwardRef<
+  ResourceOccasionalSlotsEditorHandle,
+  Props
+>(({ resourceId, tenantId }, ref) => {
   const t = useT();
   const queryClient = useQueryClient();
+  const isPending = !resourceId;
+  // useEffectiveTimezone tolerates a null resource id (falls back to
+  // tenant default), so the timezone-aware draft inputs work identically
+  // in pending mode.
   const { tz, source: tzSource } = useEffectiveTimezone(resourceId, tenantId);
   const todayInTz = tzToday(tz);
 
@@ -50,13 +69,17 @@ const ResourceOccasionalSlotsEditor = ({ resourceId, tenantId }: Props) => {
   const [draftEnd, setDraftEnd] = useState<string>("12:00");
   const [draftNote, setDraftNote] = useState<string>("");
 
+  // Pending-mode in-memory slots — kept locally until the parent flushes
+  // them once the resource id is known.
+  const [pendingSlots, setPendingSlots] = useState<SlotRow[]>([]);
+
   const slotsQuery = useQuery({
     queryKey: ["resource-availability-slots", resourceId],
     queryFn: async () => {
       const { data, error } = await (supabase as any)
         .from("resource_availability_slots")
         .select("id, slot_date, start_time, end_time, note")
-        .eq("resource_id", resourceId)
+        .eq("resource_id", resourceId!)
         .order("slot_date", { ascending: true })
         .order("start_time", { ascending: true });
       if (error) throw error;
@@ -73,18 +96,26 @@ const ResourceOccasionalSlotsEditor = ({ resourceId, tenantId }: Props) => {
     setAdding(false);
   };
 
+  // Client-side validation shared between the two add paths so the user
+  // sees the failure immediately, before either a network roundtrip
+  // (saved mode) or a silent local push (pending mode).
+  const validateDraft = (): string | null => {
+    if (draftEnd <= draftStart) return "invalid_range";
+    const now = tzNow(tz);
+    if (draftDate < now.date) return "past_date";
+    return null;
+  };
+
+  const showValidationToast = (code: string) => {
+    if (code === "invalid_range") toast.error(t("occasionalSlots.invalidRange"));
+    else if (code === "past_date") toast.error(t("occasionalSlots.pastDate"));
+    else toast.error(t("settings.saveError"));
+  };
+
   const createMutation = useMutation({
     mutationFn: async () => {
-      // Client-side validation mirrors the DB trigger so the user sees the
-      // failure immediately instead of after a roundtrip. "Past date" is
-      // evaluated in the resource's effective timezone, not the browser's.
-      if (draftEnd <= draftStart) {
-        throw new Error("invalid_range");
-      }
-      const now = tzNow(tz);
-      if (draftDate < now.date) {
-        throw new Error("past_date");
-      }
+      const v = validateDraft();
+      if (v) throw new Error(v);
       const { error } = await (supabase as any)
         .from("resource_availability_slots")
         .insert({
@@ -102,16 +133,27 @@ const ResourceOccasionalSlotsEditor = ({ resourceId, tenantId }: Props) => {
       toast.success(t("settings.saved"));
       resetDraft();
     },
-    onError: (err: Error) => {
-      if (err.message === "invalid_range") {
-        toast.error(t("occasionalSlots.invalidRange"));
-      } else if (err.message === "past_date") {
-        toast.error(t("occasionalSlots.pastDate"));
-      } else {
-        toast.error(t("settings.saveError"));
-      }
-    },
+    onError: (err: Error) => showValidationToast(err.message),
   });
+
+  const addPendingDraft = () => {
+    const v = validateDraft();
+    if (v) {
+      showValidationToast(v);
+      return;
+    }
+    setPendingSlots((prev) => [
+      ...prev,
+      {
+        id: `pending-${crypto.randomUUID()}`,
+        slot_date: draftDate,
+        start_time: draftStart,
+        end_time: draftEnd,
+        note: draftNote.trim() || null,
+      },
+    ]);
+    resetDraft();
+  };
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
@@ -127,7 +169,36 @@ const ResourceOccasionalSlotsEditor = ({ resourceId, tenantId }: Props) => {
     onError: () => toast.error(t("settings.saveError")),
   });
 
-  const slots = slotsQuery.data ?? [];
+  const removePending = (id: string) => {
+    setPendingSlots((prev) => prev.filter((s) => s.id !== id));
+  };
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      flush: async (newResourceId: string) => {
+        if (pendingSlots.length === 0) return;
+        const rows = pendingSlots.map((s) => ({
+          resource_id: newResourceId,
+          tenant_id: tenantId,
+          slot_date: s.slot_date,
+          start_time: s.start_time,
+          end_time: s.end_time,
+          note: s.note,
+        }));
+        const { error } = await (supabase as any)
+          .from("resource_availability_slots")
+          .insert(rows);
+        if (error) throw error;
+        setPendingSlots([]);
+        queryClient.invalidateQueries({ queryKey: ["resource-availability-slots", newResourceId] });
+      },
+    }),
+    [pendingSlots, tenantId, queryClient]
+  );
+
+  const savedSlots = slotsQuery.data ?? [];
+  const visibleSlots = isPending ? pendingSlots : savedSlots;
 
   return (
     <div className="space-y-3 rounded-lg border border-border p-3">
@@ -146,6 +217,12 @@ const ResourceOccasionalSlotsEditor = ({ resourceId, tenantId }: Props) => {
       <p className="text-xs text-muted-foreground">
         {t("occasionalSlots.description")}
       </p>
+
+      {isPending && (
+        <p className="text-xs text-muted-foreground italic">
+          {t("resourceHours.savedOnCreate")}
+        </p>
+      )}
 
       <p className="flex items-center gap-1 text-[11px] text-muted-foreground">
         <Globe2 className="h-3 w-3" />
@@ -205,10 +282,10 @@ const ResourceOccasionalSlotsEditor = ({ resourceId, tenantId }: Props) => {
             </Button>
             <Button
               size="sm"
-              onClick={() => createMutation.mutate()}
-              disabled={createMutation.isPending}
+              onClick={() => (isPending ? addPendingDraft() : createMutation.mutate())}
+              disabled={!isPending && createMutation.isPending}
             >
-              {createMutation.isPending ? (
+              {!isPending && createMutation.isPending ? (
                 <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" />
               ) : null}
               {t("occasionalSlots.save")}
@@ -217,16 +294,15 @@ const ResourceOccasionalSlotsEditor = ({ resourceId, tenantId }: Props) => {
         </div>
       )}
 
-      {slotsQuery.isLoading ? (
+      {!isPending && slotsQuery.isLoading ? (
         <div className="flex items-center justify-center py-3">
           <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
         </div>
-      ) : slots.length === 0 ? (
+      ) : visibleSlots.length === 0 ? (
         <p className="text-xs text-muted-foreground italic">{t("occasionalSlots.empty")}</p>
       ) : (
         <ul className="space-y-1.5">
-          {slots.map((s) => {
-            // Format the date in the active locale; fall back to ISO if invalid.
+          {visibleSlots.map((s) => {
             let dateLabel = s.slot_date;
             try {
               dateLabel = format(parseISO(s.slot_date), "EEE d MMM yyyy");
@@ -252,8 +328,8 @@ const ResourceOccasionalSlotsEditor = ({ resourceId, tenantId }: Props) => {
                   size="icon"
                   variant="ghost"
                   className="h-7 w-7 shrink-0 text-destructive hover:text-destructive"
-                  onClick={() => deleteMutation.mutate(s.id)}
-                  disabled={deleteMutation.isPending}
+                  onClick={() => (isPending ? removePending(s.id) : deleteMutation.mutate(s.id))}
+                  disabled={!isPending && deleteMutation.isPending}
                   aria-label={t("occasionalSlots.remove")}
                 >
                   <Trash2 className="h-3.5 w-3.5" />
@@ -265,6 +341,8 @@ const ResourceOccasionalSlotsEditor = ({ resourceId, tenantId }: Props) => {
       )}
     </div>
   );
-};
+});
+
+ResourceOccasionalSlotsEditor.displayName = "ResourceOccasionalSlotsEditor";
 
 export default ResourceOccasionalSlotsEditor;
