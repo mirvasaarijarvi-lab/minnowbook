@@ -4593,7 +4593,7 @@ const fi: TranslationKeys = {
   "help.art7C4": "Jokaisella tilauksella on henkilöstöraja. Päivitä lisätäksesi.",
   "help.art8Title": "Tilaukset ja laskutus",
   "help.art8Desc": "Tutustu hinnoittelutasoihin ja hallinnoi tilaustasi.",
-  "help.art8C1": "Basic (19 €/kk): 1 tyyppi, 1 to 5 henkilöä, AI-chatbot-tuki.",
+  "help.art8C1": "Basic (19 €/kk): 1 tyyppi, 1-5 henkilöä, AI-chatbot-tuki.",
   "help.art8C2": "Professional (59 €/kk): Kaikki tyypit, jopa 25 henkilöä, mukautetut mallit, AI-chatbot-tuki.",
   "help.art8C3": "Business (179 €/kk): Kaikki tyypit, rajaton henkilöstö, prioriteettituki 24h vasteajalla.",
   "help.art8C4": "Päivitä tai alenna milloin tahansa. Muutokset astuvat voimaan seuraavalla laskutuskaudella.",
