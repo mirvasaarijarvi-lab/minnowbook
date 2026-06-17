@@ -24,6 +24,7 @@ import SiteTabs from "./SiteTabs";
 import ResourceImageGallery from "./ResourceImageGallery";
 import BlockedSlotsPanel from "./BlockedSlotsPanel";
 import ResourceOpeningHoursEditor from "./ResourceOpeningHoursEditor";
+import ResourceOccasionalSlotsEditor from "./ResourceOccasionalSlotsEditor";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useTierGate } from "@/hooks/useTierGate";
 import { PERM_RESOURCES_MANAGE } from "@/lib/permissions";
@@ -716,10 +717,16 @@ const ResourceManagement = () => {
                     </div>
                   )}
 
-                  {/* Opening hours for restaurant resources */}
-                  {form.resource_type === "restaurant" && tenantId && (
+                  {/* Working hours: weekly schedule + occasional slots.
+                      Available for every resource type. Requires the resource
+                      to be saved first (we need an id for the FK + tenant
+                      pair), matching the existing pattern. */}
+                  {tenantId && (
                     editingId ? (
-                      <ResourceOpeningHoursEditor resourceId={editingId} tenantId={tenantId} />
+                      <>
+                        <ResourceOpeningHoursEditor resourceId={editingId} tenantId={tenantId} />
+                        <ResourceOccasionalSlotsEditor resourceId={editingId} tenantId={tenantId} />
+                      </>
                     ) : (
                       <div className="rounded-lg border border-border p-3 space-y-1">
                          <Label className="flex items-center gap-1.5 font-medium text-sm">
@@ -730,6 +737,7 @@ const ResourceManagement = () => {
                       </div>
                     )
                   )}
+
 
                   {/* Custom OR Wellness type: sub-services editor.
                       Wellness adds a required duration_min column (5 min steps, 5 to 480). */}
