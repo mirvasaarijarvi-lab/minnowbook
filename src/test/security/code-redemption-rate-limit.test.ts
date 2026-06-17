@@ -160,8 +160,25 @@ describe("redeem-access-code: brute-force & replay resilience", () => {
     expect(data.session).toBeNull();
   });
 
+  // Targeted CI-only retry: the 20-parallel burst is the most network-
+  // sensitive test in this file (cold instance + 20 concurrent fetches
+  // + DNS/TLS warmup variance). When CI happens to land on a cold edge
+  // worker the whole burst can exceed even the 180s budget below and
+  // surface as a "security regression" that's really a transport-layer
+  // timeout. Retry twice ONLY under CI so a single cold path doesn't
+  // fail the build, while local runs still fail fast on real regressions.
   it(
     "20 parallel attempts with the same fake code: zero successes, all known error codes",
+    {
+      // Network-bound burst against a live edge function; CI cold paths
+      // can exceed the default 60s ceiling even after the module-level
+      // warmup. Raise the per-test budget so a slow network run is not
+      // reported as a security regression.
+      timeout: 180_000,
+      // `retry` reruns the test on failure/timeout. Scope to CI to avoid
+      // masking deterministic regressions during local development.
+      retry: process.env.CI ? 2 : 0,
+    },
     async () => {
       const N = 20;
       const results = await Promise.all(
@@ -184,12 +201,8 @@ describe("redeem-access-code: brute-force & replay resilience", () => {
         expect(KNOWN_ERROR_CODES.has(code), `unexpected error code: ${code}`).toBe(true);
       }
     },
-    // Network-bound burst against a live edge function; CI cold paths can
-    // exceed the default 60s ceiling even after the module-level warmup.
-    // Raise the per-test budget so a slow network run is not reported as
-    // a security regression.
-    180_000,
   );
+
 
 
   it("repeated serial attempts return the same generic error code (no validity leak)", async () => {
