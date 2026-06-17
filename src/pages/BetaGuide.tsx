@@ -145,6 +145,70 @@ const BetaGuide = () => {
           </div>
         </section>
 
+        {/* What's new to try */}
+        <section className="py-16 px-4">
+          <div className="max-w-3xl mx-auto space-y-6">
+            <h2 className="text-2xl font-serif font-bold text-foreground text-center">
+              What's new to try
+            </h2>
+            <p className="text-muted-foreground text-center max-w-2xl mx-auto">
+              Your beta access unlocks every plan tier, including these recent additions we'd love feedback on.
+            </p>
+            <div className="grid gap-4 md:grid-cols-2">
+              <Card>
+                <CardContent className="pt-5 pb-4 space-y-2">
+                  <h3 className="font-serif font-semibold text-foreground">Kitchen Orders</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Per-reservation order tracker for restaurant and venue resources. Add food, drink and other items with quantity, price, status (received, preparing, ready, served) and notes for allergies or modifiers. Open it from the Kitchen panel in the sidebar.
+                  </p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="pt-5 pb-4 space-y-2">
+                  <h3 className="font-serif font-semibold text-foreground">Hotel rooms and bulk create</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Accommodation resources support multiple room types (capacity, base price, optional breakfast, bed mix). Use Bulk create rooms to generate a numbered sequence (for example 101 to 120) in one action.
+                  </p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="pt-5 pb-4 space-y-2">
+                  <h3 className="font-serif font-semibold text-foreground">Wellness services menu</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Wellness resources (hairdresser, masseur, makeup artist) have a tickable services menu. Each entry has a name, optional price and a duration in 5 minute steps up to 8 hours. The booking length and price update live as guests pick services.
+                  </p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="pt-5 pb-4 space-y-2">
+                  <h3 className="font-serif font-semibold text-foreground">Multi-site overrides</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Business tier lets you create multiple sites and override almost every setting per site: opening hours, email templates, branding, business name and reply-to. Use Reset to defaults to fall back to the tenant value.
+                  </p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="pt-5 pb-4 space-y-2">
+                  <h3 className="font-serif font-semibold text-foreground">Calendar sync (iCal)</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Subscribe to your reservations from Google Calendar, Apple Calendar, Outlook or Thunderbird. Find your private feed URL in Settings, Calendar Sync, and rotate it any time.
+                  </p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="pt-5 pb-4 space-y-2">
+                  <h3 className="font-serif font-semibold text-foreground">Offers to Reservations report</h3>
+                  <p className="text-sm text-muted-foreground">
+                    The Reports panel shows how many offers converted into reservations for the selected period, with a dedicated CSV export of every offer and its linked reservations.
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </section>
+
+
+
         {/* FAQ / Tips */}
         <section className="py-16 px-4">
           <div className="max-w-3xl mx-auto space-y-8">
