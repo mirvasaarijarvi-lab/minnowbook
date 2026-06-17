@@ -1,60 +1,67 @@
-# Per-Resource Operational Hours
+## Goal
 
-## What you'll see
+Make occasional slot pickers and availability calculations honor a single, explicit timezone (resource override, otherwise tenant) instead of silently using the browser's local zone. Today, `tenant_settings.timezone` exists but is never read, resources have no timezone field at all, and pickers like `ResourceOccasionalSlotsEditor` use `new Date()` / `format()` in browser local time. That means a staff member on holiday in another country can accidentally create a "Tuesday 09:00" slot that lands on Monday for the tenant.
 
-In the resource edit dialog (Muokkaa resurssia), under a new "Working hours" section:
+## Approach
 
-1. **Weekly schedule** — A row for each day Mon to Sun with:
-   - A toggle "Working / Closed"
-   - "From" and "To" time pickers (only enabled when working)
-   - An optional "Same hours every day" shortcut
-
-2. **Occasional working slots** — Below the weekly schedule, a section for sporadic workers:
-   - "Add slot" button opens a small picker: date + start time + end time
-   - Each saved slot shows as a chip "Tue 12 Aug, 10:00 to 14:00" with a delete icon
-   - Slots are additive: they make the resource bookable on dates/times outside the weekly schedule (or on days marked Closed)
-
-A resource can use either pattern or both. If both weekly schedule and occasional slots are empty, the resource falls back to the site/tenant opening hours (current behavior).
-
-The public booking page and calendar will respect these hours for any resource, not just restaurant tables.
-
-## Why two patterns
-
-- A regular massage therapist who works Tue-Sat 10 to 18 uses only the weekly schedule.
-- A visiting physiotherapist who works two Saturdays a month uses only the occasional slots.
-- A resource that's normally Mon-Fri but opens for an occasional Sunday workshop uses both.
+1. Add a per-resource override; fall back to tenant; final fallback to `Europe/Helsinki` (project default for the Finland-based product).
+2. Provide one tiny helper (`getEffectiveTimezone`, `tzNow`, `tzFormat`, `tzToday`, `tzDayOfWeek`) so every caller goes through the same code path. No `date-fns-tz` style date-math acrobatics in components.
+3. Wire the helper into the places where local-time assumptions exist today and where they're about to be added: occasional slots editor, weekly opening-hours editor display, and the public booking availability resolver.
+4. Surface the effective timezone in the UI (small caption next to the pickers) so staff in a different physical zone know what they're scheduling against.
 
 ## Scope
 
-- Extends to all resource types (wellness, custom, hotel, etc.), not just restaurant tables.
-- Available only in the **edit** dialog (after the resource is saved once). The create dialog will show "Save the resource first, then set working hours" - this matches the existing pattern.
-- Hours are validated to be on the same day, end > start, and 15 min steps.
+### Schema
 
-## Technical details
+- New migration: add `resources.timezone TEXT NULL` (IANA name, e.g. `Europe/Helsinki`). Null means "inherit tenant".
+- No change to `tenant_settings.timezone` — it already exists.
+- No change to `resource_availability_slots` — `slot_date` / `start_time` / `end_time` stay timezone-naive and are interpreted in the resource's effective timezone. This matches `resource_opening_hours` and avoids a destructive backfill.
 
-**Reused (already exists):**
-- `resource_opening_hours` table and `ResourceOpeningHoursEditor` component — currently gated to `resource_type === "restaurant"`. Will be opened to all types and re-skinned to put the toggle on the left of each row.
+### New helper: `src/lib/timezone.ts`
 
-**New:**
-- `resource_availability_slots` table:
-  - `resource_id`, `tenant_id`, `slot_date` (date), `start_time` (time), `end_time` (time), `note` (text, optional)
-  - RLS: tenant members read/write their own; anon SELECT for active tenants (so public booking can read).
-  - GRANT block as required.
-  - Trigger: validate `end_time > start_time`.
-- `ResourceOccasionalSlotsEditor` component, rendered under the weekly editor.
-- Public booking + calendar availability resolver updated: a time is bookable if (weekly schedule allows it) OR (an occasional slot covers it). Existing blocks still override both.
+```ts
+getEffectiveTimezone({ resourceTz, tenantTz }): string  // resource ?? tenant ?? "Europe/Helsinki"
+tzToday(tz): string                                     // yyyy-MM-dd in tz
+tzNow(tz): { date: string; time: string }               // for "is this slot in the past?" checks
+tzFormat(iso, pattern, tz, locale): string              // wraps Intl
+tzDayOfWeek(iso, tz): 0..6                              // Sunday=0, used by weekly hours
+```
 
-**Files to touch:**
-- `supabase/migrations/<new>.sql` - new table, RLS, GRANT, trigger.
-- `src/components/dashboard/ResourceManagement.tsx` - drop the `=== "restaurant"` gate, mount the new editor.
-- `src/components/dashboard/ResourceOpeningHoursEditor.tsx` - minor copy/layout tweak so the day-toggle reads clearly for non-restaurant resources.
-- `src/components/dashboard/ResourceOccasionalSlotsEditor.tsx` - new component.
-- `src/pages/PublicBooking.tsx` + availability helpers - merge occasional slots into the bookable-window calculation.
-- i18n keys in EN / FI / SV for the new labels.
-- Tests: RLS manifest test (`tenant-table-manifest.test.ts`) + cross-tenant RLS test get the new table added.
+Implementation uses `Intl.DateTimeFormat` with `timeZone` option — no new dependency.
 
-## Out of scope (ask if you want them later)
+### Hook: `useEffectiveTimezone(resourceId?, tenantId)`
 
-- Recurring exceptions (e.g. "every 2nd Saturday") - handled today by adding multiple occasional slots.
-- Per-slot pricing overrides.
-- Staff/user assignment to slots (the slot belongs to the resource, not a person).
+Reads `resources.timezone` and `tenant_settings_public.timezone` via React Query, returns the resolved IANA string + a `source: "resource" | "tenant" | "default"` flag.
+
+### Files to edit
+
+- `src/components/dashboard/ResourceOccasionalSlotsEditor.tsx`
+  - Replace `new Date()` / `format(...)` with `tzToday` / `tzFormat`.
+  - `past_date` validation uses `tzNow` so a slot at 23:30 in Helsinki isn't rejected as past for a user in California.
+  - Render a small `text-[11px] text-muted-foreground`: "Times shown in {tz}" with a "change" link only when the resource has no override (links to a new per-resource timezone field in the resource form).
+- `src/components/dashboard/ResourceManagement.tsx`
+  - Add an optional Timezone select (IANA list via `Intl.supportedValuesOf("timeZone")`) on the resource form. Placeholder = "Inherit tenant ({tenantTz})".
+  - Persist `resources.timezone`.
+- `src/components/dashboard/ResourceOpeningHoursEditor.tsx`
+  - Use `tzFormat` for any date labels and `tzDayOfWeek` when mapping "today" to a weekday row.
+- `src/pages/PublicBooking.tsx` (availability resolver section that reads `resource_opening_hours` and blocked slots)
+  - Compute "today / current weekday / current time" via `getEffectiveTimezone` for the resource being booked, not `new Date()`.
+  - Same for the day labels shown to the guest.
+- `src/i18n/translations.ts`
+  - Add keys: `timezone.label`, `timezone.inheritTenant`, `timezone.shownIn`, `timezone.fallback` in EN / FI / SV.
+
+### Out of scope (call out, don't do)
+
+- Wiring `resource_availability_slots` into the public booking availability resolver — still the larger separate pass from the previous turn. This change makes the timezone story correct so that pass can land cleanly.
+- Per-site timezone (sites table). If a customer asks, we can layer it between resource and tenant later; the helper signature is already shaped for that.
+- Migrating historic `resource_opening_hours` rows — they remain interpreted in the (new) effective timezone, which for existing single-site Finnish tenants is identical to today's behavior.
+
+### Tests
+
+- Add `src/lib/__tests__/timezone.test.ts`: covers `tzToday` across DST boundary, `tzDayOfWeek` for `Pacific/Auckland` vs `Europe/Helsinki`, and "Inherit tenant" fallback.
+- Update `src/test/security/tenant-table-manifest.test.ts` only if column addition affects manifest snapshot (it won't — manifest tracks tables, not columns).
+
+## Risk & rollback
+
+- Migration only adds a nullable column, safe to roll forward and back.
+- All callers default to current behavior when `timezone` is null on both resource and tenant (Helsinki), so no existing tenant sees a behavior change.

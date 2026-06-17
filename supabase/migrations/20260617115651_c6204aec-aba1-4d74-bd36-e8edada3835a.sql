@@ -1,0 +1,2 @@
+ALTER TABLE public.resources ADD COLUMN IF NOT EXISTS timezone text NULL;
+COMMENT ON COLUMN public.resources.timezone IS 'IANA timezone (e.g. Europe/Helsinki). NULL inherits tenant_settings.timezone, which itself falls back to Europe/Helsinki at the application layer.';

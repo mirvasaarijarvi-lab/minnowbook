@@ -1834,6 +1834,7 @@ export type Database = {
           site_id: string | null
           sub_services: Json
           tenant_id: string
+          timezone: string | null
         }
         Insert: {
           approval_status?: string
@@ -1862,6 +1863,7 @@ export type Database = {
           site_id?: string | null
           sub_services?: Json
           tenant_id: string
+          timezone?: string | null
         }
         Update: {
           approval_status?: string
@@ -1890,6 +1892,7 @@ export type Database = {
           site_id?: string | null
           sub_services?: Json
           tenant_id?: string
+          timezone?: string | null
         }
         Relationships: [
           {
