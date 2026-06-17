@@ -51,15 +51,22 @@ jobs:
           rm -rf node_modules
           bun install --frozen-lockfile
 
-      # Run only the RLS + CORS slices of the security suite. Each
-      # `-t` pattern is a literal substring of a `describe`/`it` name
-      # in the existing security tests; vitest treats them as a union.
-      # Listing them explicitly (rather than `--config + grep`) keeps
-      # the gate readable in CI logs.
+      # Run only the RLS + CORS slices of the security suite.
+      #
+      # NOTE: we deliberately do NOT pass `--config vitest.security.config.ts`
+      # here. That config is the OFFLINE unit runner and its `exclude` list
+      # (LIVE_SECURITY_TESTS) drops every cross-tenant RLS file and the
+      # custom-headers CORS file — running this gate with that config
+      # produced "No test files found" and a red merge gate even when no
+      # test had regressed. The default `vitest.config.ts` matches every
+      # file passed positionally, and the listed RLS/CORS tests are written
+      # to degrade gracefully (anon-only assertions) when live Supabase
+      # env vars are absent, so this gate stays green on PRs without
+      # credentials and exercises live paths on push to main where they
+      # are configured.
       - name: Run RLS regression tests
         run: |
           bunx vitest run \
-            --config vitest.security.config.ts \
             --reporter=verbose \
             src/test/security/cross-tenant-rls.test.ts \
             src/test/security/cross-tenant-log-isolation.test.ts \
@@ -74,7 +81,6 @@ jobs:
       - name: Run CORS regression tests
         run: |
           bunx vitest run \
-            --config vitest.security.config.ts \
             --reporter=verbose \
             src/test/security/cors-validation.test.ts \
             src/test/security/edge-function-cors-custom-headers.test.ts \
