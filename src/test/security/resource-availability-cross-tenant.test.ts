@@ -70,7 +70,7 @@ describe("Resource availability cross-tenant isolation", () => {
                 start_time: "09:00",
                 end_time: "12:00",
               };
-        const { data, error } = await anon.from(table).insert(payload).select();
+        const { data, error } = await anon.from(table).insert(payload as any).select();
         expectWriteDenied(
           {
             table,
@@ -211,7 +211,7 @@ describe("Resource availability cross-tenant isolation", () => {
                 start_time: "10:00",
                 end_time: "11:00",
               };
-        const { data, error } = await clientA.from(table).insert(payload).select();
+        const { data, error } = await clientA.from(table).insert(payload as any).select();
         expectWriteDenied(
           {
             table,
