@@ -1980,6 +1980,7 @@ const en: TranslationKeys = {
   "resourceHours.sameEveryDayDesc": "Same hours apply to all open days. Toggle individual days closed below.",
   "resourceHours.removeHours": "Remove hours",
   "resourceHours.saveFirst": "Save the resource first, then edit it to set opening hours.",
+  "resourceHours.savedOnCreate": "Opening hours will be saved when you create the resource.",
   "resourceHours.openingHoursLabel": "Hours",
   "occasionalSlots.title": "Occasional working slots",
   "occasionalSlots.description": "For sporadic availability. Add one-off date and time ranges that make this resource bookable in addition to the weekly schedule.",
