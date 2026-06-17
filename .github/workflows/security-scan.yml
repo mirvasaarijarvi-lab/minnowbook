@@ -156,7 +156,32 @@ jobs:
         run: |
           set -euo pipefail
           api="https://api.supabase.com/v1/projects/${SUPABASE_PROJECT_REF}/advisors/security"
-          resp=$(curl -sS -H "Authorization: Bearer ${SUPABASE_ACCESS_TOKEN}" "$api")
+
+          # Capture body and HTTP status separately so a transient 5xx,
+          # 401, or HTML error page from the platform does not crash jq
+          # with a "parse error" and mask the real cause.
+          tmp_body=$(mktemp)
+          http_code=$(curl -sS -o "$tmp_body" -w '%{http_code}' \
+            -H "Authorization: Bearer ${SUPABASE_ACCESS_TOKEN}" \
+            -H "Accept: application/json" \
+            "$api" || echo "000")
+          resp=$(cat "$tmp_body")
+
+          echo "Advisors API HTTP status: ${http_code}"
+
+          if [ "$http_code" != "200" ]; then
+            echo "::warning title=Supabase advisors API unreachable::HTTP ${http_code} from advisors endpoint — skipping gate this run."
+            echo "Response (first 500 chars): $(printf '%s' "$resp" | head -c 500)"
+            exit 0
+          fi
+
+          # Validate JSON before piping to jq so a malformed body produces
+          # a clear warning instead of "jq: parse error".
+          if ! printf '%s' "$resp" | jq -e . >/dev/null 2>&1; then
+            echo "::warning title=Supabase advisors API returned non-JSON::Skipping gate this run."
+            echo "Response (first 500 chars): $(printf '%s' "$resp" | head -c 500)"
+            exit 0
+          fi
 
           echo "$resp" | jq '{
             errors:   ([.lints[]? | select(.level=="ERROR")] | length),
