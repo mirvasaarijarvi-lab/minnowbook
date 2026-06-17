@@ -31,6 +31,8 @@ import { PERM_RESOURCES_MANAGE } from "@/lib/permissions";
 import { useAutoApproval } from "@/hooks/useAutoApproval";
 import { useTierErrorMessage } from "@/hooks/useTierErrorMessage";
 import { getTierLimits } from "@/lib/tier-limits";
+import { listSupportedTimezones } from "@/lib/timezone";
+import { useEffectiveTimezone } from "@/hooks/useEffectiveTimezone";
 
 const typeIcons: Record<string, React.ElementType> = {
   guesthouse: BedDouble,
@@ -100,6 +102,7 @@ const ResourceManagement = () => {
     offers_table_reservation: true, offers_quote: true, offers_set_menu: true,
     site_id: "" as string,
     custom_type_label: "",
+    timezone: "" as string,
   });
 
   const { data: sites } = useQuery({
