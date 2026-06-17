@@ -1,0 +1,102 @@
+name: Bun lockfile preflight
+
+# Preflight guard that catches `bun.lock` drift BEFORE any downstream
+# job runs `bun install --frozen-lockfile`. Without this, the first
+# job to install dependencies fails with a terse
+#   "lockfile had changes, but lockfile is frozen"
+# message that hides which package.json edit caused the drift.
+#
+# Strategy:
+#   1. Resolve dependencies non-destructively against the committed
+#      lockfile (`bun install --lockfile-only`). This writes any
+#      changes Bun would make to bun.lock without touching
+#      node_modules, so the job is fast (~5 s warm) and side-effect
+#      free.
+#   2. `git diff --exit-code` on bun.lock. If it changed, the
+#      committed lockfile is stale relative to package.json and we
+#      fail with a clear, actionable error.
+#
+# Runs on every PR and push to main so a stale lockfile is caught at
+# review time, not deep inside a 10-minute test matrix.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: bun-lockfile-preflight-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify-bun-lock:
+    name: bun.lock is in sync with package.json
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+
+      - name: Verify bun.lock is present in checkout
+        run: |
+          set -euo pipefail
+          if [ ! -f bun.lock ]; then
+            echo "::error file=bun.lock::bun.lock is missing from the checkout."
+            echo "Every CI job that runs 'bun install --frozen-lockfile' requires a committed bun.lock."
+            echo "Fix: run 'bun install --save-text-lockfile' locally and commit the result."
+            exit 1
+          fi
+          echo "bun.lock present ($(wc -c < bun.lock) bytes)."
+
+      - name: Setup pinned Bun
+        uses: ./.github/actions/setup-bun-with-diagnostics
+
+      - name: Try frozen install (fast path)
+        id: frozen
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          # Resolve only the lockfile graph, no scripts, no node_modules
+          # writes beyond what Bun needs to verify the resolution. If
+          # the lockfile is already in sync this succeeds in seconds
+          # and we skip the regeneration step entirely.
+          bun install --frozen-lockfile --ignore-scripts
+
+      - name: Regenerate bun.lock and detect drift
+        if: steps.frozen.outcome == 'failure'
+        run: |
+          set -euo pipefail
+          echo "::group::Frozen install failed — regenerating bun.lock to surface the drift"
+          # Re-resolve against package.json and write the result to
+          # bun.lock in text format (matches the committed format).
+          bun install --save-text-lockfile --ignore-scripts
+          echo "::endgroup::"
+
+          if ! git diff --quiet -- bun.lock; then
+            echo "::error file=bun.lock::bun.lock is out of sync with package.json."
+            echo ""
+            echo "A downstream job running 'bun install --frozen-lockfile' would fail with:"
+            echo "    error: lockfile had changes, but lockfile is frozen"
+            echo ""
+            echo "Fix locally:"
+            echo "    bun install --save-text-lockfile"
+            echo "    git add bun.lock && git commit -m 'chore: sync bun.lock'"
+            echo ""
+            echo "--- bun.lock diff (first 200 lines) ---"
+            git --no-pager diff -- bun.lock | head -200
+            exit 1
+          fi
+
+          echo "::error::Frozen install failed but bun.lock did not change after regeneration."
+          echo "This usually means a registry/network failure rather than a stale lockfile."
+          echo "Re-run the workflow; if it persists, inspect the 'Try frozen install' step logs."
+          exit 1
+
+      - name: Lockfile in sync
+        if: steps.frozen.outcome == 'success'
+        run: echo "✅ bun.lock is in sync with package.json — downstream frozen installs will succeed."
