@@ -689,6 +689,28 @@ const ResourceManagement = () => {
                     <Label className="mb-0">{t("dashboard.active")}</Label>
                   </div>
 
+                  {/* Timezone — optional override; otherwise inherits from tenant */}
+                  <div>
+                    <Label>{t("timezone.label")}</Label>
+                    <Select
+                      value={form.timezone || "__inherit__"}
+                      onValueChange={(v) => setForm({ ...form, timezone: v === "__inherit__" ? "" : v })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-72">
+                        <SelectItem value="__inherit__">
+                          {t("timezone.inheritTenant").replace("{tz}", tenantTz.tz)}
+                        </SelectItem>
+                        {listSupportedTimezones().map((zone) => (
+                          <SelectItem key={zone} value={zone}>{zone}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+
                   {/* Restaurant service options */}
                   {form.resource_type === "restaurant" && (
                     <div className="space-y-3 rounded-lg border border-border p-3">
