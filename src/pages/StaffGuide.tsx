@@ -673,6 +673,40 @@ const guideContent: Record<Language, GuideContent> = {
         ],
         tip: "Offers are available on all plans. Cross-reservations (linking across types) require Pro or Business.",
       },
+      {
+        icon: <Settings className="h-6 w-6" />, mockupId: "kitchen",
+        title: "14. Kitchen Orders (Pro & Business)",
+        steps: [
+          "Open the Kitchen panel from the sidebar to manage food and drink orders for a selected day.",
+          "Pick a date to see every reservation on resources that support kitchen orders (restaurant, venue).",
+          "For each reservation, add line items: category (food, drink, other), name, quantity, unit price, and free-form notes (allergies, modifiers, table position).",
+          "Set per-item status as it moves through the kitchen: received → preparing → ready → served. Updates show live for everyone.",
+          "Orders inherit the same tenant and site permissions, so staff only see orders for sites they belong to.",
+        ],
+        tip: "Available on restaurant and venue resources. Use the notes field for allergies and special requests.",
+      },
+      {
+        icon: <Building2 className="h-6 w-6" />, mockupId: "resources",
+        title: "15. Hotel Rooms & Room Types",
+        steps: [
+          "On any accommodation resource, define one or more Room Types with name, capacity, base price, optional breakfast price, and bed configuration (singles, doubles, sofa beds, cribs).",
+          "Use 'Bulk create rooms' to generate a numbered sequence (for example rooms 101 to 120) of the same room type in one action, instead of adding rooms one by one.",
+          "Guests on the public booking page see only room types that have at least one available room for the selected check-in / check-out range.",
+          "Breakfast appears as an opt-in line item; nightly price plus breakfast is summed automatically and shown on the confirmation email.",
+          "Multi-night stays use the check-out date — the duration determines the total.",
+        ],
+      },
+      {
+        icon: <Building2 className="h-6 w-6" />, mockupId: "multisite",
+        title: "16. Multi-site Overrides (Business)",
+        steps: [
+          "On Business plan, almost every tenant-level setting can be overridden per site: opening hours, email templates, business name, reply-to email, branding (colors, logo, hero image), and booking page copy.",
+          "When a site has no override saved, the tenant-level default is used automatically.",
+          "Use the 'Reset to defaults' control on any site setting to drop the override and fall back to the tenant value.",
+          "Assign staff to specific sites via Site Assignments — each user can hold a different role per site (for example admin on site A, staff on site B).",
+          "Public booking links accept ?site=<slug> to lock the guest flow to a single location.",
+        ],
+      },
     ],
   },
   fi: {
