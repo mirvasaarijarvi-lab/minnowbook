@@ -5490,6 +5490,7 @@ const sv: TranslationKeys = {
   "resourceHours.sameEveryDayDesc": "Samma tider gäller alla öppna dagar. Stäng enskilda dagar nedan.",
   "resourceHours.removeHours": "Ta bort öppettider",
   "resourceHours.saveFirst": "Spara resursen först, redigera sedan för att ställa in öppettider.",
+  "resourceHours.savedOnCreate": "Öppettiderna sparas när du skapar resursen.",
   "resourceHours.openingHoursLabel": "Öppettider",
   "occasionalSlots.title": "Tillfälliga arbetspass",
   "occasionalSlots.description": "För sporadisk tillgänglighet. Lägg till enskilda datum och tider då resursen är bokningsbar utöver veckoschemat.",
