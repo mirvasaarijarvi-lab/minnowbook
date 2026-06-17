@@ -1,86 +1,60 @@
-## Goal
+# Per-Resource Operational Hours
 
-Stop CI flakes that come from stale logs or leftover DB rows. Every test that touches the DB owns its own tenant, owns its own users, and cleans up. CI fails if anything survives.
+## What you'll see
 
-## 1. Shared test infrastructure (new files)
+In the resource edit dialog (Muokkaa resurssia), under a new "Working hours" section:
 
-```text
-src/test/
-  fixtures/
-    render.tsx            new — renderWithProviders(ui, { tenantId?, language?, queryClient? })
-    mock-supabase.ts      new — in-memory supabase mock for unit/security tests
-    branding.ts           new — canned persisted/signed URL samples
-  helpers/
-    ephemeral-tenant.ts   new — createEphemeralTenant() / dropEphemeralTenant() using service-role client
-    ephemeral-user.ts     new — createEphemeralUser({ tenantId, role }) with auth.admin
-    leftover-guard.ts     new — assertNoLeftoverTestRows() called in global afterAll
-```
+1. **Weekly schedule** — A row for each day Mon to Sun with:
+   - A toggle "Working / Closed"
+   - "From" and "To" time pickers (only enabled when working)
+   - An optional "Same hours every day" shortcut
 
-`renderWithProviders` wraps: `QueryClientProvider` (fresh client, retry: false), `I18nProvider`, `MemoryRouter`, `ImpersonationProvider`, `TenantProvider` (with injected tenantId). Components stop crashing on missing context and tests stop depending on test-file order.
+2. **Occasional working slots** — Below the weekly schedule, a section for sporadic workers:
+   - "Add slot" button opens a small picker: date + start time + end time
+   - Each saved slot shows as a chip "Tue 12 Aug, 10:00 to 14:00" with a delete icon
+   - Slots are additive: they make the resource bookable on dates/times outside the weekly schedule (or on days marked Closed)
 
-`ephemeral-tenant.ts` creates rows with a deterministic prefix: `slug = `ci-${workerId}-${nanoid(6)}`` and `name = `TEST CI <suite> <nanoid>``. `dropEphemeralTenant` deletes the tenant; cascade handles tenant_users / settings / resources / reservations.
+A resource can use either pattern or both. If both weekly schedule and occasional slots are empty, the resource falls back to the site/tenant opening hours (current behavior).
 
-## 2. Vitest unit/integration (`vitest.config.ts`)
+The public booking page and calendar will respect these hours for any resource, not just restaurant tables.
 
-- Add `setupFiles: ["./src/test/setup.ts", "./src/test/setup-providers.ts"]`. The new file installs a default `QueryClient` and exposes `renderWithProviders`.
-- Migrate component tests that currently call `render()` directly to `renderWithProviders()` (codemod: ripgrep + sed against `src/**/*.test.tsx`). This eliminates the "useImpersonation must be used within ImpersonationProvider" class of failures permanently.
-- Add `globalTeardown` that asserts `process.env.CI_LEAK_CHECK !== "1" || noEphemeralFilesLeftover()`.
+## Why two patterns
 
-## 3. Security tests (`vitest.security.config.ts`)
+- A regular massage therapist who works Tue-Sat 10 to 18 uses only the weekly schedule.
+- A visiting physiotherapist who works two Saturdays a month uses only the occasional slots.
+- A resource that's normally Mon-Fri but opens for an occasional Sunday workshop uses both.
 
-- Default to `setupFiles: ["./src/test/setup.ts", "./src/test/security/setup-mocks.ts"]`.
-- `setup-mocks.ts` vi.mocks `@/integrations/supabase/client` with the in-memory mock from `fixtures/mock-supabase.ts` so XSS / branding URL tests never reach the network.
-- Cross-tenant storage tests stay live but now seed their own buckets via `ephemeral-tenant.ts` and clean up in `afterAll`.
+## Scope
 
-## 4. Live integration (`vitest.live.config.ts`, `supabase/tests/integration/*`)
+- Extends to all resource types (wellness, custom, hotel, etc.), not just restaurant tables.
+- Available only in the **edit** dialog (after the resource is saved once). The create dialog will show "Save the resource first, then set working hours" - this matches the existing pattern.
+- Hours are validated to be on the same day, end > start, and 15 min steps.
 
-- New helper `withEphemeralTenant(testFn)` opens a tenant + users in `beforeAll`, exposes them via the test context, and drops them in `afterAll`. Failures inside the test still trigger cleanup (`try/finally`).
-- Rewrite `claim-discount-code.live.test.ts` and `reservation-type-limit.live.test.ts` to use it. No reliance on pre-existing tenant rows.
-- Replace any hardcoded UUIDs in `scripts/seed-rls-test-data.ts` callers with values returned from the helper.
+## Technical details
 
-## 5. Playwright e2e (`e2e/fixtures/*`)
+**Reused (already exists):**
+- `resource_opening_hours` table and `ResourceOpeningHoursEditor` component — currently gated to `resource_type === "restaurant"`. Will be opened to all types and re-skinned to put the toggle on the left of each row.
 
-- Extend `test-tenant.ts` into a Playwright fixture: `test.extend<{ ephemeralTenant: EphemeralTenant }>({...})`. Each spec receives its own tenant; the fixture tears down on `use` end.
-- `dashboard-reservations.spec.ts`, `cross-booking-same-guest.spec.ts`, `offer-confirm-creates-reservations.spec.ts`, `tenant-membership-removed.spec.ts` switch to the fixture. No spec reuses another spec's data.
-- `public-booking-client.ts` accepts the ephemeral slug instead of a hardcoded `serenity-wellness`.
+**New:**
+- `resource_availability_slots` table:
+  - `resource_id`, `tenant_id`, `slot_date` (date), `start_time` (time), `end_time` (time), `note` (text, optional)
+  - RLS: tenant members read/write their own; anon SELECT for active tenants (so public booking can read).
+  - GRANT block as required.
+  - Trigger: validate `end_time > start_time`.
+- `ResourceOccasionalSlotsEditor` component, rendered under the weekly editor.
+- Public booking + calendar availability resolver updated: a time is bookable if (weekly schedule allows it) OR (an occasional slot covers it). Existing blocks still override both.
 
-## 6. Strict leftover-row gate (new CI step)
+**Files to touch:**
+- `supabase/migrations/<new>.sql` - new table, RLS, GRANT, trigger.
+- `src/components/dashboard/ResourceManagement.tsx` - drop the `=== "restaurant"` gate, mount the new editor.
+- `src/components/dashboard/ResourceOpeningHoursEditor.tsx` - minor copy/layout tweak so the day-toggle reads clearly for non-restaurant resources.
+- `src/components/dashboard/ResourceOccasionalSlotsEditor.tsx` - new component.
+- `src/pages/PublicBooking.tsx` + availability helpers - merge occasional slots into the bookable-window calculation.
+- i18n keys in EN / FI / SV for the new labels.
+- Tests: RLS manifest test (`tenant-table-manifest.test.ts`) + cross-tenant RLS test get the new table added.
 
-New SQL helper migration:
+## Out of scope (ask if you want them later)
 
-```text
-public.assert_no_ci_leftover_rows() returns void
-  -- raises if any tenants.slug LIKE 'ci-%'
-  -- or reservations.guest_name ILIKE 'TEST CI %'
-  -- or auth.users.email LIKE 'ci+%@mimmobook.test'
-```
-
-New job `ci-leak-check` in `.github/workflows/ci.yml` runs after every test job:
-
-```text
-- psql -c "SELECT public.assert_no_ci_leftover_rows();"
-```
-
-Job fails the workflow if any leftover exists, so a forgotten cleanup is loud the first time it happens, not the tenth.
-
-## 7. Rollout order (PRs to keep diff reviewable)
-
-1. Shared providers + `renderWithProviders` + migrate component tests.
-2. Security test mocks.
-3. `withEphemeralTenant` helper + live tests.
-4. Playwright fixture conversion.
-5. Migration for `assert_no_ci_leftover_rows` + CI workflow gate.
-
-## Technical notes
-
-- Ephemeral users need the service-role key, already in CI as `SUPABASE_SERVICE_ROLE_KEY`. The helper refuses to run when the URL points at production (`assert(url.includes("supabase.co") && url.includes(EXPECTED_REF))`).
-- Worker ID comes from `process.env.VITEST_POOL_ID` / `process.env.TEST_WORKER_INDEX` so parallel workers never collide on slugs.
-- `QueryClient` in `renderWithProviders` uses `{ retries: false, gcTime: 0 }` to keep tests deterministic.
-- `leftover-guard.ts` only runs when `process.env.CI === "true"` so local dev isn't slowed.
-- No production code paths change. Only test infra, one new SQL helper, and one new CI job.
-
-## Out of scope
-
-- Rewriting individual assertion logic inside tests (only their setup/teardown changes).
-- Edge function Deno tests (already isolated, no shared DB state).
-- Refactoring `scripts/seed-rls-test-data.ts` beyond making it idempotent.
+- Recurring exceptions (e.g. "every 2nd Saturday") - handled today by adding multiple occasional slots.
+- Per-slot pricing overrides.
+- Staff/user assignment to slots (the slot belongs to the resource, not a person).

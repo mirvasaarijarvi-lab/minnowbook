@@ -1620,6 +1620,74 @@ export type Database = {
           },
         ]
       }
+      resource_availability_slots: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          end_time: string
+          id: string
+          note: string | null
+          resource_id: string
+          slot_date: string
+          start_time: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          end_time: string
+          id?: string
+          note?: string | null
+          resource_id: string
+          slot_date: string
+          start_time: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          end_time?: string
+          id?: string
+          note?: string | null
+          resource_id?: string
+          slot_date?: string
+          start_time?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resource_availability_slots_resource_id_fkey"
+            columns: ["resource_id"]
+            isOneToOne: false
+            referencedRelation: "resources"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "resource_availability_slots_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "resource_availability_slots_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "resource_availability_slots_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants_safe"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       resource_images: {
         Row: {
           created_at: string | null
