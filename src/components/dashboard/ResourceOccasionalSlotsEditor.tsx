@@ -147,6 +147,14 @@ const ResourceOccasionalSlotsEditor = ({ resourceId, tenantId }: Props) => {
         {t("occasionalSlots.description")}
       </p>
 
+      <p className="flex items-center gap-1 text-[11px] text-muted-foreground">
+        <Globe2 className="h-3 w-3" />
+        {t("timezone.shownIn").replace("{tz}", tz)}
+        {tzSource === "default" && (
+          <span className="italic">({t("timezone.fallback")})</span>
+        )}
+      </p>
+
       {adding && (
         <div className="space-y-2 rounded-md border border-dashed border-border p-3">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
