@@ -952,6 +952,9 @@ type TranslationKeys = {
   "support.openingHoursC2": string;
   "support.openingHoursC3": string;
   "support.openingHoursC4": string;
+  "support.openingHoursC5": string;
+  "support.openingHoursC6": string;
+  "support.openingHoursC7": string;
   "support.resourcesTitle": string;
   "support.resourcesDesc": string;
   "support.resourcesC1": string;
