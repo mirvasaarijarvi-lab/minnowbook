@@ -17,6 +17,12 @@ import {
   Clock,
 } from "lucide-react";
 import { useT } from "@/contexts/I18nContext";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 const Support = () => {
   const t = useT();
