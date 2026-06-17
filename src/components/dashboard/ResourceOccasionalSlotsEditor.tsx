@@ -66,7 +66,7 @@ const ResourceOccasionalSlotsEditor = ({ resourceId, tenantId }: Props) => {
   });
 
   const resetDraft = () => {
-    setDraftDate(todayISO());
+    setDraftDate(tzToday(tz));
     setDraftStart("09:00");
     setDraftEnd("12:00");
     setDraftNote("");
@@ -76,11 +76,13 @@ const ResourceOccasionalSlotsEditor = ({ resourceId, tenantId }: Props) => {
   const createMutation = useMutation({
     mutationFn: async () => {
       // Client-side validation mirrors the DB trigger so the user sees the
-      // failure immediately instead of after a roundtrip.
+      // failure immediately instead of after a roundtrip. "Past date" is
+      // evaluated in the resource's effective timezone, not the browser's.
       if (draftEnd <= draftStart) {
         throw new Error("invalid_range");
       }
-      if (draftDate < todayISO()) {
+      const now = tzNow(tz);
+      if (draftDate < now.date) {
         throw new Error("past_date");
       }
       const { error } = await (supabase as any)
