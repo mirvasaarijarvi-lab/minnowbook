@@ -216,6 +216,10 @@ type TranslationKeys = {
   "occasionalSlots.remove": string;
   "occasionalSlots.invalidRange": string;
   "occasionalSlots.pastDate": string;
+  "timezone.label": string;
+  "timezone.inheritTenant": string;
+  "timezone.shownIn": string;
+  "timezone.fallback": string;
   "booking.pickDate": string;
   "booking.checkOutDate": string;
   "booking.roomType": string;
@@ -1987,6 +1991,10 @@ const en: TranslationKeys = {
   "occasionalSlots.remove": "Remove",
   "occasionalSlots.invalidRange": "End time must be after start time.",
   "occasionalSlots.pastDate": "Pick a date that is today or later.",
+  "timezone.label": "Timezone",
+  "timezone.inheritTenant": "Inherit from organization ({tz})",
+  "timezone.shownIn": "Times shown in {tz}",
+  "timezone.fallback": "default",
   "booking.pickDate": "Pick a date",
   "booking.checkOutDate": "Check-out date",
   "booking.roomType": "Room type",
@@ -3735,6 +3743,10 @@ const fi: TranslationKeys = {
   "occasionalSlots.remove": "Poista",
   "occasionalSlots.invalidRange": "Päättymisajan on oltava alkamisajan jälkeen.",
   "occasionalSlots.pastDate": "Valitse tämä päivä tai myöhempi.",
+  "timezone.label": "Aikavyöhyke",
+  "timezone.inheritTenant": "Peri organisaatiolta ({tz})",
+  "timezone.shownIn": "Ajat näytetään aikavyöhykkeellä {tz}",
+  "timezone.fallback": "oletus",
   "booking.pickDate": "Valitse päivämäärä",
   "booking.checkOutDate": "Lähtöpäivä",
   "booking.roomType": "Huonetyyppi",
@@ -5481,6 +5493,10 @@ const sv: TranslationKeys = {
   "occasionalSlots.remove": "Ta bort",
   "occasionalSlots.invalidRange": "Sluttiden måste vara efter starttiden.",
   "occasionalSlots.pastDate": "Välj dagens datum eller senare.",
+  "timezone.label": "Tidszon",
+  "timezone.inheritTenant": "Ärv från organisationen ({tz})",
+  "timezone.shownIn": "Tider visas i {tz}",
+  "timezone.fallback": "standard",
   "booking.pickDate": "Välj datum",
   "booking.checkOutDate": "Utcheckningsdatum",
   "booking.roomType": "Rumstyp",

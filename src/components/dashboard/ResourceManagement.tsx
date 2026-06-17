@@ -31,6 +31,8 @@ import { PERM_RESOURCES_MANAGE } from "@/lib/permissions";
 import { useAutoApproval } from "@/hooks/useAutoApproval";
 import { useTierErrorMessage } from "@/hooks/useTierErrorMessage";
 import { getTierLimits } from "@/lib/tier-limits";
+import { listSupportedTimezones } from "@/lib/timezone";
+import { useEffectiveTimezone } from "@/hooks/useEffectiveTimezone";
 
 const typeIcons: Record<string, React.ElementType> = {
   guesthouse: BedDouble,
@@ -54,6 +56,7 @@ type BedEntry = { type: string; count: number };
 
 const ResourceManagement = () => {
   const { tenantId, tenant, isAdmin } = useTenant();
+  const tenantTz = useEffectiveTimezone(null, tenantId);
   const { selectedSiteId } = useSiteContext();
   const { applySiteFilter, siteIds } = useUserSites();
   const { can } = usePermissions();
@@ -100,6 +103,7 @@ const ResourceManagement = () => {
     offers_table_reservation: true, offers_quote: true, offers_set_menu: true,
     site_id: "" as string,
     custom_type_label: "",
+    timezone: "" as string,
   });
 
   const { data: sites } = useQuery({
@@ -239,6 +243,7 @@ const ResourceManagement = () => {
         approval_status: getApprovalStatus(),
         site_id: form.site_id || null,
         custom_type_label: form.resource_type === "custom" ? (form.custom_type_label.trim() || form.name.trim() || null) : null,
+        timezone: form.timezone ? form.timezone : null,
         sub_services: (form.resource_type === "custom" || form.resource_type === "wellness")
           ? subServices
               .filter((s) => s.name.trim().length > 0)
@@ -389,7 +394,7 @@ const ResourceManagement = () => {
     setEditingSiteId(null);
     setBeds([]);
     setSubServices([]);
-    setForm({ name: "", resource_type: defaultType, capacity: "", price_per_night: "", description: "", image_url: "", breakfast_price_per_person: "", room_type_pricing: { ...defaultRoomPricing }, is_active: true, room_type: "", room_description: "", offers_catering: false, offers_popup: false, offers_table_reservation: true, offers_quote: true, offers_set_menu: true, site_id: selectedSiteId || "", custom_type_label: "" });
+    setForm({ name: "", resource_type: defaultType, capacity: "", price_per_night: "", description: "", image_url: "", breakfast_price_per_person: "", room_type_pricing: { ...defaultRoomPricing }, is_active: true, room_type: "", room_description: "", offers_catering: false, offers_popup: false, offers_table_reservation: true, offers_quote: true, offers_set_menu: true, site_id: selectedSiteId || "", custom_type_label: "", timezone: "" });
   };
 
   const openEdit = (r: any) => {
@@ -422,6 +427,7 @@ const ResourceManagement = () => {
       offers_set_menu: (r as any).offers_set_menu ?? true,
       site_id: r.site_id || "",
       custom_type_label: r.custom_type_label ?? "",
+      timezone: (r as any).timezone ?? "",
       room_type_pricing: {
         single: rtp.single?.toString() ?? "1.0",
         double: rtp.double?.toString() ?? "1.5",
@@ -682,6 +688,28 @@ const ResourceManagement = () => {
                     <Switch checked={form.is_active} onCheckedChange={(checked) => setForm((prev) => ({ ...prev, is_active: checked }))} />
                     <Label className="mb-0">{t("dashboard.active")}</Label>
                   </div>
+
+                  {/* Timezone — optional override; otherwise inherits from tenant */}
+                  <div>
+                    <Label>{t("timezone.label")}</Label>
+                    <Select
+                      value={form.timezone || "__inherit__"}
+                      onValueChange={(v) => setForm({ ...form, timezone: v === "__inherit__" ? "" : v })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-72">
+                        <SelectItem value="__inherit__">
+                          {t("timezone.inheritTenant").replace("{tz}", tenantTz.tz)}
+                        </SelectItem>
+                        {listSupportedTimezones().map((zone) => (
+                          <SelectItem key={zone} value={zone}>{zone}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
 
                   {/* Restaurant service options */}
                   {form.resource_type === "restaurant" && (
