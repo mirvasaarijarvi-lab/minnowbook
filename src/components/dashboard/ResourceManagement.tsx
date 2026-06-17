@@ -425,6 +425,7 @@ const ResourceManagement = () => {
       offers_set_menu: (r as any).offers_set_menu ?? true,
       site_id: r.site_id || "",
       custom_type_label: r.custom_type_label ?? "",
+      timezone: (r as any).timezone ?? "",
       room_type_pricing: {
         single: rtp.single?.toString() ?? "1.0",
         double: rtp.double?.toString() ?? "1.5",
