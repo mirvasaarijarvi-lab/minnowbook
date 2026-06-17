@@ -270,12 +270,37 @@ const ResourceManagement = () => {
               })
           : [],
       };
+      let resolvedId = editingId as string | null;
       if (editingId) {
         const { error } = await supabase.from("resources").update(payload).eq("id", editingId);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from("resources").insert(payload);
+        // Need the new id back so we can flush draft opening hours and
+        // occasional slots that were authored in the same dialog session.
+        const { data, error } = await supabase
+          .from("resources")
+          .insert(payload)
+          .select("id")
+          .single();
         if (error) throw error;
+        resolvedId = (data as any)?.id ?? null;
+      }
+      // Flush any pending child-editor state. Failures here are
+      // surfaced but do not roll back the resource itself — the user
+      // still gets a resource they can re-open and finish configuring.
+      if (resolvedId) {
+        try {
+          await openingHoursRef.current?.flush(resolvedId);
+        } catch (e) {
+          console.error("Failed to save opening hours", e);
+          toast({ title: t("settings.saveError"), variant: "destructive" });
+        }
+        try {
+          await occasionalSlotsRef.current?.flush(resolvedId);
+        } catch (e) {
+          console.error("Failed to save occasional slots", e);
+          toast({ title: t("settings.saveError"), variant: "destructive" });
+        }
       }
     },
     onSuccess: () => {
