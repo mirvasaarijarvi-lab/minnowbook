@@ -155,7 +155,7 @@ const ResourceOccasionalSlotsEditor = ({ resourceId, tenantId }: Props) => {
               <Input
                 type="date"
                 value={draftDate}
-                min={todayISO()}
+                min={todayInTz}
                 onChange={(e) => setDraftDate(e.target.value)}
                 className="h-8 text-sm"
               />
