@@ -71,6 +71,11 @@ const ResourceManagement = () => {
   const [editingSiteId, setEditingSiteId] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const imageInputRef = useRef<HTMLInputElement>(null);
+  // Refs let the create dialog flush draft opening hours / occasional
+  // slots to the just-created resource id without forcing the user to
+  // save the resource first and re-open the form.
+  const openingHoursRef = useRef<ResourceOpeningHoursEditorHandle>(null);
+  const occasionalSlotsRef = useRef<ResourceOccasionalSlotsEditorHandle>(null);
   const t = useT();
   const formatTierError = useTierErrorMessage();
   // Centralized error -> toast helper. Tier-limit errors get a friendly,
