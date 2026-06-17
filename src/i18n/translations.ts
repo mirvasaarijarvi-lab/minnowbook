@@ -202,6 +202,20 @@ type TranslationKeys = {
   "resourceHours.removeHours": string;
   "resourceHours.saveFirst": string;
   "resourceHours.openingHoursLabel": string;
+  "occasionalSlots.title": string;
+  "occasionalSlots.description": string;
+  "occasionalSlots.addSlot": string;
+  "occasionalSlots.date": string;
+  "occasionalSlots.from": string;
+  "occasionalSlots.to": string;
+  "occasionalSlots.note": string;
+  "occasionalSlots.notePlaceholder": string;
+  "occasionalSlots.empty": string;
+  "occasionalSlots.save": string;
+  "occasionalSlots.cancel": string;
+  "occasionalSlots.remove": string;
+  "occasionalSlots.invalidRange": string;
+  "occasionalSlots.pastDate": string;
   "booking.pickDate": string;
   "booking.checkOutDate": string;
   "booking.roomType": string;
@@ -1959,6 +1973,20 @@ const en: TranslationKeys = {
   "resourceHours.removeHours": "Remove hours",
   "resourceHours.saveFirst": "Save the resource first, then edit it to set opening hours.",
   "resourceHours.openingHoursLabel": "Hours",
+  "occasionalSlots.title": "Occasional working slots",
+  "occasionalSlots.description": "For sporadic availability. Add one-off date and time ranges that make this resource bookable in addition to the weekly schedule.",
+  "occasionalSlots.addSlot": "Add slot",
+  "occasionalSlots.date": "Date",
+  "occasionalSlots.from": "From",
+  "occasionalSlots.to": "To",
+  "occasionalSlots.note": "Note (optional)",
+  "occasionalSlots.notePlaceholder": "e.g. visiting therapist",
+  "occasionalSlots.empty": "No occasional slots yet.",
+  "occasionalSlots.save": "Save slot",
+  "occasionalSlots.cancel": "Cancel",
+  "occasionalSlots.remove": "Remove",
+  "occasionalSlots.invalidRange": "End time must be after start time.",
+  "occasionalSlots.pastDate": "Pick a date that is today or later.",
   "booking.pickDate": "Pick a date",
   "booking.checkOutDate": "Check-out date",
   "booking.roomType": "Room type",
@@ -3693,6 +3721,20 @@ const fi: TranslationKeys = {
   "resourceHours.removeHours": "Poista aukioloajat",
   "resourceHours.saveFirst": "Tallenna resurssi ensin, sitten voit muokata aukioloaikoja.",
   "resourceHours.openingHoursLabel": "Aukioloajat",
+  "occasionalSlots.title": "Satunnaiset työvuorot",
+  "occasionalSlots.description": "Satunnaisille työntekijöille. Lisää yksittäisiä päivämääriä ja kellonaikoja, jolloin resurssi on varattavissa viikkoaikataulun lisäksi.",
+  "occasionalSlots.addSlot": "Lisää vuoro",
+  "occasionalSlots.date": "Päivämäärä",
+  "occasionalSlots.from": "Alkaa",
+  "occasionalSlots.to": "Päättyy",
+  "occasionalSlots.note": "Muistiinpano (valinnainen)",
+  "occasionalSlots.notePlaceholder": "esim. vieraileva terapeutti",
+  "occasionalSlots.empty": "Ei satunnaisia vuoroja vielä.",
+  "occasionalSlots.save": "Tallenna vuoro",
+  "occasionalSlots.cancel": "Peruuta",
+  "occasionalSlots.remove": "Poista",
+  "occasionalSlots.invalidRange": "Päättymisajan on oltava alkamisajan jälkeen.",
+  "occasionalSlots.pastDate": "Valitse tämä päivä tai myöhempi.",
   "booking.pickDate": "Valitse päivämäärä",
   "booking.checkOutDate": "Lähtöpäivä",
   "booking.roomType": "Huonetyyppi",
@@ -5425,6 +5467,20 @@ const sv: TranslationKeys = {
   "resourceHours.removeHours": "Ta bort öppettider",
   "resourceHours.saveFirst": "Spara resursen först, redigera sedan för att ställa in öppettider.",
   "resourceHours.openingHoursLabel": "Öppettider",
+  "occasionalSlots.title": "Tillfälliga arbetspass",
+  "occasionalSlots.description": "För sporadisk tillgänglighet. Lägg till enskilda datum och tider då resursen är bokningsbar utöver veckoschemat.",
+  "occasionalSlots.addSlot": "Lägg till pass",
+  "occasionalSlots.date": "Datum",
+  "occasionalSlots.from": "Från",
+  "occasionalSlots.to": "Till",
+  "occasionalSlots.note": "Notering (valfri)",
+  "occasionalSlots.notePlaceholder": "t.ex. besökande terapeut",
+  "occasionalSlots.empty": "Inga tillfälliga pass ännu.",
+  "occasionalSlots.save": "Spara pass",
+  "occasionalSlots.cancel": "Avbryt",
+  "occasionalSlots.remove": "Ta bort",
+  "occasionalSlots.invalidRange": "Sluttiden måste vara efter starttiden.",
+  "occasionalSlots.pastDate": "Välj dagens datum eller senare.",
   "booking.pickDate": "Välj datum",
   "booking.checkOutDate": "Utcheckningsdatum",
   "booking.roomType": "Rumstyp",
