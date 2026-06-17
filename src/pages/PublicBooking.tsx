@@ -619,24 +619,39 @@ const PublicBookingInner = () => {
     enabled: !!tenant?.id,
   });
 
-  // Generate time slots from opening hours for selected day
+  // Generate time slots from opening hours plus occasional availability slots for selected day
   const timeSlots = useMemo(() => {
-    if (!selectedDate || !openingHours?.length) return [];
-    const dayOfWeek = selectedDate.getDay();
-    const dayHours = openingHours.find((h) => h.day_of_week === dayOfWeek);
-    if (!dayHours || dayHours.is_closed || !dayHours.open_time || !dayHours.close_time) return [];
+    if (!selectedDate) return [];
+    const expand = (open: string, close: string): string[] => {
+      const out: string[] = [];
+      const [openH, openM] = open.slice(0, 5).split(":").map(Number);
+      const [closeH, closeM] = close.slice(0, 5).split(":").map(Number);
+      let h = openH;
+      let m = openM;
+      while (h < closeH || (h === closeH && m < closeM)) {
+        out.push(`${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`);
+        m += 30;
+        if (m >= 60) { h++; m = 0; }
+      }
+      return out;
+    };
 
-    const slots: string[] = [];
-    const [openH, openM] = dayHours.open_time.split(":").map(Number);
-    const [closeH, closeM] = dayHours.close_time.split(":").map(Number);
-    let h = openH, m = openM;
-    while (h < closeH || (h === closeH && m < closeM)) {
-      slots.push(`${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`);
-      m += 30;
-      if (m >= 60) { h++; m = 0; }
+    const merged = new Set<string>();
+
+    // Weekly recurring opening hours
+    const dayOfWeek = selectedDate.getDay();
+    const dayHours = openingHours?.find((h) => h.day_of_week === dayOfWeek);
+    if (dayHours && !dayHours.is_closed && dayHours.open_time && dayHours.close_time) {
+      expand(dayHours.open_time, dayHours.close_time).forEach((s) => merged.add(s));
     }
-    return slots;
-  }, [selectedDate, openingHours]);
+
+    // Occasional availability slots (positive windows, e.g. sporadic workers)
+    getOccasionalSlotsForDate(selectedDate).forEach((r) => {
+      expand(r.start_time, r.end_time).forEach((s) => merged.add(s));
+    });
+
+    return Array.from(merged).sort();
+  }, [selectedDate, openingHours, getOccasionalSlotsForDate]);
 
   // Check if a date is fully blocked for the selected resource type (and optionally specific resource)
   const isDateFullyBlocked = useCallback((date: Date) => {
