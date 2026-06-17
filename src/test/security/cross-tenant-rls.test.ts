@@ -77,6 +77,7 @@ const TENANT_SCOPED_TABLES = [
   "reservations",
   "resource_images",
   "resource_opening_hours",
+  "resource_availability_slots",
   "resources",
 ] as const;
 

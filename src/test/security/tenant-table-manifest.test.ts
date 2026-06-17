@@ -49,6 +49,7 @@ const COVERED_TABLES = new Set<string>([
   "reservations",
   "resource_images",
   "resource_opening_hours",
+  "resource_availability_slots",
   "resources",
   "role_definitions",
   "role_permissions",
