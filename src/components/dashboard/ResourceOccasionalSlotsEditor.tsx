@@ -7,7 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { CalendarPlus, Loader2, Trash2, X } from "lucide-react";
+import { CalendarPlus, Loader2, Trash2, X, Globe2 } from "lucide-react";
+import { useEffectiveTimezone } from "@/hooks/useEffectiveTimezone";
+import { tzNow, tzToday } from "@/lib/timezone";
 
 /**
  * Per-resource occasional working slots.
@@ -17,7 +19,11 @@ import { CalendarPlus, Loader2, Trash2, X } from "lucide-react";
  * workers (e.g. a visiting therapist who works two Saturdays a month).
  *
  * Reads/writes the `resource_availability_slots` table — RLS confines
- * writes to tenant members with `resources.manage`.
+ * writes to tenant members with `resources.manage`. All date/time pickers
+ * and validation are interpreted in the resource's effective timezone
+ * (resource override -> tenant default -> Europe/Helsinki), NOT the
+ * browser's local zone, so a staff member abroad cannot accidentally
+ * create a slot on the wrong wall-clock day.
  */
 interface Props {
   resourceId: string;
@@ -32,14 +38,14 @@ interface SlotRow {
   note: string | null;
 }
 
-const todayISO = () => format(new Date(), "yyyy-MM-dd");
-
 const ResourceOccasionalSlotsEditor = ({ resourceId, tenantId }: Props) => {
   const t = useT();
   const queryClient = useQueryClient();
+  const { tz, source: tzSource } = useEffectiveTimezone(resourceId, tenantId);
+  const todayInTz = tzToday(tz);
 
   const [adding, setAdding] = useState(false);
-  const [draftDate, setDraftDate] = useState<string>(todayISO());
+  const [draftDate, setDraftDate] = useState<string>(todayInTz);
   const [draftStart, setDraftStart] = useState<string>("09:00");
   const [draftEnd, setDraftEnd] = useState<string>("12:00");
   const [draftNote, setDraftNote] = useState<string>("");
