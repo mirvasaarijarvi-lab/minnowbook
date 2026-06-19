@@ -37,6 +37,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-bun-
 
+      - name: Verify bun.lock is in sync with package.json
+        uses: ./.github/actions/verify-bun-lockfile-sync
+
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
