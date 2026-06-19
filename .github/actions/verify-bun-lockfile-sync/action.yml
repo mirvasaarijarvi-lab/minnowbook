@@ -1,0 +1,48 @@
+name: Verify bun.lock is in sync with package.json
+description: |
+  Drop-in step that fails fast (in milliseconds, no network) when
+  `package.json` and `bun.lock` disagree on declared specifiers.
+  Run this BEFORE `bun install --frozen-lockfile` in any job so the
+  failure surfaces with an actionable diff instead of bun's terse
+  "lockfile had changes, but lockfile is frozen" line.
+
+  This step performs a pure-Node manifest comparison via
+  `scripts/ci/preflight-manifest-drift.mjs`. It does NOT run
+  `bun install`, mutate the lockfile, or touch the network — that
+  is intentional so it can sit in front of every cache restore and
+  install step without slowing them down.
+
+  For the deeper "would a frozen install actually succeed?" check
+  (which DOES need bun + network), see the standalone
+  `bun-lockfile-preflight.yml` workflow.
+
+runs:
+  using: composite
+  steps:
+    - name: Compare package.json against bun.lock + package-lock.json
+      shell: bash
+      run: |
+        set -euo pipefail
+        if ! command -v node >/dev/null 2>&1; then
+          echo "::error::Node is required to run the manifest preflight."
+          exit 1
+        fi
+        if ! node scripts/ci/preflight-manifest-drift.mjs; then
+          {
+            echo "## ❌ bun.lock / package-lock.json drift detected"
+            echo ""
+            echo "A later \`bun install --frozen-lockfile\` step in this job"
+            echo "would fail with:"
+            echo ""
+            echo "    error: lockfile had changes, but lockfile is frozen"
+            echo ""
+            echo "Fix locally with one of:"
+            echo ""
+            echo "    bun run lock:heal           # regenerate bun.lock + show diff"
+            echo "    bun install --save-text-lockfile"
+            echo ""
+            echo "Then commit the updated \`bun.lock\` (and"
+            echo "\`package-lock.json\` if the preflight reported npm drift)."
+          } >> "$GITHUB_STEP_SUMMARY"
+          exit 1
+        fi
