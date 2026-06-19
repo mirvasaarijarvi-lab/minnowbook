@@ -102,6 +102,98 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           persist-credentials: false
+          # Need history so we can fetch the branch tip and compare it
+          # to the SHA this run was scheduled against. With depth: 1 the
+          # subsequent `git fetch` below would still work, but having a
+          # couple of commits available makes the diff message clearer
+          # when a stale-ref is detected.
+          fetch-depth: 10
+
+      # ---------------------------------------------------------------
+      # Lockfile freshness guard against racing commits.
+      #
+      # GitHub schedules workflow runs against the SHA that was the tip
+      # at queue time. If a follow-up commit (typically: "regenerate
+      # lockfile" or "bump override") lands while the previous run is
+      # still queued, the audit ends up scanning a stale lockfile and
+      # reports vulnerabilities that have already been fixed on the
+      # branch. The user then has to re-run the job by hand.
+      #
+      # This step fetches the latest tip of the target ref and:
+      #   - PR runs: compares `github.sha` (PR merge commit) to the
+      #     current head of the PR branch via the GitHub API.
+      #   - push / schedule / workflow_dispatch: compares `github.sha`
+      #     to the current tip of the ref we ran against.
+      #
+      # If the tip has advanced, we fail fast with a clear "rerun on
+      # latest" message instead of producing a misleading red on stale
+      # state. The check is read-only (no checkout switch) so it cannot
+      # silently audit a different tree than the one a human reviewer
+      # would expect.
+      # ---------------------------------------------------------------
+      - name: Verify checkout is the latest commit on the target ref
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_SHA: ${{ github.sha }}
+          EVENT_NAME: ${{ github.event_name }}
+          REF_NAME: ${{ github.ref_name }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          PR_HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+          BASE_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+
+          # Resolve the "expected current tip" for whichever event
+          # triggered this run. For PRs we want the latest commit on
+          # the PR head branch (not the synthetic merge commit), so
+          # contributors who push a fix-up commit immediately see the
+          # in-flight run get superseded.
+          case "$EVENT_NAME" in
+            pull_request|pull_request_target)
+              tip=$(gh api "repos/${PR_HEAD_REPO}/commits/${PR_HEAD_REF}" --jq '.sha' 2>/dev/null || echo "")
+              compare_sha="${PR_HEAD_SHA:-$RUN_SHA}"
+              context="PR head ${PR_HEAD_REPO}@${PR_HEAD_REF}"
+              ;;
+            push|schedule|workflow_dispatch)
+              tip=$(gh api "repos/${BASE_REPO}/commits/${REF_NAME}" --jq '.sha' 2>/dev/null || echo "")
+              compare_sha="$RUN_SHA"
+              context="${BASE_REPO}@${REF_NAME}"
+              ;;
+            *)
+              echo "Event '$EVENT_NAME' is not freshness-checked; skipping."
+              exit 0
+              ;;
+          esac
+
+          if [ -z "$tip" ]; then
+            echo "::warning title=Freshness check skipped::Could not resolve current tip of ${context} (API unavailable or ref deleted). Continuing with the checked-out SHA ${compare_sha}."
+            exit 0
+          fi
+
+          echo "Run SHA:        ${compare_sha}"
+          echo "Current tip:    ${tip}  (${context})"
+
+          if [ "$tip" != "$compare_sha" ]; then
+            {
+              echo "### Dependency audit aborted: stale checkout"
+              echo ""
+              echo "A newer commit landed on \`${context}\` while this run was queued."
+              echo "The audit would have scanned an out-of-date lockfile and could"
+              echo "report already-fixed advisories."
+              echo ""
+              echo "- Run SHA:     \`${compare_sha}\`"
+              echo "- Current tip: \`${tip}\`"
+              echo ""
+              echo "A fresh run will be queued against \`${tip}\`; wait for that one."
+            } >> "$GITHUB_STEP_SUMMARY"
+            echo "::notice title=Stale checkout::A newer commit (${tip}) has landed on ${context} since this run was queued at ${compare_sha}. Aborting so the next run audits the up-to-date lockfile."
+            exit 1
+          fi
+
+          echo "Checkout is up to date with ${context}."
+
+
 
       # ---------------------------------------------------------------
       # Validate the resolved AUDIT_LEVEL up front so a typo in the
