@@ -216,6 +216,87 @@ jobs:
           esac
 
       # ---------------------------------------------------------------
+      # Cross-lockfile @babel/runtime parity check.
+      #
+      # @babel/runtime has had repeated moderate advisories where the
+      # vulnerable range is "< 7.26.10" but the fix is shipped via an
+      # `overrides` block in package.json. If bun.lock and
+      # package-lock.json disagree on the resolved version (typical
+      # cause: the override was added to package.json but only one of
+      # the two lockfiles was regenerated and committed), the audit
+      # below will scan the npm graph as clean while the bun runtime
+      # still ships the vulnerable copy — or vice versa.
+      #
+      # We compare the *resolved* version in each lockfile (not the
+      # spec in package.json) so a stale lockfile is caught before the
+      # audit runs. Skipped when either lockfile is absent, since the
+      # repo is then single-manager and parity is trivially satisfied.
+      # ---------------------------------------------------------------
+      - name: Verify @babel/runtime parity across lockfiles
+        if: hashFiles('bun.lock') != '' && hashFiles('package-lock.json') != ''
+        run: |
+          set -euo pipefail
+
+          # bun.lock (text format) records the resolved version as
+          #   "@babel/runtime": ["@babel/runtime@<version>", ...
+          bun_version=$(grep -oE '"@babel/runtime@[^"]+"' bun.lock \
+            | sed -E 's/.*@babel\/runtime@([^"]+)".*/\1/' \
+            | sort -u)
+
+          # package-lock.json records it under a node_modules/@babel/runtime
+          # entry with a "version" field.
+          npm_version=$(node -e '
+            const lock = require("./package-lock.json");
+            const pkgs = lock.packages || {};
+            const versions = new Set();
+            for (const [path, meta] of Object.entries(pkgs)) {
+              if (path === "node_modules/@babel/runtime" && meta && meta.version) {
+                versions.add(meta.version);
+              }
+              // Nested copies (rare with overrides, but possible) live at
+              // node_modules/<pkg>/node_modules/@babel/runtime.
+              if (path.endsWith("/node_modules/@babel/runtime") && meta && meta.version) {
+                versions.add(meta.version);
+              }
+            }
+            process.stdout.write([...versions].sort().join("\n"));
+          ')
+
+          echo "bun.lock @babel/runtime versions:"
+          printf '  %s\n' ${bun_version:-<none>}
+          echo "package-lock.json @babel/runtime versions:"
+          printf '  %s\n' ${npm_version:-<none>}
+
+          if [ -z "$bun_version" ] || [ -z "$npm_version" ]; then
+            echo "::notice title=@babel/runtime parity skipped::Package not present in one or both lockfiles; nothing to compare."
+            exit 0
+          fi
+
+          if [ "$bun_version" != "$npm_version" ]; then
+            {
+              echo "### Lockfile parity failure: @babel/runtime"
+              echo ""
+              echo "bun.lock and package-lock.json resolve different versions"
+              echo "of \`@babel/runtime\`. The dependency-audit gate would"
+              echo "scan an inconsistent graph and could mask a real advisory."
+              echo ""
+              echo "- bun.lock:          $(printf '%s ' $bun_version)"
+              echo "- package-lock.json: $(printf '%s ' $npm_version)"
+              echo ""
+              echo "Fix locally by regenerating *both* lockfiles after the"
+              echo "override change, then commit:"
+              echo ""
+              echo "    bun install --save-text-lockfile --ignore-scripts"
+              echo "    npm install --package-lock-only --ignore-scripts"
+            } >> "$GITHUB_STEP_SUMMARY"
+            echo "::error title=@babel/runtime version mismatch::bun.lock has [$bun_version] but package-lock.json has [$npm_version]. Regenerate both lockfiles and commit."
+            exit 1
+          fi
+
+          echo "@babel/runtime parity OK ($bun_version)."
+
+
+      # ---------------------------------------------------------------
       # Detect which package manager owns the dependency graph based on
       # the lockfile that is present. This avoids gaps where a repo
       # ships, say, a pnpm-lock.yaml that npm audit would silently
