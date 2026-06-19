@@ -100,7 +100,7 @@ describe("DOMPurify regression: GHSA-cmwh-pvxp-8882 attribute leak", () => {
         }).allowedAttributes.onmouseover = true;
       }
     });
-    purify.setConfig({ ADD_ATTR: ["onmouseover"] });
+    purify.setConfig({ USE_PROFILES: { html: true } });
 
     // Use the allowance once on the "approved" element shape.
     purify.sanitize(`<div onmouseover="ok()">a</div>`);
