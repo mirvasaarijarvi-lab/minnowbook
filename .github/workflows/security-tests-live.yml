@@ -79,6 +79,16 @@ jobs:
           RESOLVED_URL="${VITE_URL:-$BARE_URL}"
           RESOLVED_KEY="${VITE_KEY:-${BARE_PUB:-$BARE_ANON}}"
 
+          # Manual dispatch = hard-fail on missing/invalid creds (operator
+          # explicitly asked for a run). Scheduled cron = soft-skip so a
+          # repo without GitHub Actions secrets configured doesn't email
+          # a red X every morning. Either way we never run with only a
+          # service-role key (would bypass RLS).
+          IS_MANUAL="false"
+          if [ "${GITHUB_EVENT_NAME:-}" = "workflow_dispatch" ]; then
+            IS_MANUAL="true"
+          fi
+
           if [ -n "$RESOLVED_URL" ] && [ -n "$RESOLVED_KEY" ]; then
             echo "enabled=true" >> "$GITHUB_OUTPUT"
             echo "resolved_url=$RESOLVED_URL" >> "$GITHUB_OUTPUT"
@@ -87,12 +97,24 @@ jobs:
             echo "✅ Live Supabase credentials present, running live integration suite."
           elif [ -n "$BARE_SR" ] && [ -z "$RESOLVED_KEY" ]; then
             echo "enabled=false" >> "$GITHUB_OUTPUT"
-            echo "::error::Only SUPABASE_SERVICE_ROLE_KEY is configured. Live security tests refuse to run with service-role (would bypass RLS). Add SUPABASE_PUBLISHABLE_KEY or SUPABASE_ANON_KEY."
-            exit 1
+            MSG="Only SUPABASE_SERVICE_ROLE_KEY is configured. Live security tests refuse to run with service-role (would bypass RLS). Add SUPABASE_PUBLISHABLE_KEY or SUPABASE_ANON_KEY."
+            if [ "$IS_MANUAL" = "true" ]; then
+              echo "::error::$MSG"
+              exit 1
+            fi
+            echo "::warning::$MSG (scheduled run, soft-skipping)"
+            echo "### ⚠️ Live security tests skipped" >> "$GITHUB_STEP_SUMMARY"
+            echo "$MSG" >> "$GITHUB_STEP_SUMMARY"
           else
             echo "enabled=false" >> "$GITHUB_OUTPUT"
-            echo "::error::No Supabase URL + publishable/anon key pair configured. Live security tests cannot run."
-            exit 1
+            MSG="No Supabase URL + publishable/anon key pair configured. Live security tests cannot run. Add VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY (or SUPABASE_URL + SUPABASE_PUBLISHABLE_KEY/SUPABASE_ANON_KEY) under repo Settings → Secrets and variables → Actions."
+            if [ "$IS_MANUAL" = "true" ]; then
+              echo "::error::$MSG"
+              exit 1
+            fi
+            echo "::warning::$MSG (scheduled run, soft-skipping)"
+            echo "### ⚠️ Live security tests skipped" >> "$GITHUB_STEP_SUMMARY"
+            echo "$MSG" >> "$GITHUB_STEP_SUMMARY"
           fi
 
       - name: Run live security integration suite
