@@ -34,7 +34,22 @@ const FLOORS = {
   // dependency. Bump `min` whenever a new patched release ships and
   // refresh lockfiles in the same commit.
   "js-yaml": { min: "4.2.0", reason: "CVE-2026-53550 (merge-key DoS)" },
-  dompurify: { min: "3.4.10", reason: "DOMPurify mXSS / sanitizer bypasses" },
+  dompurify: {
+    min: "3.4.11",
+    reason:
+      "DOMPurify mXSS / sanitizer bypasses + GHSA-cmwh-pvxp-8882 permanent hook pollution (fixed in 3.4.11). Floor must remain >= 3.4.7 (initial hook-pollution patch) at minimum.",
+    // Explicit denylist of published versions known to be vulnerable to
+    // documented advisories. Any of these resolved by the lockfile fails
+    // CI even if (somehow) a future floor bump is reverted.
+    denied: [
+      "3.0.0", "3.0.1", "3.0.2", "3.0.3", "3.0.4", "3.0.5", "3.0.6", "3.0.7", "3.0.8", "3.0.9", "3.0.10", "3.0.11",
+      "3.1.0", "3.1.1", "3.1.2", "3.1.3", "3.1.4", "3.1.5", "3.1.6", "3.1.7",
+      "3.2.0", "3.2.1", "3.2.2", "3.2.3", "3.2.4", "3.2.5", "3.2.6",
+      "3.3.0",
+      "3.4.0", "3.4.1", "3.4.2", "3.4.3", "3.4.4", "3.4.5", "3.4.6", // pre-hook-pollution patch
+      "3.4.7", "3.4.8", "3.4.9", "3.4.10", // pre-GHSA-cmwh-pvxp-8882 patch (3.4.11)
+    ],
+  },
   ws: { min: "8.21.0", reason: "ws DoS via tiny fragments" },
   esbuild: { min: "0.28.1", reason: "esbuild Deno binary integrity advisory" },
   "form-data": { min: "4.0.6", reason: "form-data header injection (CR/LF/quote)" },
@@ -108,9 +123,24 @@ const lock = readJson("package-lock.json");
 const errors = [];
 const summary = [];
 
-for (const [name, { min, reason }] of Object.entries(FLOORS)) {
+for (const [name, { min, reason, denied }] of Object.entries(FLOORS)) {
   // 1. Lockfile resolutions (this is what actually gets installed).
   const installs = findInstalledVersions(lock, name);
+  // 1b. Bun lockfile (`bun.lock`) — this repo uses
+  //     `bun install --frozen-lockfile` in CI, so the bun lockfile is
+  //     just as authoritative as `package-lock.json`. Parse the
+  //     text-format lockfile with a regex tuned for entries shaped like
+  //     `"pkg": ["pkg@1.2.3", ...]` (works for scoped names too).
+  const bunLockPath = path.join(repoRoot, "bun.lock");
+  if (fs.existsSync(bunLockPath)) {
+    const bunText = fs.readFileSync(bunLockPath, "utf8");
+    const escaped = name.replace(/[\\^$.*+?()[\]{}|]/g, "\\$&");
+    const re = new RegExp(`"${escaped}":\\s*\\["${escaped}@([^"\\s]+)"`, "g");
+    let m;
+    while ((m = re.exec(bunText)) !== null) {
+      installs.push({ path: `bun.lock:${name}`, version: m[1] });
+    }
+  }
   if (installs.length === 0) {
     summary.push(`  ${name}: not present in lockfile (skipping)`);
     continue;
@@ -119,6 +149,11 @@ for (const [name, { min, reason }] of Object.entries(FLOORS)) {
     if (compareSemver(version, min) < 0) {
       errors.push(
         `${name}@${version} at ${where} is below the required floor ${min} (${reason})`,
+      );
+    }
+    if (Array.isArray(denied) && denied.includes(version)) {
+      errors.push(
+        `${name}@${version} at ${where} is on the known-vulnerable denylist (${reason})`,
       );
     }
   }
