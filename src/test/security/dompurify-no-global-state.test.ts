@@ -38,7 +38,12 @@ describe("DOMPurify: no shared-state mutation", () => {
       .split("\n")
       .filter(Boolean)
       .filter((p) => /\.(ts|tsx|js|jsx|mjs|cjs)$/.test(p))
-      .filter((p) => p !== "src/test/security/dompurify-no-global-state.test.ts");
+      .filter((p) => p !== "src/test/security/dompurify-no-global-state.test.ts")
+      // The hook-pollution regression test intentionally exercises the
+      // forbidden APIs to prove the PoC is neutralised; it isolates state
+      // via `createDOMPurify(new JSDOM(...).window)` and never touches
+      // the shared singleton used by production code.
+      .filter((p) => p !== "src/test/security/dompurify-hook-pollution.regression.test.ts");
 
     const pattern =
       /(DOMPurify\s*\.\s*(setConfig|addHook)\b|uponSanitizeAttribute)/;
