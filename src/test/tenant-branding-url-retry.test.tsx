@@ -102,7 +102,7 @@ describe("useBrandingSignedUrlState retry policy", () => {
       await flushMicrotasks();
     });
     expect(createSignedUrlMock).toHaveBeenCalledTimes(1);
-    expect(states.at(-1)?.status).toBe("loading");
+    expect(states[states.length - 1]?.status).toBe("loading");
 
     const expectedDelays = [400, 800, 1600, 3200];
     let totalCalls = 1;
@@ -150,8 +150,8 @@ describe("useBrandingSignedUrlState retry policy", () => {
       });
     }
     expect(createSignedUrlMock).toHaveBeenCalledTimes(5);
-    expect(states.at(-1)?.status).toBe("error");
-    expect(states.at(-1)?.url).toBe("");
+    expect(states[states.length - 1]?.status).toBe("error");
+    expect(states[states.length - 1]?.url).toBe("");
 
     // Run any remaining timers; no further mint should happen.
     await act(async () => {
@@ -223,8 +223,8 @@ describe("useBrandingSignedUrlState retry policy", () => {
 
     // Manual retry mints immediately (call #2) and succeeds.
     expect(createSignedUrlMock).toHaveBeenCalledTimes(2);
-    expect(states.at(-1)?.status).toBe("ready");
-    expect(states.at(-1)?.url).toBe("https://signed/ok");
+    expect(states[states.length - 1]?.status).toBe("ready");
+    expect(states[states.length - 1]?.url).toBe("https://signed/ok");
 
     // Advancing past the original 400ms timer must NOT cause a third
     // mint; the in-flight lock subscription was invalidated by the

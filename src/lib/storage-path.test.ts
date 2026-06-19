@@ -103,11 +103,11 @@ describe("assertSafeStorageObjectPath", () => {
 
     it("flags scheme, backslash, and control-char shapes", () => {
       expect(() => assertSafeStorageObjectPath("https://x/y")).toThrow();
-      expect(events.at(-1)?.hasSchemeShape).toBe(true);
+      expect(events[events.length - 1]?.hasSchemeShape).toBe(true);
       expect(() => assertSafeStorageObjectPath("a\\b")).toThrow();
-      expect(events.at(-1)?.hasBackslash).toBe(true);
+      expect(events[events.length - 1]?.hasBackslash).toBe(true);
       expect(() => assertSafeStorageObjectPath("a\u0000b")).toThrow();
-      expect(events.at(-1)?.hasControlChar).toBe(true);
+      expect(events[events.length - 1]?.hasControlChar).toBe(true);
     });
 
     it("does not log on success", () => {
@@ -127,12 +127,12 @@ describe("assertSafeStorageObjectPath", () => {
 
       it("includes valid UUID tenantId in the event", () => {
         expect(() => assertSafeStorageObjectPath("../bad", { tenantId: VALID_UUID })).toThrow();
-        expect(events.at(-1)?.tenantId).toBe(VALID_UUID);
+        expect(events[events.length - 1]?.tenantId).toBe(VALID_UUID);
       });
 
       it("normalises UUID casing and trims whitespace", () => {
         expect(() => assertSafeStorageObjectPath("../bad", { tenantId: `  ${VALID_UUID.toUpperCase()}  ` })).toThrow();
-        expect(events.at(-1)?.tenantId).toBe(VALID_UUID);
+        expect(events[events.length - 1]?.tenantId).toBe(VALID_UUID);
       });
 
       it("drops non-UUID tenantId so PII can't leak through", () => {
@@ -147,7 +147,7 @@ describe("assertSafeStorageObjectPath", () => {
 
       it("omits tenantId when the caller did not provide one", () => {
         expect(() => assertSafeStorageObjectPath("../bad")).toThrow();
-        expect(events.at(-1)?.tenantId).toBeUndefined();
+        expect(events[events.length - 1]?.tenantId).toBeUndefined();
       });
     });
   });
