@@ -19,17 +19,13 @@ import { dirname, join, resolve } from "node:path";
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(HERE, "..", "..");
 
-/** bun.lock is JSONC: trailing commas after the last property and (rarely)
- * line/block comments. Strip both, then `JSON.parse`. Keeps us free of a
- * runtime dep on json5 / jsonc-parser. */
+/** bun.lock is JSONC: in practice the only non-JSON tokens bun emits
+ * are trailing commas before `}` / `]`. Strip them and `JSON.parse`.
+ * We deliberately do NOT strip `//` comments because string values in
+ * the lockfile contain unquoted `https://...` URLs that a naive
+ * comment-stripper would mangle. */
 function stripJsoncToJson(text) {
-  // Remove /* ... */ and // ... comments. Naive but safe enough for
-  // bun's machine-generated lockfile (no string literals contain "//").
-  const noComments = text
-    .replace(/\/\*[\s\S]*?\*\//g, "")
-    .replace(/(^|[^:])\/\/[^\n]*/g, "$1");
-  // Drop trailing commas before } or ].
-  return noComments.replace(/,(\s*[}\]])/g, "$1");
+  return text.replace(/,(\s*[}\]])/g, "$1");
 }
 
 /** Parse the top-level workspace deps recorded inside bun.lock (text v1). */
