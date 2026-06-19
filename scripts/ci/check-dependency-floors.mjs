@@ -35,12 +35,15 @@ const FLOORS = {
   // refresh lockfiles in the same commit.
   "js-yaml": { min: "4.2.0", reason: "CVE-2026-53550 (merge-key DoS)" },
   dompurify: {
-    min: "3.4.11",
+    // Explicit lower bound matches the `package.json` overrides entry
+    // (`"dompurify": ">=3.4.7"`) so transitive resolutions can never
+    // drop below the first hook-pollution patch. The `denied` list
+    // below additionally blocks every published version still affected
+    // by GHSA-cmwh-pvxp-8882 (fixed in 3.4.11), so in practice only
+    // 3.4.11+ resolves cleanly.
+    min: "3.4.7",
     reason:
-      "DOMPurify mXSS / sanitizer bypasses + GHSA-cmwh-pvxp-8882 permanent hook pollution (fixed in 3.4.11). Floor must remain >= 3.4.7 (initial hook-pollution patch) at minimum.",
-    // Explicit denylist of published versions known to be vulnerable to
-    // documented advisories. Any of these resolved by the lockfile fails
-    // CI even if (somehow) a future floor bump is reverted.
+      "DOMPurify mXSS / sanitizer bypasses; GHSA-cmwh-pvxp-8882 permanent hook pollution (fixed in 3.4.11). package.json overrides pin >=3.4.7 as the absolute floor.",
     denied: [
       "3.0.0", "3.0.1", "3.0.2", "3.0.3", "3.0.4", "3.0.5", "3.0.6", "3.0.7", "3.0.8", "3.0.9", "3.0.10", "3.0.11",
       "3.1.0", "3.1.1", "3.1.2", "3.1.3", "3.1.4", "3.1.5", "3.1.6", "3.1.7",
