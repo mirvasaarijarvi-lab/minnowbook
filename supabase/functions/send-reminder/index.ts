@@ -231,9 +231,9 @@ function buildEmailHtml(reservation: any, business: any, lang: string, emailType
           ${!customBody ? `<p style="color:#63516E;font-size:14px;font-family:'Inter',Arial,sans-serif;line-height:1.6">${t.footer}</p>` : ""}
         </td></tr>
         <tr><td style="padding:24px 32px;text-align:center;font-size:12px;color:#999;border-top:1px solid #e8e0d8;font-family:'Inter',Arial,sans-serif">
-          <p style="margin:4px 0;font-weight:600;color:#63516E">${businessName}</p>
-          ${business.business_address ? `<p style="margin:4px 0">${business.business_address}</p>` : ""}
-          ${business.business_phone ? `<p style="margin:4px 0">${business.business_phone}</p>` : ""}
+          <p style="margin:4px 0;font-weight:600;color:#63516E">${escapeHtml(businessName)}</p>
+          ${business.business_address ? `<p style="margin:4px 0">${escapeHtml(business.business_address)}</p>` : ""}
+          ${business.business_phone ? `<p style="margin:4px 0">${escapeHtml(business.business_phone)}</p>` : ""}
         </td></tr>
       </table>
     </td></tr>
