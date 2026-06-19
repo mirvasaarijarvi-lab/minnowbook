@@ -163,7 +163,12 @@ jobs:
         # actions/setup-node@v4.1.0
         uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af
         with:
-          node-version: "20"
+          # Pinned to Node 22 so the bundled npm (>=10.9) writes the
+          # same `libc` fields on optional cross-platform packages that
+          # the lockfile in this repo was generated with. Node 20 ships
+          # an older npm that strips those fields on regenerate, which
+          # caused the lockfile-sync guard to flag spurious drift.
+          node-version: "22"
           # Use the manager-specific cache key only when npm owns the
           # lockfile. For pnpm / yarn we let their own setup actions
           # handle caching below.
