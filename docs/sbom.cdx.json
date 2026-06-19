@@ -1,10 +1,10 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
-  "serialNumber": "urn:uuid:0cbbc963-787e-514e-8d85-5477ec5fef49",
+  "serialNumber": "urn:uuid:4afbd295-0292-5551-9b26-feba908db4b3",
   "version": 1,
   "metadata": {
-    "timestamp": "2026-06-16T07:48:55Z",
+    "timestamp": "2026-06-19T07:41:50Z",
     "tools": [
       {
         "vendor": "MimmoBook",
@@ -21,7 +21,7 @@
       "properties": [
         {
           "name": "git:sha",
-          "value": "820a0f796c9c99148d65ea8d0e0bc41fde6b135e"
+          "value": "75b04b39b70a4f93e86e7f500e100cf84ca2c584"
         }
       ]
     }
@@ -340,11 +340,11 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/@types%2Fnode@22.16.5",
+      "bom-ref": "pkg:npm/@types%2Fnode@26.0.0",
       "type": "library",
       "name": "@types/node",
-      "version": "22.16.5",
-      "purl": "pkg:npm/@types%2Fnode@22.16.5",
+      "version": "26.0.0",
+      "purl": "pkg:npm/@types%2Fnode@26.0.0",
       "scope": "optional"
     },
     {
@@ -412,11 +412,11 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/dompurify@3.4.10",
+      "bom-ref": "pkg:npm/dompurify@3.4.7",
       "type": "library",
       "name": "dompurify",
-      "version": "3.4.10",
-      "purl": "pkg:npm/dompurify@3.4.10",
+      "version": "3.4.7",
+      "purl": "pkg:npm/dompurify@3.4.7",
       "scope": "required"
     },
     {
