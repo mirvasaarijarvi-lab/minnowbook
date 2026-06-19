@@ -52,8 +52,12 @@ describe("DOMPurify regression: GHSA-cmwh-pvxp-8882 attribute leak", () => {
       }
     });
 
-    // Step 2: lock in a config, mirroring the PoC harness.
-    purify.setConfig({ ADD_ATTR: ["onerror"] });
+    // Step 2: lock in a config, mirroring the PoC harness. The PoC
+    // explicitly noted "the same harness without the setConfig() line
+    // strips onerror and does not fire", so setConfig() is what arms
+    // the leak - the config payload itself does not need to allow
+    // onerror.
+    purify.setConfig({ USE_PROFILES: { html: true } });
 
     // Prime the pump - one sanitize call that "uses" the hook.
     purify.sanitize(`<span onerror="primer()">x</span>`);
