@@ -175,19 +175,18 @@ jobs:
           echo "Current tip:    ${tip}  (${context})"
 
           if [ "$tip" != "$compare_sha" ]; then
-            cat <<EOF >> "$GITHUB_STEP_SUMMARY"
-          ### Dependency audit aborted: stale checkout
-
-          A newer commit landed on \`${context}\` while this run was queued.
-          The audit would have scanned an out-of-date lockfile and could
-          report already-fixed advisories.
-
-          - Run SHA:     \`${compare_sha}\`
-          - Current tip: \`${tip}\`
-
-          A fresh run has been queued automatically against \`${tip}\`.
-          Wait for that run instead of re-running this one.
-          EOF
+            {
+              echo "### Dependency audit aborted: stale checkout"
+              echo ""
+              echo "A newer commit landed on \`${context}\` while this run was queued."
+              echo "The audit would have scanned an out-of-date lockfile and could"
+              echo "report already-fixed advisories."
+              echo ""
+              echo "- Run SHA:     \`${compare_sha}\`"
+              echo "- Current tip: \`${tip}\`"
+              echo ""
+              echo "A fresh run will be queued against \`${tip}\`; wait for that one."
+            } >> "$GITHUB_STEP_SUMMARY"
             echo "::notice title=Stale checkout::A newer commit (${tip}) has landed on ${context} since this run was queued at ${compare_sha}. Aborting so the next run audits the up-to-date lockfile."
             exit 1
           fi
