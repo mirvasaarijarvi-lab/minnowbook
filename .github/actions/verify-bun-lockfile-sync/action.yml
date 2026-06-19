@@ -70,7 +70,7 @@ runs:
           fi
         done
 
-        if (cd "$TMPDIR" && bun install --save-text-lockfile --lockfile-only --ignore-scripts --no-summary >/tmp/bun-lockfile-heal.log 2>&1); then
+        if (cd "$TMPDIR" && bun install --save-text-lockfile --lockfile-only --ignore-scripts --no-summary >"$TMPDIR/bun-lockfile-heal.log" 2>&1); then
           diff -u bun.lock "$TMPDIR/bun.lock" > "$TMPDIR/bun.lock.diff" || true
         else
           : > "$TMPDIR/bun.lock.diff"
@@ -79,13 +79,13 @@ runs:
         {
           echo "## ❌ bun.lock is not frozen-install clean"
           echo ""
-          echo "Bun would rewrite \\`bun.lock\\`, so the next \\`bun install --frozen-lockfile\\` step would fail."
+          echo "Bun would rewrite \`bun.lock\`, so the next \`bun install --frozen-lockfile\` step would fail."
           echo ""
           echo "Fix locally with:"
           echo ""
           echo "    bun run lock:heal"
           echo ""
-          echo "Then commit the updated \\`bun.lock\\`."
+          echo "Then commit the updated \`bun.lock\`."
           echo ""
           if [ -s "$TMPDIR/bun.lock.diff" ]; then
             echo "### Exact bun.lock changes to commit"
@@ -93,11 +93,11 @@ runs:
             echo '```diff'
             sed -n '1,240p' "$TMPDIR/bun.lock.diff"
             if [ "$(wc -l < "$TMPDIR/bun.lock.diff")" -gt 240 ]; then
-              echo "... diff truncated after 240 lines. Run \\`bun run lock:heal\\` locally for the full diff."
+              echo "... diff truncated after 240 lines. Run \`bun run lock:heal\` locally for the full diff."
             fi
             echo '```'
           else
-            echo "Bun could not generate a clean preview diff in CI. Run \\`bun run lock:heal\\` locally to print the exact changes."
+            echo "Bun could not generate a clean preview diff in CI. Run \`bun run lock:heal\` locally to print the exact changes."
           fi
         } >> "$GITHUB_STEP_SUMMARY"
 
