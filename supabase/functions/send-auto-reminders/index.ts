@@ -97,7 +97,8 @@ function buildEmailHtml(reservation: any, business: any, lang: string, customBod
     <tr><td align="center">
       <table width="480" cellpadding="0" cellspacing="0" style="background-color:#ffffff">
         <tr><td style="text-align:center;padding:32px 32px 24px">
-          <img src="${logoUrl}" alt="${businessName}" style="height:48px;width:auto;margin-bottom:24px">
+          <img src="${escapeHtml(logoUrl)}" alt="${escapeHtml(businessName)}" style="height:48px;width:auto;margin-bottom:24px">
+
         </td></tr>
         <tr><td style="padding:0 32px 32px">
           <div style="text-align:center;margin-bottom:24px">
