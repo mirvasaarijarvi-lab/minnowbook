@@ -1,20 +1,15 @@
 name: Verify bun.lock is in sync with package.json
 description: |
-  Drop-in step that fails fast (in milliseconds, no network) when
-  `package.json` and `bun.lock` disagree on declared specifiers.
+  Drop-in step that fails fast when `package.json` and `bun.lock`
+  disagree on declared specifiers or when Bun would rewrite the lockfile.
   Run this BEFORE `bun install --frozen-lockfile` in any job so the
   failure surfaces with an actionable diff instead of bun's terse
   "lockfile had changes, but lockfile is frozen" line.
 
-  This step performs a pure-Node manifest comparison via
-  `scripts/ci/preflight-manifest-drift.mjs`. It does NOT run
-  `bun install`, mutate the lockfile, or touch the network — that
-  is intentional so it can sit in front of every cache restore and
-  install step without slowing them down.
-
-  For the deeper "would a frozen install actually succeed?" check
-  (which DOES need bun + network), see the standalone
-  `bun-lockfile-preflight.yml` workflow.
+  This step first performs a pure-Node manifest comparison via
+  `scripts/ci/preflight-manifest-drift.mjs`, then runs a Bun dry-run
+  frozen install so Bun-specific lockfile serialization drift is caught
+  before the real install step. It never mutates the checked-out lockfile.
 
 runs:
   using: composite
@@ -46,3 +41,64 @@ runs:
           } >> "$GITHUB_STEP_SUMMARY"
           exit 1
         fi
+
+    - name: Verify Bun would not rewrite bun.lock
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        if ! command -v bun >/dev/null 2>&1; then
+          echo "::error::Bun is required to verify frozen lockfile sync. Run setup-bun before this action."
+          exit 1
+        fi
+
+        LOG="$(mktemp)"
+        if bun install --frozen-lockfile --ignore-scripts --dry-run --no-summary >"$LOG" 2>&1; then
+          cat "$LOG"
+          rm -f "$LOG"
+          exit 0
+        fi
+
+        cat "$LOG" >&2
+
+        TMPDIR="$(mktemp -d)"
+        trap 'rm -rf "$TMPDIR" "$LOG"' EXIT
+        cp package.json bun.lock "$TMPDIR"/
+        for optional in bunfig.toml .npmrc; do
+          if [ -f "$optional" ]; then
+            cp "$optional" "$TMPDIR"/
+          fi
+        done
+
+        if (cd "$TMPDIR" && bun install --save-text-lockfile --lockfile-only --ignore-scripts --no-summary >"$TMPDIR/bun-lockfile-heal.log" 2>&1); then
+          diff -u bun.lock "$TMPDIR/bun.lock" > "$TMPDIR/bun.lock.diff" || true
+        else
+          : > "$TMPDIR/bun.lock.diff"
+        fi
+
+        {
+          echo "## ❌ bun.lock is not frozen-install clean"
+          echo ""
+          echo "Bun would rewrite \`bun.lock\`, so the next \`bun install --frozen-lockfile\` step would fail."
+          echo ""
+          echo "Fix locally with:"
+          echo ""
+          echo "    bun run lock:heal"
+          echo ""
+          echo "Then commit the updated \`bun.lock\`."
+          echo ""
+          if [ -s "$TMPDIR/bun.lock.diff" ]; then
+            echo "### Exact bun.lock changes to commit"
+            echo ""
+            echo '```diff'
+            sed -n '1,240p' "$TMPDIR/bun.lock.diff"
+            if [ "$(wc -l < "$TMPDIR/bun.lock.diff")" -gt 240 ]; then
+              echo "... diff truncated after 240 lines. Run \`bun run lock:heal\` locally for the full diff."
+            fi
+            echo '```'
+          else
+            echo "Bun could not generate a clean preview diff in CI. Run \`bun run lock:heal\` locally to print the exact changes."
+          fi
+        } >> "$GITHUB_STEP_SUMMARY"
+
+        exit 1
