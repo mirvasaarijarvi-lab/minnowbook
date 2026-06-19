@@ -123,9 +123,24 @@ const lock = readJson("package-lock.json");
 const errors = [];
 const summary = [];
 
-for (const [name, { min, reason }] of Object.entries(FLOORS)) {
+for (const [name, { min, reason, denied }] of Object.entries(FLOORS)) {
   // 1. Lockfile resolutions (this is what actually gets installed).
   const installs = findInstalledVersions(lock, name);
+  // 1b. Bun lockfile (`bun.lock`) — this repo uses
+  //     `bun install --frozen-lockfile` in CI, so the bun lockfile is
+  //     just as authoritative as `package-lock.json`. Parse the
+  //     text-format lockfile with a regex tuned for entries shaped like
+  //     `"pkg": ["pkg@1.2.3", ...]` (works for scoped names too).
+  const bunLockPath = path.join(repoRoot, "bun.lock");
+  if (fs.existsSync(bunLockPath)) {
+    const bunText = fs.readFileSync(bunLockPath, "utf8");
+    const escaped = name.replace(/[\\^$.*+?()[\]{}|]/g, "\\$&");
+    const re = new RegExp(`"${escaped}":\\s*\\["${escaped}@([^"\\s]+)"`, "g");
+    let m;
+    while ((m = re.exec(bunText)) !== null) {
+      installs.push({ path: `bun.lock:${name}`, version: m[1] });
+    }
+  }
   if (installs.length === 0) {
     summary.push(`  ${name}: not present in lockfile (skipping)`);
     continue;
@@ -134,6 +149,11 @@ for (const [name, { min, reason }] of Object.entries(FLOORS)) {
     if (compareSemver(version, min) < 0) {
       errors.push(
         `${name}@${version} at ${where} is below the required floor ${min} (${reason})`,
+      );
+    }
+    if (Array.isArray(denied) && denied.includes(version)) {
+      errors.push(
+        `${name}@${version} at ${where} is on the known-vulnerable denylist (${reason})`,
       );
     }
   }
