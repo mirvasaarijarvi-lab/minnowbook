@@ -63,163 +63,22 @@ jobs:
           rm -rf node_modules
           bun install --frozen-lockfile
 
-      # Preflight: print a clear presence/absence table for every secret
-      # the live suite consults. This runs BEFORE the resolution logic so
-      # operators can see at a glance which GitHub Actions secrets are
-      # missing without having to decode the fallback chain. Values are
-      # never printed — only "present" / "MISSING".
-      - name: Preflight - report Supabase secrets presence
-        env:
-          VITE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-          VITE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
-          BARE_URL: ${{ secrets.SUPABASE_URL }}
-          BARE_PUB: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
-          BARE_ANON: ${{ secrets.SUPABASE_ANON_KEY }}
-          BARE_SR: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-        run: |
-          # Defence in depth: re-register every non-empty secret value as a
-          # masked string for THIS step's logs. GitHub already masks values
-          # pulled from `secrets.*`, but only the exact string -- if a key
-          # is logged with surrounding whitespace, a URL component, or a
-          # truncated prefix, the raw substring can slip through. We also
-          # mask the URL host on its own so an accidental `curl -v` that
-          # prints "Host: <ref>.supabase.co" gets redacted.
-          mask() {
-            # $1 = value. Skip empties; skip the literal word "MISSING".
-            [ -n "$1" ] || return 0
-            echo "::add-mask::$1"
-          }
-          mask_url_parts() {
-            # Mask scheme+host, host alone, and the project ref subdomain.
-            local url="$1"
-            [ -n "$url" ] || return 0
-            local host scheme_host ref
-            scheme_host="${url%%/}"               # strip trailing slash
-            scheme_host="${scheme_host%%\?*}"     # strip query
-            scheme_host="${scheme_host%%#*}"      # strip fragment
-            # Extract host between scheme and next "/"
-            host="${scheme_host#*://}"
-            host="${host%%/*}"
-            ref="${host%%.*}"
-            mask "$scheme_host"
-            mask "$host"
-            [ "$ref" != "$host" ] && mask "$ref"
-          }
-          for v in "$VITE_URL" "$VITE_KEY" "$BARE_URL" "$BARE_PUB" "$BARE_ANON" "$BARE_SR"; do
-            mask "$v"
-          done
-          mask_url_parts "$VITE_URL"
-          mask_url_parts "$BARE_URL"
-
-          status() { [ -n "$1" ] && echo "present" || echo "MISSING"; }
-
-          V_URL=$(status "$VITE_URL")
-          V_KEY=$(status "$VITE_KEY")
-          B_URL=$(status "$BARE_URL")
-          B_PUB=$(status "$BARE_PUB")
-          B_ANON=$(status "$BARE_ANON")
-          B_SR=$(status "$BARE_SR")
-
-          {
-            echo "### Supabase secrets preflight"
-            echo ""
-            echo "| Secret | Status |"
-            echo "| --- | --- |"
-            echo "| VITE_SUPABASE_URL | $V_URL |"
-            echo "| VITE_SUPABASE_PUBLISHABLE_KEY | $V_KEY |"
-            echo "| SUPABASE_URL | $B_URL |"
-            echo "| SUPABASE_PUBLISHABLE_KEY | $B_PUB |"
-            echo "| SUPABASE_ANON_KEY | $B_ANON |"
-            echo "| SUPABASE_SERVICE_ROLE_KEY | $B_SR (service-role is rejected) |"
-          } | tee -a "$GITHUB_STEP_SUMMARY"
-
-          echo ""
-          echo "Live suite needs ONE url + ONE non-privileged key:"
-          echo "  url  = VITE_SUPABASE_URL  OR  SUPABASE_URL"
-          echo "  key  = VITE_SUPABASE_PUBLISHABLE_KEY  OR  SUPABASE_PUBLISHABLE_KEY  OR  SUPABASE_ANON_KEY"
-
-          MISSING=""
-          if [ -z "$VITE_URL" ] && [ -z "$BARE_URL" ]; then
-            MISSING="$MISSING\n  - URL: add VITE_SUPABASE_URL (or SUPABASE_URL)"
-          fi
-          if [ -z "$VITE_KEY" ] && [ -z "$BARE_PUB" ] && [ -z "$BARE_ANON" ]; then
-            MISSING="$MISSING\n  - KEY: add VITE_SUPABASE_PUBLISHABLE_KEY (or SUPABASE_PUBLISHABLE_KEY / SUPABASE_ANON_KEY)"
-          fi
-          if [ -n "$MISSING" ]; then
-            printf "::warning::Missing required GitHub Actions secrets:%b\n" "$MISSING"
-          else
-            echo "✅ All required credentials are present."
-          fi
-
-      # Live integration tests need a real Supabase URL + a NON-PRIVILEGED
-      # key (publishable/anon). Service-role would bypass RLS and silently
-      # turn isolation assertions into no-ops, so we explicitly refuse it.
-      # Fallback chain mirrors the previous in-line pagination check.
-      - name: Check live-integration prerequisites
+      # Preflight: presence-check Supabase secrets, mask values, resolve
+      # the URL/key fallback chain. Hard-fails on workflow_dispatch and
+      # soft-skips on schedule via fail_on_missing=auto.
+      - name: Supabase preflight
         id: live_check
+        uses: ./.github/actions/supabase-preflight
+        with:
+          vite_supabase_url: ${{ secrets.VITE_SUPABASE_URL }}
+          vite_supabase_publishable_key: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          supabase_url: ${{ secrets.SUPABASE_URL }}
+          supabase_publishable_key: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+          supabase_anon_key: ${{ secrets.SUPABASE_ANON_KEY }}
+          supabase_service_role_key: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          fail_on_missing: auto
+          label: "Live Security Integration Tests - Supabase preflight"
 
-        env:
-          VITE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-          VITE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
-          BARE_URL: ${{ secrets.SUPABASE_URL }}
-          BARE_PUB: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
-          BARE_ANON: ${{ secrets.SUPABASE_ANON_KEY }}
-          BARE_SR: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-        run: |
-          # Re-mask every secret value for this step's logs. See the
-          # preflight step for rationale; we duplicate it here so that a
-          # future edit to either step in isolation cannot leak.
-          for v in "$VITE_URL" "$VITE_KEY" "$BARE_URL" "$BARE_PUB" "$BARE_ANON" "$BARE_SR"; do
-            [ -n "$v" ] && echo "::add-mask::$v"
-          done
-          for u in "$VITE_URL" "$BARE_URL"; do
-            [ -n "$u" ] || continue
-            host="${u#*://}"; host="${host%%/*}"
-            ref="${host%%.*}"
-            [ -n "$host" ] && echo "::add-mask::$host"
-            [ -n "$ref" ] && [ "$ref" != "$host" ] && echo "::add-mask::$ref"
-          done
-
-          RESOLVED_URL="${VITE_URL:-$BARE_URL}"
-          RESOLVED_KEY="${VITE_KEY:-${BARE_PUB:-$BARE_ANON}}"
-
-          # Manual dispatch = hard-fail on missing/invalid creds (operator
-          # explicitly asked for a run). Scheduled cron = soft-skip so a
-          # repo without GitHub Actions secrets configured doesn't email
-          # a red X every morning. Either way we never run with only a
-          # service-role key (would bypass RLS).
-          IS_MANUAL="false"
-          if [ "${GITHUB_EVENT_NAME:-}" = "workflow_dispatch" ]; then
-            IS_MANUAL="true"
-          fi
-
-          if [ -n "$RESOLVED_URL" ] && [ -n "$RESOLVED_KEY" ]; then
-            echo "enabled=true" >> "$GITHUB_OUTPUT"
-            echo "resolved_url=$RESOLVED_URL" >> "$GITHUB_OUTPUT"
-            echo "::add-mask::$RESOLVED_KEY"
-            echo "resolved_key=$RESOLVED_KEY" >> "$GITHUB_OUTPUT"
-            echo "✅ Live Supabase credentials present, running live integration suite."
-          elif [ -n "$BARE_SR" ] && [ -z "$RESOLVED_KEY" ]; then
-            echo "enabled=false" >> "$GITHUB_OUTPUT"
-            MSG="Only SUPABASE_SERVICE_ROLE_KEY is configured. Live security tests refuse to run with service-role (would bypass RLS). Add SUPABASE_PUBLISHABLE_KEY or SUPABASE_ANON_KEY."
-            if [ "$IS_MANUAL" = "true" ]; then
-              echo "::error::$MSG"
-              exit 1
-            fi
-            echo "::warning::$MSG (scheduled run, soft-skipping)"
-            echo "### ⚠️ Live security tests skipped" >> "$GITHUB_STEP_SUMMARY"
-            echo "$MSG" >> "$GITHUB_STEP_SUMMARY"
-          else
-            echo "enabled=false" >> "$GITHUB_OUTPUT"
-            MSG="No Supabase URL + publishable/anon key pair configured. Live security tests cannot run. Add VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY (or SUPABASE_URL + SUPABASE_PUBLISHABLE_KEY/SUPABASE_ANON_KEY) under repo Settings → Secrets and variables → Actions."
-            if [ "$IS_MANUAL" = "true" ]; then
-              echo "::error::$MSG"
-              exit 1
-            fi
-            echo "::warning::$MSG (scheduled run, soft-skipping)"
-            echo "### ⚠️ Live security tests skipped" >> "$GITHUB_STEP_SUMMARY"
-            echo "$MSG" >> "$GITHUB_STEP_SUMMARY"
-          fi
 
       - name: Run live security integration suite
         id: live_run
