@@ -653,6 +653,55 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
       pricingResource = r ?? null;
     }
 
+    // SECURITY: For restaurant fixed_price bookings and popup stall_fee, the
+    // client-supplied price is NOT trusted. We resolve the canonical amount
+    // from the resource's `sub_services` configuration on the server and
+    // ignore the request body value. If no server-side price is configured
+    // we drop the price entirely (staff must set it at confirmation time)
+    // rather than echo back whatever the caller submitted.
+    const subServicesList: Array<{ name?: string; price_eur?: number | null }> =
+      Array.isArray(pricingResource?.sub_services) ? pricingResource.sub_services : [];
+    const maxSubPrice = subServicesList.length > 0
+      ? Math.max(
+          0,
+          ...subServicesList.map((s) =>
+            s && s.price_eur != null && isFinite(Number(s.price_eur)) ? Number(s.price_eur) : 0,
+          ),
+        )
+      : 0;
+
+    if (pricing_type === "fixed_price") {
+      const canonical = maxSubPrice > 0 ? maxSubPrice : null;
+      if (price_eur != null && canonical !== price_eur) {
+        reasons.push(
+          `[PRICE_OVERRIDE_FIXED] Client-supplied fixed_price=${price_eur} ignored; using server canonical=${canonical ?? "null"} from resource sub_services. (${idCtx})`,
+        );
+      }
+      price_eur = canonical;
+    }
+
+    if (restaurant_sub_type === "popup") {
+      const stallEntry = subServicesList.find((s) =>
+        typeof s?.name === "string" && /stall\s*fee|booth\s*fee|pitch\s*fee/i.test(s.name),
+      );
+      let canonical: number | null = null;
+      if (stallEntry && stallEntry.price_eur != null && isFinite(Number(stallEntry.price_eur))) {
+        canonical = Number(stallEntry.price_eur);
+      } else if (maxSubPrice > 0) {
+        canonical = maxSubPrice;
+      }
+      if (canonical != null && stall_fee != null && canonical !== stall_fee) {
+        reasons.push(
+          `[PRICE_OVERRIDE_STALL] Client-supplied stall_fee=${stall_fee} ignored; using server canonical=${canonical} from resource sub_services. (${idCtx})`,
+        );
+      } else if (canonical == null && stall_fee != null) {
+        reasons.push(
+          `[PRICE_GUEST_DECLARED_STALL] No server-side stall fee configured; client-declared stall_fee=${stall_fee} dropped pending staff confirmation. (${idCtx})`,
+        );
+      }
+      stall_fee = canonical;
+    }
+
     const priced = computeReservationPrice({
       reservation_type,
       resource: pricingResource,
