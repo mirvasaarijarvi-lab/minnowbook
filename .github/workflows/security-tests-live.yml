@@ -64,8 +64,10 @@ jobs:
           bun install --frozen-lockfile
 
       # Preflight: presence-check Supabase secrets, mask values, resolve
-      # the URL/key fallback chain. Hard-fails on workflow_dispatch and
-      # soft-skips on schedule via fail_on_missing=auto.
+      # the URL/key fallback chain. fail_on_missing=true makes this a
+      # hard gate -- if a required secret is MISSING, the job fails here
+      # and the security test step never runs. Scheduled runs that need
+      # a soft-skip should set this to "auto" instead.
       - name: Supabase preflight
         id: live_check
         uses: ./.github/actions/supabase-preflight
@@ -76,8 +78,19 @@ jobs:
           supabase_publishable_key: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
           supabase_anon_key: ${{ secrets.SUPABASE_ANON_KEY }}
           supabase_service_role_key: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          fail_on_missing: auto
+          fail_on_missing: "true"
           label: "Live Security Integration Tests - Supabase preflight"
+
+      # Belt-and-braces fail-fast: even if the composite action's exit
+      # code is ever bypassed (e.g. someone adds continue-on-error), this
+      # explicit gate refuses to proceed unless the preflight resolved a
+      # usable URL + non-privileged key.
+      - name: Fail fast if preflight did not enable the suite
+        if: steps.live_check.outputs.enabled != 'true'
+        run: |
+          echo "::error::Supabase preflight did not produce usable credentials (enabled=${{ steps.live_check.outputs.enabled }}). Refusing to run security tests."
+          exit 1
+
 
 
       - name: Run live security integration suite
