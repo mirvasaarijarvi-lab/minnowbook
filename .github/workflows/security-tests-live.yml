@@ -166,6 +166,20 @@ jobs:
           BARE_ANON: ${{ secrets.SUPABASE_ANON_KEY }}
           BARE_SR: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: |
+          # Re-mask every secret value for this step's logs. See the
+          # preflight step for rationale; we duplicate it here so that a
+          # future edit to either step in isolation cannot leak.
+          for v in "$VITE_URL" "$VITE_KEY" "$BARE_URL" "$BARE_PUB" "$BARE_ANON" "$BARE_SR"; do
+            [ -n "$v" ] && echo "::add-mask::$v"
+          done
+          for u in "$VITE_URL" "$BARE_URL"; do
+            [ -n "$u" ] || continue
+            host="${u#*://}"; host="${host%%/*}"
+            ref="${host%%.*}"
+            [ -n "$host" ] && echo "::add-mask::$host"
+            [ -n "$ref" ] && [ "$ref" != "$host" ] && echo "::add-mask::$ref"
+          done
+
           RESOLVED_URL="${VITE_URL:-$BARE_URL}"
           RESOLVED_KEY="${VITE_KEY:-${BARE_PUB:-$BARE_ANON}}"
 
