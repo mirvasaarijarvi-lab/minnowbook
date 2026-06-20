@@ -36,6 +36,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      actions: read
     # Live suite has its own 180s per-test budget; cap total job time
     # well above worst-case to absorb cold starts but still fail fast
     # on a wedged Supabase project.
