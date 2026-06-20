@@ -77,6 +77,40 @@ jobs:
           BARE_ANON: ${{ secrets.SUPABASE_ANON_KEY }}
           BARE_SR: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: |
+          # Defence in depth: re-register every non-empty secret value as a
+          # masked string for THIS step's logs. GitHub already masks values
+          # pulled from `secrets.*`, but only the exact string -- if a key
+          # is logged with surrounding whitespace, a URL component, or a
+          # truncated prefix, the raw substring can slip through. We also
+          # mask the URL host on its own so an accidental `curl -v` that
+          # prints "Host: <ref>.supabase.co" gets redacted.
+          mask() {
+            # $1 = value. Skip empties; skip the literal word "MISSING".
+            [ -n "$1" ] || return 0
+            echo "::add-mask::$1"
+          }
+          mask_url_parts() {
+            # Mask scheme+host, host alone, and the project ref subdomain.
+            local url="$1"
+            [ -n "$url" ] || return 0
+            local host scheme_host ref
+            scheme_host="${url%%/}"               # strip trailing slash
+            scheme_host="${scheme_host%%\?*}"     # strip query
+            scheme_host="${scheme_host%%#*}"      # strip fragment
+            # Extract host between scheme and next "/"
+            host="${scheme_host#*://}"
+            host="${host%%/*}"
+            ref="${host%%.*}"
+            mask "$scheme_host"
+            mask "$host"
+            [ "$ref" != "$host" ] && mask "$ref"
+          }
+          for v in "$VITE_URL" "$VITE_KEY" "$BARE_URL" "$BARE_PUB" "$BARE_ANON" "$BARE_SR"; do
+            mask "$v"
+          done
+          mask_url_parts "$VITE_URL"
+          mask_url_parts "$BARE_URL"
+
           status() { [ -n "$1" ] && echo "present" || echo "MISSING"; }
 
           V_URL=$(status "$VITE_URL")
