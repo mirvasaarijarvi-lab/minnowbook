@@ -173,6 +173,7 @@ jobs:
           fi
 
       - name: Run live security integration suite
+        id: live_run
         if: steps.live_check.outputs.enabled == 'true'
         env:
           VITE_SUPABASE_URL: ${{ steps.live_check.outputs.resolved_url }}
@@ -190,6 +191,70 @@ jobs:
               --reporter=verbose
           fi
 
-      - name: Summary
+      - name: Status summary
         if: always()
-        run: echo "Live security integration tests completed"
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          ENABLED: ${{ steps.live_check.outputs.enabled }}
+          CHECK_OUTCOME: ${{ steps.live_check.outcome }}
+          RUN_OUTCOME: ${{ steps.live_run.outcome }}
+          PATTERN: ${{ inputs.pattern }}
+        run: |
+          # Resolve a clickable link to THIS job's logs. The jobs REST
+          # endpoint is the only reliable source for the per-job URL --
+          # GITHUB_JOB is the key, not the display name. Falls back to
+          # the run URL if the API call fails (no token, rate limit).
+          RUN_URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/attempts/${GITHUB_RUN_ATTEMPT}"
+          JOB_URL="$RUN_URL"
+          if command -v jq >/dev/null 2>&1 && [ -n "${GITHUB_TOKEN:-}" ]; then
+            API="${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/attempts/${GITHUB_RUN_ATTEMPT}/jobs"
+            RESOLVED=$(curl -fsSL \
+              -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+              -H "Accept: application/vnd.github+json" \
+              "$API" 2>/dev/null \
+              | jq -r --arg job "$GITHUB_JOB" '.jobs[] | select(.name == $job) | .html_url' \
+              | head -n1)
+            if [ -n "$RESOLVED" ] && [ "$RESOLVED" != "null" ]; then
+              JOB_URL="$RESOLVED"
+            fi
+          fi
+
+          # Derive a single PASS / FAIL / SKIPPED verdict.
+          STATUS="UNKNOWN"
+          DETAIL=""
+          if [ "$ENABLED" = "true" ]; then
+            case "$RUN_OUTCOME" in
+              success)   STATUS="PASS"; DETAIL="Live security integration suite passed." ;;
+              failure)   STATUS="FAIL"; DETAIL="Live security integration suite failed. See job logs." ;;
+              cancelled) STATUS="FAIL"; DETAIL="Live security integration suite was cancelled." ;;
+              *)         STATUS="FAIL"; DETAIL="Live security integration suite did not complete (outcome: ${RUN_OUTCOME:-none})." ;;
+            esac
+          else
+            if [ "$CHECK_OUTCOME" = "failure" ]; then
+              STATUS="FAIL"
+              DETAIL="Preflight credential check failed (manual dispatch requires Supabase URL + non-privileged key)."
+            else
+              STATUS="SKIPPED"
+              DETAIL="No live credentials configured. Scheduled run soft-skipped, see the preflight table above."
+            fi
+          fi
+
+          case "$STATUS" in
+            PASS)    ICON="✅" ;;
+            FAIL)    ICON="❌" ;;
+            SKIPPED) ICON="⏭️" ;;
+            *)       ICON="❓" ;;
+          esac
+
+          {
+            echo ""
+            echo "### $ICON Live Security Integration Tests: $STATUS"
+            echo ""
+            echo "- **Job:** [\`${GITHUB_JOB}\`]($JOB_URL)"
+            echo "- **Workflow run:** [#${GITHUB_RUN_NUMBER} (attempt ${GITHUB_RUN_ATTEMPT})]($RUN_URL)"
+            echo "- **Trigger:** \`${GITHUB_EVENT_NAME}\`${PATTERN:+ (pattern: \`$PATTERN\`)}"
+            echo "- **Detail:** $DETAIL"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          echo "$ICON $STATUS - $DETAIL"
+          echo "Job logs: $JOB_URL"
