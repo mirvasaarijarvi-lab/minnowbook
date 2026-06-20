@@ -136,5 +136,29 @@ exercise the redirect path; the Vitest edge-function tests in
 assert the always-403 behavior. Run `bun test` and
 `npx playwright test` to validate end-to-end.
 
+## Security tests: required GitHub Actions secrets
+
+The live integration suite (`.github/workflows/security-tests-live.yml`)
+talks to the real backend. It needs **one URL + one non-privileged key**
+to authenticate as a normal browser client.
+
+Configure these under **GitHub → repo → Settings → Secrets and variables
+→ Actions → New repository secret**:
+
+| Secret | Required | Notes |
+| --- | --- | --- |
+| `VITE_SUPABASE_URL` | yes (or `SUPABASE_URL`) | Project URL, e.g. `https://<ref>.supabase.co`. Value of `VITE_SUPABASE_URL` in `.env`. |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | yes (or `SUPABASE_PUBLISHABLE_KEY` / `SUPABASE_ANON_KEY`) | Publishable/anon key. Safe to expose. Value of `VITE_SUPABASE_PUBLISHABLE_KEY` in `.env`. |
+| `SUPABASE_SERVICE_ROLE_KEY` | **never** | Explicitly rejected: would bypass RLS and silently turn isolation assertions into no-ops. |
+
+Fallback chain (first non-empty wins):
+
+- URL: `VITE_SUPABASE_URL` → `SUPABASE_URL`
+- Key: `VITE_SUPABASE_PUBLISHABLE_KEY` → `SUPABASE_PUBLISHABLE_KEY` → `SUPABASE_ANON_KEY`
+
+The preflight step prints a `present` / `MISSING` table for each candidate
+on every run. Manual `workflow_dispatch` hard-fails on missing creds;
+scheduled runs soft-skip so an unconfigured repo doesn't email a red X.
 
 <!-- ci: trigger 2026-05-13T16:28:42Z -->
+
