@@ -14,7 +14,7 @@
 //   import { collectDrift } from "./preflight-manifest-drift.mjs";
 import { readFileSync, existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { dirname, join, resolve } from "node:path";
+import { dirname, resolve } from "node:path";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(HERE, "..", "..");
@@ -67,10 +67,30 @@ function diffSpecs(label, expected, actual) {
   return drifts;
 }
 
+// Allow-list of lockfile-adjacent filenames this script is permitted to read.
+// Combined with the path-containment check in `safeJoin`, this prevents a
+// caller-supplied `root` from being abused for arbitrary file inclusion.
+const ALLOWED_FILES = new Set(["package.json", "bun.lock", "package-lock.json"]);
+
+/** Resolve `<root>/<name>` and assert the result stays inside `<root>` and
+ *  references one of the allow-listed manifest filenames. Throws otherwise. */
+function safeJoin(rootAbs, name) {
+  if (!ALLOWED_FILES.has(name)) {
+    throw new Error(`preflight: refusing to read non-allowlisted file "${name}"`);
+  }
+  const candidate = resolve(rootAbs, name);
+  const rootWithSep = rootAbs.endsWith("/") ? rootAbs : `${rootAbs}/`;
+  if (candidate !== resolve(rootAbs, name) || !(`${candidate}/`).startsWith(rootWithSep)) {
+    throw new Error(`preflight: path escapes root: ${candidate}`);
+  }
+  return candidate;
+}
+
 export function collectDrift({ root = REPO_ROOT } = {}) {
-  const pkgPath = join(root, "package.json");
-  const bunPath = join(root, "bun.lock");
-  const npmPath = join(root, "package-lock.json");
+  const rootAbs = resolve(root);
+  const pkgPath = safeJoin(rootAbs, "package.json");
+  const bunPath = safeJoin(rootAbs, "bun.lock");
+  const npmPath = safeJoin(rootAbs, "package-lock.json");
 
   if (!existsSync(pkgPath)) {
     return { ok: false, fatal: `package.json missing at ${pkgPath}`, drifts: [] };
