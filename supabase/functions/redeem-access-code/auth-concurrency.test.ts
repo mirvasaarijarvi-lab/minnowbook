@@ -43,9 +43,17 @@ function makeUnauthenticatedRequest(i: number): Request {
   });
 }
 
-Deno.test(
-  "redeem-access-code: missing Authorization fast-fails 401 under concurrent burst",
-  withStubSupabaseEnv(async () => {
+Deno.test({
+  name:
+    "redeem-access-code: missing Authorization fast-fails 401 under concurrent burst",
+  // The handler intentionally fires fire-and-forget telemetry writes
+  // (admin Supabase client POSTs + interval-backed keepalive) that
+  // outlive the request lifecycle. They are tested separately and
+  // would otherwise trip Deno's op/resource sanitizers here.
+  sanitizeOps: false,
+  sanitizeResources: false,
+  fn: withStubSupabaseEnv(async () => {
+
     const startedAt = performance.now();
 
     const results = await Promise.all(
