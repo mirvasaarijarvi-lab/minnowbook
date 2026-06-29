@@ -40,7 +40,7 @@ jobs:
   generate:
     name: generate-sbom
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 8
     permissions:
       contents: read
     steps:
@@ -52,6 +52,10 @@ jobs:
         uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af
         with:
           node-version: "20"
+          # Cache the npm HTTP store so SBOM regeneration on warm
+          # runs skips the cold-start registry walk that occasionally
+          # pushed this job past its previous 5-minute budget.
+          cache: 'npm'
       - name: Generate SBOM
         run: node scripts/generate-sbom.mjs
       - name: Verify committed SBOM matches lockfile
