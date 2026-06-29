@@ -123,17 +123,25 @@ async function assertShortCircuit(
 }
 
 for (const { name, exportName } of AUTH_ENFORCED) {
-  Deno.test(
-    `${name}: POST without Authorization short-circuits within ${SHORT_CIRCUIT_BUDGET_MS}ms`,
-    withStubSupabaseEnv(async () => {
+  // sanitizeOps/sanitizeResources disabled: the Supabase JS client schedules
+  // a token-refresh interval on construction (even before any auth call),
+  // which would otherwise be flagged as a leaked timer by Deno's test
+  // runner. We're testing the request path, not client lifecycle.
+  Deno.test({
+    name: `${name}: POST without Authorization short-circuits within ${SHORT_CIRCUIT_BUDGET_MS}ms`,
+    sanitizeOps: false,
+    sanitizeResources: false,
+    fn: withStubSupabaseEnv(async () => {
       const handler = await loadHandler(name, exportName);
       await assertShortCircuit(name, handler, {}, "missing header");
     }),
-  );
+  });
 
-  Deno.test(
-    `${name}: POST with malformed Authorization (no Bearer) short-circuits within ${SHORT_CIRCUIT_BUDGET_MS}ms`,
-    withStubSupabaseEnv(async () => {
+  Deno.test({
+    name: `${name}: POST with malformed Authorization (no Bearer) short-circuits within ${SHORT_CIRCUIT_BUDGET_MS}ms`,
+    sanitizeOps: false,
+    sanitizeResources: false,
+    fn: withStubSupabaseEnv(async () => {
       const handler = await loadHandler(name, exportName);
       await assertShortCircuit(
         name,
@@ -142,5 +150,5 @@ for (const { name, exportName } of AUTH_ENFORCED) {
         "malformed header",
       );
     }),
-  );
+  });
 }
