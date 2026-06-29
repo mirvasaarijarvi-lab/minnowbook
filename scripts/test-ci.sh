@@ -22,6 +22,67 @@ run_step() {
   echo "✅ $name passed"
 }
 
+# ---------------------------------------------------------------------------
+# Preflight: Supabase reachability for the live security suites.
+#
+# Roughly a third of `src/test/security/*.test.ts` files construct an anon
+# `createClient(VITE_SUPABASE_URL, VITE_SUPABASE_PUBLISHABLE_KEY, ...)` at
+# module load and immediately call into PostgREST / RPC. If the project is
+# unreachable from the runner (DNS, egress block, project paused, transient
+# outage), every one of those tests hits its 5s testTimeout — last seen as
+# 130 timeouts over ~10 minutes with no other signal. This preflight does a
+# single HEAD against `/auth/v1/health` (anon key only, no DB write) with a
+# 10s budget and aborts the run early with an actionable message instead of
+# letting vitest pile up identical timeouts.
+#
+# Skip with SKIP_SUPABASE_REACHABILITY_PREFLIGHT=1 (e.g. for an offline run
+# that intentionally only touches non-live suites).
+# ---------------------------------------------------------------------------
+if [ "${SKIP_SUPABASE_REACHABILITY_PREFLIGHT:-0}" != "1" ]; then
+  preflight_url="${VITE_SUPABASE_URL:-${SUPABASE_URL:-}}"
+  preflight_key="${VITE_SUPABASE_PUBLISHABLE_KEY:-${SUPABASE_ANON_KEY:-${SUPABASE_PUBLISHABLE_KEY:-}}}"
+  if [ -z "$preflight_url" ] || [ -z "$preflight_key" ]; then
+    echo "::warning::Skipping Supabase reachability preflight (URL or anon key not exported). Live security suites may time out if the project is unreachable."
+  else
+    echo ""
+    echo "=============================================="
+    echo "▶ Preflight: Supabase reachability (10s budget)"
+    echo "=============================================="
+    probe_url="${preflight_url%/}/auth/v1/health"
+    # -m 10  : hard 10s ceiling for the whole request
+    # -sS    : silent but still show errors
+    # -o ... : drop body, we only care about the status code
+    status_code=$(curl -m 10 -sS -o /dev/null -w "%{http_code}" \
+      -H "apikey: $preflight_key" \
+      "$probe_url" || echo "000")
+    if [ "$status_code" = "200" ] || [ "$status_code" = "401" ]; then
+      # 200 = healthy, 401 = reachable but anon-only endpoint declined to
+      # disclose health (still proves DNS + TLS + edge are up).
+      echo "✅ Supabase reachable ($probe_url -> HTTP $status_code)"
+    else
+      echo ""
+      echo "❌ Supabase unreachable from this runner."
+      echo "   probe   : $probe_url"
+      echo "   result  : HTTP $status_code (000 means curl could not connect within 10s)"
+      echo ""
+      echo "   The live security suites under src/test/security/*.test.ts call"
+      echo "   anon PostgREST/RPC on every test. With the project unreachable"
+      echo "   they each hit a 5s timeout, accumulating ~130 identical"
+      echo "   failures over ~10 minutes with no other signal. Failing fast"
+      echo "   here instead so the real cause is visible at the top of the log."
+      echo ""
+      echo "   Fix:"
+      echo "     - Confirm the project ref in VITE_SUPABASE_URL is current and"
+      echo "       not paused (Backend > Project status in Lovable Cloud)."
+      echo "     - Confirm the runner has outbound HTTPS to *.supabase.co."
+      echo "     - For an intentionally offline run, set"
+      echo "       SKIP_SUPABASE_REACHABILITY_PREFLIGHT=1."
+      exit 1
+    fi
+    echo ""
+  fi
+fi
+
 # 1. Vitest unit tests (fail fast on first failing file, dot reporter to keep
 #    console quiet, junit + json reporters write into $REPORTS_DIR/vitest/).
 #    Set DEBUG_HANGING_PROCESS=1 locally to add the hanging-process reporter,
