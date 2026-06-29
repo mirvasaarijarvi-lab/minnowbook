@@ -30,7 +30,7 @@ import {
 (Deno as any).serve = (..._args: unknown[]) =>
   ({ finished: Promise.resolve(), shutdown: () => Promise.resolve() }) as any;
 
-type Handler = (req: Request) => Promise<Response> | Response;
+// Handler type and timing budget now live in assert-fast-401.ts.
 
 const AUTH_ENFORCED: ReadonlyArray<{ name: string; exportName: string }> = [
   { name: "admin-users", exportName: "handleAdminUsersRequest" },
