@@ -98,7 +98,7 @@ Deno.serve(async (req) => {
       profile: {
         id: userId,
         email,
-        claims: claimsData.claims,
+        claims: auth.claims,
       },
       tenant_memberships: memberships,
       reservations_created: reservations,
