@@ -455,6 +455,83 @@ jobs:
           set -euo pipefail
           bunx vitest run --config vitest.live.config.ts --reporter=verbose
 
+      # On any prior failure, dump per-container `docker logs`, full
+      # `docker inspect`, `docker ps -a`, `docker compose` state, and copy
+      # the captured `supabase start` attempt logs into a single bundle
+      # uploaded as a GitHub Actions artifact. This is the artifact
+      # counterpart to the inline "Diagnostics on readiness failure" step,
+      # which only prints to the job log.
+      - name: Collect docker + supabase logs
+        if: failure()
+        continue-on-error: true
+        shell: bash {0}
+        run: |
+          set +e
+          BUNDLE=/tmp/supabase-logs
+          mkdir -p "$BUNDLE"
+
+          {
+            echo "===== docker version ====="
+            docker version 2>&1
+            echo "===== docker info ====="
+            docker info 2>&1
+          } > "$BUNDLE/docker-info.txt"
+
+          docker ps -a > "$BUNDLE/docker-ps.txt" 2>&1
+          docker network ls > "$BUNDLE/docker-networks.txt" 2>&1
+          docker volume ls > "$BUNDLE/docker-volumes.txt" 2>&1
+
+          # docker compose state (Supabase CLI uses compose under the hood).
+          if docker compose version >/dev/null 2>&1; then
+            docker compose ls -a > "$BUNDLE/docker-compose-ls.txt" 2>&1
+            for proj in $(docker compose ls -a --format json 2>/dev/null | \
+                python3 -c 'import json,sys;\ndata=json.load(sys.stdin);\nprint("\n".join(p["Name"] for p in data))' 2>/dev/null); do
+              docker compose -p "$proj" ps -a > "$BUNDLE/compose-${proj}-ps.txt" 2>&1
+              docker compose -p "$proj" logs --no-color --timestamps \
+                > "$BUNDLE/compose-${proj}-logs.txt" 2>&1
+            done
+          fi
+
+          # Per-container logs + inspect for every supabase_* container.
+          mkdir -p "$BUNDLE/containers"
+          for c in $(docker ps -a --filter "name=supabase_" --format '{{.Names}}' 2>/dev/null); do
+            docker logs --timestamps "$c" > "$BUNDLE/containers/${c}.log" 2>&1
+            docker inspect "$c" > "$BUNDLE/containers/${c}.inspect.json" 2>&1
+          done
+
+          # Captured `supabase start` attempt logs from earlier steps.
+          if [ -d /tmp/supabase-diag ]; then
+            cp -a /tmp/supabase-diag "$BUNDLE/supabase-diag" 2>/dev/null || true
+          fi
+
+          # Final supabase status snapshot (may fail if stack is down).
+          supabase status > "$BUNDLE/supabase-status.txt" 2>&1 || true
+
+          # Host context useful for triaging port / resource exhaustion.
+          {
+            echo "===== ss -lntp ====="
+            ss -lntp 2>&1
+            echo "===== df -h ====="
+            df -h 2>&1
+            echo "===== free -h ====="
+            free -h 2>&1
+            echo "===== uname -a ====="
+            uname -a 2>&1
+          } > "$BUNDLE/host.txt"
+
+          ls -laR "$BUNDLE" > "$BUNDLE/INDEX.txt" 2>&1
+          exit 0
+
+      - name: Upload failure logs artifact
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: supabase-logs-${{ github.run_id }}-${{ github.run_attempt }}
+          path: /tmp/supabase-logs
+          if-no-files-found: warn
+          retention-days: 14
+
       - name: Stop local Supabase stack
         if: always() && steps.supabase-start.outcome == 'success'
         run: supabase stop --no-backup || true
+
