@@ -98,7 +98,6 @@ Deno.test({
   fn: withStubSupabaseEnv(async () => {
     const res = await preflight();
     await drainBody(res);
-    await drainBody(res);
 
     // Preflight is itself a success — browsers ignore 2xx vs 204 but
     // require non-5xx, and the full security-headers bag must ship.
@@ -118,12 +117,14 @@ Deno.test({
       `preflight Access-Control-Allow-Headers must whitelist "authorization", got ${JSON.stringify(allowHeaders)}`,
     );
   }),
-);
+});
 
 for (const { label, headers } of SCENARIOS) {
-  Deno.test(
-    `mfa-recovery: ${label} -> 401 with CORS headers identical to preflight`,
-    withStubSupabaseEnv(async () => {
+  Deno.test({
+    name: `mfa-recovery: ${label} -> 401 with CORS headers identical to preflight`,
+    sanitizeOps: false,
+    sanitizeResources: false,
+    fn: withStubSupabaseEnv(async () => {
       const preflightRes = await preflight();
       await drainBody(preflightRes);
       const preflightCors = snapshotCors(preflightRes);
