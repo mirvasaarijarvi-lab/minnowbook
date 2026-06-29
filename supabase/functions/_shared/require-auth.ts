@@ -132,3 +132,66 @@ export async function requireAuth(
     adminClient,
   };
 }
+
+export type VerifyBearerResult =
+  | { ok: true; userId: string; email: string | null; token: string; claims: Record<string, unknown>; userClient: SupabaseClient; adminClient: SupabaseClient }
+  | { ok: false; reason: "missing_header" | "missing_env" | "timeout" | "invalid_token" };
+
+/**
+ * Lower-level variant for callers that need to build a custom error response
+ * (e.g. functions with their own structured error contract). Same timeout
+ * and validation semantics as requireAuth(), but never constructs a Response.
+ */
+export async function verifyBearer(
+  req: Request,
+  options: { timeoutMs?: number } = {},
+): Promise<VerifyBearerResult> {
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader?.startsWith("Bearer ")) return { ok: false, reason: "missing_header" };
+
+  const supabaseUrl = Deno.env.get("SUPABASE_URL");
+  const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
+  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (!supabaseUrl || !anonKey || !serviceRoleKey) return { ok: false, reason: "missing_env" };
+
+  const token = authHeader.slice("Bearer ".length).trim();
+  if (!token) return { ok: false, reason: "invalid_token" };
+
+  const userClient = createClient(supabaseUrl, anonKey, {
+    global: { headers: { Authorization: authHeader } },
+  });
+
+  const timeoutMs = options.timeoutMs ?? DEFAULT_GETCLAIMS_TIMEOUT_MS;
+  let timer: number | undefined;
+  const timeout = new Promise<"__timeout__">((resolve) => {
+    timer = setTimeout(() => resolve("__timeout__"), timeoutMs) as unknown as number;
+  });
+
+  let result: Awaited<ReturnType<typeof userClient.auth.getClaims>> | "__timeout__";
+  try {
+    result = await Promise.race([userClient.auth.getClaims(token), timeout]);
+  } catch (err) {
+    console.error("[verifyBearer] getClaims threw", err);
+    return { ok: false, reason: "invalid_token" };
+  } finally {
+    if (timer !== undefined) clearTimeout(timer);
+  }
+
+  if (result === "__timeout__") return { ok: false, reason: "timeout" };
+  const { data, error } = result;
+  if (error || !data?.claims) return { ok: false, reason: "invalid_token" };
+
+  const claims = data.claims as Record<string, unknown>;
+  const userId = typeof claims.sub === "string" ? claims.sub : "";
+  if (!userId) return { ok: false, reason: "invalid_token" };
+
+  return {
+    ok: true,
+    userId,
+    email: typeof claims.email === "string" ? claims.email : null,
+    token,
+    claims,
+    userClient,
+    adminClient: createClient(supabaseUrl, serviceRoleKey),
+  };
+}
