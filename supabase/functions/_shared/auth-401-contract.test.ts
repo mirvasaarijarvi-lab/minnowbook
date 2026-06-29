@@ -92,6 +92,7 @@ async function assert401Contract(
   handler: Handler,
   headers: Record<string, string>,
   scenario: string,
+  probeBody: unknown = {},
 ): Promise<void> {
   const req = new Request(`https://example.test/${name}`, {
     method: "POST",
@@ -100,7 +101,7 @@ async function assert401Contract(
       Origin: "https://mimmobook.com",
       ...headers,
     },
-    body: JSON.stringify({}),
+    body: JSON.stringify(probeBody),
   });
 
   const started = performance.now();
