@@ -250,6 +250,12 @@ export async function handleRedeemAccessCodeRequest(req: Request): Promise<Respo
     const MAX_BODY_SIZE = 50 * 1024;
     const contentLength = parseInt(req.headers.get("content-length") || "0", 10);
     if (contentLength > MAX_BODY_SIZE) {
+      logLimiterDecision({
+        requestId,
+        decision: "reject",
+        reason: "request_too_large",
+        userIdHash,
+      });
       return respond(
         errorResponse(corsHeaders, 413, ERROR_CODES.REQUEST_TOO_LARGE, "Request too large"),
         "request_too_large",
@@ -265,6 +271,12 @@ export async function handleRedeemAccessCodeRequest(req: Request): Promise<Respo
     // instead of letting the gateway respond with 504.
     const authResult = await verifyBearer(req, { timeoutMs: 5_000 });
     if (!authResult.ok) {
+      logLimiterDecision({
+        requestId,
+        decision: "reject",
+        reason: "not_authenticated",
+        userIdHash: null,
+      });
       return respond(
         errorResponse(corsHeaders, 401, ERROR_CODES.NOT_AUTHENTICATED, "Not authenticated"),
         "not_authenticated",
