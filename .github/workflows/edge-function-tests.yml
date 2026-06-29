@@ -32,7 +32,7 @@ jobs:
           deno-version: v1.x
 
       - name: Cache Deno modules
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ${{ env.DENO_DIR }}
           key: deno-${{ runner.os }}-${{ hashFiles('supabase/functions/**/*.ts', 'deno.json', 'deno.jsonc', 'deno.lock', 'import_map.json') }}
