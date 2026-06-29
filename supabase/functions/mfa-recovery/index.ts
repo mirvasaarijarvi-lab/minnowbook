@@ -51,17 +51,42 @@ export const handleMfaRecoveryRequest = async (req: Request): Promise<Response> 
   const startedAt = Date.now();
   const elapsed = () => Date.now() - startedAt;
 
+  /**
+   * Canonical structured-log schema for this function. Every emitted
+   * line MUST include these fields so downstream log search / alerting
+   * can rely on a single shape. `error_code` is `null` on success paths
+   * and a stable machine-readable token (SCREAMING_SNAKE_CASE) on every
+   * warn/error path. Add new optional fields under `extra` only - do
+   * not introduce alternate spellings of the core four
+   * (stage, elapsed_ms, request_id, error_code).
+   */
+  type LogLevel = "info" | "warn" | "error";
+  type LogExtra = Record<string, unknown>;
+  interface LogRecord {
+    fn: "mfa-recovery";
+    stage: string;
+    request_id: string;
+    elapsed_ms: number;
+    method: string;
+    level: LogLevel;
+    error_code: string | null;
+    [key: string]: unknown;
+  }
+
   const log = (
-    level: "info" | "warn" | "error",
+    level: LogLevel,
     stage: string,
-    extra: Record<string, unknown> = {},
-  ) => {
-    const payload = {
+    errorCode: string | null,
+    extra: LogExtra = {},
+  ): void => {
+    const payload: LogRecord = {
       fn: "mfa-recovery",
       stage,
       request_id: requestId,
-      method: req.method,
       elapsed_ms: elapsed(),
+      method: req.method,
+      level,
+      error_code: errorCode,
       ...extra,
     };
     const line = `[mfa-recovery] ${JSON.stringify(payload)}`;
@@ -77,7 +102,7 @@ export const handleMfaRecoveryRequest = async (req: Request): Promise<Response> 
   const originHeader = req.headers.get("origin") ?? "";
   const contentLengthHeader = req.headers.get("content-length") ?? "";
 
-  log("info", "request_received", {
+  log("info", "request_received", null, {
     has_auth_header: hasAuthHeader,
     has_bearer_token: hasBearerToken,
     has_apikey_header: hasApiKey,
@@ -86,7 +111,7 @@ export const handleMfaRecoveryRequest = async (req: Request): Promise<Response> 
   });
 
   if (req.method === "OPTIONS") {
-    log("info", "cors_preflight_ok");
+    log("info", "cors_preflight_ok", null);
     return new Response(null, { headers: corsHeaders });
   }
 
@@ -95,7 +120,9 @@ export const handleMfaRecoveryRequest = async (req: Request): Promise<Response> 
     const MAX_BODY_SIZE = 50 * 1024;
     const contentLength = parseInt(contentLengthHeader || "0", 10);
     if (contentLength > MAX_BODY_SIZE) {
-      log("warn", "reject_oversized_body", { content_length: contentLength });
+      log("warn", "reject_oversized_body", "REQUEST_TOO_LARGE", {
+        content_length: contentLength,
+      });
       return new Response(JSON.stringify({ error: "Request too large" }), {
         status: 413,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -108,7 +135,7 @@ export const handleMfaRecoveryRequest = async (req: Request): Promise<Response> 
     // until the platform killed it. Surface that as an explicit 401 now,
     // and log the exact reason so timeouts in the wild are diagnosable.
     if (!hasAuthHeader || !hasBearerToken) {
-      log("warn", "missing_or_malformed_auth_header", {
+      log("warn", "missing_or_malformed_auth_header", "NOT_AUTHENTICATED", {
         has_auth_header: hasAuthHeader,
         has_bearer_token: hasBearerToken,
       });
@@ -123,7 +150,7 @@ export const handleMfaRecoveryRequest = async (req: Request): Promise<Response> 
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
 
     if (!supabaseUrl || !serviceKey || !anonKey) {
-      log("error", "missing_runtime_env", {
+      log("error", "missing_runtime_env", "SERVER_MISCONFIGURED", {
         has_url: !!supabaseUrl,
         has_service_key: !!serviceKey,
         has_anon_key: !!anonKey,
@@ -141,7 +168,7 @@ export const handleMfaRecoveryRequest = async (req: Request): Promise<Response> 
       global: { headers: { Authorization: authHeaderRaw } },
     });
 
-    log("info", "auth_getuser_start");
+    log("info", "auth_getuser_start", null);
     const AUTH_TIMEOUT_MS = 5000;
     let authResult: Awaited<ReturnType<typeof anonClient.auth.getUser>>;
     try {
@@ -155,7 +182,7 @@ export const handleMfaRecoveryRequest = async (req: Request): Promise<Response> 
         ),
       ]);
     } catch (timeoutErr) {
-      log("error", "auth_getuser_timeout", {
+      log("error", "auth_getuser_timeout", "AUTH_TIMEOUT", {
         message: (timeoutErr as Error).message,
       });
       return new Response(JSON.stringify({ error: "Auth check timed out" }), {
@@ -166,7 +193,7 @@ export const handleMfaRecoveryRequest = async (req: Request): Promise<Response> 
 
     const { data: { user }, error: authError } = authResult;
     if (authError || !user) {
-      log("warn", "auth_rejected", {
+      log("warn", "auth_rejected", "NOT_AUTHENTICATED", {
         has_user: !!user,
         auth_error: authError?.message ?? null,
         auth_error_status: (authError as { status?: number } | null)?.status ?? null,
@@ -176,21 +203,23 @@ export const handleMfaRecoveryRequest = async (req: Request): Promise<Response> 
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    log("info", "auth_ok", { user_id: user.id });
+    log("info", "auth_ok", null, { user_id: user.id });
 
     const adminClient = createClient(supabaseUrl, serviceKey);
     let body: { action?: string; code?: string };
     try {
       body = await req.json();
     } catch (parseErr) {
-      log("warn", "body_parse_error", { message: (parseErr as Error).message });
+      log("warn", "body_parse_error", "INVALID_JSON_BODY", {
+        message: (parseErr as Error).message,
+      });
       return new Response(JSON.stringify({ error: "Invalid JSON body" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
     const action = body.action;
-    log("info", "action_dispatch", { action: action ?? null });
+    log("info", "action_dispatch", null, { action: action ?? null });
 
     // === GENERATE: create new recovery codes ===
     if (action === "generate") {
@@ -213,6 +242,7 @@ export const handleMfaRecoveryRequest = async (req: Request): Promise<Response> 
         .insert(rows);
       if (insertError) throw insertError;
 
+      log("info", "generate_ok", null, { count: plainCodes.length });
       return new Response(JSON.stringify({ codes: plainCodes }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -222,6 +252,7 @@ export const handleMfaRecoveryRequest = async (req: Request): Promise<Response> 
     if (action === "verify") {
       const code = body.code;
       if (!code || typeof code !== "string" || code.length < 8) {
+        log("warn", "verify_invalid_format", "INVALID_RECOVERY_CODE_FORMAT");
         return new Response(
           JSON.stringify({ error: "Invalid recovery code format" }),
           {
@@ -245,6 +276,7 @@ export const handleMfaRecoveryRequest = async (req: Request): Promise<Response> 
       if (findError) throw findError;
 
       if (!match) {
+        log("warn", "verify_no_match", "INVALID_OR_USED_RECOVERY_CODE");
         return new Response(
           JSON.stringify({ error: "Invalid or already used recovery code" }),
           {
@@ -269,6 +301,7 @@ export const handleMfaRecoveryRequest = async (req: Request): Promise<Response> 
       );
 
       if (!totpFactor) {
+        log("warn", "verify_no_totp_factor", "NO_ACTIVE_2FA_FACTOR");
         return new Response(
           JSON.stringify({ error: "No active 2FA factor found" }),
           {
@@ -278,6 +311,7 @@ export const handleMfaRecoveryRequest = async (req: Request): Promise<Response> 
         );
       }
 
+      log("info", "verify_ok", null, { factor_id: totpFactor.id });
       return new Response(
         JSON.stringify({
           success: true,
@@ -293,18 +327,19 @@ export const handleMfaRecoveryRequest = async (req: Request): Promise<Response> 
     // === COUNT: get remaining unused codes ===
     if (action === "count") {
       const remaining = await getRemainingCount(adminClient, user.id);
+      log("info", "count_ok", null, { remaining });
       return new Response(JSON.stringify({ remaining }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    log("warn", "unknown_action", { action: action ?? null });
+    log("warn", "unknown_action", "UNKNOWN_ACTION", { action: action ?? null });
     return new Response(JSON.stringify({ error: "Unknown action" }), {
       status: 400,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
-    log("error", "internal_error", {
+    log("error", "internal_error", "INTERNAL_ERROR", {
       message: (error as Error)?.message ?? String(error),
       name: (error as Error)?.name ?? null,
     });
@@ -317,6 +352,7 @@ export const handleMfaRecoveryRequest = async (req: Request): Promise<Response> 
     );
   }
 };
+
 
 Deno.serve(handleMfaRecoveryRequest);
 
