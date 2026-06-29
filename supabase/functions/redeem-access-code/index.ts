@@ -218,24 +218,80 @@ export async function handleRedeemAccessCodeRequest(req: Request): Promise<Respo
   // Every return path goes through `respond()` so dashboards see exactly
   // one log entry per request and bursts can be aggregated reliably.
   let userIdHash: string | null = null;
+  let tenantIdHash: string | null = null;
   let hadIdempotencyKey = false;
   let replayed = false;
+  // Captures the most recent limiter call so `respond()` can persist
+  // the same {decision, reason} pair it just logged. Updated by
+  // `logDecision()` below; remains null only for paths that bypass the
+  // limiter entirely (preflight + raw 500 from the catch block).
+  let lastLimiterDecision: {
+    decision: LimiterDecision;
+    reason: LimiterReason;
+    accessCodeIdHash?: string | null;
+    usedCount?: number | null;
+    maxUses?: number | null;
+  } | null = null;
+  let adminClientRef: SupabaseClient | null = null;
+
+  // Wrapper around `logLimiterDecision` that also stashes the decision so
+  // `respond()` can persist a single row per request to redemption_events
+  // with the same fields dashboards see in the log.
+  const logDecision = (entry: Parameters<typeof logLimiterDecision>[0]) => {
+    lastLimiterDecision = {
+      decision: entry.decision,
+      reason: entry.reason,
+      accessCodeIdHash: entry.accessCodeIdHash ?? null,
+      usedCount: entry.usedCount ?? null,
+      maxUses: entry.maxUses ?? null,
+    };
+    logLimiterDecision(entry);
+  };
 
   const respond = (
     response: Response,
     outcome: Outcome,
     errorMessage?: string,
   ): Response => {
+    const durationMs = Date.now() - startedAt;
     logRequest({
       requestId,
       outcome,
       status: response.status,
-      durationMs: Date.now() - startedAt,
+      durationMs,
       userIdHash,
       hadIdempotencyKey,
       replayed,
       errorMessage,
     });
+    // Fire-and-forget telemetry write. We never await — a slow or failing
+    // insert must not delay or alter the caller's response. Skipped for
+    // preflight and for the rare path where adminClient was never built
+    // (only the 413 / 500 catch block before init).
+    if (adminClientRef && outcome !== "preflight") {
+      const decision = lastLimiterDecision;
+      adminClientRef
+        .from("redemption_events")
+        .insert({
+          request_id: requestId,
+          outcome,
+          decision: decision?.decision ?? null,
+          reason: decision?.reason ?? null,
+          status: response.status,
+          duration_ms: durationMs,
+          user_id_hash: userIdHash,
+          tenant_id_hash: tenantIdHash,
+          access_code_id_hash: decision?.accessCodeIdHash ?? null,
+          had_idempotency_key: hadIdempotencyKey,
+          replayed,
+          used_count: decision?.usedCount ?? null,
+          max_uses: decision?.maxUses ?? null,
+          error_message: errorMessage ?? null,
+        })
+        .then(({ error }) => {
+          if (error) console.warn("redemption_events insert failed:", error.message);
+        });
+    }
     // Echo the request id so callers can correlate client + server logs.
     response.headers.set("x-request-id", requestId);
     return response;
@@ -250,7 +306,7 @@ export async function handleRedeemAccessCodeRequest(req: Request): Promise<Respo
     const MAX_BODY_SIZE = 50 * 1024;
     const contentLength = parseInt(req.headers.get("content-length") || "0", 10);
     if (contentLength > MAX_BODY_SIZE) {
-      logLimiterDecision({
+      logDecision({
         requestId,
         decision: "reject",
         reason: "request_too_large",
@@ -265,13 +321,14 @@ export async function handleRedeemAccessCodeRequest(req: Request): Promise<Respo
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
+    adminClientRef = adminClient;
 
     // Authenticate the calling user via the shared helper. This guarantees a
     // bounded getClaims() timeout, so a slow auth path returns 401 fast
     // instead of letting the gateway respond with 504.
     const authResult = await verifyBearer(req, { timeoutMs: 5_000 });
     if (!authResult.ok) {
-      logLimiterDecision({
+      logDecision({
         requestId,
         decision: "reject",
         reason: "not_authenticated",
@@ -301,7 +358,7 @@ export async function handleRedeemAccessCodeRequest(req: Request): Promise<Respo
     if (rawKey !== null && rawKey !== undefined && rawKey !== "") {
       hadIdempotencyKey = true;
       if (!isValidIdempotencyKey(rawKey)) {
-        logLimiterDecision({
+        logDecision({
           requestId,
           decision: "reject",
           reason: "invalid_idempotency_key",
@@ -333,7 +390,7 @@ export async function handleRedeemAccessCodeRequest(req: Request): Promise<Respo
       if (cached) {
         replayed = true;
         const cachedStatus = cached.response_status as number;
-        logLimiterDecision({
+        logDecision({
           requestId,
           // Replays surface the previously-decided outcome verbatim. A 2xx
           // cached row means the original call was allowed; anything else
@@ -372,7 +429,7 @@ export async function handleRedeemAccessCodeRequest(req: Request): Promise<Respo
     };
 
     if (!code || code.length < 3 || code.length > 50) {
-      logLimiterDecision({
+      logDecision({
         requestId,
         decision: "reject",
         reason: "invalid_code_format",
@@ -396,7 +453,7 @@ export async function handleRedeemAccessCodeRequest(req: Request): Promise<Respo
       .maybeSingle();
 
     if (!tenantUser) {
-      logLimiterDecision({
+      logDecision({
         requestId,
         decision: "reject",
         reason: "missing_workspace",
@@ -412,7 +469,7 @@ export async function handleRedeemAccessCodeRequest(req: Request): Promise<Respo
       );
     }
 
-    const tenantIdHash = shortHash(tenantUser.tenant_id);
+    tenantIdHash = shortHash(tenantUser.tenant_id);
 
     // Look up the access code by hash via SECURITY DEFINER RPC.
     // Plaintext is never stored, only SHA-256 hash. Service role required.
@@ -438,7 +495,7 @@ export async function handleRedeemAccessCodeRequest(req: Request): Promise<Respo
       usedCount?: number | null;
       maxUses?: number | null;
     }) => {
-      logLimiterDecision({
+      logDecision({
         requestId,
         decision: "reject",
         reason,
@@ -520,7 +577,7 @@ export async function handleRedeemAccessCodeRequest(req: Request): Promise<Respo
       return await respondInvalid("atomic_claim_lost_race", codeCtx);
     }
 
-    logLimiterDecision({
+    logDecision({
       requestId,
       decision: "allow",
       reason: "ok",

@@ -36,6 +36,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useImpersonation } from "@/contexts/ImpersonationContext";
 import AccessCodesPanel from "@/components/dashboard/AccessCodesPanel";
+import RedemptionMetricsPanel from "@/components/dashboard/RedemptionMetricsPanel";
 import BetaFeedbackPanel from "@/components/dashboard/BetaFeedbackPanel";
 import SuperadminLoginHistory from "@/components/dashboard/SuperadminLoginHistory";
 import { CIStatusBadges } from "@/components/superadmin/CIStatusBadges";
@@ -477,6 +478,10 @@ const Superadmin = () => {
 
         {/* Access Codes */}
         <AccessCodesPanel />
+
+        {/* Redemption Metrics (last 24h by default) */}
+        <RedemptionMetricsPanel />
+
 
         {/* Login History */}
         <SuperadminLoginHistory />

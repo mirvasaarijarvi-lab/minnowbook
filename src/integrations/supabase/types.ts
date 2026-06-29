@@ -1365,6 +1365,63 @@ export type Database = {
           },
         ]
       }
+      redemption_events: {
+        Row: {
+          access_code_id_hash: string | null
+          created_at: string
+          decision: string | null
+          duration_ms: number | null
+          error_message: string | null
+          had_idempotency_key: boolean
+          id: string
+          max_uses: number | null
+          outcome: string
+          reason: string | null
+          replayed: boolean
+          request_id: string
+          status: number
+          tenant_id_hash: string | null
+          used_count: number | null
+          user_id_hash: string | null
+        }
+        Insert: {
+          access_code_id_hash?: string | null
+          created_at?: string
+          decision?: string | null
+          duration_ms?: number | null
+          error_message?: string | null
+          had_idempotency_key?: boolean
+          id?: string
+          max_uses?: number | null
+          outcome: string
+          reason?: string | null
+          replayed?: boolean
+          request_id: string
+          status: number
+          tenant_id_hash?: string | null
+          used_count?: number | null
+          user_id_hash?: string | null
+        }
+        Update: {
+          access_code_id_hash?: string | null
+          created_at?: string
+          decision?: string | null
+          duration_ms?: number | null
+          error_message?: string | null
+          had_idempotency_key?: boolean
+          id?: string
+          max_uses?: number | null
+          outcome?: string
+          reason?: string | null
+          replayed?: boolean
+          request_id?: string
+          status?: number
+          tenant_id_hash?: string | null
+          used_count?: number | null
+          user_id_hash?: string | null
+        }
+        Relationships: []
+      }
       redemption_idempotency: {
         Row: {
           created_at: string
@@ -3247,6 +3304,7 @@ export type Database = {
       }
       cleanup_old_audit_logs: { Args: never; Returns: undefined }
       cleanup_old_booking_validation_logs: { Args: never; Returns: undefined }
+      cleanup_old_redemption_events: { Args: never; Returns: undefined }
       cleanup_storage_rejection_telemetry: { Args: never; Returns: undefined }
       copy_tenant_defaults_to_site: {
         Args: { p_site_id: string; p_tenant_id: string }
@@ -3317,6 +3375,7 @@ export type Database = {
           tenant_id: string
         }[]
       }
+      get_redemption_metrics_24h: { Args: { p_hours?: number }; Returns: Json }
       get_tenant_ical_feed_token: {
         Args: { p_tenant_id: string }
         Returns: string
