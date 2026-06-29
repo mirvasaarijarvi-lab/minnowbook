@@ -229,6 +229,40 @@ jobs:
           fi
           echo "::endgroup::"
 
+          # Stale named volumes (supabase_db_*, supabase_storage_*, etc.)
+          # keep Postgres datadirs alive across runs. If a previous run
+          # crashed mid-boot, the leftover datadir can resurrect Postgres
+          # the moment a new container attaches and pin :54322 before our
+          # supabase start gets there. Prune them up front.
+          echo "::group::Remove stale supabase docker volumes"
+          stale_vols=$(docker volume ls -q --filter "name=supabase_" 2>/dev/null)
+          if [ -n "$stale_vols" ]; then
+            echo "Removing volumes:"
+            echo "$stale_vols"
+            echo "$stale_vols" | xargs -r docker volume rm -f 2>&1 || true
+          else
+            echo "(no supabase_* volumes found)"
+          fi
+          # Sweep dangling volumes too (orphaned anonymous datadirs).
+          docker volume prune -f 2>&1 || true
+          echo "::endgroup::"
+
+          # Custom user-defined networks from prior compose stacks can
+          # retain IPAM bindings that confuse port allocation; drop any
+          # network whose name starts with supabase_ plus any dangling
+          # ones.
+          echo "::group::Remove stale supabase docker networks"
+          stale_nets=$(docker network ls -q --filter "name=supabase_" 2>/dev/null)
+          if [ -n "$stale_nets" ]; then
+            echo "Removing networks:"
+            docker network ls --filter "name=supabase_" --format '{{.ID}}\t{{.Name}}' 2>/dev/null || true
+            echo "$stale_nets" | xargs -r -n1 docker network rm 2>&1 || true
+          else
+            echo "(no supabase_* networks found)"
+          fi
+          docker network prune -f 2>&1 || true
+          echo "::endgroup::"
+
           # Give the kernel a moment to release the sockets (TIME_WAIT).
           sleep 2
 
