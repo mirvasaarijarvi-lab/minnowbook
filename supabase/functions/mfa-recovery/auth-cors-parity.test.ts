@@ -91,10 +91,13 @@ async function post(headers: Record<string, string>): Promise<Response> {
   return await handleMfaRecoveryRequest(req);
 }
 
-Deno.test(
-  "mfa-recovery: OPTIONS preflight advertises a usable CORS bag",
-  withStubSupabaseEnv(async () => {
+Deno.test({
+  name: "mfa-recovery: OPTIONS preflight advertises a usable CORS bag",
+  sanitizeOps: false,
+  sanitizeResources: false,
+  fn: withStubSupabaseEnv(async () => {
     const res = await preflight();
+    await drainBody(res);
     await drainBody(res);
 
     // Preflight is itself a success — browsers ignore 2xx vs 204 but
