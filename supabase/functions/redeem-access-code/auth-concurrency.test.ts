@@ -114,8 +114,9 @@ Deno.test({
       );
 
       // 4. Security headers must be present on the fast-fail path
-      //    too — a regression here would weaken the CSP/HSTS floor
+      //    too. A regression here would weaken the CSP/HSTS floor
       //    specifically for unauthenticated traffic.
+
       assertSharedHeaders(res, `burst #${i}`);
       assertCspAndHsts(res, `burst #${i}`);
 
