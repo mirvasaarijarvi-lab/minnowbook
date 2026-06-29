@@ -207,7 +207,41 @@ jobs:
         # (a stale quarantine entry is worse than no quarantine).
         run: node scripts/ci/check-quarantine.mjs
 
+      # Probe /auth/v1/health AND /rest/v1/ before vitest runs. ~130 of the
+      # `src/test/security/*.test.ts` cases open an anon Supabase client at
+      # module load and each one hits a 5s testTimeout if PostgREST is down,
+      # which silently burns ~10 minutes with no actionable signal. Failing
+      # fast here surfaces the real cause (project paused, egress block,
+      # rest layer restarting) at the top of the log.
+      - name: Supabase reachability preflight
+        env:
+          PREFLIGHT_URL: ${{ env.VITE_SUPABASE_URL }}
+          PREFLIGHT_KEY: ${{ env.VITE_SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          set -u
+          if [ -z "${PREFLIGHT_URL:-}" ] || [ -z "${PREFLIGHT_KEY:-}" ]; then
+            echo "::warning::Skipping reachability preflight (URL or anon key not exported)."
+            exit 0
+          fi
+          base="${PREFLIGHT_URL%/}"
+          auth_status=$(curl -m 10 -sS -o /dev/null -w "%{http_code}" \
+            -H "apikey: $PREFLIGHT_KEY" "$base/auth/v1/health" || echo "000")
+          rest_status=$(curl -m 10 -sS -o /dev/null -w "%{http_code}" \
+            -H "apikey: $PREFLIGHT_KEY" \
+            -H "Authorization: Bearer $PREFLIGHT_KEY" "$base/rest/v1/" || echo "000")
+          echo "auth=$auth_status rest=$rest_status"
+          auth_ok=0; rest_ok=0
+          case "$auth_status" in 200|401) auth_ok=1 ;; esac
+          case "$rest_status" in 200|401|404) rest_ok=1 ;; esac
+          if [ "$auth_ok" = "1" ] && [ "$rest_ok" = "1" ]; then
+            echo "✅ Supabase reachable (auth=$auth_status rest=$rest_status)"
+            exit 0
+          fi
+          echo "::error title=Supabase unreachable::auth=$auth_status rest=$rest_status — live security suites would each hit 5s testTimeout. Check that the project is not paused and that the runner has egress to *.supabase.co."
+          exit 1
+
       - name: Vitest (initial)
+
         id: vitest
         env:
           SUPABASE_URL: ${{ env.SUPABASE_URL }}
