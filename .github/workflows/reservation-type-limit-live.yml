@@ -220,10 +220,13 @@ jobs:
         continue-on-error: true
         run: |
           set -uo pipefail
+          mkdir -p /tmp/supabase-diag
+          LOG=/tmp/supabase-diag/supabase-start.log
           # `supabase start` will pull on demand; trigger it briefly then
           # stop so subsequent `start` is fast. If this times out or fails,
           # downstream steps are skipped via outcome checks below.
-          supabase start --exclude=imgproxy,mailpit,studio,realtime,edge-runtime &
+          # Tee output to a log so the failure diagnostics step can dump it.
+          ( supabase start --exclude=imgproxy,mailpit,studio,realtime,edge-runtime --debug 2>&1 | tee -a "$LOG" ) &
           START_PID=$!
           # Wait up to the step timeout for either readiness or completion.
           for i in $(seq 1 420); do
@@ -233,7 +236,11 @@ jobs:
             fi
             if ! kill -0 "$START_PID" 2>/dev/null; then
               wait "$START_PID"
-              exit $?
+              rc=$?
+              echo "::error::supabase start exited with code ${rc} during pre-pull"
+              echo "----- supabase start log (tail 200) -----"
+              tail -n 200 "$LOG" || true
+              exit $rc
             fi
             sleep 1
           done
@@ -254,6 +261,7 @@ jobs:
           supabase start --exclude=imgproxy,mailpit,studio,realtime,edge-runtime || true
 
       - name: Wait for PostgREST API
+        id: wait-postgrest
         if: steps.supabase-start.outcome == 'success'
         run: |
           set -uo pipefail
@@ -264,8 +272,70 @@ jobs:
             fi
             sleep 1
           done
-          echo "::error::PostgREST never came up"
+          echo "::error::PostgREST never came up after 60s"
+          echo "::group::curl -v http://127.0.0.1:54321/rest/v1/"
+          curl -v --max-time 5 "http://127.0.0.1:54321/rest/v1/" 2>&1 || true
+          echo "::endgroup::"
           exit 1
+
+      # Always-on diagnostics: if any readiness step failed, dump everything
+      # we know about the supabase stack so the failure is debuggable from
+      # the GitHub Actions log alone (no need to repro locally).
+      - name: Diagnostics on readiness failure
+        if: failure() && steps.docker-check.outputs.available == 'true' && steps.supabase-cli.outcome == 'success'
+        run: |
+          set +e
+          echo "::group::supabase status"
+          supabase status 2>&1 || true
+          echo "::endgroup::"
+
+          echo "::group::supabase start log (full)"
+          if [ -f /tmp/supabase-diag/supabase-start.log ]; then
+            cat /tmp/supabase-diag/supabase-start.log
+          else
+            echo "(no log captured)"
+          fi
+          echo "::endgroup::"
+
+          echo "::group::docker ps -a"
+          docker ps -a 2>&1 || true
+          echo "::endgroup::"
+
+          echo "::group::docker container logs (supabase_*)"
+          for c in $(docker ps -a --filter "name=supabase_" --format '{{.Names}}' 2>/dev/null); do
+            echo "----- $c (last 200 lines) -----"
+            docker logs --tail 200 "$c" 2>&1 || true
+            echo "----- $c inspect (State) -----"
+            docker inspect --format '{{json .State}}' "$c" 2>&1 || true
+          done
+          echo "::endgroup::"
+
+          echo "::group::Listening ports (54321-54328)"
+          if command -v lsof >/dev/null 2>&1; then
+            sudo lsof -iTCP -sTCP:LISTEN -P -n 2>&1 | grep -E ':(5432[1-8])' || echo "(no listeners on Supabase ports)"
+          fi
+          ss -lntp 2>&1 | grep -E ':(5432[1-8])' || true
+          echo "::endgroup::"
+
+          echo "::group::Host processes (top by cpu)"
+          ps auxf --sort=-pcpu 2>&1 | head -n 60 || ps aux | head -n 60
+          echo "::endgroup::"
+
+          echo "::group::Disk + memory"
+          df -h 2>&1 || true
+          free -h 2>&1 || true
+          echo "::endgroup::"
+
+          echo "::group::curl probes"
+          for url in \
+            "http://127.0.0.1:54321/rest/v1/" \
+            "http://127.0.0.1:54321/auth/v1/health" \
+            "http://127.0.0.1:54322/"; do
+            echo "----- $url -----"
+            curl -v --max-time 5 "$url" 2>&1 || true
+          done
+          echo "::endgroup::"
+          exit 0
 
       - name: Resolve local Supabase keys
         id: keys
