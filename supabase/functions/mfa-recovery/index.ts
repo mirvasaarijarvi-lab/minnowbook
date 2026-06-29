@@ -51,6 +51,23 @@ export const handleMfaRecoveryRequest = async (req: Request): Promise<Response> 
   const startedAt = Date.now();
   const elapsed = () => Date.now() - startedAt;
 
+  // Echo the request id on every response (including 401/4xx/5xx and the
+  // CORS preflight) and expose it to browser JS so the client can quote
+  // it in bug reports / surface it in toast errors and we can grep the
+  // structured logs for the matching `request_id`.
+  const existingExpose = corsHeaders["Access-Control-Expose-Headers"];
+  corsHeaders["x-request-id"] = requestId;
+  corsHeaders["Access-Control-Expose-Headers"] = existingExpose
+    ? `${existingExpose}, x-request-id`
+    : "x-request-id";
+
+  // Build a JSON error body that always carries the request id so clients
+  // can correlate failures with server logs even when they can't read
+  // response headers (some fetch wrappers strip them).
+  const errorBody = (error: string, code: string | null = null) =>
+    JSON.stringify(code ? { error, code, request_id: requestId } : { error, request_id: requestId });
+
+
   /**
    * Canonical structured-log schema for this function. Every emitted
    * line MUST include these fields so downstream log search / alerting
