@@ -127,17 +127,15 @@ export type AuthContext = {
 function unauthorized(
   corsHeaders: Record<string, string>,
   opts: RequireAuthOptions,
+  requestId?: string,
 ): Response {
-  return new Response(
-    JSON.stringify({
-      error: opts.errorCode ?? "NOT_AUTHENTICATED",
-      message: opts.errorMessage ?? "Not authenticated",
-    }),
-    {
-      status: 401,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    },
-  );
+  return errorResponse({
+    status: 401,
+    code: opts.errorCode ?? ErrorCodes.NOT_AUTHENTICATED,
+    message: opts.errorMessage ?? "Not authenticated",
+    corsHeaders,
+    requestId,
+  });
 }
 
 /**
