@@ -179,43 +179,14 @@ function withMalformedEnvAndStub(
   };
 }
 
-async function loadHandler(name: string, exportName: string): Promise<Handler> {
-  const mod = await import(`../${name}/index.ts`);
-  const handler = mod[exportName] as Handler | undefined;
-  assert(typeof handler === "function", `${name}: missing export ${exportName}`);
-  return handler;
-}
-
-async function assertFast401(name: string, handler: Handler, scenario: string) {
-  const req = new Request(`https://example.test/${name}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Origin: "https://mimmobook.com" },
-    body: "{}",
-  });
-
-  const started = performance.now();
-  const res = await handler(req);
-  const elapsed = performance.now() - started;
-  const body = await res.text();
-
-  assertEquals(
-    res.status,
-    401,
-    `${name} (${scenario}): expected 401, got ${res.status}; body=${body.slice(0, 200)}`,
-  );
-  assert(
-    elapsed < BUDGET_MS,
-    `${name} (${scenario}): took ${elapsed.toFixed(0)}ms (>${BUDGET_MS}ms budget)`,
-  );
-  try {
-    JSON.parse(body);
-  } catch {
-    throw new Error(
-      `${name} (${scenario}): 401 body is not JSON, suggesting the handler ` +
-        `threw before reaching its auth branch. raw=${body.slice(0, 200)}`,
-    );
-  }
-}
+// Per-handler 401 invocation uses the shared `assertFastJson401`
+// helper so timing budget + JSON-body guard stay byte-identical across
+// every auth contract suite. See assert-fast-401.ts.
+import {
+  assertFastJson401,
+  buildUnauthenticatedProbe,
+  loadAuthHandler,
+} from "./assert-fast-401.ts";
 
 // Cover the two highest-signal variants (single space and mixed
 // whitespace) for every handler. The helper-contract tests above
@@ -234,9 +205,12 @@ for (const { name, exportName } of AUTH_ENFORCED) {
       sanitizeOps: false,
       sanitizeResources: false,
       fn: withMalformedEnvAndStub(value, async () => {
-        const handler = await loadHandler(name, exportName);
-        await assertFast401(name, handler, label);
+        const handler = await loadAuthHandler(name, exportName);
+        await assertFastJson401(handler, buildUnauthenticatedProbe(name), {
+          label: `${name} / ${label}`,
+        });
       }),
     });
   }
 }
+
