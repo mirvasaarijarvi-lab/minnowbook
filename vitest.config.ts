@@ -28,6 +28,17 @@ export default defineConfig({
     },
     // Don't wait forever on a stuck afterAll/afterEach hook.
     teardownTimeout: 10_000,
+    // Many security regression suites hit the live Supabase project over
+    // the public network (anon-client RLS probes, PostgREST count leaks,
+    // cross-tenant log isolation). The default 5s per-test timeout is too
+    // tight when the runner's egress to Supabase is even slightly slow:
+    // a single TCP/TLS handshake + first PostgREST response can eat 3-4s
+    // by itself, and any retry blows the budget. Bumping to 30s keeps
+    // local runs snappy (fast tests still finish in ms) while preventing
+    // an entire CI run from being declared a "real regression" purely
+    // because of network latency to the live project.
+    testTimeout: 30_000,
+    hookTimeout: 30_000,
     // Belt-and-braces: if a test still leaves a handle open after teardown,
     // surface it as a hard failure instead of an indefinite hang. Vitest
     // will print the offending handle and exit non-zero.
