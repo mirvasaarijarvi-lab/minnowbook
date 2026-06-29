@@ -68,8 +68,19 @@ Deno.test("auth-enforced edge functions short-circuit before createClient(...)",
     const src = raw
       .replace(/\/\*[\s\S]*?\*\//g, "")
       .replace(/(^|[^:])\/\/[^\n]*/g, "$1");
-    const createIdx = firstIndex(src, /\bcreateClient\s*\(/);
+    // Find the first IMMEDIATE createClient call — skip occurrences wrapped in
+    // a lambda/factory like `() => createClient(...)` or `function(){return createClient(...)}`
+    // because those are deferred until after requireAuth runs.
+    const createRe = /\bcreateClient\s*\(/g;
+    let createIdx = -1;
+    for (let m: RegExpExecArray | null; (m = createRe.exec(src)); ) {
+      const lookbehind = src.slice(Math.max(0, m.index - 40), m.index);
+      if (/=>\s*$|function[^{]*\{[^}]*$|return\s+$/.test(lookbehind)) continue;
+      createIdx = m.index;
+      break;
+    }
     if (createIdx === -1) continue;
+
 
 
     const authIdx = firstMatch(src, AUTH_PATTERNS);
