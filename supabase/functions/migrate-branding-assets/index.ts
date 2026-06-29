@@ -39,12 +39,22 @@ function assertSafeStoragePath(path: string): string {
 export async function handleMigrateBrandingAssetsRequest(req: Request): Promise<Response> {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
+  // Auth-header presence check FIRST so a missing/empty
+  // SUPABASE_SERVICE_ROLE_KEY (or any Supabase env) can never turn an
+  // expected 401 into an accidental 500 via `createClient` throwing.
+  const authHeader = req.headers.get("Authorization") ?? "";
+  if (!authHeader.startsWith("Bearer ") || authHeader.slice("Bearer ".length).trim() === "") {
+    return new Response(JSON.stringify({ error: "Unauthenticated" }), {
+      status: 401,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
   const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
   const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
 
   // Authenticate caller and require system_admin.
-  const authHeader = req.headers.get("Authorization") ?? "";
   const userClient = createClient(SUPABASE_URL, ANON_KEY, {
     global: { headers: { Authorization: authHeader } },
   });

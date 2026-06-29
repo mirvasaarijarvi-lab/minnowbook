@@ -318,14 +318,12 @@ export async function handleRedeemAccessCodeRequest(req: Request): Promise<Respo
       );
     }
 
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const adminClient = createClient(supabaseUrl, serviceRoleKey);
-    adminClientRef = adminClient;
-
-    // Authenticate the calling user via the shared helper. This guarantees a
-    // bounded getClaims() timeout, so a slow auth path returns 401 fast
-    // instead of letting the gateway respond with 504.
+    // Authenticate the calling user via the shared helper FIRST. This
+    // guarantees a bounded getClaims() timeout (slow auth path returns
+    // 401 instead of a gateway 504), AND keeps us out of `createClient`
+    // until we know the request is legitimate — so a missing/empty
+    // SUPABASE_SERVICE_ROLE_KEY can never turn an expected 401 into an
+    // accidental 500.
     const authResult = await verifyBearer(req, { timeoutMs: 5_000 });
     if (!authResult.ok) {
       logDecision({
@@ -342,6 +340,11 @@ export async function handleRedeemAccessCodeRequest(req: Request): Promise<Respo
     const { userId, userClient } = authResult;
     void userClient;
     userIdHash = shortHash(userId);
+
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const adminClient = createClient(supabaseUrl, serviceRoleKey);
+    adminClientRef = adminClient;
 
 
     const body = await req.json();

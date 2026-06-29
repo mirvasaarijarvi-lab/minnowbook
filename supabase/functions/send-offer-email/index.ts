@@ -157,8 +157,15 @@ export async function handleSendOfferEmailRequest(req: Request): Promise<Respons
   }
 
   try {
+    // Auth-header presence check FIRST so a missing/empty
+    // SUPABASE_SERVICE_ROLE_KEY can never turn an expected 401 into an
+    // accidental 500 via `createClient` throwing.
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
+    if (!authHeader?.startsWith("Bearer ")) {
+      return jsonResponse({ error: "Unauthorized" }, 401);
+    }
+    const token = authHeader.slice("Bearer ".length).trim();
+    if (!token) {
       return jsonResponse({ error: "Unauthorized" }, 401);
     }
 
@@ -166,7 +173,6 @@ export async function handleSendOfferEmailRequest(req: Request): Promise<Respons
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
-    const token = authHeader.replace("Bearer ", "");
     const {
       data: { user },
     } = await supabaseAdmin.auth.getUser(token);
