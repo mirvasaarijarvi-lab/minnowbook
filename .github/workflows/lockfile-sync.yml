@@ -24,7 +24,7 @@ jobs:
   verify-package-lock:
     name: package-lock.json is in sync with package.json
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 8
     permissions:
       contents: read
     steps:
@@ -43,6 +43,10 @@ jobs:
       - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
         with:
           node-version: 22
+          # Reuse the npm HTTP cache between runs so the regenerate
+          # step below doesn't fight cold registry latency, which is
+          # the most common cause of spurious timeouts on this gate.
+          cache: 'npm'
 
       - name: Regenerate package-lock.json
         run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund

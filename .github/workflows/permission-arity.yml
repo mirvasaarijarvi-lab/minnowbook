@@ -36,6 +36,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+          # Cache npm so the optional `pg` install on live-DB runs
+          # is served from a warm cache instead of a cold registry
+          # fetch, which has been a source of intermittent hangs.
+          cache: 'npm'
 
       # Optional: install pg only if a DB URL is provided. Without it,
       # the script self-skips the live probe and still enforces the
