@@ -38,6 +38,7 @@ export const LIVE_SECURITY_TESTS: string[] = [
   "src/test/security/code-redemption-authorized-concurrency.test.ts",
   "src/test/security/code-redemption-concurrency.test.ts",
   "src/test/security/code-redemption-cross-tenant.test.ts",
+  "src/test/security/code-redemption-e2e-rate-limit.test.ts",
   "src/test/security/code-redemption-idempotency.test.ts",
   "src/test/security/code-redemption-rate-limit.test.ts",
   "src/test/security/code-redemption-same-idem-key-concurrency.test.ts",
