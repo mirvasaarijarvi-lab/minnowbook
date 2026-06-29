@@ -469,7 +469,7 @@ export async function handleRedeemAccessCodeRequest(req: Request): Promise<Respo
       );
     }
 
-    const tenantIdHash = shortHash(tenantUser.tenant_id);
+    tenantIdHash = shortHash(tenantUser.tenant_id);
 
     // Look up the access code by hash via SECURITY DEFINER RPC.
     // Plaintext is never stored, only SHA-256 hash. Service role required.
