@@ -289,7 +289,7 @@ jobs:
       - name: Pre-pull Supabase images
         id: supabase-pull
         if: steps.docker-check.outputs.available == 'true' && steps.supabase-cli.outcome == 'success'
-        timeout-minutes: 8
+        timeout-minutes: 15
         continue-on-error: true
         run: |
           set -uo pipefail
@@ -301,8 +301,9 @@ jobs:
           # Tee output to a log so the failure diagnostics step can dump it.
           ( supabase start --exclude=imgproxy,mailpit,studio,realtime,edge-runtime --debug 2>&1 | tee -a "$LOG" ) &
           START_PID=$!
-          # Wait up to the step timeout for either readiness or completion.
-          for i in $(seq 1 420); do
+          # Wait up to ~14 min for readiness; Docker Hub pulls on cold
+          # runners regularly exceed the previous 7 min budget.
+          for i in $(seq 1 840); do
             if curl -sf "http://127.0.0.1:54321/rest/v1/" >/dev/null 2>&1; then
               echo "Supabase ready after ${i}s during pre-pull"
               exit 0
