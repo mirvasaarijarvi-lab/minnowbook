@@ -8,6 +8,19 @@ const logStep = (step: string, details?: any) => {
   console.log(`[CHECK-SUBSCRIPTION] ${step}${d}`);
 };
 
+// Wrap any promise with a timeout so a hung upstream (Stripe/auth) cannot
+// exceed the edge function's 150s idle budget.
+function withTimeout<T>(p: Promise<T>, ms: number, label: string): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const t = setTimeout(() => reject(new Error(`${label} timed out after ${ms}ms`)), ms);
+    p.then(
+      (v) => { clearTimeout(t); resolve(v); },
+      (e) => { clearTimeout(t); reject(e); },
+    );
+  });
+}
+
+
 // Map Stripe price IDs to tier names
 const PRICE_TO_TIER: Record<string, string> = {
   // New VAT-inclusive prices (Apr 2026)
