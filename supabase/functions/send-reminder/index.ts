@@ -270,14 +270,13 @@ export async function handleSendReminderRequest(req: Request): Promise<Response>
       });
     }
 
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const adminClient = createClient(supabaseUrl, serviceRoleKey);
-
-    // Authenticate caller. Missing/invalid auth MUST surface as a clean
-    // 401 — previously these threw into the generic catch below, which
-    // returned 400 "Failed to send email" and made client-side retry vs
-    // re-login logic impossible to distinguish.
+    // Authenticate caller FIRST. Missing/invalid auth MUST surface as a
+    // clean 401 — previously these threw into the generic catch below,
+    // which returned 400 "Failed to send email" and made client-side
+    // retry vs re-login logic impossible to distinguish. We also do this
+    // BEFORE constructing any supabase client so that a missing/empty
+    // SUPABASE_SERVICE_ROLE_KEY can never turn an expected 401 into an
+    // accidental 500.
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
       return new Response(
@@ -290,6 +289,10 @@ export async function handleSendReminderRequest(req: Request): Promise<Response>
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
+
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
     const userClient = createClient(supabaseUrl, anonKey, {
