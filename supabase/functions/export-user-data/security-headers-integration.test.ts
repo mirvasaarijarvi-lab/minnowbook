@@ -21,25 +21,23 @@ Deno.test("export-user-data: OPTIONS preflight carries SECURITY_HEADERS", async 
   assertCspAndHsts(res, "OPTIONS preflight");
 });
 
-Deno.test(
-  "export-user-data: 401 missing-auth carries SECURITY_HEADERS",
-  {
-    sanitizeOps: false,
-    sanitizeResources: false,
-    fn: withStubSupabaseEnv(async () => {
-      const req = new Request("https://example.test/export-user-data", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Origin: "https://mimmobook.com",
-        },
-        body: "{}",
-      });
-      const res = await handleExportUserDataRequest(req);
-      await drainBody(res);
-      assertEquals(res.status, 401);
-      assertSharedHeaders(res, "401 missing auth");
-      assertCspAndHsts(res, "401 missing auth");
-    }),
-  },
-);
+Deno.test({
+  name: "export-user-data: 401 missing-auth carries SECURITY_HEADERS",
+  sanitizeOps: false,
+  sanitizeResources: false,
+  fn: withStubSupabaseEnv(async () => {
+    const req = new Request("https://example.test/export-user-data", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Origin: "https://mimmobook.com",
+      },
+      body: "{}",
+    });
+    const res = await handleExportUserDataRequest(req);
+    await drainBody(res);
+    assertEquals(res.status, 401);
+    assertSharedHeaders(res, "401 missing auth");
+    assertCspAndHsts(res, "401 missing auth");
+  }),
+});

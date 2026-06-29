@@ -21,25 +21,23 @@ Deno.test("cancel-account-deletion: OPTIONS preflight carries SECURITY_HEADERS",
   assertCspAndHsts(res, "OPTIONS preflight");
 });
 
-Deno.test(
-  "cancel-account-deletion: 401 missing-auth (no token) carries SECURITY_HEADERS",
-  {
-    sanitizeOps: false,
-    sanitizeResources: false,
-    fn: withStubSupabaseEnv(async () => {
-      const req = new Request("https://example.test/cancel-account-deletion", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Origin: "https://mimmobook.com",
-        },
-        body: "{}",
-      });
-      const res = await handleCancelAccountDeletionRequest(req);
-      await drainBody(res);
-      assertEquals(res.status, 401);
-      assertSharedHeaders(res, "401 missing auth");
-      assertCspAndHsts(res, "401 missing auth");
-    }),
-  },
-);
+Deno.test({
+  name: "cancel-account-deletion: 401 missing-auth (no token) carries SECURITY_HEADERS",
+  sanitizeOps: false,
+  sanitizeResources: false,
+  fn: withStubSupabaseEnv(async () => {
+    const req = new Request("https://example.test/cancel-account-deletion", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Origin: "https://mimmobook.com",
+      },
+      body: "{}",
+    });
+    const res = await handleCancelAccountDeletionRequest(req);
+    await drainBody(res);
+    assertEquals(res.status, 401);
+    assertSharedHeaders(res, "401 missing auth");
+    assertCspAndHsts(res, "401 missing auth");
+  }),
+});
