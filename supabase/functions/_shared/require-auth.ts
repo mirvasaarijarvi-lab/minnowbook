@@ -165,7 +165,7 @@ export async function requireAuth(
       headerLen: authHeader?.length ?? 0,
       elapsedMs: Math.round(performance.now() - startedAt),
     });
-    return unauthorized(corsHeaders, options);
+    return unauthorized(corsHeaders, options, reqId);
   }
 
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
@@ -180,7 +180,7 @@ export async function requireAuth(
       hasAnonKey: Boolean(anonKey),
       hasServiceRoleKey: Boolean(serviceRoleKey),
     });
-    return unauthorized(corsHeaders, options);
+    return unauthorized(corsHeaders, options, reqId);
   }
 
   const userClient = createClient(supabaseUrl, anonKey, {
@@ -189,7 +189,7 @@ export async function requireAuth(
   const token = authHeader.slice("Bearer ".length).trim();
   if (!token) {
     logEvent("warn", "reject", { reqId, caller, reason: "empty_token" });
-    return unauthorized(corsHeaders, options);
+    return unauthorized(corsHeaders, options, reqId);
   }
 
   const shape = tokenShape(token);
@@ -225,7 +225,7 @@ export async function requireAuth(
       verifyMs,
       err: err instanceof Error ? err.message : String(err),
     });
-    return unauthorized(corsHeaders, options);
+    return unauthorized(corsHeaders, options, reqId);
   } finally {
     if (timer !== undefined) clearTimeout(timer);
   }
@@ -244,7 +244,7 @@ export async function requireAuth(
       // input was so broken the SDK never sent the request
       looksLikeJwt: shape.looksLikeJwt,
     });
-    return unauthorized(corsHeaders, options);
+    return unauthorized(corsHeaders, options, reqId);
   }
 
   const { data: claimsData, error: claimsError } = claimsResult;
@@ -261,7 +261,7 @@ export async function requireAuth(
       authErrCode: (claimsError as { code?: string } | null)?.code ?? null,
       authErrStatus: (claimsError as { status?: number } | null)?.status ?? null,
     });
-    return unauthorized(corsHeaders, options);
+    return unauthorized(corsHeaders, options, reqId);
   }
 
   const claims = claimsData.claims as Record<string, unknown>;
@@ -274,7 +274,7 @@ export async function requireAuth(
       tokenFp: fp,
       verifyMs,
     });
-    return unauthorized(corsHeaders, options);
+    return unauthorized(corsHeaders, options, reqId);
   }
 
   const email = typeof claims.email === "string" ? claims.email : null;
