@@ -62,16 +62,15 @@ Deno.test("auth-enforced edge functions short-circuit before createClient(...)",
     if (SKIP.has(name)) continue;
 
     const raw = await Deno.readTextFile(entry.path);
-    // Strip block + line comments and string literals so matches inside
-    // documentation/strings can't trip the audit.
+    // Strip block + line comments so `createClient` / `Authorization` words in
+    // documentation can't trip the audit. String literals are preserved
+    // because the auth patterns intentionally match `"Authorization"`.
     const src = raw
       .replace(/\/\*[\s\S]*?\*\//g, "")
-      .replace(/(^|[^:])\/\/[^\n]*/g, "$1")
-      .replace(/`(?:\\.|[^`\\])*`/g, "``")
-      .replace(/"(?:\\.|[^"\\])*"/g, '""')
-      .replace(/'(?:\\.|[^'\\])*'/g, "''");
+      .replace(/(^|[^:])\/\/[^\n]*/g, "$1");
     const createIdx = firstIndex(src, /\bcreateClient\s*\(/);
     if (createIdx === -1) continue;
+
 
     const authIdx = firstMatch(src, AUTH_PATTERNS);
     if (authIdx === -1) {
