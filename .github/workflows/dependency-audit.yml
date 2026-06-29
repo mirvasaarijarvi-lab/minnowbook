@@ -82,7 +82,10 @@ jobs:
   audit:
     name: dependency-audit
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    # Raised from 8 to 15 minutes: registry walks for `npm audit` /
+    # `pnpm audit` plus the lockfile freshness guard occasionally
+    # cross the old budget when GitHub or npm registry are slow.
+    timeout-minutes: 15
     permissions:
       contents: read
       # Required so the SARIF upload step at the end of the job can
