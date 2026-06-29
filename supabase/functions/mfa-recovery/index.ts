@@ -32,7 +32,14 @@ async function hashCode(code: string): Promise<string> {
  * every error path.
  */
 export const handleMfaRecoveryRequest = async (req: Request): Promise<Response> => {
-  const corsHeaders = getCorsHeaders(req);
+  // Single canonical header bag so the CORS preflight response and
+  // every error path (401, 400, 413, 500, ...) advertise the exact
+  // same Access-Control-Allow-* values. Drift here previously caused
+  // browsers to surface the preflight as "ok" but block the 401
+  // because the headers didn't match.
+  const corsHeaders = getCorsHeaders(req, {
+    allowMethods: "POST, OPTIONS",
+  });
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
