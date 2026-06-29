@@ -1,0 +1,81 @@
+name: Auth Short-Circuit Gate
+
+# Runs the auth-enforced edge function unit tests and fails the build if
+# any function regresses on the missing-Authorization short-circuit
+# contract. Designed to catch the failure mode that previously produced
+# gateway 504s: handlers doing slow upstream work before checking the
+# Authorization header.
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "supabase/functions/**"
+      - ".github/workflows/auth-short-circuit-gate.yml"
+  pull_request:
+    paths:
+      - "supabase/functions/**"
+      - ".github/workflows/auth-short-circuit-gate.yml"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  auth-short-circuit:
+    name: Auth short-circuit (Deno)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+
+    env:
+      DENO_DIR: ${{ github.workspace }}/.deno-cache
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@667a34cdef165d8d2b2e98dde39547c9daac7282 # v2.0.4
+        with:
+          deno-version: v1.x
+
+      - name: Cache Deno modules
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.DENO_DIR }}
+          key: deno-auth-gate-${{ runner.os }}-${{ hashFiles('supabase/functions/_shared/**/*.ts', 'supabase/functions/*/index.ts') }}
+          restore-keys: |
+            deno-auth-gate-${{ runner.os }}-
+            deno-${{ runner.os }}-
+
+      - name: Run auth short-circuit guard test
+        run: |
+          deno test \
+            --allow-net --allow-env --allow-read \
+            supabase/functions/_shared/auth-short-circuit.test.ts \
+            supabase/functions/_shared/require-auth_test.ts
+
+      - name: Step summary
+        if: always()
+        run: |
+          {
+            echo "## Auth Short-Circuit Gate"
+            echo ""
+            echo "Status: **${{ job.status }}**"
+            echo ""
+            echo "This gate verifies that every auth-enforced edge function"
+            echo "returns a 4xx denial within 1500 ms when called without a"
+            echo "valid \`Authorization\` header, *before* doing any slow"
+            echo "upstream work (DB, Stripe, mail, Supabase auth round-trip)."
+            echo ""
+            echo "When this fails, the offending handler is regressing on the"
+            echo "early-return contract. Either route it through"
+            echo "\`requireAuth()\` from \`supabase/functions/_shared/require-auth.ts\`,"
+            echo "or add an inline \`if (!authHeader) return 401\` *before* any"
+            echo "\`await\` that performs network I/O."
+          } >> "$GITHUB_STEP_SUMMARY"
