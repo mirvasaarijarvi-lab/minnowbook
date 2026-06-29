@@ -16,15 +16,28 @@ const RedeemAccessCode = () => {
   const handleRedeem = async () => {
     if (!code.trim()) return;
     setLoading(true);
+    // Idempotency key keeps server-side dedup safe across automatic retries.
+    const idempotencyKey =
+      (globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`);
     try {
-      const { data, error } = await supabase.functions.invoke("redeem-access-code", {
-        body: { code: code.trim().toUpperCase() },
+      const { data, error, attempts } = await invokeWithRetry<{
+        tier?: string;
+        granted_until?: string;
+        error?: string;
+      }>("redeem-access-code", {
+        body: { code: code.trim().toUpperCase(), idempotency_key: idempotencyKey },
+        headers: { "x-idempotency-key": idempotencyKey },
       });
       if (error) {
-        const msg = typeof error === "object" && "message" in error ? error.message : String(error);
-        throw new Error(msg);
+        const msg = typeof error === "object" && error && "message" in error
+          ? (error as { message?: string }).message
+          : String(error);
+        throw new Error(msg || "Redemption failed");
       }
       if (data?.error) throw new Error(data.error);
+      if (attempts > 1) {
+        console.info(`[redeem-access-code] succeeded after ${attempts} attempts`);
+      }
 
       setRedeemed(true);
       queryClient.invalidateQueries({ queryKey: ["tenant-user"] });
