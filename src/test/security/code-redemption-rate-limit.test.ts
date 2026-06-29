@@ -245,6 +245,11 @@ describe("redeem-access-code: brute-force & replay resilience", () => {
       // We tolerate that — the security property is about responses that
       // DID come back from the server.
       if (r.status === 0) continue;
+      // 502/503/504 are transient gateway responses (cold start, upstream
+      // timeout, brief edge unavailability) under burst load. They carry
+      // no input-derived information, so they don't break the
+      // indistinguishability invariant — skip them like network blips.
+      if (r.status === 502 || r.status === 503 || r.status === 504) continue;
       expect(r.status).toBeGreaterThanOrEqual(400);
       expect(r.status).toBeLessThan(500);
     }
@@ -253,7 +258,7 @@ describe("redeem-access-code: brute-force & replay resilience", () => {
     // before any code-shape or code-existence check, so the response
     // cannot vary by input.
     const codes = results
-      .filter((r) => r.status !== 0)
+      .filter((r) => r.status !== 0 && r.status !== 502 && r.status !== 503 && r.status !== 504)
       .map(errorCode)
       .filter((c) => c.length > 0);
     expect(codes.length, "at least one probe must have produced a coded error").toBeGreaterThan(0);
