@@ -245,7 +245,7 @@ export async function handleRedeemAccessCodeRequest(req: Request): Promise<Respo
       usedCount: entry.usedCount ?? null,
       maxUses: entry.maxUses ?? null,
     };
-    logLimiterDecision(entry);
+    logDecision(entry);
   };
 
   const respond = (
@@ -306,7 +306,7 @@ export async function handleRedeemAccessCodeRequest(req: Request): Promise<Respo
     const MAX_BODY_SIZE = 50 * 1024;
     const contentLength = parseInt(req.headers.get("content-length") || "0", 10);
     if (contentLength > MAX_BODY_SIZE) {
-      logLimiterDecision({
+      logDecision({
         requestId,
         decision: "reject",
         reason: "request_too_large",
@@ -328,7 +328,7 @@ export async function handleRedeemAccessCodeRequest(req: Request): Promise<Respo
     // instead of letting the gateway respond with 504.
     const authResult = await verifyBearer(req, { timeoutMs: 5_000 });
     if (!authResult.ok) {
-      logLimiterDecision({
+      logDecision({
         requestId,
         decision: "reject",
         reason: "not_authenticated",
@@ -358,7 +358,7 @@ export async function handleRedeemAccessCodeRequest(req: Request): Promise<Respo
     if (rawKey !== null && rawKey !== undefined && rawKey !== "") {
       hadIdempotencyKey = true;
       if (!isValidIdempotencyKey(rawKey)) {
-        logLimiterDecision({
+        logDecision({
           requestId,
           decision: "reject",
           reason: "invalid_idempotency_key",
@@ -390,7 +390,7 @@ export async function handleRedeemAccessCodeRequest(req: Request): Promise<Respo
       if (cached) {
         replayed = true;
         const cachedStatus = cached.response_status as number;
-        logLimiterDecision({
+        logDecision({
           requestId,
           // Replays surface the previously-decided outcome verbatim. A 2xx
           // cached row means the original call was allowed; anything else
@@ -429,7 +429,7 @@ export async function handleRedeemAccessCodeRequest(req: Request): Promise<Respo
     };
 
     if (!code || code.length < 3 || code.length > 50) {
-      logLimiterDecision({
+      logDecision({
         requestId,
         decision: "reject",
         reason: "invalid_code_format",
@@ -453,7 +453,7 @@ export async function handleRedeemAccessCodeRequest(req: Request): Promise<Respo
       .maybeSingle();
 
     if (!tenantUser) {
-      logLimiterDecision({
+      logDecision({
         requestId,
         decision: "reject",
         reason: "missing_workspace",
@@ -495,7 +495,7 @@ export async function handleRedeemAccessCodeRequest(req: Request): Promise<Respo
       usedCount?: number | null;
       maxUses?: number | null;
     }) => {
-      logLimiterDecision({
+      logDecision({
         requestId,
         decision: "reject",
         reason,
@@ -577,7 +577,7 @@ export async function handleRedeemAccessCodeRequest(req: Request): Promise<Respo
       return await respondInvalid("atomic_claim_lost_race", codeCtx);
     }
 
-    logLimiterDecision({
+    logDecision({
       requestId,
       decision: "allow",
       reason: "ok",
