@@ -32,7 +32,10 @@ jobs:
   leak-check:
     name: Verify no leftover CI rows
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    # Raised from 5 to 10 minutes: cold Bun setup + Supabase
+    # round-trip can briefly exceed the old budget when the
+    # Supabase project is cold or under load.
+    timeout-minutes: 10
     permissions:
       contents: read
 
@@ -42,6 +45,15 @@ jobs:
 
       - name: Setup Bun
         uses: ./.github/actions/setup-bun-with-diagnostics
+
+      - name: Cache Bun dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock', 'bun.lockb', 'package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
 
       - name: Install minimal deps
         run: bun install --frozen-lockfile
