@@ -17,6 +17,14 @@
 //      --allow-read supabase/functions/_shared/auth-short-circuit.test.ts`.
 
 import { assert, assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
+
+// Many index.ts modules call `Deno.serve(handler)` at top-level. Importing
+// more than one in the same test process would collide on the default
+// listen port. Stub Deno.serve to a no-op *before* importing any handler.
+// deno-lint-ignore no-explicit-any
+(Deno as any).serve = (_handler: unknown) =>
+  ({ finished: Promise.resolve(), shutdown: () => Promise.resolve() }) as any;
+
 import { withStubSupabaseEnv } from "./test-security-headers.ts";
 
 import { handleAdminUsersRequest } from "../admin-users/index.ts";
