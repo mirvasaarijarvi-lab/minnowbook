@@ -202,8 +202,12 @@ export const handleMfaRecoveryRequest = async (req: Request): Promise<Response> 
       log("error", "auth_getuser_timeout", "AUTH_TIMEOUT", {
         message: (timeoutErr as Error).message,
       });
+      // Treat an auth-backend timeout as an authentication failure: the
+      // client can't proceed without a verified session, and returning a
+      // fast 401 (rather than 504) lets the browser surface the standard
+      // "please sign in again" flow without a long spinner.
       return new Response(errorBody("Auth check timed out", "AUTH_TIMEOUT"), {
-        status: 504,
+        status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
