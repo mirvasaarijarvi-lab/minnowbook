@@ -239,20 +239,30 @@ jobs:
       # free. If anything is still bound, fail HERE with a clear, actionable
       # listing rather than letting `supabase start` die with an opaque
       # "address already in use" error several minutes later.
+      # Diagnostic-only: log which Supabase ports are still bound after
+      # the best-effort cleanup, but DO NOT fail the job. `supabase start`
+      # below retries with exponential backoff for ~10 minutes and prints
+      # the real conflict (with PID + container info) when it can't bind,
+      # which is a far more actionable signal than a 25s preflight abort.
+      # Aborting here was producing false negatives whenever a transient
+      # holder (e.g. an unrelated docker container with an overlapping
+      # publish range) showed up between the cleanup and this check.
       - name: Verify Supabase ports are free
         if: steps.docker-check.outputs.available == 'true' && steps.supabase-cli.outcome == 'success'
+        continue-on-error: true
+        shell: bash {0}
         run: |
-          set -uo pipefail
+          set +e
           PORTS="54321 54322 54323 54324 54327 54328"
           if ! command -v lsof >/dev/null 2>&1; then
             sudo apt-get install -y --no-install-recommends lsof >/dev/null 2>&1 || true
           fi
           occupied=""
-          echo "::group::Port availability check"
+          echo "::group::Port availability check (diagnostic only)"
           for port in $PORTS; do
             holders=$(sudo lsof -nP -iTCP:"$port" -sTCP:LISTEN 2>/dev/null)
             if [ -n "$holders" ]; then
-              echo "::error::Port ${port} is still occupied:"
+              echo "Port ${port}: OCCUPIED"
               echo "$holders"
               echo "----- ss -lntp for :${port} -----"
               sudo ss -lntp "sport = :$port" 2>&1 || true
@@ -265,10 +275,11 @@ jobs:
           done
           echo "::endgroup::"
           if [ -n "$occupied" ]; then
-            echo "::error::Supabase ports still occupied after cleanup:${occupied}"
-            exit 1
+            echo "::warning::Supabase ports still showing as occupied after cleanup:${occupied}. Continuing; supabase start will retry and surface real conflicts."
+          else
+            echo "All Supabase ports are free."
           fi
-          echo "All Supabase ports are free."
+          exit 0
 
 
 
