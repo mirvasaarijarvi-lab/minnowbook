@@ -156,7 +156,11 @@ Deno.test({
 // Layer 2: per-handler 401 with malformed env values
 // ---------------------------------------------------------------------------
 
-function withMalformedEnv(
+/** Inject `value` for every Supabase env key, then run `fn` inside
+ *  `withStubSupabaseEnv` so the helper has a chance to coerce the
+ *  whitespace-only inherited value into a usable stub. This is the
+ *  exact composition real test suites use. */
+function withMalformedEnvAndStub(
   value: string,
   fn: () => Promise<void>,
 ): () => Promise<void> {
@@ -165,7 +169,7 @@ function withMalformedEnv(
     for (const k of ENV_KEYS) prev[k] = Deno.env.get(k);
     try {
       for (const k of ENV_KEYS) Deno.env.set(k, value);
-      await fn();
+      await withStubSupabaseEnv(fn)();
     } finally {
       for (const k of ENV_KEYS) {
         if (typeof prev[k] === "string") Deno.env.set(k, prev[k]!);
