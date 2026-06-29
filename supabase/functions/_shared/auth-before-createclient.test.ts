@@ -61,9 +61,18 @@ Deno.test("auth-enforced edge functions short-circuit before createClient(...)",
     const name = rel.split(/[\\/]/)[0];
     if (SKIP.has(name)) continue;
 
-    const src = await Deno.readTextFile(entry.path);
+    const raw = await Deno.readTextFile(entry.path);
+    // Strip block + line comments and string literals so matches inside
+    // documentation/strings can't trip the audit.
+    const src = raw
+      .replace(/\/\*[\s\S]*?\*\//g, "")
+      .replace(/(^|[^:])\/\/[^\n]*/g, "$1")
+      .replace(/`(?:\\.|[^`\\])*`/g, "``")
+      .replace(/"(?:\\.|[^"\\])*"/g, '""')
+      .replace(/'(?:\\.|[^'\\])*'/g, "''");
     const createIdx = firstIndex(src, /\bcreateClient\s*\(/);
-    if (createIdx === -1) continue; // no client constructed
+    if (createIdx === -1) continue;
+
     const authIdx = firstMatch(src, AUTH_PATTERNS);
     if (authIdx === -1) {
       offenders.push(`${name}: createClient(...) present but no Authorization check found`);
