@@ -3,8 +3,8 @@
 // budget, *before* doing any slow I/O (DB, Supabase auth round-trip,
 // Stripe, mail, etc.).
 //
-// Previous outages were caused by functions that called `getClaims()`
-// (or similar) without an early header check; on cold/slow paths this
+// Previous outages were caused by functions that called `getClaims()` /
+// `getUser()` without an early header check; on cold/slow paths this
 // produced gateway-level 504s instead of clean 401s. The shared
 // `requireAuth()` helper now enforces the fast-fail contract, and this
 // test verifies that every auth-enforced handler still routes through
@@ -12,58 +12,54 @@
 //
 // If you add a new auth-enforced edge function:
 //   1. Export its handler from `index.ts` (e.g. `handleFooRequest`).
-//   2. Append an entry to `AUTH_ENFORCED_HANDLERS` below.
+//   2. Append an entry to `AUTH_ENFORCED` below.
 //   3. Run this test locally with `deno test --allow-net --allow-env
 //      --allow-read supabase/functions/_shared/auth-short-circuit.test.ts`.
 
 import { assert, assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
-
-// Many index.ts modules call `Deno.serve(handler)` at top-level. Importing
-// more than one in the same test process would collide on the default
-// listen port. Stub Deno.serve to a no-op *before* importing any handler.
-// deno-lint-ignore no-explicit-any
-(Deno as any).serve = (_handler: unknown) =>
-  ({ finished: Promise.resolve(), shutdown: () => Promise.resolve() }) as any;
-
 import { withStubSupabaseEnv } from "./test-security-headers.ts";
 
-import { handleAdminUsersRequest } from "../admin-users/index.ts";
-import { handleArchiveReservationsRequest } from "../archive-reservations/index.ts";
-import { handleLogForbiddenAccessRequest } from "../log-forbidden-access/index.ts";
-import { handleMfaRecoveryRequest } from "../mfa-recovery/index.ts";
-import { handleMigrateBrandingAssetsRequest } from "../migrate-branding-assets/index.ts";
-import { handleMintTenantPrivateUrlRequest } from "../mint-tenant-private-url/index.ts";
-import { handleRedeemAccessCodeRequest } from "../redeem-access-code/index.ts";
-import { handleSendOfferEmailRequest } from "../send-offer-email/index.ts";
-import { handleSendReminderRequest } from "../send-reminder/index.ts";
-import { handleSupportChatRequest } from "../support-chat/index.ts";
-// Note: check-subscription, create-checkout, customer-portal use `npm:`
-// specifiers that don't resolve in every Deno sandbox; their short-circuit
-// contract is covered by the static source-scan test below.
+// Many index.ts modules call `Deno.serve(handler)` at top level. Importing
+// more than one in the same test process would collide on the default
+// listen port. Stub Deno.serve to a no-op so handlers can be dynamically
+// imported below without binding a socket. Static imports are hoisted
+// before any code runs, so the handler modules must be loaded *after*
+// this stub via dynamic `import()`.
+// deno-lint-ignore no-explicit-any
+(Deno as any).serve = (..._args: unknown[]) =>
+  ({ finished: Promise.resolve(), shutdown: () => Promise.resolve() }) as any;
 
 type Handler = (req: Request) => Promise<Response> | Response;
 
-// Functions that MUST return 401 on a POST with no Authorization header,
-// without doing any slow upstream work. Budget is intentionally tight
-// (1500 ms) so any regression that re-introduces a pre-auth await on
-// the network surface is caught here rather than at the gateway.
-const AUTH_ENFORCED_HANDLERS: ReadonlyArray<{
-  name: string;
-  handler: Handler;
-}> = [
-  { name: "admin-users", handler: handleAdminUsersRequest },
-  { name: "archive-reservations", handler: handleArchiveReservationsRequest },
-  { name: "log-forbidden-access", handler: handleLogForbiddenAccessRequest },
-  { name: "mfa-recovery", handler: handleMfaRecoveryRequest },
-  { name: "migrate-branding-assets", handler: handleMigrateBrandingAssetsRequest },
-  { name: "mint-tenant-private-url", handler: handleMintTenantPrivateUrlRequest },
-  { name: "redeem-access-code", handler: handleRedeemAccessCodeRequest },
-  { name: "send-offer-email", handler: handleSendOfferEmailRequest },
-  { name: "send-reminder", handler: handleSendReminderRequest },
-  { name: "support-chat", handler: handleSupportChatRequest },
+// (function-name, exported handler symbol). Functions whose `npm:`
+// specifiers don't resolve in every Deno sandbox (Stripe trio,
+// cancel-account-deletion, export-user-data, request-account-deletion)
+// are exercised via their own *_test.ts files; this guard covers the
+// handlers that can be statically loaded without a node_modules dir.
+const AUTH_ENFORCED: ReadonlyArray<{ name: string; exportName: string }> = [
+  { name: "admin-users", exportName: "handleAdminUsersRequest" },
+  { name: "archive-reservations", exportName: "handleArchiveReservationsRequest" },
+  { name: "log-forbidden-access", exportName: "handleLogForbiddenAccessRequest" },
+  { name: "mfa-recovery", exportName: "handleMfaRecoveryRequest" },
+  { name: "migrate-branding-assets", exportName: "handleMigrateBrandingAssetsRequest" },
+  { name: "mint-tenant-private-url", exportName: "handleMintTenantPrivateUrlRequest" },
+  { name: "redeem-access-code", exportName: "handleRedeemAccessCodeRequest" },
+  { name: "send-offer-email", exportName: "handleSendOfferEmailRequest" },
+  { name: "send-reminder", exportName: "handleSendReminderRequest" },
+  { name: "support-chat", exportName: "handleSupportChatRequest" },
 ];
 
 const SHORT_CIRCUIT_BUDGET_MS = 1_500;
+
+async function loadHandler(name: string, exportName: string): Promise<Handler> {
+  const mod = await import(`../${name}/index.ts`);
+  const handler = mod[exportName] as Handler | undefined;
+  assert(
+    typeof handler === "function",
+    `${name}: expected export "${exportName}" to be a function`,
+  );
+  return handler;
+}
 
 async function runWithBudget<T>(
   label: string,
@@ -84,35 +80,29 @@ async function runWithBudget<T>(
   }
 }
 
-function buildRequest(name: string, init: RequestInit): Request {
-  return new Request(`https://example.test/${name}`, init);
-}
-
 async function assertShortCircuit401(
   name: string,
   handler: Handler,
   headers: Record<string, string>,
   scenario: string,
 ) {
+  const req = new Request(`https://example.test/${name}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Origin: "https://mimmobook.com",
+      ...headers,
+    },
+    body: JSON.stringify({}),
+  });
   const started = performance.now();
   const res = await runWithBudget(
     `${name} (${scenario})`,
     SHORT_CIRCUIT_BUDGET_MS,
-    async () => handler(
-      buildRequest(name, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Origin: "https://mimmobook.com",
-          ...headers,
-        },
-        body: JSON.stringify({}),
-      }),
-    ),
+    async () => handler(req),
   );
   const elapsed = performance.now() - started;
-  // Drain the body so Deno's resource tracker doesn't flag a leak.
-  try { await res.text(); } catch { /* ignore */ }
+  try { await res.text(); } catch { /* drain */ }
 
   assertEquals(
     res.status,
@@ -125,10 +115,11 @@ async function assertShortCircuit401(
   );
 }
 
-for (const { name, handler } of AUTH_ENFORCED_HANDLERS) {
+for (const { name, exportName } of AUTH_ENFORCED) {
   Deno.test(
     `${name}: POST without Authorization returns 401 within ${SHORT_CIRCUIT_BUDGET_MS}ms`,
     withStubSupabaseEnv(async () => {
+      const handler = await loadHandler(name, exportName);
       await assertShortCircuit401(name, handler, {}, "missing header");
     }),
   );
@@ -136,6 +127,7 @@ for (const { name, handler } of AUTH_ENFORCED_HANDLERS) {
   Deno.test(
     `${name}: POST with malformed Authorization (no Bearer) returns 401 within ${SHORT_CIRCUIT_BUDGET_MS}ms`,
     withStubSupabaseEnv(async () => {
+      const handler = await loadHandler(name, exportName);
       await assertShortCircuit401(
         name,
         handler,
