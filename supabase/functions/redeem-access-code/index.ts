@@ -1,5 +1,6 @@
 import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getCorsHeaders } from "../_shared/http-headers.ts";
+import { verifyBearer } from "../_shared/require-auth.ts";
 
 /**
  * Stable, machine-readable error codes for the redeem-access-code endpoint.
