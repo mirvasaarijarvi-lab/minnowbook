@@ -75,19 +75,32 @@ async function postPath(path: unknown): Promise<{ status: number; body: Rejectio
     // exercises its pre-auth path-validation branch.
     headers.apikey = SUPABASE_ANON_KEY;
   }
-  const res = await fetch(FUNCTION_URL, {
-    method: "POST",
-    headers,
-    body: JSON.stringify({ path }),
-  });
-  let body: RejectionResponse = { error_code: "" };
-  try {
-    body = (await res.json()) as RejectionResponse;
-  } catch {
-    /* leave body empty */
+  const body = JSON.stringify({ path });
+
+  // Retry transient gateway 5xx (502/503/504) once. The Supabase
+  // edge-runtime occasionally returns 503 on the very first invocation
+  // of the test run while the isolate cold-starts, even though the
+  // function's *contract* (HTTP 400 + invalid_storage_path) is stable.
+  // We don't retry 4xx — those are real assertions.
+  let lastStatus = 0;
+  let lastBody: RejectionResponse = { error_code: "" };
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    const res = await fetch(FUNCTION_URL, { method: "POST", headers, body });
+    lastStatus = res.status;
+    let parsed: RejectionResponse = { error_code: "" };
+    try {
+      parsed = (await res.json()) as RejectionResponse;
+    } catch {
+      /* leave parsed empty */
+    }
+    lastBody = parsed;
+    if (res.status < 500) return { status: res.status, body: parsed };
+    // Backoff: 250ms, 750ms.
+    await new Promise((r) => setTimeout(r, 250 * attempt * attempt));
   }
-  return { status: res.status, body };
+  return { status: lastStatus, body: lastBody };
 }
+
 
 test.describe("mint-tenant-private-url HTTP contract", () => {
   test.skip(!!skipReason, skipReason ?? "");
