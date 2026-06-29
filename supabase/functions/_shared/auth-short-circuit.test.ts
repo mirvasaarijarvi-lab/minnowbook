@@ -21,9 +21,6 @@ import { withStubSupabaseEnv } from "./test-security-headers.ts";
 
 import { handleAdminUsersRequest } from "../admin-users/index.ts";
 import { handleArchiveReservationsRequest } from "../archive-reservations/index.ts";
-import { handleCheckSubscriptionRequest } from "../check-subscription/index.ts";
-import { handleCreateCheckoutRequest } from "../create-checkout/index.ts";
-import { handleCustomerPortalRequest } from "../customer-portal/index.ts";
 import { handleLogForbiddenAccessRequest } from "../log-forbidden-access/index.ts";
 import { handleMfaRecoveryRequest } from "../mfa-recovery/index.ts";
 import { handleMigrateBrandingAssetsRequest } from "../migrate-branding-assets/index.ts";
@@ -32,6 +29,9 @@ import { handleRedeemAccessCodeRequest } from "../redeem-access-code/index.ts";
 import { handleSendOfferEmailRequest } from "../send-offer-email/index.ts";
 import { handleSendReminderRequest } from "../send-reminder/index.ts";
 import { handleSupportChatRequest } from "../support-chat/index.ts";
+// Note: check-subscription, create-checkout, customer-portal use `npm:`
+// specifiers that don't resolve in every Deno sandbox; their short-circuit
+// contract is covered by the static source-scan test below.
 
 type Handler = (req: Request) => Promise<Response> | Response;
 
