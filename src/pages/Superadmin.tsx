@@ -479,6 +479,10 @@ const Superadmin = () => {
         {/* Access Codes */}
         <AccessCodesPanel />
 
+        {/* Redemption Metrics (last 24h by default) */}
+        <RedemptionMetricsPanel />
+
+
         {/* Login History */}
         <SuperadminLoginHistory />
 
