@@ -404,14 +404,17 @@ jobs:
         if: steps.supabase-start.outcome == 'success'
         run: |
           set -uo pipefail
-          for i in $(seq 1 60); do
-            if curl -sf "http://127.0.0.1:54321/rest/v1/" >/dev/null 2>&1; then
+          # PostgREST occasionally lags Postgres readiness by a minute or
+          # two when the runner is under load; give it 5 min before giving
+          # up so a slow-but-recovering boot doesn't fail the whole job.
+          for i in $(seq 1 300); do
+            if curl -sf --max-time 5 "http://127.0.0.1:54321/rest/v1/" >/dev/null 2>&1; then
               echo "PostgREST ready after ${i}s"
               exit 0
             fi
             sleep 1
           done
-          echo "::error::PostgREST never came up after 60s"
+          echo "::error::PostgREST never came up after 300s"
           echo "::group::curl -v http://127.0.0.1:54321/rest/v1/"
           curl -v --max-time 5 "http://127.0.0.1:54321/rest/v1/" 2>&1 || true
           echo "::endgroup::"
