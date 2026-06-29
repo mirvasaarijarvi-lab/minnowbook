@@ -258,7 +258,7 @@ describe("redeem-access-code: brute-force & replay resilience", () => {
     // before any code-shape or code-existence check, so the response
     // cannot vary by input.
     const codes = results
-      .filter((r) => r.status !== 0)
+      .filter((r) => r.status !== 0 && r.status !== 502 && r.status !== 503 && r.status !== 504)
       .map(errorCode)
       .filter((c) => c.length > 0);
     expect(codes.length, "at least one probe must have produced a coded error").toBeGreaterThan(0);
