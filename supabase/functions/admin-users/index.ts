@@ -6,6 +6,7 @@ import {
   getCorsHeaders,
   isOriginAllowed,
 } from "../_shared/http-headers.ts";
+import { requireAuth } from "../_shared/require-auth.ts";
 
 
 // --- Safe error messages (prevent schema leakage) ---
@@ -132,24 +133,11 @@ export const handleAdminUsersRequest = async (req: Request): Promise<Response> =
       });
     }
 
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const adminClient = createClient(supabaseUrl, serviceRoleKey);
+    const auth = await requireAuth(req, corsHeaders, { errorCode: "Not authenticated", errorMessage: "Not authenticated" });
+    if (auth instanceof Response) return auth;
+    const { userId: callingUserId, userClient, adminClient } = auth;
+    void userClient;
 
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader?.startsWith("Bearer ")) throw new Error("Not authenticated");
-
-    const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
-    const userClient = createClient(supabaseUrl, anonKey, {
-      global: { headers: { Authorization: authHeader } },
-    });
-
-    // Use getClaims() for fast local JWT verification instead of network round-trip
-    const token = authHeader.replace("Bearer ", "");
-    const { data: claimsData, error: claimsError } = await userClient.auth.getClaims(token);
-    if (claimsError || !claimsData?.claims) throw new Error("Not authenticated");
-    const callingUserId = claimsData.claims.sub as string;
-    if (!callingUserId) throw new Error("Not authenticated");
 
     // Check caller is owner or admin (or system admin for impersonation)
     const { data: callerRole } = await adminClient
