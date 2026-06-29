@@ -18,6 +18,7 @@
 //   const { userId, claims, adminClient, userClient } = auth;
 
 import { createClient, type SupabaseClient } from "npm:@supabase/supabase-js@2";
+import { errorResponse, ErrorCodes } from "./errors.ts";
 
 const DEFAULT_GETCLAIMS_TIMEOUT_MS = 5_000;
 
