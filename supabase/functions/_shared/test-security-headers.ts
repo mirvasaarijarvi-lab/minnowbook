@@ -97,11 +97,41 @@ export async function drainBody(res: Response) {
   }
 }
 
+/** Normalize an env var value for the purposes of "is this usable?".
+ *
+ *  CI workflows frequently inject secrets as empty strings (or strings
+ *  containing only whitespace) when the real secret is unavailable in
+ *  that environment (PR from a fork, secret intentionally withheld for a
+ *  preview job, masking, etc.). For test-time stubbing, those values are
+ *  indistinguishable from "not set": passing them through to
+ *  `createClient(url, "")` makes the SDK throw "supabaseKey is required."
+ *  *before* the handler can reach its auth branch, which turns expected
+ *  401s into accidental 500s.
+ *
+ *  This helper collapses every "looks unset" representation
+ *  (`undefined`, `""`, `"   "`, `"\t\n"`) to `undefined` so callers can
+ *  use a single `value ?? fallback` (or explicit `if`) check without
+ *  juggling truthiness rules. Non-empty strings are returned verbatim
+ *  with no trimming — a legitimate token may have leading/trailing
+ *  characters that the consumer depends on. */
+export function coerceMissingEnv(value: string | undefined): string | undefined {
+  if (typeof value !== "string") return undefined;
+  if (value.length === 0) return undefined;
+  // `trim()` is only used to detect whitespace-only payloads; we never
+  // return the trimmed form, so a real secret keeps its exact bytes.
+  if (value.trim().length === 0) return undefined;
+  return value;
+}
+
 /** Set required Supabase env vars to harmless stub values for the
  *  duration of `fn`, restoring (or unsetting) afterwards. Many
  *  handlers read `Deno.env.get(...)!` at request time and would
  *  otherwise crash before reaching the response-building branch we
- *  want to inspect. */
+ *  want to inspect.
+ *
+ *  Empty / whitespace-only inherited values are treated as missing via
+ *  {@link coerceMissingEnv} so an unset secret in CI never produces a
+ *  500-before-401 regression. */
 export function withStubSupabaseEnv<T>(fn: () => Promise<T>): () => Promise<T> {
   const KEYS = [
     "SUPABASE_URL",
@@ -109,19 +139,18 @@ export function withStubSupabaseEnv<T>(fn: () => Promise<T>): () => Promise<T> {
     "SUPABASE_ANON_KEY",
     "LOVABLE_API_KEY",
   ] as const;
+  const STUBS: Record<(typeof KEYS)[number], string> = {
+    SUPABASE_URL: "https://stub.supabase.co",
+    SUPABASE_SERVICE_ROLE_KEY: "stub-service-key",
+    SUPABASE_ANON_KEY: "stub-anon-key",
+    LOVABLE_API_KEY: "stub-lovable-key",
+  };
   return async () => {
     const prev: Record<string, string | undefined> = {};
     for (const k of KEYS) prev[k] = Deno.env.get(k);
-    // Use truthiness (not ??) so that an inherited *empty-string* env var
-    // (common in CI when a real secret isn't available and the workflow sets
-    // the var to "" to mask it) is still replaced by a usable stub value.
-    // Without this, `createClient(url, "")` throws "supabaseKey is required."
-    // before the handler can reach its auth check, turning the expected 401
-    // into a 500 and breaking the short-circuit / 401-contract suites.
-    Deno.env.set("SUPABASE_URL", prev.SUPABASE_URL || "https://stub.supabase.co");
-    Deno.env.set("SUPABASE_SERVICE_ROLE_KEY", prev.SUPABASE_SERVICE_ROLE_KEY || "stub-service-key");
-    Deno.env.set("SUPABASE_ANON_KEY", prev.SUPABASE_ANON_KEY || "stub-anon-key");
-    Deno.env.set("LOVABLE_API_KEY", prev.LOVABLE_API_KEY || "stub-lovable-key");
+    for (const k of KEYS) {
+      Deno.env.set(k, coerceMissingEnv(prev[k]) ?? STUBS[k]);
+    }
     try {
       return await fn();
     } finally {
