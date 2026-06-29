@@ -329,7 +329,7 @@ jobs:
       - name: Start local Supabase stack
         id: supabase-start
         if: steps.supabase-pull.outcome == 'success'
-        timeout-minutes: 12
+        timeout-minutes: 25
         run: |
           set -uo pipefail
           mkdir -p /tmp/supabase-diag
@@ -341,9 +341,12 @@ jobs:
           fi
 
           # Retry `supabase start` with exponential backoff (capped at 60s)
-          # until the REST health endpoint responds or we hit ~10 min total.
-          MAX_ATTEMPTS=6
-          DEADLINE=$(( $(date +%s) + 600 ))
+          # until the REST health endpoint responds or we hit ~22 min total.
+          # Hosted runners with cold Docker caches + slow Hub pulls have
+          # been observed to need 12-15 min for first boot; budget extra
+          # headroom so a single sluggish attempt doesn't waste the run.
+          MAX_ATTEMPTS=10
+          DEADLINE=$(( $(date +%s) + 1320 ))
           backoff=5
           for attempt in $(seq 1 $MAX_ATTEMPTS); do
             now=$(date +%s)
@@ -359,10 +362,12 @@ jobs:
             echo "supabase start exit=${rc}"
             echo "::endgroup::"
 
-            # Poll health for up to 90s before declaring this attempt failed.
+            # Poll health for up to 240s before declaring this attempt
+            # failed. Postgres + GoTrue + PostgREST cold-start chains
+            # routinely take 2-3 min on first boot.
             healthy=0
-            for i in $(seq 1 90); do
-              if curl -sf --max-time 3 "$HEALTH_URL" >/dev/null 2>&1; then
+            for i in $(seq 1 240); do
+              if curl -sf --max-time 5 "$HEALTH_URL" >/dev/null 2>&1; then
                 echo "Supabase healthy after attempt ${attempt} (waited ${i}s)."
                 healthy=1
                 break
