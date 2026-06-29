@@ -179,8 +179,18 @@ export const handleMfaRecoveryRequest = async (req: Request): Promise<Response> 
     log("info", "auth_ok", { user_id: user.id });
 
     const adminClient = createClient(supabaseUrl, serviceKey);
-    const body = await req.json();
+    let body: { action?: string; code?: string };
+    try {
+      body = await req.json();
+    } catch (parseErr) {
+      log("warn", "body_parse_error", { message: (parseErr as Error).message });
+      return new Response(JSON.stringify({ error: "Invalid JSON body" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
     const action = body.action;
+    log("info", "action_dispatch", { action: action ?? null });
 
     // === GENERATE: create new recovery codes ===
     if (action === "generate") {
