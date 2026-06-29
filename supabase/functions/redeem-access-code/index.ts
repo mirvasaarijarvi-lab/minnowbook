@@ -210,32 +210,22 @@ export async function handleRedeemAccessCodeRequest(req: Request): Promise<Respo
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
-    // Authenticate the calling user
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
+    // Authenticate the calling user via the shared helper. This guarantees a
+    // bounded getClaims() timeout, so a slow auth path returns 401 fast
+    // instead of letting the gateway respond with 504.
+    const authResult = await verifyBearer(req, { timeoutMs: 5_000 });
+    if (!authResult.ok) {
       return respond(
         errorResponse(corsHeaders, 401, ERROR_CODES.NOT_AUTHENTICATED, "Not authenticated"),
         "not_authenticated",
       );
     }
-
-    const userClient = createClient(supabaseUrl, anonKey, {
-      global: { headers: { Authorization: authHeader } },
-    });
-    const token = authHeader.replace("Bearer ", "");
-    const { data: claimsData, error: claimsError } = await userClient.auth.getClaims(token);
-    if (claimsError || !claimsData?.claims) {
-      return respond(
-        errorResponse(corsHeaders, 401, ERROR_CODES.NOT_AUTHENTICATED, "Not authenticated"),
-        "not_authenticated",
-      );
-    }
-
-    const userId = claimsData.claims.sub as string;
+    const { userId, userClient } = authResult;
+    void userClient;
     userIdHash = shortHash(userId);
+
 
     const body = await req.json();
     const code = (body.code ?? "").trim().toUpperCase();
