@@ -29,19 +29,35 @@ import { withStubSupabaseEnv } from "./test-security-headers.ts";
 
 type Handler = (req: Request) => Promise<Response> | Response;
 
-// Mirrors AUTH_ENFORCED in auth-short-circuit.test.ts. Keep in sync when
-// adding a new auth-enforced function.
-const AUTH_ENFORCED: ReadonlyArray<{ name: string; exportName: string }> = [
+// (function-name, exported handler symbol, probe body). The probe body
+// has to satisfy any *non-auth* shape validation that legitimately runs
+// before the auth check (e.g. mint-tenant-private-url validates the path
+// shape first so the e2e malicious-paths gate can run anonymously). For
+// handlers that check auth first, an empty `{}` is fine.
+//
+// `support-chat` is intentionally NOT in this list: it's auth-optional
+// (the chat widget renders on public marketing pages), and gating it
+// behind a 401 would break those flows. That contract is covered by
+// `support-chat`'s own tests.
+const AUTH_ENFORCED: ReadonlyArray<{
+  name: string;
+  exportName: string;
+  probeBody?: unknown;
+}> = [
   { name: "admin-users", exportName: "handleAdminUsersRequest" },
   { name: "archive-reservations", exportName: "handleArchiveReservationsRequest" },
   { name: "log-forbidden-access", exportName: "handleLogForbiddenAccessRequest" },
   { name: "mfa-recovery", exportName: "handleMfaRecoveryRequest" },
   { name: "migrate-branding-assets", exportName: "handleMigrateBrandingAssetsRequest" },
-  { name: "mint-tenant-private-url", exportName: "handleMintTenantPrivateUrlRequest" },
+  {
+    name: "mint-tenant-private-url",
+    exportName: "handleMintTenantPrivateUrlRequest",
+    // Shape-valid path so we exercise the auth branch, not the path validator.
+    probeBody: { path: "tenants/00000000-0000-0000-0000-000000000000/sample.jpg" },
+  },
   { name: "redeem-access-code", exportName: "handleRedeemAccessCodeRequest" },
   { name: "send-offer-email", exportName: "handleSendOfferEmailRequest" },
   { name: "send-reminder", exportName: "handleSendReminderRequest" },
-  { name: "support-chat", exportName: "handleSupportChatRequest" },
 ];
 
 const BUDGET_MS = 1_500;
