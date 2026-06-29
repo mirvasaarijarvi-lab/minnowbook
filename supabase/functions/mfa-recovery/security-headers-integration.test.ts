@@ -39,6 +39,26 @@ Deno.test(
     assertCspAndHsts(res, "413 oversize body");
   }),
 );
+// Helper: race the handler against a wall-clock budget. We clear the
+// timer as soon as the handler resolves so Deno's sanitizer doesn't
+// flag a dangling setTimeout as a resource leak.
+async function runWithBudget(
+  req: Request,
+  budgetMs: number,
+): Promise<Response> {
+  let timerId: number | undefined;
+  const budgetPromise = new Promise<Response>((_, reject) => {
+    timerId = setTimeout(
+      () => reject(new Error(`handler exceeded ${budgetMs}ms budget`)),
+      budgetMs,
+    );
+  });
+  try {
+    return await Promise.race([handleMfaRecoveryRequest(req), budgetPromise]);
+  } finally {
+    if (timerId !== undefined) clearTimeout(timerId);
+  }
+}
 
 // Regression: a POST without an Authorization header must short-circuit
 // to a 401 *before* we ever call into Supabase auth. Previously the
@@ -57,20 +77,7 @@ Deno.test(
       body: JSON.stringify({ action: "count" }),
     });
 
-    // Hard wall-clock budget: if the handler regresses and starts
-    // waiting on auth.getUser(), this Promise.race rejects long before
-    // the platform's 150s execution cap.
-    const TEST_BUDGET_MS = 1500;
-    const res = await Promise.race([
-      handleMfaRecoveryRequest(req),
-      new Promise<Response>((_, reject) =>
-        setTimeout(
-          () => reject(new Error(`handler exceeded ${TEST_BUDGET_MS}ms budget`)),
-          TEST_BUDGET_MS,
-        ),
-      ),
-    ]);
-
+    const res = await runWithBudget(req, 1500);
     await drainBody(res);
     assertEquals(res.status, 401, "missing auth must return 401, not 504");
     assertSharedHeaders(res, "401 missing auth");
@@ -91,17 +98,7 @@ Deno.test(
       body: JSON.stringify({ action: "count" }),
     });
 
-    const TEST_BUDGET_MS = 1500;
-    const res = await Promise.race([
-      handleMfaRecoveryRequest(req),
-      new Promise<Response>((_, reject) =>
-        setTimeout(
-          () => reject(new Error(`handler exceeded ${TEST_BUDGET_MS}ms budget`)),
-          TEST_BUDGET_MS,
-        ),
-      ),
-    ]);
-
+    const res = await runWithBudget(req, 1500);
     await drainBody(res);
     assertEquals(res.status, 401, "malformed auth must return 401, not 504");
     assertSharedHeaders(res, "401 malformed auth");
