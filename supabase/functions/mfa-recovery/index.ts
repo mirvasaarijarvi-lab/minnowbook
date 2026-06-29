@@ -51,6 +51,23 @@ export const handleMfaRecoveryRequest = async (req: Request): Promise<Response> 
   const startedAt = Date.now();
   const elapsed = () => Date.now() - startedAt;
 
+  // Echo the request id on every response (including 401/4xx/5xx and the
+  // CORS preflight) and expose it to browser JS so the client can quote
+  // it in bug reports / surface it in toast errors and we can grep the
+  // structured logs for the matching `request_id`.
+  const existingExpose = corsHeaders["Access-Control-Expose-Headers"];
+  corsHeaders["x-request-id"] = requestId;
+  corsHeaders["Access-Control-Expose-Headers"] = existingExpose
+    ? `${existingExpose}, x-request-id`
+    : "x-request-id";
+
+  // Build a JSON error body that always carries the request id so clients
+  // can correlate failures with server logs even when they can't read
+  // response headers (some fetch wrappers strip them).
+  const errorBody = (error: string, code: string | null = null) =>
+    JSON.stringify(code ? { error, code, request_id: requestId } : { error, request_id: requestId });
+
+
   /**
    * Canonical structured-log schema for this function. Every emitted
    * line MUST include these fields so downstream log search / alerting
@@ -123,7 +140,7 @@ export const handleMfaRecoveryRequest = async (req: Request): Promise<Response> 
       log("warn", "reject_oversized_body", "REQUEST_TOO_LARGE", {
         content_length: contentLength,
       });
-      return new Response(JSON.stringify({ error: "Request too large" }), {
+      return new Response(errorBody("Request too large", "REQUEST_TOO_LARGE"), {
         status: 413,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -139,7 +156,7 @@ export const handleMfaRecoveryRequest = async (req: Request): Promise<Response> 
         has_auth_header: hasAuthHeader,
         has_bearer_token: hasBearerToken,
       });
-      return new Response(JSON.stringify({ error: "Not authenticated" }), {
+      return new Response(errorBody("Not authenticated", "NOT_AUTHENTICATED"), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -155,7 +172,7 @@ export const handleMfaRecoveryRequest = async (req: Request): Promise<Response> 
         has_service_key: !!serviceKey,
         has_anon_key: !!anonKey,
       });
-      return new Response(JSON.stringify({ error: "Server misconfigured" }), {
+      return new Response(errorBody("Server misconfigured", "SERVER_MISCONFIGURED"), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -185,7 +202,7 @@ export const handleMfaRecoveryRequest = async (req: Request): Promise<Response> 
       log("error", "auth_getuser_timeout", "AUTH_TIMEOUT", {
         message: (timeoutErr as Error).message,
       });
-      return new Response(JSON.stringify({ error: "Auth check timed out" }), {
+      return new Response(errorBody("Auth check timed out", "AUTH_TIMEOUT"), {
         status: 504,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -198,7 +215,7 @@ export const handleMfaRecoveryRequest = async (req: Request): Promise<Response> 
         auth_error: authError?.message ?? null,
         auth_error_status: (authError as { status?: number } | null)?.status ?? null,
       });
-      return new Response(JSON.stringify({ error: "Not authenticated" }), {
+      return new Response(errorBody("Not authenticated", "NOT_AUTHENTICATED"), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -213,7 +230,7 @@ export const handleMfaRecoveryRequest = async (req: Request): Promise<Response> 
       log("warn", "body_parse_error", "INVALID_JSON_BODY", {
         message: (parseErr as Error).message,
       });
-      return new Response(JSON.stringify({ error: "Invalid JSON body" }), {
+      return new Response(errorBody("Invalid JSON body", "INVALID_JSON_BODY"), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -254,7 +271,7 @@ export const handleMfaRecoveryRequest = async (req: Request): Promise<Response> 
       if (!code || typeof code !== "string" || code.length < 8) {
         log("warn", "verify_invalid_format", "INVALID_RECOVERY_CODE_FORMAT");
         return new Response(
-          JSON.stringify({ error: "Invalid recovery code format" }),
+          errorBody("Invalid recovery code format", "INVALID_RECOVERY_CODE_FORMAT"),
           {
             status: 400,
             headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -278,7 +295,7 @@ export const handleMfaRecoveryRequest = async (req: Request): Promise<Response> 
       if (!match) {
         log("warn", "verify_no_match", "INVALID_OR_USED_RECOVERY_CODE");
         return new Response(
-          JSON.stringify({ error: "Invalid or already used recovery code" }),
+          errorBody("Invalid or already used recovery code", "INVALID_OR_USED_RECOVERY_CODE"),
           {
             status: 400,
             headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -303,7 +320,7 @@ export const handleMfaRecoveryRequest = async (req: Request): Promise<Response> 
       if (!totpFactor) {
         log("warn", "verify_no_totp_factor", "NO_ACTIVE_2FA_FACTOR");
         return new Response(
-          JSON.stringify({ error: "No active 2FA factor found" }),
+          errorBody("No active 2FA factor found", "NO_ACTIVE_2FA_FACTOR"),
           {
             status: 400,
             headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -334,7 +351,7 @@ export const handleMfaRecoveryRequest = async (req: Request): Promise<Response> 
     }
 
     log("warn", "unknown_action", "UNKNOWN_ACTION", { action: action ?? null });
-    return new Response(JSON.stringify({ error: "Unknown action" }), {
+    return new Response(errorBody("Unknown action", "UNKNOWN_ACTION"), {
       status: 400,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
@@ -344,7 +361,7 @@ export const handleMfaRecoveryRequest = async (req: Request): Promise<Response> 
       name: (error as Error)?.name ?? null,
     });
     return new Response(
-      JSON.stringify({ error: "Internal server error" }),
+      errorBody("Internal server error", "INTERNAL_ERROR"),
       {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
