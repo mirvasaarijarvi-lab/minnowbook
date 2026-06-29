@@ -298,12 +298,16 @@ export const handleMfaRecoveryRequest = async (req: Request): Promise<Response> 
       });
     }
 
+    log("warn", "unknown_action", { action: action ?? null });
     return new Response(JSON.stringify({ error: "Unknown action" }), {
       status: 400,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error("[mfa-recovery] internal error:", error);
+    log("error", "internal_error", {
+      message: (error as Error)?.message ?? String(error),
+      name: (error as Error)?.name ?? null,
+    });
     return new Response(
       JSON.stringify({ error: "Internal server error" }),
       {
