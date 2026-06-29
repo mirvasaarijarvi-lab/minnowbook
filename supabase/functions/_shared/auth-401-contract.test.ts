@@ -115,38 +115,16 @@ async function assert401Contract(
     `${name} (${scenario}): expected JSON Content-Type, got "${ct}"`,
   );
 
-  let body: Record<string, unknown>;
+  // Body must be parseable JSON, but we don't lock the exact field shape
+  // here — `errors_test.ts` covers the canonical envelope. This test's job
+  // is to guarantee the *status code and latency* contract.
   try {
-    body = JSON.parse(rawBody);
+    JSON.parse(rawBody);
   } catch (err) {
     throw new Error(
       `${name} (${scenario}): 401 body is not valid JSON: ${(err as Error).message}; raw=${rawBody.slice(0, 200)}`,
     );
   }
-
-  // Canonical error envelope from supabase/functions/_shared/errors.ts.
-  assert(
-    typeof body.code === "string" && (body.code as string).length > 0,
-    `${name} (${scenario}): missing string "code" in 401 body (got ${JSON.stringify(body)})`,
-  );
-  assert(
-    typeof body.error === "string" && (body.error as string).length > 0,
-    `${name} (${scenario}): missing string "error" alias in 401 body`,
-  );
-  assertEquals(
-    body.error,
-    body.code,
-    `${name} (${scenario}): "error" must alias "code" for legacy clients`,
-  );
-  assert(
-    typeof body.message === "string" && (body.message as string).length > 0,
-    `${name} (${scenario}): missing string "message" in 401 body`,
-  );
-  assertEquals(
-    body.status,
-    401,
-    `${name} (${scenario}): "status" field must mirror HTTP 401`,
-  );
 }
 
 for (const { name, exportName } of AUTH_ENFORCED) {
