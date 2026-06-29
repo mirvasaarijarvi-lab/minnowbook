@@ -301,6 +301,13 @@ export async function handleRedeemAccessCodeRequest(req: Request): Promise<Respo
     if (rawKey !== null && rawKey !== undefined && rawKey !== "") {
       hadIdempotencyKey = true;
       if (!isValidIdempotencyKey(rawKey)) {
+        logLimiterDecision({
+          requestId,
+          decision: "reject",
+          reason: "invalid_idempotency_key",
+          userIdHash,
+          hadIdempotencyKey: true,
+        });
         return respond(
           errorResponse(
             corsHeaders,
@@ -325,6 +332,18 @@ export async function handleRedeemAccessCodeRequest(req: Request): Promise<Respo
 
       if (cached) {
         replayed = true;
+        const cachedStatus = cached.response_status as number;
+        logLimiterDecision({
+          requestId,
+          // Replays surface the previously-decided outcome verbatim. A 2xx
+          // cached row means the original call was allowed; anything else
+          // means it was rejected. Either way the limiter did not make a
+          // fresh decision this turn.
+          decision: cachedStatus >= 200 && cachedStatus < 300 ? "allow" : "reject",
+          reason: "idempotent_replay",
+          userIdHash,
+          hadIdempotencyKey: true,
+        });
         return respond(
           jsonResponse(
             cached.response_status,
@@ -353,6 +372,13 @@ export async function handleRedeemAccessCodeRequest(req: Request): Promise<Respo
     };
 
     if (!code || code.length < 3 || code.length > 50) {
+      logLimiterDecision({
+        requestId,
+        decision: "reject",
+        reason: "invalid_code_format",
+        userIdHash,
+        hadIdempotencyKey,
+      });
       return respond(
         await finalize(400, {
           error: "Invalid access code format",
@@ -370,6 +396,13 @@ export async function handleRedeemAccessCodeRequest(req: Request): Promise<Respo
       .maybeSingle();
 
     if (!tenantUser) {
+      logLimiterDecision({
+        requestId,
+        decision: "reject",
+        reason: "missing_workspace",
+        userIdHash,
+        hadIdempotencyKey,
+      });
       return respond(
         await finalize(400, {
           error: "You must have a workspace before redeeming a code. Complete onboarding first.",
@@ -378,6 +411,8 @@ export async function handleRedeemAccessCodeRequest(req: Request): Promise<Respo
         "no_workspace",
       );
     }
+
+    const tenantIdHash = shortHash(tenantUser.tenant_id);
 
     // Look up the access code by hash via SECURITY DEFINER RPC.
     // Plaintext is never stored, only SHA-256 hash. Service role required.
@@ -391,30 +426,57 @@ export async function handleRedeemAccessCodeRequest(req: Request): Promise<Respo
     // several distinguishable conditions (not found, inactive, revoked,
     // expired, out of uses, already redeemed) into one error so attackers
     // cannot classify codes via the response.
+    //
+    // The CLIENT-FACING payload stays generic, but the SERVER log captures
+    // the precise limiter reason so operators can debug rejections.
     const invalidPayload = {
       error: "This access code is invalid or no longer available",
       code: ERROR_CODES.INVALID_OR_UNAVAILABLE_CODE,
     };
-    const respondInvalid = async () =>
-      respond(await finalize(400, invalidPayload), "invalid_or_unavailable_code");
+    const respondInvalid = async (reason: LimiterReason, ctx?: {
+      accessCodeIdHash?: string | null;
+      usedCount?: number | null;
+      maxUses?: number | null;
+    }) => {
+      logLimiterDecision({
+        requestId,
+        decision: "reject",
+        reason,
+        userIdHash,
+        tenantIdHash,
+        accessCodeIdHash: ctx?.accessCodeIdHash ?? null,
+        usedCount: ctx?.usedCount ?? null,
+        maxUses: ctx?.maxUses ?? null,
+        hadIdempotencyKey,
+      });
+      return respond(await finalize(400, invalidPayload), "invalid_or_unavailable_code");
+    };
 
-    if (!accessCode) return await respondInvalid();
-    if (!accessCode.is_active) return await respondInvalid();
-    if (accessCode.is_revoked) return await respondInvalid();
+    if (!accessCode) return await respondInvalid("code_not_found");
+
+    const accessCodeIdHash = shortHash(String(accessCode.id));
+    const codeCtx = {
+      accessCodeIdHash,
+      usedCount: accessCode.used_count ?? null,
+      maxUses: accessCode.max_uses ?? null,
+    };
+
+    if (!accessCode.is_active) return await respondInvalid("code_inactive", codeCtx);
+    if (accessCode.is_revoked) return await respondInvalid("code_revoked", codeCtx);
 
     // Check date validity
     const now = new Date();
     now.setHours(0, 0, 0, 0);
     if (accessCode.valid_from && new Date(accessCode.valid_from) > now) {
-      return await respondInvalid();
+      return await respondInvalid("not_yet_valid", codeCtx);
     }
     if (accessCode.valid_until && new Date(accessCode.valid_until) < now) {
-      return await respondInvalid();
+      return await respondInvalid("expired", codeCtx);
     }
 
     // Check usage limits
     if (accessCode.max_uses !== null && accessCode.used_count >= accessCode.max_uses) {
-      return await respondInvalid();
+      return await respondInvalid("max_uses_exhausted", codeCtx);
     }
 
     // Check if this user already redeemed this code for their tenant
@@ -425,7 +487,7 @@ export async function handleRedeemAccessCodeRequest(req: Request): Promise<Respo
       .eq("tenant_id", tenantUser.tenant_id)
       .maybeSingle();
 
-    if (existing) return await respondInvalid();
+    if (existing) return await respondInvalid("already_redeemed_by_tenant", codeCtx);
 
     // Calculate granted_until
     const grantedUntil = new Date();
@@ -450,12 +512,25 @@ export async function handleRedeemAccessCodeRequest(req: Request): Promise<Respo
     const claim = Array.isArray(claimResult) ? claimResult[0] : claimResult;
 
     if (!claim?.success) {
-      // Collapse failure reasons (exhausted, already_redeemed, expired,
-      // etc.) into the generic invalid payload so attackers cannot
-      // classify codes via the response.
-      return await respondInvalid();
+      // Pre-claim gates already passed, so reaching here means we lost the
+      // atomic race (another concurrent caller exhausted the last slot or
+      // beat us to the tenant-level uniqueness check). Logged distinctly so
+      // dashboards can separate "user-facing limit reached" from
+      // "limiter contention under burst".
+      return await respondInvalid("atomic_claim_lost_race", codeCtx);
     }
 
+    logLimiterDecision({
+      requestId,
+      decision: "allow",
+      reason: "ok",
+      userIdHash,
+      tenantIdHash,
+      accessCodeIdHash,
+      usedCount: accessCode.used_count ?? null,
+      maxUses: accessCode.max_uses ?? null,
+      hadIdempotencyKey,
+    });
     return respond(
       await finalize(200, {
         success: true,
