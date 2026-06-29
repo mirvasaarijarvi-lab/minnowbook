@@ -155,6 +155,10 @@ Deno.test(
     assertEquals(Deno.env.get("SUPABASE_SERVICE_ROLE_KEY"), "real-service-key");
     assertEquals(Deno.env.get("SUPABASE_ANON_KEY"), "real-anon-key");
     assertEquals(Deno.env.get("LOVABLE_API_KEY"), "real-lovable-key");
+  }),
+);
+
+
 
 Deno.test(
   "withStubSupabaseEnv: restores prior state even if fn throws",
