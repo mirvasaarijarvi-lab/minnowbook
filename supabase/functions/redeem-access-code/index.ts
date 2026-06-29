@@ -321,6 +321,7 @@ export async function handleRedeemAccessCodeRequest(req: Request): Promise<Respo
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
+    adminClientRef = adminClient;
 
     // Authenticate the calling user via the shared helper. This guarantees a
     // bounded getClaims() timeout, so a slow auth path returns 401 fast
