@@ -20,7 +20,7 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
-    const auth = await (await import("../_shared/require-auth.ts")).requireAuth(req, corsHeaders, { errorCode: "Unauthorized", errorMessage: "Unauthorized" });
+    const auth = await requireAuth(req, corsHeaders, { errorCode: "Unauthorized", errorMessage: "Unauthorized" });
     if (auth instanceof Response) return auth;
     const { userId } = auth;
 
