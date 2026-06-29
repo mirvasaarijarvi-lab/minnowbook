@@ -274,16 +274,39 @@ export async function handleSendReminderRequest(req: Request): Promise<Response>
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
-    // Authenticate caller
+    // Authenticate caller. Missing/invalid auth MUST surface as a clean
+    // 401 — previously these threw into the generic catch below, which
+    // returned 400 "Failed to send email" and made client-side retry vs
+    // re-login logic impossible to distinguish.
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) throw new Error("Not authenticated");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(
+        JSON.stringify({
+          error: "NOT_AUTHENTICATED",
+          code: "NOT_AUTHENTICATED",
+          message: "Not authenticated",
+          status: 401,
+        }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
 
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
     const userClient = createClient(supabaseUrl, anonKey, {
       global: { headers: { Authorization: authHeader } },
     });
     const { data: { user: callingUser }, error: authError } = await userClient.auth.getUser();
-    if (authError || !callingUser) throw new Error("Not authenticated");
+    if (authError || !callingUser) {
+      return new Response(
+        JSON.stringify({
+          error: "NOT_AUTHENTICATED",
+          code: "NOT_AUTHENTICATED",
+          message: "Not authenticated",
+          status: 401,
+        }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
 
     // Verify caller has tenant membership
     const { data: callerRole } = await adminClient
