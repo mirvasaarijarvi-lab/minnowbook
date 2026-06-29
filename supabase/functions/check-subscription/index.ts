@@ -8,6 +8,19 @@ const logStep = (step: string, details?: any) => {
   console.log(`[CHECK-SUBSCRIPTION] ${step}${d}`);
 };
 
+// Wrap any promise with a timeout so a hung upstream (Stripe/auth) cannot
+// exceed the edge function's 150s idle budget.
+function withTimeout<T>(p: Promise<T>, ms: number, label: string): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const t = setTimeout(() => reject(new Error(`${label} timed out after ${ms}ms`)), ms);
+    p.then(
+      (v) => { clearTimeout(t); resolve(v); },
+      (e) => { clearTimeout(t); reject(e); },
+    );
+  });
+}
+
+
 // Map Stripe price IDs to tier names
 const PRICE_TO_TIER: Record<string, string> = {
   // New VAT-inclusive prices (Apr 2026)
@@ -52,14 +65,22 @@ export async function handleCheckSubscriptionRequest(req: Request): Promise<Resp
     if (!authHeader) throw new Error("No authorization header provided");
 
     const token = authHeader.replace("Bearer ", "");
-    const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
+    const { data: userData, error: userError } = await withTimeout(
+      supabaseClient.auth.getUser(token),
+      5000,
+      "auth.getUser",
+    );
     if (userError) throw new Error(`Authentication error: ${userError.message}`);
     const user = userData.user;
     if (!user?.email) throw new Error("User not authenticated or email not available");
     logStep("User authenticated", { userId: user.id, email: user.email });
 
-    const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
-    const customers = await stripe.customers.list({ email: user.email, limit: 1 });
+    const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil", timeout: 8000, maxNetworkRetries: 1 });
+    const customers = await withTimeout(
+      stripe.customers.list({ email: user.email, limit: 1 }),
+      10000,
+      "stripe.customers.list",
+    );
 
     if (customers.data.length === 0) {
       logStep("No Stripe customer found");
@@ -72,22 +93,19 @@ export async function handleCheckSubscriptionRequest(req: Request): Promise<Resp
     const customerId = customers.data[0].id;
     logStep("Found customer", { customerId });
 
-    // Check active or trialing subscriptions
-    const subscriptions = await stripe.subscriptions.list({
-      customer: customerId,
-      status: "active",
-      limit: 1,
-    });
-
-    // Also check trialing
-    const trialingSubs = await stripe.subscriptions.list({
-      customer: customerId,
-      status: "trialing",
-      limit: 1,
-    });
+    // Check active and trialing subscriptions in parallel with timeouts
+    const [subscriptions, trialingSubs] = await withTimeout(
+      Promise.all([
+        stripe.subscriptions.list({ customer: customerId, status: "active", limit: 1 }),
+        stripe.subscriptions.list({ customer: customerId, status: "trialing", limit: 1 }),
+      ]),
+      10000,
+      "stripe.subscriptions.list",
+    );
 
     const allSubs = [...subscriptions.data, ...trialingSubs.data];
     const hasActiveSub = allSubs.length > 0;
+
 
     let tier = null;
     let subscriptionEnd = null;
