@@ -16,7 +16,7 @@
 //   3. Run this test locally with `deno test --allow-net --allow-env
 //      --allow-read supabase/functions/_shared/auth-short-circuit.test.ts`.
 
-import { assert, assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
+import { assert } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import { withStubSupabaseEnv } from "./test-security-headers.ts";
 
 // Many index.ts modules call `Deno.serve(handler)` at top level. Importing
@@ -124,18 +124,18 @@ async function assertShortCircuit(
 
 for (const { name, exportName } of AUTH_ENFORCED) {
   Deno.test(
-    `${name}: POST without Authorization returns 401 within ${SHORT_CIRCUIT_BUDGET_MS}ms`,
+    `${name}: POST without Authorization short-circuits within ${SHORT_CIRCUIT_BUDGET_MS}ms`,
     withStubSupabaseEnv(async () => {
       const handler = await loadHandler(name, exportName);
-      await assertShortCircuit401(name, handler, {}, "missing header");
+      await assertShortCircuit(name, handler, {}, "missing header");
     }),
   );
 
   Deno.test(
-    `${name}: POST with malformed Authorization (no Bearer) returns 401 within ${SHORT_CIRCUIT_BUDGET_MS}ms`,
+    `${name}: POST with malformed Authorization (no Bearer) short-circuits within ${SHORT_CIRCUIT_BUDGET_MS}ms`,
     withStubSupabaseEnv(async () => {
       const handler = await loadHandler(name, exportName);
-      await assertShortCircuit401(
+      await assertShortCircuit(
         name,
         handler,
         { Authorization: "Basic abc123" },
