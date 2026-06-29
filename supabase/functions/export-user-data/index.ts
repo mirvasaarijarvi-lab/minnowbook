@@ -47,10 +47,7 @@ Deno.serve(async (req) => {
     const auth = await requireAuth(req, corsHeaders, { errorCode: "Unauthorized", errorMessage: "Unauthorized" });
     if (auth instanceof Response) return auth;
     const { userId, email, adminClient: admin } = auth;
-    // (admin client previously created locally; helper provides one with the same service-role key)
-    void admin;
 
-    const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
     // Rate limit: 1 successful export per 24h.
     const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
