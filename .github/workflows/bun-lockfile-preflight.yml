@@ -36,7 +36,10 @@ jobs:
   verify-bun-lock:
     name: bun.lock is in sync with package.json
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    # Raised from 5 to 10 minutes: Bun toolchain download + a full
+    # frozen install on a cold cache can approach the old budget,
+    # and the heal step regenerates the lockfile on drift.
+    timeout-minutes: 10
     permissions:
       contents: read
     steps:
