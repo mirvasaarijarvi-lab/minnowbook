@@ -46,7 +46,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7.0.0
 
       # Precheck Supabase secrets BEFORE the expensive Bun install /
       # Playwright browser download / Vite build, so a misconfigured fork
