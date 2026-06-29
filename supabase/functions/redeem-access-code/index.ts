@@ -52,6 +52,7 @@ type Outcome =
   | "internal_error";
 
 const LOG_TAG = "[redeem-access-code][telemetry]";
+const LIMITER_LOG_TAG = "[redeem-access-code][limiter]";
 
 function logRequest(entry: {
   requestId: string;
@@ -71,6 +72,53 @@ function logRequest(entry: {
   } else {
     console.info(LOG_TAG, line);
   }
+}
+
+/**
+ * Stable reason codes for the limiter decision log. Two top-level
+ * decisions: `allow` (the redemption proceeded past every gate) and
+ * `reject` (some gate blocked it). Each carries a `reason` enum so
+ * dashboards can break down the rejection mix without parsing prose.
+ *
+ * Reason codes are part of the operational contract — only add new
+ * values, never rename existing ones.
+ */
+type LimiterDecision = "allow" | "reject";
+type LimiterReason =
+  | "ok"
+  | "idempotent_replay"
+  | "code_not_found"
+  | "code_inactive"
+  | "code_revoked"
+  | "not_yet_valid"
+  | "expired"
+  | "max_uses_exhausted"
+  | "already_redeemed_by_tenant"
+  | "atomic_claim_lost_race"
+  | "missing_workspace"
+  | "invalid_code_format"
+  | "invalid_idempotency_key"
+  | "not_authenticated"
+  | "request_too_large";
+
+function logLimiterDecision(entry: {
+  requestId: string;
+  decision: LimiterDecision;
+  reason: LimiterReason;
+  userIdHash: string | null;
+  tenantIdHash?: string | null;
+  accessCodeIdHash?: string | null;
+  /** Optional capacity context for `max_uses_exhausted` / `ok` decisions. */
+  usedCount?: number | null;
+  maxUses?: number | null;
+  hadIdempotencyKey?: boolean;
+}) {
+  const line = JSON.stringify({
+    tag: "redeem-access-code-limiter",
+    ...entry,
+    at: new Date().toISOString(),
+  });
+  console.info(LIMITER_LOG_TAG, line);
 }
 
 /**
