@@ -181,93 +181,147 @@ jobs:
           # missing tool (e.g. lsof) or transient docker hiccup cannot abort
           # the job before we even try to boot Supabase.
           set +e
-          echo "::group::Stop host Postgres"
-          sudo systemctl stop postgresql 2>&1 || true
-          sudo service postgresql stop 2>&1 || true
-          # GitHub runners ship versioned clusters (e.g. postgresql@14-main)
-          # that don't always stop via the umbrella `postgresql` unit. Walk
-          # every cluster and stop it explicitly.
-          if command -v pg_lsclusters >/dev/null 2>&1; then
-            pg_lsclusters -h 2>/dev/null | awk '{print $1" "$2}' | while read -r ver name; do
-              [ -z "$ver" ] && continue
-              echo "Stopping cluster ${ver}/${name}"
-              sudo pg_ctlcluster "$ver" "$name" stop --force 2>&1 || true
-            done
-          fi
-          echo "::endgroup::"
 
-          echo "::group::Remove docker containers publishing Supabase ports"
-          # Catch anything that publishes 5432x even if it isn't named supabase_*
-          # (e.g. user services, leftover compose stacks from a previous job).
-          for port in 54321 54322 54323 54324 54327 54328; do
-            ids=$(docker ps -q --filter "publish=${port}" 2>/dev/null)
-            if [ -n "$ids" ]; then
-              echo "Removing containers publishing :${port}: $ids"
-              echo "$ids" | xargs -r docker rm -f 2>&1 || true
-            fi
-          done
-          echo "::endgroup::"
+          PORTS="54321 54322 54323 54324 54327 54328"
 
-          echo "::group::Free Supabase ports (PID kill)"
           if ! command -v lsof >/dev/null 2>&1; then
             echo "lsof not installed, installing..."
             sudo apt-get install -y --no-install-recommends lsof 2>&1 || true
           fi
-          for port in 54321 54322 54323 54324 54327 54328; do
-            pids=$(sudo lsof -ti tcp:"$port" 2>/dev/null)
-            if [ -n "$pids" ]; then
-              echo "Killing PIDs on port $port: $pids"
-              sudo kill -9 $pids 2>&1 || true
+
+          # One full cleanup pass: host Postgres clusters, docker containers
+          # publishing our ports, raw PID kill on holders, stale supabase_*
+          # containers/volumes/networks. Idempotent so we can re-run it on
+          # each retry attempt.
+          cleanup_pass() {
+            echo "::group::Stop host Postgres"
+            sudo systemctl stop postgresql 2>&1 || true
+            sudo service postgresql stop 2>&1 || true
+            # GitHub runners ship versioned clusters (e.g. postgresql@14-main)
+            # that don't always stop via the umbrella `postgresql` unit. Walk
+            # every cluster and stop it explicitly.
+            if command -v pg_lsclusters >/dev/null 2>&1; then
+              pg_lsclusters -h 2>/dev/null | awk '{print $1" "$2}' | while read -r ver name; do
+                [ -z "$ver" ] && continue
+                echo "Stopping cluster ${ver}/${name}"
+                sudo pg_ctlcluster "$ver" "$name" stop --force 2>&1 || true
+              done
             fi
+            echo "::endgroup::"
+
+            echo "::group::Remove docker containers publishing Supabase ports"
+            for port in $PORTS; do
+              ids=$(docker ps -q --filter "publish=${port}" 2>/dev/null)
+              if [ -n "$ids" ]; then
+                echo "Removing containers publishing :${port}: $ids"
+                echo "$ids" | xargs -r docker rm -f 2>&1 || true
+              fi
+            done
+            echo "::endgroup::"
+
+            echo "::group::Free Supabase ports (PID kill)"
+            for port in $PORTS; do
+              pids=$(sudo lsof -ti tcp:"$port" 2>/dev/null)
+              if [ -n "$pids" ]; then
+                echo "Killing PIDs on port $port: $pids"
+                sudo kill -9 $pids 2>&1 || true
+              fi
+            done
+            echo "::endgroup::"
+
+            echo "::group::Remove stale supabase containers"
+            stale=$(docker ps -aq --filter "name=supabase_" 2>/dev/null)
+            if [ -n "$stale" ]; then
+              echo "$stale" | xargs -r docker rm -f 2>&1 || true
+            fi
+            echo "::endgroup::"
+
+            # Stale named volumes (supabase_db_*, supabase_storage_*, etc.)
+            # keep Postgres datadirs alive across runs. If a previous run
+            # crashed mid-boot, the leftover datadir can resurrect Postgres
+            # the moment a new container attaches and pin :54322 before our
+            # supabase start gets there. Prune them up front.
+            echo "::group::Remove stale supabase docker volumes"
+            stale_vols=$(docker volume ls -q --filter "name=supabase_" 2>/dev/null)
+            if [ -n "$stale_vols" ]; then
+              echo "Removing volumes:"
+              echo "$stale_vols"
+              echo "$stale_vols" | xargs -r docker volume rm -f 2>&1 || true
+            else
+              echo "(no supabase_* volumes found)"
+            fi
+            docker volume prune -f 2>&1 || true
+            echo "::endgroup::"
+
+            echo "::group::Remove stale supabase docker networks"
+            stale_nets=$(docker network ls -q --filter "name=supabase_" 2>/dev/null)
+            if [ -n "$stale_nets" ]; then
+              echo "Removing networks:"
+              docker network ls --filter "name=supabase_" --format '{{.ID}}\t{{.Name}}' 2>/dev/null || true
+              echo "$stale_nets" | xargs -r -n1 docker network rm 2>&1 || true
+            else
+              echo "(no supabase_* networks found)"
+            fi
+            docker network prune -f 2>&1 || true
+            echo "::endgroup::"
+          }
+
+          # Return 0 if every port in $PORTS is free, 1 otherwise. Prints
+          # the still-occupied ports so each retry log is self-explanatory.
+          ports_free() {
+            local still=""
+            for port in $PORTS; do
+              if sudo lsof -nP -iTCP:"$port" -sTCP:LISTEN >/dev/null 2>&1; then
+                still="${still} ${port}"
+                continue
+              fi
+              # docker can publish a port without a userspace listener that
+              # lsof sees from outside the netns; double-check via docker.
+              if docker ps --format '{{.Ports}}' 2>/dev/null | grep -qE "[:.]${port}->"; then
+                still="${still} ${port}"
+              fi
+            done
+            if [ -n "$still" ]; then
+              echo "Still occupied:${still}"
+              return 1
+            fi
+            return 0
+          }
+
+          # Retry loop with exponential backoff (cap 30s) up to a 5 min
+          # deadline. Each attempt: run the full cleanup pass, sleep, then
+          # re-check. Stops early as soon as every port is free.
+          DEADLINE=$(( $(date +%s) + 300 ))
+          delay=2
+          attempt=0
+          while :; do
+            attempt=$((attempt + 1))
+            echo "::group::Cleanup attempt ${attempt}"
+            cleanup_pass
+            # Brief sleep so kernel can release sockets (TIME_WAIT) and
+            # docker can finalize container teardown before we recheck.
+            sleep "$delay"
+            if ports_free; then
+              echo "All Supabase ports free after ${attempt} attempt(s)."
+              echo "::endgroup::"
+              break
+            fi
+            echo "::endgroup::"
+            now=$(date +%s)
+            if [ "$now" -ge "$DEADLINE" ]; then
+              echo "::warning::Ports still occupied after ${attempt} cleanup attempts (~5 min). Continuing; supabase start will retry and surface real conflicts."
+              break
+            fi
+            # Exponential backoff: 2, 4, 8, 16, 30, 30, ...
+            delay=$(( delay * 2 ))
+            [ "$delay" -gt 30 ] && delay=30
+            echo "Sleeping ${delay}s before next cleanup attempt..."
           done
-          echo "::endgroup::"
 
-          echo "::group::Remove stale supabase containers"
-          stale=$(docker ps -aq --filter "name=supabase_" 2>/dev/null)
-          if [ -n "$stale" ]; then
-            echo "$stale" | xargs -r docker rm -f 2>&1 || true
-          fi
-          echo "::endgroup::"
-
-          # Stale named volumes (supabase_db_*, supabase_storage_*, etc.)
-          # keep Postgres datadirs alive across runs. If a previous run
-          # crashed mid-boot, the leftover datadir can resurrect Postgres
-          # the moment a new container attaches and pin :54322 before our
-          # supabase start gets there. Prune them up front.
-          echo "::group::Remove stale supabase docker volumes"
-          stale_vols=$(docker volume ls -q --filter "name=supabase_" 2>/dev/null)
-          if [ -n "$stale_vols" ]; then
-            echo "Removing volumes:"
-            echo "$stale_vols"
-            echo "$stale_vols" | xargs -r docker volume rm -f 2>&1 || true
-          else
-            echo "(no supabase_* volumes found)"
-          fi
-          # Sweep dangling volumes too (orphaned anonymous datadirs).
-          docker volume prune -f 2>&1 || true
-          echo "::endgroup::"
-
-          # Custom user-defined networks from prior compose stacks can
-          # retain IPAM bindings that confuse port allocation; drop any
-          # network whose name starts with supabase_ plus any dangling
-          # ones.
-          echo "::group::Remove stale supabase docker networks"
-          stale_nets=$(docker network ls -q --filter "name=supabase_" 2>/dev/null)
-          if [ -n "$stale_nets" ]; then
-            echo "Removing networks:"
-            docker network ls --filter "name=supabase_" --format '{{.ID}}\t{{.Name}}' 2>/dev/null || true
-            echo "$stale_nets" | xargs -r -n1 docker network rm 2>&1 || true
-          else
-            echo "(no supabase_* networks found)"
-          fi
-          docker network prune -f 2>&1 || true
-          echo "::endgroup::"
-
-          # Give the kernel a moment to release the sockets (TIME_WAIT).
-          sleep 2
-
-          # Always succeed.
+          # Always succeed; downstream supabase start is the authoritative gate.
           exit 0
+
+
 
       # After best-effort cleanup, verify the Supabase ports are actually
       # free. If anything is still bound, fail HERE with a clear, actionable
