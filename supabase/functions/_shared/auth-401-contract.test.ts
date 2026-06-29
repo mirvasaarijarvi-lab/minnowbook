@@ -144,7 +144,7 @@ async function assert401Contract(
   }
 }
 
-for (const { name, exportName } of AUTH_ENFORCED) {
+for (const { name, exportName, probeBody } of AUTH_ENFORCED) {
   Deno.test({
     name: `${name}: missing Authorization returns canonical 401`,
     // Supabase JS client schedules a token-refresh interval on construction;
@@ -153,7 +153,7 @@ for (const { name, exportName } of AUTH_ENFORCED) {
     sanitizeResources: false,
     fn: withStubSupabaseEnv(async () => {
       const handler = await loadHandler(name, exportName);
-      await assert401Contract(name, handler, {}, "missing header");
+      await assert401Contract(name, handler, {}, "missing header", probeBody);
     }),
   });
 
@@ -168,6 +168,7 @@ for (const { name, exportName } of AUTH_ENFORCED) {
         handler,
         { Authorization: "Basic abc123" },
         "malformed header",
+        probeBody,
       );
     }),
   });
