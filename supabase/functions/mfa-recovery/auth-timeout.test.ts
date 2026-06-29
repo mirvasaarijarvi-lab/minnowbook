@@ -24,7 +24,35 @@ Deno.env.set(
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "stub-service-key",
 );
 
+// IMPORTANT: install the fetch stub BEFORE importing the handler module.
+// supabase-js captures `globalThis.fetch` at GoTrueClient construction
+// time; if we only swap it inside the test fn, the captured reference
+// still points at the real fetch and the request to http://stub.local
+// fails fast (ECONNREFUSED), tripping the outer 500 catch in ~4ms
+// instead of the in-code 5s Promise.race timeout we want to exercise.
+let hangAuthFetch = false;
+const origFetch = globalThis.fetch;
+globalThis.fetch = ((input: RequestInfo | URL, init?: RequestInit) => {
+  const url = typeof input === "string"
+    ? input
+    : input instanceof URL
+    ? input.toString()
+    : input.url;
+  if (hangAuthFetch && url.includes("/auth/v1/user")) {
+    // Never resolve. Cooperate with abort signals so leaked timers
+    // don't keep the test runtime alive past the sanitizers.
+    return new Promise<Response>((_, reject) => {
+      const signal = init?.signal;
+      if (signal) {
+        signal.addEventListener("abort", () => reject(new Error("aborted")));
+      }
+    });
+  }
+  return origFetch(input as RequestInfo, init);
+}) as typeof fetch;
+
 const { handleMfaRecoveryRequest } = await import("./index.ts");
+
 
 interface CapturedLog {
   level: "info" | "warn" | "error";
