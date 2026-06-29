@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { Ticket, Check } from "lucide-react";
+import { invokeWithRetry } from "@/lib/invoke-with-retry";
 
 const RedeemAccessCode = () => {
   const [code, setCode] = useState("");
