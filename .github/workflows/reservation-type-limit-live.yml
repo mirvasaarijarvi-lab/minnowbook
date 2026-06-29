@@ -292,10 +292,70 @@ jobs:
       - name: Start local Supabase stack
         id: supabase-start
         if: steps.supabase-pull.outcome == 'success'
+        timeout-minutes: 12
         run: |
-          set -euo pipefail
-          # Idempotent: if pre-pull already brought it up, this is a no-op.
-          supabase start --exclude=imgproxy,mailpit,studio,realtime,edge-runtime || true
+          set -uo pipefail
+          mkdir -p /tmp/supabase-diag
+          HEALTH_URL="http://127.0.0.1:54321/rest/v1/"
+          # If pre-pull already brought it up, short-circuit immediately.
+          if curl -sf --max-time 3 "$HEALTH_URL" >/dev/null 2>&1; then
+            echo "Supabase already healthy from pre-pull step."
+            exit 0
+          fi
+
+          # Retry `supabase start` with exponential backoff (capped at 60s)
+          # until the REST health endpoint responds or we hit ~10 min total.
+          MAX_ATTEMPTS=6
+          DEADLINE=$(( $(date +%s) + 600 ))
+          backoff=5
+          for attempt in $(seq 1 $MAX_ATTEMPTS); do
+            now=$(date +%s)
+            if [ "$now" -ge "$DEADLINE" ]; then
+              echo "::error::Deadline reached before Supabase became healthy."
+              break
+            fi
+            LOG="/tmp/supabase-diag/supabase-start.attempt-${attempt}.log"
+            echo "::group::supabase start attempt ${attempt}/${MAX_ATTEMPTS}"
+            # `supabase start` is idempotent; capture output for diagnostics.
+            supabase start --exclude=imgproxy,mailpit,studio,realtime,edge-runtime 2>&1 | tee "$LOG"
+            rc=${PIPESTATUS[0]}
+            echo "supabase start exit=${rc}"
+            echo "::endgroup::"
+
+            # Poll health for up to 90s before declaring this attempt failed.
+            healthy=0
+            for i in $(seq 1 90); do
+              if curl -sf --max-time 3 "$HEALTH_URL" >/dev/null 2>&1; then
+                echo "Supabase healthy after attempt ${attempt} (waited ${i}s)."
+                healthy=1
+                break
+              fi
+              sleep 1
+            done
+            if [ "$healthy" -eq 1 ]; then
+              exit 0
+            fi
+
+            if [ "$attempt" -lt "$MAX_ATTEMPTS" ]; then
+              echo "::warning::Attempt ${attempt} did not become healthy; tearing down and retrying in ${backoff}s."
+              supabase stop --no-backup 2>&1 || true
+              # Reap any lingering supabase_* containers between attempts.
+              stale=$(docker ps -aq --filter "name=supabase_" 2>/dev/null)
+              if [ -n "$stale" ]; then
+                echo "$stale" | xargs -r docker rm -f 2>&1 || true
+              fi
+              sleep "$backoff"
+              # Exponential backoff with 60s cap.
+              backoff=$(( backoff * 2 ))
+              if [ "$backoff" -gt 60 ]; then backoff=60; fi
+            fi
+          done
+
+          echo "::error::supabase start failed to become healthy after ${MAX_ATTEMPTS} attempts."
+          echo "----- last attempt log (tail 200) -----"
+          tail -n 200 /tmp/supabase-diag/supabase-start.attempt-*.log 2>/dev/null || true
+          exit 1
+
 
       - name: Wait for PostgREST API
         id: wait-postgrest
