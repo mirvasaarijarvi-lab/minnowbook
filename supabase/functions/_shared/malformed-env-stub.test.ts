@@ -233,7 +233,7 @@ for (const { name, exportName } of AUTH_ENFORCED) {
       name: `${name}: missing Authorization returns 401 with ${label}`,
       sanitizeOps: false,
       sanitizeResources: false,
-      fn: withMalformedEnv(value, async () => {
+      fn: withMalformedEnvAndStub(value, async () => {
         const handler = await loadHandler(name, exportName);
         await assertFast401(name, handler, label);
       }),
