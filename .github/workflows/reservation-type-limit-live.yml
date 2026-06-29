@@ -172,19 +172,42 @@ jobs:
       # default ports before starting so we do not hit "address already in use".
       - name: Free Supabase ports
         if: steps.docker-check.outputs.available == 'true' && steps.supabase-cli.outcome == 'success'
+        continue-on-error: true
+        shell: bash {0}
         run: |
+          # Best-effort port/container cleanup. Never fail the job from here;
+          # downstream `supabase start` will surface real port conflicts with
+          # actionable logs. Using `bash {0}` (no -e / no pipefail) so a
+          # missing tool (e.g. lsof) or transient docker hiccup cannot abort
+          # the job before we even try to boot Supabase.
           set +e
-          sudo systemctl stop postgresql || true
-          sudo service postgresql stop || true
+          echo "::group::Stop host Postgres"
+          sudo systemctl stop postgresql 2>&1 || true
+          sudo service postgresql stop 2>&1 || true
+          echo "::endgroup::"
+
+          echo "::group::Free Supabase ports"
+          if ! command -v lsof >/dev/null 2>&1; then
+            echo "lsof not installed, installing..."
+            sudo apt-get install -y --no-install-recommends lsof 2>&1 || true
+          fi
           for port in 54321 54322 54323 54324 54327 54328; do
-            pids=$(sudo lsof -ti tcp:"$port" 2>/dev/null || true)
+            pids=$(sudo lsof -ti tcp:"$port" 2>/dev/null)
             if [ -n "$pids" ]; then
               echo "Killing PIDs on port $port: $pids"
-              sudo kill -9 $pids || true
+              sudo kill -9 $pids 2>&1 || true
             fi
           done
-          # Also clean any leftover supabase containers from prior runs.
-          docker ps -aq --filter "name=supabase_" | xargs -r docker rm -f || true
+          echo "::endgroup::"
+
+          echo "::group::Remove stale supabase containers"
+          stale=$(docker ps -aq --filter "name=supabase_" 2>/dev/null)
+          if [ -n "$stale" ]; then
+            echo "$stale" | xargs -r docker rm -f 2>&1 || true
+          fi
+          echo "::endgroup::"
+
+          # Always succeed.
           exit 0
 
       # Pre-pull images with a generous timeout so transient Docker Hub
