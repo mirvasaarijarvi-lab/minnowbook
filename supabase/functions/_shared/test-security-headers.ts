@@ -112,10 +112,16 @@ export function withStubSupabaseEnv<T>(fn: () => Promise<T>): () => Promise<T> {
   return async () => {
     const prev: Record<string, string | undefined> = {};
     for (const k of KEYS) prev[k] = Deno.env.get(k);
-    Deno.env.set("SUPABASE_URL", prev.SUPABASE_URL ?? "https://stub.supabase.co");
-    Deno.env.set("SUPABASE_SERVICE_ROLE_KEY", prev.SUPABASE_SERVICE_ROLE_KEY ?? "stub-service-key");
-    Deno.env.set("SUPABASE_ANON_KEY", prev.SUPABASE_ANON_KEY ?? "stub-anon-key");
-    Deno.env.set("LOVABLE_API_KEY", prev.LOVABLE_API_KEY ?? "stub-lovable-key");
+    // Use truthiness (not ??) so that an inherited *empty-string* env var
+    // (common in CI when a real secret isn't available and the workflow sets
+    // the var to "" to mask it) is still replaced by a usable stub value.
+    // Without this, `createClient(url, "")` throws "supabaseKey is required."
+    // before the handler can reach its auth check, turning the expected 401
+    // into a 500 and breaking the short-circuit / 401-contract suites.
+    Deno.env.set("SUPABASE_URL", prev.SUPABASE_URL || "https://stub.supabase.co");
+    Deno.env.set("SUPABASE_SERVICE_ROLE_KEY", prev.SUPABASE_SERVICE_ROLE_KEY || "stub-service-key");
+    Deno.env.set("SUPABASE_ANON_KEY", prev.SUPABASE_ANON_KEY || "stub-anon-key");
+    Deno.env.set("LOVABLE_API_KEY", prev.LOVABLE_API_KEY || "stub-lovable-key");
     try {
       return await fn();
     } finally {
