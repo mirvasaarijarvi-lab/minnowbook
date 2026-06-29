@@ -184,6 +184,7 @@ for (const { name, exportName, probeBody } of AUTH_ENFORCED) {
         handler,
         { Authorization: "Bearer    " },
         "empty bearer",
+        probeBody,
       );
     }),
   });
