@@ -49,7 +49,7 @@ const ENV_KEYS = [
   "LOVABLE_API_KEY",
 ] as const;
 
-const BUDGET_MS = 1_500;
+
 
 // The whitespace / malformed payloads CI has been observed to inject.
 // Each one MUST be treated as "missing" by `coerceMissingEnv`.
