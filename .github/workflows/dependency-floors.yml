@@ -24,7 +24,7 @@ jobs:
   check-floors:
     name: Verify installed versions meet security floors
     runs-on: ubuntu-latest
-    timeout-minutes: 3
+    timeout-minutes: 5
     permissions:
       contents: read
     steps:
@@ -33,6 +33,10 @@ jobs:
       - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
         with:
           node-version: 22
+          # Cache npm metadata so the floor check (which reads the
+          # lockfile, not node_modules) starts faster on warm runs
+          # and avoids registry round-trips on cold-start retries.
+          cache: 'npm'
 
       - name: Check security-floor versions in package-lock.json
         run: node scripts/ci/check-dependency-floors.mjs
