@@ -454,6 +454,71 @@ jobs:
           echo "::endgroup::"
           exit 1
 
+      - name: Verify Postgres container port mapping
+        id: verify-pg-ports
+        if: steps.wait-postgrest.outcome == 'success'
+        run: |
+          set -uo pipefail
+          # Confirm the live Postgres container is actually bound to the
+          # ports the test suite connects to (54322 for Postgres, 54321 for
+          # the REST/Kong gateway). If the CLI silently remapped them due to
+          # a prior conflict, the reservation-type cap test would connect to
+          # the wrong instance, so fail fast with a clear diagnostic.
+          EXPECTED_PG_PORT=54322
+          EXPECTED_API_PORT=54321
+
+          pg_container="$(docker ps --filter 'name=supabase_db_' --format '{{.Names}}' | head -n1)"
+          api_container="$(docker ps --filter 'name=supabase_kong_' --format '{{.Names}}' | head -n1)"
+
+          echo "::group::Detected containers"
+          echo "postgres: ${pg_container:-<none>}"
+          echo "kong/api: ${api_container:-<none>}"
+          echo "::endgroup::"
+
+          fail=0
+
+          check_mapping() {
+            local container="$1" internal="$2" expected_host="$3" label="$4"
+            if [ -z "$container" ]; then
+              echo "::error::${label} container not running"
+              return 1
+            fi
+            local mapped
+            mapped="$(docker port "$container" "${internal}/tcp" 2>/dev/null | awk -F: 'NR==1{print $NF}')"
+            echo "${label}: ${container} ${internal}/tcp -> ${mapped:-<unmapped>} (expected ${expected_host})"
+            if [ "${mapped}" != "${expected_host}" ]; then
+              echo "::error::${label} container is mapped to ${mapped:-<unmapped>}, expected ${expected_host}"
+              return 1
+            fi
+            return 0
+          }
+
+          echo "::group::Container port mapping"
+          check_mapping "$pg_container" 5432 "$EXPECTED_PG_PORT" "Postgres" || fail=1
+          check_mapping "$api_container" 8000 "$EXPECTED_API_PORT" "Kong/API" || fail=1
+          echo "::endgroup::"
+
+          # Sanity: confirm a TCP connection actually reaches Postgres on
+          # the expected host port (catches firewall/proxy weirdness even
+          # when `docker port` reports the right mapping).
+          echo "::group::TCP probe 127.0.0.1:${EXPECTED_PG_PORT}"
+          if ! timeout 5 bash -c "</dev/tcp/127.0.0.1/${EXPECTED_PG_PORT}" 2>&1; then
+            echo "::error::TCP connect to 127.0.0.1:${EXPECTED_PG_PORT} failed"
+            fail=1
+          else
+            echo "ok"
+          fi
+          echo "::endgroup::"
+
+          if [ "$fail" -ne 0 ]; then
+            echo "::group::docker ps -a (diagnostics)"
+            docker ps -a || true
+            echo "::endgroup::"
+            exit 1
+          fi
+
+
+
       # Always-on diagnostics: if any readiness step failed, dump everything
       # we know about the supabase stack so the failure is debuggable from
       # the GitHub Actions log alone (no need to repro locally).
