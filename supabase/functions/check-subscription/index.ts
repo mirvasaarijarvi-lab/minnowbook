@@ -39,6 +39,27 @@ export async function handleCheckSubscriptionRequest(req: Request): Promise<Resp
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Reject oversized request bodies (50KB max) — cheap pre-auth check.
+  const MAX_BODY_SIZE = 50 * 1024;
+  const contentLength = parseInt(req.headers.get("content-length") || "0", 10);
+  if (contentLength > MAX_BODY_SIZE) {
+    return new Response(JSON.stringify({ error: "Request too large" }), {
+      status: 413,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+  // Auth-header short-circuit MUST happen before any createClient(...) call so
+  // that missing/empty Supabase env vars cannot turn an expected 401 into a
+  // 500 via `supabaseKey is required.`.
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return new Response(
+      JSON.stringify({ error: "No authorization header provided" }),
+      { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
+  }
+
   const supabaseClient = createClient(
     Deno.env.get("SUPABASE_URL") ?? "",
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
@@ -46,25 +67,13 @@ export async function handleCheckSubscriptionRequest(req: Request): Promise<Resp
   );
 
   try {
-    // Reject oversized request bodies (50KB max)
-    const MAX_BODY_SIZE = 50 * 1024;
-    const contentLength = parseInt(req.headers.get("content-length") || "0", 10);
-    if (contentLength > MAX_BODY_SIZE) {
-      return new Response(JSON.stringify({ error: "Request too large" }), {
-        status: 413,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
     logStep("Function started");
 
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
     if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
 
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader) throw new Error("No authorization header provided");
-
     const token = authHeader.replace("Bearer ", "");
+
     const { data: userData, error: userError } = await withTimeout(
       supabaseClient.auth.getUser(token),
       5000,
