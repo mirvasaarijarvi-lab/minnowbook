@@ -184,9 +184,31 @@ jobs:
           echo "::group::Stop host Postgres"
           sudo systemctl stop postgresql 2>&1 || true
           sudo service postgresql stop 2>&1 || true
+          # GitHub runners ship versioned clusters (e.g. postgresql@14-main)
+          # that don't always stop via the umbrella `postgresql` unit. Walk
+          # every cluster and stop it explicitly.
+          if command -v pg_lsclusters >/dev/null 2>&1; then
+            pg_lsclusters -h 2>/dev/null | awk '{print $1" "$2}' | while read -r ver name; do
+              [ -z "$ver" ] && continue
+              echo "Stopping cluster ${ver}/${name}"
+              sudo pg_ctlcluster "$ver" "$name" stop --force 2>&1 || true
+            done
+          fi
           echo "::endgroup::"
 
-          echo "::group::Free Supabase ports"
+          echo "::group::Remove docker containers publishing Supabase ports"
+          # Catch anything that publishes 5432x even if it isn't named supabase_*
+          # (e.g. user services, leftover compose stacks from a previous job).
+          for port in 54321 54322 54323 54324 54327 54328; do
+            ids=$(docker ps -q --filter "publish=${port}" 2>/dev/null)
+            if [ -n "$ids" ]; then
+              echo "Removing containers publishing :${port}: $ids"
+              echo "$ids" | xargs -r docker rm -f 2>&1 || true
+            fi
+          done
+          echo "::endgroup::"
+
+          echo "::group::Free Supabase ports (PID kill)"
           if ! command -v lsof >/dev/null 2>&1; then
             echo "lsof not installed, installing..."
             sudo apt-get install -y --no-install-recommends lsof 2>&1 || true
@@ -206,6 +228,9 @@ jobs:
             echo "$stale" | xargs -r docker rm -f 2>&1 || true
           fi
           echo "::endgroup::"
+
+          # Give the kernel a moment to release the sockets (TIME_WAIT).
+          sleep 2
 
           # Always succeed.
           exit 0
