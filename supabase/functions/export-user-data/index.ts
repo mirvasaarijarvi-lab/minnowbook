@@ -40,7 +40,7 @@ async function safeSelect(client: ReturnType<typeof createClient>, table: string
   }
 }
 
-Deno.serve(async (req) => {
+export async function handleExportUserDataRequest(req: Request): Promise<Response> {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
@@ -135,4 +135,6 @@ Deno.serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
-});
+}
+
+Deno.serve(handleExportUserDataRequest);
