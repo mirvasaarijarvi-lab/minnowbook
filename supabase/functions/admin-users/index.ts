@@ -6,6 +6,7 @@ import {
   getCorsHeaders,
   isOriginAllowed,
 } from "../_shared/http-headers.ts";
+import { requireAuth } from "../_shared/require-auth.ts";
 
 
 // --- Safe error messages (prevent schema leakage) ---
