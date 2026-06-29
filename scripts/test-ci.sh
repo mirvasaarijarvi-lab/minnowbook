@@ -48,22 +48,35 @@ if [ "${SKIP_SUPABASE_REACHABILITY_PREFLIGHT:-0}" != "1" ]; then
     echo "=============================================="
     echo "▶ Preflight: Supabase reachability (10s budget)"
     echo "=============================================="
-    probe_url="${preflight_url%/}/auth/v1/health"
+    probe_auth_url="${preflight_url%/}/auth/v1/health"
+    probe_rest_url="${preflight_url%/}/rest/v1/"
     # -m 10  : hard 10s ceiling for the whole request
     # -sS    : silent but still show errors
     # -o ... : drop body, we only care about the status code
-    status_code=$(curl -m 10 -sS -o /dev/null -w "%{http_code}" \
+    auth_status=$(curl -m 10 -sS -o /dev/null -w "%{http_code}" \
       -H "apikey: $preflight_key" \
-      "$probe_url" || echo "000")
-    if [ "$status_code" = "200" ] || [ "$status_code" = "401" ]; then
-      # 200 = healthy, 401 = reachable but anon-only endpoint declined to
-      # disclose health (still proves DNS + TLS + edge are up).
-      echo "✅ Supabase reachable ($probe_url -> HTTP $status_code)"
+      "$probe_auth_url" || echo "000")
+    # PostgREST root: 200 with anon role on a healthy instance. Hitting this
+    # in addition to /auth/v1/health catches the case where auth is up but
+    # the DB / PostgREST layer is unreachable, which is what produces the
+    # 5s-per-test cascades in src/test/security/*.
+    rest_status=$(curl -m 10 -sS -o /dev/null -w "%{http_code}" \
+      -H "apikey: $preflight_key" \
+      -H "Authorization: Bearer $preflight_key" \
+      "$probe_rest_url" || echo "000")
+    auth_ok=0; rest_ok=0
+    case "$auth_status" in 200|401) auth_ok=1 ;; esac
+    # PostgREST returns 200 for the root introspection on healthy instances;
+    # 401/404 still proves the layer is reachable (just declined the probe).
+    case "$rest_status" in 200|401|404) rest_ok=1 ;; esac
+    if [ "$auth_ok" = "1" ] && [ "$rest_ok" = "1" ]; then
+      echo "✅ Supabase reachable (auth=$auth_status rest=$rest_status)"
     else
       echo ""
       echo "❌ Supabase unreachable from this runner."
-      echo "   probe   : $probe_url"
-      echo "   result  : HTTP $status_code (000 means curl could not connect within 10s)"
+      echo "   auth probe : $probe_auth_url -> HTTP $auth_status"
+      echo "   rest probe : $probe_rest_url -> HTTP $rest_status"
+      echo "   (000 means curl could not connect within 10s)"
       echo ""
       echo "   The live security suites under src/test/security/*.test.ts call"
       echo "   anon PostgREST/RPC on every test. With the project unreachable"
@@ -75,10 +88,13 @@ if [ "${SKIP_SUPABASE_REACHABILITY_PREFLIGHT:-0}" != "1" ]; then
       echo "     - Confirm the project ref in VITE_SUPABASE_URL is current and"
       echo "       not paused (Backend > Project status in Lovable Cloud)."
       echo "     - Confirm the runner has outbound HTTPS to *.supabase.co."
+      echo "     - If auth=ok but rest!=ok, the DB / PostgREST layer is down"
+      echo "       or restarting — wait for Cloud status to recover."
       echo "     - For an intentionally offline run, set"
       echo "       SKIP_SUPABASE_REACHABILITY_PREFLIGHT=1."
       exit 1
     fi
+
     echo ""
   fi
 fi
