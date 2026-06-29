@@ -210,6 +210,43 @@ jobs:
           # Always succeed.
           exit 0
 
+      # After best-effort cleanup, verify the Supabase ports are actually
+      # free. If anything is still bound, fail HERE with a clear, actionable
+      # listing rather than letting `supabase start` die with an opaque
+      # "address already in use" error several minutes later.
+      - name: Verify Supabase ports are free
+        if: steps.docker-check.outputs.available == 'true' && steps.supabase-cli.outcome == 'success'
+        run: |
+          set -uo pipefail
+          PORTS="54321 54322 54323 54324 54327 54328"
+          if ! command -v lsof >/dev/null 2>&1; then
+            sudo apt-get install -y --no-install-recommends lsof >/dev/null 2>&1 || true
+          fi
+          occupied=""
+          echo "::group::Port availability check"
+          for port in $PORTS; do
+            holders=$(sudo lsof -nP -iTCP:"$port" -sTCP:LISTEN 2>/dev/null)
+            if [ -n "$holders" ]; then
+              echo "::error::Port ${port} is still occupied:"
+              echo "$holders"
+              echo "----- ss -lntp for :${port} -----"
+              sudo ss -lntp "sport = :$port" 2>&1 || true
+              echo "----- docker containers publishing :${port} -----"
+              docker ps --format '{{.ID}}\t{{.Names}}\t{{.Ports}}' 2>/dev/null | grep -E "[:.]${port}->" || echo "(none)"
+              occupied="${occupied} ${port}"
+            else
+              echo "Port ${port}: free"
+            fi
+          done
+          echo "::endgroup::"
+          if [ -n "$occupied" ]; then
+            echo "::error::Supabase ports still occupied after cleanup:${occupied}"
+            exit 1
+          fi
+          echo "All Supabase ports are free."
+
+
+
       # Pre-pull images with a generous timeout so transient Docker Hub
       # slowness surfaces as a skipped job instead of a hard failure.
       # The actual `supabase start` step then re-uses the local cache.
