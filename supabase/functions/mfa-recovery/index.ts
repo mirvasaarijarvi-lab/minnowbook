@@ -51,17 +51,42 @@ export const handleMfaRecoveryRequest = async (req: Request): Promise<Response> 
   const startedAt = Date.now();
   const elapsed = () => Date.now() - startedAt;
 
+  /**
+   * Canonical structured-log schema for this function. Every emitted
+   * line MUST include these fields so downstream log search / alerting
+   * can rely on a single shape. `error_code` is `null` on success paths
+   * and a stable machine-readable token (SCREAMING_SNAKE_CASE) on every
+   * warn/error path. Add new optional fields under `extra` only - do
+   * not introduce alternate spellings of the core four
+   * (stage, elapsed_ms, request_id, error_code).
+   */
+  type LogLevel = "info" | "warn" | "error";
+  type LogExtra = Record<string, unknown>;
+  interface LogRecord {
+    fn: "mfa-recovery";
+    stage: string;
+    request_id: string;
+    elapsed_ms: number;
+    method: string;
+    level: LogLevel;
+    error_code: string | null;
+    [key: string]: unknown;
+  }
+
   const log = (
-    level: "info" | "warn" | "error",
+    level: LogLevel,
     stage: string,
-    extra: Record<string, unknown> = {},
-  ) => {
-    const payload = {
+    errorCode: string | null,
+    extra: LogExtra = {},
+  ): void => {
+    const payload: LogRecord = {
       fn: "mfa-recovery",
       stage,
       request_id: requestId,
-      method: req.method,
       elapsed_ms: elapsed(),
+      method: req.method,
+      level,
+      error_code: errorCode,
       ...extra,
     };
     const line = `[mfa-recovery] ${JSON.stringify(payload)}`;
