@@ -163,5 +163,5 @@ for (const { label, headers } of SCENARIOS) {
         `${label}: expected JSON Content-Type on 401, got "${ct}"`,
       );
     }),
-  );
+  });
 }
