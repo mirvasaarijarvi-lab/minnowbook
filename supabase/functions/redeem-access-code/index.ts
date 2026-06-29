@@ -245,7 +245,7 @@ export async function handleRedeemAccessCodeRequest(req: Request): Promise<Respo
       usedCount: entry.usedCount ?? null,
       maxUses: entry.maxUses ?? null,
     };
-    logDecision(entry);
+    logLimiterDecision(entry);
   };
 
   const respond = (
