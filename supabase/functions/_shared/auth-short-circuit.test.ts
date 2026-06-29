@@ -45,9 +45,6 @@ const AUTH_ENFORCED_HANDLERS: ReadonlyArray<{
 }> = [
   { name: "admin-users", handler: handleAdminUsersRequest },
   { name: "archive-reservations", handler: handleArchiveReservationsRequest },
-  { name: "check-subscription", handler: handleCheckSubscriptionRequest },
-  { name: "create-checkout", handler: handleCreateCheckoutRequest },
-  { name: "customer-portal", handler: handleCustomerPortalRequest },
   { name: "log-forbidden-access", handler: handleLogForbiddenAccessRequest },
   { name: "mfa-recovery", handler: handleMfaRecoveryRequest },
   { name: "migrate-branding-assets", handler: handleMigrateBrandingAssetsRequest },
