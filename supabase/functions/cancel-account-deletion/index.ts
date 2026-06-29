@@ -10,7 +10,7 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-Deno.serve(async (req) => {
+export async function handleCancelAccountDeletionRequest(req: Request): Promise<Response> {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
@@ -23,10 +23,16 @@ Deno.serve(async (req) => {
       /* no body */
     }
 
-    const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+    // Lazily construct the admin client AFTER we know which path we'll
+    // take. The no-token, unauthenticated path returns 401 via
+    // requireAuth() below without ever touching Supabase — so an empty
+    // SUPABASE_SERVICE_ROLE_KEY (CI without the secret) can't turn an
+    // expected 401 into a 500 from `createClient(url, "")`.
+    const newAdminClient = () => createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
     // Path 1: token-based cancel
     if (cancelToken) {
+      const admin = newAdminClient();
       const { data: row, error: lookupErr } = await admin
         .from("pending_account_deletions")
         .select("user_id, status, cancel_token, purge_after")
@@ -65,6 +71,7 @@ Deno.serve(async (req) => {
     const auth = await requireAuth(req, corsHeaders, { errorCode: "Unauthorized", errorMessage: "Unauthorized" });
     if (auth instanceof Response) return auth;
     const { userId } = auth;
+    const admin = newAdminClient();
     const { error: updErr } = await admin
       .from("pending_account_deletions")
       .update({ status: "cancelled", cancelled_at: new Date().toISOString() })
@@ -88,4 +95,6 @@ Deno.serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
-});
+}
+
+Deno.serve(handleCancelAccountDeletionRequest);

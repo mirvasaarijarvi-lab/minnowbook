@@ -16,7 +16,7 @@ function randomToken(bytes = 32) {
   return Array.from(buf, (b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-Deno.serve(async (req) => {
+export async function handleRequestAccountDeletionRequest(req: Request): Promise<Response> {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
@@ -119,4 +119,6 @@ Deno.serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
-});
+}
+
+Deno.serve(handleRequestAccountDeletionRequest);

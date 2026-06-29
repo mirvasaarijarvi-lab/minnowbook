@@ -28,7 +28,8 @@ Rights: GDPR Art. 15 (access) and Art. 20 (portability).
 Questions: privacy@mimmobook.com
 `;
 
-async function safeSelect(client: ReturnType<typeof createClient>, table: string, filter: Record<string, unknown>) {
+// deno-lint-ignore no-explicit-any
+async function safeSelect(client: any, table: string, filter: Record<string, unknown>) {
   try {
     let q = client.from(table).select("*");
     for (const [k, v] of Object.entries(filter)) q = q.eq(k, v as never);
@@ -40,7 +41,7 @@ async function safeSelect(client: ReturnType<typeof createClient>, table: string
   }
 }
 
-Deno.serve(async (req) => {
+export async function handleExportUserDataRequest(req: Request): Promise<Response> {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
@@ -135,4 +136,6 @@ Deno.serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
-});
+}
+
+Deno.serve(handleExportUserDataRequest);
