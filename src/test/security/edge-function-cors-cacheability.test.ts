@@ -182,65 +182,87 @@ function expectNoOriginEcho(res: Response, forbidden: string, label: string) {
   expect(acao).not.toBe("*");
 }
 
+// Per-test budget must comfortably exceed the worst-case retry envelope in
+// fetchWithRetry (3 attempts × 15s + 2 backoffs of 0.5–1s ≈ ~47s) plus a
+// margin for cold-start latency on the live edge functions. The default
+// vitest timeout (5s) would otherwise mask transient cold starts as failures.
+const LIVE_NETWORK_TIMEOUT_MS = 60_000;
+
 describe("Forbidden origins — responses are never cacheable cross-origin", () => {
   for (const fn of FUNCTIONS) {
     describe(fn, () => {
       for (const origin of FORBIDDEN_ORIGINS) {
-        it(`preflight from "${origin}" returns a non-cacheable response with Vary: Origin`, async () => {
-          const res = await preflight(fn, origin);
-          await res.text();
-          const label = `${fn} OPTIONS ${origin}`;
-          expectNonCacheable(res, label);
-          expectVariesByOrigin(res, label);
-          expectShortPreflightCache(res, label);
-          expectNoOriginEcho(res, origin, label);
-        });
+        it(
+          `preflight from "${origin}" returns a non-cacheable response with Vary: Origin`,
+          async () => {
+            const res = await preflight(fn, origin);
+            await res.text();
+            const label = `${fn} OPTIONS ${origin}`;
+            expectNonCacheable(res, label);
+            expectVariesByOrigin(res, label);
+            expectShortPreflightCache(res, label);
+            expectNoOriginEcho(res, origin, label);
+          },
+          LIVE_NETWORK_TIMEOUT_MS,
+        );
 
-        it(`POST from "${origin}" returns a non-cacheable response with Vary: Origin`, async () => {
-          const res = await postCall(fn, origin);
-          await res.text().catch(() => "");
-          const label = `${fn} POST ${origin}`;
-          expectNonCacheable(res, label);
-          expectVariesByOrigin(res, label);
-          expectNoOriginEcho(res, origin, label);
-        });
+        it(
+          `POST from "${origin}" returns a non-cacheable response with Vary: Origin`,
+          async () => {
+            const res = await postCall(fn, origin);
+            await res.text().catch(() => "");
+            const label = `${fn} POST ${origin}`;
+            expectNonCacheable(res, label);
+            expectVariesByOrigin(res, label);
+            expectNoOriginEcho(res, origin, label);
+          },
+          LIVE_NETWORK_TIMEOUT_MS,
+        );
       }
 
-      it("repeated forbidden-origin probes return identical cache directives (no caching variance)", async () => {
-        const probes = await Promise.all(
-          Array.from({ length: 4 }, () =>
-            preflight(fn, "https://evil.example.com"),
-          ),
-        );
-        await Promise.all(probes.map((r) => r.text()));
+      it(
+        "repeated forbidden-origin probes return identical cache directives (no caching variance)",
+        async () => {
+          const probes = await Promise.all(
+            Array.from({ length: 4 }, () =>
+              preflight(fn, "https://evil.example.com"),
+            ),
+          );
+          await Promise.all(probes.map((r) => r.text()));
 
-        const fingerprints = probes.map((r) =>
-          [
-            r.headers.get("cache-control"),
-            r.headers.get("vary"),
-            r.headers.get("pragma"),
-            r.headers.get("expires"),
-            r.headers.get("access-control-max-age"),
-          ].join(" | "),
-        );
-        expect(new Set(fingerprints).size).toBe(1);
-      });
+          const fingerprints = probes.map((r) =>
+            [
+              r.headers.get("cache-control"),
+              r.headers.get("vary"),
+              r.headers.get("pragma"),
+              r.headers.get("expires"),
+              r.headers.get("access-control-max-age"),
+            ].join(" | "),
+          );
+          expect(new Set(fingerprints).size).toBe(1);
+        },
+        LIVE_NETWORK_TIMEOUT_MS,
+      );
 
-      it("forbidden-origin response carries no ETag/Last-Modified that would enable revalidation reuse", async () => {
-        const res = await preflight(fn, "https://evil.example.com");
-        await res.text();
-        // These conditional-request enablers would let a cache hold a
-        // stale entry across origins and revalidate on demand. Neither
-        // should be present for a refusal response.
-        expect(
-          res.headers.get("etag"),
-          `${fn}: ETag must not be set on a forbidden-origin response`,
-        ).toBeNull();
-        expect(
-          res.headers.get("last-modified"),
-          `${fn}: Last-Modified must not be set on a forbidden-origin response`,
-        ).toBeNull();
-      });
+      it(
+        "forbidden-origin response carries no ETag/Last-Modified that would enable revalidation reuse",
+        async () => {
+          const res = await preflight(fn, "https://evil.example.com");
+          await res.text();
+          // These conditional-request enablers would let a cache hold a
+          // stale entry across origins and revalidate on demand. Neither
+          // should be present for a refusal response.
+          expect(
+            res.headers.get("etag"),
+            `${fn}: ETag must not be set on a forbidden-origin response`,
+          ).toBeNull();
+          expect(
+            res.headers.get("last-modified"),
+            `${fn}: Last-Modified must not be set on a forbidden-origin response`,
+          ).toBeNull();
+        },
+        LIVE_NETWORK_TIMEOUT_MS,
+      );
     });
   }
 });
