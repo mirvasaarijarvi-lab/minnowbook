@@ -345,29 +345,112 @@ jobs:
           if ! command -v lsof >/dev/null 2>&1; then
             sudo apt-get install -y --no-install-recommends lsof >/dev/null 2>&1 || true
           fi
+
           occupied=""
+          declare -A HOLDER_PROCS=()
+
           echo "::group::Port availability check (diagnostic only)"
           for port in $PORTS; do
             holders=$(sudo lsof -nP -iTCP:"$port" -sTCP:LISTEN 2>/dev/null)
-            if [ -n "$holders" ]; then
+            docker_holders=$(docker ps --format '{{.ID}}\t{{.Names}}\t{{.Image}}\t{{.Ports}}' 2>/dev/null | grep -E "[:.]${port}->")
+            if [ -n "$holders" ] || [ -n "$docker_holders" ]; then
               echo "Port ${port}: OCCUPIED"
-              echo "$holders"
-              echo "----- ss -lntp for :${port} -----"
+              if [ -n "$holders" ]; then
+                echo "----- lsof -----"
+                echo "$holders"
+                # Collect PIDs so we can drill into each holder below.
+                pids=$(echo "$holders" | awk 'NR>1 {print $2}' | sort -u | tr '\n' ' ')
+                HOLDER_PROCS[$port]="$pids"
+              fi
+              echo "----- ss -lntp -----"
               sudo ss -lntp "sport = :$port" 2>&1 || true
+              echo "----- fuser -----"
+              sudo fuser -v "${port}/tcp" 2>&1 || true
               echo "----- docker containers publishing :${port} -----"
-              docker ps --format '{{.ID}}\t{{.Names}}\t{{.Ports}}' 2>/dev/null | grep -E "[:.]${port}->" || echo "(none)"
+              if [ -n "$docker_holders" ]; then
+                echo "$docker_holders"
+              else
+                echo "(none)"
+              fi
               occupied="${occupied} ${port}"
             else
               echo "Port ${port}: free"
             fi
           done
           echo "::endgroup::"
-          if [ -n "$occupied" ]; then
-            echo "::warning::Supabase ports still showing as occupied after cleanup:${occupied}. Continuing; supabase start will retry and surface real conflicts."
-          else
+
+          if [ -z "$occupied" ]; then
             echo "All Supabase ports are free."
+            exit 0
           fi
+
+          echo "::warning::Supabase ports still showing as occupied after cleanup:${occupied}. Continuing; supabase start will retry and surface real conflicts."
+
+          # ---- Detailed diagnostics dump (only on occupied) ----
+          echo "::group::Holder process details (ps + status + cmdline + open files)"
+          all_pids=$(printf '%s\n' "${HOLDER_PROCS[@]}" | tr ' ' '\n' | sed '/^$/d' | sort -u)
+          if [ -n "$all_pids" ]; then
+            for pid in $all_pids; do
+              echo "----- PID ${pid} -----"
+              ps -o pid,ppid,user,etime,pcpu,pmem,stat,command -p "$pid" 2>&1 || true
+              if [ -r "/proc/${pid}/status" ]; then
+                echo "  cgroup: $(cat /proc/${pid}/cgroup 2>/dev/null | head -3)"
+                echo "  cmdline: $(tr '\0' ' ' </proc/${pid}/cmdline 2>/dev/null)"
+              fi
+              # If this PID actually belongs to a docker container, name it.
+              cid=$(grep -ohE '[0-9a-f]{64}' "/proc/${pid}/cgroup" 2>/dev/null | head -1)
+              if [ -n "$cid" ]; then
+                cname=$(docker inspect --format '{{.Name}} ({{.Config.Image}})' "$cid" 2>/dev/null)
+                echo "  docker container: ${cname:-$cid}"
+              fi
+              echo "  listening sockets:"
+              sudo lsof -nP -p "$pid" -iTCP -sTCP:LISTEN 2>/dev/null || true
+            done
+          else
+            echo "(no host PIDs - only docker publishes detected)"
+          fi
+          echo "::endgroup::"
+
+          echo "::group::Full docker ps -a"
+          docker ps -a 2>&1 || true
+          echo "::endgroup::"
+
+          echo "::group::docker logs for containers publishing occupied ports (last 100 lines)"
+          for port in $occupied; do
+            ids=$(docker ps -q --filter "publish=${port}" 2>/dev/null)
+            for cid in $ids; do
+              cname=$(docker inspect --format '{{.Name}}' "$cid" 2>/dev/null | sed 's@^/@@')
+              echo "----- ${cname:-$cid} (port ${port}) -----"
+              docker logs --tail 100 "$cid" 2>&1 || true
+            done
+          done
+          echo "::endgroup::"
+
+          echo "::group::Host Postgres clusters"
+          if command -v pg_lsclusters >/dev/null 2>&1; then
+            pg_lsclusters 2>&1 || true
+          fi
+          for unit in postgresql postgresql@14-main postgresql@15-main postgresql@16-main; do
+            sudo systemctl status "$unit" --no-pager 2>&1 | head -n 15 || true
+          done
+          echo "::endgroup::"
+
+          echo "::group::Recent PostgreSQL host logs (last 80 lines)"
+          for log in /var/log/postgresql/*.log; do
+            [ -f "$log" ] || continue
+            echo "----- ${log} -----"
+            sudo tail -n 80 "$log" 2>&1 || true
+          done
+          echo "::endgroup::"
+
+          echo "::group::Recent dmesg / syslog (port + oom hints)"
+          sudo dmesg --ctime 2>/dev/null | tail -n 50 || true
+          sudo journalctl -n 80 --no-pager 2>/dev/null | grep -iE 'postgres|supabase|5432[1-8]|address already in use' || echo "(no matching journal entries)"
+          echo "::endgroup::"
+
           exit 0
+
+
 
 
 
