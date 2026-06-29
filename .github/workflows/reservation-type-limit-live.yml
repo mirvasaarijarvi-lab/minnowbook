@@ -29,7 +29,7 @@ jobs:
   live-cap-tests:
     name: Reservation-type cap (live Postgres)
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 45
     permissions:
       contents: read
 
@@ -289,7 +289,7 @@ jobs:
       - name: Pre-pull Supabase images
         id: supabase-pull
         if: steps.docker-check.outputs.available == 'true' && steps.supabase-cli.outcome == 'success'
-        timeout-minutes: 8
+        timeout-minutes: 15
         continue-on-error: true
         run: |
           set -uo pipefail
@@ -301,8 +301,9 @@ jobs:
           # Tee output to a log so the failure diagnostics step can dump it.
           ( supabase start --exclude=imgproxy,mailpit,studio,realtime,edge-runtime --debug 2>&1 | tee -a "$LOG" ) &
           START_PID=$!
-          # Wait up to the step timeout for either readiness or completion.
-          for i in $(seq 1 420); do
+          # Wait up to ~14 min for readiness; Docker Hub pulls on cold
+          # runners regularly exceed the previous 7 min budget.
+          for i in $(seq 1 840); do
             if curl -sf "http://127.0.0.1:54321/rest/v1/" >/dev/null 2>&1; then
               echo "Supabase ready after ${i}s during pre-pull"
               exit 0
@@ -328,7 +329,7 @@ jobs:
       - name: Start local Supabase stack
         id: supabase-start
         if: steps.supabase-pull.outcome == 'success'
-        timeout-minutes: 12
+        timeout-minutes: 25
         run: |
           set -uo pipefail
           mkdir -p /tmp/supabase-diag
@@ -340,9 +341,12 @@ jobs:
           fi
 
           # Retry `supabase start` with exponential backoff (capped at 60s)
-          # until the REST health endpoint responds or we hit ~10 min total.
-          MAX_ATTEMPTS=6
-          DEADLINE=$(( $(date +%s) + 600 ))
+          # until the REST health endpoint responds or we hit ~22 min total.
+          # Hosted runners with cold Docker caches + slow Hub pulls have
+          # been observed to need 12-15 min for first boot; budget extra
+          # headroom so a single sluggish attempt doesn't waste the run.
+          MAX_ATTEMPTS=10
+          DEADLINE=$(( $(date +%s) + 1320 ))
           backoff=5
           for attempt in $(seq 1 $MAX_ATTEMPTS); do
             now=$(date +%s)
@@ -358,10 +362,12 @@ jobs:
             echo "supabase start exit=${rc}"
             echo "::endgroup::"
 
-            # Poll health for up to 90s before declaring this attempt failed.
+            # Poll health for up to 240s before declaring this attempt
+            # failed. Postgres + GoTrue + PostgREST cold-start chains
+            # routinely take 2-3 min on first boot.
             healthy=0
-            for i in $(seq 1 90); do
-              if curl -sf --max-time 3 "$HEALTH_URL" >/dev/null 2>&1; then
+            for i in $(seq 1 240); do
+              if curl -sf --max-time 5 "$HEALTH_URL" >/dev/null 2>&1; then
                 echo "Supabase healthy after attempt ${attempt} (waited ${i}s)."
                 healthy=1
                 break
@@ -398,14 +404,17 @@ jobs:
         if: steps.supabase-start.outcome == 'success'
         run: |
           set -uo pipefail
-          for i in $(seq 1 60); do
-            if curl -sf "http://127.0.0.1:54321/rest/v1/" >/dev/null 2>&1; then
+          # PostgREST occasionally lags Postgres readiness by a minute or
+          # two when the runner is under load; give it 5 min before giving
+          # up so a slow-but-recovering boot doesn't fail the whole job.
+          for i in $(seq 1 300); do
+            if curl -sf --max-time 5 "http://127.0.0.1:54321/rest/v1/" >/dev/null 2>&1; then
               echo "PostgREST ready after ${i}s"
               exit 0
             fi
             sleep 1
           done
-          echo "::error::PostgREST never came up after 60s"
+          echo "::error::PostgREST never came up after 300s"
           echo "::group::curl -v http://127.0.0.1:54321/rest/v1/"
           curl -v --max-time 5 "http://127.0.0.1:54321/rest/v1/" 2>&1 || true
           echo "::endgroup::"
