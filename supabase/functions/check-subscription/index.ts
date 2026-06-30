@@ -103,7 +103,9 @@ export async function handleCheckSubscriptionRequest(req: Request): Promise<Resp
     logStep("Found customer", { customerId });
 
     // Check active and trialing subscriptions in parallel with timeouts
-    const [subscriptions, trialingSubs] = await withTimeout(
+    const [subscriptions, trialingSubs] = await withTimeout<
+      [Stripe.ApiList<Stripe.Subscription>, Stripe.ApiList<Stripe.Subscription>]
+    >(
       Promise.all([
         stripe.subscriptions.list({ customer: customerId, status: "active", limit: 1 }),
         stripe.subscriptions.list({ customer: customerId, status: "trialing", limit: 1 }),
