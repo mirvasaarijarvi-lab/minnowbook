@@ -243,6 +243,22 @@ export async function requireAuth(
   const fp = tokenFingerprint(token);
   const timeoutMs = options.timeoutMs ?? DEFAULT_GETCLAIMS_TIMEOUT_MS;
 
+  // Fast path: provably non-user tokens (anon/service_role/other) cannot
+  // resolve to a user. Reject locally so a parallel burst of unauthenticated
+  // calls does not serialise behind GoTrue's small outbound pool.
+  const nonUser = nonUserTokenReason(token);
+  if (nonUser) {
+    logEvent("warn", "reject", {
+      reqId,
+      caller,
+      reason: "non_user_token",
+      detail: nonUser,
+      tokenFp: fp,
+      elapsedMs: Math.round(performance.now() - startedAt),
+    });
+    return unauthorized(corsHeaders, options, reqId);
+  }
+
   logEvent("debug", "verify_start", {
     reqId,
     caller,
