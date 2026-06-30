@@ -411,6 +411,7 @@ describe("redeem-access-code: brute-force & replay resilience", () => {
       (_, i) => `BURST-${i.toString().padStart(4, "0")}-XYZW`,
     );
     const results = await Promise.all(codes.map((c) => callRedeem(c, false)));
+    printMatrixSummary("burst30_distinct_fake_codes", results);
 
     const successes = results.filter((r) => r.status >= 200 && r.status < 300);
     const serverErrors = results.filter((r) => r.status >= 500);
