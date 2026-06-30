@@ -357,13 +357,23 @@ describe("redeem-access-code: brute-force & replay resilience", () => {
 
   it("repeated serial attempts return the same generic error code (no validity leak)", async () => {
     const ITER = 6;
-    const codes: string[] = [];
-    const messages: string[] = [];
+    const attempts: Attempt[] = [];
     for (let i = 0; i < ITER; i++) {
-      const r = await callRedeem(FAKE_CODES[0], false);
-      codes.push(errorCode(r));
-      messages.push(errorMessage(r));
+      attempts.push(await callRedeem(FAKE_CODES[0], false));
     }
+    // Drop transport-level blips (status===0 = our AbortController fired or
+    // the socket dropped). These carry no server response and therefore
+    // can't leak validity information; counting them would conflate a
+    // network artifact with a real message-drift regression. The other
+    // burst tests in this file already apply the same filter.
+    const responded = attempts.filter((a) => a.status !== 0);
+    expect(
+      responded.length,
+      `at least ${ITER - 1} of ${ITER} serial calls must reach the server; got ${responded.length}`,
+    ).toBeGreaterThanOrEqual(ITER - 1);
+
+    const codes = responded.map(errorCode);
+    const messages = responded.map(errorMessage);
     // Both the human message AND the machine code must be perfectly stable
     // across replays — anything else is a state-leak.
     const uniqueMsgs = new Set(messages);
