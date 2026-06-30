@@ -78,3 +78,11 @@ Deno.test({
     assertEquals(res.headers.get("x-request-id"), "empty-env-regression-1");
   },
 });
+
+// Restore real SUPABASE_* env vars at end of file so subsequent live
+// integration tests in the same `deno test` process see the real env
+// instead of the stubs we installed above.
+import { restoreSupabaseEnv as __restoreSupabaseEnv } from "../_shared/stub-supabase-env.ts";
+Deno.test("_zz_restore_supabase_env_for_subsequent_files", () => {
+  __restoreSupabaseEnv();
+});
