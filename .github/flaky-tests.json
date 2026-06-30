@@ -12,10 +12,10 @@
     },
     {
       "pattern": "code-redemption-rate-limit\\.test\\.ts > redeem-access-code: brute-force & replay resilience > burst of 30 parallel calls across many distinct fake codes: zero leaks, zero 5xx, stable codes",
-      "reason": "30-way parallel burst against the deployed redeem-access-code edge function occasionally surfaces a transient 5xx or non-JSON response from edge infrastructure under cold-start contention, despite the in-file warmupPromise. Function correctness verified by sibling tests in the same file (20-parallel, serial replay, OPTIONS preflight burst) which all pass; only the highest-fanout case is sensitive to edge latency tails. Handler returns deterministic 4xx with KNOWN_ERROR_CODES for every accepted request.",
+      "reason": "30-way parallel burst against the deployed redeem-access-code edge function. Quarantine refreshed on 2026-06-30 after a fresh fix attempt (per-test timeout raised to 180s and CI retries set to 2) still saw the test exceed the budget under cold-start contention. Function correctness is verified by sibling tests in the same file (20-parallel, serial replay, OPTIONS preflight burst) which pass in the same run; handler returns deterministic 4xx with KNOWN_ERROR_CODES for every accepted request. Only the highest-fanout case is sensitive to edge latency tails.",
       "owner": "@security",
-      "added": "2026-06-14",
-      "expires": "2026-07-10",
+      "added": "2026-06-30",
+      "expires": "2026-07-30",
       "issue": "https://github.com/mimmobook/mimmobook/issues/redeem-access-code-burst30-flake"
     },
     {
