@@ -298,6 +298,8 @@ describe("redeem-access-code: brute-force & replay resilience", () => {
         Array.from({ length: N }, () => callRedeem(FAKE_CODES[0], false)),
       );
 
+      printMatrixSummary("burst20_same_fake_code", results);
+
       const successes = results.filter((r) => r.status >= 200 && r.status < 300);
       expect(successes.length, "no parallel attempt may succeed").toBe(0);
 
