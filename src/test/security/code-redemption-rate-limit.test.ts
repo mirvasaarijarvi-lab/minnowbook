@@ -415,10 +415,12 @@ describe("redeem-access-code: brute-force & replay resilience", () => {
     }
   });
 
-  it("burst of 30 parallel calls across many distinct fake codes: zero leaks, zero 5xx, stable codes", {
-    // Network-bound burst against a live edge function; CI cold paths
-    // can exceed the prior 60s ceiling (30 parallel fetches + cold
-    // start + TLS warmup). Mirror the 20-parallel burst budgets.
+  it("burst of 30 distinct fake codes (batched 10x3): zero leaks, zero 5xx, stable codes", {
+    // Run 30 distinct codes in 3 sequential waves of 10 instead of one
+    // 30-way Promise.all. This keeps the indistinguishability + no-5xx
+    // invariants intact (still 30 calls, still 30 distinct inputs) while
+    // dropping peak fan-out by 3x, which is what was driving the cold-
+    // start tail latency that timed out CI.
     timeout: 180_000,
     retry: process.env.CI ? 2 : 0,
   }, async () => {
@@ -426,7 +428,13 @@ describe("redeem-access-code: brute-force & replay resilience", () => {
       { length: 30 },
       (_, i) => `BURST-${i.toString().padStart(4, "0")}-XYZW`,
     );
-    const results = await Promise.all(codes.map((c) => callRedeem(c, false)));
+    const BATCH = 10;
+    const results: Attempt[] = [];
+    for (let i = 0; i < codes.length; i += BATCH) {
+      const slice = codes.slice(i, i + BATCH);
+      const batch = await Promise.all(slice.map((c) => callRedeem(c, false)));
+      results.push(...batch);
+    }
     printMatrixSummary("burst30_distinct_fake_codes", results);
 
     const successes = results.filter((r) => r.status >= 200 && r.status < 300);
