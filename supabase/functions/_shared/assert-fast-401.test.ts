@@ -139,11 +139,41 @@ Deno.test("buildUnauthenticatedProbe: GET probes omit the body", async () => {
   assertEquals(await req.text(), "");
 });
 
-Deno.test("loadAuthHandler: missing export throws with handler name", async () => {
+Deno.test("loadAuthHandler: missing module surfaces handler dir + export name", async () => {
+  // `_shared` has no `index.ts`, so the dynamic import itself fails.
+  // The catch branch must still name BOTH tokens so the suite-level
+  // grep for `${handler}` and `${exportName}` finds them.
   const err = await assertRejects(
     () => loadAuthHandler("_shared", "doesNotExist"),
     Error,
   );
   assertStringIncludes(err.message, "_shared");
   assertStringIncludes(err.message, "doesNotExist");
+  assertStringIncludes(err.message, "failed to import");
 });
+
+Deno.test({
+  name: "loadAuthHandler: existing module but missing export throws clear error",
+  // The real `admin-users/index.ts` registers an HTTP listener and a
+  // keep-alive interval at module top level (production Deno Deploy
+  // entrypoint), which trips Deno's op/resource sanitizers when imported
+  // from an in-process test. We're only validating loader diagnostics
+  // here, so disable the sanitizers for this case.
+  sanitizeOps: false,
+  sanitizeResources: false,
+  fn: async () => {
+    const err = await assertRejects(
+      () => loadAuthHandler("admin-users", "handlerThatDoesNotExist"),
+      Error,
+      "missing export handlerThatDoesNotExist",
+    );
+    assertStringIncludes(err.message, "admin-users");
+    assertStringIncludes(err.message, "handlerThatDoesNotExist");
+    assert(
+      !err.message.includes("failed to import"),
+      `expected the missing-export branch, got import-failure: ${err.message}`,
+    );
+  },
+});
+
+
