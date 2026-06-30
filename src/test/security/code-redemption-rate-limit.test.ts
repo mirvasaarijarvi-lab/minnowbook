@@ -360,6 +360,7 @@ describe("redeem-access-code: brute-force & replay resilience", () => {
       "'; DROP TABLE access_codes;--",
     ];
     const results = await Promise.all(probes.map((c) => callRedeem(c, false)));
+    printMatrixSummary("varied_fake_codes_vs_malformed", results);
 
     for (const r of results) {
       // status 0 means the fetch itself failed (network blip under burst).
