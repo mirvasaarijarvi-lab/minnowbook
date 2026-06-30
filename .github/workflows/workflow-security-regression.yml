@@ -67,7 +67,7 @@ jobs:
     steps:
       - name: Checkout
         # actions/checkout@v4.2.2
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
         with:
           # Need full history so we can diff against the PR base ref
           # to enumerate which dependabot/auto-merge files actually
@@ -131,7 +131,7 @@ jobs:
     steps:
       - name: Checkout
         # actions/checkout@v4.2.2
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
         with:
           persist-credentials: false
 
@@ -180,7 +180,7 @@ jobs:
                 pull-requests: write
               steps:
                 - name: Checkout
-                  uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+                  uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
                   with:
                     persist-credentials: false
                 - name: Merge
@@ -209,7 +209,7 @@ jobs:
               permissions: write-all
               steps:
                 - name: Checkout (unsafe, no persist-credentials)
-                  uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+                  uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
                 - name: Pretend to merge
                   run: echo "this would auto-merge with full secrets"
           YML
