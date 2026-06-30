@@ -153,11 +153,21 @@ export async function loadAuthHandler(
   name: string,
   exportName: string,
 ): Promise<Handler> {
-  const mod = await import(`../${name}/index.ts`);
+  let mod: Record<string, unknown>;
+  try {
+    mod = await import(`../${name}/index.ts`);
+  } catch (err) {
+    // Re-throw with both handler dir and export name so a missing module
+    // surfaces the same diagnostic shape as a missing export (the suite
+    // greps the message for both tokens).
+    throw new Error(
+      `loadAuthHandler(${name}, ${exportName}): failed to import ../${name}/index.ts — ${(err as Error).message}`,
+    );
+  }
   const handler = mod[exportName] as Handler | undefined;
   assert(
     typeof handler === "function",
-    `${name}: missing export ${exportName}`,
+    `loadAuthHandler(${name}, ${exportName}): missing export ${exportName}`,
   );
   return handler;
 }
