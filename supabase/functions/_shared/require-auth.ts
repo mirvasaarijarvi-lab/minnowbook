@@ -424,6 +424,22 @@ export async function verifyBearer(
   const shape = tokenShape(token);
   const fp = tokenFingerprint(token);
 
+  // Fast path: see requireAuth() above. Anon/service-role keys are JWTs the
+  // gateway happily forwards as `Authorization: Bearer ...` when only the
+  // `apikey` header is supplied; verifying them is pure overhead.
+  const nonUser = nonUserTokenReason(token);
+  if (nonUser) {
+    logEvent("warn", "reject", {
+      reqId,
+      caller,
+      api: "verifyBearer",
+      reason: "invalid_token",
+      detail: nonUser,
+      tokenFp: fp,
+    });
+    return { ok: false, reason: "invalid_token" };
+  }
+
   const userClient = createClient(supabaseUrl, anonKey, {
     global: { headers: { Authorization: authHeader } },
   });
