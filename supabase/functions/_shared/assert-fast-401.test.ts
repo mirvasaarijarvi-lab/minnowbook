@@ -152,28 +152,28 @@ Deno.test("loadAuthHandler: missing module surfaces handler dir + export name", 
   assertStringIncludes(err.message, "failed to import");
 });
 
-Deno.test("loadAuthHandler: existing module but missing export throws clear error", async () => {
-  // `admin-users/index.ts` imports cleanly, so we hit the second
-  // branch — the `assert(typeof handler === "function", ...)` that
-  // fires when the requested export name is not present on the
-  // module record. The diagnostic must name both the handler dir
-  // and the missing export so a regression points at the exact
-  // rename/typo that broke the contract.
-  const err = await assertRejects(
-    () => loadAuthHandler("admin-users", "handlerThatDoesNotExist"),
-    Error,
-    // Asserting the type-of-export string keeps us on the
-    // "missing export" branch and prevents accidental matches
-    // against the "failed to import" branch tested above.
-    "missing export handlerThatDoesNotExist",
-  );
-  assertStringIncludes(err.message, "admin-users");
-  assertStringIncludes(err.message, "handlerThatDoesNotExist");
-  // Must NOT be the import-failure path — that branch would have
-  // a different diagnostic and indicate the test fixture broke.
-  assert(
-    !err.message.includes("failed to import"),
-    `expected the missing-export branch, got import-failure: ${err.message}`,
-  );
+Deno.test({
+  name: "loadAuthHandler: existing module but missing export throws clear error",
+  // The real `admin-users/index.ts` registers an HTTP listener and a
+  // keep-alive interval at module top level (production Deno Deploy
+  // entrypoint), which trips Deno's op/resource sanitizers when imported
+  // from an in-process test. We're only validating loader diagnostics
+  // here, so disable the sanitizers for this case.
+  sanitizeOps: false,
+  sanitizeResources: false,
+  fn: async () => {
+    const err = await assertRejects(
+      () => loadAuthHandler("admin-users", "handlerThatDoesNotExist"),
+      Error,
+      "missing export handlerThatDoesNotExist",
+    );
+    assertStringIncludes(err.message, "admin-users");
+    assertStringIncludes(err.message, "handlerThatDoesNotExist");
+    assert(
+      !err.message.includes("failed to import"),
+      `expected the missing-export branch, got import-failure: ${err.message}`,
+    );
+  },
 });
+
 
