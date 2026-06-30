@@ -226,7 +226,13 @@ describe("redeem-access-code: brute-force & replay resilience", () => {
     expect(AUTH_REJECTION_CODES.has(codes[0]), `expected auth-rejection code, got: ${codes[0]}`).toBe(true);
   });
 
-  it("varied fake codes do NOT produce distinguishable error codes vs. malformed input", async () => {
+  it("varied fake codes do NOT produce distinguishable error codes vs. malformed input", {
+    // Network-bound burst against a live edge function; CI cold paths
+    // can exceed the default 30s ceiling (11 parallel fetches + cold
+    // start + TLS warmup). Mirror the 20-parallel burst test budgets.
+    timeout: 180_000,
+    retry: process.env.CI ? 2 : 0,
+  }, async () => {
     // Probe matrix: shapes that should all surface as an auth-rejection
     // code (since no auth is supplied) — never a code-specific error
     // that would let an attacker classify the input.
