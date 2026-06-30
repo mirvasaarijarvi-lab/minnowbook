@@ -79,9 +79,39 @@ const warmupPromise: Promise<void> = (async () => {
   }
 })();
 
-type Attempt = { status: number; body: unknown; error?: unknown };
+type Attempt = {
+  status: number;
+  body: unknown;
+  error?: unknown;
+  /** Wall-clock duration of the fetch + body read, in milliseconds. */
+  durationMs: number;
+  /** Input shape label (e.g. "fake", "empty", "too_long", "xss", "sqli"). */
+  label: string;
+  /** Whether an Authorization header was attached. */
+  withAuth: boolean;
+  /** Truncated input for diagnostics (PII-safe: only fake/probe values). */
+  input: string;
+};
 
-async function callRedeem(code: string, withAuth: boolean): Promise<Attempt> {
+function shapeLabel(code: string): string {
+  if (code === "") return "empty";
+  if (code.length === 1) return "single_char";
+  if (code.length >= 80) return "too_long";
+  if (/<script|<\/?\w+>/i.test(code)) return "xss";
+  if (/drop\s+table|--|;/i.test(code)) return "sqli";
+  if (/^BURST-/.test(code)) return "burst";
+  if (/^WARM-/.test(code)) return "warmup";
+  return "fake";
+}
+
+async function callRedeem(
+  code: string,
+  withAuth: boolean,
+  labelOverride?: string,
+): Promise<Attempt> {
+  const label = labelOverride ?? shapeLabel(code);
+  const input = code.length > 40 ? `${code.slice(0, 37)}...` : code;
+  const startedAt = Date.now();
   try {
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -101,11 +131,94 @@ async function callRedeem(code: string, withAuth: boolean): Promise<Attempt> {
     } catch {
       body = await res.text().catch(() => null);
     }
-    return { status: res.status, body };
+    return {
+      status: res.status,
+      body,
+      durationMs: Date.now() - startedAt,
+      label,
+      withAuth,
+      input,
+    };
   } catch (e) {
-    return { status: 0, body: null, error: e };
+    return {
+      status: 0,
+      body: null,
+      error: e,
+      durationMs: Date.now() - startedAt,
+      label,
+      withAuth,
+      input,
+    };
   }
 }
+
+/**
+ * Per-matrix-case timing/status/error summary. Helps diagnose which
+ * input shape or auth path was slowest in a burst, without spamming
+ * stdout in the happy path. Always emits a compact table + a slowest-N
+ * list so CI flakes are debuggable from logs alone.
+ */
+function printMatrixSummary(testLabel: string, attempts: Attempt[]): void {
+  if (attempts.length === 0) return;
+  const durations = attempts.map((a) => a.durationMs).sort((a, b) => a - b);
+  const pct = (p: number) =>
+    durations[Math.min(durations.length - 1, Math.floor((p / 100) * durations.length))];
+  const total = attempts.length;
+  const failed = attempts.filter((a) => a.status === 0 || a.status >= 500);
+
+  // Per-(label, withAuth) aggregates.
+  const groups = new Map<string, Attempt[]>();
+  for (const a of attempts) {
+    const key = `${a.label}|auth=${a.withAuth}`;
+    const arr = groups.get(key) ?? [];
+    arr.push(a);
+    groups.set(key, arr);
+  }
+
+  // eslint-disable-next-line no-console
+  console.log(
+    `[redeem-burst-timing] ${testLabel}: n=${total} ` +
+      `min=${durations[0]}ms p50=${pct(50)}ms p95=${pct(95)}ms max=${durations[total - 1]}ms ` +
+      `failed=${failed.length}`,
+  );
+
+  for (const [key, arr] of [...groups.entries()].sort()) {
+    const ds = arr.map((a) => a.durationMs).sort((x, y) => x - y);
+    const statuses = [...new Set(arr.map((a) => a.status))].sort().join(",");
+    const codes = [
+      ...new Set(
+        arr
+          .map((a) => ((a.body as { code?: string } | null)?.code ?? "").toString())
+          .filter(Boolean),
+      ),
+    ].join(",");
+    // eslint-disable-next-line no-console
+    console.log(
+      `  [${key}] n=${arr.length} ` +
+        `min=${ds[0]}ms p50=${ds[Math.floor(ds.length / 2)]}ms max=${ds[ds.length - 1]}ms ` +
+        `statuses=[${statuses}] codes=[${codes}]`,
+    );
+  }
+
+  // Slowest 3 individual cases (always useful for flake triage).
+  const slowest = [...attempts].sort((a, b) => b.durationMs - a.durationMs).slice(0, 3);
+  for (const a of slowest) {
+    const code = ((a.body as { code?: string } | null)?.code ?? "").toString();
+    const errMsg =
+      a.error instanceof Error
+        ? a.error.message
+        : a.error
+          ? String(a.error)
+          : "";
+    // eslint-disable-next-line no-console
+    console.log(
+      `  slowest: ${a.durationMs}ms label=${a.label} auth=${a.withAuth} ` +
+        `status=${a.status} code=${code || "-"} input="${a.input}"` +
+        (errMsg ? ` error=${errMsg}` : ""),
+    );
+  }
+}
+
 
 function errorMessage(a: Attempt): string {
   const b = a.body as { error?: string } | null;
@@ -185,6 +298,8 @@ describe("redeem-access-code: brute-force & replay resilience", () => {
         Array.from({ length: N }, () => callRedeem(FAKE_CODES[0], false)),
       );
 
+      printMatrixSummary("burst20_same_fake_code", results);
+
       const successes = results.filter((r) => r.status >= 200 && r.status < 300);
       expect(successes.length, "no parallel attempt may succeed").toBe(0);
 
@@ -245,6 +360,7 @@ describe("redeem-access-code: brute-force & replay resilience", () => {
       "'; DROP TABLE access_codes;--",
     ];
     const results = await Promise.all(probes.map((c) => callRedeem(c, false)));
+    printMatrixSummary("varied_fake_codes_vs_malformed", results);
 
     for (const r of results) {
       // status 0 means the fetch itself failed (network blip under burst).
@@ -295,6 +411,7 @@ describe("redeem-access-code: brute-force & replay resilience", () => {
       (_, i) => `BURST-${i.toString().padStart(4, "0")}-XYZW`,
     );
     const results = await Promise.all(codes.map((c) => callRedeem(c, false)));
+    printMatrixSummary("burst30_distinct_fake_codes", results);
 
     const successes = results.filter((r) => r.status >= 200 && r.status < 300);
     const serverErrors = results.filter((r) => r.status >= 500);
