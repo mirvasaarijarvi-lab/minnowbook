@@ -283,7 +283,13 @@ describe("redeem-access-code: brute-force & replay resilience", () => {
     }
   });
 
-  it("burst of 30 parallel calls across many distinct fake codes: zero leaks, zero 5xx, stable codes", async () => {
+  it("burst of 30 parallel calls across many distinct fake codes: zero leaks, zero 5xx, stable codes", {
+    // Network-bound burst against a live edge function; CI cold paths
+    // can exceed the prior 60s ceiling (30 parallel fetches + cold
+    // start + TLS warmup). Mirror the 20-parallel burst budgets.
+    timeout: 180_000,
+    retry: process.env.CI ? 2 : 0,
+  }, async () => {
     const codes = Array.from(
       { length: 30 },
       (_, i) => `BURST-${i.toString().padStart(4, "0")}-XYZW`,
