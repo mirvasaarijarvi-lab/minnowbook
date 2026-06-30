@@ -139,11 +139,41 @@ Deno.test("buildUnauthenticatedProbe: GET probes omit the body", async () => {
   assertEquals(await req.text(), "");
 });
 
-Deno.test("loadAuthHandler: missing export throws with handler name", async () => {
+Deno.test("loadAuthHandler: missing module surfaces handler dir + export name", async () => {
+  // `_shared` has no `index.ts`, so the dynamic import itself fails.
+  // The catch branch must still name BOTH tokens so the suite-level
+  // grep for `${handler}` and `${exportName}` finds them.
   const err = await assertRejects(
     () => loadAuthHandler("_shared", "doesNotExist"),
     Error,
   );
   assertStringIncludes(err.message, "_shared");
   assertStringIncludes(err.message, "doesNotExist");
+  assertStringIncludes(err.message, "failed to import");
 });
+
+Deno.test("loadAuthHandler: existing module but missing export throws clear error", async () => {
+  // `admin-users/index.ts` imports cleanly, so we hit the second
+  // branch — the `assert(typeof handler === "function", ...)` that
+  // fires when the requested export name is not present on the
+  // module record. The diagnostic must name both the handler dir
+  // and the missing export so a regression points at the exact
+  // rename/typo that broke the contract.
+  const err = await assertRejects(
+    () => loadAuthHandler("admin-users", "handlerThatDoesNotExist"),
+    Error,
+    // Asserting the type-of-export string keeps us on the
+    // "missing export" branch and prevents accidental matches
+    // against the "failed to import" branch tested above.
+    "missing export handlerThatDoesNotExist",
+  );
+  assertStringIncludes(err.message, "admin-users");
+  assertStringIncludes(err.message, "handlerThatDoesNotExist");
+  // Must NOT be the import-failure path — that branch would have
+  // a different diagnostic and indicate the test fixture broke.
+  assert(
+    !err.message.includes("failed to import"),
+    `expected the missing-export branch, got import-failure: ${err.message}`,
+  );
+});
+
