@@ -85,7 +85,7 @@ export async function handleCheckSubscriptionRequest(req: Request): Promise<Resp
     logStep("User authenticated", { userId: user.id, email: user.email });
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil", timeout: 8000, maxNetworkRetries: 1 });
-    const customers = await withTimeout(
+    const customers = await withTimeout<Stripe.ApiList<Stripe.Customer>>(
       stripe.customers.list({ email: user.email, limit: 1 }),
       10000,
       "stripe.customers.list",
