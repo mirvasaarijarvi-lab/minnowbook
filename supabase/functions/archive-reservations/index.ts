@@ -17,10 +17,15 @@ export async function handleArchiveReservationsRequest(req: Request): Promise<Re
     const isServiceRole = authHeader === `Bearer ${serviceRoleKey}`;
 
     if (!isServiceRole) {
-      // Check if caller is an authenticated system admin
-      if (!authHeader) {
+      // Check if caller is an authenticated system admin. Reject missing OR
+      // malformed (non-Bearer / empty-token) headers BEFORE constructing
+      // any Supabase client — otherwise a "Basic xyz" probe would proceed
+      // to auth.getUser() and hang against an unreachable Supabase URL
+      // (the fast-401 contract test fails on the 1.5s budget).
+      const bearer = authHeader?.match(/^Bearer\s+(.+)$/i)?.[1]?.trim();
+      if (!authHeader || !bearer) {
         return new Response(
-          JSON.stringify({ error: "Not authorized" }),
+          JSON.stringify({ error: "Not authorized", code: "NOT_AUTHENTICATED", message: "Not authorized", status: 401 }),
           { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
