@@ -41,6 +41,13 @@ function snapshotOnce(): void {
   snapshotted = true;
 }
 
+// Snapshot at module load so the real env (loaded from .env or CI
+// secrets) is captured BEFORE any test code mutates Deno.env. Without
+// this, a unit test that sets a var to "" before calling stubSupabaseEnv
+// would burn that "" into the "original" snapshot and restoreSupabaseEnv
+// would put "" back — defeating cross-file restoration.
+snapshotOnce();
+
 /**
  * Returns `value` unless it's nullish OR an empty/whitespace-only string,
  * in which case `fallback` is returned. This is the contract every
