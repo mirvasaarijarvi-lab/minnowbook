@@ -80,11 +80,12 @@ Deno.test({
         requestId,
         "x-request-id must round-trip through the HTTP layer",
       );
-      // Body shape: standardized error envelope (code/message/status).
-      assertEquals(body.status, 401);
+      // Body shape: standardized error envelope ({error, code, request_id}).
+      assertEquals(body.code, "NOT_AUTHENTICATED");
+      assertEquals(body.request_id, requestId);
       assert(
-        typeof body.code === "string" && body.code.length > 0,
-        `expected error code in body, got ${JSON.stringify(body)}`,
+        typeof body.error === "string" && body.error.length > 0,
+        `expected error message in body, got ${JSON.stringify(body)}`,
       );
       assert(
         elapsedMs < 1_500,
