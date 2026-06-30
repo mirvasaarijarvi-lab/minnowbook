@@ -11,22 +11,13 @@
 // in-code 5s Promise.race timeout to fire deterministically.
 
 import { assert, assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
+import { stubSupabaseEnv } from "../_shared/stub-supabase-env.ts";
 
 // Provide minimal env so the handler reaches the auth verification path
-// instead of bailing out with SERVER_MISCONFIGURED.
-// Use `||` (not `??`) because GitHub Actions exports unset secrets as the
-// empty string, and the handler's missing-env guard treats "" as missing
-// and short-circuits to 500 before ever reaching the auth.getUser() race
-// this test is trying to exercise.
-Deno.env.set("SUPABASE_URL", Deno.env.get("SUPABASE_URL") || "http://stub.local");
-Deno.env.set(
-  "SUPABASE_ANON_KEY",
-  Deno.env.get("SUPABASE_ANON_KEY") || "stub-anon-key",
-);
-Deno.env.set(
-  "SUPABASE_SERVICE_ROLE_KEY",
-  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "stub-service-key",
-);
+// instead of bailing out with SERVER_MISCONFIGURED. The shared helper
+// treats empty strings (the GitHub Actions unset-secret form) as missing
+// and substitutes stub values; see stub-supabase-env.test.ts.
+stubSupabaseEnv();
 
 // IMPORTANT: install the fetch stub BEFORE importing the handler module.
 // supabase-js captures `globalThis.fetch` at GoTrueClient construction
