@@ -240,6 +240,45 @@ jobs:
           echo "::error title=Supabase unreachable::auth=$auth_status rest=$rest_status — live security suites would each hit 5s testTimeout. Check that the project is not paused and that the runner has egress to *.supabase.co."
           exit 1
 
+      # Validate the SERVICE_ROLE_KEY against /rest/v1/. A stale/rotated
+      # key returns 401 "Invalid API key" on every PostgREST call, which
+      # makes the public-booking Deno tests (guarded by `ignore: !KEY`)
+      # run AND cascade-fail with hard-to-diagnose 401s. If the key is
+      # invalid we unset SUPABASE_SERVICE_ROLE_KEY for downstream steps
+      # so the tests skip cleanly in degraded mode (matching the
+      # already-documented "no key configured" path) and emit a loud
+      # warning telling the operator to rotate the secret.
+      - name: Validate SUPABASE_SERVICE_ROLE_KEY
+        env:
+          SR_URL: ${{ env.SUPABASE_URL }}
+          SR_KEY: ${{ env.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          set -u
+          if [ -z "${SR_KEY:-}" ]; then
+            echo "ℹ️ No SUPABASE_SERVICE_ROLE_KEY set, downstream tests will run in degraded mode."
+            exit 0
+          fi
+          base="${SR_URL%/}"
+          code=$(curl -m 10 -sS -o /dev/null -w "%{http_code}" \
+            -H "apikey: $SR_KEY" \
+            -H "Authorization: Bearer $SR_KEY" \
+            "$base/rest/v1/" || echo "000")
+          echo "service-role probe -> $code"
+          case "$code" in
+            200|404)
+              echo "✅ SUPABASE_SERVICE_ROLE_KEY is valid."
+              ;;
+            401|403)
+              echo "::warning title=Stale SUPABASE_SERVICE_ROLE_KEY::PostgREST rejected the service-role key ($code Invalid API key). Treating as missing so guarded tests skip instead of cascade-failing. Rotate the secret under Settings → Secrets and variables → Actions."
+              # Override the workflow-level env for ALL subsequent steps.
+              echo "SUPABASE_SERVICE_ROLE_KEY=" >> "$GITHUB_ENV"
+              ;;
+            *)
+              echo "::warning::Unexpected status $code probing service-role key, leaving it set."
+              ;;
+          esac
+
+
       - name: Vitest (initial)
 
         id: vitest
