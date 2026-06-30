@@ -186,7 +186,17 @@ export const handleMfaRecoveryRequest = async (req: Request): Promise<Response> 
     });
 
     log("info", "auth_getuser_start", null);
-    const AUTH_TIMEOUT_MS = 5000;
+    // Allow operators to tune the auth.getUser() race via env, but never
+    // let a malformed value (empty string, "fast", "5s", negative, NaN)
+    // collapse this branch into a 500 SERVER_MISCONFIGURED. Anything we
+    // can't parse as a positive integer falls back to the safe default
+    // so the worst case is still a fast 401 AUTH_TIMEOUT, not a 5xx.
+    const AUTH_TIMEOUT_DEFAULT_MS = 5000;
+    const rawTimeout = Deno.env.get("MFA_AUTH_TIMEOUT_MS");
+    const parsedTimeout = rawTimeout == null ? NaN : Number(rawTimeout);
+    const AUTH_TIMEOUT_MS = Number.isFinite(parsedTimeout) && parsedTimeout > 0
+      ? Math.floor(parsedTimeout)
+      : AUTH_TIMEOUT_DEFAULT_MS;
     let authResult: Awaited<ReturnType<typeof anonClient.auth.getUser>>;
     try {
       authResult = await Promise.race([
