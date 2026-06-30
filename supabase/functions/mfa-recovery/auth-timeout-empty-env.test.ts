@@ -18,22 +18,16 @@
 //      it past the missing-env 500 guard.
 
 import { assert, assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
+import { stubSupabaseEnv } from "../_shared/stub-supabase-env.ts";
 
 // Step 1: simulate `secrets.SUPABASE_*` being unset in GitHub Actions.
 Deno.env.set("SUPABASE_URL", "");
 Deno.env.set("SUPABASE_ANON_KEY", "");
 Deno.env.set("SUPABASE_SERVICE_ROLE_KEY", "");
 
-// Step 2: apply the documented `||` fallback (NOT `??`).
-Deno.env.set("SUPABASE_URL", Deno.env.get("SUPABASE_URL") || "http://stub.local");
-Deno.env.set(
-  "SUPABASE_ANON_KEY",
-  Deno.env.get("SUPABASE_ANON_KEY") || "stub-anon-key",
-);
-Deno.env.set(
-  "SUPABASE_SERVICE_ROLE_KEY",
-  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "stub-service-key",
-);
+// Step 2: apply the shared helper (which uses the empty-string-aware
+// `coalesceEnv` rule, NOT `??`).
+stubSupabaseEnv();
 
 const { handleMfaRecoveryRequest } = await import("./index.ts");
 
