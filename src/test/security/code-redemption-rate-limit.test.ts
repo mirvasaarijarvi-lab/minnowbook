@@ -104,14 +104,30 @@ function shapeLabel(code: string): string {
   return "fake";
 }
 
+/**
+ * Per-call timeout for a single redeem fetch. A redeem rejection should
+ * resolve in well under a second; anything past this bound is a stuck
+ * connection / cold-start tail and should be surfaced as a fast failure
+ * rather than letting Promise.all hold the whole batch hostage until
+ * Vitest's per-test timeout (180s) fires.
+ *
+ * Default 8s gives plenty of headroom for the worst non-pathological
+ * cold-start, while still failing 20x faster than the test budget so
+ * batched waves keep flowing.
+ */
+const CALL_TIMEOUT_MS = Number(process.env.REDEEM_CALL_TIMEOUT_MS ?? 8_000);
+
 async function callRedeem(
   code: string,
   withAuth: boolean,
   labelOverride?: string,
+  timeoutMs: number = CALL_TIMEOUT_MS,
 ): Promise<Attempt> {
   const label = labelOverride ?? shapeLabel(code);
   const input = code.length > 40 ? `${code.slice(0, 37)}...` : code;
   const startedAt = Date.now();
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -124,6 +140,7 @@ async function callRedeem(
       method: "POST",
       headers,
       body: JSON.stringify({ code }),
+      signal: controller.signal,
     });
     let body: unknown = null;
     try {
@@ -140,15 +157,26 @@ async function callRedeem(
       input,
     };
   } catch (e) {
+    // Distinguish our deliberate abort (timeout) from other transport
+    // failures so the per-matrix summary can attribute the tail.
+    const isTimeout =
+      controller.signal.aborted ||
+      (e instanceof Error && (e.name === "AbortError" || /aborted/i.test(e.message)));
     return {
       status: 0,
-      body: null,
-      error: e,
+      body: isTimeout
+        ? { error: `client_timeout_after_${timeoutMs}ms` }
+        : null,
+      error: isTimeout
+        ? new Error(`callRedeem timed out after ${timeoutMs}ms (label=${label})`)
+        : e,
       durationMs: Date.now() - startedAt,
       label,
       withAuth,
       input,
     };
+  } finally {
+    clearTimeout(timer);
   }
 }
 
