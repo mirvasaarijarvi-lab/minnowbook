@@ -91,6 +91,53 @@ function tokenShape(token: string) {
   };
 }
 
+/**
+ * Decode the unverified payload of a JWT. We do NOT trust the result for any
+ * security decision — we only use it to recognise tokens that are structurally
+ * incapable of authenticating a user (anon / service_role / non-Supabase) so
+ * we can short-circuit BEFORE hitting GoTrue.
+ *
+ * Reading the payload locally is ~microseconds. Round-tripping the same token
+ * to GoTrue is ~300-700ms and serialises behind a small outbound connection
+ * pool, which is exactly the bottleneck that made the redeem-burst tests time
+ * out (the Functions gateway auto-promotes the `apikey` header to
+ * `Authorization: Bearer <anon_key>`, so every "unauthenticated" call was
+ * spending half a second proving the obvious).
+ */
+function decodeJwtPayloadUnsafe(token: string): Record<string, unknown> | null {
+  const parts = token.split(".");
+  if (parts.length !== 3) return null;
+  try {
+    // base64url -> base64
+    const b64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+    const padded = b64 + "=".repeat((4 - (b64.length % 4)) % 4);
+    const json = atob(padded);
+    const obj = JSON.parse(json);
+    return obj && typeof obj === "object" ? (obj as Record<string, unknown>) : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Returns a reason string if the token is provably not a user access token
+ * (anon key, service-role key, or non-Supabase issuer), otherwise null.
+ * Used to fast-fail before calling getClaims().
+ */
+function nonUserTokenReason(token: string): string | null {
+  const payload = decodeJwtPayloadUnsafe(token);
+  if (!payload) return null; // unknown shape — let getClaims decide
+  const role = typeof payload.role === "string" ? payload.role : "";
+  if (role === "anon") return "anon_key_presented_as_user_token";
+  if (role === "service_role") return "service_role_key_presented_as_user_token";
+  // Supabase user access tokens always carry role="authenticated" and an iss
+  // ending in "/auth/v1". If neither is true and a non-user role is set, the
+  // token cannot resolve to a user.
+  if (role && role !== "authenticated") return `non_user_role_${role}`;
+  return null;
+}
+
+
 let requestSeq = 0;
 function newRequestId(): string {
   requestSeq = (requestSeq + 1) % 0xffffffff;
@@ -195,6 +242,22 @@ export async function requireAuth(
   const shape = tokenShape(token);
   const fp = tokenFingerprint(token);
   const timeoutMs = options.timeoutMs ?? DEFAULT_GETCLAIMS_TIMEOUT_MS;
+
+  // Fast path: provably non-user tokens (anon/service_role/other) cannot
+  // resolve to a user. Reject locally so a parallel burst of unauthenticated
+  // calls does not serialise behind GoTrue's small outbound pool.
+  const nonUser = nonUserTokenReason(token);
+  if (nonUser) {
+    logEvent("warn", "reject", {
+      reqId,
+      caller,
+      reason: "non_user_token",
+      detail: nonUser,
+      tokenFp: fp,
+      elapsedMs: Math.round(performance.now() - startedAt),
+    });
+    return unauthorized(corsHeaders, options, reqId);
+  }
 
   logEvent("debug", "verify_start", {
     reqId,
@@ -360,6 +423,22 @@ export async function verifyBearer(
 
   const shape = tokenShape(token);
   const fp = tokenFingerprint(token);
+
+  // Fast path: see requireAuth() above. Anon/service-role keys are JWTs the
+  // gateway happily forwards as `Authorization: Bearer ...` when only the
+  // `apikey` header is supplied; verifying them is pure overhead.
+  const nonUser = nonUserTokenReason(token);
+  if (nonUser) {
+    logEvent("warn", "reject", {
+      reqId,
+      caller,
+      api: "verifyBearer",
+      reason: "invalid_token",
+      detail: nonUser,
+      tokenFp: fp,
+    });
+    return { ok: false, reason: "invalid_token" };
+  }
 
   const userClient = createClient(supabaseUrl, anonKey, {
     global: { headers: { Authorization: authHeader } },
