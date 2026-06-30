@@ -18,8 +18,6 @@
 //      it past the missing-env 500 guard.
 
 import { assert, assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
-
-import { assert, assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import { stubSupabaseEnv } from "../_shared/stub-supabase-env.ts";
 
 // Step 1: simulate `secrets.SUPABASE_*` being unset in GitHub Actions.
