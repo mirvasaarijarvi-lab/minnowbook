@@ -62,8 +62,12 @@ const FAKE_CODES = [
  */
 const warmupPromise: Promise<void> = (async () => {
   // Two sequential calls: first absorbs cold-start, second confirms the
-  // function is hot and the connection is keep-alive ready.
+  // function is hot and the connection is keep-alive ready. Each call is
+  // bounded by its own AbortController so a stuck warmup never delays
+  // the rest of the suite past Vitest's per-test budget.
   for (let i = 0; i < 2; i++) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 10_000);
     try {
       await fetch(FUNCTION_URL, {
         method: "POST",
@@ -72,9 +76,12 @@ const warmupPromise: Promise<void> = (async () => {
           apikey: SUPABASE_PUBLISHABLE_KEY,
         },
         body: JSON.stringify({ code: "WARM-UP-PROBE" }),
+        signal: controller.signal,
       }).then((r) => r.text().catch(() => null));
     } catch {
       // Warmup is best-effort; tests will still run and assert behavior.
+    } finally {
+      clearTimeout(timer);
     }
   }
 })();
