@@ -13,9 +13,11 @@ import { assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import {
   __DEFAULT_STUBS_FOR_TEST,
   coalesceEnv,
+  restoreSupabaseEnv,
   stubSupabaseEnv,
   stubSupabaseEnvVar,
 } from "./stub-supabase-env.ts";
+
 
 Deno.test("coalesceEnv: undefined -> fallback", () => {
   assertEquals(coalesceEnv(undefined, "fb"), "fb");
