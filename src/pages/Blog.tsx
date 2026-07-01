@@ -121,8 +121,12 @@ const Blog = () => {
                 <p className="text-sm text-muted-foreground leading-relaxed mb-4">
                   {t(post.excerptKey)}
                 </p>
-                <Link to={`/blog/${post.slug}`} className="inline-flex items-center gap-1.5 text-sm font-medium text-accent hover:underline">
-                  {t("blog.readMore")}
+                <Link
+                  to={`/blog/${post.slug}`}
+                  aria-label={`${t("blog.readMore")}: ${t(post.titleKey)}`}
+                  className="inline-flex items-center gap-1.5 text-sm font-medium text-accent hover:underline"
+                >
+                  <span>{t("blog.readMore")}: {t(post.titleKey)}</span>
                   <ArrowRight className="h-3.5 w-3.5" />
                 </Link>
               </article>
