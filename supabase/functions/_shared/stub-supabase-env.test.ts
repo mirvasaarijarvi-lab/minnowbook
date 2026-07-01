@@ -13,9 +13,11 @@ import { assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import {
   __DEFAULT_STUBS_FOR_TEST,
   coalesceEnv,
+  restoreSupabaseEnv,
   stubSupabaseEnv,
   stubSupabaseEnvVar,
 } from "./stub-supabase-env.ts";
+
 
 Deno.test("coalesceEnv: undefined -> fallback", () => {
   assertEquals(coalesceEnv(undefined, "fb"), "fb");
@@ -111,3 +113,14 @@ Deno.test({
     assertEquals(resolved.SUPABASE_ANON_KEY, __DEFAULT_STUBS_FOR_TEST.SUPABASE_ANON_KEY);
   },
 });
+
+// MUST sort last in this file. Deno runs all discovered test files in a
+// single process, so any SUPABASE_* var we mutated above would otherwise
+// leak into later test files (e.g. tenant-assets-storage-rls.test.ts),
+// which then treat the stub URL as real and attempt a live DNS lookup
+// to http://custom.local. Restoring the snapshot puts the process env
+// back to whatever CI/.env had at module load.
+Deno.test("zz_restore_supabase_env_for_subsequent_files", () => {
+  restoreSupabaseEnv();
+});
+

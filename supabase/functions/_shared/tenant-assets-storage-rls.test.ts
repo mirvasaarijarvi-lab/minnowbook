@@ -40,7 +40,20 @@ const ANON_KEY =
 
 const BUCKET = "tenant-assets";
 
-const SHOULD_RUN = SUPABASE_URL && SERVICE_ROLE_KEY && ANON_KEY;
+// Guard against cross-file env pollution: if a prior unit test left a
+// stub sentinel host in SUPABASE_URL (e.g. stub.local / custom.local),
+// this suite must not attempt a live DNS lookup against it.
+const STUB_HOSTS = new Set(["stub.local", "custom.local"]);
+function isStubUrl(u: string): boolean {
+  try {
+    return STUB_HOSTS.has(new URL(u).hostname);
+  } catch {
+    return false;
+  }
+}
+
+const SHOULD_RUN = SUPABASE_URL && SERVICE_ROLE_KEY && ANON_KEY && !isStubUrl(SUPABASE_URL);
+
 
 function tinyPng(): Uint8Array {
   // 1x1 transparent PNG
