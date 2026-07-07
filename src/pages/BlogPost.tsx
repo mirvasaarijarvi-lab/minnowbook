@@ -16,12 +16,16 @@ interface BlogPostData {
   slug: string;
   titleKey: string;
   dateKey: string;
+  updatedKey?: string;
   readTime: string;
   contentKeys: string[];
   seoTitle: string;
   seoDescription: string;
   faqs?: BlogFaqItem[];
 }
+
+const toIsoDate = (d: string) =>
+  /^\d{4}-\d{2}-\d{2}$/.test(d) ? `${d}T09:00:00+00:00` : d;
 
 const posts: Record<string, BlogPostData> = {
   "reservation-challenges-small-hospitality": {
