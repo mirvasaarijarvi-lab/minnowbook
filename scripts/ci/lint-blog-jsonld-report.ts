@@ -59,6 +59,8 @@ export function ruleForIssue(issue: Issue): string {
     return "author-invalid-type";
   if (/author node is missing or not an object/i.test(m)) return "author-missing";
   if (/author array is empty/i.test(m)) return "author-empty-array";
+  if (/publisher/i.test(issue.path) && /Organization/i.test(m))
+    return "publisher-invalid-type";
   if (/publisher/i.test(m) && /Organization/i.test(m)) return "publisher-invalid-type";
   if (/missing publisher/i.test(m)) return "publisher-missing";
   if (/mainEntityOfPage/i.test(m)) return "main-entity-invalid";
