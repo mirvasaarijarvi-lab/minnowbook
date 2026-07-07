@@ -63,6 +63,15 @@ const posts: Record<string, BlogPostData> = {
     seoTitle: "Wellness Industry Bookings: Ease of Use Drives Growth – MimmoBook",
     seoDescription: "Discover how easy online bookings help spas, salons, yoga studios and wellness clinics grow with higher conversion, fewer no-shows and loyal clients.",
   },
+  "best-restaurant-reservation-apps": {
+    slug: "best-restaurant-reservation-apps",
+    titleKey: "blog.post6Title",
+    dateKey: "2026-07-07",
+    readTime: "7 min",
+    contentKeys: ["blog.post6C1", "blog.post6C2", "blog.post6C3", "blog.post6C4", "blog.post6C5", "blog.post6C6"],
+    seoTitle: "Best Restaurant Reservation Apps in 2026: Free vs Paid – MimmoBook",
+    seoDescription: "Compare the best restaurant reservation apps in 2026. Free online booking systems, marketplaces and dedicated software for restaurants, cafés and venues.",
+  },
 };
 
 const BlogPost = () => {

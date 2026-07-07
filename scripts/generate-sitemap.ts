@@ -29,6 +29,7 @@ const staticEntries: SitemapEntry[] = [
   { path: "/blog/why-spreadsheets-fail-for-bookings", changefreq: "monthly", priority: "0.7" },
   { path: "/blog/branded-booking-pages-matter", changefreq: "monthly", priority: "0.7" },
   { path: "/blog/multi-site-management-hospitality", changefreq: "monthly", priority: "0.7" },
+  { path: "/blog/best-restaurant-reservation-apps", changefreq: "monthly", priority: "0.8" },
   { path: "/about", changefreq: "monthly", priority: "0.7" },
   { path: "/support", changefreq: "monthly", priority: "0.6" },
   { path: "/beta-guide", changefreq: "monthly", priority: "0.6" },
