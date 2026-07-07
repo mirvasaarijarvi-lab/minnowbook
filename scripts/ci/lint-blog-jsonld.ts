@@ -183,20 +183,141 @@ for (const [slug, post] of Object.entries(posts)) {
   }
 }
 
-if (issues.length > 0) {
-  console.error(`\n❌ BlogPost JSON-LD lint FAILED with ${issues.length} warning(s):\n`);
-  for (const issue of issues) {
-    console.error(`  [${issue.slug}] ${issue.path}: ${issue.message}`);
+// ---------------------------------------------------------------------------
+// Allowlist (documented, time-boxed suppressions).
+//
+// Path: .github/blog-jsonld-allowlist.json (override with
+// BLOG_JSONLD_ALLOWLIST=<path>). Every entry MUST carry `reason` and an
+// `expires` date (YYYY-MM-DD); expired entries fail the run. Entries that
+// don't match any real issue also fail (stale allowlist rot).
+//
+// Entry shape:
+//   {
+//     "slug": "some-slug" | "*",
+//     "path": "BlogPosting.image.url" | "*",     // exact match, or "*" wildcard
+//     "messagePattern": "must be an absolute https URL", // JS regex source
+//     "reason": "Draft image asset pending upload",
+//     "expires": "2026-08-01"
+//   }
+// ---------------------------------------------------------------------------
+
+type AllowEntry = {
+  slug: string;
+  path: string;
+  messagePattern: string;
+  reason: string;
+  expires: string;
+  _re?: RegExp;
+  _matched?: number;
+};
+
+const allowlistPath =
+  process.env.BLOG_JSONLD_ALLOWLIST ?? ".github/blog-jsonld-allowlist.json";
+const configErrors: string[] = [];
+let allowEntries: AllowEntry[] = [];
+
+const { existsSync, readFileSync } = await import("node:fs");
+if (existsSync(allowlistPath)) {
+  try {
+    const raw = JSON.parse(readFileSync(allowlistPath, "utf8"));
+    const list = Array.isArray(raw?.entries) ? raw.entries : [];
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+    list.forEach((e: any, i: number) => {
+      const where = `allowlist[${i}]`;
+      for (const k of ["slug", "path", "messagePattern", "reason", "expires"]) {
+        if (typeof e?.[k] !== "string" || !e[k].trim()) {
+          configErrors.push(`${where} missing/invalid "${k}"`);
+        }
+      }
+      if (e?.expires && !/^\d{4}-\d{2}-\d{2}$/.test(e.expires)) {
+        configErrors.push(`${where} expires "${e.expires}" is not YYYY-MM-DD`);
+      } else if (e?.expires) {
+        const d = new Date(`${e.expires}T00:00:00Z`);
+        if (isNaN(d.getTime())) configErrors.push(`${where} expires is not a real date`);
+        else if (d < today) {
+          configErrors.push(
+            `${where} EXPIRED on ${e.expires} (slug=${e.slug} path=${e.path}) — fix the underlying issue or refresh the entry`,
+          );
+        }
+      }
+      let re: RegExp | undefined;
+      if (typeof e?.messagePattern === "string") {
+        try {
+          re = new RegExp(e.messagePattern);
+        } catch (err) {
+          configErrors.push(`${where} messagePattern is not a valid regex: ${(err as Error).message}`);
+        }
+      }
+      allowEntries.push({ ...(e as AllowEntry), _re: re, _matched: 0 });
+    });
+  } catch (e) {
+    configErrors.push(`allowlist file is not valid JSON: ${(e as Error).message}`);
+  }
+} else if (process.env.BLOG_JSONLD_ALLOWLIST) {
+  configErrors.push(`BLOG_JSONLD_ALLOWLIST=${allowlistPath} does not exist`);
+}
+
+const matchesEntry = (issue: Issue, e: AllowEntry) => {
+  if (!e._re) return false;
+  if (e.slug !== "*" && e.slug !== issue.slug) return false;
+  if (e.path !== "*" && e.path !== issue.path) return false;
+  return e._re.test(issue.message);
+};
+
+const suppressed: Array<{ issue: Issue; entry: AllowEntry }> = [];
+const remaining: Issue[] = [];
+for (const issue of issues) {
+  const hit = allowEntries.find((e) => matchesEntry(issue, e));
+  if (hit) {
+    hit._matched = (hit._matched ?? 0) + 1;
+    suppressed.push({ issue, entry: hit });
+  } else {
+    remaining.push(issue);
+  }
+}
+
+const staleErrors = allowEntries
+  .filter((e) => (e._matched ?? 0) === 0)
+  .map(
+    (e) =>
+      `allowlist entry did not match any warning (stale): slug=${e.slug} path=${e.path} pattern=${e.messagePattern}`,
+  );
+
+if (suppressed.length > 0) {
+  console.log(`ℹ Suppressed ${suppressed.length} warning(s) via ${allowlistPath}:`);
+  for (const s of suppressed) {
+    console.log(
+      `  [${s.issue.slug}] ${s.issue.path}: ${s.issue.message}  — reason: ${s.entry.reason} (expires ${s.entry.expires})`,
+    );
+  }
+}
+
+const hardErrors = [...configErrors, ...staleErrors];
+
+if (remaining.length > 0 || hardErrors.length > 0) {
+  if (remaining.length > 0) {
+    console.error(`\n❌ BlogPost JSON-LD lint FAILED with ${remaining.length} warning(s):\n`);
+    for (const issue of remaining) {
+      console.error(`  [${issue.slug}] ${issue.path}: ${issue.message}`);
+    }
+  }
+  if (hardErrors.length > 0) {
+    console.error(`\n❌ Allowlist errors (${hardErrors.length}):\n`);
+    for (const e of hardErrors) console.error(`  ${e}`);
   }
   console.error(
-    "\nFix the issues above (or update src/lib/blogJsonLd.ts) and re-run `bun run lint:blog-jsonld`.\n",
+    "\nFix the issues above (or update .github/blog-jsonld-allowlist.json) and re-run `bun run lint:blog-jsonld`.\n",
   );
   process.exit(1);
 }
 
-const summary = `✅ BlogPost JSON-LD lint passed for ${Object.keys(posts).length} post(s).`;
+const summary =
+  `✅ BlogPost JSON-LD lint passed for ${Object.keys(posts).length} post(s)` +
+  (suppressed.length > 0 ? ` (${suppressed.length} suppressed via allowlist).` : ".");
 console.log(summary);
 if (process.env.GITHUB_STEP_SUMMARY) {
   const { appendFileSync } = await import("node:fs");
   appendFileSync(process.env.GITHUB_STEP_SUMMARY, `## Blog JSON-LD lint\n\n${summary}\n`);
 }
+
