@@ -107,13 +107,7 @@ const BlogPost = () => {
   const articleBody = post.contentKeys.map((k) => t(k as any)).join("\n\n");
   const wordCount = articleBody.split(/\s+/).filter(Boolean).length;
 
-  return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <SEOHead
-        title={post.seoTitle}
-        description={post.seoDescription}
-        path={`/blog/${post.slug}`}
-        type="article"
+  
   const jsonLd: Record<string, unknown>[] = [
     organizationSchema,
     breadcrumbSchema([
