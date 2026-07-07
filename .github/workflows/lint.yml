@@ -45,3 +45,6 @@ jobs:
 
       - name: Run ESLint
         run: bunx eslint .
+
+      - name: Lint BlogPost JSON-LD (fails on any warning)
+        run: bun run lint:blog-jsonld
