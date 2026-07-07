@@ -6,19 +6,16 @@ import MarketingFooter from "@/components/MarketingFooter";
 import SupportChatWidget from "@/components/SupportChatWidget";
 import SEOHead, { organizationSchema, breadcrumbSchema } from "@/components/SEOHead";
 import { useT } from "@/contexts/I18nContext";
+import {
+  type BlogAuthor,
+  buildAuthorField,
+  resolveDateModified,
+  toIsoDate,
+} from "@/lib/blogJsonLd";
 
 interface BlogFaqItem {
   question: string;
   answer: string;
-}
-
-interface BlogAuthor {
-  type?: "Person" | "Organization";
-  name: string;
-  url?: string;
-  sameAs?: string[];
-  jobTitle?: string;
-  image?: string;
 }
 
 interface BlogPostData {
@@ -34,53 +31,6 @@ interface BlogPostData {
   authors?: BlogAuthor[];
 }
 
-const toIsoDate = (d: string) =>
-  /^\d{4}-\d{2}-\d{2}$/.test(d) ? `${d}T09:00:00+00:00` : d;
-
-const defaultOrgAuthor = {
-  "@type": "Organization" as const,
-  "@id": "https://mimmobook.com/#organization",
-  name: "MimmoBook",
-  url: "https://mimmobook.com",
-  logo: {
-    "@type": "ImageObject" as const,
-    url: "https://mimmobook.com/logos/logo-color-large.png",
-    width: 512,
-    height: 512,
-  },
-  sameAs: [
-    "https://www.linkedin.com/company/mimmobook",
-    "https://twitter.com/mimmobook",
-  ],
-};
-
-const FALLBACK_AUTHOR_NAME = "MimmoBook Editorial";
-const FALLBACK_AUTHOR_URL = "https://mimmobook.com/about";
-
-const buildAuthor = (a: BlogAuthor) => {
-  const type = a.type ?? "Person";
-  const name = a.name?.trim() ? a.name.trim() : FALLBACK_AUTHOR_NAME;
-  const url = a.url?.trim() ? a.url.trim() : FALLBACK_AUTHOR_URL;
-  const node: Record<string, unknown> = {
-    "@type": type,
-    name,
-    url,
-    "@id": `${url}#${type === "Person" ? "author" : "organization"}`,
-  };
-  if (a.sameAs && a.sameAs.length > 0) node.sameAs = a.sameAs;
-  if (a.jobTitle) node.jobTitle = a.jobTitle;
-  if (a.image) node.image = a.image;
-  return node;
-};
-
-const buildAuthorField = (authors?: BlogAuthor[]) => {
-  if (!authors || authors.length === 0) return defaultOrgAuthor;
-  const nodes = authors
-    .filter((a) => a && (a.name || a.url))
-    .map(buildAuthor);
-  if (nodes.length === 0) return defaultOrgAuthor;
-  return nodes.length === 1 ? nodes[0] : nodes;
-};
 
 const posts: Record<string, BlogPostData> = {
   "reservation-challenges-small-hospitality": {
@@ -188,7 +138,7 @@ const BlogPost = () => {
       description: post.seoDescription,
       url: postUrl,
       datePublished: toIsoDate(post.dateKey),
-      dateModified: toIsoDate(post.updatedKey ?? post.dateKey),
+      dateModified: resolveDateModified(post.dateKey, post.updatedKey),
       inLanguage: "en",
       articleSection: "Hospitality reservations",
       keywords: [
