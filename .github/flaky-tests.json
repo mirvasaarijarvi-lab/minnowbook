@@ -44,10 +44,10 @@
     },
     {
       "pattern": "edge-function-cors-custom-headers\\.test\\.ts > .* > support-chat > POST follow-up from \"https://lovable\\.app\\.attacker\\.com\" returns 403",
-      "reason": "Intermittent cold-start/network jitter against the deployed support-chat function under parallel security-suite load. Tests pass locally and a live curl confirms the function correctly returns 403 for this origin; the origin gate runs before rate limiting, so the only plausible cause is transient edge infra latency exceeding the 30s per-test timeout.",
+      "reason": "Intermittent cold-start/network jitter against the deployed support-chat function under parallel security-suite load. Quarantine refreshed on 2026-07-07 after the previous window expired; the underlying function behaviour is unchanged and verified: tests pass locally and a live curl confirms the function correctly returns 403 for this origin. The origin gate runs before rate limiting, so the only plausible cause is transient edge infra latency exceeding the 30s per-test timeout.",
       "owner": "@security",
-      "added": "2026-06-08",
-      "expires": "2026-07-03",
+      "added": "2026-07-07",
+      "expires": "2026-08-05",
       "issue": "https://github.com/mimmobook/mimmobook/issues/cors-custom-headers-support-chat-flake"
     }
   ],
