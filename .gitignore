@@ -25,3 +25,6 @@ dist-ssr
 
 playwright-report/
 test-results/
+
+# Blog JSON-LD lint artifact
+blog-jsonld-report/
