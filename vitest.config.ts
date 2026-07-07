@@ -10,7 +10,11 @@ export default defineConfig({
     environment: "jsdom",
     globals: true,
     setupFiles: ["./src/test/setup.ts"],
-    include: ["src/**/*.{test,spec}.{ts,tsx}"],
+    include: [
+      "src/**/*.{test,spec}.{ts,tsx}",
+      // CI script unit tests live next to the scripts they cover.
+      "scripts/**/*.{test,spec}.{ts,tsx}",
+    ],
     // Use the forks pool so each worker is a real child process that gets
     // killed when the run ends. The previous `threads` pool kept worker
     // threads attached to the main Node process, which meant any leaked
