@@ -54,16 +54,19 @@ const defaultOrgAuthor = {
   ],
 };
 
+const FALLBACK_AUTHOR_NAME = "MimmoBook Editorial";
+const FALLBACK_AUTHOR_URL = "https://mimmobook.com/about";
+
 const buildAuthor = (a: BlogAuthor) => {
   const type = a.type ?? "Person";
+  const name = a.name?.trim() ? a.name.trim() : FALLBACK_AUTHOR_NAME;
+  const url = a.url?.trim() ? a.url.trim() : FALLBACK_AUTHOR_URL;
   const node: Record<string, unknown> = {
     "@type": type,
-    name: a.name,
+    name,
+    url,
+    "@id": `${url}#${type === "Person" ? "author" : "organization"}`,
   };
-  if (a.url) {
-    node.url = a.url;
-    node["@id"] = `${a.url}#${type === "Person" ? "author" : "organization"}`;
-  }
   if (a.sameAs && a.sameAs.length > 0) node.sameAs = a.sameAs;
   if (a.jobTitle) node.jobTitle = a.jobTitle;
   if (a.image) node.image = a.image;
@@ -72,7 +75,10 @@ const buildAuthor = (a: BlogAuthor) => {
 
 const buildAuthorField = (authors?: BlogAuthor[]) => {
   if (!authors || authors.length === 0) return defaultOrgAuthor;
-  const nodes = authors.map(buildAuthor);
+  const nodes = authors
+    .filter((a) => a && (a.name || a.url))
+    .map(buildAuthor);
+  if (nodes.length === 0) return defaultOrgAuthor;
   return nodes.length === 1 ? nodes[0] : nodes;
 };
 
