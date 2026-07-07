@@ -138,7 +138,7 @@ const BlogPost = () => {
       description: post.seoDescription,
       url: postUrl,
       datePublished: toIsoDate(post.dateKey),
-      dateModified: toIsoDate(post.updatedKey ?? post.dateKey),
+      dateModified: resolveDateModified(post.dateKey, post.updatedKey),
       inLanguage: "en",
       articleSection: "Hospitality reservations",
       keywords: [
