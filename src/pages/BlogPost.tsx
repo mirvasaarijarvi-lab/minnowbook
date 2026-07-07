@@ -96,6 +96,11 @@ const BlogPost = () => {
     );
   }
 
+  const postUrl = `https://mimmobook.com/blog/${post.slug}`;
+  const headline = t(post.titleKey as any);
+  const articleBody = post.contentKeys.map((k) => t(k as any)).join("\n\n");
+  const wordCount = articleBody.split(/\s+/).filter(Boolean).length;
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <SEOHead
@@ -108,16 +113,57 @@ const BlogPost = () => {
           breadcrumbSchema([
             { name: "Home", url: "https://mimmobook.com/" },
             { name: "Blog", url: "https://mimmobook.com/blog" },
-            { name: t(post.titleKey as any), url: `https://mimmobook.com/blog/${post.slug}` },
+            { name: headline, url: postUrl },
           ]),
           {
             "@context": "https://schema.org",
             "@type": "BlogPosting",
-            headline: t(post.titleKey as any),
+            "@id": `${postUrl}#article`,
+            mainEntityOfPage: { "@type": "WebPage", "@id": postUrl },
+            headline,
+            name: headline,
+            description: post.seoDescription,
+            url: postUrl,
             datePublished: post.dateKey,
-            author: { "@type": "Organization", name: "MimmoBook" },
-            publisher: { "@type": "Organization", name: "MimmoBook", url: "https://mimmobook.com" },
-            url: `https://mimmobook.com/blog/${post.slug}`,
+            dateModified: post.dateKey,
+            inLanguage: "en",
+            articleSection: "Hospitality reservations",
+            keywords: [
+              "reservation management",
+              "booking software",
+              "hospitality",
+              "restaurants",
+              "MimmoBook",
+            ],
+            wordCount,
+            timeRequired: `PT${post.readTime.replace(/\D/g, "")}M`,
+            image: {
+              "@type": "ImageObject",
+              url: "https://mimmobook.com/og-image.png",
+              width: 1200,
+              height: 630,
+            },
+            author: {
+              "@type": "Organization",
+              name: "MimmoBook",
+              url: "https://mimmobook.com",
+            },
+            publisher: {
+              "@type": "Organization",
+              name: "MimmoBook",
+              url: "https://mimmobook.com",
+              logo: {
+                "@type": "ImageObject",
+                url: "https://mimmobook.com/logos/logo-color-large.png",
+              },
+            },
+            isPartOf: {
+              "@type": "Blog",
+              "@id": "https://mimmobook.com/blog#blog",
+              name: "MimmoBook Blog",
+              url: "https://mimmobook.com/blog",
+            },
+            articleBody,
           },
         ]}
       />
