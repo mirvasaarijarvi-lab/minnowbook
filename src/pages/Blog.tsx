@@ -48,6 +48,14 @@ const blogPosts = [
     readTime: "6 min",
     categoryKey: "blog.catInsights" as const,
   },
+  {
+    slug: "best-restaurant-reservation-apps",
+    titleKey: "blog.post6Title" as const,
+    excerptKey: "blog.post6Excerpt" as const,
+    date: "2026-07-07",
+    readTime: "7 min",
+    categoryKey: "blog.catGuides" as const,
+  },
 ];
 
 const Blog = () => {
