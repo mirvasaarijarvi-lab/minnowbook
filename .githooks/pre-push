@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# Runs the Blog JSON-LD linter before pushing so structured-data issues
+# are caught locally instead of in CI.
+#
+# Skip with: git push --no-verify
+# Or set: SKIP_BLOG_JSONLD_HOOK=1 git push
+
+set -e
+
+if [ "${SKIP_BLOG_JSONLD_HOOK:-0}" = "1" ]; then
+  echo "[pre-push] SKIP_BLOG_JSONLD_HOOK=1, skipping blog JSON-LD lint."
+  exit 0
+fi
+
+if ! command -v bun >/dev/null 2>&1; then
+  echo "[pre-push] bun not found on PATH; skipping blog JSON-LD lint." >&2
+  exit 0
+fi
+
+echo "[pre-push] Running: bun run lint:blog-jsonld"
+if ! bun run lint:blog-jsonld; then
+  echo ""
+  echo "[pre-push] Blog JSON-LD lint FAILED. Fix the issues above, or bypass with:"
+  echo "           git push --no-verify"
+  echo "           SKIP_BLOG_JSONLD_HOOK=1 git push"
+  exit 1
+fi
+
+exit 0
