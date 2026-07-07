@@ -54,7 +54,7 @@ jobs:
 
       - name: Upload BlogPost JSON-LD report
         if: always() && hashFiles('blog-jsonld-report/report.json') != ''
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: blog-jsonld-report
           path: blog-jsonld-report/
