@@ -16,12 +16,16 @@ interface BlogPostData {
   slug: string;
   titleKey: string;
   dateKey: string;
+  updatedKey?: string;
   readTime: string;
   contentKeys: string[];
   seoTitle: string;
   seoDescription: string;
   faqs?: BlogFaqItem[];
 }
+
+const toIsoDate = (d: string) =>
+  /^\d{4}-\d{2}-\d{2}$/.test(d) ? `${d}T09:00:00+00:00` : d;
 
 const posts: Record<string, BlogPostData> = {
   "reservation-challenges-small-hospitality": {
@@ -119,13 +123,17 @@ const BlogPost = () => {
       "@context": "https://schema.org",
       "@type": "BlogPosting",
       "@id": `${postUrl}#article`,
-      mainEntityOfPage: { "@type": "WebPage", "@id": postUrl },
+      mainEntityOfPage: {
+        "@type": "WebPage",
+        "@id": postUrl,
+        url: postUrl,
+      },
       headline,
       name: headline,
       description: post.seoDescription,
       url: postUrl,
-      datePublished: post.dateKey,
-      dateModified: post.dateKey,
+      datePublished: toIsoDate(post.dateKey),
+      dateModified: toIsoDate(post.updatedKey ?? post.dateKey),
       inLanguage: "en",
       articleSection: "Hospitality reservations",
       keywords: [
