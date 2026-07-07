@@ -1,7 +1,12 @@
 /**
  * JSON-LD helpers for blog posts. Extracted from BlogPost.tsx so they can be
- * unit-tested in isolation without pulling react-router or the full page.
+ * unit-tested in isolation without pulling react-router or the full page,
+ * and so the superadmin JSON-LD preview page (/superadmin/blog-json-ld) can
+ * render the exact same output that ships to production.
  */
+
+import { organizationSchema, breadcrumbSchema } from "@/components/SEOHead";
+
 
 export interface BlogAuthor {
   type?: "Person" | "Organization";
@@ -67,3 +72,182 @@ export const buildAuthorField = (authors?: BlogAuthor[]) => {
  */
 export const resolveDateModified = (dateKey: string, updatedKey?: string) =>
   toIsoDate(updatedKey && updatedKey.trim() ? updatedKey : dateKey);
+
+export interface BlogFaqItem {
+  question: string;
+  answer: string;
+}
+
+export interface BlogPostData {
+  slug: string;
+  titleKey: string;
+  dateKey: string;
+  updatedKey?: string;
+  readTime: string;
+  contentKeys: string[];
+  seoTitle: string;
+  seoDescription: string;
+  faqs?: BlogFaqItem[];
+  authors?: BlogAuthor[];
+}
+
+export const posts: Record<string, BlogPostData> = {
+  "reservation-challenges-small-hospitality": {
+    slug: "reservation-challenges-small-hospitality",
+    titleKey: "blog.post1Title",
+    dateKey: "2026-03-10",
+    readTime: "6 min",
+    contentKeys: ["blog.post1C1", "blog.post1C2", "blog.post1C3", "blog.post1C4", "blog.post1C5"],
+    seoTitle: "5 Reservation Challenges Small Hospitality Businesses Face – MimmoBook",
+    seoDescription: "Small restaurants, venues and guesthouses face unique booking challenges. Learn the top 5 problems and how cloud-based reservation management solves them.",
+  },
+  "why-spreadsheets-fail-for-bookings": {
+    slug: "why-spreadsheets-fail-for-bookings",
+    titleKey: "blog.post2Title",
+    dateKey: "2026-03-08",
+    readTime: "5 min",
+    contentKeys: ["blog.post2C1", "blog.post2C2", "blog.post2C3", "blog.post2C4"],
+    seoTitle: "Why Spreadsheets Fail for Booking Management – MimmoBook",
+    seoDescription: "Still using spreadsheets for reservations? Discover why hospitality businesses are moving to dedicated booking software and the risks of manual tracking.",
+  },
+  "branded-booking-pages-matter": {
+    slug: "branded-booking-pages-matter",
+    titleKey: "blog.post3Title",
+    dateKey: "2026-03-05",
+    readTime: "4 min",
+    contentKeys: ["blog.post3C1", "blog.post3C2", "blog.post3C3"],
+    seoTitle: "Why Branded Booking Pages Matter for Your Business – MimmoBook",
+    seoDescription: "A branded booking page builds trust and improves conversion. Learn why your reservation page should reflect your brand identity.",
+  },
+  "multi-site-management-hospitality": {
+    slug: "multi-site-management-hospitality",
+    titleKey: "blog.post4Title",
+    dateKey: "2026-03-01",
+    readTime: "5 min",
+    contentKeys: ["blog.post4C1", "blog.post4C2", "blog.post4C3", "blog.post4C4"],
+    seoTitle: "Multi-Site Management for Hospitality Businesses – MimmoBook",
+    seoDescription: "Managing reservations across multiple locations? Learn how centralized multi-site management saves time and reduces errors.",
+  },
+  "wellness-industry-bookings-growth": {
+    slug: "wellness-industry-bookings-growth",
+    titleKey: "blog.post5Title",
+    dateKey: "2026-06-12",
+    readTime: "6 min",
+    contentKeys: ["blog.post5C1", "blog.post5C2", "blog.post5C3", "blog.post5C4", "blog.post5C5"],
+    seoTitle: "Wellness Industry Bookings: Ease of Use Drives Growth – MimmoBook",
+    seoDescription: "Discover how easy online bookings help spas, salons, yoga studios and wellness clinics grow with higher conversion, fewer no-shows and loyal clients.",
+  },
+  "best-restaurant-reservation-apps": {
+    slug: "best-restaurant-reservation-apps",
+    titleKey: "blog.post6Title",
+    dateKey: "2026-07-07",
+    readTime: "7 min",
+    contentKeys: ["blog.post6C1", "blog.post6C2", "blog.post6C3", "blog.post6C4", "blog.post6C5", "blog.post6C6"],
+    seoTitle: "Best Restaurant Reservation Apps in 2026: Free vs Paid – MimmoBook",
+    seoDescription: "Compare the best restaurant reservation apps in 2026. Free online booking systems, marketplaces and dedicated software for restaurants, cafés and venues.",
+  },
+};
+
+/**
+ * Build the exact JSON-LD array shipped by /blog/:slug. `translate` is the
+ * i18n resolver (post.titleKey → localized headline, contentKeys → body).
+ * Optional `overrides` let the preview page simulate edits (e.g. a draft
+ * updatedKey or draft authors list) without mutating the shared posts map.
+ */
+export const buildBlogPostJsonLd = (
+  post: BlogPostData,
+  translate: (key: string) => string,
+  overrides: { updatedKey?: string; authors?: BlogAuthor[] } = {},
+): Record<string, unknown>[] => {
+  const postUrl = `https://mimmobook.com/blog/${post.slug}`;
+  const headline = translate(post.titleKey);
+  const articleBody = post.contentKeys.map((k) => translate(k)).join("\n\n");
+  const wordCount = articleBody.split(/\s+/).filter(Boolean).length;
+  const effectiveUpdatedKey = overrides.updatedKey ?? post.updatedKey;
+  const effectiveAuthors = overrides.authors ?? post.authors;
+
+  const jsonLd: Record<string, unknown>[] = [
+    organizationSchema,
+    breadcrumbSchema([
+      { name: "Home", url: "https://mimmobook.com/" },
+      { name: "Blog", url: "https://mimmobook.com/blog" },
+      { name: headline, url: postUrl },
+    ]),
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "@id": `${postUrl}#article`,
+      mainEntityOfPage: {
+        "@type": "WebPage",
+        "@id": postUrl,
+        url: postUrl,
+      },
+      headline,
+      name: headline,
+      description: post.seoDescription,
+      url: postUrl,
+      datePublished: toIsoDate(post.dateKey),
+      dateModified: resolveDateModified(post.dateKey, effectiveUpdatedKey),
+      inLanguage: "en",
+      articleSection: "Hospitality reservations",
+      keywords: [
+        "reservation management",
+        "booking software",
+        "hospitality",
+        "restaurants",
+        "MimmoBook",
+      ],
+      wordCount,
+      timeRequired: `PT${post.readTime.replace(/\D/g, "")}M`,
+      image: {
+        "@type": "ImageObject",
+        url: "https://mimmobook.com/og-image.png",
+        width: 1200,
+        height: 630,
+      },
+      author: buildAuthorField(effectiveAuthors),
+      publisher: {
+        "@type": "Organization",
+        "@id": "https://mimmobook.com/#organization",
+        name: "MimmoBook",
+        url: "https://mimmobook.com",
+        logo: {
+          "@type": "ImageObject",
+          url: "https://mimmobook.com/logos/logo-color-large.png",
+          width: 512,
+          height: 512,
+        },
+        sameAs: [
+          "https://www.linkedin.com/company/mimmobook",
+          "https://twitter.com/mimmobook",
+        ],
+      },
+      isPartOf: {
+        "@type": "Blog",
+        "@id": "https://mimmobook.com/blog#blog",
+        name: "MimmoBook Blog",
+        url: "https://mimmobook.com/blog",
+      },
+      articleBody,
+    },
+  ];
+
+  if (post.faqs && post.faqs.length > 0) {
+    jsonLd.push({
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "@id": `${postUrl}#faq`,
+      inLanguage: "en",
+      mainEntity: post.faqs.map((f) => ({
+        "@type": "Question",
+        name: f.question,
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: f.answer,
+        },
+      })),
+    });
+  }
+
+  return jsonLd;
+};
