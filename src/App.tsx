@@ -38,6 +38,7 @@ import UseCases from "./pages/UseCases";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import BetaGuide from "./pages/BetaGuide";
+import BlogJsonLdPreview from "./pages/BlogJsonLdPreview";
 import EmailPreviewSmoke from "./pages/EmailPreviewSmoke";
 import CookieConsent from "./components/CookieConsent";
 import AccessibilityWidget from "./components/AccessibilityWidget";
