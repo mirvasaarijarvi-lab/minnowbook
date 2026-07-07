@@ -114,65 +114,92 @@ const BlogPost = () => {
         description={post.seoDescription}
         path={`/blog/${post.slug}`}
         type="article"
-        jsonLd={[
-          organizationSchema,
-          breadcrumbSchema([
-            { name: "Home", url: "https://mimmobook.com/" },
-            { name: "Blog", url: "https://mimmobook.com/blog" },
-            { name: headline, url: postUrl },
-          ]),
-          {
-            "@context": "https://schema.org",
-            "@type": "BlogPosting",
-            "@id": `${postUrl}#article`,
-            mainEntityOfPage: { "@type": "WebPage", "@id": postUrl },
-            headline,
-            name: headline,
-            description: post.seoDescription,
-            url: postUrl,
-            datePublished: post.dateKey,
-            dateModified: post.dateKey,
-            inLanguage: "en",
-            articleSection: "Hospitality reservations",
-            keywords: [
-              "reservation management",
-              "booking software",
-              "hospitality",
-              "restaurants",
-              "MimmoBook",
-            ],
-            wordCount,
-            timeRequired: `PT${post.readTime.replace(/\D/g, "")}M`,
-            image: {
-              "@type": "ImageObject",
-              url: "https://mimmobook.com/og-image.png",
-              width: 1200,
-              height: 630,
-            },
-            author: {
-              "@type": "Organization",
-              name: "MimmoBook",
-              url: "https://mimmobook.com",
-            },
-            publisher: {
-              "@type": "Organization",
-              name: "MimmoBook",
-              url: "https://mimmobook.com",
-              logo: {
-                "@type": "ImageObject",
-                url: "https://mimmobook.com/logos/logo-color-large.png",
-              },
-            },
-            isPartOf: {
-              "@type": "Blog",
-              "@id": "https://mimmobook.com/blog#blog",
-              name: "MimmoBook Blog",
-              url: "https://mimmobook.com/blog",
-            },
-            articleBody,
-          },
-        ]}
+  const jsonLd: Record<string, unknown>[] = [
+    organizationSchema,
+    breadcrumbSchema([
+      { name: "Home", url: "https://mimmobook.com/" },
+      { name: "Blog", url: "https://mimmobook.com/blog" },
+      { name: headline, url: postUrl },
+    ]),
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "@id": `${postUrl}#article`,
+      mainEntityOfPage: { "@type": "WebPage", "@id": postUrl },
+      headline,
+      name: headline,
+      description: post.seoDescription,
+      url: postUrl,
+      datePublished: post.dateKey,
+      dateModified: post.dateKey,
+      inLanguage: "en",
+      articleSection: "Hospitality reservations",
+      keywords: [
+        "reservation management",
+        "booking software",
+        "hospitality",
+        "restaurants",
+        "MimmoBook",
+      ],
+      wordCount,
+      timeRequired: `PT${post.readTime.replace(/\D/g, "")}M`,
+      image: {
+        "@type": "ImageObject",
+        url: "https://mimmobook.com/og-image.png",
+        width: 1200,
+        height: 630,
+      },
+      author: {
+        "@type": "Organization",
+        name: "MimmoBook",
+        url: "https://mimmobook.com",
+      },
+      publisher: {
+        "@type": "Organization",
+        name: "MimmoBook",
+        url: "https://mimmobook.com",
+        logo: {
+          "@type": "ImageObject",
+          url: "https://mimmobook.com/logos/logo-color-large.png",
+        },
+      },
+      isPartOf: {
+        "@type": "Blog",
+        "@id": "https://mimmobook.com/blog#blog",
+        name: "MimmoBook Blog",
+        url: "https://mimmobook.com/blog",
+      },
+      articleBody,
+    },
+  ];
+
+  if (post.faqs && post.faqs.length > 0) {
+    jsonLd.push({
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "@id": `${postUrl}#faq`,
+      inLanguage: "en",
+      mainEntity: post.faqs.map((f) => ({
+        "@type": "Question",
+        name: f.question,
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: f.answer,
+        },
+      })),
+    });
+  }
+
+  return (
+    <div className="min-h-screen bg-background flex flex-col">
+      <SEOHead
+        title={post.seoTitle}
+        description={post.seoDescription}
+        path={`/blog/${post.slug}`}
+        type="article"
+        jsonLd={jsonLd}
       />
+
       <MarketingHeader />
 
       <article className="py-16 md:py-24">
