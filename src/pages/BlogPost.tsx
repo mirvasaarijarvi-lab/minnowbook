@@ -145,17 +145,35 @@ const BlogPost = () => {
       },
       author: {
         "@type": "Organization",
-        name: "MimmoBook",
-        url: "https://mimmobook.com",
-      },
-      publisher: {
-        "@type": "Organization",
+        "@id": "https://mimmobook.com/#organization",
         name: "MimmoBook",
         url: "https://mimmobook.com",
         logo: {
           "@type": "ImageObject",
           url: "https://mimmobook.com/logos/logo-color-large.png",
+          width: 512,
+          height: 512,
         },
+        sameAs: [
+          "https://www.linkedin.com/company/mimmobook",
+          "https://twitter.com/mimmobook",
+        ],
+      },
+      publisher: {
+        "@type": "Organization",
+        "@id": "https://mimmobook.com/#organization",
+        name: "MimmoBook",
+        url: "https://mimmobook.com",
+        logo: {
+          "@type": "ImageObject",
+          url: "https://mimmobook.com/logos/logo-color-large.png",
+          width: 512,
+          height: 512,
+        },
+        sameAs: [
+          "https://www.linkedin.com/company/mimmobook",
+          "https://twitter.com/mimmobook",
+        ],
       },
       isPartOf: {
         "@type": "Blog",
