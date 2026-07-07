@@ -1,0 +1,4 @@
+{
+  "_doc": "Allowlist for scripts/ci/lint-blog-jsonld.ts. Every entry must carry a `reason` and an `expires` date (YYYY-MM-DD); expired or unmatched entries fail CI. Override the path with BLOG_JSONLD_ALLOWLIST=<file>. Entry shape: { slug: '<slug>'|'*', path: 'BlogPosting.image.url'|'*', messagePattern: '<JS regex source>', reason: '...', expires: 'YYYY-MM-DD' }.",
+  "entries": []
+}
