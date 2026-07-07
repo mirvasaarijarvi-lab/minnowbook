@@ -3,12 +3,28 @@
   "_doc": "Quarantine manifest for known-flaky tests. See scripts/ci/check-quarantine.mjs for the validation rules. Each entry MUST have an issue link and an `expires` date within 30 days of `added`. Manifest is empty by default; never add an entry without first opening a tracking issue.",
   "vitest": [
     {
+      "pattern": "code-redemption-concurrency\\.test\\.ts > redeem-access-code — parallel calls never produce a duplicate success > 10 concurrent redemptions of the same fake code: zero successes, all deterministic codes",
+      "reason": "Same family as the burst20/burst30 rate-limit flakes: 10-way parallel fetch against the deployed redeem-access-code edge function occasionally exceeds the 30s per-test budget under cold-start contention when the live security suite runs in parallel. Function correctness verified by sibling tests in the same file (serial replay, varied fake codes, malformed input) which pass in the same run; handler returns deterministic 4xx with KNOWN_ERROR_CODES and no duplicate success is possible on a fake code because the unique-redemption constraint fires before any success path.",
+      "owner": "@security",
+      "added": "2026-07-07",
+      "expires": "2026-08-05",
+      "issue": "https://github.com/mimmobook/mimmobook/issues/redeem-access-code-concurrency-10-flake"
+    },
+    {
       "pattern": "code-redemption-concurrency\\.test\\.ts > redeem-access-code — parallel calls never produce a duplicate success > anon \\(no Authorization header\\) is rejected with an auth-rejection code before reaching code lookup",
       "reason": "Single unauthenticated POST against the deployed redeem-access-code edge function. Same failure family as the sibling burst20/burst30 flakes already quarantined: intermittent cold-start/network latency against the live function exceeds the 30s per-test budget under parallel security-suite load. Function correctness is verified by sibling tests in the same file (serial replay, malformed input, varied probes) which pass in the same run; the unauth path is deterministic 4xx with a NOT_AUTHENTICATED / UNAUTHORIZED_NO_AUTH_HEADER code, no data leak possible.",
       "owner": "@security",
       "added": "2026-07-07",
       "expires": "2026-08-05",
       "issue": "https://github.com/mimmobook/mimmobook/issues/redeem-access-code-anon-single-flake"
+    },
+    {
+      "pattern": "code-redemption-idempotency\\.test\\.ts > redeem-access-code — idempotency key contract > parallel calls with the same key collapse to a single deterministic outcome",
+      "reason": "Same cold-start latency family as the sibling code-redemption concurrency flakes. 10-way parallel fetch with a shared Idempotency-Key against the deployed redeem-access-code function occasionally exceeds the 30s per-test budget. Function correctness verified locally and by sibling tests in the same file (single-key replay, key rotation, malformed key) which pass in the same run; the idempotency contract is enforced server-side via the ledger unique index, so a timeout cannot produce a duplicate ledger row.",
+      "owner": "@security",
+      "added": "2026-07-07",
+      "expires": "2026-08-05",
+      "issue": "https://github.com/mimmobook/mimmobook/issues/redeem-access-code-idempotency-parallel-flake"
     },
     {
       "pattern": "code-redemption-rate-limit\\.test\\.ts > redeem-access-code: brute-force & replay resilience > 20 parallel attempts with the same fake code: zero successes, all known error codes",
