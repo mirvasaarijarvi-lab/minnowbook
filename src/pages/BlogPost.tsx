@@ -7,6 +7,11 @@ import SupportChatWidget from "@/components/SupportChatWidget";
 import SEOHead, { organizationSchema, breadcrumbSchema } from "@/components/SEOHead";
 import { useT } from "@/contexts/I18nContext";
 
+interface BlogFaqItem {
+  question: string;
+  answer: string;
+}
+
 interface BlogPostData {
   slug: string;
   titleKey: string;
@@ -15,6 +20,7 @@ interface BlogPostData {
   contentKeys: string[];
   seoTitle: string;
   seoDescription: string;
+  faqs?: BlogFaqItem[];
 }
 
 const posts: Record<string, BlogPostData> = {
