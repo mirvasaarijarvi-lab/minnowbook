@@ -163,8 +163,13 @@ for (const [slug, post] of Object.entries(posts)) {
     if (!isNonEmptyString(n["@type"] as string)) {
       push(slug, `[${i}].@type`, "missing @type");
     }
-    if (!isNonEmptyString(n["@id"] as string)) {
-      push(slug, `[${i}].@id`, "missing @id (breaks node deduplication across graph)");
+    // @id is required on the article + FAQ nodes so cross-graph refs
+    // (author, publisher, mainEntityOfPage) actually deduplicate.
+    // BreadcrumbList / Organization top-level nodes don't need one.
+    if (n["@type"] === "BlogPosting" || n["@type"] === "FAQPage") {
+      if (!isNonEmptyString(n["@id"] as string)) {
+        push(slug, `[${i}].@id`, "missing @id");
+      }
     }
     switch (n["@type"]) {
       case "BlogPosting":
