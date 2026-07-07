@@ -12,6 +12,15 @@ interface BlogFaqItem {
   answer: string;
 }
 
+interface BlogAuthor {
+  type?: "Person" | "Organization";
+  name: string;
+  url?: string;
+  sameAs?: string[];
+  jobTitle?: string;
+  image?: string;
+}
+
 interface BlogPostData {
   slug: string;
   titleKey: string;
@@ -22,10 +31,50 @@ interface BlogPostData {
   seoTitle: string;
   seoDescription: string;
   faqs?: BlogFaqItem[];
+  authors?: BlogAuthor[];
 }
 
 const toIsoDate = (d: string) =>
   /^\d{4}-\d{2}-\d{2}$/.test(d) ? `${d}T09:00:00+00:00` : d;
+
+const defaultOrgAuthor = {
+  "@type": "Organization" as const,
+  "@id": "https://mimmobook.com/#organization",
+  name: "MimmoBook",
+  url: "https://mimmobook.com",
+  logo: {
+    "@type": "ImageObject" as const,
+    url: "https://mimmobook.com/logos/logo-color-large.png",
+    width: 512,
+    height: 512,
+  },
+  sameAs: [
+    "https://www.linkedin.com/company/mimmobook",
+    "https://twitter.com/mimmobook",
+  ],
+};
+
+const buildAuthor = (a: BlogAuthor) => {
+  const type = a.type ?? "Person";
+  const node: Record<string, unknown> = {
+    "@type": type,
+    name: a.name,
+  };
+  if (a.url) {
+    node.url = a.url;
+    node["@id"] = `${a.url}#${type === "Person" ? "author" : "organization"}`;
+  }
+  if (a.sameAs && a.sameAs.length > 0) node.sameAs = a.sameAs;
+  if (a.jobTitle) node.jobTitle = a.jobTitle;
+  if (a.image) node.image = a.image;
+  return node;
+};
+
+const buildAuthorField = (authors?: BlogAuthor[]) => {
+  if (!authors || authors.length === 0) return defaultOrgAuthor;
+  const nodes = authors.map(buildAuthor);
+  return nodes.length === 1 ? nodes[0] : nodes;
+};
 
 const posts: Record<string, BlogPostData> = {
   "reservation-challenges-small-hospitality": {
