@@ -214,6 +214,19 @@ const App = () => (
                   </ProtectedRoute>
                 }
               />
+              <Route
+                path="/superadmin/blog-json-ld"
+                element={
+                  <ProtectedRoute>
+                    <SystemAdminRoute
+                      attemptedArea="the blog JSON-LD preview"
+                      areaSlug="superadmin"
+                    >
+                      <BlogJsonLdPreview />
+                    </SystemAdminRoute>
+                  </ProtectedRoute>
+                }
+              />
               <Route path="/book/:slug" element={<PublicBooking />} />
               <Route path="/my-booking/:token" element={<GuestPortal />} />
               <Route
