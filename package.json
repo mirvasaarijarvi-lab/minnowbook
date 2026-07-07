@@ -35,7 +35,9 @@
     "check:permission-arity": "node scripts/ci/check-permission-arity.mjs",
     "check:lockfile": "node scripts/ci/preflight-manifest-drift.mjs",
     "lock:heal": "node scripts/ci/heal-bun-lockfile.mjs",
-    "lock:heal:check": "node scripts/ci/heal-bun-lockfile.mjs --check"
+    "lock:heal:check": "node scripts/ci/heal-bun-lockfile.mjs --check",
+    "prepare": "node scripts/setup-git-hooks.mjs",
+    "hooks:install": "node scripts/setup-git-hooks.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
