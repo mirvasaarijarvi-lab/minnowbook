@@ -1,7 +1,12 @@
 /**
  * JSON-LD helpers for blog posts. Extracted from BlogPost.tsx so they can be
- * unit-tested in isolation without pulling react-router or the full page.
+ * unit-tested in isolation without pulling react-router or the full page,
+ * and so the superadmin JSON-LD preview page (/superadmin/blog-json-ld) can
+ * render the exact same output that ships to production.
  */
+
+import { organizationSchema, breadcrumbSchema } from "@/components/SEOHead";
+
 
 export interface BlogAuthor {
   type?: "Person" | "Organization";
