@@ -5124,7 +5124,7 @@ const fi: TranslationKeys = {
   "blog.post1C4": "Kolmanneksi vierasviestintä on epäjohdonmukaista. Jotkut vieraat saavat vahvistussähköpostin, toiset eivät. Automaattiset sähköpostivirrat varmistavat, että jokainen vieras saa saman ammattimaisen kokemuksen.",
   "blog.post1C5": "Neljänneksi liikevaihdon seuranta on manuaalista ja virhealtista. Pienet yritykset käyttävät usein taulukoita tai paperia varausten seuraamiseen. Varausjärjestelmä sisäänrakennetuilla raporteilla ratkaisee tämän. Viidenneksi verkkonäkyvyys kärsii. Ilman ammattimaista varaussivua potentiaaliset vieraat eivät löydä saatavuutta helposti.",
   "blog.post2Title": "Miksi taulukot eivät toimi varaustenhallinnassa",
-  "blog.post2Excerpt": "Taulukot ovat joustavia, mutta ne luovat ongelmia varaustenhallinnassa. Tässä miksi omistettu ohjelmisto kannattaa.",
+  "blog.post2Excerpt": "Taulukot ovat joustavia, mutta ne luovat ongelmia varaustenhallinnassa. Lue tästä miksi räätälöity ohjelmisto kannattaa.",
   "blog.post2C1": "Taulukot ovat monien pienyritysten oletustyökalu. Ne ovat ilmaisia, joustavia ja tuttuja. Mutta varaustenhallinnassa ne luovat ongelmia, jotka pahenevat ajan myötä.",
   "blog.post2C2": "Suurin ongelma on, etteivät taulukot ole reaaliaikaisia. Kun kaksi henkilökunnan jäsentä päivittää samaa taulukkoa, syntyy ristiriitoja. Ei ole live-saatavuusnäkymää, joten henkilökunnan on tarkistettava manuaalisesti ennen jokaista vahvistusta.",
   "blog.post2C3": "Taulukot eivät myöskään voi lähettää sähköposteja. Jokainen vahvistus, muistutus ja peruutus on hoidettava manuaalisesti. Omistettu varausjärjestelmä automatisoi kaiken vierasviestinnän.",
