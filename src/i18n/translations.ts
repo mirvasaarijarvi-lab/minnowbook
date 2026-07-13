@@ -5117,7 +5117,7 @@ const fi: TranslationKeys = {
   "blog.catInsights": "Oivallukset",
   "blog.catGuides": "Oppaat",
   "blog.post1Title": "5 varaushaastetta, joita pienet ravintola-alan yritykset kohtaavat",
-  "blog.post1Excerpt": "No-show-tapauksista tuplavaraukuksiin, pienet ravintolat, tilat ja majatalot kohtaavat ainutlaatuisia haasteita. Tässä ne ja niiden ratkaisut.",
+  "blog.post1Excerpt": "No-show-tapauksista tuplavarauksiin, pienet ravintolat, tilat ja majatalot kohtaavat ainutlaatuisia haasteita. Tässä niistä ja niiden ratkaisuista.",
   "blog.post1C1": "Pienet ravintola-alan yritykset, kuten ravintolat muutamalla pöydällä, boutique-tilat ja perhemajatalot, kohtaavat varaushaast­eita, jotka suuremmat toimijat ratkaisevat omistautuneella henkilökunnalla ja yritysohjelmistoilla. Mutta yritykselle, jossa on 5 to 30 asiakaspaikkaa tai muutama huone, nämä ratkaisut ovat ylimitoitettuja.",
   "blog.post1C2": "Ensimmäinen haaste on no-showt. Kun neljän hengen pöytä ei saavu 20-paikkaisessa ravintolassa, se on 20 % kapasiteetista hukassa. Automaattiset muistutussähköpostit 24 tuntia ennen varausta voivat vähentää no-show-lukuja 30 to 50 %.",
   "blog.post1C3": "Toinen haaste on tuplavaraukset. Kun varauksia tulee puhelimitse, sähköpostitse, Instagram-viesteillä ja walk-ineina, on helppoa varata sama pöytä tai huone kahdesti. Keskitetty varausjärjestelmä reaaliaikaisella saatavuudella poistaa tämän ongelman kokonaan.",
