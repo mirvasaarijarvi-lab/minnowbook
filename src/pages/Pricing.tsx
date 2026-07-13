@@ -83,8 +83,8 @@ const Pricing = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <SEOHead
-        title="MimmoBook Pricing – Plans from €19/month (incl. VAT)"
-        description="Compare MimmoBook plans: Basic €19/mo, Professional €59/mo, Business €179/mo. All prices include VAT. 30-day free trial, branded booking pages and automated emails."
+        title="MimmoBook Pricing, Plans from €19/month (VAT included)"
+        description="Compare MimmoBook plans: Basic €19, Professional €59, Business €179/mo (VAT included). 30-day free trial, branded booking pages and automated emails."
         path="/pricing"
         jsonLd={[
           faqSchema([
