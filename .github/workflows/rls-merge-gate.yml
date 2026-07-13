@@ -37,6 +37,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
+        with:
+          persist-credentials: false
 
       - name: Setup Bun
         uses: ./.github/actions/setup-bun-with-diagnostics

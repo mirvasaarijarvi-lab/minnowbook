@@ -33,6 +33,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
 
       - name: Setup Bun
         uses: ./.github/actions/setup-bun-with-diagnostics
@@ -96,6 +98,8 @@ jobs:
       SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
     steps:
       - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
 
       # Fail the build if the Supabase advisors API reports any
       # RLS-class finding at WARN or ERROR. Unlike the general
