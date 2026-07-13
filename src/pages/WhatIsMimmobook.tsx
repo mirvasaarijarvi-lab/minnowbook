@@ -16,8 +16,8 @@ const WhatIsMimmobook = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <SEOHead
-        title="What Is MimmoBook? – Cloud Reservation Management for Hospitality & Wellness"
-        description="MimmoBook is a cloud-based reservation management platform built for restaurants, venues, hotels, guesthouses, and wellness service providers like hairdressers, masseurs, and makeup artists. Learn how it works, who it's for, and why hospitality businesses choose MimmoBook."
+        title="What Is MimmoBook? Cloud Reservations for Hospitality"
+        description="MimmoBook is a cloud reservation platform for restaurants, venues, hotels, guesthouses and wellness pros. See how it works and why teams choose it."
         path="/what-is-mimmobook"
         jsonLd={[
           organizationSchema,
