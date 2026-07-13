@@ -1,10 +1,10 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
-  "serialNumber": "urn:uuid:4afbd295-0292-5551-9b26-feba908db4b3",
+  "serialNumber": "urn:uuid:2e5d41c6-c8c3-54e7-8d35-b9cda99b9e8f",
   "version": 1,
   "metadata": {
-    "timestamp": "2026-06-19T07:41:50Z",
+    "timestamp": "2026-07-13T05:58:39Z",
     "tools": [
       {
         "vendor": "MimmoBook",
@@ -21,7 +21,7 @@
       "properties": [
         {
           "name": "git:sha",
-          "value": "75b04b39b70a4f93e86e7f500e100cf84ca2c584"
+          "value": "61b53efe04356fa3c5c0867330b3347d7c0bed63"
         }
       ]
     }
@@ -444,11 +444,11 @@
       "scope": "optional"
     },
     {
-      "bom-ref": "pkg:npm/eslint-plugin-react-refresh@0.4.20",
+      "bom-ref": "pkg:npm/eslint-plugin-react-refresh@0.5.3",
       "type": "library",
       "name": "eslint-plugin-react-refresh",
-      "version": "0.4.20",
-      "purl": "pkg:npm/eslint-plugin-react-refresh@0.4.20",
+      "version": "0.5.3",
+      "purl": "pkg:npm/eslint-plugin-react-refresh@0.5.3",
       "scope": "optional"
     },
     {
@@ -500,11 +500,11 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/next-themes@0.3.0",
+      "bom-ref": "pkg:npm/next-themes@0.4.6",
       "type": "library",
       "name": "next-themes",
-      "version": "0.3.0",
-      "purl": "pkg:npm/next-themes@0.3.0",
+      "version": "0.4.6",
+      "purl": "pkg:npm/next-themes@0.4.6",
       "scope": "required"
     },
     {
@@ -548,11 +548,11 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/react-hook-form@7.61.1",
+      "bom-ref": "pkg:npm/react-hook-form@7.81.0",
       "type": "library",
       "name": "react-hook-form",
-      "version": "7.61.1",
-      "purl": "pkg:npm/react-hook-form@7.61.1",
+      "version": "7.81.0",
+      "purl": "pkg:npm/react-hook-form@7.81.0",
       "scope": "required"
     },
     {
@@ -564,11 +564,11 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/react-router@6.30.1",
+      "bom-ref": "pkg:npm/react-router@6.30.4",
       "type": "library",
       "name": "react-router",
-      "version": "6.30.1",
-      "purl": "pkg:npm/react-router@6.30.1",
+      "version": "6.30.4",
+      "purl": "pkg:npm/react-router@6.30.4",
       "scope": "required"
     },
     {
