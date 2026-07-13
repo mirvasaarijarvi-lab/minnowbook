@@ -32,13 +32,18 @@ jobs:
       contents: read
 
     env:
-      # Required by the Deno edge function tests. The project URL and
-      # publishable key are safe public values, so keep CI runnable even when
-      # repository secrets have not been configured yet.
-      SUPABASE_URL: ${{ secrets.SUPABASE_URL || secrets.VITE_SUPABASE_URL || 'https://lsgznskkxadplwnxplhd.supabase.co' }}
-      VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL || secrets.SUPABASE_URL || 'https://lsgznskkxadplwnxplhd.supabase.co' }}
-      SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY || secrets.SUPABASE_PUBLISHABLE_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxzZ3puc2treGFkcGx3bnhwbGhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5MTkyODAsImV4cCI6MjA4NzQ5NTI4MH0.v6DlzrUsFu_fpTIcWcSzz1Zyqbl_ZwF9v54TrW_yWtM' }}
-      VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY || secrets.SUPABASE_PUBLISHABLE_KEY || secrets.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxzZ3puc2treGFkcGx3bnhwbGhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5MTkyODAsImV4cCI6MjA4NzQ5NTI4MH0.v6DlzrUsFu_fpTIcWcSzz1Zyqbl_ZwF9v54TrW_yWtM' }}
+      # Required by the Deno edge function tests. All values are pulled from
+      # repository secrets/variables; no inline fallbacks so no JWT-shaped
+      # value is ever hardcoded in this workflow file (see security scanner
+      # flag on the JWT pattern, even for the publishable anon key).
+      # Configure these under Settings → Secrets and variables → Actions:
+      #   - SUPABASE_URL (or VITE_SUPABASE_URL)
+      #   - SUPABASE_ANON_KEY (or VITE_SUPABASE_PUBLISHABLE_KEY)
+      #   - SUPABASE_SERVICE_ROLE_KEY (optional; enables full test suite)
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL || secrets.VITE_SUPABASE_URL || vars.SUPABASE_URL || vars.VITE_SUPABASE_URL }}
+      VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL || secrets.SUPABASE_URL || vars.VITE_SUPABASE_URL || vars.SUPABASE_URL }}
+      SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY || secrets.SUPABASE_PUBLISHABLE_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+      VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY || secrets.SUPABASE_PUBLISHABLE_KEY || secrets.SUPABASE_ANON_KEY }}
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
       # Pin Deno's module cache so actions/cache can restore it across runs.
       DENO_DIR: ${{ github.workspace }}/.deno-cache
