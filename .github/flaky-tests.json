@@ -60,10 +60,10 @@
     },
     {
       "pattern": "edge-function-cors-cacheability\\.test\\.ts > Forbidden origins .* > support-chat > POST from \"http://localhost\\.evil\\.com\" returns a non-cacheable response with Vary: Origin",
-      "reason": "Same family as the cors-custom-headers support-chat flake: intermittent cold-start/network jitter on the deployed support-chat function under parallel security-suite load. The 403 forbidden-origin path emits the full SECURITY_HEADERS bag (Cache-Control: no-store, Vary: Origin, Pragma: no-cache), verified locally and by sibling origins in the same matrix passing in the same run. Only the http://localhost.evil.com case occasionally times out or returns a transport-level failure before headers can be asserted.",
+      "reason": "Quarantine refreshed on 2026-07-13 after the previous window expired; underlying behaviour unchanged. Same family as the cors-custom-headers support-chat flake: intermittent cold-start/network jitter on the deployed support-chat function under parallel security-suite load. The 403 forbidden-origin path emits the full SECURITY_HEADERS bag (Cache-Control: no-store, Vary: Origin, Pragma: no-cache), verified locally and by sibling origins in the same matrix passing in the same run. Only the http://localhost.evil.com case occasionally times out or returns a transport-level failure before headers can be asserted.",
       "owner": "@security",
-      "added": "2026-06-14",
-      "expires": "2026-07-10",
+      "added": "2026-07-13",
+      "expires": "2026-08-12",
       "issue": "https://github.com/mimmobook/mimmobook/issues/cors-cacheability-support-chat-localhost-evil-flake"
     },
     {
