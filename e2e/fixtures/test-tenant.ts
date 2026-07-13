@@ -15,8 +15,13 @@ import { test as base, expect } from "@playwright/test";
 
 // --- Backend (publishable) ---------------------------------------------------
 export const SUPABASE_URL = "https://lsgznskkxadplwnxplhd.supabase.co";
+// Read from env so the literal JWT does not live in source. Populated
+// from `.env` (VITE_SUPABASE_PUBLISHABLE_KEY) or CI secrets.
 export const SUPABASE_ANON_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxzZ3puc2treGFkcGx3bnhwbGhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5MTkyODAsImV4cCI6MjA4NzQ5NTI4MH0.v6DlzrUsFu_fpTIcWcSzz1Zyqbl_ZwF9v54TrW_yWtM";
+  process.env.SUPABASE_ANON_KEY ??
+  process.env.VITE_SUPABASE_PUBLISHABLE_KEY ??
+  process.env.VITE_SUPABASE_ANON_KEY ??
+  "";
 
 // --- Tenant identity ---------------------------------------------------------
 export const TEST_TENANT_SLUG = process.env.E2E_TENANT_SLUG ?? "mimmin-testi";
