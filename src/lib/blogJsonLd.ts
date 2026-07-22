@@ -156,6 +156,7 @@ export const posts: Record<string, BlogPostData> = {
     contentKeys: ["blog.post5C1", "blog.post5C2", "blog.post5C3", "blog.post5C4", "blog.post5C5"],
     seoTitle: "Wellness Bookings: Ease of Use Drives Growth",
     seoDescription: "Discover how easy online bookings help spas, salons, yoga studios and wellness clinics grow with higher conversion, fewer no-shows and loyal clients.",
+    relatedSlugs: ["MimmoBook_compared_to_other_bookingsystems_for_wellness"],
   },
   "best-restaurant-reservation-apps": {
     slug: "best-restaurant-reservation-apps",
@@ -222,6 +223,77 @@ export const posts: Record<string, BlogPostData> = {
           "https://www.wikidata.org/wiki/Q217583",
         ],
       },
+      {
+        "@type": "Organization",
+        name: "Squarespace",
+        url: "https://www.squarespace.com",
+        sameAs: [
+          "https://en.wikipedia.org/wiki/Squarespace",
+          "https://www.wikidata.org/wiki/Q2337005",
+        ],
+      },
+    ],
+  },
+  "MimmoBook_compared_to_other_bookingsystems_for_wellness": {
+    slug: "MimmoBook_compared_to_other_bookingsystems_for_wellness",
+    titleKey: "blog.post8Title",
+    dateKey: "2026-07-22",
+    readTime: "7 min",
+    contentKeys: ["blog.post8C1", "blog.post8C2", "blog.post8C3", "blog.post8C4", "blog.post8C5", "blog.post8C6"],
+    seoTitle: "MimmoBook vs Mindbody, Vagaro, Fresha, Acuity Compared",
+    seoDescription: "MimmoBook vs Mindbody, Vagaro, Fresha and Acuity: compare pricing, brand control, multi-site management and ease of use for wellness booking software.",
+    relatedSlugs: ["wellness-industry-bookings-growth", "comparison-resy-tock-mimmobook", "branded-booking-pages-matter", "multi-site-management-hospitality"],
+    schemaType: "Article",
+    about: [
+      {
+        "@type": "SoftwareApplication",
+        "@id": "https://mimmobook.com/#software",
+        name: "MimmoBook",
+        applicationCategory: "BusinessApplication",
+        operatingSystem: "Web",
+        url: "https://mimmobook.com",
+        sameAs: ["https://www.linkedin.com/company/mimmobook"],
+      },
+      {
+        "@type": "SoftwareApplication",
+        name: "Mindbody",
+        applicationCategory: "BusinessApplication",
+        operatingSystem: "Web",
+        url: "https://www.mindbodyonline.com",
+        sameAs: [
+          "https://en.wikipedia.org/wiki/Mindbody,_Inc.",
+          "https://www.wikidata.org/wiki/Q6858266",
+        ],
+      },
+      {
+        "@type": "SoftwareApplication",
+        name: "Vagaro",
+        applicationCategory: "BusinessApplication",
+        operatingSystem: "Web",
+        url: "https://www.vagaro.com",
+      },
+      {
+        "@type": "SoftwareApplication",
+        name: "Fresha",
+        applicationCategory: "BusinessApplication",
+        operatingSystem: "Web",
+        url: "https://www.fresha.com",
+        sameAs: [
+          "https://en.wikipedia.org/wiki/Fresha",
+        ],
+      },
+      {
+        "@type": "SoftwareApplication",
+        name: "Acuity Scheduling",
+        applicationCategory: "BusinessApplication",
+        operatingSystem: "Web",
+        url: "https://acuityscheduling.com",
+        sameAs: [
+          "https://en.wikipedia.org/wiki/Squarespace",
+        ],
+      },
+    ],
+    mentions: [
       {
         "@type": "Organization",
         name: "Squarespace",

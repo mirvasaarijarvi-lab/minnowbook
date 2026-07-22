@@ -64,6 +64,14 @@ const blogPosts = [
     readTime: "6 min",
     categoryKey: "blog.catGuides" as const,
   },
+  {
+    slug: "MimmoBook_compared_to_other_bookingsystems_for_wellness",
+    titleKey: "blog.post8Title" as const,
+    excerptKey: "blog.post8Excerpt" as const,
+    date: "2026-07-22",
+    readTime: "7 min",
+    categoryKey: "blog.catGuides" as const,
+  },
 ];
 
 const Blog = () => {
