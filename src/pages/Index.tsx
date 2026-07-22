@@ -106,12 +106,12 @@ const Index = () => {
         <div className="container mx-auto px-4 relative">
           <div className="max-w-3xl mx-auto text-center">
 
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white leading-tight mb-6 opacity-0 animate-fade-up drop-shadow-lg">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white leading-tight mb-6 drop-shadow-lg">
               {t("hero.title")}{" "}
               <span className="text-gradient">{t("hero.titleHighlight")}</span>
             </h1>
 
-            <p className="text-lg md:text-xl text-white/80 mb-10 max-w-2xl mx-auto leading-relaxed opacity-0 animate-fade-up" style={{ animationDelay: "150ms" }}>
+            <p className="text-lg md:text-xl text-white mb-10 max-w-2xl mx-auto leading-relaxed drop-shadow">
               {t("hero.subtitle")}
             </p>
 
