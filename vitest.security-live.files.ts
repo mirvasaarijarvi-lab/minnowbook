@@ -59,6 +59,7 @@ export const LIVE_SECURITY_TESTS: string[] = [
   "src/test/security/redeem-preflight.test.ts",
   "src/test/security/resource-images-anon-by-id.test.ts",
   "src/test/security/resource-images-anon-cross-tenant.test.ts",
+  "src/test/security/resource-images-anon-pagination.test.ts",
   "src/test/security/resource-images-anon-select.test.ts",
 
   "src/test/security/session-persistence.test.tsx",
