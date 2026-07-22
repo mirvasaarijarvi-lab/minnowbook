@@ -228,7 +228,10 @@ const AdminPanel = () => {
         );
       }
 
-      const isSystemRole = ["superadmin", "owner", "admin", "staff"].includes(newUser.role);
+      const isSystemRole = isSystemRoleKey(newUser.role);
+      if (!isSystemRole && !isAssignableRole(newUser.role)) {
+        throw new Error(t("admin.invalidCustomRole"));
+      }
       return invokeAdmin({
         action: "create",
         email: newUser.email,
@@ -237,6 +240,7 @@ const AdminPanel = () => {
         role: isSystemRole ? newUser.role : "staff",
         customRoleKey: isSystemRole ? undefined : newUser.role,
       });
+
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-users"] });
