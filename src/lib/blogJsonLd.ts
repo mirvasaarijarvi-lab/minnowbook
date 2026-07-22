@@ -126,6 +126,7 @@ export const posts: Record<string, BlogPostData> = {
     contentKeys: ["blog.post3C1", "blog.post3C2", "blog.post3C3"],
     seoTitle: "Why Branded Booking Pages Matter for Your Business",
     seoDescription: "A branded booking page builds trust and improves conversion. Learn why your reservation page should reflect your brand identity.",
+    relatedSlugs: ["comparison-resy-tock-mimmobook", "best-restaurant-reservation-apps"],
   },
   "multi-site-management-hospitality": {
     slug: "multi-site-management-hospitality",
@@ -135,6 +136,7 @@ export const posts: Record<string, BlogPostData> = {
     contentKeys: ["blog.post4C1", "blog.post4C2", "blog.post4C3", "blog.post4C4"],
     seoTitle: "Multi-Site Management for Hospitality, MimmoBook",
     seoDescription: "Managing reservations across multiple locations? Learn how centralized multi-site management saves time and reduces errors.",
+    relatedSlugs: ["comparison-resy-tock-mimmobook", "best-restaurant-reservation-apps"],
   },
   "wellness-industry-bookings-growth": {
     slug: "wellness-industry-bookings-growth",
@@ -153,6 +155,7 @@ export const posts: Record<string, BlogPostData> = {
     contentKeys: ["blog.post6C1", "blog.post6C2", "blog.post6C3", "blog.post6C4", "blog.post6C5", "blog.post6C6"],
     seoTitle: "Best Restaurant Reservation Apps 2026: Free vs Paid",
     seoDescription: "Compare the best restaurant reservation apps in 2026. Free online booking systems, marketplaces and dedicated software for restaurants, cafés and venues.",
+    relatedSlugs: ["comparison-resy-tock-mimmobook", "branded-booking-pages-matter", "multi-site-management-hospitality"],
   },
   "comparison-resy-tock-mimmobook": {
     slug: "comparison-resy-tock-mimmobook",
@@ -164,6 +167,7 @@ export const posts: Record<string, BlogPostData> = {
     seoDescription: "MimmoBook vs Resy vs Tock: compare pricing, brand control, multi-site management and ease of use for restaurant reservation software in 2026.",
     image: ogComparisonAsset.url,
     imageAlt: "MimmoBook vs Resy vs Tock comparison, reservation platforms compared",
+    relatedSlugs: ["best-restaurant-reservation-apps", "branded-booking-pages-matter", "multi-site-management-hospitality"],
   },
 };
 
