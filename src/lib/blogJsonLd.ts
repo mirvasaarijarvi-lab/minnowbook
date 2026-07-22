@@ -98,7 +98,7 @@ export const posts: Record<string, BlogPostData> = {
     dateKey: "2026-03-10",
     readTime: "6 min",
     contentKeys: ["blog.post1C1", "blog.post1C2", "blog.post1C3", "blog.post1C4", "blog.post1C5"],
-    seoTitle: "5 Reservation Challenges Small Hospitality Businesses Face – MimmoBook",
+    seoTitle: "5 Reservation Challenges for Small Hospitality Businesses",
     seoDescription: "Small restaurants, venues and guesthouses face unique booking challenges. Learn the top 5 problems and how cloud-based reservation management solves them.",
   },
   "why-spreadsheets-fail-for-bookings": {
@@ -107,7 +107,7 @@ export const posts: Record<string, BlogPostData> = {
     dateKey: "2026-03-08",
     readTime: "5 min",
     contentKeys: ["blog.post2C1", "blog.post2C2", "blog.post2C3", "blog.post2C4"],
-    seoTitle: "Why Spreadsheets Fail for Booking Management – MimmoBook",
+    seoTitle: "Why Spreadsheets Fail for Booking Management, MimmoBook",
     seoDescription: "Still using spreadsheets for reservations? Discover why hospitality businesses are moving to dedicated booking software and the risks of manual tracking.",
   },
   "branded-booking-pages-matter": {
@@ -116,7 +116,7 @@ export const posts: Record<string, BlogPostData> = {
     dateKey: "2026-03-05",
     readTime: "4 min",
     contentKeys: ["blog.post3C1", "blog.post3C2", "blog.post3C3"],
-    seoTitle: "Why Branded Booking Pages Matter for Your Business – MimmoBook",
+    seoTitle: "Why Branded Booking Pages Matter for Your Business",
     seoDescription: "A branded booking page builds trust and improves conversion. Learn why your reservation page should reflect your brand identity.",
   },
   "multi-site-management-hospitality": {
@@ -125,7 +125,7 @@ export const posts: Record<string, BlogPostData> = {
     dateKey: "2026-03-01",
     readTime: "5 min",
     contentKeys: ["blog.post4C1", "blog.post4C2", "blog.post4C3", "blog.post4C4"],
-    seoTitle: "Multi-Site Management for Hospitality Businesses – MimmoBook",
+    seoTitle: "Multi-Site Management for Hospitality, MimmoBook",
     seoDescription: "Managing reservations across multiple locations? Learn how centralized multi-site management saves time and reduces errors.",
   },
   "wellness-industry-bookings-growth": {
@@ -134,7 +134,7 @@ export const posts: Record<string, BlogPostData> = {
     dateKey: "2026-06-12",
     readTime: "6 min",
     contentKeys: ["blog.post5C1", "blog.post5C2", "blog.post5C3", "blog.post5C4", "blog.post5C5"],
-    seoTitle: "Wellness Industry Bookings: Ease of Use Drives Growth – MimmoBook",
+    seoTitle: "Wellness Bookings: Ease of Use Drives Growth",
     seoDescription: "Discover how easy online bookings help spas, salons, yoga studios and wellness clinics grow with higher conversion, fewer no-shows and loyal clients.",
   },
   "best-restaurant-reservation-apps": {
@@ -143,7 +143,7 @@ export const posts: Record<string, BlogPostData> = {
     dateKey: "2026-07-07",
     readTime: "7 min",
     contentKeys: ["blog.post6C1", "blog.post6C2", "blog.post6C3", "blog.post6C4", "blog.post6C5", "blog.post6C6"],
-    seoTitle: "Best Restaurant Reservation Apps in 2026: Free vs Paid – MimmoBook",
+    seoTitle: "Best Restaurant Reservation Apps 2026: Free vs Paid",
     seoDescription: "Compare the best restaurant reservation apps in 2026. Free online booking systems, marketplaces and dedicated software for restaurants, cafés and venues.",
   },
 };
