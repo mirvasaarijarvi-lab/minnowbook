@@ -92,6 +92,10 @@ jobs:
           fail_on_missing: "auto"
           label: "Billing & RPC hardening regression - Supabase preflight"
 
+      - name: Prepare reports directory
+        if: always()
+        run: mkdir -p reports/billing-hardening
+
       - name: Run focused regression suite
         id: run_regression
         if: steps.live_check.outputs.enabled == 'true'
@@ -101,11 +105,55 @@ jobs:
           SUPABASE_URL: ${{ steps.live_check.outputs.resolved_url }}
           SUPABASE_ANON_KEY: ${{ steps.live_check.outputs.resolved_key }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        # Emit both a JUnit XML report (for CI viewers / annotations) and a
+        # JSON report (structured per-test data) alongside a plain-text log
+        # tee so failures can be debugged post-mortem from the uploaded
+        # artifact bundle without re-running the suite. `set -o pipefail`
+        # preserves vitest's non-zero exit through `tee`.
         run: |
+          set -o pipefail
           bunx vitest run \
             --config vitest.security-live.config.ts \
             --reporter=verbose \
-            src/test/security/billing-and-rpc-hardening.test.ts
+            --reporter=junit \
+            --reporter=json \
+            --outputFile.junit=reports/billing-hardening/junit.xml \
+            --outputFile.json=reports/billing-hardening/results.json \
+            src/test/security/billing-and-rpc-hardening.test.ts \
+            2>&1 | tee reports/billing-hardening/vitest.log
+
+      - name: Capture runtime diagnostics
+        if: always()
+        env:
+          ENABLED: ${{ steps.live_check.outputs.enabled }}
+          OUTCOME: ${{ steps.run_regression.outcome }}
+          EVENT: ${{ github.event_name }}
+          REF: ${{ github.ref }}
+          SHA: ${{ github.sha }}
+          RUN_ID: ${{ github.run_id }}
+          RUN_ATTEMPT: ${{ github.run_attempt }}
+        run: |
+          {
+            echo "event=$EVENT"
+            echo "ref=$REF"
+            echo "sha=$SHA"
+            echo "run_id=$RUN_ID"
+            echo "run_attempt=$RUN_ATTEMPT"
+            echo "live_check_enabled=$ENABLED"
+            echo "regression_outcome=$OUTCOME"
+            echo "node=$(node --version 2>/dev/null || echo 'n/a')"
+            echo "bun=$(bun --version 2>/dev/null || echo 'n/a')"
+            echo "os=$(uname -a)"
+          } > reports/billing-hardening/run-metadata.txt
+
+      - name: Upload regression report artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: billing-hardening-reports-${{ github.run_id }}-${{ github.run_attempt }}
+          path: reports/billing-hardening/
+          if-no-files-found: warn
+          retention-days: 14
 
       - name: Summary
         if: always()
@@ -125,5 +173,8 @@ jobs:
             *)
               echo "### ❌ Billing & RPC hardening regression: FAIL ($OUTCOME)" >> "$GITHUB_STEP_SUMMARY"
               echo "" >> "$GITHUB_STEP_SUMMARY"
-              echo "A migration or edge-function change may have reintroduced one of the four hardened vulnerabilities. See job logs." >> "$GITHUB_STEP_SUMMARY" ;;
+              echo "A migration or edge-function change may have reintroduced one of the four hardened vulnerabilities." >> "$GITHUB_STEP_SUMMARY"
+              echo "" >> "$GITHUB_STEP_SUMMARY"
+              echo "Download the **billing-hardening-reports-${{ github.run_id }}-${{ github.run_attempt }}** artifact for the JUnit XML, JSON results, full vitest log, and run metadata." >> "$GITHUB_STEP_SUMMARY" ;;
           esac
+
