@@ -257,8 +257,16 @@ const AdminPanel = () => {
   });
 
   const updateRoleMutation = useMutation({
-    mutationFn: ({ userId, role }: { userId: string; role: string }) =>
-      invokeAdmin({ action: "update_role", userId, role }),
+    mutationFn: ({ userId, role }: { userId: string; role: string }) => {
+      // Client-side mirror of the DB trigger that owner-assigned custom
+      // roles must exist in role_definitions with hierarchy_level >= 10
+      // and not be a reserved key. Fail fast so the user sees a clear,
+      // localized message instead of a raw Postgres error.
+      if (!isAssignableRole(role)) {
+        return Promise.reject(new Error(t("admin.invalidCustomRole")));
+      }
+      return invokeAdmin({ action: "update_role", userId, role });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-users"] });
       toast({ title: t("admin.roleUpdated") });
@@ -267,6 +275,7 @@ const AdminPanel = () => {
       showError(err);
     },
   });
+
 
   const updateSiteAssignmentsMutation = useMutation({
     mutationFn: ({ userId, assignments }: { userId: string; assignments: { siteId: string; role: string }[] }) =>
