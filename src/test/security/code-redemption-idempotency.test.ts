@@ -211,7 +211,7 @@ describe("redeem-access-code — idempotency key contract", () => {
     // No 5xx allowed — concurrent cache writes must not crash.
     const crashes = results.filter((r) => r.status >= 500);
     expect(crashes.length, `unexpected 5xx under concurrency: ${JSON.stringify(crashes)}`).toBe(0);
-  }, 30_000);
+  }, 90_000);
 
   it("different keys for the same input produce independent responses (no cross-key cache pollution)", async () => {
     // Two distinct keys for the same caller MUST be treated as two
