@@ -451,7 +451,28 @@ export async function handleRedeemAccessCodeRequest(req: Request): Promise<Respo
       return jsonResponse(status, payload, corsHeaders);
     };
 
-    // Code format was already validated pre-auth; nothing to re-check here.
+    // Validate code format post-auth. This runs AFTER verifyBearer so
+    // unauthenticated callers never see a distinct INVALID_CODE_FORMAT
+    // response for malformed input — every unauth path collapses to
+    // NOT_AUTHENTICATED.
+    if (!code || code.length < 3 || code.length > 50) {
+      logDecision({
+        requestId,
+        decision: "reject",
+        reason: "invalid_code_format",
+        userIdHash,
+        hadIdempotencyKey,
+      });
+      return respond(
+        await finalize(400, {
+          error: "Invalid access code format",
+          code: ERROR_CODES.INVALID_CODE_FORMAT,
+        }),
+        "invalid_code_format",
+      );
+    }
+
+
 
 
 
