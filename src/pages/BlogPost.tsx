@@ -80,6 +80,29 @@ const BlogPost = () => {
               ))}
             </div>
 
+            {post.relatedSlugs && post.relatedSlugs.length > 0 && (
+              <aside className="mt-12 pt-8 border-t border-border" aria-labelledby="related-reading-heading">
+                <h2 id="related-reading-heading" className="font-serif text-xl font-bold text-foreground mb-4">
+                  {t("blog.relatedReading")}
+                </h2>
+                <ul className="space-y-3">
+                  {post.relatedSlugs
+                    .map((s) => posts[s])
+                    .filter((p): p is NonNullable<typeof p> => Boolean(p))
+                    .map((related) => (
+                      <li key={related.slug}>
+                        <Link
+                          to={`/blog/${related.slug}`}
+                          className="text-primary hover:underline font-medium"
+                        >
+                          {t(related.titleKey as any)}
+                        </Link>
+                      </li>
+                    ))}
+                </ul>
+              </aside>
+            )}
+
             <div className="mt-12 p-8 rounded-xl bg-primary/5 text-center">
               <h3 className="font-serif text-xl font-bold text-foreground mb-3">{t("blog.postCta")}</h3>
               <Link to="/signup">

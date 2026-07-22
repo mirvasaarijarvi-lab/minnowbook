@@ -1583,6 +1583,7 @@ type TranslationKeys = {
   "blog.readMore": string;
   "blog.backToBlog": string;
   "blog.postCta": string;
+  "blog.relatedReading": string;
   "blog.ctaTitle": string;
   "blog.ctaSubtitle": string;
   "blog.catInsights": string;
@@ -3362,6 +3363,7 @@ const en: TranslationKeys = {
   "blog.readMore": "Read more",
   "blog.backToBlog": "Back to Blog",
   "blog.postCta": "Ready to streamline your reservations?",
+  "blog.relatedReading": "Related reading",
   "blog.ctaTitle": "Stay Up to Date",
   "blog.ctaSubtitle": "Try MimmoBook free for 30 days and see how it transforms your booking management.",
   "blog.catInsights": "Insights",
@@ -5134,6 +5136,7 @@ const fi: TranslationKeys = {
   "blog.readMore": "Lue lisää",
   "blog.backToBlog": "Takaisin blogiin",
   "blog.postCta": "Valmiina tehostamaan varaustenhallintaa?",
+  "blog.relatedReading": "Lue myös",
   "blog.ctaTitle": "Pysy ajan tasalla",
   "blog.ctaSubtitle": "Kokeile MimmoBookia ilmaiseksi 30 päivää ja katso miten se muuttaa varaustenhallintasi.",
   "blog.catInsights": "Oivallukset",
@@ -6906,6 +6909,7 @@ const sv: TranslationKeys = {
   "blog.readMore": "Läs mer",
   "blog.backToBlog": "Tillbaka till bloggen",
   "blog.postCta": "Redo att effektivisera dina bokningar?",
+  "blog.relatedReading": "Läs också",
   "blog.ctaTitle": "Håll dig uppdaterad",
   "blog.ctaSubtitle": "Testa MimmoBook gratis i 30 dagar och se hur det förändrar din bokningshantering.",
   "blog.catInsights": "Insikter",
