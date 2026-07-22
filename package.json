@@ -20,6 +20,7 @@
     "test:watch": "vitest",
     "test:security": "vitest run --config vitest.security.config.ts --reporter=verbose",
     "test:security:live": "vitest run --config vitest.security-live.config.ts --reporter=verbose",
+    "test:security:billing": "node scripts/run-billing-hardening-tests.mjs",
     "test:rls-report": "vitest run --testTimeout=120000 --hookTimeout=120000 --reporter=default --reporter=./src/test/security/rls-report-reporter.ts src/test/security/cross-tenant-rls.test.ts src/test/security/cross-tenant-storage.test.ts src/test/security/tenant-table-manifest.test.ts",
     "test:rls-report:core": "vitest run --testTimeout=120000 --hookTimeout=120000 --reporter=default --reporter=./src/test/security/rls-report-reporter.ts src/test/security/cross-tenant-rls.test.ts src/test/security/tenant-table-manifest.test.ts",
     "test:rls-report:storage-baseline": "vitest run --testTimeout=120000 --hookTimeout=120000 --reporter=default --reporter=./src/test/security/rls-report-reporter.ts src/test/security/cross-tenant-storage.test.ts -t \"Anonymous client storage enforcement|Live cross-tenant storage denial|Anonymous client nested-path enforcement\"",
