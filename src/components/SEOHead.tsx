@@ -5,12 +5,15 @@ interface SEOHeadProps {
   description: string;
   path: string;
   type?: string;
+  image?: string;
+  imageAlt?: string;
   jsonLd?: Record<string, unknown> | Record<string, unknown>[];
 }
 
 const BASE_URL = "https://mimmobook.com";
 
-const SEOHead = ({ title, description, path, type = "website", jsonLd }: SEOHeadProps) => {
+const SEOHead = ({ title, description, path, type = "website", image, imageAlt, jsonLd }: SEOHeadProps) => {
+
   useEffect(() => {
     document.title = title;
 
