@@ -156,6 +156,7 @@ export const posts: Record<string, BlogPostData> = {
     contentKeys: ["blog.post5C1", "blog.post5C2", "blog.post5C3", "blog.post5C4", "blog.post5C5"],
     seoTitle: "Wellness Bookings: Ease of Use Drives Growth",
     seoDescription: "Discover how easy online bookings help spas, salons, yoga studios and wellness clinics grow with higher conversion, fewer no-shows and loyal clients.",
+    relatedSlugs: ["MimmoBook_compared_to_other_bookingsystems_for_wellness"],
   },
   "best-restaurant-reservation-apps": {
     slug: "best-restaurant-reservation-apps",
