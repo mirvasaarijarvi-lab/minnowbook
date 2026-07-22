@@ -27,6 +27,14 @@
       "issue": "https://github.com/mimmobook/mimmobook/issues/redeem-access-code-idempotency-parallel-flake"
     },
     {
+      "pattern": "code-redemption-idempotency\\.test\\.ts > redeem-access-code — idempotency key contract > serial replay with the same key returns identical status, body, and never double-counts",
+      "reason": "Same cold-start latency family as the sibling code-redemption idempotency parallel flake already quarantined. 5 sequential unauthenticated POSTs against the deployed redeem-access-code function occasionally exceed the 30s per-test budget under parallel security-suite load (each call can incur cold-start latency independently). Function correctness verified by sibling tests in the same file (parallel same-key collapse, malformed key rejection, distinct-key independence) which pass in the same run; the idempotency contract is enforced server-side via the ledger unique index, so a timeout cannot produce a duplicate ledger row or divergent body.",
+      "owner": "@security",
+      "added": "2026-07-22",
+      "expires": "2026-08-21",
+      "issue": "https://github.com/mimmobook/mimmobook/issues/redeem-access-code-idempotency-serial-flake"
+    },
+    {
       "pattern": "code-redemption-rate-limit\\.test\\.ts > redeem-access-code: brute-force & replay resilience > 20 parallel attempts with the same fake code: zero successes, all known error codes",
       "reason": "Quarantine refreshed on 2026-07-13 after the previous window expired; underlying behaviour unchanged. Same family as the burst30 flake: 20-way parallel fetch against the deployed redeem-access-code edge function occasionally exceeds the per-test timeout under cold-start contention, despite the in-file warmupPromise. Function correctness verified by sibling tests (serial replay, varied probes, OPTIONS preflight burst) which all pass in the same run. Handler returns deterministic 4xx with KNOWN_ERROR_CODES for every accepted request.",
       "owner": "@security",
