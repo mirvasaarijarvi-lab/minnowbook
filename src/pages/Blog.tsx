@@ -56,6 +56,14 @@ const blogPosts = [
     readTime: "7 min",
     categoryKey: "blog.catGuides" as const,
   },
+  {
+    slug: "comparison-resy-tock-mimmobook",
+    titleKey: "blog.post7Title" as const,
+    excerptKey: "blog.post7Excerpt" as const,
+    date: "2026-07-22",
+    readTime: "6 min",
+    categoryKey: "blog.catGuides" as const,
+  },
 ];
 
 const Blog = () => {
