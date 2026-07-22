@@ -1,0 +1,204 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`blogJsonLd — comparison post regression snapshot > matches the frozen JSON-LD snapshot for the comparison post 1`] = `
+[
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "address": {
+      "@type": "PostalAddress",
+      "addressCountry": "FI",
+    },
+    "contactPoint": [
+      {
+        "@type": "ContactPoint",
+        "availableLanguage": [
+          "English",
+          "Finnish",
+          "Swedish",
+        ],
+        "contactType": "customer support",
+        "email": "support@mimmobook.com",
+        "url": "https://mimmobook.com/support",
+      },
+      {
+        "@type": "ContactPoint",
+        "availableLanguage": [
+          "English",
+          "Finnish",
+          "Swedish",
+        ],
+        "contactType": "sales",
+        "email": "sales@mimmobook.com",
+        "url": "https://mimmobook.com/pricing",
+      },
+    ],
+    "description": "MimmoBook is a SaaS reservation management platform for restaurants, venues, hotels, and guesthouses.",
+    "logo": "https://mimmobook.com/logos/logo-color-large.png",
+    "name": "MimmoBook",
+    "sameAs": [],
+    "url": "https://mimmobook.com",
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "item": "https://mimmobook.com/",
+        "name": "Home",
+        "position": 1,
+      },
+      {
+        "@type": "ListItem",
+        "item": "https://mimmobook.com/blog",
+        "name": "Blog",
+        "position": 2,
+      },
+      {
+        "@type": "ListItem",
+        "item": "https://mimmobook.com/blog/comparison-resy-tock-mimmobook",
+        "name": "blog.post7Title",
+        "position": 3,
+      },
+    ],
+  },
+  {
+    "@context": "https://schema.org",
+    "@id": "https://mimmobook.com/blog/comparison-resy-tock-mimmobook#article",
+    "@type": "Article",
+    "about": [
+      {
+        "@id": "https://mimmobook.com/#software",
+        "@type": "SoftwareApplication",
+        "applicationCategory": "BusinessApplication",
+        "name": "MimmoBook",
+        "operatingSystem": "Web",
+        "sameAs": [
+          "https://www.linkedin.com/company/mimmobook",
+        ],
+        "url": "https://mimmobook.com",
+      },
+      {
+        "@type": "SoftwareApplication",
+        "applicationCategory": "BusinessApplication",
+        "name": "Resy",
+        "operatingSystem": "Web",
+        "sameAs": [
+          "https://en.wikipedia.org/wiki/Resy",
+          "https://www.wikidata.org/wiki/Q99490211",
+        ],
+        "url": "https://resy.com",
+      },
+      {
+        "@type": "SoftwareApplication",
+        "applicationCategory": "BusinessApplication",
+        "name": "Tock",
+        "operatingSystem": "Web",
+        "sameAs": [
+          "https://en.wikipedia.org/wiki/Tock_(company)",
+          "https://www.wikidata.org/wiki/Q104871430",
+        ],
+        "url": "https://www.exploretock.com",
+      },
+    ],
+    "articleBody": "blog.post7C1
+
+blog.post7C2
+
+blog.post7C3
+
+blog.post7C4
+
+blog.post7C5
+
+blog.post7C6",
+    "articleSection": "Hospitality reservations",
+    "author": {
+      "@id": "https://mimmobook.com/#organization",
+      "@type": "Organization",
+      "logo": {
+        "@type": "ImageObject",
+        "height": 512,
+        "url": "https://mimmobook.com/logos/logo-color-large.png",
+        "width": 512,
+      },
+      "name": "MimmoBook",
+      "sameAs": [
+        "https://www.linkedin.com/company/mimmobook",
+        "https://twitter.com/mimmobook",
+      ],
+      "url": "https://mimmobook.com",
+    },
+    "dateModified": "2026-07-22T09:00:00+00:00",
+    "datePublished": "2026-07-22T09:00:00+00:00",
+    "description": "MimmoBook vs Resy vs Tock: compare pricing, brand control, multi-site management and ease of use for restaurant reservation software in 2026.",
+    "headline": "blog.post7Title",
+    "image": {
+      "@type": "ImageObject",
+      "height": 630,
+      "url": "https://mimmobook.com/__l5e/assets-v1/f48ab4a0-1761-4f05-af31-33726e74e705/og-comparison-resy-tock-mimmobook.jpg",
+      "width": 1200,
+    },
+    "inLanguage": "en",
+    "isPartOf": {
+      "@id": "https://mimmobook.com/blog#blog",
+      "@type": "Blog",
+      "name": "MimmoBook Blog",
+      "url": "https://mimmobook.com/blog",
+    },
+    "keywords": [
+      "reservation management",
+      "booking software",
+      "hospitality",
+      "restaurants",
+      "MimmoBook",
+    ],
+    "mainEntityOfPage": {
+      "@id": "https://mimmobook.com/blog/comparison-resy-tock-mimmobook",
+      "@type": "WebPage",
+      "url": "https://mimmobook.com/blog/comparison-resy-tock-mimmobook",
+    },
+    "mentions": [
+      {
+        "@type": "Organization",
+        "name": "American Express",
+        "sameAs": [
+          "https://en.wikipedia.org/wiki/American_Express",
+          "https://www.wikidata.org/wiki/Q217583",
+        ],
+        "url": "https://www.americanexpress.com",
+      },
+      {
+        "@type": "Organization",
+        "name": "Squarespace",
+        "sameAs": [
+          "https://en.wikipedia.org/wiki/Squarespace",
+          "https://www.wikidata.org/wiki/Q2337005",
+        ],
+        "url": "https://www.squarespace.com",
+      },
+    ],
+    "name": "blog.post7Title",
+    "publisher": {
+      "@id": "https://mimmobook.com/#organization",
+      "@type": "Organization",
+      "logo": {
+        "@type": "ImageObject",
+        "height": 512,
+        "url": "https://mimmobook.com/logos/logo-color-large.png",
+        "width": 512,
+      },
+      "name": "MimmoBook",
+      "sameAs": [
+        "https://www.linkedin.com/company/mimmobook",
+        "https://twitter.com/mimmobook",
+      ],
+      "url": "https://mimmobook.com",
+    },
+    "timeRequired": "PT6M",
+    "url": "https://mimmobook.com/blog/comparison-resy-tock-mimmobook",
+    "wordCount": 6,
+  },
+]
+`;
