@@ -6,6 +6,8 @@
  */
 
 import { organizationSchema, breadcrumbSchema } from "@/components/SEOHead";
+import ogComparisonAsset from "@/assets/og-comparison-resy-tock-mimmobook.jpg.asset.json";
+
 
 
 export interface BlogAuthor {
