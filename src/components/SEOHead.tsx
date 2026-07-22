@@ -42,19 +42,28 @@ const SEOHead = ({ title, description, path, type = "website", image, imageAlt, 
     setMeta("name", "description", description);
     setLink("canonical", url);
 
+    const resolvedImage = image
+      ? (image.startsWith("http") ? image : `${BASE_URL}${image}`)
+      : `${BASE_URL}/og-image.png`;
+
     // Open Graph
     setMeta("property", "og:title", title);
     setMeta("property", "og:description", description);
     setMeta("property", "og:url", url);
     setMeta("property", "og:type", type);
-    setMeta("property", "og:image", `${BASE_URL}/og-image.png`);
+    setMeta("property", "og:image", resolvedImage);
+    setMeta("property", "og:image:width", "1200");
+    setMeta("property", "og:image:height", "630");
+    if (imageAlt) setMeta("property", "og:image:alt", imageAlt);
     setMeta("property", "og:site_name", "MimmoBook");
 
     // Twitter
     setMeta("name", "twitter:card", "summary_large_image");
     setMeta("name", "twitter:title", title);
     setMeta("name", "twitter:description", description);
-    setMeta("name", "twitter:image", `${BASE_URL}/og-image.png`);
+    setMeta("name", "twitter:image", resolvedImage);
+    if (imageAlt) setMeta("name", "twitter:image:alt", imageAlt);
+
 
     // JSON-LD
     const existingScripts = document.querySelectorAll('script[data-seo-jsonld]');
