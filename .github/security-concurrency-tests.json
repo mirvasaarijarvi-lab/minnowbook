@@ -1,0 +1,30 @@
+{
+  "$schema": "./security-concurrency-tests.schema.json",
+  "description": "Declarative inventory of security 'concurrency-class' tests that get the dedicated rerun/timeout strategy in scripts/ci/rerun-security-concurrency.mjs. These tests exercise deployed edge functions under parallel load or cold-start conditions and are structurally prone to timing flakes without indicating a real regression. Adding a file here opts it into: (a) extended per-test timeout, (b) up to N deterministic reruns, (c) frequency tracking before quarantine.",
+  "files": [
+    "src/test/security/code-redemption-concurrency.test.ts",
+    "src/test/security/code-redemption-authorized-concurrency.test.ts",
+    "src/test/security/code-redemption-same-idem-key-concurrency.test.ts",
+    "src/test/security/code-redemption-authenticated-e2e.test.ts",
+    "src/test/security/code-redemption-authenticated-replay.test.ts",
+    "src/test/security/code-redemption-e2e-rate-limit.test.ts",
+    "src/test/security/code-redemption-expired-e2e.test.ts",
+    "src/test/security/code-redemption-idempotency.test.ts",
+    "src/test/security/code-redemption-idempotent-ledger.test.ts",
+    "src/test/security/code-redemption-rate-limit.test.ts",
+    "src/test/security/edge-function-cors-allowlist-coverage.test.ts",
+    "src/test/security/edge-function-cold-start-retry.test.ts"
+  ],
+  "strategy": {
+    "perTestTimeoutMs": 90000,
+    "maxAttempts": 3,
+    "backoffMs": [0, 15000, 45000],
+    "singleFork": true
+  },
+  "quarantineThresholds": {
+    "windowDays": 14,
+    "observeAfterFailures": 2,
+    "recommendQuarantineAfterFailures": 4,
+    "recommendQuarantineMinFailureRate": 0.25
+  }
+}
