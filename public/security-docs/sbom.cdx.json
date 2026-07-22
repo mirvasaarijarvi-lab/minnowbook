@@ -4,7 +4,7 @@
   "serialNumber": "urn:uuid:19f7b3ee-a32b-5fdc-9535-84535e259310",
   "version": 1,
   "metadata": {
-    "timestamp": "2026-07-13T07:25:29Z",
+    "timestamp": "2026-07-22T07:16:22Z",
     "tools": [
       {
         "vendor": "MimmoBook",
@@ -21,7 +21,7 @@
       "properties": [
         {
           "name": "git:sha",
-          "value": "93aa3f504d8c6d4681664a5d1e8d68f091633b2b"
+          "value": "3df4bce75b05f5ef0d4e36bb96bb924e936b0f26"
         }
       ]
     }
