@@ -389,14 +389,49 @@ jobs:
         # race (transient `address already in use` on 54322 has been observed
         # on GitHub-hosted runners even after the preflight cleanup).
         run: |
-          set -euo pipefail
-          if ! supabase start --exclude=imgproxy,mailpit,studio,realtime,edge-runtime; then
-            echo "::warning::supabase start failed — cleaning up and retrying once"
-            supabase stop --no-backup 2>/dev/null || true
+          set -uo pipefail
+          free_ports() {
+            # Stop host-installed Postgres (often bound to :5432 but sometimes
+            # bleeds into the Supabase range on prewarmed runner images).
+            sudo systemctl stop postgresql 2>/dev/null || true
+            if command -v pg_lsclusters >/dev/null 2>&1; then
+              while read -r ver name _; do
+                [ -n "$ver" ] && sudo pg_ctlcluster "$ver" "$name" stop --mode=immediate 2>/dev/null || true
+              done < <(pg_lsclusters -h 2>/dev/null)
+            fi
+            # Kill any host process still listening on Supabase ports.
+            for port in 54321 54322 54323 54324 54325 54326 54327 54328; do
+              if command -v fuser >/dev/null 2>&1; then
+                sudo fuser -k -n tcp "$port" 2>/dev/null || true
+              fi
+              cid=$(docker ps -q --filter "publish=$port")
+              [ -n "$cid" ] && docker rm -f $cid 2>/dev/null || true
+            done
             docker ps -aq --filter "name=supabase_" | xargs -r docker rm -f 2>/dev/null || true
-            sleep 5
-            supabase start --exclude=imgproxy,mailpit,studio,realtime,edge-runtime
-          fi
+            docker volume ls -q --filter "name=supabase_" | xargs -r docker volume rm -f 2>/dev/null || true
+            docker network ls -q --filter "name=supabase_" | xargs -r docker network rm 2>/dev/null || true
+          }
+
+          MAX_ATTEMPTS=3
+          attempt=1
+          while [ $attempt -le $MAX_ATTEMPTS ]; do
+            echo "::group::supabase start attempt ${attempt}/${MAX_ATTEMPTS}"
+            if supabase start --exclude=imgproxy,mailpit,studio,realtime,edge-runtime; then
+              echo "::endgroup::"
+              exit 0
+            fi
+            rc=$?
+            echo "::endgroup::"
+            echo "::warning::supabase start failed (exit=${rc}) on attempt ${attempt}; cleaning up and retrying"
+            supabase stop --no-backup 2>/dev/null || true
+            free_ports
+            # Diagnostic: what still holds :54322?
+            ss -ltnp 2>/dev/null | grep ':5432[0-9] ' || true
+            sleep $((attempt * 5))
+            attempt=$((attempt + 1))
+          done
+          echo "::error::supabase start failed after ${MAX_ATTEMPTS} attempts"
+          exit 1
 
       - name: Capture local stack credentials
         if: steps.supabase-start.outcome == 'success'
