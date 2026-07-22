@@ -9,6 +9,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { CalendarDays, Clock, Users, MapPin, Mail, Phone, CheckCircle, XCircle, Loader2, UtensilsCrossed, Home, Building2 } from "lucide-react";
 import { format } from "date-fns";
 import Logo from "@/components/Logo";
+import SEOHead from "@/components/SEOHead";
 import { toast } from "sonner";
 
 const typeIcons: Record<string, React.ElementType> = {
@@ -124,6 +125,12 @@ const GuestPortal = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title="Your reservation | MimmoBook Guest Portal"
+        description="View, manage, or cancel your reservation directly from the MimmoBook guest portal using your secure booking link."
+        path={`/my-booking/${token ?? ""}`}
+        type="website"
+      />
       <header className="border-b border-border bg-card px-4 py-4">
         <div className="max-w-2xl mx-auto flex items-center justify-between">
           <Logo variant="color" size="sm" />
