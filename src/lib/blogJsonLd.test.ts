@@ -2,7 +2,9 @@ import { describe, it, expect } from "vitest";
 import {
   buildAuthor,
   buildAuthorField,
+  buildBlogPostJsonLd,
   defaultOrgAuthor,
+  posts,
   resolveDateModified,
   toIsoDate,
   FALLBACK_AUTHOR_NAME,
