@@ -208,6 +208,20 @@ jobs:
           fi
           echo "✅ No ERROR-level Supabase findings."
 
+          # Regression gate: cross-check every lint (WARN or ERROR) against
+          # .github/security-regression-baseline.json so previously-fixed
+          # findings and class-level RLS/policy misconfigurations cannot
+          # silently reappear as WARN-only lints.
+          echo "$resp" > /tmp/advisors.json
+          if ! node scripts/ci/check-security-regressions.mjs --file /tmp/advisors.json; then
+            echo "::error title=Security regression gate::A baseline-tracked finding was re-detected. See annotations above."
+            if [ "${{ steps.migrations.outputs.changed }}" != "0" ]; then
+              echo "::error::This PR modifies supabase/migrations/** and reintroduced a previously-fixed finding. Merge blocked."
+            fi
+            exit 1
+          fi
+
+
   summary:
     name: Security scan summary
     needs: [npm-audit, supabase-advisors]
