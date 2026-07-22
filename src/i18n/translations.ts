@@ -330,6 +330,8 @@ type TranslationKeys = {
   "admin.addUser": string;
   "admin.role": string;
   "admin.staff": string;
+  "admin.invalidCustomRole": string;
+
   "admin.adminRole": string;
   "admin.owner": string;
   "admin.changePassword": string;
