@@ -156,13 +156,36 @@ const AdminPanel = () => {
     queryFn: async () => {
       const { data } = await supabase
         .from("role_definitions")
-        .select("role_key, display_name, is_system")
+        .select("role_key, display_name, is_system, hierarchy_level")
         .eq("tenant_id", tenantId!)
         .order("hierarchy_level");
       return data ?? [];
     },
     enabled: !!tenantId,
   });
+
+  // Mirrors the DB check `is_custom_role_key_assignable_by_owner`:
+  // a custom role_key is assignable only if it exists for this tenant,
+  // has hierarchy_level >= 10 (admin or lower), and is not one of the
+  // reserved system role keys owner/superadmin. Keeping this list in
+  // sync with the trigger prevents the UI from surfacing options that
+  // the database will always reject.
+  const assignableCustomRoles = (roleDefinitions ?? []).filter(
+    (r) =>
+      !r.is_system &&
+      (r.hierarchy_level ?? 0) >= 10 &&
+      r.role_key !== "owner" &&
+      r.role_key !== "superadmin",
+  );
+
+  const isSystemRoleKey = (key: string) =>
+    ["superadmin", "owner", "admin", "staff"].includes(key);
+
+  const isAssignableRole = (key: string) => {
+    if (isSystemRoleKey(key)) return true;
+    return assignableCustomRoles.some((r) => r.role_key === key);
+  };
+
 
   const createMutation = useMutation({
     // Re-validate the staff limit at submit time. The user could have been
