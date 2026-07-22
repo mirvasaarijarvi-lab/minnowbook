@@ -96,6 +96,10 @@ export interface BlogPostData {
   authors?: BlogAuthor[];
   /** Slugs of other posts to surface as "Related reading" at the bottom of this post. */
   relatedSlugs?: string[];
+  /** Primary entities the post is about (schema.org `about`). */
+  about?: Record<string, unknown>[];
+  /** Secondary entities the post mentions (schema.org `mentions`). */
+  mentions?: Record<string, unknown>[];
 }
 
 
