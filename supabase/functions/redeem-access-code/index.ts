@@ -474,22 +474,9 @@ export async function handleRedeemAccessCodeRequest(req: Request): Promise<Respo
       return jsonResponse(status, payload, corsHeaders);
     };
 
-    if (!code || code.length < 3 || code.length > 50) {
-      logDecision({
-        requestId,
-        decision: "reject",
-        reason: "invalid_code_format",
-        userIdHash,
-        hadIdempotencyKey,
-      });
-      return respond(
-        await finalize(400, {
-          error: "Invalid access code format",
-          code: ERROR_CODES.INVALID_CODE_FORMAT,
-        }),
-        "invalid_code_format",
-      );
-    }
+    // Code format was already validated pre-auth; nothing to re-check here.
+
+
 
     // Get the user's tenant
     const { data: tenantUser } = await adminClient
