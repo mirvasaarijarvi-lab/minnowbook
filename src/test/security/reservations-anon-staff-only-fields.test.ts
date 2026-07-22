@@ -201,7 +201,7 @@ describe.runIf(canRun)("anon reservation insert — staff-only fields scrubbed (
       // Silent-scrub path — row inserted but field must not carry the hostile value.
       expect(data, `${field}: expected rejection or scrubbed row`).toBeTruthy();
       expect(data!.length, `${field}: exactly one row`).toBe(1);
-      const row = data![0] as Record<string, unknown>;
+      const row = data![0] as unknown as Record<string, unknown>;
       ctx.cleanupReservationIds.push(row.id as string);
       expect(
         row[field],
@@ -227,7 +227,7 @@ describe.runIf(canRun)("anon reservation insert — staff-only fields scrubbed (
     }
     expect(data).toBeTruthy();
     expect(data!.length).toBe(1);
-    const row = data![0] as Record<string, unknown>;
+    const row = data![0] as unknown as Record<string, unknown>;
     ctx.cleanupReservationIds.push(row.id as string);
     for (const c of STAFF_ONLY_CASES) {
       expect(
