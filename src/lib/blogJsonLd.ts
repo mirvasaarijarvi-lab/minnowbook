@@ -172,8 +172,62 @@ export const posts: Record<string, BlogPostData> = {
     image: ogComparisonAsset.url,
     imageAlt: "MimmoBook vs Resy vs Tock comparison, reservation platforms compared",
     relatedSlugs: ["best-restaurant-reservation-apps", "branded-booking-pages-matter", "multi-site-management-hospitality"],
+    about: [
+      {
+        "@type": "SoftwareApplication",
+        "@id": "https://mimmobook.com/#software",
+        name: "MimmoBook",
+        applicationCategory: "BusinessApplication",
+        operatingSystem: "Web",
+        url: "https://mimmobook.com",
+        sameAs: ["https://www.linkedin.com/company/mimmobook"],
+      },
+      {
+        "@type": "SoftwareApplication",
+        name: "Resy",
+        applicationCategory: "BusinessApplication",
+        operatingSystem: "Web",
+        url: "https://resy.com",
+        sameAs: [
+          "https://en.wikipedia.org/wiki/Resy",
+          "https://www.wikidata.org/wiki/Q99490211",
+        ],
+      },
+      {
+        "@type": "SoftwareApplication",
+        name: "Tock",
+        applicationCategory: "BusinessApplication",
+        operatingSystem: "Web",
+        url: "https://www.exploretock.com",
+        sameAs: [
+          "https://en.wikipedia.org/wiki/Tock_(company)",
+          "https://www.wikidata.org/wiki/Q104871430",
+        ],
+      },
+    ],
+    mentions: [
+      {
+        "@type": "Organization",
+        name: "American Express",
+        url: "https://www.americanexpress.com",
+        sameAs: [
+          "https://en.wikipedia.org/wiki/American_Express",
+          "https://www.wikidata.org/wiki/Q217583",
+        ],
+      },
+      {
+        "@type": "Organization",
+        name: "Squarespace",
+        url: "https://www.squarespace.com",
+        sameAs: [
+          "https://en.wikipedia.org/wiki/Squarespace",
+          "https://www.wikidata.org/wiki/Q2337005",
+        ],
+      },
+    ],
   },
 };
+
 
 
 /**
