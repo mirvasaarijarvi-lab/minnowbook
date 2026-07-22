@@ -264,7 +264,7 @@ export const buildBlogPostJsonLd = (
     ]),
     {
       "@context": "https://schema.org",
-      "@type": "BlogPosting",
+      "@type": post.schemaType ?? "BlogPosting",
       "@id": `${postUrl}#article`,
       mainEntityOfPage: {
         "@type": "WebPage",
