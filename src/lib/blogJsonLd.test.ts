@@ -2,7 +2,9 @@ import { describe, it, expect } from "vitest";
 import {
   buildAuthor,
   buildAuthorField,
+  buildBlogPostJsonLd,
   defaultOrgAuthor,
+  posts,
   resolveDateModified,
   toIsoDate,
   FALLBACK_AUTHOR_NAME,
@@ -155,3 +157,51 @@ describe("blogJsonLd — resolveDateModified (updatedKey behavior)", () => {
     expect(resolveDateModified("2026-03-10", alreadyIso)).toBe(alreadyIso);
   });
 });
+
+
+
+describe("blogJsonLd — comparison post regression snapshot", () => {
+  // Deterministic translator: mirrors the i18n resolver by echoing the key.
+  // Snapshotting the raw shape (not translated copy) keeps the test stable
+  // across locale/content edits while still catching schema regressions:
+  // @type flips, missing required fields, changes to about/mentions entity
+  // nodes, publisher/author shape drift, image URL structure, etc.
+  const echo = (k: string) => k;
+  const post = posts["comparison-resy-tock-mimmobook"];
+
+  it("has the comparison post registered in the posts map", () => {
+    expect(post).toBeDefined();
+    expect(post.slug).toBe("comparison-resy-tock-mimmobook");
+  });
+
+  it("emits Article JSON-LD (not BlogPosting) for the comparison post", () => {
+    const graph = buildBlogPostJsonLd(post, echo);
+    const article = graph.find(
+      (n) => n["@type"] === "Article" || n["@type"] === "BlogPosting",
+    );
+    expect(article).toBeDefined();
+    expect(article!["@type"]).toBe("Article");
+  });
+
+  it("matches the frozen JSON-LD snapshot for the comparison post", () => {
+    // Fixed authors override so the snapshot doesn't churn if defaults change.
+    const graph = buildBlogPostJsonLd(post, echo);
+    expect(graph).toMatchSnapshot();
+  });
+
+  it("keeps the about/mentions entity nodes stable", () => {
+    const graph = buildBlogPostJsonLd(post, echo);
+    const article = graph.find((n) => n["@type"] === "Article") as
+      | Record<string, unknown>
+      | undefined;
+    expect(article).toBeDefined();
+    const about = article!.about as Array<Record<string, unknown>>;
+    const mentions = article!.mentions as Array<Record<string, unknown>>;
+    expect(about.map((n) => n.name)).toEqual(["MimmoBook", "Resy", "Tock"]);
+    expect(mentions.map((n) => n.name)).toEqual([
+      "American Express",
+      "Squarespace",
+    ]);
+  });
+});
+
