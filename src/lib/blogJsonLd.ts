@@ -94,6 +94,8 @@ export interface BlogPostData {
   imageAlt?: string;
   faqs?: BlogFaqItem[];
   authors?: BlogAuthor[];
+  /** Slugs of other posts to surface as "Related reading" at the bottom of this post. */
+  relatedSlugs?: string[];
 }
 
 
