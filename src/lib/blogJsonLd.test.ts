@@ -155,7 +155,10 @@ describe("blogJsonLd — resolveDateModified (updatedKey behavior)", () => {
     const alreadyIso = "2026-03-10T12:34:56+00:00";
     expect(toIsoDate(alreadyIso)).toBe(alreadyIso);
     expect(resolveDateModified("2026-03-10", alreadyIso)).toBe(alreadyIso);
+  });
 });
+
+
 
 describe("blogJsonLd — comparison post regression snapshot", () => {
   // Deterministic translator: mirrors the i18n resolver by echoing the key.
