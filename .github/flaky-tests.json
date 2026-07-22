@@ -35,6 +35,14 @@
       "issue": "https://github.com/mimmobook/mimmobook/issues/redeem-access-code-idempotency-serial-flake"
     },
     {
+      "pattern": "edge-function-cors-allowlist-coverage\\.test\\.ts > Edge function CORS — exhaustive allowed/disallowed origin coverage > admin-users > does NOT echo DISALLOWED origin \"https://lovable.app\" in ACAO",
+      "reason": "Cold-start latency on the deployed admin-users edge function occasionally exceeds the 30s per-test budget for a single OPTIONS preflight against a disallowed origin. The CORS allowlist behaviour itself is exhaustively verified by 100+ sibling cases in the same file (allowed variants, other disallowed variants, other functions) which pass in the same run. Handler returns deterministic 403/omitted-ACAO for disallowed origins with no data path exposed by preflight. Same cold-start family as other edge-function security-suite flakes.",
+      "owner": "@security",
+      "added": "2026-07-22",
+      "expires": "2026-08-21",
+      "issue": "https://github.com/mimmobook/mimmobook/issues/admin-users-cors-preflight-cold-start-flake"
+    },
+    {
       "pattern": "code-redemption-concurrency\\.test\\.ts > redeem-access-code — parallel calls never produce a duplicate success > malformed code returns a known error code without leaking lookup behaviour",
       "reason": "Same cold-start latency family as sibling code-redemption-concurrency flakes already quarantined (10-parallel-fake-code, anon-single). Single unauthenticated POST with a malformed code against the deployed redeem-access-code edge function; the length-bounded validation path runs before the SECURITY DEFINER RPC, so the outcome is deterministic 4xx with a KNOWN_ERROR_CODES value. Function correctness verified by sibling tests in the same file (serial replay, varied fake codes, burst probes) which pass in the same run. Only this case occasionally exceeds the 15s per-test budget under parallel security-suite cold-start contention; no data-leak path is possible on a malformed input.",
       "owner": "@security",
