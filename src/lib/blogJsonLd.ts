@@ -178,6 +178,7 @@ export const posts: Record<string, BlogPostData> = {
     image: ogComparisonAsset.url,
     imageAlt: "MimmoBook vs Resy vs Tock comparison, reservation platforms compared",
     relatedSlugs: ["best-restaurant-reservation-apps", "branded-booking-pages-matter", "multi-site-management-hospitality"],
+    schemaType: "Article",
     about: [
       {
         "@type": "SoftwareApplication",
