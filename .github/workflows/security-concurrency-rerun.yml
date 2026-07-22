@@ -1,0 +1,113 @@
+name: Security Concurrency Rerun & Flake Tracker
+#
+# Runs the "concurrency-class" security tests (listed in
+# .github/security-concurrency-tests.json) with an elevated per-test
+# timeout and up to 3 deterministic attempts, and RECORDS the outcome
+# of every attempt into a persistent flake-frequency history stored
+# as a workflow artifact.
+#
+# The goal is to stop quarantining tests on the first cold-start red
+# and instead quarantine only after the recorded failure rate crosses
+# the threshold in the config file. See
+# docs/ci-security-concurrency-strategy.md for the full policy.
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+on:
+  schedule:
+    # Every 6h — enough resolution for a 14d window without spamming CI.
+    - cron: "23 */6 * * *"
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Security Regression Tests (Live Integration)"]
+    types:
+      - completed
+
+permissions: {}
+
+jobs:
+  security-concurrency-rerun:
+    name: Rerun security concurrency suite + record flake frequency
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Setup Bun
+        uses: ./.github/actions/setup-bun-with-diagnostics
+
+      - name: Install dependencies
+        run: |
+          rm -rf node_modules
+          bun install --frozen-lockfile
+
+      # Restore previous flake history (best-effort — first run will be
+      # empty, which is fine; the tracker treats missing history as zero
+      # observations).
+      - name: Restore flake history
+        id: restore_history
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: security-concurrency-flake-history
+          path: .github
+
+      - name: Prune old history
+        run: |
+          node scripts/ci/security-concurrency-flake-tracker.mjs prune \
+            --path=.github/security-concurrency-flake-history.jsonl \
+            --config=.github/security-concurrency-tests.json || true
+
+      - name: Run security concurrency suite with dedicated strategy
+        id: run
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+        run: node scripts/ci/rerun-security-concurrency.mjs
+        continue-on-error: true
+
+      - name: Emit flake-frequency report
+        if: always()
+        run: |
+          node scripts/ci/security-concurrency-flake-tracker.mjs report \
+            --path=.github/security-concurrency-flake-history.jsonl \
+            --config=.github/security-concurrency-tests.json \
+            | tee -a "$GITHUB_STEP_SUMMARY"
+          node scripts/ci/security-concurrency-flake-tracker.mjs report \
+            --path=.github/security-concurrency-flake-history.jsonl \
+            --config=.github/security-concurrency-tests.json \
+            --json > test-reports/security-concurrency/flake-report.json
+
+      - name: Upload attempt JUnit reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-concurrency-junit
+          path: test-reports/security-concurrency/
+          retention-days: 14
+
+      - name: Upload updated flake history (drives next run)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-concurrency-flake-history
+          path: .github/security-concurrency-flake-history.jsonl
+          retention-days: 60
+          if-no-files-found: ignore
+
+      - name: Fail job if suite did not recover
+        if: steps.run.outcome == 'failure'
+        run: |
+          echo "::error::Security concurrency suite still failing after all attempts. See flake-frequency verdict in the job summary before opening a quarantine PR."
+          exit 1
