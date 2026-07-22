@@ -511,13 +511,17 @@ export const handleAdminUsersRequest = async (req: Request): Promise<Response> =
       const userId = validateUuid(body.userId, "userId");
       const newPassword = validatePassword(body.newPassword);
 
-      const { data: tu } = await adminClient
-        .from("tenant_users")
-        .select("id")
-        .eq("user_id", userId)
-        .eq("tenant_id", tenantId)
-        .single();
-      if (!tu) throw new Error("User not in your tenant");
+      const target = await getTargetRole(userId);
+      if (!target) throw new Error("User not in your tenant");
+
+      // Only owner/superadmin/sys admin can reset an owner or superadmin password.
+      if (isOwnerLevelTarget(target) && !isOwnerLevelCaller) {
+        throw new Error("Only the owner can reset the owner or superadmin password");
+      }
+      // Admins can reset their own password but not another admin's.
+      if (target.role === "admin" && userId !== callingUserId && !isOwnerLevelCaller) {
+        throw new Error("Only the owner can reset another admin's password");
+      }
 
       const { error } = await adminClient.auth.admin.updateUserById(userId, {
         password: newPassword,
@@ -532,6 +536,16 @@ export const handleAdminUsersRequest = async (req: Request): Promise<Response> =
     if (action === "delete") {
       const userId = validateUuid(body.userId, "userId");
       if (userId === callingUserId) throw new Error("Cannot delete yourself");
+
+      const target = await getTargetRole(userId);
+      if (!target) throw new Error("User not in your tenant");
+
+      if (isOwnerLevelTarget(target) && !isOwnerLevelCaller) {
+        throw new Error("Only the owner can delete the owner or superadmin account");
+      }
+      if (target.role === "admin" && !isOwnerLevelCaller) {
+        throw new Error("Only the owner can delete another admin account");
+      }
 
       // Also delete site_users
       await adminClient
@@ -551,6 +565,7 @@ export const handleAdminUsersRequest = async (req: Request): Promise<Response> =
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
 
     throw new Error("Unknown action");
   } catch (error: any) {
