@@ -2124,6 +2124,8 @@ const en: TranslationKeys = {
   "admin.addUser": "Add User",
   "admin.role": "Role",
   "admin.staff": "Staff",
+  "admin.invalidCustomRole": "This custom role cannot be assigned. Choose a role with hierarchy level 10 or lower, and not owner or superadmin.",
+
   "admin.adminRole": "Admin",
   "admin.owner": "Owner",
   "admin.changePassword": "Change Password",
