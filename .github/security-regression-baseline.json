@@ -1,0 +1,144 @@
+{
+  "$doc": "Regression baseline for the Supabase security scanner. Each entry names a previously-fixed finding (or a class of RLS/policy misconfigurations we never want to reintroduce). scripts/ci/check-security-regressions.mjs fails the build if any live advisor lint matches an entry — regardless of severity — so a re-detection blocks merge even when the lint would otherwise be a WARN. Add entries when a security finding is marked as fixed via security--manage_security_finding.",
+  "$schema": {
+    "id": "stable slug, also used as the CI failure code",
+    "match": {
+      "lint_name": "advisor lint name (e.g. rls_disabled_in_public, policy_exists_rls_disabled, security_definer_view, function_search_path_mutable, auth_rls_initplan). Regex supported when prefixed with 're:'.",
+      "schema": "optional metadata.schema filter",
+      "name": "optional metadata.name (object name) filter — regex when prefixed with 're:'",
+      "description": "optional lint description substring filter"
+    },
+    "severity_floor": "any | ERROR — 'any' means the entry triggers on WARN too. Defaults to 'any'.",
+    "reference": "audit link (finding id, migration file, docs), for humans reviewing failures.",
+    "fixed_at": "ISO date the underlying finding was resolved."
+  },
+  "entries": [
+    {
+      "id": "resource_images_unconditional_public_select",
+      "match": {
+        "lint_name": "re:^(rls_disabled_in_public|policy_exists_rls_disabled|auth_users_exposed|unrestricted_public_select)$",
+        "schema": "public",
+        "name": "resource_images"
+      },
+      "severity_floor": "any",
+      "reference": "docs/rls-hardening-reservations-and-availability.md; finding resource_images_unconditional_public_select",
+      "fixed_at": "2026-07-15"
+    },
+    {
+      "id": "reservations_anon_insert_discount_bypass",
+      "match": {
+        "lint_name": "re:^(policy_exists_rls_disabled|rls_disabled_in_public|policy_allows_write_without_check)$",
+        "schema": "public",
+        "name": "reservations"
+      },
+      "severity_floor": "any",
+      "reference": "docs/rls-hardening-reservations-and-availability.md",
+      "fixed_at": "2026-07-18"
+    },
+    {
+      "id": "reservations_public_insert_review",
+      "match": {
+        "lint_name": "re:^(policy_exists_rls_disabled|policy_allows_write_without_check|rls_disabled_in_public)$",
+        "schema": "public",
+        "name": "reservations"
+      },
+      "severity_floor": "any",
+      "reference": "docs/rls-hardening-reservations-and-availability.md",
+      "fixed_at": "2026-07-20"
+    },
+    {
+      "id": "resource_availability_slots_anon_no_tenant_filter",
+      "match": {
+        "lint_name": "re:^(rls_disabled_in_public|policy_exists_rls_disabled|unrestricted_public_select)$",
+        "schema": "public",
+        "name": "resource_availability_slots"
+      },
+      "severity_floor": "any",
+      "reference": "docs/rls-hardening-reservations-and-availability.md",
+      "fixed_at": "2026-07-20"
+    },
+    {
+      "id": "tenant_users_custom_role_key_unvalidated",
+      "match": {
+        "lint_name": "re:^(policy_exists_rls_disabled|rls_disabled_in_public|policy_allows_write_without_check)$",
+        "schema": "public",
+        "name": "tenant_users"
+      },
+      "severity_floor": "any",
+      "reference": "finding tenant_users_custom_role_key_unvalidated",
+      "fixed_at": "2026-07-14"
+    },
+    {
+      "id": "admin_users_custom_role_and_owner_takeover",
+      "match": {
+        "lint_name": "re:^(policy_exists_rls_disabled|rls_disabled_in_public)$",
+        "schema": "public",
+        "name": "admin_users"
+      },
+      "severity_floor": "any",
+      "reference": "findings admin_users_custom_role, admin_users_owner_takeover",
+      "fixed_at": "2026-07-15"
+    },
+    {
+      "id": "tenants_tier_selfwrite",
+      "match": {
+        "lint_name": "re:^(policy_exists_rls_disabled|policy_allows_write_without_check)$",
+        "schema": "public",
+        "name": "tenants"
+      },
+      "severity_floor": "any",
+      "reference": "finding tenants_tier_selfwrite",
+      "fixed_at": "2026-07-19"
+    },
+    {
+      "id": "copy_tenant_defaults_rpc_unrestricted",
+      "match": {
+        "lint_name": "re:^(function_search_path_mutable|security_definer_view|rpc_public_grants)$",
+        "schema": "public",
+        "name": "re:^(copy_tenant_defaults|create_tenant_free_tier)$"
+      },
+      "severity_floor": "any",
+      "reference": "findings copy_tenant_defaults_rpc, create_tenant_free_tier",
+      "fixed_at": "2026-07-19"
+    },
+    {
+      "id": "class_rls_disabled_public",
+      "match": {
+        "lint_name": "rls_disabled_in_public",
+        "schema": "public"
+      },
+      "severity_floor": "any",
+      "reference": "Class rule: no public-schema table may ship without RLS enabled.",
+      "fixed_at": "2026-01-01"
+    },
+    {
+      "id": "class_policy_exists_rls_disabled",
+      "match": {
+        "lint_name": "policy_exists_rls_disabled"
+      },
+      "severity_floor": "any",
+      "reference": "Class rule: a table that has policies MUST also have RLS enabled.",
+      "fixed_at": "2026-01-01"
+    },
+    {
+      "id": "class_security_definer_view",
+      "match": {
+        "lint_name": "security_definer_view",
+        "schema": "public"
+      },
+      "severity_floor": "any",
+      "reference": "Class rule: public views must be SECURITY INVOKER (see docs/rls-hardening-reservations-and-availability.md).",
+      "fixed_at": "2026-01-01"
+    },
+    {
+      "id": "class_function_search_path_mutable",
+      "match": {
+        "lint_name": "function_search_path_mutable",
+        "schema": "public"
+      },
+      "severity_floor": "any",
+      "reference": "Class rule: SECURITY DEFINER functions must SET search_path = public (see mem://security/maintenance-policy).",
+      "fixed_at": "2026-01-01"
+    }
+  ]
+}
