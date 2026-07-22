@@ -98,12 +98,28 @@ export const organizationSchema = {
   description:
     "MimmoBook is a SaaS reservation management platform for restaurants, venues, hotels, and guesthouses.",
   sameAs: [],
-  contactPoint: {
-    "@type": "ContactPoint",
-    contactType: "customer support",
-    url: "https://mimmobook.com/support",
+  address: {
+    "@type": "PostalAddress",
+    addressCountry: "FI",
   },
+  contactPoint: [
+    {
+      "@type": "ContactPoint",
+      contactType: "customer support",
+      url: "https://mimmobook.com/support",
+      email: "support@mimmobook.com",
+      availableLanguage: ["English", "Finnish", "Swedish"],
+    },
+    {
+      "@type": "ContactPoint",
+      contactType: "sales",
+      url: "https://mimmobook.com/pricing",
+      email: "sales@mimmobook.com",
+      availableLanguage: ["English", "Finnish", "Swedish"],
+    },
+  ],
 };
+
 
 export const softwareSchema = {
   "@context": "https://schema.org",
