@@ -113,7 +113,7 @@ jobs:
 
       - name: Upload Playwright HTML report
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: playwright-report-run-${{ github.run_id }}
           path: playwright-report/
@@ -124,7 +124,7 @@ jobs:
         # playwright.config.ts; test-results/ holds traces, screenshots,
         # videos, and stack-trace dumps for any failing test.
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: playwright-artifacts-run-${{ github.run_id }}
           path: |

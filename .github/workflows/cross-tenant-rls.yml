@@ -279,7 +279,7 @@ jobs:
         # from the workflow run page. `reports/` covers both artifact
         # families in a single upload.
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: rls-report-remote
           path: reports/
