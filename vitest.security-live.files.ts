@@ -32,6 +32,8 @@ export const LIVE_SECURITY_TESTS: string[] = [
   "src/test/security/billing-and-rpc-hardening-roles.test.ts",
   "src/test/security/billing-and-discount-role-matrix.test.ts",
   "src/test/security/reservations-anon-discount-malformed.test.ts",
+  "src/test/security/reservations-anon-staff-only-fields.test.ts",
+  "src/test/security/resource-availability-slots-anon-note.test.ts",
   "src/test/security/booking-token-enumeration.test.ts",
   "src/test/security/booking-token-expired.test.ts",
   "src/test/security/booking-token-lookup.test.ts",
