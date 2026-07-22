@@ -72,6 +72,10 @@ const BlogPost = () => {
               {t(post.titleKey as any)}
             </h1>
 
+            {post.slug === "MimmoBook_compared_to_other_bookingsystems_for_wellness" && (
+              <ComparisonTable />
+            )}
+
             <div className="prose prose-lg max-w-none">
               {post.contentKeys.map((key, i) => (
                 <p key={i} className="text-muted-foreground leading-relaxed mb-6">
