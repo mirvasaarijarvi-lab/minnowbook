@@ -45,6 +45,7 @@ export const LIVE_SECURITY_TESTS: string[] = [
   "src/test/security/cross-tenant-log-isolation.test.ts",
   "src/test/security/cross-tenant-rls.test.ts",
   "src/test/security/cross-tenant-storage.test.ts",
+  "src/test/security/custom-role-key-assignment-db.test.ts",
   "src/test/security/duplicate-tenant-membership.test.ts",
   "src/test/security/edge-function-cold-start-retry.test.ts",
   "src/test/security/edge-function-cors-allowlist-coverage.test.ts",
