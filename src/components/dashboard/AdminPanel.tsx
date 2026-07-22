@@ -571,7 +571,7 @@ const AdminPanel = () => {
                             <SelectItem value="admin">{t("admin.adminRole")}</SelectItem>
                             {isOwner && <SelectItem value="owner">{t("admin.owner")}</SelectItem>}
                             {(isSuperadmin || isSystemAdmin) && <SelectItem value="superadmin">Superadmin</SelectItem>}
-                            {(roleDefinitions ?? []).filter((r) => !r.is_system).map((r) => (
+                            {assignableCustomRoles.map((r) => (
                               <SelectItem key={r.role_key} value={r.role_key}>{r.display_name}</SelectItem>
                             ))}
                           </SelectContent>
