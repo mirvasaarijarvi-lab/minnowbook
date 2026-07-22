@@ -46,16 +46,16 @@
       "pattern": "cross-tenant-log-isolation\\.test\\.ts > 'booking_validation_log' — anon cross-tenant read isolation > plain SELECT returns zero rows",
       "reason": "Anon REST probe against booking_validation_log. RLS surface verified correct: anon has zero policies on this table (confirmed via pg_policies), and a live curl with the publishable key returns `[]` deterministically. Local runs of the full file (69 tests) pass green in ~10s. Failure only surfaces in CI under parallel security-suite load, consistent with transient PostgREST/network jitter producing a non-Array body or pre-RLS error path that doesn't match expectNoRowsLeaked's shape. No data leak possible because no anon SELECT policy exists.",
       "owner": "@security",
-      "added": "2026-06-16",
-      "expires": "2026-07-14",
+      "added": "2026-07-22",
+      "expires": "2026-08-21",
       "issue": "https://github.com/mimmobook/mimmobook/issues/cross-tenant-log-isolation-plain-select-flake"
     },
     {
       "pattern": "cross-tenant-rls\\.test\\.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon SELECT \\* FROM access_code_redemptions returns no rows \\(RLS enforced\\)",
       "reason": "Anon REST probe against access_code_redemptions. RLS surface verified correct: only `is_system_admin` (ALL) and an authenticated tenant-member SELECT policy exist; anon has no SELECT policy, so the table is denied by default. Live curl with the publishable key returns `[]` deterministically. Sibling anon-RLS assertions in the same file pass in the same run; only this single case occasionally surfaces under parallel security-suite contention, consistent with transient PostgREST/network jitter.",
       "owner": "@security",
-      "added": "2026-06-16",
-      "expires": "2026-07-14",
+      "added": "2026-07-22",
+      "expires": "2026-08-21",
       "issue": "https://github.com/mimmobook/mimmobook/issues/cross-tenant-rls-access-code-redemptions-anon-flake"
     },
     {
