@@ -74,7 +74,7 @@ const BlogPost = () => {
             </h1>
 
             {post.slug === "MimmoBook_compared_to_other_bookingsystems_for_wellness" && (
-              <ComparisonTable />
+              <WellnessComparisonTable />
             )}
 
             <div className="prose prose-lg max-w-none">
