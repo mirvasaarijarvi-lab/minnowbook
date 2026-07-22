@@ -330,6 +330,8 @@ type TranslationKeys = {
   "admin.addUser": string;
   "admin.role": string;
   "admin.staff": string;
+  "admin.invalidCustomRole": string;
+
   "admin.adminRole": string;
   "admin.owner": string;
   "admin.changePassword": string;
@@ -2122,6 +2124,8 @@ const en: TranslationKeys = {
   "admin.addUser": "Add User",
   "admin.role": "Role",
   "admin.staff": "Staff",
+  "admin.invalidCustomRole": "This custom role cannot be assigned. Choose a role with hierarchy level 10 or lower, and not owner or superadmin.",
+
   "admin.adminRole": "Admin",
   "admin.owner": "Owner",
   "admin.changePassword": "Change Password",
@@ -3894,6 +3898,8 @@ const fi: TranslationKeys = {
   "admin.addUser": "Lisää käyttäjä",
   "admin.role": "Rooli",
   "admin.staff": "Henkilökunta",
+  "admin.invalidCustomRole": "Tätä mukautettua roolia ei voi määrittää. Valitse rooli, jonka hierarkiataso on 10 tai alempi, eikä se ole owner tai superadmin.",
+
   "admin.adminRole": "Ylläpitäjä",
   "admin.owner": "Omistaja",
   "admin.changePassword": "Vaihda salasana",
@@ -5664,6 +5670,8 @@ const sv: TranslationKeys = {
   "admin.addUser": "Lägg till användare",
   "admin.role": "Roll",
   "admin.staff": "Personal",
+  "admin.invalidCustomRole": "Denna anpassade roll kan inte tilldelas. Välj en roll med hierarkinivå 10 eller lägre, och inte owner eller superadmin.",
+
   "admin.adminRole": "Admin",
   "admin.owner": "Ägare",
   "admin.changePassword": "Ändra lösenord",

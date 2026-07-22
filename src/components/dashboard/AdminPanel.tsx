@@ -156,13 +156,36 @@ const AdminPanel = () => {
     queryFn: async () => {
       const { data } = await supabase
         .from("role_definitions")
-        .select("role_key, display_name, is_system")
+        .select("role_key, display_name, is_system, hierarchy_level")
         .eq("tenant_id", tenantId!)
         .order("hierarchy_level");
       return data ?? [];
     },
     enabled: !!tenantId,
   });
+
+  // Mirrors the DB check `is_custom_role_key_assignable_by_owner`:
+  // a custom role_key is assignable only if it exists for this tenant,
+  // has hierarchy_level >= 10 (admin or lower), and is not one of the
+  // reserved system role keys owner/superadmin. Keeping this list in
+  // sync with the trigger prevents the UI from surfacing options that
+  // the database will always reject.
+  const assignableCustomRoles = (roleDefinitions ?? []).filter(
+    (r) =>
+      !r.is_system &&
+      (r.hierarchy_level ?? 0) >= 10 &&
+      r.role_key !== "owner" &&
+      r.role_key !== "superadmin",
+  );
+
+  const isSystemRoleKey = (key: string) =>
+    ["superadmin", "owner", "admin", "staff"].includes(key);
+
+  const isAssignableRole = (key: string) => {
+    if (isSystemRoleKey(key)) return true;
+    return assignableCustomRoles.some((r) => r.role_key === key);
+  };
+
 
   const createMutation = useMutation({
     // Re-validate the staff limit at submit time. The user could have been
@@ -205,7 +228,10 @@ const AdminPanel = () => {
         );
       }
 
-      const isSystemRole = ["superadmin", "owner", "admin", "staff"].includes(newUser.role);
+      const isSystemRole = isSystemRoleKey(newUser.role);
+      if (!isSystemRole && !isAssignableRole(newUser.role)) {
+        throw new Error(t("admin.invalidCustomRole"));
+      }
       return invokeAdmin({
         action: "create",
         email: newUser.email,
@@ -214,6 +240,7 @@ const AdminPanel = () => {
         role: isSystemRole ? newUser.role : "staff",
         customRoleKey: isSystemRole ? undefined : newUser.role,
       });
+
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-users"] });
@@ -230,8 +257,16 @@ const AdminPanel = () => {
   });
 
   const updateRoleMutation = useMutation({
-    mutationFn: ({ userId, role }: { userId: string; role: string }) =>
-      invokeAdmin({ action: "update_role", userId, role }),
+    mutationFn: ({ userId, role }: { userId: string; role: string }) => {
+      // Client-side mirror of the DB trigger that owner-assigned custom
+      // roles must exist in role_definitions with hierarchy_level >= 10
+      // and not be a reserved key. Fail fast so the user sees a clear,
+      // localized message instead of a raw Postgres error.
+      if (!isAssignableRole(role)) {
+        return Promise.reject(new Error(t("admin.invalidCustomRole")));
+      }
+      return invokeAdmin({ action: "update_role", userId, role });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-users"] });
       toast({ title: t("admin.roleUpdated") });
@@ -240,6 +275,7 @@ const AdminPanel = () => {
       showError(err);
     },
   });
+
 
   const updateSiteAssignmentsMutation = useMutation({
     mutationFn: ({ userId, assignments }: { userId: string; assignments: { siteId: string; role: string }[] }) =>
@@ -397,7 +433,8 @@ const AdminPanel = () => {
                         <SelectItem value="admin">{t("admin.adminRole")}</SelectItem>
                         {isOwner && <SelectItem value="owner">{t("admin.owner")}</SelectItem>}
                         {(isSuperadmin || isSystemAdmin) && <SelectItem value="superadmin">Superadmin</SelectItem>}
-                        {(roleDefinitions ?? []).filter((r) => !r.is_system).map((r) => (
+                        {assignableCustomRoles.map((r) => (
+
                           <SelectItem key={r.role_key} value={r.role_key}>{r.display_name}</SelectItem>
                         ))}
                       </SelectContent>
@@ -534,7 +571,7 @@ const AdminPanel = () => {
                             <SelectItem value="admin">{t("admin.adminRole")}</SelectItem>
                             {isOwner && <SelectItem value="owner">{t("admin.owner")}</SelectItem>}
                             {(isSuperadmin || isSystemAdmin) && <SelectItem value="superadmin">Superadmin</SelectItem>}
-                            {(roleDefinitions ?? []).filter((r) => !r.is_system).map((r) => (
+                            {assignableCustomRoles.map((r) => (
                               <SelectItem key={r.role_key} value={r.role_key}>{r.display_name}</SelectItem>
                             ))}
                           </SelectContent>
