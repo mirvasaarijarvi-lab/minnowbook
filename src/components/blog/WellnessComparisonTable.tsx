@@ -26,13 +26,13 @@ const featureRows: Row[] = [
   { label: "No marketplace listing required", mimmobook: true, mindbody: true, vagaro: true, fresha: false, acuity: true },
 ];
 
-const columns = [
+const columns: { key: keyof Omit<Row, "label">; label: string; highlight?: boolean }[] = [
   { key: "mimmobook", label: "MimmoBook", highlight: true },
   { key: "mindbody", label: "Mindbody" },
   { key: "vagaro", label: "Vagaro" },
   { key: "fresha", label: "Fresha" },
   { key: "acuity", label: "Acuity" },
-] as const;
+];
 
 function renderCell(value: Cell) {
   if (value === true) return <Check className="h-4 w-4 text-primary inline" aria-label="Included" />;
