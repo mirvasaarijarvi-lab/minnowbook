@@ -7,6 +7,7 @@ import SupportChatWidget from "@/components/SupportChatWidget";
 import SEOHead from "@/components/SEOHead";
 import { useT } from "@/contexts/I18nContext";
 import { posts, buildBlogPostJsonLd } from "@/lib/blogJsonLd";
+import WellnessComparisonTable from "@/components/blog/WellnessComparisonTable";
 
 const BlogPost = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -71,6 +72,10 @@ const BlogPost = () => {
             <h1 className="text-3xl md:text-4xl lg:text-5xl font-serif font-bold text-foreground leading-tight mb-8">
               {t(post.titleKey as any)}
             </h1>
+
+            {post.slug === "MimmoBook_compared_to_other_bookingsystems_for_wellness" && (
+              <WellnessComparisonTable />
+            )}
 
             <div className="prose prose-lg max-w-none">
               {post.contentKeys.map((key, i) => (
