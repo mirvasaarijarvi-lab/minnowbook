@@ -518,4 +518,161 @@ describe.runIf(canRun)("billing + RPC hardening — role matrix (live)", () => {
       await outsider.auth.signOut();
     });
   });
+
+  // ─── Error surface hygiene ────────────────────────────────────────
+  //
+  // Rejections for anon and non-owner callers must:
+  //   1. Use a recognised Postgres/PostgREST error code from a small
+  //      allowlist (RLS violation, insufficient privilege, permission
+  //      denied, or check-constraint style rejection). No 5xx / null
+  //      codes — those indicate an unhandled server path.
+  //   2. Never echo tenant UUIDs, site UUIDs, user IDs, emails, Stripe
+  //      IDs, or the internal role name back to the caller. A leaked
+  //      identifier lets an attacker enumerate resources or confirm
+  //      existence of a specific tenant.
+  //   3. Return the SAME code+message shape across anon and outsider
+  //      for the same operation, so response fingerprinting can't
+  //      distinguish "no session" from "wrong session".
+  describe("rejection error surface is consistent and leak-free", () => {
+    // Codes that are legitimately produced by our RLS / SECURITY DEFINER
+    // guards. Anything outside this set means an error path leaked
+    // through (e.g. FK violation exposing a column name).
+    const ALLOWED_CODES = new Set([
+      "42501", // insufficient_privilege
+      "42P01", // undefined_table (only if the role can't see the relation at all)
+      "P0001", // raise_exception from SECURITY DEFINER guard
+      "PGRST301", // JWT-required / permission denied via PostgREST
+      "PGRST116", // no rows returned by .single() after RLS filter — treated as "blocked"
+      "23514", // check_violation (trigger-based tier/discount clamps)
+    ]);
+
+    const SENSITIVE_TOKENS = (): string[] => [
+      ctx.tenantId,
+      ctx.siteId,
+      ctx.otherTenantId,
+      ctx.otherSiteId,
+      ctx.owner.userId,
+      ctx.owner.email,
+      ctx.admin.userId,
+      ctx.admin.email,
+      ctx.staff.userId,
+      ctx.staff.email,
+      ctx.outsider.userId,
+      ctx.outsider.email,
+    ].filter(Boolean);
+
+    interface Rejection {
+      code: string | null;
+      message: string;
+      details: string;
+      hint: string;
+    }
+
+    const capture = (error: unknown): Rejection => {
+      const e = (error ?? {}) as {
+        code?: string | null;
+        message?: string;
+        details?: string | null;
+        hint?: string | null;
+      };
+      return {
+        code: e.code ?? null,
+        message: e.message ?? "",
+        details: e.details ?? "",
+        hint: e.hint ?? "",
+      };
+    };
+
+    const assertClean = (r: Rejection, label: string) => {
+      expect(r.code, `${label}: error code must be present`).not.toBeNull();
+      expect(
+        ALLOWED_CODES.has(r.code as string),
+        `${label}: unexpected error code ${r.code} — message="${r.message}"`,
+      ).toBe(true);
+
+      const haystack = `${r.message}\n${r.details}\n${r.hint}`.toLowerCase();
+      for (const token of SENSITIVE_TOKENS()) {
+        expect(
+          haystack.includes(String(token).toLowerCase()),
+          `${label}: rejection leaked sensitive token "${token}" — payload=${JSON.stringify(r)}`,
+        ).toBe(false);
+      }
+    };
+
+    it("copy_tenant_defaults_to_site: anon and outsider return an allowlisted, leak-free rejection", async () => {
+      const anon = newAnon();
+      const { error: anonErr } = await anon.rpc("copy_tenant_defaults_to_site", {
+        p_tenant_id: ctx.tenantId,
+        p_site_id: ctx.siteId,
+      });
+      const anonR = capture(anonErr);
+      assertClean(anonR, "anon rpc");
+
+      const outsider = await signedInClient(ctx.outsider);
+      const { error: outsiderErr } = await outsider.rpc("copy_tenant_defaults_to_site", {
+        p_tenant_id: ctx.tenantId,
+        p_site_id: ctx.siteId,
+      });
+      const outsiderR = capture(outsiderErr);
+      assertClean(outsiderR, "outsider rpc");
+      await outsider.auth.signOut();
+
+      // Cross-role fingerprinting: same code so response shape cannot
+      // distinguish "no session" from "wrong session".
+      expect(
+        outsiderR.code,
+        `rpc rejection code mismatch: anon=${anonR.code} outsider=${outsiderR.code}`,
+      ).toBe(anonR.code);
+    });
+
+    it("tenants billing update: anon and outsider return an allowlisted, leak-free rejection", async () => {
+      const patch = { tier: "business" as const };
+      const anon = newAnon();
+      const { error: anonErr } = await anon.from("tenants").update(patch).eq("id", ctx.tenantId);
+      const anonR = capture(anonErr);
+      assertClean(anonR, "anon billing update");
+
+      const outsider = await signedInClient(ctx.outsider);
+      const { error: outsiderErr } = await outsider
+        .from("tenants")
+        .update(patch)
+        .eq("id", ctx.tenantId);
+      // Outsider path may return either an explicit error (trigger) or
+      // an RLS-filtered empty result. When it errors, the surface must
+      // still be clean.
+      if (outsiderErr) {
+        assertClean(capture(outsiderErr), "outsider billing update");
+      }
+      await outsider.auth.signOut();
+    });
+
+    it("reservations discount insert: anon and outsider return an allowlisted, leak-free rejection", async () => {
+      const base = {
+        tenant_id: ctx.tenantId,
+        reservation_type: "restaurant",
+        date: new Date(Date.now() + 30 * 86_400_000).toISOString().slice(0, 10),
+        guest_name: `TEST CI roles surface ${randomUUID().slice(0, 8)}`,
+        guest_email: "ci-roles-surface@mimmobook.test",
+        status: "pending",
+        discount_type: "percent",
+        discount_value: 10,
+      };
+
+      const anon = newAnon();
+      const { error: anonErr } = await anon.from("reservations").insert(base);
+      const anonR = capture(anonErr);
+      assertClean(anonR, "anon reservation discount insert");
+
+      const outsider = await signedInClient(ctx.outsider);
+      const { error: outsiderErr } = await outsider.from("reservations").insert(base);
+      const outsiderR = capture(outsiderErr);
+      assertClean(outsiderR, "outsider reservation discount insert");
+      await outsider.auth.signOut();
+
+      expect(
+        outsiderR.code,
+        `reservation rejection code mismatch: anon=${anonR.code} outsider=${outsiderR.code}`,
+      ).toBe(anonR.code);
+    });
+  });
 });
