@@ -134,14 +134,17 @@ describe.runIf(canRun)("billing + RPC hardening (live)", () => {
 
   afterAll(async () => {
     if (!ctx.service) return;
+    const swallow = async (p: PromiseLike<unknown>) => {
+      try { await p; } catch { /* best-effort cleanup */ }
+    };
     for (const t of ctx.cleanupTenants) {
-      await ctx.service.from("reservations").delete().eq("tenant_id", t).catch(() => {});
-      await ctx.service.from("tenant_users").delete().eq("tenant_id", t).catch(() => {});
-      await ctx.service.from("sites").delete().eq("tenant_id", t).catch(() => {});
-      await ctx.service.from("tenants").delete().eq("id", t).catch(() => {});
+      await swallow(ctx.service.from("reservations").delete().eq("tenant_id", t));
+      await swallow(ctx.service.from("tenant_users").delete().eq("tenant_id", t));
+      await swallow(ctx.service.from("sites").delete().eq("tenant_id", t));
+      await swallow(ctx.service.from("tenants").delete().eq("id", t));
     }
     for (const u of ctx.cleanupUsers) {
-      await ctx.service.auth.admin.deleteUser(u).catch(() => {});
+      await swallow(ctx.service.auth.admin.deleteUser(u));
     }
   }, 60_000);
 
