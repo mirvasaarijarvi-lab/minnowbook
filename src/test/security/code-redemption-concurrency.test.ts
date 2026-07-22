@@ -225,7 +225,7 @@ describe("redeem-access-code — parallel calls never produce a duplicate succes
         `unexpected code for malformed input: ${code}`,
       ).toBe(true);
     }
-  }, 15_000);
+  }, 90_000);
 });
 
 describe("discount_codes — replay/concurrency surface as anon", () => {

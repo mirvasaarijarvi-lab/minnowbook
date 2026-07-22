@@ -318,53 +318,28 @@ export async function handleRedeemAccessCodeRequest(req: Request): Promise<Respo
       );
     }
 
-    // Parse the body ONCE, up front, and run cheap length-bounded format
-    // validation BEFORE the auth round-trip. Malformed input is a pure
-    // client error that cannot leak anything (the format rules — 3..50
-    // chars — are already public in the UI), and short-circuiting here
-    // keeps the malformed-code path bounded to a few milliseconds even
-    // when the auth gateway is cold. Without this hoist, a slow
-    // getClaims() call could stretch the malformed path past the test's
-    // outer timeout even though nothing about the request needed auth.
+    // Parse the body once, up front, so we don't re-read the request
+    // stream later. We do NOT run any input-shape validation here —
+    // authentication MUST run first, otherwise an unauthenticated
+    // caller could distinguish "malformed input" (400 INVALID_CODE_FORMAT)
+    // from "well-formed input" (401 NOT_AUTHENTICATED) and use that as
+    // a side channel on the code shape. The rate-limit indistinguishability
+    // suite pins this invariant.
     let parsedBody: Record<string, unknown> = {};
     try {
       const raw = await req.text();
       parsedBody = raw ? (JSON.parse(raw) as Record<string, unknown>) : {};
     } catch {
-      // Fall through with an empty body — the format check below will
-      // reject it as INVALID_CODE_FORMAT.
       parsedBody = {};
     }
-    const code = (
-      typeof parsedBody.code === "string" ? parsedBody.code : ""
-    )
-      .trim()
-      .toUpperCase();
 
-    if (!code || code.length < 3 || code.length > 50) {
-      logDecision({
-        requestId,
-        decision: "reject",
-        reason: "invalid_code_format",
-        userIdHash: null,
-      });
-      return respond(
-        errorResponse(
-          corsHeaders,
-          400,
-          ERROR_CODES.INVALID_CODE_FORMAT,
-          "Invalid access code format",
-        ),
-        "invalid_code_format",
-      );
-    }
-
-    // Authenticate the calling user via the shared helper. This
+    // Authenticate the calling user via the shared helper FIRST. This
     // guarantees a bounded getClaims() timeout (slow auth path returns
     // 401 instead of a gateway 504), AND keeps us out of `createClient`
     // until we know the request is legitimate — so a missing/empty
     // SUPABASE_SERVICE_ROLE_KEY can never turn an expected 401 into an
-    // accidental 500.
+    // accidental 500. Running auth before any input-shape branch also
+    // preserves the indistinguishability invariant for unauth callers.
     const authResult = await verifyBearer(req, { timeoutMs: 5_000 });
     if (!authResult.ok) {
       logDecision({
@@ -387,10 +362,12 @@ export async function handleRedeemAccessCodeRequest(req: Request): Promise<Respo
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
     adminClientRef = adminClient;
 
-
-    // `code` was parsed and validated above. Reuse the same parsed body
-    // for the idempotency key so we don't re-read the request stream.
+    // Reuse the body parsed above; do not re-read the stream.
     const body = parsedBody;
+    const code = (typeof body.code === "string" ? body.code : "")
+      .trim()
+      .toUpperCase();
+
 
 
     // Optional idempotency key. Accepted from either the request body
@@ -474,7 +451,28 @@ export async function handleRedeemAccessCodeRequest(req: Request): Promise<Respo
       return jsonResponse(status, payload, corsHeaders);
     };
 
-    // Code format was already validated pre-auth; nothing to re-check here.
+    // Validate code format post-auth. This runs AFTER verifyBearer so
+    // unauthenticated callers never see a distinct INVALID_CODE_FORMAT
+    // response for malformed input — every unauth path collapses to
+    // NOT_AUTHENTICATED.
+    if (!code || code.length < 3 || code.length > 50) {
+      logDecision({
+        requestId,
+        decision: "reject",
+        reason: "invalid_code_format",
+        userIdHash,
+        hadIdempotencyKey,
+      });
+      return respond(
+        await finalize(400, {
+          error: "Invalid access code format",
+          code: ERROR_CODES.INVALID_CODE_FORMAT,
+        }),
+        "invalid_code_format",
+      );
+    }
+
+
 
 
 
