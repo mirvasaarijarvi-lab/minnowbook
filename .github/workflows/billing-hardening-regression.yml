@@ -8,12 +8,19 @@ name: Billing & RPC Hardening Regression
 #   3. copy_tenant_defaults_to_site cross-tenant / mismatched-site bypass
 #   4. anonymous reservation insert self-applying discount fields
 #
-# All four assertions live in `src/test/security/billing-and-rpc-hardening.test.ts`.
-# Running them on every PR (in addition to the daily broad live cron)
-# ensures a future migration cannot silently reintroduce any of them.
+# Assertions live across the security role/hardening suites in
+# `src/test/security/` (billing-and-rpc-hardening*.test.ts, the
+# billing-and-discount role matrix, custom-role-key-assignment, and
+# related role/auth regressions).
 #
-# Runs on PRs and pushes to main. Also fires on manual dispatch. Skips
-# cleanly when live Supabase credentials are missing (fork PRs).
+# The suite runs on every PR that touches:
+#   - Any DB migration (schema, RLS, RPC, trigger definitions)
+#   - Any Supabase Edge Function (server-side auth/role boundary)
+#   - Any auth/role/permission/tenant client library or hook
+#   - Any security regression test or its vitest config
+#   - This workflow itself
+#
+# Skips cleanly when live Supabase credentials are missing (fork PRs).
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -23,23 +30,46 @@ on:
   push:
     branches: [main]
     paths:
+      # DB surface — migrations define schema, RLS, triggers, RPCs.
       - "supabase/migrations/**"
-      - "supabase/functions/create-tenant/**"
-      - "supabase/functions/check-subscription/**"
-      - "src/test/security/billing-and-rpc-hardening.test.ts"
+      # ALL edge functions — they run as service_role and enforce
+      # server-side auth/role boundaries for every hardened path.
+      - "supabase/functions/**"
+      - "supabase/config.toml"
+      # Client-side auth/role/permission/tenant logic.
+      - "src/hooks/useIsSystemAdmin.ts"
+      - "src/hooks/useTenant.ts"
+      - "src/hooks/usePermissions.ts"
+      - "src/hooks/useTierGate.ts"
+      - "src/lib/permissions.ts"
+      - "src/integrations/supabase/**"
+      - "src/contexts/AuthContext.tsx"
+      - "src/components/AdminPanel.tsx"
+      # Security regression suites + their vitest wiring.
+      - "src/test/security/**"
       - "vitest.security-live.files.ts"
       - "vitest.security-live.config.ts"
       - ".github/workflows/billing-hardening-regression.yml"
+      - ".github/actions/supabase-preflight/**"
   pull_request:
     branches: [main]
     paths:
       - "supabase/migrations/**"
-      - "supabase/functions/create-tenant/**"
-      - "supabase/functions/check-subscription/**"
-      - "src/test/security/billing-and-rpc-hardening.test.ts"
+      - "supabase/functions/**"
+      - "supabase/config.toml"
+      - "src/hooks/useIsSystemAdmin.ts"
+      - "src/hooks/useTenant.ts"
+      - "src/hooks/usePermissions.ts"
+      - "src/hooks/useTierGate.ts"
+      - "src/lib/permissions.ts"
+      - "src/integrations/supabase/**"
+      - "src/contexts/AuthContext.tsx"
+      - "src/components/AdminPanel.tsx"
+      - "src/test/security/**"
       - "vitest.security-live.files.ts"
       - "vitest.security-live.config.ts"
       - ".github/workflows/billing-hardening-regression.yml"
+      - ".github/actions/supabase-preflight/**"
   workflow_dispatch:
 
 permissions: {}
