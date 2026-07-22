@@ -100,6 +100,12 @@ export interface BlogPostData {
   about?: Record<string, unknown>[];
   /** Secondary entities the post mentions (schema.org `mentions`). */
   mentions?: Record<string, unknown>[];
+  /**
+   * Override the JSON-LD `@type` for this post. Defaults to `BlogPosting`.
+   * Use `Article` for evergreen editorial pieces (e.g. long-form comparison
+   * guides) to improve rich-result eligibility.
+   */
+  schemaType?: "BlogPosting" | "Article";
 }
 
 
