@@ -146,6 +146,15 @@ export const posts: Record<string, BlogPostData> = {
     seoTitle: "Best Restaurant Reservation Apps 2026: Free vs Paid",
     seoDescription: "Compare the best restaurant reservation apps in 2026. Free online booking systems, marketplaces and dedicated software for restaurants, cafés and venues.",
   },
+  "comparison-resy-tock-mimmobook": {
+    slug: "comparison-resy-tock-mimmobook",
+    titleKey: "blog.post7Title",
+    dateKey: "2026-07-22",
+    readTime: "6 min",
+    contentKeys: ["blog.post7C1", "blog.post7C2", "blog.post7C3", "blog.post7C4", "blog.post7C5", "blog.post7C6"],
+    seoTitle: "MimmoBook vs Resy vs Tock: Reservation Software Compared",
+    seoDescription: "MimmoBook vs Resy vs Tock: compare pricing, brand control, multi-site management and ease of use for restaurant reservation software in 2026.",
+  },
 };
 
 /**
