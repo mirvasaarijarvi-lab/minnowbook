@@ -100,6 +100,12 @@ export interface BlogPostData {
   about?: Record<string, unknown>[];
   /** Secondary entities the post mentions (schema.org `mentions`). */
   mentions?: Record<string, unknown>[];
+  /**
+   * Override the JSON-LD `@type` for this post. Defaults to `BlogPosting`.
+   * Use `Article` for evergreen editorial pieces (e.g. long-form comparison
+   * guides) to improve rich-result eligibility.
+   */
+  schemaType?: "BlogPosting" | "Article";
 }
 
 
@@ -172,6 +178,7 @@ export const posts: Record<string, BlogPostData> = {
     image: ogComparisonAsset.url,
     imageAlt: "MimmoBook vs Resy vs Tock comparison, reservation platforms compared",
     relatedSlugs: ["best-restaurant-reservation-apps", "branded-booking-pages-matter", "multi-site-management-hospitality"],
+    schemaType: "Article",
     about: [
       {
         "@type": "SoftwareApplication",
@@ -257,7 +264,7 @@ export const buildBlogPostJsonLd = (
     ]),
     {
       "@context": "https://schema.org",
-      "@type": "BlogPosting",
+      "@type": post.schemaType ?? "BlogPosting",
       "@id": `${postUrl}#article`,
       mainEntityOfPage: {
         "@type": "WebPage",

@@ -73,6 +73,7 @@ const validateImageObject = (out: Issue[], slug: string, path: string, img: unkn
 };
 
 const validateBlogPosting = (out: Issue[], slug: string, node: Record<string, unknown>) => {
+  const t = typeof node["@type"] === "string" ? (node["@type"] as string) : "BlogPosting";
   const required = [
     "headline",
     "datePublished",
@@ -87,7 +88,7 @@ const validateBlogPosting = (out: Issue[], slug: string, node: Record<string, un
   ];
   for (const k of required) {
     if (node[k] === undefined || node[k] === null || node[k] === "") {
-      out.push({ slug, path: `BlogPosting.${k}`, message: "missing required field" });
+      out.push({ slug, path: `${t}.${k}`, message: "missing required field" });
     }
   }
   for (const dateKey of ["datePublished", "dateModified"]) {
@@ -95,16 +96,16 @@ const validateBlogPosting = (out: Issue[], slug: string, node: Record<string, un
     if (typeof v !== "string" || !ISO_8601.test(v)) {
       out.push({
         slug,
-        path: `BlogPosting.${dateKey}`,
+        path: `${t}.${dateKey}`,
         message: `must be ISO 8601 (got ${String(v)})`,
       });
     }
   }
   if (typeof node.url === "string" && !ABS_HTTPS_URL.test(node.url)) {
-    out.push({ slug, path: "BlogPosting.url", message: "url must be an absolute https URL" });
+    out.push({ slug, path: `${t}.url`, message: "url must be an absolute https URL" });
   }
   if (typeof node.wordCount === "number" && node.wordCount <= 0) {
-    out.push({ slug, path: "BlogPosting.wordCount", message: "wordCount must be > 0" });
+    out.push({ slug, path: `${t}.wordCount`, message: "wordCount must be > 0" });
   }
   const mainEntity = node.mainEntityOfPage as Record<string, unknown> | undefined;
   if (
@@ -114,39 +115,39 @@ const validateBlogPosting = (out: Issue[], slug: string, node: Record<string, un
   ) {
     out.push({
       slug,
-      path: "BlogPosting.mainEntityOfPage",
+      path: `${t}.mainEntityOfPage`,
       message: "must be a WebPage with an @id",
     });
   }
-  validateImageObject(out, slug, "BlogPosting.image", node.image);
+  validateImageObject(out, slug, `${t}.image`, node.image);
 
   const author = node.author;
   if (Array.isArray(author)) {
     if (author.length === 0) {
-      out.push({ slug, path: "BlogPosting.author", message: "author array is empty" });
+      out.push({ slug, path: `${t}.author`, message: "author array is empty" });
     }
-    author.forEach((a, i) => validateAuthorNode(out, slug, `BlogPosting.author[${i}]`, a));
+    author.forEach((a, i) => validateAuthorNode(out, slug, `${t}.author[${i}]`, a));
   } else {
-    validateAuthorNode(out, slug, "BlogPosting.author", author);
+    validateAuthorNode(out, slug, `${t}.author`, author);
   }
 
   const publisher = node.publisher as Record<string, unknown> | undefined;
   if (!publisher) {
-    out.push({ slug, path: "BlogPosting.publisher", message: "missing publisher" });
+    out.push({ slug, path: `${t}.publisher`, message: "missing publisher" });
   } else {
     if (publisher["@type"] !== "Organization") {
       out.push({
         slug,
-        path: "BlogPosting.publisher.@type",
+        path: `${t}.publisher.@type`,
         message: "must be Organization",
       });
     }
     for (const k of ["name", "url", "@id"]) {
       if (!isNonEmptyString(publisher[k])) {
-        out.push({ slug, path: `BlogPosting.publisher.${k}`, message: `missing/empty ${k}` });
+        out.push({ slug, path: `${t}.publisher.${k}`, message: `missing/empty ${k}` });
       }
     }
-    validateImageObject(out, slug, "BlogPosting.publisher.logo", publisher.logo);
+    validateImageObject(out, slug, `${t}.publisher.logo`, publisher.logo);
   }
 };
 
@@ -205,13 +206,14 @@ export function validateNodes(slug: string, nodes: unknown): Issue[] {
     if (!isNonEmptyString(n["@type"] as string)) {
       out.push({ slug, path: `[${i}].@type`, message: "missing @type" });
     }
-    if (n["@type"] === "BlogPosting" || n["@type"] === "FAQPage") {
+    if (n["@type"] === "BlogPosting" || n["@type"] === "Article" || n["@type"] === "FAQPage") {
       if (!isNonEmptyString(n["@id"] as string)) {
         out.push({ slug, path: `[${i}].@id`, message: "missing @id" });
       }
     }
     switch (n["@type"]) {
       case "BlogPosting":
+      case "Article":
         validateBlogPosting(out, slug, n);
         break;
       case "FAQPage":
