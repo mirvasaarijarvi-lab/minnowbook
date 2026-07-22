@@ -314,8 +314,11 @@ export const buildBlogPostJsonLd = (
         url: "https://mimmobook.com/blog",
       },
       articleBody,
+      ...(post.about && post.about.length > 0 ? { about: post.about } : {}),
+      ...(post.mentions && post.mentions.length > 0 ? { mentions: post.mentions } : {}),
     },
   ];
+
 
   if (post.faqs && post.faqs.length > 0) {
     jsonLd.push({
