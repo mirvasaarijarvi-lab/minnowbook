@@ -219,10 +219,13 @@ export const buildBlogPostJsonLd = (
       timeRequired: `PT${post.readTime.replace(/\D/g, "")}M`,
       image: {
         "@type": "ImageObject",
-        url: "https://mimmobook.com/og-image.png",
+        url: post.image
+          ? (post.image.startsWith("http") ? post.image : `https://mimmobook.com${post.image}`)
+          : "https://mimmobook.com/og-image.png",
         width: 1200,
         height: 630,
       },
+
       author: buildAuthorField(effectiveAuthors),
       publisher: {
         "@type": "Organization",
