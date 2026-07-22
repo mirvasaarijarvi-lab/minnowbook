@@ -91,6 +91,11 @@ const UseCases = () => {
               <ArrowRight className="h-4 w-4" />
             </Button>
           </Link>
+          <p className="mt-6 text-sm text-muted-foreground">
+            <Link to="/blog/comparison-resy-tock-mimmobook" className="underline hover:text-foreground">
+              Read: MimmoBook vs Resy vs Tock
+            </Link>
+          </p>
         </div>
       </section>
 
