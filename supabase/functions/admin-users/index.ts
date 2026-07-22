@@ -201,6 +201,51 @@ export const handleAdminUsersRequest = async (req: Request): Promise<Response> =
       });
     }
 
+    // Helper: determine whether caller is owner-level (owner, superadmin, or system admin).
+    // Only owner-level callers may touch owner/superadmin targets.
+    const isOwnerLevelCaller = !!sysAdmin || callerRole?.role === "owner" || callerRole?.role === "superadmin";
+
+    // Helper: fetch the target's current role within this tenant. Returns null if not a member.
+    async function getTargetRole(userId: string): Promise<{ role: string; custom_role_key: string | null } | null> {
+      const { data } = await adminClient
+        .from("tenant_users")
+        .select("role, custom_role_key")
+        .eq("user_id", userId)
+        .eq("tenant_id", tenantId)
+        .maybeSingle();
+      if (!data) return null;
+      return { role: (data as any).role, custom_role_key: (data as any).custom_role_key ?? null };
+    }
+
+    function isOwnerLevelTarget(target: { role: string; custom_role_key: string | null } | null): boolean {
+      if (!target) return false;
+      return target.role === "owner" || target.role === "superadmin";
+    }
+
+    // Helper: verify a custom_role_key is assignable (hierarchy_level >= 10, not owner/superadmin).
+    // Mirrors public.is_custom_role_key_assignable_by_owner used by tenant_users RLS.
+    async function assertCustomRoleKeyAssignable(key: string | null): Promise<void> {
+      if (!key) return;
+      if (key === "owner" || key === "superadmin") {
+        throw new Error("This role is reserved and cannot be assigned");
+      }
+      const { data, error } = await adminClient
+        .from("role_definitions")
+        .select("role_key, hierarchy_level")
+        .eq("tenant_id", tenantId)
+        .eq("role_key", key)
+        .maybeSingle();
+      if (error) throw error;
+      if (!data) {
+        throw new Error("Invalid custom role");
+      }
+      const level = (data as any).hierarchy_level as number;
+      const rk = (data as any).role_key as string;
+      if (rk === "owner" || rk === "superadmin" || level < 10) {
+        throw new Error("This custom role is reserved and cannot be assigned");
+      }
+    }
+
     if (action === "create") {
       const email = validateEmail(body.email);
       const password = validatePassword(body.password);
@@ -211,6 +256,11 @@ export const handleAdminUsersRequest = async (req: Request): Promise<Response> =
       // Only superadmins and system admins can grant admin+ roles
       if (PRIVILEGED_ROLES.includes(role) && !sysAdmin && callerRole?.role !== "superadmin") {
         throw new Error("Only superadmins can grant admin access or above");
+      }
+
+      // Enforce custom-role hierarchy (mirrors RLS is_custom_role_key_assignable_by_owner)
+      if (customRoleKey && !VALID_ROLES.includes(customRoleKey)) {
+        await assertCustomRoleKeyAssignable(customRoleKey);
       }
 
       const baseRole = (role === "superadmin" || role === "owner" || role === "admin") ? role : "staff";
@@ -327,9 +377,24 @@ export const handleAdminUsersRequest = async (req: Request): Promise<Response> =
         throw new Error("Only superadmins can grant admin access or above");
       }
 
+      // Block admins from modifying owner/superadmin targets (or admins other than self)
+      const target = await getTargetRole(userId);
+      if (!target) throw new Error("User not in your tenant");
+      if (isOwnerLevelTarget(target) && !isOwnerLevelCaller) {
+        throw new Error("Only the owner can modify the owner or superadmin account");
+      }
+      if (target.role === "admin" && userId !== callingUserId && !isOwnerLevelCaller) {
+        throw new Error("Only the owner can modify another admin account");
+      }
+
       const isSystemRole = VALID_ROLES.includes(role);
       const baseRole = isSystemRole ? role : "staff";
       const effectiveCustomKey = isSystemRole ? null : role;
+
+      // Enforce custom-role hierarchy (mirrors RLS is_custom_role_key_assignable_by_owner)
+      if (effectiveCustomKey) {
+        await assertCustomRoleKeyAssignable(effectiveCustomKey);
+      }
 
       const { error } = await adminClient
         .from("tenant_users")
@@ -342,6 +407,7 @@ export const handleAdminUsersRequest = async (req: Request): Promise<Response> =
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
 
     if (action === "update_site_assignments") {
       const userId = validateUuid(body.userId, "userId");
@@ -445,13 +511,17 @@ export const handleAdminUsersRequest = async (req: Request): Promise<Response> =
       const userId = validateUuid(body.userId, "userId");
       const newPassword = validatePassword(body.newPassword);
 
-      const { data: tu } = await adminClient
-        .from("tenant_users")
-        .select("id")
-        .eq("user_id", userId)
-        .eq("tenant_id", tenantId)
-        .single();
-      if (!tu) throw new Error("User not in your tenant");
+      const target = await getTargetRole(userId);
+      if (!target) throw new Error("User not in your tenant");
+
+      // Only owner/superadmin/sys admin can reset an owner or superadmin password.
+      if (isOwnerLevelTarget(target) && !isOwnerLevelCaller) {
+        throw new Error("Only the owner can reset the owner or superadmin password");
+      }
+      // Admins can reset their own password but not another admin's.
+      if (target.role === "admin" && userId !== callingUserId && !isOwnerLevelCaller) {
+        throw new Error("Only the owner can reset another admin's password");
+      }
 
       const { error } = await adminClient.auth.admin.updateUserById(userId, {
         password: newPassword,
@@ -466,6 +536,16 @@ export const handleAdminUsersRequest = async (req: Request): Promise<Response> =
     if (action === "delete") {
       const userId = validateUuid(body.userId, "userId");
       if (userId === callingUserId) throw new Error("Cannot delete yourself");
+
+      const target = await getTargetRole(userId);
+      if (!target) throw new Error("User not in your tenant");
+
+      if (isOwnerLevelTarget(target) && !isOwnerLevelCaller) {
+        throw new Error("Only the owner can delete the owner or superadmin account");
+      }
+      if (target.role === "admin" && !isOwnerLevelCaller) {
+        throw new Error("Only the owner can delete another admin account");
+      }
 
       // Also delete site_users
       await adminClient
@@ -485,6 +565,7 @@ export const handleAdminUsersRequest = async (req: Request): Promise<Response> =
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
 
     throw new Error("Unknown action");
   } catch (error: any) {
