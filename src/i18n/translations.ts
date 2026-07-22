@@ -1635,6 +1635,14 @@ type TranslationKeys = {
   "blog.post7C4": string;
   "blog.post7C5": string;
   "blog.post7C6": string;
+  "blog.post8Title": string;
+  "blog.post8Excerpt": string;
+  "blog.post8C1": string;
+  "blog.post8C2": string;
+  "blog.post8C3": string;
+  "blog.post8C4": string;
+  "blog.post8C5": string;
+  "blog.post8C6": string;
 
   // Nav new pages
   "nav.features": string;
