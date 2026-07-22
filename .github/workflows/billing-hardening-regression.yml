@@ -150,6 +150,11 @@ jobs:
             --outputFile.junit=reports/billing-hardening/junit.xml \
             --outputFile.json=reports/billing-hardening/results.json \
             src/test/security/billing-and-rpc-hardening.test.ts \
+            src/test/security/billing-and-rpc-hardening-roles.test.ts \
+            src/test/security/billing-and-discount-role-matrix.test.ts \
+            src/test/security/custom-role-key-assignment.test.ts \
+            src/test/security/custom-role-key-assignment-db.test.ts \
+            src/test/security/reservations-anon-discount-malformed.test.ts \
             2>&1 | tee reports/billing-hardening/vitest.log
 
       - name: Capture runtime diagnostics
