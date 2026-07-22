@@ -6909,6 +6909,7 @@ const sv: TranslationKeys = {
   "blog.readMore": "Läs mer",
   "blog.backToBlog": "Tillbaka till bloggen",
   "blog.postCta": "Redo att effektivisera dina bokningar?",
+  "blog.relatedReading": "Läs också",
   "blog.ctaTitle": "Håll dig uppdaterad",
   "blog.ctaSubtitle": "Testa MimmoBook gratis i 30 dagar och se hur det förändrar din bokningshantering.",
   "blog.catInsights": "Insikter",
