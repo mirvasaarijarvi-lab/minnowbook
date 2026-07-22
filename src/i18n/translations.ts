@@ -1583,6 +1583,7 @@ type TranslationKeys = {
   "blog.readMore": string;
   "blog.backToBlog": string;
   "blog.postCta": string;
+  "blog.relatedReading": string;
   "blog.ctaTitle": string;
   "blog.ctaSubtitle": string;
   "blog.catInsights": string;
