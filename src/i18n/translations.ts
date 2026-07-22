@@ -5136,6 +5136,7 @@ const fi: TranslationKeys = {
   "blog.readMore": "Lue lisää",
   "blog.backToBlog": "Takaisin blogiin",
   "blog.postCta": "Valmiina tehostamaan varaustenhallintaa?",
+  "blog.relatedReading": "Lue myös",
   "blog.ctaTitle": "Pysy ajan tasalla",
   "blog.ctaSubtitle": "Kokeile MimmoBookia ilmaiseksi 30 päivää ja katso miten se muuttaa varaustenhallintasi.",
   "blog.catInsights": "Oivallukset",
