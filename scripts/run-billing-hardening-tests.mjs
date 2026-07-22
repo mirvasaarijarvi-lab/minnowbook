@@ -90,13 +90,41 @@ process.env.SUPABASE_ANON_KEY = anonKey;
 process.env.SUPABASE_PUBLISHABLE_KEY = anonKey;
 process.env.SUPABASE_SERVICE_ROLE_KEY = serviceKey;
 
-const testFiles = [
-  "src/test/security/billing-and-rpc-hardening.test.ts",
-  "src/test/security/billing-and-rpc-hardening-roles.test.ts",
-  "src/test/security/reservations-anon-discount-malformed.test.ts",
-];
+// Named test bundles. Keep `all` as the default so the existing
+// `test:security:billing` behavior is unchanged.
+const SUITES = {
+  all: [
+    "src/test/security/billing-and-rpc-hardening.test.ts",
+    "src/test/security/billing-and-rpc-hardening-roles.test.ts",
+    "src/test/security/reservations-anon-discount-malformed.test.ts",
+  ],
+  // Focused role-matrix run: only the two suites that assert per-role
+  // can/can't behavior for billing + discount mutations. Matches the
+  // scope of `test:security:billing:roles`.
+  roles: [
+    "src/test/security/billing-and-rpc-hardening-roles.test.ts",
+    "src/test/security/billing-and-discount-role-matrix.test.ts",
+  ],
+};
 
-const extraArgs = process.argv.slice(2);
+const rawArgs = process.argv.slice(2);
+let suiteName = "all";
+const passthroughArgs = [];
+for (const arg of rawArgs) {
+  if (arg.startsWith("--suite=")) {
+    suiteName = arg.slice("--suite=".length);
+  } else {
+    passthroughArgs.push(arg);
+  }
+}
+
+const testFiles = SUITES[suiteName];
+if (!testFiles) {
+  console.error(
+    `[test:security:billing] Unknown --suite="${suiteName}". Valid: ${Object.keys(SUITES).join(", ")}`,
+  );
+  process.exit(1);
+}
 
 const args = [
   "vitest",
@@ -105,8 +133,9 @@ const args = [
   "vitest.security-live.config.ts",
   "--reporter=verbose",
   ...testFiles,
-  ...extraArgs,
+  ...passthroughArgs,
 ];
+
 
 console.log(`[test:security:billing] Running: bunx ${args.join(" ")}`);
 
