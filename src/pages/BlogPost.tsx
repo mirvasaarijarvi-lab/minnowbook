@@ -7,6 +7,7 @@ import SupportChatWidget from "@/components/SupportChatWidget";
 import SEOHead from "@/components/SEOHead";
 import { useT } from "@/contexts/I18nContext";
 import { posts, buildBlogPostJsonLd } from "@/lib/blogJsonLd";
+import WellnessComparisonTable from "@/components/blog/WellnessComparisonTable";
 
 const BlogPost = () => {
   const { slug } = useParams<{ slug: string }>();
