@@ -3363,6 +3363,7 @@ const en: TranslationKeys = {
   "blog.readMore": "Read more",
   "blog.backToBlog": "Back to Blog",
   "blog.postCta": "Ready to streamline your reservations?",
+  "blog.relatedReading": "Related reading",
   "blog.ctaTitle": "Stay Up to Date",
   "blog.ctaSubtitle": "Try MimmoBook free for 30 days and see how it transforms your booking management.",
   "blog.catInsights": "Insights",
