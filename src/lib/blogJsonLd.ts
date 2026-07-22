@@ -6,6 +6,8 @@
  */
 
 import { organizationSchema, breadcrumbSchema } from "@/components/SEOHead";
+import ogComparisonAsset from "@/assets/og-comparison-resy-tock-mimmobook.jpg.asset.json";
+
 
 
 export interface BlogAuthor {
@@ -87,9 +89,13 @@ export interface BlogPostData {
   contentKeys: string[];
   seoTitle: string;
   seoDescription: string;
+  /** Optional absolute or root-relative image URL for OG/Twitter and JSON-LD. */
+  image?: string;
+  imageAlt?: string;
   faqs?: BlogFaqItem[];
   authors?: BlogAuthor[];
 }
+
 
 export const posts: Record<string, BlogPostData> = {
   "reservation-challenges-small-hospitality": {
@@ -154,8 +160,11 @@ export const posts: Record<string, BlogPostData> = {
     contentKeys: ["blog.post7C1", "blog.post7C2", "blog.post7C3", "blog.post7C4", "blog.post7C5", "blog.post7C6"],
     seoTitle: "MimmoBook vs Resy vs Tock: Reservation Software Compared",
     seoDescription: "MimmoBook vs Resy vs Tock: compare pricing, brand control, multi-site management and ease of use for restaurant reservation software in 2026.",
+    image: ogComparisonAsset.url,
+    imageAlt: "MimmoBook vs Resy vs Tock comparison, reservation platforms compared",
   },
 };
+
 
 /**
  * Build the exact JSON-LD array shipped by /blog/:slug. `translate` is the
@@ -210,10 +219,13 @@ export const buildBlogPostJsonLd = (
       timeRequired: `PT${post.readTime.replace(/\D/g, "")}M`,
       image: {
         "@type": "ImageObject",
-        url: "https://mimmobook.com/og-image.png",
+        url: post.image
+          ? (post.image.startsWith("http") ? post.image : `https://mimmobook.com${post.image}`)
+          : "https://mimmobook.com/og-image.png",
         width: 1200,
         height: 630,
       },
+
       author: buildAuthorField(effectiveAuthors),
       publisher: {
         "@type": "Organization",
