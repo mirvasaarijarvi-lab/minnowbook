@@ -206,13 +206,14 @@ export function validateNodes(slug: string, nodes: unknown): Issue[] {
     if (!isNonEmptyString(n["@type"] as string)) {
       out.push({ slug, path: `[${i}].@type`, message: "missing @type" });
     }
-    if (n["@type"] === "BlogPosting" || n["@type"] === "FAQPage") {
+    if (n["@type"] === "BlogPosting" || n["@type"] === "Article" || n["@type"] === "FAQPage") {
       if (!isNonEmptyString(n["@id"] as string)) {
         out.push({ slug, path: `[${i}].@id`, message: "missing @id" });
       }
     }
     switch (n["@type"]) {
       case "BlogPosting":
+      case "Article":
         validateBlogPosting(out, slug, n);
         break;
       case "FAQPage":
