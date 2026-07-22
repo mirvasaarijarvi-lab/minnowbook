@@ -5670,6 +5670,8 @@ const sv: TranslationKeys = {
   "admin.addUser": "Lägg till användare",
   "admin.role": "Roll",
   "admin.staff": "Personal",
+  "admin.invalidCustomRole": "Denna anpassade roll kan inte tilldelas. Välj en roll med hierarkinivå 10 eller lägre, och inte owner eller superadmin.",
+
   "admin.adminRole": "Admin",
   "admin.owner": "Ägare",
   "admin.changePassword": "Ändra lösenord",
