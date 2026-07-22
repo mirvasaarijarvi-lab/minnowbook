@@ -41,8 +41,11 @@ const BlogPost = () => {
         description={post.seoDescription}
         path={`/blog/${post.slug}`}
         type="article"
+        image={post.image}
+        imageAlt={post.imageAlt}
         jsonLd={jsonLd}
       />
+
 
       <MarketingHeader />
 
