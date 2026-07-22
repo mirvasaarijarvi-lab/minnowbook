@@ -3898,6 +3898,8 @@ const fi: TranslationKeys = {
   "admin.addUser": "Lisää käyttäjä",
   "admin.role": "Rooli",
   "admin.staff": "Henkilökunta",
+  "admin.invalidCustomRole": "Tätä mukautettua roolia ei voi määrittää. Valitse rooli, jonka hierarkiataso on 10 tai alempi, eikä se ole owner tai superadmin.",
+
   "admin.adminRole": "Ylläpitäjä",
   "admin.owner": "Omistaja",
   "admin.changePassword": "Vaihda salasana",
