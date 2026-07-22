@@ -81,7 +81,7 @@ const SEOHead = ({ title, description, path, type = "website", image, imageAlt, 
     return () => {
       document.querySelectorAll('script[data-seo-jsonld]').forEach((s) => s.remove());
     };
-  }, [title, description, path, type, jsonLd]);
+  }, [title, description, path, type, image, imageAlt, jsonLd]);
 
   return null;
 };
