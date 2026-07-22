@@ -377,9 +377,24 @@ export const handleAdminUsersRequest = async (req: Request): Promise<Response> =
         throw new Error("Only superadmins can grant admin access or above");
       }
 
+      // Block admins from modifying owner/superadmin targets (or admins other than self)
+      const target = await getTargetRole(userId);
+      if (!target) throw new Error("User not in your tenant");
+      if (isOwnerLevelTarget(target) && !isOwnerLevelCaller) {
+        throw new Error("Only the owner can modify the owner or superadmin account");
+      }
+      if (target.role === "admin" && userId !== callingUserId && !isOwnerLevelCaller) {
+        throw new Error("Only the owner can modify another admin account");
+      }
+
       const isSystemRole = VALID_ROLES.includes(role);
       const baseRole = isSystemRole ? role : "staff";
       const effectiveCustomKey = isSystemRole ? null : role;
+
+      // Enforce custom-role hierarchy (mirrors RLS is_custom_role_key_assignable_by_owner)
+      if (effectiveCustomKey) {
+        await assertCustomRoleKeyAssignable(effectiveCustomKey);
+      }
 
       const { error } = await adminClient
         .from("tenant_users")
@@ -392,6 +407,7 @@ export const handleAdminUsersRequest = async (req: Request): Promise<Response> =
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
 
     if (action === "update_site_assignments") {
       const userId = validateUuid(body.userId, "userId");
