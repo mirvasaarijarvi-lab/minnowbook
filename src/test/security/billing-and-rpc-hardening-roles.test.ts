@@ -399,4 +399,123 @@ describe.runIf(canRun)("billing + RPC hardening — role matrix (live)", () => {
       await client.auth.signOut();
     });
   });
+
+  // ─── service_role positive path — bypasses RLS, exercises trusted writes ──
+  //
+  // These assertions pin the invariant that the hardening migration only
+  // clamps down on anon + authenticated roles. The Lovable Cloud backend
+  // (edge functions, Stripe webhooks, admin jobs) still needs the
+  // service_role to perform legitimate billing writes and tenant setup.
+  // If a future migration accidentally revokes those grants, the app
+  // breaks silently in production — these tests catch that regression.
+  describe("service_role retains permitted writes", () => {
+    it("service_role can update billing columns that anon/members cannot", async () => {
+      const patch = {
+        tier: "professional" as const,
+        subscription_status: "active",
+        stripe_customer_id: `cus_service_${randomUUID().slice(0, 8)}`,
+        stripe_subscription_id: `sub_service_${randomUUID().slice(0, 8)}`,
+        discount_percentage: 15,
+      };
+      const { error } = await ctx.service
+        .from("tenants")
+        .update(patch)
+        .eq("id", ctx.tenantId);
+      expect(error, "service_role billing update must succeed").toBeNull();
+
+      const { data: row } = await ctx.service
+        .from("tenants")
+        .select("tier, subscription_status, stripe_customer_id, stripe_subscription_id, discount_percentage")
+        .eq("id", ctx.tenantId)
+        .single();
+      expect(row?.tier).toBe("professional");
+      expect(row?.subscription_status).toBe("active");
+      expect(row?.stripe_customer_id).toBe(patch.stripe_customer_id);
+      expect(row?.stripe_subscription_id).toBe(patch.stripe_subscription_id);
+      expect(Number(row?.discount_percentage)).toBe(15);
+
+      // Reset so downstream assertions/cleanup stay deterministic.
+      const { error: resetErr } = await ctx.service
+        .from("tenants")
+        .update({
+          tier: "basic",
+          subscription_status: "trialing",
+          stripe_customer_id: null,
+          stripe_subscription_id: null,
+          discount_percentage: 0,
+        })
+        .eq("id", ctx.tenantId);
+      expect(resetErr).toBeNull();
+    });
+
+    it("service_role can invoke copy_tenant_defaults_to_site cross-tenant", async () => {
+      // Trusted server code (edge functions running as service_role) must be
+      // able to seed defaults for ANY tenant/site pair — the admin-only
+      // guard inside the SECURITY DEFINER function only applies to the
+      // authenticated caller path, not to service_role callers.
+      const { error } = await ctx.service.rpc("copy_tenant_defaults_to_site", {
+        p_tenant_id: ctx.otherTenantId,
+        p_site_id: ctx.otherSiteId,
+      });
+      expect(error, "service_role cross-tenant copy must succeed").toBeNull();
+    });
+
+    it("service_role can insert reservations with discount fields (anon cannot)", async () => {
+      const row = {
+        tenant_id: ctx.tenantId,
+        reservation_type: "restaurant",
+        date: new Date(Date.now() + 14 * 86_400_000).toISOString().slice(0, 10),
+        guest_name: `TEST CI roles svc-disc ${randomUUID().slice(0, 8)}`,
+        guest_email: "ci-roles-svc-disc@mimmobook.test",
+        status: "pending",
+        discount_type: "percent",
+        discount_value: 10,
+      };
+      const { data, error } = await ctx.service
+        .from("reservations")
+        .insert(row)
+        .select("id, discount_type, discount_value")
+        .single();
+      expect(error, "service_role discount insert must succeed").toBeNull();
+      expect(data?.discount_type).toBe("percent");
+      expect(Number(data?.discount_value)).toBe(10);
+    });
+
+    it("negative control: anon + outsider remain blocked on the same operations", async () => {
+      // Mirrors the positive assertions above with the roles that MUST
+      // stay blocked, so the matrix is unambiguous at review time.
+      const anon = newAnon();
+      const { error: anonBillingErr } = await anon
+        .from("tenants")
+        .update({ tier: "business" })
+        .eq("id", ctx.tenantId);
+      expect(anonBillingErr, "anon billing update stays blocked").not.toBeNull();
+
+      const { error: anonRpcErr } = await anon.rpc("copy_tenant_defaults_to_site", {
+        p_tenant_id: ctx.tenantId,
+        p_site_id: ctx.siteId,
+      });
+      expect(anonRpcErr, "anon copy_tenant_defaults_to_site stays blocked").not.toBeNull();
+
+      const outsider = await signedInClient(ctx.outsider);
+      const { error: outsiderRpcErr } = await outsider.rpc("copy_tenant_defaults_to_site", {
+        p_tenant_id: ctx.tenantId,
+        p_site_id: ctx.siteId,
+      });
+      expect(outsiderRpcErr, "outsider copy_tenant_defaults_to_site stays blocked").not.toBeNull();
+
+      const { error: outsiderResvErr } = await outsider.from("reservations").insert({
+        tenant_id: ctx.tenantId,
+        reservation_type: "restaurant",
+        date: new Date(Date.now() + 21 * 86_400_000).toISOString().slice(0, 10),
+        guest_name: `TEST CI roles neg-ctrl ${randomUUID().slice(0, 8)}`,
+        guest_email: "ci-roles-neg-ctrl@mimmobook.test",
+        status: "pending",
+        discount_type: "percent",
+        discount_value: 10,
+      });
+      expect(outsiderResvErr, "outsider discount insert stays blocked").not.toBeNull();
+      await outsider.auth.signOut();
+    });
+  });
 });
