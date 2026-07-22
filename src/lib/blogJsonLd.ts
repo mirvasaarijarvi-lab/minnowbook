@@ -87,9 +87,13 @@ export interface BlogPostData {
   contentKeys: string[];
   seoTitle: string;
   seoDescription: string;
+  /** Optional absolute or root-relative image URL for OG/Twitter and JSON-LD. */
+  image?: string;
+  imageAlt?: string;
   faqs?: BlogFaqItem[];
   authors?: BlogAuthor[];
 }
+
 
 export const posts: Record<string, BlogPostData> = {
   "reservation-challenges-small-hospitality": {
