@@ -1,0 +1,129 @@
+name: Billing & RPC Hardening Regression
+#
+# Focused live regression gate for the four billing/RPC vulnerabilities
+# closed on 2026-07-22:
+#
+#   1. create_tenant free upgrade to paid tiers
+#   2. tenants.tier / Stripe / discount self-write via RLS UPDATE
+#   3. copy_tenant_defaults_to_site cross-tenant / mismatched-site bypass
+#   4. anonymous reservation insert self-applying discount fields
+#
+# All four assertions live in `src/test/security/billing-and-rpc-hardening.test.ts`.
+# Running them on every PR (in addition to the daily broad live cron)
+# ensures a future migration cannot silently reintroduce any of them.
+#
+# Runs on PRs and pushes to main. Also fires on manual dispatch. Skips
+# cleanly when live Supabase credentials are missing (fork PRs).
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "supabase/migrations/**"
+      - "supabase/functions/create-tenant/**"
+      - "supabase/functions/check-subscription/**"
+      - "src/test/security/billing-and-rpc-hardening.test.ts"
+      - "vitest.security-live.files.ts"
+      - "vitest.security-live.config.ts"
+      - ".github/workflows/billing-hardening-regression.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "supabase/migrations/**"
+      - "supabase/functions/create-tenant/**"
+      - "supabase/functions/check-subscription/**"
+      - "src/test/security/billing-and-rpc-hardening.test.ts"
+      - "vitest.security-live.files.ts"
+      - "vitest.security-live.config.ts"
+      - ".github/workflows/billing-hardening-regression.yml"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  billing-hardening:
+    name: Billing & RPC hardening regression
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Setup Bun
+        uses: ./.github/actions/setup-bun-with-diagnostics
+
+      - name: Cache Bun dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock', 'bun.lockb', 'package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+
+      - name: Install dependencies
+        run: |
+          rm -rf node_modules
+          bun install --frozen-lockfile
+
+      # Presence-check Supabase creds and set fail_on_missing=auto so
+      # fork PRs (which don't inherit secrets) soft-skip rather than
+      # false-fail. Same-repo PRs and pushes to main have full creds
+      # and will hard-run.
+      - name: Supabase preflight
+        id: live_check
+        uses: ./.github/actions/supabase-preflight
+        with:
+          vite_supabase_url: ${{ secrets.VITE_SUPABASE_URL }}
+          vite_supabase_publishable_key: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          supabase_url: ${{ secrets.SUPABASE_URL }}
+          supabase_publishable_key: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+          supabase_anon_key: ${{ secrets.SUPABASE_ANON_KEY }}
+          supabase_service_role_key: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          fail_on_missing: "auto"
+          label: "Billing & RPC hardening regression - Supabase preflight"
+
+      - name: Run focused regression suite
+        id: run_regression
+        if: steps.live_check.outputs.enabled == 'true'
+        env:
+          VITE_SUPABASE_URL: ${{ steps.live_check.outputs.resolved_url }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ steps.live_check.outputs.resolved_key }}
+          SUPABASE_URL: ${{ steps.live_check.outputs.resolved_url }}
+          SUPABASE_ANON_KEY: ${{ steps.live_check.outputs.resolved_key }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          bunx vitest run \
+            --config vitest.security-live.config.ts \
+            --reporter=verbose \
+            src/test/security/billing-and-rpc-hardening.test.ts
+
+      - name: Summary
+        if: always()
+        env:
+          ENABLED: ${{ steps.live_check.outputs.enabled }}
+          OUTCOME: ${{ steps.run_regression.outcome }}
+        run: |
+          if [ "$ENABLED" != "true" ]; then
+            echo "### ⏭️ Billing & RPC hardening regression: SKIPPED" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "Live Supabase credentials are not available in this run (likely a fork PR)." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          case "$OUTCOME" in
+            success)
+              echo "### ✅ Billing & RPC hardening regression: PASS" >> "$GITHUB_STEP_SUMMARY" ;;
+            *)
+              echo "### ❌ Billing & RPC hardening regression: FAIL ($OUTCOME)" >> "$GITHUB_STEP_SUMMARY"
+              echo "" >> "$GITHUB_STEP_SUMMARY"
+              echo "A migration or edge-function change may have reintroduced one of the four hardened vulnerabilities. See job logs." >> "$GITHUB_STEP_SUMMARY" ;;
+          esac
