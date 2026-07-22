@@ -160,8 +160,11 @@ export const posts: Record<string, BlogPostData> = {
     contentKeys: ["blog.post7C1", "blog.post7C2", "blog.post7C3", "blog.post7C4", "blog.post7C5", "blog.post7C6"],
     seoTitle: "MimmoBook vs Resy vs Tock: Reservation Software Compared",
     seoDescription: "MimmoBook vs Resy vs Tock: compare pricing, brand control, multi-site management and ease of use for restaurant reservation software in 2026.",
+    image: ogComparisonAsset.url,
+    imageAlt: "MimmoBook vs Resy vs Tock comparison, reservation platforms compared",
   },
 };
+
 
 /**
  * Build the exact JSON-LD array shipped by /blog/:slug. `translate` is the
