@@ -17,13 +17,16 @@ concurrency:
 
 on:
   schedule:
-    # Every 6h — enough resolution for a 14d window without spamming CI.
+    # Every 6h, enough resolution for a 14d window without spamming CI.
     - cron: "23 */6 * * *"
   workflow_dispatch:
-  workflow_run:
-    workflows: ["Security Regression Tests (Live Integration)"]
-    types:
-      - completed
+  # NOTE: workflow_run trigger intentionally removed. Aikido flagged it as
+  # a privilege-escalation vector (this workflow performs checkout and runs
+  # local scripts, which could execute PR-originating code with elevated
+  # perms in the workflow_run context). Scheduled + manual dispatch cover
+  # the same recovery use case safely.
+
+
 
 permissions: {}
 
