@@ -23,10 +23,36 @@
 //             → exit code 0 always; consumers key off stdout.
 
 import { readFileSync, appendFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
-import { dirname } from "node:path";
+import { dirname, resolve, relative, isAbsolute } from "node:path";
 
 const DEFAULT_HISTORY = ".github/security-concurrency-flake-history.jsonl";
 const DEFAULT_CONFIG = ".github/security-concurrency-tests.json";
+
+// Path traversal / file-inclusion guard. This CLI takes --path and --config
+// from argv, which a malicious caller could point at arbitrary files
+// (e.g. /etc/passwd, ~/.ssh/id_rsa) before readFileSync ingests them.
+// Restrict every filesystem read/write to files under the repo root, and
+// only allow the known extensions this tracker uses.
+const REPO_ROOT = resolve(process.cwd());
+const ALLOWED_EXTS = [".json", ".jsonl"];
+
+function safeResolve(inputPath, { label }) {
+  if (typeof inputPath !== "string" || inputPath.length === 0) {
+    throw new Error(`${label}: path must be a non-empty string`);
+  }
+  if (inputPath.includes("\0")) {
+    throw new Error(`${label}: path must not contain NUL bytes`);
+  }
+  const abs = isAbsolute(inputPath) ? resolve(inputPath) : resolve(REPO_ROOT, inputPath);
+  const rel = relative(REPO_ROOT, abs);
+  if (rel.startsWith("..") || isAbsolute(rel)) {
+    throw new Error(`${label}: path must stay inside the repo root (${REPO_ROOT})`);
+  }
+  if (!ALLOWED_EXTS.some((ext) => abs.toLowerCase().endsWith(ext))) {
+    throw new Error(`${label}: path must end with one of ${ALLOWED_EXTS.join(", ")}`);
+  }
+  return abs;
+}
 
 function parseArgs(argv) {
   const [sub, ...rest] = argv;
@@ -40,13 +66,15 @@ function parseArgs(argv) {
 }
 
 function loadConfig(path = DEFAULT_CONFIG) {
-  const raw = readFileSync(path, "utf8");
+  const safe = safeResolve(path, { label: "config" });
+  const raw = readFileSync(safe, "utf8");
   return JSON.parse(raw);
 }
 
 function loadHistory(path) {
-  if (!existsSync(path)) return [];
-  const raw = readFileSync(path, "utf8");
+  const safe = safeResolve(path, { label: "history" });
+  if (!existsSync(safe)) return [];
+  const raw = readFileSync(safe, "utf8");
   return raw
     .split("\n")
     .filter(Boolean)
