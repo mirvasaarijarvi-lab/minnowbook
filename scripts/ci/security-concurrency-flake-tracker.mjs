@@ -199,8 +199,8 @@ function prune({ path, configPath }) {
   const history = loadHistory(path);
   const cutoff = Date.now() - cfg.quarantineThresholds.windowDays * 2 * 24 * 60 * 60 * 1000;
   const kept = history.filter((r) => Date.parse(r.ts) >= cutoff);
-  ensureDir(path);
-  writeFileSync(path, kept.map((r) => JSON.stringify(r)).join("\n") + (kept.length ? "\n" : ""));
+  const safe = ensureDir(path);
+  writeFileSync(safe, kept.map((r) => JSON.stringify(r)).join("\n") + (kept.length ? "\n" : ""));
   console.log(`[flake-tracker] pruned ${history.length - kept.length} record(s); kept ${kept.length}.`);
 }
 
