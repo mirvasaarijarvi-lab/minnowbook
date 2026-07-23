@@ -40,8 +40,19 @@ const PricingTier = ({
         body: { priceId },
       });
       if (error) throw error;
-      if (data?.url) {
-        window.open(data.url, "_blank");
+      if (data?.url && typeof data.url === "string") {
+        // Validate URL scheme against allowlist to prevent XSS via javascript:/data: URIs
+        try {
+          const parsed = new URL(data.url);
+          const allowedHosts = ["checkout.stripe.com", "billing.stripe.com"];
+          if (parsed.protocol === "https:" && allowedHosts.includes(parsed.hostname)) {
+            window.open(parsed.toString(), "_blank", "noopener,noreferrer");
+          } else {
+            toast.error("Invalid checkout URL received");
+          }
+        } catch {
+          toast.error("Invalid checkout URL received");
+        }
       }
     } catch (err: any) {
       toast.error(err.message || "Failed to start checkout");
