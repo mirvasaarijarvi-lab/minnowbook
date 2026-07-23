@@ -20,10 +20,6 @@ on:
     # Every 6h — enough resolution for a 14d window without spamming CI.
     - cron: "23 */6 * * *"
   workflow_dispatch:
-  workflow_run:
-    workflows: ["Security Regression Tests (Live Integration)"]
-    types:
-      - completed
 
 permissions: {}
 
