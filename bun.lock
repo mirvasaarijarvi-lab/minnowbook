@@ -110,7 +110,7 @@
     "postcss": "^8.5.6",
     "react-router": "6.30.4",
     "rollup": ">=4.30.0",
-    "ws": ">=8.21.0",
+    "ws": "8.21.1",
     "yaml": ">=2.8.3",
   },
   "packages": {
@@ -1030,7 +1030,7 @@
 
     "word-wrap": ["word-wrap@1.2.5", "", {}, ""],
 
-    "ws": ["ws@8.21.0", "", { "peerDependencies": { "bufferutil": "^4.0.1", "utf-8-validate": ">=5.0.2" }, "optionalPeers": ["bufferutil", "utf-8-validate"] }, ""],
+    "ws": ["ws@8.21.1", "", { "peerDependencies": { "bufferutil": "^4.0.1", "utf-8-validate": ">=5.0.2" }, "optionalPeers": ["bufferutil", "utf-8-validate"] }, "sha512-+0NTnW77fFN/DjQi6k/Sq/Yvk4Sgajw7urW8V+asjXnRgDs9gyGkdb7EzgfhA4goXsRIZKE28fzIXBHEzhuiWw=="],
 
     "xml-name-validator": ["xml-name-validator@5.0.0", "", {}, ""],
 
