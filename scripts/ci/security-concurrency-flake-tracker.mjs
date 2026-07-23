@@ -90,7 +90,9 @@ function loadHistory(path) {
 }
 
 function ensureDir(path) {
-  mkdirSync(dirname(path), { recursive: true });
+  const safe = safeResolve(path, { label: "history" });
+  mkdirSync(dirname(safe), { recursive: true });
+  return safe;
 }
 
 function record({ path, testId, outcome, attempt, suite, runId, sha }) {
@@ -98,7 +100,7 @@ function record({ path, testId, outcome, attempt, suite, runId, sha }) {
   if (outcome !== "pass" && outcome !== "fail") {
     throw new Error(`record: --outcome must be pass|fail, got ${outcome}`);
   }
-  ensureDir(path);
+  const safe = ensureDir(path);
   const rec = {
     ts: new Date().toISOString(),
     testId,
@@ -108,7 +110,7 @@ function record({ path, testId, outcome, attempt, suite, runId, sha }) {
     runId: runId || process.env.GITHUB_RUN_ID || null,
     sha: sha || process.env.GITHUB_SHA || null,
   };
-  appendFileSync(path, JSON.stringify(rec) + "\n");
+  appendFileSync(safe, JSON.stringify(rec) + "\n");
   return rec;
 }
 
