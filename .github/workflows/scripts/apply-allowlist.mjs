@@ -161,7 +161,16 @@ for (const adv of advisories) {
   bumpSeverity(totalBySeverity, adv.severity);
 
   const waiver = matchAllowlist(adv);
-  if (waiver) {
+  // Strict gate: high/critical severities are NEVER waivable at
+  // runtime, even if an allowlist entry names them. This prevents a
+  // regression where a fresh high/critical advisory gets silenced by
+  // a pre-existing entry (e.g. same package, prior moderate CVE that
+  // upstream reclassified upward). Waivers apply only to low/
+  // moderate findings.
+  const advSevRank = severityRank(adv.severity);
+  const highRank = severityRank("high");
+  const waivable = waiver && advSevRank < highRank;
+  if (waivable) {
     waivedEntries.push({ adv, waiver });
     bumpSeverity(waivedBySeverity, adv.severity);
     const reason = waiver.reason ? ` Reason: ${waiver.reason}` : "";
@@ -171,8 +180,11 @@ for (const adv of advisories) {
   } else {
     blocking.push(adv);
     bumpSeverity(blockingBySeverity, adv.severity);
+    const note = waiver
+      ? ` Allowlist entry "${waiver.id}" ignored: ${adv.severity} advisories are not waivable.`
+      : "";
     console.log(
-      `::error title=Vulnerable dependency::${adv.pkg} ${adv.ruleId} (${adv.severity}): ${adv.title}. See ${adv.url}`,
+      `::error title=Vulnerable dependency::${adv.pkg} ${adv.ruleId} (${adv.severity}): ${adv.title}. See ${adv.url}.${note}`,
     );
   }
 }
