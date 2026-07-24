@@ -14,28 +14,28 @@
       "package": "react-router",
       "severity": "moderate",
       "expires": "2026-09-14",
-      "reason": "Project is pinned to react-router 6.30.1 (latest v6 patch); upstream fix is only in 7.x. Upgrade to v7 is intentionally deferred per project policy (see mem://architecture/dependency-pinning). Redirect surface is reviewed; no untrusted external redirects in app routes."
+      "reason": "Pinned to react-router 6.30.4 per mem://architecture/dependency-pinning; upstream fix only in 7.x. Mitigation: no <Link>/useNavigate/Navigate call site accepts a user-controlled `to` value (verified: `rg -n \"to=\\{\" src/ | rg -v \"'/|\\\"/\"` returns only static literals). Reviewer check: re-run that ripgrep on the PR diff; if it introduces a dynamic `to`, block the waiver."
     },
     {
       "id": "GHSA-2j2x-hqr9-3h42",
       "package": "react-router",
       "severity": "moderate",
       "expires": "2026-09-14",
-      "reason": "Project is pinned to react-router 6.30.1 (latest v6 patch); upstream fix is only in 7.x. Upgrade to v7 is intentionally deferred per project policy (see mem://architecture/dependency-pinning). No same-origin redirects accept user-controlled paths starting with //."
+      "reason": "Pinned to react-router 6.30.4 per mem://architecture/dependency-pinning; upstream fix only in 7.x. Mitigation: no route accepts a user-controlled path starting with `//` (verified: all `navigate(...)` targets in `src/` are string literals or values from our own routing constants, never `location.search`/`hash`/query params). Reviewer check: `rg -n \"navigate\\(\" src/` — every match must resolve to an internal literal path."
     },
     {
       "id": "GHSA-wrjc-x8rr-h8h6",
       "package": "react-router",
       "severity": "moderate",
       "expires": "2026-09-14",
-      "reason": "Open redirect via backslash in <Link>/useNavigate (CVE-2025-68470 bypass). Fixed only in react-router 7.18.0+. Project is pinned to react-router v6 per mem://architecture/dependency-pinning; upgrade to v7 is intentionally deferred. App routes do not accept user-controlled redirect targets in <Link> or useNavigate; social OAuth redirect_uri is constrained to same-origin literals per project policy."
+      "reason": "Open-redirect via backslash in <Link>/useNavigate (CVE-2025-68470 bypass); fixed only in react-router 7.18.0+. Pinned to v6 per mem://architecture/dependency-pinning. Mitigation: (a) no `<Link to>` or `navigate(...)` argument is derived from `window.location`, query strings, or request bodies; (b) social-OAuth `redirect_uri` is a same-origin literal built from `window.location.origin` per mem://auth/social-sign-on. Reviewer check: `rg -n \"to=\\{|navigate\\(\" src/` — flag any dynamic value from user input."
     },
     {
       "id": "GHSA-337j-9hxr-rhxg",
       "package": "react-router",
       "severity": "moderate",
       "expires": "2026-09-14",
-      "reason": "Arbitrary Constructor Injection via deserializeErrors() in React Router SSR Hydration. Fixed only in react-router 7.18.0+. Project is pinned to react-router v6 per mem://architecture/dependency-pinning; upgrade to v7 is intentionally deferred. Project is a Vite SPA and does not use React Router SSR hydration, so the vulnerable code path is unreachable at runtime."
+      "reason": "Arbitrary Constructor Injection via deserializeErrors() in React Router SSR hydration; fixed only in react-router 7.18.0+. Pinned to v6 per mem://architecture/dependency-pinning. Mitigation: this project is a Vite SPA (`vite build` → static assets, no SSR/StaticHandler/createStaticRouter usage) so the vulnerable hydration path is unreachable at runtime. Reviewer check: `rg -n \"StaticRouter|createStaticRouter|StaticHandler|renderToString\" src/` must return no results."
     },
     {
       "id": "GHSA-qx2v-qp2m-jg93",
