@@ -310,10 +310,18 @@ export async function handleLogForbiddenAccessRequest(req: Request): Promise<Res
   }
 
   if (!tenantId) {
-    const { data: rpc } = await admin.rpc("get_user_tenant_id", {
-      p_user_id: user.id,
-    });
-    if (typeof rpc === "string") tenantId = rpc;
+    // Resolve single-tenant membership directly via the service-role client.
+    // We can't use the get_user_tenant_id RPC here because it enforces
+    // auth.uid()-based authorization, and the service role has no auth.uid().
+    // The service-role query bypasses RLS, which is intentional: audit rows
+    // must be attributable even when the user's own policy view would deny.
+    const { data: memberships } = await admin
+      .from("tenant_users")
+      .select("tenant_id")
+      .eq("user_id", user.id);
+    if (Array.isArray(memberships) && memberships.length === 1) {
+      tenantId = memberships[0].tenant_id as string;
+    }
   }
 
   if (!tenantId) {
