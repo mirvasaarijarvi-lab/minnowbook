@@ -38,6 +38,13 @@
       "reason": "Arbitrary Constructor Injection via deserializeErrors() in React Router SSR hydration; fixed only in react-router 7.18.0+. Pinned to v6 per mem://architecture/dependency-pinning. Mitigation: this project is a Vite SPA (`vite build` → static assets, no SSR/StaticHandler/createStaticRouter usage) so the vulnerable hydration path is unreachable at runtime. Reviewer check: `rg -n \"StaticRouter|createStaticRouter|StaticHandler|renderToString\" src/` must return no results."
     },
     {
+      "id": "GHSA-jjmj-jmhj-qwj2",
+      "package": "react-router-dom",
+      "severity": "moderate",
+      "expires": "2026-09-14",
+      "reason": "react-router-dom re-export of the same open-redirect-to-XSS advisory that affects react-router v6 (CVE-2025-68470 family); fix only ships in react-router-dom 7.18.0+. Pinned to v6 per mem://architecture/dependency-pinning. Mitigation is identical to the react-router entries above: no `<Link to>` or `navigate(...)` argument is derived from user-controlled input (`window.location`, query strings, request bodies), and OAuth `redirect_uri` is a same-origin literal built from `window.location.origin` per mem://auth/social-sign-on. Reviewer check: `rg -n \"to=\\{|navigate\\(\" src/` — flag any dynamic value from user input."
+    },
+    {
       "id": "GHSA-qx2v-qp2m-jg93",
       "package": "postcss",
       "severity": "moderate",
