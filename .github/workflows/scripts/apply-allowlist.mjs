@@ -92,6 +92,21 @@ for (const [i, entry] of (allowlist.entries || []).entries()) {
     process.exit(2);
   }
   seenIds.add(entry.id);
+  // Strict severity policy: only low/moderate advisories can ever be
+  // waived. High and critical advisories must be fixed (or the
+  // dependency dropped) before a PR can merge. If an entry omits
+  // `severity`, we default to "moderate" — the current gate floor.
+  // Entries claiming `high`/`critical` are rejected outright so
+  // reviewers cannot accidentally silence a serious finding by
+  // adding a waiver.
+  const declaredSev = String(entry.severity || "moderate").toLowerCase();
+  if (!["low", "moderate"].includes(declaredSev)) {
+    console.error(
+      `::error file=${allowlistPath}::${at}.severity="${entry.severity}" is not waivable. Only "low" and "moderate" advisories may be allowlisted; "high"/"critical" must be fixed at source.`,
+    );
+    process.exit(2);
+  }
+  entry._declaredSeverity = declaredSev;
 }
 
 const activeEntries = allowlist.entries.filter(isActive);
