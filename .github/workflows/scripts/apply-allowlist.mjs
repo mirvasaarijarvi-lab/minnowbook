@@ -92,6 +92,21 @@ for (const [i, entry] of (allowlist.entries || []).entries()) {
     process.exit(2);
   }
   seenIds.add(entry.id);
+  // Strict severity policy: only low/moderate advisories can ever be
+  // waived. High and critical advisories must be fixed (or the
+  // dependency dropped) before a PR can merge. If an entry omits
+  // `severity`, we default to "moderate" — the current gate floor.
+  // Entries claiming `high`/`critical` are rejected outright so
+  // reviewers cannot accidentally silence a serious finding by
+  // adding a waiver.
+  const declaredSev = String(entry.severity || "moderate").toLowerCase();
+  if (!["low", "moderate"].includes(declaredSev)) {
+    console.error(
+      `::error file=${allowlistPath}::${at}.severity="${entry.severity}" is not waivable. Only "low" and "moderate" advisories may be allowlisted; "high"/"critical" must be fixed at source.`,
+    );
+    process.exit(2);
+  }
+  entry._declaredSeverity = declaredSev;
 }
 
 const activeEntries = allowlist.entries.filter(isActive);
@@ -146,7 +161,16 @@ for (const adv of advisories) {
   bumpSeverity(totalBySeverity, adv.severity);
 
   const waiver = matchAllowlist(adv);
-  if (waiver) {
+  // Strict gate: high/critical severities are NEVER waivable at
+  // runtime, even if an allowlist entry names them. This prevents a
+  // regression where a fresh high/critical advisory gets silenced by
+  // a pre-existing entry (e.g. same package, prior moderate CVE that
+  // upstream reclassified upward). Waivers apply only to low/
+  // moderate findings.
+  const advSevRank = severityRank(adv.severity);
+  const highRank = severityRank("high");
+  const waivable = waiver && advSevRank < highRank;
+  if (waivable) {
     waivedEntries.push({ adv, waiver });
     bumpSeverity(waivedBySeverity, adv.severity);
     const reason = waiver.reason ? ` Reason: ${waiver.reason}` : "";
@@ -156,8 +180,11 @@ for (const adv of advisories) {
   } else {
     blocking.push(adv);
     bumpSeverity(blockingBySeverity, adv.severity);
+    const note = waiver
+      ? ` Allowlist entry "${waiver.id}" ignored: ${adv.severity} advisories are not waivable.`
+      : "";
     console.log(
-      `::error title=Vulnerable dependency::${adv.pkg} ${adv.ruleId} (${adv.severity}): ${adv.title}. See ${adv.url}`,
+      `::error title=Vulnerable dependency::${adv.pkg} ${adv.ruleId} (${adv.severity}): ${adv.title}. See ${adv.url}.${note}`,
     );
   }
 }

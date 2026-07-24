@@ -2,9 +2,10 @@
   "$schema": "./dependency-audit-allowlist.schema.json",
   "_doc": [
     "Advisories listed here will NOT fail the dependency-audit job until their `expires` date.",
+    "STRICT POLICY: only entries with `severity` of `low` or `moderate` are accepted. High and critical advisories are never waivable and must be fixed at source (upgrade, override, or drop the dependency). Entries declaring high/critical severity are rejected by apply-allowlist.mjs at validation time, and a high/critical advisory at runtime always fails the gate even if a matching id is present.",
     "After `expires` (UTC, YYYY-MM-DD), the entry is treated as inactive and the gate fails again.",
     "An entry matches when its `id` equals any of the advisory's ruleId, GHSA id, or one of its CVE ids.",
-    "All fields except `id` and `expires` are documentation only.",
+    "All fields except `id`, `severity`, and `expires` are documentation only.",
     "Audit JSON parsing and matching live in .github/workflows/scripts/apply-allowlist.mjs."
   ],
   "entries": [
