@@ -1,10 +1,10 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
-  "serialNumber": "urn:uuid:f2e7869c-dd8c-5f80-a443-3f760ddbd36f",
+  "serialNumber": "urn:uuid:b81b01e2-aa6e-5031-a2f3-fff1baf4111b",
   "version": 1,
   "metadata": {
-    "timestamp": "2026-07-24T07:25:47Z",
+    "timestamp": "2026-07-25T11:50:40Z",
     "tools": [
       {
         "vendor": "MimmoBook",
@@ -21,7 +21,7 @@
       "properties": [
         {
           "name": "git:sha",
-          "value": "d1e5497d6d6d3b747c7c9cacf986b013cb249596"
+          "value": "6d9358ff9154d123063dcd17286aa36aebef4e30"
         }
       ]
     }
@@ -452,11 +452,11 @@
       "scope": "optional"
     },
     {
-      "bom-ref": "pkg:npm/flatted@3.4.2",
+      "bom-ref": "pkg:npm/flatted@3.4.3",
       "type": "library",
       "name": "flatted",
-      "version": "3.4.2",
-      "purl": "pkg:npm/flatted@3.4.2",
+      "version": "3.4.3",
+      "purl": "pkg:npm/flatted@3.4.3",
       "scope": "required"
     },
     {
@@ -572,19 +572,19 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/react-router-dom@6.30.1",
+      "bom-ref": "pkg:npm/react-router-dom@6.30.4",
       "type": "library",
       "name": "react-router-dom",
-      "version": "6.30.1",
-      "purl": "pkg:npm/react-router-dom@6.30.1",
+      "version": "6.30.4",
+      "purl": "pkg:npm/react-router-dom@6.30.4",
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/recharts@3.9.2",
+      "bom-ref": "pkg:npm/recharts@3.10.0",
       "type": "library",
       "name": "recharts",
-      "version": "3.9.2",
-      "purl": "pkg:npm/recharts@3.9.2",
+      "version": "3.10.0",
+      "purl": "pkg:npm/recharts@3.10.0",
       "scope": "required"
     },
     {
