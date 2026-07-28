@@ -10,47 +10,72 @@
 -- We only gate SELECT (subscribe) and INSERT (broadcast) — the realtime
 -- service itself manages the underlying rows.
 
-ALTER TABLE realtime.messages ENABLE ROW LEVEL SECURITY;
+-- Guard the realtime.messages setup so it is a no-op when the table
+-- does not yet exist (fresh local stacks) or when the current role
+-- lacks ownership (e.g. supabase CLI running before realtime bootstraps).
+DO $mig$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_class c
+    JOIN pg_namespace n ON n.oid = c.relnamespace
+    WHERE n.nspname = 'realtime' AND c.relname = 'messages'
+  ) THEN
+    RAISE NOTICE 'realtime.messages not present; skipping realtime RLS setup';
+    RETURN;
+  END IF;
 
-DROP POLICY IF EXISTS "Tenant members can subscribe to their tenant topic" ON realtime.messages;
-CREATE POLICY "Tenant members can subscribe to their tenant topic"
-  ON realtime.messages
-  FOR SELECT
-  TO authenticated
-  USING (
-    public.is_system_admin(auth.uid())
-    OR (
-      realtime.topic() LIKE 'tenant:%'
-      AND public.is_user_tenant_member(
-        auth.uid(),
-        NULLIF(split_part(realtime.topic(), ':', 2), '')::uuid
-      )
-    )
-    OR (
-      realtime.topic() LIKE 'user:%'
-      AND split_part(realtime.topic(), ':', 2) = auth.uid()::text
-    )
-  );
+  BEGIN
+    EXECUTE 'ALTER TABLE realtime.messages ENABLE ROW LEVEL SECURITY';
+  EXCEPTION WHEN OTHERS THEN
+    RAISE NOTICE 'Skipping realtime.messages RLS setup: %', SQLERRM;
+    RETURN;
+  END;
 
-DROP POLICY IF EXISTS "Tenant members can broadcast to their tenant topic" ON realtime.messages;
-CREATE POLICY "Tenant members can broadcast to their tenant topic"
-  ON realtime.messages
-  FOR INSERT
-  TO authenticated
-  WITH CHECK (
-    public.is_system_admin(auth.uid())
-    OR (
-      realtime.topic() LIKE 'tenant:%'
-      AND public.is_user_tenant_member(
-        auth.uid(),
-        NULLIF(split_part(realtime.topic(), ':', 2), '')::uuid
+  EXECUTE $sql$DROP POLICY IF EXISTS "Tenant members can subscribe to their tenant topic" ON realtime.messages$sql$;
+  EXECUTE $sql$
+    CREATE POLICY "Tenant members can subscribe to their tenant topic"
+      ON realtime.messages
+      FOR SELECT
+      TO authenticated
+      USING (
+        public.is_system_admin(auth.uid())
+        OR (
+          realtime.topic() LIKE 'tenant:%'
+          AND public.is_user_tenant_member(
+            auth.uid(),
+            NULLIF(split_part(realtime.topic(), ':', 2), '')::uuid
+          )
+        )
+        OR (
+          realtime.topic() LIKE 'user:%'
+          AND split_part(realtime.topic(), ':', 2) = auth.uid()::text
+        )
       )
-    )
-    OR (
-      realtime.topic() LIKE 'user:%'
-      AND split_part(realtime.topic(), ':', 2) = auth.uid()::text
-    )
-  );
+  $sql$;
+
+  EXECUTE $sql$DROP POLICY IF EXISTS "Tenant members can broadcast to their tenant topic" ON realtime.messages$sql$;
+  EXECUTE $sql$
+    CREATE POLICY "Tenant members can broadcast to their tenant topic"
+      ON realtime.messages
+      FOR INSERT
+      TO authenticated
+      WITH CHECK (
+        public.is_system_admin(auth.uid())
+        OR (
+          realtime.topic() LIKE 'tenant:%'
+          AND public.is_user_tenant_member(
+            auth.uid(),
+            NULLIF(split_part(realtime.topic(), ':', 2), '')::uuid
+          )
+        )
+        OR (
+          realtime.topic() LIKE 'user:%'
+          AND split_part(realtime.topic(), ':', 2) = auth.uid()::text
+        )
+      )
+  $sql$;
+END
+$mig$;
 
 
 -- =========================================================================
