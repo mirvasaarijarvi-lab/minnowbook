@@ -34,6 +34,11 @@ jobs:
       contents: read
     strategy:
       fail-fast: false
+      # Every matrix leg boots a local Supabase stack with the same Docker
+      # project id and fixed host ports (54321 to 54328). On shared runners,
+      # parallel legs race for those ports and can also remove each other's
+      # `supabase_*` containers during cleanup, causing all starts to fail.
+      max-parallel: 1
       matrix:
         include:
           - label: core
@@ -416,11 +421,12 @@ jobs:
           attempt=1
           while [ $attempt -le $MAX_ATTEMPTS ]; do
             echo "::group::supabase start attempt ${attempt}/${MAX_ATTEMPTS}"
-            if supabase start --exclude=imgproxy,mailpit,studio,realtime,edge-runtime; then
+            supabase start --exclude=imgproxy,mailpit,studio,realtime,edge-runtime
+            rc=$?
+            if [ "$rc" -eq 0 ]; then
               echo "::endgroup::"
               exit 0
             fi
-            rc=$?
             echo "::endgroup::"
             echo "::warning::supabase start failed (exit=${rc}) on attempt ${attempt}; cleaning up and retrying"
             supabase stop --no-backup 2>/dev/null || true
