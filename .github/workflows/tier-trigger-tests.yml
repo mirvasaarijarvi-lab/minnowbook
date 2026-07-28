@@ -167,7 +167,35 @@ jobs:
         if: steps.docker-check.outputs.available == 'true' && steps.supabase-cli.outcome == 'success'
         run: |
           set -euo pipefail
-          supabase start --exclude=imgproxy,mailpit,studio,realtime,edge-runtime
+          # Free any host ports the Supabase stack binds. The runner may
+          # have leftover processes from prior jobs (most commonly 54322
+          # for Postgres). Kill them before `supabase start` tries to
+          # bind, and retry a couple of times with backoff for stubborn
+          # port holders. Mirrors the guard in cross-tenant-rls-local.yml.
+          free_supabase_ports() {
+            for port in 54321 54322 54323 54324 54327 54328; do
+              # `fuser -k` kills any process holding the TCP port. It's
+              # a no-op if nothing is listening.
+              fuser -k "${port}/tcp" 2>/dev/null || true
+            done
+            # Stop any leftover Supabase containers from prior runs.
+            docker ps -aq --filter "name=supabase_" | xargs -r docker rm -f >/dev/null 2>&1 || true
+          }
+
+          attempt=1
+          max_attempts=3
+          until supabase start --exclude=imgproxy,mailpit,studio,realtime,edge-runtime; do
+            if [ "$attempt" -ge "$max_attempts" ]; then
+              echo "::error::supabase start failed after ${attempt} attempts"
+              exit 1
+            fi
+            echo "::warning::supabase start failed (attempt ${attempt}); freeing ports and retrying"
+            supabase stop --no-backup >/dev/null 2>&1 || true
+            free_supabase_ports
+            sleep $((attempt * 5))
+            attempt=$((attempt + 1))
+          done
+
 
       - name: Wait for Postgres
         if: steps.supabase-start.outcome == 'success'
