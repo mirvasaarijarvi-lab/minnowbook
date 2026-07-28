@@ -83,6 +83,7 @@ jobs:
       - name: Emit flake-frequency report
         if: always()
         run: |
+          mkdir -p test-reports/security-concurrency
           node scripts/ci/security-concurrency-flake-tracker.mjs report \
             --path=.github/security-concurrency-flake-history.jsonl \
             --config=.github/security-concurrency-tests.json \
