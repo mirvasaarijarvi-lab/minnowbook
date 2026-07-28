@@ -144,7 +144,7 @@ jobs:
           deno-version: v1.x
 
       - name: Cache Deno modules
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ${{ env.DENO_DIR }}
           key: deno-${{ runner.os }}-${{ hashFiles('supabase/functions/**/*.ts', 'deno.json', 'deno.jsonc', 'deno.lock', 'import_map.json') }}
@@ -152,7 +152,7 @@ jobs:
             deno-${{ runner.os }}-
 
       - name: Cache Bun dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             ~/.bun/install/cache
@@ -175,7 +175,7 @@ jobs:
 
       - name: Cache Playwright browsers
         id: pw-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ steps.pw.outputs.version }}
