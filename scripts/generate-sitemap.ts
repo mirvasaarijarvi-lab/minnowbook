@@ -7,6 +7,7 @@ import { resolve } from "path";
 import { createClient } from "@supabase/supabase-js";
 
 const BASE_URL = "https://mimmobook.com";
+// Republish trigger: 2026-07-29 (force fresh Lighthouse re-measure)
 
 interface SitemapEntry {
   path: string;
