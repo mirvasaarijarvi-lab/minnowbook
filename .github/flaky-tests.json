@@ -35,14 +35,6 @@
       "issue": "https://github.com/mimmobook/mimmobook/issues/redeem-access-code-idempotency-serial-flake"
     },
     {
-      "pattern": "edge-function-cors-allowlist-coverage\\.test\\.ts > Edge function CORS — exhaustive allowed/disallowed origin coverage > admin-users > does NOT echo DISALLOWED origin \"https://lovable.app\" in ACAO",
-      "reason": "Cold-start latency on the deployed admin-users edge function occasionally exceeds the 30s per-test budget for a single OPTIONS preflight against a disallowed origin. The CORS allowlist behaviour itself is exhaustively verified by 100+ sibling cases in the same file (allowed variants, other disallowed variants, other functions) which pass in the same run. Handler returns deterministic 403/omitted-ACAO for disallowed origins with no data path exposed by preflight. Same cold-start family as other edge-function security-suite flakes.",
-      "owner": "@security",
-      "added": "2026-07-22",
-      "expires": "2026-08-21",
-      "issue": "https://github.com/mimmobook/mimmobook/issues/admin-users-cors-preflight-cold-start-flake"
-    },
-    {
       "pattern": "code-redemption-rate-limit\\.test\\.ts > redeem-access-code: brute-force & replay resilience > 20 parallel attempts with the same fake code: zero successes, all known error codes",
       "reason": "Quarantine refreshed on 2026-07-13 after the previous window expired; underlying behaviour unchanged. Same family as the burst30 flake: 20-way parallel fetch against the deployed redeem-access-code edge function occasionally exceeds the per-test timeout under cold-start contention, despite the in-file warmupPromise. Function correctness verified by sibling tests (serial replay, varied probes, OPTIONS preflight burst) which all pass in the same run. Handler returns deterministic 4xx with KNOWN_ERROR_CODES for every accepted request.",
       "owner": "@security",
@@ -73,6 +65,14 @@
       "added": "2026-07-22",
       "expires": "2026-08-21",
       "issue": "https://github.com/mimmobook/mimmobook/issues/cross-tenant-rls-access-code-redemptions-anon-flake"
+    },
+    {
+      "pattern": "edge-function-cors-allowlist-coverage\\.test\\.ts > Edge function CORS — exhaustive allowed/disallowed origin coverage > admin-users > does NOT echo DISALLOWED origin \"https://lovable.app\" in ACAO",
+      "reason": "Cold-start latency on the deployed admin-users edge function occasionally exceeds the 30s per-test budget for a single OPTIONS preflight against a disallowed origin. The CORS allowlist behaviour itself is exhaustively verified by 100+ sibling cases in the same file (allowed variants, other disallowed variants, other functions) which pass in the same run. Handler returns deterministic 403/omitted-ACAO for disallowed origins with no data path exposed by preflight. Same cold-start family as other edge-function security-suite flakes.",
+      "owner": "@security",
+      "added": "2026-07-22",
+      "expires": "2026-08-21",
+      "issue": "https://github.com/mimmobook/mimmobook/issues/admin-users-cors-preflight-cold-start-flake"
     },
     {
       "pattern": "edge-function-cors-cacheability\\.test\\.ts > Forbidden origins .* > support-chat > POST from \"http://localhost\\.evil\\.com\" returns a non-cacheable response with Vary: Origin",
