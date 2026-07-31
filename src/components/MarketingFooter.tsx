@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import Logo from "@/components/Logo";
 import { useT } from "@/contexts/I18nContext";
 import { openCookieSettings } from "@/components/CookieConsent";
+import aiBadge from "@/assets/ai-by-cmimmio.png.asset.json";
 
 const MarketingFooter = () => {
   const t = useT();
@@ -101,11 +102,19 @@ const MarketingFooter = () => {
           </div>
         </div>
 
-        <div className="border-t border-primary-foreground/10 mt-10 pt-6 pb-16 sm:pb-0 text-center">
+        <div className="border-t border-primary-foreground/10 mt-10 pt-6 pb-16 sm:pb-0 flex flex-col items-center gap-3">
+          <img
+            src={aiBadge.url}
+            alt="AI by Anthropic badge"
+            className="h-8 w-8 object-contain"
+            style={{ filter: "saturate(0.6)" }}
+            loading="lazy"
+          />
           <p className="text-xs text-primary-foreground/40">
             © {new Date().getFullYear()} MimmoBook. {t("footer.allRightsReserved")}
           </p>
         </div>
+
       </div>
     </footer>
   );
