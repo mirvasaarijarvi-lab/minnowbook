@@ -106,7 +106,7 @@ const MarketingFooter = () => {
           <img
             src={aiBadge.url}
             alt="AI by Anthropic badge"
-            className="h-8 w-8 object-contain"
+            className="h-8 w-8 object-contain opacity-40"
             style={{ filter: "saturate(0.6)" }}
             loading="lazy"
           />
