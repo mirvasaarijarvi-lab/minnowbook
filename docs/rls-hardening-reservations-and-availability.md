@@ -143,3 +143,22 @@ forgotten `NULL` scrub in a policy expression.
 | Date       | Migration                        | Change                                                             |
 | ---------- | -------------------------------- | ------------------------------------------------------------------ |
 | 2026-07-22 | `reservations_public_insert_review` / `resource_availability_slots_anon_no_tenant_filter` | Introduced WITH CHECK column pin + column-level anon SELECT grants |
+| 2026-08-04 | `reservations_public_insert_review` / `waitlist_public_insert_pii` | Pinned `guest_search_text IS NULL` on public reservation inserts; added `validate_public_waitlist_insert` BEFORE INSERT trigger on `public.waitlist` |
+
+---
+
+## 3. `public.waitlist` — anonymous guest PII validation
+
+The `Public can join waitlist` policy still only checks that the tenant is
+active. Field-level safety is enforced by the
+`validate_public_waitlist_insert()` BEFORE INSERT trigger:
+
+| Field            | Rule                                                            |
+| ---------------- | --------------------------------------------------------------- |
+| `guest_name`     | trimmed, 1 to 100 chars                                          |
+| `guest_email`    | trimmed + lowercased, max 255 chars, must match email shape      |
+| `guest_phone`    | optional, max 32 chars, digits and `+()./ -` only                |
+| `resource_type`  | required, max 50 chars                                           |
+| `preferred_date` | required, within yesterday to +730 days                          |
+| `status`         | forced to `pending` (staff-owned lifecycle)                      |
+| `notified_at`    | forced to `NULL` (system-owned)                                  |
