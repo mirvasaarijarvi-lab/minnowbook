@@ -18,7 +18,7 @@
  * payload run unbounded will fail the time budget.
  */
 import { describe, it, expect } from "vitest";
-import yaml from "js-yaml";
+import * as yaml from "js-yaml";
 
 function buildMergeBombYaml(keys: number, repeats: number): string {
   const entries = Array.from({ length: keys }, (_, i) => `k${i}: ${i}`).join(", ");
