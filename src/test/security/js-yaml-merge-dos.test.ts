@@ -63,14 +63,22 @@ describe("js-yaml merge-key DoS regression (CVE-2026-53550)", () => {
     const { elapsed, parsed, rejected } = safeParse(payload);
 
     if (!rejected) {
-      // If the parser accepted the payload, the merged object must contain
-      // all K alias keys plus its own (i.e. dedup worked correctly).
       const result = parsed as { a: Record<string, number>; b: Record<string, number> };
-      expect(Object.keys(result.b)).toHaveLength(KEYS + 1);
-      expect(result.b.k0).toBe(0);
-      expect(result.b[`k${KEYS - 1}`]).toBe(KEYS - 1);
+      const mergeExpanded = !Object.prototype.hasOwnProperty.call(result.b, "<<");
+      if (mergeExpanded) {
+        // Parser applied merge keys: the merged object must contain all K
+        // alias keys plus its own (i.e. dedup worked correctly).
+        expect(Object.keys(result.b)).toHaveLength(KEYS + 1);
+        expect(result.b.k0).toBe(0);
+        expect(result.b[`k${KEYS - 1}`]).toBe(KEYS - 1);
+      } else {
+        // js-yaml >= 5 does not enable the merge tag by default, so "<<"
+        // stays a literal key and the quadratic merge path is never taken.
+        expect(Object.keys(result.b)).toHaveLength(2);
+      }
       expect(result.b.z).toBe(1);
     }
+
 
     expect(
       elapsed,
