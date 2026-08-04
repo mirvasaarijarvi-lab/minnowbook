@@ -167,9 +167,9 @@ const Pricing = () => {
               <Building2 className="h-8 w-8 text-accent" />
             </div>
             <div className="flex-1 text-center md:text-left">
-              <h3 className="text-2xl font-serif font-bold text-foreground mb-2">
+              <h2 className="text-2xl font-serif font-bold text-foreground mb-2">
                 {t("pricing.multiLocationTitle")}
-              </h3>
+              </h2>
               <p className="text-muted-foreground leading-relaxed mb-4">
                 {t("pricing.multiLocationDesc")}
               </p>
