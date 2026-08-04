@@ -24,7 +24,7 @@
  * YAML (config files, CI manifests) and tight enough to refuse the
  * crafted payloads documented in the js-yaml advisories.
  */
-import yaml from "js-yaml";
+import * as yaml from "js-yaml";
 
 export interface SafeYamlOptions {
   /** Max input size in bytes (UTF-8 length of the string). Default 256 KB. */
