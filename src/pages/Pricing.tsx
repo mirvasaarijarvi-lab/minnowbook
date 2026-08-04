@@ -115,6 +115,7 @@ const Pricing = () => {
       {/* Tiers */}
       <section className="pb-20">
         <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-serif font-bold text-foreground text-center mb-12">{t("pricing.plansTitle")}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {tiers.map((tier, i) => (
               <PricingTier key={tier.name} {...tier} delay={i * 100} />
@@ -166,9 +167,9 @@ const Pricing = () => {
               <Building2 className="h-8 w-8 text-accent" />
             </div>
             <div className="flex-1 text-center md:text-left">
-              <h3 className="text-2xl font-serif font-bold text-foreground mb-2">
+              <h2 className="text-2xl font-serif font-bold text-foreground mb-2">
                 {t("pricing.multiLocationTitle")}
-              </h3>
+              </h2>
               <p className="text-muted-foreground leading-relaxed mb-4">
                 {t("pricing.multiLocationDesc")}
               </p>

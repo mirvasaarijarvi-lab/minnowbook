@@ -485,6 +485,8 @@ type TranslationKeys = {
   "pricing.simpleTitle": string;
   "pricing.simpleSubtitle": string;
   "pricing.comparePlans": string;
+  "pricing.plansTitle": string;
+  "home.videoTitle": string;
   "pricing.faq": string;
   "pricing.feature": string;
   "pricing.monthlyPrice": string;
@@ -2288,6 +2290,8 @@ const en: TranslationKeys = {
   "pricing.simpleTitle": "Simple and transparent pricing",
   "pricing.simpleSubtitle": "Start with a 30-day free trial. Upgrade to the next tier or cancel anytime.",
   "pricing.comparePlans": "Compare plans in detail",
+  "pricing.plansTitle": "Choose your plan",
+  "home.videoTitle": "See MimmoBook in action",
   "pricing.faq": "Frequently asked questions",
   "pricing.feature": "Feature",
   "pricing.monthlyPrice": "Monthly price",
@@ -4070,6 +4074,8 @@ const fi: TranslationKeys = {
   "pricing.simpleTitle": "Yksinkertainen ja läpinäkyvä hinnoittelu",
   "pricing.simpleSubtitle": "Aloita 30 päivän ilmaisella kokeilujaksolla. Korota seuraavaan tasoon tai peruuta milloin tahansa.",
   "pricing.comparePlans": "Vertaile eri tasoja",
+  "pricing.plansTitle": "Valitse sopiva taso",
+  "home.videoTitle": "Katso MimmoBook toiminnassa",
   "pricing.faq": "Usein kysytyt kysymykset",
   "pricing.feature": "Ominaisuus",
   "pricing.monthlyPrice": "Kuukausihinta",
@@ -5851,6 +5857,8 @@ const sv: TranslationKeys = {
   "pricing.simpleTitle": "Enkel och transparent prissättning",
   "pricing.simpleSubtitle": "Börja med en 30 dagars gratis provperiod. Uppgradera till nästa nivå eller avbryt när som helst.",
   "pricing.comparePlans": "Jämför planer",
+  "pricing.plansTitle": "Välj din plan",
+  "home.videoTitle": "Se MimmoBook i praktiken",
   "pricing.faq": "Vanliga frågor",
   "pricing.feature": "Funktion",
   "pricing.monthlyPrice": "Månadspris",

@@ -157,6 +157,7 @@ const Index = () => {
       <section className="py-16 md:py-24">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
+            <h2 className="text-3xl md:text-4xl font-serif font-bold text-foreground text-center mb-10">{t("home.videoTitle")}</h2>
             <div className="relative w-full rounded-2xl overflow-hidden shadow-hover border border-border" style={{ paddingBottom: "56.25%" }}>
               <iframe
                 className="absolute inset-0 w-full h-full"
