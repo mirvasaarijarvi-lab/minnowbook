@@ -1,10 +1,10 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
-  "serialNumber": "urn:uuid:19f7b3ee-a32b-5fdc-9535-84535e259310",
+  "serialNumber": "urn:uuid:f9a73922-38a9-5cd0-a893-4c7118862445",
   "version": 1,
   "metadata": {
-    "timestamp": "2026-07-22T07:16:22Z",
+    "timestamp": "2026-08-04T07:50:57Z",
     "tools": [
       {
         "vendor": "MimmoBook",
@@ -21,7 +21,7 @@
       "properties": [
         {
           "name": "git:sha",
-          "value": "3df4bce75b05f5ef0d4e36bb96bb924e936b0f26"
+          "value": "11601ed81a921a18be37e1d14a95ee2446810dfa"
         }
       ]
     }
@@ -452,11 +452,11 @@
       "scope": "optional"
     },
     {
-      "bom-ref": "pkg:npm/flatted@3.4.2",
+      "bom-ref": "pkg:npm/flatted@3.4.3",
       "type": "library",
       "name": "flatted",
-      "version": "3.4.2",
-      "purl": "pkg:npm/flatted@3.4.2",
+      "version": "3.4.3",
+      "purl": "pkg:npm/flatted@3.4.3",
       "scope": "required"
     },
     {
@@ -516,11 +516,11 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/postcss@8.5.6",
+      "bom-ref": "pkg:npm/postcss@8.5.25",
       "type": "library",
       "name": "postcss",
-      "version": "8.5.6",
-      "purl": "pkg:npm/postcss@8.5.6",
+      "version": "8.5.25",
+      "purl": "pkg:npm/postcss@8.5.25",
       "scope": "optional"
     },
     {
@@ -572,19 +572,19 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/react-router-dom@6.30.1",
+      "bom-ref": "pkg:npm/react-router-dom@6.30.4",
       "type": "library",
       "name": "react-router-dom",
-      "version": "6.30.1",
-      "purl": "pkg:npm/react-router-dom@6.30.1",
+      "version": "6.30.4",
+      "purl": "pkg:npm/react-router-dom@6.30.4",
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/recharts@3.9.2",
+      "bom-ref": "pkg:npm/recharts@3.10.1",
       "type": "library",
       "name": "recharts",
-      "version": "3.9.2",
-      "purl": "pkg:npm/recharts@3.9.2",
+      "version": "3.10.1",
+      "purl": "pkg:npm/recharts@3.10.1",
       "scope": "required"
     },
     {
