@@ -331,7 +331,11 @@ const Support = () => {
                         value={itemId}
                         className="rounded-xl border border-border bg-card overflow-hidden"
                       >
-                        <AccordionTrigger className="px-4 py-4 text-left hover:no-underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none">
+                        <AccordionTrigger
+                          id={`${itemId}-trigger`}
+                          aria-controls={`${itemId}-content`}
+                          className="px-4 py-4 text-left hover:no-underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
+                        >
                           <span className="flex items-start gap-3">
                             <HelpCircle
                               className="h-4 w-4 text-accent mt-1 shrink-0"
@@ -342,9 +346,14 @@ const Support = () => {
                             </span>
                           </span>
                         </AccordionTrigger>
-                        <AccordionContent className="px-4 pb-4 pl-11 text-sm text-foreground/80 leading-relaxed">
+                        <AccordionContent
+                          id={`${itemId}-content`}
+                          aria-labelledby={`${itemId}-trigger`}
+                          className="px-4 pb-4 pl-11 text-sm text-foreground/80 leading-relaxed"
+                        >
                           {a}
                         </AccordionContent>
+
                       </AccordionItem>
                     );
                   })}
