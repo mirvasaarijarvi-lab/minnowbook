@@ -110,6 +110,7 @@ describe.runIf(canRun)("run_test_reservation_cleanup authorization (live)", () =
     // Tenant + owner (a normal, non-platform-admin signed-in user).
     const owner = await createUser(ctx.service, "cleanup-owner");
     ctx.userEmail = owner.email;
+    ctx.userId = owner.userId;
     ctx.userPassword = owner.password;
 
     const tenantId = randomUUID();
