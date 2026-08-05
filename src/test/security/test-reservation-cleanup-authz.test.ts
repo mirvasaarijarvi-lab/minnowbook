@@ -55,6 +55,7 @@ interface Ctx {
   service: SupabaseClient;
   tenantId: string;
   userEmail: string;
+  userId: string;
   userPassword: string;
   adminEmail: string;
   adminPassword: string;
