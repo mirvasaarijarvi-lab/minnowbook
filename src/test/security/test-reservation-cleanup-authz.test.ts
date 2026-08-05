@@ -109,6 +109,7 @@ describe.runIf(canRun)("run_test_reservation_cleanup authorization (live)", () =
   beforeAll(async () => {
     ctx.service = newService();
     ctx.marker = `TEST CI cleanup-authz ${randomUUID().slice(0, 8)}`;
+    ctx.startedAt = new Date(Date.now() - 60_000).toISOString();
 
     // Tenant + owner (a normal, non-platform-admin signed-in user).
     const owner = await createUser(ctx.service, "cleanup-owner");
