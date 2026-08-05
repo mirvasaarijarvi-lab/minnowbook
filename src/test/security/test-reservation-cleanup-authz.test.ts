@@ -79,6 +79,7 @@ const ctx: Ctx = {
   adminPassword: "",
   adminId: "",
   marker: "",
+  startedAt: new Date(Date.now() - 60_000).toISOString(),
   reservationIds: [],
   cleanupUsers: [],
   cleanupTenants: [],
