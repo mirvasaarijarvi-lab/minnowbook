@@ -225,8 +225,18 @@ EOF
 
   # Deno's --junit-path emits a JUnit XML alongside the normal console output,
   # giving CI a structured report with per-test stack traces.
+  #
+  # --node-modules-dir=none is REQUIRED: the repo root has a package.json +
+  # node_modules (Vite app), so Deno auto-selects "manual" node_modules mode
+  # and then refuses to resolve edge-function `npm:` specifiers that are not
+  # installed locally, e.g.
+  #   error: Could not find a matching package for 'npm:@lovable.dev/webhooks-js'
+  #          in the node_modules directory
+  # Edge functions run on Deno Deploy with the global npm cache, not the app's
+  # node_modules, so "none" matches production resolution.
   run_step "Edge function tests (Deno)" \
     deno test --allow-net --allow-env --allow-read \
+      --node-modules-dir=none \
       --junit-path="$REPORTS_DIR/deno/junit.xml" \
       supabase/functions/
 else
