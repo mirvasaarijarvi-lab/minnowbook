@@ -68,18 +68,30 @@ Deno.test(
 Deno.test(
   "auth-email-hook: /preview 400 invalid-JSON carries security triad",
   withStubSupabaseEnv(async () => {
-    const req = new Request("https://example.test/auth-email-hook/preview", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer stub-lovable-key",
-      },
-      body: "{ not valid json",
-    });
-    const res = await handleAuthEmailHookRequest(req);
-    await drainBody(res);
-    assertEquals(res.status, 400);
-    assertSecurityTriad(res, "400 invalid JSON (preview)");
-    assertCspAndHsts(res, "400 invalid JSON (preview)");
+    // The preview endpoint authenticates with LOVABLE_API_KEY before parsing
+    // the body, so the key must be stubbed to reach the JSON-parse branch.
+    const previousKey = Deno.env.get("LOVABLE_API_KEY");
+    Deno.env.set("LOVABLE_API_KEY", "stub-lovable-key");
+    try {
+      const req = new Request("https://example.test/auth-email-hook/preview", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer stub-lovable-key",
+        },
+        body: "{ not valid json",
+      });
+      const res = await handleAuthEmailHookRequest(req);
+      await drainBody(res);
+      assertEquals(res.status, 400);
+      assertSecurityTriad(res, "400 invalid JSON (preview)");
+      assertCspAndHsts(res, "400 invalid JSON (preview)");
+    } finally {
+      if (previousKey === undefined) {
+        Deno.env.delete("LOVABLE_API_KEY");
+      } else {
+        Deno.env.set("LOVABLE_API_KEY", previousKey);
+      }
+    }
   }),
 );
