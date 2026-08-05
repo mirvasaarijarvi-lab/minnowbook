@@ -1,0 +1,259 @@
+/**
+ * Live regression suite for the `run_test_reservation_cleanup` authorization
+ * hardening (finding: cleanup_cron_bypass).
+ *
+ * The RPC used to skip its system-admin check whenever the CALLER passed
+ * `p_source = 'cron'`, which let any signed-in user mass-delete reservations
+ * across every tenant. The hardened function derives the cron path from the
+ * actual execution context instead:
+ *
+ *   cron path  := auth.uid() IS NULL
+ *                 AND no request.jwt.claims
+ *                 AND current_user NOT IN ('anon','authenticated')
+ *
+ * Everything else must pass `public.is_system_admin(auth.uid())`.
+ *
+ * What this suite pins down:
+ *   1. Anonymous callers are rejected (no deletion).
+ *   2. A signed-in NON-admin is rejected even with `p_source = 'cron'`
+ *      and a wide-open pattern/cutoff — this is the exact bypass payload.
+ *   3. The victim reservations still exist after those attempts.
+ *   4. A real system admin can run it, and the audit log records
+ *      `trigger_source = 'manual'` even when the caller claims 'cron'
+ *      (the label can no longer be spoofed).
+ *   5. PostgREST `service_role` is NOT silently treated as cron either;
+ *      only a true no-JWT database session (pg_cron) takes that path.
+ *
+ * Runs only when live Supabase credentials + service role key are available
+ * (scheduled/manual live workflows). Skips locally so PR checks stay offline.
+ */
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { randomUUID } from "node:crypto";
+
+const SUPABASE_URL =
+  (import.meta.env?.VITE_SUPABASE_URL as string | undefined) ?? process.env.SUPABASE_URL;
+const SUPABASE_ANON_KEY =
+  (import.meta.env?.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined) ??
+  process.env.SUPABASE_ANON_KEY ??
+  process.env.SUPABASE_PUBLISHABLE_KEY;
+const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SERVICE_ROLE_KEY;
+
+const canRun = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY && SERVICE_ROLE_KEY);
+
+const newService = (): SupabaseClient =>
+  createClient(SUPABASE_URL!, SERVICE_ROLE_KEY!, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+
+const newAnon = (): SupabaseClient =>
+  createClient(SUPABASE_URL!, SUPABASE_ANON_KEY!, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+
+interface Ctx {
+  service: SupabaseClient;
+  tenantId: string;
+  userEmail: string;
+  userPassword: string;
+  adminEmail: string;
+  adminPassword: string;
+  adminId: string;
+  /** Unique guest-name marker so the admin run only touches our own rows. */
+  marker: string;
+  reservationIds: string[];
+  cleanupUsers: string[];
+  cleanupTenants: string[];
+}
+
+const ctx: Ctx = {
+  service: null as unknown as SupabaseClient,
+  tenantId: "",
+  userEmail: "",
+  userPassword: "",
+  adminEmail: "",
+  adminPassword: "",
+  adminId: "",
+  marker: "",
+  reservationIds: [],
+  cleanupUsers: [],
+  cleanupTenants: [],
+};
+
+async function createUser(service: SupabaseClient, label: string) {
+  const email = `ci+${label}-${randomUUID().slice(0, 8)}@mimmobook.test`;
+  const password = `Ci-Tmp-${randomUUID()}-Z9!`;
+  const { data, error } = await service.auth.admin.createUser({
+    email,
+    password,
+    email_confirm: true,
+  });
+  if (error || !data.user) throw error ?? new Error("createUser failed");
+  ctx.cleanupUsers.push(data.user.id);
+  return { userId: data.user.id, email, password };
+}
+
+async function signIn(email: string, password: string) {
+  const client = newAnon();
+  const { error } = await client.auth.signInWithPassword({ email, password });
+  if (error) throw error;
+  return client;
+}
+
+describe.runIf(canRun)("run_test_reservation_cleanup authorization (live)", () => {
+  beforeAll(async () => {
+    ctx.service = newService();
+    ctx.marker = `TEST CI cleanup-authz ${randomUUID().slice(0, 8)}`;
+
+    // Tenant + owner (a normal, non-platform-admin signed-in user).
+    const owner = await createUser(ctx.service, "cleanup-owner");
+    ctx.userEmail = owner.email;
+    ctx.userPassword = owner.password;
+
+    const tenantId = randomUUID();
+    const short = tenantId.slice(0, 8);
+    const { error: tErr } = await ctx.service.from("tenants").insert({
+      id: tenantId,
+      name: `TEST CI cleanup ${short}`,
+      slug: `ci-cleanup-${short}`,
+      tier: "basic",
+      allowed_reservation_types: ["restaurant"],
+      owner_user_id: owner.userId,
+      subscription_status: "trialing",
+      is_active: true,
+    });
+    if (tErr) throw tErr;
+    ctx.tenantId = tenantId;
+    ctx.cleanupTenants.push(tenantId);
+
+    const { error: tuErr } = await ctx.service.from("tenant_users").insert({
+      tenant_id: tenantId,
+      user_id: owner.userId,
+      role: "owner",
+      is_approved: true,
+    });
+    if (tuErr) throw tuErr;
+
+    // Victim reservations the bypass payload would have deleted.
+    const rows = [1, 2].map((n) => ({
+      id: randomUUID(),
+      tenant_id: tenantId,
+      reservation_type: "restaurant",
+      date: "2020-01-0" + n,
+      guest_name: `${ctx.marker} ${n}`,
+      guest_email: `guest${n}@mimmobook.test`,
+    }));
+    const { error: rErr } = await ctx.service.from("reservations").insert(rows);
+    if (rErr) throw rErr;
+    ctx.reservationIds = rows.map((r) => r.id);
+
+    // A real platform admin for the positive-path assertion.
+    const admin = await createUser(ctx.service, "cleanup-admin");
+    ctx.adminId = admin.userId;
+    ctx.adminEmail = admin.email;
+    ctx.adminPassword = admin.password;
+    const { error: saErr } = await ctx.service
+      .from("system_admins")
+      .insert({ user_id: admin.userId });
+    if (saErr) throw saErr;
+
+    // Worst case for the old code: scheduled cleanup enabled.
+    await ctx.service
+      .from("test_reservation_cleanup_config")
+      .insert({ name_pattern: "TEST Lovable Cross%", is_enabled: true });
+  }, 90_000);
+
+  afterAll(async () => {
+    if (!ctx.service) return;
+    const swallow = async (p: PromiseLike<unknown>) => {
+      try { await p; } catch { /* best-effort cleanup */ }
+    };
+    await swallow(ctx.service.from("test_reservation_cleanup_log").delete().ilike("name_pattern", `${ctx.marker}%`));
+    for (const t of ctx.cleanupTenants) {
+      await swallow(ctx.service.from("reservations").delete().eq("tenant_id", t));
+      await swallow(ctx.service.from("tenant_users").delete().eq("tenant_id", t));
+      await swallow(ctx.service.from("tenants").delete().eq("id", t));
+    }
+    if (ctx.adminId) {
+      await swallow(ctx.service.from("system_admins").delete().eq("user_id", ctx.adminId));
+    }
+    for (const u of ctx.cleanupUsers) {
+      await swallow(ctx.service.auth.admin.deleteUser(u));
+    }
+  }, 90_000);
+
+  const survivingCount = async () => {
+    const { count, error } = await ctx.service
+      .from("reservations")
+      .select("id", { count: "exact", head: true })
+      .eq("tenant_id", ctx.tenantId);
+    if (error) throw error;
+    return count ?? 0;
+  };
+
+  it("rejects anonymous callers", async () => {
+    const anon = newAnon();
+    const { error } = await anon.rpc("run_test_reservation_cleanup", {
+      p_source: "cron",
+      p_override_pattern: "%",
+      p_override_cutoff: "2999-01-01",
+    });
+    expect(error, "anonymous cleanup call must be rejected").not.toBeNull();
+    expect(await survivingCount()).toBe(ctx.reservationIds.length);
+  }, 60_000);
+
+  it("rejects a signed-in non-admin using the p_source='cron' bypass payload", async () => {
+    const client = await signIn(ctx.userEmail, ctx.userPassword);
+    for (const p_source of ["cron", "CRON", "manual", "system"]) {
+      const { error } = await client.rpc("run_test_reservation_cleanup", {
+        p_source,
+        p_override_pattern: "%",
+        p_override_cutoff: "2999-01-01",
+      });
+      expect(error, `p_source='${p_source}' must not bypass the admin check`).not.toBeNull();
+      expect(error?.message ?? "").toMatch(/not authorized/i);
+    }
+    await client.auth.signOut();
+    expect(
+      await survivingCount(),
+      "no reservation may be deleted by a non-admin cleanup attempt",
+    ).toBe(ctx.reservationIds.length);
+  }, 90_000);
+
+  it("does not treat the PostgREST service_role JWT as the cron identity", async () => {
+    // Only a true no-JWT database session (pg_cron) may take the cron path.
+    const { error } = await ctx.service.rpc("run_test_reservation_cleanup", {
+      p_source: "cron",
+      p_override_pattern: "%",
+      p_override_cutoff: "2999-01-01",
+    });
+    expect(error, "service_role over PostgREST must not take the cron path").not.toBeNull();
+    expect(await survivingCount()).toBe(ctx.reservationIds.length);
+  }, 60_000);
+
+  it("allows a real system admin, and logs the run as manual even if 'cron' is claimed", async () => {
+    const client = await signIn(ctx.adminEmail, ctx.adminPassword);
+    const { data, error } = await client.rpc("run_test_reservation_cleanup", {
+      p_source: "cron", // spoof attempt by an admin: label must be normalized
+      p_override_pattern: `${ctx.marker}%`,
+      p_override_cutoff: "2999-01-01",
+    });
+    expect(error).toBeNull();
+    expect(Number(data)).toBe(ctx.reservationIds.length);
+
+    const { data: logRow, error: logErr } = await ctx.service
+      .from("test_reservation_cleanup_log")
+      .select("trigger_source, triggered_by, deleted_count, name_pattern")
+      .eq("name_pattern", `${ctx.marker}%`)
+      .order("triggered_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    expect(logErr).toBeNull();
+    expect(logRow?.trigger_source).toBe("manual");
+    expect(logRow?.triggered_by).toBe(ctx.adminId);
+    expect(logRow?.deleted_count).toBe(ctx.reservationIds.length);
+
+    await client.auth.signOut();
+    expect(await survivingCount()).toBe(0);
+  }, 90_000);
+});
