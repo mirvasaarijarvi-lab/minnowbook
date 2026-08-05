@@ -71,6 +71,7 @@ const ctx: Ctx = {
   service: null as unknown as SupabaseClient,
   tenantId: "",
   userEmail: "",
+  userId: "",
   userPassword: "",
   adminEmail: "",
   adminPassword: "",
