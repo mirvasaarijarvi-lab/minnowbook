@@ -226,6 +226,50 @@ describe.runIf(canRun)("run_test_reservation_cleanup authorization (live)", () =
     return count ?? 0;
   };
 
+  interface LogRow {
+    id: string;
+    triggered_by: string | null;
+    trigger_source: string;
+    name_pattern: string;
+    deleted_count: number;
+    notes: string | null;
+    triggered_at: string;
+  }
+
+  /** Every audit row written since this suite started. */
+  const logRowsSinceStart = async (): Promise<LogRow[]> => {
+    const { data, error } = await ctx.service
+      .from("test_reservation_cleanup_log")
+      .select("id, triggered_by, trigger_source, name_pattern, deleted_count, notes, triggered_at")
+      .gte("triggered_at", ctx.startedAt)
+      .order("triggered_at", { ascending: true });
+    if (error) throw error;
+    return (data ?? []) as LogRow[];
+  };
+
+  /**
+   * A rejected run must never be credited to the caller: no audit row may name
+   * the attacker as actor, and none may claim the privileged 'cron' source.
+   */
+  const expectNoAuditForActor = async (actorId: string | null, context: string) => {
+    const rows = await logRowsSinceStart();
+    for (const row of rows) {
+      if (actorId !== null) {
+        expect(row.triggered_by, `${context}: audit row must not credit the rejected caller`).not.toBe(actorId);
+      }
+      expect(
+        row.trigger_source,
+        `${context}: no audit row may claim the scheduled-job actor`,
+      ).not.toBe("cron");
+      expect(
+        ["%", "TEST CI cleanup-authz%"].includes(row.name_pattern),
+        `${context}: no audit row may record a spoofed wide-open pattern`,
+      ).toBe(false);
+    }
+  };
+
+
+
   it("rejects anonymous callers for every spoofed payload shape", async () => {
     const anon = newAnon();
     for (const { label, args } of SPOOF_PAYLOADS) {
