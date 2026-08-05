@@ -29,6 +29,7 @@ export const LIVE_SECURITY_TESTS: string[] = [
   "src/test/security/anon-access-audit.test.ts",
   "src/test/security/audit-log-append-only.test.ts",
   "src/test/security/billing-and-rpc-hardening.test.ts",
+  "src/test/security/test-reservation-cleanup-authz.test.ts",
   "src/test/security/billing-and-rpc-hardening-roles.test.ts",
   "src/test/security/billing-and-discount-role-matrix.test.ts",
   "src/test/security/reservations-anon-discount-malformed.test.ts",
