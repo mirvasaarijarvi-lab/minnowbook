@@ -283,6 +283,7 @@ describe.runIf(canRun)("run_test_reservation_cleanup authorization (live)", () =
     }
     expect(await survivingCount()).toBe(ctx.reservationIds.length);
     expect(await spoofLogCount(), "rejected anon attempts must not be logged").toBe(0);
+    await expectNoAuditForActor(null, "anonymous caller");
   }, 120_000);
 
   it("rejects a signed-in non-admin for every spoofed payload shape", async () => {
