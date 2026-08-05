@@ -302,6 +302,7 @@ describe.runIf(canRun)("run_test_reservation_cleanup authorization (live)", () =
       await client.auth.signOut();
     }
     expect(await spoofLogCount(), "rejected non-admin attempts must not be logged").toBe(0);
+    await expectNoAuditForActor(ctx.userId, "signed-in non-admin");
   }, 180_000);
 
   it("does not treat the PostgREST service_role JWT as the cron identity", async () => {
