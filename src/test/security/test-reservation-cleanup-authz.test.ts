@@ -191,45 +191,76 @@ describe.runIf(canRun)("run_test_reservation_cleanup authorization (live)", () =
     return count ?? 0;
   };
 
-  it("rejects anonymous callers", async () => {
-    const anon = newAnon();
-    const { error } = await anon.rpc("run_test_reservation_cleanup", {
-      p_source: "cron",
-      p_override_pattern: "%",
-      p_override_cutoff: "2999-01-01",
-    });
-    expect(error, "anonymous cleanup call must be rejected").not.toBeNull();
-    expect(await survivingCount()).toBe(ctx.reservationIds.length);
-  }, 60_000);
+  /**
+   * Every payload shape an attacker could use to try to look like the
+   * scheduled job. `p_source` is the documented bypass vector; the pattern /
+   * cutoff overrides are what turn the bypass into a platform-wide delete.
+   */
+  const SPOOF_PAYLOADS: Array<{ label: string; args: Record<string, unknown> }> = [
+    { label: "exact cron label + wide-open pattern", args: { p_source: "cron", p_override_pattern: "%", p_override_cutoff: "2999-01-01" } },
+    { label: "uppercase CRON", args: { p_source: "CRON", p_override_pattern: "%", p_override_cutoff: "2999-01-01" } },
+    { label: "mixed-case CrOn", args: { p_source: "CrOn", p_override_pattern: "%", p_override_cutoff: "2999-01-01" } },
+    { label: "padded ' cron '", args: { p_source: " cron ", p_override_pattern: "%", p_override_cutoff: "2999-01-01" } },
+    { label: "pg_cron label", args: { p_source: "pg_cron", p_override_pattern: "%", p_override_cutoff: "2999-01-01" } },
+    { label: "system label", args: { p_source: "system", p_override_pattern: "%", p_override_cutoff: "2999-01-01" } },
+    { label: "service_role label", args: { p_source: "service_role", p_override_pattern: "%", p_override_cutoff: "2999-01-01" } },
+    { label: "null p_source", args: { p_source: null, p_override_pattern: "%", p_override_cutoff: "2999-01-01" } },
+    { label: "empty p_source", args: { p_source: "", p_override_pattern: "%", p_override_cutoff: "2999-01-01" } },
+    { label: "quote-injection p_source", args: { p_source: "cron'); DROP TABLE public.reservations; --", p_override_pattern: "%", p_override_cutoff: "2999-01-01" } },
+    { label: "cron + targeted marker pattern", args: { p_source: "cron", p_override_pattern: "TEST CI cleanup-authz%", p_override_cutoff: "2999-01-01" } },
+    { label: "cron + null overrides (config defaults)", args: { p_source: "cron", p_override_pattern: null, p_override_cutoff: null } },
+    { label: "cron + no overrides at all", args: { p_source: "cron" } },
+    { label: "no args at all (defaults)", args: {} },
+  ];
 
-  it("rejects a signed-in non-admin using the p_source='cron' bypass payload", async () => {
-    const client = await signIn(ctx.userEmail, ctx.userPassword);
-    for (const p_source of ["cron", "CRON", "manual", "system"]) {
-      const { error } = await client.rpc("run_test_reservation_cleanup", {
-        p_source,
-        p_override_pattern: "%",
-        p_override_cutoff: "2999-01-01",
-      });
-      expect(error, `p_source='${p_source}' must not bypass the admin check`).not.toBeNull();
-      expect(error?.message ?? "").toMatch(/not authorized/i);
+  /** Rejected attempts must not leave an audit trail claiming a cron run. */
+  const spoofLogCount = async () => {
+    const { count, error } = await ctx.service
+      .from("test_reservation_cleanup_log")
+      .select("id", { count: "exact", head: true })
+      .in("name_pattern", ["%", "TEST CI cleanup-authz%"]);
+    if (error) throw error;
+    return count ?? 0;
+  };
+
+  it("rejects anonymous callers for every spoofed payload shape", async () => {
+    const anon = newAnon();
+    for (const { label, args } of SPOOF_PAYLOADS) {
+      const { error } = await anon.rpc("run_test_reservation_cleanup", args);
+      expect(error, `anonymous cleanup call must be rejected (${label})`).not.toBeNull();
+      expect(error?.message ?? "", label).toMatch(/not authorized|permission denied/i);
     }
-    await client.auth.signOut();
-    expect(
-      await survivingCount(),
-      "no reservation may be deleted by a non-admin cleanup attempt",
-    ).toBe(ctx.reservationIds.length);
-  }, 90_000);
+    expect(await survivingCount()).toBe(ctx.reservationIds.length);
+    expect(await spoofLogCount(), "rejected anon attempts must not be logged").toBe(0);
+  }, 120_000);
+
+  it("rejects a signed-in non-admin for every spoofed payload shape", async () => {
+    const client = await signIn(ctx.userEmail, ctx.userPassword);
+    try {
+      for (const { label, args } of SPOOF_PAYLOADS) {
+        const { error } = await client.rpc("run_test_reservation_cleanup", args);
+        expect(error, `non-admin must not bypass the admin check (${label})`).not.toBeNull();
+        expect(error?.message ?? "", label).toMatch(/not authorized/i);
+        expect(
+          await survivingCount(),
+          `no reservation may be deleted (${label})`,
+        ).toBe(ctx.reservationIds.length);
+      }
+    } finally {
+      await client.auth.signOut();
+    }
+    expect(await spoofLogCount(), "rejected non-admin attempts must not be logged").toBe(0);
+  }, 180_000);
 
   it("does not treat the PostgREST service_role JWT as the cron identity", async () => {
     // Only a true no-JWT database session (pg_cron) may take the cron path.
-    const { error } = await ctx.service.rpc("run_test_reservation_cleanup", {
-      p_source: "cron",
-      p_override_pattern: "%",
-      p_override_cutoff: "2999-01-01",
-    });
-    expect(error, "service_role over PostgREST must not take the cron path").not.toBeNull();
+    for (const { label, args } of SPOOF_PAYLOADS) {
+      const { error } = await ctx.service.rpc("run_test_reservation_cleanup", args);
+      expect(error, `service_role over PostgREST must not take the cron path (${label})`).not.toBeNull();
+    }
     expect(await survivingCount()).toBe(ctx.reservationIds.length);
-  }, 60_000);
+    expect(await spoofLogCount(), "rejected service_role attempts must not be logged").toBe(0);
+  }, 120_000);
 
   it("allows a real system admin, and logs the run as manual even if 'cron' is claimed", async () => {
     const client = await signIn(ctx.adminEmail, ctx.adminPassword);
