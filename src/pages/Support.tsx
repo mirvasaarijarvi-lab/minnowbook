@@ -229,7 +229,13 @@ const Support = () => {
           </p>
           <div className="max-w-md mx-auto relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <label htmlFor="support-search" className="sr-only">
+              {t("support.searchPlaceholder")}
+            </label>
             <Input
+              id="support-search"
+              type="search"
+              aria-label={t("support.searchPlaceholder")}
               placeholder={t("support.searchPlaceholder")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
