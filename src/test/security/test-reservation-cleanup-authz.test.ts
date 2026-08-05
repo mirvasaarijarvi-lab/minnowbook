@@ -62,6 +62,8 @@ interface Ctx {
   adminId: string;
   /** Unique guest-name marker so the admin run only touches our own rows. */
   marker: string;
+  /** ISO timestamp captured before the first RPC call, to scope audit reads. */
+  startedAt: string;
   reservationIds: string[];
   cleanupUsers: string[];
   cleanupTenants: string[];
