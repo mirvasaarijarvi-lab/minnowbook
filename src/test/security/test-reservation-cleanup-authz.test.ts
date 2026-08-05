@@ -55,12 +55,15 @@ interface Ctx {
   service: SupabaseClient;
   tenantId: string;
   userEmail: string;
+  userId: string;
   userPassword: string;
   adminEmail: string;
   adminPassword: string;
   adminId: string;
   /** Unique guest-name marker so the admin run only touches our own rows. */
   marker: string;
+  /** ISO timestamp captured before the first RPC call, to scope audit reads. */
+  startedAt: string;
   reservationIds: string[];
   cleanupUsers: string[];
   cleanupTenants: string[];
@@ -70,11 +73,13 @@ const ctx: Ctx = {
   service: null as unknown as SupabaseClient,
   tenantId: "",
   userEmail: "",
+  userId: "",
   userPassword: "",
   adminEmail: "",
   adminPassword: "",
   adminId: "",
   marker: "",
+  startedAt: new Date(Date.now() - 60_000).toISOString(),
   reservationIds: [],
   cleanupUsers: [],
   cleanupTenants: [],
@@ -104,10 +109,12 @@ describe.runIf(canRun)("run_test_reservation_cleanup authorization (live)", () =
   beforeAll(async () => {
     ctx.service = newService();
     ctx.marker = `TEST CI cleanup-authz ${randomUUID().slice(0, 8)}`;
+    ctx.startedAt = new Date(Date.now() - 60_000).toISOString();
 
     // Tenant + owner (a normal, non-platform-admin signed-in user).
     const owner = await createUser(ctx.service, "cleanup-owner");
     ctx.userEmail = owner.email;
+    ctx.userId = owner.userId;
     ctx.userPassword = owner.password;
 
     const tenantId = randomUUID();
@@ -223,6 +230,50 @@ describe.runIf(canRun)("run_test_reservation_cleanup authorization (live)", () =
     return count ?? 0;
   };
 
+  interface LogRow {
+    id: string;
+    triggered_by: string | null;
+    trigger_source: string;
+    name_pattern: string;
+    deleted_count: number;
+    notes: string | null;
+    triggered_at: string;
+  }
+
+  /** Every audit row written since this suite started. */
+  const logRowsSinceStart = async (): Promise<LogRow[]> => {
+    const { data, error } = await ctx.service
+      .from("test_reservation_cleanup_log")
+      .select("id, triggered_by, trigger_source, name_pattern, deleted_count, notes, triggered_at")
+      .gte("triggered_at", ctx.startedAt)
+      .order("triggered_at", { ascending: true });
+    if (error) throw error;
+    return (data ?? []) as LogRow[];
+  };
+
+  /**
+   * A rejected run must never be credited to the caller: no audit row may name
+   * the attacker as actor, and none may claim the privileged 'cron' source.
+   */
+  const expectNoAuditForActor = async (actorId: string | null, context: string) => {
+    const rows = await logRowsSinceStart();
+    for (const row of rows) {
+      if (actorId !== null) {
+        expect(row.triggered_by, `${context}: audit row must not credit the rejected caller`).not.toBe(actorId);
+      }
+      expect(
+        row.trigger_source,
+        `${context}: no audit row may claim the scheduled-job actor`,
+      ).not.toBe("cron");
+      expect(
+        ["%", "TEST CI cleanup-authz%"].includes(row.name_pattern),
+        `${context}: no audit row may record a spoofed wide-open pattern`,
+      ).toBe(false);
+    }
+  };
+
+
+
   it("rejects anonymous callers for every spoofed payload shape", async () => {
     const anon = newAnon();
     for (const { label, args } of SPOOF_PAYLOADS) {
@@ -232,6 +283,7 @@ describe.runIf(canRun)("run_test_reservation_cleanup authorization (live)", () =
     }
     expect(await survivingCount()).toBe(ctx.reservationIds.length);
     expect(await spoofLogCount(), "rejected anon attempts must not be logged").toBe(0);
+    await expectNoAuditForActor(null, "anonymous caller");
   }, 120_000);
 
   it("rejects a signed-in non-admin for every spoofed payload shape", async () => {
@@ -250,6 +302,7 @@ describe.runIf(canRun)("run_test_reservation_cleanup authorization (live)", () =
       await client.auth.signOut();
     }
     expect(await spoofLogCount(), "rejected non-admin attempts must not be logged").toBe(0);
+    await expectNoAuditForActor(ctx.userId, "signed-in non-admin");
   }, 180_000);
 
   it("does not treat the PostgREST service_role JWT as the cron identity", async () => {
@@ -260,7 +313,38 @@ describe.runIf(canRun)("run_test_reservation_cleanup authorization (live)", () =
     }
     expect(await survivingCount()).toBe(ctx.reservationIds.length);
     expect(await spoofLogCount(), "rejected service_role attempts must not be logged").toBe(0);
+    await expectNoAuditForActor(null, "PostgREST service_role");
   }, 120_000);
+
+  it("records unauthorized cron-like runs as rejected, never as an audited cleanup", async () => {
+    // Replay the bypass payload from every unauthorized identity and assert the
+    // audit trail treats each attempt as a rejection: an error is returned, no
+    // row is written, and no actor (attacker or spoofed cron) is credited.
+    const before = await logRowsSinceStart();
+
+    const nonAdmin = await signIn(ctx.userEmail, ctx.userPassword);
+    const attempts: Array<{ who: string; actor: string | null; client: SupabaseClient }> = [
+      { who: "anonymous", actor: null, client: newAnon() },
+      { who: "non-admin", actor: ctx.userId, client: nonAdmin },
+      { who: "service_role", actor: null, client: ctx.service },
+    ];
+
+    try {
+      for (const { who, actor, client } of attempts) {
+        for (const { label, args } of SPOOF_PAYLOADS) {
+          const { error } = await client.rpc("run_test_reservation_cleanup", args);
+          expect(error, `${who} must be rejected (${label})`).not.toBeNull();
+        }
+        await expectNoAuditForActor(actor, `${who} cron-like payload`);
+      }
+    } finally {
+      await nonAdmin.auth.signOut();
+    }
+
+    const after = await logRowsSinceStart();
+    expect(after.length, "rejected runs must not append any audit row").toBe(before.length);
+    expect(await survivingCount()).toBe(ctx.reservationIds.length);
+  }, 240_000);
 
   it("allows a real system admin, and logs the run as manual even if 'cron' is claimed", async () => {
     const client = await signIn(ctx.adminEmail, ctx.adminPassword);
@@ -274,7 +358,7 @@ describe.runIf(canRun)("run_test_reservation_cleanup authorization (live)", () =
 
     const { data: logRow, error: logErr } = await ctx.service
       .from("test_reservation_cleanup_log")
-      .select("trigger_source, triggered_by, deleted_count, name_pattern")
+      .select("trigger_source, triggered_by, deleted_count, name_pattern, notes, deleted_rows")
       .eq("name_pattern", `${ctx.marker}%`)
       .order("triggered_at", { ascending: false })
       .limit(1)
@@ -283,8 +367,21 @@ describe.runIf(canRun)("run_test_reservation_cleanup authorization (live)", () =
     expect(logRow?.trigger_source).toBe("manual");
     expect(logRow?.triggered_by).toBe(ctx.adminId);
     expect(logRow?.deleted_count).toBe(ctx.reservationIds.length);
+    expect(logRow?.notes ?? null, "an authorized run is not a skipped run").toBeNull();
+
+    // The audited actor is the admin, and the audited payload is exactly the
+    // rows the admin was allowed to remove (never the wide-open spoof set).
+    const deletedIds = ((logRow?.deleted_rows as Array<{ id: string }> | null) ?? []).map((r) => r.id);
+    expect(deletedIds.sort()).toEqual([...ctx.reservationIds].sort());
+
+    // Exactly one authorized run exists in this window, credited to the admin.
+    const rows = await logRowsSinceStart();
+    const adminRows = rows.filter((r) => r.triggered_by === ctx.adminId);
+    expect(adminRows.length, "only the single authorized admin run may be audited").toBe(1);
+    expect(rows.every((r) => r.trigger_source !== "cron"), "no spoofed cron run may be audited").toBe(true);
 
     await client.auth.signOut();
     expect(await survivingCount()).toBe(0);
   }, 90_000);
 });
+
