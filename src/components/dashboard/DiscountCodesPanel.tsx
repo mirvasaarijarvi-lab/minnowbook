@@ -98,7 +98,8 @@ const DiscountCodesPanel = () => {
       toast.success(editingId ? t("discountCodes.updated") : t("discountCodes.created"));
       closeDialog();
     },
-    onError: () => toast.error(t("discountCodes.saveError")),
+    onError: (e: any) =>
+      toast.error(t("discountCodes.saveError"), { description: e?.message }),
   });
 
   const toggleMutation = useMutation({
