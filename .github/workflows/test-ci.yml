@@ -274,6 +274,7 @@ jobs:
       # already-documented "no key configured" path) and emit a loud
       # warning telling the operator to rotate the secret.
       - name: Validate SUPABASE_SERVICE_ROLE_KEY
+        if: steps.env_check.outputs.skip_supabase_suites != 'true'
         env:
           SR_URL: ${{ env.SUPABASE_URL }}
           SR_KEY: ${{ env.SUPABASE_SERVICE_ROLE_KEY }}
@@ -305,8 +306,8 @@ jobs:
 
 
       - name: Vitest (initial)
-
         id: vitest
+        if: steps.env_check.outputs.skip_supabase_suites != 'true'
         env:
           SUPABASE_URL: ${{ env.SUPABASE_URL }}
           VITE_SUPABASE_URL: ${{ env.VITE_SUPABASE_URL }}
@@ -321,7 +322,7 @@ jobs:
             --outputFile.junit=test-reports/vitest/junit.xml
 
       - name: Vitest (deterministic rerun of quarantined failures)
-        if: failure() && steps.vitest.outcome == 'failure'
+        if: failure() && steps.vitest.outcome == 'failure' && steps.env_check.outputs.skip_supabase_suites != 'true'
         env:
           SUPABASE_URL: ${{ env.SUPABASE_URL }}
           VITE_SUPABASE_URL: ${{ env.VITE_SUPABASE_URL }}
@@ -333,7 +334,7 @@ jobs:
       - name: Deno edge function tests
         # No rerun: these are deterministic, no flake history. If they fail
         # it's a real regression every time.
-        if: success() || (failure() && steps.vitest.conclusion == 'success')
+        if: steps.env_check.outputs.skip_supabase_suites != 'true' && (success() || (failure() && steps.vitest.conclusion == 'success'))
         env:
           SUPABASE_URL: ${{ env.SUPABASE_URL }}
           VITE_SUPABASE_URL: ${{ env.VITE_SUPABASE_URL }}
@@ -346,6 +347,7 @@ jobs:
 
       - name: Playwright (initial)
         id: playwright
+        if: steps.env_check.outputs.skip_supabase_suites != 'true'
         env:
           SUPABASE_URL: ${{ env.SUPABASE_URL }}
           VITE_SUPABASE_URL: ${{ env.VITE_SUPABASE_URL }}
@@ -353,7 +355,7 @@ jobs:
         run: bunx playwright test
 
       - name: Playwright (deterministic rerun of quarantined failures)
-        if: failure() && steps.playwright.outcome == 'failure'
+        if: failure() && steps.playwright.outcome == 'failure' && steps.env_check.outputs.skip_supabase_suites != 'true'
         env:
           SUPABASE_URL: ${{ env.SUPABASE_URL }}
           VITE_SUPABASE_URL: ${{ env.VITE_SUPABASE_URL }}
