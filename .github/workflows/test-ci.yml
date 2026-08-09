@@ -81,8 +81,13 @@ jobs:
       #     promote the warning to a hard failure (recommended for the
       #     main branch's required check).
       - name: Validate required Supabase env vars
+        id: env_check
         env:
           REQUIRE_SERVICE_ROLE_KEY: ${{ vars.REQUIRE_SERVICE_ROLE_KEY }}
+          # Dependabot and fork PRs never receive repository Actions secrets,
+          # so the Supabase-backed suites cannot run there. Those runs degrade
+          # to lint/typecheck/build instead of failing on a missing secret.
+          SECRETS_UNAVAILABLE: ${{ (github.actor == 'dependabot[bot]' || github.event.pull_request.head.repo.fork == true) && '1' || '0' }}
         run: |
           set -u
           effective_url="${SUPABASE_URL:-${VITE_SUPABASE_URL:-}}"
@@ -95,7 +100,18 @@ jobs:
 
           # ---- Critical: SUPABASE_URL ----
           if [ -z "$effective_url" ]; then
+            if [ "${SECRETS_UNAVAILABLE:-0}" = "1" ]; then
+              echo "skip_supabase_suites=true" >> "$GITHUB_OUTPUT"
+              echo "::warning title=Supabase suites skipped::This run has no access to repository secrets (Dependabot or fork PR), so the Supabase-backed suites are skipped. Lint, typecheck and build still run."
+              {
+                echo "- ⏭️ **Supabase suites skipped**: this run cannot read repository secrets (Dependabot or fork PR)."
+                echo ""
+                echo "Lint, typecheck and build still gate the change. The full suite runs once the branch lands on main."
+              } >> "$summary"
+              exit 0
+            fi
             echo "::error title=Missing Supabase URL::SUPABASE_URL (or VITE_SUPABASE_URL) is required for the Deno edge function tests. Add it under Settings → Secrets and variables → Actions."
+
             {
               echo "- ❌ **SUPABASE_URL** (or VITE_SUPABASE_URL): missing , cannot run any edge function test."
               echo ""
