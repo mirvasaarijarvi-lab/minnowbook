@@ -237,9 +237,11 @@ jobs:
       # fast here surfaces the real cause (project paused, egress block,
       # rest layer restarting) at the top of the log.
       - name: Supabase reachability preflight
+        if: steps.env_check.outputs.skip_supabase_suites != 'true'
         env:
           PREFLIGHT_URL: ${{ env.VITE_SUPABASE_URL }}
           PREFLIGHT_KEY: ${{ env.VITE_SUPABASE_PUBLISHABLE_KEY }}
+
         run: |
           set -u
           if [ -z "${PREFLIGHT_URL:-}" ] || [ -z "${PREFLIGHT_KEY:-}" ]; then
