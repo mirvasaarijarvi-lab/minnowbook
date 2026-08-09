@@ -81,8 +81,13 @@ jobs:
       #     promote the warning to a hard failure (recommended for the
       #     main branch's required check).
       - name: Validate required Supabase env vars
+        id: env_check
         env:
           REQUIRE_SERVICE_ROLE_KEY: ${{ vars.REQUIRE_SERVICE_ROLE_KEY }}
+          # Dependabot and fork PRs never receive repository Actions secrets,
+          # so the Supabase-backed suites cannot run there. Those runs degrade
+          # to lint/typecheck/build instead of failing on a missing secret.
+          SECRETS_UNAVAILABLE: ${{ (github.actor == 'dependabot[bot]' || github.event.pull_request.head.repo.fork == true) && '1' || '0' }}
         run: |
           set -u
           effective_url="${SUPABASE_URL:-${VITE_SUPABASE_URL:-}}"
@@ -95,7 +100,18 @@ jobs:
 
           # ---- Critical: SUPABASE_URL ----
           if [ -z "$effective_url" ]; then
+            if [ "${SECRETS_UNAVAILABLE:-0}" = "1" ]; then
+              echo "skip_supabase_suites=true" >> "$GITHUB_OUTPUT"
+              echo "::warning title=Supabase suites skipped::This run has no access to repository secrets (Dependabot or fork PR), so the Supabase-backed suites are skipped. Lint, typecheck and build still run."
+              {
+                echo "- ⏭️ **Supabase suites skipped**: this run cannot read repository secrets (Dependabot or fork PR)."
+                echo ""
+                echo "Lint, typecheck and build still gate the change. The full suite runs once the branch lands on main."
+              } >> "$summary"
+              exit 0
+            fi
             echo "::error title=Missing Supabase URL::SUPABASE_URL (or VITE_SUPABASE_URL) is required for the Deno edge function tests. Add it under Settings → Secrets and variables → Actions."
+
             {
               echo "- ❌ **SUPABASE_URL** (or VITE_SUPABASE_URL): missing , cannot run any edge function test."
               echo ""
@@ -221,9 +237,11 @@ jobs:
       # fast here surfaces the real cause (project paused, egress block,
       # rest layer restarting) at the top of the log.
       - name: Supabase reachability preflight
+        if: steps.env_check.outputs.skip_supabase_suites != 'true'
         env:
           PREFLIGHT_URL: ${{ env.VITE_SUPABASE_URL }}
           PREFLIGHT_KEY: ${{ env.VITE_SUPABASE_PUBLISHABLE_KEY }}
+
         run: |
           set -u
           if [ -z "${PREFLIGHT_URL:-}" ] || [ -z "${PREFLIGHT_KEY:-}" ]; then
@@ -256,6 +274,7 @@ jobs:
       # already-documented "no key configured" path) and emit a loud
       # warning telling the operator to rotate the secret.
       - name: Validate SUPABASE_SERVICE_ROLE_KEY
+        if: steps.env_check.outputs.skip_supabase_suites != 'true'
         env:
           SR_URL: ${{ env.SUPABASE_URL }}
           SR_KEY: ${{ env.SUPABASE_SERVICE_ROLE_KEY }}
@@ -287,8 +306,8 @@ jobs:
 
 
       - name: Vitest (initial)
-
         id: vitest
+        if: steps.env_check.outputs.skip_supabase_suites != 'true'
         env:
           SUPABASE_URL: ${{ env.SUPABASE_URL }}
           VITE_SUPABASE_URL: ${{ env.VITE_SUPABASE_URL }}
@@ -303,7 +322,7 @@ jobs:
             --outputFile.junit=test-reports/vitest/junit.xml
 
       - name: Vitest (deterministic rerun of quarantined failures)
-        if: failure() && steps.vitest.outcome == 'failure'
+        if: failure() && steps.vitest.outcome == 'failure' && steps.env_check.outputs.skip_supabase_suites != 'true'
         env:
           SUPABASE_URL: ${{ env.SUPABASE_URL }}
           VITE_SUPABASE_URL: ${{ env.VITE_SUPABASE_URL }}
@@ -315,7 +334,7 @@ jobs:
       - name: Deno edge function tests
         # No rerun: these are deterministic, no flake history. If they fail
         # it's a real regression every time.
-        if: success() || (failure() && steps.vitest.conclusion == 'success')
+        if: steps.env_check.outputs.skip_supabase_suites != 'true' && (success() || (failure() && steps.vitest.conclusion == 'success'))
         env:
           SUPABASE_URL: ${{ env.SUPABASE_URL }}
           VITE_SUPABASE_URL: ${{ env.VITE_SUPABASE_URL }}
@@ -328,6 +347,7 @@ jobs:
 
       - name: Playwright (initial)
         id: playwright
+        if: steps.env_check.outputs.skip_supabase_suites != 'true'
         env:
           SUPABASE_URL: ${{ env.SUPABASE_URL }}
           VITE_SUPABASE_URL: ${{ env.VITE_SUPABASE_URL }}
@@ -335,7 +355,7 @@ jobs:
         run: bunx playwright test
 
       - name: Playwright (deterministic rerun of quarantined failures)
-        if: failure() && steps.playwright.outcome == 'failure'
+        if: failure() && steps.playwright.outcome == 'failure' && steps.env_check.outputs.skip_supabase_suites != 'true'
         env:
           SUPABASE_URL: ${{ env.SUPABASE_URL }}
           VITE_SUPABASE_URL: ${{ env.VITE_SUPABASE_URL }}
