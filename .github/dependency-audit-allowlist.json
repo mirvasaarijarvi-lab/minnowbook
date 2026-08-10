@@ -51,6 +51,7 @@
       "expires": "2026-09-14",
       "reason": "Open-redirect-to-XSS in react-router-dom 6.30.2 to 6.30.4; fix only in 7.13.0. Pinned to v6 per mem://architecture/dependency-pinning. Mitigation: no `<Link to>` or `navigate(...)` target is user-controlled (verified: all dynamic targets are internal blog slugs from our own content; `navigate` targets are literals or the sanitized `safeReturnTo` internal path in Onboarding.tsx), and OAuth `redirect_uri` is a same-origin literal from `window.location.origin`. Reviewer check: `rg -n \"to=\\{|navigate\\(\" src/` — flag any value derived from window.location, query strings, or request bodies."
     },
+    {
 
       "id": "GHSA-qx2v-qp2m-jg93",
       "package": "postcss",
