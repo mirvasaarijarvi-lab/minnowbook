@@ -45,6 +45,14 @@
       "reason": "react-router-dom re-export of the same open-redirect-to-XSS advisory that affects react-router v6 (CVE-2025-68470 family); fix only ships in react-router-dom 7.18.0+. Pinned to v6 per mem://architecture/dependency-pinning. Mitigation is identical to the react-router entries above: no `<Link to>` or `navigate(...)` argument is derived from user-controlled input (`window.location`, query strings, request bodies), and OAuth `redirect_uri` is a same-origin literal built from `window.location.origin` per mem://auth/social-sign-on. Reviewer check: `rg -n \"to=\\{|navigate\\(\" src/` — flag any dynamic value from user input."
     },
     {
+      "id": "CVE-2026-53668",
+      "package": "react-router-dom",
+      "severity": "moderate",
+      "expires": "2026-09-14",
+      "reason": "Open-redirect-to-XSS in react-router-dom 6.30.2 to 6.30.4; fix only in 7.13.0. Pinned to v6 per mem://architecture/dependency-pinning. Mitigation: no `<Link to>` or `navigate(...)` target is user-controlled (verified: all dynamic targets are internal blog slugs from our own content; `navigate` targets are literals or the sanitized `safeReturnTo` internal path in Onboarding.tsx), and OAuth `redirect_uri` is a same-origin literal from `window.location.origin`. Reviewer check: `rg -n \"to=\\{|navigate\\(\" src/` — flag any value derived from window.location, query strings, or request bodies."
+    },
+    {
+
       "id": "GHSA-qx2v-qp2m-jg93",
       "package": "postcss",
       "severity": "moderate",
