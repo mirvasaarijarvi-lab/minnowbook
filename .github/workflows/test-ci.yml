@@ -249,21 +249,34 @@ jobs:
             exit 0
           fi
           base="${PREFLIGHT_URL%/}"
-          auth_status=$(curl -m 10 -sS -o /dev/null -w "%{http_code}" \
-            -H "apikey: $PREFLIGHT_KEY" "$base/auth/v1/health" || echo "000")
-          rest_status=$(curl -m 10 -sS -o /dev/null -w "%{http_code}" \
-            -H "apikey: $PREFLIGHT_KEY" \
-            -H "Authorization: Bearer $PREFLIGHT_KEY" "$base/rest/v1/" || echo "000")
+          probe() {
+            # $1 = url. Retries transient network failures (DNS, TLS, timeouts).
+            local url="$1" code="" attempt=1
+            while [ "$attempt" -le 3 ]; do
+              code=$(curl -m 15 -sS -o /dev/null -w "%{http_code}" \
+                -H "apikey: $PREFLIGHT_KEY" \
+                -H "Authorization: Bearer $PREFLIGHT_KEY" "$url" 2>/dev/null) || code="000"
+              case "$code" in 000|"") ;; *) echo "$code"; return 0 ;; esac
+              sleep $((attempt * 5))
+              attempt=$((attempt + 1))
+            done
+            echo "000"
+          }
+          auth_status=$(probe "$base/auth/v1/health")
+          rest_status=$(probe "$base/rest/v1/")
           echo "auth=$auth_status rest=$rest_status"
-          auth_ok=0; rest_ok=0
-          case "$auth_status" in 200|401) auth_ok=1 ;; esac
+          rest_ok=0
           case "$rest_status" in 200|401|404) rest_ok=1 ;; esac
-          if [ "$auth_ok" = "1" ] && [ "$rest_ok" = "1" ]; then
-            echo "✅ Supabase reachable (auth=$auth_status rest=$rest_status)"
+          if [ "$rest_ok" = "1" ]; then
+            case "$auth_status" in
+              200|401) echo "✅ Supabase reachable (auth=$auth_status rest=$rest_status)" ;;
+              *) echo "::warning title=Supabase auth health unreachable::auth=$auth_status but PostgREST responded ($rest_status); continuing." ;;
+            esac
             exit 0
           fi
           echo "::error title=Supabase unreachable::auth=$auth_status rest=$rest_status — live security suites would each hit 5s testTimeout. Check that the project is not paused and that the runner has egress to *.supabase.co."
           exit 1
+
 
       # Validate the SERVICE_ROLE_KEY against /rest/v1/. A stale/rotated
       # key returns 401 "Invalid API key" on every PostgREST call, which
