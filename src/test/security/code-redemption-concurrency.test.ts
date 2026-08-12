@@ -49,6 +49,11 @@ const FAKE_BUT_VALID_SHAPE = "BETA-RACE0001";
 
 let anon: SupabaseClient;
 
+// Network hangs against the live project must surface as a denial (an error
+// on the PostgREST call), not as a 90s Vitest timeout that reds the suite.
+const PROBE_TIMEOUT_MS = 15_000;
+const probeSignal = () => AbortSignal.timeout(PROBE_TIMEOUT_MS);
+
 beforeAll(() => {
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
     throw new Error(
@@ -237,7 +242,7 @@ describe("discount_codes — replay/concurrency surface as anon", () => {
   // All three vectors must be denied by RLS.
 
   it("anon cannot SELECT discount_codes (no public read policy)", async () => {
-    const { data, error } = await anon.from("discount_codes").select("*").limit(1);
+    const { data, error } = await anon.from("discount_codes").select("*").limit(1).abortSignal(probeSignal());
     if (error) {
       expect(error).toBeTruthy();
     } else {
@@ -253,7 +258,7 @@ describe("discount_codes — replay/concurrency surface as anon", () => {
       discount_value: 100,
       max_uses: 9999,
       is_active: true,
-    } as never);
+    } as never).abortSignal(probeSignal());
     expect(error, "anon insert into discount_codes must be denied").toBeTruthy();
     const insertedRows = (data ?? []) as unknown[];
     expect(insertedRows.length).toBe(0);
@@ -266,7 +271,8 @@ describe("discount_codes — replay/concurrency surface as anon", () => {
       .from("discount_codes")
       .update({ used_count: 0 } as never)
       .eq("code", "ANY-EXISTING-CODE")
-      .select();
+      .select()
+      .abortSignal(probeSignal());
     if (Array.isArray(result.data)) {
       expect(
         result.data.length,
@@ -280,7 +286,8 @@ describe("discount_codes — replay/concurrency surface as anon", () => {
       .from("discount_codes")
       .delete()
       .eq("code", "ANY-EXISTING-CODE")
-      .select();
+      .select()
+      .abortSignal(probeSignal());
     if (Array.isArray(result.data)) {
       expect(
         result.data.length,
@@ -295,7 +302,7 @@ describe("discount_codes — replay/concurrency surface as anon", () => {
     const PARALLEL = 100;
     const results = await Promise.all(
       Array.from({ length: PARALLEL }, () =>
-        anon.from("discount_codes").select("id").limit(1)
+        anon.from("discount_codes").select("id").limit(1).abortSignal(probeSignal())
       )
     );
     for (const r of results) {
@@ -318,7 +325,7 @@ describe("redemption ledger — anon cannot forge or reset access_code_redemptio
       redeemed_by: "00000000-0000-0000-0000-0000000000cc",
       granted_tier: "business",
       granted_until: "2099-12-31",
-    } as never);
+    } as never).abortSignal(probeSignal());
     expect(error, "anon insert into redemptions must be denied").toBeTruthy();
     const insertedRows = (data ?? []) as unknown[];
     expect(insertedRows.length).toBe(0);
@@ -329,7 +336,8 @@ describe("redemption ledger — anon cannot forge or reset access_code_redemptio
       .from("access_code_redemptions")
       .delete()
       .eq("tenant_id", "00000000-0000-0000-0000-0000000000bb")
-      .select();
+      .select()
+      .abortSignal(probeSignal());
     if (Array.isArray(result.data)) {
       expect(result.data.length).toBe(0);
     }
@@ -340,14 +348,15 @@ describe("redemption ledger — anon cannot forge or reset access_code_redemptio
       .from("access_code_redemptions")
       .update({ is_active: false } as never)
       .eq("tenant_id", "00000000-0000-0000-0000-0000000000bb")
-      .select();
+      .select()
+      .abortSignal(probeSignal());
     if (Array.isArray(result.data)) {
       expect(result.data.length).toBe(0);
     }
   });
 
   it("anon SELECT on access_code_redemptions returns zero rows", async () => {
-    const { data } = await anon.from("access_code_redemptions").select("id").limit(5);
+    const { data } = await anon.from("access_code_redemptions").select("id").limit(5).abortSignal(probeSignal());
     expect((data ?? []).length).toBe(0);
   });
 });
