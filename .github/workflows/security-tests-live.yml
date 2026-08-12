@@ -37,10 +37,10 @@ jobs:
     permissions:
       contents: read
       actions: read
-    # Live suite has its own 180s per-test budget; cap total job time
-    # well above worst-case to absorb cold starts but still fail fast
-    # on a wedged Supabase project.
-    timeout-minutes: 45
+    # Live suite has its own 180s per-test budget and now runs fully
+    # serialised (one file at a time) to stay inside the Supabase pooler's
+    # connection limit, so it needs a wider total budget.
+    timeout-minutes: 90
 
     steps:
       - name: Checkout code

@@ -29,6 +29,19 @@ export default defineConfig({
     // assert on latency.
     testTimeout: 180_000,
     hookTimeout: 180_000,
+    // The live project sits behind a connection-limited pooler. Running
+    // suites in parallel exhausted it ("Too many connections issued to
+    // the database"), which surfaced as bogus RLS failures and 180s
+    // timeouts rather than real regressions. Serialise the whole live
+    // run: one worker, one file at a time, no concurrent tests.
+    pool: "forks",
+    poolOptions: { forks: { singleFork: true, minForks: 1, maxForks: 1 } },
+    fileParallelism: false,
+    maxConcurrency: 1,
+    // Absorb single transient pooler/cold-start blips without turning
+    // the whole scheduled run red.
+    retry: 1,
+
     include: LIVE_SECURITY_TESTS,
     exclude: [
       "node_modules/**",
