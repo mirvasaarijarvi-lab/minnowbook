@@ -37,6 +37,11 @@ updates:
         update-types: ["version-update:semver-major"]
       - dependency-name: "react-dom"
         update-types: ["version-update:semver-major"]
+      # React type definitions must stay on the same major as React 18.
+      - dependency-name: "@types/react"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@types/react-dom"
+        update-types: ["version-update:semver-major"]
       # Tailwind v4 is a breaking rewrite; project is pinned to v3.
       - dependency-name: "tailwindcss"
         update-types: ["version-update:semver-major"]
