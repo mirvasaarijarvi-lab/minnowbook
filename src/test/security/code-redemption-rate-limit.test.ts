@@ -520,11 +520,16 @@ describe("redeem-access-code: brute-force & replay resilience", () => {
   });
 });
 
+// Live-network hangs must fail fast as denials rather than hitting the
+// 90s per-test timeout used by the concurrency suite.
+const PROBE_TIMEOUT_MS = 15_000;
+const probeSignal = () => AbortSignal.timeout(PROBE_TIMEOUT_MS);
+
 describe("discount_codes: brute-force / replay resilience (no public endpoint)", () => {
   it("100 parallel anon SELECTs return zero rows (no enumeration)", { timeout: 30000 }, async () => {
     const results = await Promise.all(
       Array.from({ length: 100 }, () =>
-        anon.from("discount_codes").select("id, code").limit(1),
+        anon.from("discount_codes").select("id, code").limit(1).abortSignal(probeSignal()),
       ),
     );
     for (const r of results) {
@@ -545,7 +550,8 @@ describe("discount_codes: brute-force / replay resilience (no public endpoint)",
           .from("discount_codes")
           .update({ used_count: 0 } as never)
           .eq("code", "ANY-EXISTING-CODE")
-          .select(),
+          .select()
+          .abortSignal(probeSignal()),
       ),
     );
     for (const r of results) {
@@ -565,7 +571,7 @@ describe("discount_codes: brute-force / replay resilience (no public endpoint)",
           code: `FORGED-${i}`,
           discount_type: "percentage",
           discount_value: 100,
-        } as never),
+        } as never).abortSignal(probeSignal()),
       ),
     );
     // Every attempt must error out — no row may ever land.
@@ -580,7 +586,8 @@ describe("discount_codes: brute-force / replay resilience (no public endpoint)",
         anon
           .from("access_code_redemptions")
           .select("id, access_code_id, tenant_id")
-          .limit(5),
+          .limit(5)
+          .abortSignal(probeSignal()),
       ),
     );
     for (const r of results) {
