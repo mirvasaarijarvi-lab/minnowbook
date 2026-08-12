@@ -42,10 +42,23 @@ export async function fetchWithRetry(
   init: RequestInit = {},
   options: RetryOptions = {},
 ): Promise<FetchResult> {
+  const envNumber = (name: string): number | undefined => {
+    try {
+      const raw = Deno.env.get(name);
+      const n = raw ? Number(raw) : NaN;
+      return Number.isFinite(n) && n > 0 ? n : undefined;
+    } catch {
+      return undefined;
+    }
+  };
+
   const {
-    timeoutMs = 25_000,
-    attempts = 3,
-    backoffMs = 1_000,
+    // Cold starts on a saturated shared project routinely exceed 25s;
+    // give each attempt a wider window and one extra retry so genuine
+    // contract assertions still run instead of dying on infra latency.
+    timeoutMs = envNumber("EDGE_TEST_TIMEOUT_MS") ?? 45_000,
+    attempts = envNumber("EDGE_TEST_ATTEMPTS") ?? 4,
+    backoffMs = 1_500,
     label = url,
   } = options;
 
