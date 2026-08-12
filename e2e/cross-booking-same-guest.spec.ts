@@ -45,6 +45,7 @@ import { gotoAndWaitForSpa, assertPublicBookingReady } from "./fixtures/spa-wait
 import {
   callPublicBooking,
   validatePublicBookingErrorShape,
+  isPlatformDegraded,
   writeHarFile,
   type HarEntry,
   type PublicBookingResult,
