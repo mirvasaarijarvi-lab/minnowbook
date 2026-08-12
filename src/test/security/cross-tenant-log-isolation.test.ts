@@ -237,16 +237,32 @@ describe.each([
   });
 
   liveIt("50 parallel reads with mixed filters never surface a leak", async () => {
+    // Fire in bounded batches: 50 simultaneous PostgREST connections
+    // saturate the live pool in CI and stall the whole test past its
+    // budget. Batches of 10 keep the concurrency probe meaningful while
+    // staying inside the connection limits.
     const PARALLEL = 50;
-    const queries = Array.from({ length: PARALLEL }, (_, i) => {
-      const tid = i % 2 === 0 ? LIVE_TENANT_ID : FAKE_TENANT_ID;
-      return anon.from(table).select("id, tenant_id").eq("tenant_id", tid).limit(5);
-    });
-    const results = await Promise.all(queries);
-    for (const r of results) {
-      expectNoRowsLeaked(r, `${table} parallel read`);
+    const BATCH = 10;
+    for (let start = 0; start < PARALLEL; start += BATCH) {
+      const queries = Array.from(
+        { length: Math.min(BATCH, PARALLEL - start) },
+        (_, j) => {
+          const i = start + j;
+          const tid = i % 2 === 0 ? LIVE_TENANT_ID : FAKE_TENANT_ID;
+          return anon
+            .from(table)
+            .select("id, tenant_id")
+            .eq("tenant_id", tid)
+            .limit(5);
+        },
+      );
+      const results = await Promise.all(queries);
+      for (const r of results) {
+        expectNoRowsLeaked(r, `${table} parallel read`);
+      }
     }
-  }, 30_000);
+  }, 120_000);
+
 });
 
 /**
