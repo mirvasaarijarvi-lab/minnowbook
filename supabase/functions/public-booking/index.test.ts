@@ -52,10 +52,31 @@ function isoFutureDate(daysAhead = 14): string {
   return d.toISOString().slice(0, 10);
 }
 
+// One-time warmup: the first invocation of a cold deployment can take
+// far longer than a steady-state call. Doing it once, with failures
+// ignored, keeps the cold-start cost out of the assertion path.
+let warmup: Promise<void> | null = null;
+function warmFunction(): Promise<void> {
+  warmup ??= (async () => {
+    try {
+      const res = await fetch(FN_URL, {
+        method: "OPTIONS",
+        headers: { Origin: "https://mimmobook.com" },
+        signal: AbortSignal.timeout(60_000),
+      });
+      await res.body?.cancel();
+    } catch {
+      /* warmup is best-effort */
+    }
+  })();
+  return warmup;
+}
+
 async function callFn(body: Record<string, unknown>) {
   // Bounded + retried: a cold or saturated deployment otherwise stalls
   // until the platform's 150s idle limit and returns 504 IDLE_TIMEOUT,
   // which is infra noise rather than a contract failure.
+  await warmFunction();
   return await fetchWithRetry(
     FN_URL,
     {
