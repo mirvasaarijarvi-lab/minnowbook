@@ -74,6 +74,22 @@ function runVitest({ files, testNamePattern, junitOut, perTestTimeoutMs, singleF
   return spawnSync("bunx", args, { env, stdio: "inherit" });
 }
 
+// A retry attempt that executed ZERO tests (e.g. the --testNamePattern
+// matched nothing) must never be interpreted as "all tests recovered".
+function junitExecutedCount(path) {
+  if (!existsSync(path)) return 0;
+  const xml = readFileSync(path, "utf8");
+  let total = 0;
+  const re = /<testcase\b([^>]*)(\/>|>([\s\S]*?)<\/testcase>)/g;
+  let m;
+  while ((m = re.exec(xml))) {
+    const body = m[3] ?? "";
+    if (/<skipped\b/.test(body)) continue;
+    total += 1;
+  }
+  return total;
+}
+
 function escapeRegex(s) {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
@@ -175,6 +191,30 @@ async function main() {
       perTestTimeoutMs,
       singleFork,
     });
+    let executed = junitExecutedCount(junitN);
+    if (executed === 0) {
+      // The name filter matched nothing — rerun the whole failing files so the
+      // attempt produces real evidence instead of a vacuous green.
+      writeSummary(
+        `::warning::Attempt ${attempt} name filter matched 0 tests; rerunning full concurrency files without a filter.\n\n`,
+      );
+      runVitest({ files, junitOut: junitN, perTestTimeoutMs, singleFork });
+      executed = junitExecutedCount(junitN);
+    }
+    if (executed === 0) {
+      writeSummary(
+        [
+          `## ❌ Attempt ${attempt} executed 0 tests`,
+          ``,
+          `No verdict could be produced, so the previous failures are NOT treated`,
+          `as recovered. Investigate the runner/filter before trusting this suite.`,
+          ``,
+          ...stillFailing.map((f) => `- \`${f.id}\``),
+          ``,
+        ].join("\n"),
+      );
+      process.exit(3);
+    }
     const nextFailures = parseJunit(junitN);
     const nextFailIds = new Set(nextFailures.map((f) => f.id));
 
