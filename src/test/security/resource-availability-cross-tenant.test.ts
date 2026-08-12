@@ -108,7 +108,9 @@ describe("Resource availability cross-tenant isolation", () => {
                 start_time: "09:00",
                 end_time: "12:00",
               };
-        const { data, error } = await anon.from(table).insert(payload as any).select();
+        const { data, error } = await runWriteProbe(() =>
+          anon.from(table).insert(payload as any).select(),
+        );
         expectWriteDenied(
           {
             table,
@@ -129,11 +131,9 @@ describe("Resource availability cross-tenant isolation", () => {
         const fakeId = "00000000-0000-0000-0000-000000000000";
         const patch =
           table === "resource_opening_hours" ? { is_closed: true } : { note: "leaked" };
-        const { data, error } = await anon
-          .from(table)
-          .update(patch)
-          .eq("id", fakeId)
-          .select();
+        const { data, error } = await runWriteProbe(() =>
+          anon.from(table).update(patch).eq("id", fakeId).select(),
+        );
         expectWriteDenied(
           {
             table,
@@ -151,7 +151,9 @@ describe("Resource availability cross-tenant isolation", () => {
       "anon DELETE from %s for an arbitrary id is denied or affects zero rows",
       async (table) => {
         const fakeId = "00000000-0000-0000-0000-000000000000";
-        const { data, error } = await anon.from(table).delete().eq("id", fakeId).select();
+        const { data, error } = await runWriteProbe(() =>
+          anon.from(table).delete().eq("id", fakeId).select(),
+        );
         expectWriteDenied(
           {
             table,
