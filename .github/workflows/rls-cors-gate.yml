@@ -55,17 +55,11 @@ jobs:
 
       # Run only the RLS + CORS slices of the security suite.
       #
-      # NOTE: we deliberately do NOT pass `--config vitest.security.config.ts`
-      # here. That config is the OFFLINE unit runner and its `exclude` list
-      # (LIVE_SECURITY_TESTS) drops every cross-tenant RLS file and the
-      # custom-headers CORS file — running this gate with that config
-      # produced "No test files found" and a red merge gate even when no
-      # test had regressed. The default `vitest.config.ts` matches every
-      # file passed positionally, and the listed RLS/CORS tests are written
-      # to degrade gracefully (anon-only assertions) when live Supabase
-      # env vars are absent, so this gate stays green on PRs without
-      # credentials and exercises live paths on push to main where they
-      # are configured.
+      # Use the dedicated live config explicitly. The default Vitest config
+      # intentionally excludes LIVE_SECURITY_TESTS so the deterministic
+      # Type-check & Build job cannot duplicate these network probes in
+      # parallel. Positional paths below narrow the live inventory to this
+      # gate's RLS slice.
       # Serialised on purpose: these files all dial the SAME live project
       # with anon clients. Running them in parallel forks saturated the
       # connection pool and produced 109 "Test timed out" failures in one
@@ -75,7 +69,7 @@ jobs:
         env:
           LIVE_FETCH_TIMEOUT_MS: "15000"
         run: |
-          bunx vitest run \
+          bunx vitest run --config vitest.security-live.config.ts \
             --no-file-parallelism \
             --reporter=verbose \
 
@@ -89,12 +83,19 @@ jobs:
             src/test/security/duplicate-tenant-membership.test.ts \
             src/test/security/storage-offer-pdf-isolation.test.ts
 
-      - name: Run CORS regression tests
+      - name: Run live CORS regression test
+        env:
+          LIVE_FETCH_TIMEOUT_MS: "15000"
+        run: |
+          bunx vitest run --config vitest.security-live.config.ts \
+            --reporter=verbose \
+            src/test/security/edge-function-cors-custom-headers.test.ts
+
+      - name: Run offline CORS regression tests
         run: |
           bunx vitest run \
             --reporter=verbose \
             src/test/security/cors-validation.test.ts \
-            src/test/security/edge-function-cors-custom-headers.test.ts \
             src/test/security/edge-function-hsts-referrer-csp.test.ts \
             src/test/security/edge-function-csp.test.ts \
             src/test/security/public-booking-response-headers.test.ts
