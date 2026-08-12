@@ -81,7 +81,7 @@ const Blog = () => {
     <div className="min-h-screen bg-background flex flex-col">
       <SEOHead
         title="Blog – MimmoBook Hospitality Insights & Guides"
-        description="Insights, guides and best practices for hospitality reservation management. Learn how to streamline bookings, reduce no-shows, and grow your restaurant, venue, hotel or guesthouse."
+        description="Guides and best practices for hospitality reservation management: streamline bookings, reduce no-shows and grow your restaurant, venue or hotel."
         path="/blog"
         jsonLd={[
           organizationSchema,
