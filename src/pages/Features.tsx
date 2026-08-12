@@ -59,7 +59,7 @@ const Features = () => {
     <div className="min-h-screen bg-background flex flex-col">
       <SEOHead
         title="Features – MimmoBook Reservation Management Platform"
-        description="Explore MimmoBook's full feature set: smart reservations, branded booking pages, team management, automated emails, reports, discount codes, multi-site support and more."
+        description="Explore MimmoBook features: smart reservations, branded booking pages, team management, automated emails, reports and multi-site support."
         path="/features"
         jsonLd={[
           organizationSchema,
