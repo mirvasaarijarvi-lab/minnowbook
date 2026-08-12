@@ -32,6 +32,26 @@ export const PUBLIC_BOOKING_MAX_ATTEMPTS = 2;
  */
 export type PublicBookingErrorBody = { error: string };
 
+/**
+ * Detect a Supabase *platform* error envelope (gateway/edge-runtime), which
+ * is emitted by the infrastructure before our function code runs. These
+ * bodies look like `{ code, message }` and never satisfy the function's own
+ * `{ error: string }` contract, so specs must treat them as infrastructure
+ * noise rather than a contract break.
+ */
+export function isPlatformDegraded(status: number, body: unknown): boolean {
+  if (status < 500) return false;
+  if (!body || typeof body !== "object" || Array.isArray(body)) return false;
+  const obj = body as Record<string, unknown>;
+  const code = typeof obj.code === "string" ? obj.code : "";
+  const message = typeof obj.message === "string" ? obj.message : "";
+  return (
+    /SUPABASE_EDGE_RUNTIME|SERVICE_DEGRADED|BOOT_ERROR|WORKER_LIMIT/i.test(code) ||
+    /temporarily unavailable|service is degraded/i.test(message)
+  );
+}
+
+
 /** Validate `{ error: string }`. Returns human-readable problems (empty = OK). */
 export function validatePublicBookingErrorShape(body: unknown): string[] {
   const problems: string[] = [];
@@ -255,7 +275,28 @@ export async function callPublicBooking(
         timeout: PUBLIC_BOOKING_TIMEOUT_MS,
       });
       durationMs = Date.now() - startedAt;
+      // Transparently retry Supabase platform-level degradation (the edge
+      // runtime answering 5xx before our function boots).
+      if (attempt < PUBLIC_BOOKING_MAX_ATTEMPTS && res.status() >= 500) {
+        let peeked: unknown = null;
+        try {
+          const peekText = await res.text();
+          peeked = peekText ? JSON.parse(peekText) : null;
+        } catch {
+          /* ignore */
+        }
+        if (isPlatformDegraded(res.status(), peeked)) {
+          // eslint-disable-next-line no-console
+          console.warn(
+            `${logPrefix} ${label} attempt ${attempt}/${PUBLIC_BOOKING_MAX_ATTEMPTS} hit platform degradation (HTTP ${res.status()}), retrying`,
+          );
+          res = null;
+          await new Promise((r) => setTimeout(r, 1500));
+          continue;
+        }
+      }
       break;
+
     } catch (err) {
       durationMs = Date.now() - startedAt;
       lastError = err;

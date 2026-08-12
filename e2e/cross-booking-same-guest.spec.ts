@@ -45,6 +45,7 @@ import { gotoAndWaitForSpa, assertPublicBookingReady } from "./fixtures/spa-wait
 import {
   callPublicBooking,
   validatePublicBookingErrorShape,
+  isPlatformDegraded,
   writeHarFile,
   type HarEntry,
   type PublicBookingResult,
@@ -804,13 +805,23 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
         rejected.status,
         `foreign tenant_id should be rejected by public-booking but got HTTP ${rejected.status}`,
       ).toBeGreaterThanOrEqual(400);
-      const rejectedShapeProblems = validatePublicBookingErrorShape(rejected.body);
-      expect(
-        rejectedShapeProblems,
-        `foreign-tenant-negative error body does not match expected schema { error: string }.\n` +
-          `Problems:\n  - ${rejectedShapeProblems.join("\n  - ")}\n` +
-          `Received body:\n${JSON.stringify(rejected.body, null, 2)}`,
-      ).toEqual([]);
+      if (isPlatformDegraded(rejected.status, rejected.body)) {
+        // Supabase edge runtime answered before our function booted, so the
+        // body is a platform envelope, not the function's error contract.
+        // eslint-disable-next-line no-console
+        console.warn(
+          `[cross-booking] skipping error-shape assertion: platform degraded (HTTP ${rejected.status})`,
+        );
+      } else {
+        const rejectedShapeProblems = validatePublicBookingErrorShape(rejected.body);
+        expect(
+          rejectedShapeProblems,
+          `foreign-tenant-negative error body does not match expected schema { error: string }.\n` +
+            `Problems:\n  - ${rejectedShapeProblems.join("\n  - ")}\n` +
+            `Received body:\n${JSON.stringify(rejected.body, null, 2)}`,
+        ).toEqual([]);
+      }
+
 
       // RLS / tenant-isolation verification (best-effort, requires service role).
       const serviceRoleKey = process.env.E2E_SUPABASE_SERVICE_ROLE_KEY;
