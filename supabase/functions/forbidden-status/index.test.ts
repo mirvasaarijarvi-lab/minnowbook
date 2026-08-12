@@ -23,6 +23,7 @@
  */
 
 import "../_shared/load-env.ts";
+import { fetchWithRetry } from "../_shared/test-fetch.ts";
 import {
   assert,
   assertEquals,
@@ -41,12 +42,20 @@ const FUNCTION_URL = `${SUPABASE_URL}/functions/v1/forbidden-status`;
 // The function is deliberately auth-free (verify_jwt = false). Anonymous
 // callers should always see 403 — which is the very signal the page is
 // trying to surface to monitoring.
+//
+// Every call goes through `fetchWithRetry`: the shared project
+// occasionally answers with a platform envelope (502/503/504,
+// IDLE_TIMEOUT) that has nothing to do with this function's contract.
+// Retrying those keeps the assertions honest without going red on
+// infrastructure noise.
 Deno.test(
   "GET forbidden-status returns HTTP 403 with the JSON denial body",
   async () => {
-    const res = await fetch(`${FUNCTION_URL}?area=the%20Superadmin%20area`, {
-      method: "GET",
-    });
+    const { res, json: body } = await fetchWithRetry(
+      `${FUNCTION_URL}?area=the%20Superadmin%20area`,
+      { method: "GET" },
+      { label: "forbidden-status GET" },
+    );
 
     // The headline assertion: a real, observable 403 status code.
     assertEquals(
@@ -65,7 +74,6 @@ Deno.test(
     // denial could be served to a user who is actually authorized.
     assertEquals(res.headers.get("cache-control"), "no-store");
 
-    const body = await res.json();
     assertEquals(body.status, 403);
     assertEquals(body.error, "forbidden");
     // The message echoes the requested area so audit logs and screenshots
@@ -77,9 +85,12 @@ Deno.test(
 Deno.test(
   "GET forbidden-status without ?area= falls back to 'this area'",
   async () => {
-    const res = await fetch(FUNCTION_URL, { method: "GET" });
+    const { res, json: body } = await fetchWithRetry(
+      FUNCTION_URL,
+      { method: "GET" },
+      { label: "forbidden-status GET (no area)" },
+    );
     assertEquals(res.status, 403);
-    const body = await res.json();
     assertStringIncludes(body.message, "this area");
   },
 );
@@ -87,13 +98,16 @@ Deno.test(
 Deno.test(
   "POST forbidden-status also returns 403 (method-agnostic denial)",
   async () => {
-    const res = await fetch(`${FUNCTION_URL}?area=audit%20log`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ ignored: true }),
-    });
+    const { res, json: body } = await fetchWithRetry(
+      `${FUNCTION_URL}?area=audit%20log`,
+      {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ ignored: true }),
+      },
+      { label: "forbidden-status POST" },
+    );
     assertEquals(res.status, 403);
-    const body = await res.json();
     assertStringIncludes(body.message, "audit log");
   },
 );
@@ -101,18 +115,19 @@ Deno.test(
 Deno.test(
   "OPTIONS preflight returns HTTP 204 with the documented CORS headers",
   async () => {
-    const res = await fetch(FUNCTION_URL, {
-      method: "OPTIONS",
-      headers: {
-        // Mirror what a browser preflight from the SPA would send.
-        origin: "https://app.example.com",
-        "access-control-request-method": "GET",
-        "access-control-request-headers": "authorization, content-type",
+    const { res } = await fetchWithRetry(
+      FUNCTION_URL,
+      {
+        method: "OPTIONS",
+        headers: {
+          // Mirror what a browser preflight from the SPA would send.
+          origin: "https://app.example.com",
+          "access-control-request-method": "GET",
+          "access-control-request-headers": "authorization, content-type",
+        },
       },
-    });
-
-    // Consume body to avoid resource leak warnings even though it's empty.
-    await res.text();
+      { label: "forbidden-status OPTIONS" },
+    );
 
     assertEquals(res.status, 204, "preflight must succeed without a body");
 
@@ -133,17 +148,17 @@ Deno.test(
   async () => {
     // Five back-to-back calls to confirm the function is stateless and
     // never accidentally upgrades to a 2xx (e.g. via a future cache miss).
-    const responses = await Promise.all(
-      Array.from({ length: 5 }, () =>
-        fetch(`${FUNCTION_URL}?area=probe`, { method: "GET" }),
-      ),
-    );
-
-    for (const res of responses) {
+    // Sequential rather than a 5-way burst: a parallel burst on a
+    // saturated shared project is what produced the transient 503 that
+    // this assertion mistook for a contract break.
+    for (let i = 0; i < 5; i++) {
+      const { res, json: body } = await fetchWithRetry(
+        `${FUNCTION_URL}?area=probe`,
+        { method: "GET" },
+        { label: `forbidden-status probe ${i + 1}/5` },
+      );
       assertEquals(res.status, 403);
-      // Drain the body — Deno requires it to release the connection.
-      const body = await res.json();
-      assert(body.message);
+      assert(body?.message);
     }
   },
 );
