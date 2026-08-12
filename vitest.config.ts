@@ -1,6 +1,7 @@
 import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
+import { LIVE_SECURITY_TESTS } from "./vitest.security-live.files";
 
 export default defineConfig({
   plugins: [react()],
@@ -48,7 +49,21 @@ export default defineConfig({
     // will print the offending handle and exit non-zero.
     // (Reporter `hanging-process` can be added on the CLI when triaging.)
     // Don't scan node_modules or build output for tests.
-    exclude: ["node_modules", "dist", ".idea", ".git", ".cache", "e2e", "playwright"],
+    // The default runner is the deterministic PR/build gate. Live backend
+    // probes have their own serialised runner and dedicated RLS/CORS gate;
+    // including them here duplicates coverage in parallel forks, exhausts
+    // the shared connection pool, and turns network stalls into hundreds of
+    // false unit-test regressions.
+    exclude: [
+      "node_modules",
+      "dist",
+      ".idea",
+      ".git",
+      ".cache",
+      "e2e",
+      "playwright",
+      ...LIVE_SECURITY_TESTS,
+    ],
     // Reduce reporter overhead in CI; scripts/test-ci.sh adds --bail=1 + --reporter=dot.
     passWithNoTests: false,
     // CI-friendly report files. The dot reporter is added on the CLI in
