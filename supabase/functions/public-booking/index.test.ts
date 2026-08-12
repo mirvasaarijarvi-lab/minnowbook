@@ -11,7 +11,7 @@ import {
   assertFunctionError,
   assertMissingServiceKeyResponse,
 } from "../_shared/test-assert.ts";
-import { fetchWithRetry } from "../_shared/test-fetch.ts";
+import { fetchWithRetry, isInfraTimeout } from "../_shared/test-fetch.ts";
 
 function requireEnv(...names: string[]): string {
   for (const n of names) {
