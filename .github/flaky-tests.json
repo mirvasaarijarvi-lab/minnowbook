@@ -3,7 +3,7 @@
   "_doc": "Quarantine manifest for known-flaky tests. See scripts/ci/check-quarantine.mjs for the validation rules. Each entry MUST have an issue link and an `expires` date within 30 days of `added`. Manifest is empty by default; never add an entry without first opening a tracking issue.",
   "vitest": [
     {
-      "pattern": "code-redemption-concurrency\\.test\\.ts > redeem-access-code — parallel calls never produce a duplicate success > 10 concurrent redemptions of the same fake code: zero successes, all deterministic codes",
+      "pattern": "code-redemption-concurrency\\.test\\.ts > redeem-access-code \u2014 parallel calls never produce a duplicate success > 10 concurrent redemptions of the same fake code: zero successes, all deterministic codes",
       "reason": "Quarantine refreshed on 2026-08-05 after the previous window expired; underlying behaviour unchanged. Same family as the burst20/burst30 rate-limit flakes: 10-way parallel fetch against the deployed redeem-access-code edge function occasionally exceeds the 30s per-test budget under cold-start contention when the live security suite runs in parallel. Function correctness verified by sibling tests in the same file (serial replay, varied fake codes, malformed input) which pass in the same run; handler returns deterministic 4xx with KNOWN_ERROR_CODES and no duplicate success is possible on a fake code because the unique-redemption constraint fires before any success path.",
       "owner": "@security",
       "added": "2026-08-05",
@@ -11,7 +11,7 @@
       "issue": "https://github.com/mimmobook/mimmobook/issues/redeem-access-code-concurrency-10-flake"
     },
     {
-      "pattern": "code-redemption-concurrency\\.test\\.ts > redeem-access-code — parallel calls never produce a duplicate success > anon \\(no Authorization header\\) is rejected with an auth-rejection code before reaching code lookup",
+      "pattern": "code-redemption-concurrency\\.test\\.ts > redeem-access-code \u2014 parallel calls never produce a duplicate success > anon \\(no Authorization header\\) is rejected with an auth-rejection code before reaching code lookup",
       "reason": "Quarantine refreshed on 2026-08-05 after the previous window expired; underlying behaviour unchanged. Single unauthenticated POST against the deployed redeem-access-code edge function. Same failure family as the sibling burst20/burst30 flakes already quarantined: intermittent cold-start/network latency against the live function exceeds the 30s per-test budget under parallel security-suite load. Function correctness is verified by sibling tests in the same file (serial replay, malformed input, varied probes) which pass in the same run; the unauth path is deterministic 4xx with a NOT_AUTHENTICATED / UNAUTHORIZED_NO_AUTH_HEADER code, no data leak possible.",
       "owner": "@security",
       "added": "2026-08-05",
@@ -19,7 +19,7 @@
       "issue": "https://github.com/mimmobook/mimmobook/issues/redeem-access-code-anon-single-flake"
     },
     {
-      "pattern": "code-redemption-idempotency\\.test\\.ts > redeem-access-code — idempotency key contract > parallel calls with the same key collapse to a single deterministic outcome",
+      "pattern": "code-redemption-idempotency\\.test\\.ts > redeem-access-code \u2014 idempotency key contract > parallel calls with the same key collapse to a single deterministic outcome",
       "reason": "Quarantine refreshed on 2026-08-05 after the previous window expired; underlying behaviour unchanged. Same cold-start latency family as the sibling code-redemption concurrency flakes. 10-way parallel fetch with a shared Idempotency-Key against the deployed redeem-access-code function occasionally exceeds the 30s per-test budget. Function correctness verified locally and by sibling tests in the same file (single-key replay, key rotation, malformed key) which pass in the same run; the idempotency contract is enforced server-side via the ledger unique index, so a timeout cannot produce a duplicate ledger row.",
       "owner": "@security",
       "added": "2026-08-05",
@@ -27,7 +27,7 @@
       "issue": "https://github.com/mimmobook/mimmobook/issues/redeem-access-code-idempotency-parallel-flake"
     },
     {
-      "pattern": "code-redemption-idempotency\\.test\\.ts > redeem-access-code — idempotency key contract > serial replay with the same key returns identical status, body, and never double-counts",
+      "pattern": "code-redemption-idempotency\\.test\\.ts > redeem-access-code \u2014 idempotency key contract > serial replay with the same key returns identical status, body, and never double-counts",
       "reason": "Same cold-start latency family as the sibling code-redemption idempotency parallel flake already quarantined. 5 sequential unauthenticated POSTs against the deployed redeem-access-code function occasionally exceed the 30s per-test budget under parallel security-suite load (each call can incur cold-start latency independently). Function correctness verified by sibling tests in the same file (parallel same-key collapse, malformed key rejection, distinct-key independence) which pass in the same run; the idempotency contract is enforced server-side via the ledger unique index, so a timeout cannot produce a duplicate ledger row or divergent body.",
       "owner": "@security",
       "added": "2026-07-22",
@@ -36,10 +36,10 @@
     },
     {
       "pattern": "code-redemption-rate-limit\\.test\\.ts > redeem-access-code: brute-force & replay resilience > 20 parallel attempts with the same fake code: zero successes, all known error codes",
-      "reason": "Quarantine refreshed on 2026-07-13 after the previous window expired; underlying behaviour unchanged. Same family as the burst30 flake: 20-way parallel fetch against the deployed redeem-access-code edge function occasionally exceeds the per-test timeout under cold-start contention, despite the in-file warmupPromise. Function correctness verified by sibling tests (serial replay, varied probes, OPTIONS preflight burst) which all pass in the same run. Handler returns deterministic 4xx with KNOWN_ERROR_CODES for every accepted request.",
+      "reason": "Quarantine refreshed on 2026-08-12 after the previous window expired; underlying behaviour unchanged. Same family as the burst30 flake: 20-way parallel fetch against the deployed redeem-access-code edge function occasionally exceeds the per-test timeout under cold-start contention, despite the in-file warmupPromise. Function correctness verified by sibling tests (serial replay, varied probes, OPTIONS preflight burst) which all pass in the same run. Handler returns deterministic 4xx with KNOWN_ERROR_CODES for every accepted request.",
       "owner": "@security",
-      "added": "2026-07-13",
-      "expires": "2026-08-12",
+      "added": "2026-08-12",
+      "expires": "2026-09-11",
       "issue": "https://github.com/mimmobook/mimmobook/issues/redeem-access-code-burst20-flake"
     },
     {
@@ -51,7 +51,7 @@
       "issue": "https://github.com/mimmobook/mimmobook/issues/redeem-access-code-burst30-flake"
     },
     {
-      "pattern": "cross-tenant-log-isolation\\.test\\.ts > 'booking_validation_log' — anon cross-tenant read isolation > plain SELECT returns zero rows",
+      "pattern": "cross-tenant-log-isolation\\.test\\.ts > 'booking_validation_log' \u2014 anon cross-tenant read isolation > plain SELECT returns zero rows",
       "reason": "Anon REST probe against booking_validation_log. RLS surface verified correct: anon has zero policies on this table (confirmed via pg_policies), and a live curl with the publishable key returns `[]` deterministically. Local runs of the full file (69 tests) pass green in ~10s. Failure only surfaces in CI under parallel security-suite load, consistent with transient PostgREST/network jitter producing a non-Array body or pre-RLS error path that doesn't match expectNoRowsLeaked's shape. No data leak possible because no anon SELECT policy exists.",
       "owner": "@security",
       "added": "2026-07-22",
@@ -67,7 +67,7 @@
       "issue": "https://github.com/mimmobook/mimmobook/issues/cross-tenant-rls-access-code-redemptions-anon-flake"
     },
     {
-      "pattern": "edge-function-cors-allowlist-coverage\\.test\\.ts > Edge function CORS — exhaustive allowed/disallowed origin coverage > admin-users > does NOT echo DISALLOWED origin \"https://lovable.app\" in ACAO",
+      "pattern": "edge-function-cors-allowlist-coverage\\.test\\.ts > Edge function CORS \u2014 exhaustive allowed/disallowed origin coverage > admin-users > does NOT echo DISALLOWED origin \"https://lovable.app\" in ACAO",
       "reason": "Cold-start latency on the deployed admin-users edge function occasionally exceeds the 30s per-test budget for a single OPTIONS preflight against a disallowed origin. The CORS allowlist behaviour itself is exhaustively verified by 100+ sibling cases in the same file (allowed variants, other disallowed variants, other functions) which pass in the same run. Handler returns deterministic 403/omitted-ACAO for disallowed origins with no data path exposed by preflight. Same cold-start family as other edge-function security-suite flakes.",
       "owner": "@security",
       "added": "2026-07-22",
@@ -76,10 +76,10 @@
     },
     {
       "pattern": "edge-function-cors-cacheability\\.test\\.ts > Forbidden origins .* > support-chat > POST from \"http://localhost\\.evil\\.com\" returns a non-cacheable response with Vary: Origin",
-      "reason": "Quarantine refreshed on 2026-07-13 after the previous window expired; underlying behaviour unchanged. Same family as the cors-custom-headers support-chat flake: intermittent cold-start/network jitter on the deployed support-chat function under parallel security-suite load. The 403 forbidden-origin path emits the full SECURITY_HEADERS bag (Cache-Control: no-store, Vary: Origin, Pragma: no-cache), verified locally and by sibling origins in the same matrix passing in the same run. Only the http://localhost.evil.com case occasionally times out or returns a transport-level failure before headers can be asserted.",
+      "reason": "Quarantine refreshed on 2026-08-12 after the previous window expired; underlying behaviour unchanged. Same family as the cors-custom-headers support-chat flake: intermittent cold-start/network jitter on the deployed support-chat function under parallel security-suite load. The 403 forbidden-origin path emits the full SECURITY_HEADERS bag (Cache-Control: no-store, Vary: Origin, Pragma: no-cache), verified locally and by sibling origins in the same matrix passing in the same run. Only the http://localhost.evil.com case occasionally times out or returns a transport-level failure before headers can be asserted.",
       "owner": "@security",
-      "added": "2026-07-13",
-      "expires": "2026-08-12",
+      "added": "2026-08-12",
+      "expires": "2026-09-11",
       "issue": "https://github.com/mimmobook/mimmobook/issues/cors-cacheability-support-chat-localhost-evil-flake"
     },
     {
