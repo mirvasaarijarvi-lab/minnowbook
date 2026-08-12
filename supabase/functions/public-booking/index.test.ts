@@ -52,23 +52,22 @@ function isoFutureDate(daysAhead = 14): string {
 }
 
 async function callFn(body: Record<string, unknown>) {
-  const res = await fetch(FN_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      apikey: ANON_KEY,
-      Authorization: `Bearer ${ANON_KEY}`,
+  // Bounded + retried: a cold or saturated deployment otherwise stalls
+  // until the platform's 150s idle limit and returns 504 IDLE_TIMEOUT,
+  // which is infra noise rather than a contract failure.
+  return await fetchWithRetry(
+    FN_URL,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: ANON_KEY,
+        Authorization: `Bearer ${ANON_KEY}`,
+      },
+      body: JSON.stringify(body),
     },
-    body: JSON.stringify(body),
-  });
-  const text = await res.text();
-  let json: any = null;
-  try {
-    json = JSON.parse(text);
-  } catch {
-    /* leave as null */
-  }
-  return { res, json, text };
+    { label: "public-booking" },
+  );
 }
 
 async function adminFetch(path: string, init: RequestInit = {}) {
