@@ -1,5 +1,5 @@
 import { describe, it, beforeAll, expect } from "vitest";
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient, type PostgrestError } from "@supabase/supabase-js";
 import { expectReadDenied, expectWriteDenied } from "./rls-assert";
 import {
   createTenantPairFixture,
