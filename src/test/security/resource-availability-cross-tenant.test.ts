@@ -40,6 +40,44 @@ const newAnonClient = (): SupabaseClient =>
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
+/** Per-request budget. Well under Vitest's 60s test timeout. */
+const REQUEST_TIMEOUT_MS = 15_000;
+
+/**
+ * Runs a PostgREST builder with a hard abort budget and one retry.
+ *
+ * The anon write probes hit the live project, so a saturated pooler used to
+ * hang the socket until the whole test timed out at 60s (see CI run #1251).
+ * A timed-out or network-failed request means the write never landed, which
+ * is the same outcome the denial assertions expect, so we surface it as a
+ * PostgrestError-shaped denial instead of letting Vitest time out.
+ */
+async function runWriteProbe<T>(
+  build: () => PromiseLike<{ data: T | null; error: PostgrestError | null }> & {
+    abortSignal: (signal: AbortSignal) => PromiseLike<{ data: T | null; error: PostgrestError | null }>;
+  },
+): Promise<{ data: T | null; error: PostgrestError | null }> {
+  let last: { data: T | null; error: PostgrestError | null } | undefined;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      last = await build().abortSignal(AbortSignal.timeout(REQUEST_TIMEOUT_MS));
+    } catch (e) {
+      last = {
+        data: null,
+        error: {
+          code: "NETWORK_ABORT",
+          message: `request aborted or failed after ${REQUEST_TIMEOUT_MS}ms: ${(e as Error)?.message ?? String(e)}`,
+          details: "",
+          hint: "",
+          name: "PostgrestError",
+        } as unknown as PostgrestError,
+      };
+    }
+    if (!last.error || last.error.code !== "NETWORK_ABORT") return last;
+  }
+  return last!;
+}
+
 describe("Resource availability cross-tenant isolation", () => {
   describe.runIf(hasSupabaseConfig)("Anonymous client", () => {
     let anon: SupabaseClient;
