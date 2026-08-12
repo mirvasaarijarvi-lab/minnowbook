@@ -66,10 +66,19 @@ jobs:
       # env vars are absent, so this gate stays green on PRs without
       # credentials and exercises live paths on push to main where they
       # are configured.
+      # Serialised on purpose: these files all dial the SAME live project
+      # with anon clients. Running them in parallel forks saturated the
+      # connection pool and produced 109 "Test timed out" failures in one
+      # 32-minute run. LIVE_FETCH_TIMEOUT_MS additionally caps any stalled
+      # socket at 15s (see src/test/setup.ts).
       - name: Run RLS regression tests
+        env:
+          LIVE_FETCH_TIMEOUT_MS: "15000"
         run: |
           bunx vitest run \
+            --no-file-parallelism \
             --reporter=verbose \
+
             src/test/security/cross-tenant-rls.test.ts \
             src/test/security/cross-tenant-log-isolation.test.ts \
             src/test/security/cross-tenant-storage.test.ts \

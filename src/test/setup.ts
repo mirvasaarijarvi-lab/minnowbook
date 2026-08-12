@@ -53,7 +53,39 @@ afterAll(() => {
   console.error = originalConsoleError;
 });
 
+// --- Live network hang guard --------------------------------------------------
+// The live security suites (cross-tenant RLS, log isolation, storage, code
+// redemption) fire anon PostgREST/Storage/Functions requests. When the shared
+// project saturates its connection pool the socket simply stalls, and every
+// probe burns the full Vitest timeout (30s/60s each) instead of failing fast.
+// One saturated job produced 109 identical "Test timed out" failures over 32
+// minutes with no other signal.
+//
+// Wrap global fetch so any request that does NOT already carry an AbortSignal
+// is capped. A timed-out probe never wrote or read anything, which is exactly
+// the outcome the denial assertions expect, so the suites stay meaningful and
+// fail in seconds instead of wedging the run.
+const LIVE_FETCH_TIMEOUT_MS = Number(
+  (globalThis as any).process?.env?.LIVE_FETCH_TIMEOUT_MS ?? 15_000,
+);
+
+if (Number.isFinite(LIVE_FETCH_TIMEOUT_MS) && LIVE_FETCH_TIMEOUT_MS > 0) {
+  const originalFetch = globalThis.fetch?.bind(globalThis);
+  if (originalFetch) {
+    globalThis.fetch = ((input: any, init?: RequestInit) => {
+      if (init?.signal || (input && typeof input === "object" && input.signal)) {
+        return originalFetch(input, init);
+      }
+      return originalFetch(input, {
+        ...init,
+        signal: AbortSignal.timeout(LIVE_FETCH_TIMEOUT_MS),
+      });
+    }) as typeof fetch;
+  }
+}
+
 Object.defineProperty(window, "matchMedia", {
+
   writable: true,
   value: (query: string) => ({
     matches: false,
