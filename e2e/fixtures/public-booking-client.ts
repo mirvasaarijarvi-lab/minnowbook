@@ -275,7 +275,28 @@ export async function callPublicBooking(
         timeout: PUBLIC_BOOKING_TIMEOUT_MS,
       });
       durationMs = Date.now() - startedAt;
+      // Transparently retry Supabase platform-level degradation (the edge
+      // runtime answering 5xx before our function boots).
+      if (attempt < PUBLIC_BOOKING_MAX_ATTEMPTS && res.status() >= 500) {
+        let peeked: unknown = null;
+        try {
+          const peekText = await res.text();
+          peeked = peekText ? JSON.parse(peekText) : null;
+        } catch {
+          /* ignore */
+        }
+        if (isPlatformDegraded(res.status(), peeked)) {
+          // eslint-disable-next-line no-console
+          console.warn(
+            `${logPrefix} ${label} attempt ${attempt}/${PUBLIC_BOOKING_MAX_ATTEMPTS} hit platform degradation (HTTP ${res.status()}), retrying`,
+          );
+          res = null;
+          await new Promise((r) => setTimeout(r, 1500));
+          continue;
+        }
+      }
       break;
+
     } catch (err) {
       durationMs = Date.now() - startedAt;
       lastError = err;
