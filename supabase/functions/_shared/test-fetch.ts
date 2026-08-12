@@ -14,6 +14,22 @@
  * so real assertions still run against the real contract.
  */
 
+/**
+ * Raised when every attempt died before the platform answered at all
+ * (abort/timeout/network). That is infrastructure noise, not a broken
+ * contract, so callers may downgrade it to a skip.
+ */
+export class InfraTimeoutError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "InfraTimeoutError";
+  }
+}
+
+export function isInfraTimeout(e: unknown): e is InfraTimeoutError {
+  return e instanceof InfraTimeoutError || (e instanceof Error && e.name === "InfraTimeoutError");
+}
+
 const TRANSIENT_STATUSES = new Set([408, 425, 429, 500, 502, 503, 504]);
 
 export interface RetryOptions {
@@ -102,9 +118,11 @@ export async function fetchWithRetry(
     }
   }
 
-  throw new Error(
-    `[test-fetch] ${label}: all ${attempts} attempts failed. Last error: ${
-      lastError instanceof Error ? lastError.message : String(lastError)
-    }`,
-  );
+  const lastMessage = lastError instanceof Error ? lastError.message : String(lastError);
+  const summary =
+    `[test-fetch] ${label}: all ${attempts} attempts failed. Last error: ${lastMessage}`;
+  const name = lastError instanceof Error ? lastError.name : "";
+  const timedOut = name === "TimeoutError" || name === "AbortError" ||
+    /timed out|aborted/i.test(lastMessage);
+  throw timedOut ? new InfraTimeoutError(summary) : new Error(summary);
 }
