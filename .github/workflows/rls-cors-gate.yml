@@ -72,7 +72,6 @@ jobs:
           bunx vitest run --config vitest.security-live.config.ts \
             --no-file-parallelism \
             --reporter=verbose \
-
             src/test/security/cross-tenant-rls.test.ts \
             src/test/security/cross-tenant-log-isolation.test.ts \
             src/test/security/cross-tenant-storage.test.ts \
