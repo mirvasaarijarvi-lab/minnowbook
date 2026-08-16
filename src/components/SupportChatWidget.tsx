@@ -545,9 +545,11 @@ const SupportChatWidget = ({ businessTier = false }: SupportChatWidgetProps) => 
                       variant="default"
                       disabled={!input.trim() || isLoading}
                       className="shrink-0"
+                      aria-label={t("aid.sendMessage" as TranslationKey)}
                     >
-                      <Send className="h-3.5 w-3.5" />
+                      <Send className="h-3.5 w-3.5" aria-hidden="true" />
                     </Button>
+
                   </form>
                 )}
               </div>
