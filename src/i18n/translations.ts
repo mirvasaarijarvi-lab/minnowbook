@@ -1868,6 +1868,26 @@ type TranslationKeys = {
   "timeline.legendPending": string;
   "timeline.legendBlocked": string;
   "timeline.legendSlot": string;
+
+  // Forecast
+  "forecast.title": string;
+  "forecast.subtitle": string;
+  "forecast.booked": string;
+  "forecast.expected": string;
+  "forecast.next14Booked": string;
+  "forecast.next14Guests": string;
+  "forecast.gapToPace": string;
+  "forecast.peakHours": string;
+  "forecast.peakSubtitle": string;
+  "forecast.busiest": string;
+  "forecast.basedOn": string;
+  "forecast.mon": string;
+  "forecast.tue": string;
+  "forecast.wed": string;
+  "forecast.thu": string;
+  "forecast.fri": string;
+  "forecast.sat": string;
+  "forecast.sun": string;
 };
 
 export type TranslationKey = keyof TranslationKeys;
@@ -3713,6 +3733,26 @@ const en: TranslationKeys = {
   "timeline.legendPending": "Pending",
   "timeline.legendBlocked": "Blocked",
   "timeline.legendSlot": "Extra availability",
+
+  // Forecast
+  "forecast.title": "Demand forecast",
+  "forecast.subtitle": "Bookings already on the books for the next 14 days versus your typical pace for that weekday.",
+  "forecast.booked": "Booked",
+  "forecast.expected": "Typical pace",
+  "forecast.next14Booked": "Reservations next 14 days",
+  "forecast.next14Guests": "Guests next 14 days",
+  "forecast.gapToPace": "Gap to typical pace",
+  "forecast.peakHours": "Peak hours",
+  "forecast.peakSubtitle": "Reservation start times by weekday over the last 90 days.",
+  "forecast.busiest": "Busiest",
+  "forecast.basedOn": "Based on the last days:",
+  "forecast.mon": "Mon",
+  "forecast.tue": "Tue",
+  "forecast.wed": "Wed",
+  "forecast.thu": "Thu",
+  "forecast.fri": "Fri",
+  "forecast.sat": "Sat",
+  "forecast.sun": "Sun",
 };
 
 const fi: TranslationKeys = {
@@ -5554,6 +5594,26 @@ const fi: TranslationKeys = {
   "timeline.legendPending": "Odottaa",
   "timeline.legendBlocked": "Estetty",
   "timeline.legendSlot": "Lisäsaatavuus",
+
+  // Forecast
+  "forecast.title": "Kysyntäennuste",
+  "forecast.subtitle": "Jo tehdyt varaukset seuraaville 14 päivälle verrattuna kyseisen viikonpäivän tavanomaiseen tahtiin.",
+  "forecast.booked": "Varattu",
+  "forecast.expected": "Tavanomainen tahti",
+  "forecast.next14Booked": "Varaukset 14 päivän aikana",
+  "forecast.next14Guests": "Vieraat 14 päivän aikana",
+  "forecast.gapToPace": "Ero tavanomaiseen tahtiin",
+  "forecast.peakHours": "Ruuhkatunnit",
+  "forecast.peakSubtitle": "Varausten alkamisajat viikonpäivittäin viimeisen 90 päivän ajalta.",
+  "forecast.busiest": "Vilkkain",
+  "forecast.basedOn": "Perustuu viime päiviin:",
+  "forecast.mon": "Ma",
+  "forecast.tue": "Ti",
+  "forecast.wed": "Ke",
+  "forecast.thu": "To",
+  "forecast.fri": "Pe",
+  "forecast.sat": "La",
+  "forecast.sun": "Su",
 };
 
 const sv: TranslationKeys = {
@@ -7395,6 +7455,26 @@ const sv: TranslationKeys = {
   "timeline.legendPending": "Väntande",
   "timeline.legendBlocked": "Blockerad",
   "timeline.legendSlot": "Extra tillgänglighet",
+
+  // Forecast
+  "forecast.title": "Efterfrågeprognos",
+  "forecast.subtitle": "Redan gjorda bokningar för de kommande 14 dagarna jämfört med din vanliga takt för den veckodagen.",
+  "forecast.booked": "Bokat",
+  "forecast.expected": "Vanlig takt",
+  "forecast.next14Booked": "Bokningar nästa 14 dagar",
+  "forecast.next14Guests": "Gäster nästa 14 dagar",
+  "forecast.gapToPace": "Skillnad mot vanlig takt",
+  "forecast.peakHours": "Toppentimmar",
+  "forecast.peakSubtitle": "Bokningarnas starttider per veckodag under de senaste 90 dagarna.",
+  "forecast.busiest": "Mest bokat",
+  "forecast.basedOn": "Baserat på de senaste dagarna:",
+  "forecast.mon": "Mån",
+  "forecast.tue": "Tis",
+  "forecast.wed": "Ons",
+  "forecast.thu": "Tors",
+  "forecast.fri": "Fre",
+  "forecast.sat": "Lör",
+  "forecast.sun": "Sön",
 };
 
 export const translations: Record<Language, TranslationKeys> = { en, fi, sv };
