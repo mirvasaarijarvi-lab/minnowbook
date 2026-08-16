@@ -109,7 +109,23 @@ jobs:
 
       - name: Run E2E tests
         if: steps.env-check.outputs.ready == 'true'
-        run: bunx playwright test
+        # Specs that seed an ephemeral tenant (guest portal flow, cross
+        # booking) read SERVICE_ROLE_KEY / anon key at runtime and self-skip
+        # when they are absent, so pass them through or those specs never run.
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          VITE_SUPABASE_PROJECT_ID: ${{ secrets.VITE_SUPABASE_PROJECT_ID }}
+          SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          if [ -z "${SERVICE_ROLE_KEY:-}" ]; then
+            echo "::notice::SUPABASE_SERVICE_ROLE_KEY not configured, backend-seeded specs will self-skip."
+          fi
+          bunx playwright test
+
 
       - name: Upload Playwright HTML report
         if: always()
