@@ -14,13 +14,7 @@ const FindBooking = () => {
   const [email, setEmail] = useState("");
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
-  let language = "en";
-  try {
-    // Language context is optional on this standalone public page.
-    language = useLanguage().language;
-  } catch {
-    language = "en";
-  }
+  const { language } = useLanguage();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
