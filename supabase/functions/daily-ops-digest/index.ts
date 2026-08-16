@@ -1,16 +1,24 @@
 // Daily operations digest.
 //
-// Cron entrypoint (06:00 Helsinki). For every tenant that opted in via
-// tenant_settings.ops_digest_enabled it builds the same run sheet the
-// dashboard shows for the coming day and enqueues it to the configured
-// recipients. Service-role authorization only: no browser ever calls this.
+// Cron entrypoint. The job runs every hour and each tenant is mailed only when
+// the clock reads SEND_LOCAL_HOUR in that tenant's own timezone, so the digest
+// lands at the same local time all year instead of drifting with daylight
+// saving. For every tenant that opted in via tenant_settings.ops_digest_enabled
+// it builds the same run sheet the dashboard shows for the coming day and
+// enqueues it to the configured recipients. Service-role authorization only:
+// no browser ever calls this directly.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { corsHeaders } from "../_shared/http-headers.ts";
+import { getCorsHeaders } from "../_shared/http-headers.ts";
+import { requireAuth } from "../_shared/require-auth.ts";
+
 
 const SENDER_DOMAIN = "notify.mimmobook.com";
 const KITCHEN_TYPES = ["restaurant", "catering", "venue"];
 const LODGING_TYPES = ["hotel", "guesthouse", "cottage", "camping"];
 const MAX_TENANTS_PER_RUN = 200;
+export const SEND_LOCAL_HOUR = 6;
+const DEFAULT_TIMEZONE = "Europe/Helsinki";
+
 
 function escapeHtml(str: unknown): string {
   return String(str ?? "")
@@ -35,10 +43,47 @@ export function normalizeRecipients(raw: unknown, fallback?: unknown): string[] 
   return Array.from(seen).slice(0, 10);
 }
 
-/** The digest always covers "the day the venue is about to work". */
-export function digestDate(now: Date): string {
-  return new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+/** Tenant timezones come from settings, so fall back when they are unusable. */
+export function normalizeTimezone(raw: unknown): string {
+  if (typeof raw !== "string" || raw.trim().length === 0) return DEFAULT_TIMEZONE;
+  const tz = raw.trim();
+  try {
+    new Intl.DateTimeFormat("en-CA", { timeZone: tz }).format(new Date());
+    return tz;
+  } catch {
+    return DEFAULT_TIMEZONE;
+  }
 }
+
+/** Wall-clock parts for `now` as seen inside `timeZone`. */
+function localParts(now: Date, timeZone: string): { date: string; hour: number } {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(now);
+  const get = (type: string) => parts.find((p) => p.type === type)?.value ?? "";
+  return { date: `${get("year")}-${get("month")}-${get("day")}`, hour: Number(get("hour")) };
+}
+
+/** Local hour of the tenant, used to gate the hourly cron down to one send. */
+export function tenantLocalHour(now: Date, timeZone: unknown): number {
+  return localParts(now, normalizeTimezone(timeZone)).hour;
+}
+
+/**
+ * The digest always covers "the day the venue is about to work", counted from
+ * the tenant's own calendar rather than UTC.
+ */
+export function digestDate(now: Date, timeZone: unknown = DEFAULT_TIMEZONE): string {
+  const today = localParts(now, normalizeTimezone(timeZone)).date;
+  const [y, m, d] = today.split("-").map(Number);
+  return new Date(Date.UTC(y, m - 1, d + 1)).toISOString().slice(0, 10);
+}
+
 
 type DigestRow = {
   reservation_type: string;
@@ -87,7 +132,17 @@ export function buildDigestHtml(businessName: string, date: string, rows: Digest
 </body></html>`;
 }
 
+type TenantSetting = {
+  tenant_id: string;
+  business_name: string | null;
+  business_email: string | null;
+  ops_digest_recipients: unknown;
+  timezone: unknown;
+};
+
 export async function handleDailyOpsDigestRequest(req: Request): Promise<Response> {
+  const corsHeaders = getCorsHeaders(req, { allowMethods: "POST, OPTIONS" });
+
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -101,8 +156,31 @@ export async function handleDailyOpsDigestRequest(req: Request): Promise<Respons
   const serviceRoleKey = (Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "").trim();
   const supabaseUrl = (Deno.env.get("SUPABASE_URL") ?? "").trim();
   const authHeader = req.headers.get("Authorization");
-  if (!serviceRoleKey || authHeader !== `Bearer ${serviceRoleKey}`) {
-    return json({ error: "Unauthorized" }, 401);
+  const isCron = Boolean(serviceRoleKey) && authHeader === `Bearer ${serviceRoleKey}`;
+
+  const body = req.method === "POST" ? await req.json().catch(() => ({})) : {};
+  const wantsTestSend = (body as Record<string, unknown>).test === true;
+
+  // Two callers, two authorization paths: the hourly cron presents the service
+  // role key, staff press "send test digest" with their own session.
+  let staffTenantId: string | null = null;
+  if (!isCron) {
+    if (!wantsTestSend) return json({ error: "Unauthorized" }, 401);
+
+    const auth = await requireAuth(req, corsHeaders, { caller: "daily-ops-digest" });
+    if (auth instanceof Response) return auth;
+
+    const { data: membership } = await auth.adminClient
+      .from("tenant_users")
+      .select("tenant_id, role, is_approved")
+      .eq("user_id", auth.userId)
+      .maybeSingle();
+
+    const allowedRoles = ["owner", "admin", "superadmin"];
+    if (!membership || membership.is_approved === false || !allowedRoles.includes(String(membership.role))) {
+      return json({ error: "Insufficient permissions" }, 403);
+    }
+    staffTenantId = membership.tenant_id as string;
   }
 
   try {
@@ -110,13 +188,24 @@ export async function handleDailyOpsDigestRequest(req: Request): Promise<Respons
       auth: { persistSession: false, autoRefreshToken: false },
     });
 
-    const date = digestDate(new Date());
+    const now = new Date();
 
-    const { data: settings, error: settingsErr } = await admin
+    let query = admin
       .from("tenant_settings")
-      .select("tenant_id, business_name, business_email, ops_digest_recipients")
+      .select("tenant_id, business_name, business_email, ops_digest_recipients, timezone")
       .eq("ops_digest_enabled", true)
       .limit(MAX_TENANTS_PER_RUN);
+
+    // A test send bypasses the opt-in flag so staff can preview before enabling.
+    if (staffTenantId) {
+      query = admin
+        .from("tenant_settings")
+        .select("tenant_id, business_name, business_email, ops_digest_recipients, timezone")
+        .eq("tenant_id", staffTenantId)
+        .limit(1);
+    }
+
+    const { data: settings, error: settingsErr } = await query;
 
     if (settingsErr) {
       console.error("Failed to load digest settings", settingsErr.message);
@@ -125,8 +214,20 @@ export async function handleDailyOpsDigestRequest(req: Request): Promise<Respons
 
     let enqueued = 0;
     let skipped = 0;
+    let dueTenants = 0;
+    let lastDate: string | null = null;
 
-    for (const setting of settings ?? []) {
+    for (const setting of (settings ?? []) as TenantSetting[]) {
+      const timezone = normalizeTimezone(setting.timezone);
+
+      // The cron fires hourly; only the tenants whose local clock just struck
+      // SEND_LOCAL_HOUR are mailed, so the digest never drifts with DST.
+      if (!staffTenantId && tenantLocalHour(now, timezone) !== SEND_LOCAL_HOUR) {
+        skipped++;
+        continue;
+      }
+      dueTenants++;
+
       const recipients = normalizeRecipients(setting.ops_digest_recipients, setting.business_email);
       if (recipients.length === 0) {
         skipped++;
@@ -143,6 +244,9 @@ export async function handleDailyOpsDigestRequest(req: Request): Promise<Respons
         continue;
       }
 
+      const date = digestDate(now, timezone);
+      lastDate = date;
+
       const { data: rows } = await admin
         .from("reservations")
         .select(
@@ -155,6 +259,7 @@ export async function handleDailyOpsDigestRequest(req: Request): Promise<Respons
         .limit(300);
 
       const html = buildDigestHtml(setting.business_name || "MimmoBook", date, (rows ?? []) as DigestRow[]);
+      const subjectPrefix = staffTenantId ? "Test run sheet" : "Run sheet";
 
       for (const to of recipients) {
         const { error: enqueueErr } = await admin.rpc("enqueue_email", {
@@ -163,10 +268,10 @@ export async function handleDailyOpsDigestRequest(req: Request): Promise<Respons
             to,
             from: `MimmoBook <noreply@${SENDER_DOMAIN}>`,
             sender_domain: SENDER_DOMAIN,
-            subject: `Run sheet ${date} · ${setting.business_name || "MimmoBook"}`,
+            subject: `${subjectPrefix} ${date} · ${setting.business_name || "MimmoBook"}`,
             html,
             purpose: "transactional",
-            label: "daily_ops_digest",
+            label: staffTenantId ? "daily_ops_digest_test" : "daily_ops_digest",
             queued_at: new Date().toISOString(),
           },
         });
@@ -178,7 +283,18 @@ export async function handleDailyOpsDigestRequest(req: Request): Promise<Respons
       }
     }
 
-    return json({ success: true, date, enqueued, skipped, tenants: settings?.length ?? 0 });
+    if (staffTenantId && enqueued === 0) {
+      return json({ error: "No valid recipients configured." }, 400);
+    }
+
+    return json({
+      success: true,
+      date: lastDate,
+      enqueued,
+      skipped,
+      due: dueTenants,
+      tenants: settings?.length ?? 0,
+    });
   } catch (error) {
     console.error("Daily ops digest error", error);
     return json({ error: "Failed to process daily ops digest" }, 500);
@@ -186,3 +302,4 @@ export async function handleDailyOpsDigestRequest(req: Request): Promise<Respons
 }
 
 Deno.serve(handleDailyOpsDigestRequest);
+

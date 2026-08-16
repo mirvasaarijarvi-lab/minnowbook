@@ -1876,6 +1876,9 @@ type TranslationKeys = {
   "timeline.createBlock": string;
   "timeline.blockCreated": string;
   "timeline.blockError": string;
+  "timeline.overlapBlocked": string;
+  "timeline.undo": string;
+  "timeline.blockUndone": string;
   "ops.digest.title": string;
   "ops.digest.description": string;
   "ops.digest.enabled": string;
@@ -1884,6 +1887,9 @@ type TranslationKeys = {
   "ops.digest.save": string;
   "ops.digest.saved": string;
   "ops.digest.saveError": string;
+  "ops.digest.test": string;
+  "ops.digest.testSent": string;
+  "ops.digest.testError": string;
   "nav.pendingRequests": string;
 
   // Forecast
@@ -3758,6 +3764,9 @@ const en: TranslationKeys = {
   "timeline.createBlock": "Block time",
   "timeline.blockCreated": "Time blocked.",
   "timeline.blockError": "Could not block that time.",
+  "timeline.overlapBlocked": "That time overlaps an existing booking, pick a free slot.",
+  "timeline.undo": "Undo",
+  "timeline.blockUndone": "Block removed.",
   "ops.digest.title": "Daily digest email",
   "ops.digest.description": "Send tomorrow's run sheet automatically every morning at 06:00 Helsinki time.",
   "ops.digest.enabled": "Email the daily run sheet",
@@ -3766,6 +3775,9 @@ const en: TranslationKeys = {
   "ops.digest.save": "Save digest settings",
   "ops.digest.saved": "Digest settings saved.",
   "ops.digest.saveError": "Could not save digest settings.",
+  "ops.digest.test": "Send test digest now",
+  "ops.digest.testSent": "Test digest sent to the listed recipients.",
+  "ops.digest.testError": "Could not send the test digest.",
   "nav.pendingRequests": "pending guest requests",
 
   // Forecast
@@ -5636,6 +5648,9 @@ const fi: TranslationKeys = {
   "timeline.createBlock": "Estä aika",
   "timeline.blockCreated": "Aika estetty.",
   "timeline.blockError": "Ajan estäminen ei onnistunut.",
+  "timeline.overlapBlocked": "Aika menee päällekkäin olemassa olevan varauksen kanssa, valitse vapaa aika.",
+  "timeline.undo": "Kumoa",
+  "timeline.blockUndone": "Esto poistettu.",
   "ops.digest.title": "Päivittäinen koosteviesti",
   "ops.digest.description": "Lähetä huomisen työlista automaattisesti joka aamu klo 06.00 Suomen aikaa.",
   "ops.digest.enabled": "Lähetä päivän työlista sähköpostilla",
@@ -5644,6 +5659,9 @@ const fi: TranslationKeys = {
   "ops.digest.save": "Tallenna kooste",
   "ops.digest.saved": "Koosteasetukset tallennettu.",
   "ops.digest.saveError": "Koosteasetusten tallennus ei onnistunut.",
+  "ops.digest.test": "Lähetä testikooste nyt",
+  "ops.digest.testSent": "Testikooste lähetetty listatuille vastaanottajille.",
+  "ops.digest.testError": "Testikoosteen lähetys ei onnistunut.",
   "nav.pendingRequests": "odottavaa vieraspyyntöä",
 
   // Forecast
@@ -7514,6 +7532,9 @@ const sv: TranslationKeys = {
   "timeline.createBlock": "Blockera tid",
   "timeline.blockCreated": "Tiden blockerad.",
   "timeline.blockError": "Det gick inte att blockera tiden.",
+  "timeline.overlapBlocked": "Tiden överlappar en befintlig bokning, välj en ledig tid.",
+  "timeline.undo": "Ångra",
+  "timeline.blockUndone": "Blockeringen togs bort.",
   "ops.digest.title": "Dagligt sammandrag via e-post",
   "ops.digest.description": "Skicka morgondagens körschema automatiskt varje morgon kl. 06.00 finsk tid.",
   "ops.digest.enabled": "Skicka dagens körschema via e-post",
@@ -7523,6 +7544,9 @@ const sv: TranslationKeys = {
   "ops.digest.saved": "Inställningarna sparade.",
   "ops.digest.saveError": "Det gick inte att spara inställningarna.",
   "nav.pendingRequests": "väntande gästförfrågningar",
+  "ops.digest.test": "Skicka testsammandrag nu",
+  "ops.digest.testSent": "Testsammandraget skickades till mottagarna.",
+  "ops.digest.testError": "Det gick inte att skicka testsammandraget.",
 
   // Forecast
   "forecast.title": "Efterfrågeprognos",
