@@ -36,6 +36,15 @@ project_id = "lsgznskkxadplwnxplhd"
     # Guests are not signed in: the function authenticates via the
     # secure booking token or returns a generic response for lookups.
     verify_jwt = false
+  [functions.daily-ops-digest]
+    # Cron entrypoint. Authorization is the service-role bearer check
+    # inside the function, so the gateway must let the request through.
+    verify_jwt = false
+  [functions.reschedule-review]
+    # CORS preflights must reach the function so it can apply the
+    # request-aware origin allowlist. requireAuth() enforces the
+    # staff bearer token before any write.
+    verify_jwt = false
   [functions.admin-users]
     # CORS preflights must reach the function so it can apply the
     # request-aware origin allowlist + SECURITY_HEADERS. With the
