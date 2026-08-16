@@ -198,7 +198,55 @@ const GuestPortal = () => {
             )}
 
             {!isCancelled && !isPast && (
-              <div className="border-t border-border pt-4">
+              <div className="border-t border-border pt-4 space-y-4">
+                {rescheduleSent ? (
+                  <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 text-sm">
+                    Your change request has been sent to the venue. They will contact you to confirm.
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <p className="text-sm font-medium">Need a different date?</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <Label htmlFor="reschedule-date" className="text-xs text-muted-foreground">New date</Label>
+                        <Input
+                          id="reschedule-date"
+                          type="date"
+                          value={newDate}
+                          min={format(new Date(), "yyyy-MM-dd")}
+                          onChange={(e) => setNewDate(e.target.value)}
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label htmlFor="reschedule-time" className="text-xs text-muted-foreground">New time (optional)</Label>
+                        <Input
+                          id="reschedule-time"
+                          type="time"
+                          value={newTime}
+                          onChange={(e) => setNewTime(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="reschedule-note" className="text-xs text-muted-foreground">Message (optional)</Label>
+                      <Textarea
+                        id="reschedule-note"
+                        value={note}
+                        maxLength={1000}
+                        onChange={(e) => setNote(e.target.value)}
+                        placeholder="Anything the venue should know?"
+                      />
+                    </div>
+                    <Button
+                      variant="secondary"
+                      disabled={!newDate || rescheduleMutation.isPending}
+                      onClick={() => rescheduleMutation.mutate()}
+                    >
+                      {rescheduleMutation.isPending ? "Sending..." : "Request new date"}
+                    </Button>
+                  </div>
+                )}
+
                 <Button
                   variant="outline"
                   className="border-destructive/30 text-destructive hover:bg-destructive/10"
