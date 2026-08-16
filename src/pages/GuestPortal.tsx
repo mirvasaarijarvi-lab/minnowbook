@@ -69,6 +69,30 @@ const GuestPortal = () => {
     enabled: !!token,
   });
 
+  const rescheduleMutation = useMutation({
+    mutationFn: async () => {
+      const { data: res, error } = await supabase.functions.invoke("guest-booking-portal", {
+        body: {
+          action: "reschedule",
+          token,
+          requested_date: newDate,
+          requested_start_time: newTime || null,
+          guest_note: note || null,
+        },
+      });
+      if (error) throw error;
+      if ((res as any)?.error) throw new Error((res as any).error);
+      return res;
+    },
+    onSuccess: () => {
+      setRescheduleSent(true);
+      toast.success("Change request sent to the venue.");
+    },
+    onError: (err: Error) => {
+      toast.error(err.message || "Could not send your request. Please try again.");
+    },
+  });
+
   const cancelMutation = useMutation({
     mutationFn: async () => {
       if (!data?.reservation) return;
