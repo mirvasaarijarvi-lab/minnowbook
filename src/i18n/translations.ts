@@ -1888,6 +1888,13 @@ type TranslationKeys = {
   "ops.digest.saved": string;
   "ops.digest.saveError": string;
   "ops.digest.test": string;
+  "ops.alerts.title": string;
+  "ops.alerts.description": string;
+  "ops.alerts.enabled": string;
+  "ops.alerts.recipientsHelp": string;
+  "ops.alerts.saved": string;
+  "ops.alerts.saveError": string;
+  "timeline.blockButton": string;
   "ops.digest.testSent": string;
   "ops.digest.testError": string;
   "nav.pendingRequests": string;
@@ -3776,6 +3783,13 @@ const en: TranslationKeys = {
   "ops.digest.saved": "Digest settings saved.",
   "ops.digest.saveError": "Could not save digest settings.",
   "ops.digest.test": "Send test digest now",
+  "ops.alerts.title": "Guest change alerts",
+  "ops.alerts.description": "Email staff when a guest requests a new date or cancels a booking.",
+  "ops.alerts.enabled": "Email alerts on",
+  "ops.alerts.recipientsHelp": "Comma separated. Leave empty to use the business email.",
+  "ops.alerts.saved": "Alert settings saved.",
+  "ops.alerts.saveError": "Could not save alert settings.",
+  "timeline.blockButton": "Block time",
   "ops.digest.testSent": "Test digest sent to the listed recipients.",
   "ops.digest.testError": "Could not send the test digest.",
   "nav.pendingRequests": "pending guest requests",
@@ -5660,6 +5674,13 @@ const fi: TranslationKeys = {
   "ops.digest.saved": "Koosteasetukset tallennettu.",
   "ops.digest.saveError": "Koosteasetusten tallennus ei onnistunut.",
   "ops.digest.test": "Lähetä testikooste nyt",
+  "ops.alerts.title": "Ilmoitukset vieraan muutoksista",
+  "ops.alerts.description": "Lähetä henkilökunnalle sähköposti, kun vieras pyytää uutta aikaa tai peruu varauksen.",
+  "ops.alerts.enabled": "Sähköposti-ilmoitukset päällä",
+  "ops.alerts.recipientsHelp": "Erota pilkulla. Jätä tyhjäksi, niin käytetään yrityksen sähköpostia.",
+  "ops.alerts.saved": "Ilmoitusasetukset tallennettu.",
+  "ops.alerts.saveError": "Ilmoitusasetuksia ei voitu tallentaa.",
+  "timeline.blockButton": "Varaa aika pois",
   "ops.digest.testSent": "Testikooste lähetetty listatuille vastaanottajille.",
   "ops.digest.testError": "Testikoosteen lähetys ei onnistunut.",
   "nav.pendingRequests": "odottavaa vieraspyyntöä",
@@ -7545,6 +7566,13 @@ const sv: TranslationKeys = {
   "ops.digest.saveError": "Det gick inte att spara inställningarna.",
   "nav.pendingRequests": "väntande gästförfrågningar",
   "ops.digest.test": "Skicka testsammandrag nu",
+  "ops.alerts.title": "Aviseringar om gäständringar",
+  "ops.alerts.description": "Mejla personalen när en gäst begär ny tid eller avbokar.",
+  "ops.alerts.enabled": "E-postaviseringar på",
+  "ops.alerts.recipientsHelp": "Separera med komma. Lämna tomt för att använda företagets e-post.",
+  "ops.alerts.saved": "Aviseringsinställningarna sparade.",
+  "ops.alerts.saveError": "Kunde inte spara aviseringsinställningarna.",
+  "timeline.blockButton": "Blockera tid",
   "ops.digest.testSent": "Testsammandraget skickades till mottagarna.",
   "ops.digest.testError": "Det gick inte att skicka testsammandraget.",
 
