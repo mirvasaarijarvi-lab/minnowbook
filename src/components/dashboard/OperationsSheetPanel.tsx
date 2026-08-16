@@ -285,9 +285,20 @@ const OperationsSheetPanel = () => {
               />
               <p className="text-xs text-muted-foreground">{t("ops.digest.recipientsHelp")}</p>
             </div>
-            <Button size="sm" onClick={() => saveDigest.mutate()} disabled={saveDigest.isPending}>
-              {t("ops.digest.save")}
-            </Button>
+            <div className="flex flex-wrap gap-2">
+              <Button size="sm" onClick={() => saveDigest.mutate()} disabled={saveDigest.isPending}>
+                {t("ops.digest.save")}
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => sendTestDigest.mutate()}
+                disabled={sendTestDigest.isPending}
+              >
+                <Send className="h-4 w-4 mr-1.5" />
+                {t("ops.digest.test")}
+              </Button>
+            </div>
           </div>
         </div>
 
