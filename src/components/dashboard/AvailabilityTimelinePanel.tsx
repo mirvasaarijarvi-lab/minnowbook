@@ -224,30 +224,69 @@ const AvailabilityTimelinePanel = () => {
     return snap(windowStart + ratio * span);
   };
 
+  /**
+   * A block must never be dropped on top of a live booking, otherwise staff
+   * would silently double-book themselves out of a reserved slot.
+   */
+  const overlapsReservation = (row: TimelineRow, from: number, to: number) =>
+    row.bars.some(
+      (bar) => bar.kind === "reservation" && bar.startMin < to && bar.endMin > from,
+    );
+
+  const dragInvalid = useMemo(() => {
+    if (!drag) return false;
+    const row = rows.find((r) => r.key === drag.rowKey);
+    if (!row) return false;
+    const from = Math.min(drag.startMin, drag.endMin);
+    const to = Math.max(drag.startMin, drag.endMin);
+    return to - from >= SNAP_MINUTES && overlapsReservation(row, from, to);
+  }, [drag, rows]);
+
+  const removeBlock = async (blockId: string) => {
+    const { error } = await supabase.from("blocked_slots").delete().eq("id", blockId);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    queryClient.invalidateQueries({ queryKey: ["availability-timeline"] });
+    queryClient.invalidateQueries({ queryKey: ["blocked-slots"] });
+    queryClient.invalidateQueries({ queryKey: ["approval-queue-count"] });
+    toast.success(t("timeline.blockUndone"));
+  };
+
   const createBlock = useMutation({
     mutationFn: async () => {
       if (!pendingBlock || !tenantId) throw new Error("Missing block");
       const { row, startMin, endMin } = pendingBlock;
-      const { error } = await supabase.from("blocked_slots").insert({
-        tenant_id: tenantId,
-        site_id: row.siteId ?? selectedSiteId ?? null,
-        date: day,
-        resource_type: row.resourceType,
-        resource_id: row.resourceId,
-        start_time: `${fmt(startMin)}:00`,
-        end_time: `${fmt(endMin)}:00`,
-        reason: blockReason.trim() || null,
-        approval_status: getApprovalStatus(),
-      });
+      const { data, error } = await supabase
+        .from("blocked_slots")
+        .insert({
+          tenant_id: tenantId,
+          site_id: row.siteId ?? selectedSiteId ?? null,
+          date: day,
+          resource_type: row.resourceType,
+          resource_id: row.resourceId,
+          start_time: `${fmt(startMin)}:00`,
+          end_time: `${fmt(endMin)}:00`,
+          reason: blockReason.trim() || null,
+          approval_status: getApprovalStatus(),
+        })
+        .select("id")
+        .single();
       if (error) throw error;
+      return data?.id as string | undefined;
     },
-    onSuccess: () => {
+    onSuccess: (blockId) => {
       queryClient.invalidateQueries({ queryKey: ["availability-timeline"] });
       queryClient.invalidateQueries({ queryKey: ["blocked-slots"] });
       queryClient.invalidateQueries({ queryKey: ["approval-queue-count"] });
       setPendingBlock(null);
       setBlockReason("");
-      toast.success(t("timeline.blockCreated"));
+      toast.success(t("timeline.blockCreated"), {
+        action: blockId
+          ? { label: t("timeline.undo"), onClick: () => void removeBlock(blockId) }
+          : undefined,
+      });
     },
     onError: (err: any) => {
       toast.error(err?.message || t("timeline.blockError"));
