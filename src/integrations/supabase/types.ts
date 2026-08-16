@@ -2531,6 +2531,8 @@ export type Database = {
           business_phone: string | null
           created_at: string | null
           default_language: string | null
+          guest_request_alert_recipients: string[]
+          guest_request_alerts_enabled: boolean
           hero_image_url: string | null
           id: string
           logo_url: string | null
@@ -2554,6 +2556,8 @@ export type Database = {
           business_phone?: string | null
           created_at?: string | null
           default_language?: string | null
+          guest_request_alert_recipients?: string[]
+          guest_request_alerts_enabled?: boolean
           hero_image_url?: string | null
           id?: string
           logo_url?: string | null
@@ -2577,6 +2581,8 @@ export type Database = {
           business_phone?: string | null
           created_at?: string | null
           default_language?: string | null
+          guest_request_alert_recipients?: string[]
+          guest_request_alerts_enabled?: boolean
           hero_image_url?: string | null
           id?: string
           logo_url?: string | null
