@@ -253,7 +253,7 @@ const Dashboard = () => {
   const viewComponents: Record<DashboardView, React.ReactNode> = {
     overview: <DashboardOverview onNavigate={handleOverviewNavigate} />,
     calendar: gatedView("calendar", <CalendarView />),
-    reservations: gatedView("reservations", <ReservationList initialStatusFilter={reservationStatusFilter} initialInvoicedFilter={reservationInvoicedFilter} initialCheckoutToday={reservationCheckoutTodayFilter} />),
+    reservations: gatedView("reservations", <><RescheduleRequestsPanel /><ReservationList initialStatusFilter={reservationStatusFilter} initialInvoicedFilter={reservationInvoicedFilter} initialCheckoutToday={reservationCheckoutTodayFilter} /></>),
     resources: gatedView("resources", <ResourceManagement />),
     offers: gatedView("reservations", <OffersManager />),
     kitchen: gatedView("reservations", <KitchenOrdersPanel />),
