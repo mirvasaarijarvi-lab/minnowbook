@@ -19,6 +19,7 @@ import Dashboard from "./pages/Dashboard";
 import Onboarding from "./pages/Onboarding";
 import PublicBooking from "./pages/PublicBooking";
 import GuestPortal from "./pages/GuestPortal";
+import FindBooking from "./pages/FindBooking";
 import NotFound from "./pages/NotFound";
 import Support from "./pages/Support";
 import About from "./pages/About";
