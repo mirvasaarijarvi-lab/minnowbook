@@ -2534,6 +2534,8 @@ export type Database = {
           hero_image_url: string | null
           id: string
           logo_url: string | null
+          ops_digest_enabled: boolean
+          ops_digest_recipients: string[]
           primary_color: string | null
           resource_type_descriptions: Json | null
           resource_type_names: Json | null
@@ -2555,6 +2557,8 @@ export type Database = {
           hero_image_url?: string | null
           id?: string
           logo_url?: string | null
+          ops_digest_enabled?: boolean
+          ops_digest_recipients?: string[]
           primary_color?: string | null
           resource_type_descriptions?: Json | null
           resource_type_names?: Json | null
@@ -2576,6 +2580,8 @@ export type Database = {
           hero_image_url?: string | null
           id?: string
           logo_url?: string | null
+          ops_digest_enabled?: boolean
+          ops_digest_recipients?: string[]
           primary_color?: string | null
           resource_type_descriptions?: Json | null
           resource_type_names?: Json | null
