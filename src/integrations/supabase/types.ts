@@ -2545,6 +2545,9 @@ export type Database = {
           tenant_id: string
           timezone: string | null
           updated_at: string | null
+          weekly_report_enabled: boolean
+          weekly_report_recipients: string[]
+          weekly_report_weekday: number
         }
         Insert: {
           accent_color?: string | null
@@ -2570,6 +2573,9 @@ export type Database = {
           tenant_id: string
           timezone?: string | null
           updated_at?: string | null
+          weekly_report_enabled?: boolean
+          weekly_report_recipients?: string[]
+          weekly_report_weekday?: number
         }
         Update: {
           accent_color?: string | null
@@ -2595,6 +2601,9 @@ export type Database = {
           tenant_id?: string
           timezone?: string | null
           updated_at?: string | null
+          weekly_report_enabled?: boolean
+          weekly_report_recipients?: string[]
+          weekly_report_weekday?: number
         }
         Relationships: [
           {
