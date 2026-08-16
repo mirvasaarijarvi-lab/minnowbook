@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { CalendarRange, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { Ban, CalendarRange, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { format, addDays } from "date-fns";
 import { useT } from "@/contexts/I18nContext";
 import { useAutoApproval } from "@/hooks/useAutoApproval";
@@ -213,6 +213,17 @@ const AvailabilityTimelinePanel = () => {
     { row: TimelineRow; startMin: number; endMin: number } | null
   >(null);
   const [blockReason, setBlockReason] = useState("");
+  /** Editable times so the dialog also works without a pointer drag. */
+  const [blockStart, setBlockStart] = useState("09:00");
+  const [blockEnd, setBlockEnd] = useState("10:00");
+
+  /** Open the block dialog from a keyboard-reachable button. */
+  const openBlockDialog = (row: TimelineRow, from: number, to: number) => {
+    setBlockReason("");
+    setBlockStart(fmt(from));
+    setBlockEnd(fmt(to));
+    setPendingBlock({ row, startMin: from, endMin: to });
+  };
 
   /** Convert a pointer position inside a lane into snapped minutes. */
   const minutesFromPointer = (rowKey: string, clientX: number) => {
@@ -257,7 +268,11 @@ const AvailabilityTimelinePanel = () => {
   const createBlock = useMutation({
     mutationFn: async () => {
       if (!pendingBlock || !tenantId) throw new Error("Missing block");
-      const { row, startMin, endMin } = pendingBlock;
+      const { row } = pendingBlock;
+      const startMin = snap(toMinutes(blockStart, pendingBlock.startMin));
+      const endMin = snap(toMinutes(blockEnd, pendingBlock.endMin));
+      if (endMin <= startMin) throw new Error(t("timeline.blockError"));
+      if (overlapsReservation(row, startMin, endMin)) throw new Error(t("timeline.overlapBlocked"));
       const { data, error } = await supabase
         .from("blocked_slots")
         .insert({
@@ -387,8 +402,7 @@ const AvailabilityTimelinePanel = () => {
                           toast.error(t("timeline.overlapBlocked"));
                           return;
                         }
-                        setBlockReason("");
-                        setPendingBlock({ row, startMin: from, endMin: to });
+                        openBlockDialog(row, from, to);
                       }}
                       onPointerCancel={() => setDrag(null)}
                     >
@@ -424,6 +438,15 @@ const AvailabilityTimelinePanel = () => {
                         );
                       })}
                     </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="shrink-0 h-8 px-2 text-xs"
+                      onClick={() => openBlockDialog(row, Math.max(windowStart, 9 * 60), Math.max(windowStart, 9 * 60) + 60)}
+                    >
+                      <Ban className="h-3.5 w-3.5 mr-1" />
+                      {t("timeline.blockButton")}
+                    </Button>
                   </div>
                 );
               })}
@@ -443,8 +466,18 @@ const AvailabilityTimelinePanel = () => {
               <p className="text-sm">
                 <span className="font-medium">{pendingBlock.row.title}</span>
                 {" · "}
-                {day} {fmt(pendingBlock.startMin)} to {fmt(pendingBlock.endMin)}
+                {day}
               </p>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label htmlFor="timeline-block-start">{t("timeline.startTime")}</Label>
+                  <Input id="timeline-block-start" type="time" step={900} value={blockStart} onChange={(e) => setBlockStart(e.target.value)} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="timeline-block-end">{t("timeline.endTime")}</Label>
+                  <Input id="timeline-block-end" type="time" step={900} value={blockEnd} onChange={(e) => setBlockEnd(e.target.value)} />
+                </div>
+              </div>
               <div className="space-y-1.5">
                 <Label htmlFor="timeline-block-reason">{t("timeline.reason")}</Label>
                 <Input

@@ -62,6 +62,8 @@ const OperationsSheetPanel = () => {
   const queryClient = useQueryClient();
   const [digestEnabled, setDigestEnabled] = useState(false);
   const [digestRecipients, setDigestRecipients] = useState("");
+  const [alertsEnabled, setAlertsEnabled] = useState(true);
+  const [alertRecipients, setAlertRecipients] = useState("");
 
   const { data: digestSettings } = useQuery({
     queryKey: ["ops-digest-settings", tenantId],
@@ -69,7 +71,7 @@ const OperationsSheetPanel = () => {
     queryFn: async () => {
       const { data: row, error } = await supabase
         .from("tenant_settings")
-        .select("ops_digest_enabled, ops_digest_recipients, business_email")
+        .select("ops_digest_enabled, ops_digest_recipients, business_email, guest_request_alerts_enabled, guest_request_alert_recipients")
         .eq("tenant_id", tenantId)
         .maybeSingle();
       if (error) throw error;
@@ -81,6 +83,8 @@ const OperationsSheetPanel = () => {
     if (!digestSettings) return;
     setDigestEnabled(Boolean((digestSettings as any).ops_digest_enabled));
     setDigestRecipients(((digestSettings as any).ops_digest_recipients ?? []).join(", "));
+    setAlertsEnabled((digestSettings as any).guest_request_alerts_enabled !== false);
+    setAlertRecipients(((digestSettings as any).guest_request_alert_recipients ?? []).join(", "));
   }, [digestSettings]);
 
   const saveDigest = useMutation({
@@ -100,6 +104,28 @@ const OperationsSheetPanel = () => {
       toast.success(t("ops.digest.saved"));
     },
     onError: (err: any) => toast.error(err?.message || t("ops.digest.saveError")),
+  });
+
+  const saveGuestAlerts = useMutation({
+    mutationFn: async () => {
+      const recipients = alertRecipients
+        .split(",")
+        .map((entry) => entry.trim().toLowerCase())
+        .filter((entry) => entry.length > 0);
+      const { error } = await supabase
+        .from("tenant_settings")
+        .update({
+          guest_request_alerts_enabled: alertsEnabled,
+          guest_request_alert_recipients: recipients,
+        })
+        .eq("tenant_id", tenantId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["ops-digest-settings", tenantId] });
+      toast.success(t("ops.alerts.saved"));
+    },
+    onError: (err: any) => toast.error(err?.message || t("ops.alerts.saveError")),
   });
 
   /**
@@ -318,6 +344,35 @@ const OperationsSheetPanel = () => {
                 {t("ops.digest.test")}
               </Button>
             </div>
+          </div>
+        </div>
+
+        <div className="rounded-lg border border-border p-3 space-y-3">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <p className="text-sm font-medium">{t("ops.alerts.title")}</p>
+              <p className="text-xs text-muted-foreground">{t("ops.alerts.description")}</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Switch id="guest-alerts-enabled" checked={alertsEnabled} onCheckedChange={setAlertsEnabled} />
+              <Label htmlFor="guest-alerts-enabled" className="text-sm">{t("ops.alerts.enabled")}</Label>
+            </div>
+          </div>
+          <div className="grid gap-2 sm:grid-cols-[1fr_auto] sm:items-end">
+            <div className="space-y-1.5">
+              <Label htmlFor="guest-alerts-recipients" className="text-xs">{t("ops.digest.recipients")}</Label>
+              <Input
+                id="guest-alerts-recipients"
+                value={alertRecipients}
+                onChange={(e) => setAlertRecipients(e.target.value)}
+                placeholder="reception@example.com"
+                className="h-9"
+              />
+              <p className="text-xs text-muted-foreground">{t("ops.alerts.recipientsHelp")}</p>
+            </div>
+            <Button size="sm" onClick={() => saveGuestAlerts.mutate()} disabled={saveGuestAlerts.isPending}>
+              {t("ops.digest.save")}
+            </Button>
           </div>
         </div>
 

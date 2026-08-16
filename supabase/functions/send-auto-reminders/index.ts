@@ -2,6 +2,15 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { corsHeaders } from "../_shared/http-headers.ts";
 
 const SENDER_DOMAIN = "notify.mimmobook.com";
+const PORTAL_BASE_URL = "https://mimmobook.com";
+const PORTAL_TOKEN_TTL_DAYS = 7;
+
+export function newPortalToken(): string {
+  const bytes = new Uint8Array(32);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
 
 // --- Translations ---
 const translations: Record<string, Record<string, string>> = {
@@ -13,6 +22,9 @@ const translations: Record<string, Record<string, string>> = {
     footer: "If you need to make any changes, please contact us. We look forward to seeing you!",
     type: "Type", date: "Date", time: "Time", guests: "Guests", checkOut: "Check-out",
     roomType: "Room type", eventType: "Event type", price: "Price", at: "at",
+    manageIntro: "Need to change or cancel? You can manage this booking yourself:",
+    manageCta: "Manage my booking",
+    manageNote: "This link is personal and valid for 7 days.",
   },
   fi: {
     subject: "Muistutus: Tuleva varauksesi",
@@ -22,6 +34,9 @@ const translations: Record<string, Record<string, string>> = {
     footer: "Jos sinun tarvitsee tehdä muutoksia, ota meihin yhteyttä. Odotamme innolla vierailuasi!",
     type: "Tyyppi", date: "Päivämäärä", time: "Aika", guests: "Vieraat", checkOut: "Uloskirjautuminen",
     roomType: "Huonetyyppi", eventType: "Tapahtumatyyppi", price: "Hinta", at: "klo",
+    manageIntro: "Tarvitsetko muutosta tai peruutusta? Voit hallita varaustasi itse:",
+    manageCta: "Hallitse varaustani",
+    manageNote: "Linkki on henkilökohtainen ja voimassa 7 päivää.",
   },
   sv: {
     subject: "Påminnelse: Din kommande bokning",
@@ -31,6 +46,9 @@ const translations: Record<string, Record<string, string>> = {
     footer: "Om du behöver göra ändringar, kontakta oss. Vi ser fram emot att välkomna dig!",
     type: "Typ", date: "Datum", time: "Tid", guests: "Gäster", checkOut: "Utcheckning",
     roomType: "Rumstyp", eventType: "Evenemangstyp", price: "Pris", at: "kl",
+    manageIntro: "Behöver du ändra eller avboka? Du kan hantera bokningen själv:",
+    manageCta: "Hantera min bokning",
+    manageNote: "Länken är personlig och giltig i 7 dagar.",
   },
 };
 
@@ -47,7 +65,7 @@ function getT(lang: string) {
   return translations[lang] || translations.en;
 }
 
-function buildEmailHtml(reservation: any, business: any, lang: string, customBody?: string): string {
+function buildEmailHtml(reservation: any, business: any, lang: string, customBody?: string, portalUrl?: string): string {
   const t = getT(lang);
   const primaryColor = business.primary_color || "#3F1F5C";
   const businessName = business.business_name || "Business";
@@ -109,6 +127,12 @@ function buildEmailHtml(reservation: any, business: any, lang: string, customBod
           <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e8e0d8;border-radius:10px;overflow:hidden;margin:20px 0;font-size:14px">
             ${detailsHtml}
           </table>
+          ${portalUrl ? `
+          <div style="margin:24px 0;text-align:center">
+            <p style="color:#63516E;font-size:14px;font-family:'Inter',Arial,sans-serif;line-height:1.6;margin:0 0 12px">${t.manageIntro}</p>
+            <a href="${escapeHtml(portalUrl)}" style="display:inline-block;background-color:${escapeHtml(primaryColor)};color:#ffffff;text-decoration:none;padding:12px 24px;border-radius:8px;font-family:'Inter',Arial,sans-serif;font-size:14px;font-weight:600">${t.manageCta}</a>
+            <p style="color:#999;font-size:12px;font-family:'Inter',Arial,sans-serif;margin:12px 0 0">${t.manageNote}</p>
+          </div>` : ""}
           ${!customBody ? `<p style="color:#63516E;font-size:14px;font-family:'Inter',Arial,sans-serif;line-height:1.6">${t.footer}</p>` : ""}
         </td></tr>
         <tr><td style="padding:24px 32px;text-align:center;font-size:12px;color:#999;border-top:1px solid #e8e0d8;font-family:'Inter',Arial,sans-serif">
@@ -253,7 +277,27 @@ export async function handleSendAutoRemindersRequest(req: Request): Promise<Resp
           customBody = customTemplate.body_html;
         }
 
-        const html = buildEmailHtml(reservation, business, lang, customBody);
+        // Mint a guest-portal token so the reminder links straight to
+        // "manage my booking" without the find-booking lookup step.
+        let portalUrl: string | undefined;
+        try {
+          const portalToken = newPortalToken();
+          const { error: portalTokenErr } = await adminClient.from("booking_tokens").insert({
+            reservation_id: reservation.id,
+            tenant_id: reservation.tenant_id,
+            token: portalToken,
+            expires_at: new Date(Date.now() + PORTAL_TOKEN_TTL_DAYS * 24 * 60 * 60 * 1000).toISOString(),
+          });
+          if (portalTokenErr) {
+            console.error(`Failed to mint portal token for ${reservation.id}:`, portalTokenErr.message);
+          } else {
+            portalUrl = `${PORTAL_BASE_URL}/my-booking/${portalToken}`;
+          }
+        } catch (tokenErr) {
+          console.error(`Portal token error for ${reservation.id}:`, tokenErr);
+        }
+
+        const html = buildEmailHtml(reservation, business, lang, customBody, portalUrl);
         const fromName = business.business_name || "Mimmobook";
 
         // Determine reply-to: site-level overrides tenant-level
