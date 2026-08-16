@@ -1,9 +1,12 @@
 // Daily operations digest.
 //
-// Cron entrypoint (06:00 Helsinki). For every tenant that opted in via
-// tenant_settings.ops_digest_enabled it builds the same run sheet the
-// dashboard shows for the coming day and enqueues it to the configured
-// recipients. Service-role authorization only: no browser ever calls this.
+// Cron entrypoint. The job runs every hour and each tenant is mailed only when
+// the clock reads SEND_LOCAL_HOUR in that tenant's own timezone, so the digest
+// lands at the same local time all year instead of drifting with daylight
+// saving. For every tenant that opted in via tenant_settings.ops_digest_enabled
+// it builds the same run sheet the dashboard shows for the coming day and
+// enqueues it to the configured recipients. Service-role authorization only:
+// no browser ever calls this directly.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { corsHeaders } from "../_shared/http-headers.ts";
 
@@ -11,6 +14,9 @@ const SENDER_DOMAIN = "notify.mimmobook.com";
 const KITCHEN_TYPES = ["restaurant", "catering", "venue"];
 const LODGING_TYPES = ["hotel", "guesthouse", "cottage", "camping"];
 const MAX_TENANTS_PER_RUN = 200;
+export const SEND_LOCAL_HOUR = 6;
+const DEFAULT_TIMEZONE = "Europe/Helsinki";
+
 
 function escapeHtml(str: unknown): string {
   return String(str ?? "")
