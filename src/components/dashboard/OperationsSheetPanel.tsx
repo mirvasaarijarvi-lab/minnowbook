@@ -64,6 +64,9 @@ const OperationsSheetPanel = () => {
   const [digestRecipients, setDigestRecipients] = useState("");
   const [alertsEnabled, setAlertsEnabled] = useState(true);
   const [alertRecipients, setAlertRecipients] = useState("");
+  const [weeklyEnabled, setWeeklyEnabled] = useState(false);
+  const [weeklyDay, setWeeklyDay] = useState("1");
+  const [weeklyRecipients, setWeeklyRecipients] = useState("");
 
   const { data: digestSettings } = useQuery({
     queryKey: ["ops-digest-settings", tenantId],
@@ -71,7 +74,7 @@ const OperationsSheetPanel = () => {
     queryFn: async () => {
       const { data: row, error } = await supabase
         .from("tenant_settings")
-        .select("ops_digest_enabled, ops_digest_recipients, business_email, guest_request_alerts_enabled, guest_request_alert_recipients")
+        .select("ops_digest_enabled, ops_digest_recipients, business_email, guest_request_alerts_enabled, guest_request_alert_recipients, weekly_report_enabled, weekly_report_weekday, weekly_report_recipients")
         .eq("tenant_id", tenantId)
         .maybeSingle();
       if (error) throw error;
@@ -85,6 +88,9 @@ const OperationsSheetPanel = () => {
     setDigestRecipients(((digestSettings as any).ops_digest_recipients ?? []).join(", "));
     setAlertsEnabled((digestSettings as any).guest_request_alerts_enabled !== false);
     setAlertRecipients(((digestSettings as any).guest_request_alert_recipients ?? []).join(", "));
+    setWeeklyEnabled(Boolean((digestSettings as any).weekly_report_enabled));
+    setWeeklyDay(String((digestSettings as any).weekly_report_weekday ?? 1));
+    setWeeklyRecipients(((digestSettings as any).weekly_report_recipients ?? []).join(", "));
   }, [digestSettings]);
 
   const saveDigest = useMutation({
@@ -126,6 +132,42 @@ const OperationsSheetPanel = () => {
       toast.success(t("ops.alerts.saved"));
     },
     onError: (err: any) => toast.error(err?.message || t("ops.alerts.saveError")),
+  });
+
+  const saveWeeklyReport = useMutation({
+    mutationFn: async () => {
+      const recipients = weeklyRecipients
+        .split(",")
+        .map((entry) => entry.trim().toLowerCase())
+        .filter((entry) => entry.length > 0);
+      const { error } = await supabase
+        .from("tenant_settings")
+        .update({
+          weekly_report_enabled: weeklyEnabled,
+          weekly_report_weekday: Number(weeklyDay),
+          weekly_report_recipients: recipients,
+        })
+        .eq("tenant_id", tenantId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["ops-digest-settings", tenantId] });
+      toast.success(t("ops.weekly.saved"));
+    },
+    onError: (err: any) => toast.error(err?.message || t("ops.weekly.saveError")),
+  });
+
+  /** Same preview path as the digest: send the report to the current list now. */
+  const sendTestWeekly = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.functions.invoke("weekly-ops-report", {
+        body: { test: true },
+      });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => toast.success(t("ops.weekly.testSent")),
+    onError: (err: any) => toast.error(err?.message || t("ops.weekly.testError")),
   });
 
   /**
@@ -373,6 +415,59 @@ const OperationsSheetPanel = () => {
             <Button size="sm" onClick={() => saveGuestAlerts.mutate()} disabled={saveGuestAlerts.isPending}>
               {t("ops.digest.save")}
             </Button>
+          </div>
+        </div>
+
+        <div className="rounded-lg border border-border p-3 space-y-3">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <p className="text-sm font-medium">{t("ops.weekly.title")}</p>
+              <p className="text-xs text-muted-foreground">{t("ops.weekly.description")}</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Switch id="weekly-report-enabled" checked={weeklyEnabled} onCheckedChange={setWeeklyEnabled} />
+              <Label htmlFor="weekly-report-enabled" className="text-sm">{t("ops.weekly.enabled")}</Label>
+            </div>
+          </div>
+          <div className="grid gap-2 sm:grid-cols-[10rem_1fr_auto] sm:items-end">
+            <div className="space-y-1.5">
+              <Label htmlFor="weekly-report-day" className="text-xs">{t("ops.weekly.day")}</Label>
+              <select
+                id="weekly-report-day"
+                value={weeklyDay}
+                onChange={(e) => setWeeklyDay(e.target.value)}
+                className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
+              >
+                {["forecast.sun", "forecast.mon", "forecast.tue", "forecast.wed", "forecast.thu", "forecast.fri", "forecast.sat"].map((key, index) => (
+                  <option key={key} value={String(index)}>{t(key as any)}</option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="weekly-report-recipients" className="text-xs">{t("ops.digest.recipients")}</Label>
+              <Input
+                id="weekly-report-recipients"
+                value={weeklyRecipients}
+                onChange={(e) => setWeeklyRecipients(e.target.value)}
+                placeholder="owner@example.com"
+                className="h-9"
+              />
+              <p className="text-xs text-muted-foreground">{t("ops.weekly.recipientsHelp")}</p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button size="sm" onClick={() => saveWeeklyReport.mutate()} disabled={saveWeeklyReport.isPending}>
+                {t("ops.digest.save")}
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => sendTestWeekly.mutate()}
+                disabled={sendTestWeekly.isPending}
+              >
+                <Send className="h-4 w-4 mr-1.5" />
+                {t("ops.weekly.test")}
+              </Button>
+            </div>
           </div>
         </div>
 

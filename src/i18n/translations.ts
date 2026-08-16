@@ -1888,6 +1888,27 @@ type TranslationKeys = {
   "ops.digest.saved": string;
   "ops.digest.saveError": string;
   "ops.digest.test": string;
+  "ops.weekly.title": string;
+  "ops.weekly.description": string;
+  "ops.weekly.enabled": string;
+  "ops.weekly.day": string;
+  "ops.weekly.recipientsHelp": string;
+  "ops.weekly.saved": string;
+  "ops.weekly.saveError": string;
+  "ops.weekly.test": string;
+  "ops.weekly.testSent": string;
+  "ops.weekly.testError": string;
+  "forecast.drilldownTitle": string;
+  "forecast.drilldownEmpty": string;
+  "forecast.drilldownHint": string;
+  "forecast.avgGuests": string;
+  "forecast.bookings": string;
+  "forecast.yoyTitle": string;
+  "forecast.yoySubtitle": string;
+  "forecast.thisYear": string;
+  "forecast.lastYear": string;
+  "forecast.change": string;
+  "forecast.occupancyTrend": string;
   "ops.alerts.title": string;
   "ops.alerts.description": string;
   "ops.alerts.enabled": string;
@@ -3785,6 +3806,27 @@ const en: TranslationKeys = {
   "ops.digest.saved": "Digest settings saved.",
   "ops.digest.saveError": "Could not save digest settings.",
   "ops.digest.test": "Send test digest now",
+  "ops.weekly.title": "Weekly report email",
+  "ops.weekly.description": "Email a seven day summary with a copy ready CSV block, sent at 06:00 local time on the chosen weekday.",
+  "ops.weekly.enabled": "Weekly report on",
+  "ops.weekly.day": "Send on",
+  "ops.weekly.recipientsHelp": "Comma separated. Leave empty to use the business email.",
+  "ops.weekly.saved": "Weekly report settings saved.",
+  "ops.weekly.saveError": "Could not save the weekly report settings.",
+  "ops.weekly.test": "Send test report now",
+  "ops.weekly.testSent": "Test report queued.",
+  "ops.weekly.testError": "Could not send the test report.",
+  "forecast.drilldownTitle": "Peak hour detail",
+  "forecast.drilldownEmpty": "No bookings started in this hour over the period.",
+  "forecast.drilldownHint": "Select a cell to see the services and guest volume behind it.",
+  "forecast.avgGuests": "Average guests",
+  "forecast.bookings": "Bookings",
+  "forecast.yoyTitle": "Occupancy trend versus last year",
+  "forecast.yoySubtitle": "Monthly bookings and guests compared with the same month a year ago.",
+  "forecast.thisYear": "This year",
+  "forecast.lastYear": "Last year",
+  "forecast.change": "Change",
+  "forecast.occupancyTrend": "Trend",
   "ops.alerts.title": "Guest change alerts",
   "ops.alerts.description": "Email staff when a guest requests a new date or cancels a booking.",
   "ops.alerts.enabled": "Email alerts on",
@@ -5678,6 +5720,27 @@ const fi: TranslationKeys = {
   "ops.digest.saved": "Koosteasetukset tallennettu.",
   "ops.digest.saveError": "Koosteasetusten tallennus ei onnistunut.",
   "ops.digest.test": "Lähetä testikooste nyt",
+  "ops.weekly.title": "Viikkoraportti sähköpostiin",
+  "ops.weekly.description": "Lähettää seitsemän päivän koosteen ja valmiin CSV-lohkon klo 06.00 paikallista aikaa valittuna viikonpäivänä.",
+  "ops.weekly.enabled": "Viikkoraportti päällä",
+  "ops.weekly.day": "Lähetyspäivä",
+  "ops.weekly.recipientsHelp": "Erota pilkulla. Jätä tyhjäksi, niin käytetään yrityksen sähköpostia.",
+  "ops.weekly.saved": "Viikkoraportin asetukset tallennettu.",
+  "ops.weekly.saveError": "Viikkoraportin asetuksia ei voitu tallentaa.",
+  "ops.weekly.test": "Lähetä testiraportti nyt",
+  "ops.weekly.testSent": "Testiraportti jonossa.",
+  "ops.weekly.testError": "Testiraporttia ei voitu lähettää.",
+  "forecast.drilldownTitle": "Huipputunnin erittely",
+  "forecast.drilldownEmpty": "Tälle tunnille ei osunut varauksia jaksolla.",
+  "forecast.drilldownHint": "Valitse ruutu, niin näet sen taustalla olevat palvelut ja vieraiden määrän.",
+  "forecast.avgGuests": "Vieraita keskimäärin",
+  "forecast.bookings": "Varauksia",
+  "forecast.yoyTitle": "Käyttöasteen kehitys viime vuoteen verrattuna",
+  "forecast.yoySubtitle": "Kuukausittaiset varaukset ja vieraat verrattuna vuoden takaiseen kuukauteen.",
+  "forecast.thisYear": "Tänä vuonna",
+  "forecast.lastYear": "Viime vuonna",
+  "forecast.change": "Muutos",
+  "forecast.occupancyTrend": "Kehitys",
   "ops.alerts.title": "Ilmoitukset vieraan muutoksista",
   "ops.alerts.description": "Lähetä henkilökunnalle sähköposti, kun vieras pyytää uutta aikaa tai peruu varauksen.",
   "ops.alerts.enabled": "Sähköposti-ilmoitukset päällä",
@@ -7572,6 +7635,27 @@ const sv: TranslationKeys = {
   "ops.digest.saveError": "Det gick inte att spara inställningarna.",
   "nav.pendingRequests": "väntande gästförfrågningar",
   "ops.digest.test": "Skicka testsammandrag nu",
+  "ops.weekly.title": "Veckorapport via e-post",
+  "ops.weekly.description": "Skickar ett sammandrag för sju dagar med ett färdigt CSV-block kl. 06.00 lokal tid på vald veckodag.",
+  "ops.weekly.enabled": "Veckorapport på",
+  "ops.weekly.day": "Skickas på",
+  "ops.weekly.recipientsHelp": "Separera med komma. Lämna tomt för att använda företagets e-post.",
+  "ops.weekly.saved": "Inställningarna för veckorapporten sparade.",
+  "ops.weekly.saveError": "Kunde inte spara inställningarna för veckorapporten.",
+  "ops.weekly.test": "Skicka testrapport nu",
+  "ops.weekly.testSent": "Testrapporten är i kö.",
+  "ops.weekly.testError": "Kunde inte skicka testrapporten.",
+  "forecast.drilldownTitle": "Detaljer för topptimme",
+  "forecast.drilldownEmpty": "Inga bokningar började denna timme under perioden.",
+  "forecast.drilldownHint": "Välj en ruta för att se tjänsterna och gästvolymen bakom den.",
+  "forecast.avgGuests": "Gäster i snitt",
+  "forecast.bookings": "Bokningar",
+  "forecast.yoyTitle": "Beläggningstrend jämfört med i fjol",
+  "forecast.yoySubtitle": "Bokningar och gäster per månad jämfört med samma månad i fjol.",
+  "forecast.thisYear": "I år",
+  "forecast.lastYear": "I fjol",
+  "forecast.change": "Förändring",
+  "forecast.occupancyTrend": "Trend",
   "ops.alerts.title": "Aviseringar om gäständringar",
   "ops.alerts.description": "Mejla personalen när en gäst begär ny tid eller avbokar.",
   "ops.alerts.enabled": "E-postaviseringar på",
