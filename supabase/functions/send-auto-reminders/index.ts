@@ -2,6 +2,15 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { corsHeaders } from "../_shared/http-headers.ts";
 
 const SENDER_DOMAIN = "notify.mimmobook.com";
+const PORTAL_BASE_URL = "https://mimmobook.com";
+const PORTAL_TOKEN_TTL_DAYS = 7;
+
+export function newPortalToken(): string {
+  const bytes = new Uint8Array(32);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
 
 // --- Translations ---
 const translations: Record<string, Record<string, string>> = {
