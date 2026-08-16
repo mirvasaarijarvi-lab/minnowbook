@@ -102,6 +102,25 @@ const OperationsSheetPanel = () => {
     onError: (err: any) => toast.error(err?.message || t("ops.digest.saveError")),
   });
 
+  /**
+   * Preview send. The digest function accepts `{ test: true }` from a staff
+   * session and mails the current recipient list right away, bypassing both
+   * the opt-in flag and the 06:00 local-time gate.
+   */
+  const sendTestDigest = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.functions.invoke("daily-ops-digest", {
+        body: { test: true },
+      });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => toast.success(t("ops.digest.testSent")),
+    onError: (err: any) => toast.error(err?.message || t("ops.digest.testError")),
+  });
+
+
+
   const { data, isLoading } = useQuery({
     queryKey: ["operations-sheet", tenantId, selectedSiteId, date],
     enabled: !!tenantId,
