@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMemo, useRef, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/hooks/useTenant";
 import { useSiteContext } from "@/hooks/useSiteContext";
@@ -10,6 +10,17 @@ import { Badge } from "@/components/ui/badge";
 import { CalendarRange, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { format, addDays } from "date-fns";
 import { useT } from "@/contexts/I18nContext";
+import { useAutoApproval } from "@/hooks/useAutoApproval";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 type Bar = {
   id: string;
@@ -26,6 +37,20 @@ const toMinutes = (time: string | null | undefined, fallback: number) => {
   const mins = Number(h) * 60 + Number(m ?? 0);
   return Number.isFinite(mins) ? mins : fallback;
 };
+
+type TimelineRow = {
+  key: string;
+  title: string;
+  subtitle?: string;
+  bars: Bar[];
+  resourceType: string;
+  resourceId: string | null;
+  siteId: string | null;
+};
+
+/** Drags snap to quarter hours so a block never lands on an odd minute. */
+const SNAP_MINUTES = 15;
+const snap = (mins: number) => Math.round(mins / SNAP_MINUTES) * SNAP_MINUTES;
 
 const fmt = (mins: number) =>
   `${String(Math.floor(mins / 60)).padStart(2, "0")}:${String(mins % 60).padStart(2, "0")}`;
@@ -88,7 +113,7 @@ const AvailabilityTimelinePanel = () => {
   });
 
   const rows = useMemo(() => {
-    if (!data) return [] as { key: string; title: string; subtitle?: string; bars: Bar[] }[];
+    if (!data) return [] as TimelineRow[];
     const byType = new Map<string, typeof data.resources>();
     for (const r of data.resources) {
       const list = byType.get(r.resource_type) ?? [];
@@ -96,7 +121,7 @@ const AvailabilityTimelinePanel = () => {
       byType.set(r.resource_type, list);
     }
 
-    const out: { key: string; title: string; subtitle?: string; bars: Bar[] }[] = [];
+    const out: TimelineRow[] = [];
 
     for (const [type, resourceList] of byType) {
       const typeBars: Bar[] = [
@@ -120,7 +145,15 @@ const AvailabilityTimelinePanel = () => {
             kind: "block" as const,
           })),
       ];
-      out.push({ key: `type-${type}`, title: type, subtitle: `${resourceList.length}`, bars: typeBars });
+      out.push({
+        key: `type-${type}`,
+        title: type,
+        subtitle: `${resourceList.length}`,
+        bars: typeBars,
+        resourceType: type,
+        resourceId: null,
+        siteId: (resourceList[0] as any)?.site_id ?? null,
+      });
 
       for (const resource of resourceList) {
         const bars: Bar[] = [
@@ -148,6 +181,9 @@ const AvailabilityTimelinePanel = () => {
           title: resource.name,
           subtitle: resource.capacity ? `${resource.capacity}` : undefined,
           bars,
+          resourceType: resource.resource_type,
+          resourceId: resource.id,
+          siteId: (resource as any).site_id ?? null,
         });
       }
     }
@@ -168,6 +204,55 @@ const AvailabilityTimelinePanel = () => {
     for (let m = windowStart; m <= windowEnd; m += 60) marks.push(m);
     return marks;
   }, [windowStart, windowEnd]);
+
+  const queryClient = useQueryClient();
+  const { getApprovalStatus } = useAutoApproval();
+  const laneRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const [drag, setDrag] = useState<{ rowKey: string; startMin: number; endMin: number } | null>(null);
+  const [pendingBlock, setPendingBlock] = useState<
+    { row: TimelineRow; startMin: number; endMin: number } | null
+  >(null);
+  const [blockReason, setBlockReason] = useState("");
+
+  /** Convert a pointer position inside a lane into snapped minutes. */
+  const minutesFromPointer = (rowKey: string, clientX: number) => {
+    const lane = laneRefs.current[rowKey];
+    if (!lane) return null;
+    const rect = lane.getBoundingClientRect();
+    if (rect.width === 0) return null;
+    const ratio = Math.min(1, Math.max(0, (clientX - rect.left) / rect.width));
+    return snap(windowStart + ratio * span);
+  };
+
+  const createBlock = useMutation({
+    mutationFn: async () => {
+      if (!pendingBlock || !tenantId) throw new Error("Missing block");
+      const { row, startMin, endMin } = pendingBlock;
+      const { error } = await supabase.from("blocked_slots").insert({
+        tenant_id: tenantId,
+        site_id: row.siteId ?? selectedSiteId ?? null,
+        date: day,
+        resource_type: row.resourceType,
+        resource_id: row.resourceId,
+        start_time: `${fmt(startMin)}:00`,
+        end_time: `${fmt(endMin)}:00`,
+        reason: blockReason.trim() || null,
+        approval_status: getApprovalStatus(),
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["availability-timeline"] });
+      queryClient.invalidateQueries({ queryKey: ["blocked-slots"] });
+      queryClient.invalidateQueries({ queryKey: ["approval-queue-count"] });
+      setPendingBlock(null);
+      setBlockReason("");
+      toast.success(t("timeline.blockCreated"));
+    },
+    onError: (err: any) => {
+      toast.error(err?.message || t("timeline.blockError"));
+    },
+  });
 
   const barClass = (kind: Bar["kind"], status?: string | null) => {
     if (kind === "block") return "bg-destructive/20 border-destructive/40 text-destructive";
@@ -201,6 +286,8 @@ const AvailabilityTimelinePanel = () => {
           <span className="flex items-center gap-1"><span className="h-3 w-3 rounded-sm bg-emerald-500/30 border border-emerald-500/40" />{t("timeline.legendSlot")}</span>
         </div>
 
+        <p className="text-xs text-muted-foreground">{t("timeline.dragHint")}</p>
+
         {isLoading ? (
           <div className="py-10 flex justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
         ) : rows.length === 0 ? (
@@ -233,10 +320,47 @@ const AvailabilityTimelinePanel = () => {
                         <Badge variant="outline" className="ml-2 text-[10px] px-1 py-0">{row.subtitle}</Badge>
                       )}
                     </div>
-                    <div className="relative flex-1 h-8 rounded-md bg-muted/40 border border-border/60">
+                    <div
+                      ref={(el) => { laneRefs.current[row.key] = el; }}
+                      role="presentation"
+                      className="relative flex-1 h-8 rounded-md bg-muted/40 border border-border/60 cursor-crosshair touch-none"
+                      onPointerDown={(e) => {
+                        if (e.button !== 0) return;
+                        const start = minutesFromPointer(row.key, e.clientX);
+                        if (start === null) return;
+                        (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
+                        setDrag({ rowKey: row.key, startMin: start, endMin: start });
+                      }}
+                      onPointerMove={(e) => {
+                        if (!drag || drag.rowKey !== row.key) return;
+                        const now = minutesFromPointer(row.key, e.clientX);
+                        if (now === null) return;
+                        setDrag({ ...drag, endMin: now });
+                      }}
+                      onPointerUp={() => {
+                        if (!drag || drag.rowKey !== row.key) return;
+                        const from = Math.min(drag.startMin, drag.endMin);
+                        const to = Math.max(drag.startMin, drag.endMin);
+                        setDrag(null);
+                        // A click (zero-length drag) should not silently block a whole day.
+                        if (to - from < SNAP_MINUTES) return;
+                        setBlockReason("");
+                        setPendingBlock({ row, startMin: from, endMin: to });
+                      }}
+                      onPointerCancel={() => setDrag(null)}
+                    >
                       {hourMarks.map((m) => (
                         <span key={m} className="absolute top-0 bottom-0 w-px bg-border/60" style={{ left: `${((m - windowStart) / span) * 100}%` }} />
                       ))}
+                      {drag && drag.rowKey === row.key && Math.abs(drag.endMin - drag.startMin) >= SNAP_MINUTES && (
+                        <div
+                          className="absolute top-1 bottom-1 rounded border border-destructive/60 bg-destructive/25 pointer-events-none"
+                          style={{
+                            left: `${((Math.min(drag.startMin, drag.endMin) - windowStart) / span) * 100}%`,
+                            width: `${(Math.abs(drag.endMin - drag.startMin) / span) * 100}%`,
+                          }}
+                        />
+                      )}
                       {row.bars.map((bar) => {
                         const left = ((Math.max(bar.startMin, windowStart) - windowStart) / span) * 100;
                         const width = ((Math.min(bar.endMin, windowEnd) - Math.max(bar.startMin, windowStart)) / span) * 100;
@@ -260,6 +384,43 @@ const AvailabilityTimelinePanel = () => {
           </div>
         )}
       </CardContent>
+
+      <Dialog open={!!pendingBlock} onOpenChange={(open) => { if (!open) setPendingBlock(null); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-serif">{t("timeline.newBlockTitle")}</DialogTitle>
+            <DialogDescription>{t("timeline.newBlockDescription")}</DialogDescription>
+          </DialogHeader>
+          {pendingBlock && (
+            <div className="space-y-3">
+              <p className="text-sm">
+                <span className="font-medium">{pendingBlock.row.title}</span>
+                {" · "}
+                {day} {fmt(pendingBlock.startMin)} to {fmt(pendingBlock.endMin)}
+              </p>
+              <div className="space-y-1.5">
+                <Label htmlFor="timeline-block-reason">{t("timeline.reason")}</Label>
+                <Input
+                  id="timeline-block-reason"
+                  value={blockReason}
+                  maxLength={200}
+                  placeholder={t("timeline.reasonPlaceholder")}
+                  onChange={(e) => setBlockReason(e.target.value)}
+                />
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPendingBlock(null)}>
+              {t("common.cancel")}
+            </Button>
+            <Button onClick={() => createBlock.mutate()} disabled={createBlock.isPending}>
+              {createBlock.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              {t("timeline.createBlock")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 };

@@ -65,32 +65,23 @@ const RescheduleRequestsPanel = () => {
 
   const reviewMutation = useMutation({
     mutationFn: async ({ row, approve }: { row: RescheduleRow; approve: boolean }) => {
-      const { data: userData } = await supabase.auth.getUser();
-      if (approve) {
-        const update: any = { date: row.requested_date };
-        if (row.requested_start_time) update.start_time = row.requested_start_time;
-        if (row.requested_end_time) update.end_time = row.requested_end_time;
-        const { error: resErr } = await supabase
-          .from("reservations")
-          .update(update)
-          .eq("id", row.reservation_id)
-          .eq("tenant_id", tenantId);
-        if (resErr) throw resErr;
-      }
-      const { error } = await supabase
-        .from("reschedule_requests")
-        .update({
-          status: approve ? "approved" : "declined",
-          reviewed_by: userData?.user?.id ?? null,
-          reviewed_at: new Date().toISOString(),
-        })
-        .eq("id", row.id)
-        .eq("tenant_id", tenantId);
+      // The decision moves the booking, closes the request, and emails the
+      // guest. Those must not drift apart, so the edge function owns all three.
+      const { data: res, error } = await supabase.functions.invoke("reschedule-review", {
+        body: { request_id: row.id, decision: approve ? "approved" : "declined" },
+      });
       if (error) throw error;
+      if ((res as any)?.error) throw new Error((res as any).error);
+      return res;
     },
     onSuccess: (_res, vars) => {
-      toast.success(vars.approve ? "Booking moved to the new date." : "Request declined.");
+      toast.success(
+        vars.approve
+          ? "Booking moved to the new date and the guest was notified."
+          : "Request declined and the guest was notified.",
+      );
       queryClient.invalidateQueries({ queryKey: ["reschedule-requests", tenantId] });
+      queryClient.invalidateQueries({ queryKey: ["pending-reschedule-count", tenantId] });
       queryClient.invalidateQueries({ queryKey: ["reservations"] });
     },
     onError: (err: any) => {

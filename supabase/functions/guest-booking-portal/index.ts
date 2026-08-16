@@ -120,7 +120,26 @@ const lookupCopy: Record<string, { subject: string; title: string; intro: string
   },
 };
 
-Deno.serve(async (req) => {
+
+const cancelCopy: Record<string, { subject: string; title: string; body: string }> = {
+  en: {
+    subject: "Your booking is cancelled",
+    title: "Booking cancelled",
+    body: "We have cancelled your booking for",
+  },
+  fi: {
+    subject: "Varauksesi on peruttu",
+    title: "Varaus peruttu",
+    body: "Olemme peruneet varauksesi ajalle",
+  },
+  sv: {
+    subject: "Din bokning är avbokad",
+    title: "Bokning avbokad",
+    body: "Vi har avbokat din bokning för",
+  },
+};
+
+export async function handleGuestBookingPortalRequest(req: Request): Promise<Response> {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
@@ -305,9 +324,100 @@ Deno.serve(async (req) => {
       return json({ ok: true, request: inserted });
     }
 
+
+    if (action === "cancel") {
+      const token = validateToken(body.token);
+      const reason = validateNote(body.reason);
+      const language = ["en", "fi", "sv"].includes(String(body.language)) ? String(body.language) : "en";
+
+      const { data: tokenRow } = await admin
+        .from("booking_tokens")
+        .select("reservation_id, tenant_id, is_revoked, expires_at")
+        .eq("token", token)
+        .maybeSingle();
+
+      if (!tokenRow || tokenRow.is_revoked || new Date(tokenRow.expires_at) < new Date()) {
+        return json({ error: "This booking link is no longer valid." }, 403);
+      }
+
+      const { data: reservation } = await admin
+        .from("reservations")
+        .select("id, tenant_id, status, date, start_time, guest_name, guest_email")
+        .eq("id", tokenRow.reservation_id)
+        .eq("tenant_id", tokenRow.tenant_id)
+        .maybeSingle();
+
+      if (!reservation) return json({ error: "Booking not found." }, 404);
+      if (reservation.status === "cancelled") {
+        return json({ ok: true, alreadyCancelled: true });
+      }
+
+      const { error: cancelErr } = await admin
+        .from("reservations")
+        .update({
+          status: "cancelled",
+          internal_notes: reason ? `Guest cancellation: ${reason}` : "Cancelled by guest via booking portal",
+        })
+        .eq("id", reservation.id)
+        .eq("tenant_id", reservation.tenant_id);
+
+      if (cancelErr) {
+        console.error("Failed to cancel reservation", cancelErr.message);
+        return json({ error: "Could not cancel this booking. Please contact the venue." }, 500);
+      }
+
+      // Any pending change request is moot once the booking is cancelled.
+      await admin
+        .from("reschedule_requests")
+        .update({ status: "cancelled", staff_note: "Booking cancelled by guest" })
+        .eq("reservation_id", reservation.id)
+        .eq("status", "pending");
+
+      // The link must not survive the booking it points at.
+      await admin.from("booking_tokens").update({ is_revoked: true }).eq("token", token);
+
+      try {
+        await admin.from("notifications").insert({
+          tenant_id: reservation.tenant_id,
+          reservation_id: reservation.id,
+          type: "guest_cancellation",
+          title: "Guest cancelled a booking",
+          message: `${reservation.guest_name} cancelled their booking for ${reservation.date}${reason ? `. Reason: ${reason}` : "."}`,
+        });
+      } catch (notifyErr) {
+        console.error("Failed to create cancellation notification", notifyErr);
+      }
+
+      const copy = cancelCopy[language];
+      try {
+        await admin.rpc("enqueue_email", {
+          queue_name: "transactional_emails",
+          payload: {
+            to: reservation.guest_email,
+            from: `MimmoBook <noreply@${SENDER_DOMAIN}>`,
+            sender_domain: SENDER_DOMAIN,
+            subject: copy.subject,
+            html: `<!DOCTYPE html><html><head><meta charset="utf-8"></head><body style="margin:0;padding:32px;background:#ffffff;font-family:'Inter',Arial,sans-serif">
+  <h1 style="color:#1E1519;font-size:22px;font-family:'Playfair Display',Georgia,serif;margin:0 0 12px">${copy.title}</h1>
+  <p style="color:#63516E;font-size:15px;line-height:1.6">${copy.body} <strong>${escapeHtml(reservation.date)}</strong>${reservation.start_time ? ` ${escapeHtml(String(reservation.start_time).slice(0, 5))}` : ""}.</p>
+</body></html>`,
+            purpose: "transactional",
+            label: "guest_cancellation",
+            queued_at: new Date().toISOString(),
+          },
+        });
+      } catch (mailErr) {
+        console.error("Failed to enqueue cancellation email", mailErr);
+      }
+
+      return json({ ok: true });
+    }
+
     return json({ error: "Unknown action" }, 400);
   } catch (err) {
     const message = err instanceof Error ? err.message : "Request failed";
     return json({ error: message }, 400);
   }
-});
+}
+
+Deno.serve(handleGuestBookingPortalRequest);
