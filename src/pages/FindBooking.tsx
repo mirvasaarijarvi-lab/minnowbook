@@ -8,7 +8,7 @@ import { Loader2, MailCheck, Search } from "lucide-react";
 import Logo from "@/components/Logo";
 import SEOHead from "@/components/SEOHead";
 import { toast } from "sonner";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useLanguage } from "@/contexts/I18nContext";
 
 const FindBooking = () => {
   const [email, setEmail] = useState("");
