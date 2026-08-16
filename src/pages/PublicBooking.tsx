@@ -2617,11 +2617,18 @@ const PublicBookingInner = () => {
         />
 
         {/* Footer */}
-        <footer className="text-center py-6 text-xs text-muted-foreground">
+        <footer className="text-center py-6 text-xs text-muted-foreground space-y-1">
+          <p>
+            <span>{t("guest.find.linkHint")} </span>
+            <a href="/find-booking" className="underline underline-offset-2 hover:text-foreground">
+              {t("guest.find.linkLabel")}
+            </a>
+          </p>
           {businessName && <p>{businessName}</p>}
           {settings?.business_address && <p>{settings.business_address}</p>}
           {settings?.business_phone && <p>{settings.business_phone}</p>}
         </footer>
+
       </main>
     </div>
   );
