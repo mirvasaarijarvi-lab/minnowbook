@@ -1,0 +1,290 @@
+import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { format } from "date-fns";
+import { supabase } from "@/integrations/supabase/client";
+import { useTenant } from "@/hooks/useTenant";
+import { useSiteContext } from "@/hooks/useSiteContext";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ClipboardList, Download, Printer } from "lucide-react";
+import DashboardTooltip from "./DashboardTooltip";
+
+interface OpsReservation {
+  id: string;
+  reservation_type: string;
+  status: string | null;
+  date: string;
+  check_out_date: string | null;
+  start_time: string | null;
+  end_time: string | null;
+  guest_name: string;
+  guest_phone: string | null;
+  guests_count: number | null;
+  estimated_guests: number | null;
+  room_type: string | null;
+  dietary_notes: string | null;
+  special_requests: string | null;
+  breakfast_included: boolean | null;
+  catering_needed: boolean | null;
+}
+
+const KITCHEN_TYPES = ["restaurant", "catering", "venue"];
+const LODGING_TYPES = ["hotel", "guesthouse", "cottage", "camping"];
+
+/** Neutralize spreadsheet formula injection in exported cells. */
+function sanitizeCell(value: unknown): string {
+  const raw = String(value ?? "");
+  const cleaned = raw.replace(/"/g, '""').replace(/[\r\n]+/g, " ");
+  return /^[=+\-@\t]/.test(cleaned) ? `'${cleaned}` : cleaned;
+}
+
+function escapeHtml(value: unknown): string {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+const OperationsSheetPanel = () => {
+  const { tenantId } = useTenant();
+  const { selectedSiteId } = useSiteContext();
+  const [date, setDate] = useState(() => format(new Date(), "yyyy-MM-dd"));
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["operations-sheet", tenantId, selectedSiteId, date],
+    enabled: !!tenantId,
+    queryFn: async () => {
+      let query = supabase
+        .from("reservations")
+        .select(
+          "id, reservation_type, status, date, check_out_date, start_time, end_time, guest_name, guest_phone, guests_count, estimated_guests, room_type, dietary_notes, special_requests, breakfast_included, catering_needed",
+        )
+        .eq("tenant_id", tenantId)
+        .neq("status", "cancelled")
+        .or(`date.eq.${date},check_out_date.eq.${date}`)
+        .order("start_time", { ascending: true, nullsFirst: false });
+
+      if (selectedSiteId) query = query.eq("site_id", selectedSiteId);
+
+      const { data: rows, error } = await query;
+      if (error) throw error;
+
+      const reservations = (rows ?? []) as OpsReservation[];
+
+      const { data: orders } = await supabase
+        .from("kitchen_orders")
+        .select("reservation_id, item_name, quantity, category, status")
+        .eq("tenant_id", tenantId)
+        .in("reservation_id", reservations.map((r) => r.id).length ? reservations.map((r) => r.id) : ["00000000-0000-0000-0000-000000000000"]);
+
+      const ordersByReservation: Record<string, string[]> = {};
+      for (const order of orders ?? []) {
+        const list = ordersByReservation[order.reservation_id] ?? [];
+        list.push(`${order.quantity}x ${order.item_name}`);
+        ordersByReservation[order.reservation_id] = list;
+      }
+
+      return { reservations, ordersByReservation };
+    },
+  });
+
+  const { kitchen, lodging } = useMemo(() => {
+    const reservations = data?.reservations ?? [];
+    return {
+      kitchen: reservations.filter(
+        (r) => r.date === date && (KITCHEN_TYPES.includes(r.reservation_type) || r.catering_needed),
+      ),
+      lodging: reservations.filter((r) => LODGING_TYPES.includes(r.reservation_type)),
+    };
+  }, [data, date]);
+
+  const guestsOf = (r: OpsReservation) => r.guests_count ?? r.estimated_guests ?? "";
+
+  const kitchenRows = kitchen.map((r) => [
+    r.start_time?.slice(0, 5) ?? "",
+    r.guest_name,
+    r.reservation_type,
+    guestsOf(r),
+    (data?.ordersByReservation[r.id] ?? []).join(", "),
+    r.dietary_notes ?? "",
+    r.special_requests ?? "",
+  ]);
+
+  const lodgingRows = lodging.map((r) => [
+    r.date === date && r.check_out_date === date
+      ? "Arrival + departure"
+      : r.date === date
+      ? "Arrival"
+      : "Departure",
+    r.guest_name,
+    r.room_type ?? "",
+    guestsOf(r),
+    r.breakfast_included ? "Yes" : "No",
+    r.guest_phone ?? "",
+    r.special_requests ?? "",
+  ]);
+
+  const kitchenHeaders = ["Time", "Guest", "Type", "Guests", "Kitchen orders", "Dietary notes", "Notes"];
+  const lodgingHeaders = ["Movement", "Guest", "Room", "Guests", "Breakfast", "Phone", "Notes"];
+
+  const handleExportCSV = () => {
+    const lines: string[][] = [
+      [`Operations sheet ${date}`],
+      [],
+      ["Kitchen"],
+      kitchenHeaders,
+      ...kitchenRows.map((r) => r.map(String)),
+      [],
+      ["Lodging"],
+      lodgingHeaders,
+      ...lodgingRows.map((r) => r.map(String)),
+    ];
+    const csv = "sep=;\n" + lines.map((row) => row.map((c) => `"${sanitizeCell(c)}"`).join(";")).join("\r\n");
+    const blob = new Blob([new Uint8Array([0xef, 0xbb, 0xbf]), new TextEncoder().encode(csv)], {
+      type: "text/csv;charset=utf-8;",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `operations_sheet_${date}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handlePrint = () => {
+    const section = (title: string, headers: string[], rows: (string | number)[][]) => `
+      <h2>${escapeHtml(title)}</h2>
+      ${rows.length === 0 ? "<p>No entries.</p>" : `<table>
+        <thead><tr>${headers.map((h) => `<th>${escapeHtml(h)}</th>`).join("")}</tr></thead>
+        <tbody>${rows
+          .map((r) => `<tr>${r.map((c) => `<td>${escapeHtml(c)}</td>`).join("")}</tr>`)
+          .join("")}</tbody>
+      </table>`}`;
+
+    const pw = window.open("", "_blank", "width=900,height=700");
+    if (!pw) return;
+    pw.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Operations sheet ${escapeHtml(date)}</title>
+      <style>
+        body { font-family: Arial, sans-serif; padding: 24px; color: #1E1519; }
+        h1 { font-size: 20px; margin-bottom: 4px; }
+        h2 { font-size: 15px; margin-top: 24px; }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        th, td { border: 1px solid #ddd; padding: 6px 8px; text-align: left; vertical-align: top; }
+        th { background: #faf8f5; }
+        @media print { body { padding: 0; } }
+      </style></head><body>
+      <h1>Operations sheet</h1>
+      <p>${escapeHtml(date)}</p>
+      ${section("Kitchen", kitchenHeaders, kitchenRows)}
+      ${section("Lodging", lodgingHeaders, lodgingRows)}
+      </body></html>`);
+    pw.document.close();
+    pw.focus();
+    pw.print();
+  };
+
+  return (
+    <Card className="mb-6">
+      <CardHeader className="pb-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <CardTitle className="flex items-center gap-2 text-base font-serif">
+            <ClipboardList className="h-4 w-4 text-primary" />
+            Daily operations sheet
+            <DashboardTooltip text="A print-ready run sheet for one day: kitchen service with dietary notes and orders, plus lodging arrivals and departures." />
+          </CardTitle>
+          <div className="flex flex-wrap items-center gap-2">
+            <Input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className="h-9 w-auto"
+              aria-label="Operations sheet date"
+            />
+            <Button variant="outline" size="sm" onClick={handleExportCSV} className="gap-1.5">
+              <Download className="h-4 w-4" /> CSV
+            </Button>
+            <Button variant="outline" size="sm" onClick={handlePrint} className="gap-1.5">
+              <Printer className="h-4 w-4" /> Print
+            </Button>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        {isLoading ? (
+          <Skeleton className="h-24 w-full" />
+        ) : (
+          <>
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <h3 className="text-sm font-medium">Kitchen</h3>
+                <Badge variant="secondary">{kitchen.length}</Badge>
+              </div>
+              {kitchen.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No kitchen service for this day.</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="text-left text-muted-foreground">
+                        {kitchenHeaders.map((h) => (
+                          <th key={h} className="py-1.5 pr-3 font-medium">{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {kitchenRows.map((row, i) => (
+                        <tr key={kitchen[i].id} className="border-t border-border">
+                          {row.map((cell, j) => (
+                            <td key={j} className="py-1.5 pr-3 align-top">{cell}</td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <h3 className="text-sm font-medium">Lodging</h3>
+                <Badge variant="secondary">{lodging.length}</Badge>
+              </div>
+              {lodging.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No arrivals or departures for this day.</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="text-left text-muted-foreground">
+                        {lodgingHeaders.map((h) => (
+                          <th key={h} className="py-1.5 pr-3 font-medium">{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {lodgingRows.map((row, i) => (
+                        <tr key={lodging[i].id} className="border-t border-border">
+                          {row.map((cell, j) => (
+                            <td key={j} className="py-1.5 pr-3 align-top">{cell}</td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
+export default OperationsSheetPanel;
