@@ -32,6 +32,10 @@ project_id = "lsgznskkxadplwnxplhd"
     # can exercise the contract anonymously. The function itself
     # enforces the bearer-token check before minting.
     verify_jwt = false
+  [functions.guest-booking-portal]
+    # Guests are not signed in: the function authenticates via the
+    # secure booking token or returns a generic response for lookups.
+    verify_jwt = false
   [functions.admin-users]
     # CORS preflights must reach the function so it can apply the
     # request-aware origin allowlist + SECURITY_HEADERS. With the
