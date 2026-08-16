@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ClipboardList, Download, Printer } from "lucide-react";
+import { ClipboardList, Download, Printer, Send } from "lucide-react";
 import DashboardTooltip from "./DashboardTooltip";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
