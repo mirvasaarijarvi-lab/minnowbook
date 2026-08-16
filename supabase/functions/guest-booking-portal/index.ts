@@ -90,6 +90,63 @@ function json(body: unknown, status = 200): Response {
   });
 }
 
+/**
+ * Email staff when a guest changes or cancels a booking.
+ *
+ * Recipients come from tenant_settings.guest_request_alert_recipients, and
+ * fall back to the business email. Opt out with guest_request_alerts_enabled.
+ */
+async function notifyStaffByEmail(
+  admin: ReturnType<typeof createClient>,
+  tenantId: string,
+  subject: string,
+  bodyLines: string[],
+): Promise<void> {
+  try {
+    const { data: settings } = await admin
+      .from("tenant_settings")
+      .select("guest_request_alerts_enabled, guest_request_alert_recipients, business_email, business_name")
+      .eq("tenant_id", tenantId)
+      .maybeSingle();
+
+    if (!settings || settings.guest_request_alerts_enabled === false) return;
+
+    const recipients = (settings.guest_request_alert_recipients ?? []).filter(
+      (addr: unknown) => typeof addr === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(addr),
+    );
+    if (recipients.length === 0 && settings.business_email) {
+      recipients.push(settings.business_email);
+    }
+    if (recipients.length === 0) return;
+
+    const businessName = settings.business_name || "MimmoBook";
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
+<body style="margin:0;padding:32px;background:#ffffff;font-family:'Inter',Arial,sans-serif">
+  <h1 style="color:#1E1519;font-size:20px;font-family:'Playfair Display',Georgia,serif;margin:0 0 12px">${escapeHtml(subject)}</h1>
+  ${bodyLines.map((line) => `<p style="color:#63516E;font-size:15px;line-height:1.6;margin:0 0 8px">${escapeHtml(line)}</p>`).join("")}
+  <p style="color:#999;font-size:12px;margin-top:24px">${escapeHtml(businessName)} · MimmoBook</p>
+</body></html>`;
+
+    for (const to of recipients) {
+      await admin.rpc("enqueue_email", {
+        queue_name: "transactional_emails",
+        payload: {
+          to,
+          from: `MimmoBook <noreply@${SENDER_DOMAIN}>`,
+          sender_domain: SENDER_DOMAIN,
+          subject,
+          html,
+          purpose: "transactional",
+          label: "guest_request_staff_alert",
+          queued_at: new Date().toISOString(),
+        },
+      });
+    }
+  } catch (err) {
+    console.error("Failed to enqueue staff alert", err);
+  }
+}
+
 function newToken(): string {
   const bytes = new Uint8Array(32);
   crypto.getRandomValues(bytes);
@@ -321,6 +378,12 @@ export async function handleGuestBookingPortalRequest(req: Request): Promise<Res
         console.error("Failed to create reschedule notification", notifyErr);
       }
 
+      await notifyStaffByEmail(admin, reservation.tenant_id, "Guest requested a new date", [
+        `${reservation.guest_name} asked to move their booking from ${reservation.date} to ${requestedDate}${requestedStart ? ` at ${requestedStart.slice(0, 5)}` : ""}.`,
+        note ? `Guest note: ${note}` : "No note from the guest.",
+        "Open the Reservations tab in MimmoBook to approve or decline.",
+      ]);
+
       return json({ ok: true, request: inserted });
     }
 
@@ -387,6 +450,11 @@ export async function handleGuestBookingPortalRequest(req: Request): Promise<Res
       } catch (notifyErr) {
         console.error("Failed to create cancellation notification", notifyErr);
       }
+
+      await notifyStaffByEmail(admin, reservation.tenant_id, "Guest cancelled a booking", [
+        `${reservation.guest_name} cancelled their booking for ${reservation.date}${reservation.start_time ? ` at ${String(reservation.start_time).slice(0, 5)}` : ""}.`,
+        reason ? `Reason: ${reason}` : "No reason given.",
+      ]);
 
       const copy = cancelCopy[language];
       try {
