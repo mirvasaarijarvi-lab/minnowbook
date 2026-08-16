@@ -383,6 +383,10 @@ const AvailabilityTimelinePanel = () => {
                         setDrag(null);
                         // A click (zero-length drag) should not silently block a whole day.
                         if (to - from < SNAP_MINUTES) return;
+                        if (overlapsReservation(row, from, to)) {
+                          toast.error(t("timeline.overlapBlocked"));
+                          return;
+                        }
                         setBlockReason("");
                         setPendingBlock({ row, startMin: from, endMin: to });
                       }}
@@ -393,7 +397,11 @@ const AvailabilityTimelinePanel = () => {
                       ))}
                       {drag && drag.rowKey === row.key && Math.abs(drag.endMin - drag.startMin) >= SNAP_MINUTES && (
                         <div
-                          className="absolute top-1 bottom-1 rounded border border-destructive/60 bg-destructive/25 pointer-events-none"
+                          className={`absolute top-1 bottom-1 rounded border pointer-events-none ${
+                            dragInvalid
+                              ? "border-amber-500/70 bg-amber-500/25 border-dashed"
+                              : "border-destructive/60 bg-destructive/25"
+                          }`}
                           style={{
                             left: `${((Math.min(drag.startMin, drag.endMin) - windowStart) / span) * 100}%`,
                             width: `${(Math.abs(drag.endMin - drag.startMin) / span) * 100}%`,
