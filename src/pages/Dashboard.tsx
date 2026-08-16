@@ -257,7 +257,7 @@ const Dashboard = () => {
     resources: gatedView("resources", <ResourceManagement />),
     offers: gatedView("reservations", <OffersManager />),
     kitchen: gatedView("reservations", <KitchenOrdersPanel />),
-    reports: gatedView("reports", <ReportsPanel />),
+    reports: gatedView("reports", <><OperationsSheetPanel /><ReportsPanel /></>),
     settings: gatedView("settings", <SettingsPanel />),
     admin: gatedView("admin", <AdminPanel />),
     bookingLog: gatedView("admin", <BookingValidationLogPanel />),
