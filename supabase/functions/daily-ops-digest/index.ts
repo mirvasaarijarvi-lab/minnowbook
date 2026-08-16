@@ -41,10 +41,47 @@ export function normalizeRecipients(raw: unknown, fallback?: unknown): string[] 
   return Array.from(seen).slice(0, 10);
 }
 
-/** The digest always covers "the day the venue is about to work". */
-export function digestDate(now: Date): string {
-  return new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+/** Tenant timezones come from settings, so fall back when they are unusable. */
+export function normalizeTimezone(raw: unknown): string {
+  if (typeof raw !== "string" || raw.trim().length === 0) return DEFAULT_TIMEZONE;
+  const tz = raw.trim();
+  try {
+    new Intl.DateTimeFormat("en-CA", { timeZone: tz }).format(new Date());
+    return tz;
+  } catch {
+    return DEFAULT_TIMEZONE;
+  }
 }
+
+/** Wall-clock parts for `now` as seen inside `timeZone`. */
+function localParts(now: Date, timeZone: string): { date: string; hour: number } {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(now);
+  const get = (type: string) => parts.find((p) => p.type === type)?.value ?? "";
+  return { date: `${get("year")}-${get("month")}-${get("day")}`, hour: Number(get("hour")) };
+}
+
+/** Local hour of the tenant, used to gate the hourly cron down to one send. */
+export function tenantLocalHour(now: Date, timeZone: unknown): number {
+  return localParts(now, normalizeTimezone(timeZone)).hour;
+}
+
+/**
+ * The digest always covers "the day the venue is about to work", counted from
+ * the tenant's own calendar rather than UTC.
+ */
+export function digestDate(now: Date, timeZone: unknown = DEFAULT_TIMEZONE): string {
+  const today = localParts(now, normalizeTimezone(timeZone)).date;
+  const [y, m, d] = today.split("-").map(Number);
+  return new Date(Date.UTC(y, m - 1, d + 1)).toISOString().slice(0, 10);
+}
+
 
 type DigestRow = {
   reservation_type: string;
