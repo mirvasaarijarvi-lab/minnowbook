@@ -8,7 +8,9 @@
 // enqueues it to the configured recipients. Service-role authorization only:
 // no browser ever calls this directly.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { corsHeaders } from "../_shared/http-headers.ts";
+import { getCorsHeaders } from "../_shared/http-headers.ts";
+import { requireAuth } from "../_shared/require-auth.ts";
+
 
 const SENDER_DOMAIN = "notify.mimmobook.com";
 const KITCHEN_TYPES = ["restaurant", "catering", "venue"];
