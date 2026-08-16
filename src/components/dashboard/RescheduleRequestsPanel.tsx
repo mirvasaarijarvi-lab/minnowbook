@@ -67,7 +67,7 @@ const RescheduleRequestsPanel = () => {
     mutationFn: async ({ row, approve }: { row: RescheduleRow; approve: boolean }) => {
       const { data: userData } = await supabase.auth.getUser();
       if (approve) {
-        const update: Record<string, unknown> = { date: row.requested_date };
+        const update: any = { date: row.requested_date };
         if (row.requested_start_time) update.start_time = row.requested_start_time;
         if (row.requested_end_time) update.end_time = row.requested_end_time;
         const { error: resErr } = await supabase
