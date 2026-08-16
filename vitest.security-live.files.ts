@@ -38,6 +38,7 @@ export const LIVE_SECURITY_TESTS: string[] = [
   "src/test/security/booking-token-enumeration.test.ts",
   "src/test/security/booking-token-expired.test.ts",
   "src/test/security/booking-token-lookup.test.ts",
+  "src/test/security/reschedule-requests-rls.test.ts",
   "src/test/security/booking-token-revoked.test.ts",
   "src/test/security/booking-token-tenant-isolation.test.ts",
   "src/test/security/code-redemption-authenticated-e2e.test.ts",

@@ -46,6 +46,7 @@ const COVERED_TABLES = new Set<string>([
   "notifications",
   "offers",
   "recurring_blocked_slots",
+  "reschedule_requests",
   "reservations",
   "resource_images",
   "resource_opening_hours",
