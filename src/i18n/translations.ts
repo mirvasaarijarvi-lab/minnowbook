@@ -1855,6 +1855,19 @@ type TranslationKeys = {
   "guest.find.error": string;
   "guest.find.linkLabel": string;
   "guest.find.linkHint": string;
+
+  // Availability timeline
+  "timeline.title": string;
+  "timeline.resource": string;
+  "timeline.blocked": string;
+  "timeline.availableSlot": string;
+  "timeline.empty": string;
+  "timeline.previousDay": string;
+  "timeline.nextDay": string;
+  "timeline.legendReservation": string;
+  "timeline.legendPending": string;
+  "timeline.legendBlocked": string;
+  "timeline.legendSlot": string;
 };
 
 export type TranslationKey = keyof TranslationKeys;
@@ -3687,6 +3700,19 @@ const en: TranslationKeys = {
   "guest.find.error": "Something went wrong. Please try again in a moment.",
   "guest.find.linkLabel": "Find my booking",
   "guest.find.linkHint": "Already booked? Manage your reservation.",
+
+  // Availability timeline
+  "timeline.title": "Availability timeline",
+  "timeline.resource": "Resource",
+  "timeline.blocked": "Blocked",
+  "timeline.availableSlot": "Extra availability",
+  "timeline.empty": "No active resources for this day.",
+  "timeline.previousDay": "Previous day",
+  "timeline.nextDay": "Next day",
+  "timeline.legendReservation": "Reservation",
+  "timeline.legendPending": "Pending",
+  "timeline.legendBlocked": "Blocked",
+  "timeline.legendSlot": "Extra availability",
 };
 
 const fi: TranslationKeys = {
@@ -5515,6 +5541,19 @@ const fi: TranslationKeys = {
   "guest.find.error": "Jokin meni pieleen. Yritä hetken kuluttua uudelleen.",
   "guest.find.linkLabel": "Etsi varaukseni",
   "guest.find.linkHint": "Oletko jo varannut? Hallinnoi varaustasi.",
+
+  // Availability timeline
+  "timeline.title": "Saatavuuden aikajana",
+  "timeline.resource": "Resurssi",
+  "timeline.blocked": "Estetty",
+  "timeline.availableSlot": "Lisäsaatavuus",
+  "timeline.empty": "Ei aktiivisia resursseja tälle päivälle.",
+  "timeline.previousDay": "Edellinen päivä",
+  "timeline.nextDay": "Seuraava päivä",
+  "timeline.legendReservation": "Varaus",
+  "timeline.legendPending": "Odottaa",
+  "timeline.legendBlocked": "Estetty",
+  "timeline.legendSlot": "Lisäsaatavuus",
 };
 
 const sv: TranslationKeys = {
@@ -7343,6 +7382,19 @@ const sv: TranslationKeys = {
   "guest.find.error": "Något gick fel. Försök igen om en stund.",
   "guest.find.linkLabel": "Hitta min bokning",
   "guest.find.linkHint": "Redan bokat? Hantera din reservation.",
+
+  // Availability timeline
+  "timeline.title": "Tillgänglighetstidslinje",
+  "timeline.resource": "Resurs",
+  "timeline.blocked": "Blockerad",
+  "timeline.availableSlot": "Extra tillgänglighet",
+  "timeline.empty": "Inga aktiva resurser för den här dagen.",
+  "timeline.previousDay": "Föregående dag",
+  "timeline.nextDay": "Nästa dag",
+  "timeline.legendReservation": "Bokning",
+  "timeline.legendPending": "Väntande",
+  "timeline.legendBlocked": "Blockerad",
+  "timeline.legendSlot": "Extra tillgänglighet",
 };
 
 export const translations: Record<Language, TranslationKeys> = { en, fi, sv };
