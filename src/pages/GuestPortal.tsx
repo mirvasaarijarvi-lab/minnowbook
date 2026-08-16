@@ -25,6 +25,10 @@ const typeIcons: Record<string, React.ElementType> = {
 const GuestPortal = () => {
   const { token } = useParams<{ token: string }>();
   const [cancelOpen, setCancelOpen] = useState(false);
+  const [newDate, setNewDate] = useState("");
+  const [newTime, setNewTime] = useState("");
+  const [note, setNote] = useState("");
+  const [rescheduleSent, setRescheduleSent] = useState(false);
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["guest-booking", token],
