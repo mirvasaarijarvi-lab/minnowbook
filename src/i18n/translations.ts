@@ -1895,6 +1895,8 @@ type TranslationKeys = {
   "ops.alerts.saved": string;
   "ops.alerts.saveError": string;
   "timeline.blockButton": string;
+  "timeline.startTime": string;
+  "timeline.endTime": string;
   "ops.digest.testSent": string;
   "ops.digest.testError": string;
   "nav.pendingRequests": string;
@@ -3790,6 +3792,8 @@ const en: TranslationKeys = {
   "ops.alerts.saved": "Alert settings saved.",
   "ops.alerts.saveError": "Could not save alert settings.",
   "timeline.blockButton": "Block time",
+  "timeline.startTime": "Start time",
+  "timeline.endTime": "End time",
   "ops.digest.testSent": "Test digest sent to the listed recipients.",
   "ops.digest.testError": "Could not send the test digest.",
   "nav.pendingRequests": "pending guest requests",
@@ -5681,6 +5685,8 @@ const fi: TranslationKeys = {
   "ops.alerts.saved": "Ilmoitusasetukset tallennettu.",
   "ops.alerts.saveError": "Ilmoitusasetuksia ei voitu tallentaa.",
   "timeline.blockButton": "Varaa aika pois",
+  "timeline.startTime": "Alkuaika",
+  "timeline.endTime": "Loppuaika",
   "ops.digest.testSent": "Testikooste lähetetty listatuille vastaanottajille.",
   "ops.digest.testError": "Testikoosteen lähetys ei onnistunut.",
   "nav.pendingRequests": "odottavaa vieraspyyntöä",
@@ -7573,6 +7579,8 @@ const sv: TranslationKeys = {
   "ops.alerts.saved": "Aviseringsinställningarna sparade.",
   "ops.alerts.saveError": "Kunde inte spara aviseringsinställningarna.",
   "timeline.blockButton": "Blockera tid",
+  "timeline.startTime": "Starttid",
+  "timeline.endTime": "Sluttid",
   "ops.digest.testSent": "Testsammandraget skickades till mottagarna.",
   "ops.digest.testError": "Det gick inte att skicka testsammandraget.",
 
