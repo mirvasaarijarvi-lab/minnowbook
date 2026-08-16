@@ -1256,6 +1256,7 @@ type TranslationKeys = {
   "aid.messagePlaceholder": string;
   "aid.submitToAdmin": string;
   "aid.typePlaceholder": string;
+  "aid.sendMessage": string;
   "aid.chat": string;
   "aid.requests": string;
   "aid.loadingRequests": string;
@@ -3047,6 +3048,7 @@ const en: TranslationKeys = {
   "aid.messagePlaceholder": "Describe your request or suggestion...",
   "aid.submitToAdmin": "Submit to Admin",
   "aid.typePlaceholder": "Type your question...",
+  "aid.sendMessage": "Send message",
   "aid.chat": "Chat",
   "aid.requests": "Requests",
   "aid.loadingRequests": "Loading requests...",
@@ -4962,6 +4964,7 @@ const fi: TranslationKeys = {
   "aid.messagePlaceholder": "Kuvaile pyyntösi tai ehdotuksesi...",
   "aid.submitToAdmin": "Lähetä ylläpidolle",
   "aid.typePlaceholder": "Kirjoita kysymyksesi...",
+  "aid.sendMessage": "Lähetä viesti",
   "aid.chat": "Chat",
   "aid.requests": "Pyynnöt",
   "aid.loadingRequests": "Ladataan pyyntöjä...",
@@ -6876,6 +6879,7 @@ const sv: TranslationKeys = {
   "aid.messagePlaceholder": "Beskriv ditt ärende eller förslag...",
   "aid.submitToAdmin": "Skicka till admin",
   "aid.typePlaceholder": "Skriv din fråga...",
+  "aid.sendMessage": "Skicka meddelande",
   "aid.chat": "Chatt",
   "aid.requests": "Ärenden",
   "aid.loadingRequests": "Laddar ärenden...",
