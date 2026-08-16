@@ -223,5 +223,10 @@ test.describe("guest self-service flow", () => {
       .eq("token", second.token)
       .single();
     expect(tokenRow!.is_revoked).toBe(true);
+
+    // booking_tokens and reschedule_requests are not covered by the tenant
+    // cascade, so clear them explicitly before the fixture drops the tenant.
+    await admin.from("reschedule_requests").delete().eq("tenant_id", tenantId);
+    await admin.from("booking_tokens").delete().eq("tenant_id", tenantId);
   });
 });
