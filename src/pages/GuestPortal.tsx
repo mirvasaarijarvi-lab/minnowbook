@@ -97,12 +97,14 @@ const GuestPortal = () => {
 
   const cancelMutation = useMutation({
     mutationFn: async () => {
-      if (!data?.reservation) return;
-      const { error } = await supabase
-        .from("reservations")
-        .update({ status: "cancelled" })
-        .eq("id", data.reservation.id);
+      // Guests are unauthenticated, so the cancellation runs server-side
+      // through the booking token instead of a direct table write.
+      const { data: res, error } = await supabase.functions.invoke("guest-booking-portal", {
+        body: { action: "cancel", token },
+      });
       if (error) throw error;
+      if ((res as any)?.error) throw new Error((res as any).error);
+      return res;
     },
     onSuccess: () => {
       toast.success(t("guest.portal.cancelSuccess"));
