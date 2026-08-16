@@ -63,6 +63,7 @@ export const LIVE_SECURITY_TESTS: string[] = [
   "src/test/security/edge-function-cors-origin.test.ts",
   "src/test/security/edge-function-disallowed-origin-403.test.ts",
   "src/test/security/forbidden-access-audit.integration.test.ts",
+  "src/test/security/guest-booking-portal.test.ts",
   "src/test/security/guest-reviews-and-tenants-rls.test.ts",
   "src/test/security/pagination-negative-rls.test.ts",
   "src/test/security/redeem-preflight.test.ts",
