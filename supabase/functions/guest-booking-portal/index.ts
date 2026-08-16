@@ -97,7 +97,8 @@ function json(body: unknown, status = 200): Response {
  * fall back to the business email. Opt out with guest_request_alerts_enabled.
  */
 async function notifyStaffByEmail(
-  admin: ReturnType<typeof createClient>,
+  // deno-lint-ignore no-explicit-any
+  admin: any,
   tenantId: string,
   subject: string,
   bodyLines: string[],
