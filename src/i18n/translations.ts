@@ -1887,6 +1887,9 @@ type TranslationKeys = {
   "ops.digest.save": string;
   "ops.digest.saved": string;
   "ops.digest.saveError": string;
+  "ops.digest.test": string;
+  "ops.digest.testSent": string;
+  "ops.digest.testError": string;
   "nav.pendingRequests": string;
 
   // Forecast
@@ -3772,6 +3775,9 @@ const en: TranslationKeys = {
   "ops.digest.save": "Save digest settings",
   "ops.digest.saved": "Digest settings saved.",
   "ops.digest.saveError": "Could not save digest settings.",
+  "ops.digest.test": "Send test digest now",
+  "ops.digest.testSent": "Test digest sent to the listed recipients.",
+  "ops.digest.testError": "Could not send the test digest.",
   "nav.pendingRequests": "pending guest requests",
 
   // Forecast
@@ -5653,6 +5659,9 @@ const fi: TranslationKeys = {
   "ops.digest.save": "Tallenna kooste",
   "ops.digest.saved": "Koosteasetukset tallennettu.",
   "ops.digest.saveError": "Koosteasetusten tallennus ei onnistunut.",
+  "ops.digest.test": "Lähetä testikooste nyt",
+  "ops.digest.testSent": "Testikooste lähetetty listatuille vastaanottajille.",
+  "ops.digest.testError": "Testikoosteen lähetys ei onnistunut.",
   "nav.pendingRequests": "odottavaa vieraspyyntöä",
 
   // Forecast
@@ -7535,6 +7544,9 @@ const sv: TranslationKeys = {
   "ops.digest.saved": "Inställningarna sparade.",
   "ops.digest.saveError": "Det gick inte att spara inställningarna.",
   "nav.pendingRequests": "väntande gästförfrågningar",
+  "ops.digest.test": "Skicka testsammandrag nu",
+  "ops.digest.testSent": "Testsammandraget skickades till mottagarna.",
+  "ops.digest.testError": "Det gick inte att skicka testsammandraget.",
 
   // Forecast
   "forecast.title": "Efterfrågeprognos",
