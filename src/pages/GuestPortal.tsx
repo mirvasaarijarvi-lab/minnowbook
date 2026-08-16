@@ -14,6 +14,7 @@ import { format } from "date-fns";
 import Logo from "@/components/Logo";
 import SEOHead from "@/components/SEOHead";
 import { toast } from "sonner";
+import { useT } from "@/contexts/I18nContext";
 
 const typeIcons: Record<string, React.ElementType> = {
   restaurant: UtensilsCrossed,
@@ -24,6 +25,7 @@ const typeIcons: Record<string, React.ElementType> = {
 
 const GuestPortal = () => {
   const { token } = useParams<{ token: string }>();
+  const t = useT();
   const [cancelOpen, setCancelOpen] = useState(false);
   const [newDate, setNewDate] = useState("");
   const [newTime, setNewTime] = useState("");
@@ -86,10 +88,10 @@ const GuestPortal = () => {
     },
     onSuccess: () => {
       setRescheduleSent(true);
-      toast.success("Change request sent to the venue.");
+      toast.success(t("guest.portal.requestSentToast"));
     },
     onError: (err: Error) => {
-      toast.error(err.message || "Could not send your request. Please try again.");
+      toast.error(err.message || t("guest.portal.requestError"));
     },
   });
 
@@ -103,12 +105,12 @@ const GuestPortal = () => {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Your booking has been cancelled.");
+      toast.success(t("guest.portal.cancelSuccess"));
       setCancelOpen(false);
       refetch();
     },
     onError: () => {
-      toast.error("Failed to cancel. Please try again.");
+      toast.error(t("guest.portal.cancelError"));
     },
   });
 
@@ -128,14 +130,14 @@ const GuestPortal = () => {
           <CardContent className="pt-6 text-center space-y-4">
             <XCircle className="h-12 w-12 text-destructive mx-auto" />
             <h2 className="text-xl font-serif font-semibold">
-              {msg === "expired" ? "Link Expired" : msg === "revoked" ? "Link Revoked" : "Booking Not Found"}
+              {msg === "expired" ? t("guest.portal.linkExpiredTitle") : msg === "revoked" ? t("guest.portal.linkRevokedTitle") : t("guest.portal.notFoundTitle")}
             </h2>
             <p className="text-muted-foreground">
               {msg === "expired"
-                ? "This booking link has expired. Please contact the venue for assistance."
+                ? t("guest.portal.linkExpiredBody")
                 : msg === "revoked"
-                ? "This link has been revoked. Please contact the venue."
-                : "We couldn't find a booking with this link. It may have been removed."}
+                ? t("guest.portal.linkRevokedBody")
+                : t("guest.portal.notFoundBody")}
             </p>
           </CardContent>
         </Card>
@@ -165,7 +167,7 @@ const GuestPortal = () => {
       <header className="border-b border-border bg-card px-4 py-4">
         <div className="max-w-2xl mx-auto flex items-center justify-between">
           <Logo variant="color" size="sm" />
-          <span className="text-sm text-muted-foreground">Guest Portal</span>
+          <span className="text-sm text-muted-foreground">{t("guest.portal.label")}</span>
         </div>
       </header>
 
@@ -178,7 +180,7 @@ const GuestPortal = () => {
                   <TypeIcon className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <CardTitle className="font-serif text-lg">Your Booking</CardTitle>
+                  <CardTitle className="font-serif text-lg">{t("guest.portal.title")}</CardTitle>
                   <p className="text-sm text-muted-foreground capitalize">{res.reservation_type}</p>
                 </div>
               </div>
@@ -203,27 +205,27 @@ const GuestPortal = () => {
               {(res.guests_count || res.estimated_guests) && (
                 <div className="flex items-center gap-2 text-sm">
                   <Users className="h-4 w-4 text-muted-foreground shrink-0" />
-                  <span>{res.guests_count || res.estimated_guests} guest(s)</span>
+                  <span>{res.guests_count || res.estimated_guests} {t("guest.portal.guestsSuffix")}</span>
                 </div>
               )}
               {res.check_out_date && (
                 <div className="flex items-center gap-2 text-sm">
                   <CalendarDays className="h-4 w-4 text-muted-foreground shrink-0" />
-                  <span>Check-out: {format(new Date(res.check_out_date), "MMM d, yyyy")}</span>
+                  <span>{t("guest.portal.checkOut")}: {format(new Date(res.check_out_date), "MMM d, yyyy")}</span>
                 </div>
               )}
             </div>
 
             {res.special_requests && (
               <div className="border-t border-border pt-3">
-                <p className="text-xs text-muted-foreground mb-1">Special Requests</p>
+                <p className="text-xs text-muted-foreground mb-1">{t("guest.portal.specialRequests")}</p>
                 <p className="text-sm">{res.special_requests}</p>
               </div>
             )}
 
             {res.price_eur != null && (
               <div className="border-t border-border pt-3">
-                <p className="text-xs text-muted-foreground mb-1">Total</p>
+                <p className="text-xs text-muted-foreground mb-1">{t("guest.portal.total")}</p>
                 <p className="text-lg font-semibold">€{Number(res.price_eur).toFixed(2)}</p>
               </div>
             )}
@@ -232,14 +234,14 @@ const GuestPortal = () => {
               <div className="border-t border-border pt-4 space-y-4">
                 {rescheduleSent ? (
                   <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 text-sm">
-                    Your change request has been sent to the venue. They will contact you to confirm.
+                    {t("guest.portal.requestSentBanner")}
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    <p className="text-sm font-medium">Need a different date?</p>
+                    <p className="text-sm font-medium">{t("guest.portal.needDifferentDate")}</p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div className="space-y-1">
-                        <Label htmlFor="reschedule-date" className="text-xs text-muted-foreground">New date</Label>
+                        <Label htmlFor="reschedule-date" className="text-xs text-muted-foreground">{t("guest.portal.newDate")}</Label>
                         <Input
                           id="reschedule-date"
                           type="date"
@@ -249,7 +251,7 @@ const GuestPortal = () => {
                         />
                       </div>
                       <div className="space-y-1">
-                        <Label htmlFor="reschedule-time" className="text-xs text-muted-foreground">New time (optional)</Label>
+                        <Label htmlFor="reschedule-time" className="text-xs text-muted-foreground">{t("guest.portal.newTime")}</Label>
                         <Input
                           id="reschedule-time"
                           type="time"
@@ -259,13 +261,13 @@ const GuestPortal = () => {
                       </div>
                     </div>
                     <div className="space-y-1">
-                      <Label htmlFor="reschedule-note" className="text-xs text-muted-foreground">Message (optional)</Label>
+                      <Label htmlFor="reschedule-note" className="text-xs text-muted-foreground">{t("guest.portal.message")}</Label>
                       <Textarea
                         id="reschedule-note"
                         value={note}
                         maxLength={1000}
                         onChange={(e) => setNote(e.target.value)}
-                        placeholder="Anything the venue should know?"
+                        placeholder={t("guest.portal.messagePlaceholder")}
                       />
                     </div>
                     <Button
@@ -273,7 +275,7 @@ const GuestPortal = () => {
                       disabled={!newDate || rescheduleMutation.isPending}
                       onClick={() => rescheduleMutation.mutate()}
                     >
-                      {rescheduleMutation.isPending ? "Sending..." : "Request new date"}
+                      {rescheduleMutation.isPending ? t("guest.portal.sending") : t("guest.portal.requestNewDate")}
                     </Button>
                   </div>
                 )}
@@ -283,14 +285,14 @@ const GuestPortal = () => {
                   className="border-destructive/30 text-destructive hover:bg-destructive/10"
                   onClick={() => setCancelOpen(true)}
                 >
-                  Cancel Booking
+                  {t("guest.portal.cancelBooking")}
                 </Button>
               </div>
             )}
 
             {isPast && !isCancelled && (
               <div className="border-t border-border pt-3 text-sm text-muted-foreground">
-                This booking date has passed. We hope you enjoyed your visit!
+                {t("guest.portal.pastBooking")}
               </div>
             )}
           </CardContent>
@@ -298,7 +300,7 @@ const GuestPortal = () => {
 
         <div className="text-center">
           <p className="text-xs text-muted-foreground">
-            Questions? Contact the venue directly using the details in your confirmation email.
+            {t("guest.portal.questionsFooter")}
           </p>
         </div>
       </main>
@@ -306,19 +308,18 @@ const GuestPortal = () => {
       <AlertDialog open={cancelOpen} onOpenChange={setCancelOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Cancel your booking?</AlertDialogTitle>
+            <AlertDialogTitle>{t("guest.portal.cancelTitle")}</AlertDialogTitle>
             <AlertDialogDescription>
-              This will cancel your booking for {format(new Date(res?.date ?? new Date()), "MMMM d, yyyy")}.
-              This action cannot be undone.
+              {t("guest.portal.cancelDescription")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Keep Booking</AlertDialogCancel>
+            <AlertDialogCancel>{t("guest.portal.keepBooking")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => cancelMutation.mutate()}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {cancelMutation.isPending ? "Cancelling..." : "Yes, Cancel"}
+              {cancelMutation.isPending ? t("guest.portal.cancelling") : t("guest.portal.yesCancel")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
