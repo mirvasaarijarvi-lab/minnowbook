@@ -22,6 +22,7 @@ import {
   PERM_SITES_VIEW,
 } from "@/lib/permissions";
 import { useHasKitchenResources } from "@/hooks/useHasKitchenResources";
+import { usePendingGuestRequests } from "@/hooks/usePendingGuestRequests";
 
 export type DashboardView = "overview" | "calendar" | "reservations" | "resources" | "offers" | "kitchen" | "reports" | "settings" | "admin" | "bookingLog" | "support" | "sites" | "profile";
 
@@ -57,6 +58,7 @@ const DashboardSidebar = ({ currentView, onViewChange, userEmail, onSignOut, mob
   const { tenant } = useTenant();
   const { isMultiSite, effectiveTier } = useTierGate();
   const { hasKitchenResources } = useHasKitchenResources();
+  const { pendingCount } = usePendingGuestRequests();
   const navigate = useNavigate();
   const visibleItems = navItems.filter((item) => {
     if (item.adminOnly && !isAdminUser) return false;
@@ -118,6 +120,14 @@ const DashboardSidebar = ({ currentView, onViewChange, userEmail, onSignOut, mob
                 >
                   <Icon className="h-4 w-4 shrink-0" />
                   <span className="truncate">{t(labelKey)}</span>
+                  {view === "reservations" && pendingCount > 0 && (
+                    <span
+                      className="ml-auto min-w-5 h-5 px-1.5 rounded-full bg-primary text-primary-foreground text-[11px] font-semibold flex items-center justify-center"
+                      aria-label={`${pendingCount} ${t("nav.pendingRequests")}`}
+                    >
+                      {pendingCount > 9 ? "9+" : pendingCount}
+                    </span>
+                  )}
                   {tierRequired && (
                     <Crown className="h-3 w-3 shrink-0 text-accent ml-auto" />
                   )}
