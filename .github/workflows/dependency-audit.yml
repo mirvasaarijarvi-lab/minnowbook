@@ -693,7 +693,7 @@ jobs:
         if: always() && (steps.detect.outputs.manager == 'npm' || steps.detect.outputs.manager == 'bun-via-npm') && hashFiles('npm-audit.sarif') != '' && steps.validate_npm_sarif.outcome == 'success'
         continue-on-error: true
         # github/codeql-action/upload-sarif@v3.27.5
-        uses: github/codeql-action/upload-sarif@f09c1c0a94de965c15400f5634aa42fac8fb8f88
+        uses: github/codeql-action/upload-sarif@8aad20d150bbac5944a9f9d289da16a4b0d87c1e
         with:
           sarif_file: npm-audit.sarif
           category: npm-audit
@@ -711,7 +711,7 @@ jobs:
         if: always() && steps.detect.outputs.manager == 'pnpm' && hashFiles('pnpm-audit.sarif') != '' && steps.validate_pnpm_sarif.outcome == 'success'
         continue-on-error: true
         # github/codeql-action/upload-sarif@v3.27.5
-        uses: github/codeql-action/upload-sarif@f09c1c0a94de965c15400f5634aa42fac8fb8f88
+        uses: github/codeql-action/upload-sarif@8aad20d150bbac5944a9f9d289da16a4b0d87c1e
         with:
           sarif_file: pnpm-audit.sarif
           category: pnpm-audit
@@ -739,7 +739,7 @@ jobs:
         if: always() && steps.detect.outputs.manager == 'yarn' && hashFiles('yarn-audit.sarif') != '' && steps.validate_yarn_sarif.outcome == 'success'
         continue-on-error: true
         # github/codeql-action/upload-sarif@v3.27.5
-        uses: github/codeql-action/upload-sarif@f09c1c0a94de965c15400f5634aa42fac8fb8f88
+        uses: github/codeql-action/upload-sarif@8aad20d150bbac5944a9f9d289da16a4b0d87c1e
         with:
           sarif_file: yarn-audit.sarif
           category: yarn-audit
