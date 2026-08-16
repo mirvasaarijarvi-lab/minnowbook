@@ -28,6 +28,8 @@ import ReservationList from "@/components/dashboard/ReservationList";
 import ResourceManagement from "@/components/dashboard/ResourceManagement";
 import SettingsPanel from "@/components/dashboard/SettingsPanel";
 import ReportsPanel from "@/components/dashboard/ReportsPanel";
+import OperationsSheetPanel from "@/components/dashboard/OperationsSheetPanel";
+import RescheduleRequestsPanel from "@/components/dashboard/RescheduleRequestsPanel";
 import AdminPanel from "@/components/dashboard/AdminPanel";
 import DashboardSupportPanel from "@/components/dashboard/DashboardSupportPanel";
 import SitesManagementPanel from "@/components/dashboard/SitesManagementPanel";
