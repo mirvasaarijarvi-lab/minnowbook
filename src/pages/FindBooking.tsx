@@ -8,18 +8,19 @@ import { Loader2, MailCheck, Search } from "lucide-react";
 import Logo from "@/components/Logo";
 import SEOHead from "@/components/SEOHead";
 import { toast } from "sonner";
-import { useLanguage } from "@/contexts/I18nContext";
+import { useLanguage, useT } from "@/contexts/I18nContext";
 
 const FindBooking = () => {
   const [email, setEmail] = useState("");
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
   const { language } = useLanguage();
+  const t = useT();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
-      toast.error("Please enter a valid email address.");
+      toast.error(t("guest.find.invalidEmail"));
       return;
     }
     setSending(true);
@@ -35,7 +36,7 @@ const FindBooking = () => {
       if (error) throw error;
       setSent(true);
     } catch {
-      toast.error("Something went wrong. Please try again in a moment.");
+      toast.error(t("guest.find.error"));
     } finally {
       setSending(false);
     }
@@ -52,7 +53,7 @@ const FindBooking = () => {
       <header className="border-b border-border bg-card px-4 py-4">
         <div className="max-w-2xl mx-auto flex items-center justify-between">
           <Logo variant="color" size="sm" />
-          <span className="text-sm text-muted-foreground">Guest Portal</span>
+          <span className="text-sm text-muted-foreground">{t("guest.portal.label")}</span>
         </div>
       </header>
 
@@ -61,29 +62,23 @@ const FindBooking = () => {
           <CardHeader>
             <CardTitle className="font-serif text-xl flex items-center gap-2">
               <Search className="h-5 w-5 text-primary" />
-              Find your booking
+              {t("guest.find.heading")}
             </CardTitle>
           </CardHeader>
           <CardContent>
             {sent ? (
               <div className="space-y-3 text-center py-4">
                 <MailCheck className="h-10 w-10 text-primary mx-auto" />
-                <p className="text-sm text-muted-foreground">
-                  If we found upcoming bookings for that email address, we have sent secure links to it.
-                  The links are valid for 7 days.
-                </p>
+                <p className="text-sm text-muted-foreground">{t("guest.find.sentBody")}</p>
                 <Button variant="outline" onClick={() => { setSent(false); setEmail(""); }}>
-                  Use another email
+                  {t("guest.find.useAnother")}
                 </Button>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
-                <p className="text-sm text-muted-foreground">
-                  Enter the email address you used when booking and we will send you a secure link
-                  to view, change, or cancel your reservation.
-                </p>
+                <p className="text-sm text-muted-foreground">{t("guest.find.intro")}</p>
                 <div className="space-y-2">
-                  <Label htmlFor="find-booking-email">Email address</Label>
+                  <Label htmlFor="find-booking-email">{t("guest.find.emailLabel")}</Label>
                   <Input
                     id="find-booking-email"
                     type="email"
@@ -96,7 +91,7 @@ const FindBooking = () => {
                 </div>
                 <Button type="submit" className="w-full" disabled={sending}>
                   {sending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                  Send me my booking link
+                  {t("guest.find.submit")}
                 </Button>
               </form>
             )}

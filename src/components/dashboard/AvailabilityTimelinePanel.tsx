@@ -1,0 +1,267 @@
+import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useTenant } from "@/hooks/useTenant";
+import { useSiteContext } from "@/hooks/useSiteContext";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { CalendarRange, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { format, addDays } from "date-fns";
+import { useT } from "@/contexts/I18nContext";
+
+type Bar = {
+  id: string;
+  label: string;
+  startMin: number;
+  endMin: number;
+  kind: "reservation" | "block" | "slot";
+  status?: string | null;
+};
+
+const toMinutes = (time: string | null | undefined, fallback: number) => {
+  if (!time) return fallback;
+  const [h, m] = time.split(":");
+  const mins = Number(h) * 60 + Number(m ?? 0);
+  return Number.isFinite(mins) ? mins : fallback;
+};
+
+const fmt = (mins: number) =>
+  `${String(Math.floor(mins / 60)).padStart(2, "0")}:${String(mins % 60).padStart(2, "0")}`;
+
+const AvailabilityTimelinePanel = () => {
+  const { tenantId } = useTenant();
+  const { selectedSiteId } = useSiteContext();
+  const t = useT();
+  const [day, setDay] = useState(() => format(new Date(), "yyyy-MM-dd"));
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["availability-timeline", tenantId, selectedSiteId, day],
+    enabled: !!tenantId,
+    queryFn: async () => {
+      let resourcesQuery = supabase
+        .from("resources")
+        .select("id, name, resource_type, capacity, site_id, is_active")
+        .eq("tenant_id", tenantId!)
+        .eq("is_active", true)
+        .order("resource_type")
+        .order("name");
+      if (selectedSiteId) resourcesQuery = resourcesQuery.eq("site_id", selectedSiteId);
+
+      let reservationsQuery = supabase
+        .from("reservations")
+        .select("id, guest_name, reservation_type, status, date, start_time, end_time, guests_count, site_id")
+        .eq("tenant_id", tenantId!)
+        .eq("date", day)
+        .neq("status", "cancelled");
+      if (selectedSiteId) reservationsQuery = reservationsQuery.eq("site_id", selectedSiteId);
+
+      let blocksQuery = supabase
+        .from("blocked_slots")
+        .select("id, resource_type, resource_id, date, start_time, end_time, reason, site_id")
+        .eq("tenant_id", tenantId!)
+        .eq("date", day);
+      if (selectedSiteId) blocksQuery = blocksQuery.eq("site_id", selectedSiteId);
+
+      const slotsQuery = supabase
+        .from("resource_availability_slots")
+        .select("id, resource_id, slot_date, start_time, end_time, note")
+        .eq("tenant_id", tenantId!)
+        .eq("slot_date", day);
+
+      const [resources, reservations, blocks, slots] = await Promise.all([
+        resourcesQuery,
+        reservationsQuery,
+        blocksQuery,
+        slotsQuery,
+      ]);
+      if (resources.error) throw resources.error;
+
+      return {
+        resources: resources.data ?? [],
+        reservations: reservations.data ?? [],
+        blocks: blocks.data ?? [],
+        slots: slots.data ?? [],
+      };
+    },
+  });
+
+  const rows = useMemo(() => {
+    if (!data) return [] as { key: string; title: string; subtitle?: string; bars: Bar[] }[];
+    const byType = new Map<string, typeof data.resources>();
+    for (const r of data.resources) {
+      const list = byType.get(r.resource_type) ?? [];
+      list.push(r);
+      byType.set(r.resource_type, list);
+    }
+
+    const out: { key: string; title: string; subtitle?: string; bars: Bar[] }[] = [];
+
+    for (const [type, resourceList] of byType) {
+      const typeBars: Bar[] = [
+        ...data.reservations
+          .filter((r) => r.reservation_type === type)
+          .map((r) => ({
+            id: `res-${r.id}`,
+            label: `${r.guest_name}${r.guests_count ? ` (${r.guests_count})` : ""}`,
+            startMin: toMinutes(r.start_time, 9 * 60),
+            endMin: toMinutes(r.end_time, toMinutes(r.start_time, 9 * 60) + 90),
+            kind: "reservation" as const,
+            status: r.status,
+          })),
+        ...data.blocks
+          .filter((b) => b.resource_type === type && !b.resource_id)
+          .map((b) => ({
+            id: `blk-${b.id}`,
+            label: b.reason || t("timeline.blocked"),
+            startMin: toMinutes(b.start_time, 0),
+            endMin: toMinutes(b.end_time, 24 * 60),
+            kind: "block" as const,
+          })),
+      ];
+      out.push({ key: `type-${type}`, title: type, subtitle: `${resourceList.length}`, bars: typeBars });
+
+      for (const resource of resourceList) {
+        const bars: Bar[] = [
+          ...data.blocks
+            .filter((b) => b.resource_id === resource.id)
+            .map((b) => ({
+              id: `blk-${b.id}`,
+              label: b.reason || t("timeline.blocked"),
+              startMin: toMinutes(b.start_time, 0),
+              endMin: toMinutes(b.end_time, 24 * 60),
+              kind: "block" as const,
+            })),
+          ...data.slots
+            .filter((s) => s.resource_id === resource.id)
+            .map((s) => ({
+              id: `slot-${s.id}`,
+              label: s.note || t("timeline.availableSlot"),
+              startMin: toMinutes(s.start_time, 0),
+              endMin: toMinutes(s.end_time, 24 * 60),
+              kind: "slot" as const,
+            })),
+        ];
+        out.push({
+          key: `res-${resource.id}`,
+          title: resource.name,
+          subtitle: resource.capacity ? `${resource.capacity}` : undefined,
+          bars,
+        });
+      }
+    }
+    return out;
+  }, [data, t]);
+
+  const [windowStart, windowEnd] = useMemo(() => {
+    const all = rows.flatMap((r) => r.bars);
+    if (all.length === 0) return [8 * 60, 22 * 60];
+    const min = Math.min(...all.map((b) => b.startMin), 8 * 60);
+    const max = Math.max(...all.map((b) => b.endMin), 22 * 60);
+    return [Math.floor(min / 60) * 60, Math.min(24 * 60, Math.ceil(max / 60) * 60)];
+  }, [rows]);
+
+  const span = Math.max(60, windowEnd - windowStart);
+  const hourMarks = useMemo(() => {
+    const marks: number[] = [];
+    for (let m = windowStart; m <= windowEnd; m += 60) marks.push(m);
+    return marks;
+  }, [windowStart, windowEnd]);
+
+  const barClass = (kind: Bar["kind"], status?: string | null) => {
+    if (kind === "block") return "bg-destructive/20 border-destructive/40 text-destructive";
+    if (kind === "slot") return "bg-emerald-500/15 border-emerald-500/40 text-emerald-700 dark:text-emerald-400";
+    if (status === "pending") return "bg-amber-500/20 border-amber-500/40 text-amber-700 dark:text-amber-400";
+    return "bg-primary/20 border-primary/40 text-primary";
+  };
+
+  return (
+    <Card data-tour="availability-timeline">
+      <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <CardTitle className="font-serif text-lg flex items-center gap-2">
+          <CalendarRange className="h-5 w-5 text-primary" />
+          {t("timeline.title")}
+        </CardTitle>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="icon" aria-label={t("timeline.previousDay")} onClick={() => setDay(format(addDays(new Date(day), -1), "yyyy-MM-dd"))}>
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <Input type="date" value={day} onChange={(e) => setDay(e.target.value)} className="w-[10.5rem]" />
+          <Button variant="outline" size="icon" aria-label={t("timeline.nextDay")} onClick={() => setDay(format(addDays(new Date(day), 1), "yyyy-MM-dd"))}>
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+          <span className="flex items-center gap-1"><span className="h-3 w-3 rounded-sm bg-primary/30 border border-primary/40" />{t("timeline.legendReservation")}</span>
+          <span className="flex items-center gap-1"><span className="h-3 w-3 rounded-sm bg-amber-500/30 border border-amber-500/40" />{t("timeline.legendPending")}</span>
+          <span className="flex items-center gap-1"><span className="h-3 w-3 rounded-sm bg-destructive/30 border border-destructive/40" />{t("timeline.legendBlocked")}</span>
+          <span className="flex items-center gap-1"><span className="h-3 w-3 rounded-sm bg-emerald-500/30 border border-emerald-500/40" />{t("timeline.legendSlot")}</span>
+        </div>
+
+        {isLoading ? (
+          <div className="py-10 flex justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+        ) : rows.length === 0 ? (
+          <p className="py-8 text-center text-sm text-muted-foreground">{t("timeline.empty")}</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <div className="min-w-[46rem]">
+              <div className="flex border-b border-border pb-1 mb-1">
+                <div className="w-44 shrink-0 text-xs text-muted-foreground">{t("timeline.resource")}</div>
+                <div className="relative flex-1 h-4">
+                  {hourMarks.map((m) => (
+                    <span
+                      key={m}
+                      className="absolute -translate-x-1/2 text-[10px] text-muted-foreground"
+                      style={{ left: `${((m - windowStart) / span) * 100}%` }}
+                    >
+                      {fmt(m)}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {rows.map((row) => {
+                const isTypeRow = row.key.startsWith("type-");
+                return (
+                  <div key={row.key} className="flex items-center gap-2 py-1">
+                    <div className={`w-44 shrink-0 truncate text-sm ${isTypeRow ? "font-semibold capitalize" : "pl-4 text-muted-foreground"}`}>
+                      {row.title}
+                      {row.subtitle && (
+                        <Badge variant="outline" className="ml-2 text-[10px] px-1 py-0">{row.subtitle}</Badge>
+                      )}
+                    </div>
+                    <div className="relative flex-1 h-8 rounded-md bg-muted/40 border border-border/60">
+                      {hourMarks.map((m) => (
+                        <span key={m} className="absolute top-0 bottom-0 w-px bg-border/60" style={{ left: `${((m - windowStart) / span) * 100}%` }} />
+                      ))}
+                      {row.bars.map((bar) => {
+                        const left = ((Math.max(bar.startMin, windowStart) - windowStart) / span) * 100;
+                        const width = ((Math.min(bar.endMin, windowEnd) - Math.max(bar.startMin, windowStart)) / span) * 100;
+                        if (width <= 0) return null;
+                        return (
+                          <div
+                            key={bar.id}
+                            title={`${bar.label} ${fmt(bar.startMin)} to ${fmt(bar.endMin)}`}
+                            className={`absolute top-1 bottom-1 rounded border px-1 text-[11px] leading-6 truncate ${barClass(bar.kind, bar.status)}`}
+                            style={{ left: `${left}%`, width: `${Math.max(width, 1.5)}%` }}
+                          >
+                            {bar.label}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
+export default AvailabilityTimelinePanel;

@@ -24,6 +24,8 @@ import useKeyboardShortcuts from "@/components/dashboard/useKeyboardShortcuts";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import DashboardOverview from "@/components/dashboard/DashboardOverview";
 import CalendarView from "@/components/dashboard/CalendarView";
+import AvailabilityTimelinePanel from "@/components/dashboard/AvailabilityTimelinePanel";
+import ForecastPanel from "@/components/dashboard/ForecastPanel";
 import ReservationList from "@/components/dashboard/ReservationList";
 import ResourceManagement from "@/components/dashboard/ResourceManagement";
 import SettingsPanel from "@/components/dashboard/SettingsPanel";
@@ -252,12 +254,12 @@ const Dashboard = () => {
 
   const viewComponents: Record<DashboardView, React.ReactNode> = {
     overview: <DashboardOverview onNavigate={handleOverviewNavigate} />,
-    calendar: gatedView("calendar", <CalendarView />),
+    calendar: gatedView("calendar", <div className="space-y-6"><CalendarView /><AvailabilityTimelinePanel /></div>),
     reservations: gatedView("reservations", <><RescheduleRequestsPanel /><ReservationList initialStatusFilter={reservationStatusFilter} initialInvoicedFilter={reservationInvoicedFilter} initialCheckoutToday={reservationCheckoutTodayFilter} /></>),
     resources: gatedView("resources", <ResourceManagement />),
     offers: gatedView("reservations", <OffersManager />),
     kitchen: gatedView("reservations", <KitchenOrdersPanel />),
-    reports: gatedView("reports", <><OperationsSheetPanel /><ReportsPanel /></>),
+    reports: gatedView("reports", <><OperationsSheetPanel /><ForecastPanel /><ReportsPanel /></>),
     settings: gatedView("settings", <SettingsPanel />),
     admin: gatedView("admin", <AdminPanel />),
     bookingLog: gatedView("admin", <BookingValidationLogPanel />),

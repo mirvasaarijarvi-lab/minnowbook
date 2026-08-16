@@ -1811,6 +1811,83 @@ type TranslationKeys = {
   "privacy.delete.confirmLabel": string;
   "privacy.delete.confirmAction": string;
   "privacy.delete.requested": string;
+  // Guest portal
+  "guest.portal.label": string;
+  "guest.portal.title": string;
+  "guest.portal.linkExpiredTitle": string;
+  "guest.portal.linkRevokedTitle": string;
+  "guest.portal.notFoundTitle": string;
+  "guest.portal.linkExpiredBody": string;
+  "guest.portal.linkRevokedBody": string;
+  "guest.portal.notFoundBody": string;
+  "guest.portal.checkOut": string;
+  "guest.portal.specialRequests": string;
+  "guest.portal.total": string;
+  "guest.portal.guestsSuffix": string;
+  "guest.portal.needDifferentDate": string;
+  "guest.portal.newDate": string;
+  "guest.portal.newTime": string;
+  "guest.portal.message": string;
+  "guest.portal.messagePlaceholder": string;
+  "guest.portal.requestNewDate": string;
+  "guest.portal.sending": string;
+  "guest.portal.requestSentBanner": string;
+  "guest.portal.requestSentToast": string;
+  "guest.portal.requestError": string;
+  "guest.portal.cancelBooking": string;
+  "guest.portal.cancelTitle": string;
+  "guest.portal.cancelDescription": string;
+  "guest.portal.keepBooking": string;
+  "guest.portal.yesCancel": string;
+  "guest.portal.cancelling": string;
+  "guest.portal.cancelSuccess": string;
+  "guest.portal.cancelError": string;
+  "guest.portal.pastBooking": string;
+  "guest.portal.questionsFooter": string;
+  "guest.find.pageTitle": string;
+  "guest.find.heading": string;
+  "guest.find.intro": string;
+  "guest.find.emailLabel": string;
+  "guest.find.submit": string;
+  "guest.find.sentBody": string;
+  "guest.find.useAnother": string;
+  "guest.find.invalidEmail": string;
+  "guest.find.error": string;
+  "guest.find.linkLabel": string;
+  "guest.find.linkHint": string;
+
+  // Availability timeline
+  "timeline.title": string;
+  "timeline.resource": string;
+  "timeline.blocked": string;
+  "timeline.availableSlot": string;
+  "timeline.empty": string;
+  "timeline.previousDay": string;
+  "timeline.nextDay": string;
+  "timeline.legendReservation": string;
+  "timeline.legendPending": string;
+  "timeline.legendBlocked": string;
+  "timeline.legendSlot": string;
+
+  // Forecast
+  "forecast.title": string;
+  "forecast.subtitle": string;
+  "forecast.booked": string;
+  "forecast.expected": string;
+  "forecast.next14Booked": string;
+  "forecast.next14Guests": string;
+  "forecast.gapToPace": string;
+  "forecast.peakHours": string;
+  "forecast.peakSubtitle": string;
+  "forecast.busiest": string;
+  "forecast.basedOn": string;
+  "forecast.mon": string;
+  "forecast.tue": string;
+  "forecast.wed": string;
+  "forecast.thu": string;
+  "forecast.fri": string;
+  "forecast.sat": string;
+  "forecast.sun": string;
 };
 
 export type TranslationKey = keyof TranslationKeys;
@@ -3598,6 +3675,84 @@ const en: TranslationKeys = {
   "privacy.delete.confirmLabel": "Confirmation",
   "privacy.delete.confirmAction": "Schedule deletion",
   "privacy.delete.requested": "Account deletion scheduled. You have 30 days to cancel.",
+
+  // Guest portal
+  "guest.portal.label": "Guest portal",
+  "guest.portal.title": "Your booking",
+  "guest.portal.linkExpiredTitle": "Link expired",
+  "guest.portal.linkRevokedTitle": "Link revoked",
+  "guest.portal.notFoundTitle": "Booking not found",
+  "guest.portal.linkExpiredBody": "This booking link has expired. Please contact the venue for assistance.",
+  "guest.portal.linkRevokedBody": "This link has been revoked. Please contact the venue.",
+  "guest.portal.notFoundBody": "We could not find a booking with this link. It may have been removed.",
+  "guest.portal.checkOut": "Check-out",
+  "guest.portal.specialRequests": "Special requests",
+  "guest.portal.total": "Total",
+  "guest.portal.guestsSuffix": "guest(s)",
+  "guest.portal.needDifferentDate": "Need a different date?",
+  "guest.portal.newDate": "New date",
+  "guest.portal.newTime": "New time (optional)",
+  "guest.portal.message": "Message (optional)",
+  "guest.portal.messagePlaceholder": "Anything the venue should know?",
+  "guest.portal.requestNewDate": "Request new date",
+  "guest.portal.sending": "Sending...",
+  "guest.portal.requestSentBanner": "Your change request has been sent to the venue. They will contact you to confirm.",
+  "guest.portal.requestSentToast": "Change request sent to the venue.",
+  "guest.portal.requestError": "Could not send your request. Please try again.",
+  "guest.portal.cancelBooking": "Cancel booking",
+  "guest.portal.cancelTitle": "Cancel your booking?",
+  "guest.portal.cancelDescription": "This will cancel your booking. This action cannot be undone.",
+  "guest.portal.keepBooking": "Keep booking",
+  "guest.portal.yesCancel": "Yes, cancel",
+  "guest.portal.cancelling": "Cancelling...",
+  "guest.portal.cancelSuccess": "Your booking has been cancelled.",
+  "guest.portal.cancelError": "Failed to cancel. Please try again.",
+  "guest.portal.pastBooking": "This booking date has passed. We hope you enjoyed your visit!",
+  "guest.portal.questionsFooter": "Questions? Contact the venue directly using the details in your confirmation email.",
+  "guest.find.pageTitle": "Find your booking",
+  "guest.find.heading": "Find your booking",
+  "guest.find.intro": "Enter the email address you used when booking and we will send you a secure link to view, change, or cancel your reservation.",
+  "guest.find.emailLabel": "Email address",
+  "guest.find.submit": "Send me my booking link",
+  "guest.find.sentBody": "If we found upcoming bookings for that email address, we have sent secure links to it. The links are valid for 7 days.",
+  "guest.find.useAnother": "Use another email",
+  "guest.find.invalidEmail": "Please enter a valid email address.",
+  "guest.find.error": "Something went wrong. Please try again in a moment.",
+  "guest.find.linkLabel": "Find my booking",
+  "guest.find.linkHint": "Already booked? Manage your reservation.",
+
+  // Availability timeline
+  "timeline.title": "Availability timeline",
+  "timeline.resource": "Resource",
+  "timeline.blocked": "Blocked",
+  "timeline.availableSlot": "Extra availability",
+  "timeline.empty": "No active resources for this day.",
+  "timeline.previousDay": "Previous day",
+  "timeline.nextDay": "Next day",
+  "timeline.legendReservation": "Reservation",
+  "timeline.legendPending": "Pending",
+  "timeline.legendBlocked": "Blocked",
+  "timeline.legendSlot": "Extra availability",
+
+  // Forecast
+  "forecast.title": "Demand forecast",
+  "forecast.subtitle": "Bookings already on the books for the next 14 days versus your typical pace for that weekday.",
+  "forecast.booked": "Booked",
+  "forecast.expected": "Typical pace",
+  "forecast.next14Booked": "Reservations next 14 days",
+  "forecast.next14Guests": "Guests next 14 days",
+  "forecast.gapToPace": "Gap to typical pace",
+  "forecast.peakHours": "Peak hours",
+  "forecast.peakSubtitle": "Reservation start times by weekday over the last 90 days.",
+  "forecast.busiest": "Busiest",
+  "forecast.basedOn": "Based on the last days:",
+  "forecast.mon": "Mon",
+  "forecast.tue": "Tue",
+  "forecast.wed": "Wed",
+  "forecast.thu": "Thu",
+  "forecast.fri": "Fri",
+  "forecast.sat": "Sat",
+  "forecast.sun": "Sun",
 };
 
 const fi: TranslationKeys = {
@@ -5381,6 +5536,84 @@ const fi: TranslationKeys = {
   "privacy.delete.confirmLabel": "Vahvistus",
   "privacy.delete.confirmAction": "Ajasta poisto",
   "privacy.delete.requested": "Tilin poisto on ajastettu. Sinulla on 30 päivää aikaa peruuttaa.",
+
+  // Guest portal
+  "guest.portal.label": "Vieraan portaali",
+  "guest.portal.title": "Varauksesi",
+  "guest.portal.linkExpiredTitle": "Linkki vanhentunut",
+  "guest.portal.linkRevokedTitle": "Linkki mitätöity",
+  "guest.portal.notFoundTitle": "Varausta ei löytynyt",
+  "guest.portal.linkExpiredBody": "Tämä varauslinkki on vanhentunut. Ota yhteyttä kohteeseen.",
+  "guest.portal.linkRevokedBody": "Tämä linkki on mitätöity. Ota yhteyttä kohteeseen.",
+  "guest.portal.notFoundBody": "Emme löytäneet varausta tällä linkillä. Se on voitu poistaa.",
+  "guest.portal.checkOut": "Lähtöpäivä",
+  "guest.portal.specialRequests": "Erityistoiveet",
+  "guest.portal.total": "Yhteensä",
+  "guest.portal.guestsSuffix": "vierasta",
+  "guest.portal.needDifferentDate": "Tarvitsetko toisen päivän?",
+  "guest.portal.newDate": "Uusi päivä",
+  "guest.portal.newTime": "Uusi aika (valinnainen)",
+  "guest.portal.message": "Viesti (valinnainen)",
+  "guest.portal.messagePlaceholder": "Onko jotain, mitä kohteen tulisi tietää?",
+  "guest.portal.requestNewDate": "Pyydä uutta päivää",
+  "guest.portal.sending": "Lähetetään...",
+  "guest.portal.requestSentBanner": "Muutospyyntösi on lähetetty kohteeseen. He ottavat sinuun yhteyttä vahvistaakseen sen.",
+  "guest.portal.requestSentToast": "Muutospyyntö lähetetty kohteeseen.",
+  "guest.portal.requestError": "Pyyntöä ei voitu lähettää. Yritä uudelleen.",
+  "guest.portal.cancelBooking": "Peruuta varaus",
+  "guest.portal.cancelTitle": "Peruutetaanko varauksesi?",
+  "guest.portal.cancelDescription": "Tämä peruuttaa varauksesi. Toimintoa ei voi kumota.",
+  "guest.portal.keepBooking": "Säilytä varaus",
+  "guest.portal.yesCancel": "Kyllä, peruuta",
+  "guest.portal.cancelling": "Peruutetaan...",
+  "guest.portal.cancelSuccess": "Varauksesi on peruutettu.",
+  "guest.portal.cancelError": "Peruutus epäonnistui. Yritä uudelleen.",
+  "guest.portal.pastBooking": "Tämän varauksen päivä on jo mennyt. Toivottavasti viihdyit!",
+  "guest.portal.questionsFooter": "Kysyttävää? Ota yhteyttä suoraan kohteeseen vahvistusviestin yhteystiedoilla.",
+  "guest.find.pageTitle": "Etsi varauksesi",
+  "guest.find.heading": "Etsi varauksesi",
+  "guest.find.intro": "Syötä sähköpostiosoite, jota käytit varatessasi, niin lähetämme sinulle turvallisen linkin varauksesi katseluun, muuttamiseen tai peruuttamiseen.",
+  "guest.find.emailLabel": "Sähköpostiosoite",
+  "guest.find.submit": "Lähetä varauslinkkini",
+  "guest.find.sentBody": "Jos löysimme tulevia varauksia tällä sähköpostiosoitteella, olemme lähettäneet turvalliset linkit siihen. Linkit ovat voimassa 7 päivää.",
+  "guest.find.useAnother": "Käytä toista sähköpostia",
+  "guest.find.invalidEmail": "Syötä kelvollinen sähköpostiosoite.",
+  "guest.find.error": "Jokin meni pieleen. Yritä hetken kuluttua uudelleen.",
+  "guest.find.linkLabel": "Etsi varaukseni",
+  "guest.find.linkHint": "Oletko jo varannut? Hallinnoi varaustasi.",
+
+  // Availability timeline
+  "timeline.title": "Saatavuuden aikajana",
+  "timeline.resource": "Resurssi",
+  "timeline.blocked": "Estetty",
+  "timeline.availableSlot": "Lisäsaatavuus",
+  "timeline.empty": "Ei aktiivisia resursseja tälle päivälle.",
+  "timeline.previousDay": "Edellinen päivä",
+  "timeline.nextDay": "Seuraava päivä",
+  "timeline.legendReservation": "Varaus",
+  "timeline.legendPending": "Odottaa",
+  "timeline.legendBlocked": "Estetty",
+  "timeline.legendSlot": "Lisäsaatavuus",
+
+  // Forecast
+  "forecast.title": "Kysyntäennuste",
+  "forecast.subtitle": "Jo tehdyt varaukset seuraaville 14 päivälle verrattuna kyseisen viikonpäivän tavanomaiseen tahtiin.",
+  "forecast.booked": "Varattu",
+  "forecast.expected": "Tavanomainen tahti",
+  "forecast.next14Booked": "Varaukset 14 päivän aikana",
+  "forecast.next14Guests": "Vieraat 14 päivän aikana",
+  "forecast.gapToPace": "Ero tavanomaiseen tahtiin",
+  "forecast.peakHours": "Ruuhkatunnit",
+  "forecast.peakSubtitle": "Varausten alkamisajat viikonpäivittäin viimeisen 90 päivän ajalta.",
+  "forecast.busiest": "Vilkkain",
+  "forecast.basedOn": "Perustuu viime päiviin:",
+  "forecast.mon": "Ma",
+  "forecast.tue": "Ti",
+  "forecast.wed": "Ke",
+  "forecast.thu": "To",
+  "forecast.fri": "Pe",
+  "forecast.sat": "La",
+  "forecast.sun": "Su",
 };
 
 const sv: TranslationKeys = {
@@ -7164,6 +7397,84 @@ const sv: TranslationKeys = {
   "privacy.delete.confirmLabel": "Bekräftelse",
   "privacy.delete.confirmAction": "Schemalägg radering",
   "privacy.delete.requested": "Kontoradering schemalagd. Du har 30 dagar att avbryta.",
+
+  // Guest portal
+  "guest.portal.label": "Gästportal",
+  "guest.portal.title": "Din bokning",
+  "guest.portal.linkExpiredTitle": "Länken har gått ut",
+  "guest.portal.linkRevokedTitle": "Länken är återkallad",
+  "guest.portal.notFoundTitle": "Bokningen hittades inte",
+  "guest.portal.linkExpiredBody": "Den här bokningslänken har gått ut. Kontakta verksamheten för hjälp.",
+  "guest.portal.linkRevokedBody": "Den här länken har återkallats. Kontakta verksamheten.",
+  "guest.portal.notFoundBody": "Vi kunde inte hitta någon bokning med den här länken. Den kan ha tagits bort.",
+  "guest.portal.checkOut": "Utcheckning",
+  "guest.portal.specialRequests": "Särskilda önskemål",
+  "guest.portal.total": "Totalt",
+  "guest.portal.guestsSuffix": "gäst(er)",
+  "guest.portal.needDifferentDate": "Behöver du ett annat datum?",
+  "guest.portal.newDate": "Nytt datum",
+  "guest.portal.newTime": "Ny tid (valfritt)",
+  "guest.portal.message": "Meddelande (valfritt)",
+  "guest.portal.messagePlaceholder": "Något verksamheten bör veta?",
+  "guest.portal.requestNewDate": "Begär nytt datum",
+  "guest.portal.sending": "Skickar...",
+  "guest.portal.requestSentBanner": "Din ändringsbegäran har skickats till verksamheten. De kontaktar dig för att bekräfta.",
+  "guest.portal.requestSentToast": "Ändringsbegäran skickad till verksamheten.",
+  "guest.portal.requestError": "Din begäran kunde inte skickas. Försök igen.",
+  "guest.portal.cancelBooking": "Avboka",
+  "guest.portal.cancelTitle": "Vill du avboka din bokning?",
+  "guest.portal.cancelDescription": "Detta avbokar din bokning. Åtgärden kan inte ångras.",
+  "guest.portal.keepBooking": "Behåll bokningen",
+  "guest.portal.yesCancel": "Ja, avboka",
+  "guest.portal.cancelling": "Avbokar...",
+  "guest.portal.cancelSuccess": "Din bokning har avbokats.",
+  "guest.portal.cancelError": "Avbokningen misslyckades. Försök igen.",
+  "guest.portal.pastBooking": "Datumet för den här bokningen har passerat. Vi hoppas att du trivdes!",
+  "guest.portal.questionsFooter": "Frågor? Kontakta verksamheten direkt med uppgifterna i ditt bekräftelsemejl.",
+  "guest.find.pageTitle": "Hitta din bokning",
+  "guest.find.heading": "Hitta din bokning",
+  "guest.find.intro": "Ange e-postadressen du använde vid bokningen så skickar vi en säker länk där du kan se, ändra eller avboka din reservation.",
+  "guest.find.emailLabel": "E-postadress",
+  "guest.find.submit": "Skicka min bokningslänk",
+  "guest.find.sentBody": "Om vi hittade kommande bokningar för den e-postadressen har vi skickat säkra länkar dit. Länkarna är giltiga i 7 dagar.",
+  "guest.find.useAnother": "Använd en annan e-postadress",
+  "guest.find.invalidEmail": "Ange en giltig e-postadress.",
+  "guest.find.error": "Något gick fel. Försök igen om en stund.",
+  "guest.find.linkLabel": "Hitta min bokning",
+  "guest.find.linkHint": "Redan bokat? Hantera din reservation.",
+
+  // Availability timeline
+  "timeline.title": "Tillgänglighetstidslinje",
+  "timeline.resource": "Resurs",
+  "timeline.blocked": "Blockerad",
+  "timeline.availableSlot": "Extra tillgänglighet",
+  "timeline.empty": "Inga aktiva resurser för den här dagen.",
+  "timeline.previousDay": "Föregående dag",
+  "timeline.nextDay": "Nästa dag",
+  "timeline.legendReservation": "Bokning",
+  "timeline.legendPending": "Väntande",
+  "timeline.legendBlocked": "Blockerad",
+  "timeline.legendSlot": "Extra tillgänglighet",
+
+  // Forecast
+  "forecast.title": "Efterfrågeprognos",
+  "forecast.subtitle": "Redan gjorda bokningar för de kommande 14 dagarna jämfört med din vanliga takt för den veckodagen.",
+  "forecast.booked": "Bokat",
+  "forecast.expected": "Vanlig takt",
+  "forecast.next14Booked": "Bokningar nästa 14 dagar",
+  "forecast.next14Guests": "Gäster nästa 14 dagar",
+  "forecast.gapToPace": "Skillnad mot vanlig takt",
+  "forecast.peakHours": "Toppentimmar",
+  "forecast.peakSubtitle": "Bokningarnas starttider per veckodag under de senaste 90 dagarna.",
+  "forecast.busiest": "Mest bokat",
+  "forecast.basedOn": "Baserat på de senaste dagarna:",
+  "forecast.mon": "Mån",
+  "forecast.tue": "Tis",
+  "forecast.wed": "Ons",
+  "forecast.thu": "Tors",
+  "forecast.fri": "Fre",
+  "forecast.sat": "Lör",
+  "forecast.sun": "Sön",
 };
 
 export const translations: Record<Language, TranslationKeys> = { en, fi, sv };
