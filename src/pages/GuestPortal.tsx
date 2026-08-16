@@ -5,6 +5,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { CalendarDays, Clock, Users, MapPin, Mail, Phone, CheckCircle, XCircle, Loader2, UtensilsCrossed, Home, Building2 } from "lucide-react";
 import { format } from "date-fns";
@@ -22,6 +25,10 @@ const typeIcons: Record<string, React.ElementType> = {
 const GuestPortal = () => {
   const { token } = useParams<{ token: string }>();
   const [cancelOpen, setCancelOpen] = useState(false);
+  const [newDate, setNewDate] = useState("");
+  const [newTime, setNewTime] = useState("");
+  const [note, setNote] = useState("");
+  const [rescheduleSent, setRescheduleSent] = useState(false);
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["guest-booking", token],
@@ -60,6 +67,30 @@ const GuestPortal = () => {
       return { reservation, token: tokenData, settings: tenantSettings };
     },
     enabled: !!token,
+  });
+
+  const rescheduleMutation = useMutation({
+    mutationFn: async () => {
+      const { data: res, error } = await supabase.functions.invoke("guest-booking-portal", {
+        body: {
+          action: "reschedule",
+          token,
+          requested_date: newDate,
+          requested_start_time: newTime || null,
+          guest_note: note || null,
+        },
+      });
+      if (error) throw error;
+      if ((res as any)?.error) throw new Error((res as any).error);
+      return res;
+    },
+    onSuccess: () => {
+      setRescheduleSent(true);
+      toast.success("Change request sent to the venue.");
+    },
+    onError: (err: Error) => {
+      toast.error(err.message || "Could not send your request. Please try again.");
+    },
   });
 
   const cancelMutation = useMutation({
@@ -198,7 +229,55 @@ const GuestPortal = () => {
             )}
 
             {!isCancelled && !isPast && (
-              <div className="border-t border-border pt-4">
+              <div className="border-t border-border pt-4 space-y-4">
+                {rescheduleSent ? (
+                  <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 text-sm">
+                    Your change request has been sent to the venue. They will contact you to confirm.
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <p className="text-sm font-medium">Need a different date?</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <Label htmlFor="reschedule-date" className="text-xs text-muted-foreground">New date</Label>
+                        <Input
+                          id="reschedule-date"
+                          type="date"
+                          value={newDate}
+                          min={format(new Date(), "yyyy-MM-dd")}
+                          onChange={(e) => setNewDate(e.target.value)}
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label htmlFor="reschedule-time" className="text-xs text-muted-foreground">New time (optional)</Label>
+                        <Input
+                          id="reschedule-time"
+                          type="time"
+                          value={newTime}
+                          onChange={(e) => setNewTime(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="reschedule-note" className="text-xs text-muted-foreground">Message (optional)</Label>
+                      <Textarea
+                        id="reschedule-note"
+                        value={note}
+                        maxLength={1000}
+                        onChange={(e) => setNote(e.target.value)}
+                        placeholder="Anything the venue should know?"
+                      />
+                    </div>
+                    <Button
+                      variant="secondary"
+                      disabled={!newDate || rescheduleMutation.isPending}
+                      onClick={() => rescheduleMutation.mutate()}
+                    >
+                      {rescheduleMutation.isPending ? "Sending..." : "Request new date"}
+                    </Button>
+                  </div>
+                )}
+
                 <Button
                   variant="outline"
                   className="border-destructive/30 text-destructive hover:bg-destructive/10"
