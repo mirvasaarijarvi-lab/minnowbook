@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useEffect, useMemo, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/hooks/useTenant";
@@ -11,6 +11,10 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ClipboardList, Download, Printer } from "lucide-react";
 import DashboardTooltip from "./DashboardTooltip";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
+import { useT } from "@/contexts/I18nContext";
 
 interface OpsReservation {
   id: string;
@@ -54,6 +58,49 @@ const OperationsSheetPanel = () => {
   const { tenantId } = useTenant();
   const { selectedSiteId } = useSiteContext();
   const [date, setDate] = useState(() => format(new Date(), "yyyy-MM-dd"));
+  const t = useT();
+  const queryClient = useQueryClient();
+  const [digestEnabled, setDigestEnabled] = useState(false);
+  const [digestRecipients, setDigestRecipients] = useState("");
+
+  const { data: digestSettings } = useQuery({
+    queryKey: ["ops-digest-settings", tenantId],
+    enabled: !!tenantId,
+    queryFn: async () => {
+      const { data: row, error } = await supabase
+        .from("tenant_settings")
+        .select("ops_digest_enabled, ops_digest_recipients, business_email")
+        .eq("tenant_id", tenantId)
+        .maybeSingle();
+      if (error) throw error;
+      return row;
+    },
+  });
+
+  useEffect(() => {
+    if (!digestSettings) return;
+    setDigestEnabled(Boolean((digestSettings as any).ops_digest_enabled));
+    setDigestRecipients(((digestSettings as any).ops_digest_recipients ?? []).join(", "));
+  }, [digestSettings]);
+
+  const saveDigest = useMutation({
+    mutationFn: async () => {
+      const recipients = digestRecipients
+        .split(",")
+        .map((entry) => entry.trim().toLowerCase())
+        .filter((entry) => entry.length > 0);
+      const { error } = await supabase
+        .from("tenant_settings")
+        .update({ ops_digest_enabled: digestEnabled, ops_digest_recipients: recipients })
+        .eq("tenant_id", tenantId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["ops-digest-settings", tenantId] });
+      toast.success(t("ops.digest.saved"));
+    },
+    onError: (err: any) => toast.error(err?.message || t("ops.digest.saveError")),
+  });
 
   const { data, isLoading } = useQuery({
     queryKey: ["operations-sheet", tenantId, selectedSiteId, date],
@@ -215,6 +262,35 @@ const OperationsSheetPanel = () => {
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
+        <div className="rounded-lg border border-border p-3 space-y-3">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <p className="text-sm font-medium">{t("ops.digest.title")}</p>
+              <p className="text-xs text-muted-foreground">{t("ops.digest.description")}</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Switch id="ops-digest-enabled" checked={digestEnabled} onCheckedChange={setDigestEnabled} />
+              <Label htmlFor="ops-digest-enabled" className="text-sm">{t("ops.digest.enabled")}</Label>
+            </div>
+          </div>
+          <div className="grid gap-2 sm:grid-cols-[1fr_auto] sm:items-end">
+            <div className="space-y-1.5">
+              <Label htmlFor="ops-digest-recipients" className="text-xs">{t("ops.digest.recipients")}</Label>
+              <Input
+                id="ops-digest-recipients"
+                value={digestRecipients}
+                onChange={(e) => setDigestRecipients(e.target.value)}
+                placeholder="ops@example.com, kitchen@example.com"
+                className="h-9"
+              />
+              <p className="text-xs text-muted-foreground">{t("ops.digest.recipientsHelp")}</p>
+            </div>
+            <Button size="sm" onClick={() => saveDigest.mutate()} disabled={saveDigest.isPending}>
+              {t("ops.digest.save")}
+            </Button>
+          </div>
+        </div>
+
         {isLoading ? (
           <Skeleton className="h-24 w-full" />
         ) : (
