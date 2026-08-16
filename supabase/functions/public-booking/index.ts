@@ -861,9 +861,10 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
 
       const businessName = settings?.business_name || tenant.name || "Mimmobook";
       const lang = body.language || settings?.default_language || "en";
+      const findBookingUrl = `${(typeof body.origin === "string" && /^https:\/\/[a-zA-Z0-9.-]+$/.test(body.origin) ? body.origin : "https://mimmobook.com")}/find-booking`;
       const logoUrl = settings?.logo_url || "https://lsgznskkxadplwnxplhd.supabase.co/storage/v1/object/public/tenant-assets/email-assets%2Flogo-color.png";
 
-      const ackTranslations: Record<string, { subject: string; title: string; greeting: string; body: string; footer: string; regards: string }> = {
+      const ackTranslations: Record<string, { subject: string; title: string; greeting: string; body: string; footer: string; regards: string; manage: string; manageLink: string }> = {
         en: {
           subject: `We received your booking request — ${businessName}`,
           title: "Booking Received",
@@ -871,6 +872,8 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
           body: "Thank you for your booking request. We will review it and get back to you shortly.",
           footer: "You will receive a confirmation email once your booking is approved.",
           regards: "Best regards,",
+          manage: "Need to view, change, or cancel this booking?",
+          manageLink: "Find my booking",
         },
         fi: {
           subject: `Olemme vastaanottaneet varauspyyntösi — ${businessName}`,
@@ -879,6 +882,8 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
           body: "Kiitos varauspyynnöstäsi. Käsittelemme sen ja palaamme asiaan pian.",
           footer: "Saat vahvistusviestin, kun varauksesi on hyväksytty.",
           regards: "Ystävällisin terveisin,",
+          manage: "Haluatko katsoa, muuttaa tai peruuttaa tämän varauksen?",
+          manageLink: "Etsi varaukseni",
         },
         sv: {
           subject: `Vi har mottagit din bokningsförfrågan — ${businessName}`,
@@ -887,6 +892,8 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
           body: "Tack för din bokningsförfrågan. Vi kommer att granska den och återkomma inom kort.",
           footer: "Du får ett bekräftelsemeddelande när din bokning har godkänts.",
           regards: "Med vänliga hälsningar,",
+          manage: "Vill du se, ändra eller avboka den här bokningen?",
+          manageLink: "Hitta min bokning",
         },
       };
 
@@ -925,6 +932,7 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
             ${rows.join("")}
           </table>
           <p style="color:#63516E;font-size:14px;font-family:'Inter',Arial,sans-serif;line-height:1.6">${tr.footer}</p>
+          <p style="color:#63516E;font-size:14px;font-family:'Inter',Arial,sans-serif;line-height:1.6">${tr.manage} <a href="${findBookingUrl}" style="color:#3F1F5C;font-weight:600">${tr.manageLink}</a></p>
           <p style="color:#1E1519;font-size:15px;font-family:'Inter',Arial,sans-serif;line-height:1.6;margin-top:24px">${tr.regards}<br><strong>${businessName}</strong></p>
         </td></tr>
         <tr><td style="padding:24px 32px;text-align:center;font-size:12px;color:#999;border-top:1px solid #e8e0d8;font-family:'Inter',Arial,sans-serif">
