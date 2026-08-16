@@ -1868,6 +1868,23 @@ type TranslationKeys = {
   "timeline.legendPending": string;
   "timeline.legendBlocked": string;
   "timeline.legendSlot": string;
+  "timeline.dragHint": string;
+  "timeline.newBlockTitle": string;
+  "timeline.newBlockDescription": string;
+  "timeline.reason": string;
+  "timeline.reasonPlaceholder": string;
+  "timeline.createBlock": string;
+  "timeline.blockCreated": string;
+  "timeline.blockError": string;
+  "ops.digest.title": string;
+  "ops.digest.description": string;
+  "ops.digest.enabled": string;
+  "ops.digest.recipients": string;
+  "ops.digest.recipientsHelp": string;
+  "ops.digest.save": string;
+  "ops.digest.saved": string;
+  "ops.digest.saveError": string;
+  "nav.pendingRequests": string;
 
   // Forecast
   "forecast.title": string;
@@ -3733,6 +3750,23 @@ const en: TranslationKeys = {
   "timeline.legendPending": "Pending",
   "timeline.legendBlocked": "Blocked",
   "timeline.legendSlot": "Extra availability",
+  "timeline.dragHint": "Tip: drag across a resource lane to block that time.",
+  "timeline.newBlockTitle": "Block this time",
+  "timeline.newBlockDescription": "Nothing can be booked on this resource during the selected time.",
+  "timeline.reason": "Reason",
+  "timeline.reasonPlaceholder": "For example: maintenance, private event",
+  "timeline.createBlock": "Block time",
+  "timeline.blockCreated": "Time blocked.",
+  "timeline.blockError": "Could not block that time.",
+  "ops.digest.title": "Daily digest email",
+  "ops.digest.description": "Send tomorrow's run sheet automatically every morning at 06:00 Helsinki time.",
+  "ops.digest.enabled": "Email the daily run sheet",
+  "ops.digest.recipients": "Recipients",
+  "ops.digest.recipientsHelp": "Comma separated. Leave empty to use your business email.",
+  "ops.digest.save": "Save digest settings",
+  "ops.digest.saved": "Digest settings saved.",
+  "ops.digest.saveError": "Could not save digest settings.",
+  "nav.pendingRequests": "pending guest requests",
 
   // Forecast
   "forecast.title": "Demand forecast",
@@ -5594,6 +5628,23 @@ const fi: TranslationKeys = {
   "timeline.legendPending": "Odottaa",
   "timeline.legendBlocked": "Estetty",
   "timeline.legendSlot": "Lisäsaatavuus",
+  "timeline.dragHint": "Vinkki: vedä resurssin rivillä estääksesi kyseisen ajan.",
+  "timeline.newBlockTitle": "Estä tämä aika",
+  "timeline.newBlockDescription": "Tälle resurssille ei voi tehdä varauksia valittuna aikana.",
+  "timeline.reason": "Syy",
+  "timeline.reasonPlaceholder": "Esimerkiksi: huolto, yksityistilaisuus",
+  "timeline.createBlock": "Estä aika",
+  "timeline.blockCreated": "Aika estetty.",
+  "timeline.blockError": "Ajan estäminen ei onnistunut.",
+  "ops.digest.title": "Päivittäinen koosteviesti",
+  "ops.digest.description": "Lähetä huomisen työlista automaattisesti joka aamu klo 06.00 Suomen aikaa.",
+  "ops.digest.enabled": "Lähetä päivän työlista sähköpostilla",
+  "ops.digest.recipients": "Vastaanottajat",
+  "ops.digest.recipientsHelp": "Erota pilkulla. Jätä tyhjäksi, niin käytetään yrityksen sähköpostia.",
+  "ops.digest.save": "Tallenna kooste",
+  "ops.digest.saved": "Koosteasetukset tallennettu.",
+  "ops.digest.saveError": "Koosteasetusten tallennus ei onnistunut.",
+  "nav.pendingRequests": "odottavaa vieraspyyntöä",
 
   // Forecast
   "forecast.title": "Kysyntäennuste",
@@ -7455,6 +7506,23 @@ const sv: TranslationKeys = {
   "timeline.legendPending": "Väntande",
   "timeline.legendBlocked": "Blockerad",
   "timeline.legendSlot": "Extra tillgänglighet",
+  "timeline.dragHint": "Tips: dra över en resursrad för att blockera den tiden.",
+  "timeline.newBlockTitle": "Blockera den här tiden",
+  "timeline.newBlockDescription": "Inget kan bokas på resursen under den valda tiden.",
+  "timeline.reason": "Orsak",
+  "timeline.reasonPlaceholder": "Till exempel: underhåll, privat evenemang",
+  "timeline.createBlock": "Blockera tid",
+  "timeline.blockCreated": "Tiden blockerad.",
+  "timeline.blockError": "Det gick inte att blockera tiden.",
+  "ops.digest.title": "Dagligt sammandrag via e-post",
+  "ops.digest.description": "Skicka morgondagens körschema automatiskt varje morgon kl. 06.00 finsk tid.",
+  "ops.digest.enabled": "Skicka dagens körschema via e-post",
+  "ops.digest.recipients": "Mottagare",
+  "ops.digest.recipientsHelp": "Separera med komma. Lämna tomt för att använda företagets e-post.",
+  "ops.digest.save": "Spara sammandrag",
+  "ops.digest.saved": "Inställningarna sparade.",
+  "ops.digest.saveError": "Det gick inte att spara inställningarna.",
+  "nav.pendingRequests": "väntande gästförfrågningar",
 
   // Forecast
   "forecast.title": "Efterfrågeprognos",
