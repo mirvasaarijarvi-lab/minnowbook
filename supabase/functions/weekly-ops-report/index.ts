@@ -194,7 +194,7 @@ type TenantSetting = {
 };
 
 export async function handleWeeklyOpsReportRequest(req: Request): Promise<Response> {
-  const corsHeaders = getCorsHeaders(req.headers.get("origin"));
+  const corsHeaders = getCorsHeaders(req, { allowMethods: "POST, OPTIONS" });
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   const json = (body: unknown, status = 200) =>
