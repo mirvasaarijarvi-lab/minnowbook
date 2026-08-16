@@ -17,6 +17,7 @@ const SKIP = new Set<string>([
   "_shared",
   "auth-email-hook",        // webhook signed by GoTrue, validated separately
   "forbidden-status",
+  "guest-booking-portal",   // guest magic token in body/URL, not a bearer header
   "ical-feed",              // token in URL, not header
   "log-forbidden-access",   // public telemetry sink
   "mint-tenant-private-url",// token-based, not bearer
