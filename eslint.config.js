@@ -40,6 +40,14 @@ export default tseslint.config(
     },
   },
   {
+    // Auto-generated Lovable Cloud integration files: not hand-editable,
+    // so lint rules that would require touching them are disabled here.
+    files: ["src/integrations/supabase/**/*.{ts,tsx}"],
+    rules: {
+      "prefer-const": "off",
+    },
+  },
+  {
     files: ["e2e/**/*.{ts,tsx}"],
     rules: {
       "react-hooks/rules-of-hooks": "off",
