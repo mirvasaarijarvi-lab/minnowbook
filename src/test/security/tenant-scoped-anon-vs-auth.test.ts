@@ -105,7 +105,7 @@ async function rowCountAnon(table: string, tenantId: string): Promise<number> {
   const { count, error } = await anon
     .from(table)
     // head:true → no rows transferred, just the count from the X-Range header.
-    .select("*", { count: "exact", head: true })
+    .select("id", { count: "exact", head: true })
     .eq("tenant_id", tenantId);
   if (error) {
     throw new Error(`Failed to read ${table} count for ${tenantId}: ${error.message}`);
