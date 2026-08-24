@@ -323,3 +323,37 @@ d("Test sanity — anon client is truly unauthenticated", () => {
     expect(data.user).toBeNull();
   });
 });
+
+d("scheduling tables — internal free-text columns hidden from anon", () => {
+  // Column-level GRANTs (not RLS) keep staff-only fields out of reach for
+  // anonymous booking visitors, while timing columns stay readable so the
+  // public booking calendar can compute availability.
+  const internalColumns: Array<[string, string]> = [
+    ["blocked_slots", "reason"],
+    ["blocked_slots", "rejection_reason"],
+    ["recurring_blocked_slots", "reason"],
+    ["recurring_blocked_slots", "rejection_reason"],
+    ["tenant_opening_hours", "rejection_reason"],
+  ];
+
+  for (const [table, column] of internalColumns) {
+    it(`anon cannot SELECT ${table}.${column}`, async () => {
+      const { error } = await anon.from(table).select(column).limit(1);
+      expect(error, `${table}.${column} must be denied to anon`).toBeTruthy();
+      expect(error?.message ?? "").toMatch(/permission denied/i);
+    });
+  }
+
+  it("anon cannot SELECT * from blocked_slots (would include internal columns)", async () => {
+    const { error } = await anon.from("blocked_slots").select("*").limit(1);
+    expect(error, "anon select * must be denied").toBeTruthy();
+  });
+
+  it("anon can still read booking-relevant blocked_slots columns", async () => {
+    const { error } = await anon
+      .from("blocked_slots")
+      .select("id,tenant_id,date,start_time,end_time")
+      .limit(1);
+    expect(error?.message ?? "").not.toMatch(/permission denied/i);
+  });
+});
