@@ -488,7 +488,10 @@ const PublicBookingInner = () => {
       if (!tenant?.id || !form.reservation_type) return [];
       let query = supabase
         .from("tenant_opening_hours")
-        .select("*")
+        // Explicit columns: internal staff fields (rejection_reason, approved_by)
+        // are not readable by anonymous visitors.
+        .select("id, tenant_id, site_id, resource_type, day_of_week, open_time, close_time, is_closed, approval_status")
+
         .eq("tenant_id", tenant.id)
         .eq("resource_type", form.reservation_type);
       if (activeSiteId) {
@@ -586,7 +589,10 @@ const PublicBookingInner = () => {
       if (!tenant?.id) return [];
       let query = supabase
         .from("blocked_slots")
-        .select("*")
+        // Internal-only columns (reason, rejection_reason, created_by) are not
+        // exposed to anonymous booking visitors.
+        .select("id, tenant_id, site_id, resource_id, resource_type, date, start_time, end_time, approval_status")
+
         .eq("tenant_id", tenant.id)
         .gte("date", format(new Date(), "yyyy-MM-dd"));
       if (activeSiteId) {
@@ -606,7 +612,10 @@ const PublicBookingInner = () => {
       if (!tenant?.id) return [];
       let query = supabase
         .from("recurring_blocked_slots")
-        .select("*")
+        // Internal-only columns (reason, rejection_reason, created_by) are not
+        // exposed to anonymous booking visitors.
+        .select("id, tenant_id, site_id, resource_id, resource_type, day_of_week, start_time, end_time, is_active, approval_status")
+
         .eq("tenant_id", tenant.id)
         .eq("is_active", true);
       if (activeSiteId) {
