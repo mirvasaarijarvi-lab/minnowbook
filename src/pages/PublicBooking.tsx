@@ -612,7 +612,10 @@ const PublicBookingInner = () => {
       if (!tenant?.id) return [];
       let query = supabase
         .from("recurring_blocked_slots")
-        .select("*")
+        // Internal-only columns (reason, rejection_reason, created_by) are not
+        // exposed to anonymous booking visitors.
+        .select("id, tenant_id, site_id, resource_id, resource_type, day_of_week, start_time, end_time, is_active, approval_status")
+
         .eq("tenant_id", tenant.id)
         .eq("is_active", true);
       if (activeSiteId) {
