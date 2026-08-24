@@ -31,6 +31,7 @@ const GuestPortal = () => {
   const [newTime, setNewTime] = useState("");
   const [note, setNote] = useState("");
   const [rescheduleSent, setRescheduleSent] = useState(false);
+  const [cancelledByGuest, setCancelledByGuest] = useState(false);
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["guest-booking", token],
