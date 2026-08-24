@@ -108,9 +108,12 @@ const GuestPortal = () => {
       return res;
     },
     onSuccess: () => {
+      // The server revokes the booking token as part of the cancellation, so a
+      // refetch would surface a misleading "link revoked" error. Show a
+      // confirmation screen instead.
       toast.success(t("guest.portal.cancelSuccess"));
       setCancelOpen(false);
-      refetch();
+      setCancelledByGuest(true);
     },
     onError: () => {
       toast.error(t("guest.portal.cancelError"));
