@@ -120,6 +120,20 @@ const GuestPortal = () => {
     },
   });
 
+  if (cancelledByGuest) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <Card className="max-w-md w-full">
+          <CardContent className="pt-6 text-center space-y-4">
+            <CheckCircle className="h-12 w-12 text-primary mx-auto" />
+            <h2 className="text-xl font-serif font-semibold">{t("guest.portal.cancelSuccess")}</h2>
+            <p className="text-muted-foreground text-sm">{t("guest.portal.questionsFooter")}</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
