@@ -31,6 +31,7 @@ const GuestPortal = () => {
   const [newTime, setNewTime] = useState("");
   const [note, setNote] = useState("");
   const [rescheduleSent, setRescheduleSent] = useState(false);
+  const [cancelledByGuest, setCancelledByGuest] = useState(false);
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["guest-booking", token],
@@ -107,14 +108,31 @@ const GuestPortal = () => {
       return res;
     },
     onSuccess: () => {
+      // The server revokes the booking token as part of the cancellation, so a
+      // refetch would surface a misleading "link revoked" error. Show a
+      // confirmation screen instead.
       toast.success(t("guest.portal.cancelSuccess"));
       setCancelOpen(false);
-      refetch();
+      setCancelledByGuest(true);
     },
     onError: () => {
       toast.error(t("guest.portal.cancelError"));
     },
   });
+
+  if (cancelledByGuest) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <Card className="max-w-md w-full">
+          <CardContent className="pt-6 text-center space-y-4">
+            <CheckCircle className="h-12 w-12 text-primary mx-auto" />
+            <h2 className="text-xl font-serif font-semibold">{t("guest.portal.cancelSuccess")}</h2>
+            <p className="text-muted-foreground text-sm">{t("guest.portal.questionsFooter")}</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
