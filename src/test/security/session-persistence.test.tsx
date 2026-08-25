@@ -32,11 +32,23 @@ describe("Supabase client persistence configuration", () => {
       resolve(__dirname, "../../integrations/supabase/client.ts"),
       "utf8",
     );
-    expect(file).toMatch(/storage:\s*localStorage/);
+    // The generated client either passes localStorage directly or a
+    // localStorage-backed broker (brokeredPreviewStorage) used by the
+    // Lovable preview. Both persist across refresh and browser restart.
+    expect(file).toMatch(/storage:\s*(localStorage|brokeredPreviewStorage\()/);
     expect(file).toMatch(/persistSession:\s*true/);
     expect(file).toMatch(/autoRefreshToken:\s*true/);
   });
+
+  it("keeps the storage broker backed by window.localStorage", () => {
+    const broker = readFileSync(
+      resolve(__dirname, "../../integrations/supabase/previewAuthStorage.ts"),
+      "utf8",
+    );
+    expect(broker).toMatch(/localStorage/);
+  });
 });
+
 
 // ---------- Runtime persistence behaviour ----------
 
