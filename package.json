@@ -94,7 +94,7 @@
     "react-hook-form": "^7.81.0",
     "react-resizable-panels": "^4.12.2",
     "react-router": "6.30.6",
-    "react-router-dom": "6.30.4",
+    "react-router-dom": "6.30.6",
     "recharts": "3.10.1",
     "sonner": "^1.7.4",
     "tailwind-merge": "^2.6.0",
