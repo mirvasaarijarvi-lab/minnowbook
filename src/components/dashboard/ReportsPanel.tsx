@@ -418,7 +418,12 @@ const ReportsPanel = () => {
     });
     rows.push(["", "", "", "", "", "", "", "", t("reports.grandTotal"), grandTotal.toFixed(2), ""]);
 
-    const sanitize = (v: string) => String(v).replace(/"/g, '""').replace(/[\r\n]+/g, " ").replace(/\u2014/g, "-").replace(/\u20AC/g, "EUR");
+    const sanitize = (v: string) => {
+      const cleaned = String(v).replace(/[\r\n]+/g, " ").replace(/\u2014/g, "-").replace(/\u20AC/g, "EUR");
+      // Neutralize spreadsheet formula injection (=, +, -, @, tab, CR) before quoting.
+      const guarded = /^[=+\-@\t]/.test(cleaned) ? `'${cleaned}` : cleaned;
+      return guarded.replace(/"/g, '""');
+    };
     const csvContent = "sep=;\n" + [headers, ...rows].map((row) => row.map((c) => `"${sanitize(c)}"`).join(";")).join("\r\n");
     const encoder = new TextEncoder();
     const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
@@ -452,7 +457,12 @@ const ReportsPanel = () => {
     rows.push(["", "", t("reports.convertedOffers"), String(offerConversion.converted), ""]);
     rows.push(["", "", t("reports.conversionRate"), `${offerConversion.rate}%`, ""]);
 
-    const sanitize = (v: string) => String(v).replace(/"/g, '""').replace(/[\r\n]+/g, " ").replace(/\u2014/g, "-").replace(/\u20AC/g, "EUR");
+    const sanitize = (v: string) => {
+      const cleaned = String(v).replace(/[\r\n]+/g, " ").replace(/\u2014/g, "-").replace(/\u20AC/g, "EUR");
+      // Neutralize spreadsheet formula injection (=, +, -, @, tab, CR) before quoting.
+      const guarded = /^[=+\-@\t]/.test(cleaned) ? `'${cleaned}` : cleaned;
+      return guarded.replace(/"/g, '""');
+    };
     const csvContent = "sep=;\n" + [headers, ...rows].map((row) => row.map((c) => `"${sanitize(c)}"`).join(";")).join("\r\n");
     const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
     const csvBytes = new TextEncoder().encode(csvContent);
