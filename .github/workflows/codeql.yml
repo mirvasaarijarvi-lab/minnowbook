@@ -62,7 +62,7 @@ jobs:
 
       - name: Initialize CodeQL
         # github/codeql-action/init@v3.27.5
-        uses: github/codeql-action/init@f09c1c0a94de965c15400f5634aa42fac8fb8f88
+        uses: github/codeql-action/init@8aad20d150bbac5944a9f9d289da16a4b0d87c1e
         with:
           languages: ${{ matrix.language }}
           queries: security-and-quality
@@ -76,7 +76,7 @@ jobs:
         # SARIF artifact is produced; only the upload step is best-effort.
         continue-on-error: true
         # github/codeql-action/analyze@v3.27.5
-        uses: github/codeql-action/analyze@f09c1c0a94de965c15400f5634aa42fac8fb8f88
+        uses: github/codeql-action/analyze@8aad20d150bbac5944a9f9d289da16a4b0d87c1e
         with:
           category: "/language:${{ matrix.language }}"
           upload: always
