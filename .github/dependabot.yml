@@ -64,6 +64,12 @@ updates:
         update-types: ["version-update:semver-major"]
       - dependency-name: "@hookform/resolvers"
         update-types: ["version-update:semver-major"]
+      # sonner v2 changes the toast API surface shadcn's toaster wraps.
+      - dependency-name: "sonner"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "globals"
+        update-types: ["version-update:semver-major"]
+
       # ESLint 10 / flat-config plugin majors need a manual config migration.
       - dependency-name: "eslint"
         update-types: ["version-update:semver-major"]
