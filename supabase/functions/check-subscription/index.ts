@@ -60,11 +60,22 @@ export async function handleCheckSubscriptionRequest(req: Request): Promise<Resp
     );
   }
 
-  const supabaseClient = createClient(
-    Deno.env.get("SUPABASE_URL") ?? "",
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-    { auth: { persistSession: false } },
-  );
+  const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+  if (!supabaseUrl || !serviceRoleKey) {
+    console.error("[check-subscription] Missing Supabase environment variable(s)", {
+      hasUrl: Boolean(supabaseUrl),
+      hasServiceRoleKey: Boolean(serviceRoleKey),
+    });
+    return new Response(
+      JSON.stringify({ error: "Subscription service is not configured." }),
+      { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
+  }
+
+  const supabaseClient = createClient(supabaseUrl, serviceRoleKey, {
+    auth: { persistSession: false },
+  });
 
   try {
     logStep("Function started");
@@ -79,7 +90,13 @@ export async function handleCheckSubscriptionRequest(req: Request): Promise<Resp
       5000,
       "auth.getUser",
     );
-    if (userError) throw new Error(`Authentication error: ${userError.message}`);
+    if (userError) {
+      logStep("ERROR", { message: `Authentication error: ${userError.message}` });
+      return new Response(
+        JSON.stringify({ error: "Not authenticated" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
     const user = userData.user;
     if (!user?.email) throw new Error("User not authenticated or email not available");
     logStep("User authenticated", { userId: user.id, email: user.email });
