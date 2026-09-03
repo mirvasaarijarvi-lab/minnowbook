@@ -463,9 +463,12 @@ const ReportsPanel = () => {
     const sanitize = (v: string) => {
       const cleaned = String(v).replace(/[\r\n]+/g, " ").replace(/\u2014/g, "-").replace(/\u20AC/g, "EUR");
       // Neutralize spreadsheet formula injection (=, +, -, @, tab, CR) before quoting.
-      const guarded = /^[=+\-@\t]/.test(cleaned) ? `'${cleaned}` : cleaned;
+      // Plain dashes and numeric values (incl. negatives) stay untouched so Excel keeps them as data.
+      const isSafeValue = cleaned === "-" || /^-?\d+([.,]\d+)?%?$/.test(cleaned);
+      const guarded = !isSafeValue && /^[=+\-@\t]/.test(cleaned) ? `'${cleaned}` : cleaned;
       return guarded.replace(/"/g, '""');
     };
+
     const csvContent = "sep=;\n" + [headers, ...rows].map((row) => row.map((c) => `"${sanitize(c)}"`).join(";")).join("\r\n");
     const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
     const csvBytes = new TextEncoder().encode(csvContent);
