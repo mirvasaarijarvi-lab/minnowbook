@@ -162,7 +162,7 @@ jobs:
 
       - name: Upload edge test logs
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           # Artifact name itself includes the run id so downloads from
           # multiple runs don't collide when reviewers save them locally.
@@ -173,7 +173,7 @@ jobs:
 
       - name: Upload Deno junit reports
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: edge-test-junit-run-${{ github.run_id }}
           path: test-reports/deno/

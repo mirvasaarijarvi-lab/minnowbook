@@ -112,7 +112,7 @@ jobs:
 
       - name: Upload schema-gate report
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: schema-gate-report-run-${{ github.run_id }}
           path: test-reports/vitest-schema/
@@ -184,7 +184,7 @@ jobs:
 
       - name: Upload test reports
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: test-reports-vitest-run-${{ github.run_id }}
           path: |
