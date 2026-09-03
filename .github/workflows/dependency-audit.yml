@@ -358,7 +358,7 @@ jobs:
       - name: Set up pnpm
         if: steps.detect.outputs.manager == 'pnpm'
         # pnpm/action-setup@v4.0.0
-        uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86
         with:
           run_install: false
 
