@@ -85,18 +85,41 @@ export async function handleCheckSubscriptionRequest(req: Request): Promise<Resp
 
     const token = authHeader.replace("Bearer ", "");
 
-    const { data: userData, error: userError } = await withTimeout(
-      supabaseClient.auth.getUser(token),
-      5000,
-      "auth.getUser",
-    );
-    if (userError) {
-      logStep("ERROR", { message: `Authentication error: ${userError.message}` });
+    // A single slow auth round-trip should not fail the whole call: retry once
+    // with a longer budget before giving up.
+    let userData: Awaited<ReturnType<typeof supabaseClient.auth.getUser>>["data"] | null = null;
+    let userError: { message: string } | null = null;
+    let authTimedOut = false;
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        const res = await withTimeout(
+          supabaseClient.auth.getUser(token),
+          10000,
+          "auth.getUser",
+        );
+        userData = res.data;
+        userError = res.error;
+        authTimedOut = false;
+        break;
+      } catch (e) {
+        authTimedOut = true;
+        logStep("Auth attempt failed", { attempt, message: e instanceof Error ? e.message : String(e) });
+      }
+    }
+    if (authTimedOut) {
+      return new Response(
+        JSON.stringify({ error: "Subscription service temporarily unavailable." }),
+        { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+    if (userError || !userData) {
+      logStep("ERROR", { message: `Authentication error: ${userError?.message ?? "no user data"}` });
       return new Response(
         JSON.stringify({ error: "Not authenticated" }),
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
+
     const user = userData.user;
     if (!user?.email) throw new Error("User not authenticated or email not available");
     logStep("User authenticated", { userId: user.id, email: user.email });
