@@ -95,7 +95,7 @@ jobs:
 
       - name: Upload attempt JUnit reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: security-concurrency-junit
           path: test-reports/security-concurrency/
@@ -103,7 +103,7 @@ jobs:
 
       - name: Upload updated flake history (drives next run)
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: security-concurrency-flake-history
           path: .github/security-concurrency-flake-history.jsonl
