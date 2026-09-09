@@ -218,7 +218,7 @@ jobs:
         # `v2` tag is moved/compromised. Update by replacing both the SHA
         # and the trailing comment with a newer release from
         # https://github.com/supabase/setup-cli/releases.
-        uses: supabase/setup-cli@df56b21da46c98abb12a9804e4fb1f657773e333 # v2.0.0
+        uses: supabase/setup-cli@46f7f98c7f948ad727d22c1e67fab04c223a0520 # v3.0.0
         with:
           version: latest
         continue-on-error: true
