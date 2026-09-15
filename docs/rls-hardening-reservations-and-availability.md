@@ -144,6 +144,7 @@ forgotten `NULL` scrub in a policy expression.
 | ---------- | -------------------------------- | ------------------------------------------------------------------ |
 | 2026-07-22 | `reservations_public_insert_review` / `resource_availability_slots_anon_no_tenant_filter` | Introduced WITH CHECK column pin + column-level anon SELECT grants |
 | 2026-08-04 | `reservations_public_insert_review` / `waitlist_public_insert_pii` | Pinned `guest_search_text IS NULL` on public reservation inserts; added `validate_public_waitlist_insert` BEFORE INSERT trigger on `public.waitlist` |
+| 2026-09-15 | `harden_public_reservation_insert_and_site_settings_contact` | `validate_public_reservation_insert()` now scrubs every staff/system-owned column for anon inserts (policy WITH CHECK becomes defense-in-depth); re-asserted anon column-level SELECT grants on `resource_availability_slots` (`note` hidden); `site_settings` SELECT narrowed from all tenant members to owners/admins |
 
 ---
 
