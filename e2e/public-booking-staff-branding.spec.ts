@@ -68,7 +68,7 @@ test.describe("Public booking page branding for authenticated staff", () => {
     const stamp = Date.now();
     const siteSlug = `branding-${stamp}`;
     const siteBusinessName = `TEST CI Branding House ${stamp}`;
-    const logoPath = `${tenantId}/logo-${stamp}.png`;
+    const logoPath = `${tenantId}/logo/e2e-${stamp}.png`;
     const staffEmail = `ci+staff-${stamp}@mimmobook.test`;
     const staffPassword = `Ci-Staff-${randomUUID()}-Z9!`;
 
