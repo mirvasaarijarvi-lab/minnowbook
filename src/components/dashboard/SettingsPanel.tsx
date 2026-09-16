@@ -220,6 +220,9 @@ const SiteSettingsInfo = ({ siteId, tenantId }: { siteId: string; tenantId: stri
   if (siteAccessError || !site) {
     return (
       <PermissionEmptyState
+        surface="settings_site"
+        tenantId={tenantId}
+        siteId={siteId}
         title={t("settings.siteNoAccessTitle")}
         description={t("settings.siteNoAccessDesc")}
         detail={(siteAccessError as any)?.message ?? null}
