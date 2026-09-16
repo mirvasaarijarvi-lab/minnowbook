@@ -3350,6 +3350,19 @@ export type Database = {
           table_name: string
         }[]
       }
+      log_reservation_pricing_decision: {
+        Args: {
+          p_db_user: string
+          p_jwt_role: string
+          p_kept: string[]
+          p_reservation_id: string
+          p_scrubbed: string[]
+          p_submitted: Json
+          p_tenant_id: string
+          p_trusted: boolean
+        }
+        Returns: undefined
+      }
       lookup_access_code_by_plaintext: {
         Args: { p_code: string }
         Returns: {
