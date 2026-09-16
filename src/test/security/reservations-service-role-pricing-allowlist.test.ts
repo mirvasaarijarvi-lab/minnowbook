@@ -136,4 +136,133 @@ describe.runIf(canRun)("reservations insert trigger — service_role pricing all
       expect(error.message).toBeTruthy();
     }
   });
+
+  it("server-side pricing persists byte-for-byte when the allowlist matches", async () => {
+    // A real promo code so discount_code_id survives the sanitiser's
+    // cross-tenant / dangling-reference checks.
+    const code = `CIALLOW${randomUUID().slice(0, 6).toUpperCase()}`;
+    const { data: codeRow, error: codeErr } = await ctx.service
+      .from("discount_codes")
+      .insert({
+        tenant_id: ctx.tenantId,
+        code,
+        discount_type: "percentage",
+        discount_value: 33,
+        is_active: true,
+        used_count: 0,
+      })
+      .select("id")
+      .single();
+    expect(codeErr, codeErr?.message).toBeNull();
+    const codeId = codeRow!.id as string;
+
+    // 3 nights x 89.90 with -33% => 269.70 gross, 180.70 final (cent rounding).
+    const payload = {
+      ...buildBase(`TEST CI allowlist exact ${randomUUID().slice(0, 8)}`),
+      check_out_date: new Date(Date.now() + 10 * 86_400_000).toISOString().slice(0, 10),
+      original_price_eur: 269.7,
+      price_eur: 180.7,
+      pricing_details: "3 x 89.90 EUR, -33% (server-side)",
+      discount_type: "percentage",
+      discount_value: 33,
+      discount_reason: `Promo code: ${code}`,
+      discount_code_id: codeId,
+      pricing_type: "fixed_price",
+      breakfast_price_per_person: 12.5,
+      stall_fee: 0,
+      internal_notes: "edge function: public-booking",
+      staff_notes: "no allergies reported",
+      is_invoiced: true,
+      is_checked_in: true,
+      staff_needed: true,
+      status: "confirmed",
+      created_by: ctx.ownerId,
+    };
+
+    const { data: inserted, error } = await ctx.service
+      .from("reservations")
+      .insert(payload)
+      .select("id")
+      .single();
+    expect(error, `service insert must succeed: ${error?.message}`).toBeNull();
+    const id = inserted!.id as string;
+
+    // Re-read from the database: the sanitiser trigger must not have rewritten
+    // any of the trusted values.
+    const { data: stored, error: readErr } = await ctx.service
+      .from("reservations")
+      .select(
+        "price_eur, original_price_eur, pricing_details, pricing_type, discount_type, discount_value, discount_reason, discount_code_id, breakfast_price_per_person, stall_fee, internal_notes, staff_notes, is_invoiced, is_checked_in, staff_needed, status, created_by",
+      )
+      .eq("id", id)
+      .single();
+    expect(readErr, readErr?.message).toBeNull();
+
+    expect(Number(stored!.price_eur)).toBe(180.7);
+    expect(Number(stored!.original_price_eur)).toBe(269.7);
+    expect(stored!.pricing_details).toBe(payload.pricing_details);
+    expect(stored!.pricing_type).toBe("fixed_price");
+    expect(stored!.discount_type).toBe("percentage");
+    expect(Number(stored!.discount_value)).toBe(33);
+    expect(stored!.discount_reason).toBe(payload.discount_reason);
+    expect(stored!.discount_code_id).toBe(codeId);
+    expect(Number(stored!.breakfast_price_per_person)).toBe(12.5);
+    expect(Number(stored!.stall_fee)).toBe(0);
+    expect(stored!.internal_notes).toBe(payload.internal_notes);
+    expect(stored!.staff_notes).toBe(payload.staff_notes);
+    expect(stored!.is_invoiced).toBe(true);
+    expect(stored!.is_checked_in).toBe(true);
+    expect(stored!.staff_needed).toBe(true);
+    expect(stored!.status).toBe("confirmed");
+    expect(stored!.created_by).toBe(ctx.ownerId);
+
+    // The gross amount must stay above the charged amount, and the audit trail
+    // must report the pricing fields as kept, not scrubbed.
+    expect(Number(stored!.original_price_eur)).toBeGreaterThan(Number(stored!.price_eur));
+
+    const { data: audit, error: auditErr } = await ctx.service
+      .from("audit_log")
+      .select("new_data")
+      .eq("tenant_id", ctx.tenantId)
+      .eq("action", "pricing_trust_decision")
+      .eq("record_id", id);
+    expect(auditErr, auditErr?.message).toBeNull();
+    expect(audit ?? []).toHaveLength(1);
+    const decision = (audit ?? [])[0]?.new_data as {
+      trusted?: boolean;
+      kept_fields?: string[];
+      scrubbed_fields?: string[];
+    } | null;
+    expect(decision?.trusted).toBe(true);
+    expect(decision?.scrubbed_fields).toEqual([]);
+    expect(decision?.kept_fields).toContain("price_eur");
+    expect(decision?.kept_fields).toContain("discount_code_id");
+
+    await ctx.service.from("reservations").delete().eq("id", id);
+    await ctx.service.from("audit_log").delete().eq("record_id", id);
+    await ctx.service.from("discount_codes").delete().eq("id", codeId);
+  });
+
+  it("a zero-cost trusted insert keeps an explicit 0 instead of dropping to null", async () => {
+    const name = `TEST CI allowlist zero ${randomUUID().slice(0, 8)}`;
+    const { data, error } = await ctx.service
+      .from("reservations")
+      .insert({
+        ...buildBase(name),
+        original_price_eur: 80,
+        price_eur: 0,
+        discount_type: "free",
+        discount_value: 80,
+        discount_reason: "Comp stay",
+      })
+      .select("id, price_eur, original_price_eur, discount_type, discount_value")
+      .single();
+
+    expect(error, error?.message).toBeNull();
+    expect(Number(data!.price_eur)).toBe(0);
+    expect(data!.price_eur).not.toBeNull();
+    expect(Number(data!.original_price_eur)).toBe(80);
+    expect(data!.discount_type).toBe("free");
+    expect(Number(data!.discount_value)).toBe(80);
+  });
 });
