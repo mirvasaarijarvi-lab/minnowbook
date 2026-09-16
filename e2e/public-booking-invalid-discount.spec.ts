@@ -151,26 +151,46 @@ test.describe("Public booking with an invalid or expired discount code", () => {
     await gotoAndWaitForSpa(page, `/book/${slug}?type=guesthouse`);
     await assertPublicBookingReady(page);
 
-    await page.locator("#guest_name").fill(`TEST CI BadCode UI ${stamp}`);
+    const uiGuestName = `TEST CI BadCode UI ${stamp}`;
+    await page.locator("#guest_name").fill(uiGuestName);
     await page.locator("#guest_email").fill(`ci+baddiscount-ui-${stamp}@mimmobook.test`);
     await page.locator("#guests_count").fill("2");
+
+    // Pick check-in / check-out from next month, so the dates are always in
+    // the future regardless of which day the suite runs on.
+    const pickDay = async (triggerIndex: number, day: string) => {
+      await page.getByRole("button", { name: /Pick a date/i }).nth(triggerIndex).click();
+      const grid = page.getByRole("dialog").locator("table").last();
+      await page.getByRole("button", { name: /next month/i }).last().click();
+      await grid.getByRole("gridcell", { name: day, exact: true }).first().click();
+      await page.keyboard.press("Escape");
+    };
+    await pickDay(0, "10");
+    await pickDay(0, "12");
+
     await page.locator("#promo_code").fill(unknownCode);
 
-    // Guest-visible failure signal: an error toast, no confirmation screen,
-    // and the promo code still in the field so it can be corrected.
-    const submitViaApi = page.waitForResponse(
-      (r) => r.url().includes("/functions/v1/public-booking"),
-      { timeout: 30_000 },
-    ).catch(() => null);
+    // Bot protection rejects submissions faster than 3s after form load.
+    await page.waitForTimeout(3_500);
 
-    // The submit button stays disabled until a date is chosen, so the guest
-    // cannot even reach the server with a half-filled form: that alone
-    // proves no price is written from the client.
     const submit = page.getByRole("button", { name: /Submit Reservation/i });
-    await expect(submit).toBeDisabled();
-    await submitViaApi;
+    await expect(submit).toBeEnabled();
+    await submit.click();
 
-    await expect(page.getByText(/Reservation Received|Thank you/i)).toHaveCount(0);
+    // Guest-visible failure signal: an error message, no confirmation
+    // screen, and the promo code still in the field so it can be corrected.
+    await expect(
+      page.getByText(/Failed to submit reservation|promo code/i).first(),
+    ).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByText(/Reservation Received/i)).toHaveCount(0);
     await expect(page.locator("#promo_code")).toHaveValue(unknownCode);
+
+    // And still nothing persisted after the browser attempt.
+    const { data: afterUi } = await admin
+      .from("reservations")
+      .select("id, price_eur, is_invoiced")
+      .eq("tenant_id", tenantId);
+    expect(afterUi ?? [], "the browser attempt must not create a reservation").toHaveLength(0);
   });
 });
+
