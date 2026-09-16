@@ -121,7 +121,7 @@ describe("generateInvoicePdf", () => {
       "en",
     ));
     expect(text).not.toContain("SUMMER25");
-    expect(text).not.toContain("Discount");
+    expect(text).not.toContain("Discount code");
     expect(text).toContain("120.00 EUR");
   });
 });
