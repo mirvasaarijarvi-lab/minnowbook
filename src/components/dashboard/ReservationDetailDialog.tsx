@@ -1,9 +1,15 @@
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useTenant } from "@/hooks/useTenant";
+import { useI18n } from "@/contexts/I18nContext";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { format } from "date-fns";
-import { CalendarDays, Clock, Mail, Phone, User, Users, MapPin, Receipt, PackageCheck, Coffee, Tag, Pencil, FileText, StickyNote, Building2 } from "lucide-react";
+import { CalendarDays, Clock, Mail, Phone, User, Users, MapPin, Receipt, PackageCheck, Coffee, Tag, Pencil, FileText, Download, StickyNote, Building2 } from "lucide-react";
 import { useT, useTDynamic } from "@/contexts/I18nContext";
 import { useDateLocale } from "@/hooks/useDateLocale";
 import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
@@ -42,6 +48,43 @@ const ReservationDetailDialog = ({ reservation, open, onOpenChange, onEdit, canE
   const tDynamic = useTDynamic();
   const dateFnsLocale = useDateLocale();
   const { typeLabel } = useResourceTypeLabel();
+  const { language } = useI18n();
+  const { tenant, tenantId } = useTenant();
+  const [generating, setGenerating] = useState(false);
+
+  const { data: tenantSettings } = useQuery({
+    queryKey: ["tenant-settings-branding", tenantId],
+    queryFn: async () => {
+      if (!tenantId) return null;
+      const { data } = await supabase
+        .from("tenant_settings")
+        .select("logo_url, business_name, business_email, business_phone, business_address, primary_color")
+        .eq("tenant_id", tenantId)
+        .maybeSingle();
+      return data;
+    },
+    enabled: !!tenantId,
+  });
+
+  const handleDownloadInvoice = async () => {
+    if (!reservation) return;
+    setGenerating(true);
+    try {
+      const { downloadInvoicePdf } = await import("@/lib/invoicePdf");
+      await downloadInvoicePdf(reservation, language || "en", {
+        logoUrl: tenantSettings?.logo_url,
+        businessName: tenantSettings?.business_name || (tenant as any)?.name,
+        businessEmail: tenantSettings?.business_email,
+        businessPhone: tenantSettings?.business_phone,
+        businessAddress: tenantSettings?.business_address,
+        primaryColor: tenantSettings?.primary_color,
+      });
+    } catch {
+      toast.error("Invoice generation failed");
+    } finally {
+      setGenerating(false);
+    }
+  };
 
   if (!reservation) return null;
   const r = reservation;
@@ -197,6 +240,18 @@ const ReservationDetailDialog = ({ reservation, open, onOpenChange, onEdit, canE
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>{"Close"}</Button>
+          {r.price_eur != null && (
+            <Button
+              variant="outline"
+              onClick={handleDownloadInvoice}
+              disabled={generating}
+              className="gap-1.5"
+              data-testid="download-invoice"
+            >
+              <Download className="h-4 w-4" />
+              {t("dashboard.downloadInvoice")}
+            </Button>
+          )}
           {canEdit && onEdit && (
             <Button onClick={() => { onOpenChange(false); onEdit(r); }} className="gap-1.5">
               <Pencil className="h-4 w-4" />
