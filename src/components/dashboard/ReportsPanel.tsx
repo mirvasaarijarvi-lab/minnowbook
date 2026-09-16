@@ -38,6 +38,11 @@ import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { escapeHtml } from "@/lib/html-escape";
 import DashboardTooltip from "./DashboardTooltip";
+import { downloadReportPdf } from "@/lib/reportsPdf";
+import { useAnalyticsT } from "@/i18n/analytics";
+
+/** Bar colours for the PDF chart, mirroring the on-screen series order. */
+const PDF_SERIES_COLORS: [number, number, number][] = [[37, 99, 235], [217, 119, 6], [148, 163, 184], [16, 185, 129]];
 
 interface ReservationRow {
   id: string;
@@ -484,6 +489,79 @@ const ReportsPanel = () => {
     URL.revokeObjectURL(url);
   };
 
+  /* ── PDF Export ──────────────────────────────────────── */
+  const handleExportPDF = () => {
+    const fmtEur = (v: number) => `${v.toFixed(2)} EUR`;
+    const buckets = eachDayOrBucketLabels();
+    downloadReportPdf({
+      title: t("reports.print.title"),
+      subtitle: [periodLabel, effectiveSiteName].filter(Boolean).join(" · "),
+      kpis: [
+        { label: t("reports.total"), value: String(stats.total) },
+        { label: t("reports.invoiced"), value: String(stats.invoiced) },
+        { label: t("reports.used"), value: String(stats.used) },
+        { label: t("reports.grandTotal"), value: fmtEur(grandTotal) },
+      ],
+      chart: buckets.length
+        ? {
+            title: t("reports.chart.title"),
+            buckets,
+            series: allowedTypes.map((tp: string, i: number) => ({
+              key: tp,
+              label: typeLabel(tp),
+              color: PDF_SERIES_COLORS[i % PDF_SERIES_COLORS.length],
+            })),
+          }
+        : undefined,
+      table: {
+        head: [
+          t("common.date"), t("reports.guest"), t("common.type"), t("common.guests"),
+          t("common.status"), t("reports.used"), t("reports.invoiced"), `${t("reports.totalPrice")} (EUR)`,
+        ],
+        body: reservations.map((r) => [
+          format(new Date(r.date + "T00:00:00"), "d.M.yyyy"),
+          r.guest_name,
+          typeLabel(r.reservation_type),
+          String(r.guests_count || r.estimated_guests || "-"),
+          r.status,
+          r.is_used ? t("reports.yes") : t("reports.no"),
+          r.is_invoiced ? t("reports.yes") : t("reports.no"),
+          effectivePrice(r) > 0 ? effectivePrice(r).toFixed(2) : "-",
+        ]),
+        numericColumns: [3, 7],
+      },
+      fileName: `report_${periodLabel.replace(/\s/g, "_")}${effectiveSiteName ? `_${effectiveSiteName.replace(/\s/g, "_")}` : ""}`,
+    });
+  };
+
+  /** Buckets reservations for the PDF chart the same way the on-screen chart does. */
+  function eachDayOrBucketLabels() {
+    const bucket = (items: ReservationRow[]) => {
+      const counts: Record<string, number> = {};
+      allowedTypes.forEach((tp: string) => {
+        counts[tp] = items.filter((r) => r.reservation_type === tp).length;
+      });
+      return counts;
+    };
+    const dayOf = (r: ReservationRow) => new Date(r.date + "T00:00:00");
+    if (period === "week" || (period === "custom" && differenceInDays(end, start) <= 14)) {
+      return eachDayOfInterval({ start, end }).map((day) => ({
+        label: format(day, "d.M.", { locale: dateLocale }),
+        counts: bucket(reservations.filter((r) => isSameDay(dayOf(r), day))),
+      }));
+    }
+    if (period === "month" || (period === "custom" && differenceInDays(end, start) <= 90)) {
+      return eachWeekOfInterval({ start, end }, { weekStartsOn: 1 }).map((ws) => ({
+        label: format(ws, "d.M.", { locale: dateLocale }),
+        counts: bucket(reservations.filter((r) => isSameWeek(dayOf(r), ws, { weekStartsOn: 1 }))),
+      }));
+    }
+    return eachMonthOfInterval({ start, end }).map((ms) => ({
+      label: format(ms, "LLL", { locale: dateLocale }),
+      counts: bucket(reservations.filter((r) => isSameMonth(dayOf(r), ms))),
+    }));
+  }
+
   /* ── Print ───────────────────────────────────────────── */
   const handlePrint = () => {
     const pw = window.open("", "_blank");
@@ -674,6 +752,7 @@ const ReportsPanel = () => {
   }, [typeFilteredRaw, effectivePrice, invoicingStats.totalEur]);
 
   const { typeLabel } = useResourceTypeLabel();
+  const anT = useAnalyticsT();
 
   return (
     <div className="space-y-6 max-w-6xl">
@@ -775,6 +854,17 @@ const ReportsPanel = () => {
             <span>
               <Button variant="outline" size="sm" onClick={handleExportCSV} disabled={reservations.length === 0 || isBasicTier} className="gap-1.5">
                 <Download className="h-4 w-4" /><span className="hidden sm:inline">{t("reports.exportCsv")}</span><span className="sm:hidden">CSV</span>
+                {isBasicTier && <LockIcon className="h-3 w-3 ml-0.5 text-muted-foreground" />}
+              </Button>
+            </span>
+          </UiTooltipTrigger>
+          {isBasicTier && <UiTooltipContent>Pro+</UiTooltipContent>}
+        </UiTooltip>
+        <UiTooltip>
+          <UiTooltipTrigger asChild>
+            <span>
+              <Button variant="outline" size="sm" onClick={handleExportPDF} disabled={reservations.length === 0 || isBasicTier} className="gap-1.5">
+                <FileText className="h-4 w-4" /><span className="hidden sm:inline">{anT("an.exportPdf")}</span><span className="sm:hidden">PDF</span>
                 {isBasicTier && <LockIcon className="h-3 w-3 ml-0.5 text-muted-foreground" />}
               </Button>
             </span>

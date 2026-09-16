@@ -9,8 +9,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ClipboardList, Download, Printer, Send } from "lucide-react";
+import { ClipboardList, Download, FileText, Printer, Send } from "lucide-react";
 import DashboardTooltip from "./DashboardTooltip";
+import { downloadReportPdf } from "@/lib/reportsPdf";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
@@ -290,6 +291,23 @@ const OperationsSheetPanel = () => {
     URL.revokeObjectURL(url);
   };
 
+  /** Two-section pick sheet as a PDF, matching the CSV and print output. */
+  const handleExportPDF = () => {
+    downloadReportPdf({
+      title: `Operations sheet ${date}`,
+      subtitle: "Kitchen",
+      table: { head: kitchenHeaders, body: kitchenRows.map((r) => r.map(String)), numericColumns: [3] },
+      fileName: `operations_sheet_kitchen_${date}`,
+    });
+    downloadReportPdf({
+      title: `Operations sheet ${date}`,
+      subtitle: "Lodging",
+      table: { head: lodgingHeaders, body: lodgingRows.map((r) => r.map(String)), numericColumns: [3] },
+      fileName: `operations_sheet_lodging_${date}`,
+    });
+  };
+
+
   const handlePrint = () => {
     const section = (title: string, headers: string[], rows: (string | number)[][]) => `
       <h2>${escapeHtml(title)}</h2>
@@ -341,6 +359,9 @@ const OperationsSheetPanel = () => {
             />
             <Button variant="outline" size="sm" onClick={handleExportCSV} className="gap-1.5">
               <Download className="h-4 w-4" /> CSV
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleExportPDF} className="gap-1.5">
+              <FileText className="h-4 w-4" /> PDF
             </Button>
             <Button variant="outline" size="sm" onClick={handlePrint} className="gap-1.5">
               <Printer className="h-4 w-4" /> Print

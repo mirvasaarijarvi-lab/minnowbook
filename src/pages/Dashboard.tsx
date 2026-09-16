@@ -31,6 +31,10 @@ import ResourceManagement from "@/components/dashboard/ResourceManagement";
 import SettingsPanel from "@/components/dashboard/SettingsPanel";
 import ReportsPanel from "@/components/dashboard/ReportsPanel";
 import OperationsSheetPanel from "@/components/dashboard/OperationsSheetPanel";
+import PeakHoursPanel from "@/components/dashboard/PeakHoursPanel";
+import BusiestWeekdayPanel from "@/components/dashboard/BusiestWeekdayPanel";
+import BookingChannelPanel from "@/components/dashboard/BookingChannelPanel";
+import CrossBookingAuditPanel from "@/components/dashboard/CrossBookingAuditPanel";
 import RescheduleRequestsPanel from "@/components/dashboard/RescheduleRequestsPanel";
 import AdminPanel from "@/components/dashboard/AdminPanel";
 import DashboardSupportPanel from "@/components/dashboard/DashboardSupportPanel";
@@ -259,7 +263,7 @@ const Dashboard = () => {
     resources: gatedView("resources", <ResourceManagement />),
     offers: gatedView("reservations", <OffersManager />),
     kitchen: gatedView("reservations", <KitchenOrdersPanel />),
-    reports: gatedView("reports", <><OperationsSheetPanel /><ForecastPanel /><ReportsPanel /></>),
+    reports: gatedView("reports", <div className="space-y-6"><OperationsSheetPanel /><ForecastPanel /><ReportsPanel /><div className="grid gap-6 lg:grid-cols-2"><PeakHoursPanel /><BusiestWeekdayPanel /></div><BookingChannelPanel /><CrossBookingAuditPanel /></div>),
     settings: gatedView("settings", <SettingsPanel />),
     admin: gatedView("admin", <AdminPanel />),
     bookingLog: gatedView("admin", <BookingValidationLogPanel />),
