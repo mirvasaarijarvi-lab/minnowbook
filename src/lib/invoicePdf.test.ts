@@ -1,13 +1,13 @@
 import { describe, it, expect } from "vitest";
 import zlib from "node:zlib";
-import { buildInvoiceModel, generateInvoicePdf, extractDiscountCode, type InvoiceReservation } from "./invoicePdf";
+import { buildInvoiceModel, generateInvoicePdf, generateInvoicePdfBytes, extractDiscountCode, type InvoiceReservation } from "./invoicePdf";
 
 /**
  * Minimal PDF text extraction: inflate every stream and decode the
  * hex-encoded string literals that pdf-lib emits for `Tj` operators.
  */
-async function extractPdfText(blob: Blob): Promise<string> {
-  const buf = Buffer.from(await blob.arrayBuffer());
+function extractPdfText(bytes: Uint8Array): string {
+  const buf = Buffer.from(bytes);
   const raw = buf.toString("latin1");
   let content = "";
   const re = /stream\r?\n/g;
@@ -87,12 +87,10 @@ describe("buildInvoiceModel", () => {
 
 describe("generateInvoicePdf", () => {
   it("renders the discounted price, applied code and final total", async () => {
-    const blob = await generateInvoicePdf(discounted, "en", {
-      businessName: "Villa Mimmi",
-      businessEmail: "billing@villamimmi.test",
-    });
+    const branding = { businessName: "Villa Mimmi", businessEmail: "billing@villamimmi.test" };
+    const blob = await generateInvoicePdf(discounted, "en", branding);
     expect(blob.type).toBe("application/pdf");
-    const text = await extractPdfText(blob);
+    const text = extractPdfText(await generateInvoicePdfBytes(discounted, "en", branding));
 
     expect(text).toContain("Invoice");
     expect(text).toContain("Villa Mimmi");
@@ -110,8 +108,7 @@ describe("generateInvoicePdf", () => {
   });
 
   it("localises the invoice in Finnish", async () => {
-    const blob = await generateInvoicePdf(discounted, "fi");
-    const text = await extractPdfText(blob);
+    const text = extractPdfText(await generateInvoicePdfBytes(discounted, "fi"));
     expect(text).toContain("Lasku");
     expect(text).toContain("Alennuskoodi: SUMMER25");
     expect(text).toContain("Loppusumma");
@@ -119,11 +116,10 @@ describe("generateInvoicePdf", () => {
   });
 
   it("omits discount lines when no discount was applied", async () => {
-    const blob = await generateInvoicePdf(
+    const text = extractPdfText(await generateInvoicePdfBytes(
       { ...discounted, discount_type: null, discount_value: null, discount_reason: null, original_price_eur: null, price_eur: 120, is_invoiced: false },
       "en",
-    );
-    const text = await extractPdfText(blob);
+    ));
     expect(text).not.toContain("SUMMER25");
     expect(text).not.toContain("Discount");
     expect(text).toContain("120.00 EUR");
