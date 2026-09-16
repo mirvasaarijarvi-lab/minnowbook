@@ -3412,6 +3412,7 @@ export type Database = {
         }
         Returns: number
       }
+      public_reservation_guards_enabled: { Args: never; Returns: boolean }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }
         Returns: {
