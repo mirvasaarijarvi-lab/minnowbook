@@ -752,6 +752,7 @@ const ReportsPanel = () => {
   }, [typeFilteredRaw, effectivePrice, invoicingStats.totalEur]);
 
   const { typeLabel } = useResourceTypeLabel();
+  const anT = useAnalyticsT();
 
   return (
     <div className="space-y-6 max-w-6xl">
