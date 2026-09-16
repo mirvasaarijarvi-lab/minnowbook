@@ -663,6 +663,7 @@ type TranslationKeys = {
   "notifications.invoiced": string;
   "dashboard.used": string;
   "dashboard.invoiced": string;
+  "dashboard.downloadInvoice": string;
   "dashboard.markLinkedUsed": string;
   "dashboard.markLinkedUsedMsg": string;
   "dashboard.markAll": string;
@@ -2614,6 +2615,7 @@ const en: TranslationKeys = {
   "notifications.invoiced": "Reservation marked as invoiced",
   "dashboard.used": "Used",
   "dashboard.invoiced": "Invoiced",
+  "dashboard.downloadInvoice": "Download invoice",
   "dashboard.markLinkedUsed": "Mark linked reservations used?",
   "dashboard.markLinkedUsedMsg": "This reservation is linked to an offer with other reservations. Would you like to mark them all as used?",
   "dashboard.markAll": "Mark all used",
@@ -4545,6 +4547,7 @@ const fi: TranslationKeys = {
   "notifications.invoiced": "Varaus merkitty laskutetuksi",
   "dashboard.used": "Käytetty",
   "dashboard.invoiced": "Laskutettu",
+  "dashboard.downloadInvoice": "Lataa lasku",
   "dashboard.markLinkedUsed": "Merkitäänkö linkitetyt varaukset käytetyiksi?",
   "dashboard.markLinkedUsedMsg": "Tämä varaus on linkitetty tarjoukseen, jossa on muita varauksia. Haluatko merkitä ne kaikki käytetyiksi?",
   "dashboard.markAll": "Merkitse kaikki käytetyiksi",
@@ -6475,6 +6478,7 @@ const sv: TranslationKeys = {
   "notifications.invoiced": "Bokning markerad som fakturerad",
   "dashboard.used": "Använd",
   "dashboard.invoiced": "Fakturerad",
+  "dashboard.downloadInvoice": "Ladda ner faktura",
   "dashboard.markLinkedUsed": "Markera länkade bokningar som använda?",
   "dashboard.markLinkedUsedMsg": "Denna bokning är länkad till ett erbjudande med andra bokningar. Vill du markera alla som använda?",
   "dashboard.markAll": "Markera alla använda",

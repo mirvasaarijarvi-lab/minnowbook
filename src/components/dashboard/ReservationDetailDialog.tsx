@@ -80,7 +80,7 @@ const ReservationDetailDialog = ({ reservation, open, onOpenChange, onEdit, canE
         primaryColor: tenantSettings?.primary_color,
       });
     } catch {
-      toast.error(t("common.error"));
+      toast.error("Invoice generation failed");
     } finally {
       setGenerating(false);
     }
