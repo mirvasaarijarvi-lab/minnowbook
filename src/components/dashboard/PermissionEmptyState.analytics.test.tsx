@@ -117,10 +117,7 @@ describe("PermissionEmptyState", () => {
     );
 
     await user.click(screen.getByRole("button", { name: /access.requestButton/ }));
-    await user.type(
-      screen.getByLabelText("access.requestTitle"),
-      "I need the branding settings"
-    );
+    await user.type(screen.getByRole("textbox"), "I need the branding settings");
     await user.click(screen.getByRole("button", { name: "access.requestSubmit" }));
 
     await waitFor(() => expect(insert).toHaveBeenCalledTimes(1));
