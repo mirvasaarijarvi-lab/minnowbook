@@ -58,7 +58,7 @@ const SiteSettingsInfo = ({ siteId, tenantId }: { siteId: string; tenantId: stri
   const queryClient = useQueryClient();
 
   // Site basic info
-  const { data: site } = useQuery({
+  const { data: site, isLoading: loadingSite, error: siteError } = useQuery({
     queryKey: ["site-settings-info", siteId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -70,10 +70,11 @@ const SiteSettingsInfo = ({ siteId, tenantId }: { siteId: string; tenantId: stri
       return data;
     },
     enabled: !!siteId,
+    retry: false,
   });
 
   // Tenant (parent) defaults
-  const { data: tenantSettings } = useQuery({
+  const { data: tenantSettings, error: tenantSettingsError } = useQuery({
     queryKey: ["tenant-settings-for-site", tenantId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -85,10 +86,11 @@ const SiteSettingsInfo = ({ siteId, tenantId }: { siteId: string; tenantId: stri
       return data;
     },
     enabled: !!tenantId,
+    retry: false,
   });
 
   // Site-specific overrides
-  const { data: siteSettings, isLoading: loadingSiteSettings } = useQuery({
+  const { data: siteSettings, isLoading: loadingSiteSettings, error: siteSettingsError } = useQuery({
     queryKey: ["site-settings", siteId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -100,6 +102,7 @@ const SiteSettingsInfo = ({ siteId, tenantId }: { siteId: string; tenantId: stri
       return data;
     },
     enabled: !!siteId,
+    retry: false,
   });
 
   // Determine if the site has custom overrides
