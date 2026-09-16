@@ -129,6 +129,16 @@ type TranslationKeys = {
   "settings.noAccessDesc": string;
   "settings.siteNoAccessTitle": string;
   "settings.siteNoAccessDesc": string;
+  "access.requestButton": string;
+  "access.requestTitle": string;
+  "access.requestDesc": string;
+  "access.requestPlaceholder": string;
+  "access.requestSubmit": string;
+  "access.requestSending": string;
+  "access.requestSent": string;
+  "access.requestError": string;
+  "access.requestSentInline": string;
+  "access.requestSubject": string;
   "booking.brandingUnavailable": string;
   "settings.upsellTitle": string;
   "settings.upsellDesc": string;
