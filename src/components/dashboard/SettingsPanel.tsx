@@ -204,7 +204,27 @@ const SiteSettingsInfo = ({ siteId, tenantId }: { siteId: string; tenantId: stri
     setForm((prev) => ({ ...prev, [key]: parentVal }));
   };
 
-  if (!site) return null;
+  // Never render a silently blank panel: while the queries run show a
+  // spinner, and if the role is not allowed to read the site details or the
+  // settings rows, explain that instead of showing empty fields.
+  if (loadingSite || loadingSiteSettings) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  const siteAccessError = siteError || siteSettingsError || tenantSettingsError;
+  if (siteAccessError || !site) {
+    return (
+      <PermissionEmptyState
+        title={t("settings.siteNoAccessTitle")}
+        description={t("settings.siteNoAccessDesc")}
+        detail={(siteAccessError as any)?.message ?? null}
+      />
+    );
+  }
 
   return (
     <div className="space-y-6">
