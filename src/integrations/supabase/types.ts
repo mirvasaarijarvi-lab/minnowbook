@@ -3261,6 +3261,23 @@ export type Database = {
         }[]
       }
       get_redemption_metrics_24h: { Args: { p_hours?: number }; Returns: Json }
+      get_site_settings_public: {
+        Args: { p_site_id: string }
+        Returns: {
+          accent_color: string
+          business_description: string
+          business_name: string
+          created_at: string
+          hero_image_url: string
+          id: string
+          logo_url: string
+          primary_color: string
+          secondary_color: string
+          site_id: string
+          tenant_id: string
+          updated_at: string
+        }[]
+      }
       get_tenant_ical_feed_token: {
         Args: { p_tenant_id: string }
         Returns: string
