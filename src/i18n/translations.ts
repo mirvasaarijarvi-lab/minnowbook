@@ -129,6 +129,16 @@ type TranslationKeys = {
   "settings.noAccessDesc": string;
   "settings.siteNoAccessTitle": string;
   "settings.siteNoAccessDesc": string;
+  "access.requestButton": string;
+  "access.requestTitle": string;
+  "access.requestDesc": string;
+  "access.requestPlaceholder": string;
+  "access.requestSubmit": string;
+  "access.requestSending": string;
+  "access.requestSent": string;
+  "access.requestError": string;
+  "access.requestSentInline": string;
+  "access.requestSubject": string;
   "booking.brandingUnavailable": string;
   "settings.upsellTitle": string;
   "settings.upsellDesc": string;
@@ -2073,6 +2083,16 @@ const en: TranslationKeys = {
   "settings.noAccessDesc": "Your account does not have permission to view or edit business settings. Ask an owner or admin of this account to update them, or to give you admin access.",
   "settings.siteNoAccessTitle": "Site settings are not available for your role",
   "settings.siteNoAccessDesc": "Only owners and admins can view this site's business details and branding. Ask an owner or admin for access if you need to change them.",
+  "access.requestButton": "Request access",
+  "access.requestTitle": "Request access from an admin",
+  "access.requestDesc": "We will send your request to the owners and admins of this account. Tell them briefly what you need access to.",
+  "access.requestPlaceholder": "I need access to settings so I can update ...",
+  "access.requestSubmit": "Send request",
+  "access.requestSending": "Sending ...",
+  "access.requestSent": "Your request was sent to the owners and admins",
+  "access.requestError": "Could not send your request",
+  "access.requestSentInline": "Request sent. An owner or admin will get back to you.",
+  "access.requestSubject": "Access request",
   "booking.brandingUnavailable": "Custom colours and logo could not be loaded, so this page uses the default look. Booking still works normally.",
   "settings.upsellTitle": "Manage multiple locations",
   "settings.upsellDesc": "Upgrade to the Business plan to manage hotels, restaurants, and venues from a single dashboard, each with its own resources, hours, and booking page.",
@@ -3995,6 +4015,16 @@ const fi: TranslationKeys = {
   "settings.noAccessDesc": "Tunnuksellasi ei ole oikeutta tarkastella tai muokata yrityksen asetuksia. Pyydä omistajaa tai ylläpitäjää päivittämään ne tai antamaan sinulle ylläpitäjän oikeudet.",
   "settings.siteNoAccessTitle": "Toimipisteen asetukset eivät ole käytettävissä roolillasi",
   "settings.siteNoAccessDesc": "Vain omistajat ja ylläpitäjät näkevät tämän toimipisteen yritystiedot ja ilmeen. Pyydä tarvittaessa oikeuksia omistajalta tai ylläpitäjältä.",
+  "access.requestButton": "Pyydä käyttöoikeutta",
+  "access.requestTitle": "Pyydä käyttöoikeutta ylläpitäjältä",
+  "access.requestDesc": "Lähetämme pyyntösi tämän tilin omistajille ja ylläpitäjille. Kerro lyhyesti, mihin tarvitset oikeudet.",
+  "access.requestPlaceholder": "Tarvitsen pääsyn asetuksiin, jotta voin päivittää ...",
+  "access.requestSubmit": "Lähetä pyyntö",
+  "access.requestSending": "Lähetetään ...",
+  "access.requestSent": "Pyyntösi lähetettiin omistajille ja ylläpitäjille",
+  "access.requestError": "Pyynnön lähetys ei onnistunut",
+  "access.requestSentInline": "Pyyntö lähetetty. Omistaja tai ylläpitäjä vastaa sinulle.",
+  "access.requestSubject": "Käyttöoikeuspyyntö",
   "booking.brandingUnavailable": "Omia värejä ja logoa ei voitu ladata, joten sivu käyttää oletusilmettä. Varaaminen toimii normaalisti.",
   "settings.upsellTitle": "Hallinnoi useita toimipisteitä",
   "settings.upsellDesc": "Päivitä Business-suunnitelmaan hallinnoidaksesi hotelleja, ravintoloita ja juhlatiloja yhdestä hallintapaneelista. Jokaisella on omat resurssit, aukioloajat ja varaussivu.",
@@ -5915,6 +5945,16 @@ const sv: TranslationKeys = {
   "settings.noAccessDesc": "Ditt konto har inte behörighet att se eller ändra företagets inställningar. Be en ägare eller administratör att uppdatera dem eller ge dig administratörsrättigheter.",
   "settings.siteNoAccessTitle": "Platsens inställningar är inte tillgängliga för din roll",
   "settings.siteNoAccessDesc": "Endast ägare och administratörer kan se platsens företagsuppgifter och utseende. Be en ägare eller administratör om behörighet om du behöver ändra dem.",
+  "access.requestButton": "Begär behörighet",
+  "access.requestTitle": "Begär behörighet av en administratör",
+  "access.requestDesc": "Vi skickar din begäran till ägarna och administratörerna för det här kontot. Berätta gärna vad du behöver komma åt.",
+  "access.requestPlaceholder": "Jag behöver komma åt inställningarna för att uppdatera ...",
+  "access.requestSubmit": "Skicka begäran",
+  "access.requestSending": "Skickar ...",
+  "access.requestSent": "Din begäran skickades till ägarna och administratörerna",
+  "access.requestError": "Begäran kunde inte skickas",
+  "access.requestSentInline": "Begäran skickad. En ägare eller administratör svarar dig.",
+  "access.requestSubject": "Begäran om behörighet",
   "booking.brandingUnavailable": "Egna färger och logotyp kunde inte laddas, så sidan använder standardutseendet. Bokningen fungerar som vanligt.",
   "settings.upsellTitle": "Hantera flera platser",
   "settings.upsellDesc": "Uppgradera till Business-planen för att hantera hotell, restauranger och evenemangslokaler från en enda instrumentpanel. Var och en med egna resurser, öppettider och bokningssida.",

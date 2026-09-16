@@ -223,6 +223,7 @@ const SiteSettingsInfo = ({ siteId, tenantId }: { siteId: string; tenantId: stri
         surface="settings_site"
         tenantId={tenantId}
         siteId={siteId}
+        allowAccessRequest
         title={t("settings.siteNoAccessTitle")}
         description={t("settings.siteNoAccessDesc")}
         detail={(siteAccessError as any)?.message ?? null}
@@ -835,6 +836,7 @@ const SettingsPanel = () => {
         <PermissionEmptyState
           surface="settings_panel"
           tenantId={tenantId}
+          allowAccessRequest
           title={t("settings.noAccessTitle")}
           description={t("settings.noAccessDesc")}
           detail={(settingsError as any)?.message ?? null}
