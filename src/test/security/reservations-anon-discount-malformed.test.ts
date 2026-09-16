@@ -199,14 +199,20 @@ describe.runIf(canRun)("anon reservation insert — malformed discount payloads 
   }
 
   // ─── Control ───────────────────────────────────────────────────────
+  // Anon has no SELECT policy on reservations, so the insert must not ask
+  // for a representation; read the row back with the service role.
   it("clean payload with no discount fields is accepted", async () => {
     const anon = newAnon();
-    const { data, error } = await anon
-      .from("reservations")
-      .insert(buildBase())
-      .select("id, discount_code_id, discount_type, discount_value")
-      .single();
+    const payload = buildBase();
+    const { error } = await anon.from("reservations").insert(payload);
     expect(error).toBeNull();
+
+    const { data } = await ctx.service
+      .from("reservations")
+      .select("id, discount_code_id, discount_type, discount_value")
+      .eq("tenant_id", payload.tenant_id)
+      .eq("guest_name", payload.guest_name)
+      .single();
     expect(data?.discount_code_id).toBeNull();
     expect(data?.discount_type).toBeNull();
     expect(data?.discount_value).toBeNull();
