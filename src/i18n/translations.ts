@@ -125,6 +125,11 @@ type TranslationKeys = {
   "settings.accentBtn": string;
   "settings.saved": string;
   "settings.saveError": string;
+  "settings.noAccessTitle": string;
+  "settings.noAccessDesc": string;
+  "settings.siteNoAccessTitle": string;
+  "settings.siteNoAccessDesc": string;
+  "booking.brandingUnavailable": string;
   "settings.upsellTitle": string;
   "settings.upsellDesc": string;
   "settings.learnMore": string;
@@ -2064,6 +2069,11 @@ const en: TranslationKeys = {
   "settings.accentBtn": "Accent Button",
   "settings.saved": "Settings saved",
   "settings.saveError": "Failed to save settings",
+  "settings.noAccessTitle": "Settings are not available for your role",
+  "settings.noAccessDesc": "Your account does not have permission to view or edit business settings. Ask an owner or admin of this account to update them, or to give you admin access.",
+  "settings.siteNoAccessTitle": "Site settings are not available for your role",
+  "settings.siteNoAccessDesc": "Only owners and admins can view this site's business details and branding. Ask an owner or admin for access if you need to change them.",
+  "booking.brandingUnavailable": "Custom colours and logo could not be loaded, so this page uses the default look. Booking still works normally.",
   "settings.upsellTitle": "Manage multiple locations",
   "settings.upsellDesc": "Upgrade to the Business plan to manage hotels, restaurants, and venues from a single dashboard, each with its own resources, hours, and booking page.",
   "settings.learnMore": "Learn more",
@@ -3981,6 +3991,11 @@ const fi: TranslationKeys = {
   "settings.accentBtn": "Korostuspainike",
   "settings.saved": "Asetukset tallennettu",
   "settings.saveError": "Asetusten tallennus epäonnistui",
+  "settings.noAccessTitle": "Asetukset eivät ole käytettävissä roolillasi",
+  "settings.noAccessDesc": "Tunnuksellasi ei ole oikeutta tarkastella tai muokata yrityksen asetuksia. Pyydä omistajaa tai ylläpitäjää päivittämään ne tai antamaan sinulle ylläpitäjän oikeudet.",
+  "settings.siteNoAccessTitle": "Toimipisteen asetukset eivät ole käytettävissä roolillasi",
+  "settings.siteNoAccessDesc": "Vain omistajat ja ylläpitäjät näkevät tämän toimipisteen yritystiedot ja ilmeen. Pyydä tarvittaessa oikeuksia omistajalta tai ylläpitäjältä.",
+  "booking.brandingUnavailable": "Omia värejä ja logoa ei voitu ladata, joten sivu käyttää oletusilmettä. Varaaminen toimii normaalisti.",
   "settings.upsellTitle": "Hallinnoi useita toimipisteitä",
   "settings.upsellDesc": "Päivitä Business-suunnitelmaan hallinnoidaksesi hotelleja, ravintoloita ja juhlatiloja yhdestä hallintapaneelista. Jokaisella on omat resurssit, aukioloajat ja varaussivu.",
   "settings.learnMore": "Lue lisää",
@@ -5896,6 +5911,11 @@ const sv: TranslationKeys = {
   "settings.accentBtn": "Accentknapp",
   "settings.saved": "Inställningar sparade",
   "settings.saveError": "Kunde inte spara inställningar",
+  "settings.noAccessTitle": "Inställningar är inte tillgängliga för din roll",
+  "settings.noAccessDesc": "Ditt konto har inte behörighet att se eller ändra företagets inställningar. Be en ägare eller administratör att uppdatera dem eller ge dig administratörsrättigheter.",
+  "settings.siteNoAccessTitle": "Platsens inställningar är inte tillgängliga för din roll",
+  "settings.siteNoAccessDesc": "Endast ägare och administratörer kan se platsens företagsuppgifter och utseende. Be en ägare eller administratör om behörighet om du behöver ändra dem.",
+  "booking.brandingUnavailable": "Egna färger och logotyp kunde inte laddas, så sidan använder standardutseendet. Bokningen fungerar som vanligt.",
   "settings.upsellTitle": "Hantera flera platser",
   "settings.upsellDesc": "Uppgradera till Business-planen för att hantera hotell, restauranger och evenemangslokaler från en enda instrumentpanel. Var och en med egna resurser, öppettider och bokningssida.",
   "settings.learnMore": "Läs mer",

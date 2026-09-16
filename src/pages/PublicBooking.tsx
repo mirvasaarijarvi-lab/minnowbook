@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Calendar } from "@/components/ui/calendar";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Loader2, CheckCircle, UtensilsCrossed, Building2, Home, Clock, CalendarDays, CalendarIcon, CalendarPlus, BedDouble, Coffee, Users, Truck, ShoppingBag, ChefHat, Plug, Droplets, Tag, Mail, Phone, MapPin, Sparkles, HeartPulse, Minus, Plus } from "lucide-react";
+import { Loader2, CheckCircle, UtensilsCrossed, Building2, Home, Clock, CalendarDays, CalendarIcon, CalendarPlus, BedDouble, Coffee, Users, Truck, ShoppingBag, ChefHat, Plug, Droplets, Tag, Mail, Phone, MapPin, Sparkles, HeartPulse, Minus, Plus, Info } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
 import { format, startOfMonth, endOfMonth, addMonths, subMonths, isSameDay } from "date-fns";
@@ -352,7 +352,7 @@ const PublicBookingInner = () => {
 
   // Fetch site_settings for site-specific branding
   const effectiveSiteId = siteLockedByUrl ? site?.id : pickedSiteId;
-  const { data: siteSettings } = useQuery({
+  const { data: siteSettings, error: siteSettingsError } = useQuery({
     queryKey: ["public-site-settings", effectiveSiteId],
     queryFn: async () => {
       if (!effectiveSiteId) return null;
@@ -369,7 +369,7 @@ const PublicBookingInner = () => {
   });
 
   // Fetch tenant settings as fallback branding
-  const { data: tenantSettings } = useQuery({
+  const { data: tenantSettings, error: tenantSettingsError } = useQuery({
     queryKey: ["public-tenant-settings", tenant?.id],
     queryFn: async () => {
       if (!tenant?.id) return null;
@@ -395,6 +395,12 @@ const PublicBookingInner = () => {
       ),
     };
   }, [tenantSettings, siteSettings]);
+
+  // Branding is a nice-to-have: if the branding reads are blocked (for
+  // example a signed-in staff member without access to the settings rows)
+  // the page keeps working, but say so instead of silently dropping the
+  // logo, colours and business details.
+  const brandingBlocked = !settings && !!(tenantSettingsError || siteSettingsError);
 
   // Resolve branding URLs to short-lived signed URLs at render time, with
   // a graceful fallback path if the signed URL ever fails (e.g. expired
@@ -1407,6 +1413,16 @@ const PublicBookingInner = () => {
           </div>
         )}
 
+
+        {brandingBlocked && (
+          <div
+            role="status"
+            className="flex items-start gap-2 rounded-md border border-muted bg-muted/40 px-3 py-2 text-xs text-muted-foreground"
+          >
+            <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+            <span>{t("booking.brandingUnavailable")}</span>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Honeypot field - hidden from real users, bots will fill it */}
