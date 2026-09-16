@@ -172,6 +172,15 @@ export async function generateInvoicePdf(
   lang: string = "en",
   branding?: TenantBranding,
 ): Promise<Blob> {
+  const bytes = await generateInvoicePdfBytes(reservation, lang, branding);
+  return new Blob([bytes.buffer as ArrayBuffer], { type: "application/pdf" });
+}
+
+export async function generateInvoicePdfBytes(
+  reservation: InvoiceReservation,
+  lang: string = "en",
+  branding?: TenantBranding,
+): Promise<Uint8Array> {
   const model = buildInvoiceModel(reservation, lang, branding);
 
   const pdfDoc = await PDFDocument.create();
