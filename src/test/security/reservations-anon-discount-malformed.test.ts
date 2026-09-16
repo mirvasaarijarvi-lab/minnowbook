@@ -116,7 +116,7 @@ async function createDiscount(tenantId: string, code: string): Promise<string> {
     .insert({
       tenant_id: tenantId,
       code,
-      discount_type: "percent",
+      discount_type: "percentage",
       discount_value: 10,
       is_active: true,
     })
