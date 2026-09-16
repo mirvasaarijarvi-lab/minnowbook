@@ -220,6 +220,9 @@ const SiteSettingsInfo = ({ siteId, tenantId }: { siteId: string; tenantId: stri
   if (siteAccessError || !site) {
     return (
       <PermissionEmptyState
+        surface="settings_site"
+        tenantId={tenantId}
+        siteId={siteId}
         title={t("settings.siteNoAccessTitle")}
         description={t("settings.siteNoAccessDesc")}
         detail={(siteAccessError as any)?.message ?? null}
@@ -830,6 +833,8 @@ const SettingsPanel = () => {
           <h2 className="text-2xl font-serif font-bold text-foreground">{t("nav.settings")}</h2>
         </div>
         <PermissionEmptyState
+          surface="settings_panel"
+          tenantId={tenantId}
           title={t("settings.noAccessTitle")}
           description={t("settings.noAccessDesc")}
           detail={(settingsError as any)?.message ?? null}

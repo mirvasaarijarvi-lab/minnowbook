@@ -188,4 +188,23 @@ export const gtm = {
     previous_tenant_id?: string | null;
     pathname?: string;
   }) => track("tenant_lost", params),
+
+  /**
+   * Fired when a permission-driven empty state replaces real content:
+   * the settings panel (tenant-wide or a single site) and the public
+   * booking page's branding-unavailable notice. Used to measure how
+   * often role limits block data people expect to see.
+   */
+  permissionEmptyStateShown: (params: {
+    surface: "settings_panel" | "settings_site" | "public_booking_branding";
+    reason?: string | null;
+    tenant_id?: string | null;
+    site_id?: string | null;
+  }) =>
+    track("permission_empty_state_shown", {
+      surface: params.surface,
+      reason: params.reason ?? undefined,
+      tenant_id: params.tenant_id ?? undefined,
+      site_id: params.site_id ?? undefined,
+    }),
 };
