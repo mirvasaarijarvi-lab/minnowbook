@@ -6,6 +6,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 
 import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/hooks/useTenant";
+import { useAllowedReservationTypes } from "@/hooks/useAllowedReservationTypes";
 import { useSiteContext } from "@/hooks/useSiteContext";
 import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
 import { useDateLocale } from "@/hooks/useDateLocale";
@@ -33,7 +34,7 @@ interface Row {
 const WEEKDAY_ORDER = [1, 2, 3, 4, 5, 6, 0];
 
 const BusiestWeekdayPanel = () => {
-  const { tenantId, tenant } = useTenant();
+  const { tenantId } = useTenant();
   const { selectedSiteId } = useSiteContext();
   const t = useAnalyticsT();
   const typeLabel = useResourceTypeLabel();
@@ -43,10 +44,7 @@ const BusiestWeekdayPanel = () => {
   const [service, setService] = useState<string>("all");
   const [rangeKey, setRangeKey] = useState<RangeKey>("90");
 
-  const allowedTypes: string[] = useMemo(
-    () => ((tenant as any)?.allowed_reservation_types as string[] | undefined) ?? [],
-    [tenant],
-  );
+  const allowedTypes = useAllowedReservationTypes();
 
   const endStr = format(new Date(), "yyyy-MM-dd");
   const startStr = format(subDays(new Date(), Number(rangeKey)), "yyyy-MM-dd");

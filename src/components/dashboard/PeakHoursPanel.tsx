@@ -6,6 +6,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 
 import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/hooks/useTenant";
+import { useAllowedReservationTypes } from "@/hooks/useAllowedReservationTypes";
 import { useSiteContext } from "@/hooks/useSiteContext";
 import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
 import { useAnalyticsT } from "@/i18n/analytics";
@@ -32,7 +33,7 @@ interface Row {
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
 
 const PeakHoursPanel = () => {
-  const { tenantId, tenant } = useTenant();
+  const { tenantId } = useTenant();
   const { selectedSiteId } = useSiteContext();
   const t = useAnalyticsT();
   const typeLabel = useResourceTypeLabel();
@@ -41,10 +42,7 @@ const PeakHoursPanel = () => {
   const [service, setService] = useState<string>("all");
   const [rangeKey, setRangeKey] = useState<RangeKey>("90");
 
-  const allowedTypes: string[] = useMemo(
-    () => ((tenant as any)?.allowed_reservation_types as string[] | undefined) ?? [],
-    [tenant],
-  );
+  const allowedTypes = useAllowedReservationTypes();
 
   const endStr = format(new Date(), "yyyy-MM-dd");
   const startStr = format(subDays(new Date(), Number(rangeKey)), "yyyy-MM-dd");
