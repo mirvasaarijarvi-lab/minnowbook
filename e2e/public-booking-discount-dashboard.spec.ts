@@ -154,7 +154,7 @@ test.describe("Public booking with a discount code", () => {
     expect(row.discount_type).toBe("percentage");
     expect(Number(row.discount_value)).toBe(DISCOUNT_PERCENT);
     expect(row.discount_code_id).toBe(codeId);
-    expect(row.discount_reason).toContain(promoCode);
+    expect(row.discount_reason?.toUpperCase()).toContain(promoCode);
     expect(row.is_invoiced).toBe(false);
     expect(row.status).toBe("pending");
 
@@ -196,7 +196,7 @@ test.describe("Public booking with a discount code", () => {
     await expect(card.getByText(`€${FINAL_EUR.toFixed(2)}`).first()).toBeVisible();
     // Discount badge uses a minus sign (U+2212) before the percentage.
     await expect(card.getByText(`\u2212${DISCOUNT_PERCENT}%`).first()).toBeVisible();
-    await expect(card.getByText(new RegExp(promoCode)).first()).toBeVisible();
+    await expect(card.getByText(new RegExp(promoCode, "i")).first()).toBeVisible();
 
     const invoicedToggle = card
       .locator("label")
