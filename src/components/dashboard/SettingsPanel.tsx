@@ -833,6 +833,8 @@ const SettingsPanel = () => {
           <h2 className="text-2xl font-serif font-bold text-foreground">{t("nav.settings")}</h2>
         </div>
         <PermissionEmptyState
+          surface="settings_panel"
+          tenantId={tenantId}
           title={t("settings.noAccessTitle")}
           description={t("settings.noAccessDesc")}
           detail={(settingsError as any)?.message ?? null}
