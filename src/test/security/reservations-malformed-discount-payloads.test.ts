@@ -292,17 +292,23 @@ describe.runIf(canRun)(
       expect(Number(row?.original_price_eur)).toBe(250);
     });
 
-    it("rejects negative money and unknown discount types outright", async () => {
+    it("rejects negative money and unknown discount types, scrubbing negative discounts", async () => {
       const negative = await insertAsService({ price_eur: -50, original_price_eur: -10 });
       expect(negative.error, "negative prices must be rejected").toBeTruthy();
 
+      // A negative discount is not a rejection case: the trigger clears the
+      // whole discount payload first, so the row lands with the gross amount.
       const negativeDiscount = await insertAsService({
         original_price_eur: 100,
         price_eur: 100,
         discount_type: "percentage",
         discount_value: -25,
       });
-      expect(negativeDiscount.error, "negative discount must be rejected").toBeTruthy();
+      expect(negativeDiscount.error).toBeNull();
+      expect(negativeDiscount.row?.discount_type).toBeNull();
+      expect(negativeDiscount.row?.discount_value).toBeNull();
+      expect(Number(negativeDiscount.row?.price_eur)).toBe(100);
+
 
       const unknownType = await insertAsService({
         original_price_eur: 100,
