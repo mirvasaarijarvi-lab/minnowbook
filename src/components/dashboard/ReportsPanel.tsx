@@ -494,7 +494,7 @@ const ReportsPanel = () => {
     const fmtEur = (v: number) => `${v.toFixed(2)} EUR`;
     const buckets = eachDayOrBucketLabels();
     downloadReportPdf({
-      title: t("reports.title"),
+      title: t("reports.print.title"),
       subtitle: [periodLabel, effectiveSiteName].filter(Boolean).join(" · "),
       kpis: [
         { label: t("reports.total"), value: String(stats.total) },
