@@ -155,16 +155,25 @@ describe.runIf(canRun)("anon reservation insert — staff-only fields scrubbed (
 
   // Control: clean payload succeeds and leaves staff-only fields at
   // their default/NULL state. This catches over-blocking regressions.
+  //
+  // Anon has no SELECT policy on reservations (by design), so the insert
+  // must not ask for a representation; the row is read back with the
+  // service role instead.
   it("clean payload is accepted with all staff-only fields at defaults", async () => {
     const anon = newAnon();
-    const { data, error } = await anon
+    const payload = buildBase();
+    const { error } = await anon.from("reservations").insert(payload);
+    expect(error, `control insert must succeed: ${error?.message}`).toBeNull();
+
+    const { data, error: readErr } = await ctx.service
       .from("reservations")
-      .insert(buildBase())
       .select(
         "id, price_eur, original_price_eur, pricing_details, staff_notes, internal_notes, discount_reason, is_invoiced, created_by, acknowledgment_email_sent_at, confirmation_email_sent_at, cancellation_email_sent_at, reminder_email_sent_at",
       )
+      .eq("tenant_id", ctx.tenantId)
+      .eq("guest_name", payload.guest_name)
       .single();
-    expect(error, `control insert must succeed: ${error?.message}`).toBeNull();
+    expect(readErr, `control read-back must succeed: ${readErr?.message}`).toBeNull();
     expect(data).toBeTruthy();
     if (!data) return;
     ctx.cleanupReservationIds.push(data.id);
