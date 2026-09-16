@@ -36,6 +36,20 @@
       "when": 1789573869592,
       "tag": "0004_sanitize_malformed_reservation_discount_payloads",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1789574230775,
+      "tag": "0005_audit_reservation_pricing_trust_decisions",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1789574323347,
+      "tag": "0006_fix_reservation_pricing_audit_array_concat",
+      "breakpoints": true
     }
   ]
 }
