@@ -356,10 +356,11 @@ const PublicBookingInner = () => {
     queryKey: ["public-site-settings", effectiveSiteId],
     queryFn: async () => {
       if (!effectiveSiteId) return null;
+      // Branding-only, non-PII read. Works for guests and for signed-in staff
+      // who are not owners/admins (site_settings rows themselves stay locked
+      // down because they hold business contact PII).
       const { data, error } = await supabase
-        .from("site_settings_public" as any)
-        .select("*")
-        .eq("site_id", effectiveSiteId)
+        .rpc("get_site_settings_public" as any, { p_site_id: effectiveSiteId })
         .maybeSingle();
       if (error) throw error;
       return data as any;
