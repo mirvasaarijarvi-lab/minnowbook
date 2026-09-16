@@ -38,6 +38,11 @@ import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { escapeHtml } from "@/lib/html-escape";
 import DashboardTooltip from "./DashboardTooltip";
+import { downloadReportPdf } from "@/lib/reportsPdf";
+import { useAnalyticsT } from "@/i18n/analytics";
+
+/** Bar colours for the PDF chart, mirroring the on-screen series order. */
+const PDF_SERIES_COLORS: [number, number, number][] = [[37, 99, 235], [217, 119, 6], [148, 163, 184], [16, 185, 129]];
 
 interface ReservationRow {
   id: string;
