@@ -99,7 +99,7 @@ test.describe("Public booking with an invalid or expired discount code", () => {
           apikey: SUPABASE_ANON_KEY,
         },
         data: {
-          tenant_slug: slug,
+          tenant_id: tenantId,
           reservation_type: "guesthouse",
           resource_id: resourceId,
           date: checkIn,
