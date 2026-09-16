@@ -146,8 +146,8 @@ function drawChart(
   return top + 8;
 }
 
-/** Builds and downloads a report PDF. */
-export function downloadReportPdf(options: PdfReportOptions): void {
+/** Builds a report PDF document (exported separately so it can be tested). */
+export function buildReportPdf(options: PdfReportOptions): jsPDF {
   const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
   const pageWidth = doc.internal.pageSize.getWidth();
 
@@ -198,5 +198,11 @@ export function downloadReportPdf(options: PdfReportOptions): void {
     });
   }
 
+  return doc;
+}
+
+/** Builds and downloads a report PDF. */
+export function downloadReportPdf(options: PdfReportOptions): void {
+  const doc = buildReportPdf(options);
   doc.save(`${options.fileName.replace(/[^\w\-.]+/g, "_")}.pdf`);
 }
