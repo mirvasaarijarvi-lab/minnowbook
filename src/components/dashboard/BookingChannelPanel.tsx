@@ -30,7 +30,7 @@ const BookingChannelPanel = () => {
   const t = useAnalyticsT();
   const dateLocale = useDateLocale();
   const allowedTypes = useAllowedReservationTypes();
-  const typeLabel = useResourceTypeLabel();
+  const { typeLabel } = useResourceTypeLabel();
 
   const [rangeKey, setRangeKey] = useState<RangeKey>("90");
 
@@ -110,7 +110,7 @@ const BookingChannelPanel = () => {
         <CardTitle className="flex items-center gap-2 text-sm font-medium">
           <Globe className="h-4 w-4 text-primary" />
           {t("an.channel.title")}
-          <DashboardTooltip content={t("an.channel.help")} />
+          <DashboardTooltip text={t("an.channel.help")} />
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">

@@ -53,7 +53,7 @@ const CrossBookingAuditPanel = () => {
   const { tenantId } = useTenant();
   const { selectedSiteId } = useSiteContext();
   const t = useAnalyticsT();
-  const typeLabel = useResourceTypeLabel();
+  const { typeLabel } = useResourceTypeLabel();
 
   const [rangeKey, setRangeKey] = useState<RangeKey>("90");
   const [linkedOnly, setLinkedOnly] = useState(false);
@@ -187,7 +187,7 @@ const CrossBookingAuditPanel = () => {
         <CardTitle className="flex items-center gap-2 text-sm font-medium">
           <GitCompareArrows className="h-4 w-4 text-primary" />
           {t("an.cross.title")}
-          <DashboardTooltip content={t("an.cross.help")} />
+          <DashboardTooltip text={t("an.cross.help")} />
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">

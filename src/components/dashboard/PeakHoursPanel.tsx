@@ -36,7 +36,7 @@ const PeakHoursPanel = () => {
   const { tenantId } = useTenant();
   const { selectedSiteId } = useSiteContext();
   const t = useAnalyticsT();
-  const typeLabel = useResourceTypeLabel();
+  const { typeLabel } = useResourceTypeLabel();
 
   const [metric, setMetric] = useState<Metric>("reservations");
   const [service, setService] = useState<string>("all");
@@ -99,7 +99,7 @@ const PeakHoursPanel = () => {
         <CardTitle className="flex items-center gap-2 text-sm font-medium">
           <Clock className="h-4 w-4 text-primary" />
           {t("an.peak.title")}
-          <DashboardTooltip content={t("an.peak.help")} />
+          <DashboardTooltip text={t("an.peak.help")} />
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
