@@ -77,6 +77,16 @@ function extractPdfText(bytes: Uint8Array): string {
   );
 }
 
+/** jsdom Blob has no arrayBuffer(); read it through FileReader. */
+function blobBytes(blob: Blob): Promise<Uint8Array> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(new Uint8Array(reader.result as ArrayBuffer));
+    reader.onerror = () => reject(reader.error);
+    reader.readAsArrayBuffer(blob);
+  });
+}
+
 const reservation = {
   id: "3f1c9a44-1111-2222-3333-444455556666",
   guest_name: "Promo Guest",
@@ -96,7 +106,7 @@ const reservation = {
   created_at: "2026-09-01T10:00:00Z",
 };
 
-let capturedBytes: Uint8Array | null = null;
+let capturedBlob: Blob | null = null;
 let originalCreate: typeof URL.createObjectURL;
 let originalRevoke: typeof URL.revokeObjectURL;
 let originalClick: typeof HTMLAnchorElement.prototype.click;
@@ -112,15 +122,14 @@ function renderDialog() {
 
 describe("ReservationDetailDialog invoice export", () => {
   beforeEach(() => {
-    capturedBytes = null;
+    capturedBlob = null;
     originalCreate = URL.createObjectURL;
     originalRevoke = URL.revokeObjectURL;
     originalClick = HTMLAnchorElement.prototype.click;
 
-    // jsdom Blob has no arrayBuffer(); capture the bytes as the blob is created.
+    // Capture the blob handed to the download anchor.
     URL.createObjectURL = vi.fn((blob: Blob) => {
-      const parts = (blob as any)[Object.getOwnPropertySymbols(blob).find((s) => String(s).includes("Blob")) as any];
-      void parts;
+      capturedBlob = blob;
       return "blob:mock";
     }) as any;
     URL.revokeObjectURL = vi.fn() as any;
@@ -136,9 +145,6 @@ describe("ReservationDetailDialog invoice export", () => {
   });
 
   it("generates an invoice PDF showing the discount code, discounted price and final total", async () => {
-    const invoicePdf = await import("@/lib/invoicePdf");
-    const spy = vi.spyOn(invoicePdf, "generateInvoicePdfBytes");
-
     renderDialog();
 
     const button = await screen.findByTestId("download-invoice");
@@ -146,11 +152,9 @@ describe("ReservationDetailDialog invoice export", () => {
 
     await userEvent.click(button);
 
-    await waitFor(() => expect(spy).toHaveBeenCalledTimes(1));
-    capturedBytes = await spy.mock.results[0].value;
-    expect(capturedBytes).toBeTruthy();
-
-    const text = extractPdfText(capturedBytes!);
+    await waitFor(() => expect(capturedBlob).toBeTruthy());
+    expect(capturedBlob!.type).toBe("application/pdf");
+    const text = extractPdfText(await blobBytes(capturedBlob!));
     expect(text).toContain("Invoice");
     expect(text).toContain("Villa Mimmi");
     expect(text).toContain("Promo Guest");
