@@ -179,6 +179,12 @@ export function buildReportPdf(options: PdfReportOptions): jsPDF {
       columnStyles: Object.fromEntries(
         options.table.head.map((_, i) => [i, { halign: numeric.has(i) ? "right" : "left" }]),
       ) as Record<number, { halign: "left" | "right" }>,
+      didParseCell: (data) => {
+        // autoTable does not inherit column alignment for header cells.
+        if (data.section === "head" && numeric.has(data.column.index)) {
+          data.cell.styles.halign = "right";
+        }
+      },
       didDrawPage: () => {
         const pageHeight = doc.internal.pageSize.getHeight();
         doc.setFontSize(7);
