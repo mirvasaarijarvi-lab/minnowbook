@@ -1414,6 +1414,16 @@ const PublicBookingInner = () => {
         )}
 
 
+        {brandingBlocked && (
+          <div
+            role="status"
+            className="flex items-start gap-2 rounded-md border border-muted bg-muted/40 px-3 py-2 text-xs text-muted-foreground"
+          >
+            <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+            <span>{t("booking.brandingUnavailable")}</span>
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Honeypot field - hidden from real users, bots will fill it */}
           <div aria-hidden="true" style={{ position: "absolute", left: "-9999px", top: "-9999px", opacity: 0, height: 0, overflow: "hidden" }}>
