@@ -402,6 +402,30 @@ const PublicBookingInner = () => {
   // logo, colours and business details.
   const brandingBlocked = !settings && !!(tenantSettingsError || siteSettingsError);
 
+  // Record the permission-driven empty state once per blocked page view so
+  // we can see how often guests/staff land on an unbranded booking page.
+  const brandingBlockedTracked = useRef<string | null>(null);
+  useEffect(() => {
+    if (!brandingBlocked) return;
+    const key = `${tenant?.id ?? ""}:${effectiveSiteId ?? ""}`;
+    if (brandingBlockedTracked.current === key) return;
+    brandingBlockedTracked.current = key;
+    try {
+      gtm.permissionEmptyStateShown({
+        surface: "public_booking_branding",
+        reason:
+          (siteSettingsError as any)?.message ??
+          (tenantSettingsError as any)?.message ??
+          null,
+        tenant_id: tenant?.id ?? null,
+        site_id: effectiveSiteId ?? null,
+      });
+    } catch {
+      /* analytics must never break the booking page */
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [brandingBlocked, tenant?.id, effectiveSiteId]);
+
   // Resolve branding URLs to short-lived signed URLs at render time, with
   // a graceful fallback path if the signed URL ever fails (e.g. expired
   // or revoked) so the booking page still renders without broken images.
