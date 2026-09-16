@@ -21,6 +21,7 @@ import OpeningHoursSettings from "./OpeningHoursSettings";
 import DiscountCodesPanel from "./DiscountCodesPanel";
 import RedeemAccessCode from "./RedeemAccessCode";
 import ReservationTypesCard from "./ReservationTypesCard";
+import PermissionEmptyState from "./PermissionEmptyState";
 
 const SITE_COLOR_PRESETS = [
   { name: "Navy & Amber", primary: "#1e3a5f", secondary: "#f5f0e8", accent: "#d4a853" },
@@ -597,7 +598,7 @@ const SettingsPanel = () => {
   const [uploading, setUploading] = useState(false);
   const [uploadingHero, setUploadingHero] = useState(false);
 
-  const { data: settings, isLoading, dataUpdatedAt } = useQuery({
+  const { data: settings, isLoading, dataUpdatedAt, error: settingsError } = useQuery({
     queryKey: ["tenant-settings", tenantId],
     queryFn: async () => {
       if (!tenantId) return null;
@@ -610,6 +611,7 @@ const SettingsPanel = () => {
       return data;
     },
     enabled: !!tenantId,
+    retry: false,
   });
 
   const [form, setForm] = useState({
@@ -815,6 +817,23 @@ const SettingsPanel = () => {
     return (
       <div className="flex items-center justify-center py-12">
         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  // The settings tables are readable by owners and admins only. Without this
+  // guard a limited role saw a full form of blank fields it could not save.
+  if (settingsError) {
+    return (
+      <div data-tour="settings-panel" className="space-y-6 max-w-3xl pb-20">
+        <div className="flex items-center gap-2">
+          <h2 className="text-2xl font-serif font-bold text-foreground">{t("nav.settings")}</h2>
+        </div>
+        <PermissionEmptyState
+          title={t("settings.noAccessTitle")}
+          description={t("settings.noAccessDesc")}
+          detail={(settingsError as any)?.message ?? null}
+        />
       </div>
     );
   }
