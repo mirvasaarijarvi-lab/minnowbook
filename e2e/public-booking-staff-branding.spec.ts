@@ -170,16 +170,25 @@ test.describe("Public booking page branding for authenticated staff", () => {
       );
 
       // Logo: rendered from a freshly minted signed URL for the uploaded object.
+      // Signing happens client-side after mount, so wait for the src to land.
       const logo = header.locator("img").first();
       await expect(logo).toBeVisible();
-      const logoSrc = await logo.getAttribute("src");
-      expect(logoSrc).toContain(`/object/sign/${BRANDING_BUCKET}/`);
-      expect(logoSrc).toContain(encodeURIComponent(logoPath).replace(/%2F/g, "/"));
-      expect(logoSrc).toContain("token=");
-      const naturalWidth = await logo.evaluate(
-        (img) => (img as HTMLImageElement).naturalWidth,
+      await expect(logo).toHaveAttribute(
+        "src",
+        new RegExp(`/object/sign/${BRANDING_BUCKET}/${logoPath}\\?.*token=`),
+        { timeout: 15_000 },
       );
-      expect(naturalWidth).toBeGreaterThan(0);
+      await expect
+        .poll(
+          () =>
+            logo.evaluate(
+              (img) =>
+                (img as HTMLImageElement).complete &&
+                (img as HTMLImageElement).naturalWidth > 0,
+            ),
+          { timeout: 15_000 },
+        )
+        .toBe(true);
 
       // Description from the same branding payload.
       await expect(
