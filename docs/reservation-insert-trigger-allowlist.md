@@ -82,4 +82,30 @@ bunx vitest run --config vitest.security-live.config.ts \
   src/test/security/reservations-anon-discount-malformed.test.ts
 ```
 
+## 4. Audit trail
+
+`validate_public_reservation_insert()` calls `log_reservation_pricing_decision()`
+(SECURITY DEFINER) and writes one `public.audit_log` row per insert with
+`table_name='reservations'`, `action='pricing_trust_decision'`,
+`record_id = NEW.id` and `new_data`:
+
+```json
+{
+  "trusted": true,
+  "jwt_role": "service_role",
+  "db_user": "authenticator",
+  "kept_fields": ["price_eur", "original_price_eur", "discount_type"],
+  "scrubbed_fields": [],
+  "submitted_values": { "price_eur": 90, "original_price_eur": 120 }
+}
+```
+
+Trusted inserts are always logged. Untrusted inserts are logged only when the
+payload actually carried pricing/discount fields, so an ordinary public booking
+adds no row. Logging failures are swallowed and never block a booking, and a
+rolled-back insert leaves no entry. When you add a field in step 3, add it to
+the `v_supplied` snapshot block so it shows up in `kept_fields` /
+`scrubbed_fields`. Retention follows `cleanup_old_audit_logs()` (90 days).
+Coverage: `src/test/security/reservations-pricing-trust-audit.test.ts`.
+
 Related: `docs/rls-hardening-reservations-and-availability.md`.
