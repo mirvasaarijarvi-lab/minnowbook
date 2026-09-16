@@ -22,6 +22,13 @@
       "when": 1789569262500,
       "tag": "0002_reservation_insert_trigger_service_role_allowlist",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1789569459718,
+      "tag": "0003_fix_generated_guest_search_text_blocking_public_inserts",
+      "breakpoints": true
     }
   ]
 }
