@@ -352,7 +352,7 @@ const PublicBookingInner = () => {
 
   // Fetch site_settings for site-specific branding
   const effectiveSiteId = siteLockedByUrl ? site?.id : pickedSiteId;
-  const { data: siteSettings } = useQuery({
+  const { data: siteSettings, error: siteSettingsError } = useQuery({
     queryKey: ["public-site-settings", effectiveSiteId],
     queryFn: async () => {
       if (!effectiveSiteId) return null;
@@ -369,7 +369,7 @@ const PublicBookingInner = () => {
   });
 
   // Fetch tenant settings as fallback branding
-  const { data: tenantSettings } = useQuery({
+  const { data: tenantSettings, error: tenantSettingsError } = useQuery({
     queryKey: ["public-tenant-settings", tenant?.id],
     queryFn: async () => {
       if (!tenant?.id) return null;
@@ -395,6 +395,12 @@ const PublicBookingInner = () => {
       ),
     };
   }, [tenantSettings, siteSettings]);
+
+  // Branding is a nice-to-have: if the branding reads are blocked (for
+  // example a signed-in staff member without access to the settings rows)
+  // the page keeps working, but say so instead of silently dropping the
+  // logo, colours and business details.
+  const brandingBlocked = !settings && !!(tenantSettingsError || siteSettingsError);
 
   // Resolve branding URLs to short-lived signed URLs at render time, with
   // a graceful fallback path if the signed URL ever fails (e.g. expired
