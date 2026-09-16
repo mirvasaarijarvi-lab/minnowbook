@@ -251,8 +251,7 @@ export async function generateInvoicePdfBytes(
 
   void CW;
 
-  const bytes = await pdfDoc.save();
-  return new Blob([bytes.buffer as ArrayBuffer], { type: "application/pdf" });
+  return await pdfDoc.save();
 }
 
 export async function downloadInvoicePdf(
