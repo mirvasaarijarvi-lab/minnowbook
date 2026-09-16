@@ -147,6 +147,16 @@ test.describe("Public booking with an invalid or expired discount code", () => {
     await page.addInitScript(() => {
       window.localStorage.setItem("mimmobook-lang", "en");
       window.localStorage.setItem("mimmobook-tour-completed", "true");
+      // Pre-answer the cookie banner: as an overlay it intercepts clicks on
+      // the date-picker popovers.
+      window.localStorage.setItem(
+        "cookie-consent",
+        JSON.stringify({
+          version: 1,
+          categories: { necessary: true, analytics: false, marketing: false },
+          updatedAt: new Date().toISOString(),
+        }),
+      );
     });
     await gotoAndWaitForSpa(page, `/book/${slug}?type=guesthouse`);
     await assertPublicBookingReady(page);
@@ -158,15 +168,15 @@ test.describe("Public booking with an invalid or expired discount code", () => {
 
     // Pick check-in / check-out from next month, so the dates are always in
     // the future regardless of which day the suite runs on.
-    const pickDay = async (triggerIndex: number, day: string) => {
-      await page.getByRole("button", { name: /Pick a date/i }).nth(triggerIndex).click();
-      const grid = page.getByRole("dialog").locator("table").last();
-      await page.getByRole("button", { name: /next month/i }).last().click();
-      await grid.getByRole("gridcell", { name: day, exact: true }).first().click();
+    const pickDay = async (day: string) => {
+      await page.getByRole("button", { name: /Pick a date/i }).first().click();
+      const popover = page.locator("[data-radix-popper-content-wrapper]").last();
+      await popover.getByRole("button", { name: /next month/i }).click();
+      await popover.getByRole("gridcell", { name: day, exact: true }).first().click();
       await page.keyboard.press("Escape");
     };
-    await pickDay(0, "10");
-    await pickDay(0, "12");
+    await pickDay("10");
+    await pickDay("12");
 
     await page.locator("#promo_code").fill(unknownCode);
 
