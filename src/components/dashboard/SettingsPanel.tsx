@@ -836,6 +836,7 @@ const SettingsPanel = () => {
         <PermissionEmptyState
           surface="settings_panel"
           tenantId={tenantId}
+          allowAccessRequest
           title={t("settings.noAccessTitle")}
           description={t("settings.noAccessDesc")}
           detail={(settingsError as any)?.message ?? null}
