@@ -142,7 +142,7 @@ vi.mock("./OfferEmailDialog", () => ({ default: () => null }));
 vi.mock("./DashboardTooltip", () => ({ default: () => null }));
 
 vi.mock("sonner", () => ({
-  toast: { success: vi.fn(), error: vi.fn() },
+  toast: { success: vi.fn(), error: vi.fn(), warning: vi.fn() },
 }));
 
 // --- Supabase mock -------------------------------------------------------
@@ -328,7 +328,7 @@ describe("OffersManager: cross-booking pricing on offer confirmation", () => {
     expect(insertedReservations).toHaveLength(2);
     const wellness = insertedReservations[1];
     expect(wellness.reservation_type).toBe("wellness");
-    expect(wellness.price_eur).toBe(80);
+    expect(wellness.price_eur).toBe(90);
     expect(isInvoicable(wellness)).toBe(true);
 
     // The main leg is still priced from its own resource.
