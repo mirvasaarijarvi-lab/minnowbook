@@ -190,7 +190,7 @@ function renderRlsDetails(d: RlsFailureDetails): string {
  * anything. Returns "—" when no snapshot was captured (probe skipped or
  * the suite errored before fetching).
  */
-function renderMembershipRow(snap?: TenantMembershipSnapshot): string {
+export function renderMembershipRow(snap?: TenantMembershipSnapshot): string {
   if (!snap) return `<span class="guard-time">—</span>`;
   if (snap.lookupError) {
     return `<span class="badge fail">lookup error</span><div class="guard-rowdetail">${escapeHtml(snap.lookupError)}</div>`;
@@ -216,13 +216,13 @@ function renderMembershipRow(snap?: TenantMembershipSnapshot): string {
   return `<div class="guard-rolebadge"><code>${escapeHtml(role)}</code> ${approvedBadge}</div>${customLine}${userLine}`;
 }
 
-function membershipBadge(value: boolean | "skipped"): string {
+export function membershipBadge(value: boolean | "skipped"): string {
   if (value === true) return `<span class="badge ok">probe ✓</span>`;
   if (value === false) return `<span class="badge fail">probe ✗</span>`;
   return `<span class="badge skip">skipped</span>`;
 }
 
-function renderTenantGuardSection(records: TenantGuardRecord[]): string {
+export function renderTenantGuardSection(records: TenantGuardRecord[]): string {
   if (records.length === 0) {
     // Empty intentionally: anon-only runs don't invoke the guard. Showing
     // a "no guard" notice would create false noise in the dashboard.
