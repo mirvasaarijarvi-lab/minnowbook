@@ -6627,6 +6627,8 @@ const sv: TranslationKeys = {
   "invoiceRefusal.serverReasonLabel": "Orsak:",
   "invoiceRefusal.guestNotice": "Bokningen är redan fakturerad och kan inte längre ändras här. Kontakta oss direkt.",
   "dashboard.downloadInvoice": "Ladda ner faktura",
+  "dashboard.downloadInvoicePdf": "Ladda ner faktura som PDF",
+  "reports.downloadReportPdf": "Ladda ner rapport som PDF",
   "dashboard.markLinkedUsed": "Markera länkade bokningar som använda?",
   "dashboard.markLinkedUsedMsg": "Denna bokning är länkad till ett erbjudande med andra bokningar. Vill du markera alla som använda?",
   "dashboard.markAll": "Markera alla använda",
