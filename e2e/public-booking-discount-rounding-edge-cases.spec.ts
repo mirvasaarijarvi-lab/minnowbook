@@ -174,7 +174,14 @@ test.describe("Discount rounding edge cases", () => {
       const row = rows![0];
       expect(Number(row.original_price_eur), `${c.label} gross`).toBe(GROSS_EUR);
       expect(Number(row.price_eur), `${c.label} charged total`).toBe(expectedFinal(c));
-      expect(row.discount_code_id).toBe(code.id);
+      // A code worth nothing (0 %) is recorded as no discount at all: the
+      // booking simply carries the full price, with no discount fields set.
+      if (c.value === 0) {
+        expect(row.discount_code_id, `${c.label} should store no discount`).toBeNull();
+        expect(Number(row.price_eur)).toBe(GROSS_EUR);
+      } else {
+        expect(row.discount_code_id, `${c.label} discount code`).toBe(code.id);
+      }
       stored.push({ label: c.label, expected: expectedFinal(c), row: row as Record<string, unknown> });
     }
 
