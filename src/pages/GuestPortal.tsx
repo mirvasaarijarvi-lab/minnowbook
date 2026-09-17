@@ -15,7 +15,7 @@ import Logo from "@/components/Logo";
 import SEOHead from "@/components/SEOHead";
 import { toast } from "sonner";
 import { useT, useTDynamic } from "@/contexts/I18nContext";
-import { useInvoiceRefusalMessage } from "@/hooks/useInvoiceRefusalMessage";
+import { useInvoiceRefusalNotice } from "@/hooks/useInvoiceRefusalNotice";
 
 const typeIcons: Record<string, React.ElementType> = {
   restaurant: UtensilsCrossed,
@@ -28,7 +28,7 @@ const GuestPortal = () => {
   const { token } = useParams<{ token: string }>();
   const t = useT();
   const tDynamic = useTDynamic();
-  const formatInvoiceRefusal = useInvoiceRefusalMessage();
+  const { showRefusal, clearRefusal } = useInvoiceRefusalNotice(token);
   const guestInvoicedNotice = tDynamic("invoiceRefusal.guestNotice");
   const [cancelOpen, setCancelOpen] = useState(false);
   const [newDate, setNewDate] = useState("");
@@ -78,17 +78,20 @@ const GuestPortal = () => {
     },
     onSuccess: () => {
       setRescheduleSent(true);
+      clearRefusal();
       toast.success(t("guest.portal.requestSentToast"));
     },
     onError: (err: Error) => {
       // When the server refuses because the booking is already invoiced (or a
       // related pricing rule), say exactly that instead of "try again".
-      const refusal = formatInvoiceRefusal(err);
-      if (refusal.code !== "UNKNOWN") {
-        toast.error(refusal.code === "INVOICED_LOCKED" ? guestInvoicedNotice : refusal.message);
-        return;
+      const refusal = showRefusal(err, (r) =>
+        r.code === "INVOICED_LOCKED" ? guestInvoicedNotice : r.message,
+      );
+      if (refusal.code === "UNKNOWN") {
+        // Not an invoicing refusal: replace it with the generic message.
+        clearRefusal();
+        toast.error(err.message || t("guest.portal.requestError"));
       }
-      toast.error(err.message || t("guest.portal.requestError"));
     },
   });
 
@@ -107,17 +110,19 @@ const GuestPortal = () => {
       // The server revokes the booking token as part of the cancellation, so a
       // refetch would surface a misleading "link revoked" error. Show a
       // confirmation screen instead.
+      clearRefusal();
       toast.success(t("guest.portal.cancelSuccess"));
       setCancelOpen(false);
       setCancelledByGuest(true);
     },
     onError: (err: Error) => {
-      const refusal = formatInvoiceRefusal(err);
-      if (refusal.code !== "UNKNOWN") {
-        toast.error(refusal.code === "INVOICED_LOCKED" ? guestInvoicedNotice : refusal.message);
-        return;
+      const refusal = showRefusal(err, (r) =>
+        r.code === "INVOICED_LOCKED" ? guestInvoicedNotice : r.message,
+      );
+      if (refusal.code === "UNKNOWN") {
+        clearRefusal();
+        toast.error(t("guest.portal.cancelError"));
       }
-      toast.error(t("guest.portal.cancelError"));
     },
   });
 
