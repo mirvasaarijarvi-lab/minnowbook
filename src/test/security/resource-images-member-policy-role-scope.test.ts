@@ -58,6 +58,7 @@ interface Seeded {
   visible: SeededImage;
   memberUserId: string;
   outsiderUserId: string;
+  ownerUserId: string;
 }
 
 describe.runIf(canRun)(
