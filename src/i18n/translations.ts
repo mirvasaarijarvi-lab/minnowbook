@@ -2485,7 +2485,7 @@ const en: TranslationKeys = {
   "howItWorks.step2Title": "Set up your business",
   "howItWorks.step2Desc": "Upload your branding, add your site(s) and operations, and configure opening hours, pricing, occupancy capacity and much more.",
   "howItWorks.step3Title": "Share your booking link",
-  "howItWorks.step3Desc": "Send your custom booking page to customers and start receiving reservations.",
+  "howItWorks.step3Desc": "Send your custom booking page to customers, add it to your website, and start receiving reservations.",
 
   // Pricing
   "pricing.title": "Simple and transparent pricing",
