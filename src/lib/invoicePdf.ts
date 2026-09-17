@@ -146,6 +146,111 @@ export function buildInvoiceModel(
   };
 }
 
+/* ------------------------------------------------------------------ *
+ * Itemised invoice for a booking that spans several resources.
+ *
+ * A group booking is stored as one row per resource (linked by
+ * `linked_group_id`). The invoice lists each leg's room amount and, when
+ * breakfast was taken, its breakfast amount, so the line items always sum to
+ * the amount the guest is charged. Every figure comes from the shared report
+ * pricing accessor, so an invoice can never disagree with a report.
+ * ------------------------------------------------------------------ */
+
+export interface InvoiceLegRow extends InvoiceReservation {
+  breakfast_included?: boolean | null;
+  breakfast_price_per_person?: number | string | null;
+  pricing_type?: string | null;
+  resource_name?: string | null;
+}
+
+export interface InvoiceLineItem {
+  /** Line description, e.g. "Room 4 (2 nights)" or "Breakfast (2 guests x 2 nights)". */
+  description: string;
+  amount: number;
+  kind: "room" | "breakfast";
+  legId: string;
+}
+
+export interface GroupInvoiceModel {
+  title: string;
+  invoiceNumber: string;
+  businessName: string;
+  language: string;
+  lines: InvoiceLineItem[];
+  /** Sum of all line items, cents-exact. */
+  total: number;
+  /** True when every leg with an amount is marked invoiced. */
+  isInvoiced: boolean;
+  /** Legs carrying no amount (unpriced or "according to menu"). */
+  skippedLegIds: string[];
+}
+
+const LG: Record<string, Record<string, string>> = {
+  room: { fi: "Huone", en: "Room", sv: "Rum" },
+  breakfast: { fi: "Aamiainen", en: "Breakfast", sv: "Frukost" },
+  nights: { fi: "yötä", en: "nights", sv: "nätter" },
+  night: { fi: "yö", en: "night", sv: "natt" },
+  guests: { fi: "henkilöä", en: "guests", sv: "gäster" },
+  service: { fi: "Palvelu", en: "Service", sv: "Tjänst" },
+};
+
+const tg = (key: string, lang: string) => LG[key]?.[lang] || LG[key]?.en || key;
+
+export function buildGroupInvoiceModel(
+  legs: InvoiceLegRow[],
+  lang: string = "en",
+  branding?: TenantBranding,
+): GroupInvoiceModel {
+  const lines: InvoiceLineItem[] = [];
+  const skippedLegIds: string[] = [];
+  let totalCents = 0;
+  let allInvoiced = true;
+
+  for (const leg of legs) {
+    const a = reportAmounts(leg as unknown as ReportPricingRow);
+    if (!a.hasAmount) {
+      skippedLegIds.push(leg.id);
+      continue;
+    }
+    if (!leg.is_invoiced) allInvoiced = false;
+
+    const name = leg.resource_name?.trim() || tg(a.isAccommodation ? "room" : "service", lang);
+    const nightsLabel = a.isAccommodation
+      ? ` (${a.nights} ${tg(a.nights === 1 ? "night" : "nights", lang)})`
+      : "";
+    lines.push({
+      description: `${name}${nightsLabel}`,
+      amount: a.room,
+      kind: "room",
+      legId: leg.id,
+    });
+    totalCents += Math.round(a.room * 100);
+
+    if (a.breakfast > 0) {
+      const guests = leg.guests_count ?? leg.estimated_guests ?? 0;
+      lines.push({
+        description: `${tg("breakfast", lang)} (${guests} ${tg("guests", lang)} x ${a.nights} ${tg(a.nights === 1 ? "night" : "nights", lang)})`,
+        amount: a.breakfast,
+        kind: "breakfast",
+        legId: leg.id,
+      });
+      totalCents += Math.round(a.breakfast * 100);
+    }
+  }
+
+  const first = legs[0];
+  return {
+    title: t("title", lang),
+    invoiceNumber: (first?.id ?? "").slice(0, 8).toUpperCase(),
+    businessName: branding?.businessName || "MimmoBook",
+    language: lang,
+    lines,
+    total: round2(totalCents / 100),
+    isInvoiced: lines.length > 0 && allInvoiced,
+    skippedLegIds,
+  };
+}
+
 const PW = 595.28;
 const PH = 841.89;
 const ML = 56;
