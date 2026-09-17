@@ -386,20 +386,9 @@ const ReportsPanel = () => {
   const handleExportCSV = () => {
     const headers = [t("common.date"), t("reports.guest"), t("common.type"), t("common.guests"), t("common.status"), t("reports.used"), t("reports.breakfast"), t("reports.invoiced"), `${t("common.price")} (EUR)`, `${t("reports.totalPrice")} (EUR)`, t("reports.notes")];
     const rows = reservations.map((r) => {
-      const bfPrice = calcBreakfastPrice(r);
-      const roomPrice = calcRoomPrice(r);
-      const total = effectivePrice(r);
-      let priceStr: string;
-      let totalStr: string;
-      if (isAccommodation(r)) {
-        priceStr = roomPrice.toFixed(2);
-        totalStr = bfPrice > 0
-          ? `${roomPrice.toFixed(2)} + ${t("reports.breakfast")}: ${bfPrice.toFixed(2)} = ${total.toFixed(2)}`
-          : total.toFixed(2);
-      } else {
-        priceStr = total > 0 ? total.toFixed(2) : "-";
-        totalStr = total > 0 ? total.toFixed(2) : "-";
-      }
+      const { price: priceStr, total: totalStr } = csvPriceCells(r, {
+        breakfast: t("reports.breakfast"),
+      });
       return [
         format(new Date(r.date + "T00:00:00"), "d.M.yyyy"),
         r.guest_name,
