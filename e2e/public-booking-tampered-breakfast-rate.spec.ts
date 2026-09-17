@@ -240,16 +240,24 @@ test.describe("Server recalculates breakfast from resource rules, ignoring the c
     expect(nbSplit.breakfast).toBe(0);
     expect(nbSplit.room).toBe(NO_BREAKFAST_TOTAL);
 
-    // ── 5. Resource with no breakfast rate: nothing invented ───────────
+    // ── 5. Resource with no breakfast rate: the server's own fallback ──
+    // The claimed 30 EUR is still ignored: the booking is priced with the
+    // standard 15 EUR fallback, and the stored rate matches it so reports
+    // split the same figure.
     const unconfigured = await post(
       booking("unconfigured", { breakfast_price_per_person: 30 }, noRate!.id),
     );
     expect(unconfigured.status(), await unconfigured.text()).toBe(200);
     const unconfiguredRow = await readRow("unconfigured");
-    expect(unconfiguredRow.breakfast_price_per_person).toBeNull();
-    // No rate configured means no breakfast money: the nightly price only.
-    expect(Number(unconfiguredRow.price_eur)).toBe(NO_BREAKFAST_TOTAL);
-    expectReportSplitMatches(unconfiguredRow, "unconfigured");
+    expect(Number(unconfiguredRow.breakfast_price_per_person)).toBe(
+      FALLBACK_BREAKFAST_EUR,
+    );
+    expect(Number(unconfiguredRow.price_eur)).toBe(FALLBACK_TOTAL);
+    const unconfiguredSplit = expectReportSplitMatches(unconfiguredRow, "unconfigured");
+    expect(unconfiguredSplit.breakfast).toBe(
+      roundCents(FALLBACK_BREAKFAST_EUR * GUESTS * NIGHTS),
+    );
+    expect(unconfiguredSplit.room).toBe(NO_BREAKFAST_TOTAL);
 
     // ── 6. A tampered nightly price and total change nothing ───────────
     const tampered = await post(
