@@ -4867,7 +4867,7 @@ const fi: TranslationKeys = {
   "tier.businessDesc": "Monin ominaisuuksin varusteltu alusta yrityksille, joilla on useampia toimipisteitä ja toimintoja.",
 
   // Footer
-  "footer.tagline": "Moderni varausalusta ravintoloille, tiloille ja majataloille.",
+  "footer.tagline": "Moderni varausalusta ravintoloille, tiloille ja majataloille sekä palvelualan ammattilaisille.",
   "footer.product": "Tuote",
   "footer.company": "Yritys",
   "footer.legal": "Juridiikka",
