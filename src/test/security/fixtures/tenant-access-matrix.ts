@@ -79,6 +79,17 @@ export function evaluateTenantAccess(record: TenantGuardRecord): TenantAccessEva
   ) {
     reasons.push("tenants_not_distinct");
   }
+  // Overlapping identities: if the SAME auth user is the actor on both sides
+  // (same user_id, or the same login email), the "cross-tenant" attempt is
+  // really the same person acting in a tenant they legitimately belong to.
+  // Any denial would then be a false negative, so the pair is denied outright.
+  const userA = record.membershipRowA?.userId?.trim();
+  const userB = record.membershipRowB?.userId?.trim();
+  if (userA && userB && userA === userB) reasons.push("same_user_both_tenants");
+  const mailA = record.emailA?.trim().toLowerCase();
+  const mailB = record.emailB?.trim().toLowerCase();
+  if (mailA && mailB && mailA === mailB) reasons.push("same_identity_both_tenants");
+
   reasons.push(...membershipReasons("A", record.membershipA, record.membershipRowA));
   reasons.push(...membershipReasons("B", record.membershipB, record.membershipRowB));
 
@@ -238,6 +249,143 @@ export const TENANT_ACCESS_MATRIX: TenantAccessCase[] = [
       "membership_row_missing_B",
     ],
     expectedHtml: ["probe ✗", "no row", "membership probe failed"],
+  },
+  {
+    label: "allow: combined roles, owner in tenant A and staff in tenant B",
+    record: base({
+      membershipRowA: { role: "owner", isApproved: true, userId: "u-a", found: true },
+      membershipRowB: { role: "staff", isApproved: true, userId: "u-b", found: true },
+    }),
+    expected: "allowed",
+    expectedReasons: [],
+    expectedHtml: ["owner", "staff", "approved"],
+  },
+  {
+    label: "allow: overlapping custom roles with different keys per tenant",
+    record: base({
+      membershipRowA: {
+        role: "staff",
+        customRoleKey: "front_desk",
+        isApproved: true,
+        userId: "u-a",
+        found: true,
+      },
+      membershipRowB: {
+        role: "staff",
+        customRoleKey: "kitchen_lead",
+        isApproved: true,
+        userId: "u-b",
+        found: true,
+      },
+    }),
+    expected: "allowed",
+    expectedReasons: [],
+    expectedHtml: ["front_desk", "kitchen_lead", "effective="],
+  },
+  {
+    label: "allow: custom role key duplicates the enum role (redundant overlap)",
+    record: base({
+      membershipRowA: {
+        role: "owner",
+        customRoleKey: "owner",
+        isApproved: true,
+        userId: "u-a",
+        found: true,
+      },
+    }),
+    expected: "allowed",
+    expectedReasons: [],
+    expectedHtml: ["custom_role_key=", "owner"],
+  },
+  {
+    label: "allow: custom role only, enum role null but approved",
+    record: base({
+      membershipRowA: {
+        role: null,
+        customRoleKey: "site_manager",
+        isApproved: true,
+        userId: "u-a",
+        found: true,
+      },
+    }),
+    expected: "allowed",
+    expectedReasons: [],
+    expectedHtml: ["site_manager", "(null)"],
+  },
+  {
+    label: "deny: elevated custom role cannot make up for a missing approval",
+    record: base({
+      membershipRowA: {
+        role: "owner",
+        customRoleKey: "super_manager",
+        isApproved: false,
+        userId: "u-a",
+        found: true,
+      },
+    }),
+    expected: "denied",
+    expectedReasons: ["membership_not_approved_A"],
+    expectedHtml: ["not approved", "super_manager"],
+  },
+  {
+    label: "deny: an approved privileged role on one side cannot cover the other side",
+    record: base({
+      membershipRowA: { role: "owner", isApproved: false, userId: "u-a", found: true },
+      membershipRowB: {
+        role: "staff",
+        customRoleKey: "tenant_admin",
+        isApproved: true,
+        userId: "u-b",
+        found: true,
+      },
+    }),
+    expected: "denied",
+    expectedReasons: ["membership_not_approved_A"],
+    expectedHtml: ["not approved", "tenant_admin"],
+  },
+  {
+    label: "deny: a failed probe wins over an approved privileged role",
+    record: base({
+      membershipB: false,
+      membershipRowB: {
+        role: "owner",
+        customRoleKey: "tenant_admin",
+        isApproved: true,
+        userId: "u-b",
+        found: true,
+      },
+    }),
+    expected: "denied",
+    expectedReasons: ["membership_probe_failed_B"],
+    expectedHtml: ["probe ✗", "tenant_admin"],
+  },
+  {
+    label: "deny: the same auth user acts for both tenants",
+    record: base({
+      membershipRowA: { role: "owner", isApproved: true, userId: "u-shared", found: true },
+      membershipRowB: { role: "staff", isApproved: true, userId: "u-shared", found: true },
+    }),
+    expected: "denied",
+    expectedReasons: ["same_user_both_tenants"],
+    expectedHtml: ["u-shared"],
+  },
+  {
+    label: "deny: the same login email is used for both sides",
+    record: base({ emailA: "shared@example.test", emailB: "Shared@Example.Test" }),
+    expected: "denied",
+    expectedReasons: ["same_identity_both_tenants"],
+    expectedHtml: ["shared@example.test"],
+  },
+  {
+    label: "deny: overlapping identity together with an unapproved membership",
+    record: base({
+      emailA: "shared@example.test",
+      emailB: "shared@example.test",
+      membershipRowB: { role: "staff", isApproved: false, userId: "u-b", found: true },
+    }),
+    expected: "denied",
+    expectedReasons: ["same_identity_both_tenants", "membership_not_approved_B"],
+    expectedHtml: ["not approved"],
   },
   {
     label: "inconclusive: probe deliberately skipped by the suite",
