@@ -64,10 +64,10 @@ export function evaluateTenantAccess(record: TenantGuardRecord): TenantAccessEva
   if (!idA || !idA.trim()) {
     // Absent, blank or a non-string value: absent/blank counts as missing,
     // any other type as malformed.
-    reasons.push(idA !== undefined || record.tenantA == null ? "missing_tenant_a" : "malformed_tenant_a");
+    reasons.push(idA === undefined && record.tenantA != null ? "malformed_tenant_a" : "missing_tenant_a");
   } else if (!UUID_RE.test(idA.trim())) reasons.push("malformed_tenant_a");
   if (!idB || !idB.trim()) {
-    reasons.push(idB !== undefined || record.tenantB == null ? "missing_tenant_b" : "malformed_tenant_b");
+    reasons.push(idB === undefined && record.tenantB != null ? "malformed_tenant_b" : "missing_tenant_b");
   } else if (!UUID_RE.test(idB.trim())) reasons.push("malformed_tenant_b");
   if (
     idA &&
