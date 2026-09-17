@@ -425,6 +425,8 @@ jobs:
             echo "| RLS + CORS regression tests | ${tests} |"
             echo "| Supabase RLS advisor gate | ${advisor} |"
             echo ""
+            echo "Full step output: download the **rls-cors-gate-logs** artifact from this run (start with \`00-index.txt\`)."
+            echo ""
           } >> "$GITHUB_STEP_SUMMARY"
           echo "gate-config:       ${config}"
           echo "rls-cors-tests:    ${tests}"
