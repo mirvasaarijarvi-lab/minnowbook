@@ -115,7 +115,7 @@ describe("check-rls-cors-gate-config", () => {
   });
 
   it("fails when the gate no longer runs on pull requests", () => {
-    const r = run(fixture((y) => y.replace(/\n  pull_request:\n    branches: \[main\]/, "")));
+    const r = run(fixture((y) => y.replace("\n  pull_request:\n    branches: [main]", "")));
     expect(r.code).toBe(1);
     expect(r.stdout).toContain("Gate does not run on pull requests");
   });
