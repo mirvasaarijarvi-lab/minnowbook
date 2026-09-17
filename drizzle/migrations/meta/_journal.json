@@ -92,6 +92,13 @@
       "when": 1789651381507,
       "tag": "0012_revalidate_invoiced_pricing_edits",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1789652224608,
+      "tag": "0013_create_booking_idempotency",
+      "breakpoints": true
     }
   ]
 }

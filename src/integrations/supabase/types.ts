@@ -526,6 +526,48 @@ export type Database = {
           },
         ]
       }
+      booking_idempotency: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          id: string
+          idempotency_key: string
+          reservation_id: string | null
+          tenant_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          idempotency_key: string
+          reservation_id?: string | null
+          tenant_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          idempotency_key?: string
+          reservation_id?: string | null
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_idempotency_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_idempotency_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants_safe"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       booking_tokens: {
         Row: {
           created_at: string
