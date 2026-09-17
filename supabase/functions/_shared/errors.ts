@@ -77,7 +77,8 @@ export const REDACTED = "[redacted]";
 const UUID_RE = /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/;
 const EMAIL_RE = /[^\s@]+@[^\s@]+\.[^\s@]+/;
 const TOKEN_RE = /^[A-Za-z0-9_-]{20,}$/;
-const SENSITIVE_KEY_RE = /tenant|email|token|guest|user|owner|customer|phone|name|secret|key/i;
+const SENSITIVE_KEY_RE =
+  /tenant|email|token|guest|user|owner|customer|phone|name|secret|key|path|file|url|slug|resource|site|booking|reservation|invoice|offer|record|row|id$|_id/i;
 
 /**
  * Strip anything that could identify another tenant (or its people) from the
