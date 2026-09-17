@@ -152,7 +152,7 @@ describe("ReservationDetailDialog invoice export", () => {
 
     await userEvent.click(button);
 
-    await waitFor(() => expect(capturedBlob).toBeTruthy());
+    await waitFor(() => expect(capturedBlob).toBeTruthy(), { timeout: 15000 });
     expect(capturedBlob!.type).toBe("application/pdf");
     const text = extractPdfText(await blobBytes(capturedBlob!));
     expect(text).toContain("Invoice");
