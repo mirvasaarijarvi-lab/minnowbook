@@ -89,6 +89,34 @@ describe("useInvoiceRefusalNotice", () => {
     expect(dismissMock).toHaveBeenCalledWith(INVOICE_REFUSAL_TOAST_ID);
   });
 
+  it("clears the message when the router navigates to another reservation", () => {
+    const { result, rerender } = renderHook(
+      ({ path }: { path: string }) => (
+        useInvoiceRefusalNotice("res-1")
+      ),
+      {
+        initialProps: { path: "/dashboard/reservations/res-1" },
+        wrapper: ({ children }) => <>{children}</>,
+      },
+    );
+    act(() => {
+      result.current.showRefusal("no price");
+    });
+    dismissMock.mockClear();
+    // Simulated browser back/forward: the hook listens for popstate so a
+    // history navigation clears the notice even without a router in the tree.
+    act(() => {
+      window.dispatchEvent(new PopStateEvent("popstate"));
+    });
+    expect(dismissMock).toHaveBeenCalledWith(INVOICE_REFUSAL_TOAST_ID);
+    dismissMock.mockClear();
+    act(() => {
+      window.dispatchEvent(new HashChangeEvent("hashchange"));
+    });
+    expect(dismissMock).toHaveBeenCalledWith(INVOICE_REFUSAL_TOAST_ID);
+    rerender({ path: "/dashboard/reservations/res-2" });
+  });
+
   it("supports a custom message while keeping the classified code", () => {
     const { result } = renderHook(() => useInvoiceRefusalNotice("res-1"));
     let code = "";
