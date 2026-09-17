@@ -2,7 +2,11 @@ import { test, expect } from "./fixtures/ephemeral-tenant";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./fixtures/test-tenant";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { randomUUID } from "node:crypto";
-import { buildGroupInvoiceModel, type InvoiceLegRow } from "@/lib/invoicePdf";
+import {
+  buildInvoiceModel,
+  buildGroupInvoiceModel,
+  type InvoiceLegRow,
+} from "@/lib/invoicePdf";
 import { reportAmounts, sumReportAmounts, roundCents } from "@/lib/report-pricing-accessor";
 
 /**
