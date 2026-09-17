@@ -467,8 +467,8 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["reservations"] });
     },
-    onError: () => {
-      toast.error("Error updating invoiced status");
+    onError: (err: any) => {
+      toast.error(err?.message || "Error updating invoiced status");
     },
   });
 
