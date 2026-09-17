@@ -217,4 +217,39 @@ test.describe("Invoice refusal notice lifecycle", () => {
     await expect(page.getByText(GUEST_CANCELLED)).toHaveCount(0, { timeout: 15_000 });
     await expect.poll(() => announced(page), { timeout: 10_000 }).toBe("");
   });
+
+  test("clears a refusal on back and forward navigation between bookings", async ({ page }) => {
+    const state = { outcome: "invoiced" as Outcome, attempts: 0 };
+    await mockPortal(page, state);
+
+    // Visit two bookings so the browser has history to walk through.
+    await openBooking(page, "token-a");
+    await openBooking(page, "token-b");
+    await requestNewDate(page);
+    await expect(page.getByText(GUEST_INVOICED)).toBeVisible({ timeout: 15_000 });
+
+    // Back to the first booking: the refusal belongs to the other one.
+    await page.goBack({ waitUntil: "domcontentloaded" });
+    await expect(page.getByTestId("guest-portal-name")).toHaveText("First Booking Guest", {
+      timeout: 30_000,
+    });
+    await expect(
+      page.getByText(GUEST_INVOICED),
+      "going back must not carry the refusal to the previous booking",
+    ).toHaveCount(0, { timeout: 15_000 });
+    await expect.poll(() => announced(page), { timeout: 10_000 }).toBe("");
+
+    // Refuse here, then go forward again: still nothing stale.
+    state.outcome = "cancelled-rule";
+    await requestNewDate(page);
+    await expect(page.getByText(GUEST_CANCELLED)).toBeVisible({ timeout: 15_000 });
+
+    await page.goForward({ waitUntil: "domcontentloaded" });
+    await expect(page.getByTestId("guest-portal-name")).toHaveText("Second Booking Guest", {
+      timeout: 30_000,
+    });
+    await expect(page.getByText(GUEST_CANCELLED)).toHaveCount(0, { timeout: 15_000 });
+    await expect(page.getByText(GUEST_INVOICED)).toHaveCount(0);
+    await expect.poll(() => announced(page), { timeout: 10_000 }).toBe("");
+  });
 });

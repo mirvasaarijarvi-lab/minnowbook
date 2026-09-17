@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useContext, useEffect, useRef } from "react";
+import { UNSAFE_LocationContext } from "react-router-dom";
 import { toast } from "sonner";
 import { useInvoiceRefusalMessage, type FormattedInvoiceRefusal } from "@/hooks/useInvoiceRefusalMessage";
 import type { InvoiceRefusalSurface } from "@/lib/invoice-refusal";
@@ -66,15 +67,46 @@ export function useInvoiceRefusalNotice(
   surface: InvoiceRefusalSurface = "staff",
 ) {
   const formatInvoiceRefusal = useInvoiceRefusalMessage(surface);
+  // Read the router location through context instead of `useLocation()`, which
+  // throws outside a router. Surfaces rendered in isolation (tests, previews)
+  // then simply have no route to watch.
+  const routerContext = useContext(UNSAFE_LocationContext) as
+    | { location?: { pathname?: string; search?: string } }
+    | null;
+  const routeKey = routerContext?.location
+    ? `${routerContext.location.pathname ?? ""}${routerContext.location.search ?? ""}`
+    : null;
+  // Scope and route are watched as one key: whichever changes first (staff
+  // selecting another booking, a link to another reservation, or the browser's
+  // back and forward buttons) clears the message exactly once.
   const previousScope = useRef<string | null | undefined>(scopeKey);
+  const previousRoute = useRef<string | null>(routeKey);
 
   useEffect(() => {
-    if (previousScope.current !== scopeKey) {
+    if (previousScope.current !== scopeKey || previousRoute.current !== routeKey) {
       previousScope.current = scopeKey;
+      previousRoute.current = routeKey;
       toast.dismiss(INVOICE_REFUSAL_TOAST_ID);
       clearInvoiceRefusalAnnouncement();
     }
-  }, [scopeKey]);
+  }, [scopeKey, routeKey]);
+
+  // Back and forward navigations that the router does not surface (hash links,
+  // history entries pushed outside the router) still have to clear the notice,
+  // so a refusal can never outlive the booking it belongs to.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const clear = () => {
+      toast.dismiss(INVOICE_REFUSAL_TOAST_ID);
+      clearInvoiceRefusalAnnouncement();
+    };
+    window.addEventListener("popstate", clear);
+    window.addEventListener("hashchange", clear);
+    return () => {
+      window.removeEventListener("popstate", clear);
+      window.removeEventListener("hashchange", clear);
+    };
+  }, []);
 
   useEffect(
     () => () => {

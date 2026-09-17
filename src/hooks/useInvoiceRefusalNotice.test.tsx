@@ -1,5 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { renderHook, act } from "@testing-library/react";
+import { renderHook, act, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { MemoryRouter, Routes, Route, Link } from "react-router-dom";
 
 const errorMock = vi.fn();
 const dismissMock = vi.fn();
@@ -87,6 +89,54 @@ describe("useInvoiceRefusalNotice", () => {
     dismissMock.mockClear();
     unmount();
     expect(dismissMock).toHaveBeenCalledWith(INVOICE_REFUSAL_TOAST_ID);
+  });
+
+  it("clears the message on browser back and forward navigation", () => {
+    const { result } = renderHook(() => useInvoiceRefusalNotice("res-1"));
+    act(() => {
+      result.current.showRefusal("no price");
+    });
+
+    dismissMock.mockClear();
+    act(() => {
+      window.dispatchEvent(new PopStateEvent("popstate"));
+    });
+    expect(dismissMock).toHaveBeenCalledWith(INVOICE_REFUSAL_TOAST_ID);
+
+    dismissMock.mockClear();
+    act(() => {
+      window.dispatchEvent(new HashChangeEvent("hashchange"));
+    });
+    expect(dismissMock).toHaveBeenCalledWith(INVOICE_REFUSAL_TOAST_ID);
+  });
+
+  it("clears the message when a link navigates to another reservation", async () => {
+    const Surface = () => {
+      const { showRefusal } = useInvoiceRefusalNotice("shared-scope");
+      return (
+        <div>
+          <button onClick={() => showRefusal("no price")}>refuse</button>
+          <Link to="/dashboard/reservations/res-2">next booking</Link>
+        </div>
+      );
+    };
+
+    render(
+      <MemoryRouter initialEntries={["/dashboard/reservations/res-1"]}>
+        <Routes>
+          <Route path="/dashboard/reservations/:id" element={<Surface />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    await userEvent.click(screen.getByRole("button", { name: "refuse" }));
+    expect(errorMock).toHaveBeenCalledTimes(1);
+
+    dismissMock.mockClear();
+    // The scope stays the same on purpose: the route change alone must clear it.
+    await userEvent.click(screen.getByRole("link", { name: "next booking" }));
+    expect(dismissMock).toHaveBeenCalledWith(INVOICE_REFUSAL_TOAST_ID);
+    expect(errorMock, "no new refusal is invented for the new booking").toHaveBeenCalledTimes(1);
   });
 
   it("supports a custom message while keeping the classified code", () => {
