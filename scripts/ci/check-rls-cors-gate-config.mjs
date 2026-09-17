@@ -222,6 +222,96 @@ if (liveSteps.length > 0 && timeoutCount < liveSteps.length) {
 }
 note(`Live Vitest steps: ${liveSteps.length}`);
 
+// ------------------------------------------------------------ run logs
+// The gate's steps tee their output into test-reports/logs and upload it as an
+// artifact. If that wiring is dropped, a failure can only be read in the
+// browser log viewer, which truncates long live suites.
+const LOGS_DIR = "test-reports/logs";
+const LOGS_ARTIFACT = "rls-cors-gate-logs";
+
+/**
+ * Split a workflow into step blocks, line by line (a nested regex would
+ * backtrack on a long file). A step ends at the next step, or as soon as a
+ * non-empty line is indented less than the step's own `- ` marker — otherwise
+ * the last step of a job absorbs the whole next job.
+ */
+function stepBlocks(text) {
+  const blocks = [];
+  let current = null;
+  let indent = 0;
+  for (const line of text.split("\n")) {
+    const start = /^(\s*)- (name|uses):/.exec(line);
+    if (start) {
+      current = [];
+      indent = start[1].length;
+      blocks.push(current);
+    } else if (current && line.trim() !== "" && line.search(/\S/) <= indent) {
+      current = null;
+    }
+    if (current) current.push(line);
+  }
+  return blocks.map((b) => b.join("\n"));
+}
+
+
+if (!yml.includes("actions/upload-artifact@")) {
+  fail(
+    "Gate uploads no run logs",
+    `Add an actions/upload-artifact step that uploads ${LOGS_DIR}, otherwise a failing run can only be read in the truncating log viewer.`,
+  );
+} else {
+  if (!new RegExp(`name:\\s*${LOGS_ARTIFACT}\\s*$`, "m").test(yml)) {
+    fail(
+      "Run log artifact renamed or removed",
+      `No upload step is named "${LOGS_ARTIFACT}". Keep that name so the logs are findable on the run page, or update this check deliberately.`,
+    );
+  }
+  if (!yml.includes(LOGS_DIR)) {
+    fail(
+      "Run logs are not collected",
+      `No step writes to ${LOGS_DIR}. Each gate step must tee its output there so the artifact contains the full text of the run.`,
+    );
+  }
+  // An upload that only runs on success is useless: failures are the reason
+  // the artifact exists.
+  // Split into step blocks by line, so a long workflow cannot make a nested
+  // regex backtrack.
+  const uploadBlocks = stepBlocks(yml).filter((b) => b.includes("actions/upload-artifact@"));
+  for (const block of uploadBlocks) {
+    if (!/if:\s*always\(\)/.test(block)) {
+      fail(
+        "Log upload is skipped on failure",
+        "Every actions/upload-artifact step in this gate needs `if: always()`, otherwise the logs are missing exactly when a step failed.",
+      );
+      break;
+    }
+  }
+  if (!yml.includes("00-index.txt")) {
+    fail(
+      "Log artifact has no index",
+      "The gate must write test-reports/logs/00-index.txt (run URL, commit, preflight mode, failing lines) so the artifact can be triaged without opening every log.",
+    );
+  }
+}
+
+// Every step that runs tests or the preflight must persist its own output, so a
+// failure can be read from the artifact instead of the truncating log viewer.
+let loggedSteps = 0;
+for (const block of stepBlocks(yml)) {
+  const runsTests = block.includes("bunx vitest run") || block.includes(PREFLIGHT_SCRIPT);
+  if (!runsTests) continue;
+  const name = (/- name:\s*(.+)/.exec(block)?.[1] ?? "unnamed step").trim();
+  if (new RegExp(`${LOGS_DIR}/[\\w.-]+\\.log`).test(block)) {
+    loggedSteps += 1;
+  } else {
+    fail(
+      `Gate step does not persist its output: ${name}`,
+      `This step runs the preflight or a test suite but writes no log under ${LOGS_DIR}. Tee its output into its own .log file so the run artifact contains the full text.`,
+    );
+  }
+}
+note(`Gate steps writing run logs: ${loggedSteps}`);
+
 // -------------------------------------------------- denial notification
 // A tenant-access denial is the gate's most serious outcome. It must reach the
 // maintainer outside the run page, so the notification job has to stay wired to

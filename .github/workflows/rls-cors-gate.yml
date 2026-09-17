@@ -81,6 +81,13 @@ jobs:
       # themselves and the gate reports success while asserting nothing.
       # Prints which inputs are present (never their values) and the exact
       # API refusal reason when access is denied.
+      # Every gate step below tees its output into test-reports/logs so the
+      # whole run can be downloaded as one artifact. Reading a failure from a
+      # 30-minute live suite in the browser log viewer is slow and truncates;
+      # the artifact keeps the full text of each step in a separate file.
+      - name: Prepare log directory
+        run: mkdir -p test-reports/logs test-reports/vitest
+
       - name: Preflight tenant access
         id: preflight
         env:
@@ -93,7 +100,10 @@ jobs:
           RLS_TEST_TENANT_B_EMAIL: ${{ secrets.RLS_TEST_TENANT_B_EMAIL }}
           RLS_TEST_TENANT_B_PASSWORD: ${{ secrets.RLS_TEST_TENANT_B_PASSWORD }}
           RLS_TEST_TENANT_B_ID: ${{ secrets.RLS_TEST_TENANT_B_ID }}
-        run: node scripts/ci/rls-cors-gate-preflight.mjs
+        run: |
+          set -o pipefail
+          node scripts/ci/rls-cors-gate-preflight.mjs 2>&1 \
+            | tee test-reports/logs/01-preflight.log
 
       # Run only the RLS + CORS slices of the security suite.
       #
@@ -111,7 +121,8 @@ jobs:
         env:
           LIVE_FETCH_TIMEOUT_MS: "15000"
         run: |
-          mkdir -p test-reports/vitest
+          set -o pipefail
+          mkdir -p test-reports/vitest test-reports/logs
           bunx vitest run --config vitest.security-live.config.ts \
             --no-file-parallelism \
             --reporter=verbose \
@@ -124,7 +135,8 @@ jobs:
             src/test/security/guest-reviews-and-tenants-rls.test.ts \
             src/test/security/code-redemption-cross-tenant.test.ts \
             src/test/security/duplicate-tenant-membership.test.ts \
-            src/test/security/storage-offer-pdf-isolation.test.ts
+            src/test/security/storage-offer-pdf-isolation.test.ts 2>&1 \
+            | tee test-reports/logs/02-rls-suites.log
 
       # When the preflight verified live access, an all-skipped run is a
       # silent failure, not a pass. Require real assertions.
@@ -132,6 +144,8 @@ jobs:
         if: steps.preflight.outputs.mode == 'live'
         run: |
           set -euo pipefail
+          mkdir -p test-reports/logs
+          exec > >(tee test-reports/logs/03-live-assertions.log) 2>&1
           report=test-reports/vitest/rls-gate.json
           if [ ! -f "$report" ]; then
             echo "::error title=RLS gate report missing::$report was not produced, so the live run cannot be verified."
@@ -159,27 +173,60 @@ jobs:
         env:
           LIVE_FETCH_TIMEOUT_MS: "15000"
         run: |
+          set -o pipefail
+          mkdir -p test-reports/logs
           bunx vitest run --config vitest.security-live.config.ts \
             --reporter=verbose \
-            src/test/security/edge-function-cors-custom-headers.test.ts
+            src/test/security/edge-function-cors-custom-headers.test.ts 2>&1 \
+            | tee test-reports/logs/04-cors-live.log
 
       - name: Run offline CORS regression tests
         run: |
+          set -o pipefail
+          mkdir -p test-reports/logs
           bunx vitest run \
             --reporter=verbose \
             src/test/security/cors-validation.test.ts \
             src/test/security/edge-function-hsts-referrer-csp.test.ts \
             src/test/security/edge-function-csp.test.ts \
-            src/test/security/public-booking-response-headers.test.ts
+            src/test/security/public-booking-response-headers.test.ts 2>&1 \
+            | tee test-reports/logs/05-cors-offline.log
 
-      - name: Upload RLS gate report
+      # A short index so the downloaded artifact says, at a glance, which step
+      # failed and where its full output is, without opening every log.
+      - name: Write log index
+        if: always()
+        run: |
+          mkdir -p test-reports/logs
+          {
+            echo "RLS/CORS gate run logs"
+            echo "workflow run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+            echo "ref:          ${GITHUB_REF}"
+            echo "commit:       ${GITHUB_SHA}"
+            echo "tenant access (preflight mode): ${PREFLIGHT_MODE:-unknown}"
+            echo ""
+            echo "Files:"
+            ls -l test-reports/logs test-reports/vitest 2>/dev/null || true
+            echo ""
+            echo "Lines containing FAIL / error annotations:"
+            grep -n -E "FAIL|::error|✕|AssertionError" test-reports/logs/*.log || echo "  (none)"
+          } > test-reports/logs/00-index.txt
+          cat test-reports/logs/00-index.txt
+        env:
+          PREFLIGHT_MODE: ${{ steps.preflight.outputs.mode }}
+
+      # Full text of every gate step plus the JSON report, downloadable from the
+      # run page. Uploaded on failure too — that is when it is needed.
+      - name: Upload RLS gate logs and report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: rls-cors-gate-report
-          path: test-reports/vitest/rls-gate.json
-          if-no-files-found: ignore
-          retention-days: 7
+          name: rls-cors-gate-logs
+          path: |
+            test-reports/logs/
+            test-reports/vitest/rls-gate.json
+          if-no-files-found: warn
+          retention-days: 14
 
 
   # A tenant-access denial means the gate could not assert isolation at all —
@@ -296,6 +343,8 @@ jobs:
       - name: Fetch advisors and gate on RLS findings
         run: |
           set -euo pipefail
+          mkdir -p test-reports/logs
+          exec > >(tee test-reports/logs/06-advisor.log) 2>&1
           if [ -z "${SUPABASE_ACCESS_TOKEN:-}" ] || [ -z "${SUPABASE_PROJECT_REF:-}" ]; then
             echo "::warning::SUPABASE_ACCESS_TOKEN / SUPABASE_PROJECT_REF not configured — skipping advisor RLS gate."
             exit 0
@@ -348,6 +397,15 @@ jobs:
           fi
           echo "✅ No RLS-class Supabase advisor findings."
 
+      - name: Upload advisor gate log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rls-cors-gate-logs-advisor
+          path: test-reports/logs/
+          if-no-files-found: warn
+          retention-days: 14
+
   gate-summary:
     name: RLS/CORS gate summary
     needs: [gate-config, rls-cors-tests, rls-advisor-gate]
@@ -366,6 +424,8 @@ jobs:
             echo "| Gate configuration | ${config} |"
             echo "| RLS + CORS regression tests | ${tests} |"
             echo "| Supabase RLS advisor gate | ${advisor} |"
+            echo ""
+            echo "Full step output: download the **rls-cors-gate-logs** artifact from this run (start with \`00-index.txt\`)."
             echo ""
           } >> "$GITHUB_STEP_SUMMARY"
           echo "gate-config:       ${config}"
