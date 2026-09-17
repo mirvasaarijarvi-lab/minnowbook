@@ -53,6 +53,25 @@ jobs:
           rm -rf node_modules
           bun install --frozen-lockfile
 
+      # Fail fast, before any 30-minute suite, when this run cannot actually
+      # reach the two test tenants. Without this the live suites skip
+      # themselves and the gate reports success while asserting nothing.
+      # Prints which inputs are present (never their values) and the exact
+      # API refusal reason when access is denied.
+      - name: Preflight tenant access
+        id: preflight
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          RLS_TEST_TENANT_A_EMAIL: ${{ secrets.RLS_TEST_TENANT_A_EMAIL }}
+          RLS_TEST_TENANT_A_PASSWORD: ${{ secrets.RLS_TEST_TENANT_A_PASSWORD }}
+          RLS_TEST_TENANT_A_ID: ${{ secrets.RLS_TEST_TENANT_A_ID }}
+          RLS_TEST_TENANT_B_EMAIL: ${{ secrets.RLS_TEST_TENANT_B_EMAIL }}
+          RLS_TEST_TENANT_B_PASSWORD: ${{ secrets.RLS_TEST_TENANT_B_PASSWORD }}
+          RLS_TEST_TENANT_B_ID: ${{ secrets.RLS_TEST_TENANT_B_ID }}
+        run: node scripts/ci/rls-cors-gate-preflight.mjs
+
       # Run only the RLS + CORS slices of the security suite.
       #
       # Use the dedicated live config explicitly. The default Vitest config
@@ -69,9 +88,11 @@ jobs:
         env:
           LIVE_FETCH_TIMEOUT_MS: "15000"
         run: |
+          mkdir -p test-reports/vitest
           bunx vitest run --config vitest.security-live.config.ts \
             --no-file-parallelism \
             --reporter=verbose \
+            --reporter=json --outputFile=test-reports/vitest/rls-gate.json \
             src/test/security/cross-tenant-rls.test.ts \
             src/test/security/cross-tenant-log-isolation.test.ts \
             src/test/security/cross-tenant-storage.test.ts \
@@ -81,6 +102,35 @@ jobs:
             src/test/security/code-redemption-cross-tenant.test.ts \
             src/test/security/duplicate-tenant-membership.test.ts \
             src/test/security/storage-offer-pdf-isolation.test.ts
+
+      # When the preflight verified live access, an all-skipped run is a
+      # silent failure, not a pass. Require real assertions.
+      - name: Require the live RLS suites to have executed
+        if: steps.preflight.outputs.mode == 'live'
+        run: |
+          set -euo pipefail
+          report=test-reports/vitest/rls-gate.json
+          if [ ! -f "$report" ]; then
+            echo "::error title=RLS gate report missing::$report was not produced, so the live run cannot be verified."
+            exit 1
+          fi
+          passed=$(jq '.numPassedTests // 0' "$report")
+          pending=$(jq '.numPendingTests // 0' "$report")
+          total=$(jq '.numTotalTests // 0' "$report")
+          echo "Live RLS results: ${passed} passed, ${pending} skipped, ${total} total."
+          {
+            echo "### RLS gate live results"
+            echo ""
+            echo "| passed | skipped | total |"
+            echo "|---|---|---|"
+            echo "| ${passed} | ${pending} | ${total} |"
+            echo ""
+          } >> "$GITHUB_STEP_SUMMARY"
+          if [ "$passed" -eq 0 ]; then
+            echo "::error title=RLS gate asserted nothing::Tenant access was verified by the preflight, but every live RLS test skipped. Treating this as a gate failure."
+            exit 1
+          fi
+          echo "✅ Live RLS suites executed with ${passed} passing assertions."
 
       - name: Run live CORS regression test
         env:
@@ -98,6 +148,16 @@ jobs:
             src/test/security/edge-function-hsts-referrer-csp.test.ts \
             src/test/security/edge-function-csp.test.ts \
             src/test/security/public-booking-response-headers.test.ts
+
+      - name: Upload RLS gate report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rls-cors-gate-report
+          path: test-reports/vitest/rls-gate.json
+          if-no-files-found: ignore
+          retention-days: 7
+
 
   rls-advisor-gate:
     name: Supabase RLS advisor gate
