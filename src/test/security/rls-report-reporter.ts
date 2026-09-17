@@ -7,6 +7,7 @@ import {
   type TenantGuardRecord,
   type TenantMembershipSnapshot,
 } from "./fixtures/tenant-guard-record";
+import { applyReportGuard, WITHHELD_NOTICE } from "./fixtures/report-render-guard";
 
 /**
  * Custom Vitest reporter that produces a CI-friendly summary of the
@@ -42,6 +43,12 @@ export interface RlsFailureDetails {
   reason?: string;
   supabaseError?: string;
   returnedRows?: string;
+  /**
+   * Set by the report render/export guard when the tenant-pair check denied
+   * the run: every captured value is dropped and only the refusal is shown.
+   */
+  withheld?: boolean;
+  withheldReasons?: string[];
 }
 
 export interface ReportEntry {
@@ -80,6 +87,8 @@ export interface ReportPayload {
    */
   tenantGuard: TenantGuardRecord[];
   entries: ReportEntry[];
+  /** Present when the render/export guard withheld details. */
+  guardWithheld?: { entries: number; reasons: string[] };
 }
 
 const TRACKED_FILE_PATTERN =
@@ -165,6 +174,21 @@ export function parseRlsFailure(message: string | null): RlsFailureDetails | nul
 }
 
 export function renderRlsDetails(d: RlsFailureDetails): string {
+  // Denied runs never render captured data — not even partially. The guard
+  // has already stripped the payload; this branch makes sure a hand-built or
+  // replayed details object can't slip through the renderer either.
+  if (d.withheld) {
+    const reasonList = (d.withheldReasons ?? []).filter(Boolean);
+    const reasonsBlock =
+      reasonList.length > 0
+        ? `<div class="kv-row"><div class="kv-label">Refusal reasons</div><div class="kv-value">${escapeHtml(
+            reasonList.join(", "),
+          )}</div></div>`
+        : "";
+    return `<div class="rls-details withheld"><div class="kv-row"><div class="kv-label">Details</div><div class="kv-value">${escapeHtml(
+      d.reason || WITHHELD_NOTICE,
+    )}</div></div>${reasonsBlock}</div>`;
+  }
   const row = (label: string, value: string | undefined) =>
     value
       ? `<div class="kv-row"><div class="kv-label">${escapeHtml(label)}</div><div class="kv-value">${escapeHtml(value)}</div></div>`
@@ -474,6 +498,21 @@ export default class RlsReportReporter implements Reporter {
       entries,
     };
 
+    // Last gate before BOTH output paths: when the tenant-pair guard denied
+    // the run, no failure details or captured rows may be rendered or
+    // exported. Applying it here (not in renderHtml / not at write time)
+    // guarantees the HTML and the JSON can never disagree.
+    const guarded = applyReportGuard(payload);
+    const outPayload = guarded.payload;
+    if (guarded.denied) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        `[rls-report] tenant access denied (${guarded.reasons.join(", ")}) — withheld details for ${guarded.withheldEntries} entr${
+          guarded.withheldEntries === 1 ? "y" : "ies"
+        }`,
+      );
+    }
+
     try {
       mkdirSync(this.outDir, { recursive: true });
       // Always write the canonical filenames (back-compat with anything that
@@ -483,10 +522,10 @@ export default class RlsReportReporter implements Reporter {
       const htmlPath = resolve(this.outDir, "rls-report.html");
       const flavoredJsonPath = resolve(this.outDir, `rls-report.${safeFlavor}.json`);
       const flavoredHtmlPath = resolve(this.outDir, `rls-report.${safeFlavor}.html`);
-      const json = JSON.stringify(payload, null, 2);
+      const json = JSON.stringify(outPayload, null, 2);
       // Strip trailing whitespace so the artifact stays clean when an
       // optional section (e.g. the tenant guard) renders empty.
-      const html = renderHtml(payload).replace(/[ \t]+$/gm, "");
+      const html = renderHtml(outPayload).replace(/[ \t]+$/gm, "");
       writeFileSync(jsonPath, json, "utf-8");
       writeFileSync(htmlPath, html, "utf-8");
       writeFileSync(flavoredJsonPath, json, "utf-8");
