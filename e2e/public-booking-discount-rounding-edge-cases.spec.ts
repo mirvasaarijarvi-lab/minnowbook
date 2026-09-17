@@ -180,7 +180,8 @@ test.describe("Discount rounding edge cases", () => {
       expect(Number(row.price_eur), `${c.label} charged total`).toBe(expectedFinal(c));
       // A code worth nothing (0 %) is recorded as no discount at all: the
       // booking simply carries the full price, with no discount fields set.
-      if (c.value === 0) {
+      const discountKept = c.value > 0 && !(c.type === "fixed" && c.value > GROSS_EUR);
+      if (!discountKept) {
         expect(row.discount_code_id, `${c.label} should store no discount`).toBeNull();
         expect(Number(row.price_eur)).toBe(GROSS_EUR);
       } else {
