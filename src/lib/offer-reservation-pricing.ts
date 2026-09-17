@@ -72,6 +72,51 @@ export function resolveOfferReservationPrice(
   return null;
 }
 
+/** Why a price could (not) be resolved, so the UI can explain it to staff. */
+export type OfferPriceReason =
+  | "resolved"
+  | "no_resource"
+  | "unpriced"
+  | "ambiguous";
+
+export interface OfferPriceDescription {
+  /** Resolved price, or null when staff must choose one. */
+  price: number | null;
+  reason: OfferPriceReason;
+  /** Priced options the resource offers, when the choice is ambiguous. */
+  candidates: Array<{ name: string; price: number }>;
+}
+
+/**
+ * Same resolution as `resolveOfferReservationPrice`, plus the reason and the
+ * candidate prices, so the confirmation UI can warn staff and let them pick.
+ */
+export function describeOfferReservationPrice(
+  input: ResolveOfferPriceInput,
+): OfferPriceDescription {
+  const price = resolveOfferReservationPrice(input);
+  if (price != null) return { price, reason: "resolved", candidates: [] };
+
+  const res = input.resource;
+  if (!res) return { price: null, reason: "no_resource", candidates: [] };
+
+  if (ACCOMMODATION.has(input.reservation_type)) {
+    return { price: null, reason: "unpriced", candidates: [] };
+  }
+
+  const subs = Array.isArray(res.sub_services) ? res.sub_services : [];
+  const candidates = subs
+    .map((s) => ({ name: (s?.name ?? "").trim(), price: num(s?.price_eur) }))
+    .filter((s): s is { name: string; price: number } => s.price != null && s.price > 0)
+    .map((s) => ({ name: s.name, price: round2(s.price) }));
+
+  return {
+    price: null,
+    reason: candidates.length > 1 ? "ambiguous" : "unpriced",
+    candidates,
+  };
+}
+
 /** Pick the resource backing an offer line: exact name match first, then type. */
 export function pickOfferResource<T extends OfferPricingResource>(
   resources: T[],
