@@ -14,7 +14,7 @@ import { format } from "date-fns";
 import Logo from "@/components/Logo";
 import SEOHead from "@/components/SEOHead";
 import { toast } from "sonner";
-import { useT, useTDynamic } from "@/contexts/I18nContext";
+import { useT } from "@/contexts/I18nContext";
 import { useInvoiceRefusalNotice } from "@/hooks/useInvoiceRefusalNotice";
 
 const typeIcons: Record<string, React.ElementType> = {
@@ -27,7 +27,6 @@ const typeIcons: Record<string, React.ElementType> = {
 const GuestPortal = () => {
   const { token } = useParams<{ token: string }>();
   const t = useT();
-  const tDynamic = useTDynamic();
   // Guest wording: every refusal code resolves to a sentence written for the
   // guest, never the staff-facing "add the price first" text.
   const { showRefusal, clearRefusal } = useInvoiceRefusalNotice(token, "guest");
