@@ -63,6 +63,8 @@ interface MultiCodeCase {
   listPrice: number;
   /** Figures the rejected code combinations would have produced. */
   forbidden: number[];
+  /** True when the finalized amount is the list price (no code applied). */
+  chargesListPrice?: boolean;
   row: ReportPricingRow;
 }
 
