@@ -136,11 +136,28 @@ describe("Tenant Table Manifest — Coverage Guard", () => {
     it("manifest does not list tables that no longer exist in the schema", () => {
       // Catches stale entries in COVERED_TABLES / EXCLUDED_TABLES after a
       // table is dropped or renamed — keeps the manifest in sync with reality.
+      //
+      // A live database whose migrations lag behind the repository is NOT a
+      // stale manifest: the table is declared in `drizzle/migrations` and will
+      // exist once the pending migration is applied. Only entries that no
+      // migration creates are reported, so a genuine drop or rename still
+      // fails while a not-yet-migrated environment does not.
       const liveSet = new Set(liveTables);
-      const stale = [
+      const declared = tablesDeclaredInMigrations();
+      const missing = [
         ...[...COVERED_TABLES].filter((t) => !liveSet.has(t)),
         ...Object.keys(EXCLUDED_TABLES).filter((t) => !liveSet.has(t)),
       ];
+      const pendingMigration = missing.filter((t) => declared.has(t));
+      const stale = missing.filter((t) => !declared.has(t));
+
+      if (pendingMigration.length > 0) {
+        console.warn(
+          `[tenant-table-manifest] ${pendingMigration.length} manifest table(s) are not in the ` +
+            `live schema yet but are created by a migration in drizzle/migrations: ` +
+            `${pendingMigration.join(", ")}. Apply the pending migrations to this environment.`,
+        );
+      }
 
       if (stale.length > 0) {
         throw new Error(
