@@ -3,6 +3,7 @@ import { dirname, resolve } from "node:path";
 import type { Reporter, File, Task, TaskResultPack } from "vitest";
 import {
   readTenantGuardLog,
+  resetTenantGuardLog,
   type TenantGuardRecord,
   type TenantMembershipSnapshot,
 } from "./fixtures/tenant-guard-record";
@@ -365,6 +366,9 @@ ${rows || '<tr><td colspan="5" style="text-align:center;color:#94a3b8;padding:24
 export default class RlsReportReporter implements Reporter {
   private outDir: string;
   private files: File[] = [];
+  /** Wall-clock start of this run; used to drop guard records left behind
+   *  by an earlier run in the same working tree. */
+  private runStartedAtMs = Date.now();
 
   constructor(options?: { outDir?: string }) {
     this.outDir = options?.outDir ?? DEFAULT_OUT_DIR;
@@ -372,6 +376,11 @@ export default class RlsReportReporter implements Reporter {
 
   onInit() {
     this.files = [];
+    this.runStartedAtMs = Date.now();
+    // Guard records are appended by workers to a file next to the report.
+    // Clearing it here guarantees the report only ever shows tenant-pair
+    // checks performed by THIS run.
+    resetTenantGuardLog();
   }
 
   onCollected(files: File[] = []) {
@@ -435,7 +444,22 @@ export default class RlsReportReporter implements Reporter {
 
     // Pull guard outcomes recorded by `guardTenantPair` via the file
     // side-channel. Empty when no live cross-tenant suite ran.
-    const tenantGuard = readTenantGuardLog().records;
+    // Defensive second layer on top of the onInit reset: ignore any record
+    // whose timestamp predates this run (stale file, clock-skewed worker,
+    // or a reset that failed due to a read-only filesystem).
+    const allGuardRecords = readTenantGuardLog().records;
+    const guardCutoffMs = this.runStartedAtMs - 60_000;
+    const tenantGuard = allGuardRecords.filter((r) => {
+      const t = Date.parse(r.recordedAt);
+      return Number.isNaN(t) ? true : t >= guardCutoffMs;
+    });
+    const staleGuardRecords = allGuardRecords.length - tenantGuard.length;
+    if (staleGuardRecords > 0) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        `[rls-report] ignored ${staleGuardRecords} tenant-guard record(s) from an earlier run`,
+      );
+    }
 
     const payload: ReportPayload = {
       generatedAt: new Date().toISOString(),
