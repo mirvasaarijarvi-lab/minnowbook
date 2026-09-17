@@ -34,6 +34,17 @@ const TENANTS = ["A", "B"].map((letter) => ({
   tenantId: env[`RLS_TEST_TENANT_${letter}_ID`] || "",
 }));
 
+/**
+ * Dry run: same inputs, same refusal reasons, no side effects. Nothing is
+ * written to $GITHUB_OUTPUT or the step summary, no network call is made, and
+ * the process always exits 0 so it is safe to run on a laptop or in a hook.
+ * Enable with `--dry-run` or RLS_GATE_DRY_RUN=1.
+ */
+const DRY_RUN =
+  process.argv.slice(2).includes("--dry-run") ||
+  env.RLS_GATE_DRY_RUN === "1" ||
+  env.RLS_GATE_DRY_RUN === "true";
+
 const lines = [];
 const problems = [];
 const log = (line) => {
@@ -41,12 +52,15 @@ const log = (line) => {
   console.log(line);
 };
 const problem = (title, message) => {
-  console.log(`::error title=${title}::${message}`);
+  // In a dry run the GitHub annotation would turn a local report into a red
+  // step, so print the identical reason as plain text instead.
+  console.log(DRY_RUN ? `FAIL ${title}: ${message}` : `::error title=${title}::${message}`);
   lines.push(`FAIL ${title}: ${message}`);
   problems.push({ title, message });
 };
 
 const writeSummary = () => {
+  if (DRY_RUN) return;
   if (!env.GITHUB_STEP_SUMMARY) return;
   appendFileSync(
     env.GITHUB_STEP_SUMMARY,
