@@ -552,16 +552,11 @@ const ReportsPanel = () => {
     const fmtEur = (v: number) => v.toLocaleString("fi-FI", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
 
     const tableRows = reservations.map((r) => {
-      const total = effectivePrice(r);
-      const bfPrice = calcBreakfastPrice(r);
-      const roomPrice = calcRoomPrice(r);
-      const priceCell = isAccommodation(r) ? fmtEur(roomPrice) : (total > 0 ? fmtEur(total) : "—");
-      let totalCell: string;
-      if (isAccommodation(r) && bfPrice > 0 && total > 0) {
-        totalCell = `<span style="white-space:nowrap">${fmtEur(roomPrice)}</span><br><span style="font-size:0.7rem;color:#666">+ ${t("reports.breakfast")}: ${fmtEur(bfPrice)}</span><br><strong>${fmtEur(total)}</strong>`;
-      } else {
-        totalCell = total > 0 ? fmtEur(total) : "—";
-      }
+      const { price: priceCell, total: totalCell } = printPriceCells(
+        r,
+        { breakfast: t("reports.breakfast") },
+        fmtEur,
+      );
       return `<tr>
         <td>${esc(format(new Date(r.date + "T00:00:00"), "d.M.yyyy"))}</td>
         <td>${esc(r.guest_name)}</td>
