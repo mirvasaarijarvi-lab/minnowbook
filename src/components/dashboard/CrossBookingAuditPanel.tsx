@@ -107,6 +107,7 @@ const CrossBookingAuditPanel = () => {
           dates[0] === dates[dates.length - 1]
             ? format(parseISO(`${dates[0]}T00:00:00`), "d.M.yyyy")
             : `${format(parseISO(`${dates[0]}T00:00:00`), "d.M.yyyy")} to ${format(parseISO(`${dates[dates.length - 1]}T00:00:00`), "d.M.yyyy")}`,
+        sortDate: dates[dates.length - 1],
         types: Array.from(new Set(list.map((r) => r.reservation_type))),
         count: list.length,
         linked: true,
