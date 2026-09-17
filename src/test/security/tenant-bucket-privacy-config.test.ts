@@ -77,6 +77,43 @@ const NON_BRANDING_OBJECTS: Record<string, string> = {
 };
 const OBJECT_BODY = "bucket-privacy-config-probe";
 
+/**
+ * Upload via the raw Storage HTTP API. The JS SDK's Blob upload path
+ * hangs under jsdom (no streaming Blob support), so we POST the bytes
+ * directly with the service-role key.
+ */
+async function adminUpload(bucket: string, path: string, body: string): Promise<void> {
+  const url = `${SUPABASE_URL}/storage/v1/object/${bucket}/${path}`;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${SERVICE_ROLE_KEY}`,
+      apikey: SERVICE_ROLE_KEY!,
+      "Content-Type": "text/plain",
+      "x-upsert": "true",
+    },
+    body,
+  });
+  if (!res.ok) {
+    throw new Error(
+      `upload ${bucket}/${path} failed: ${res.status} ${(await res.text()).slice(0, 300)}`,
+    );
+  }
+  await res.text();
+}
+
+async function adminRemove(bucket: string, path: string): Promise<void> {
+  const url = `${SUPABASE_URL}/storage/v1/object/${bucket}/${path}`;
+  const res = await fetch(url, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${SERVICE_ROLE_KEY}`,
+      apikey: SERVICE_ROLE_KEY!,
+    },
+  });
+  await res.text();
+}
+
 async function fetchPublicObject(bucket: string, path: string): Promise<Response> {
   const url = `${SUPABASE_URL}/storage/v1/object/public/${bucket}/${path}`;
   const ctrl = new AbortController();
@@ -106,19 +143,14 @@ describe.runIf(canRun)("tenant storage buckets stay private (config regression)"
     );
 
     for (const [bucket, path] of Object.entries(NON_BRANDING_OBJECTS)) {
-      await withRetry(`upload ${bucket}/${path}`, () =>
-        admin.storage.from(bucket).upload(path, new Blob([OBJECT_BODY]), {
-          upsert: true,
-          contentType: "text/plain",
-        }),
-      );
+      await adminUpload(bucket, path, OBJECT_BODY);
     }
   }, 180_000);
 
   afterAll(async () => {
     if (!admin) return;
     for (const [bucket, path] of Object.entries(NON_BRANDING_OBJECTS)) {
-      await admin.storage.from(bucket).remove([path]);
+      await adminRemove(bucket, path);
     }
   }, NET_TIMEOUT_MS);
 
@@ -145,12 +177,17 @@ describe.runIf(canRun)("tenant storage buckets stay private (config regression)"
 
       it("does not let anon download the planted non-branding object", async () => {
         const path = NON_BRANDING_OBJECTS[bucket];
-        const { data, error } = await anon.storage.from(bucket).download(path);
-        if (!error) {
-          expect(data?.size ?? 0).toBe(0);
-        } else {
-          expect(data).toBeNull();
-        }
+        const res = await fetch(
+          `${SUPABASE_URL}/storage/v1/object/${bucket}/${path}`,
+          {
+            headers: {
+              Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+              apikey: SUPABASE_ANON_KEY!,
+            },
+          },
+        );
+        expect(res.status).not.toBe(200);
+        expect(await res.text()).not.toContain(OBJECT_BODY);
       }, NET_TIMEOUT_MS);
 
       it("still serves the object to a service-role signed URL (private, not broken)", async () => {
