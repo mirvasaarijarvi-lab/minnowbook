@@ -345,6 +345,8 @@ export function renderHtml(payload: ReportPayload): string {
   summary { cursor: pointer; color: #f87171; font-weight: 500; }
   pre { background: #0f172a; color: #fda4af; padding: 10px; border-radius: 6px;
     overflow-x: auto; margin: 8px 0 0; font-size: 12px; white-space: pre-wrap; word-break: break-word; }
+  .rls-details.withheld { background: rgba(148, 163, 184, 0.10); border-left-color: #94a3b8; }
+  .rls-details.withheld .kv-value { color: #cbd5e1; }
   .rls-details { background: rgba(248, 113, 113, 0.08); border-left: 3px solid #f87171;
     padding: 10px 12px; border-radius: 6px; margin-bottom: 8px; }
   .kv-row { display: grid; grid-template-columns: 140px 1fr; gap: 8px;
@@ -507,7 +509,7 @@ export default class RlsReportReporter implements Reporter {
     if (guarded.denied) {
       // eslint-disable-next-line no-console
       console.warn(
-        `[rls-report] tenant access denied (${guarded.reasons.join(", ")}) — withheld details for ${guarded.withheldEntries} entr${
+        `[rls-report] tenant access denied (${guarded.reasons.join(", ")}), withheld details for ${guarded.withheldEntries} entr${
           guarded.withheldEntries === 1 ? "y" : "ies"
         }`,
       );
