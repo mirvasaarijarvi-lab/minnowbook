@@ -28,6 +28,7 @@ import { useT, useTDynamic } from "@/contexts/I18nContext";
 import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
 import SiteTabs from "./SiteTabs";
 import { toast } from "sonner";
+import { useInvoiceRefusalMessage } from "@/hooks/useInvoiceRefusalMessage";
 import { useDateLocale } from "@/hooks/useDateLocale";
 import { usePermissions } from "@/hooks/usePermissions";
 import {
