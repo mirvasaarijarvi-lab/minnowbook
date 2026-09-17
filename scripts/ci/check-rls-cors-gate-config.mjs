@@ -222,6 +222,64 @@ if (liveSteps.length > 0 && timeoutCount < liveSteps.length) {
 }
 note(`Live Vitest steps: ${liveSteps.length}`);
 
+// ------------------------------------------------------------ run logs
+// The gate's steps tee their output into test-reports/logs and upload it as an
+// artifact. If that wiring is dropped, a failure can only be read in the
+// browser log viewer, which truncates long live suites.
+const LOGS_DIR = "test-reports/logs";
+const LOGS_ARTIFACT = "rls-cors-gate-logs";
+
+if (!yml.includes("actions/upload-artifact@")) {
+  fail(
+    "Gate uploads no run logs",
+    `Add an actions/upload-artifact step that uploads ${LOGS_DIR}, otherwise a failing run can only be read in the truncating log viewer.`,
+  );
+} else {
+  if (!new RegExp(`name:\\s*${LOGS_ARTIFACT}\\b`).test(yml)) {
+    fail(
+      "Run log artifact renamed or removed",
+      `No upload step is named "${LOGS_ARTIFACT}". Keep that name so the logs are findable on the run page, or update this check deliberately.`,
+    );
+  }
+  if (!yml.includes(LOGS_DIR)) {
+    fail(
+      "Run logs are not collected",
+      `No step writes to ${LOGS_DIR}. Each gate step must tee its output there so the artifact contains the full text of the run.`,
+    );
+  }
+  // An upload that only runs on success is useless: failures are the reason
+  // the artifact exists.
+  const uploadBlocks = [...yml.matchAll(/- name: [^\n]*\n(?:[ \t]+[^\n]*\n)*?[ \t]+uses: actions\/upload-artifact@[^\n]*\n/g)];
+  for (const block of uploadBlocks) {
+    if (!/if:\s*always\(\)/.test(block[0])) {
+      fail(
+        "Log upload is skipped on failure",
+        "Every actions/upload-artifact step in this gate needs `if: always()`, otherwise the logs are missing exactly when a step failed.",
+      );
+      break;
+    }
+  }
+  if (!yml.includes("00-index.txt")) {
+    fail(
+      "Log artifact has no index",
+      "The gate must write test-reports/logs/00-index.txt (run URL, commit, preflight mode, failing lines) so the artifact can be triaged without opening every log.",
+    );
+  }
+}
+
+// Every step that runs tests or the preflight must persist its output.
+const logWrites = new Set(
+  [...yml.matchAll(/test-reports\/logs\/([\w.-]+)/g)].map((m) => m[1]).filter((f) => f.endsWith(".log")),
+);
+const testStepCount = [...yml.matchAll(/bunx vitest run/g)].length + 1; // + preflight
+if (logWrites.size < testStepCount) {
+  fail(
+    "Some gate steps do not persist their output",
+    `${testStepCount} gate step(s) run tests or the preflight but only ${logWrites.size} log file(s) are written under ${LOGS_DIR}. Tee every step's output into its own log file.`,
+  );
+}
+note(`Run log files collected: ${logWrites.size}`);
+
 // -------------------------------------------------- denial notification
 // A tenant-access denial is the gate's most serious outcome. It must reach the
 // maintainer outside the run page, so the notification job has to stay wired to
