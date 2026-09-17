@@ -47,6 +47,7 @@ import {
   calcNights as calcNightsFor,
 } from "@/lib/report-pricing-accessor";
 import { csvPriceCells, printPriceCells, pdfPriceCells } from "@/lib/report-export-cells";
+import { buildReportCsv, reportCsvFileName, downloadReportCsv } from "@/lib/report-csv-export";
 
 /** Bar colours for the PDF chart, mirroring the on-screen series order. */
 const PDF_SERIES_COLORS: [number, number, number][] = [[37, 99, 235], [217, 119, 6], [148, 163, 184], [16, 185, 129]];
