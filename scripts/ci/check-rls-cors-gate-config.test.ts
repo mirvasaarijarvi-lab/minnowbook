@@ -138,7 +138,66 @@ describe("check-rls-cors-gate-config", () => {
     expect(r.code).toBe(1);
     expect(r.stdout).toContain('gate-summary does not depend on "rls-advisor-gate"');
   });
+
+  it("fails when the denial notification job is deleted", () => {
+    const r = run(fixture((y) => y.replace("\n  notify-tenant-denial:", "\n  something-else:")));
+    expect(r.code).toBe(1);
+    expect(r.stdout).toContain('Gate job "notify-tenant-denial" missing');
+  });
+
+  it("fails when the denial notification can never trigger", () => {
+    const r = run(
+      fixture((y) =>
+        y.replace(
+          "if: always() && needs.rls-cors-tests.outputs.tenant_access == 'denied'",
+          "if: failure()",
+        ),
+      ),
+    );
+    expect(r.code).toBe(1);
+    expect(r.stdout).toContain("Denial notification never triggers");
+  });
+
+  it("fails when the denial notification loses issue write permission", () => {
+    const r = run(
+      fixture((y) =>
+        y.replace(
+          "      contents: read\n      issues: write",
+          "      contents: read",
+        ),
+      ),
+    );
+    expect(r.code).toBe(1);
+    expect(r.stdout).toContain("Denial notification cannot file an issue");
+  });
+
+  it("fails when the preflight result is not exposed to the notification", () => {
+    const r = run(
+      fixture((y) =>
+        y.replace("tenant_access: ${{ steps.preflight.outputs.mode }}", "tenant_access: 'live'"),
+      ),
+    );
+    expect(r.code).toBe(1);
+    expect(r.stdout).toContain("Preflight result is not exposed to the notification");
+  });
+
+  it("fails when the denial reason is no longer reported", () => {
+    const r = run(
+      fixture((y) =>
+        y.replace("denied_reason: ${{ steps.preflight.outputs.denied_reason }}", ""),
+      ),
+    );
+    expect(r.code).toBe(1);
+    expect(r.stdout).toContain("Denial notification is missing denied_reason");
+  });
+
+  it("fails when the reporting step is removed", () => {
+    const r = run(fixture((y) => y.replace("actions/github-script@v7", "actions/checkout@v5")));
+    expect(r.code).toBe(1);
+    expect(r.stdout).toContain("Denial notification has no reporting step");
+  });
 });
+
 
 describe("rls-cors-gate-preflight misconfiguration", () => {
   const PREFLIGHT = join(ROOT, "scripts/ci/rls-cors-gate-preflight.mjs");
