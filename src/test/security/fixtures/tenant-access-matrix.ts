@@ -234,3 +234,183 @@ export const TENANT_ACCESS_MATRIX: TenantAccessCase[] = [
     expectedHtml: ["skipped"],
   },
 ];
+
+/**
+ * Query-path matrix
+ * -----------------
+ * The report must describe EVERY query shape the cross-tenant suites use,
+ * not just plain list reads. Detail-by-id reads, counts, embedded joins,
+ * paginated ranges, writes, RPCs and storage paths each produce their own
+ * failure context; if any of them rendered without its table, operation or
+ * tenant pair, a reviewer could not tell what leaked.
+ *
+ * Each case is fed through the real `rls-assert` helpers so the expected
+ * text can never drift from the assertion format the suites actually use.
+ */
+export type QueryPathKind = "read" | "write" | "scan";
+
+export interface QueryPathCase {
+  /** Unique label; also used as the test name. */
+  label: string;
+  kind: QueryPathKind;
+  table: string;
+  operation: string;
+  attemptedQuery: string;
+  scenario?: string;
+  /** Rows a leaking database would hand back. */
+  leakedRows: Array<Record<string, unknown>>;
+  /** For scan cases: the tenant whose rows must never appear. */
+  forbiddenTenantId?: string;
+}
+
+export const ACTING_TENANT = TENANT_A;
+export const TARGET_TENANT = TENANT_B;
+
+const foreignRow = (extra: Record<string, unknown> = {}) => ({
+  id: "99999999-9999-4999-8999-999999999999",
+  tenant_id: TARGET_TENANT,
+  ...extra,
+});
+
+export const QUERY_PATH_MATRIX: QueryPathCase[] = [
+  {
+    label: "list view: unfiltered select of another tenant's reservations",
+    kind: "read",
+    table: "reservations",
+    operation: "SELECT (list)",
+    attemptedQuery: "from('reservations').select('*').eq('tenant_id', TARGET)",
+    scenario: "list view leaks foreign reservations",
+    leakedRows: [foreignRow({ guest_name: "Foreign Guest" }), foreignRow()],
+  },
+  {
+    label: "list view: paginated range read",
+    kind: "read",
+    table: "reservations",
+    operation: "SELECT (list, range 0-49)",
+    attemptedQuery: "from('reservations').select('*').range(0, 49)",
+    leakedRows: [foreignRow()],
+  },
+  {
+    label: "list view: ordered and filtered list read",
+    kind: "read",
+    table: "resources",
+    operation: "SELECT (list, ordered)",
+    attemptedQuery: "from('resources').select('id,name').order('name').limit(20)",
+    leakedRows: [foreignRow({ name: "Foreign Sauna" })],
+  },
+  {
+    label: "detail view: single row by id",
+    kind: "read",
+    table: "reservations",
+    operation: "SELECT (detail, single)",
+    attemptedQuery: "from('reservations').select('*').eq('id', FOREIGN_ID).single()",
+    scenario: "detail view leaks a foreign reservation",
+    leakedRows: [foreignRow({ guest_email: "foreign@example.test" })],
+  },
+  {
+    label: "detail view: maybeSingle by id",
+    kind: "read",
+    table: "offers",
+    operation: "SELECT (detail, maybeSingle)",
+    attemptedQuery: "from('offers').select('*').eq('id', FOREIGN_ID).maybeSingle()",
+    leakedRows: [foreignRow()],
+  },
+  {
+    label: "detail view: embedded join pulls the parent row",
+    kind: "read",
+    table: "resource_images",
+    operation: "SELECT (detail, embedded join)",
+    attemptedQuery: "from('resource_images').select('*, resources(*)').eq('id', FOREIGN_ID)",
+    leakedRows: [foreignRow({ resources: { id: "r-1", tenant_id: TARGET_TENANT } })],
+  },
+  {
+    label: "count path: head request with exact count",
+    kind: "read",
+    table: "reservations",
+    operation: "SELECT (count, head)",
+    attemptedQuery: "from('reservations').select('*', { count: 'exact', head: true })",
+    leakedRows: [foreignRow()],
+  },
+  {
+    label: "search path: text filter across tenants",
+    kind: "read",
+    table: "reservations",
+    operation: "SELECT (search)",
+    attemptedQuery: "from('reservations').select('*').ilike('guest_search_text', '%foreign%')",
+    leakedRows: [foreignRow()],
+  },
+  {
+    label: "rpc path: security definer function returning rows",
+    kind: "read",
+    table: "get_published_reviews",
+    operation: "RPC",
+    attemptedQuery: "rpc('get_published_reviews', { tenant: TARGET })",
+    leakedRows: [foreignRow({ rating: 5 })],
+  },
+  {
+    label: "storage path: listing another tenant's private objects",
+    kind: "read",
+    table: "storage.objects (tenant-private)",
+    operation: "STORAGE LIST",
+    attemptedQuery: "storage.from('tenant-private').list(`${TARGET}/offers`)",
+    leakedRows: [foreignRow({ name: "offer.pdf" })],
+  },
+  {
+    label: "storage path: downloading another tenant's object",
+    kind: "read",
+    table: "storage.objects (tenant-private)",
+    operation: "STORAGE DOWNLOAD",
+    attemptedQuery: "storage.from('tenant-private').download(`${TARGET}/offers/offer.pdf`)",
+    leakedRows: [foreignRow()],
+  },
+  {
+    label: "write path: insert into another tenant",
+    kind: "write",
+    table: "reservations",
+    operation: "INSERT",
+    attemptedQuery: "from('reservations').insert({ tenant_id: TARGET, ... }).select()",
+    leakedRows: [foreignRow()],
+  },
+  {
+    label: "write path: update another tenant's row",
+    kind: "write",
+    table: "reservations",
+    operation: "UPDATE",
+    attemptedQuery: "from('reservations').update({ is_invoiced: true }).eq('id', FOREIGN_ID).select()",
+    leakedRows: [foreignRow({ is_invoiced: true })],
+  },
+  {
+    label: "write path: upsert across tenants",
+    kind: "write",
+    table: "resources",
+    operation: "UPSERT",
+    attemptedQuery: "from('resources').upsert({ id: FOREIGN_ID, tenant_id: TARGET }).select()",
+    leakedRows: [foreignRow()],
+  },
+  {
+    label: "write path: delete another tenant's row",
+    kind: "write",
+    table: "reservations",
+    operation: "DELETE",
+    attemptedQuery: "from('reservations').delete().eq('id', FOREIGN_ID).select()",
+    leakedRows: [foreignRow()],
+  },
+  {
+    label: "scan path: own-tenant list must contain no foreign rows",
+    kind: "scan",
+    table: "reservations",
+    operation: "SELECT (broad scan)",
+    attemptedQuery: "from('reservations').select('*')",
+    leakedRows: [foreignRow(), foreignRow()],
+    forbiddenTenantId: TARGET_TENANT,
+  },
+  {
+    label: "scan path: detail lookup without a tenant filter",
+    kind: "scan",
+    table: "booking_tokens",
+    operation: "SELECT (detail, no tenant filter)",
+    attemptedQuery: "from('booking_tokens').select('*').eq('token', FOREIGN_TOKEN)",
+    leakedRows: [foreignRow({ token: "tok_foreign" })],
+    forbiddenTenantId: TARGET_TENANT,
+  },
+];
