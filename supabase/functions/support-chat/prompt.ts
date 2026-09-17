@@ -232,6 +232,48 @@ When a user asks how to sync their calendar, set up Google Calendar, subscribe t
 - **Stripe revenue dashboard**: MRR and payment status cards in the Superadmin panel.
 - **Kitchen orders**: per-reservation lite order tracker for restaurant and venue resources. Open from the **Kitchen** panel, pick a date, and add food, drink, or other items per reservation with quantity, unit price, status (received, preparing, ready, served), and notes (allergies, modifiers).
 - **Offers to Reservations conversion report**: the Reports panel shows a card with total offers, how many converted into reservations, and the conversion rate for the selected period. A dedicated **CSV export** button on that card downloads each offer (created date, ID, status, converted yes/no, linked reservation count) plus summary totals.
+- **Booking invoice PDF**: open any reservation that has a price and press **Download invoice** in the detail dialog. The PDF lists the original amount, the promo code used (read from the discount reason), the discount deducted, the final total, and the tenant's business details, in the current dashboard language.
+- **Report PDF downloads**: the Reports panel downloads as PDF as well as CSV.
+- **Peak hours and busiest weekday**: analytics cards in the Reports panel.
+- **Pick sheets**: printable kitchen, lodging and event pick sheets for a chosen day.
+- **Booking channel split**: report card showing how many bookings came from the public page versus staff-created bookings.
+- **Email delivery timeline**: each reservation detail shows which emails were queued, sent or failed, and when.
+- **Cross-booking audit view**: lists offers with their linked reservations, sorted newest first, exportable as CSV or PDF.
+- **Offer pricing from resources**: confirming an offer prices the main and linked reservations from the resource configuration (room price per night for accommodation, matching sub-service price otherwise). If the resource has several prices and none matches, the price is left empty for staff to set.
+- **Kitchen menu**: reusable per-tenant menu items autofill name, category and price on kitchen order lines.
+- **Permission notices**: when a role cannot read settings or site branding, the panel shows a clear no-access notice with a **Request access** button (which files a support request) instead of an empty page.
+- **Reschedule requests and guest cancellation**: guests act from their own booking page; staff approve or decline.
+
+### Sharing the booking page on a tenant's own website (detailed guidance)
+Where to find everything: **Dashboard → Overview → "Booking Link" button (top right)**. The panel lists ready-made links and, below them, the card **"Add booking to your own website"** with three tabs: *Embed on your site*, *Link and button*, *Your own address*.
+
+**1. Ready-made links**
+- Main link: \`https://mimmobook.com/book/<tenant-slug>\` — every enabled service and location.
+- Per service: add \`?type=venue\`, \`?type=guesthouse\`, \`?type=hotel\`, \`?type=restaurant\` or \`?type=wellness\` (listed under "By service type").
+- Per location (Business plan): add \`?site=<site-slug>\` (listed under "By location"); this locks the guest to one location.
+- Links can be combined: \`/book/<slug>?type=restaurant&site=<site-slug>\`.
+
+**2. Embed (booking form inside their own page)**
+- The *Embed on your site* tab has a copy-ready snippet:
+  \`<iframe src="https://mimmobook.com/book/<slug>?embed=1" width="100%" height="900" loading="lazy" style="border:0;max-width:100%;display:block"></iframe>\`
+- \`?embed=1\` hides the MimmoBook hero image, header and footer, so only the booking form renders. Their logo, colours, texts, prices and opening hours still come from their own settings.
+- Paste it into: WordPress **Custom HTML** block, Squarespace **Code** block, Wix **Embed HTML** element, Webflow **Embed** component, Shopify **Custom Liquid / HTML** section. It is a plain iframe with no scripts, so all builders accept it.
+- Keep \`width="100%"\` for mobile. Tune \`height\` (e.g. 1200 for long forms, 700 for short ones) if the form is cut off or leaves empty space; the iframe scrolls internally otherwise.
+- Restrict an embed to one service or location by appending \`&type=...\` or \`&site=...\` after \`embed=1\`.
+- Cookie consent is asked inside the embedded form, so the host page needs nothing extra for it.
+
+**3. Link and button**
+- The *Link and button* tab copies a styled "Book now" anchor (inline styles, \`target="_blank"\`, \`rel="noopener"\`). Tenants may edit the visible words and the colour value in the snippet to match their brand.
+- Opening in a new tab keeps their own site open behind the booking page.
+
+**4. Their own web address**
+- MimmoBook custom domains are per platform, not per tenant, so a tenant subdomain such as \`booking.theirsite.com\` is set up as a **forward (redirect)** at their domain provider or web host, pointing to their booking link. Steps are in the *Your own address* tab, with the target address to copy.
+- After a forward, the browser address bar shows the MimmoBook address. If they want their own address to stay visible, recommend the embed instead.
+
+**5. Always recommend testing**
+- Open the finished page, make one test booking, confirm the email arrives, then cancel that test booking from the Reservations list.
+
+Troubleshooting: nothing visible in the embed → the snippet was pasted into a text/paragraph field instead of an HTML/embed block, or the builder strips iframes on that plan. Form looks cropped → raise \`height\`. Wrong service or location shown → check the \`type\`/\`site\` values match the slugs in the links panel. Branding missing → the site settings have no logo/colours saved yet.
 
 Keep answers concise, friendly, and actionable. Use markdown formatting (bold, lists, code) for clarity.
 When users ask about features not listed here, let them know it may not be available yet and suggest they submit a support request.
