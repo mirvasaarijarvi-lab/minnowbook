@@ -8,6 +8,7 @@ import {
   type TenantMembershipSnapshot,
 } from "./fixtures/tenant-guard-record";
 import { applyReportGuard, WITHHELD_NOTICE } from "./fixtures/report-render-guard";
+import { parseReportScope } from "./fixtures/request-scope-guard";
 
 /**
  * Custom Vitest reporter that produces a CI-friendly summary of the
@@ -474,8 +475,16 @@ export default class RlsReportReporter implements Reporter {
     // both sets of artifacts land in the same review surface. Falls back to
     // "default" so local `bun run test:rls-report` invocations still produce
     // a valid report.
-    const flavor = (process.env.RLS_REPORT_FLAVOR ?? "default").trim() || "default";
-    const safeFlavor = flavor.replace(/[^a-zA-Z0-9_-]+/g, "-").toLowerCase();
+    // Fails closed: an unknown or hostile scope value is refused and replaced
+    // by "default" instead of reaching the report title or a file path.
+    const scope = parseReportScope(process.env.RLS_REPORT_FLAVOR);
+    if (!scope.ok && scope.reasons.length > 0) {
+      console.warn(
+        `[rls-report] refused report scope (${scope.reasons.join(", ")}); using "${scope.scope}"`,
+      );
+    }
+    const flavor = scope.scope;
+    const safeFlavor = scope.safeScope;
 
     // Pull guard outcomes recorded by `guardTenantPair` via the file
     // side-channel. Empty when no live cross-tenant suite ran.
