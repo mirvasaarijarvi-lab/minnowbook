@@ -269,6 +269,10 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
   const adminClient = _publicBookingTestHooks.createClient(supabaseUrl, serviceRoleKey);
 
 
+  // Set once an idempotency key has been claimed but not yet bound to a
+  // reservation, so a rejected request releases the key for a genuine retry.
+  let pendingIdempotency: { tenant_id: string; key: string } | null = null;
+
   try {
     const contentLength = parseInt(req.headers.get("content-length") || "0", 10);
     if (contentLength > 50 * 1024) {
@@ -536,6 +540,137 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
       !tenant.allowed_reservation_types.includes(reservation_type)
     ) {
       throw new Error("This reservation type is not available");
+    }
+
+    // ---------- Explicit idempotency key ----------
+    // A client may send its own key (header `Idempotency-Key`, or
+    // `idempotency_key` in the body) with a create request. Repeating the
+    // request with the same key never creates a second reservation and never
+    // claims a promo code again: the key maps to the one reservation the first
+    // accepted request produced.
+    const rawIdemKey =
+      (req.headers.get("idempotency-key") ?? "").trim() ||
+      (typeof body.idempotency_key === "string" ? body.idempotency_key.trim() : "");
+    let idempotencyKey: string | null = null;
+    if (rawIdemKey) {
+      if (rawIdemKey.length < 8 || rawIdemKey.length > 200 || /[\u0000-\u001f]/.test(rawIdemKey)) {
+        return new Response(
+          JSON.stringify({
+            error: "Idempotency key must be 8 to 200 characters without control characters",
+          }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+      idempotencyKey = rawIdemKey;
+    }
+
+    /** Return the reservation a previous request with this key already created. */
+    const respondWithExisting = async (reservationId: string) => {
+      const { data: existingRow } = await adminClient
+        .from("reservations")
+        .select("id, linked_group_id, guests_count")
+        .eq("id", reservationId)
+        .maybeSingle();
+      const { capacity_total: capTotal, current_load: capLoad } = await computeCapacity(
+        adminClient,
+        tenant_id,
+        reservation_type,
+        date,
+        validateUuid(body.site_id, "site_id", false),
+      );
+      return new Response(
+        JSON.stringify({
+          success: true,
+          duplicate: true,
+          idempotent_replay: true,
+          warning: null,
+          reservation: {
+            id: reservationId,
+            linked_group_id: existingRow?.linked_group_id ?? null,
+          },
+          linked_group_id: existingRow?.linked_group_id ?? null,
+          linked_siblings: [],
+          capacity: {
+            current_load: capLoad,
+            capacity_total: capTotal,
+            requested: guests_count ?? estimated_guests ?? 0,
+          },
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    };
+
+    if (idempotencyKey) {
+      // Wait for the request that owns this key to bind its reservation, then
+      // answer with that reservation. Returns null when the owner never
+      // finished (crashed, or refused before inserting), so a genuine retry can
+      // claim the key again instead of hanging forever.
+      const awaitWinner = async (): Promise<string | null> => {
+        for (let attempt = 0; attempt < 10; attempt++) {
+          const { data: winner } = await adminClient
+            .from("booking_idempotency")
+            .select("reservation_id")
+            .eq("tenant_id", tenant_id)
+            .eq("idempotency_key", idempotencyKey)
+            .maybeSingle();
+          if (winner?.reservation_id) return winner.reservation_id;
+          // The claim was released (the owner failed): the key is free again.
+          if (!winner) return null;
+          await new Promise((r) => setTimeout(r, 300));
+        }
+        return null;
+      };
+      const stillInProgress = () =>
+        new Response(
+          JSON.stringify({ error: "A booking with this idempotency key is still in progress" }),
+          { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+
+      const { data: known } = await adminClient
+        .from("booking_idempotency")
+        .select("reservation_id")
+        .eq("tenant_id", tenant_id)
+        .eq("idempotency_key", idempotencyKey)
+        .maybeSingle();
+      if (known?.reservation_id) {
+        console.log(
+          `[public-booking] idempotent replay; returning reservation ${known.reservation_id}`,
+        );
+        return await respondWithExisting(known.reservation_id);
+      }
+
+      if (known) {
+        // The key is claimed but not yet bound to a reservation: another
+        // request is mid-flight. Never fall through to a second booking.
+        const winnerId = await awaitWinner();
+        if (winnerId) {
+          console.log(`[public-booking] idempotent replay; returning reservation ${winnerId}`);
+          return await respondWithExisting(winnerId);
+        }
+        return stillInProgress();
+      }
+
+      // Claim the key before doing any work that has side effects (promo
+      // claim, reservation insert, emails). A concurrent request with the
+      // same key loses this insert and waits for the winner's reservation.
+      const { error: claimErr } = await adminClient
+        .from("booking_idempotency")
+        .insert({ tenant_id, idempotency_key: idempotencyKey });
+      if (claimErr) {
+        const winnerId = await awaitWinner();
+        if (winnerId) {
+          console.log(`[public-booking] idempotent replay; returning reservation ${winnerId}`);
+          return await respondWithExisting(winnerId);
+        }
+        // The claim vanished before it was bound: try once more to own it.
+        const { error: retryClaimErr } = await adminClient
+          .from("booking_idempotency")
+          .insert({ tenant_id, idempotency_key: idempotencyKey });
+        if (retryClaimErr) return stillInProgress();
+        pendingIdempotency = { tenant_id, key: idempotencyKey };
+      } else {
+        pendingIdempotency = { tenant_id, key: idempotencyKey };
+      }
     }
 
     // ---------- Retry de-duplication ----------
@@ -912,7 +1047,31 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
         outcome: "rejected",
         reasons,
       });
+      // Release the idempotency claim so the guest can genuinely retry.
+      if (idempotencyKey) {
+        await adminClient
+          .from("booking_idempotency")
+          .delete()
+          .eq("tenant_id", tenant_id)
+          .eq("idempotency_key", idempotencyKey)
+          .is("reservation_id", null);
+      }
       throw new Error("Failed to create reservation");
+    }
+
+    // Bind the idempotency key to the reservation it created, so any repeat of
+    // this request returns this reservation instead of booking again.
+    if (idempotencyKey) {
+      const { error: bindErr } = await adminClient
+        .from("booking_idempotency")
+        .update({ reservation_id: insertedRes.id, completed_at: new Date().toISOString() })
+        .eq("tenant_id", tenant_id)
+        .eq("idempotency_key", idempotencyKey);
+      if (bindErr) {
+        console.warn("[public-booking] idempotency bind failed", bindErr.message);
+      } else {
+        pendingIdempotency = null;
+      }
     }
 
     // Log success/warning
@@ -1129,6 +1288,19 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
     );
   } catch (error) {
     console.error("[public-booking] unexpected error:", error);
+    // A rejected request must not burn the guest's idempotency key.
+    if (pendingIdempotency) {
+      try {
+        await adminClient
+          .from("booking_idempotency")
+          .delete()
+          .eq("tenant_id", pendingIdempotency.tenant_id)
+          .eq("idempotency_key", pendingIdempotency.key)
+          .is("reservation_id", null);
+      } catch (releaseError) {
+        console.warn("[public-booking] idempotency release failed", releaseError);
+      }
+    }
     // Forward validator-thrown messages (safe, user-facing copy) so the
     // booking UI can surface a precise reason. Anything that isn't an
     // Error instance is treated as opaque and replaced with a generic
