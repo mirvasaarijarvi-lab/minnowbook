@@ -178,12 +178,12 @@ describe("rls-report deny cases return zero rows and leak no tenant metadata", (
       suite: "cross-tenant RLS",
       tenantA: ACTING_TENANT,
       tenantB: TARGET_TENANT,
-      probeAPassed: true,
-      probeBPassed: true,
       recordedAt: "2026-01-01T00:00:00.000Z",
-      membershipA: { role: "owner", isApproved: true },
-      membershipB: { role: "owner", isApproved: true },
-    } as TenantGuardRecord;
+      membershipA: true,
+      membershipB: true,
+      membershipRowA: { role: "owner", isApproved: true, found: true },
+      membershipRowB: { role: "owner", isApproved: true, found: true },
+    };
     const html = renderTenantGuardSection([record]);
     // Tenant ids are the guard's whole point; row data never is.
     for (const secret of new Set(QUERY_PATH_MATRIX.flatMap(forbiddenStrings))) {
