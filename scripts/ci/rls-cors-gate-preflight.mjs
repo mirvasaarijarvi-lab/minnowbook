@@ -197,10 +197,27 @@ if (!envCredsComplete && !SERVICE) {
     );
     finish(1, "denied");
   }
+  const offlineWarning =
+    "RLS/CORS gate running offline only: No tenant credentials configured (RLS_TEST_TENANT_A/B_* or SUPABASE_SERVICE_ROLE_KEY), so the live RLS suites will skip. Only the offline CORS checks gate this run.";
   console.log(
-    "::warning title=RLS/CORS gate running offline only::No tenant credentials configured (RLS_TEST_TENANT_A/B_* or SUPABASE_SERVICE_ROLE_KEY), so the live RLS suites will skip. Only the offline CORS checks gate this run.",
+    DRY_RUN
+      ? `WARN ${offlineWarning}`
+      : `::warning title=RLS/CORS gate running offline only::${offlineWarning.replace(/^[^:]+: /, "")}`,
   );
   finish(0, "skip");
+}
+
+if (DRY_RUN) {
+  log("");
+  log("Static configuration checks passed. A real run would now verify, over the network:");
+  if (envCredsComplete) {
+    for (const t of TENANTS) {
+      log(`  - tenant ${t.letter}: password sign-in, then reading its own membership row`);
+    }
+  } else {
+    log("  - the service role key can list users to auto-provision the test tenants");
+  }
+  finish(0, "live");
 }
 
 const timeout = Number(env.PREFLIGHT_TIMEOUT_MS || 20000);
