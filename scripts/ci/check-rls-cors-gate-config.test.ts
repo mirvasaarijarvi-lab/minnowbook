@@ -263,6 +263,25 @@ describe("rls-cors-gate-preflight misconfiguration", () => {
     expect(r.stdout).toContain("RLS/CORS gate requires live coverage here");
   });
 
+  it("publishes the denial reason so the notification can report it", () => {
+    const dir = mkdtempSync(join(tmpdir(), "rls-gate-output-"));
+    const outFile = join(dir, "github-output");
+    writeFileSync(outFile, "");
+    const r = runPreflight({
+      ...base,
+      VITE_SUPABASE_URL: "example.supabase.co/rest",
+      GITHUB_OUTPUT: outFile,
+    });
+    const out = readFileSync(outFile, "utf8");
+    rmSync(dir, { recursive: true, force: true });
+    expect(r.code).toBe(1);
+    expect(out).toContain("mode=denied");
+    expect(out).toContain("denied_title=VITE_SUPABASE_URL is misconfigured");
+    expect(out).toMatch(/denied_reason=.+/);
+    expect(out).toContain("denied_details<<");
+  });
+
+
   it("skips (exit 0) offline when nothing is configured and live is not required", () => {
     const r = runPreflight(base);
     expect(r.code).toBe(0);
