@@ -24,7 +24,7 @@ import EditReservationDialog from "./EditReservationDialog";
 import ReservationDetailDialog from "./ReservationDetailDialog";
 import ManualReservationDialog from "./ManualReservationDialog";
 import ConfirmationEmailPreview from "@/components/ConfirmationEmailPreview";
-import { useT, useTDynamic } from "@/contexts/I18nContext";
+import { useT, useTDynamic, useI18n } from "@/contexts/I18nContext";
 import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
 import SiteTabs from "./SiteTabs";
 import { toast } from "sonner";
