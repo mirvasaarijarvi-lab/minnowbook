@@ -33,7 +33,12 @@ export function useInvoiceRefusalNotice(scopeKey?: string | null) {
     }
   }, [scopeKey]);
 
-  useEffect(() => () => toast.dismiss(INVOICE_REFUSAL_TOAST_ID), []);
+  useEffect(
+    () => () => {
+      toast.dismiss(INVOICE_REFUSAL_TOAST_ID);
+    },
+    [],
+  );
 
   const clearRefusal = useCallback(() => {
     toast.dismiss(INVOICE_REFUSAL_TOAST_ID);
