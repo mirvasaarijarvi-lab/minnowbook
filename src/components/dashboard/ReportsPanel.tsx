@@ -850,8 +850,8 @@ const ReportsPanel = () => {
         <UiTooltip>
           <UiTooltipTrigger asChild>
             <span>
-              <Button variant="outline" size="sm" onClick={handleExportPDF} disabled={reservations.length === 0 || isBasicTier} className="gap-1.5">
-                <FileText className="h-4 w-4" /><span className="hidden sm:inline">{anT("an.exportPdf")}</span><span className="sm:hidden">PDF</span>
+              <Button variant="outline" size="sm" onClick={handleExportPDF} disabled={reservations.length === 0 || isBasicTier} className="gap-1.5" data-testid="download-report-pdf">
+                <FileText className="h-4 w-4" /><span className="hidden sm:inline">{t("reports.downloadReportPdf")}</span><span className="sm:hidden">PDF</span>
                 {isBasicTier && <LockIcon className="h-3 w-3 ml-0.5 text-muted-foreground" />}
               </Button>
             </span>
