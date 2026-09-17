@@ -15,6 +15,7 @@ import { useDateLocale } from "@/hooks/useDateLocale";
 import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
 import LinkedReservationsPanel from "./LinkedReservationsPanel";
 import ReservationEmailTimeline from "./ReservationEmailTimeline";
+import { useInvoiceRefusalMessage } from "@/hooks/useInvoiceRefusalMessage";
 
 const statusColors: Record<string, string> = {
   pending: "bg-warning/10 text-warning-foreground border-warning/20",
@@ -51,6 +52,7 @@ const ReservationDetailDialog = ({ reservation, open, onOpenChange, onEdit, canE
   const { language } = useI18n();
   const { tenant, tenantId } = useTenant();
   const [generating, setGenerating] = useState(false);
+  const formatInvoiceRefusal = useInvoiceRefusalMessage();
 
   const { data: tenantSettings } = useQuery({
     queryKey: ["tenant-settings-branding", tenantId],
@@ -79,8 +81,10 @@ const ReservationDetailDialog = ({ reservation, open, onOpenChange, onEdit, canE
         businessAddress: tenantSettings?.business_address,
         primaryColor: tenantSettings?.primary_color,
       });
-    } catch {
-      toast.error("Invoice generation failed");
+    } catch (err) {
+      // Surface the exact reason (for example a refused amount) rather than
+      // one generic sentence for every failure.
+      toast.error(formatInvoiceRefusal(err).message);
     } finally {
       setGenerating(false);
     }
