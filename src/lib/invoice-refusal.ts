@@ -23,8 +23,29 @@ export type InvoiceRefusalCode =
   | "INVOICED_LOCKED"
   /** Row-level security / role refused the write. */
   | "NOT_PERMITTED"
+  /** The booking is cancelled or archived, so invoicing no longer applies. */
+  | "CANCELLED"
+  /** The booking (or its link) is gone: deleted, revoked or expired. */
+  | "NOT_FOUND"
+  /** The signed-in session expired, so the write was rejected unauthenticated. */
+  | "SESSION_EXPIRED"
+  /** The request never reached the server (offline, blocked, timed out). */
+  | "OFFLINE"
+  /** Too many attempts in a short window. */
+  | "RATE_LIMITED"
+  /** Someone else changed the booking first, so the write was stale. */
+  | "CONFLICT"
+  /** The server itself failed while handling the write. */
+  | "SERVER_ERROR"
   /** Refused, but not by one of the rules we recognise. */
   | "UNKNOWN";
+
+/**
+ * Which audience the wording is for. Staff see the operational explanation
+ * ("add the price first"); guests see a softer sentence that never asks them
+ * to fix internal data.
+ */
+export type InvoiceRefusalSurface = "staff" | "guest";
 
 export interface InvoiceRefusal {
   code: InvoiceRefusalCode;
@@ -59,15 +80,65 @@ const INTERNAL_MARKERS = [
   "fetch failed",
 ];
 
+/**
+ * Message classifiers, most specific first. The invoicing rules come before
+ * the transport-level ones so a refusal that names a business rule is never
+ * mistaken for a generic 4xx.
+ */
 const CLASSIFIERS: ReadonlyArray<[RegExp, InvoiceRefusalCode]> = [
   [/add a price before marking/i, "NO_PRICE"],
   [/invoice amount must match/i, "AMOUNT_MISMATCH"],
   [/already invoiced|invoiced reservation|cannot be changed after invoicing/i, "INVOICED_LOCKED"],
+  [/\bcancelled\b|\bcanceled\b|archived reservation|booking is archived/i, "CANCELLED"],
   [
-    /row-level security|permission denied|not authori[sz]ed|insufficient privilege|violates row/i,
+    /jwt (?:is )?expired|token (?:is )?expired|session (?:has )?expired|invalid jwt|not logged in|no active session/i,
+    "SESSION_EXPIRED",
+  ],
+  [
+    /row-level security|permission denied|not authori[sz]ed|insufficient privilege|violates row|forbidden/i,
     "NOT_PERMITTED",
   ],
+  [
+    /link (?:has been )?revoked|revoked|not_found|not found|no rows|0 rows|does not exist|no longer available/i,
+    "NOT_FOUND",
+  ],
+  [/too many requests|rate limit|slow down/i, "RATE_LIMITED"],
+  [
+    /conflict|concurrent|modified by another|stale|version mismatch|already being updated/i,
+    "CONFLICT",
+  ],
+  [
+    /failed to fetch|fetch failed|network ?error|networkerror|load failed|offline|timed? ?out|timeout|econnrefused|enotfound|dns/i,
+    "OFFLINE",
+  ],
+  [/internal server error|unexpected server error|edge function .*non-2xx|502|503|504/i, "SERVER_ERROR"],
 ];
+
+/** HTTP status codes mapped to a refusal code, for errors that carry one. */
+const STATUS_CODES: ReadonlyArray<[(status: number) => boolean, InvoiceRefusalCode]> = [
+  [(s) => s === 401, "SESSION_EXPIRED"],
+  [(s) => s === 403, "NOT_PERMITTED"],
+  [(s) => s === 404 || s === 410, "NOT_FOUND"],
+  [(s) => s === 409 || s === 412 || s === 428, "CONFLICT"],
+  [(s) => s === 429, "RATE_LIMITED"],
+  [(s) => s >= 500 && s <= 599, "SERVER_ERROR"],
+];
+
+/** Read an HTTP-ish status from a thrown error, if it carries one. */
+const statusOf = (err: unknown): number | null => {
+  if (!err || typeof err !== "object") return null;
+  const e = err as Record<string, unknown>;
+  for (const key of ["status", "statusCode", "httpStatus", "code"]) {
+    const value = e[key];
+    if (typeof value === "number" && value >= 100 && value <= 599) return value;
+    if (typeof value === "string" && /^[1-5][0-9]{2}$/.test(value.trim())) {
+      return Number(value.trim());
+    }
+  }
+  const context = e.context;
+  if (context && typeof context === "object") return statusOf(context);
+  return null;
+};
 
 const rawMessageOf = (err: unknown): string => {
   if (typeof err === "string") return err;
@@ -106,13 +177,36 @@ const extractServerReason = (raw: string): string | null => {
 /** Classify a failed invoicing write. Never throws. */
 export const classifyInvoiceRefusal = (err: unknown): InvoiceRefusal => {
   const raw = rawMessageOf(err);
-  const code = CLASSIFIERS.find(([re]) => re.test(raw))?.[1] ?? "UNKNOWN";
-  return { code, serverReason: extractServerReason(raw), raw };
+  // The message wins over the status: a 400 that says "add a price before
+  // marking" is a pricing refusal, not an anonymous bad request.
+  const byMessage = CLASSIFIERS.find(([re]) => re.test(raw))?.[1];
+  const status = statusOf(err);
+  const byStatus =
+    status === null ? undefined : STATUS_CODES.find(([matches]) => matches(status))?.[1];
+  return {
+    code: byMessage ?? byStatus ?? "UNKNOWN",
+    serverReason: extractServerReason(raw),
+    raw,
+  };
 };
 
-/** Translation key carrying the localized explanation for a refusal code. */
-export const invoiceRefusalTranslationKey = (code: InvoiceRefusalCode): string =>
-  `invoiceRefusal.${code}`;
+/**
+ * Translation key carrying the localized explanation for a refusal code.
+ * Guest surfaces get their own namespace so their wording can differ; callers
+ * fall back to the staff key when a guest variant is not defined.
+ */
+export const invoiceRefusalTranslationKey = (
+  code: InvoiceRefusalCode,
+  surface: InvoiceRefusalSurface = "staff",
+): string => (surface === "guest" ? `invoiceRefusalGuest.${code}` : `invoiceRefusal.${code}`);
+
+/**
+ * Codes that mean "the write never landed for a reason unrelated to the
+ * booking's own data". Surfaces use this to decide whether a retry makes
+ * sense to offer.
+ */
+export const isRetriableInvoiceRefusal = (code: InvoiceRefusalCode): boolean =>
+  code === "OFFLINE" || code === "RATE_LIMITED" || code === "CONFLICT" || code === "SERVER_ERROR";
 
 /**
  * Compose the text to show: the localized explanation, followed by the exact
