@@ -144,6 +144,8 @@ jobs:
         if: steps.preflight.outputs.mode == 'live'
         run: |
           set -euo pipefail
+          mkdir -p test-reports/logs
+          exec > >(tee test-reports/logs/03-live-assertions.log) 2>&1
           report=test-reports/vitest/rls-gate.json
           if [ ! -f "$report" ]; then
             echo "::error title=RLS gate report missing::$report was not produced, so the live run cannot be verified."
