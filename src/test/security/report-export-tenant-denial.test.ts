@@ -166,8 +166,7 @@ describe("report exports on tenant deny cases", () => {
     const suite = "src/test/security/report-export-tenant-denial.test.ts";
     const payload = {
       generatedAt: new Date().toISOString(),
-      durationMs: 12,
-      totals: { passed: 0, failed: 1, skipped: 0 },
+      totals: { total: 1, passed: 0, failed: 1, skipped: 0, durationMs: 12 },
       entries: [
         {
           suite,
@@ -195,8 +194,13 @@ describe("report exports on tenant deny cases", () => {
     const suite = "src/test/security/report-export-tenant-denial.test.ts";
     const payload = {
       generatedAt: new Date().toISOString(),
-      durationMs: 12,
-      totals: { passed: EXPORT_SURFACES.length, failed: 0, skipped: 0 },
+      totals: {
+        total: EXPORT_SURFACES.length,
+        passed: EXPORT_SURFACES.length,
+        failed: 0,
+        skipped: 0,
+        durationMs: 12,
+      },
       entries: EXPORT_SURFACES.map((s) => ({ suite, name: s.label, status: "passed" })),
       tenantGuard: [],
     } as unknown as ReportPayload;
