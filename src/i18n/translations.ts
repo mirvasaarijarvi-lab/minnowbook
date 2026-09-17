@@ -4655,6 +4655,8 @@ const fi: TranslationKeys = {
   "invoiceRefusal.serverReasonLabel": "Syy:",
   "invoiceRefusal.guestNotice": "Varaus on jo laskutettu, joten sitä ei voi enää muuttaa täällä. Ota yhteyttä meihin suoraan.",
   "dashboard.downloadInvoice": "Lataa lasku",
+  "dashboard.downloadInvoicePdf": "Lataa lasku PDF-muodossa",
+  "reports.downloadReportPdf": "Lataa raportti PDF-muodossa",
   "dashboard.markLinkedUsed": "Merkitäänkö linkitetyt varaukset käytetyiksi?",
   "dashboard.markLinkedUsedMsg": "Tämä varaus on linkitetty tarjoukseen, jossa on muita varauksia. Haluatko merkitä ne kaikki käytetyiksi?",
   "dashboard.markAll": "Merkitse kaikki käytetyiksi",
