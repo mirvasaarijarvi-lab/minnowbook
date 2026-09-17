@@ -41,12 +41,11 @@ import DashboardTooltip from "./DashboardTooltip";
 import { downloadReportPdf } from "@/lib/reportsPdf";
 import { useAnalyticsT } from "@/i18n/analytics";
 import {
+  reportAmounts,
+  sumReportAmounts,
   isAccommodationRow,
   calcNights as calcNightsFor,
-  calcBreakfastPrice as calcBreakfastPriceFor,
-  calcRoomPrice as calcRoomPriceFor,
-  effectiveChargedTotal as effectiveChargedTotalFor,
-} from "@/lib/report-accommodation-pricing";
+} from "@/lib/report-pricing-accessor";
 
 /** Bar colours for the PDF chart, mirroring the on-screen series order. */
 const PDF_SERIES_COLORS: [number, number, number][] = [[37, 99, 235], [217, 119, 6], [148, 163, 184], [16, 185, 129]];
