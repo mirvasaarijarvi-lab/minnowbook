@@ -239,18 +239,28 @@ test.describe("Repeat invoicing of the same booking", () => {
       }
       expect(new Set(snapshots).size, "every attempt produced the same invoice").toBe(1);
 
-      // --- 4. A repeat that also changes the amount is refused -------------
-      const tamper = await staffClient
-        .from("reservations")
-        .update({ is_invoiced: true, price_eur: STAY_TOTAL + 50 })
-        .eq("id", stay.id)
-        .eq("tenant_id", tenantId);
-      expect(tamper.error, "an invoiced booking cannot be re-invoiced at a new amount").not.toBeNull();
-      expect(tamper.error!.message).toContain(AMOUNT_ERROR);
-      const afterTamper = await fetchRow(stayEmail);
-      expect(Number(afterTamper.price_eur), "stored amount untouched").toBe(STAY_TOTAL);
-      expect(afterTamper.is_invoiced, "still invoiced once").toBe(true);
-      expect(await invoiceTransitions(stay.id), "no extra invoicing recorded").toHaveLength(1);
+      // --- 4. A repeat that breaks the totals is refused -------------------
+      // An amount that no longer covers the breakfast lines, or one with
+      // fractions of a cent, cannot ride along on a repeat of the action.
+      for (const [label, price] of [
+        ["below-breakfast", 50],
+        ["sub-cent", STAY_TOTAL + 0.005],
+      ] as Array<[string, number]>) {
+        const tamper = await staffClient
+          .from("reservations")
+          .update({ is_invoiced: true, price_eur: price })
+          .eq("id", stay.id)
+          .eq("tenant_id", tenantId);
+        expect(tamper.error, `${label}: refused`).not.toBeNull();
+        expect(tamper.error!.message).toContain(AMOUNT_ERROR);
+        const afterTamper = await fetchRow(stayEmail);
+        expect(Number(afterTamper.price_eur), `${label}: stored amount untouched`).toBe(STAY_TOTAL);
+        expect(afterTamper.is_invoiced, `${label}: still invoiced once`).toBe(true);
+        expect(
+          await invoiceTransitions(stay.id),
+          `${label}: no extra invoicing recorded`,
+        ).toHaveLength(1);
+      }
 
       // --- 3. Repeating the action across a two-leg group ------------------
       for (let attempt = 1; attempt <= ATTEMPTS; attempt++) {
