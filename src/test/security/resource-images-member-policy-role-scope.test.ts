@@ -41,9 +41,17 @@ const newService = (): SupabaseClient =>
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
+// Each client gets its own storage key: sibling clients in one jsdom
+// context otherwise share the default localStorage token and clobber each
+// other's session, which would silently invalidate the access matrix.
+let clientSeq = 0;
 const newAnon = (): SupabaseClient =>
   createClient(SUPABASE_URL!, SUPABASE_ANON_KEY!, {
-    auth: { persistSession: false, autoRefreshToken: false },
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+      storageKey: `ci-resimg-scope-${++clientSeq}-${Math.random().toString(36).slice(2, 8)}`,
+    },
   });
 
 interface SeededImage {
