@@ -38,6 +38,30 @@ const NET_TIMEOUT_MS = 60_000;
 
 const canRun = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY && SERVICE_ROLE_KEY);
 
+/**
+ * Storage admin calls occasionally time out on a cold edge. Retry a few
+ * times so setup failures reflect real misconfiguration, not transport
+ * noise.
+ */
+async function withRetry<T>(
+  label: string,
+  fn: () => Promise<{ data: T | null; error: { message: string } | null }>,
+  attempts = 4,
+): Promise<T> {
+  let last = "";
+  for (let i = 0; i < attempts; i++) {
+    try {
+      const res = await fn();
+      if (!res.error) return res.data as T;
+      last = res.error.message;
+    } catch (e) {
+      last = e instanceof Error ? e.message : String(e);
+    }
+    await new Promise((r) => setTimeout(r, 750 * (i + 1)));
+  }
+  throw new Error(`${label} failed after ${attempts} attempts: ${last}`);
+}
+
 let admin: SupabaseClient;
 let anon: SupabaseClient;
 
@@ -73,22 +97,23 @@ describe.runIf(canRun)("tenant storage buckets stay private (config regression)"
       auth: { persistSession: false, autoRefreshToken: false },
     });
 
-    const { data, error } = await admin.storage.listBuckets();
-    if (error) throw error;
+    const buckets = await withRetry("listBuckets", () => admin.storage.listBuckets());
     bucketPublicFlags = Object.fromEntries(
-      (data ?? []).map((b) => [b.name, Boolean((b as { public?: boolean }).public)]),
+      (buckets ?? []).map((b: { name: string; public?: boolean }) => [
+        b.name,
+        Boolean(b.public),
+      ]),
     );
 
     for (const [bucket, path] of Object.entries(NON_BRANDING_OBJECTS)) {
-      const { error: upErr } = await admin.storage
-        .from(bucket)
-        .upload(path, new Blob([OBJECT_BODY]), {
+      await withRetry(`upload ${bucket}/${path}`, () =>
+        admin.storage.from(bucket).upload(path, new Blob([OBJECT_BODY]), {
           upsert: true,
           contentType: "text/plain",
-        });
-      if (upErr) throw upErr;
+        }),
+      );
     }
-  }, NET_TIMEOUT_MS);
+  }, 180_000);
 
   afterAll(async () => {
     if (!admin) return;
@@ -156,12 +181,11 @@ describe.runIf(canRun)("tenant storage buckets stay private (config regression)"
     // Sweep the tenant prefixes present in the public branding bucket and
     // assert no non-branding folder names have crept in.
     const forbiddenSegments = ["avatars", "offers", "invoices", "private", "documents"];
-    const { data: roots, error } = await admin.storage
-      .from(PUBLIC_BRANDING_BUCKET)
-      .list("", { limit: 100 });
-    if (error) throw error;
+    const roots = await withRetry("list branding root", () =>
+      admin.storage.from(PUBLIC_BRANDING_BUCKET).list("", { limit: 100 }),
+    );
 
-    for (const root of roots ?? []) {
+    for (const root of (roots ?? []) as { name: string }[]) {
       const { data: children } = await admin.storage
         .from(PUBLIC_BRANDING_BUCKET)
         .list(root.name, { limit: 100 });
