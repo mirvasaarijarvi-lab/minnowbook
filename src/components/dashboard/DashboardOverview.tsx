@@ -33,6 +33,7 @@ import { useDateLocale } from "@/hooks/useDateLocale";
 import DashboardTooltip from "./DashboardTooltip";
 import AutoReminderStatus from "./AutoReminderStatus";
 import BookingLinksCard from "./BookingLinksCard";
+import ShareBookingPageCard from "./ShareBookingPageCard";
 import ActionAlertsBanner from "./ActionAlertsBanner";
 import BetaFeedbackCard from "./BetaFeedbackCard";
 import EmailFailureAlert from "./EmailFailureAlert";
@@ -225,6 +226,9 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
             </PopoverTrigger>
             <PopoverContent className="w-[min(500px,calc(100vw-2rem))] max-h-[70vh] overflow-y-auto p-0" align="end" sideOffset={8}>
               <BookingLinksCard />
+              <div className="p-3 pt-0">
+                <ShareBookingPageCard />
+              </div>
             </PopoverContent>
           </Popover>
         )}

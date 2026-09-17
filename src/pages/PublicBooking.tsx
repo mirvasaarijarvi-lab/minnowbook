@@ -294,6 +294,10 @@ const PublicBookingInner = () => {
 
   // Resolve site from ?site= query param
   const siteSlug = searchParams.get("site");
+
+  // Embed mode (?embed=1): render only the booking form so the page can be
+  // framed inside a tenant's own website without duplicated headers/footers.
+  const isEmbed = searchParams.get("embed") === "1";
   const [pickedSiteId, setPickedSiteId] = useState<string | null>(null);
 
   // Fetch tenant by slug
@@ -1291,9 +1295,9 @@ const PublicBookingInner = () => {
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: secondaryColor }}>
+    <div className={isEmbed ? "" : "min-h-screen"} style={{ backgroundColor: secondaryColor }}>
       {/* Header with optional hero image */}
-      {settings?.hero_image_url && !heroFailed ? (
+      {!isEmbed && (settings?.hero_image_url && !heroFailed ? (
         <header className="relative overflow-hidden" style={{ backgroundColor: primaryColor }}>
           <FadeInImage
             src={heroSignedUrl || undefined}
@@ -1394,7 +1398,7 @@ const PublicBookingInner = () => {
             <LanguageSwitcher variant="dark" />
           </div>
         </header>
-      )}
+      ))}
 
       <SEOHead
         title={`Book at ${displayName} – MimmoBook`}
@@ -2668,17 +2672,19 @@ const PublicBookingInner = () => {
         />
 
         {/* Footer */}
-        <footer className="text-center py-6 text-xs text-muted-foreground space-y-1">
-          <p>
-            <span>{t("guest.find.linkHint")} </span>
-            <a href="/find-booking" className="underline underline-offset-2 hover:text-foreground">
-              {t("guest.find.linkLabel")}
-            </a>
-          </p>
-          {businessName && <p>{businessName}</p>}
-          {settings?.business_address && <p>{settings.business_address}</p>}
-          {settings?.business_phone && <p>{settings.business_phone}</p>}
-        </footer>
+        {!isEmbed && (
+          <footer className="text-center py-6 text-xs text-muted-foreground space-y-1">
+            <p>
+              <span>{t("guest.find.linkHint")} </span>
+              <a href="/find-booking" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-foreground">
+                {t("guest.find.linkLabel")}
+              </a>
+            </p>
+            {businessName && <p>{businessName}</p>}
+            {settings?.business_address && <p>{settings.business_address}</p>}
+            {settings?.business_phone && <p>{settings.business_phone}</p>}
+          </footer>
+        )}
 
       </main>
     </div>

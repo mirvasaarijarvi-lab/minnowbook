@@ -578,6 +578,24 @@ type TranslationKeys = {
   "dashboard.activeResources": string;
   "dashboard.bookingLink": string;
   "dashboard.bookingLinkDesc": string;
+  "dashboard.shareTitle": string;
+  "dashboard.shareDesc": string;
+  "dashboard.shareTabEmbed": string;
+  "dashboard.shareTabButton": string;
+  "dashboard.shareTabDomain": string;
+  "dashboard.shareEmbedDesc": string;
+  "dashboard.shareEmbedHint": string;
+  "dashboard.shareButtonDesc": string;
+  "dashboard.shareButtonHint": string;
+  "dashboard.shareButtonLabel": string;
+  "dashboard.shareDomainDesc": string;
+  "dashboard.shareDomainStep1": string;
+  "dashboard.shareDomainStep2": string;
+  "dashboard.shareDomainStep3": string;
+  "dashboard.shareDomainHint": string;
+  "dashboard.shareCopyCode": string;
+  "dashboard.shareCopyAddress": string;
+  "dashboard.shareIframeTitle": string;
   "dashboard.allServices": string;
   "dashboard.byServiceType": string;
   "dashboard.byLocation": string;
@@ -2530,6 +2548,24 @@ const en: TranslationKeys = {
   "dashboard.activeResources": "Active Resources",
   "dashboard.bookingLink": "Booking Link",
   "dashboard.bookingLinkDesc": "Share this link with your customers so they can make reservations.",
+  "dashboard.shareTitle": "Add booking to your own website",
+  "dashboard.shareDesc": "Put your booking page on your website as a subpage, a button, or your own web address.",
+  "dashboard.shareTabEmbed": "Embed on your site",
+  "dashboard.shareTabButton": "Link and button",
+  "dashboard.shareTabDomain": "Your own address",
+  "dashboard.shareEmbedDesc": "Paste this into the page where you want booking to appear, for example yoursite.com/booking. The form shows inside your own page, without our header or footer.",
+  "dashboard.shareEmbedHint": "Adjust height if needed. Your colours, logo and prices follow automatically.",
+  "dashboard.shareButtonDesc": "Paste this where you want a Book now button, or just link to the address below.",
+  "dashboard.shareButtonHint": "The booking page opens in a new tab so visitors keep your site open.",
+  "dashboard.shareButtonLabel": "Book now",
+  "dashboard.shareDomainDesc": "You can also use a web address of your own, such as booking.yoursite.com.",
+  "dashboard.shareDomainStep1": "Sign in where your domain is managed, for example your domain provider or web host.",
+  "dashboard.shareDomainStep2": "Create a forward, sometimes called redirect, from booking.yoursite.com to the address below.",
+  "dashboard.shareDomainStep3": "Save and wait a moment, then test the address in your browser.",
+  "dashboard.shareDomainHint": "After the forward, visitors reach your booking page but see our address in the browser bar. If you want your own address to stay visible, use the embed option instead.",
+  "dashboard.shareCopyCode": "Copy code",
+  "dashboard.shareCopyAddress": "Copy address",
+  "dashboard.shareIframeTitle": "Online booking",
   "dashboard.allServices": "All services",
   "dashboard.byServiceType": "By service type",
   "dashboard.byLocation": "By location",
@@ -4462,6 +4498,24 @@ const fi: TranslationKeys = {
   "dashboard.activeResources": "Aktiiviset resurssit",
   "dashboard.bookingLink": "Varauslinkki",
   "dashboard.bookingLinkDesc": "Jaa tämä linkki asiakkaillesi, jotta he voivat tehdä varauksia.",
+  "dashboard.shareTitle": "Lisää varaus omille verkkosivuillesi",
+  "dashboard.shareDesc": "Voit lisätä varaussivun omille sivuillesi alasivuna, painikkeena tai omalla verkko-osoitteella.",
+  "dashboard.shareTabEmbed": "Liitä sivuillesi",
+  "dashboard.shareTabButton": "Linkki ja painike",
+  "dashboard.shareTabDomain": "Oma osoite",
+  "dashboard.shareEmbedDesc": "Liitä tämä sille sivulle, jolla haluat varauksen näkyvän, esimerkiksi sivustosi.fi/varaa. Lomake näkyy omalla sivullasi ilman meidän ylä- ja alapalkkia.",
+  "dashboard.shareEmbedHint": "Säädä korkeutta tarvittaessa. Värit, logo ja hinnat tulevat automaattisesti mukaan.",
+  "dashboard.shareButtonDesc": "Liitä tämä kohtaan, jossa haluat Varaa nyt -painikkeen, tai käytä pelkkää alla olevaa osoitetta.",
+  "dashboard.shareButtonHint": "Varaussivu avautuu uuteen välilehteen, joten omat sivusi jäävät auki.",
+  "dashboard.shareButtonLabel": "Varaa nyt",
+  "dashboard.shareDomainDesc": "Voit käyttää myös omaa verkko-osoitetta, esimerkiksi varaa.sivustosi.fi.",
+  "dashboard.shareDomainStep1": "Kirjaudu sinne, missä verkkotunnustasi hallitaan, esimerkiksi verkkotunnuksen tarjoajalle tai sivustosi ylläpitoon.",
+  "dashboard.shareDomainStep2": "Tee ohjaus osoitteesta varaa.sivustosi.fi alla olevaan osoitteeseen.",
+  "dashboard.shareDomainStep3": "Tallenna ja odota hetki, kokeile sitten osoitetta selaimessa.",
+  "dashboard.shareDomainHint": "Ohjauksen jälkeen asiakas päätyy varaussivullesi, mutta selaimen osoitepalkissa näkyy meidän osoite. Jos haluat oman osoitteen pysyvän näkyvissä, käytä liittämistä sivuillesi.",
+  "dashboard.shareCopyCode": "Kopioi koodi",
+  "dashboard.shareCopyAddress": "Kopioi osoite",
+  "dashboard.shareIframeTitle": "Verkkovaraus",
   "dashboard.allServices": "Kaikki palvelut",
   "dashboard.byServiceType": "Palvelutyypin mukaan",
   "dashboard.byLocation": "Sijainnin mukaan",
@@ -6393,6 +6447,24 @@ const sv: TranslationKeys = {
   "dashboard.activeResources": "Aktiva resurser",
   "dashboard.bookingLink": "Bokningslänk",
   "dashboard.bookingLinkDesc": "Dela denna länk med dina kunder så att de kan boka.",
+  "dashboard.shareTitle": "Lägg till bokning på din egen webbplats",
+  "dashboard.shareDesc": "Lägg bokningssidan på din webbplats som en undersida, en knapp eller med en egen webbadress.",
+  "dashboard.shareTabEmbed": "Bädda in på din sida",
+  "dashboard.shareTabButton": "Länk och knapp",
+  "dashboard.shareTabDomain": "Egen adress",
+  "dashboard.shareEmbedDesc": "Klistra in detta på den sida där bokningen ska visas, till exempel dinsida.se/bokning. Formuläret visas på din egen sida, utan vårt sidhuvud och sidfot.",
+  "dashboard.shareEmbedHint": "Justera höjden om det behövs. Färger, logotyp och priser följer med automatiskt.",
+  "dashboard.shareButtonDesc": "Klistra in detta där du vill ha en Boka nu-knapp, eller länka bara till adressen nedan.",
+  "dashboard.shareButtonHint": "Bokningssidan öppnas i en ny flik så att besökaren behåller din sida öppen.",
+  "dashboard.shareButtonLabel": "Boka nu",
+  "dashboard.shareDomainDesc": "Du kan också använda en egen webbadress, till exempel bokning.dinsida.se.",
+  "dashboard.shareDomainStep1": "Logga in där din domän hanteras, till exempel hos din domänleverantör eller webbvärd.",
+  "dashboard.shareDomainStep2": "Skapa en vidarebefordran från bokning.dinsida.se till adressen nedan.",
+  "dashboard.shareDomainStep3": "Spara och vänta en stund, testa sedan adressen i webbläsaren.",
+  "dashboard.shareDomainHint": "Efter vidarebefordran kommer besökaren till din bokningssida men ser vår adress i adressfältet. Vill du att din egen adress syns, använd inbäddning i stället.",
+  "dashboard.shareCopyCode": "Kopiera kod",
+  "dashboard.shareCopyAddress": "Kopiera adress",
+  "dashboard.shareIframeTitle": "Onlinebokning",
   "dashboard.allServices": "Alla tjänster",
   "dashboard.byServiceType": "Per tjänstetyp",
   "dashboard.byLocation": "Per plats",
