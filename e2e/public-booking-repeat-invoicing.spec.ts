@@ -69,6 +69,7 @@ test.describe("Repeat invoicing of the same booking", () => {
         breakfast_price_per_person: BREAKFAST_RATE,
         is_active: true,
         approval_status: "approved",
+        offers_table_reservation: false,
       },
       {
         tenant_id: tenantId,
