@@ -289,32 +289,68 @@ describe("OffersManager: cross-booking pricing on offer confirmation", () => {
     expect(toast.error).not.toHaveBeenCalled();
   });
 
-  it("leaves the price empty instead of guessing when no resource price matches", async () => {
-    currentOffers = [
-      baseOffer({
-        id: "offer-2",
-        linked_reservations: {
-          wellness: {
-            enabled: true,
-            resource_type: "wellness",
-            // Not one of the spa's sub-services, and the spa has several
-            // candidate prices — nothing may be invented here.
-            space: "Unknown treatment",
-            guests_count: 2,
-          },
+  /** Offer whose wellness leg cannot be priced automatically. */
+  const ambiguousOffer = () =>
+    baseOffer({
+      id: "offer-2",
+      linked_reservations: {
+        wellness: {
+          enabled: true,
+          resource_type: "wellness",
+          // Not one of the spa's sub-services, and the spa has several
+          // candidate prices — nothing may be invented here.
+          space: "Unknown treatment",
+          guests_count: 2,
         },
-      }),
-    ];
+      },
+    });
 
-    await confirmOffer();
+  it("warns and blocks confirmation until staff choose a price", async () => {
+    currentOffers = [ambiguousOffer()];
+    renderOffers();
 
+    await userEvent.click(await screen.findByRole("button", { name: /confirm/i }));
+
+    // Nothing is written yet: staff see a warning instead of an empty total.
+    expect(await screen.findByTestId("offer-price-warning")).toBeInTheDocument();
+    expect(insertedReservations).toHaveLength(0);
+    expect(updateOfferMutate).not.toHaveBeenCalled();
+
+    const confirmBtn = screen.getByTestId("offer-price-confirm");
+    expect(confirmBtn).toBeDisabled();
+
+    // Picking one of the resource's own prices unblocks the confirmation.
+    await userEvent.click(screen.getByRole("button", { name: /Massage/i }));
+    await waitFor(() => expect(confirmBtn).toBeEnabled());
+    await userEvent.click(confirmBtn);
+
+    await waitFor(() => expect(updateOfferMutate).toHaveBeenCalled());
     expect(insertedReservations).toHaveLength(2);
     const wellness = insertedReservations[1];
     expect(wellness.reservation_type).toBe("wellness");
-    expect(wellness).not.toHaveProperty("price_eur");
-    expect(isInvoicable(wellness)).toBe(false);
+    expect(wellness.price_eur).toBe(80);
+    expect(isInvoicable(wellness)).toBe(true);
 
     // The main leg is still priced from its own resource.
     expect(insertedReservations[0].price_eur).toBe(450);
+  });
+
+  it("lets staff deliberately leave the price empty, with a warning toast", async () => {
+    currentOffers = [ambiguousOffer()];
+    renderOffers();
+
+    await userEvent.click(await screen.findByRole("button", { name: /confirm/i }));
+    await screen.findByTestId("offer-price-warning");
+
+    await userEvent.click(screen.getByRole("checkbox"));
+    const confirmBtn = screen.getByTestId("offer-price-confirm");
+    await waitFor(() => expect(confirmBtn).toBeEnabled());
+    await userEvent.click(confirmBtn);
+
+    await waitFor(() => expect(updateOfferMutate).toHaveBeenCalled());
+    const wellness = insertedReservations[1];
+    expect(wellness).not.toHaveProperty("price_eur");
+    expect(isInvoicable(wellness)).toBe(false);
+    expect(toast.warning).toHaveBeenCalled();
   });
 });
