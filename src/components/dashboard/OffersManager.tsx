@@ -14,6 +14,11 @@ import { Plus, FileText, Check, Send, Printer, Archive, ArchiveRestore, Search, 
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  resolveOfferReservationPrice,
+  pickOfferResource,
+} from "@/lib/offer-reservation-pricing";
+
 import OfferCreateDialog from "./OfferCreateDialog";
 import OfferEmailDialog from "./OfferEmailDialog";
 import { useDateLocale } from "@/hooks/useDateLocale";
