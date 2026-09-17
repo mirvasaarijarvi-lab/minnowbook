@@ -1,5 +1,6 @@
 import { PDFDocument, rgb, PDFFont, PDFPage } from "pdf-lib";
 import type { TenantBranding } from "@/lib/offerPdf";
+import { reportAmounts, type ReportPricingRow } from "@/lib/report-pricing-accessor";
 
 /**
  * Invoice document for a single reservation.
