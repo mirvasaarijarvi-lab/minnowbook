@@ -110,7 +110,7 @@ describe("check-rls-cors-gate-config", () => {
   it("fails when a test step stops writing its own log file", () => {
     const r = run(fixture((y) => y.replaceAll("test-reports/logs/05-cors-offline.log", "/dev/null")));
     expect(r.code).toBe(1);
-    expect(r.stdout).toContain("Some gate steps do not persist their output");
+    expect(r.stdout).toContain("Gate step does not persist its output");
   });
 
   it("fails when the preflight step is removed", () => {
