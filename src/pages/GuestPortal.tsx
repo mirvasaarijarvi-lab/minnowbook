@@ -28,8 +28,9 @@ const GuestPortal = () => {
   const { token } = useParams<{ token: string }>();
   const t = useT();
   const tDynamic = useTDynamic();
-  const { showRefusal, clearRefusal } = useInvoiceRefusalNotice(token);
-  const guestInvoicedNotice = tDynamic("invoiceRefusal.guestNotice");
+  // Guest wording: every refusal code resolves to a sentence written for the
+  // guest, never the staff-facing "add the price first" text.
+  const { showRefusal, clearRefusal } = useInvoiceRefusalNotice(token, "guest");
   const [cancelOpen, setCancelOpen] = useState(false);
   const [newDate, setNewDate] = useState("");
   const [newTime, setNewTime] = useState("");
@@ -84,11 +85,9 @@ const GuestPortal = () => {
     onError: (err: Error) => {
       // When the server refuses because the booking is already invoiced (or a
       // related pricing rule), say exactly that instead of "try again".
-      const refusal = showRefusal(err, (r) =>
-        r.code === "INVOICED_LOCKED" ? guestInvoicedNotice : r.message,
-      );
+      const refusal = showRefusal(err);
       if (refusal.code === "UNKNOWN") {
-        // Not an invoicing refusal: replace it with the generic message.
+        // Not a refusal we recognise: replace it with the generic message.
         clearRefusal();
         toast.error(err.message || t("guest.portal.requestError"));
       }
@@ -116,9 +115,7 @@ const GuestPortal = () => {
       setCancelledByGuest(true);
     },
     onError: (err: Error) => {
-      const refusal = showRefusal(err, (r) =>
-        r.code === "INVOICED_LOCKED" ? guestInvoicedNotice : r.message,
-      );
+      const refusal = showRefusal(err);
       if (refusal.code === "UNKNOWN") {
         clearRefusal();
         toast.error(t("guest.portal.cancelError"));
