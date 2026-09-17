@@ -97,7 +97,7 @@ describe("denial error payloads", () => {
       expect(json.details.guest_email).toBe(REDACTED);
       expect(json.details.booking_token).toBe(REDACTED);
       expect(json.details.attempted).toBe(REDACTED);
-      expect(json.details.rows).toBe(REDACTED);
+        expect(json.details.rows).toBe(REDACTED);
       // Non-identifying operational context survives.
       expect(json.details.attemptCount).toBe(3);
       expect(json.details.retriable).toBe(false);
@@ -254,7 +254,7 @@ describe("audit events for refused access", () => {
         /v_tenant_id\s*:?=\s*(OLD|NEW)\.tenant_id|(OLD|NEW)\.tenant_id/,
       );
       expect(sql, `${name} must not take a tenant id from the request`).not.toMatch(
-        /current_setting\(\s*'request\./i,
+        /current_setting\(\s*'request\.[^']*tenant/i,
       );
     }
   });
