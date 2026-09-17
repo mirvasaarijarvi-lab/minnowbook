@@ -18,7 +18,7 @@
  * here must NEVER fail a test. The reporter treats a missing file as
  * "guard didn't run" and omits the section.
  */
-import { mkdirSync, readFileSync, writeFileSync, existsSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync, existsSync, rmSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 
 /**
@@ -129,5 +129,19 @@ export function readTenantGuardLog(path = tenantGuardRecordPath()): TenantGuardL
     return { records: [] };
   } catch {
     return { records: [] };
+  }
+}
+
+/**
+ * Delete the guard log so a fresh run cannot inherit records from an
+ * earlier run (e.g. a different report flavor executed minutes ago in the
+ * same working tree). Called by the reporter in `onInit`, before any
+ * worker appends to the file. Best-effort — never throws.
+ */
+export function resetTenantGuardLog(path = tenantGuardRecordPath()): void {
+  try {
+    if (existsSync(path)) rmSync(path, { force: true });
+  } catch {
+    // Diagnostics-only path — never fail the run over bookkeeping IO.
   }
 }
