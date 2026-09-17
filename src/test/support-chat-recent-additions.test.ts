@@ -48,6 +48,17 @@ const RECENT_FEATURES: Array<{ name: string; keywords: RegExp }> = [
   { name: "Stripe revenue dashboard", keywords: /Stripe revenue/i },
   { name: "Kitchen orders", keywords: /Kitchen orders|keittiötilaukset|kökets beställningar/i },
   { name: "Offers to Reservations conversion report", keywords: /Offers to Reservations|offer.*conversion|tarjouksista varauksiin|offerter till bokningar/i },
+  { name: "Booking invoice PDF", keywords: /invoice PDF/i },
+  { name: "Report PDF downloads", keywords: /report PDF/i },
+  { name: "Peak hours and busiest weekday", keywords: /peak hours|busiest weekday/i },
+  { name: "Pick sheets", keywords: /pick sheet/i },
+  { name: "Booking channel split", keywords: /booking channel|channel split/i },
+  { name: "Email delivery timeline", keywords: /email delivery timeline/i },
+  { name: "Cross-booking audit view", keywords: /cross-booking audit/i },
+  { name: "Offer pricing from resources", keywords: /offer pricing from resources/i },
+  { name: "Kitchen menu", keywords: /kitchen menu/i },
+  { name: "Permission notices", keywords: /permission notice|request access/i },
+  { name: "Reschedule requests and guest cancellation", keywords: /reschedule request|guest cancellation/i },
 ];
 
 describe("'Recent additions' prompt section ↔ dashboard UI parity", () => {
