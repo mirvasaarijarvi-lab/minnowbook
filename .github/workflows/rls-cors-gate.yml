@@ -100,7 +100,10 @@ jobs:
           RLS_TEST_TENANT_B_EMAIL: ${{ secrets.RLS_TEST_TENANT_B_EMAIL }}
           RLS_TEST_TENANT_B_PASSWORD: ${{ secrets.RLS_TEST_TENANT_B_PASSWORD }}
           RLS_TEST_TENANT_B_ID: ${{ secrets.RLS_TEST_TENANT_B_ID }}
-        run: node scripts/ci/rls-cors-gate-preflight.mjs
+        run: |
+          set -o pipefail
+          node scripts/ci/rls-cors-gate-preflight.mjs 2>&1 \
+            | tee test-reports/logs/01-preflight.log
 
       # Run only the RLS + CORS slices of the security suite.
       #
