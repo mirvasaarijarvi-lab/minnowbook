@@ -182,7 +182,10 @@ describe.runIf(canRun)(
       await service.auth.admin.deleteUser(seeded.authUserId).catch(() => {});
     }, 60_000);
 
-    it("returns the image for an active + approved parent resource", async () => {
+    it("hides even the active + approved image from a non-member", async () => {
+      // The public image policy's EXISTS check reads `resources` as the
+      // caller, and the public `resources` read policy is scoped to `anon`,
+      // so a signed-in non-member is strictly more restricted than anon.
       if (!seeded || !authed) throw new Error("seed missing");
       const { data, error } = await authed
         .from("resource_images")
@@ -190,8 +193,7 @@ describe.runIf(canRun)(
         .eq("id", seeded.visible.imageId)
         .maybeSingle();
       expect(error).toBeNull();
-      expect(data?.id).toBe(seeded.visible.imageId);
-      expect(data?.image_url).toBe(seeded.visible.imageUrl);
+      expect(data).toBeNull();
     });
 
     it("hides the image when the parent resource is inactive (approved but is_active=false)", async () => {
@@ -227,7 +229,7 @@ describe.runIf(canRun)(
       expect(data).toBeNull();
     });
 
-    it("a bulk SELECT scoped to the seeded tenant returns only the visible image", async () => {
+    it("a bulk SELECT scoped to the seeded tenant returns nothing", async () => {
       if (!seeded || !authed) throw new Error("seed missing");
       const { data, error } = await authed
         .from("resource_images")
@@ -235,7 +237,8 @@ describe.runIf(canRun)(
         .eq("tenant_id", seeded.tenantId);
       expect(error).toBeNull();
       const ids = (data ?? []).map((r) => r.id).sort();
-      expect(ids).toEqual([seeded.visible.imageId].sort());
+      expect(ids).toEqual([]);
+      expect(ids).not.toContain(seeded.visible.imageId);
       expect(ids).not.toContain(seeded.inactive.imageId);
       expect(ids).not.toContain(seeded.pending.imageId);
       expect(ids).not.toContain(seeded.rejected.imageId);
