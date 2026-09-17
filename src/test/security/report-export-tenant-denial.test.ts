@@ -179,7 +179,7 @@ describe("report exports on tenant deny cases", () => {
       tenantGuard: deniedGuardLog(suite),
     } as unknown as ReportPayload;
 
-    const guarded = applyReportGuard(payload, deniedGuardLog(suite)).payload as ReportPayload;
+    const guarded = applyReportGuard(payload).payload as ReportPayload;
     const json = JSON.stringify(guarded);
     const html = renderHtml(guarded);
     // The guard section legitimately names the tenant pair (ids, roles, flags
