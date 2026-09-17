@@ -7028,6 +7028,7 @@ const sv: TranslationKeys = {
   "help.art10C2": "Väntelista: när en tid är fullbokad kan gäster gå med i en väntelista och meddelas automatiskt när en plats blir ledig.",
   "help.art10C3": "Google Kalender-synk: prenumerera på dina bokningar via iCal-flödet (Inställningar → Kalendersynk). CSV/PDF-export från Bokningar och Rapporter.",
   "help.art10C4": "Förbättringar i instrumentpanelen: mörkt läge, kortkommandon (tryck ?), Snabbåtgärds-FAB på mobil, introduktionscheckslista, granskningsloggfilter, analysdiagram, inloggningsbegränsning, säkerhetskopieringsstatus, publika omdömen/recensioner, flerspråkig publik bokningssida, kökets beställningar för restaurang- och lokalbokningar, och en Stripe-intäktspanel för superadmins.",
+  "help.art10C5": "Senaste tilläggen: faktura-PDF per bokning, PDF-nedladdning av periodrapporter, mest bokade timmar och veckodag, plocklistor för kök, logi och evenemang, fördelning av bokningskanaler (gäst eller personal), tidslinje för e-postleveranser per bokning, granskningsvy för korsbokningar, offertpriser hämtade från resurserna, köksmeny med priser, behörighetsmeddelanden med knappen Begär åtkomst, samt ombokningsförfrågningar och avbokning av gäst.",
   "help.guide1Q": "Hur hanterar jag bokningar?",
   "help.guide1A": "Gå till **Instrumentpanel → Bokningar** för att visa, filtrera, redigera och hantera alla bokningar.",
   "help.guide2Q": "Hur anpassar jag min bokningssida?",
