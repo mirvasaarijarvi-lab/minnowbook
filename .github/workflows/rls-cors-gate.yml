@@ -248,7 +248,7 @@ jobs:
 
   gate-summary:
     name: RLS/CORS gate summary
-    needs: [rls-cors-tests, rls-advisor-gate]
+    needs: [gate-config, rls-cors-tests, rls-advisor-gate]
     if: always()
     runs-on: ubuntu-latest
     steps:
