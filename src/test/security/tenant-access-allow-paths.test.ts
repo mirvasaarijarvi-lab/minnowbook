@@ -160,7 +160,7 @@ describe("allow-path matrix: own-tenant query paths", () => {
       const html = renderHtml(guarded.payload);
       expect(html).not.toContain("RLS DENIAL FAILED");
       expect(html).not.toContain("Returned rows");
-      expect(html).toContain(c.label.replace(/&/g, "&amp;"));
+      expect(html).toContain(c.label.replace(/&/g, "&amp;").replace(/'/g, "&#39;"));
     });
   });
 
