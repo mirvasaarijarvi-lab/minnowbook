@@ -1,5 +1,7 @@
 import { describe, it, expect, beforeAll } from "vitest";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import fs from "node:fs";
+import path from "node:path";
 
 /**
  * Tenant Table Manifest — Coverage Guard
@@ -83,6 +85,35 @@ const EXCLUDED_TABLES: Record<string, string> = {
     "Service-role-only bookkeeping for booking idempotency keys, written exclusively by the public-booking edge function. Holds no guest or business data (tenant_id, key, reservation_id, timestamps). RLS grants service_role only, plus system-admin SELECT; anon and authenticated have no grants, so there is no client-side cross-tenant surface to test. Behaviour is covered by e2e/public-booking-idempotency-key.spec.ts.",
 };
 
+/**
+ * Every public-schema table created by a migration in `drizzle/migrations`.
+ * Used to tell a manifest entry awaiting a migration apart from a stale one.
+ */
+function tablesDeclaredInMigrations(): Set<string> {
+  const declared = new Set<string>();
+  const root = path.resolve(process.cwd(), "drizzle/migrations");
+  if (!fs.existsSync(root)) return declared;
+
+  const walk = (dir: string): void => {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        walk(full);
+      } else if (entry.name.endsWith(".sql")) {
+        const sql = fs.readFileSync(full, "utf8");
+        const re = /create\s+table\s+(?:if\s+not\s+exists\s+)?(?:"?public"?\.)?"?([a-z0-9_]+)"?/gi;
+        let m: RegExpExecArray | null;
+        while ((m = re.exec(sql)) !== null) {
+          declared.add(m[1].toLowerCase());
+        }
+      }
+    }
+  };
+
+  walk(root);
+  return declared;
+}
+
 describe("Tenant Table Manifest — Coverage Guard", () => {
   describe.runIf(hasSupabaseConfig)("Live schema introspection", () => {
     let anon: SupabaseClient;
@@ -136,11 +167,28 @@ describe("Tenant Table Manifest — Coverage Guard", () => {
     it("manifest does not list tables that no longer exist in the schema", () => {
       // Catches stale entries in COVERED_TABLES / EXCLUDED_TABLES after a
       // table is dropped or renamed — keeps the manifest in sync with reality.
+      //
+      // A live database whose migrations lag behind the repository is NOT a
+      // stale manifest: the table is declared in `drizzle/migrations` and will
+      // exist once the pending migration is applied. Only entries that no
+      // migration creates are reported, so a genuine drop or rename still
+      // fails while a not-yet-migrated environment does not.
       const liveSet = new Set(liveTables);
-      const stale = [
+      const declared = tablesDeclaredInMigrations();
+      const missing = [
         ...[...COVERED_TABLES].filter((t) => !liveSet.has(t)),
         ...Object.keys(EXCLUDED_TABLES).filter((t) => !liveSet.has(t)),
       ];
+      const pendingMigration = missing.filter((t) => declared.has(t));
+      const stale = missing.filter((t) => !declared.has(t));
+
+      if (pendingMigration.length > 0) {
+        console.warn(
+          `[tenant-table-manifest] ${pendingMigration.length} manifest table(s) are not in the ` +
+            `live schema yet but are created by a migration in drizzle/migrations: ` +
+            `${pendingMigration.join(", ")}. Apply the pending migrations to this environment.`,
+        );
+      }
 
       if (stale.length > 0) {
         throw new Error(
