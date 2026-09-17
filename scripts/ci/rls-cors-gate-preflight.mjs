@@ -34,6 +34,17 @@ const TENANTS = ["A", "B"].map((letter) => ({
   tenantId: env[`RLS_TEST_TENANT_${letter}_ID`] || "",
 }));
 
+/**
+ * Dry run: same inputs, same refusal reasons, no side effects. Nothing is
+ * written to $GITHUB_OUTPUT or the step summary, no network call is made, and
+ * the process always exits 0 so it is safe to run on a laptop or in a hook.
+ * Enable with `--dry-run` or RLS_GATE_DRY_RUN=1.
+ */
+const DRY_RUN =
+  process.argv.slice(2).includes("--dry-run") ||
+  env.RLS_GATE_DRY_RUN === "1" ||
+  env.RLS_GATE_DRY_RUN === "true";
+
 const lines = [];
 const problems = [];
 const log = (line) => {
@@ -41,12 +52,15 @@ const log = (line) => {
   console.log(line);
 };
 const problem = (title, message) => {
-  console.log(`::error title=${title}::${message}`);
+  // In a dry run the GitHub annotation would turn a local report into a red
+  // step, so print the identical reason as plain text instead.
+  console.log(DRY_RUN ? `FAIL ${title}: ${message}` : `::error title=${title}::${message}`);
   lines.push(`FAIL ${title}: ${message}`);
   problems.push({ title, message });
 };
 
 const writeSummary = () => {
+  if (DRY_RUN) return;
   if (!env.GITHUB_STEP_SUMMARY) return;
   appendFileSync(
     env.GITHUB_STEP_SUMMARY,
@@ -58,6 +72,7 @@ const writeSummary = () => {
 const oneLine = (value) => String(value).replace(/[\r\n]+/g, " ").trim().slice(0, 400);
 
 const setOutput = (mode) => {
+  if (DRY_RUN) return;
   if (!env.GITHUB_OUTPUT) return;
   const out = [`mode=${mode}\n`];
   if (mode === "denied") {
@@ -78,11 +93,26 @@ const setOutput = (mode) => {
 const finish = (code, mode) => {
   setOutput(mode);
   writeSummary();
+  if (DRY_RUN) {
+    console.log("");
+    console.log(`Dry run verdict: mode=${mode}, real run would exit ${code}.`);
+    if (problems.length > 0) {
+      console.log(`Refusal reason(s): ${problems.length}`);
+      for (const p of problems) console.log(`  - ${p.title}: ${p.message}`);
+    }
+    console.log("No files written, no annotations emitted, nothing changed.");
+    process.exit(0);
+  }
   process.exit(code);
 };
 
 
 const present = (value) => (value ? "present" : "MISSING");
+
+if (DRY_RUN) {
+  log("Dry run: reporting only. No output files, no annotations, no network calls.");
+  log("");
+}
 
 log("Configuration inputs (values never printed):");
 log(`  VITE_SUPABASE_URL                ${present(URL_)}`);
@@ -167,10 +197,27 @@ if (!envCredsComplete && !SERVICE) {
     );
     finish(1, "denied");
   }
+  const offlineWarning =
+    "RLS/CORS gate running offline only: No tenant credentials configured (RLS_TEST_TENANT_A/B_* or SUPABASE_SERVICE_ROLE_KEY), so the live RLS suites will skip. Only the offline CORS checks gate this run.";
   console.log(
-    "::warning title=RLS/CORS gate running offline only::No tenant credentials configured (RLS_TEST_TENANT_A/B_* or SUPABASE_SERVICE_ROLE_KEY), so the live RLS suites will skip. Only the offline CORS checks gate this run.",
+    DRY_RUN
+      ? `WARN ${offlineWarning}`
+      : `::warning title=RLS/CORS gate running offline only::${offlineWarning.replace(/^[^:]+: /, "")}`,
   );
   finish(0, "skip");
+}
+
+if (DRY_RUN) {
+  log("");
+  log("Static configuration checks passed. A real run would now verify, over the network:");
+  if (envCredsComplete) {
+    for (const t of TENANTS) {
+      log(`  - tenant ${t.letter}: password sign-in, then reading its own membership row`);
+    }
+  } else {
+    log("  - the service role key can list users to auto-provision the test tenants");
+  }
+  finish(0, "live");
 }
 
 const timeout = Number(env.PREFLIGHT_TIMEOUT_MS || 20000);

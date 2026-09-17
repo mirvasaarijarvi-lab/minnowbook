@@ -36,6 +36,7 @@
     "test:ci": "bash scripts/test-ci.sh",
     "check:permission-arity": "node scripts/ci/check-permission-arity.mjs",
     "check:rls-cors-gate": "node scripts/ci/check-rls-cors-gate-config.mjs",
+    "check:rls-cors-gate:dry-run": "node scripts/ci/rls-cors-gate-preflight.mjs --dry-run",
     "check:lockfile": "node scripts/ci/preflight-manifest-drift.mjs",
     "lock:heal": "node scripts/ci/heal-bun-lockfile.mjs",
     "lock:heal:check": "node scripts/ci/heal-bun-lockfile.mjs --check",
