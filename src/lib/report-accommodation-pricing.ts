@@ -34,19 +34,41 @@ export const calcNights = (r: Pick<AccommodationPricingRow, "date" | "check_out_
   return d > 0 ? d : 1;
 };
 
-/** Breakfast component of the stored total: price per person x guests x nights. */
-export const calcBreakfastPrice = (r: AccommodationPricingRow) => {
-  if (!r.breakfast_included || !isAccommodationRow(r)) return 0;
-  return (
-    (r.breakfast_price_per_person ?? DEFAULT_BREAKFAST_PRICE_PER_PERSON) *
-    (r.guests_count ?? 1) *
-    calcNights(r)
-  );
+/**
+ * Round to whole cents. Reports are money, so every figure is snapped to a cent
+ * before it is shown or summed; this also removes binary floating point dust
+ * (0.1 * 3 = 0.30000000000000004) that would otherwise make the room line and
+ * the breakfast line miss the charged total by a fraction of a cent.
+ */
+export const roundCents = (n: number) => {
+  if (!Number.isFinite(n)) return 0;
+  return Math.round((n + Number.EPSILON * Math.sign(n) * Math.abs(n)) * 100) / 100;
 };
 
-/** Room component: the stored total minus breakfast, never negative. */
+/** The charged amount, snapped to cents: room + breakfast always equals this. */
+export const calcChargedTotal = (r: Pick<AccommodationPricingRow, "price_eur">) =>
+  roundCents(r.price_eur ?? 0);
+
+/**
+ * Breakfast component of the stored total: price per person x guests x nights,
+ * rounded to cents and never more than the charged total (so the room line can
+ * stay non-negative without the split drifting away from the total).
+ */
+export const calcBreakfastPrice = (r: AccommodationPricingRow) => {
+  if (!r.breakfast_included || !isAccommodationRow(r)) return 0;
+  const raw = roundCents(
+    (r.breakfast_price_per_person ?? DEFAULT_BREAKFAST_PRICE_PER_PERSON) *
+      (r.guests_count ?? 1) *
+      calcNights(r),
+  );
+  const total = calcChargedTotal(r);
+  if (raw <= 0) return 0;
+  return Math.min(raw, Math.max(0, total));
+};
+
+/** Room component: the charged total minus breakfast, never negative. */
 export const calcRoomPrice = (r: AccommodationPricingRow) => {
-  const total = r.price_eur ?? 0;
+  const total = calcChargedTotal(r);
   if (!isAccommodationRow(r)) return total;
-  return Math.max(0, total - calcBreakfastPrice(r));
+  return roundCents(Math.max(0, total - calcBreakfastPrice(r)));
 };

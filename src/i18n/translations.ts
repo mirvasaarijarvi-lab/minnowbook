@@ -4438,7 +4438,7 @@ const fi: TranslationKeys = {
   "howItWorks.step2Title": "Luo yrityksesi alustalle",
   "howItWorks.step2Desc": "Lataa brändisi, lisää toimipisteesi ja toimintasi sekä määritä aukioloajat, hinnoittelu, käyttöaste ja paljon muuta.",
   "howItWorks.step3Title": "Jaa varauslinkkisi",
-  "howItWorks.step3Desc": "Lähetä yrityksellesi räätälöity varaussivu asiakkaille ja aloita varausten vastaanottaminen.",
+  "howItWorks.step3Desc": "Jaa yrityksesi räätälöity varaussivu asiakkaille suoraan sekä lisää se kotisivuillesi ja aloita varausten vastaanottaminen.",
 
   // Pricing
   "pricing.title": "Yksinkertainen ja läpinäkyvä hinnoittelu",
