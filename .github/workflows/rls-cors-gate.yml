@@ -343,6 +343,8 @@ jobs:
       - name: Fetch advisors and gate on RLS findings
         run: |
           set -euo pipefail
+          mkdir -p test-reports/logs
+          exec > >(tee test-reports/logs/06-advisor.log) 2>&1
           if [ -z "${SUPABASE_ACCESS_TOKEN:-}" ] || [ -z "${SUPABASE_PROJECT_REF:-}" ]; then
             echo "::warning::SUPABASE_ACCESS_TOKEN / SUPABASE_PROJECT_REF not configured — skipping advisor RLS gate."
             exit 0
