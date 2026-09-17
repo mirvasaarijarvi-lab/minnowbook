@@ -187,7 +187,19 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://mimmobook.com/book/probe-1789626861843</loc>
+    <lastmod>2026-09-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://mimmobook.com/book/ci-0-shows-site-name--col-d3d1debd</loc>
+    <lastmod>2026-09-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://mimmobook.com/book/ci-resimg-auth-1789626956701-xhoglh</loc>
     <lastmod>2026-09-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
