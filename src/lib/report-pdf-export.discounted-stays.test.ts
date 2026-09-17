@@ -253,10 +253,16 @@ describe("period report PDF for discounted multi-night stays", () => {
   it.skipIf(!hasPdfToText)("never prints a list price or a discount step", () => {
     const text = pdfText(buildPdfBytes());
 
+    // A figure is only forbidden if no row legitimately charges that amount
+    // (two different stays can coincide, e.g. one stay's list price equals
+    // another stay's discounted total).
+    const chargedCents = new Set(
+      CASES.map((c) => Math.round(reportAmounts(c.row).charged * 100)),
+    );
+
     for (const c of CASES) {
-      const charged = reportAmounts(c.row).charged;
       const forbidden = [c.listPrice, ...c.intermediates].filter(
-        (v) => Math.round(v * 100) !== Math.round(charged * 100),
+        (v) => !chargedCents.has(Math.round(v * 100)),
       );
       for (const value of forbidden) {
         expect(
