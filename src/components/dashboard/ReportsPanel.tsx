@@ -41,12 +41,11 @@ import DashboardTooltip from "./DashboardTooltip";
 import { downloadReportPdf } from "@/lib/reportsPdf";
 import { useAnalyticsT } from "@/i18n/analytics";
 import {
+  reportAmounts,
+  sumReportAmounts,
   isAccommodationRow,
   calcNights as calcNightsFor,
-  calcBreakfastPrice as calcBreakfastPriceFor,
-  calcRoomPrice as calcRoomPriceFor,
-  effectiveChargedTotal as effectiveChargedTotalFor,
-} from "@/lib/report-accommodation-pricing";
+} from "@/lib/report-pricing-accessor";
 
 /** Bar colours for the PDF chart, mirroring the on-screen series order. */
 const PDF_SERIES_COLORS: [number, number, number][] = [[37, 99, 235], [217, 119, 6], [148, 163, 184], [16, 185, 129]];
@@ -293,21 +292,21 @@ const ReportsPanel = () => {
     }
   }, [period, start, end, dateLocale]);
 
-  // Shared, unit-tested accommodation revenue split (see
-  // src/lib/report-accommodation-pricing.ts): room + breakfast always equals
-  // the stored total the guest is charged.
+  // Every money figure on every report surface (screen table, CSV, print view,
+  // PDF export, KPI cards, period totals) comes from the single accessor in
+  // src/lib/report-pricing-accessor.ts. Nothing here does its own arithmetic on
+  // price_eur: room + breakfast always equals the amount the guest is charged.
+  const amountsOf = useCallback((r: ReservationRow) => reportAmounts(r), []);
+
   const calcNights = useCallback((r: ReservationRow) => calcNightsFor(r), []);
 
   const isAccommodation = useCallback((r: ReservationRow) => isAccommodationRow(r), []);
 
-  const calcBreakfastPrice = useCallback((r: ReservationRow) => calcBreakfastPriceFor(r), []);
+  const calcBreakfastPrice = useCallback((r: ReservationRow) => amountsOf(r).breakfast, [amountsOf]);
 
-  const calcRoomPrice = useCallback((r: ReservationRow) => calcRoomPriceFor(r), []);
+  const calcRoomPrice = useCallback((r: ReservationRow) => amountsOf(r).room, [amountsOf]);
 
-  // Single source for the amount every report surface shows (screen, CSV, print
-  // view, PDF export, grand total). Cents-exact, so room + breakfast always
-  // equals it. Restaurant "according to menu" has no fixed price.
-  const effectivePrice = useCallback((r: ReservationRow) => effectiveChargedTotalFor(r), []);
+  const effectivePrice = useCallback((r: ReservationRow) => amountsOf(r).charged, [amountsOf]);
 
 
   const stats = useMemo(() => {
@@ -328,9 +327,9 @@ const ReportsPanel = () => {
     const total = src.length;
     const invoiced = src.filter((r) => r.is_invoiced).length;
     const used = src.filter((r) => r.is_used).length;
-    const totalEur = src.reduce((s, r) => s + effectivePrice(r), 0);
-    const invoicedEur = src.filter((r) => r.is_invoiced).reduce((s, r) => s + effectivePrice(r), 0);
-    const usedEur = src.filter((r) => r.is_used).reduce((s, r) => s + effectivePrice(r), 0);
+    const totalEur = sumReportAmounts(src).charged;
+    const invoicedEur = sumReportAmounts(src.filter((r) => r.is_invoiced)).charged;
+    const usedEur = sumReportAmounts(src.filter((r) => r.is_used)).charged;
     const byType = (tp: string) => {
       const items = src.filter((r) => r.reservation_type === tp);
       const inv = items.filter((r) => r.is_invoiced);
@@ -338,9 +337,9 @@ const ReportsPanel = () => {
       return {
         total: items.length, invoiced: inv.length, notInvoiced: items.length - inv.length,
         used: usedItems.length, notUsed: items.length - usedItems.length,
-        totalEur: items.reduce((s, r) => s + effectivePrice(r), 0),
-        invoicedEur: inv.reduce((s, r) => s + effectivePrice(r), 0),
-        usedEur: usedItems.reduce((s, r) => s + effectivePrice(r), 0),
+        totalEur: sumReportAmounts(items).charged,
+        invoicedEur: sumReportAmounts(inv).charged,
+        usedEur: sumReportAmounts(usedItems).charged,
       };
     };
     const result: Record<string, any> = {
@@ -351,9 +350,9 @@ const ReportsPanel = () => {
     };
     allowedTypes.forEach((tp) => { result[tp] = byType(tp); });
     return result;
-  }, [typeFilteredRaw, effectivePrice, allowedTypes]);
+  }, [typeFilteredRaw, allowedTypes]);
 
-  const grandTotal = useMemo(() => reservations.reduce((s, r) => s + effectivePrice(r), 0), [reservations, effectivePrice]);
+  const grandTotal = useMemo(() => sumReportAmounts(reservations).charged, [reservations]);
 
   // Offers in period (by created_at) and conversion to reservations
   const { data: offersInPeriod = [] } = useQuery({
@@ -693,20 +692,22 @@ const ReportsPanel = () => {
   // Accommodation-specific stats
   const accomStats = useMemo(() => {
     const accomReservations = typeFilteredRaw.filter((r) => isAccommodation(r));
+    const totals = sumReportAmounts(accomReservations);
     const totalNights = accomReservations.reduce((s, r) => s + calcNights(r), 0);
-    const totalRoomRevenue = accomReservations.reduce((s, r) => s + calcRoomPrice(r), 0);
+    const totalRoomRevenue = totals.room;
     const bfReservations = accomReservations.filter((r) => r.breakfast_included);
     const totalBfNights = bfReservations.reduce((s, r) => s + calcNights(r), 0);
     const totalBfGuests = bfReservations.reduce((s, r) => s + (r.guests_count ?? 1), 0);
-    const totalBfRevenue = accomReservations.reduce((s, r) => s + calcBreakfastPrice(r), 0);
+    const totalBfRevenue = totals.breakfast;
     const avgBfPrice = bfReservations.length > 0 ? totalBfRevenue / (totalBfNights * totalBfGuests || 1) : 0;
-    const totalAccomRevenue = totalRoomRevenue + totalBfRevenue;
+    // Room + breakfast is the charged total by construction of the accessor.
+    const totalAccomRevenue = totals.charged;
     return {
       count: accomReservations.length, totalNights, totalRoomRevenue,
       bfCount: bfReservations.length, totalBfNights, totalBfGuests, totalBfRevenue, avgBfPrice,
       totalAccomRevenue,
     };
-  }, [typeFilteredRaw, isAccommodation, calcNights, calcRoomPrice, calcBreakfastPrice]);
+  }, [typeFilteredRaw, isAccommodation, calcNights]);
 
   // Uninvoiced stats for alert
   const uninvoicedStats = useMemo(() => {
@@ -714,9 +715,9 @@ const ReportsPanel = () => {
     return {
       count: notInv.length,
       total: typeFilteredRaw.length,
-      amount: notInv.reduce((s, r) => s + effectivePrice(r), 0),
+      amount: sumReportAmounts(notInv).charged,
     };
-  }, [typeFilteredRaw, effectivePrice]);
+  }, [typeFilteredRaw]);
 
   // Discount summary stats
   const discountStats = useMemo(() => {
