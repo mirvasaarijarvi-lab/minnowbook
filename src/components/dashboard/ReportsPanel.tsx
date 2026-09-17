@@ -692,20 +692,22 @@ const ReportsPanel = () => {
   // Accommodation-specific stats
   const accomStats = useMemo(() => {
     const accomReservations = typeFilteredRaw.filter((r) => isAccommodation(r));
+    const totals = sumReportAmounts(accomReservations);
     const totalNights = accomReservations.reduce((s, r) => s + calcNights(r), 0);
-    const totalRoomRevenue = accomReservations.reduce((s, r) => s + calcRoomPrice(r), 0);
+    const totalRoomRevenue = totals.room;
     const bfReservations = accomReservations.filter((r) => r.breakfast_included);
     const totalBfNights = bfReservations.reduce((s, r) => s + calcNights(r), 0);
     const totalBfGuests = bfReservations.reduce((s, r) => s + (r.guests_count ?? 1), 0);
-    const totalBfRevenue = accomReservations.reduce((s, r) => s + calcBreakfastPrice(r), 0);
+    const totalBfRevenue = totals.breakfast;
     const avgBfPrice = bfReservations.length > 0 ? totalBfRevenue / (totalBfNights * totalBfGuests || 1) : 0;
-    const totalAccomRevenue = totalRoomRevenue + totalBfRevenue;
+    // Room + breakfast is the charged total by construction of the accessor.
+    const totalAccomRevenue = totals.charged;
     return {
       count: accomReservations.length, totalNights, totalRoomRevenue,
       bfCount: bfReservations.length, totalBfNights, totalBfGuests, totalBfRevenue, avgBfPrice,
       totalAccomRevenue,
     };
-  }, [typeFilteredRaw, isAccommodation, calcNights, calcRoomPrice, calcBreakfastPrice]);
+  }, [typeFilteredRaw, isAccommodation, calcNights]);
 
   // Uninvoiced stats for alert
   const uninvoicedStats = useMemo(() => {
@@ -713,9 +715,9 @@ const ReportsPanel = () => {
     return {
       count: notInv.length,
       total: typeFilteredRaw.length,
-      amount: notInv.reduce((s, r) => s + effectivePrice(r), 0),
+      amount: sumReportAmounts(notInv).charged,
     };
-  }, [typeFilteredRaw, effectivePrice]);
+  }, [typeFilteredRaw]);
 
   // Discount summary stats
   const discountStats = useMemo(() => {
