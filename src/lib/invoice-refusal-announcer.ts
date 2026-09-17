@@ -111,10 +111,18 @@ export function restoreFocusAfterRefusal(previous: Element | null): void {
   if (!canUseDom()) return;
   const target = previous as HTMLElement | null;
   if (!target || typeof target.focus !== "function") return;
-  const active = document.activeElement;
-  const focusLost = !active || active === document.body || active === document.documentElement;
-  if (!focusLost) return;
-  if (!document.body.contains(target)) return;
-  if (target.hasAttribute("disabled") || target.getAttribute("aria-hidden") === "true") return;
-  target.focus({ preventScroll: true });
+
+  const attempt = () => {
+    const active = document.activeElement;
+    const focusLost = !active || active === document.body || active === document.documentElement;
+    if (!focusLost) return;
+    if (!document.body.contains(target)) return;
+    if (target.hasAttribute("disabled") || target.getAttribute("aria-hidden") === "true") return;
+    target.focus({ preventScroll: true });
+  };
+
+  // Once now, and once after the refused action's re-render has settled, since
+  // that render is usually what drops focus in the first place.
+  attempt();
+  setTimeout(attempt, 0);
 }
