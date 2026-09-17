@@ -264,14 +264,30 @@ describe.runIf(canRun)(
       expect(data).toBeNull();
     });
 
-    it("an authenticated outsider sees only the active + approved image", async () => {
+    it("an authenticated outsider sees NO images from a tenant they do not belong to", async () => {
+      // The public image policy's EXISTS check reads `resources` as the
+      // caller, and the public `resources` read policy is anon-only, so a
+      // signed-in outsider is strictly more restricted than anon here.
+      // Pinning this keeps a future loosening of the `resources` policies
+      // from silently widening cross-tenant image reads.
       if (!seeded || !outsider) throw new Error("seed missing");
       const { data, error } = await outsider
         .from("resource_images")
         .select("id")
         .eq("tenant_id", seeded.tenantId);
       expect(error).toBeNull();
-      expect((data ?? []).map((r) => r.id)).toEqual([seeded.visible.imageId]);
+      expect(data ?? []).toEqual([]);
+    });
+
+    it("an authenticated outsider cannot fetch the active + approved image by id", async () => {
+      if (!seeded || !outsider) throw new Error("seed missing");
+      const { data, error } = await outsider
+        .from("resource_images")
+        .select("id")
+        .eq("id", seeded.visible.imageId)
+        .maybeSingle();
+      expect(error).toBeNull();
+      expect(data).toBeNull();
     });
 
     it("the member read policy grants SELECT only: staff cannot insert an image", async () => {
