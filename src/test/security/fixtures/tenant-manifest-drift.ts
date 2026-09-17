@@ -100,3 +100,72 @@ export function staleManifestError(stale: string[]): string {
     `${stale.join(", ")}. Remove them from COVERED_TABLES / EXCLUDED_TABLES.`
   );
 }
+
+/** One tenant environment's view of the live schema. */
+export interface TenantSchemaView {
+  /** Stable tenant identifier (uuid in live runs, label in offline tests). */
+  tenant: string;
+  /** Tables the live database reports as tenant-scoped for this tenant. */
+  liveTables: Iterable<string>;
+}
+
+export type TenantDriftVerdict = "ok" | "pending" | "stale";
+
+export interface TenantDriftResult {
+  tenant: string;
+  drift: ManifestDrift;
+  verdict: TenantDriftVerdict;
+}
+
+export interface MultiTenantDrift {
+  /** One result per input tenant, in input order. Never merged. */
+  perTenant: TenantDriftResult[];
+  /** Tenants whose manifest entries only await a pending migration. */
+  pendingTenants: string[];
+  /** Tenants with at least one genuinely dropped table — these must fail. */
+  staleTenants: string[];
+}
+
+/**
+ * Classify manifest drift for several tenant environments at once, keeping
+ * each tenant's result strictly separate.
+ *
+ * Isolation rule: a table is judged only against the tenant whose schema
+ * view reported it. One tenant lagging on migrations can never make another
+ * tenant's dropped table look tolerable, and one tenant being healthy can
+ * never hide a second tenant's drift.
+ */
+export function classifyManifestDriftForTenants(input: {
+  manifestTables: Iterable<string>;
+  tenants: TenantSchemaView[];
+  declaredInMigrations: Iterable<string>;
+}): MultiTenantDrift {
+  const manifestTables = [...input.manifestTables];
+  const declaredInMigrations = [...input.declaredInMigrations];
+  const perTenant = input.tenants.map((view) => {
+    const drift = classifyManifestDrift({
+      manifestTables,
+      liveTables: view.liveTables,
+      declaredInMigrations,
+    });
+    const verdict: TenantDriftVerdict =
+      drift.stale.length > 0 ? "stale" : drift.pendingMigration.length > 0 ? "pending" : "ok";
+    return { tenant: view.tenant, drift, verdict };
+  });
+  return {
+    perTenant,
+    pendingTenants: perTenant.filter((r) => r.verdict === "pending").map((r) => r.tenant),
+    staleTenants: perTenant.filter((r) => r.verdict === "stale").map((r) => r.tenant),
+  };
+}
+
+/** Failure text naming each tenant with its own dropped tables. */
+export function staleTenantsError(result: MultiTenantDrift): string {
+  const parts = result.perTenant
+    .filter((r) => r.verdict === "stale")
+    .map((r) => `${r.tenant}: ${r.drift.stale.join(", ")}`);
+  return (
+    `Manifest lists table(s) that no longer exist for ${parts.length} tenant(s) ` +
+    `(${parts.join(" | ")}). Remove them from COVERED_TABLES / EXCLUDED_TABLES.`
+  );
+}
