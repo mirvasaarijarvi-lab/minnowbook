@@ -538,6 +538,103 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
       throw new Error("This reservation type is not available");
     }
 
+    // ---------- Explicit idempotency key ----------
+    // A client may send its own key (header `Idempotency-Key`, or
+    // `idempotency_key` in the body) with a create request. Repeating the
+    // request with the same key never creates a second reservation and never
+    // claims a promo code again: the key maps to the one reservation the first
+    // accepted request produced.
+    const rawIdemKey =
+      (req.headers.get("idempotency-key") ?? "").trim() ||
+      (typeof body.idempotency_key === "string" ? body.idempotency_key.trim() : "");
+    let idempotencyKey: string | null = null;
+    if (rawIdemKey) {
+      if (rawIdemKey.length < 8 || rawIdemKey.length > 200 || /[\u0000-\u001f]/.test(rawIdemKey)) {
+        return new Response(
+          JSON.stringify({
+            error: "Idempotency key must be 8 to 200 characters without control characters",
+          }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+      idempotencyKey = rawIdemKey;
+    }
+
+    /** Return the reservation a previous request with this key already created. */
+    const respondWithExisting = async (reservationId: string) => {
+      const { data: existingRow } = await adminClient
+        .from("reservations")
+        .select("id, linked_group_id, guests_count")
+        .eq("id", reservationId)
+        .maybeSingle();
+      const { capacity_total: capTotal, current_load: capLoad } = await computeCapacity(
+        adminClient,
+        tenant_id,
+        reservation_type,
+        date,
+        validateUuid(body.site_id, "site_id", false),
+      );
+      return new Response(
+        JSON.stringify({
+          success: true,
+          duplicate: true,
+          idempotent_replay: true,
+          warning: null,
+          reservation: {
+            id: reservationId,
+            linked_group_id: existingRow?.linked_group_id ?? null,
+          },
+          linked_group_id: existingRow?.linked_group_id ?? null,
+          linked_siblings: [],
+          capacity: {
+            current_load: capLoad,
+            capacity_total: capTotal,
+            requested: guests_count ?? estimated_guests ?? 0,
+          },
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    };
+
+    if (idempotencyKey) {
+      const { data: known } = await adminClient
+        .from("booking_idempotency")
+        .select("reservation_id")
+        .eq("tenant_id", tenant_id)
+        .eq("idempotency_key", idempotencyKey)
+        .maybeSingle();
+      if (known?.reservation_id) {
+        console.log(
+          `[public-booking] idempotent replay; returning reservation ${known.reservation_id}`,
+        );
+        return await respondWithExisting(known.reservation_id);
+      }
+      if (!known) {
+        // Claim the key before doing any work that has side effects (promo
+        // claim, reservation insert, emails). A concurrent request with the
+        // same key loses this insert and waits for the winner's reservation.
+        const { error: claimErr } = await adminClient
+          .from("booking_idempotency")
+          .insert({ tenant_id, idempotency_key: idempotencyKey });
+        if (claimErr) {
+          for (let attempt = 0; attempt < 10; attempt++) {
+            const { data: winner } = await adminClient
+              .from("booking_idempotency")
+              .select("reservation_id")
+              .eq("tenant_id", tenant_id)
+              .eq("idempotency_key", idempotencyKey)
+              .maybeSingle();
+            if (winner?.reservation_id) return await respondWithExisting(winner.reservation_id);
+            await new Promise((r) => setTimeout(r, 300));
+          }
+          return new Response(
+            JSON.stringify({ error: "A booking with this idempotency key is still in progress" }),
+            { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+          );
+        }
+      }
+    }
+
     // ---------- Retry de-duplication ----------
     // A guest's browser (or a flaky network) can re-send the very same booking
     // request: a double click, a refresh mid-submit, an automatic retry. Such a
