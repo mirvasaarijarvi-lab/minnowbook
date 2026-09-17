@@ -129,7 +129,6 @@ test.describe("Multi-resource invoice line items", () => {
         .insert({
           tenant_id: tenantId,
           site_id: null,
-          resource_id: resourceIds[spec.resourceIndex],
           reservation_type: spec.resource_type,
           status: "confirmed",
           date: isoDate(320),
