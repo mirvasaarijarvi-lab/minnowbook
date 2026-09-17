@@ -450,8 +450,8 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
       toast.success(vars.value ? t("dashboard.invoiced") : t("dashboard.statusUpdated"));
       setLinkedInvoicedPrompt(null);
     },
-    onError: () => {
-      toast.error("Error updating invoiced status");
+    onError: (err: unknown) => {
+      toast.error(formatInvoiceRefusal(err).message);
     },
   });
 
@@ -467,8 +467,11 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["reservations"] });
     },
-    onError: (err: any) => {
-      toast.error(err?.message || "Error updating invoiced status");
+    onError: (err: unknown) => {
+      // Show the exact reason the server refused (missing price, an amount
+      // that does not reconcile, an already invoiced row, or permissions)
+      // instead of one generic sentence for all of them.
+      toast.error(formatInvoiceRefusal(err).message);
     },
   });
 
@@ -495,7 +498,9 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
     if (checked) {
       const hasPrice = await linkedGroupHasPrice(id);
       if (!hasPrice) {
-        toast.error("Add a price before marking this reservation as invoiced.");
+        toast.error(
+          formatInvoiceRefusal("Add a price before marking this reservation as invoiced.").message,
+        );
         return;
       }
     }
