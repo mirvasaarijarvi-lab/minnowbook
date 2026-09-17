@@ -294,8 +294,8 @@ test.describe("Concurrent invoicing identity", () => {
         "lines sum to the group total",
       ).toBe(group.total);
       // Each leg appears once, not once per concurrent request.
-      const stayLines = group.lines.filter((l) => l.label.includes("Identity Room"));
-      const dinnerLines = group.lines.filter((l) => l.label.includes("Identity Table"));
+      const stayLines = group.lines.filter((l) => l.legId === stay.id);
+      const dinnerLines = group.lines.filter((l) => l.legId === dinner.id);
       expect(stayLines.length, "one room line plus one breakfast line").toBe(2);
       expect(dinnerLines.length, "one line for the dinner").toBe(1);
 
