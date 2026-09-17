@@ -284,11 +284,11 @@ function renderHtml(payload: ReportPayload): string {
     })
     .join("\n");
 
-  return `<!doctype html>
+  return `<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Cross-Tenant RLS Test Report</title>
 <style>
   :root { color-scheme: light dark; }
@@ -337,10 +337,11 @@ function renderHtml(payload: ReportPayload): string {
   .guard-rowdetail { color: #94a3b8; font-size: 11px; margin-top: 2px; }
   .guard-rolebadge { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
   .guard-rolebadge code { font-size: 12px; }
+  .title-flavor { color: #94a3b8; font-weight: 400; font-size: 14px; }
 </style>
 </head>
 <body>
-  <h1>Cross-Tenant RLS Test Report <span style="color:#94a3b8;font-weight:400;font-size:14px">· ${escapeHtml(flavor)}</span></h1>
+  <h1>Cross-Tenant RLS Test Report <span class="title-flavor">· ${escapeHtml(flavor)}</span></h1>
   <div class="meta">Generated ${escapeHtml(generatedAt)} · Flavor <code>${escapeHtml(flavor)}</code> · Total duration ${totals.durationMs.toFixed(
     0,
   )} ms</div>
