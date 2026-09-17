@@ -225,11 +225,6 @@ describe.runIf(canRun)("reservation pricing fields — staff role matrix (live)"
   }
 
   // ─── Unauthorized actors ────────────────────────────────────────────
-  const unauthorized: Array<{ label: string; actor: Actor | null }> = [
-    { label: "anon guest", actor: null },
-    { label: "authenticated non-member", actor: null }, // filled in below
-  ];
-
   it("anon guests cannot create a booking carrying any pricing field", async () => {
     const anon = newAnon();
     for (const [field, value] of Object.entries(PRICING_FIELDS)) {
@@ -246,7 +241,6 @@ describe.runIf(canRun)("reservation pricing fields — staff role matrix (live)"
         .eq("guest_email", `ci+pricing-${label}@mimmobook.test`);
       expect(rows ?? [], `no row may exist after anon set ${field}`).toHaveLength(0);
     }
-    expect(unauthorized.length).toBe(2);
   }, 120_000);
 
   it("anon guests cannot edit pricing on an existing booking", async () => {
