@@ -76,6 +76,43 @@ describe("check-rls-cors-gate-config", () => {
     expect(r.stdout).toContain("Advisor input SUPABASE_ACCESS_TOKEN not wired");
   });
 
+  it("fails when the run logs are no longer uploaded", () => {
+    const r = run(fixture((y) => y.replaceAll("actions/upload-artifact@v4", "actions/checkout@v5")));
+    expect(r.code).toBe(1);
+    expect(r.stdout).toContain("Gate uploads no run logs");
+  });
+
+  it("fails when the log artifact is renamed", () => {
+    const r = run(fixture((y) => y.replaceAll("name: rls-cors-gate-logs\n", "name: something-else\n")));
+    expect(r.code).toBe(1);
+    expect(r.stdout).toContain("Run log artifact renamed or removed");
+  });
+
+  it("fails when a log upload no longer runs on failure", () => {
+    const r = run(
+      fixture((y) =>
+        y.replace(
+          "      - name: Upload RLS gate logs and report\n        if: always()\n",
+          "      - name: Upload RLS gate logs and report\n",
+        ),
+      ),
+    );
+    expect(r.code).toBe(1);
+    expect(r.stdout).toContain("Log upload is skipped on failure");
+  });
+
+  it("fails when the log index is dropped", () => {
+    const r = run(fixture((y) => y.replaceAll("00-index.txt", "notes.txt")));
+    expect(r.code).toBe(1);
+    expect(r.stdout).toContain("Log artifact has no index");
+  });
+
+  it("fails when a test step stops writing its own log file", () => {
+    const r = run(fixture((y) => y.replaceAll("test-reports/logs/05-cors-offline.log", "/dev/null")));
+    expect(r.code).toBe(1);
+    expect(r.stdout).toContain("Some gate steps do not persist their output");
+  });
+
   it("fails when the preflight step is removed", () => {
     const r = run(fixture((y) => y.replaceAll("scripts/ci/rls-cors-gate-preflight.mjs", "true")));
     expect(r.code).toBe(1);
