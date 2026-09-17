@@ -499,19 +499,26 @@ const ReportsPanel = () => {
       table: {
         head: [
           t("common.date"), t("reports.guest"), t("common.type"), t("common.guests"),
-          t("common.status"), t("reports.used"), t("reports.invoiced"), `${t("reports.totalPrice")} (EUR)`,
+          t("common.status"), t("reports.used"), t("reports.invoiced"),
+          `${t("common.price")} (EUR)`, `${t("reports.breakfast")} (EUR)`,
+          `${t("reports.totalPrice")} (EUR)`,
         ],
-        body: reservations.map((r) => [
-          format(new Date(r.date + "T00:00:00"), "d.M.yyyy"),
-          r.guest_name,
-          typeLabel(r.reservation_type),
-          String(r.guests_count || r.estimated_guests || "-"),
-          r.status,
-          r.is_used ? t("reports.yes") : t("reports.no"),
-          r.is_invoiced ? t("reports.yes") : t("reports.no"),
-          effectivePrice(r) > 0 ? effectivePrice(r).toFixed(2) : "-",
-        ]),
-        numericColumns: [3, 7],
+        body: reservations.map((r) => {
+          const cells = pdfPriceCells(r);
+          return [
+            format(new Date(r.date + "T00:00:00"), "d.M.yyyy"),
+            r.guest_name,
+            typeLabel(r.reservation_type),
+            String(r.guests_count || r.estimated_guests || "-"),
+            r.status,
+            r.is_used ? t("reports.yes") : t("reports.no"),
+            r.is_invoiced ? t("reports.yes") : t("reports.no"),
+            cells.room,
+            cells.breakfast,
+            cells.total,
+          ];
+        }),
+        numericColumns: [3, 7, 8, 9],
       },
       fileName: `report_${periodLabel.replace(/\s/g, "_")}${effectiveSiteName ? `_${effectiveSiteName.replace(/\s/g, "_")}` : ""}`,
     });
