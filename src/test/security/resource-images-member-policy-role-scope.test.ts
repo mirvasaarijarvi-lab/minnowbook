@@ -77,6 +77,38 @@ describe.runIf(canRun)(
       const stamp = Date.now();
       const rand = Math.random().toString(36).slice(2, 8);
 
+      async function makeUser(
+        prefix: string,
+        signIn: boolean,
+      ): Promise<{ id: string; client: SupabaseClient | null }> {
+        const email = `ci-resimg-${prefix}+${stamp}-${rand}@example.invalid`;
+        const password = `Pw!${rand}${stamp}${rand}`;
+        const { data: created, error: createErr } = await service.auth.admin.createUser({
+          email,
+          password,
+          email_confirm: true,
+        });
+        if (createErr || !created?.user) {
+          throw createErr ?? new Error(`auth user creation failed for ${prefix}`);
+        }
+        if (!signIn) return { id: created.user.id, client: null };
+        const client = newAnon();
+        const { error: signInErr } = await client.auth.signInWithPassword({
+          email,
+          password,
+        });
+        if (signInErr) throw signInErr;
+        return { id: created.user.id, client };
+      }
+
+      // The tenant owner is a distinct throwaway user so the staff member
+      // under test never inherits owner standing via tenants.owner_user_id.
+      const ownerUser = await makeUser("owner", false);
+      const memberUser = await makeUser("member", true);
+      const outsiderUser = await makeUser("outsider", true);
+      member = memberUser.client;
+      outsider = outsiderUser.client;
+
       const { data: tenant, error: tenantErr } = await service
         .from("tenants")
         .insert({
@@ -85,6 +117,7 @@ describe.runIf(canRun)(
           tier: "basic",
           subscription_status: "trialing",
           is_active: true,
+          owner_user_id: ownerUser.id,
         })
         .select("id")
         .single();
