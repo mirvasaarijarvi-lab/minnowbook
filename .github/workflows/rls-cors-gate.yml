@@ -46,7 +46,15 @@ jobs:
     name: RLS + CORS regression tests
     needs: [gate-config]
     runs-on: ubuntu-latest
+    # Surfaced to the notification job so a tenant-access denial is reported
+    # immediately instead of being buried in a failed job's logs.
+    outputs:
+      tenant_access: ${{ steps.preflight.outputs.mode }}
+      denied_title: ${{ steps.preflight.outputs.denied_title }}
+      denied_reason: ${{ steps.preflight.outputs.denied_reason }}
+      denied_details: ${{ steps.preflight.outputs.denied_details }}
     steps:
+
       - uses: actions/checkout@v5
         with:
           persist-credentials: false
