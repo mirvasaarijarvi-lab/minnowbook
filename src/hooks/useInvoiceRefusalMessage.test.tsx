@@ -91,8 +91,9 @@ describe("useInvoiceRefusalMessage — per-surface wording", () => {
   });
 
   it("falls back to the generic wording for an unrecognised failure", () => {
+    // Staff keep the server's own sentence appended after the explanation.
     expect(format({ message: "something odd happened" }).message).toBe(
-      translations.en["invoiceRefusal.UNKNOWN"],
+      `${translations.en["invoiceRefusal.UNKNOWN"]} Reason: something odd happened`,
     );
     expect(format({ message: "something odd happened" }, "guest").message).toBe(
       translations.en["invoiceRefusalGuest.UNKNOWN"],
