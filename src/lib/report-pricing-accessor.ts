@@ -48,7 +48,10 @@ export interface ReportAmounts {
 
 /** Every money figure a report shows for one booking, from one place. */
 export const reportAmounts = (r: ReportPricingRow): ReportAmounts => {
-  const charged = effectiveChargedTotal(r);
+  // A negative stored price is not money a report can show: treat it as no
+  // amount, so the room and breakfast lines (which are never negative) still
+  // add up to the charged figure exactly.
+  const charged = Math.max(0, effectiveChargedTotal(r));
   const isAccommodation = isAccommodationRow(r);
   // A menu-priced restaurant booking has no amount, so it has no split either.
   const breakfast = charged > 0 ? calcBreakfastPrice(r) : 0;
