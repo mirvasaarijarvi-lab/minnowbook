@@ -15,6 +15,7 @@ import {
   expectNoForeignTenantRows,
   expectReadDenied,
   expectWriteDenied,
+  type DenialResult,
   type QueryContext,
 } from "./rls-assert";
 import { parseRlsFailure, renderRlsDetails } from "./rls-report-reporter";
@@ -49,18 +50,18 @@ function runLeak(c: QueryPathCase): void {
 /** Run the same helper against a properly denied result. */
 function runDenied(c: QueryPathCase): void {
   const ctx = contextOf(c);
-  const denied = {
-    data: [] as unknown[],
+  const denied: DenialResult = {
+    data: [],
     error:
       c.kind === "scan"
         ? null
-        : {
+        : ({
             code: "42501",
             message: "permission denied",
             details: "",
             hint: "",
             name: "PostgrestError",
-          },
+          } as unknown as DenialResult["error"]),
   };
   if (c.kind === "write") expectWriteDenied(ctx, denied);
   else if (c.kind === "scan")
