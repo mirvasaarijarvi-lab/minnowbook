@@ -29,7 +29,10 @@ import {
 function contextOf(c: QueryPathCase): QueryContext {
   return {
     table: c.table,
-    operation: c.operation,
+    // The suites pass descriptive operation labels ("SELECT (detail, single)",
+    // "STORAGE LIST") so the report names the exact query path; the field is
+    // only ever interpolated into text.
+    operation: c.operation as QueryContext["operation"],
     attemptedQuery: c.attemptedQuery,
     actingTenantId: ACTING_TENANT,
     targetTenantId: TARGET_TENANT,
