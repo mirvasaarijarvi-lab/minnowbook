@@ -188,6 +188,15 @@ const DENIALS: Array<{ label: string; result: DenialResult }> = [
   { label: "permission denied error", result: { data: null, error: PERMISSION_ERROR } },
 ];
 
+/**
+ * An unfiltered scan is a legitimate own-tenant query: a permission error
+ * there means the query itself broke, not that a cross-tenant read was
+ * refused, so that shape is not part of a scan's refusal corpus.
+ */
+function isApplicableDenial(c: FuzzCase, result: DenialResult): boolean {
+  return !(c.kind === "scan" && Boolean(result.error));
+}
+
 function assertDenied(c: FuzzCase, result: DenialResult): void {
   if (c.kind === "read") expectReadDenied(c.ctx, result);
   else if (c.kind === "write") expectWriteDenied(c.ctx, result);
@@ -270,6 +279,7 @@ describe(`rls-report deny fuzzing (pagination, sorting, search, ids) [seed=${SEE
       it(`passes every fuzzed shape when the refusal is a ${denial.label}`, () => {
         const entries: ReportEntry[] = [];
         for (const c of FUZZ_CASES) {
+          if (!isApplicableDenial(c, denial.result)) continue;
           expect(() => assertDenied(c, denial.result), c.label).not.toThrow();
           const rows = denial.result.data ?? [];
           expect(rows, c.label).toHaveLength(0);
@@ -287,10 +297,12 @@ describe(`rls-report deny fuzzing (pagination, sorting, search, ids) [seed=${SEE
           expect(json).not.toContain(secret);
           expect(html).not.toContain(secret);
         }
-        for (const marker of ["RLS DENIAL FAILED", "rls-details", "Returned rows", "Attempted query"]) {
+        for (const marker of ["RLS DENIAL FAILED", "Returned rows", "Attempted query"]) {
           expect(json).not.toContain(marker);
           expect(html).not.toContain(marker);
         }
+        expect(json).not.toContain("rlsDetails\":{");
+        expect(html).not.toContain(`<div class="rls-details"`);
         expect(guarded.payload.entries.every((e) => e.rlsDetails === null)).toBe(true);
       });
     }
@@ -302,6 +314,7 @@ describe(`rls-report deny fuzzing (pagination, sorting, search, ids) [seed=${SEE
           { data: [], error: PERMISSION_ERROR },
           { data: null, error: null },
         ] as DenialResult[]) {
+          if (!isApplicableDenial(c, window)) continue;
           expect(() => assertDenied(c, window), `${c.label} / ${JSON.stringify(window)}`).not.toThrow();
         }
       }
