@@ -656,6 +656,7 @@ export const ALLOW_PATH_MATRIX: AllowPathCase[] = QUERY_PATH_MATRIX.map((deny) =
       .replace(/TARGET/g, "OWN")
       .replace(/FOREIGN_ID/g, "OWN_ID")
       .replace(/FOREIGN_TOKEN/g, "OWN_TOKEN")
+      .replace(/offers\/offer\.pdf/g, "offers/own-quote.pdf")
       .replace(/foreign/g, "own")
       .replace(new RegExp(TARGET_TENANT, "g"), ACTING_TENANT),
     scenario: deny.scenario?.replace(/foreign/g, "own"),
