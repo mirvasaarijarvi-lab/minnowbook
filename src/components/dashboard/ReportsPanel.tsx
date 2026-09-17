@@ -47,6 +47,7 @@ import {
   calcNights as calcNightsFor,
 } from "@/lib/report-pricing-accessor";
 import { csvPriceCells, printPriceCells, pdfPriceCells } from "@/lib/report-export-cells";
+import { buildReportCsv, reportCsvFileName, downloadReportCsv } from "@/lib/report-csv-export";
 
 /** Bar colours for the PDF chart, mirroring the on-screen series order. */
 const PDF_SERIES_COLORS: [number, number, number][] = [[37, 99, 235], [217, 119, 6], [148, 163, 184], [16, 185, 129]];
@@ -406,29 +407,10 @@ const ReportsPanel = () => {
     });
     rows.push(["", "", "", "", "", "", "", "", t("reports.grandTotal"), grandTotal.toFixed(2), ""]);
 
-    const sanitize = (v: string) => {
-      const cleaned = String(v).replace(/[\r\n]+/g, " ").replace(/\u2014/g, "-").replace(/\u20AC/g, "EUR");
-      // Neutralize spreadsheet formula injection (=, +, -, @, tab, CR) before quoting.
-      // Plain dashes and numeric values (incl. negatives) stay untouched so Excel keeps them as data.
-      const isSafeValue = cleaned === "-" || /^-?\d+([.,]\d+)?%?$/.test(cleaned);
-      const guarded = !isSafeValue && /^[=+\-@\t]/.test(cleaned) ? `'${cleaned}` : cleaned;
-      return guarded.replace(/"/g, '""');
-    };
-
-    const csvContent = "sep=;\n" + [headers, ...rows].map((row) => row.map((c) => `"${sanitize(c)}"`).join(";")).join("\r\n");
-    const encoder = new TextEncoder();
-    const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
-    const csvBytes = encoder.encode(csvContent);
-    const blob = new Blob([bom, csvBytes], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `report_${periodLabel.replace(/\s/g, "_")}${effectiveSiteName ? `_${effectiveSiteName.replace(/\s/g, "_")}` : ""}.csv`;
-    a.style.display = "none";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    downloadReportCsv(
+      reportCsvFileName("report", periodLabel, effectiveSiteName),
+      buildReportCsv(headers, rows),
+    );
   };
 
   const handleExportOfferConversionCSV = () => {
@@ -448,28 +430,10 @@ const ReportsPanel = () => {
     rows.push(["", "", t("reports.convertedOffers"), String(offerConversion.converted), ""]);
     rows.push(["", "", t("reports.conversionRate"), `${offerConversion.rate}%`, ""]);
 
-    const sanitize = (v: string) => {
-      const cleaned = String(v).replace(/[\r\n]+/g, " ").replace(/\u2014/g, "-").replace(/\u20AC/g, "EUR");
-      // Neutralize spreadsheet formula injection (=, +, -, @, tab, CR) before quoting.
-      // Plain dashes and numeric values (incl. negatives) stay untouched so Excel keeps them as data.
-      const isSafeValue = cleaned === "-" || /^-?\d+([.,]\d+)?%?$/.test(cleaned);
-      const guarded = !isSafeValue && /^[=+\-@\t]/.test(cleaned) ? `'${cleaned}` : cleaned;
-      return guarded.replace(/"/g, '""');
-    };
-
-    const csvContent = "sep=;\n" + [headers, ...rows].map((row) => row.map((c) => `"${sanitize(c)}"`).join(";")).join("\r\n");
-    const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
-    const csvBytes = new TextEncoder().encode(csvContent);
-    const blob = new Blob([bom, csvBytes], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `offer_conversion_${periodLabel.replace(/\s/g, "_")}${effectiveSiteName ? `_${effectiveSiteName.replace(/\s/g, "_")}` : ""}.csv`;
-    a.style.display = "none";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    downloadReportCsv(
+      reportCsvFileName("offer_conversion", periodLabel, effectiveSiteName),
+      buildReportCsv(headers, rows),
+    );
   };
 
   /* ── PDF Export ──────────────────────────────────────── */
