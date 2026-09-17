@@ -136,7 +136,10 @@ const CrossBookingAuditPanel = () => {
       });
     }
 
-    return out.sort((a, b) => (a.dateLabel < b.dateLabel ? 1 : -1));
+    // Newest first, comparing ISO dates so 10.3. sorts after 9.3.
+    return out.sort((a, b) =>
+      a.sortDate === b.sortDate ? a.guest.localeCompare(b.guest) : a.sortDate < b.sortDate ? 1 : -1,
+    );
   }, [rows]);
 
   const visible = linkedOnly ? clusters.filter((c) => c.linked) : clusters;
