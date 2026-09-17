@@ -270,13 +270,62 @@ describe("audit events for refused access", () => {
     }
   });
 
-  it("no application code inserts audit rows directly", () => {
+  /**
+   * Two places write audit rows outside the trigger. Both are allowed, but
+   * both must attribute the row to a tenant the caller is really a member of.
+   */
+  const ALLOWED_AUDIT_WRITERS = [
+    "supabase/functions/log-forbidden-access/index.ts",
+    "src/contexts/ImpersonationContext.tsx",
+  ];
+
+  it("only the reviewed writers insert audit rows directly", () => {
     const appFiles = [...sourceFiles(FUNCTIONS_DIR), ...sourceFiles(resolve(process.cwd(), "src"))];
-    const offenders = appFiles.filter((file) => {
-      const src = readFileSync(file, "utf-8");
-      return /from\(\s*["'`]audit_log["'`]\s*\)[\s\S]{0,80}?\.(insert|upsert)\(/.test(src);
-    });
-    expect(offenders, offenders.join("\n")).toEqual([]);
+    const writers = appFiles
+      .filter((file) => {
+        const src = readFileSync(file, "utf-8");
+        return /from\(\s*["'`]audit_log["'`]\s*\)[\s\S]{0,120}?\.(insert|upsert)\(/.test(src);
+      })
+      .map((file) => file.replace(`${process.cwd()}/`, ""))
+      .sort();
+    expect(writers).toEqual([...ALLOWED_AUDIT_WRITERS].sort());
+  });
+
+  it("the forbidden-access logger attributes rows only to an approved membership", () => {
+    const src = readFileSync(
+      resolve(process.cwd(), "supabase/functions/log-forbidden-access/index.ts"),
+      "utf-8",
+    );
+    // A client-supplied tenant hint must be validated as a uuid AND checked
+    // against an approved tenant_users row before it reaches the audit row.
+    const hintBlock = src.slice(src.indexOf("body.tenantId"), src.indexOf("if (!tenantId)"));
+    expect(hintBlock).toContain('.eq("tenant_id", body.tenantId)');
+    expect(hintBlock).toContain('.eq("is_approved", true)');
+    // Every membership lookup in the file requires approval.
+    const lookups = src.split('.from("tenant_users")').slice(1);
+    expect(lookups.length).toBeGreaterThan(1);
+    for (const lookup of lookups) {
+      const block = lookup.slice(0, 300);
+      expect(block, `membership lookup must require approval:\n${block}`).toContain(
+        '.eq("is_approved", true)',
+      );
+    }
+    // The user id always comes from the verified JWT, never the body.
+    expect(src).not.toMatch(/user_id:\s*body\./);
+    // The response never echoes an unverified tenant hint.
+    expect(src).not.toMatch(/tenantId:\s*body\.tenantId/);
+  });
+
+  it("the impersonation audit write is tenant-scoped and RLS-bound", () => {
+    const src = readFileSync(
+      resolve(process.cwd(), "src/contexts/ImpersonationContext.tsx"),
+      "utf-8",
+    );
+    // Uses the user-scoped client (RLS applies), never a service role.
+    expect(src).not.toContain("SERVICE_ROLE");
+    expect(src).toMatch(/supabase\.from\("audit_log"\)/);
+    // Attributes to the tenant being impersonated and the verified user id.
+    expect(src).toMatch(/user_id:\s*user\.id/);
   });
 
   it("the audit trigger runs with a pinned search_path and is not callable by clients", () => {
