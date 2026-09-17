@@ -157,15 +157,21 @@ test.describe("Staff pricing edits and invoicing", () => {
     const expectedBreakfast = newRate * newGuests * newNights; // 468
     const editedSplit = reportAmounts(edited as any);
 
-    // The report lines follow the edit, recalculated from the stored booking.
-    expect(roundCents(editedSplit.breakfast), "breakfast line recalculated").toBe(
-      expectedBreakfast,
-    );
+    // The stored fields drive the recalculated lines: the breakfast the guests
+    // now consume (468 EUR) exceeds the amount still stored on the booking, so
+    // the report has to clamp breakfast to the charged amount and show no room
+    // line at all. That is the signal the totals no longer reconcile.
+    expect(Number(edited.guests_count)).toBe(newGuests);
+    expect(Number(edited.breakfast_price_per_person)).toBe(newRate);
     expect(Number(edited.price_eur), "the stored amount has not been raised").toBe(BOOKED_TOTAL);
     expect(
       expectedBreakfast > BOOKED_TOTAL,
       "the edit leaves the amount below the recalculated breakfast",
     ).toBe(true);
+    expect(roundCents(editedSplit.breakfast), "breakfast clamped to the amount").toBe(
+      BOOKED_TOTAL,
+    );
+    expect(roundCents(editedSplit.room), "no room line left").toBe(0);
 
     // Invoicing is refused while the amount no longer reconciles.
     const { error: blockedErr } = await staff
