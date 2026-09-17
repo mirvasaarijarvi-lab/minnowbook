@@ -248,11 +248,14 @@ describe("period report PDF after multi-code discount requests", () => {
         expect(total, why).toBeCloseTo(a.charged, 10);
         expect(room >= 0, `${why}: no negative room line`).toBe(true);
         expect(breakfast >= 0, `${why}: no negative breakfast line`).toBe(true);
-        // The list price never becomes the printed total.
-        expect(total, `${why}: list price not printed as the total`).not.toBeCloseTo(
-          c.listPrice,
-          10,
-        );
+        // A discounted row never prints the list price as its total. The row
+        // where every code was refused is charged the list price on purpose.
+        if (!c.chargesListPrice) {
+          expect(total, `${why}: list price not printed as the total`).not.toBeCloseTo(
+            c.listPrice,
+            10,
+          );
+        }
         if (breakfast > 0 && room === 0) cappedBreakfast++;
 
         totalCents += Math.round(total * 100);
