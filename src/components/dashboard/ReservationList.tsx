@@ -18,13 +18,13 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { CalendarDays, CalendarIcon, User, Mail, Phone, MoreVertical, CheckCircle2, XCircle, Pencil, Receipt, PackageCheck, Coffee, Plus, Building2, Tag, Bell, MailCheck, MailX, Search, Link2, Trash2, ShieldAlert } from "lucide-react";
+import { CalendarDays, CalendarIcon, User, Mail, Phone, MoreVertical, CheckCircle2, XCircle, Pencil, Receipt, PackageCheck, Coffee, Plus, Building2, Tag, Bell, MailCheck, MailX, Search, Link2, Trash2, ShieldAlert, Download } from "lucide-react";
 import { useIsSystemAdmin } from "@/hooks/useIsSystemAdmin";
 import EditReservationDialog from "./EditReservationDialog";
 import ReservationDetailDialog from "./ReservationDetailDialog";
 import ManualReservationDialog from "./ManualReservationDialog";
 import ConfirmationEmailPreview from "@/components/ConfirmationEmailPreview";
-import { useT, useTDynamic } from "@/contexts/I18nContext";
+import { useT, useTDynamic, useI18n } from "@/contexts/I18nContext";
 import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
 import SiteTabs from "./SiteTabs";
 import { toast } from "sonner";
@@ -97,6 +97,41 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
   const canEdit = can(PERM_RESERVATIONS_EDIT);
   const canDelete = can(PERM_RESERVATIONS_DELETE);
   const queryClient = useQueryClient();
+  const { language } = useI18n();
+  // Branding for the invoice PDF, so staff can export straight from a row
+  // without opening the booking first.
+  const { data: invoiceBranding } = useQuery({
+    queryKey: ["tenant-settings-invoice", tenantId],
+    queryFn: async () => {
+      if (!tenantId) return null;
+      const { data } = await supabase
+        .from("tenant_settings")
+        .select("logo_url, business_name, business_email, business_phone, business_address, primary_color")
+        .eq("tenant_id", tenantId)
+        .maybeSingle();
+      return data;
+    },
+    enabled: !!tenantId,
+  });
+  const [invoicePdfBusyId, setInvoicePdfBusyId] = useState<string | null>(null);
+  const handleDownloadInvoicePdf = async (reservation: any) => {
+    setInvoicePdfBusyId(reservation.id);
+    try {
+      const { downloadInvoicePdf } = await import("@/lib/invoicePdf");
+      await downloadInvoicePdf(reservation, language || "en", {
+        logoUrl: invoiceBranding?.logo_url,
+        businessName: invoiceBranding?.business_name || (tenant as any)?.name,
+        businessEmail: invoiceBranding?.business_email,
+        businessPhone: invoiceBranding?.business_phone,
+        businessAddress: invoiceBranding?.business_address,
+        primaryColor: invoiceBranding?.primary_color,
+      });
+    } catch (err) {
+      toast.error(formatInvoiceRefusal(err).message);
+    } finally {
+      setInvoicePdfBusyId(null);
+    }
+  };
   const today = format(new Date(), "yyyy-MM-dd");
   const { isSystemAdmin } = useIsSystemAdmin();
 
@@ -943,6 +978,20 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
                     ) : r.price_eur != null ? (
                       <span className="text-sm font-semibold text-foreground whitespace-nowrap">€{Number(r.price_eur).toFixed(2)}</span>
                     ) : null}
+                    {r.price_eur != null && !bulkMode && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="gap-1.5 h-8"
+                        disabled={invoicePdfBusyId === r.id}
+                        onClick={(e) => { e.stopPropagation(); handleDownloadInvoicePdf(r); }}
+                        data-testid="download-invoice-pdf"
+                      >
+                        <Download className="h-3.5 w-3.5" />
+                        <span className="hidden md:inline">{t("dashboard.downloadInvoicePdf")}</span>
+                        <span className="md:hidden">PDF</span>
+                      </Button>
+                    )}
                     {(canEdit || canDelete) && !bulkMode && (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>

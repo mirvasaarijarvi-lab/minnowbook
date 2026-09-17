@@ -689,6 +689,8 @@ type TranslationKeys = {
   "invoiceRefusal.serverReasonLabel": string;
   "invoiceRefusal.guestNotice": string;
   "dashboard.downloadInvoice": string;
+  "dashboard.downloadInvoicePdf": string;
+  "reports.downloadReportPdf": string;
   "dashboard.markLinkedUsed": string;
   "dashboard.markLinkedUsedMsg": string;
   "dashboard.markAll": string;
@@ -2680,6 +2682,8 @@ const en: TranslationKeys = {
   "invoiceRefusal.serverReasonLabel": "Reason:",
   "invoiceRefusal.guestNotice": "This booking has already been invoiced, so it can no longer be changed here. Please contact us directly.",
   "dashboard.downloadInvoice": "Download invoice",
+  "dashboard.downloadInvoicePdf": "Download invoice PDF",
+  "reports.downloadReportPdf": "Download report PDF",
   "dashboard.markLinkedUsed": "Mark linked reservations used?",
   "dashboard.markLinkedUsedMsg": "This reservation is linked to an offer with other reservations. Would you like to mark them all as used?",
   "dashboard.markAll": "Mark all used",
@@ -4651,6 +4655,8 @@ const fi: TranslationKeys = {
   "invoiceRefusal.serverReasonLabel": "Syy:",
   "invoiceRefusal.guestNotice": "Varaus on jo laskutettu, joten sitä ei voi enää muuttaa täällä. Ota yhteyttä meihin suoraan.",
   "dashboard.downloadInvoice": "Lataa lasku",
+  "dashboard.downloadInvoicePdf": "Lataa lasku PDF-muodossa",
+  "reports.downloadReportPdf": "Lataa raportti PDF-muodossa",
   "dashboard.markLinkedUsed": "Merkitäänkö linkitetyt varaukset käytetyiksi?",
   "dashboard.markLinkedUsedMsg": "Tämä varaus on linkitetty tarjoukseen, jossa on muita varauksia. Haluatko merkitä ne kaikki käytetyiksi?",
   "dashboard.markAll": "Merkitse kaikki käytetyiksi",
@@ -6621,6 +6627,8 @@ const sv: TranslationKeys = {
   "invoiceRefusal.serverReasonLabel": "Orsak:",
   "invoiceRefusal.guestNotice": "Bokningen är redan fakturerad och kan inte längre ändras här. Kontakta oss direkt.",
   "dashboard.downloadInvoice": "Ladda ner faktura",
+  "dashboard.downloadInvoicePdf": "Ladda ner faktura som PDF",
+  "reports.downloadReportPdf": "Ladda ner rapport som PDF",
   "dashboard.markLinkedUsed": "Markera länkade bokningar som använda?",
   "dashboard.markLinkedUsedMsg": "Denna bokning är länkad till ett erbjudande med andra bokningar. Vill du markera alla som använda?",
   "dashboard.markAll": "Markera alla använda",

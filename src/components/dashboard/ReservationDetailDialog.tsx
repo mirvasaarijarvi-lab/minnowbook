@@ -253,7 +253,7 @@ const ReservationDetailDialog = ({ reservation, open, onOpenChange, onEdit, canE
               data-testid="download-invoice"
             >
               <Download className="h-4 w-4" />
-              {t("dashboard.downloadInvoice")}
+              {t("dashboard.downloadInvoicePdf")}
             </Button>
           )}
           {canEdit && onEdit && (
