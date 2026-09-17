@@ -125,7 +125,15 @@ async function requestNewDate(page: Page) {
   return button;
 }
 
-const announced = (page: Page) => page.locator(REGION).innerText();
+/**
+ * Text currently in the live region, or "" when the region does not exist
+ * (which is the case right after a full page load).
+ */
+const announced = (page: Page) =>
+  page.evaluate(
+    (sel) => (document.querySelector(sel)?.textContent ?? "").trim(),
+    REGION,
+  );
 
 test.describe("Invoice refusal notice lifecycle", () => {
   test("replaces, announces and clears refusals across retries and bookings", async ({ page }) => {
@@ -156,7 +164,7 @@ test.describe("Invoice refusal notice lifecycle", () => {
     const firstAnnouncement = await page.locator(REGION).textContent();
     await button.click();
     await expect
-      .poll(async () => await page.locator(REGION).textContent(), { timeout: 10_000 })
+      .poll(() => page.locator(REGION).textContent(), { timeout: 10_000 })
       .not.toBe(firstAnnouncement);
     // Still exactly one refusal on screen, not two stacked copies.
     await expect(page.getByText(GUEST_INVOICED)).toHaveCount(1);
