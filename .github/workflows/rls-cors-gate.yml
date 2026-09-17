@@ -121,7 +121,8 @@ jobs:
         env:
           LIVE_FETCH_TIMEOUT_MS: "15000"
         run: |
-          mkdir -p test-reports/vitest
+          set -o pipefail
+          mkdir -p test-reports/vitest test-reports/logs
           bunx vitest run --config vitest.security-live.config.ts \
             --no-file-parallelism \
             --reporter=verbose \
@@ -134,7 +135,8 @@ jobs:
             src/test/security/guest-reviews-and-tenants-rls.test.ts \
             src/test/security/code-redemption-cross-tenant.test.ts \
             src/test/security/duplicate-tenant-membership.test.ts \
-            src/test/security/storage-offer-pdf-isolation.test.ts
+            src/test/security/storage-offer-pdf-isolation.test.ts 2>&1 \
+            | tee test-reports/logs/02-rls-suites.log
 
       # When the preflight verified live access, an all-skipped run is a
       # silent failure, not a pass. Require real assertions.
