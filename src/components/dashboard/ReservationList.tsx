@@ -97,6 +97,41 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
   const canEdit = can(PERM_RESERVATIONS_EDIT);
   const canDelete = can(PERM_RESERVATIONS_DELETE);
   const queryClient = useQueryClient();
+  const { language } = useI18n();
+  // Branding for the invoice PDF, so staff can export straight from a row
+  // without opening the booking first.
+  const { data: invoiceBranding } = useQuery({
+    queryKey: ["tenant-settings-invoice", tenantId],
+    queryFn: async () => {
+      if (!tenantId) return null;
+      const { data } = await supabase
+        .from("tenant_settings")
+        .select("logo_url, business_name, business_email, business_phone, business_address, primary_color")
+        .eq("tenant_id", tenantId)
+        .maybeSingle();
+      return data;
+    },
+    enabled: !!tenantId,
+  });
+  const [invoicePdfBusyId, setInvoicePdfBusyId] = useState<string | null>(null);
+  const handleDownloadInvoicePdf = async (reservation: any) => {
+    setInvoicePdfBusyId(reservation.id);
+    try {
+      const { downloadInvoicePdf } = await import("@/lib/invoicePdf");
+      await downloadInvoicePdf(reservation, language || "en", {
+        logoUrl: invoiceBranding?.logo_url,
+        businessName: invoiceBranding?.business_name || (tenant as any)?.name,
+        businessEmail: invoiceBranding?.business_email,
+        businessPhone: invoiceBranding?.business_phone,
+        businessAddress: invoiceBranding?.business_address,
+        primaryColor: invoiceBranding?.primary_color,
+      });
+    } catch (err) {
+      toast.error(formatInvoiceRefusal(err).message);
+    } finally {
+      setInvoicePdfBusyId(null);
+    }
+  };
   const today = format(new Date(), "yyyy-MM-dd");
   const { isSystemAdmin } = useIsSystemAdmin();
 
