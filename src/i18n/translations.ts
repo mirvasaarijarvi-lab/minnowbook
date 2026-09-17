@@ -1782,6 +1782,19 @@ type TranslationKeys = {
   "offers.saveError": string;
   "offers.fillRequired": string;
   "offers.confirmedSuccess": string;
+  "offers.confirmedWithoutPrice": string;
+  "offers.priceReviewTitle": string;
+  "offers.priceReviewDesc": string;
+  "offers.priceReviewWarnTitle": string;
+  "offers.priceReviewWarnDesc": string;
+  "offers.priceReviewNeedsPrice": string;
+  "offers.priceReviewFromResource": string;
+  "offers.priceReviewReasonAmbiguous": string;
+  "offers.priceReviewReasonNoResource": string;
+  "offers.priceReviewReasonUnpriced": string;
+  "offers.priceReviewAmount": string;
+  "offers.priceReviewSkip": string;
+  "offers.priceReviewConfirm": string;
   "offers.confirmError": string;
   "offers.sendEmail": string;
   "offers.emailSent": string;
@@ -3734,6 +3747,19 @@ const en: TranslationKeys = {
   "offers.saveError": "Error saving offer",
   "offers.fillRequired": "Please fill in all required fields",
   "offers.confirmedSuccess": "Offer confirmed",
+  "offers.confirmedWithoutPrice": "Some bookings were saved without a price. Add the price before invoicing them.",
+  "offers.priceReviewTitle": "Check the prices",
+  "offers.priceReviewDesc": "These bookings will be created from the offer. Prices come from your resource settings.",
+  "offers.priceReviewWarnTitle": "A price is missing",
+  "offers.priceReviewWarnDesc": "For some bookings the resource has several prices and none matches the chosen space, so no price can be picked automatically. Choose a price, type an amount, or decide to leave it empty for now.",
+  "offers.priceReviewNeedsPrice": "Price needed",
+  "offers.priceReviewFromResource": "From resource settings",
+  "offers.priceReviewReasonAmbiguous": "This resource has several prices and none matches the chosen space.",
+  "offers.priceReviewReasonNoResource": "No matching resource was found for this booking.",
+  "offers.priceReviewReasonUnpriced": "No price has been saved for this resource.",
+  "offers.priceReviewAmount": "Price (EUR)",
+  "offers.priceReviewSkip": "Leave empty for now, staff will add the price later",
+  "offers.priceReviewConfirm": "Confirm offer",
   "offers.confirmError": "Error confirming offer",
   "offers.sendEmail": "Send email",
   "offers.emailSent": "Email sent",
@@ -5683,6 +5709,19 @@ const fi: TranslationKeys = {
   "offers.saveError": "Virhe tarjouksen tallennuksessa",
   "offers.fillRequired": "Täytä kaikki pakolliset kentät",
   "offers.confirmedSuccess": "Tarjous vahvistettu",
+  "offers.confirmedWithoutPrice": "Osa varauksista tallennettiin ilman hintaa. Lisää hinta ennen laskutusta.",
+  "offers.priceReviewTitle": "Tarkista hinnat",
+  "offers.priceReviewDesc": "Nämä varaukset luodaan tarjouksesta. Hinnat tulevat resurssien asetuksista.",
+  "offers.priceReviewWarnTitle": "Hinta puuttuu",
+  "offers.priceReviewWarnDesc": "Joissakin varauksissa resurssilla on useita hintoja eikä mikään vastaa valittua tilaa, joten hintaa ei voi valita automaattisesti. Valitse hinta, kirjoita summa tai päätä jättää se toistaiseksi tyhjäksi.",
+  "offers.priceReviewNeedsPrice": "Hinta tarvitaan",
+  "offers.priceReviewFromResource": "Resurssin asetuksista",
+  "offers.priceReviewReasonAmbiguous": "Tällä resurssilla on useita hintoja eikä mikään vastaa valittua tilaa.",
+  "offers.priceReviewReasonNoResource": "Tälle varaukselle ei löytynyt vastaavaa resurssia.",
+  "offers.priceReviewReasonUnpriced": "Tälle resurssille ei ole tallennettu hintaa.",
+  "offers.priceReviewAmount": "Hinta (EUR)",
+  "offers.priceReviewSkip": "Jätä toistaiseksi tyhjäksi, henkilökunta lisää hinnan myöhemmin",
+  "offers.priceReviewConfirm": "Vahvista tarjous",
   "offers.confirmError": "Virhe tarjouksen vahvistamisessa",
   "offers.sendEmail": "Lähetä sähköposti",
   "offers.emailSent": "Sähköposti lähetetty",
@@ -7632,6 +7671,19 @@ const sv: TranslationKeys = {
   "offers.saveError": "Fel vid sparande",
   "offers.fillRequired": "Fyll i alla obligatoriska fält",
   "offers.confirmedSuccess": "Erbjudande bekräftat",
+  "offers.confirmedWithoutPrice": "Vissa bokningar sparades utan pris. Lägg till priset innan du fakturerar dem.",
+  "offers.priceReviewTitle": "Kontrollera priserna",
+  "offers.priceReviewDesc": "Dessa bokningar skapas från erbjudandet. Priserna kommer från resursinställningarna.",
+  "offers.priceReviewWarnTitle": "Ett pris saknas",
+  "offers.priceReviewWarnDesc": "För vissa bokningar har resursen flera priser och inget matchar det valda utrymmet, så priset kan inte väljas automatiskt. Välj ett pris, skriv in ett belopp eller lämna det tomt för nu.",
+  "offers.priceReviewNeedsPrice": "Pris behövs",
+  "offers.priceReviewFromResource": "Från resursinställningarna",
+  "offers.priceReviewReasonAmbiguous": "Denna resurs har flera priser och inget matchar det valda utrymmet.",
+  "offers.priceReviewReasonNoResource": "Ingen matchande resurs hittades för denna bokning.",
+  "offers.priceReviewReasonUnpriced": "Inget pris har sparats för denna resurs.",
+  "offers.priceReviewAmount": "Pris (EUR)",
+  "offers.priceReviewSkip": "Lämna tomt för nu, personalen lägger till priset senare",
+  "offers.priceReviewConfirm": "Bekräfta erbjudande",
   "offers.confirmError": "Fel vid bekräftelse",
   "offers.sendEmail": "Skicka e-post",
   "offers.emailSent": "E-post skickad",

@@ -15,14 +15,20 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  resolveOfferReservationPrice,
+  describeOfferReservationPrice,
   pickOfferResource,
 } from "@/lib/offer-reservation-pricing";
 
 import OfferCreateDialog from "./OfferCreateDialog";
 import OfferEmailDialog from "./OfferEmailDialog";
+import OfferPriceReviewDialog, { type OfferPriceLeg } from "./OfferPriceReviewDialog";
 import { useDateLocale } from "@/hooks/useDateLocale";
 import DashboardTooltip from "./DashboardTooltip";
+
+interface ConfirmPlan {
+  mainType: string;
+  legs: OfferPriceLeg[];
+}
 
 const OffersManager = () => {
   const t = useT();
@@ -35,6 +41,8 @@ const OffersManager = () => {
   const [createOpen, setCreateOpen] = useState(false);
   const [emailOffer, setEmailOffer] = useState<Offer | null>(null);
   const [editOffer, setEditOffer] = useState<Offer | null>(null);
+  const [priceReview, setPriceReview] = useState<{ offer: Offer; plan: ConfirmPlan } | null>(null);
+  const [confirming, setConfirming] = useState(false);
 
   const filteredOffers = useMemo(() => {
     if (!searchQuery.trim()) return offers;
@@ -120,55 +128,103 @@ const OffersManager = () => {
     }
   };
 
-  const handleConfirm = async (offer: Offer) => {
+  /**
+   * Work out, without writing anything, which reservations a confirmation
+   * would create and what each of them would cost according to the resource
+   * configuration. Legs whose price cannot be resolved unambiguously are
+   * flagged so staff can choose a price instead of getting an empty total.
+   */
+  const buildConfirmPlan = async (offer: Offer): Promise<ConfirmPlan> => {
+    // Load the tenant's resource configuration once so every reservation
+    // created here is priced from the same source of truth the public
+    // booking flow uses (room price per night, sub-service prices).
+    const { data: resourceRows } = await supabase
+      .from("resources")
+      .select("id, name, resource_type, price_per_night, breakfast_price_per_person, sub_services")
+      .eq("tenant_id", offer.tenant_id)
+      .eq("is_active", true);
+    const resources = (resourceRows ?? []) as any[];
+
+    // Resolve the main reservation_type: look up the resource by name,
+    // otherwise fall back to the tenant's first allowed type, then "venue".
+    let mainType = "venue";
+    const mainResource = pickOfferResource(resources, {
+      name: offer.event_space,
+      reservation_type: mainType,
+    });
+    if (offer.event_space && mainResource?.resource_type) {
+      mainType = mainResource.resource_type;
+    }
+    if (mainType === "venue") {
+      const allowed = (tenant?.allowed_reservation_types as string[] | undefined) ?? [];
+      if (!allowed.includes("venue") && allowed.length > 0) {
+        mainType = allowed[0];
+      }
+    }
+
+    const mainPriceResource = pickOfferResource(resources, {
+      name: offer.event_space,
+      reservation_type: mainType,
+    });
+    const mainDesc = describeOfferReservationPrice({
+      reservation_type: mainType,
+      resource: mainPriceResource,
+      space: offer.event_space,
+    });
+
+    const legs: OfferPriceLeg[] = [
+      {
+        key: "main",
+        reservation_type: mainType,
+        space: offer.event_space,
+        resourceName: mainPriceResource?.name ?? null,
+        ...mainDesc,
+      },
+    ];
+
+    const linked = offer.linked_reservations || {};
+    for (const [key, lr] of Object.entries(linked)) {
+      if (!lr.enabled) continue;
+      const resType = lr.resource_type || key;
+      const resource = pickOfferResource(resources, {
+        name: lr.space,
+        reservation_type: resType,
+      });
+      legs.push({
+        key,
+        reservation_type: resType,
+        space: lr.space ?? null,
+        resourceName: resource?.name ?? null,
+        ...describeOfferReservationPrice({
+          reservation_type: resType,
+          resource,
+          space: lr.space,
+        }),
+      });
+    }
+
+    return { mainType, legs };
+  };
+
+  /** Create the reservations for an offer with the given per-leg prices. */
+  const executeConfirm = async (
+    offer: Offer,
+    plan: ConfirmPlan,
+    prices: Record<string, number | null>,
+  ) => {
     try {
       // Stamp every reservation created from this offer with a shared
       // linked_group_id so the edit dialog can show them as one bundle even
       // if the offer row is later archived.
       const linkedGroupId = crypto.randomUUID();
-
-      // Load the tenant's resource configuration once so every reservation
-      // created here is priced from the same source of truth the public
-      // booking flow uses (room price per night, sub-service prices).
-      const { data: resourceRows } = await supabase
-        .from("resources")
-        .select("id, name, resource_type, price_per_night, breakfast_price_per_person, sub_services")
-        .eq("tenant_id", offer.tenant_id)
-        .eq("is_active", true);
-      const resources = (resourceRows ?? []) as any[];
-
-      // Resolve the main reservation_type: look up the resource by name,
-      // otherwise fall back to the tenant's first allowed type, then "venue".
-      let mainType = "venue";
-      const mainResource = pickOfferResource(resources, {
-        name: offer.event_space,
-        reservation_type: mainType,
-      });
-      if (offer.event_space && mainResource?.resource_type) {
-        mainType = mainResource.resource_type;
-      }
-      if (mainType === "venue") {
-        const allowed = (tenant?.allowed_reservation_types as string[] | undefined) ?? [];
-        if (!allowed.includes("venue") && allowed.length > 0) {
-          mainType = allowed[0];
-        }
-      }
-
-      const mainPrice = resolveOfferReservationPrice({
-        reservation_type: mainType,
-        resource: pickOfferResource(resources, {
-          name: offer.event_space,
-          reservation_type: mainType,
-        }),
-        space: offer.event_space,
-      });
+      const mainPrice = prices.main ?? null;
 
       // Create main reservation
       const { data: mainRes, error: mainErr } = await supabase
         .from("reservations")
         .insert({
           tenant_id: offer.tenant_id,
-          reservation_type: mainType,
+          reservation_type: plan.mainType,
           status: "confirmed",
           date: offer.event_date,
           start_time: offer.start_time ? `${offer.start_time}:00` : null,
@@ -196,15 +252,7 @@ const OffersManager = () => {
       for (const [key, lr] of Object.entries(linked)) {
         if (!lr.enabled) continue;
         const resType = lr.resource_type || key;
-
-        const linkedPrice = resolveOfferReservationPrice({
-          reservation_type: resType,
-          resource: pickOfferResource(resources, {
-            name: lr.space,
-            reservation_type: resType,
-          }),
-          space: lr.space,
-        });
+        const linkedPrice = prices[key] ?? null;
 
         const { data: linkedRes, error: linkedErr } = await supabase
           .from("reservations")
@@ -241,10 +289,35 @@ const OffersManager = () => {
         reservation_ids: resIds,
       });
 
+      const missingPrice = plan.legs.filter((l) => (prices[l.key] ?? null) == null);
       toast.success(t("offers.confirmedSuccess"));
+      if (missingPrice.length > 0) {
+        toast.warning(t("offers.confirmedWithoutPrice"));
+      }
     } catch {
       toast.error(t("offers.confirmError"));
     }
+  };
+
+  const handleConfirm = async (offer: Offer) => {
+    let plan: ConfirmPlan;
+    try {
+      plan = await buildConfirmPlan(offer);
+    } catch {
+      toast.error(t("offers.confirmError"));
+      return;
+    }
+
+    // Any leg without an unambiguous resource price must be decided by staff
+    // before we create bookings that would otherwise show up as 0 EUR.
+    if (plan.legs.some((l) => l.price == null)) {
+      setPriceReview({ offer, plan });
+      return;
+    }
+
+    const prices: Record<string, number | null> = {};
+    for (const leg of plan.legs) prices[leg.key] = leg.price;
+    await executeConfirm(offer, plan, prices);
   };
 
   const handlePrintPdf = async (offer: Offer) => {
@@ -375,6 +448,25 @@ const OffersManager = () => {
           offer={emailOffer}
           open={!!emailOffer}
           onOpenChange={(open) => { if (!open) setEmailOffer(null); }}
+        />
+      )}
+
+      {priceReview && (
+        <OfferPriceReviewDialog
+          open={!!priceReview}
+          onOpenChange={(open) => { if (!open) setPriceReview(null); }}
+          legs={priceReview.plan.legs}
+          isSubmitting={confirming}
+          onConfirm={async (prices) => {
+            const { offer, plan } = priceReview;
+            setConfirming(true);
+            try {
+              await executeConfirm(offer, plan, prices);
+            } finally {
+              setConfirming(false);
+              setPriceReview(null);
+            }
+          }}
         />
       )}
     </div>
