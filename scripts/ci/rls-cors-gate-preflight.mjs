@@ -72,6 +72,7 @@ const writeSummary = () => {
 const oneLine = (value) => String(value).replace(/[\r\n]+/g, " ").trim().slice(0, 400);
 
 const setOutput = (mode) => {
+  if (DRY_RUN) return;
   if (!env.GITHUB_OUTPUT) return;
   const out = [`mode=${mode}\n`];
   if (mode === "denied") {
