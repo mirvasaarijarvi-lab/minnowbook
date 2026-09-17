@@ -50,7 +50,8 @@ const pdfText = (
     kpis: [{ label: "Total", value: String(body.length) }],
     table: { head: surface.headers, body },
   });
-  return doc.output("string");
+  const buf = doc.output("arraybuffer") as ArrayBuffer;
+  return Buffer.from(buf).toString("latin1");
 };
 
 const buildExport = (
@@ -165,6 +166,7 @@ describe("report exports on tenant deny cases", () => {
     const suite = "src/test/security/report-export-tenant-denial.test.ts";
     const payload = {
       generatedAt: new Date().toISOString(),
+      durationMs: 12,
       totals: { passed: 0, failed: 1, skipped: 0 },
       entries: [
         {
@@ -193,6 +195,7 @@ describe("report exports on tenant deny cases", () => {
     const suite = "src/test/security/report-export-tenant-denial.test.ts";
     const payload = {
       generatedAt: new Date().toISOString(),
+      durationMs: 12,
       totals: { passed: EXPORT_SURFACES.length, failed: 0, skipped: 0 },
       entries: EXPORT_SURFACES.map((s) => ({ suite, name: s.label, status: "passed" })),
       tenantGuard: [],
