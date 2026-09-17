@@ -92,6 +92,13 @@ const GuestPortal = () => {
       toast.success(t("guest.portal.requestSentToast"));
     },
     onError: (err: Error) => {
+      // When the server refuses because the booking is already invoiced (or a
+      // related pricing rule), say exactly that instead of "try again".
+      const refusal = formatInvoiceRefusal(err);
+      if (refusal.code !== "UNKNOWN") {
+        toast.error(refusal.code === "INVOICED_LOCKED" ? guestInvoicedNotice : refusal.message);
+        return;
+      }
       toast.error(err.message || t("guest.portal.requestError"));
     },
   });
@@ -115,7 +122,12 @@ const GuestPortal = () => {
       setCancelOpen(false);
       setCancelledByGuest(true);
     },
-    onError: () => {
+    onError: (err: Error) => {
+      const refusal = formatInvoiceRefusal(err);
+      if (refusal.code !== "UNKNOWN") {
+        toast.error(refusal.code === "INVOICED_LOCKED" ? guestInvoicedNotice : refusal.message);
+        return;
+      }
       toast.error(t("guest.portal.cancelError"));
     },
   });
