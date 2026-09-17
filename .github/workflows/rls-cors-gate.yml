@@ -397,6 +397,15 @@ jobs:
           fi
           echo "✅ No RLS-class Supabase advisor findings."
 
+      - name: Upload advisor gate log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rls-cors-gate-logs-advisor
+          path: test-reports/logs/
+          if-no-files-found: warn
+          retention-days: 14
+
   gate-summary:
     name: RLS/CORS gate summary
     needs: [gate-config, rls-cors-tests, rls-advisor-gate]
