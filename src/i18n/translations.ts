@@ -6839,7 +6839,7 @@ const sv: TranslationKeys = {
   "tier.businessDesc": "Funktionsrik plattform för företag med flera platser och verksamheter.",
 
   // Footer
-  "footer.tagline": "Den moderna bokningsplattformen för restauranger, lokaler och gästhus.",
+  "footer.tagline": "Den moderna bokningsplattformen för restauranger, lokaler, gästhus och de professionella inom servicebranschen.",
   "footer.product": "Produkt",
   "footer.company": "Företag",
   "footer.legal": "Juridik",
