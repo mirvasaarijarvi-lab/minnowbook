@@ -327,9 +327,9 @@ const ReportsPanel = () => {
     const total = src.length;
     const invoiced = src.filter((r) => r.is_invoiced).length;
     const used = src.filter((r) => r.is_used).length;
-    const totalEur = src.reduce((s, r) => s + effectivePrice(r), 0);
-    const invoicedEur = src.filter((r) => r.is_invoiced).reduce((s, r) => s + effectivePrice(r), 0);
-    const usedEur = src.filter((r) => r.is_used).reduce((s, r) => s + effectivePrice(r), 0);
+    const totalEur = sumReportAmounts(src).charged;
+    const invoicedEur = sumReportAmounts(src.filter((r) => r.is_invoiced)).charged;
+    const usedEur = sumReportAmounts(src.filter((r) => r.is_used)).charged;
     const byType = (tp: string) => {
       const items = src.filter((r) => r.reservation_type === tp);
       const inv = items.filter((r) => r.is_invoiced);
@@ -337,9 +337,9 @@ const ReportsPanel = () => {
       return {
         total: items.length, invoiced: inv.length, notInvoiced: items.length - inv.length,
         used: usedItems.length, notUsed: items.length - usedItems.length,
-        totalEur: items.reduce((s, r) => s + effectivePrice(r), 0),
-        invoicedEur: inv.reduce((s, r) => s + effectivePrice(r), 0),
-        usedEur: usedItems.reduce((s, r) => s + effectivePrice(r), 0),
+        totalEur: sumReportAmounts(items).charged,
+        invoicedEur: sumReportAmounts(inv).charged,
+        usedEur: sumReportAmounts(usedItems).charged,
       };
     };
     const result: Record<string, any> = {
@@ -350,9 +350,9 @@ const ReportsPanel = () => {
     };
     allowedTypes.forEach((tp) => { result[tp] = byType(tp); });
     return result;
-  }, [typeFilteredRaw, effectivePrice, allowedTypes]);
+  }, [typeFilteredRaw, allowedTypes]);
 
-  const grandTotal = useMemo(() => reservations.reduce((s, r) => s + effectivePrice(r), 0), [reservations, effectivePrice]);
+  const grandTotal = useMemo(() => sumReportAmounts(reservations).charged, [reservations]);
 
   // Offers in period (by created_at) and conversion to reservations
   const { data: offersInPeriod = [] } = useQuery({
