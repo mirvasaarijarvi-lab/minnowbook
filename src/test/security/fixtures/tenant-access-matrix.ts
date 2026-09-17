@@ -635,7 +635,7 @@ const OWN_ROWS_BY_LABEL: Record<string, Array<Record<string, unknown>>> = {
   "count path: head request with exact count": [],
   "search path: text filter across tenants": [ownRow({ guest_name: "Own Guest" })],
   "rpc path: security definer function returning rows": [ownRow({ rating: 5 })],
-  "storage path: listing another tenant's private objects": [ownRow({ name: "own-offer.pdf" })],
+  "storage path: listing another tenant's private objects": [ownRow({ name: "own-quote.pdf" })],
   "storage path: downloading another tenant's object": [ownRow()],
   "write path: insert into another tenant": [ownRow()],
   "write path: update another tenant's row": [ownRow({ is_invoiced: true })],
