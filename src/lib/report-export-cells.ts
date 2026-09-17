@@ -77,3 +77,25 @@ export const parseCsvSplitCell = (
   if (!m) return null;
   return { room: Number(m[1]), breakfast: Number(m[2]), total: Number(m[3]) };
 };
+
+/** Money columns of the PDF table: room, breakfast and total, as strings. */
+export interface PdfPriceCells {
+  room: string;
+  breakfast: string;
+  total: string;
+}
+
+/** Placeholder for "no amount" in the PDF export. */
+export const PDF_NO_AMOUNT = "-";
+
+export const pdfPriceCells = (r: ReportPricingRow): PdfPriceCells => {
+  const { charged, room, breakfast, hasAmount } = reportAmounts(r);
+  if (!hasAmount) {
+    return { room: PDF_NO_AMOUNT, breakfast: PDF_NO_AMOUNT, total: PDF_NO_AMOUNT };
+  }
+  return {
+    room: csvNum(room),
+    breakfast: breakfast > 0 ? csvNum(breakfast) : PDF_NO_AMOUNT,
+    total: csvNum(charged),
+  };
+};
