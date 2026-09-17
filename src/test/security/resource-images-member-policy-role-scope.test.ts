@@ -178,6 +178,7 @@ describe.runIf(canRun)(
         visible,
         memberUserId: memberUser.id,
         outsiderUserId: outsiderUser.id,
+        ownerUserId: ownerUser.id,
       };
     }, 90_000);
 
