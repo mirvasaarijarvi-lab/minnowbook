@@ -49,7 +49,7 @@ const PRICING_FIELDS = {
   discount_type: "percentage",
   discount_value: 25,
   discount_reason: "Promo code: ROLEMATRIX25",
-  pricing_type: "fixed",
+  pricing_type: "fixed_price",
   pricing_details: "3 nights x 75 + breakfast",
   breakfast_price_per_person: 12,
   is_invoiced: true,
@@ -310,7 +310,7 @@ describe.runIf(canRun)("reservation pricing fields — staff role matrix (live)"
         expect(data?.discount_type).toBe("percentage");
         expect(Number(data?.discount_value)).toBe(25);
         expect(data?.discount_reason).toBe(PRICING_FIELDS.discount_reason);
-        expect(data?.pricing_type).toBe("fixed");
+        expect(data?.pricing_type).toBe("fixed_price");
         expect(data?.pricing_details).toBe(PRICING_FIELDS.pricing_details);
         expect(Number(data?.breakfast_price_per_person)).toBe(12);
         expect(data?.is_invoiced).toBe(true);
