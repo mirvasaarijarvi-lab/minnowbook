@@ -38,6 +38,7 @@ export const LIVE_SECURITY_TESTS: string[] = [
   "src/test/security/reservations-service-role-pricing-allowlist.test.ts",
   "src/test/security/reservations-trigger-failure-atomicity.test.ts",
   "src/test/security/reservations-pricing-trust-audit.test.ts",
+  "src/test/security/reservations-pricing-role-matrix.test.ts",
   "src/test/security/resource-availability-slots-anon-note.test.ts",
   "src/test/security/booking-token-enumeration.test.ts",
   "src/test/security/booking-token-expired.test.ts",
