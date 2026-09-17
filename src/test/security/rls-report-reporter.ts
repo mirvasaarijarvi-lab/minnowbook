@@ -32,7 +32,7 @@ type EntryStatus = "passed" | "failed" | "skipped";
  * When present, the reporter renders these as a labelled grid in the HTML
  * report instead of a generic stack trace.
  */
-interface RlsFailureDetails {
+export interface RlsFailureDetails {
   scenario?: string;
   table?: string;
   operation?: string;
@@ -44,7 +44,7 @@ interface RlsFailureDetails {
   returnedRows?: string;
 }
 
-interface ReportEntry {
+export interface ReportEntry {
   file: string;
   suite: string;
   name: string;
@@ -56,7 +56,7 @@ interface ReportEntry {
   rlsDetails: RlsFailureDetails | null;
 }
 
-interface ReportPayload {
+export interface ReportPayload {
   generatedAt: string;
   /**
    * Identifies which environment produced the report so local-stack and
@@ -260,7 +260,7 @@ ${rows}
   </table>`;
 }
 
-function renderHtml(payload: ReportPayload): string {
+export function renderHtml(payload: ReportPayload): string {
   const { totals, entries, generatedAt, flavor, tenantGuard } = payload;
 
   const rows = entries
