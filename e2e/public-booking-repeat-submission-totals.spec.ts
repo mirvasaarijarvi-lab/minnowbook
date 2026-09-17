@@ -120,8 +120,16 @@ test.describe("Repeated identical booking submissions", () => {
       special_requests: "Created by the repeat-submission E2E spec.",
     } as const;
 
+    // Each submission targets its own date: an identical re-send of the very
+    // same request is de-duplicated on purpose (see
+    // public-booking-retry-discount-usage.spec.ts), so this spec repeats the
+    // same pricing inputs across distinct bookings.
     for (let i = 0; i < SUBMISSIONS; i++) {
-      const res = await post({ ...payload });
+      const res = await post({
+        ...payload,
+        date: isoDate(70 + i * 10),
+        check_out_date: isoDate(70 + i * 10 + NIGHTS),
+      });
       expect(res.status(), `submission ${i + 1} failed: ${await res.text()}`).toBe(200);
     }
 
