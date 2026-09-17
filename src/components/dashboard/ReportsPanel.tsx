@@ -286,32 +286,16 @@ const ReportsPanel = () => {
     }
   }, [period, start, end, dateLocale]);
 
-  const calcNights = useCallback((r: ReservationRow) => {
-    if (!r.check_out_date) return 1;
-    const d = Math.round((new Date(r.check_out_date + "T00:00:00").getTime() - new Date(r.date + "T00:00:00").getTime()) / 86400000);
-    return d > 0 ? d : 1;
-  }, []);
+  // Shared, unit-tested accommodation revenue split (see
+  // src/lib/report-accommodation-pricing.ts): room + breakfast always equals
+  // the stored total the guest is charged.
+  const calcNights = useCallback((r: ReservationRow) => calcNightsFor(r), []);
 
-  const isAccommodation = useCallback((r: ReservationRow) => r.reservation_type === "guesthouse" || r.reservation_type === "hotel", []);
+  const isAccommodation = useCallback((r: ReservationRow) => isAccommodationRow(r), []);
 
-  const calcBreakfastPrice = useCallback((r: ReservationRow) => {
-    if (!r.breakfast_included || !isAccommodation(r)) return 0;
-    const n = calcNights(r);
-    return (r.breakfast_price_per_person ?? 15) * (r.guests_count ?? 1) * n;
-  }, [calcNights, isAccommodation]);
+  const calcBreakfastPrice = useCallback((r: ReservationRow) => calcBreakfastPriceFor(r), []);
 
-  /**
-   * `price_eur` is always the total the guest pays for the whole booking:
-   * the public booking function and the manual reservation dialog both derive
-   * it from the resource's configured room price x nights (+ breakfast).
-   * Reports therefore must not multiply it by nights again — the room line is
-   * the stored total minus the breakfast component.
-   */
-  const calcRoomPrice = useCallback((r: ReservationRow) => {
-    const total = r.price_eur ?? 0;
-    if (!isAccommodation(r)) return total;
-    return Math.max(0, total - calcBreakfastPrice(r));
-  }, [calcBreakfastPrice, isAccommodation]);
+  const calcRoomPrice = useCallback((r: ReservationRow) => calcRoomPriceFor(r), []);
 
   const effectivePrice = useCallback((r: ReservationRow) => {
     // Restaurant "according to menu" has no fixed price
