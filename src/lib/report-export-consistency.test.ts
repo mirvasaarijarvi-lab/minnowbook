@@ -109,9 +109,10 @@ describe("period report exports use one accommodation calculation", () => {
       resolve(__dirname, "../components/dashboard/ReportsPanel.tsx"),
       "utf8",
     );
-    // The single money helper delegates to the shared, tested calculation.
-    expect(src).toContain("effectiveChargedTotal as effectiveChargedTotalFor");
-    expect(src).toContain("effectiveChargedTotalFor(r)");
+    // Every money figure comes from the single pricing accessor.
+    expect(src).toContain('from "@/lib/report-pricing-accessor"');
+    expect(src).toContain("reportAmounts(r)");
+    expect(src).toContain("sumReportAmounts(");
     // No local re-implementation of the charged amount or the split.
     expect(src).not.toMatch(/return r\.price_eur \?\? 0/);
     expect(src).not.toMatch(/price_eur\s*\??\?\?\s*0\)\s*\*\s*calcNights/);
