@@ -18,8 +18,8 @@ import { reportAmounts, sumReportAmounts, roundCents } from "@/lib/report-pricin
  *      to the cent. No repeat adds a duplicate line or inflates the total.
  *   3. Repeating the action on a two-leg group invoices each leg once, and the
  *      group invoice total equals the sum of the legs, counted once.
- *   4. A repeat that also changes the amount is refused, and the stored amount
- *      and invoiced flag are untouched.
+ *   4. A repeat that carries a broken amount (below the breakfast lines, or
+ *      fractions of a cent) is refused, leaving amount and flag untouched.
  *   5. Reporting counts the revenue once, not once per attempt.
  *
  * Requires SERVICE_ROLE_KEY; skips itself without it.
