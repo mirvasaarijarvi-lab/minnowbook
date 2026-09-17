@@ -978,6 +978,20 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
                     ) : r.price_eur != null ? (
                       <span className="text-sm font-semibold text-foreground whitespace-nowrap">€{Number(r.price_eur).toFixed(2)}</span>
                     ) : null}
+                    {r.price_eur != null && !bulkMode && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="gap-1.5 h-8"
+                        disabled={invoicePdfBusyId === r.id}
+                        onClick={(e) => { e.stopPropagation(); handleDownloadInvoicePdf(r); }}
+                        data-testid="download-invoice-pdf"
+                      >
+                        <Download className="h-3.5 w-3.5" />
+                        <span className="hidden md:inline">{t("dashboard.downloadInvoicePdf")}</span>
+                        <span className="md:hidden">PDF</span>
+                      </Button>
+                    )}
                     {(canEdit || canDelete) && !bulkMode && (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
