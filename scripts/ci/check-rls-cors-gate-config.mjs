@@ -249,9 +249,18 @@ if (!yml.includes("actions/upload-artifact@")) {
   }
   // An upload that only runs on success is useless: failures are the reason
   // the artifact exists.
-  const uploadBlocks = [...yml.matchAll(/- name: [^\n]*\n(?:[ \t]+[^\n]*\n)*?[ \t]+uses: actions\/upload-artifact@[^\n]*\n/g)];
+  // Split into step blocks by line, so a long workflow cannot make a nested
+  // regex backtrack.
+  const stepBlocks = [];
+  for (const line of yml.split("\n")) {
+    if (/^\s*- (name|uses):/.test(line)) stepBlocks.push([]);
+    if (stepBlocks.length > 0) stepBlocks[stepBlocks.length - 1].push(line);
+  }
+  const uploadBlocks = stepBlocks
+    .map((b) => b.join("\n"))
+    .filter((b) => b.includes("actions/upload-artifact@"));
   for (const block of uploadBlocks) {
-    if (!/if:\s*always\(\)/.test(block[0])) {
+    if (!/if:\s*always\(\)/.test(block)) {
       fail(
         "Log upload is skipped on failure",
         "Every actions/upload-artifact step in this gate needs `if: always()`, otherwise the logs are missing exactly when a step failed.",
