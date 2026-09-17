@@ -69,9 +69,54 @@ export type ErrorResponseInit = {
   headers?: Record<string, string>;
 };
 
+/** Statuses that mean "this request was refused" — the leak-prone ones. */
+export const DENIAL_STATUSES = [401, 403, 404, 410] as const;
+
+export const REDACTED = "[redacted]";
+
+const UUID_RE = /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/;
+const EMAIL_RE = /[^\s@]+@[^\s@]+\.[^\s@]+/;
+const TOKEN_RE = /^[A-Za-z0-9_-]{20,}$/;
+const SENSITIVE_KEY_RE = /tenant|email|token|guest|user|owner|customer|phone|name|secret|key/i;
+
+/**
+ * Strip anything that could identify another tenant (or its people) from the
+ * structured context attached to a refusal. Used for both the JSON body of a
+ * denial response and for denial log lines, so a refusal can never publish a
+ * tenant id, an email, a booking token or a guest name.
+ *
+ * Fails closed: unknown nested shapes are dropped rather than passed through.
+ */
+export function redactDenialContext(
+  details: Record<string, unknown> | undefined,
+): Record<string, unknown> | undefined {
+  if (!details) return undefined;
+  const out: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(details)) {
+    if (SENSITIVE_KEY_RE.test(key)) {
+      out[key] = REDACTED;
+      continue;
+    }
+    if (typeof value === "string") {
+      out[key] =
+        UUID_RE.test(value) || EMAIL_RE.test(value) || TOKEN_RE.test(value) ? REDACTED : value;
+      continue;
+    }
+    if (typeof value === "number" || typeof value === "boolean" || value === null) {
+      out[key] = value;
+      continue;
+    }
+    // Objects, arrays, functions: no safe way to vouch for the contents.
+    out[key] = REDACTED;
+  }
+  return out;
+}
+
 /**
  * Build a Response with the canonical error payload. Always JSON; always
  * sets Content-Type; merges corsHeaders + any extra headers (e.g. Retry-After).
+ *
+ * On denial statuses the structured `details` are redacted first.
  */
 export function errorResponse(init: ErrorResponseInit): Response {
   const code = String(init.code);
@@ -82,8 +127,10 @@ export function errorResponse(init: ErrorResponseInit): Response {
     status: init.status,
   };
   if (init.requestId) payload.requestId = init.requestId;
-  if (init.details && Object.keys(init.details).length > 0) {
-    payload.details = init.details;
+  const isDenial = (DENIAL_STATUSES as readonly number[]).includes(init.status);
+  const details = isDenial ? redactDenialContext(init.details) : init.details;
+  if (details && Object.keys(details).length > 0) {
+    payload.details = details;
   }
   return new Response(JSON.stringify(payload), {
     status: init.status,
@@ -93,6 +140,31 @@ export function errorResponse(init: ErrorResponseInit): Response {
       "Content-Type": "application/json; charset=utf-8",
     },
   });
+}
+
+/**
+ * One-line, leak-free log entry for a refused request. Only the request id,
+ * the action and the refusal code survive verbatim; everything else goes
+ * through `redactDenialContext`.
+ */
+export function denialLogLine(input: {
+  fn: string;
+  action?: string;
+  code: ErrorCode;
+  status: number;
+  requestId?: string;
+  context?: Record<string, unknown>;
+}): string {
+  const parts = [
+    `[${input.fn}] denied`,
+    `code=${String(input.code)}`,
+    `status=${input.status}`,
+  ];
+  if (input.action) parts.push(`action=${input.action}`);
+  if (input.requestId) parts.push(`request_id=${input.requestId}`);
+  const ctx = redactDenialContext(input.context);
+  if (ctx && Object.keys(ctx).length > 0) parts.push(`context=${JSON.stringify(ctx)}`);
+  return parts.join(" ");
 }
 
 // ---------------------------------------------------------------------------
