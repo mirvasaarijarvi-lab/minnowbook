@@ -45,6 +45,7 @@ import {
   calcNights as calcNightsFor,
   calcBreakfastPrice as calcBreakfastPriceFor,
   calcRoomPrice as calcRoomPriceFor,
+  effectiveChargedTotal as effectiveChargedTotalFor,
 } from "@/lib/report-accommodation-pricing";
 
 /** Bar colours for the PDF chart, mirroring the on-screen series order. */
