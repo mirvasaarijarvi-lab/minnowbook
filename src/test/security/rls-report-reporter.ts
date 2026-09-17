@@ -8,6 +8,7 @@ import {
   type TenantMembershipSnapshot,
 } from "./fixtures/tenant-guard-record";
 import { applyReportGuard, WITHHELD_NOTICE } from "./fixtures/report-render-guard";
+import { parseReportScope } from "./fixtures/request-scope-guard";
 
 /**
  * Custom Vitest reporter that produces a CI-friendly summary of the
