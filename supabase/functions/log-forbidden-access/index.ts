@@ -297,12 +297,15 @@ export async function handleLogForbiddenAccessRequest(req: Request): Promise<Res
     )
   ) {
     // Verify the caller actually belongs to the hinted tenant before
-    // attributing the audit row to it.
+    // attributing the audit row to it. Only an APPROVED membership counts:
+    // a pending or revoked one means the caller has no access to that
+    // tenant, and a denied request must never write into its audit trail.
     const { data: membership } = await admin
       .from("tenant_users")
       .select("tenant_id")
       .eq("user_id", user.id)
       .eq("tenant_id", body.tenantId)
+      .eq("is_approved", true)
       .maybeSingle();
     if (membership?.tenant_id) {
       tenantId = membership.tenant_id;
@@ -315,10 +318,12 @@ export async function handleLogForbiddenAccessRequest(req: Request): Promise<Res
     // auth.uid()-based authorization, and the service role has no auth.uid().
     // The service-role query bypasses RLS, which is intentional: audit rows
     // must be attributable even when the user's own policy view would deny.
+    // Approved memberships only, for the same reason as above.
     const { data: memberships } = await admin
       .from("tenant_users")
       .select("tenant_id")
-      .eq("user_id", user.id);
+      .eq("user_id", user.id)
+      .eq("is_approved", true);
     if (Array.isArray(memberships) && memberships.length === 1) {
       tenantId = memberships[0].tenant_id as string;
     }
