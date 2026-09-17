@@ -64,6 +64,13 @@
       "when": 1789621237718,
       "tag": "0008_audit_log_trigger_skip_when_tenant_deleted",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1789625859866,
+      "tag": "0009_harden_custom_role_hierarchy_and_resource_images_role",
+      "breakpoints": true
     }
   ]
 }
