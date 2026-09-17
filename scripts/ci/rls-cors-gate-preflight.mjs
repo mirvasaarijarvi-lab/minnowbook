@@ -93,11 +93,26 @@ const setOutput = (mode) => {
 const finish = (code, mode) => {
   setOutput(mode);
   writeSummary();
+  if (DRY_RUN) {
+    console.log("");
+    console.log(`Dry run verdict: mode=${mode}, real run would exit ${code}.`);
+    if (problems.length > 0) {
+      console.log(`Refusal reason(s): ${problems.length}`);
+      for (const p of problems) console.log(`  - ${p.title}: ${p.message}`);
+    }
+    console.log("No files written, no annotations emitted, nothing changed.");
+    process.exit(0);
+  }
   process.exit(code);
 };
 
 
 const present = (value) => (value ? "present" : "MISSING");
+
+if (DRY_RUN) {
+  log("Dry run: reporting only. No output files, no annotations, no network calls.");
+  log("");
+}
 
 log("Configuration inputs (values never printed):");
 log(`  VITE_SUPABASE_URL                ${present(URL_)}`);
