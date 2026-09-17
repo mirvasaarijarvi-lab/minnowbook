@@ -83,6 +83,35 @@ const EXCLUDED_TABLES: Record<string, string> = {
     "Service-role-only bookkeeping for booking idempotency keys, written exclusively by the public-booking edge function. Holds no guest or business data (tenant_id, key, reservation_id, timestamps). RLS grants service_role only, plus system-admin SELECT; anon and authenticated have no grants, so there is no client-side cross-tenant surface to test. Behaviour is covered by e2e/public-booking-idempotency-key.spec.ts.",
 };
 
+/**
+ * Every public-schema table created by a migration in `drizzle/migrations`.
+ * Used to tell a manifest entry awaiting a migration apart from a stale one.
+ */
+function tablesDeclaredInMigrations(): Set<string> {
+  const declared = new Set<string>();
+  const root = path.resolve(process.cwd(), "drizzle/migrations");
+  if (!fs.existsSync(root)) return declared;
+
+  const walk = (dir: string): void => {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        walk(full);
+      } else if (entry.name.endsWith(".sql")) {
+        const sql = fs.readFileSync(full, "utf8");
+        const re = /create\s+table\s+(?:if\s+not\s+exists\s+)?(?:"?public"?\.)?"?([a-z0-9_]+)"?/gi;
+        let m: RegExpExecArray | null;
+        while ((m = re.exec(sql)) !== null) {
+          declared.add(m[1].toLowerCase());
+        }
+      }
+    }
+  };
+
+  walk(root);
+  return declared;
+}
+
 describe("Tenant Table Manifest — Coverage Guard", () => {
   describe.runIf(hasSupabaseConfig)("Live schema introspection", () => {
     let anon: SupabaseClient;
