@@ -35,6 +35,7 @@ const TENANTS = ["A", "B"].map((letter) => ({
 }));
 
 const lines = [];
+const problems = [];
 const log = (line) => {
   lines.push(line);
   console.log(line);
@@ -42,6 +43,7 @@ const log = (line) => {
 const problem = (title, message) => {
   console.log(`::error title=${title}::${message}`);
   lines.push(`FAIL ${title}: ${message}`);
+  problems.push({ title, message });
 };
 
 const writeSummary = () => {
@@ -51,8 +53,26 @@ const writeSummary = () => {
     `### RLS/CORS gate preflight\n\n\`\`\`\n${lines.join("\n")}\n\`\`\`\n\n`,
   );
 };
+
+/** One line, no control characters: safe for a GITHUB_OUTPUT key=value pair. */
+const oneLine = (value) => String(value).replace(/[\r\n]+/g, " ").trim().slice(0, 400);
+
 const setOutput = (mode) => {
-  if (env.GITHUB_OUTPUT) appendFileSync(env.GITHUB_OUTPUT, `mode=${mode}\n`);
+  if (!env.GITHUB_OUTPUT) return;
+  const out = [`mode=${mode}\n`];
+  if (mode === "denied") {
+    const first = problems[0] ?? {
+      title: "Tenant access denied",
+      message: "The RLS/CORS gate preflight denied tenant access.",
+    };
+    out.push(`denied_title=${oneLine(first.title)}\n`);
+    out.push(`denied_reason=${oneLine(first.message)}\n`);
+    // Multiline detail for the notification body, via the delimiter syntax.
+    const delimiter = `RLSGATE_${Date.now()}`;
+    const detail = problems.map((p) => `- **${p.title}**: ${p.message}`).join("\n");
+    out.push(`denied_details<<${delimiter}\n${detail || "- (no detail captured)"}\n${delimiter}\n`);
+  }
+  appendFileSync(env.GITHUB_OUTPUT, out.join(""));
 };
 
 const finish = (code, mode) => {
@@ -60,6 +80,7 @@ const finish = (code, mode) => {
   writeSummary();
   process.exit(code);
 };
+
 
 const present = (value) => (value ? "present" : "MISSING");
 
