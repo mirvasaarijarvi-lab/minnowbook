@@ -448,6 +448,25 @@ const OffersManager = () => {
           onOpenChange={(open) => { if (!open) setEmailOffer(null); }}
         />
       )}
+
+      {priceReview && (
+        <OfferPriceReviewDialog
+          open={!!priceReview}
+          onOpenChange={(open) => { if (!open) setPriceReview(null); }}
+          legs={priceReview.plan.legs}
+          isSubmitting={confirming}
+          onConfirm={async (prices) => {
+            const { offer, plan } = priceReview;
+            setConfirming(true);
+            try {
+              await executeConfirm(offer, plan, prices);
+            } finally {
+              setConfirming(false);
+              setPriceReview(null);
+            }
+          }}
+        />
+      )}
     </div>
   );
 };
