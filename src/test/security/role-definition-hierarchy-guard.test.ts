@@ -43,6 +43,7 @@ interface Seeded {
   safeKey: string;
   boundaryKey: string;
   staffUserId: string;
+  ownerUserId: string;
   otherTenantKey: string;
 }
 
@@ -156,6 +157,7 @@ describe.runIf(canRun)("custom role definition hierarchy guard", () => {
       .delete()
       .in("id", [seeded.tenantId, seeded.otherTenantId]);
     await service.auth.admin.deleteUser(seeded.staffUserId).catch(() => {});
+    await service.auth.admin.deleteUser(seeded.ownerUserId).catch(() => {});
   }, 90_000);
 
   // ---------- write-time trigger ----------
