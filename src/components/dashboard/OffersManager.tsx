@@ -15,14 +15,20 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  resolveOfferReservationPrice,
+  describeOfferReservationPrice,
   pickOfferResource,
 } from "@/lib/offer-reservation-pricing";
 
 import OfferCreateDialog from "./OfferCreateDialog";
 import OfferEmailDialog from "./OfferEmailDialog";
+import OfferPriceReviewDialog, { type OfferPriceLeg } from "./OfferPriceReviewDialog";
 import { useDateLocale } from "@/hooks/useDateLocale";
 import DashboardTooltip from "./DashboardTooltip";
+
+interface ConfirmPlan {
+  mainType: string;
+  legs: OfferPriceLeg[];
+}
 
 const OffersManager = () => {
   const t = useT();
