@@ -173,27 +173,60 @@ jobs:
         env:
           LIVE_FETCH_TIMEOUT_MS: "15000"
         run: |
+          set -o pipefail
+          mkdir -p test-reports/logs
           bunx vitest run --config vitest.security-live.config.ts \
             --reporter=verbose \
-            src/test/security/edge-function-cors-custom-headers.test.ts
+            src/test/security/edge-function-cors-custom-headers.test.ts 2>&1 \
+            | tee test-reports/logs/04-cors-live.log
 
       - name: Run offline CORS regression tests
         run: |
+          set -o pipefail
+          mkdir -p test-reports/logs
           bunx vitest run \
             --reporter=verbose \
             src/test/security/cors-validation.test.ts \
             src/test/security/edge-function-hsts-referrer-csp.test.ts \
             src/test/security/edge-function-csp.test.ts \
-            src/test/security/public-booking-response-headers.test.ts
+            src/test/security/public-booking-response-headers.test.ts 2>&1 \
+            | tee test-reports/logs/05-cors-offline.log
 
-      - name: Upload RLS gate report
+      # A short index so the downloaded artifact says, at a glance, which step
+      # failed and where its full output is, without opening every log.
+      - name: Write log index
+        if: always()
+        run: |
+          mkdir -p test-reports/logs
+          {
+            echo "RLS/CORS gate run logs"
+            echo "workflow run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+            echo "ref:          ${GITHUB_REF}"
+            echo "commit:       ${GITHUB_SHA}"
+            echo "tenant access (preflight mode): ${PREFLIGHT_MODE:-unknown}"
+            echo ""
+            echo "Files:"
+            ls -l test-reports/logs test-reports/vitest 2>/dev/null || true
+            echo ""
+            echo "Lines containing FAIL / error annotations:"
+            grep -n -E "FAIL|::error|✕|AssertionError" test-reports/logs/*.log || echo "  (none)"
+          } > test-reports/logs/00-index.txt
+          cat test-reports/logs/00-index.txt
+        env:
+          PREFLIGHT_MODE: ${{ steps.preflight.outputs.mode }}
+
+      # Full text of every gate step plus the JSON report, downloadable from the
+      # run page. Uploaded on failure too — that is when it is needed.
+      - name: Upload RLS gate logs and report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: rls-cors-gate-report
-          path: test-reports/vitest/rls-gate.json
-          if-no-files-found: ignore
-          retention-days: 7
+          name: rls-cors-gate-logs
+          path: |
+            test-reports/logs/
+            test-reports/vitest/rls-gate.json
+          if-no-files-found: warn
+          retention-days: 14
 
 
   # A tenant-access denial means the gate could not assert isolation at all —
