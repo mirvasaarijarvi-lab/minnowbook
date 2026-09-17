@@ -1264,6 +1264,7 @@ type TranslationKeys = {
   "help.art10C2": string;
   "help.art10C3": string;
   "help.art10C4": string;
+  "help.art10C5": string;
   "help.guide1Q": string;
   "help.guide1A": string;
   "help.guide2Q": string;
