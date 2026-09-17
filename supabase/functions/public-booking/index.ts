@@ -1021,6 +1021,19 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
       throw new Error("Failed to create reservation");
     }
 
+    // Bind the idempotency key to the reservation it created, so any repeat of
+    // this request returns this reservation instead of booking again.
+    if (idempotencyKey) {
+      const { error: bindErr } = await adminClient
+        .from("booking_idempotency")
+        .update({ reservation_id: insertedRes.id, completed_at: new Date().toISOString() })
+        .eq("tenant_id", tenant_id)
+        .eq("idempotency_key", idempotencyKey);
+      if (bindErr) {
+        console.warn("[public-booking] idempotency bind failed", bindErr.message);
+      }
+    }
+
     // Log success/warning
     await logValidation(adminClient, {
       tenant_id,
