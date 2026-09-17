@@ -285,6 +285,7 @@ test.describe("Server-owned invoicing flag and pricing notes", () => {
       auth: { persistSession: false, autoRefreshToken: false },
     });
 
+    const anonEmail = `ci+owned-anon-${stamp}@mimmobook.test`;
     const { error: anonInsertErr } = await anon.from("reservations").insert({
       tenant_id: tenantId,
       reservation_type: "restaurant",
@@ -293,14 +294,29 @@ test.describe("Server-owned invoicing flag and pricing notes", () => {
       start_time: "18:30",
       guests_count: 2,
       guest_name: `TEST CI Owned Anon ${stamp}`,
-      guest_email: `ci+owned-anon-${stamp}@mimmobook.test`,
+      guest_email: anonEmail,
       guest_phone: "+358401234567",
       is_invoiced: true,
       pricing_details: "Free of charge",
       staff_notes: "Do not bill",
+      internal_notes: "Comped",
+      status: "confirmed",
       price_eur: 0,
     });
-    expect(anonInsertErr, "a guest must not insert invoicing or note fields").not.toBeNull();
+    // Public booking inserts are allowed, but the staff and system columns are
+    // stripped: either the row is refused outright or it lands scrubbed.
+    if (anonInsertErr) {
+      expect(anonInsertErr.message.length).toBeGreaterThan(0);
+    } else {
+      const anonRow = await fetchRow(anonEmail);
+      expect(anonRow.is_invoiced, "guest insert is_invoiced").toBe(false);
+      expect(anonRow.pricing_details, "guest insert pricing notes").toBeNull();
+      expect(anonRow.staff_notes, "guest insert staff notes").toBeNull();
+      expect(anonRow.internal_notes, "guest insert internal notes").toBeNull();
+      expect(anonRow.status, "guest insert status").toBe("pending");
+      expect(anonRow.price_eur, "guest insert amount").toBeNull();
+      expect(anonRow.created_by, "guest insert created_by").toBeNull();
+    }
 
     const { error: anonUpdateErr } = await anon
       .from("reservations")
