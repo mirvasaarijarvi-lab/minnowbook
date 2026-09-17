@@ -93,6 +93,7 @@ export const LIVE_SECURITY_TESTS: string[] = [
   "src/test/security/session-persistence.test.tsx",
   "src/test/security/storage-offer-pdf-isolation.test.ts",
   "src/test/security/tenant-assets-private.test.ts",
+  "src/test/security/tenant-bucket-privacy-config.test.ts",
   "src/test/security/tenant-scoped-anon-vs-auth.test.ts",
   "src/test/security/tenant-table-manifest.test.ts",
 ];
