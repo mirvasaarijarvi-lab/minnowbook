@@ -127,7 +127,7 @@ function escapeHtml(value: string): string {
  * Format is intentionally line-oriented so it survives Vitest's serializer
  * and stays greppable in raw CI logs.
  */
-function parseRlsFailure(message: string | null): RlsFailureDetails | null {
+export function parseRlsFailure(message: string | null): RlsFailureDetails | null {
   if (!message || !message.includes("RLS DENIAL FAILED:")) return null;
   const lines = message.split("\n");
   const details: RlsFailureDetails = {};
@@ -160,7 +160,7 @@ function parseRlsFailure(message: string | null): RlsFailureDetails | null {
   return Object.keys(details).length > 0 ? details : null;
 }
 
-function renderRlsDetails(d: RlsFailureDetails): string {
+export function renderRlsDetails(d: RlsFailureDetails): string {
   const row = (label: string, value: string | undefined) =>
     value
       ? `<div class="kv-row"><div class="kv-label">${escapeHtml(label)}</div><div class="kv-value">${escapeHtml(value)}</div></div>`
