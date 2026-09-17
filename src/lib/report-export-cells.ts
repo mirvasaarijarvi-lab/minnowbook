@@ -32,6 +32,9 @@ export const csvPriceCells = (
   labels: { breakfast: string },
 ): ExportPriceCells => {
   const { charged, room, breakfast, isAccommodation, hasAmount } = reportAmounts(r);
+  // A booking with no amount shows a placeholder in both exports, never 0.00,
+  // so a spreadsheet cannot read "priced at zero" where staff still owe a price.
+  if (!hasAmount) return { price: CSV_NO_AMOUNT, total: CSV_NO_AMOUNT };
   if (isAccommodation) {
     return {
       price: csvNum(room),
@@ -41,8 +44,7 @@ export const csvPriceCells = (
           : csvNum(charged),
     };
   }
-  const amount = hasAmount ? csvNum(charged) : CSV_NO_AMOUNT;
-  return { price: amount, total: amount };
+  return { price: csvNum(charged), total: csvNum(charged) };
 };
 
 export const printPriceCells = (
