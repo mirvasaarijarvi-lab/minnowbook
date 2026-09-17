@@ -130,7 +130,8 @@ const PERMISSION_ERROR: PostgrestError = {
   details: "",
   hint: "",
   name: "PostgrestError",
-};
+  toJSON: () => ({ code: "42501", message: "permission denied for table reservations" }),
+} as unknown as PostgrestError;
 
 type FuzzKind = "read" | "write" | "scan";
 
