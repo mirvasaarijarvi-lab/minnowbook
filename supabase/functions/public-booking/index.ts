@@ -269,6 +269,10 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
   const adminClient = _publicBookingTestHooks.createClient(supabaseUrl, serviceRoleKey);
 
 
+  // Set once an idempotency key has been claimed but not yet bound to a
+  // reservation, so a rejected request releases the key for a genuine retry.
+  let pendingIdempotency: { tenant_id: string; key: string } | null = null;
+
   try {
     const contentLength = parseInt(req.headers.get("content-length") || "0", 10);
     if (contentLength > 50 * 1024) {
