@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { useInvoiceRefusalMessage, type FormattedInvoiceRefusal } from "@/hooks/useInvoiceRefusalMessage";
+import type { InvoiceRefusalSurface } from "@/lib/invoice-refusal";
 
 /**
  * Single toast id shared by every invoicing surface. Reusing one id means a
@@ -21,9 +22,13 @@ export const INVOICE_REFUSAL_TOAST_ID = "invoice-refusal";
  *
  * @param scopeKey Identifier of the thing the refusal is about, usually the
  *                 reservation id. Changing it clears the visible message.
+ * @param surface  Whose wording to use: staff (default) or guest.
  */
-export function useInvoiceRefusalNotice(scopeKey?: string | null) {
-  const formatInvoiceRefusal = useInvoiceRefusalMessage();
+export function useInvoiceRefusalNotice(
+  scopeKey?: string | null,
+  surface: InvoiceRefusalSurface = "staff",
+) {
+  const formatInvoiceRefusal = useInvoiceRefusalMessage(surface);
   const previousScope = useRef<string | null | undefined>(scopeKey);
 
   useEffect(() => {

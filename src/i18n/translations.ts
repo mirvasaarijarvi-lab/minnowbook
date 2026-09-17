@@ -688,6 +688,25 @@ type TranslationKeys = {
   "invoiceRefusal.UNKNOWN": string;
   "invoiceRefusal.serverReasonLabel": string;
   "invoiceRefusal.guestNotice": string;
+  "invoiceRefusal.CANCELLED": string;
+  "invoiceRefusal.NOT_FOUND": string;
+  "invoiceRefusal.SESSION_EXPIRED": string;
+  "invoiceRefusal.OFFLINE": string;
+  "invoiceRefusal.RATE_LIMITED": string;
+  "invoiceRefusal.CONFLICT": string;
+  "invoiceRefusal.SERVER_ERROR": string;
+  "invoiceRefusalGuest.NO_PRICE": string;
+  "invoiceRefusalGuest.AMOUNT_MISMATCH": string;
+  "invoiceRefusalGuest.INVOICED_LOCKED": string;
+  "invoiceRefusalGuest.NOT_PERMITTED": string;
+  "invoiceRefusalGuest.CANCELLED": string;
+  "invoiceRefusalGuest.NOT_FOUND": string;
+  "invoiceRefusalGuest.SESSION_EXPIRED": string;
+  "invoiceRefusalGuest.OFFLINE": string;
+  "invoiceRefusalGuest.RATE_LIMITED": string;
+  "invoiceRefusalGuest.CONFLICT": string;
+  "invoiceRefusalGuest.SERVER_ERROR": string;
+  "invoiceRefusalGuest.UNKNOWN": string;
   "dashboard.downloadInvoice": string;
   "dashboard.downloadInvoicePdf": string;
   "reports.downloadReportPdf": string;
@@ -2681,6 +2700,25 @@ const en: TranslationKeys = {
   "invoiceRefusal.UNKNOWN": "The invoiced status could not be updated.",
   "invoiceRefusal.serverReasonLabel": "Reason:",
   "invoiceRefusal.guestNotice": "This booking has already been invoiced, so it can no longer be changed here. Please contact us directly.",
+  "invoiceRefusal.CANCELLED": "This booking is cancelled, so its invoiced status cannot be changed.",
+  "invoiceRefusal.NOT_FOUND": "This booking could no longer be found. Refresh the list and try again.",
+  "invoiceRefusal.SESSION_EXPIRED": "Your session expired before the change was saved. Sign in again, then retry.",
+  "invoiceRefusal.OFFLINE": "The change could not reach the server. Check your connection and try again.",
+  "invoiceRefusal.RATE_LIMITED": "Too many attempts in a short time. Wait a moment, then try again.",
+  "invoiceRefusal.CONFLICT": "Someone else changed this booking first. Refresh it, then apply your change again.",
+  "invoiceRefusal.SERVER_ERROR": "The server could not complete the change. Please try again in a moment.",
+  "invoiceRefusalGuest.NO_PRICE": "This booking cannot be changed here yet. Please contact us directly.",
+  "invoiceRefusalGuest.AMOUNT_MISMATCH": "This booking cannot be changed here. Please contact us directly.",
+  "invoiceRefusalGuest.INVOICED_LOCKED": "This booking has already been invoiced, so it can no longer be changed here. Please contact us directly.",
+  "invoiceRefusalGuest.NOT_PERMITTED": "This booking can no longer be changed with this link. Please contact us directly.",
+  "invoiceRefusalGuest.CANCELLED": "This booking is already cancelled, so there is nothing left to change.",
+  "invoiceRefusalGuest.NOT_FOUND": "This booking link is no longer valid. Please contact us directly.",
+  "invoiceRefusalGuest.SESSION_EXPIRED": "This booking link has expired. Please contact us directly.",
+  "invoiceRefusalGuest.OFFLINE": "Your request did not go through. Check your connection and try again.",
+  "invoiceRefusalGuest.RATE_LIMITED": "Too many attempts in a short time. Please wait a moment and try again.",
+  "invoiceRefusalGuest.CONFLICT": "This booking was just updated. Reload the page and try again.",
+  "invoiceRefusalGuest.SERVER_ERROR": "Something went wrong on our side. Please try again in a moment.",
+  "invoiceRefusalGuest.UNKNOWN": "Your request could not be completed. Please try again or contact us directly.",
   "dashboard.downloadInvoice": "Download invoice",
   "dashboard.downloadInvoicePdf": "Download invoice PDF",
   "reports.downloadReportPdf": "Download report PDF",
@@ -4654,6 +4692,25 @@ const fi: TranslationKeys = {
   "invoiceRefusal.UNKNOWN": "Laskutustilaa ei voitu päivittää.",
   "invoiceRefusal.serverReasonLabel": "Syy:",
   "invoiceRefusal.guestNotice": "Varaus on jo laskutettu, joten sitä ei voi enää muuttaa täällä. Ota yhteyttä meihin suoraan.",
+  "invoiceRefusal.CANCELLED": "Varaus on peruttu, joten sen laskutustilaa ei voi muuttaa.",
+  "invoiceRefusal.NOT_FOUND": "Varausta ei enää löytynyt. Päivitä lista ja yritä uudelleen.",
+  "invoiceRefusal.SESSION_EXPIRED": "Istuntosi vanheni ennen tallennusta. Kirjaudu uudelleen ja yritä sitten uudestaan.",
+  "invoiceRefusal.OFFLINE": "Muutos ei tavoittanut palvelinta. Tarkista yhteys ja yritä uudelleen.",
+  "invoiceRefusal.RATE_LIMITED": "Liian monta yritystä lyhyessä ajassa. Odota hetki ja yritä uudelleen.",
+  "invoiceRefusal.CONFLICT": "Joku muu muutti varausta ensin. Päivitä varaus ja tee muutos uudelleen.",
+  "invoiceRefusal.SERVER_ERROR": "Palvelin ei saanut muutosta valmiiksi. Yritä hetken kuluttua uudelleen.",
+  "invoiceRefusalGuest.NO_PRICE": "Varausta ei voi vielä muuttaa täällä. Ota yhteyttä meihin suoraan.",
+  "invoiceRefusalGuest.AMOUNT_MISMATCH": "Varausta ei voi muuttaa täällä. Ota yhteyttä meihin suoraan.",
+  "invoiceRefusalGuest.INVOICED_LOCKED": "Varaus on jo laskutettu, joten sitä ei voi enää muuttaa täällä. Ota yhteyttä meihin suoraan.",
+  "invoiceRefusalGuest.NOT_PERMITTED": "Varausta ei voi enää muuttaa tällä linkillä. Ota yhteyttä meihin suoraan.",
+  "invoiceRefusalGuest.CANCELLED": "Varaus on jo peruttu, joten muutettavaa ei ole.",
+  "invoiceRefusalGuest.NOT_FOUND": "Varauslinkki ei ole enää voimassa. Ota yhteyttä meihin suoraan.",
+  "invoiceRefusalGuest.SESSION_EXPIRED": "Varauslinkki on vanhentunut. Ota yhteyttä meihin suoraan.",
+  "invoiceRefusalGuest.OFFLINE": "Pyyntösi ei mennyt läpi. Tarkista yhteys ja yritä uudelleen.",
+  "invoiceRefusalGuest.RATE_LIMITED": "Liian monta yritystä lyhyessä ajassa. Odota hetki ja yritä uudelleen.",
+  "invoiceRefusalGuest.CONFLICT": "Varausta päivitettiin juuri. Lataa sivu uudelleen ja yritä uudestaan.",
+  "invoiceRefusalGuest.SERVER_ERROR": "Jokin meni vikaan meidän päässä. Yritä hetken kuluttua uudelleen.",
+  "invoiceRefusalGuest.UNKNOWN": "Pyyntöä ei voitu suorittaa. Yritä uudelleen tai ota yhteyttä meihin.",
   "dashboard.downloadInvoice": "Lataa lasku",
   "dashboard.downloadInvoicePdf": "Lataa lasku PDF-muodossa",
   "reports.downloadReportPdf": "Lataa raportti PDF-muodossa",
@@ -6626,6 +6683,25 @@ const sv: TranslationKeys = {
   "invoiceRefusal.UNKNOWN": "Fakturastatusen kunde inte uppdateras.",
   "invoiceRefusal.serverReasonLabel": "Orsak:",
   "invoiceRefusal.guestNotice": "Bokningen är redan fakturerad och kan inte längre ändras här. Kontakta oss direkt.",
+  "invoiceRefusal.CANCELLED": "Bokningen är avbokad, så dess fakturastatus kan inte ändras.",
+  "invoiceRefusal.NOT_FOUND": "Bokningen kunde inte hittas längre. Uppdatera listan och försök igen.",
+  "invoiceRefusal.SESSION_EXPIRED": "Din session gick ut innan ändringen sparades. Logga in igen och försök sedan på nytt.",
+  "invoiceRefusal.OFFLINE": "Ändringen nådde inte servern. Kontrollera din anslutning och försök igen.",
+  "invoiceRefusal.RATE_LIMITED": "För många försök på kort tid. Vänta en stund och försök igen.",
+  "invoiceRefusal.CONFLICT": "Någon annan ändrade bokningen först. Uppdatera den och gör om din ändring.",
+  "invoiceRefusal.SERVER_ERROR": "Servern kunde inte slutföra ändringen. Försök igen om en liten stund.",
+  "invoiceRefusalGuest.NO_PRICE": "Bokningen kan inte ändras här än. Kontakta oss direkt.",
+  "invoiceRefusalGuest.AMOUNT_MISMATCH": "Bokningen kan inte ändras här. Kontakta oss direkt.",
+  "invoiceRefusalGuest.INVOICED_LOCKED": "Bokningen är redan fakturerad och kan inte längre ändras här. Kontakta oss direkt.",
+  "invoiceRefusalGuest.NOT_PERMITTED": "Bokningen kan inte längre ändras med den här länken. Kontakta oss direkt.",
+  "invoiceRefusalGuest.CANCELLED": "Bokningen är redan avbokad, så det finns inget kvar att ändra.",
+  "invoiceRefusalGuest.NOT_FOUND": "Bokningslänken är inte längre giltig. Kontakta oss direkt.",
+  "invoiceRefusalGuest.SESSION_EXPIRED": "Bokningslänken har gått ut. Kontakta oss direkt.",
+  "invoiceRefusalGuest.OFFLINE": "Din förfrågan gick inte igenom. Kontrollera din anslutning och försök igen.",
+  "invoiceRefusalGuest.RATE_LIMITED": "För många försök på kort tid. Vänta en stund och försök igen.",
+  "invoiceRefusalGuest.CONFLICT": "Bokningen uppdaterades just nu. Ladda om sidan och försök igen.",
+  "invoiceRefusalGuest.SERVER_ERROR": "Något gick fel hos oss. Försök igen om en liten stund.",
+  "invoiceRefusalGuest.UNKNOWN": "Din förfrågan kunde inte slutföras. Försök igen eller kontakta oss direkt.",
   "dashboard.downloadInvoice": "Ladda ner faktura",
   "dashboard.downloadInvoicePdf": "Ladda ner faktura som PDF",
   "reports.downloadReportPdf": "Ladda ner rapport som PDF",
