@@ -291,16 +291,18 @@ test.describe("Server recalculates breakfast from resource rules, ignoring the c
       .eq("tenant_id", tenantId)
       .like("guest_email", `ci+breakfast-%-${stamp}@mimmobook.test`);
     expect(allErr, allErr?.message).toBeNull();
-    // 4 junk + cheap + inflated + tampered at the full total, plus the two
-    // bookings without breakfast money.
-    const fullTotalCount = allRows!.filter(
-      (r) => Number(r.price_eur) === EXPECTED_TOTAL,
-    ).length;
-    const roomOnlyCount = allRows!.filter(
-      (r) => Number(r.price_eur) === NO_BREAKFAST_TOTAL,
-    ).length;
-    expect(fullTotalCount).toBe(7);
-    expect(roomOnlyCount).toBe(2);
+    // 4 junk + cheap + inflated + tampered at the resource-rate total, one
+    // room-only booking, one on the 15 EUR fallback. No other amount exists:
+    // every claimed figure was discarded.
+    const counts = new Map<number, number>();
+    for (const r of allRows!) {
+      const v = Number(r.price_eur);
+      counts.set(v, (counts.get(v) ?? 0) + 1);
+    }
+    expect(counts.get(EXPECTED_TOTAL)).toBe(7);
+    expect(counts.get(NO_BREAKFAST_TOTAL)).toBe(1);
+    expect(counts.get(FALLBACK_TOTAL)).toBe(1);
+    expect(counts.size).toBe(3);
     expect(allRows).toHaveLength(9);
   });
 });
