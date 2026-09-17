@@ -182,7 +182,13 @@ describe("report exports on tenant deny cases", () => {
     const guarded = applyReportGuard(payload, deniedGuardLog(suite)).payload as ReportPayload;
     const json = JSON.stringify(guarded);
     const html = renderHtml(guarded);
-    for (const secret of [...FOREIGN_EXPORT_METADATA, surface.attemptedQuery]) {
+    // The guard section legitimately names the tenant pair (ids, roles, flags
+    // only); nothing else about the other tenant may survive.
+    const rowMetadata = [
+      ...FOREIGN_EXPORT_METADATA.filter((v) => v !== TARGET_TENANT),
+      surface.attemptedQuery,
+    ];
+    for (const secret of rowMetadata) {
       expect(json).not.toContain(secret);
       expect(html).not.toContain(secret);
     }
