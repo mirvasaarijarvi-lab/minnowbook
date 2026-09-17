@@ -12,6 +12,9 @@ import {
   printPriceCells,
   pdfPriceCells,
   parseCsvSplitCell,
+  CSV_NO_AMOUNT,
+  PRINT_NO_AMOUNT,
+  PDF_NO_AMOUNT,
 } from "@/lib/report-export-cells";
 
 /**
@@ -187,10 +190,14 @@ test.describe("Discount rounding edge cases", () => {
       price_eur: Number(s.row.price_eur),
     }));
 
+    const LABELS = { breakfast: "Breakfast" };
+    const fmtEur = (v: number) => `${v.toFixed(2)} EUR`;
+
     let totalCents = 0;
     reportRows.forEach((r, i) => {
       const label = stored[i].label;
       const expected = stored[i].expected;
+      const hasAmount = expected > 0;
 
       // Shared accessor: the single source of truth for report money.
       const amounts = reportAmounts(r);
@@ -198,29 +205,52 @@ test.describe("Discount rounding edge cases", () => {
       expect(roundCents(amounts.room + amounts.breakfast), `${label} accessor split`).toBe(
         expected,
       );
-      expect(amounts.hasAmount).toBe(true);
+      expect(amounts.hasAmount, `${label} hasAmount`).toBe(hasAmount);
 
-      // Lower level helpers agree with the accessor.
-      expect(roundCents(effectiveChargedTotal(r)), `${label} charged helper`).toBe(expected);
-      expect(roundCents(calcRoomPrice(r) + calcBreakfastPrice(r)), `${label} helper split`).toBe(
-        expected,
-      );
+      // Lower level helpers agree with the accessor whenever there is money.
+      if (hasAmount) {
+        expect(roundCents(effectiveChargedTotal(r)), `${label} charged helper`).toBe(expected);
+        expect(roundCents(calcRoomPrice(r) + calcBreakfastPrice(r)), `${label} helper split`).toBe(
+          expected,
+        );
+      }
 
-      // CSV: the split cell parses back to the same cents.
-      const csv = csvPriceCells(r);
-      const parsed = parseCsvSplitCell(csv);
-      expect(roundCents(parsed.room + parsed.breakfast), `${label} CSV split`).toBe(expected);
-      expect(roundCents(parsed.total), `${label} CSV total`).toBe(expected);
-
-      // Print view and PDF columns: identical figures to the cent.
-      const print = printPriceCells(r);
+      const csv = csvPriceCells(r, LABELS);
+      const print = printPriceCells(r, LABELS, fmtEur);
       const pdf = pdfPriceCells(r);
-      expect(pdf.total, `${label} PDF total`).toBe(csv.total);
-      expect(pdf.room, `${label} PDF room`).toBe(csv.room);
-      expect(pdf.breakfast, `${label} PDF breakfast`).toBe(csv.breakfast);
-      expect(print.total.replace(/\s/g, ""), `${label} print total`).toContain(
-        expected.toFixed(2),
-      );
+
+      if (!hasAmount) {
+        // A fully comped stay shows a placeholder, never 0.00, so a spreadsheet
+        // cannot read it as a genuine zero-euro charge.
+        expect(csv.total, `${label} CSV total`).toBe(CSV_NO_AMOUNT);
+        expect(csv.price, `${label} CSV price`).toBe(CSV_NO_AMOUNT);
+        expect(print.total, `${label} print total`).toBe(PRINT_NO_AMOUNT);
+        expect(pdf.total, `${label} PDF total`).toBe(PDF_NO_AMOUNT);
+        expect(pdf.room, `${label} PDF room`).toBe(PDF_NO_AMOUNT);
+        expect(pdf.breakfast, `${label} PDF breakfast`).toBe(PDF_NO_AMOUNT);
+        return;
+      }
+
+      // CSV: when a split is spelled out it parses back to the same cents.
+      const parsed = parseCsvSplitCell(csv.total);
+      if (amounts.breakfast > 0) {
+        expect(parsed, `${label} CSV split unparseable: ${csv.total}`).not.toBeNull();
+        expect(roundCents(parsed!.room + parsed!.breakfast), `${label} CSV split`).toBe(expected);
+        expect(roundCents(parsed!.total), `${label} CSV total`).toBe(expected);
+      } else {
+        expect(csv.total, `${label} CSV total`).toBe(expected.toFixed(2));
+      }
+      expect(csv.price, `${label} CSV room cell`).toBe(amounts.room.toFixed(2));
+
+      // PDF columns: room + breakfast = total, on the printed strings.
+      expect(pdf.total, `${label} PDF total`).toBe(expected.toFixed(2));
+      expect(pdf.room, `${label} PDF room`).toBe(amounts.room.toFixed(2));
+      const pdfBreakfast = pdf.breakfast === PDF_NO_AMOUNT ? 0 : Number(pdf.breakfast);
+      expect(roundCents(Number(pdf.room) + pdfBreakfast), `${label} PDF split`).toBe(expected);
+
+      // Print view carries the very same cents.
+      expect(print.total, `${label} print total`).toContain(fmtEur(expected));
+      expect(print.price, `${label} print room cell`).toBe(fmtEur(amounts.room));
 
       // Never negative, never above the gross.
       expect(amounts.room).toBeGreaterThanOrEqual(0);
