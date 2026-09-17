@@ -300,21 +300,25 @@ const ReportsPanel = () => {
     return (r.breakfast_price_per_person ?? 15) * (r.guests_count ?? 1) * n;
   }, [calcNights, isAccommodation]);
 
+  /**
+   * `price_eur` is always the total the guest pays for the whole booking:
+   * the public booking function and the manual reservation dialog both derive
+   * it from the resource's configured room price x nights (+ breakfast).
+   * Reports therefore must not multiply it by nights again — the room line is
+   * the stored total minus the breakfast component.
+   */
   const calcRoomPrice = useCallback((r: ReservationRow) => {
-    if (!isAccommodation(r)) return r.price_eur ?? 0;
-    const n = calcNights(r);
-    return (r.price_eur ?? 0) * n;
-  }, [calcNights, isAccommodation]);
+    const total = r.price_eur ?? 0;
+    if (!isAccommodation(r)) return total;
+    return Math.max(0, total - calcBreakfastPrice(r));
+  }, [calcBreakfastPrice, isAccommodation]);
 
   const effectivePrice = useCallback((r: ReservationRow) => {
     // Restaurant "according to menu" has no fixed price
     if (r.reservation_type === "restaurant" && r.pricing_type === "menu") return 0;
-    if (r.reservation_type === "restaurant") return r.price_eur ?? 0;
-    // Accommodation: multiply per-night room price + breakfast by nights.
-    if (isAccommodation(r)) return calcRoomPrice(r) + calcBreakfastPrice(r);
-    // Everything else (wellness, custom, venue, etc.) uses the flat price.
     return r.price_eur ?? 0;
-  }, [calcRoomPrice, calcBreakfastPrice, isAccommodation]);
+  }, []);
+
 
   const stats = useMemo(() => {
     const calc = (items: ReservationRow[]) => ({

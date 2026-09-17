@@ -122,20 +122,25 @@ const OffersManager = () => {
       // if the offer row is later archived.
       const linkedGroupId = crypto.randomUUID();
 
+      // Load the tenant's resource configuration once so every reservation
+      // created here is priced from the same source of truth the public
+      // booking flow uses (room price per night, sub-service prices).
+      const { data: resourceRows } = await supabase
+        .from("resources")
+        .select("id, name, resource_type, price_per_night, breakfast_price_per_person, sub_services")
+        .eq("tenant_id", offer.tenant_id)
+        .eq("is_active", true);
+      const resources = (resourceRows ?? []) as any[];
+
       // Resolve the main reservation_type: look up the resource by name,
       // otherwise fall back to the tenant's first allowed type, then "venue".
       let mainType = "venue";
-      if (offer.event_space) {
-        const { data: matchResource } = await supabase
-          .from("resources")
-          .select("resource_type")
-          .eq("tenant_id", offer.tenant_id)
-          .eq("name", offer.event_space)
-          .limit(1)
-          .maybeSingle();
-        if (matchResource?.resource_type) {
-          mainType = matchResource.resource_type;
-        }
+      const mainResource = pickOfferResource(resources, {
+        name: offer.event_space,
+        reservation_type: mainType,
+      });
+      if (offer.event_space && mainResource?.resource_type) {
+        mainType = mainResource.resource_type;
       }
       if (mainType === "venue") {
         const allowed = (tenant?.allowed_reservation_types as string[] | undefined) ?? [];
@@ -143,6 +148,15 @@ const OffersManager = () => {
           mainType = allowed[0];
         }
       }
+
+      const mainPrice = resolveOfferReservationPrice({
+        reservation_type: mainType,
+        resource: pickOfferResource(resources, {
+          name: offer.event_space,
+          reservation_type: mainType,
+        }),
+        space: offer.event_space,
+      });
 
       // Create main reservation
       const { data: mainRes, error: mainErr } = await supabase
@@ -164,6 +178,7 @@ const OffersManager = () => {
           staff_notes: "Offer to Reservation",
           language: offer.language || "en",
           linked_group_id: linkedGroupId,
+          ...(mainPrice != null ? { price_eur: mainPrice } : {}),
         } as any)
         .select()
         .single();
@@ -176,6 +191,15 @@ const OffersManager = () => {
       for (const [key, lr] of Object.entries(linked)) {
         if (!lr.enabled) continue;
         const resType = lr.resource_type || key;
+
+        const linkedPrice = resolveOfferReservationPrice({
+          reservation_type: resType,
+          resource: pickOfferResource(resources, {
+            name: lr.space,
+            reservation_type: resType,
+          }),
+          space: lr.space,
+        });
 
         const { data: linkedRes, error: linkedErr } = await supabase
           .from("reservations")
@@ -192,10 +216,11 @@ const OffersManager = () => {
             guests_count: lr.guests_count || offer.guests_count,
             event_type: offer.event_type || null,
             room_type: lr.space || null,
-            special_requests: lr.special_requests ? `Cross-reservation – via offer\n${lr.special_requests}` : "Cross-reservation – via offer",
-            staff_notes: "Cross-reservation – offer",
+            special_requests: lr.special_requests ? `Cross-reservation via offer\n${lr.special_requests}` : "Cross-reservation via offer",
+            staff_notes: "Cross-reservation, offer",
             language: offer.language || "en",
             linked_group_id: linkedGroupId,
+            ...(linkedPrice != null ? { price_eur: linkedPrice } : {}),
           } as any)
           .select()
           .single();
@@ -203,6 +228,7 @@ const OffersManager = () => {
         if (linkedErr) throw linkedErr;
         resIds.push(linkedRes.id);
       }
+
 
       await updateOffer.mutateAsync({
         id: offer.id,
