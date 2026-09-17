@@ -68,6 +68,10 @@ const CASES: Case[] = [
 
 /** Same arithmetic and rounding the server applies. */
 function expectedFinal(c: Case): number {
+  // A fixed coupon worth more than the stay is refused as inconsistent data by
+  // the database safeguard: the discount is cleared and the guest owes the
+  // full amount, never a value derived from the malformed payload.
+  if (c.type === "fixed" && c.value > GROSS_EUR) return GROSS_EUR;
   const raw =
     c.type === "percentage"
       ? Math.max(0, GROSS_EUR * (1 - c.value / 100))
@@ -278,7 +282,8 @@ test.describe("Discount rounding edge cases", () => {
     const comped = stored.find((s) => s.label === "exactly one hundred percent")!;
     expect(Number(comped.row.price_eur)).toBe(0);
     const overFixed = stored.find((s) => s.label === "fixed above the total")!;
-    expect(Number(overFixed.row.price_eur)).toBe(0);
+    expect(Number(overFixed.row.price_eur)).toBe(GROSS_EUR);
+    expect(overFixed.row.discount_type, "an over-sized coupon must be cleared").toBeNull();
     const oneCent = stored.find((s) => s.label === "fixed one cent below the total")!;
     expect(Number(oneCent.row.price_eur)).toBe(0.01);
   });
