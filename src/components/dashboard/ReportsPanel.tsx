@@ -303,11 +303,10 @@ const ReportsPanel = () => {
 
   const calcRoomPrice = useCallback((r: ReservationRow) => calcRoomPriceFor(r), []);
 
-  const effectivePrice = useCallback((r: ReservationRow) => {
-    // Restaurant "according to menu" has no fixed price
-    if (r.reservation_type === "restaurant" && r.pricing_type === "menu") return 0;
-    return r.price_eur ?? 0;
-  }, []);
+  // Single source for the amount every report surface shows (screen, CSV, print
+  // view, PDF export, grand total). Cents-exact, so room + breakfast always
+  // equals it. Restaurant "according to menu" has no fixed price.
+  const effectivePrice = useCallback((r: ReservationRow) => effectiveChargedTotalFor(r), []);
 
 
   const stats = useMemo(() => {
