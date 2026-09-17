@@ -296,7 +296,11 @@ export function renderHtml(payload: ReportPayload): string {
       const statusClass =
         e.status === "passed" ? "ok" : e.status === "failed" ? "fail" : "skip";
       const rlsBlock = e.rlsDetails ? renderRlsDetails(e.rlsDetails) : "";
-      const rawError = e.errorMessage
+      // A withheld entry shows the refusal notice only: no raw error block,
+      // no stack, nothing the guard already decided must not be published.
+      const rawError = e.rlsDetails?.withheld
+        ? ""
+        : e.errorMessage
         ? `<details${e.rlsDetails ? "" : " open"}><summary>Raw error / stack</summary><pre>${escapeHtml(e.errorMessage)}${
             e.errorStack ? "\n\n" + escapeHtml(e.errorStack) : ""
           }</pre></details>`

@@ -239,7 +239,13 @@ describe("rls-report render/export guard", () => {
       );
       expect(outcome.withheldEntries).toBe(1);
       expect(outcome.payload.entries[0].status).toBe("passed");
-      expect(outcome.payload.totals).toEqual(payloadWith([]).totals);
+      expect(outcome.payload.totals).toEqual({
+        total: 2,
+        passed: 1,
+        failed: 1,
+        skipped: 0,
+        durationMs: 42,
+      });
     });
   });
 
