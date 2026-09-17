@@ -3,6 +3,7 @@ import { dirname, resolve } from "node:path";
 import type { Reporter, File, Task, TaskResultPack } from "vitest";
 import {
   readTenantGuardLog,
+  resetTenantGuardLog,
   type TenantGuardRecord,
   type TenantMembershipSnapshot,
 } from "./fixtures/tenant-guard-record";
@@ -283,11 +284,11 @@ function renderHtml(payload: ReportPayload): string {
     })
     .join("\n");
 
-  return `<!doctype html>
+  return `<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Cross-Tenant RLS Test Report</title>
 <style>
   :root { color-scheme: light dark; }
@@ -336,10 +337,11 @@ function renderHtml(payload: ReportPayload): string {
   .guard-rowdetail { color: #94a3b8; font-size: 11px; margin-top: 2px; }
   .guard-rolebadge { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
   .guard-rolebadge code { font-size: 12px; }
+  .title-flavor { color: #94a3b8; font-weight: 400; font-size: 14px; }
 </style>
 </head>
 <body>
-  <h1>Cross-Tenant RLS Test Report <span style="color:#94a3b8;font-weight:400;font-size:14px">· ${escapeHtml(flavor)}</span></h1>
+  <h1>Cross-Tenant RLS Test Report <span class="title-flavor">· ${escapeHtml(flavor)}</span></h1>
   <div class="meta">Generated ${escapeHtml(generatedAt)} · Flavor <code>${escapeHtml(flavor)}</code> · Total duration ${totals.durationMs.toFixed(
     0,
   )} ms</div>
@@ -365,6 +367,9 @@ ${rows || '<tr><td colspan="5" style="text-align:center;color:#94a3b8;padding:24
 export default class RlsReportReporter implements Reporter {
   private outDir: string;
   private files: File[] = [];
+  /** Wall-clock start of this run; used to drop guard records left behind
+   *  by an earlier run in the same working tree. */
+  private runStartedAtMs = Date.now();
 
   constructor(options?: { outDir?: string }) {
     this.outDir = options?.outDir ?? DEFAULT_OUT_DIR;
@@ -372,6 +377,11 @@ export default class RlsReportReporter implements Reporter {
 
   onInit() {
     this.files = [];
+    this.runStartedAtMs = Date.now();
+    // Guard records are appended by workers to a file next to the report.
+    // Clearing it here guarantees the report only ever shows tenant-pair
+    // checks performed by THIS run.
+    resetTenantGuardLog();
   }
 
   onCollected(files: File[] = []) {
@@ -435,7 +445,22 @@ export default class RlsReportReporter implements Reporter {
 
     // Pull guard outcomes recorded by `guardTenantPair` via the file
     // side-channel. Empty when no live cross-tenant suite ran.
-    const tenantGuard = readTenantGuardLog().records;
+    // Defensive second layer on top of the onInit reset: ignore any record
+    // whose timestamp predates this run (stale file, clock-skewed worker,
+    // or a reset that failed due to a read-only filesystem).
+    const allGuardRecords = readTenantGuardLog().records;
+    const guardCutoffMs = this.runStartedAtMs - 60_000;
+    const tenantGuard = allGuardRecords.filter((r) => {
+      const t = Date.parse(r.recordedAt);
+      return Number.isNaN(t) ? true : t >= guardCutoffMs;
+    });
+    const staleGuardRecords = allGuardRecords.length - tenantGuard.length;
+    if (staleGuardRecords > 0) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        `[rls-report] ignored ${staleGuardRecords} tenant-guard record(s) from an earlier run`,
+      );
+    }
 
     const payload: ReportPayload = {
       generatedAt: new Date().toISOString(),
@@ -455,7 +480,9 @@ export default class RlsReportReporter implements Reporter {
       const flavoredJsonPath = resolve(this.outDir, `rls-report.${safeFlavor}.json`);
       const flavoredHtmlPath = resolve(this.outDir, `rls-report.${safeFlavor}.html`);
       const json = JSON.stringify(payload, null, 2);
-      const html = renderHtml(payload);
+      // Strip trailing whitespace so the artifact stays clean when an
+      // optional section (e.g. the tenant guard) renders empty.
+      const html = renderHtml(payload).replace(/[ \t]+$/gm, "");
       writeFileSync(jsonPath, json, "utf-8");
       writeFileSync(htmlPath, html, "utf-8");
       writeFileSync(flavoredJsonPath, json, "utf-8");
