@@ -2682,6 +2682,8 @@ const en: TranslationKeys = {
   "invoiceRefusal.serverReasonLabel": "Reason:",
   "invoiceRefusal.guestNotice": "This booking has already been invoiced, so it can no longer be changed here. Please contact us directly.",
   "dashboard.downloadInvoice": "Download invoice",
+  "dashboard.downloadInvoicePdf": "Download invoice PDF",
+  "reports.downloadReportPdf": "Download report PDF",
   "dashboard.markLinkedUsed": "Mark linked reservations used?",
   "dashboard.markLinkedUsedMsg": "This reservation is linked to an offer with other reservations. Would you like to mark them all as used?",
   "dashboard.markAll": "Mark all used",
