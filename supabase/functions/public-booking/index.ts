@@ -1009,6 +1009,15 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
         outcome: "rejected",
         reasons,
       });
+      // Release the idempotency claim so the guest can genuinely retry.
+      if (idempotencyKey) {
+        await adminClient
+          .from("booking_idempotency")
+          .delete()
+          .eq("tenant_id", tenant_id)
+          .eq("idempotency_key", idempotencyKey)
+          .is("reservation_id", null);
+      }
       throw new Error("Failed to create reservation");
     }
 
