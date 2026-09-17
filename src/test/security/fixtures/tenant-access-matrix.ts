@@ -58,7 +58,14 @@ export function evaluateTenantAccess(record: TenantGuardRecord): TenantAccessEva
   else if (!UUID_RE.test(record.tenantA)) reasons.push("malformed_tenant_a");
   if (!record.tenantB) reasons.push("missing_tenant_b");
   else if (!UUID_RE.test(record.tenantB)) reasons.push("malformed_tenant_b");
-  if (record.tenantA && record.tenantB && record.tenantA === record.tenantB) {
+  if (
+    record.tenantA &&
+    record.tenantB &&
+    // UUIDs are case-insensitive (RFC 4122) and env values can carry stray
+    // whitespace, so compare normalized: "AAAA…" and "aaaa… " are the SAME
+    // tenant and must never be treated as a cross-tenant pair.
+    record.tenantA.trim().toLowerCase() === record.tenantB.trim().toLowerCase()
+  ) {
     reasons.push("tenants_not_distinct");
   }
   reasons.push(...membershipReasons("A", record.membershipA, record.membershipRowA));
