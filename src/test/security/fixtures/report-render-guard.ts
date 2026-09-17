@@ -49,16 +49,14 @@ export interface GuardableEntry {
   errorMessage: string | null;
   errorStack: string | null;
   rlsDetails: GuardableFailureDetails | null;
-  [key: string]: unknown;
 }
 
-export interface GuardablePayload {
+export interface GuardablePayload<E extends GuardableEntry = GuardableEntry> {
   tenantGuard: TenantGuardRecord[];
-  entries: GuardableEntry[];
-  [key: string]: unknown;
+  entries: E[];
 }
 
-export interface ReportGuardOutcome<P extends GuardablePayload> {
+export interface ReportGuardOutcome<P> {
   payload: P;
   /** Number of entries whose details were withheld. */
   withheldEntries: number;
@@ -115,7 +113,9 @@ export function redactFailureDetails(reasons: string[]): GuardableFailureDetails
  * never mutated so callers can compare before/after and repeated calls are
  * idempotent.
  */
-export function applyReportGuard<P extends GuardablePayload>(payload: P): ReportGuardOutcome<P> {
+export function applyReportGuard<E extends GuardableEntry, P extends GuardablePayload<E>>(
+  payload: P,
+): ReportGuardOutcome<P> {
   const denied = deniedGuardRecords(payload.tenantGuard ?? []);
   const reasons = [...new Set(denied.flatMap((d) => d.reasons))].sort();
   if (denied.length === 0) {
@@ -123,7 +123,7 @@ export function applyReportGuard<P extends GuardablePayload>(payload: P): Report
   }
 
   let withheldEntries = 0;
-  const entries = (payload.entries ?? []).map((entry) => {
+  const entries = (payload.entries ?? []).map((entry): E => {
     const matching = denied.filter((d) => suiteMatchesGuard(entry.suite, d.suite));
     if (matching.length === 0) return entry;
     const entryReasons = [...new Set(matching.flatMap((m) => m.reasons))].sort();
@@ -139,7 +139,7 @@ export function applyReportGuard<P extends GuardablePayload>(payload: P): Report
   });
 
   return {
-    payload: { ...payload, entries, guardWithheld: { entries: withheldEntries, reasons } },
+    payload: { ...payload, entries, guardWithheld: { entries: withheldEntries, reasons } } as P,
     withheldEntries,
     reasons,
     denied: true,

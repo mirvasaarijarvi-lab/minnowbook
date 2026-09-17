@@ -511,7 +511,6 @@ export default class RlsReportReporter implements Reporter {
     const guarded = applyReportGuard(payload);
     const outPayload = guarded.payload;
     if (guarded.denied) {
-      // eslint-disable-next-line no-console
       console.warn(
         `[rls-report] tenant access denied (${guarded.reasons.join(", ")}), withheld details for ${guarded.withheldEntries} entr${
           guarded.withheldEntries === 1 ? "y" : "ies"
