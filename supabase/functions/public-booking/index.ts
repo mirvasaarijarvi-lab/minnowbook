@@ -620,6 +620,7 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
         const { error: claimErr } = await adminClient
           .from("booking_idempotency")
           .insert({ tenant_id, idempotency_key: idempotencyKey });
+        if (!claimErr) pendingIdempotency = { tenant_id, key: idempotencyKey };
         if (claimErr) {
           for (let attempt = 0; attempt < 10; attempt++) {
             const { data: winner } = await adminClient
@@ -1035,6 +1036,8 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
         .eq("idempotency_key", idempotencyKey);
       if (bindErr) {
         console.warn("[public-booking] idempotency bind failed", bindErr.message);
+      } else {
+        pendingIdempotency = null;
       }
     }
 
@@ -1252,6 +1255,19 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
     );
   } catch (error) {
     console.error("[public-booking] unexpected error:", error);
+    // A rejected request must not burn the guest's idempotency key.
+    if (pendingIdempotency) {
+      try {
+        await adminClient
+          .from("booking_idempotency")
+          .delete()
+          .eq("tenant_id", pendingIdempotency.tenant_id)
+          .eq("idempotency_key", pendingIdempotency.key)
+          .is("reservation_id", null);
+      } catch (releaseError) {
+        console.warn("[public-booking] idempotency release failed", releaseError);
+      }
+    }
     // Forward validator-thrown messages (safe, user-facing copy) so the
     // booking UI can surface a precise reason. Anything that isn't an
     // Error instance is treated as opaque and replaced with a generic
