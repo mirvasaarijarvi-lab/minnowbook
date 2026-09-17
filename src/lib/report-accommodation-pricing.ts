@@ -17,6 +17,8 @@ export interface AccommodationPricingRow {
   breakfast_included?: boolean | null;
   breakfast_price_per_person?: number | null;
   price_eur?: number | null;
+  /** Restaurant "according to menu" bookings carry no fixed amount. */
+  pricing_type?: string | null;
 }
 
 export const DEFAULT_BREAKFAST_PRICE_PER_PERSON = 15;
