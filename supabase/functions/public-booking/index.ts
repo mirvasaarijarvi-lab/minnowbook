@@ -601,6 +601,31 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
     };
 
     if (idempotencyKey) {
+      // Wait for the request that owns this key to bind its reservation, then
+      // answer with that reservation. Returns null when the owner never
+      // finished (crashed, or refused before inserting), so a genuine retry can
+      // claim the key again instead of hanging forever.
+      const awaitWinner = async (): Promise<string | null> => {
+        for (let attempt = 0; attempt < 10; attempt++) {
+          const { data: winner } = await adminClient
+            .from("booking_idempotency")
+            .select("reservation_id")
+            .eq("tenant_id", tenant_id)
+            .eq("idempotency_key", idempotencyKey)
+            .maybeSingle();
+          if (winner?.reservation_id) return winner.reservation_id;
+          // The claim was released (the owner failed): the key is free again.
+          if (!winner) return null;
+          await new Promise((r) => setTimeout(r, 300));
+        }
+        return null;
+      };
+      const stillInProgress = () =>
+        new Response(
+          JSON.stringify({ error: "A booking with this idempotency key is still in progress" }),
+          { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+
       const { data: known } = await adminClient
         .from("booking_idempotency")
         .select("reservation_id")
@@ -613,30 +638,38 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
         );
         return await respondWithExisting(known.reservation_id);
       }
-      if (!known) {
-        // Claim the key before doing any work that has side effects (promo
-        // claim, reservation insert, emails). A concurrent request with the
-        // same key loses this insert and waits for the winner's reservation.
-        const { error: claimErr } = await adminClient
+
+      if (known) {
+        // The key is claimed but not yet bound to a reservation: another
+        // request is mid-flight. Never fall through to a second booking.
+        const winnerId = await awaitWinner();
+        if (winnerId) {
+          console.log(`[public-booking] idempotent replay; returning reservation ${winnerId}`);
+          return await respondWithExisting(winnerId);
+        }
+        return stillInProgress();
+      }
+
+      // Claim the key before doing any work that has side effects (promo
+      // claim, reservation insert, emails). A concurrent request with the
+      // same key loses this insert and waits for the winner's reservation.
+      const { error: claimErr } = await adminClient
+        .from("booking_idempotency")
+        .insert({ tenant_id, idempotency_key: idempotencyKey });
+      if (claimErr) {
+        const winnerId = await awaitWinner();
+        if (winnerId) {
+          console.log(`[public-booking] idempotent replay; returning reservation ${winnerId}`);
+          return await respondWithExisting(winnerId);
+        }
+        // The claim vanished before it was bound: try once more to own it.
+        const { error: retryClaimErr } = await adminClient
           .from("booking_idempotency")
           .insert({ tenant_id, idempotency_key: idempotencyKey });
-        if (!claimErr) pendingIdempotency = { tenant_id, key: idempotencyKey };
-        if (claimErr) {
-          for (let attempt = 0; attempt < 10; attempt++) {
-            const { data: winner } = await adminClient
-              .from("booking_idempotency")
-              .select("reservation_id")
-              .eq("tenant_id", tenant_id)
-              .eq("idempotency_key", idempotencyKey)
-              .maybeSingle();
-            if (winner?.reservation_id) return await respondWithExisting(winner.reservation_id);
-            await new Promise((r) => setTimeout(r, 300));
-          }
-          return new Response(
-            JSON.stringify({ error: "A booking with this idempotency key is still in progress" }),
-            { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-          );
-        }
+        if (retryClaimErr) return stillInProgress();
+        pendingIdempotency = { tenant_id, key: idempotencyKey };
+      } else {
+        pendingIdempotency = { tenant_id, key: idempotencyKey };
       }
     }
 
