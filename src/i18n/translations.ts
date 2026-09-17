@@ -5066,6 +5066,7 @@ const fi: TranslationKeys = {
   "help.art10C2": "Jonotuslista: kun vuoro on täynnä, vieraat voivat liittyä jonoon ja saavat automaattisen ilmoituksen, kun paikka vapautuu.",
   "help.art10C3": "Google-kalenterisynkronointi: tilaa varauksesi iCal-syötteellä (Asetukset → Kalenterisynkronointi). CSV/PDF-vienti Varauksista ja Raporteista.",
   "help.art10C4": "Hallintapaneelin parannukset: tumma teema, pikanäppäimet (paina ?), pikatoimintojen FAB mobiilissa, käyttöönoton tarkistuslista, audit-lokin suodattimet, analytiikkakaaviot, kirjautumisen rate-rajoitus, varmuuskopion tilailmaisin, julkiset arvostelut/suosittelut, monikielinen julkinen varaussivu, keittiötilaukset ravintola- ja tilavarauksille, ja Stripe-tulospaneeli pääkäyttäjille.",
+  "help.art10C5": "Uusimmat lisäykset: varauksen lasku-PDF, jaksoraporttien PDF-lataus, vilkkaimmat tunnit ja viikonpäivä, poimintalistat keittiölle, majoitukselle ja tapahtumille, varauskanavien jakauma (vieras vai henkilökunta), sähköpostien toimitusaikajana varauskohtaisesti, ristiinvarausten tarkastusnäkymä, tarjousten hinnat resursseista, keittiön menu hinnoilla, käyttöoikeusilmoitukset Pyydä käyttöoikeutta -painikkeella sekä siirtopyynnöt ja vieraan peruutus.",
   "help.guide1Q": "Miten hallitsen varauksia?",
   "help.guide1A": "Siirry kohtaan **Hallintapaneeli → Varaukset** selataksesi, suodattaaksesi, muokataksesi ja hallinnoitsesi kaikkia varauksia.",
   "help.guide2Q": "Miten mukautan varaussivua?",
