@@ -85,6 +85,13 @@
       "when": 1789651116143,
       "tag": "0011_enforce_invoice_amount_matches_split",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1789651381507,
+      "tag": "0012_revalidate_invoiced_pricing_edits",
+      "breakpoints": true
     }
   ]
 }
