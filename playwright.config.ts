@@ -18,6 +18,12 @@ export default defineConfig({
   outputDir: "test-results",
   use: {
     baseURL: "http://localhost:4173",
+    // Sandboxes and CI images occasionally ship a Chromium whose shared
+    // libraries are incomplete. E2E_CHROMIUM_PATH lets a run point at a
+    // working browser binary without touching the spec files.
+    launchOptions: process.env.E2E_CHROMIUM_PATH
+      ? { executablePath: process.env.E2E_CHROMIUM_PATH }
+      : {},
     // Capture diagnostics on failure so booking, offer, and reservation
     // regressions are easy to triage from the HTML report.
     // Always capture trace + video on the first attempt and on every retry,
