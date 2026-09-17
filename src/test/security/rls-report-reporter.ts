@@ -480,7 +480,9 @@ export default class RlsReportReporter implements Reporter {
       const flavoredJsonPath = resolve(this.outDir, `rls-report.${safeFlavor}.json`);
       const flavoredHtmlPath = resolve(this.outDir, `rls-report.${safeFlavor}.html`);
       const json = JSON.stringify(payload, null, 2);
-      const html = renderHtml(payload);
+      // Strip trailing whitespace so the artifact stays clean when an
+      // optional section (e.g. the tenant guard) renders empty.
+      const html = renderHtml(payload).replace(/[ \t]+$/gm, "");
       writeFileSync(jsonPath, json, "utf-8");
       writeFileSync(htmlPath, html, "utf-8");
       writeFileSync(flavoredJsonPath, json, "utf-8");
