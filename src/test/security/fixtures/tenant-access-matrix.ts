@@ -580,3 +580,86 @@ export const QUERY_PATH_MATRIX: QueryPathCase[] = [
     forbiddenTenantId: TARGET_TENANT,
   },
 ];
+
+/**
+ * Allow-path matrix
+ * -----------------
+ * Deny coverage alone is not enough: if RLS were accidentally tightened, the
+ * suites would still "pass" (everything denied) while the product broke, and
+ * a report full of empty own-tenant reads would look healthy.
+ *
+ * For every query path in `QUERY_PATH_MATRIX` there is exactly one allow
+ * path: the same shape aimed at the acting tenant's OWN data. It must return
+ * only rows carrying the acting tenant id, and neither the response nor the
+ * report may carry any other tenant's metadata.
+ */
+export interface AllowPathCase {
+  /** Same label as the matching deny path, so coverage stays 1:1. */
+  label: string;
+  kind: QueryPathKind;
+  table: string;
+  operation: string;
+  /** The own-tenant version of the attempted query. */
+  attemptedQuery: string;
+  scenario?: string;
+  /** Rows the query legitimately returns; all carry the acting tenant id. */
+  ownRows: Array<Record<string, unknown>>;
+  /** Minimum number of rows the path must return (0 for count/head paths). */
+  minRows: number;
+}
+
+/** Values that belong to the acting tenant and are safe to surface. */
+const ownRow = (extra: Record<string, unknown> = {}) => ({
+  id: "33333333-3333-4333-8333-333333333333",
+  tenant_id: ACTING_TENANT,
+  ...extra,
+});
+
+/**
+ * Own-tenant payloads per path. Keyed by the deny-path label so a new deny
+ * path without an allow path fails the coverage assertion instead of silently
+ * going unchecked.
+ */
+const OWN_ROWS_BY_LABEL: Record<string, Array<Record<string, unknown>>> = {
+  "list view: unfiltered select of another tenant's reservations": [
+    ownRow({ guest_name: "Own Guest" }),
+    ownRow({ guest_name: "Own Guest Two" }),
+  ],
+  "list view: paginated range read": [ownRow(), ownRow()],
+  "list view: ordered and filtered list read": [ownRow({ name: "Own Sauna" })],
+  "detail view: single row by id": [ownRow({ guest_email: "own@example.test" })],
+  "detail view: maybeSingle by id": [ownRow()],
+  "detail view: embedded join pulls the parent row": [
+    ownRow({ resources: { id: "own-resource", tenant_id: ACTING_TENANT } }),
+  ],
+  "count path: head request with exact count": [],
+  "search path: text filter across tenants": [ownRow({ guest_name: "Own Guest" })],
+  "rpc path: security definer function returning rows": [ownRow({ rating: 5 })],
+  "storage path: listing another tenant's private objects": [ownRow({ name: "own-offer.pdf" })],
+  "storage path: downloading another tenant's object": [ownRow()],
+  "write path: insert into another tenant": [ownRow()],
+  "write path: update another tenant's row": [ownRow({ is_invoiced: true })],
+  "write path: upsert across tenants": [ownRow()],
+  "write path: delete another tenant's row": [ownRow()],
+  "scan path: own-tenant list must contain no foreign rows": [ownRow(), ownRow()],
+  "scan path: detail lookup without a tenant filter": [ownRow({ token: "tok_own" })],
+};
+
+export const ALLOW_PATH_MATRIX: AllowPathCase[] = QUERY_PATH_MATRIX.map((deny) => {
+  const ownRows = OWN_ROWS_BY_LABEL[deny.label] ?? [];
+  return {
+    label: deny.label,
+    kind: deny.kind,
+    table: deny.table,
+    operation: deny.operation,
+    attemptedQuery: deny.attemptedQuery
+      .replace(/TARGET/g, "OWN")
+      .replace(/FOREIGN_ID/g, "OWN_ID")
+      .replace(/FOREIGN_TOKEN/g, "OWN_TOKEN")
+      .replace(/foreign/g, "own")
+      .replace(new RegExp(TARGET_TENANT, "g"), ACTING_TENANT),
+    scenario: deny.scenario?.replace(/foreign/g, "own"),
+    ownRows,
+    minRows: ownRows.length,
+  };
+});
