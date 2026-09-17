@@ -597,7 +597,23 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
       }
     }
 
-    // Promo code (unchanged)
+    // ---------- Promo code policy: exactly one code per booking ----------
+    // Discounts never stack on the public booking path. A request that carries
+    // more than one code (an array, a plural field, or several codes packed
+    // into one string) is refused outright rather than silently picking one,
+    // so a guest can never combine codes and staff always see which single
+    // code was applied.
+    const MULTI_CODE_ERROR = "Only one promo code can be used per booking";
+    if (Array.isArray(body.promo_code) || Array.isArray((body as Record<string, unknown>).promo_codes)) {
+      throw new Error(MULTI_CODE_ERROR);
+    }
+    const pluralCode = (body as Record<string, unknown>).promo_codes;
+    if (typeof pluralCode === "string" && pluralCode.trim() !== "") {
+      throw new Error(MULTI_CODE_ERROR);
+    }
+    if (typeof body.promo_code === "string" && /[,;+|/&]|\s/.test(body.promo_code.trim())) {
+      throw new Error(MULTI_CODE_ERROR);
+    }
     const promo_code = validateString(body.promo_code, "promo_code", 50);
     let discount_type: string | null = null;
     let discount_value: number | null = null;
