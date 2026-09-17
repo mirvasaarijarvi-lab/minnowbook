@@ -1264,6 +1264,7 @@ type TranslationKeys = {
   "help.art10C2": string;
   "help.art10C3": string;
   "help.art10C4": string;
+  "help.art10C5": string;
   "help.guide1Q": string;
   "help.guide1A": string;
   "help.guide2Q": string;
@@ -3102,6 +3103,7 @@ const en: TranslationKeys = {
   "help.art10C2": "Waitlist: when a slot is full, guests can join a waitlist and get notified automatically when it opens.",
   "help.art10C3": "Google Calendar sync: subscribe to your reservations via the iCal feed (Settings → Calendar Sync). CSV/PDF export from Reservations and Reports.",
   "help.art10C4": "Dashboard upgrades: dark mode, keyboard shortcuts (press ?), Quick Actions FAB on mobile, onboarding checklist, audit log filters, analytics charts, login rate limiting, backup status indicator, public reviews/testimonials, multi-language public booking, Kitchen orders for restaurant and venue reservations, and a Stripe revenue dashboard for superadmins.",
+  "help.art10C5": "Newest additions: booking invoice PDF, report PDF downloads for period reports, peak hours and busiest weekday, pick sheets for kitchen, lodging and events, booking channel split (guest or staff), email delivery timeline per booking, cross-booking audit view, offer pricing from resources, kitchen menu with prices, permission notices with a Request access button, plus reschedule requests and guest cancellation.",
   "help.guide1Q": "How do I manage reservations?",
   "help.guide1A": "Go to your **Dashboard → Reservations** to view, filter, edit, and manage all bookings. You can confirm or cancel reservations from the action menu on each card.",
   "help.guide2Q": "How do I customize my booking page?",
@@ -5065,6 +5067,7 @@ const fi: TranslationKeys = {
   "help.art10C2": "Jonotuslista: kun vuoro on täynnä, vieraat voivat liittyä jonoon ja saavat automaattisen ilmoituksen, kun paikka vapautuu.",
   "help.art10C3": "Google-kalenterisynkronointi: tilaa varauksesi iCal-syötteellä (Asetukset → Kalenterisynkronointi). CSV/PDF-vienti Varauksista ja Raporteista.",
   "help.art10C4": "Hallintapaneelin parannukset: tumma teema, pikanäppäimet (paina ?), pikatoimintojen FAB mobiilissa, käyttöönoton tarkistuslista, audit-lokin suodattimet, analytiikkakaaviot, kirjautumisen rate-rajoitus, varmuuskopion tilailmaisin, julkiset arvostelut/suosittelut, monikielinen julkinen varaussivu, keittiötilaukset ravintola- ja tilavarauksille, ja Stripe-tulospaneeli pääkäyttäjille.",
+  "help.art10C5": "Uusimmat lisäykset: varauksen lasku-PDF, jaksoraporttien PDF-lataus, vilkkaimmat tunnit ja viikonpäivä, poimintalistat keittiölle, majoitukselle ja tapahtumille, varauskanavien jakauma (vieras vai henkilökunta), sähköpostien toimitusaikajana varauskohtaisesti, ristiinvarausten tarkastusnäkymä, tarjousten hinnat resursseista, keittiön menu hinnoilla, käyttöoikeusilmoitukset Pyydä käyttöoikeutta -painikkeella sekä siirtopyynnöt ja vieraan peruutus.",
   "help.guide1Q": "Miten hallitsen varauksia?",
   "help.guide1A": "Siirry kohtaan **Hallintapaneeli → Varaukset** selataksesi, suodattaaksesi, muokataksesi ja hallinnoitsesi kaikkia varauksia.",
   "help.guide2Q": "Miten mukautan varaussivua?",
@@ -7027,6 +7030,7 @@ const sv: TranslationKeys = {
   "help.art10C2": "Väntelista: när en tid är fullbokad kan gäster gå med i en väntelista och meddelas automatiskt när en plats blir ledig.",
   "help.art10C3": "Google Kalender-synk: prenumerera på dina bokningar via iCal-flödet (Inställningar → Kalendersynk). CSV/PDF-export från Bokningar och Rapporter.",
   "help.art10C4": "Förbättringar i instrumentpanelen: mörkt läge, kortkommandon (tryck ?), Snabbåtgärds-FAB på mobil, introduktionscheckslista, granskningsloggfilter, analysdiagram, inloggningsbegränsning, säkerhetskopieringsstatus, publika omdömen/recensioner, flerspråkig publik bokningssida, kökets beställningar för restaurang- och lokalbokningar, och en Stripe-intäktspanel för superadmins.",
+  "help.art10C5": "Senaste tilläggen: faktura-PDF per bokning, PDF-nedladdning av periodrapporter, mest bokade timmar och veckodag, plocklistor för kök, logi och evenemang, fördelning av bokningskanaler (gäst eller personal), tidslinje för e-postleveranser per bokning, granskningsvy för korsbokningar, offertpriser hämtade från resurserna, köksmeny med priser, behörighetsmeddelanden med knappen Begär åtkomst, samt ombokningsförfrågningar och avbokning av gäst.",
   "help.guide1Q": "Hur hanterar jag bokningar?",
   "help.guide1A": "Gå till **Instrumentpanel → Bokningar** för att visa, filtrera, redigera och hantera alla bokningar.",
   "help.guide2Q": "Hur anpassar jag min bokningssida?",

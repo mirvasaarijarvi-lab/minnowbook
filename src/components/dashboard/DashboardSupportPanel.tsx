@@ -43,7 +43,7 @@ const articleDefs: GuideArticle[] = [
   { titleKey: "help.art7Title", descKey: "help.art7Desc", icon: Users, contentKeys: ["help.art7C1", "help.art7C2", "help.art7C3", "help.art7C4"] },
   { titleKey: "help.art8Title", descKey: "help.art8Desc", icon: CreditCard, contentKeys: ["help.art8C1", "help.art8C2", "help.art8C3", "help.art8C4"] },
   { titleKey: "help.art9Title", descKey: "help.art9Desc", icon: HelpCircle, contentKeys: ["help.art9C1", "help.art9C2", "help.art9C3", "help.art9C4"] },
-  { titleKey: "help.art10Title", descKey: "help.art10Desc", icon: Sparkles, contentKeys: ["help.art10C1", "help.art10C2", "help.art10C3", "help.art10C4"] },
+  { titleKey: "help.art10Title", descKey: "help.art10Desc", icon: Sparkles, contentKeys: ["help.art10C1", "help.art10C2", "help.art10C3", "help.art10C4", "help.art10C5"] },
 ];
 
 interface ChatMessage {
