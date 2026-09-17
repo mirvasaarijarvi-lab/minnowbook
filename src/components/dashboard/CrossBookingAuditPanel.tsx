@@ -129,6 +129,7 @@ const CrossBookingAuditPanel = () => {
         key: `d:${key}`,
         guest: list[0].guest_name,
         dateLabel: format(parseISO(`${list[0].date}T00:00:00`), "d.M.yyyy"),
+        sortDate: list[0].date,
         types: Array.from(new Set(list.map((r) => r.reservation_type))),
         count: list.length,
         linked: false,
