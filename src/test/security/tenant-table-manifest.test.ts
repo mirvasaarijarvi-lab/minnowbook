@@ -1,5 +1,7 @@
 import { describe, it, expect, beforeAll } from "vitest";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import fs from "node:fs";
+import path from "node:path";
 
 /**
  * Tenant Table Manifest — Coverage Guard
