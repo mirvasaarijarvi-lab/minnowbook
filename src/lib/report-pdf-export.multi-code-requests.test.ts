@@ -120,6 +120,7 @@ const CASES: MultiCodeCase[] = [
     label: "no code applied at all",
     listPrice: LIST_A,
     forbidden: [roundCents(LIST_A * 0.8), roundCents(LIST_A - 40)],
+    chargesListPrice: true,
     row: stay(2, 2, 15, LIST_A),
   },
   {
