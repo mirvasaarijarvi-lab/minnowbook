@@ -133,7 +133,7 @@ test.describe("Server recalculates discounts, ignoring the client", () => {
       password: `Ci-Foreign-${randomUUID()}-Z9!`,
       email_confirm: true,
     });
-    expect(foreignOwner.error, foreignOwner.error?.message).toBeUndefined();
+    expect(foreignOwner.error, foreignOwner.error?.message ?? "").toBeNull();
     const foreignUserId = foreignOwner.data.user!.id;
     const foreignTenantId = randomUUID();
     const foreignCode = `CIFOREIGN${stamp}`;
