@@ -85,6 +85,7 @@ describe("support chat — guidebook article keys", () => {
       translations.en["help.art10C2"],
       translations.en["help.art10C3"],
       translations.en["help.art10C4"],
+    translations.en["help.art10C5"],
     ].join(" ");
     expect(enArt10).toMatch(/Guest Portal/i);
     expect(enArt10).toMatch(/Waitlist/i);

@@ -70,6 +70,7 @@ describe("'Recent additions' prompt section ↔ dashboard UI parity", () => {
     translations.en["help.art10C2"],
     translations.en["help.art10C3"],
     translations.en["help.art10C4"],
+    translations.en["help.art10C5"],
     translations.en["help.guide6A"],
   ].join("\n");
 
