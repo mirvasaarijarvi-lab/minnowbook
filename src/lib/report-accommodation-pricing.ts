@@ -17,6 +17,8 @@ export interface AccommodationPricingRow {
   breakfast_included?: boolean | null;
   breakfast_price_per_person?: number | null;
   price_eur?: number | null;
+  /** Restaurant "according to menu" bookings carry no fixed amount. */
+  pricing_type?: string | null;
 }
 
 export const DEFAULT_BREAKFAST_PRICE_PER_PERSON = 15;
@@ -71,4 +73,18 @@ export const calcRoomPrice = (r: AccommodationPricingRow) => {
   const total = calcChargedTotal(r);
   if (!isAccommodationRow(r)) return total;
   return roundCents(Math.max(0, total - calcBreakfastPrice(r)));
+};
+
+/**
+ * The amount a report shows for a booking, in cents-exact euros. Every report
+ * surface (screen table, CSV, print view, PDF export and the grand total) must
+ * use this single function, so the accommodation room + breakfast split always
+ * adds up to the very same figure the guest is charged.
+ *
+ * Restaurant "according to menu" bookings have no fixed amount, so they count
+ * as 0 rather than as an invented price.
+ */
+export const effectiveChargedTotal = (r: AccommodationPricingRow) => {
+  if (r.reservation_type === "restaurant" && r.pricing_type === "menu") return 0;
+  return calcChargedTotal(r);
 };
