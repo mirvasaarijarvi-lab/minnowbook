@@ -34,7 +34,13 @@ const PREFLIGHT_SCRIPT = "scripts/ci/rls-cors-gate-preflight.mjs";
 const LIVE_CONFIG = "vitest.security-live.config.ts";
 
 /** Jobs the gate must keep. Removing one silently narrows the gate. */
-const REQUIRED_JOBS = ["rls-cors-tests", "rls-advisor-gate", "gate-summary"];
+const REQUIRED_JOBS = [
+  "rls-cors-tests",
+  "rls-advisor-gate",
+  "gate-summary",
+  "notify-tenant-denial",
+];
+
 
 /** Secrets the preflight and the live suites need to run against a project. */
 const REQUIRED_TEST_SECRETS = [
