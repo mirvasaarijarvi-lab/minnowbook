@@ -71,6 +71,17 @@ describe.runIf(canRun)(
       const rand = Math.random().toString(36).slice(2, 8);
       const slug = `ci-resimg-auth-${stamp}-${rand}`;
 
+      const authEmail = `ci-resimg-outsider+${stamp}-${rand}@example.invalid`;
+      const authPassword = `Pw!${rand}${stamp}${rand}`;
+      const { data: created, error: createErr } = await service.auth.admin.createUser({
+        email: authEmail,
+        password: authPassword,
+        email_confirm: true,
+      });
+      if (createErr || !created?.user) {
+        throw createErr ?? new Error("auth user creation returned no user");
+      }
+
       const { data: tenant, error: tenantErr } = await service
         .from("tenants")
         .insert({
@@ -79,6 +90,7 @@ describe.runIf(canRun)(
           tier: "basic",
           subscription_status: "trialing",
           is_active: true,
+          owner_user_id: created.user.id,
         })
         .select("id")
         .single();
@@ -123,20 +135,6 @@ describe.runIf(canRun)(
       const inactive = await seedOne("inactive", false, "approved");
       const pending = await seedOne("pending", true, "pending");
       const rejected = await seedOne("rejected", true, "rejected");
-
-      // Create an outsider auth user (NOT linked to the seeded tenant via
-      // tenant_users). This user should hit only the "Public can view
-      // resource images" policy, not the tenant-member policy.
-      const authEmail = `ci-resimg-outsider+${stamp}-${rand}@example.invalid`;
-      const authPassword = `Pw!${rand}${stamp}${rand}`;
-      const { data: created, error: createErr } = await service.auth.admin.createUser({
-        email: authEmail,
-        password: authPassword,
-        email_confirm: true,
-      });
-      if (createErr || !created?.user) {
-        throw createErr ?? new Error("auth user creation returned no user");
-      }
 
       authed = newAnon();
       const { error: signInErr } = await authed.auth.signInWithPassword({

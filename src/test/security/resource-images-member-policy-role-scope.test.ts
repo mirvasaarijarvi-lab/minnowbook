@@ -16,8 +16,12 @@
  *
  * Then asserts the three-way access matrix:
  *   - tenant member (authenticated, staff role): sees BOTH images
- *   - outsider (authenticated, no membership):   sees only `visible`
+ *   - outsider (authenticated, no membership):   sees NEITHER image
  *   - anon:                                      sees only `visible`
+ *
+ * The outsider being stricter than anon is real, intended behaviour: the
+ * public image policy's EXISTS check reads `resources` as the caller, and
+ * the public `resources` read policy is scoped to `anon` only.
  *
  * Also pins that the member-read policy grants SELECT only: a staff member
  * cannot insert, update or delete image rows (that stays owner/admin).
