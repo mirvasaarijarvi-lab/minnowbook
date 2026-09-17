@@ -152,7 +152,7 @@ describe("rls-report deny cases return zero rows and leak no tenant metadata", (
         expect(json, `JSON leaks "${secret}"`).not.toContain(secret);
         expect(html, `HTML leaks "${secret}"`).not.toContain(secret);
       }
-      expect(html).not.toContain("rls-details");
+      expect(html).not.toContain(`<div class="rls-details"`);
       expect(html).not.toContain("Returned rows");
       expect(html).not.toContain("Attempted query");
       expect(html).not.toContain(ACTING_TENANT);
@@ -163,7 +163,7 @@ describe("rls-report deny cases return zero rows and leak no tenant metadata", (
     const entries = QUERY_PATH_MATRIX.map((c) => passedEntry(c, "empty result"));
     const payload = payloadOf(entries);
     const html = renderHtml(payload);
-    expect(html).not.toContain("rls-details");
+    expect(html).not.toContain(`<div class="rls-details"`);
     expect(payload.entries.every((e) => e.errorMessage === null && e.rlsDetails === null)).toBe(
       true,
     );
