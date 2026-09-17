@@ -113,6 +113,10 @@ function statusFromTask(task: Task): EntryStatus {
 }
 
 function escapeHtml(value: string): string {
+  // Guard records come from a JSON side-channel, so a "string" field can hold
+  // any JSON value. Coerce defensively: the report must render the odd value
+  // as visible text, never crash the whole report.
+  if (typeof value !== "string") return escapeHtml(value === undefined ? "" : String(value));
   return value
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
