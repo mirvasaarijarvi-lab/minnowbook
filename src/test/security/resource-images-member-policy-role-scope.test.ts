@@ -161,33 +161,6 @@ describe.runIf(canRun)(
       const hidden = await seedOne("hidden", false, "pending");
       const visible = await seedOne("visible", true, "approved");
 
-      async function makeUser(
-        prefix: string,
-      ): Promise<{ id: string; client: SupabaseClient }> {
-        const email = `ci-resimg-${prefix}+${stamp}-${rand}@example.invalid`;
-        const password = `Pw!${rand}${stamp}${rand}`;
-        const { data: created, error: createErr } = await service.auth.admin.createUser({
-          email,
-          password,
-          email_confirm: true,
-        });
-        if (createErr || !created?.user) {
-          throw createErr ?? new Error(`auth user creation failed for ${prefix}`);
-        }
-        const client = newAnon();
-        const { error: signInErr } = await client.auth.signInWithPassword({
-          email,
-          password,
-        });
-        if (signInErr) throw signInErr;
-        return { id: created.user.id, client };
-      }
-
-      const memberUser = await makeUser("member");
-      const outsiderUser = await makeUser("outsider");
-      member = memberUser.client;
-      outsider = outsiderUser.client;
-
       // Staff membership: enough for the tenant-member read policy, but not
       // for the owner/admin manage policy.
       const { error: memberErr } = await service.from("tenant_users").insert({
