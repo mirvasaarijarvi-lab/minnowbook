@@ -109,7 +109,7 @@ describe("check-rls-cors-gate-config", () => {
   });
 
   it("fails when a live step loses its fetch timeout", () => {
-    const r = run(fixture((y) => y.replace("LIVE_FETCH_TIMEOUT_MS", "UNUSED_TIMEOUT")));
+    const r = run(fixture((y) => y.replaceAll("LIVE_FETCH_TIMEOUT_MS", "UNUSED_TIMEOUT")));
     expect(r.code).toBe(1);
     expect(r.stdout).toContain("Live steps missing LIVE_FETCH_TIMEOUT_MS");
   });
