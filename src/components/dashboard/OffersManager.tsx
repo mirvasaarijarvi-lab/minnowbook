@@ -41,6 +41,8 @@ const OffersManager = () => {
   const [createOpen, setCreateOpen] = useState(false);
   const [emailOffer, setEmailOffer] = useState<Offer | null>(null);
   const [editOffer, setEditOffer] = useState<Offer | null>(null);
+  const [priceReview, setPriceReview] = useState<{ offer: Offer; plan: ConfirmPlan } | null>(null);
+  const [confirming, setConfirming] = useState(false);
 
   const filteredOffers = useMemo(() => {
     if (!searchQuery.trim()) return offers;
