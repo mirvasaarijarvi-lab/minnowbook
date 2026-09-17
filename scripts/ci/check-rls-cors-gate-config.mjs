@@ -294,18 +294,23 @@ if (!yml.includes("actions/upload-artifact@")) {
   }
 }
 
-// Every step that runs tests or the preflight must persist its output.
-const logWrites = new Set(
-  [...yml.matchAll(/test-reports\/logs\/([\w.-]+)/g)].map((m) => m[1]).filter((f) => f.endsWith(".log")),
-);
-const testStepCount = [...yml.matchAll(/bunx vitest run/g)].length + 1; // + preflight
-if (logWrites.size < testStepCount) {
-  fail(
-    "Some gate steps do not persist their output",
-    `${testStepCount} gate step(s) run tests or the preflight but only ${logWrites.size} log file(s) are written under ${LOGS_DIR}. Tee every step's output into its own log file.`,
-  );
+// Every step that runs tests or the preflight must persist its own output, so a
+// failure can be read from the artifact instead of the truncating log viewer.
+let loggedSteps = 0;
+for (const block of stepBlocks(yml)) {
+  const runsTests = block.includes("bunx vitest run") || block.includes(PREFLIGHT_SCRIPT);
+  if (!runsTests) continue;
+  const name = (/- name:\s*(.+)/.exec(block)?.[1] ?? "unnamed step").trim();
+  if (new RegExp(`${LOGS_DIR}/[\\w.-]+\\.log`).test(block)) {
+    loggedSteps += 1;
+  } else {
+    fail(
+      `Gate step does not persist its output: ${name}`,
+      `This step runs the preflight or a test suite but writes no log under ${LOGS_DIR}. Tee its output into its own .log file so the run artifact contains the full text.`,
+    );
+  }
 }
-note(`Run log files collected: ${logWrites.size}`);
+note(`Gate steps writing run logs: ${loggedSteps}`);
 
 // -------------------------------------------------- denial notification
 // A tenant-access denial is the gate's most serious outcome. It must reach the
