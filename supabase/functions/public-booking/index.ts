@@ -538,6 +538,65 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
       throw new Error("This reservation type is not available");
     }
 
+    // ---------- Retry de-duplication ----------
+    // A guest's browser (or a flaky network) can re-send the very same booking
+    // request: a double click, a refresh mid-submit, an automatic retry. Such a
+    // retry must not create a second reservation and must NOT claim the promo
+    // code a second time. If an identical booking already exists for this
+    // tenant within a short window, the existing reservation is returned as-is.
+    const RETRY_WINDOW_MINUTES = 15;
+    {
+      const since = new Date(Date.now() - RETRY_WINDOW_MINUTES * 60_000).toISOString();
+      let dupQuery = adminClient
+        .from("reservations")
+        .select("id, linked_group_id, guests_count, created_at")
+        .eq("tenant_id", tenant_id)
+        .eq("guest_email", guest_email)
+        .eq("reservation_type", reservation_type)
+        .eq("date", date)
+        .neq("status", "cancelled")
+        .gte("created_at", since)
+        .order("created_at", { ascending: true })
+        .limit(1);
+      dupQuery = start_time
+        ? dupQuery.eq("start_time", start_time)
+        : dupQuery.is("start_time", null);
+      const { data: existing, error: dupErr } = await dupQuery.maybeSingle();
+      if (dupErr) {
+        console.warn("[public-booking] duplicate lookup failed", dupErr.message);
+      } else if (existing) {
+        console.log(
+          `[public-booking] duplicate request ignored; returning reservation ${existing.id}`,
+        );
+        const { capacity_total: dupCapacity, current_load: dupLoad } = await computeCapacity(
+          adminClient,
+          tenant_id,
+          reservation_type,
+          date,
+          validateUuid(body.site_id, "site_id", false),
+        );
+        return new Response(
+          JSON.stringify({
+            success: true,
+            duplicate: true,
+            warning: null,
+            reservation: {
+              id: existing.id,
+              linked_group_id: existing.linked_group_id ?? null,
+            },
+            linked_group_id: existing.linked_group_id ?? null,
+            linked_siblings: [],
+            capacity: {
+              current_load: dupLoad,
+              capacity_total: dupCapacity,
+              requested: guests_count ?? estimated_guests ?? 0,
+            },
+          }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+    }
+
     // Promo code (unchanged)
     const promo_code = validateString(body.promo_code, "promo_code", 50);
     let discount_type: string | null = null;
