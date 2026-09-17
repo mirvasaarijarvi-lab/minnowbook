@@ -42,36 +42,21 @@ const GuestPortal = () => {
     queryFn: async () => {
       if (!token) throw new Error("No token");
 
-      // Look up token
-      const { data: tokenData, error: tokenErr } = await supabase
-        .from("booking_tokens")
-        .select("*")
-        .eq("token", token)
-        .maybeSingle();
+      // Guests are unauthenticated: the booking is loaded server-side through
+      // the booking token, never by reading the tables directly.
+      const { data: res, error: fnErr } = await supabase.functions.invoke(
+        "guest-booking-portal",
+        { body: { action: "view", token } },
+      );
+      if (fnErr) throw fnErr;
+      const payload = res as any;
+      if (!payload?.ok) throw new Error(payload?.code || payload?.error || "not_found");
 
-      if (tokenErr) throw tokenErr;
-      if (!tokenData) throw new Error("not_found");
-      if (tokenData.is_revoked) throw new Error("revoked");
-      if (new Date(tokenData.expires_at) < new Date()) throw new Error("expired");
-
-      // Fetch reservation
-      const { data: reservation, error: resErr } = await supabase
-        .from("reservations")
-        .select("*")
-        .eq("id", tokenData.reservation_id)
-        .maybeSingle();
-
-      if (resErr) throw resErr;
-      if (!reservation) throw new Error("not_found");
-
-      // Fetch tenant settings for branding
-      const { data: tenantSettings } = await supabase
-        .from("tenant_settings_public" as any)
-        .select("business_name, primary_color, logo_url")
-        .eq("tenant_id", tokenData.tenant_id)
-        .maybeSingle();
-
-      return { reservation, token: tokenData, settings: tenantSettings };
+      return {
+        reservation: payload.reservation,
+        token: payload.token,
+        settings: payload.settings,
+      };
     },
     enabled: !!token,
   });
@@ -217,6 +202,11 @@ const GuestPortal = () => {
                 </div>
                 <div>
                   <CardTitle className="font-serif text-lg">{t("guest.portal.title")}</CardTitle>
+                  {res.guest_name ? (
+                    <p className="text-sm font-medium" data-testid="guest-portal-name">
+                      {res.guest_name}
+                    </p>
+                  ) : null}
                   <p className="text-sm text-muted-foreground capitalize">{res.reservation_type}</p>
                 </div>
               </div>

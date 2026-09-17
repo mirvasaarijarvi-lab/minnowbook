@@ -1250,10 +1250,12 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
         const { data: siblings, error: sibErr } = await adminClient
           .from("reservations")
           .select(
-            "id, reservation_type, date, start_time, check_out_date, room_type, guests_count, price_eur, status",
+            "id, linked_group_id, reservation_type, date, start_time, check_out_date, room_type, guests_count, price_eur, status",
           )
           .eq("tenant_id", tenant_id)
           .eq("linked_group_id", linked_group_id)
+          // "every OTHER sibling": never echo the row we just inserted.
+          .neq("id", insertedRes.id)
           .neq("status", "cancelled");
         if (sibErr) {
           console.warn(

@@ -39,6 +39,7 @@ interface Ctx {
   ownerEmail: string;
   ownerPassword: string;
   staffUserId: string;
+  outsiderUserId: string;
   staffEmail: string;
   staffPassword: string;
   tenantA: string;
@@ -62,6 +63,10 @@ async function provision(admin: any): Promise<Ctx> {
 
   const owner = await mk("owner");
   const staff = await mk("staff");
+  // tenants.owner_user_id is NOT NULL, so tenantB needs an owner too. It must
+  // be an unrelated user: neither `owner` nor `staff` may gain any standing in
+  // tenantB, or the cross-tenant negatives below would stop proving anything.
+  const outsider = await mk("outsider");
 
   const tenantA = crypto.randomUUID();
   const tenantB = crypto.randomUUID();
@@ -81,6 +86,7 @@ async function provision(admin: any): Promise<Ctx> {
     name: `Perm B ${tag}`,
     slug: `perm-b-${tag}`,
     tier: "basic",
+    owner_user_id: outsider.id,
     subscription_status: "trialing",
   });
   if (tBErr) throw new Error(`insert tenantB: ${tBErr.message}`);
@@ -103,11 +109,18 @@ async function provision(admin: any): Promise<Ctx> {
   if (stErr) throw new Error(`tenant_users staff: ${stErr.message}`);
 
   // Seed a role_permission for staff in tenantA only.
-  const { error: rpErr } = await admin.from("role_permissions").insert({
-    tenant_id: tenantA,
-    role_key: "staff",
-    permission: "reservations.create",
-  });
+  // New tenants may already be seeded with default role permissions, so this
+  // must be idempotent rather than a plain insert.
+  const { error: rpErr } = await admin
+    .from("role_permissions")
+    .upsert(
+      {
+        tenant_id: tenantA,
+        role_key: "staff",
+        permission: "reservations.create",
+      },
+      { onConflict: "tenant_id,role_key,permission", ignoreDuplicates: true },
+    );
   if (rpErr) throw new Error(`role_permissions: ${rpErr.message}`);
 
   return {
@@ -115,6 +128,7 @@ async function provision(admin: any): Promise<Ctx> {
     ownerEmail: owner.email,
     ownerPassword: owner.password,
     staffUserId: staff.id,
+    outsiderUserId: outsider.id,
     staffEmail: staff.email,
     staffPassword: staff.password,
     tenantA,
@@ -135,6 +149,7 @@ async function cleanup(admin: any, ctx: Ctx) {
   await admin.from("tenants").delete().in("id", [ctx.tenantA, ctx.tenantB]);
   await admin.auth.admin.deleteUser(ctx.ownerUserId).catch(() => undefined);
   await admin.auth.admin.deleteUser(ctx.staffUserId).catch(() => undefined);
+  await admin.auth.admin.deleteUser(ctx.outsiderUserId).catch(() => undefined);
 }
 
 // deno-lint-ignore no-explicit-any

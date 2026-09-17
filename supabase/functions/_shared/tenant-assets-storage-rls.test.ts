@@ -104,23 +104,42 @@ async function provisionTenantAndStaff(admin: any) {
   if (tuErr) throw new Error(`insert tenant_users failed: ${tuErr.message}`);
 
   // 3. Second tenant (no membership for our user) for cross-tenant negative test.
+  // owner_user_id is NOT NULL; use a throwaway user so our staff member gains
+  // no standing whatsoever in the other tenant.
+  const outsiderEmail = `${slug}-outsider@example.test`;
+  const { data: outsiderRes, error: outsiderErr } = await admin.auth.admin.createUser({
+    email: outsiderEmail,
+    password: `Pw_${crypto.randomUUID()}_Aa1!`,
+    email_confirm: true,
+  });
+  if (outsiderErr || !outsiderRes.user) {
+    throw new Error(`createUser outsider failed: ${outsiderErr?.message}`);
+  }
+  const outsiderUserId = outsiderRes.user.id as string;
+
   const otherTenantId = crypto.randomUUID();
   const { error: oErr } = await admin.from("tenants").insert({
     id: otherTenantId,
     name: `RLS Other ${slug}`,
     slug: `${slug}-other`,
     tier: "basic",
+    owner_user_id: outsiderUserId,
     subscription_status: "trialing",
   });
   if (oErr) throw new Error(`insert other tenant failed: ${oErr.message}`);
 
-  return { userId, email, password, tenantId, otherTenantId };
+  return { userId, email, password, tenantId, otherTenantId, outsiderUserId };
 }
 
 async function cleanup(
   // deno-lint-ignore no-explicit-any
   admin: any,
-  ctx: { userId: string; tenantId: string; otherTenantId: string },
+  ctx: {
+    userId: string;
+    tenantId: string;
+    otherTenantId: string;
+    outsiderUserId?: string;
+  },
 ) {
   // Best-effort: empty bucket folders, drop memberships/tenants, delete user.
   for (const t of [ctx.tenantId, ctx.otherTenantId]) {
@@ -143,6 +162,9 @@ async function cleanup(
     ctx.otherTenantId,
   ]);
   await admin.auth.admin.deleteUser(ctx.userId).catch(() => undefined);
+  if (ctx.outsiderUserId) {
+    await admin.auth.admin.deleteUser(ctx.outsiderUserId).catch(() => undefined);
+  }
 }
 
 Deno.test({
