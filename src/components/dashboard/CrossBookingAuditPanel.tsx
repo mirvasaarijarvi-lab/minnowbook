@@ -36,6 +36,8 @@ interface Cluster {
   key: string;
   guest: string;
   dateLabel: string;
+  /** ISO date used for chronological ordering (localized labels sort wrong). */
+  sortDate: string;
   types: string[];
   count: number;
   linked: boolean;
@@ -105,6 +107,7 @@ const CrossBookingAuditPanel = () => {
           dates[0] === dates[dates.length - 1]
             ? format(parseISO(`${dates[0]}T00:00:00`), "d.M.yyyy")
             : `${format(parseISO(`${dates[0]}T00:00:00`), "d.M.yyyy")} to ${format(parseISO(`${dates[dates.length - 1]}T00:00:00`), "d.M.yyyy")}`,
+        sortDate: dates[dates.length - 1],
         types: Array.from(new Set(list.map((r) => r.reservation_type))),
         count: list.length,
         linked: true,
@@ -126,13 +129,17 @@ const CrossBookingAuditPanel = () => {
         key: `d:${key}`,
         guest: list[0].guest_name,
         dateLabel: format(parseISO(`${list[0].date}T00:00:00`), "d.M.yyyy"),
+        sortDate: list[0].date,
         types: Array.from(new Set(list.map((r) => r.reservation_type))),
         count: list.length,
         linked: false,
       });
     }
 
-    return out.sort((a, b) => (a.dateLabel < b.dateLabel ? 1 : -1));
+    // Newest first, comparing ISO dates so 10.3. sorts after 9.3.
+    return out.sort((a, b) =>
+      a.sortDate === b.sortDate ? a.guest.localeCompare(b.guest) : a.sortDate < b.sortDate ? 1 : -1,
+    );
   }, [rows]);
 
   const visible = linkedOnly ? clusters.filter((c) => c.linked) : clusters;

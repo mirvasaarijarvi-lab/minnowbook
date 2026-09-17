@@ -57,6 +57,13 @@
       "when": 1789574613188,
       "tag": "0007_harden_access_codes_resource_images_public_reservation_insert",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1789621237718,
+      "tag": "0008_audit_log_trigger_skip_when_tenant_deleted",
+      "breakpoints": true
     }
   ]
 }
