@@ -243,6 +243,62 @@ test.describe("Repeat invoicing of the same booking", () => {
       }
       expect(new Set(snapshots).size, "every attempt produced the same invoice").toBe(1);
 
+      // --- 1b. A retry after success returns the existing invoice result ----
+      // The response to a retry is the already-invoiced booking itself: same
+      // identifier, same amount, same lines, and no second invoice anywhere.
+      const firstInvoiced = await fetchRow(stayEmail);
+      const existing = buildInvoiceModel(firstInvoiced as any, "en");
+      const fingerprint = (row: Record<string, any>) => {
+        const single = buildInvoiceModel(row as any, "en");
+        const group = buildGroupInvoiceModel([legRow(row, "Repeat Invoice Room")], "en");
+        return JSON.stringify({
+          invoiceNumber: single.invoiceNumber,
+          total: roundCents(single.total),
+          subtotal: roundCents(single.subtotal),
+          discountAmount: roundCents(single.discountAmount),
+          isInvoiced: group.isInvoiced,
+          lines: group.lines.map((l) => [l.kind, l.description, roundCents(l.amount)]),
+        });
+      };
+      const expectedFingerprint = fingerprint(firstInvoiced);
+
+      for (let retry = 1; retry <= ATTEMPTS; retry++) {
+        const { data: returned, error: retryErr } = await staffClient
+          .from("reservations")
+          .update({ is_invoiced: true })
+          .eq("id", stay.id)
+          .eq("tenant_id", tenantId)
+          .select(INVOICE_COLS)
+          .maybeSingle();
+        expect(retryErr, `retry ${retry}: must succeed`).toBeNull();
+        expect(returned, `retry ${retry}: returns the booking`).not.toBeNull();
+
+        const row = returned as Record<string, any>;
+        expect(row.id, `retry ${retry}: same booking, no new record`).toBe(firstInvoiced.id);
+        expect(row.is_invoiced, `retry ${retry}: still invoiced`).toBe(true);
+        expect(
+          buildInvoiceModel(row as any, "en").invoiceNumber,
+          `retry ${retry}: same invoice identifier`,
+        ).toBe(existing.invoiceNumber);
+        expect(fingerprint(row), `retry ${retry}: identical invoice result`).toBe(
+          expectedFingerprint,
+        );
+        expect(
+          await invoiceTransitions(stay.id),
+          `retry ${retry}: no second invoicing recorded`,
+        ).toHaveLength(1);
+
+        // No second invoiced booking was conjured up for this guest.
+        const { data: rowsForGuest, error: countErr } = await admin
+          .from("reservations")
+          .select("id, is_invoiced")
+          .eq("tenant_id", tenantId)
+          .eq("guest_email", stayEmail);
+        expect(countErr, countErr?.message).toBeNull();
+        expect(rowsForGuest, `retry ${retry}: exactly one booking`).toHaveLength(1);
+        expect(rowsForGuest![0].is_invoiced).toBe(true);
+      }
+
       // --- 4. A repeat that breaks the totals is refused -------------------
       // An amount that no longer covers the breakfast lines, or one with
       // fractions of a cent, cannot ride along on a repeat of the action.
