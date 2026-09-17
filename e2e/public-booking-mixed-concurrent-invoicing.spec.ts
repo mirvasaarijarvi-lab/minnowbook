@@ -272,7 +272,7 @@ test.describe("Mixed concurrent invoicing", () => {
 
       for (const r of resultsA.filter((x) => x.label !== "correct")) {
         expect(r.error, `${r.label}: must be refused`).not.toBeNull();
-        expect(r.error!.message, `${r.label}: server explanation`).toContain(r.error!.message);
+        expect(r.error!.message, `${r.label}: server explanation`).toBeTruthy();
         expect(r.error!.message).toContain(
           r.label === "amount cleared" ? NO_PRICE_ERROR : AMOUNT_ERROR,
         );
