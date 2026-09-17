@@ -222,10 +222,61 @@ if (liveSteps.length > 0 && timeoutCount < liveSteps.length) {
 }
 note(`Live Vitest steps: ${liveSteps.length}`);
 
+// -------------------------------------------------- denial notification
+// A tenant-access denial is the gate's most serious outcome. It must reach the
+// maintainer outside the run page, so the notification job has to stay wired to
+// the preflight's mode output and keep permission to file the issue.
+const notifyStart = yml.indexOf("  notify-tenant-denial:");
+if (notifyStart !== -1) {
+  const summaryStart = yml.indexOf("  gate-summary:");
+  const notifyBlock = yml.slice(
+    notifyStart,
+    summaryStart > notifyStart ? summaryStart : undefined,
+  );
+  if (!/needs:[^\n]*rls-cors-tests/.test(notifyBlock)) {
+    fail(
+      "Denial notification does not depend on the test job",
+      "Add `needs: [rls-cors-tests]` to notify-tenant-denial, otherwise it cannot read the preflight result and never reports a blocked tenant.",
+    );
+  }
+  if (!/if:\s*always\(\)[^\n]*tenant_access\s*==\s*'denied'/.test(notifyBlock)) {
+    fail(
+      "Denial notification never triggers",
+      "notify-tenant-denial must use `if: always() && needs.rls-cors-tests.outputs.tenant_access == 'denied'`; without it the job is skipped when the gate job fails, which is exactly when a denial happens.",
+    );
+  }
+  if (!/issues:\s*write/.test(notifyBlock)) {
+    fail(
+      "Denial notification cannot file an issue",
+      "Add `permissions: issues: write` to notify-tenant-denial, otherwise the GitHub API rejects the notification with 403 and the denial stays silent.",
+    );
+  }
+  if (!/actions\/github-script@/.test(notifyBlock)) {
+    fail(
+      "Denial notification has no reporting step",
+      "notify-tenant-denial must use actions/github-script to open or comment on the tenant-access denial issue.",
+    );
+  }
+  if (!/tenant_access:\s*\$\{\{\s*steps\.preflight\.outputs\.mode/.test(yml)) {
+    fail(
+      "Preflight result is not exposed to the notification",
+      "The rls-cors-tests job must expose `outputs: tenant_access: ${{ steps.preflight.outputs.mode }}` so a denial can be notified.",
+    );
+  }
+  for (const output of ["denied_title", "denied_reason"]) {
+    if (!new RegExp(`steps\\.preflight\\.outputs\\.${output}`).test(yml)) {
+      fail(
+        `Denial notification is missing ${output}`,
+        `The rls-cors-tests job must expose steps.preflight.outputs.${output} so the notification states why tenant access was denied.`,
+      );
+    }
+  }
+}
+
 // ------------------------------------------------------------ gate summary
 const summaryBlock = yml.slice(yml.indexOf("  gate-summary:"));
 if (summaryBlock) {
-  for (const job of REQUIRED_JOBS.filter((j) => j !== "gate-summary")) {
+  for (const job of ["rls-cors-tests", "rls-advisor-gate"]) {
     if (!new RegExp(`needs:[^\\n]*${job}`).test(summaryBlock)) {
       fail(
         `gate-summary does not depend on "${job}"`,
@@ -246,6 +297,7 @@ if (summaryBlock) {
     );
   }
 }
+
 
 report();
 
