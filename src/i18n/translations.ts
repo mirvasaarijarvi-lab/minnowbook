@@ -689,6 +689,8 @@ type TranslationKeys = {
   "invoiceRefusal.serverReasonLabel": string;
   "invoiceRefusal.guestNotice": string;
   "dashboard.downloadInvoice": string;
+  "dashboard.downloadInvoicePdf": string;
+  "reports.downloadReportPdf": string;
   "dashboard.markLinkedUsed": string;
   "dashboard.markLinkedUsedMsg": string;
   "dashboard.markAll": string;
