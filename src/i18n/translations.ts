@@ -6430,7 +6430,7 @@ const sv: TranslationKeys = {
   "howItWorks.step2Title": "Ställ in ditt företag",
   "howItWorks.step2Desc": "Ladda upp ditt varumärke, lägg till din(a) anläggning(ar) och verksamhet, och konfigurera öppettider, priser, beläggningskapacitet och mycket mer.",
   "howItWorks.step3Title": "Dela din bokningslänk",
-  "howItWorks.step3Desc": "Skicka din bokningssida till kunder och börja ta emot bokningar.",
+  "howItWorks.step3Desc": "Skicka din bokningssida till kunder, lägg till den på din webbplats och börja ta emot bokningar.",
 
   // Pricing
   "pricing.title": "Enkel och transparent prissättning",
