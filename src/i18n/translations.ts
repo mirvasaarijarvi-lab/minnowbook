@@ -2894,7 +2894,7 @@ const en: TranslationKeys = {
   "tier.businessDesc": "Feature-rich platform for businesses with multiple sites and operations.",
 
   // Footer
-  "footer.tagline": "The modern reservation platform for restaurants, venues, and guesthouses.",
+  "footer.tagline": "The modern reservation platform for restaurants, venues, guesthouses and the service industry professionals.",
   "footer.product": "Product",
   "footer.company": "Company",
   "footer.legal": "Legal",
