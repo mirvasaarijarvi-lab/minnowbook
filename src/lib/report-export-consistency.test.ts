@@ -70,7 +70,8 @@ describe("period report exports use one accommodation calculation", () => {
       const shown = effectiveChargedTotal(r);
       // The PDF cell and the CSV total end with the very same amount.
       expect(pdfTotalCell(r)).toBe(shown > 0 ? shown.toFixed(2) : "-");
-      expect(csvTotal.endsWith(shown.toFixed(2))).toBe(true);
+      expect(csvTotal).toBe(shown > 0 ? csvCells(r).total : "-");
+      if (shown > 0) expect(csvTotal.endsWith(shown.toFixed(2))).toBe(true);
       if (isAccommodationRow(r)) {
         expect(cents(calcRoomPrice(r)) + cents(calcBreakfastPrice(r))).toBe(cents(shown));
       }
