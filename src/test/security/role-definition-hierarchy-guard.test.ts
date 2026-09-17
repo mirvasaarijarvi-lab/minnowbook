@@ -69,6 +69,18 @@ describe.runIf(canRun)("custom role definition hierarchy guard", () => {
     stamp = Date.now();
     const rand = Math.random().toString(36).slice(2, 8);
 
+    async function makeAuthUser(prefix: string): Promise<string> {
+      const { data: created, error } = await service.auth.admin.createUser({
+        email: `ci-roleguard-${prefix}+${stamp}-${rand}@example.invalid`,
+        password: `Pw!${rand}${stamp}${rand}`,
+        email_confirm: true,
+      });
+      if (error || !created?.user) throw error ?? new Error(`user creation failed (${prefix})`);
+      return created.user.id;
+    }
+
+    const ownerUserId = await makeAuthUser("owner");
+
     async function makeTenant(label: string): Promise<string> {
       const { data, error } = await service
         .from("tenants")
@@ -78,6 +90,7 @@ describe.runIf(canRun)("custom role definition hierarchy guard", () => {
           tier: "business",
           subscription_status: "trialing",
           is_active: true,
+          owner_user_id: ownerUserId,
         })
         .select("id")
         .single();
