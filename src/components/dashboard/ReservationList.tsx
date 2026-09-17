@@ -28,7 +28,7 @@ import { useT, useTDynamic, useI18n } from "@/contexts/I18nContext";
 import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
 import SiteTabs from "./SiteTabs";
 import { toast } from "sonner";
-import { useInvoiceRefusalMessage } from "@/hooks/useInvoiceRefusalMessage";
+import { useInvoiceRefusalNotice } from "@/hooks/useInvoiceRefusalNotice";
 import { useDateLocale } from "@/hooks/useDateLocale";
 import { usePermissions } from "@/hooks/usePermissions";
 import {
@@ -88,7 +88,7 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
   const [linkedInvoicedPrompt, setLinkedInvoicedPrompt] = useState<{ reservationId: string; linkedIds: string[]; linkedNames: string[]; value: boolean } | null>(null);
   const [linkedCancelPrompt, setLinkedCancelPrompt] = useState<{ reservationId: string; linkedIds: string[]; linkedNames: string[]; suppressEmail: boolean } | null>(null);
   const t = useT();
-  const formatInvoiceRefusal = useInvoiceRefusalMessage();
+  const { showRefusal, clearRefusal } = useInvoiceRefusalNotice();
   const tDynamic = useTDynamic();
   const dateFnsLocale = useDateLocale();
   const { typeLabel } = useResourceTypeLabel();
@@ -126,8 +126,9 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
         businessAddress: invoiceBranding?.business_address,
         primaryColor: invoiceBranding?.primary_color,
       });
+      clearRefusal();
     } catch (err) {
-      toast.error(formatInvoiceRefusal(err).message);
+      showRefusal(err);
     } finally {
       setInvoicePdfBusyId(null);
     }
@@ -486,9 +487,11 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
       queryClient.invalidateQueries({ queryKey: ["reservations"] });
       toast.success(vars.value ? t("dashboard.invoiced") : t("dashboard.statusUpdated"));
       setLinkedInvoicedPrompt(null);
+      // A successful retry must not leave the previous refusal on screen.
+      clearRefusal();
     },
     onError: (err: unknown) => {
-      toast.error(formatInvoiceRefusal(err).message);
+      showRefusal(err);
     },
   });
 
@@ -503,12 +506,14 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["reservations"] });
+      clearRefusal();
     },
     onError: (err: unknown) => {
       // Show the exact reason the server refused (missing price, an amount
       // that does not reconcile, an already invoiced row, or permissions)
-      // instead of one generic sentence for all of them.
-      toast.error(formatInvoiceRefusal(err).message);
+      // instead of one generic sentence for all of them. Replaces any earlier
+      // refusal so only the current one is visible.
+      showRefusal(err);
     },
   });
 
@@ -535,9 +540,7 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
     if (checked) {
       const hasPrice = await linkedGroupHasPrice(id);
       if (!hasPrice) {
-        toast.error(
-          formatInvoiceRefusal("Add a price before marking this reservation as invoiced.").message,
-        );
+        showRefusal("Add a price before marking this reservation as invoiced.");
         return;
       }
     }
