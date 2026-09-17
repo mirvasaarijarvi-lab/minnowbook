@@ -1,0 +1,758 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="deno test" tests="314" failures="0" errors="0" time="38.078">
+    <testsuite name="./supabase/functions/_shared/assert-fast-401.test.ts" tests="11" disabled="0" errors="0" failures="0">
+        <testcase name="assertFastJson401: happy path returns parsed body + elapsed + response" classname="./supabase/functions/_shared/assert-fast-401.test.ts" time="0.002" line="28" col="6">
+        </testcase>
+        <testcase name="assertFastJson401: wrong status throws with label + actual code" classname="./supabase/functions/_shared/assert-fast-401.test.ts" time="0.026" line="37" col="6">
+        </testcase>
+        <testcase name="assertFastJson401: HTML body fails the JSON guard with diagnostic" classname="./supabase/functions/_shared/assert-fast-401.test.ts" time="0.000" line="53" col="6">
+        </testcase>
+        <testcase name="assertFastJson401: JSON array body is rejected (must be object)" classname="./supabase/functions/_shared/assert-fast-401.test.ts" time="0.000" line="69" col="6">
+        </testcase>
+        <testcase name="assertFastJson401: over-budget handler is flagged with timing diagnostic" classname="./supabase/functions/_shared/assert-fast-401.test.ts" time="0.083" line="84" col="6">
+        </testcase>
+        <testcase name="assertFastJson401: budgetMs override accepts slower handlers" classname="./supabase/functions/_shared/assert-fast-401.test.ts" time="0.042" line="106" col="6">
+        </testcase>
+        <testcase name="buildUnauthenticatedProbe: defaults to POST + {} body + canonical headers" classname="./supabase/functions/_shared/assert-fast-401.test.ts" time="0.000" line="122" col="6">
+        </testcase>
+        <testcase name="buildUnauthenticatedProbe: custom body is JSON-stringified" classname="./supabase/functions/_shared/assert-fast-401.test.ts" time="0.000" line="131" col="6">
+        </testcase>
+        <testcase name="buildUnauthenticatedProbe: GET probes omit the body" classname="./supabase/functions/_shared/assert-fast-401.test.ts" time="0.000" line="136" col="6">
+        </testcase>
+        <testcase name="loadAuthHandler: missing module surfaces handler dir + export name" classname="./supabase/functions/_shared/assert-fast-401.test.ts" time="0.003" line="142" col="6">
+        </testcase>
+        <testcase name="loadAuthHandler: existing module but missing export throws clear error" classname="./supabase/functions/_shared/assert-fast-401.test.ts" time="0.103" line="155" col="6">
+        </testcase>
+    </testsuite>
+    <testsuite name="./supabase/functions/_shared/auth-401-contract.test.ts" tests="27" disabled="0" errors="0" failures="0">
+        <testcase name="admin-users: missing Authorization returns canonical 401" classname="./supabase/functions/_shared/auth-401-contract.test.ts" time="0.091" line="148" col="8">
+        </testcase>
+        <testcase name="admin-users: malformed Authorization (non-Bearer) returns canonical 401" classname="./supabase/functions/_shared/auth-401-contract.test.ts" time="0.000" line="160" col="8">
+        </testcase>
+        <testcase name="admin-users: Bearer with empty token returns canonical 401" classname="./supabase/functions/_shared/auth-401-contract.test.ts" time="0.000" line="176" col="8">
+        </testcase>
+        <testcase name="archive-reservations: missing Authorization returns canonical 401" classname="./supabase/functions/_shared/auth-401-contract.test.ts" time="0.014" line="148" col="8">
+        </testcase>
+        <testcase name="archive-reservations: malformed Authorization (non-Bearer) returns canonical 401" classname="./supabase/functions/_shared/auth-401-contract.test.ts" time="0.000" line="160" col="8">
+        </testcase>
+        <testcase name="archive-reservations: Bearer with empty token returns canonical 401" classname="./supabase/functions/_shared/auth-401-contract.test.ts" time="0.000" line="176" col="8">
+        </testcase>
+        <testcase name="log-forbidden-access: missing Authorization returns canonical 401" classname="./supabase/functions/_shared/auth-401-contract.test.ts" time="0.037" line="148" col="8">
+        </testcase>
+        <testcase name="log-forbidden-access: malformed Authorization (non-Bearer) returns canonical 401" classname="./supabase/functions/_shared/auth-401-contract.test.ts" time="0.000" line="160" col="8">
+        </testcase>
+        <testcase name="log-forbidden-access: Bearer with empty token returns canonical 401" classname="./supabase/functions/_shared/auth-401-contract.test.ts" time="0.000" line="176" col="8">
+        </testcase>
+        <testcase name="mfa-recovery: missing Authorization returns canonical 401" classname="./supabase/functions/_shared/auth-401-contract.test.ts" time="0.002" line="148" col="8">
+        </testcase>
+        <testcase name="mfa-recovery: malformed Authorization (non-Bearer) returns canonical 401" classname="./supabase/functions/_shared/auth-401-contract.test.ts" time="0.000" line="160" col="8">
+        </testcase>
+        <testcase name="mfa-recovery: Bearer with empty token returns canonical 401" classname="./supabase/functions/_shared/auth-401-contract.test.ts" time="0.000" line="176" col="8">
+        </testcase>
+        <testcase name="migrate-branding-assets: missing Authorization returns canonical 401" classname="./supabase/functions/_shared/auth-401-contract.test.ts" time="0.002" line="148" col="8">
+        </testcase>
+        <testcase name="migrate-branding-assets: malformed Authorization (non-Bearer) returns canonical 401" classname="./supabase/functions/_shared/auth-401-contract.test.ts" time="0.000" line="160" col="8">
+        </testcase>
+        <testcase name="migrate-branding-assets: Bearer with empty token returns canonical 401" classname="./supabase/functions/_shared/auth-401-contract.test.ts" time="0.000" line="176" col="8">
+        </testcase>
+        <testcase name="mint-tenant-private-url: missing Authorization returns canonical 401" classname="./supabase/functions/_shared/auth-401-contract.test.ts" time="0.002" line="148" col="8">
+        </testcase>
+        <testcase name="mint-tenant-private-url: malformed Authorization (non-Bearer) returns canonical 401" classname="./supabase/functions/_shared/auth-401-contract.test.ts" time="0.000" line="160" col="8">
+        </testcase>
+        <testcase name="mint-tenant-private-url: Bearer with empty token returns canonical 401" classname="./supabase/functions/_shared/auth-401-contract.test.ts" time="0.000" line="176" col="8">
+        </testcase>
+        <testcase name="redeem-access-code: missing Authorization returns canonical 401" classname="./supabase/functions/_shared/auth-401-contract.test.ts" time="0.004" line="148" col="8">
+        </testcase>
+        <testcase name="redeem-access-code: malformed Authorization (non-Bearer) returns canonical 401" classname="./supabase/functions/_shared/auth-401-contract.test.ts" time="0.001" line="160" col="8">
+        </testcase>
+        <testcase name="redeem-access-code: Bearer with empty token returns canonical 401" classname="./supabase/functions/_shared/auth-401-contract.test.ts" time="0.000" line="176" col="8">
+        </testcase>
+        <testcase name="send-offer-email: missing Authorization returns canonical 401" classname="./supabase/functions/_shared/auth-401-contract.test.ts" time="0.002" line="148" col="8">
+        </testcase>
+        <testcase name="send-offer-email: malformed Authorization (non-Bearer) returns canonical 401" classname="./supabase/functions/_shared/auth-401-contract.test.ts" time="0.000" line="160" col="8">
+        </testcase>
+        <testcase name="send-offer-email: Bearer with empty token returns canonical 401" classname="./supabase/functions/_shared/auth-401-contract.test.ts" time="0.000" line="176" col="8">
+        </testcase>
+        <testcase name="send-reminder: missing Authorization returns canonical 401" classname="./supabase/functions/_shared/auth-401-contract.test.ts" time="0.002" line="148" col="8">
+        </testcase>
+        <testcase name="send-reminder: malformed Authorization (non-Bearer) returns canonical 401" classname="./supabase/functions/_shared/auth-401-contract.test.ts" time="0.000" line="160" col="8">
+        </testcase>
+        <testcase name="send-reminder: Bearer with empty token returns canonical 401" classname="./supabase/functions/_shared/auth-401-contract.test.ts" time="0.000" line="176" col="8">
+        </testcase>
+    </testsuite>
+    <testsuite name="./supabase/functions/_shared/auth-401-no-env.test.ts" tests="14" disabled="0" errors="0" failures="0">
+        <testcase name="admin-users: missing Authorization returns 401 even with empty Supabase env" classname="./supabase/functions/_shared/auth-401-no-env.test.ts" time="0.116" line="110" col="8">
+        </testcase>
+        <testcase name="admin-users: missing Authorization returns 401 even with unset Supabase env" classname="./supabase/functions/_shared/auth-401-no-env.test.ts" time="0.000" line="120" col="8">
+        </testcase>
+        <testcase name="archive-reservations: missing Authorization returns 401 even with empty Supabase env" classname="./supabase/functions/_shared/auth-401-no-env.test.ts" time="0.020" line="110" col="8">
+        </testcase>
+        <testcase name="archive-reservations: missing Authorization returns 401 even with unset Supabase env" classname="./supabase/functions/_shared/auth-401-no-env.test.ts" time="0.000" line="120" col="8">
+        </testcase>
+        <testcase name="mfa-recovery: missing Authorization returns 401 even with empty Supabase env" classname="./supabase/functions/_shared/auth-401-no-env.test.ts" time="0.003" line="110" col="8">
+        </testcase>
+        <testcase name="mfa-recovery: missing Authorization returns 401 even with unset Supabase env" classname="./supabase/functions/_shared/auth-401-no-env.test.ts" time="0.000" line="120" col="8">
+        </testcase>
+        <testcase name="migrate-branding-assets: missing Authorization returns 401 even with empty Supabase env" classname="./supabase/functions/_shared/auth-401-no-env.test.ts" time="0.027" line="110" col="8">
+        </testcase>
+        <testcase name="migrate-branding-assets: missing Authorization returns 401 even with unset Supabase env" classname="./supabase/functions/_shared/auth-401-no-env.test.ts" time="0.000" line="120" col="8">
+        </testcase>
+        <testcase name="redeem-access-code: missing Authorization returns 401 even with empty Supabase env" classname="./supabase/functions/_shared/auth-401-no-env.test.ts" time="0.003" line="110" col="8">
+        </testcase>
+        <testcase name="redeem-access-code: missing Authorization returns 401 even with unset Supabase env" classname="./supabase/functions/_shared/auth-401-no-env.test.ts" time="0.000" line="120" col="8">
+        </testcase>
+        <testcase name="send-offer-email: missing Authorization returns 401 even with empty Supabase env" classname="./supabase/functions/_shared/auth-401-no-env.test.ts" time="0.002" line="110" col="8">
+        </testcase>
+        <testcase name="send-offer-email: missing Authorization returns 401 even with unset Supabase env" classname="./supabase/functions/_shared/auth-401-no-env.test.ts" time="0.000" line="120" col="8">
+        </testcase>
+        <testcase name="send-reminder: missing Authorization returns 401 even with empty Supabase env" classname="./supabase/functions/_shared/auth-401-no-env.test.ts" time="0.002" line="110" col="8">
+        </testcase>
+        <testcase name="send-reminder: missing Authorization returns 401 even with unset Supabase env" classname="./supabase/functions/_shared/auth-401-no-env.test.ts" time="0.001" line="120" col="8">
+        </testcase>
+    </testsuite>
+    <testsuite name="./supabase/functions/_shared/auth-401-partial-env.test.ts" tests="21" disabled="0" errors="0" failures="0">
+        <testcase name="admin-users: 401 short-circuit when SUPABASE_URL set but keys are missing" classname="./supabase/functions/_shared/auth-401-partial-env.test.ts" time="0.145" line="107" col="10">
+        </testcase>
+        <testcase name="admin-users: 401 short-circuit when SUPABASE_URL set but keys are empty" classname="./supabase/functions/_shared/auth-401-partial-env.test.ts" time="0.001" line="107" col="10">
+        </testcase>
+        <testcase name="admin-users: 401 short-circuit when SUPABASE_URL set but keys are whitespace" classname="./supabase/functions/_shared/auth-401-partial-env.test.ts" time="0.001" line="107" col="10">
+        </testcase>
+        <testcase name="archive-reservations: 401 short-circuit when SUPABASE_URL set but keys are missing" classname="./supabase/functions/_shared/auth-401-partial-env.test.ts" time="0.015" line="107" col="10">
+        </testcase>
+        <testcase name="archive-reservations: 401 short-circuit when SUPABASE_URL set but keys are empty" classname="./supabase/functions/_shared/auth-401-partial-env.test.ts" time="0.000" line="107" col="10">
+        </testcase>
+        <testcase name="archive-reservations: 401 short-circuit when SUPABASE_URL set but keys are whitespace" classname="./supabase/functions/_shared/auth-401-partial-env.test.ts" time="0.000" line="107" col="10">
+        </testcase>
+        <testcase name="mfa-recovery: 401 short-circuit when SUPABASE_URL set but keys are missing" classname="./supabase/functions/_shared/auth-401-partial-env.test.ts" time="0.002" line="107" col="10">
+        </testcase>
+        <testcase name="mfa-recovery: 401 short-circuit when SUPABASE_URL set but keys are empty" classname="./supabase/functions/_shared/auth-401-partial-env.test.ts" time="0.000" line="107" col="10">
+        </testcase>
+        <testcase name="mfa-recovery: 401 short-circuit when SUPABASE_URL set but keys are whitespace" classname="./supabase/functions/_shared/auth-401-partial-env.test.ts" time="0.000" line="107" col="10">
+        </testcase>
+        <testcase name="migrate-branding-assets: 401 short-circuit when SUPABASE_URL set but keys are missing" classname="./supabase/functions/_shared/auth-401-partial-env.test.ts" time="0.035" line="107" col="10">
+        </testcase>
+        <testcase name="migrate-branding-assets: 401 short-circuit when SUPABASE_URL set but keys are empty" classname="./supabase/functions/_shared/auth-401-partial-env.test.ts" time="0.000" line="107" col="10">
+        </testcase>
+        <testcase name="migrate-branding-assets: 401 short-circuit when SUPABASE_URL set but keys are whitespace" classname="./supabase/functions/_shared/auth-401-partial-env.test.ts" time="0.000" line="107" col="10">
+        </testcase>
+        <testcase name="redeem-access-code: 401 short-circuit when SUPABASE_URL set but keys are missing" classname="./supabase/functions/_shared/auth-401-partial-env.test.ts" time="0.003" line="107" col="10">
+        </testcase>
+        <testcase name="redeem-access-code: 401 short-circuit when SUPABASE_URL set but keys are empty" classname="./supabase/functions/_shared/auth-401-partial-env.test.ts" time="0.000" line="107" col="10">
+        </testcase>
+        <testcase name="redeem-access-code: 401 short-circuit when SUPABASE_URL set but keys are whitespace" classname="./supabase/functions/_shared/auth-401-partial-env.test.ts" time="0.002" line="107" col="10">
+        </testcase>
+        <testcase name="send-offer-email: 401 short-circuit when SUPABASE_URL set but keys are missing" classname="./supabase/functions/_shared/auth-401-partial-env.test.ts" time="0.002" line="107" col="10">
+        </testcase>
+        <testcase name="send-offer-email: 401 short-circuit when SUPABASE_URL set but keys are empty" classname="./supabase/functions/_shared/auth-401-partial-env.test.ts" time="0.000" line="107" col="10">
+        </testcase>
+        <testcase name="send-offer-email: 401 short-circuit when SUPABASE_URL set but keys are whitespace" classname="./supabase/functions/_shared/auth-401-partial-env.test.ts" time="0.000" line="107" col="10">
+        </testcase>
+        <testcase name="send-reminder: 401 short-circuit when SUPABASE_URL set but keys are missing" classname="./supabase/functions/_shared/auth-401-partial-env.test.ts" time="0.003" line="107" col="10">
+        </testcase>
+        <testcase name="send-reminder: 401 short-circuit when SUPABASE_URL set but keys are empty" classname="./supabase/functions/_shared/auth-401-partial-env.test.ts" time="0.000" line="107" col="10">
+        </testcase>
+        <testcase name="send-reminder: 401 short-circuit when SUPABASE_URL set but keys are whitespace" classname="./supabase/functions/_shared/auth-401-partial-env.test.ts" time="0.000" line="107" col="10">
+        </testcase>
+    </testsuite>
+    <testsuite name="./supabase/functions/_shared/auth-before-createclient.test.ts" tests="1" disabled="0" errors="0" failures="0">
+        <testcase name="auth-enforced edge functions short-circuit before createClient(...)" classname="./supabase/functions/_shared/auth-before-createclient.test.ts" time="0.016" line="53" col="6">
+        </testcase>
+    </testsuite>
+    <testsuite name="./supabase/functions/_shared/auth-short-circuit.test.ts" tests="20" disabled="0" errors="0" failures="0">
+        <testcase name="admin-users: POST without Authorization short-circuits within 1500ms" classname="./supabase/functions/_shared/auth-short-circuit.test.ts" time="0.122" line="130" col="8">
+        </testcase>
+        <testcase name="admin-users: POST with malformed Authorization (no Bearer) short-circuits within 1500ms" classname="./supabase/functions/_shared/auth-short-circuit.test.ts" time="0.001" line="140" col="8">
+        </testcase>
+        <testcase name="archive-reservations: POST without Authorization short-circuits within 1500ms" classname="./supabase/functions/_shared/auth-short-circuit.test.ts" time="0.016" line="130" col="8">
+        </testcase>
+        <testcase name="archive-reservations: POST with malformed Authorization (no Bearer) short-circuits within 1500ms" classname="./supabase/functions/_shared/auth-short-circuit.test.ts" time="0.000" line="140" col="8">
+        </testcase>
+        <testcase name="log-forbidden-access: POST without Authorization short-circuits within 1500ms" classname="./supabase/functions/_shared/auth-short-circuit.test.ts" time="0.034" line="130" col="8">
+        </testcase>
+        <testcase name="log-forbidden-access: POST with malformed Authorization (no Bearer) short-circuits within 1500ms" classname="./supabase/functions/_shared/auth-short-circuit.test.ts" time="0.000" line="140" col="8">
+        </testcase>
+        <testcase name="mfa-recovery: POST without Authorization short-circuits within 1500ms" classname="./supabase/functions/_shared/auth-short-circuit.test.ts" time="0.003" line="130" col="8">
+        </testcase>
+        <testcase name="mfa-recovery: POST with malformed Authorization (no Bearer) short-circuits within 1500ms" classname="./supabase/functions/_shared/auth-short-circuit.test.ts" time="0.000" line="140" col="8">
+        </testcase>
+        <testcase name="migrate-branding-assets: POST without Authorization short-circuits within 1500ms" classname="./supabase/functions/_shared/auth-short-circuit.test.ts" time="0.003" line="130" col="8">
+        </testcase>
+        <testcase name="migrate-branding-assets: POST with malformed Authorization (no Bearer) short-circuits within 1500ms" classname="./supabase/functions/_shared/auth-short-circuit.test.ts" time="0.001" line="140" col="8">
+        </testcase>
+        <testcase name="mint-tenant-private-url: POST without Authorization short-circuits within 1500ms" classname="./supabase/functions/_shared/auth-short-circuit.test.ts" time="0.002" line="130" col="8">
+        </testcase>
+        <testcase name="mint-tenant-private-url: POST with malformed Authorization (no Bearer) short-circuits within 1500ms" classname="./supabase/functions/_shared/auth-short-circuit.test.ts" time="0.000" line="140" col="8">
+        </testcase>
+        <testcase name="redeem-access-code: POST without Authorization short-circuits within 1500ms" classname="./supabase/functions/_shared/auth-short-circuit.test.ts" time="0.005" line="130" col="8">
+        </testcase>
+        <testcase name="redeem-access-code: POST with malformed Authorization (no Bearer) short-circuits within 1500ms" classname="./supabase/functions/_shared/auth-short-circuit.test.ts" time="0.003" line="140" col="8">
+        </testcase>
+        <testcase name="send-offer-email: POST without Authorization short-circuits within 1500ms" classname="./supabase/functions/_shared/auth-short-circuit.test.ts" time="0.002" line="130" col="8">
+        </testcase>
+        <testcase name="send-offer-email: POST with malformed Authorization (no Bearer) short-circuits within 1500ms" classname="./supabase/functions/_shared/auth-short-circuit.test.ts" time="0.000" line="140" col="8">
+        </testcase>
+        <testcase name="send-reminder: POST without Authorization short-circuits within 1500ms" classname="./supabase/functions/_shared/auth-short-circuit.test.ts" time="0.005" line="130" col="8">
+        </testcase>
+        <testcase name="send-reminder: POST with malformed Authorization (no Bearer) short-circuits within 1500ms" classname="./supabase/functions/_shared/auth-short-circuit.test.ts" time="0.000" line="140" col="8">
+        </testcase>
+        <testcase name="support-chat: POST without Authorization short-circuits within 1500ms" classname="./supabase/functions/_shared/auth-short-circuit.test.ts" time="0.007" line="130" col="8">
+        </testcase>
+        <testcase name="support-chat: POST with malformed Authorization (no Bearer) short-circuits within 1500ms" classname="./supabase/functions/_shared/auth-short-circuit.test.ts" time="0.000" line="140" col="8">
+        </testcase>
+    </testsuite>
+    <testsuite name="./supabase/functions/_shared/errors_test.ts" tests="8" disabled="0" errors="0" failures="0">
+        <testcase name="errorResponse: canonical shape has error+code+message+status and JSON content-type" classname="./supabase/functions/_shared/errors_test.ts" time="0.004" line="28" col="6">
+        </testcase>
+        <testcase name="errorResponse: error and code are always identical (legacy alias preserved)" classname="./supabase/functions/_shared/errors_test.ts" time="0.017" line="49" col="6">
+        </testcase>
+        <testcase name="errorResponse: omits requestId and details when not provided" classname="./supabase/functions/_shared/errors_test.ts" time="0.000" line="57" col="6">
+        </testcase>
+        <testcase name="helpers map to the documented HTTP status + default code" classname="./supabase/functions/_shared/errors_test.ts" time="0.001" line="68" col="6">
+        </testcase>
+        <testcase name="methodNotAllowed sets Allow header listing permitted verbs" classname="./supabase/functions/_shared/errors_test.ts" time="0.000" line="88" col="6">
+        </testcase>
+        <testcase name="tooManyRequests sets Retry-After when seconds provided" classname="./supabase/functions/_shared/errors_test.ts" time="0.000" line="96" col="6">
+        </testcase>
+        <testcase name="tooManyRequests omits Retry-After when not provided or non-positive" classname="./supabase/functions/_shared/errors_test.ts" time="0.000" line="103" col="6">
+        </testcase>
+        <testcase name="overrides win over helper defaults without losing required fields" classname="./supabase/functions/_shared/errors_test.ts" time="0.000" line="109" col="6">
+        </testcase>
+    </testsuite>
+    <testsuite name="./supabase/functions/_shared/inherited-empty-env-regression.test.ts" tests="18" disabled="0" errors="0" failures="0">
+        <testcase name="coerceMissingEnv: inherited empty strings are missing" classname="./supabase/functions/_shared/inherited-empty-env-regression.test.ts" time="0.000" line="78" col="6">
+        </testcase>
+        <testcase name="coerceMissingEnv: non-empty values pass through verbatim" classname="./supabase/functions/_shared/inherited-empty-env-regression.test.ts" time="0.000" line="85" col="6">
+        </testcase>
+        <testcase name="withStubSupabaseEnv: replaces inherited empty env with usable stubs" classname="./supabase/functions/_shared/inherited-empty-env-regression.test.ts" time="0.017" line="91" col="6">
+        </testcase>
+        <testcase name="withStubSupabaseEnv: restores inherited empty values after fn" classname="./supabase/functions/_shared/inherited-empty-env-regression.test.ts" time="0.000" line="109" col="6">
+        </testcase>
+        <testcase name="admin-users: inherited empty Supabase env still yields a JSON 401 (not 500)" classname="./supabase/functions/_shared/inherited-empty-env-regression.test.ts" time="0.071" line="170" col="8">
+        </testcase>
+        <testcase name="admin-users: inherited whitespace-only Supabase env still yields a JSON 401 (not 500)" classname="./supabase/functions/_shared/inherited-empty-env-regression.test.ts" time="0.000" line="179" col="8">
+        </testcase>
+        <testcase name="archive-reservations: inherited empty Supabase env still yields a JSON 401 (not 500)" classname="./supabase/functions/_shared/inherited-empty-env-regression.test.ts" time="0.013" line="170" col="8">
+        </testcase>
+        <testcase name="archive-reservations: inherited whitespace-only Supabase env still yields a JSON 401 (not 500)" classname="./supabase/functions/_shared/inherited-empty-env-regression.test.ts" time="0.000" line="179" col="8">
+        </testcase>
+        <testcase name="mfa-recovery: inherited empty Supabase env still yields a JSON 401 (not 500)" classname="./supabase/functions/_shared/inherited-empty-env-regression.test.ts" time="0.004" line="170" col="8">
+        </testcase>
+        <testcase name="mfa-recovery: inherited whitespace-only Supabase env still yields a JSON 401 (not 500)" classname="./supabase/functions/_shared/inherited-empty-env-regression.test.ts" time="0.000" line="179" col="8">
+        </testcase>
+        <testcase name="migrate-branding-assets: inherited empty Supabase env still yields a JSON 401 (not 500)" classname="./supabase/functions/_shared/inherited-empty-env-regression.test.ts" time="0.028" line="170" col="8">
+        </testcase>
+        <testcase name="migrate-branding-assets: inherited whitespace-only Supabase env still yields a JSON 401 (not 500)" classname="./supabase/functions/_shared/inherited-empty-env-regression.test.ts" time="0.000" line="179" col="8">
+        </testcase>
+        <testcase name="redeem-access-code: inherited empty Supabase env still yields a JSON 401 (not 500)" classname="./supabase/functions/_shared/inherited-empty-env-regression.test.ts" time="0.002" line="170" col="8">
+        </testcase>
+        <testcase name="redeem-access-code: inherited whitespace-only Supabase env still yields a JSON 401 (not 500)" classname="./supabase/functions/_shared/inherited-empty-env-regression.test.ts" time="0.000" line="179" col="8">
+        </testcase>
+        <testcase name="send-offer-email: inherited empty Supabase env still yields a JSON 401 (not 500)" classname="./supabase/functions/_shared/inherited-empty-env-regression.test.ts" time="0.003" line="170" col="8">
+        </testcase>
+        <testcase name="send-offer-email: inherited whitespace-only Supabase env still yields a JSON 401 (not 500)" classname="./supabase/functions/_shared/inherited-empty-env-regression.test.ts" time="0.000" line="179" col="8">
+        </testcase>
+        <testcase name="send-reminder: inherited empty Supabase env still yields a JSON 401 (not 500)" classname="./supabase/functions/_shared/inherited-empty-env-regression.test.ts" time="0.002" line="170" col="8">
+        </testcase>
+        <testcase name="send-reminder: inherited whitespace-only Supabase env still yields a JSON 401 (not 500)" classname="./supabase/functions/_shared/inherited-empty-env-regression.test.ts" time="0.000" line="179" col="8">
+        </testcase>
+    </testsuite>
+    <testsuite name="./supabase/functions/_shared/malformed-env-stub.test.ts" tests="24" disabled="0" errors="0" failures="0">
+        <testcase name="coerceMissingEnv: single space -&gt; undefined" classname="./supabase/functions/_shared/malformed-env-stub.test.ts" time="0.000" line="71" col="8">
+        </testcase>
+        <testcase name="coerceMissingEnv: multiple spaces -&gt; undefined" classname="./supabase/functions/_shared/malformed-env-stub.test.ts" time="0.000" line="71" col="8">
+        </testcase>
+        <testcase name="coerceMissingEnv: tab only -&gt; undefined" classname="./supabase/functions/_shared/malformed-env-stub.test.ts" time="0.000" line="71" col="8">
+        </testcase>
+        <testcase name="coerceMissingEnv: newline only -&gt; undefined" classname="./supabase/functions/_shared/malformed-env-stub.test.ts" time="0.000" line="71" col="8">
+        </testcase>
+        <testcase name="coerceMissingEnv: carriage return + newline -&gt; undefined" classname="./supabase/functions/_shared/malformed-env-stub.test.ts" time="0.000" line="71" col="8">
+        </testcase>
+        <testcase name="coerceMissingEnv: mixed whitespace -&gt; undefined" classname="./supabase/functions/_shared/malformed-env-stub.test.ts" time="0.000" line="71" col="8">
+        </testcase>
+        <testcase name="coerceMissingEnv: non-breaking space -&gt; undefined" classname="./supabase/functions/_shared/malformed-env-stub.test.ts" time="0.000" line="71" col="8">
+        </testcase>
+        <testcase name="coerceMissingEnv: legitimate token returned verbatim (no trimming)" classname="./supabase/functions/_shared/malformed-env-stub.test.ts" time="0.000" line="80" col="6">
+        </testcase>
+        <testcase name="withStubSupabaseEnv: overwrites whitespace-only inherited values" classname="./supabase/functions/_shared/malformed-env-stub.test.ts" time="0.000" line="90" col="6">
+        </testcase>
+        <testcase name="withStubSupabaseEnv: preserves legitimate non-empty inherited values" classname="./supabase/functions/_shared/malformed-env-stub.test.ts" time="0.000" line="126" col="6">
+        </testcase>
+        <testcase name="admin-users: missing Authorization returns 401 with single space env" classname="./supabase/functions/_shared/malformed-env-stub.test.ts" time="0.072" line="203" col="10">
+        </testcase>
+        <testcase name="admin-users: missing Authorization returns 401 with mixed whitespace env" classname="./supabase/functions/_shared/malformed-env-stub.test.ts" time="0.000" line="203" col="10">
+        </testcase>
+        <testcase name="archive-reservations: missing Authorization returns 401 with single space env" classname="./supabase/functions/_shared/malformed-env-stub.test.ts" time="0.010" line="203" col="10">
+        </testcase>
+        <testcase name="archive-reservations: missing Authorization returns 401 with mixed whitespace env" classname="./supabase/functions/_shared/malformed-env-stub.test.ts" time="0.000" line="203" col="10">
+        </testcase>
+        <testcase name="mfa-recovery: missing Authorization returns 401 with single space env" classname="./supabase/functions/_shared/malformed-env-stub.test.ts" time="0.002" line="203" col="10">
+        </testcase>
+        <testcase name="mfa-recovery: missing Authorization returns 401 with mixed whitespace env" classname="./supabase/functions/_shared/malformed-env-stub.test.ts" time="0.000" line="203" col="10">
+        </testcase>
+        <testcase name="migrate-branding-assets: missing Authorization returns 401 with single space env" classname="./supabase/functions/_shared/malformed-env-stub.test.ts" time="0.024" line="203" col="10">
+        </testcase>
+        <testcase name="migrate-branding-assets: missing Authorization returns 401 with mixed whitespace env" classname="./supabase/functions/_shared/malformed-env-stub.test.ts" time="0.003" line="203" col="10">
+        </testcase>
+        <testcase name="redeem-access-code: missing Authorization returns 401 with single space env" classname="./supabase/functions/_shared/malformed-env-stub.test.ts" time="0.003" line="203" col="10">
+        </testcase>
+        <testcase name="redeem-access-code: missing Authorization returns 401 with mixed whitespace env" classname="./supabase/functions/_shared/malformed-env-stub.test.ts" time="0.000" line="203" col="10">
+        </testcase>
+        <testcase name="send-offer-email: missing Authorization returns 401 with single space env" classname="./supabase/functions/_shared/malformed-env-stub.test.ts" time="0.002" line="203" col="10">
+        </testcase>
+        <testcase name="send-offer-email: missing Authorization returns 401 with mixed whitespace env" classname="./supabase/functions/_shared/malformed-env-stub.test.ts" time="0.000" line="203" col="10">
+        </testcase>
+        <testcase name="send-reminder: missing Authorization returns 401 with single space env" classname="./supabase/functions/_shared/malformed-env-stub.test.ts" time="0.003" line="203" col="10">
+        </testcase>
+        <testcase name="send-reminder: missing Authorization returns 401 with mixed whitespace env" classname="./supabase/functions/_shared/malformed-env-stub.test.ts" time="0.000" line="203" col="10">
+        </testcase>
+    </testsuite>
+    <testsuite name="./supabase/functions/_shared/permission-checks-rls.test.ts" tests="3" disabled="0" errors="0" failures="0">
+        <testcase name="permission helpers: legacy 2-arg overloads no longer exist" classname="./supabase/functions/_shared/permission-checks-rls.test.ts" time="1.358" line="165" col="6">
+        </testcase>
+        <testcase name="has_tenant_role(3-arg) is tenant-scoped across tenants" classname="./supabase/functions/_shared/permission-checks-rls.test.ts" time="1.582" line="215" col="6">
+        </testcase>
+        <testcase name="has_permission(3-arg) is tenant-scoped and blocks cross-tenant leakage" classname="./supabase/functions/_shared/permission-checks-rls.test.ts" time="1.469" line="288" col="6">
+        </testcase>
+    </testsuite>
+    <testsuite name="./supabase/functions/_shared/preflight-options.test.ts" tests="7" disabled="0" errors="0" failures="0">
+        <testcase name="getCorsHeaders: allowed origin echoes Origin and sets full SECURITY_HEADERS" classname="./supabase/functions/_shared/preflight-options.test.ts" time="0.002" line="55" col="6">
+        </testcase>
+        <testcase name="getCorsHeaders: disallowed origin omits Allow-Origin but keeps SECURITY_HEADERS" classname="./supabase/functions/_shared/preflight-options.test.ts" time="0.000" line="80" col="6">
+        </testcase>
+        <testcase name="getCorsHeaders: wildcard mode sets Allow-Origin: *" classname="./supabase/functions/_shared/preflight-options.test.ts" time="0.000" line="103" col="6">
+        </testcase>
+        <testcase name="getCorsHeaders: every DEFAULT_ALLOWED_ORIGINS entry is honoured" classname="./supabase/functions/_shared/preflight-options.test.ts" time="0.000" line="115" col="6">
+        </testcase>
+        <testcase name="corsHeaders static bag carries CORS + SECURITY_HEADERS" classname="./supabase/functions/_shared/preflight-options.test.ts" time="0.000" line="140" col="6">
+        </testcase>
+        <testcase name="public-booking OPTIONS preflight returns CORS + SECURITY_HEADERS" classname="./supabase/functions/_shared/preflight-options.test.ts" time="0.002" line="154" col="6">
+        </testcase>
+        <testcase name="public-booking OPTIONS from a disallowed origin still ships SECURITY_HEADERS" classname="./supabase/functions/_shared/preflight-options.test.ts" time="0.000" line="177" col="6">
+        </testcase>
+    </testsuite>
+    <testsuite name="./supabase/functions/_shared/require-auth_test.ts" tests="4" disabled="0" errors="0" failures="0">
+        <testcase name="requireAuth returns 401 when Authorization header is missing" classname="./supabase/functions/_shared/require-auth_test.ts" time="0.003" line="29" col="6">
+        </testcase>
+        <testcase name="requireAuth returns 401 when header is not Bearer" classname="./supabase/functions/_shared/require-auth_test.ts" time="0.000" line="40" col="6">
+        </testcase>
+        <testcase name="verifyBearer reports missing_header without making a network call" classname="./supabase/functions/_shared/require-auth_test.ts" time="0.002" line="54" col="6">
+        </testcase>
+        <testcase name="verifyBearer reports missing_env when service-role key is absent" classname="./supabase/functions/_shared/require-auth_test.ts" time="0.000" line="65" col="6">
+        </testcase>
+    </testsuite>
+    <testsuite name="./supabase/functions/_shared/security-headers-coverage.test.ts" tests="1" disabled="0" errors="0" failures="0">
+        <testcase name="every edge function ships a security-headers-integration.test.ts" classname="./supabase/functions/_shared/security-headers-coverage.test.ts" time="0.006" line="21" col="6">
+        </testcase>
+    </testsuite>
+    <testsuite name="./supabase/functions/_shared/stub-supabase-env.test.ts" tests="12" disabled="0" errors="0" failures="0">
+        <testcase name="coalesceEnv: undefined -&gt; fallback" classname="./supabase/functions/_shared/stub-supabase-env.test.ts" time="0.001" line="22" col="6">
+        </testcase>
+        <testcase name="coalesceEnv: null -&gt; fallback" classname="./supabase/functions/_shared/stub-supabase-env.test.ts" time="0.000" line="26" col="6">
+        </testcase>
+        <testcase name="coalesceEnv: empty string (the CI pitfall) -&gt; fallback" classname="./supabase/functions/_shared/stub-supabase-env.test.ts" time="0.000" line="30" col="6">
+        </testcase>
+        <testcase name="coalesceEnv: whitespace-only -&gt; fallback" classname="./supabase/functions/_shared/stub-supabase-env.test.ts" time="0.000" line="35" col="6">
+        </testcase>
+        <testcase name="coalesceEnv: real value preserved verbatim" classname="./supabase/functions/_shared/stub-supabase-env.test.ts" time="0.000" line="40" col="6">
+        </testcase>
+        <testcase name="coalesceEnv: real value with surrounding text is NOT trimmed" classname="./supabase/functions/_shared/stub-supabase-env.test.ts" time="0.000" line="44" col="6">
+        </testcase>
+        <testcase name="stubSupabaseEnvVar: writes fallback when env is empty string" classname="./supabase/functions/_shared/stub-supabase-env.test.ts" time="0.000" line="50" col="6">
+        </testcase>
+        <testcase name="stubSupabaseEnvVar: keeps existing real value untouched" classname="./supabase/functions/_shared/stub-supabase-env.test.ts" time="0.000" line="61" col="6">
+        </testcase>
+        <testcase name="stubSupabaseEnvVar: is idempotent across repeated calls" classname="./supabase/functions/_shared/stub-supabase-env.test.ts" time="0.000" line="72" col="6">
+        </testcase>
+        <testcase name="stubSupabaseEnv: rehydrates all three Supabase vars from empty CI secrets" classname="./supabase/functions/_shared/stub-supabase-env.test.ts" time="0.000" line="83" col="6">
+        </testcase>
+        <testcase name="stubSupabaseEnv: per-key overrides win over defaults" classname="./supabase/functions/_shared/stub-supabase-env.test.ts" time="0.000" line="102" col="6">
+        </testcase>
+        <testcase name="zz_restore_supabase_env_for_subsequent_files" classname="./supabase/functions/_shared/stub-supabase-env.test.ts" time="0.015" line="123" col="6">
+        </testcase>
+    </testsuite>
+    <testsuite name="./supabase/functions/_shared/tenant-assets-storage-rls.test.ts" tests="2" disabled="0" errors="0" failures="0">
+        <testcase name="tenant-assets storage RLS: branding paths allowed, others blocked" classname="./supabase/functions/_shared/tenant-assets-storage-rls.test.ts" time="2.633" line="170" col="6">
+        </testcase>
+        <testcase name="tenant-assets storage RLS: anon cannot upload to any path" classname="./supabase/functions/_shared/tenant-assets-storage-rls.test.ts" time="0.303" line="275" col="6">
+        </testcase>
+    </testsuite>
+    <testsuite name="./supabase/functions/_shared/test-security-headers.test.ts" tests="11" disabled="0" errors="0" failures="0">
+        <testcase name="coerceMissingEnv: undefined -&gt; undefined" classname="./supabase/functions/_shared/test-security-headers.test.ts" time="0.000" line="39" col="6">
+        </testcase>
+        <testcase name="coerceMissingEnv: empty string -&gt; undefined" classname="./supabase/functions/_shared/test-security-headers.test.ts" time="0.000" line="43" col="6">
+        </testcase>
+        <testcase name="coerceMissingEnv: whitespace-only -&gt; undefined" classname="./supabase/functions/_shared/test-security-headers.test.ts" time="0.000" line="47" col="6">
+        </testcase>
+        <testcase name="coerceMissingEnv: non-empty string passes through verbatim" classname="./supabase/functions/_shared/test-security-headers.test.ts" time="0.000" line="54" col="6">
+        </testcase>
+        <testcase name="coerceMissingEnv: preserves leading/trailing whitespace on real values" classname="./supabase/functions/_shared/test-security-headers.test.ts" time="0.000" line="59" col="6">
+        </testcase>
+        <testcase name="withStubSupabaseEnv: sets stubs when vars are unset, then unsets" classname="./supabase/functions/_shared/test-security-headers.test.ts" time="0.015" line="71" col="6">
+        </testcase>
+        <testcase name="withStubSupabaseEnv: replaces empty-string inherited values with stubs" classname="./supabase/functions/_shared/test-security-headers.test.ts" time="0.000" line="93" col="6">
+        </testcase>
+        <testcase name="withStubSupabaseEnv: replaces whitespace-only inherited values with stubs" classname="./supabase/functions/_shared/test-security-headers.test.ts" time="0.000" line="115" col="6">
+        </testcase>
+        <testcase name="withStubSupabaseEnv: preserves real inherited values verbatim" classname="./supabase/functions/_shared/test-security-headers.test.ts" time="0.000" line="135" col="6">
+        </testcase>
+        <testcase name="withStubSupabaseEnv: restores prior state even if fn throws" classname="./supabase/functions/_shared/test-security-headers.test.ts" time="0.000" line="163" col="6">
+        </testcase>
+        <testcase name="withStubSupabaseEnv: returns the inner function&apos;s resolved value" classname="./supabase/functions/_shared/test-security-headers.test.ts" time="0.000" line="186" col="6">
+        </testcase>
+    </testsuite>
+    <testsuite name="./supabase/functions/admin-users/sanitize-error.test.ts" tests="10" disabled="0" errors="0" failures="0">
+        <testcase name="sanitizeError: passes through every hard-coded SAFE_ERRORS literal" classname="./supabase/functions/admin-users/sanitize-error.test.ts" time="0.000" line="47" col="6">
+        </testcase>
+        <testcase name="sanitizeError: passes through validator-prefixed messages" classname="./supabase/functions/admin-users/sanitize-error.test.ts" time="0.000" line="57" col="6">
+        </testcase>
+        <testcase name="sanitizeError: passes through tier-limit messages from enforce_staff_user_limit" classname="./supabase/functions/admin-users/sanitize-error.test.ts" time="0.000" line="78" col="6">
+        </testcase>
+        <testcase name="sanitizeError: passes through tier-limit messages from enforce_site_limit" classname="./supabase/functions/admin-users/sanitize-error.test.ts" time="0.000" line="88" col="6">
+        </testcase>
+        <testcase name="sanitizeError: passes through tier-limit messages from enforce_reservation_type_limit" classname="./supabase/functions/admin-users/sanitize-error.test.ts" time="0.000" line="96" col="6">
+        </testcase>
+        <testcase name="sanitizeError: passes through resource-per-type limit messages" classname="./supabase/functions/admin-users/sanitize-error.test.ts" time="0.000" line="107" col="6">
+        </testcase>
+        <testcase name="sanitizeError: passes through duplicate-tenant-membership messages" classname="./supabase/functions/admin-users/sanitize-error.test.ts" time="0.000" line="116" col="6">
+        </testcase>
+        <testcase name="sanitizeError: replaces unknown / internal Postgres errors with the generic copy" classname="./supabase/functions/admin-users/sanitize-error.test.ts" time="0.000" line="128" col="6">
+        </testcase>
+        <testcase name="sanitizeError: does NOT match tier-like text that lacks the exact prefix" classname="./supabase/functions/admin-users/sanitize-error.test.ts" time="0.000" line="153" col="6">
+        </testcase>
+        <testcase name="sanitizeError: tier message with malformed quotes falls back to generic" classname="./supabase/functions/admin-users/sanitize-error.test.ts" time="0.014" line="170" col="6">
+        </testcase>
+    </testsuite>
+    <testsuite name="./supabase/functions/admin-users/security-headers-integration.test.ts" tests="3" disabled="0" errors="0" failures="0">
+        <testcase name="admin-users: OPTIONS preflight carries SECURITY_HEADERS" classname="./supabase/functions/admin-users/security-headers-integration.test.ts" time="0.003" line="13" col="6">
+        </testcase>
+        <testcase name="admin-users: 403 disallowed-origin carries SECURITY_HEADERS" classname="./supabase/functions/admin-users/security-headers-integration.test.ts" time="0.002" line="24" col="6">
+        </testcase>
+        <testcase name="admin-users: 413 oversize-body carries SECURITY_HEADERS" classname="./supabase/functions/admin-users/security-headers-integration.test.ts" time="0.000" line="43" col="6">
+        </testcase>
+    </testsuite>
+    <testsuite name="./supabase/functions/admin-users/staff-user-limit.test.ts" tests="4" disabled="0" errors="0" failures="0">
+        <testcase name="Basic tier: staff-user-limit error reaches the UI verbatim with HTTP 400" classname="./supabase/functions/admin-users/staff-user-limit.test.ts" time="0.001" line="63" col="6">
+        </testcase>
+        <testcase name="Professional tier: staff-user-limit error (cap of 25) is also forwarded verbatim" classname="./supabase/functions/admin-users/staff-user-limit.test.ts" time="0.000" line="108" col="6">
+        </testcase>
+        <testcase name="Trigger error wrapped in a real Error instance still surfaces verbatim" classname="./supabase/functions/admin-users/staff-user-limit.test.ts" time="0.000" line="127" col="6">
+        </testcase>
+        <testcase name="Negative control: an internal Postgres error during user creation does NOT leak" classname="./supabase/functions/admin-users/staff-user-limit.test.ts" time="0.000" line="144" col="6">
+        </testcase>
+    </testsuite>
+    <testsuite name="./supabase/functions/archive-reservations/security-headers-integration.test.ts" tests="1" disabled="0" errors="0" failures="0">
+        <testcase name="archive-reservations: OPTIONS preflight carries SECURITY_HEADERS" classname="./supabase/functions/archive-reservations/security-headers-integration.test.ts" time="0.003" line="19" col="6">
+        </testcase>
+    </testsuite>
+    <testsuite name="./supabase/functions/auth-email-hook/security-headers-integration.test.ts" tests="5" disabled="0" errors="0" failures="0">
+        <testcase name="auth-email-hook: OPTIONS preflight carries security triad" classname="./supabase/functions/auth-email-hook/security-headers-integration.test.ts" time="0.005" line="15" col="6">
+        </testcase>
+        <testcase name="auth-email-hook: /preview OPTIONS preflight carries security triad" classname="./supabase/functions/auth-email-hook/security-headers-integration.test.ts" time="0.000" line="25" col="6">
+        </testcase>
+        <testcase name="auth-email-hook: 401 missing-auth carries security triad" classname="./supabase/functions/auth-email-hook/security-headers-integration.test.ts" time="0.004" line="35" col="6">
+        </testcase>
+        <testcase name="auth-email-hook: /preview 401 missing-auth carries security triad" classname="./supabase/functions/auth-email-hook/security-headers-integration.test.ts" time="0.001" line="52" col="6">
+        </testcase>
+        <testcase name="auth-email-hook: /preview 400 invalid-JSON carries security triad" classname="./supabase/functions/auth-email-hook/security-headers-integration.test.ts" time="0.001" line="68" col="6">
+        </testcase>
+    </testsuite>
+    <testsuite name="./supabase/functions/cancel-account-deletion/security-headers-integration.test.ts" tests="2" disabled="0" errors="0" failures="0">
+        <testcase name="cancel-account-deletion: OPTIONS preflight carries SECURITY_HEADERS" classname="./supabase/functions/cancel-account-deletion/security-headers-integration.test.ts" time="0.003" line="13" col="6">
+        </testcase>
+        <testcase name="cancel-account-deletion: 401 missing-auth (no token) carries SECURITY_HEADERS" classname="./supabase/functions/cancel-account-deletion/security-headers-integration.test.ts" time="0.001" line="24" col="6">
+        </testcase>
+    </testsuite>
+    <testsuite name="./supabase/functions/check-subscription/security-headers-integration.test.ts" tests="1" disabled="0" errors="0" failures="0">
+        <testcase name="check-subscription: OPTIONS preflight carries SECURITY_HEADERS" classname="./supabase/functions/check-subscription/security-headers-integration.test.ts" time="0.005" line="19" col="6">
+        </testcase>
+    </testsuite>
+    <testsuite name="./supabase/functions/create-checkout/security-headers-integration.test.ts" tests="1" disabled="0" errors="0" failures="0">
+        <testcase name="create-checkout: OPTIONS preflight carries SECURITY_HEADERS" classname="./supabase/functions/create-checkout/security-headers-integration.test.ts" time="0.002" line="19" col="6">
+        </testcase>
+    </testsuite>
+    <testsuite name="./supabase/functions/customer-portal/security-headers-integration.test.ts" tests="1" disabled="0" errors="0" failures="0">
+        <testcase name="customer-portal: OPTIONS preflight carries SECURITY_HEADERS" classname="./supabase/functions/customer-portal/security-headers-integration.test.ts" time="0.002" line="19" col="6">
+        </testcase>
+    </testsuite>
+    <testsuite name="./supabase/functions/daily-ops-digest/security-headers-integration.test.ts" tests="5" disabled="0" errors="0" failures="0">
+        <testcase name="daily-ops-digest: OPTIONS preflight carries SECURITY_HEADERS" classname="./supabase/functions/daily-ops-digest/security-headers-integration.test.ts" time="0.003" line="12" col="6">
+        </testcase>
+        <testcase name="daily-ops-digest: unauthenticated POST is rejected with SECURITY_HEADERS" classname="./supabase/functions/daily-ops-digest/security-headers-integration.test.ts" time="0.002" line="26" col="6">
+        </testcase>
+        <testcase name="daily-ops-digest: local hour follows DST in Helsinki" classname="./supabase/functions/daily-ops-digest/security-headers-integration.test.ts" time="0.020" line="48" col="6">
+        </testcase>
+        <testcase name="daily-ops-digest: unusable timezones fall back to Helsinki" classname="./supabase/functions/daily-ops-digest/security-headers-integration.test.ts" time="0.000" line="57" col="6">
+        </testcase>
+        <testcase name="daily-ops-digest: run sheet date is tomorrow in tenant local time" classname="./supabase/functions/daily-ops-digest/security-headers-integration.test.ts" time="0.000" line="64" col="6">
+        </testcase>
+    </testsuite>
+    <testsuite name="./supabase/functions/export-user-data/security-headers-integration.test.ts" tests="2" disabled="0" errors="0" failures="0">
+        <testcase name="export-user-data: OPTIONS preflight carries SECURITY_HEADERS" classname="./supabase/functions/export-user-data/security-headers-integration.test.ts" time="0.003" line="13" col="6">
+        </testcase>
+        <testcase name="export-user-data: 401 missing-auth carries SECURITY_HEADERS" classname="./supabase/functions/export-user-data/security-headers-integration.test.ts" time="0.001" line="24" col="6">
+        </testcase>
+    </testsuite>
+    <testsuite name="./supabase/functions/forbidden-status/index.test.ts" tests="5" disabled="0" errors="0" failures="0">
+        <testcase name="GET forbidden-status returns HTTP 403 with the JSON denial body" classname="./supabase/functions/forbidden-status/index.test.ts" time="0.192" line="51" col="6">
+        </testcase>
+        <testcase name="GET forbidden-status without ?area= falls back to &apos;this area&apos;" classname="./supabase/functions/forbidden-status/index.test.ts" time="0.134" line="85" col="6">
+        </testcase>
+        <testcase name="POST forbidden-status also returns 403 (method-agnostic denial)" classname="./supabase/functions/forbidden-status/index.test.ts" time="0.123" line="98" col="6">
+        </testcase>
+        <testcase name="OPTIONS preflight returns HTTP 204 with the documented CORS headers" classname="./supabase/functions/forbidden-status/index.test.ts" time="0.134" line="115" col="6">
+        </testcase>
+        <testcase name="Repeated calls always return 403 — no rate-limit or auth bypass" classname="./supabase/functions/forbidden-status/index.test.ts" time="0.511" line="146" col="6">
+        </testcase>
+    </testsuite>
+    <testsuite name="./supabase/functions/forbidden-status/security-headers-integration.test.ts" tests="1" disabled="0" errors="0" failures="0">
+        <testcase name="forbidden-status: OPTIONS preflight carries SECURITY_HEADERS" classname="./supabase/functions/forbidden-status/security-headers-integration.test.ts" time="0.021" line="19" col="6">
+        </testcase>
+    </testsuite>
+    <testsuite name="./supabase/functions/guest-booking-portal/security-headers-integration.test.ts" tests="3" disabled="0" errors="0" failures="0">
+        <testcase name="guest-booking-portal: OPTIONS preflight carries SECURITY_HEADERS" classname="./supabase/functions/guest-booking-portal/security-headers-integration.test.ts" time="0.005" line="12" col="6">
+        </testcase>
+        <testcase name="guest-booking-portal: GET is rejected with SECURITY_HEADERS" classname="./supabase/functions/guest-booking-portal/security-headers-integration.test.ts" time="0.000" line="26" col="6">
+        </testcase>
+        <testcase name="guest-booking-portal: cancel tokens must be opaque and well formed" classname="./supabase/functions/guest-booking-portal/security-headers-integration.test.ts" time="0.000" line="41" col="6">
+        </testcase>
+    </testsuite>
+    <testsuite name="./supabase/functions/ical-feed/security-headers-integration.test.ts" tests="1" disabled="0" errors="0" failures="0">
+        <testcase name="ical-feed: OPTIONS preflight carries SECURITY_HEADERS" classname="./supabase/functions/ical-feed/security-headers-integration.test.ts" time="0.004" line="19" col="6">
+        </testcase>
+    </testsuite>
+    <testsuite name="./supabase/functions/log-forbidden-access/security-headers-integration.test.ts" tests="1" disabled="0" errors="0" failures="0">
+        <testcase name="log-forbidden-access: OPTIONS preflight carries SECURITY_HEADERS" classname="./supabase/functions/log-forbidden-access/security-headers-integration.test.ts" time="0.002" line="19" col="6">
+        </testcase>
+    </testsuite>
+    <testsuite name="./supabase/functions/mfa-recovery/auth-cors-parity.test.ts" tests="5" disabled="0" errors="0" failures="0">
+        <testcase name="mfa-recovery: OPTIONS preflight advertises a usable CORS bag" classname="./supabase/functions/mfa-recovery/auth-cors-parity.test.ts" time="0.005" line="94" col="6">
+        </testcase>
+        <testcase name="mfa-recovery: missing Authorization -&gt; 401 with CORS headers identical to preflight" classname="./supabase/functions/mfa-recovery/auth-cors-parity.test.ts" time="0.004" line="123" col="8">
+        </testcase>
+        <testcase name="mfa-recovery: non-Bearer Authorization -&gt; 401 with CORS headers identical to preflight" classname="./supabase/functions/mfa-recovery/auth-cors-parity.test.ts" time="0.000" line="123" col="8">
+        </testcase>
+        <testcase name="mfa-recovery: Bearer with empty token -&gt; 401 with CORS headers identical to preflight" classname="./supabase/functions/mfa-recovery/auth-cors-parity.test.ts" time="0.000" line="123" col="8">
+        </testcase>
+        <testcase name="mfa-recovery: Bearer with garbage token (not three JWT segments) -&gt; 401 with CORS headers identical to preflight" classname="./supabase/functions/mfa-recovery/auth-cors-parity.test.ts" time="0.109" line="123" col="8">
+        </testcase>
+    </testsuite>
+    <testsuite name="./supabase/functions/mfa-recovery/auth-timeout-empty-env.test.ts" tests="2" disabled="0" errors="0" failures="0">
+        <testcase name="mfa-recovery: empty-string CI secrets -&gt; `||` fallback rehydrates stubs and handler reaches 401 path (not 500)" classname="./supabase/functions/mfa-recovery/auth-timeout-empty-env.test.ts" time="0.004" line="34" col="6">
+        </testcase>
+        <testcase name="_zz_restore_supabase_env_for_subsequent_files" classname="./supabase/functions/mfa-recovery/auth-timeout-empty-env.test.ts" time="0.000" line="86" col="6">
+        </testcase>
+    </testsuite>
+    <testsuite name="./supabase/functions/mfa-recovery/auth-timeout-http.test.ts" tests="2" disabled="0" errors="0" failures="0">
+        <testcase name="mfa-recovery HTTP: empty-string CI secrets -&gt; live server returns fast JSON 401 with request_id echo" classname="./supabase/functions/mfa-recovery/auth-timeout-http.test.ts" time="0.010" line="37" col="6">
+        </testcase>
+        <testcase name="_zz_restore_supabase_env_for_subsequent_files" classname="./supabase/functions/mfa-recovery/auth-timeout-http.test.ts" time="0.000" line="105" col="6">
+        </testcase>
+    </testsuite>
+    <testsuite name="./supabase/functions/mfa-recovery/auth-timeout-malformed-env.test.ts" tests="2" disabled="0" errors="0" failures="0">
+        <testcase name="mfa-recovery: malformed MFA_AUTH_TIMEOUT_MS falls back to default and still returns fast 401 AUTH_TIMEOUT (not 500 SERVER_MISCONFIGURED)" classname="./supabase/functions/mfa-recovery/auth-timeout-malformed-env.test.ts" time="5.011" line="45" col="6">
+        </testcase>
+        <testcase name="_zz_restore_supabase_env_for_subsequent_files" classname="./supabase/functions/mfa-recovery/auth-timeout-malformed-env.test.ts" time="0.000" line="107" col="6">
+        </testcase>
+    </testsuite>
+    <testsuite name="./supabase/functions/mfa-recovery/auth-timeout-mixed-env.test.ts" tests="8" disabled="0" errors="0" failures="0">
+        <testcase name="mfa-recovery: mixed missing-env permutation [SUPABASE_URL=empty, SUPABASE_ANON_KEY=empty, SUPABASE_SERVICE_ROLE_KEY=unset] -&gt; stubs rehydrate and handler returns fast 401" classname="./supabase/functions/mfa-recovery/auth-timeout-mixed-env.test.ts" time="0.004" line="61" col="8">
+        </testcase>
+        <testcase name="mfa-recovery: mixed missing-env permutation [SUPABASE_URL=empty, SUPABASE_ANON_KEY=unset, SUPABASE_SERVICE_ROLE_KEY=empty] -&gt; stubs rehydrate and handler returns fast 401" classname="./supabase/functions/mfa-recovery/auth-timeout-mixed-env.test.ts" time="0.000" line="61" col="8">
+        </testcase>
+        <testcase name="mfa-recovery: mixed missing-env permutation [SUPABASE_URL=empty, SUPABASE_ANON_KEY=unset, SUPABASE_SERVICE_ROLE_KEY=unset] -&gt; stubs rehydrate and handler returns fast 401" classname="./supabase/functions/mfa-recovery/auth-timeout-mixed-env.test.ts" time="0.000" line="61" col="8">
+        </testcase>
+        <testcase name="mfa-recovery: mixed missing-env permutation [SUPABASE_URL=unset, SUPABASE_ANON_KEY=empty, SUPABASE_SERVICE_ROLE_KEY=empty] -&gt; stubs rehydrate and handler returns fast 401" classname="./supabase/functions/mfa-recovery/auth-timeout-mixed-env.test.ts" time="0.000" line="61" col="8">
+        </testcase>
+        <testcase name="mfa-recovery: mixed missing-env permutation [SUPABASE_URL=unset, SUPABASE_ANON_KEY=empty, SUPABASE_SERVICE_ROLE_KEY=unset] -&gt; stubs rehydrate and handler returns fast 401" classname="./supabase/functions/mfa-recovery/auth-timeout-mixed-env.test.ts" time="0.000" line="61" col="8">
+        </testcase>
+        <testcase name="mfa-recovery: mixed missing-env permutation [SUPABASE_URL=unset, SUPABASE_ANON_KEY=unset, SUPABASE_SERVICE_ROLE_KEY=empty] -&gt; stubs rehydrate and handler returns fast 401" classname="./supabase/functions/mfa-recovery/auth-timeout-mixed-env.test.ts" time="0.000" line="61" col="8">
+        </testcase>
+        <testcase name="mfa-recovery: mixed missing-env permutation [SUPABASE_URL=unset, SUPABASE_ANON_KEY=unset, SUPABASE_SERVICE_ROLE_KEY=unset] -&gt; stubs rehydrate and handler returns fast 401" classname="./supabase/functions/mfa-recovery/auth-timeout-mixed-env.test.ts" time="0.000" line="61" col="8">
+        </testcase>
+        <testcase name="_zz_restore_supabase_env_for_subsequent_files" classname="./supabase/functions/mfa-recovery/auth-timeout-mixed-env.test.ts" time="0.001" line="127" col="6">
+        </testcase>
+    </testsuite>
+    <testsuite name="./supabase/functions/mfa-recovery/auth-timeout.test.ts" tests="2" disabled="0" errors="0" failures="0">
+        <testcase name="mfa-recovery: auth.getUser() hang -&gt; fast 401 + auth_getuser_timeout log w/ matching request_id" classname="./supabase/functions/mfa-recovery/auth-timeout.test.ts" time="5.014" line="83" col="6">
+        </testcase>
+        <testcase name="_zz_restore_supabase_env_for_subsequent_files" classname="./supabase/functions/mfa-recovery/auth-timeout.test.ts" time="0.000" line="162" col="6">
+        </testcase>
+    </testsuite>
+    <testsuite name="./supabase/functions/mfa-recovery/log-schema.test.ts" tests="4" disabled="0" errors="0" failures="0">
+        <testcase name="mfa-recovery log schema: OPTIONS preflight" classname="./supabase/functions/mfa-recovery/log-schema.test.ts" time="0.003" line="128" col="6">
+        </testcase>
+        <testcase name="mfa-recovery log schema: missing Authorization yields error_code" classname="./supabase/functions/mfa-recovery/log-schema.test.ts" time="0.001" line="147" col="6">
+        </testcase>
+        <testcase name="mfa-recovery log schema: malformed Bearer yields error_code" classname="./supabase/functions/mfa-recovery/log-schema.test.ts" time="0.000" line="167" col="6">
+        </testcase>
+        <testcase name="mfa-recovery log schema: every captured log line carries a stable request_id" classname="./supabase/functions/mfa-recovery/log-schema.test.ts" time="0.000" line="189" col="6">
+        </testcase>
+    </testsuite>
+    <testsuite name="./supabase/functions/mfa-recovery/request-id-propagation.test.ts" tests="4" disabled="0" errors="0" failures="0">
+        <testcase name="401 (missing auth) carries request_id in header + body" classname="./supabase/functions/mfa-recovery/request-id-propagation.test.ts" time="0.004" line="26" col="6">
+        </testcase>
+        <testcase name="401 (malformed bearer) carries request_id in header + body" classname="./supabase/functions/mfa-recovery/request-id-propagation.test.ts" time="0.000" line="49" col="6">
+        </testcase>
+        <testcase name="inbound x-request-id is echoed on response header and body" classname="./supabase/functions/mfa-recovery/request-id-propagation.test.ts" time="0.000" line="70" col="6">
+        </testcase>
+        <testcase name="OPTIONS preflight echoes x-request-id and exposes it" classname="./supabase/functions/mfa-recovery/request-id-propagation.test.ts" time="0.000" line="91" col="6">
+        </testcase>
+    </testsuite>
+    <testsuite name="./supabase/functions/mfa-recovery/security-headers-integration.test.ts" tests="4" disabled="0" errors="0" failures="0">
+        <testcase name="mfa-recovery: OPTIONS preflight carries SECURITY_HEADERS" classname="./supabase/functions/mfa-recovery/security-headers-integration.test.ts" time="0.005" line="12" col="6">
+        </testcase>
+        <testcase name="mfa-recovery: 413 oversize-body carries SECURITY_HEADERS" classname="./supabase/functions/mfa-recovery/security-headers-integration.test.ts" time="0.004" line="23" col="6">
+        </testcase>
+        <testcase name="mfa-recovery: missing Authorization fast-fails with 401 (not 504)" classname="./supabase/functions/mfa-recovery/security-headers-integration.test.ts" time="0.000" line="68" col="6">
+        </testcase>
+        <testcase name="mfa-recovery: malformed Authorization (no Bearer) fast-fails with 401" classname="./supabase/functions/mfa-recovery/security-headers-integration.test.ts" time="0.000" line="88" col="6">
+        </testcase>
+    </testsuite>
+    <testsuite name="./supabase/functions/migrate-branding-assets/security-headers-integration.test.ts" tests="1" disabled="0" errors="0" failures="0">
+        <testcase name="migrate-branding-assets: OPTIONS preflight carries SECURITY_HEADERS" classname="./supabase/functions/migrate-branding-assets/security-headers-integration.test.ts" time="0.010" line="19" col="6">
+        </testcase>
+    </testsuite>
+    <testsuite name="./supabase/functions/mint-tenant-private-url/security-headers-integration.test.ts" tests="1" disabled="0" errors="0" failures="0">
+        <testcase name="mint-tenant-private-url: OPTIONS preflight carries SECURITY_HEADERS" classname="./supabase/functions/mint-tenant-private-url/security-headers-integration.test.ts" time="0.003" line="19" col="6">
+        </testcase>
+    </testsuite>
+    <testsuite name="./supabase/functions/process-email-queue/security-headers-integration.test.ts" tests="1" disabled="0" errors="0" failures="0">
+        <testcase name="process-email-queue: missing-env 500 carries SECURITY_HEADERS" classname="./supabase/functions/process-email-queue/security-headers-integration.test.ts" time="0.008" line="18" col="6">
+        </testcase>
+    </testsuite>
+    <testsuite name="./supabase/functions/public-booking/create-client-not-called.test.ts" tests="1" disabled="0" errors="0" failures="0">
+        <testcase name="public-booking guard: createClient is NEVER called when SUPABASE_SERVICE_ROLE_KEY is missing" classname="./supabase/functions/public-booking/create-client-not-called.test.ts" time="0.010" line="23" col="6">
+        </testcase>
+    </testsuite>
+    <testsuite name="./supabase/functions/public-booking/cross-booking.test.ts" tests="3" disabled="0" errors="0" failures="0">
+        <testcase name="public-booking: cross-booking persists linked_group_id and returns siblings" classname="./supabase/functions/public-booking/cross-booking.test.ts" time="2.612" line="76" col="6">
+        </testcase>
+        <testcase name="public-booking: rejects malformed linked_group_id" classname="./supabase/functions/public-booking/cross-booking.test.ts" time="0.155" line="215" col="6">
+        </testcase>
+        <testcase name="public-booking: capacity.current_load reflects post-booking load (cross-booking regression)" classname="./supabase/functions/public-booking/cross-booking.test.ts" time="2.409" line="237" col="6">
+        </testcase>
+    </testsuite>
+    <testsuite name="./supabase/functions/public-booking/index.test.ts" tests="7" disabled="1" errors="0" failures="0">
+        <testcase name="public-booking: rejects missing required fields" classname="./supabase/functions/public-booking/index.test.ts" time="0.262" line="127" col="6">
+        </testcase>
+        <testcase name="public-booking: rejects bad email format" classname="./supabase/functions/public-booking/index.test.ts" time="0.151" line="132" col="6">
+        </testcase>
+        <testcase name="public-booking: rejects unknown tenant" classname="./supabase/functions/public-booking/index.test.ts" time="0.342" line="148" col="6">
+        </testcase>
+        <testcase name="public-booking: creates a pending reservation end-to-end" classname="./supabase/functions/public-booking/index.test.ts" time="1.242" line="165" col="6">
+        </testcase>
+        <testcase name="schema: anon role cannot SELECT reservations directly (RLS)" classname="./supabase/functions/public-booking/index.test.ts" time="0.098" line="222" col="6">
+        </testcase>
+        <testcase name="public-booking: no data leak when SUPABASE_SERVICE_ROLE_KEY is missing" classname="./supabase/functions/public-booking/index.test.ts" time="0.000" line="290" col="6">
+            <skipped/>
+        </testcase>
+        <testcase name="public-booking: validation-only request leaves reservations row count unchanged" classname="./supabase/functions/public-booking/index.test.ts" time="0.221" line="333" col="6">
+        </testcase>
+    </testsuite>
+    <testsuite name="./supabase/functions/public-booking/missing-service-key-integration.test.ts" tests="1" disabled="0" errors="0" failures="0">
+        <testcase name="public-booking integration: missing SUPABASE_SERVICE_ROLE_KEY writes ZERO rows to reservations or booking_validation_log" classname="./supabase/functions/public-booking/missing-service-key-integration.test.ts" time="0.244" line="93" col="6">
+        </testcase>
+    </testsuite>
+    <testsuite name="./supabase/functions/public-booking/schema.test.ts" tests="3" disabled="0" errors="0" failures="0">
+        <testcase name="schema: reservations table has all expected dashboard indexes" classname="./supabase/functions/public-booking/schema.test.ts" time="0.104" line="61" col="6">
+        </testcase>
+        <testcase name="schema: dashboard query plan uses idx_reservations_tenant_date for tenant filter + date ordering" classname="./supabase/functions/public-booking/schema.test.ts" time="0.099" line="82" col="6">
+        </testcase>
+        <testcase name="schema: dashboard query stays within row-estimate and execution-time budgets" classname="./supabase/functions/public-booking/schema.test.ts" time="0.169" line="189" col="6">
+        </testcase>
+    </testsuite>
+    <testsuite name="./supabase/functions/public-booking/security-headers-integration.test.ts" tests="6" disabled="0" errors="0" failures="0">
+        <testcase name="security headers: OPTIONS preflight response carries SECURITY_HEADERS" classname="./supabase/functions/public-booking/security-headers-integration.test.ts" time="0.008" line="90" col="6">
+        </testcase>
+        <testcase name="security headers: 400 SERVICE_ROLE_KEY_MISSING response carries SECURITY_HEADERS" classname="./supabase/functions/public-booking/security-headers-integration.test.ts" time="0.001" line="103" col="6">
+        </testcase>
+        <testcase name="security headers: 413 oversize-body response carries SECURITY_HEADERS" classname="./supabase/functions/public-booking/security-headers-integration.test.ts" time="0.002" line="129" col="6">
+        </testcase>
+        <testcase name="security headers: 400 invalid-JSON response carries SECURITY_HEADERS" classname="./supabase/functions/public-booking/security-headers-integration.test.ts" time="0.003" line="154" col="6">
+        </testcase>
+        <testcase name="security headers: 429 rate-limit response carries SECURITY_HEADERS" classname="./supabase/functions/public-booking/security-headers-integration.test.ts" time="0.003" line="179" col="6">
+        </testcase>
+        <testcase name="security headers: 200 success response carries SECURITY_HEADERS" classname="./supabase/functions/public-booking/security-headers-integration.test.ts" time="0.003" line="312" col="6">
+        </testcase>
+    </testsuite>
+    <testsuite name="./supabase/functions/public-booking/service-role-guard.test.ts" tests="5" disabled="0" errors="0" failures="0">
+        <testcase name="assertServiceRoleKey: returns ok=true with trimmed key when present" classname="./supabase/functions/public-booking/service-role-guard.test.ts" time="0.000" line="28" col="6">
+        </testcase>
+        <testcase name="assertServiceRoleKey: rejects undefined env value with 400 + error_code" classname="./supabase/functions/public-booking/service-role-guard.test.ts" time="0.002" line="40" col="6">
+        </testcase>
+        <testcase name="assertServiceRoleKey: rejects empty string with 400" classname="./supabase/functions/public-booking/service-role-guard.test.ts" time="0.000" line="53" col="6">
+        </testcase>
+        <testcase name="assertServiceRoleKey: rejects whitespace-only value with 400" classname="./supabase/functions/public-booking/service-role-guard.test.ts" time="0.000" line="62" col="6">
+        </testcase>
+        <testcase name="assertServiceRoleKey: missing-key response carries CORS + JSON headers so the browser can read the body" classname="./supabase/functions/public-booking/service-role-guard.test.ts" time="0.000" line="74" col="6">
+        </testcase>
+    </testsuite>
+    <testsuite name="./supabase/functions/redeem-access-code/auth-concurrency.test.ts" tests="1" disabled="0" errors="0" failures="0">
+        <testcase name="redeem-access-code: missing Authorization fast-fails 401 under concurrent burst" classname="./supabase/functions/redeem-access-code/auth-concurrency.test.ts" time="0.013" line="46" col="6">
+        </testcase>
+    </testsuite>
+    <testsuite name="./supabase/functions/redeem-access-code/security-headers-integration.test.ts" tests="1" disabled="0" errors="0" failures="0">
+        <testcase name="redeem-access-code: OPTIONS preflight carries SECURITY_HEADERS" classname="./supabase/functions/redeem-access-code/security-headers-integration.test.ts" time="0.007" line="19" col="6">
+        </testcase>
+    </testsuite>
+    <testsuite name="./supabase/functions/report-storage-rejection/security-headers-integration.test.ts" tests="1" disabled="0" errors="0" failures="0">
+        <testcase name="report-storage-rejection: OPTIONS preflight carries SECURITY_HEADERS" classname="./supabase/functions/report-storage-rejection/security-headers-integration.test.ts" time="0.003" line="19" col="6">
+        </testcase>
+    </testsuite>
+    <testsuite name="./supabase/functions/request-account-deletion/security-headers-integration.test.ts" tests="2" disabled="0" errors="0" failures="0">
+        <testcase name="request-account-deletion: OPTIONS preflight carries SECURITY_HEADERS" classname="./supabase/functions/request-account-deletion/security-headers-integration.test.ts" time="0.004" line="13" col="6">
+        </testcase>
+        <testcase name="request-account-deletion: 401 missing-auth carries SECURITY_HEADERS" classname="./supabase/functions/request-account-deletion/security-headers-integration.test.ts" time="0.003" line="24" col="6">
+        </testcase>
+    </testsuite>
+    <testsuite name="./supabase/functions/reschedule-review/security-headers-integration.test.ts" tests="3" disabled="0" errors="0" failures="0">
+        <testcase name="reschedule-review: OPTIONS preflight carries SECURITY_HEADERS" classname="./supabase/functions/reschedule-review/security-headers-integration.test.ts" time="0.005" line="12" col="6">
+        </testcase>
+        <testcase name="reschedule-review: POST without Authorization is rejected" classname="./supabase/functions/reschedule-review/security-headers-integration.test.ts" time="0.002" line="26" col="6">
+        </testcase>
+        <testcase name="reschedule-review: validators reject malformed input" classname="./supabase/functions/reschedule-review/security-headers-integration.test.ts" time="0.000" line="42" col="6">
+        </testcase>
+    </testsuite>
+    <testsuite name="./supabase/functions/resend-confirmation/security-headers-integration.test.ts" tests="1" disabled="0" errors="0" failures="0">
+        <testcase name="resend-confirmation: OPTIONS preflight carries SECURITY_HEADERS" classname="./supabase/functions/resend-confirmation/security-headers-integration.test.ts" time="0.004" line="19" col="6">
+        </testcase>
+    </testsuite>
+    <testsuite name="./supabase/functions/send-auto-reminders/security-headers-integration.test.ts" tests="1" disabled="0" errors="0" failures="0">
+        <testcase name="send-auto-reminders: OPTIONS preflight carries SECURITY_HEADERS" classname="./supabase/functions/send-auto-reminders/security-headers-integration.test.ts" time="0.003" line="19" col="6">
+        </testcase>
+    </testsuite>
+    <testsuite name="./supabase/functions/send-offer-email/security-headers-integration.test.ts" tests="1" disabled="0" errors="0" failures="0">
+        <testcase name="send-offer-email: OPTIONS preflight carries SECURITY_HEADERS" classname="./supabase/functions/send-offer-email/security-headers-integration.test.ts" time="0.006" line="19" col="6">
+        </testcase>
+    </testsuite>
+    <testsuite name="./supabase/functions/send-reminder/security-headers-integration.test.ts" tests="1" disabled="0" errors="0" failures="0">
+        <testcase name="send-reminder: OPTIONS preflight carries SECURITY_HEADERS" classname="./supabase/functions/send-reminder/security-headers-integration.test.ts" time="0.003" line="19" col="6">
+        </testcase>
+    </testsuite>
+    <testsuite name="./supabase/functions/support-chat/security-headers-integration.test.ts" tests="4" disabled="0" errors="0" failures="0">
+        <testcase name="support-chat: OPTIONS preflight carries SECURITY_HEADERS" classname="./supabase/functions/support-chat/security-headers-integration.test.ts" time="0.008" line="12" col="6">
+        </testcase>
+        <testcase name="support-chat: 403 disallowed-origin carries SECURITY_HEADERS" classname="./supabase/functions/support-chat/security-headers-integration.test.ts" time="0.002" line="23" col="6">
+        </testcase>
+        <testcase name="support-chat: 413 oversize-body carries SECURITY_HEADERS" classname="./supabase/functions/support-chat/security-headers-integration.test.ts" time="0.001" line="42" col="6">
+        </testcase>
+        <testcase name="support-chat: 429 rate-limit response carries SECURITY_HEADERS" classname="./supabase/functions/support-chat/security-headers-integration.test.ts" time="0.008" line="62" col="6">
+        </testcase>
+    </testsuite>
+    <testsuite name="./supabase/functions/weekly-ops-report/report.test.ts" tests="4" disabled="0" errors="0" failures="0">
+        <testcase name="summarizeByDay covers every day in the window" classname="./supabase/functions/weekly-ops-report/report.test.ts" time="0.001" line="24" col="6">
+        </testcase>
+        <testcase name="CSV quotes values and neutralises formula injection" classname="./supabase/functions/weekly-ops-report/report.test.ts" time="0.000" line="32" col="6">
+        </testcase>
+        <testcase name="recipients fall back to the business email and drop junk" classname="./supabase/functions/weekly-ops-report/report.test.ts" time="0.000" line="39" col="6">
+        </testcase>
+        <testcase name="weekday setting is clamped" classname="./supabase/functions/weekly-ops-report/report.test.ts" time="0.000" line="44" col="6">
+        </testcase>
+    </testsuite>
+    <testsuite name="./supabase/functions/weekly-ops-report/security-headers-integration.test.ts" tests="2" disabled="0" errors="0" failures="0">
+        <testcase name="weekly-ops-report: OPTIONS preflight carries SECURITY_HEADERS" classname="./supabase/functions/weekly-ops-report/security-headers-integration.test.ts" time="0.007" line="12" col="6">
+        </testcase>
+        <testcase name="weekly-ops-report: unauthenticated POST is rejected with SECURITY_HEADERS" classname="./supabase/functions/weekly-ops-report/security-headers-integration.test.ts" time="0.001" line="26" col="6">
+        </testcase>
+    </testsuite>
+</testsuites>

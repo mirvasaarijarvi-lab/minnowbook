@@ -117,6 +117,20 @@ test.describe("guest self-service flow", () => {
     const { admin, tenantId } = ephemeralTenant;
     const booking = await seedBooking(admin, tenantId, "reschedule");
 
+    // Pre-answer the cookie banner: as an overlay it intercepts clicks on the
+    // portal's action buttons.
+    await page.addInitScript(() => {
+      window.localStorage.setItem("mimmobook-lang", "en");
+      window.localStorage.setItem(
+        "cookie-consent",
+        JSON.stringify({
+          version: 1,
+          categories: { necessary: true, analytics: false, marketing: false },
+          updatedAt: new Date().toISOString(),
+        }),
+      );
+    });
+
     // --- 1. Find booking -----------------------------------------------------
     await page.goto("/find-booking");
     await page.getByLabel(/email/i).fill(booking.guestEmail);

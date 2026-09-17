@@ -187,9 +187,16 @@ if (envCredsComplete) {
 // Service-role path: the fixture auto-provisions the pair, so verify the key
 // is accepted before paying for a full suite run.
 log("Verifying the service role key can provision the test tenants...");
-const probe = await call("/auth/v1/admin/users?page=1&per_page=1", {
-  headers: { apikey: SERVICE, Authorization: `Bearer ${SERVICE}` },
-});
+// Use the same FILTERED lookup the tenant-pair fixture uses. Paging the
+// whole account list can 500 on unrelated legacy rows, so probing it here
+// would report a failure the gate does not actually depend on.
+const probe = await call(
+  "/auth/v1/admin/users?page=1&per_page=5&filter=" +
+    encodeURIComponent("rls-fixture-a@mimmobook.local"),
+  {
+    headers: { apikey: SERVICE, Authorization: `Bearer ${SERVICE}` },
+  },
+);
 if (probe.status !== 200) {
   problem(
     "Service role access denied",

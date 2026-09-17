@@ -159,8 +159,22 @@ const STRING_OPS: FilterOp[] = ["eq", "neq", "in", "like", "ilike", "or", "not"]
 const NUMERIC_OPS: FilterOp[] = ["eq", "neq", "in", "gt", "gte", "lt", "lte", "or", "not"];
 const BOOL_OPS: FilterOp[] = ["eq", "is", "not"];
 const DATE_OPS: FilterOp[] = ["eq", "neq", "gt", "gte", "lt", "lte"];
+/**
+ * uuid columns accept equality-shaped filters only. Postgres has no
+ * `uuid ~~ text` operator, so a LIKE/ILIKE probe fails with 42883 before RLS
+ * is ever consulted — a type error masquerading as a leak, not a real signal.
+ */
+const UUID_OPS: FilterOp[] = ["eq", "neq", "in", "or", "not"];
+const UUID_COLUMNS = new Set([
+  "id",
+  "tenant_id",
+  "access_code_id",
+  "redeemed_by",
+  "discount_code_id",
+]);
 
 function opsFor(column: string): FilterOp[] {
+  if (UUID_COLUMNS.has(column)) return UUID_OPS;
   if (column.includes("_at") || column.includes("until") || column.includes("from")) return DATE_OPS;
   if (column === "is_active" || column === "is_revoked") return BOOL_OPS;
   if (
@@ -175,6 +189,7 @@ function opsFor(column: string): FilterOp[] {
   }
   return STRING_OPS;
 }
+
 
 interface FuzzFilter {
   description: string;
@@ -318,8 +333,15 @@ describe.runIf(liveAvailable)(
           const a = fixture.a!;
           const b = fixture.b!;
           // Try a few "no filter" scans with different orderings — a regression
-          // where RLS was dropped would surface as foreign rows here.
-          const orderings = ["created_at", "id", "tenant_id"];
+          // where RLS was dropped would surface as foreign rows here. Order
+          // only by columns the table really has: access_code_redemptions
+          // timestamps its rows with redeemed_at, not created_at, and ordering
+          // by a missing column fails with 42703 before RLS is consulted.
+          const orderings =
+            table === "discount_codes"
+              ? ["created_at", "id", "tenant_id"]
+              : ["redeemed_at", "id", "tenant_id"];
+
           for (const orderCol of orderings) {
             const { data, error } = await a.client
               .from(table)

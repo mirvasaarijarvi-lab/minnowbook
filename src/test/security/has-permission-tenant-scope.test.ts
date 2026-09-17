@@ -95,7 +95,7 @@ describe.runIf(fixtureLikelyAvailable)(
         .from("booking_validation_log")
         .insert({
           tenant_id: fixture.b.tenantId, // <-- forging the other tenant
-          source: "regression-test",
+          source: "manual_dashboard",
           outcome: "rejected",
           reasons: [{ code: "regression_probe" }],
         });
@@ -113,7 +113,7 @@ describe.runIf(fixtureLikelyAvailable)(
         .from("booking_validation_log")
         .insert({
           tenant_id: fixture.a.tenantId,
-          source: "regression-test",
+          source: "manual_dashboard",
           outcome: "accepted",
           reasons: [{ code: "regression_probe_self" }],
         });

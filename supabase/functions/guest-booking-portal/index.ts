@@ -309,6 +309,48 @@ export async function handleGuestBookingPortalRequest(req: Request): Promise<Res
       return json({ ok: true });
     }
 
+    if (action === "view") {
+      // Guests are unauthenticated and cannot read reservations directly, so the
+      // portal loads its booking through this service-role action.
+      const token = validateToken(body.token);
+
+      const { data: tokenRow } = await admin
+        .from("booking_tokens")
+        .select("reservation_id, tenant_id, is_revoked, expires_at")
+        .eq("token", token)
+        .maybeSingle();
+
+      if (!tokenRow) return json({ ok: false, code: "not_found" });
+      if (tokenRow.is_revoked) return json({ ok: false, code: "revoked" });
+      if (new Date(tokenRow.expires_at) < new Date()) {
+        return json({ ok: false, code: "expired" });
+      }
+
+      const { data: reservation } = await admin
+        .from("reservations")
+        .select(
+          "id, tenant_id, status, reservation_type, date, start_time, end_time, check_out_date, guest_name, guests_count, estimated_guests, price_eur, special_requests, is_invoiced",
+        )
+        .eq("id", tokenRow.reservation_id)
+        .eq("tenant_id", tokenRow.tenant_id)
+        .maybeSingle();
+
+      if (!reservation) return json({ ok: false, code: "not_found" });
+
+      const { data: settings } = await admin
+        .from("tenant_settings")
+        .select("business_name, primary_color, logo_url")
+        .eq("tenant_id", tokenRow.tenant_id)
+        .maybeSingle();
+
+      return json({
+        ok: true,
+        reservation,
+        settings: settings ?? null,
+        token: { expires_at: tokenRow.expires_at, is_revoked: tokenRow.is_revoked },
+      });
+    }
+
     if (action === "reschedule") {
       const token = validateToken(body.token);
       const requestedDate = validateDate(body.requested_date);

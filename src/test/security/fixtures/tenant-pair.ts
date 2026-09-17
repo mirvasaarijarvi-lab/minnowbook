@@ -115,6 +115,38 @@ async function signInAsExistingUser(
 }
 
 /**
+ * Look up a single auth user by email via the admin API's server-side filter.
+ *
+ * Deliberately NOT `auth.admin.listUsers({ perPage: 200 })`: paging the whole
+ * account list makes GoTrue scan every row, and one legacy account with null
+ * token columns makes the endpoint return 500 "Database error finding users".
+ * That took down every live RLS suite even though the fixture only ever needs
+ * two known emails. A filtered lookup touches only the matching rows.
+ */
+async function findUserByEmail(
+  email: string,
+): Promise<{ id: string; email?: string } | null> {
+  const base = SUPABASE_URL!.replace(/\/$/, "");
+  const url =
+    `${base}/auth/v1/admin/users?page=1&per_page=5&filter=` + encodeURIComponent(email);
+  const res = await fetch(url, {
+    headers: {
+      apikey: SUPABASE_SERVICE_ROLE_KEY!,
+      Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+    },
+  });
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(
+      `admin users lookup for ${email} failed: HTTP ${res.status} ${body.slice(0, 200)}`,
+    );
+  }
+  const body = (await res.json()) as { users?: Array<{ id: string; email?: string }> };
+  const users = body.users ?? [];
+  return users.find((u) => u.email?.toLowerCase() === email.toLowerCase()) ?? null;
+}
+
+/**
  * Look up or create an auth user via the admin API. Auto-confirms email so
  * password sign-in works without an email round trip.
  */
@@ -123,23 +155,25 @@ async function ensureUser(
   email: string,
   password: string,
 ): Promise<string> {
-  for (let page = 1; page <= 5; page++) {
-    const { data, error } = await admin.auth.admin.listUsers({ page, perPage: 200 });
-    if (error) throw new Error(`listUsers failed: ${error.message}`);
-    const users = data.users as Array<{ id: string; email?: string }>;
-    const found = users.find((u) => u.email?.toLowerCase() === email.toLowerCase());
-    if (found) return found.id;
-    if (users.length < 200) break;
-  }
+  const existing = await findUserByEmail(email);
+  if (existing) return existing.id;
+
   const { data, error } = await admin.auth.admin.createUser({
     email,
     password,
     email_confirm: true,
   });
-  if (error) throw new Error(`createUser(${email}) failed: ${error.message}`);
+  if (error) {
+    // Lost a race, or the account exists but the filter missed it — re-check
+    // before failing so the fixture stays idempotent.
+    const retry = await findUserByEmail(email);
+    if (retry) return retry.id;
+    throw new Error(`createUser(${email}) failed: ${error.message}`);
+  }
   if (!data.user) throw new Error(`createUser(${email}) returned no user`);
   return data.user.id;
 }
+
 
 /**
  * Look up the user's existing tenant via service role (bypasses RLS) or

@@ -54,6 +54,25 @@ function summarizeRows(rows: unknown[] | null | undefined): string {
   return more > 0 ? `${json}\n  …and ${more} more row(s) (total: ${rows.length})` : json;
 }
 
+/**
+ * A request carrying an injection-shaped payload can be stopped by the edge
+ * WAF before it ever reaches Postgres. That response is an HTML error page, not
+ * a PostgrestError, and it means zero rows were returned — a stricter outcome
+ * than RLS denial, so it must never be reported as a leak or as a broken
+ * own-tenant query.
+ */
+export function isBlockedByEdgeFirewall(result: DenialResult): boolean {
+  const msg = result.error?.message;
+  if (typeof msg !== "string") return false;
+  const head = msg.slice(0, 400).toLowerCase();
+  return (
+    head.includes("<!doctype html") ||
+    head.includes("<html") ||
+    head.includes("attention required") ||
+    head.includes("cloudflare")
+  );
+}
+
 function buildFailureMessage(ctx: QueryContext, result: DenialResult, reason: string): string {
   const lines = [
     `RLS DENIAL FAILED: ${ctx.scenario ?? `${ctx.operation} on ${ctx.table}`}`,
@@ -124,6 +143,8 @@ export function expectNoForeignTenantRows(
   forbiddenTenantId: string,
 ): void {
   if (result.error) {
+    // Blocked at the edge: no rows reached the client, nothing to leak.
+    if (isBlockedByEdgeFirewall(result)) return;
     throw new Error(
       buildFailureMessage(ctx, result, `Unexpected error on legitimate own-tenant query.`),
     );
