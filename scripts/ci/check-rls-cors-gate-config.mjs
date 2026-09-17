@@ -229,6 +229,31 @@ note(`Live Vitest steps: ${liveSteps.length}`);
 const LOGS_DIR = "test-reports/logs";
 const LOGS_ARTIFACT = "rls-cors-gate-logs";
 
+/**
+ * Split a workflow into step blocks, line by line (a nested regex would
+ * backtrack on a long file). A step ends at the next step, or as soon as a
+ * non-empty line is indented less than the step's own `- ` marker — otherwise
+ * the last step of a job absorbs the whole next job.
+ */
+function stepBlocks(text) {
+  const blocks = [];
+  let current = null;
+  let indent = 0;
+  for (const line of text.split("\n")) {
+    const start = /^(\s*)- (name|uses):/.exec(line);
+    if (start) {
+      current = [];
+      indent = start[1].length;
+      blocks.push(current);
+    } else if (current && line.trim() !== "" && line.search(/\S/) <= indent) {
+      current = null;
+    }
+    if (current) current.push(line);
+  }
+  return blocks.map((b) => b.join("\n"));
+}
+
+
 if (!yml.includes("actions/upload-artifact@")) {
   fail(
     "Gate uploads no run logs",
