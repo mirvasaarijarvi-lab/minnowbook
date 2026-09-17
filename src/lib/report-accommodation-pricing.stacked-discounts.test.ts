@@ -62,12 +62,12 @@ describe("stacked discounts on multi-night stays", () => {
 
     // Promo code -20%, then a 50 EUR coupon, then -5% loyalty.
     const charged = applyStack(list, [{ pct: 0.2 }, { minus: 50 }, { pct: 0.05 }]);
-    expect(charged).toBe(405.44);
+    expect(charged).toBe(405.46);
 
     const a = expectBalanced(stay({ price_eur: charged }), "20% + 50 EUR + 5%");
-    expect(a.charged).toBe(405.44);
+    expect(a.charged).toBe(405.46);
     expect(a.breakfast).toBe(116); // stored rate x guests x nights
-    expect(a.room).toBe(289.44);
+    expect(a.room).toBe(289.46);
 
     // None of the intermediate figures (476.80, 426.80) appear anywhere.
     const csv = csvPriceCells(stay({ price_eur: charged }), { breakfast: "Breakfast" });
@@ -79,7 +79,7 @@ describe("stacked discounts on multi-night stays", () => {
     }
     const split = parseCsvSplitCell(csv.total);
     expect(split).not.toBeNull();
-    expect(roundCents(split!.room + split!.breakfast)).toBe(405.44);
+    expect(roundCents(split!.room + split!.breakfast)).toBe(405.46);
   });
 
   it("stays balanced when a stack discounts a stay below its breakfast value", () => {
