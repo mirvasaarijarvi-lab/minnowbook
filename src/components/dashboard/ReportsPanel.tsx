@@ -40,6 +40,12 @@ import { escapeHtml } from "@/lib/html-escape";
 import DashboardTooltip from "./DashboardTooltip";
 import { downloadReportPdf } from "@/lib/reportsPdf";
 import { useAnalyticsT } from "@/i18n/analytics";
+import {
+  isAccommodationRow,
+  calcNights as calcNightsFor,
+  calcBreakfastPrice as calcBreakfastPriceFor,
+  calcRoomPrice as calcRoomPriceFor,
+} from "@/lib/report-accommodation-pricing";
 
 /** Bar colours for the PDF chart, mirroring the on-screen series order. */
 const PDF_SERIES_COLORS: [number, number, number][] = [[37, 99, 235], [217, 119, 6], [148, 163, 184], [16, 185, 129]];
