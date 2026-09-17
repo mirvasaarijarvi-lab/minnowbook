@@ -122,17 +122,11 @@ describe.runIf(canRun)("custom role definition hierarchy guard", () => {
     }
 
     // A staff user in the main tenant, used for the end-to-end assignment check.
-    const email = `ci-roleguard+${stamp}-${rand}@example.invalid`;
-    const { data: created, error: createErr } = await service.auth.admin.createUser({
-      email,
-      password: `Pw!${rand}${stamp}${rand}`,
-      email_confirm: true,
-    });
-    if (createErr || !created?.user) throw createErr ?? new Error("auth user creation failed");
+    const staffUserId = await makeAuthUser("staff");
 
     const { error: memberErr } = await service.from("tenant_users").insert({
       tenant_id: tenantId,
-      user_id: created.user.id,
+      user_id: staffUserId,
       role: "staff",
       is_approved: true,
       display_name: "CI RoleGuard Staff",
@@ -144,7 +138,8 @@ describe.runIf(canRun)("custom role definition hierarchy guard", () => {
       otherTenantId,
       safeKey,
       boundaryKey,
-      staffUserId: created.user.id,
+      staffUserId,
+      ownerUserId,
       otherTenantKey,
     };
   }, 90_000);
