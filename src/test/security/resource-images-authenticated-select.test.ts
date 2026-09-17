@@ -87,7 +87,7 @@ describe.runIf(canRun)(
         .insert({
           name: `CI Resource-Images-Auth ${stamp}`,
           slug,
-          tier: "basic",
+          tier: "business",
           subscription_status: "trialing",
           is_active: true,
           owner_user_id: created.user.id,
