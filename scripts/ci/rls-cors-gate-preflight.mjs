@@ -138,6 +138,14 @@ const envCredsComplete = tenantConfigured.every(Boolean);
 
 if (!envCredsComplete && !SERVICE) {
   log("");
+  // On protected branches an offline-only gate is a hole, not a skip.
+  if (env.RLS_GATE_REQUIRE_LIVE === "1" || env.RLS_GATE_REQUIRE_LIVE === "true") {
+    problem(
+      "RLS/CORS gate requires live coverage here",
+      "RLS_GATE_REQUIRE_LIVE is set, but no tenant credentials (RLS_TEST_TENANT_A/B_*) and no SUPABASE_SERVICE_ROLE_KEY are configured, so no cross-tenant isolation would be asserted.",
+    );
+    finish(1, "denied");
+  }
   console.log(
     "::warning title=RLS/CORS gate running offline only::No tenant credentials configured (RLS_TEST_TENANT_A/B_* or SUPABASE_SERVICE_ROLE_KEY), so the live RLS suites will skip. Only the offline CORS checks gate this run.",
   );
