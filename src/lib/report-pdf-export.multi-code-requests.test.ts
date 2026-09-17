@@ -266,7 +266,10 @@ describe("period report PDF after multi-code discount requests", () => {
       });
 
       expect(priced).toBeGreaterThan(5);
-      expect(placeholders).toBe(1);
+      // Exactly the rows without a finalized amount print dashes.
+      expect(placeholders).toBe(
+        CASES.filter((c) => !reportAmounts(c.row).hasAmount).length,
+      );
       expect(cappedBreakfast).toBeGreaterThan(0);
 
       const grandTotal = sumReportAmounts(CASES.map((c) => c.row)).charged;
