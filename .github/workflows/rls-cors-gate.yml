@@ -81,6 +81,13 @@ jobs:
       # themselves and the gate reports success while asserting nothing.
       # Prints which inputs are present (never their values) and the exact
       # API refusal reason when access is denied.
+      # Every gate step below tees its output into test-reports/logs so the
+      # whole run can be downloaded as one artifact. Reading a failure from a
+      # 30-minute live suite in the browser log viewer is slow and truncates;
+      # the artifact keeps the full text of each step in a separate file.
+      - name: Prepare log directory
+        run: mkdir -p test-reports/logs test-reports/vitest
+
       - name: Preflight tenant access
         id: preflight
         env:
