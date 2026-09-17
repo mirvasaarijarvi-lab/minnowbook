@@ -28,8 +28,23 @@ permissions:
   contents: read
 
 jobs:
+  # Static, secret-free, network-free check that the gate below is still wired
+  # to everything it claims to protect (jobs, secrets, preflight step, required
+  # RLS/CORS test files). Runs in milliseconds and fails with one actionable
+  # error per problem, so a mis-wired gate never reports a hollow success.
+  gate-config:
+    name: RLS/CORS gate configuration
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - name: Validate gate configuration
+        run: node scripts/ci/check-rls-cors-gate-config.mjs
+
   rls-cors-tests:
     name: RLS + CORS regression tests
+    needs: [gate-config]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -233,11 +248,12 @@ jobs:
 
   gate-summary:
     name: RLS/CORS gate summary
-    needs: [rls-cors-tests, rls-advisor-gate]
+    needs: [gate-config, rls-cors-tests, rls-advisor-gate]
     if: always()
     runs-on: ubuntu-latest
     steps:
       - run: |
+          config='${{ needs.gate-config.result }}'
           tests='${{ needs.rls-cors-tests.result }}'
           advisor='${{ needs.rls-advisor-gate.result }}'
           {
@@ -245,13 +261,20 @@ jobs:
             echo ""
             echo "| check | result |"
             echo "|---|---|"
+            echo "| Gate configuration | ${config} |"
             echo "| RLS + CORS regression tests | ${tests} |"
             echo "| Supabase RLS advisor gate | ${advisor} |"
             echo ""
           } >> "$GITHUB_STEP_SUMMARY"
+          echo "gate-config:       ${config}"
           echo "rls-cors-tests:    ${tests}"
           echo "rls-advisor-gate:  ${advisor}"
           failed=0
+          if [ "$config" != "success" ]; then
+            echo "::error title=RLS/CORS gate configuration ${config}::A required gate setting is missing or misconfigured. Open the 'RLS/CORS gate configuration' job for the exact list."
+            echo "- Gate configuration: ${config}" >> "$GITHUB_STEP_SUMMARY"
+            failed=1
+          fi
           if [ "$tests" != "success" ]; then
             echo "::error title=RLS/CORS regression tests ${tests}::Either tenant access was denied (see the preflight step) or an RLS/CORS regression test failed. Open the 'RLS + CORS regression tests' job."
             echo "- RLS + CORS regression tests: ${tests}" >> "$GITHUB_STEP_SUMMARY"

@@ -83,10 +83,69 @@ if (!URL_ || !ANON) {
   finish(1, "denied");
 }
 
-const envCredsComplete = TENANTS.every((t) => t.email && t.password && t.tenantId);
+// Shape checks: catch a misconfigured value before spending a network round
+// trip that would fail with an opaque 401 or DNS error deep in the logs.
+if (!/^https:\/\/[^\s/]+$/.test(URL_.replace(/\/$/, ""))) {
+  problem(
+    "VITE_SUPABASE_URL is misconfigured",
+    "It must be a bare https origin such as https://<project-ref>.supabase.co, with no path, query or trailing spaces.",
+  );
+  finish(1, "denied");
+}
+if (ANON.split(".").length !== 3) {
+  problem(
+    "VITE_SUPABASE_PUBLISHABLE_KEY is misconfigured",
+    "The value is not a JWT (expected three dot-separated segments). A truncated or wrapped secret makes every live suite fail with 401.",
+  );
+  finish(1, "denied");
+}
+if (SERVICE && SERVICE === ANON) {
+  problem(
+    "SUPABASE_SERVICE_ROLE_KEY and the publishable key are identical",
+    "The gate would provision its fixtures with an anon key and every live suite would fail. Re-set the service role secret to the correct value.",
+  );
+  finish(1, "denied");
+}
+
+// A half-configured tenant is a misconfiguration, not a documented skip:
+// silently falling back would run the gate with less coverage than intended.
+for (const t of TENANTS) {
+  const parts = [
+    ["EMAIL", t.email],
+    ["PASSWORD", t.password],
+    ["ID", t.tenantId],
+  ];
+  const missing = parts.filter(([, v]) => !v).map(([n]) => `RLS_TEST_TENANT_${t.letter}_${n}`);
+  if (missing.length > 0 && missing.length < parts.length) {
+    problem(
+      `Tenant ${t.letter} credentials are incomplete`,
+      `Missing ${missing.join(", ")} while the other tenant ${t.letter} inputs are set. Configure all three, or remove all three to run the gate offline on purpose.`,
+    );
+    finish(1, "denied");
+  }
+}
+
+const tenantConfigured = TENANTS.map((t) => Boolean(t.email && t.password && t.tenantId));
+if (tenantConfigured[0] !== tenantConfigured[1]) {
+  problem(
+    "Only one test tenant is configured",
+    "Cross-tenant isolation needs both tenant A and tenant B. Configure the missing tenant's EMAIL, PASSWORD and ID.",
+  );
+  finish(1, "denied");
+}
+
+const envCredsComplete = tenantConfigured.every(Boolean);
 
 if (!envCredsComplete && !SERVICE) {
   log("");
+  // On protected branches an offline-only gate is a hole, not a skip.
+  if (env.RLS_GATE_REQUIRE_LIVE === "1" || env.RLS_GATE_REQUIRE_LIVE === "true") {
+    problem(
+      "RLS/CORS gate requires live coverage here",
+      "RLS_GATE_REQUIRE_LIVE is set, but no tenant credentials (RLS_TEST_TENANT_A/B_*) and no SUPABASE_SERVICE_ROLE_KEY are configured, so no cross-tenant isolation would be asserted.",
+    );
+    finish(1, "denied");
+  }
   console.log(
     "::warning title=RLS/CORS gate running offline only::No tenant credentials configured (RLS_TEST_TENANT_A/B_* or SUPABASE_SERVICE_ROLE_KEY), so the live RLS suites will skip. Only the offline CORS checks gate this run.",
   );
