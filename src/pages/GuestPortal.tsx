@@ -14,7 +14,8 @@ import { format } from "date-fns";
 import Logo from "@/components/Logo";
 import SEOHead from "@/components/SEOHead";
 import { toast } from "sonner";
-import { useT } from "@/contexts/I18nContext";
+import { useT, useTDynamic } from "@/contexts/I18nContext";
+import { useInvoiceRefusalMessage } from "@/hooks/useInvoiceRefusalMessage";
 
 const typeIcons: Record<string, React.ElementType> = {
   restaurant: UtensilsCrossed,
@@ -26,6 +27,9 @@ const typeIcons: Record<string, React.ElementType> = {
 const GuestPortal = () => {
   const { token } = useParams<{ token: string }>();
   const t = useT();
+  const tDynamic = useTDynamic();
+  const formatInvoiceRefusal = useInvoiceRefusalMessage();
+  const guestInvoicedNotice = tDynamic("invoiceRefusal.guestNotice");
   const [cancelOpen, setCancelOpen] = useState(false);
   const [newDate, setNewDate] = useState("");
   const [newTime, setNewTime] = useState("");
