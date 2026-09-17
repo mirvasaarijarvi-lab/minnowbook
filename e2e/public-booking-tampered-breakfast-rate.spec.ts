@@ -37,6 +37,11 @@ const EXPECTED_TOTAL = roundCents(
   NIGHTLY_EUR * NIGHTS + RESOURCE_BREAKFAST_EUR * GUESTS * NIGHTS,
 ); // 289.50 + 165.00 = 454.50
 const NO_BREAKFAST_TOTAL = roundCents(NIGHTLY_EUR * NIGHTS); // 289.50
+/** Fallback rate the server uses when a resource has no rate configured. */
+const FALLBACK_BREAKFAST_EUR = 15;
+const FALLBACK_TOTAL = roundCents(
+  NIGHTLY_EUR * NIGHTS + FALLBACK_BREAKFAST_EUR * GUESTS * NIGHTS,
+); // 289.50 + 180.00 = 469.50
 
 /** Breakfast/pricing figures a tampered client might append to a request. */
 const TAMPERED_TOTALS = {
