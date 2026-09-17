@@ -757,6 +757,13 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
       insertData.check_out_date = check_out_date;
       insertData.room_type = room_type;
       insertData.breakfast_included = breakfast_included;
+      // Persist the breakfast rate actually used in the calculation (from the
+      // resource, never the request body) so reports can split the stored
+      // total into room and breakfast lines without guessing a default.
+      if (breakfast_included && pricingResource?.breakfast_price_per_person != null) {
+        const bf = Number(pricingResource.breakfast_price_per_person);
+        if (isFinite(bf) && bf >= 0) insertData.breakfast_price_per_person = bf;
+      }
     }
     if (isVenue) {
       insertData.event_type = event_type;
