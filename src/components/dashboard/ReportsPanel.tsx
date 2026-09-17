@@ -46,6 +46,7 @@ import {
   isAccommodationRow,
   calcNights as calcNightsFor,
 } from "@/lib/report-pricing-accessor";
+import { csvPriceCells, printPriceCells } from "@/lib/report-export-cells";
 
 /** Bar colours for the PDF chart, mirroring the on-screen series order. */
 const PDF_SERIES_COLORS: [number, number, number][] = [[37, 99, 235], [217, 119, 6], [148, 163, 184], [16, 185, 129]];
@@ -386,20 +387,9 @@ const ReportsPanel = () => {
   const handleExportCSV = () => {
     const headers = [t("common.date"), t("reports.guest"), t("common.type"), t("common.guests"), t("common.status"), t("reports.used"), t("reports.breakfast"), t("reports.invoiced"), `${t("common.price")} (EUR)`, `${t("reports.totalPrice")} (EUR)`, t("reports.notes")];
     const rows = reservations.map((r) => {
-      const bfPrice = calcBreakfastPrice(r);
-      const roomPrice = calcRoomPrice(r);
-      const total = effectivePrice(r);
-      let priceStr: string;
-      let totalStr: string;
-      if (isAccommodation(r)) {
-        priceStr = roomPrice.toFixed(2);
-        totalStr = bfPrice > 0
-          ? `${roomPrice.toFixed(2)} + ${t("reports.breakfast")}: ${bfPrice.toFixed(2)} = ${total.toFixed(2)}`
-          : total.toFixed(2);
-      } else {
-        priceStr = total > 0 ? total.toFixed(2) : "-";
-        totalStr = total > 0 ? total.toFixed(2) : "-";
-      }
+      const { price: priceStr, total: totalStr } = csvPriceCells(r, {
+        breakfast: t("reports.breakfast"),
+      });
       return [
         format(new Date(r.date + "T00:00:00"), "d.M.yyyy"),
         r.guest_name,
@@ -563,16 +553,11 @@ const ReportsPanel = () => {
     const fmtEur = (v: number) => v.toLocaleString("fi-FI", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
 
     const tableRows = reservations.map((r) => {
-      const total = effectivePrice(r);
-      const bfPrice = calcBreakfastPrice(r);
-      const roomPrice = calcRoomPrice(r);
-      const priceCell = isAccommodation(r) ? fmtEur(roomPrice) : (total > 0 ? fmtEur(total) : "—");
-      let totalCell: string;
-      if (isAccommodation(r) && bfPrice > 0 && total > 0) {
-        totalCell = `<span style="white-space:nowrap">${fmtEur(roomPrice)}</span><br><span style="font-size:0.7rem;color:#666">+ ${t("reports.breakfast")}: ${fmtEur(bfPrice)}</span><br><strong>${fmtEur(total)}</strong>`;
-      } else {
-        totalCell = total > 0 ? fmtEur(total) : "—";
-      }
+      const { price: priceCell, total: totalCell } = printPriceCells(
+        r,
+        { breakfast: t("reports.breakfast") },
+        fmtEur,
+      );
       return `<tr>
         <td>${esc(format(new Date(r.date + "T00:00:00"), "d.M.yyyy"))}</td>
         <td>${esc(r.guest_name)}</td>
