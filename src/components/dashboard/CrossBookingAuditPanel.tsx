@@ -36,6 +36,8 @@ interface Cluster {
   key: string;
   guest: string;
   dateLabel: string;
+  /** ISO date used for chronological ordering (localized labels sort wrong). */
+  sortDate: string;
   types: string[];
   count: number;
   linked: boolean;
