@@ -681,6 +681,13 @@ type TranslationKeys = {
   "notifications.invoiced": string;
   "dashboard.used": string;
   "dashboard.invoiced": string;
+  "invoiceRefusal.NO_PRICE": string;
+  "invoiceRefusal.AMOUNT_MISMATCH": string;
+  "invoiceRefusal.INVOICED_LOCKED": string;
+  "invoiceRefusal.NOT_PERMITTED": string;
+  "invoiceRefusal.UNKNOWN": string;
+  "invoiceRefusal.serverReasonLabel": string;
+  "invoiceRefusal.guestNotice": string;
   "dashboard.downloadInvoice": string;
   "dashboard.markLinkedUsed": string;
   "dashboard.markLinkedUsedMsg": string;
@@ -2665,6 +2672,13 @@ const en: TranslationKeys = {
   "notifications.invoiced": "Reservation marked as invoiced",
   "dashboard.used": "Used",
   "dashboard.invoiced": "Invoiced",
+  "invoiceRefusal.NO_PRICE": "This booking has no price yet, so it cannot be marked as invoiced. Add the price first.",
+  "invoiceRefusal.AMOUNT_MISMATCH": "The amount does not match the recalculated room and breakfast totals. Correct the price, then try again.",
+  "invoiceRefusal.INVOICED_LOCKED": "This booking is already invoiced, so the change would leave its totals inconsistent.",
+  "invoiceRefusal.NOT_PERMITTED": "Your account is not allowed to change the invoiced status of this booking.",
+  "invoiceRefusal.UNKNOWN": "The invoiced status could not be updated.",
+  "invoiceRefusal.serverReasonLabel": "Reason:",
+  "invoiceRefusal.guestNotice": "This booking has already been invoiced, so it can no longer be changed here. Please contact us directly.",
   "dashboard.downloadInvoice": "Download invoice",
   "dashboard.markLinkedUsed": "Mark linked reservations used?",
   "dashboard.markLinkedUsedMsg": "This reservation is linked to an offer with other reservations. Would you like to mark them all as used?",
@@ -4629,6 +4643,13 @@ const fi: TranslationKeys = {
   "notifications.invoiced": "Varaus merkitty laskutetuksi",
   "dashboard.used": "Käytetty",
   "dashboard.invoiced": "Laskutettu",
+  "invoiceRefusal.NO_PRICE": "Varauksella ei ole vielä hintaa, joten sitä ei voi merkitä laskutetuksi. Lisää hinta ensin.",
+  "invoiceRefusal.AMOUNT_MISMATCH": "Summa ei vastaa uudelleen laskettuja huone- ja aamiaissummia. Korjaa hinta ja yritä uudelleen.",
+  "invoiceRefusal.INVOICED_LOCKED": "Varaus on jo laskutettu, joten muutos jättäisi summat ristiriitaisiksi.",
+  "invoiceRefusal.NOT_PERMITTED": "Tunnuksellasi ei ole oikeutta muuttaa tämän varauksen laskutustilaa.",
+  "invoiceRefusal.UNKNOWN": "Laskutustilaa ei voitu päivittää.",
+  "invoiceRefusal.serverReasonLabel": "Syy:",
+  "invoiceRefusal.guestNotice": "Varaus on jo laskutettu, joten sitä ei voi enää muuttaa täällä. Ota yhteyttä meihin suoraan.",
   "dashboard.downloadInvoice": "Lataa lasku",
   "dashboard.markLinkedUsed": "Merkitäänkö linkitetyt varaukset käytetyiksi?",
   "dashboard.markLinkedUsedMsg": "Tämä varaus on linkitetty tarjoukseen, jossa on muita varauksia. Haluatko merkitä ne kaikki käytetyiksi?",
@@ -6592,6 +6613,13 @@ const sv: TranslationKeys = {
   "notifications.invoiced": "Bokning markerad som fakturerad",
   "dashboard.used": "Använd",
   "dashboard.invoiced": "Fakturerad",
+  "invoiceRefusal.NO_PRICE": "Bokningen har inget pris än, så den kan inte markeras som fakturerad. Lägg till priset först.",
+  "invoiceRefusal.AMOUNT_MISMATCH": "Beloppet stämmer inte med de omräknade rums- och frukostsummorna. Korrigera priset och försök igen.",
+  "invoiceRefusal.INVOICED_LOCKED": "Bokningen är redan fakturerad, så ändringen skulle göra summorna motstridiga.",
+  "invoiceRefusal.NOT_PERMITTED": "Ditt konto får inte ändra fakturastatus för den här bokningen.",
+  "invoiceRefusal.UNKNOWN": "Fakturastatusen kunde inte uppdateras.",
+  "invoiceRefusal.serverReasonLabel": "Orsak:",
+  "invoiceRefusal.guestNotice": "Bokningen är redan fakturerad och kan inte längre ändras här. Kontakta oss direkt.",
   "dashboard.downloadInvoice": "Ladda ner faktura",
   "dashboard.markLinkedUsed": "Markera länkade bokningar som använda?",
   "dashboard.markLinkedUsedMsg": "Denna bokning är länkad till ett erbjudande med andra bokningar. Vill du markera alla som använda?",

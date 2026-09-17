@@ -92,7 +92,7 @@ const extractServerReason = (raw: string): string | null => {
   // Strip severity and code prefixes such as "ERROR: " or "P0001: ".
   text = text.replace(/^(error|fatal|warning)\s*:\s*/i, "").replace(/^[A-Z0-9]{5}\s*:\s*/, "");
   // Some clients prefix the trigger message with the failing statement.
-  const marker = text.match(/(add a price[^]*|invoice amount must match[^]*)/i);
+  const marker = text.match(/(add a price.*|invoice amount must match.*)/i);
   if (marker) text = marker[1].trim();
   text = text.trim();
   if (text.length < 8 || text.length > 240) return null;
