@@ -251,14 +251,7 @@ if (!yml.includes("actions/upload-artifact@")) {
   // the artifact exists.
   // Split into step blocks by line, so a long workflow cannot make a nested
   // regex backtrack.
-  const stepBlocks = [];
-  for (const line of yml.split("\n")) {
-    if (/^\s*- (name|uses):/.test(line)) stepBlocks.push([]);
-    if (stepBlocks.length > 0) stepBlocks[stepBlocks.length - 1].push(line);
-  }
-  const uploadBlocks = stepBlocks
-    .map((b) => b.join("\n"))
-    .filter((b) => b.includes("actions/upload-artifact@"));
+  const uploadBlocks = stepBlocks(yml).filter((b) => b.includes("actions/upload-artifact@"));
   for (const block of uploadBlocks) {
     if (!/if:\s*always\(\)/.test(block)) {
       fail(
