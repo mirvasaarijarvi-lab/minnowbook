@@ -292,21 +292,21 @@ const ReportsPanel = () => {
     }
   }, [period, start, end, dateLocale]);
 
-  // Shared, unit-tested accommodation revenue split (see
-  // src/lib/report-accommodation-pricing.ts): room + breakfast always equals
-  // the stored total the guest is charged.
+  // Every money figure on every report surface (screen table, CSV, print view,
+  // PDF export, KPI cards, period totals) comes from the single accessor in
+  // src/lib/report-pricing-accessor.ts. Nothing here does its own arithmetic on
+  // price_eur: room + breakfast always equals the amount the guest is charged.
+  const amountsOf = useCallback((r: ReservationRow) => reportAmounts(r), []);
+
   const calcNights = useCallback((r: ReservationRow) => calcNightsFor(r), []);
 
   const isAccommodation = useCallback((r: ReservationRow) => isAccommodationRow(r), []);
 
-  const calcBreakfastPrice = useCallback((r: ReservationRow) => calcBreakfastPriceFor(r), []);
+  const calcBreakfastPrice = useCallback((r: ReservationRow) => amountsOf(r).breakfast, [amountsOf]);
 
-  const calcRoomPrice = useCallback((r: ReservationRow) => calcRoomPriceFor(r), []);
+  const calcRoomPrice = useCallback((r: ReservationRow) => amountsOf(r).room, [amountsOf]);
 
-  // Single source for the amount every report surface shows (screen, CSV, print
-  // view, PDF export, grand total). Cents-exact, so room + breakfast always
-  // equals it. Restaurant "according to menu" has no fixed price.
-  const effectivePrice = useCallback((r: ReservationRow) => effectiveChargedTotalFor(r), []);
+  const effectivePrice = useCallback((r: ReservationRow) => amountsOf(r).charged, [amountsOf]);
 
 
   const stats = useMemo(() => {
