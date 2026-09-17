@@ -217,6 +217,13 @@ jobs:
 
           count=$(echo "$rls" | jq 'length')
           echo "$rls" | jq -r '.[] | "::error title=Supabase RLS advisor (\(.level))::\(.name) — \(.description)"'
+          {
+            echo "### Supabase RLS advisor"
+            echo ""
+            echo "RLS-class findings: ${count}"
+            echo ""
+            echo "$rls" | jq -r '.[] | "- **\(.level)** \(.name): \(.description)"'
+          } >> "$GITHUB_STEP_SUMMARY"
 
           if [ "$count" -gt 0 ]; then
             echo "❌ $count RLS-class Supabase finding(s). Fix before merging."
@@ -231,11 +238,32 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: |
-          echo "rls-cors-tests:    ${{ needs.rls-cors-tests.result }}"
-          echo "rls-advisor-gate:  ${{ needs.rls-advisor-gate.result }}"
-          if [ "${{ needs.rls-cors-tests.result }}" != "success" ] \
-             || [ "${{ needs.rls-advisor-gate.result }}" != "success" ]; then
-            echo "::error::RLS/CORS gate failed. See job logs above."
+          tests='${{ needs.rls-cors-tests.result }}'
+          advisor='${{ needs.rls-advisor-gate.result }}'
+          {
+            echo "### RLS/CORS gate result"
+            echo ""
+            echo "| check | result |"
+            echo "|---|---|"
+            echo "| RLS + CORS regression tests | ${tests} |"
+            echo "| Supabase RLS advisor gate | ${advisor} |"
+            echo ""
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "rls-cors-tests:    ${tests}"
+          echo "rls-advisor-gate:  ${advisor}"
+          failed=0
+          if [ "$tests" != "success" ]; then
+            echo "::error title=RLS/CORS regression tests ${tests}::Either tenant access was denied (see the preflight step) or an RLS/CORS regression test failed. Open the 'RLS + CORS regression tests' job."
+            echo "- RLS + CORS regression tests: ${tests}" >> "$GITHUB_STEP_SUMMARY"
+            failed=1
+          fi
+          if [ "$advisor" != "success" ]; then
+            echo "::error title=Supabase RLS advisor gate ${advisor}::A policy-class advisor finding is open. Open the 'Supabase RLS advisor gate' job."
+            echo "- Supabase RLS advisor gate: ${advisor}" >> "$GITHUB_STEP_SUMMARY"
+            failed=1
+          fi
+          if [ "$failed" -ne 0 ]; then
             exit 1
           fi
+
           echo "✅ RLS/CORS gate passed."
