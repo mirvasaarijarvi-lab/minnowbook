@@ -198,6 +198,7 @@ describe.runIf(canRun)(
       await service.from("tenants").delete().eq("id", seeded.tenantId);
       await service.auth.admin.deleteUser(seeded.memberUserId).catch(() => {});
       await service.auth.admin.deleteUser(seeded.outsiderUserId).catch(() => {});
+      await service.auth.admin.deleteUser(seeded.ownerUserId).catch(() => {});
     }, 90_000);
 
     it("a tenant member sees the hidden (inactive + pending) image", async () => {
