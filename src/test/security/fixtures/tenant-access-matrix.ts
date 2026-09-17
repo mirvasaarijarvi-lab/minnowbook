@@ -53,18 +53,27 @@ function membershipReasons(
 export function evaluateTenantAccess(record: TenantGuardRecord): TenantAccessEvaluation {
   const reasons: string[] = [];
 
+  // Guard records arrive from a JSON side-channel written by worker
+  // processes, so a value can be any JSON type (or absent). Anything that is
+  // not a non-empty string is treated as missing/malformed rather than
+  // trusted, and never dereferenced as a string.
+  const idA = typeof record.tenantA === "string" ? record.tenantA : undefined;
+  const idB = typeof record.tenantB === "string" ? record.tenantB : undefined;
+
   if (record.failure) reasons.push("guard_failure");
-  if (!record.tenantA) reasons.push("missing_tenant_a");
-  else if (!UUID_RE.test(record.tenantA)) reasons.push("malformed_tenant_a");
-  if (!record.tenantB) reasons.push("missing_tenant_b");
-  else if (!UUID_RE.test(record.tenantB)) reasons.push("malformed_tenant_b");
+  if (!idA) {
+    reasons.push(record.tenantA == null ? "missing_tenant_a" : "malformed_tenant_a");
+  } else if (!UUID_RE.test(idA.trim())) reasons.push("malformed_tenant_a");
+  if (!idB) {
+    reasons.push(record.tenantB == null ? "missing_tenant_b" : "malformed_tenant_b");
+  } else if (!UUID_RE.test(idB.trim())) reasons.push("malformed_tenant_b");
   if (
-    record.tenantA &&
-    record.tenantB &&
+    idA &&
+    idB &&
     // UUIDs are case-insensitive (RFC 4122) and env values can carry stray
     // whitespace, so compare normalized: "AAAA…" and "aaaa… " are the SAME
     // tenant and must never be treated as a cross-tenant pair.
-    record.tenantA.trim().toLowerCase() === record.tenantB.trim().toLowerCase()
+    idA.trim().toLowerCase() === idB.trim().toLowerCase()
   ) {
     reasons.push("tenants_not_distinct");
   }
