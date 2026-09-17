@@ -235,7 +235,7 @@ if (!yml.includes("actions/upload-artifact@")) {
     `Add an actions/upload-artifact step that uploads ${LOGS_DIR}, otherwise a failing run can only be read in the truncating log viewer.`,
   );
 } else {
-  if (!new RegExp(`name:\\s*${LOGS_ARTIFACT}\\b`).test(yml)) {
+  if (!new RegExp(`name:\\s*${LOGS_ARTIFACT}\\s*$`, "m").test(yml)) {
     fail(
       "Run log artifact renamed or removed",
       `No upload step is named "${LOGS_ARTIFACT}". Keep that name so the logs are findable on the run page, or update this check deliberately.`,
