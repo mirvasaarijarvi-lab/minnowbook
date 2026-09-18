@@ -6040,6 +6040,7 @@ const fi: TranslationKeys = {
   "pricing.basicTypes": "2 tyyppiä",
   "pricing.basicStaff": "1 to 5",
   "pricing.basicResourcesTotal": "2 yhteensä",
+  "pricing.proResourcesPerType": "Enintään 5",
   "pricing.proName": "Protaso",
   "pricing.proDesc": "Yrityksille, jotka tarjoavat hotelli-, ravintola- ja tapahtumatilapalvelun yhdessä paikassa.",
   "pricing.proTypes": "Jopa 5 varaustyyppiä missä tahansa yhdistelmässä (esim. kaksi ravintolaa ja yksi hotelli)",
