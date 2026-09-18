@@ -4719,7 +4719,7 @@ const fi: TranslationKeys = {
   "features.teamManagement": "Käyttäjähallinta",
   "features.teamManagementDesc": "Lisää henkilökuntaa, määritä rooleja ja hallinnoi käyttöoikeuksia helposti.",
   "features.brandedPages": "Varaustyypit",
-  "features.brandedPagesDesc": "Hotelli/majatalo, ravintola ja tilat tapahtumiin.",
+  "features.brandedPagesDesc": "Hotelli/majatalo, ravintola, tilat tapahtumiin sekä palvelualan ammattilaiset, kuten hierojat, parturit, kampaajat, leipurit, meikkaajat, hoitojen tarjoajat ja personal trainerit.",
   "features.reportsInsights": "Raportointi",
   "features.reportsInsightsDesc": "Seuraa varauksia, käyttöasteita ja tuloja yhdellä silmäyksellä.",
   "features.automatedEmails": "Automaattiset sähköpostit",
