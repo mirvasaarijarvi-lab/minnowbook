@@ -174,6 +174,17 @@ async function mockBackend(page: Page, offer: Record<string, unknown>) {
     }
 
     if (path.startsWith("reservations")) {
+      if (method === "GET") {
+        // The Kitchen tab lists the reservations created from the offer.
+        return json(
+          route,
+          reservations.map((r) => ({
+            ...r,
+            guest_name: r.guest_name ?? "Kitchen E2E Guest",
+            status: r.status ?? "confirmed",
+          })),
+        );
+      }
       if (method === "POST") {
         const body = request.postDataJSON();
         const row = { id: `reservation-${reservations.length + 1}`, ...body };
@@ -191,7 +202,18 @@ async function mockBackend(page: Page, offer: Record<string, unknown>) {
         for (const row of Array.isArray(body) ? body : [body]) kitchenRows.push(row);
         return json(route, Array.isArray(body) ? body : [body]);
       }
-      return json(route, []);
+      // The Kitchen tab reads back exactly the rows the offer wrote.
+      return json(
+        route,
+        kitchenRows.map((row, index) => ({
+          id: `kitchen-order-${index + 1}`,
+          status: "received",
+          notes: null,
+          unit_price_eur: null,
+          sort_order: index,
+          ...row,
+        })),
+      );
     }
 
     return json(route, []);
@@ -215,6 +237,13 @@ async function readToast(page: Page): Promise<string> {
 }
 
 const ref = projectRef();
+
+/** Today in the browser's calendar format, so the Kitchen tab shows it by default. */
+function todayIso(): string {
+  const now = new Date();
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+}
 
 test.describe("Offer confirmation states the Kitchen tab result", () => {
   test.skip(!ref, "VITE_SUPABASE_URL is required to compute the auth-token key");
@@ -280,5 +309,50 @@ test.describe("Offer confirmation states the Kitchen tab result", () => {
     // One plain reservation, no kitchen lines at all.
     await expect.poll(() => recorded.reservations.length, { timeout: 10_000 }).toBe(1);
     expect(recorded.kitchenRows).toHaveLength(0);
+  });
+
+  test("accepted offer's food and drink lines show up in the Kitchen tab", async ({ page }) => {
+    // The event is today so the Kitchen tab, which opens on today, lists it.
+    const recorded = await mockBackend(
+      page,
+      offerRow({
+        id: "offer-e2e-3",
+        event_date: todayIso(),
+        menu: [
+          "20 x Roast beef - medium rare",
+          "4 x Vegan plate (no nuts)",
+          "20 x Red wine",
+        ].join("\n"),
+      }),
+    );
+
+    await openOffers(page);
+    await page.getByRole("button", { name: "Confirm", exact: true }).first().click();
+
+    // Wait until the kitchen lines have been written by the confirmation.
+    await expect.poll(() => recorded.kitchenRows.length, { timeout: 15_000 }).toBe(3);
+
+    // Now open the Kitchen tab and check the guest and the lines are listed.
+    await page.getByRole("button", { name: "Kitchen", exact: true }).first().click();
+    await expect(page.getByText("Kitchen E2E Guest").first()).toBeVisible({ timeout: 15_000 });
+
+    const itemNames = page.getByRole("textbox", { name: "Item" });
+    await expect(itemNames).toHaveCount(3);
+    await expect(itemNames.nth(0)).toHaveValue("Roast beef");
+    await expect(itemNames.nth(1)).toHaveValue("Vegan plate");
+    await expect(itemNames.nth(2)).toHaveValue("Red wine");
+
+    const quantities = page.getByRole("spinbutton", { name: "Qty" });
+    await expect(quantities.nth(0)).toHaveValue("20");
+    await expect(quantities.nth(1)).toHaveValue("4");
+    await expect(quantities.nth(2)).toHaveValue("20");
+
+    // The note written after the dash / in brackets travelled with the line.
+    const notes = page.getByRole("textbox", { name: "Notes" });
+    await expect(notes.nth(0)).toHaveValue("medium rare");
+    await expect(notes.nth(1)).toHaveValue("no nuts");
+
+    // Category comes through as food / drink.
+    await expect(page.getByRole("combobox", { name: "Category" }).nth(2)).toContainText("Drink");
   });
 });
