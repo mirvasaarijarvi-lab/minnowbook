@@ -988,6 +988,7 @@ type TranslationKeys = {
   // Support page
   "support.heroTitle": string;
   "support.heroSubtitle": string;
+  "support.articlesHeading": string;
   "support.searchPlaceholder": string;
   "support.noResults": string;
   "support.stillNeedHelp": string;
@@ -3439,6 +3440,7 @@ const en: TranslationKeys = {
   // Support page
   "support.heroTitle": "How can we help?",
   "support.heroSubtitle": "Browse guides, FAQs, and tips to get the most out of MimmoBook.",
+  "support.articlesHeading": "Guides and answers",
   "support.searchPlaceholder": "Search for help...",
   "support.noResults": "No results found. Try a different search term.",
   "support.stillNeedHelp": "Still need help?",
@@ -5433,6 +5435,7 @@ const fi: TranslationKeys = {
   // Support page
   "support.heroTitle": "Kuinka voimme auttaa?",
   "support.heroSubtitle": "Selaa oppaita, usein kysyttyjä kysymyksiä ja vinkkejä saadaksesi kaiken irti MimmoBookista.",
+  "support.articlesHeading": "Oppaat ja vastaukset",
   "support.searchPlaceholder": "Hae apua...",
   "support.noResults": "Ei tuloksia. Kokeile toista hakusanaa.",
   "support.stillNeedHelp": "Tarvitsetko vielä apua?",
@@ -7427,6 +7430,7 @@ const sv: TranslationKeys = {
   // Support page
   "support.heroTitle": "Hur kan vi hjälpa till?",
   "support.heroSubtitle": "Bläddra bland guider, vanliga frågor och svar och tips för att få ut det mesta av MimmoBook.",
+  "support.articlesHeading": "Guider och svar",
   "support.searchPlaceholder": "Sök efter hjälp...",
   "support.noResults": "Inga resultat hittades. Prova ett annat sökord.",
   "support.stillNeedHelp": "Behöver du fortfarande hjälp?",

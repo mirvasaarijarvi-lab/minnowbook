@@ -33,7 +33,7 @@ const stepKeys: { step: string; titleKey: TranslationKey; descKey: TranslationKe
 const tierKeys = [
   {
     nameKey: "pricing.basicName" as TranslationKey,
-    price: 29,
+    price: 19,
     descriptionKey: "pricing.basicDesc" as TranslationKey,
     reservationTypesKey: "pricing.basicTypes" as TranslationKey,
     staffUsersKey: "pricing.basicStaff" as TranslationKey,
@@ -47,7 +47,7 @@ const tierKeys = [
   },
   {
     nameKey: "pricing.proName" as TranslationKey,
-    price: 79,
+    price: 59,
     descriptionKey: "pricing.proDesc" as TranslationKey,
     reservationTypesKey: "pricing.proTypes" as TranslationKey,
     staffUsersKey: "pricing.proStaff" as TranslationKey,
@@ -60,7 +60,7 @@ const tierKeys = [
   },
   {
     nameKey: "pricing.businessName" as TranslationKey,
-    price: 199,
+    price: 179,
     descriptionKey: "pricing.businessDesc" as TranslationKey,
     reservationTypesKey: "pricing.businessTypes" as TranslationKey,
     staffUsersKey: "pricing.businessStaff" as TranslationKey,
