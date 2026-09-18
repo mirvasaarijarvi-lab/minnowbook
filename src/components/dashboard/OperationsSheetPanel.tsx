@@ -16,6 +16,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useT } from "@/contexts/I18nContext";
+import CollapsibleSection from "./CollapsibleSection";
 
 interface OpsReservation {
   id: string;
