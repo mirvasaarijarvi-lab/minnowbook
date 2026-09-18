@@ -23,6 +23,8 @@ import {
   useRef,
   useContext,
   createContext,
+  Children,
+  isValidElement,
   forwardRef,
   type ComponentProps,
   type ReactNode,
@@ -89,6 +91,8 @@ export function useLocation() {
 // ---------- useParams ----------
 
 export function useParams<T extends Record<string, string | undefined> = Record<string, string | undefined>>(): T {
+  const shimParams = useContext(ShimParamsContext);
+  if (shimParams) return shimParams as T;
   return tsParams({ strict: false } as never) as T;
 }
 
@@ -255,5 +259,72 @@ export function MemoryRouter({
 
   return (
     <RouterContextProvider router={router as never}>{children}</RouterContextProvider>
+  );
+}
+
+// ---------- Routes / Route (v6-style flat matching) ----------
+// Used by tests and isolated harnesses that render a small route table
+// instead of the generated app route tree.
+
+const ShimParamsContext = createContext<Record<string, string> | null>(null);
+
+type ShimRouteProps = {
+  path?: string;
+  element?: ReactNode;
+  index?: boolean;
+  children?: ReactNode;
+};
+
+export function Route(_props: ShimRouteProps): null {
+  return null;
+}
+
+function matchPath(
+  pattern: string,
+  pathname: string,
+): { score: number; params: Record<string, string> } | null {
+  const pSegs = pattern.replace(/^\//, "").split("/").filter(Boolean);
+  const aSegs = pathname.replace(/^\//, "").split("/").filter(Boolean);
+  const params: Record<string, string> = {};
+  let score = 0;
+  for (let i = 0; i < pSegs.length; i += 1) {
+    const seg = pSegs[i];
+    if (seg === "*") return { score, params };
+    const actual = aSegs[i];
+    if (actual === undefined) return null;
+    if (seg.startsWith(":")) {
+      params[seg.slice(1)] = decodeURIComponent(actual);
+      score += 1;
+    } else if (seg === actual) {
+      score += 2;
+    } else {
+      return null;
+    }
+  }
+  if (aSegs.length !== pSegs.length) return null;
+  return { score, params };
+}
+
+export function Routes({ children }: { children?: ReactNode }) {
+  const { pathname } = useLocation();
+  let best: { element: ReactNode; params: Record<string, string>; score: number } | null = null;
+
+  Children.forEach(children, (child) => {
+    if (!isValidElement(child)) return;
+    const props = child.props as ShimRouteProps;
+    const pattern = props.index ? "/" : props.path ?? "/";
+    const match = matchPath(pattern, pathname);
+    if (!match) return;
+    if (!best || match.score > best.score) {
+      best = { element: props.element ?? null, params: match.params, score: match.score };
+    }
+  });
+
+  if (!best) return null;
+  const matched = best as { element: ReactNode; params: Record<string, string> };
+  return (
+    <ShimParamsContext.Provider value={matched.params}>
+      {matched.element}
+    </ShimParamsContext.Provider>
   );
 }
