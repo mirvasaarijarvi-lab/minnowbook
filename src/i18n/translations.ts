@@ -1878,6 +1878,8 @@ type TranslationKeys = {
   "offers.noResults": string;
   "offers.searchPlaceholder": string;
   "offers.showArchived": string;
+  "offers.printPdf": string;
+  "offers.searchLabel": string;
   "offers.archive": string;
   "offers.unarchive": string;
   "offers.archived": string;
@@ -3955,6 +3957,8 @@ const en: TranslationKeys = {
   "offers.noResults": "No offers match your search",
   "offers.searchPlaceholder": "Search offers...",
   "offers.showArchived": "Show archived",
+  "offers.printPdf": "Print offer as PDF",
+  "offers.searchLabel": "Search offers",
   "offers.archive": "Archive",
   "offers.unarchive": "Unarchive",
   "offers.archived": "Archived",
@@ -6029,6 +6033,8 @@ const fi: TranslationKeys = {
   "offers.noResults": "Hakuasi vastaavia tarjouksia ei löytynyt",
   "offers.searchPlaceholder": "Hae tarjouksia...",
   "offers.showArchived": "Näytä arkistoidut",
+  "offers.printPdf": "Tulosta tarjous PDF-tiedostona",
+  "offers.searchLabel": "Etsi tarjouksia",
   "offers.archive": "Arkistoi",
   "offers.unarchive": "Palauta arkistosta",
   "offers.archived": "Arkistoitu",
@@ -8103,6 +8109,8 @@ const sv: TranslationKeys = {
   "offers.noResults": "Inga erbjudanden matchar din sökning",
   "offers.searchPlaceholder": "Sök erbjudanden...",
   "offers.showArchived": "Visa arkiverade",
+  "offers.printPdf": "Skriv ut erbjudandet som PDF",
+  "offers.searchLabel": "Sök erbjudanden",
   "offers.archive": "Arkivera",
   "offers.unarchive": "Avarkivera",
   "offers.archived": "Arkiverad",

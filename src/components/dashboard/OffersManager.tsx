@@ -393,6 +393,7 @@ const OffersManager = () => {
         <div className="relative flex-1 w-full sm:max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
+            aria-label={t("offers.searchLabel")}
             placeholder={t("offers.searchPlaceholder")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -412,11 +413,12 @@ const OffersManager = () => {
           {searchQuery.trim() ? t("offers.noResults") : t("offers.empty")}
         </CardContent></Card>
       ) : (
-        <div className="space-y-2">
+        <ul className="space-y-2 list-none p-0 m-0">
           {filteredOffers.map((offer) => {
             const isArchived = !!offer.archived_at;
             return (
-              <Card key={offer.id} className={`hover:shadow-sm transition-shadow ${isArchived ? "opacity-60" : ""}`}>
+              <li key={offer.id}>
+              <Card className={`hover:shadow-sm transition-shadow ${isArchived ? "opacity-60" : ""}`}>
                 <CardContent className="p-4">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <div className="min-w-0">
@@ -445,7 +447,7 @@ const OffersManager = () => {
                       )}
                     </div>
                     <div className="flex items-center gap-1.5 flex-shrink-0 flex-wrap">
-                      <Button size="sm" variant="outline" onClick={() => handlePrintPdf(offer)} title="PDF">
+                      <Button size="sm" variant="outline" onClick={() => handlePrintPdf(offer)} title="PDF" aria-label={`${t("offers.printPdf")}: ${offer.guest_name}`}>
                         <Printer className="h-3.5 w-3.5" />
                       </Button>
                       <Button size="sm" variant="outline" onClick={() => { setEditOffer(offer); setCreateOpen(true); }}>
@@ -465,11 +467,11 @@ const OffersManager = () => {
                         </Button>
                       )}
                       {isArchived ? (
-                        <Button size="sm" variant="outline" onClick={() => handleUnarchive(offer)} title={t("offers.unarchive")}>
+                        <Button size="sm" variant="outline" onClick={() => handleUnarchive(offer)} title={t("offers.unarchive")} aria-label={`${t("offers.unarchive")}: ${offer.guest_name}`}>
                           <ArchiveRestore className="h-3.5 w-3.5" />
                         </Button>
                       ) : (
-                        <Button size="sm" variant="outline" onClick={() => handleArchive(offer)} title={t("offers.archive")}>
+                        <Button size="sm" variant="outline" onClick={() => handleArchive(offer)} title={t("offers.archive")} aria-label={`${t("offers.archive")}: ${offer.guest_name}`}>
                           <Archive className="h-3.5 w-3.5" />
                         </Button>
                       )}
@@ -477,6 +479,7 @@ const OffersManager = () => {
                   </div>
                 </CardContent>
               </Card>
+              </li>
             );
           })}
         </div>
