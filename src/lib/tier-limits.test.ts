@@ -4,6 +4,11 @@ import {
   canSelectMoreTypes,
   canCreateResourceOfType,
   isResourceTypeAllowed,
+  getMaxStaffUsers,
+  canAddStaffUser,
+  canCreateSite,
+  isMultiSiteTier,
+  getTierLabel,
 } from "./tier-limits";
 
 describe("tier-limits: Professional tier", () => {
@@ -66,9 +71,28 @@ describe("tier-limits: Basic tier (regression)", () => {
 describe("tier-limits: Business tier (regression)", () => {
   const tier = "business";
 
-  it("has no caps", () => {
+  it("has no resource or type caps", () => {
     expect(canSelectMoreTypes(tier, 999)).toBe(true);
     const many = Array.from({ length: 1000 }, () => ({ resource_type: "custom" }));
     expect(canCreateResourceOfType(tier, "custom", many)).toBe(true);
+  });
+
+  it("caps staff users at 50", () => {
+    expect(getMaxStaffUsers(tier)).toBe(50);
+    expect(canAddStaffUser(tier, 49)).toBe(true);
+    expect(canAddStaffUser(tier, 50)).toBe(false);
+  });
+});
+
+describe("tier-limits: Enterprise tier", () => {
+  const tier = "enterprise";
+
+  it("has unlimited staff users and no other caps", () => {
+    expect(getMaxStaffUsers(tier)).toBeNull();
+    expect(canAddStaffUser(tier, 5000)).toBe(true);
+    expect(canCreateSite(tier, 99)).toBe(true);
+    expect(canSelectMoreTypes(tier, 999)).toBe(true);
+    expect(isMultiSiteTier(tier)).toBe(true);
+    expect(getTierLabel(tier)).toBe("Enterprise");
   });
 });

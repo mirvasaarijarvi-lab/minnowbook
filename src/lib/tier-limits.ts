@@ -8,7 +8,8 @@
  *
  *   basic         → 1 site, 2 reservation types, 2 resources TOTAL (any types), 5 staff users
  *   professional  → 1 site, up to 5 reservation types (any combo), unlimited resources (any mix of types), 25 staff users
- *   business      → unlimited sites, all types, unlimited resources, unlimited staff users
+ *   business      → unlimited sites, all types, unlimited resources, 50 staff users
+ *   enterprise    → unlimited everything (staff users included), sold by offer only
  */
 
 interface TierLimits {
@@ -22,7 +23,8 @@ interface TierLimits {
 const TIER_LIMITS: Record<string, TierLimits> = {
   basic:        { maxSites: 1,    maxReservationTypes: 2,    maxResourcesPerType: null, maxResourcesTotal: 2,    maxStaffUsers: 5 },
   professional: { maxSites: 1,    maxReservationTypes: 5,    maxResourcesPerType: null, maxResourcesTotal: null, maxStaffUsers: 25 },
-  business:     { maxSites: null, maxReservationTypes: null, maxResourcesPerType: null, maxResourcesTotal: null, maxStaffUsers: null },
+  business:     { maxSites: null, maxReservationTypes: null, maxResourcesPerType: null, maxResourcesTotal: null, maxStaffUsers: 50 },
+  enterprise:   { maxSites: null, maxReservationTypes: null, maxResourcesPerType: null, maxResourcesTotal: null, maxStaffUsers: null },
 };
 
 export function getTierLimits(tier: string | null | undefined): TierLimits {
@@ -96,11 +98,12 @@ export function getTierLabel(tier: string): string {
     case "basic": return "Basic";
     case "professional": return "Pro";
     case "business": return "Business";
+    case "enterprise": return "Enterprise";
     default: return tier;
   }
 }
 
 /** Whether the tier supports multi-site features (business or higher) */
 export function isMultiSiteTier(tier: string | null | undefined): boolean {
-  return tier === "business";
+  return tier === "business" || tier === "enterprise";
 }
