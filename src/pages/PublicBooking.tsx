@@ -939,6 +939,7 @@ const PublicBookingInner = () => {
       if (error) {
         let errorCode: string | undefined;
         let serverMessage: string | undefined;
+        let occasionContext: unknown;
         const ctx: any = (error as any).context;
         if (ctx?.body) {
           try {
@@ -949,10 +950,20 @@ const PublicBookingInner = () => {
               const parsed = JSON.parse(text);
               errorCode = parsed?.error_code;
               serverMessage = parsed?.error;
+              occasionContext = parsed?.occasion;
             }
           } catch {
             /* fall through to generic error */
           }
+        }
+        // Special occasion refusals carry a structured code plus the
+        // seats/sittings context, so the guest gets a precise localized
+        // explanation instead of the English server fallback.
+        if (isOccasionErrorCode(errorCode)) {
+          const e = new Error(serverMessage ?? "Occasion unavailable");
+          (e as any).code = errorCode;
+          (e as any).occasion = occasionContext ?? {};
+          throw e;
         }
         if (errorCode === BOOKING_ERROR_CODES.SERVICE_ROLE_KEY_MISSING) {
           const e = new Error(serverMessage ?? "Service misconfigured");
@@ -981,6 +992,22 @@ const PublicBookingInner = () => {
     onError: (err: any) => {
       // All branching for booking errors lives in the central
       // registry. PublicBooking just consumes the resolved descriptor.
+      const occasionInfo = parseOccasionError(err);
+      if (occasionInfo) {
+        const template = t(occasionErrorTranslationKey(occasionInfo));
+        toast.error(applyOccasionErrorPlaceholders(template, occasionInfo), { duration: 8000 });
+        // Drop a stale sitting choice so the guest must pick again from
+        // the times that are actually still open.
+        if (
+          occasionInfo.code === OCCASION_ERROR_CODES.OCCASION_SEATING_UNAVAILABLE ||
+          occasionInfo.code === OCCASION_ERROR_CODES.OCCASION_FULL
+        ) {
+          setOccasionSeating("");
+          updateField("start_time", "");
+        }
+        queryClient.invalidateQueries({ queryKey: ["public-special-occasions"] });
+        return;
+      }
       const descriptor = resolveBookingError(err, { isStaff });
       if (descriptor.pinMisconfigBanner) {
         // Pin the inline confirmation. The toast disappears after
