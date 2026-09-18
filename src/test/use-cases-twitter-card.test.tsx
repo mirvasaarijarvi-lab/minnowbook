@@ -112,7 +112,7 @@ describe("use cases page Twitter Card", () => {
     const expectedWords: Record<Language, string[]> = {
       en: ["barbers", "salons", "massage", "bakeries", "trainers"],
       fi: ["partureille", "kampaajille", "hierojille", "leipomoille", "valmentajille"],
-      sv: ["barberare", "frisörer", "massörer", "bagerier", "tränare"],
+      sv: ["barberare", "salonger", "massörer", "bagerier", "tränare"],
     };
     for (const lang of LANGS) {
       const title = translations[lang]["useCases.ogTitle"].toLowerCase();
