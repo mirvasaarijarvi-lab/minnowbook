@@ -8,6 +8,7 @@ import SEOHead from "@/components/SEOHead";
 import { useT } from "@/contexts/I18nContext";
 import { posts, buildBlogPostJsonLd } from "@/lib/blogJsonLd";
 import WellnessComparisonTable from "@/components/blog/WellnessComparisonTable";
+import ServiceProInfographic from "@/components/blog/ServiceProInfographic";
 
 const BlogPost = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -75,6 +76,10 @@ const BlogPost = () => {
 
             {post.slug === "MimmoBook_compared_to_other_bookingsystems_for_wellness" && (
               <WellnessComparisonTable />
+            )}
+
+            {post.slug === "booking-software-for-service-professionals" && (
+              <ServiceProInfographic />
             )}
 
             <div className="prose prose-lg max-w-none">
