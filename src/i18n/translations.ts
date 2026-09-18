@@ -280,6 +280,9 @@ type TranslationKeys = {
   "booking.thankYou": string;
   "booking.confirmationMsg": string;
   "booking.checkSpam": string;
+  "booking.duplicateTitle": string;
+  "booking.duplicateMsg": string;
+  "booking.duplicateHint": string;
   "booking.makeAnother": string;
   "booking.addToCalendar": string;
   "booking.notFound": string;
@@ -2295,6 +2298,9 @@ const en: TranslationKeys = {
   "booking.thankYou": "Thank you!",
   "booking.confirmationMsg": "Your reservation has been received. You will receive a confirmation email from {name}.",
   "booking.checkSpam": "If you don't see the email in your inbox, please check your spam or junk folder.",
+  "booking.duplicateTitle": "You already sent this booking",
+  "booking.duplicateMsg": "We found an identical booking you just sent, so we kept the first one and did not create a second reservation.",
+  "booking.duplicateHint": "If you meant to book something more, for example another room or a second table, please send a new booking with those details.",
   "booking.makeAnother": "Make another reservation",
   "booking.addToCalendar": "Add to calendar",
   "booking.notFound": "Business not found",
@@ -4288,6 +4294,9 @@ const fi: TranslationKeys = {
   "booking.thankYou": "Kiitos!",
   "booking.confirmationMsg": "Varauksesi on vastaanotettu. Saat vahvistusviestin lähettäjältä {name}.",
   "booking.checkSpam": "Jos et näe sähköpostia saapuneissa, tarkista roskaposti- tai roskapostikansio.",
+  "booking.duplicateTitle": "Lähetit tämän varauksen jo",
+  "booking.duplicateMsg": "Löysimme juuri lähettämäsi täysin samanlaisen varauksen, joten säilytimme ensimmäisen emmekä luoneet toista varausta.",
+  "booking.duplicateHint": "Jos halusit varata lisää, esimerkiksi toisen huoneen tai toisen pöydän, lähetä uusi varaus näillä tiedoilla.",
   "booking.makeAnother": "Tee uusi varaus",
   "booking.addToCalendar": "Lisää kalenteriin",
   "booking.notFound": "Yritystä ei löytynyt",
@@ -6279,6 +6288,9 @@ const sv: TranslationKeys = {
   "booking.thankYou": "Tack!",
   "booking.confirmationMsg": "Din bokning har mottagits. Du kommer att få ett bekräftelsemail från {name}.",
   "booking.checkSpam": "Om du inte ser e-postmeddelandet i din inkorg, kontrollera din skräppost- eller skräppostmapp.",
+  "booking.duplicateTitle": "Du har redan skickat den här bokningen",
+  "booking.duplicateMsg": "Vi hittade en identisk bokning som du nyss skickade, så vi behöll den första och skapade ingen andra bokning.",
+  "booking.duplicateHint": "Om du ville boka mer, till exempel ett till rum eller ett andra bord, skicka en ny bokning med de uppgifterna.",
   "booking.makeAnother": "Gör en ny bokning",
   "booking.addToCalendar": "Lägg till i kalender",
   "booking.notFound": "Företag hittades inte",

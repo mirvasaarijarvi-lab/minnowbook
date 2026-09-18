@@ -231,6 +231,7 @@ const PublicBookingInner = () => {
   const isStaff = !!user;
   const dateFnsLocale = useDateLocale();
   const [submitted, setSubmitted] = useState(false);
+  const [duplicateDetected, setDuplicateDetected] = useState(false);
   // Sticky flag set when the public-booking edge function reports
   // SERVICE_ROLE_KEY_MISSING. While set, the form blocks resubmits
   // and renders an inline confirmation that NO reservation was
@@ -929,9 +930,15 @@ const PublicBookingInner = () => {
         throw e;
       }
       if (data?.error) throw new Error(data.error);
+      return data;
     },
-    onSuccess: () => {
+    onSuccess: (data: any) => {
       setServiceMisconfigured(false);
+      // The edge function answers `duplicate: true` when this exact booking
+      // (same guest, service, date, resource, dates, guest count and notes)
+      // was already received. No second reservation exists, so the guest must
+      // be told plainly instead of seeing a normal confirmation.
+      setDuplicateDetected(Boolean(data?.duplicate));
       setSubmitted(true);
     },
     onError: (err: any) => {
@@ -1119,15 +1126,34 @@ const PublicBookingInner = () => {
           <div className="max-w-2xl mx-auto space-y-6">
           <Card className="text-center">
             <CardContent className="pt-8 pb-8 space-y-4">
-              <CheckCircle className="h-16 w-16 mx-auto" style={{ color: accentColor }} />
-              <h2 className="text-2xl font-serif font-bold" style={{ color: primaryColor }}>
-                {t("booking.thankYou")}
-              </h2>
-              <p className="text-muted-foreground">{t("booking.confirmationMsg").replace("{name}", displayName)}</p>
-              <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-800 text-left">
-                <Mail className="h-4 w-4 mt-0.5 shrink-0" />
-                <p>{t("booking.checkSpam")}</p>
-              </div>
+              {duplicateDetected ? (
+                <>
+                  <Info className="h-16 w-16 mx-auto text-amber-600" aria-hidden="true" />
+                  <h2 className="text-2xl font-serif font-bold" style={{ color: primaryColor }}>
+                    {t("booking.duplicateTitle")}
+                  </h2>
+                  <div
+                    role="status"
+                    aria-live="polite"
+                    className="space-y-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800 text-left"
+                  >
+                    <p>{t("booking.duplicateMsg")}</p>
+                    <p>{t("booking.duplicateHint")}</p>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <CheckCircle className="h-16 w-16 mx-auto" style={{ color: accentColor }} />
+                  <h2 className="text-2xl font-serif font-bold" style={{ color: primaryColor }}>
+                    {t("booking.thankYou")}
+                  </h2>
+                  <p className="text-muted-foreground">{t("booking.confirmationMsg").replace("{name}", displayName)}</p>
+                  <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-800 text-left">
+                    <Mail className="h-4 w-4 mt-0.5 shrink-0" />
+                    <p>{t("booking.checkSpam")}</p>
+                  </div>
+                </>
+              )}
               <div className="flex flex-col sm:flex-row gap-2 justify-center">
                 <Button
                   variant="outline"
@@ -1166,7 +1192,7 @@ const PublicBookingInner = () => {
                 </Button>
                 <Button
                   variant="outline"
-                  onClick={() => { setSubmitted(false); setForm({ guest_name: "", guest_email: "", guest_phone: "", guests_count: "", reservation_type: "", start_time: "", special_requests: "", resource_id: "", check_out_date: "", room_type: "", breakfast_included: false, event_type: "", estimated_guests: "", catering_needed: false, pricing_type: "", fixed_price: "", restaurant_sub_type: "dine_in", delivery_address: "", dietary_notes: "", equipment_needed: false, staff_needed: false, festival_name: "", stall_size: "", electricity_needed: false, water_needed: false, food_permits: "", stall_fee: "", promo_code: "", selected_sub_services: [] }); setSelectedDate(undefined); }}
+                  onClick={() => { setSubmitted(false); setDuplicateDetected(false); setForm({ guest_name: "", guest_email: "", guest_phone: "", guests_count: "", reservation_type: "", start_time: "", special_requests: "", resource_id: "", check_out_date: "", room_type: "", breakfast_included: false, event_type: "", estimated_guests: "", catering_needed: false, pricing_type: "", fixed_price: "", restaurant_sub_type: "dine_in", delivery_address: "", dietary_notes: "", equipment_needed: false, staff_needed: false, festival_name: "", stall_size: "", electricity_needed: false, water_needed: false, food_permits: "", stall_fee: "", promo_code: "", selected_sub_services: [] }); setSelectedDate(undefined); }}
                 >
                   {t("booking.makeAnother")}
                 </Button>
