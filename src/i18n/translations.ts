@@ -8006,7 +8006,7 @@ const sv: TranslationKeys = {
   "features.f18Title": "Korsbokningar",
   "features.f18Desc": "Länka bokningar mellan utrymmen och tjänster. Markera länkade bokningar som använda eller fakturerade tillsammans.",
   "features.offersAndCross": "Erbjudanden och korsbokningar",
-  "features.offersAndCrossDesc": "Skapa erbjudanden, generera varumärkesanpassade PDF:er och länka bokningar mellan utrymmen — hantera allt tillsammans.",
+  "features.offersAndCrossDesc": "Skapa erbjudanden, generera varumärkesanpassade PDF:er och länka bokningar mellan utrymmen och hantera allt tillsammans.",
 
   // Use Cases
   "useCases.badge": "Användningsfall",
