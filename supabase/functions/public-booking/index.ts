@@ -677,10 +677,16 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
     // A guest's browser (or a flaky network) can re-send the very same booking
     // request: a double click, a refresh mid-submit, an automatic retry. Such a
     // retry must not create a second reservation and must NOT claim the promo
-    // code a second time. If an identical booking already exists for this
+    // code a second time. If an IDENTICAL booking already exists for this
     // tenant within a short window, the existing reservation is returned as-is.
+    //
+    // "Identical" must compare every field a guest can vary, otherwise genuinely
+    // distinct bookings (two hotel rooms for the same nights, a second table for
+    // the same evening) would be silently swallowed. When the client supplied an
+    // explicit idempotency key, that mechanism above already covers retries and
+    // this heuristic is skipped entirely.
     const RETRY_WINDOW_MINUTES = 15;
-    {
+    if (!idempotencyKey) {
       const since = new Date(Date.now() - RETRY_WINDOW_MINUTES * 60_000).toISOString();
       let dupQuery = adminClient
         .from("reservations")
@@ -693,10 +699,22 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
         .gte("created_at", since)
         .order("created_at", { ascending: true })
         .limit(1);
-      dupQuery = start_time
-        ? dupQuery.eq("start_time", start_time)
-        : dupQuery.is("start_time", null);
+      // Every guest-variable field must match too, or two different bookings
+      // made in the same 15 minutes would collapse into one.
+      const eqOrNull = (col: string, value: unknown) => {
+        dupQuery = value === null || value === undefined
+          ? dupQuery.is(col, null)
+          : dupQuery.eq(col, value as never);
+      };
+      eqOrNull("start_time", start_time);
+      eqOrNull("resource_id", resource_id);
+      eqOrNull("room_type", room_type);
+      eqOrNull("check_out_date", check_out_date);
+      eqOrNull("guests_count", guests_count);
+      eqOrNull("estimated_guests", estimated_guests);
+      eqOrNull("special_requests", special_requests);
       const { data: existing, error: dupErr } = await dupQuery.maybeSingle();
+
       if (dupErr) {
         console.warn("[public-booking] duplicate lookup failed", dupErr.message);
       } else if (existing) {
