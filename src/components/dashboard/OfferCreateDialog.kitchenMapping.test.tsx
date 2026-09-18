@@ -9,7 +9,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, cleanup } from "@testing-library/react";
+import { render, screen, waitFor, cleanup } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { I18nProvider } from "@/contexts/I18nContext";
@@ -112,14 +112,29 @@ const renderDialog = async (o: Offer, language: Language = "en") => {
     </QueryClientProvider>,
   );
   await screen.findByText(translations[language]["offers.kitchenPreviewTitle"]);
+  // The linked functions appear only once the resource types have loaded.
+  const legCount =
+    1 +
+    Object.values((o.linked_reservations ?? {}) as Record<string, any>).filter((v) => v?.enabled)
+      .length;
+  await waitFor(() => {
+    const ul = document.querySelector('[aria-labelledby="offer-kitchen-preview-title"] ul');
+    expect(ul?.querySelectorAll("li").length ?? 0).toBe(legCount);
+  });
   const panel = document.querySelector('[aria-labelledby="offer-kitchen-preview-title"]');
   if (!panel) throw new Error("kitchen preview panel not rendered");
   return panel as HTMLElement;
 };
 
 const uls = (panel: HTMLElement) => Array.from(panel.querySelectorAll("ul"));
+/** Visible text of each list item, with element boundaries kept as spaces. */
 const texts = (el: Element) =>
-  Array.from(el.querySelectorAll("li")).map((li) => li.textContent?.replace(/\s+/g, " ").trim() ?? "");
+  Array.from(el.querySelectorAll("li")).map((li) =>
+    Array.from(li.childNodes)
+      .map((n) => (n.textContent ?? "").replace(/\s+/g, " ").trim())
+      .filter(Boolean)
+      .join(" "),
+  );
 
 /** Names shown for each leg, i.e. the tenant's resource-type labels. */
 const nameFor = (key: string, language: Language) =>
