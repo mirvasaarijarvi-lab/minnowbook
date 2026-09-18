@@ -431,7 +431,8 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
                     </div>
                   </div>
                 ))}
-              </div>
+                </div>
+              </CollapsibleSection>
             ) : null}
           </CardContent>
         </Card>
