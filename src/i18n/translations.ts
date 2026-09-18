@@ -1945,6 +1945,11 @@ type TranslationKeys = {
   "offers.menuKitchenHintLeg": string;
   "offers.menuFormatHint": string;
   "offers.menuNoKitchenHint": string;
+  "offers.menuKitchenLabelMain": string;
+  "offers.menuKitchenLabelFor": string;
+  "offers.menuKitchenHintLegOwn": string;
+  "offers.menuKitchenHintLegMoved": string;
+  "offers.menuKitchenSummary": string;
   "offers.language": string;
   "offers.emailTo": string;
   "offers.emailSubject": string;
@@ -4039,6 +4044,11 @@ const en: TranslationKeys = {
   "offers.menuKitchenHintLeg": "Food and drinks written here also go to the kitchen order of the dining or event booking, since rooms and other bookings never appear in the Kitchen tab.",
   "offers.menuFormatHint": "One item per line, for example: 2 x Salmon (no dill), 10 Coffee, Cake x 3.",
   "offers.menuNoKitchenHint": "Not sent to the kitchen. Use the food and drinks field for that.",
+  "offers.menuKitchenLabelMain": "Food and drinks for the main booking (becomes the kitchen order)",
+  "offers.menuKitchenLabelFor": "Food and drinks for {name} (becomes the kitchen order)",
+  "offers.menuKitchenHintLegOwn": "These lines become the kitchen order of the {name} booking in the Kitchen tab.",
+  "offers.menuKitchenHintLegMoved": "{name} never appears in the Kitchen tab, so these lines are added to the kitchen order of the dining or event booking in this offer.",
+  "offers.menuKitchenSummary": "Each part of this offer has its own food and drinks field. Every field creates its own kitchen order lines when the offer is accepted, and fields on parts that never appear in the Kitchen tab, such as rooms, are added to the dining or event booking instead.",
   "offers.language": "Language",
   "offers.emailTo": "To",
   "offers.emailSubject": "Subject",
@@ -6130,6 +6140,11 @@ const fi: TranslationKeys = {
   "offers.menuKitchenHintLeg": "Tähän kirjatut ruoat ja juomat menevät myös ravintola- tai tilavarauksen keittiötilaukseen, koska huoneet ja muut varaukset eivät näy Keittiö-välilehdellä.",
   "offers.menuFormatHint": "Yksi tuote per rivi, esimerkiksi: 2 x Lohi (ei tilliä), 10 Kahvi, Kakku x 3.",
   "offers.menuNoKitchenHint": "Ei mene keittiöön. Käytä siihen ruoat ja juomat -kenttää.",
+  "offers.menuKitchenLabelMain": "Päävarauksen ruoat ja juomat (muodostaa keittiötilauksen)",
+  "offers.menuKitchenLabelFor": "Ruoat ja juomat: {name} (muodostaa keittiötilauksen)",
+  "offers.menuKitchenHintLegOwn": "Nämä rivit muodostavat varauksen {name} keittiötilauksen Keittiö-välilehdellä.",
+  "offers.menuKitchenHintLegMoved": "{name} ei näy Keittiö-välilehdellä, joten nämä rivit lisätään tämän tarjouksen ravintola- tai tilavarauksen keittiötilaukseen.",
+  "offers.menuKitchenSummary": "Jokaisella tarjouksen osalla on oma ruoat ja juomat -kenttä. Jokainen kenttä muodostaa omat keittiötilauksen rivinsä, kun tarjous hyväksytään, ja niiden osien kentät, jotka eivät näy Keittiö-välilehdellä, kuten huoneet, lisätään ravintola- tai tilavaraukseen.",
   "offers.language": "Kieli",
   "offers.emailTo": "Vastaanottaja",
   "offers.emailSubject": "Aihe",
@@ -8221,6 +8236,11 @@ const sv: TranslationKeys = {
   "offers.menuKitchenHintLeg": "Mat och dryck som skrivs här går också till köksordern för restaurang- eller lokalbokningen, eftersom rum och andra bokningar aldrig visas i Kök-fliken.",
   "offers.menuFormatHint": "En post per rad, till exempel: 2 x Lax (utan dill), 10 Kaffe, Tårta x 3.",
   "offers.menuNoKitchenHint": "Skickas inte till köket. Använd fältet för mat och dryck till det.",
+  "offers.menuKitchenLabelMain": "Mat och dryck för huvudbokningen (blir köksordern)",
+  "offers.menuKitchenLabelFor": "Mat och dryck: {name} (blir köksordern)",
+  "offers.menuKitchenHintLegOwn": "Dessa rader blir köksordern för bokningen {name} i Kök-fliken.",
+  "offers.menuKitchenHintLegMoved": "{name} visas aldrig i Kök-fliken, så dessa rader läggs till köksordern för restaurang- eller lokalbokningen i det här erbjudandet.",
+  "offers.menuKitchenSummary": "Varje del av erbjudandet har ett eget fält för mat och dryck. Varje fält skapar sina egna rader i köksordern när erbjudandet accepteras, och fält på delar som aldrig visas i Kök-fliken, till exempel rum, läggs i stället till restaurang- eller lokalbokningen.",
   "offers.language": "Språk",
   "offers.emailTo": "Till",
   "offers.emailSubject": "Ämne",
