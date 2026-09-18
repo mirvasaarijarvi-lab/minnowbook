@@ -1945,6 +1945,11 @@ type TranslationKeys = {
   "offers.menuKitchenHintLeg": string;
   "offers.menuFormatHint": string;
   "offers.menuNoKitchenHint": string;
+  "offers.menuKitchenLabelMain": string;
+  "offers.menuKitchenLabelFor": string;
+  "offers.menuKitchenHintLegOwn": string;
+  "offers.menuKitchenHintLegMoved": string;
+  "offers.menuKitchenSummary": string;
   "offers.language": string;
   "offers.emailTo": string;
   "offers.emailSubject": string;
