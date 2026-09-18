@@ -33,6 +33,8 @@ type TranslationKeys = {
   "common.status": string;
   "common.type": string;
   "common.price": string;
+  "common.showList": string;
+  "common.hideList": string;
   "common.guests": string;
   "common.date": string;
   "common.noResults": string;
@@ -2338,6 +2340,8 @@ const en: TranslationKeys = {
   "common.status": "Status",
   "common.type": "Type",
   "common.price": "Price",
+  "common.showList": "Show list",
+  "common.hideList": "Hide list",
   "common.guests": "Guests",
   "common.date": "Date",
   "common.noResults": "No results found.",
@@ -4620,6 +4624,8 @@ const fi: TranslationKeys = {
   "common.status": "Tila",
   "common.type": "Tyyppi",
   "common.price": "Hinta",
+  "common.showList": "Näytä lista",
+  "common.hideList": "Piilota lista",
   "common.guests": "vierasta",
   "common.date": "Päivämäärä",
   "common.noResults": "Ei tuloksia.",
@@ -6900,6 +6906,8 @@ const sv: TranslationKeys = {
   "common.status": "Status",
   "common.type": "Typ",
   "common.price": "Pris",
+  "common.showList": "Visa lista",
+  "common.hideList": "Dölj lista",
   "common.guests": "gäster",
   "common.date": "Datum",
   "common.noResults": "Inga resultat hittades.",
