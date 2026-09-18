@@ -302,14 +302,59 @@ describe("OffersManager: offer confirmation forwards kitchen details", () => {
     expect(insertedKitchenOrders.some((o) => o.reservation_id === "r-3")).toBe(false);
   });
 
-  it("writes no kitchen lines when the offer has no menu", async () => {
-    currentOffers = [baseOffer({ id: "offer-kitchen-3", menu: "   " })];
+  /**
+   * Regression: an offer with nothing to cook must behave like a plain offer.
+   * Accepting it creates exactly one reservation, unchanged, and the Kitchen
+   * tab is never touched (not even an empty insert).
+   */
+  describe.each([
+    ["missing menu", undefined],
+    ["null menu", null],
+    ["empty menu", ""],
+    ["spaces only", "   "],
+    ["blank lines and tabs only", "\n \t\n\n  \n"],
+    ["bullet markers only", "-\n*\n• \n"],
+  ])("offer with %s", (_label, menu) => {
+    it("creates one unchanged reservation and no kitchen order lines", async () => {
+      const offer = baseOffer({ id: `offer-kitchen-none-${_label}`, menu: menu as any });
+      currentOffers = [offer];
 
-    await confirmOffer();
+      await confirmOffer();
 
-    expect(insertedReservations).toHaveLength(1);
-    expect(insertedKitchenOrders).toHaveLength(0);
-    expect(toast.warning).not.toHaveBeenCalled();
+      // Exactly one reservation, carrying the offer's data untouched.
+      expect(insertedReservations).toHaveLength(1);
+      const main = insertedReservations[0];
+      expect(main).toMatchObject({
+        tenant_id: TENANT_ID,
+        reservation_type: "venue",
+        status: "confirmed",
+        date: offer.event_date,
+        start_time: "17:00:00",
+        end_time: "23:00:00",
+        guest_name: offer.guest_name,
+        guest_email: offer.guest_email,
+        guest_phone: offer.guest_phone,
+        guests_count: offer.guests_count,
+        room_type: offer.event_space,
+        event_type: offer.event_type,
+        special_requests: offer.special_requests,
+        language: "en",
+        price_eur: 450,
+      });
+
+      // No kitchen rows, and the kitchen table was never written to at all.
+      expect(insertedKitchenOrders).toHaveLength(0);
+      const { supabase } = await import("@/integrations/supabase/client");
+      const tables = (supabase.from as any).mock.calls.map((c: any[]) => c[0]);
+      expect(tables).not.toContain("kitchen_orders");
+
+      // The offer is confirmed normally, with no warning about the kitchen.
+      expect(updateOfferMutate).toHaveBeenCalledWith(
+        expect.objectContaining({ id: offer.id, status: "confirmed" }),
+      );
+      expect(toast.warning).not.toHaveBeenCalled();
+      expect(toast.error).not.toHaveBeenCalled();
+    });
   });
 
   it("keeps the reservation and warns when the kitchen lines cannot be saved", async () => {
