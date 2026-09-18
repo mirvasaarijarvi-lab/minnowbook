@@ -72,3 +72,34 @@ describe("empty menu field on one function", () => {
     expect(preview.legs[0].lines).toHaveLength(1);
   });
 });
+
+describe("mapping shown before anything is typed", () => {
+  it("names the receiving kitchen order for every function, empty or not", () => {
+    const preview = buildKitchenPreview([
+      { key: "main", name: "Event space", reservationType: "venue" },
+      { key: "restaurant", name: "Restaurant", reservationType: "restaurant" },
+      { key: "guesthouse", name: "Rooms", reservationType: "guesthouse" },
+    ]);
+    expect(preview.legs.map((l) => [l.name, l.routeName, l.ownKitchenOrder])).toEqual([
+      ["Event space", "Event space", true],
+      ["Restaurant", "Restaurant", true],
+      ["Rooms", "Restaurant", false],
+    ]);
+  });
+
+  it("falls back to the event booking when there is no dining one", () => {
+    const preview = buildKitchenPreview([
+      { key: "main", name: "Event space", reservationType: "venue" },
+      { key: "guesthouse", name: "Rooms", reservationType: "guesthouse" },
+    ]);
+    expect(preview.legs[1].routeName).toBe("Event space");
+  });
+
+  it("reports no receiver when the offer has no dining or event booking", () => {
+    const preview = buildKitchenPreview([
+      { key: "guesthouse", name: "Rooms", reservationType: "guesthouse" },
+    ]);
+    expect(preview.legs[0].routeKey).toBeNull();
+    expect(preview.legs[0].routeName).toBeNull();
+  });
+});
