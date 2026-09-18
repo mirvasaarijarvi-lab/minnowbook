@@ -49,6 +49,20 @@ const Pricing = () => {
         t("pricing.businessF4"),
       ],
     },
+    {
+      name: t("pricing.enterpriseName"),
+      price: 0,
+      priceLabel: t("pricing.enterprisePrice"),
+      description: t("pricing.enterpriseDesc"),
+      reservationTypes: t("pricing.enterpriseTypes"),
+      staffUsers: t("pricing.enterpriseStaff"),
+      ctaLabel: t("pricing.enterpriseCta"),
+      ctaHref: "/support?contact=1",
+      features: [
+        t("pricing.enterpriseF1"), t("pricing.enterpriseF2"), t("pricing.enterpriseF3"),
+        t("pricing.enterpriseF4"),
+      ],
+    },
   ];
 
   const faqs = [
@@ -60,22 +74,22 @@ const Pricing = () => {
   ];
 
   const comparisonRows = [
-    [t("pricing.monthlyPrice"), "€19", "€59", "€179"],
-    [t("pricing.freeTrial"), t("pricing.days30"), t("pricing.days30"), t("pricing.days30")],
-    [t("pricing.sitesLocations"), "1", "1", t("pricing.unlimited")],
-    [t("pricing.reservationTypes"), "2", t("pricing.all"), t("pricing.all")],
-    [t("pricing.operationTypes"), "2", t("pricing.onePerResType"), t("pricing.unlimited")],
-    [t("pricing.resourcesPerType"), t("pricing.basicResourcesTotal"), "1", t("pricing.unlimited")],
-    [t("pricing.staffUsers"), "1 to 5", t("pricing.proStaff"), t("pricing.unlimited")],
-    [t("pricing.brandedBooking"), "✓", "✓", "✓"],
-    [t("pricing.defaultTemplates"), "✓", "✓", "✓"],
-    [t("pricing.customTemplates"), "—", "✓", "✓"],
-    [t("pricing.multiLanguage"), "✓", "✓", "✓"],
-    [t("pricing.multisiteManagement"), "—", "—", "✓"],
-    [t("pricing.offers"), "✓", "✓", "✓"],
-    [t("pricing.crossReservations"), "✓", "✓", "✓"],
-    [t("pricing.analyticsReports"), t("pricing.basic"), t("pricing.advanced"), t("pricing.advanced")],
-    [t("pricing.supportLevel"), "AI chatbot", "AI chatbot", t("pricing.responseTime24h")],
+    [t("pricing.monthlyPrice"), "€19", "€59", "€179", t("pricing.byOffer")],
+    [t("pricing.freeTrial"), t("pricing.days30"), t("pricing.days30"), t("pricing.days30"), "—"],
+    [t("pricing.sitesLocations"), "1", "1", t("pricing.unlimited"), t("pricing.unlimited")],
+    [t("pricing.reservationTypes"), "2", t("pricing.all"), t("pricing.all"), t("pricing.all")],
+    [t("pricing.operationTypes"), "2", t("pricing.onePerResType"), t("pricing.unlimited"), t("pricing.unlimited")],
+    [t("pricing.resourcesPerType"), t("pricing.basicResourcesTotal"), "1", t("pricing.unlimited"), t("pricing.unlimited")],
+    [t("pricing.staffUsers"), "1 to 5", t("pricing.proStaff"), "50", t("pricing.unlimited")],
+    [t("pricing.brandedBooking"), "✓", "✓", "✓", "✓"],
+    [t("pricing.defaultTemplates"), "✓", "✓", "✓", "✓"],
+    [t("pricing.customTemplates"), "—", "✓", "✓", "✓"],
+    [t("pricing.multiLanguage"), "✓", "✓", "✓", "✓"],
+    [t("pricing.multisiteManagement"), "—", "—", "✓", "✓"],
+    [t("pricing.offers"), "✓", "✓", "✓", "✓"],
+    [t("pricing.crossReservations"), "✓", "✓", "✓", "✓"],
+    [t("pricing.analyticsReports"), t("pricing.basic"), t("pricing.advanced"), t("pricing.advanced"), t("pricing.advanced")],
+    [t("pricing.supportLevel"), "AI chatbot", "AI chatbot", t("pricing.responseTime24h"), t("pricing.responseTime24h")],
   ];
 
   const highlightFeatures = [t("pricing.sitesLocations"), t("pricing.reservationTypes"), t("pricing.operationTypes"), t("pricing.resourcesPerType")];
@@ -84,12 +98,12 @@ const Pricing = () => {
     <div className="min-h-screen bg-background flex flex-col">
       <SEOHead
         title="MimmoBook Pricing, Plans from €19/month (VAT included)"
-        description="Compare MimmoBook plans: Basic €19, Professional €59, Business €179/mo (VAT included). 30-day free trial, branded booking pages and automated emails."
+        description="Compare MimmoBook plans: Basic €19, Professional €59, Business €179/mo (VAT included) and Enterprise by offer. 30-day free trial and branded booking pages."
         path="/pricing"
         keywords="booking software pricing, barber booking software price, hairdresser booking system cost, massage therapist booking app, personal trainer scheduling price, bakery order system, no commission booking"
         jsonLd={[
           faqSchema([
-            { question: "How much does MimmoBook cost?", answer: "MimmoBook offers three plans: Basic at €19/month, Professional at €59/month, and Business at €179/month. All prices include VAT." },
+            { question: "How much does MimmoBook cost?", answer: "MimmoBook offers four plans: Basic at €19/month, Professional at €59/month, Business at €179/month, and Enterprise, which is priced per offer. All listed prices include VAT." },
             { question: "Is there a free trial?", answer: "Yes, all MimmoBook plans include a 30-day free trial with full access to features." },
             { question: "Can I change plans later?", answer: "Yes, you can upgrade or downgrade your plan at any time from the dashboard." },
           ]),
@@ -117,7 +131,7 @@ const Pricing = () => {
       <section className="pb-20">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-serif font-bold text-foreground text-center mb-12">{t("pricing.plansTitle")}</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
             {tiers.map((tier, i) => (
               <PricingTier key={tier.name} {...tier} delay={i * 100} />
             ))}
@@ -133,17 +147,18 @@ const Pricing = () => {
           </h2>
 
           <div className="max-w-4xl mx-auto overflow-x-auto -mx-4 px-4">
-            <table className="w-full text-sm min-w-[600px]">
+            <table className="w-full text-sm min-w-[720px]">
               <thead>
                 <tr className="border-b border-border">
                   <th className="text-left py-4 pr-4 font-sans font-semibold text-muted-foreground">{t("pricing.feature")}</th>
                   <th className="text-center py-4 px-3 font-serif font-semibold text-foreground">Basic</th>
                   <th className="text-center py-4 px-3 font-serif font-semibold text-foreground">Pro</th>
                   <th className="text-center py-4 px-3 font-serif font-semibold text-foreground">Business</th>
+                  <th className="text-center py-4 px-3 font-serif font-semibold text-foreground">Enterprise</th>
                 </tr>
               </thead>
               <tbody>
-                {comparisonRows.map(([feature, basic, pro, business]) => {
+                {comparisonRows.map(([feature, basic, pro, business, enterprise]) => {
                   const isHighlight = highlightFeatures.includes(feature);
                   return (
                     <tr key={feature} className={`border-b border-border/50 ${isHighlight ? "bg-accent/5" : ""}`}>
@@ -151,6 +166,7 @@ const Pricing = () => {
                       <td className="py-3 px-3 text-center text-muted-foreground">{basic}</td>
                       <td className={`py-3 px-3 text-center font-medium ${isHighlight ? "text-accent" : "text-foreground"}`}>{pro}</td>
                       <td className={`py-3 px-3 text-center font-medium ${isHighlight ? "text-accent" : "text-foreground"}`}>{business}</td>
+                      <td className={`py-3 px-3 text-center font-medium ${isHighlight ? "text-accent" : "text-foreground"}`}>{enterprise}</td>
                     </tr>
                   );
                 })}

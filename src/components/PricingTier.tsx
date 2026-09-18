@@ -17,11 +17,16 @@ interface PricingTierProps {
   isPopular?: boolean;
   delay?: number;
   priceId?: string;
+  /** Replaces the "€NN /month" block, e.g. "By offer" for Enterprise. */
+  priceLabel?: string;
+  /** Replaces the subscribe button with a link, e.g. to request an offer. */
+  ctaLabel?: string;
+  ctaHref?: string;
 }
 
 const PricingTier = ({
   name, price, description, features, reservationTypes, staffUsers,
-  isPopular = false, delay = 0, priceId,
+  isPopular = false, delay = 0, priceId, priceLabel, ctaLabel, ctaHref,
 }: PricingTierProps) => {
   const t = useT();
   const [loading, setLoading] = useState(false);
@@ -87,11 +92,19 @@ const PricingTier = ({
       </div>
 
       <div className="mb-6">
-        <div className="flex items-baseline gap-1">
-          <span className="text-4xl font-serif font-bold text-foreground">€{price}</span>
-          <span className="text-muted-foreground text-sm">{t("pricing.perMonth")}</span>
-        </div>
-        <p className="text-xs text-muted-foreground mt-1">{t("pricing.trialIncluded")} · Incl. VAT</p>
+        {priceLabel ? (
+          <div className="flex items-baseline gap-1">
+            <span className="text-3xl font-serif font-bold text-foreground">{priceLabel}</span>
+          </div>
+        ) : (
+          <>
+            <div className="flex items-baseline gap-1">
+              <span className="text-4xl font-serif font-bold text-foreground">€{price}</span>
+              <span className="text-muted-foreground text-sm">{t("pricing.perMonth")}</span>
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">{t("pricing.trialIncluded")} · Incl. VAT</p>
+          </>
+        )}
       </div>
 
       <div className="mb-6 space-y-2 pb-6 border-b border-border">
@@ -116,6 +129,11 @@ const PricingTier = ({
         ))}
       </ul>
 
+      {ctaLabel && ctaHref ? (
+        <Button variant="default" size="lg" className="w-full" asChild>
+          <Link to={ctaHref}>{ctaLabel}</Link>
+        </Button>
+      ) : (
       <Button
         variant={isPopular ? "hero" : "default"}
         size="lg"
@@ -132,6 +150,7 @@ const PricingTier = ({
           t("common.startFreeTrial")
         )}
       </Button>
+      )}
 
       {loading && (
         <p className="text-xs text-accent text-center mt-3 animate-pulse font-medium">
