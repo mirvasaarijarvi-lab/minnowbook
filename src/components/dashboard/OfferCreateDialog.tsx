@@ -452,8 +452,8 @@ const OfferCreateDialog = ({ open, onOpenChange, editOffer }: Props) => {
                               </span>
                               <span className="text-muted-foreground">
                                 {line.category === "drink"
-                                  ? t("kitchen.categoryDrink")
-                                  : t("kitchen.categoryFood")}
+                                  ? t("kitchen.cat.drink")
+                                  : t("kitchen.cat.food")}
                               </span>
                               {line.notes && (
                                 <span className="text-muted-foreground">({line.notes})</span>
