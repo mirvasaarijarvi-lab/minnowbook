@@ -3760,6 +3760,7 @@ const en: TranslationKeys = {
   "pricing.basicTypes": "2 types",
   "pricing.basicStaff": "1 to 5",
   "pricing.basicResourcesTotal": "2 total",
+  "pricing.proResourcesPerType": "Up to 5",
   "pricing.proName": "Pro",
   "pricing.proDesc": "For businesses offering hotel, restaurant and event venue services in one place.",
   "pricing.proTypes": "Up to 5 reservation types in any combination (e.g. two restaurants and one hotel)",
