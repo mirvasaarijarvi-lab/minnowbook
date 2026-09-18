@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import Logo from "@/components/Logo";
 import MarketingFooter from "@/components/MarketingFooter";
 import SEOHead, { breadcrumbSchema } from "@/components/SEOHead";
+import ProtectedEmail from "@/components/ProtectedEmail";
+
 
 const rows: { category: string; data: string; period: string }[] = [
   { category: "Active reservations", data: "Guest name, contact, date, resource, notes", period: "Until the tenant deletes them or closes the account" },
