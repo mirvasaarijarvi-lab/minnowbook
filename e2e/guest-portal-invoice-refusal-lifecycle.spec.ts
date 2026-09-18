@@ -136,6 +136,9 @@ const announced = (page: Page) =>
   );
 
 test.describe("Invoice refusal notice lifecycle", () => {
+  // Full app loads in parallel starve the preview server in CI sandboxes.
+  test.describe.configure({ mode: "serial" });
+
   test("replaces, announces and clears refusals across retries and bookings", async ({ page }) => {
     const state = { outcome: "invoiced" as Outcome, attempts: 0 };
     await mockPortal(page, state);
