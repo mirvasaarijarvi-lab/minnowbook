@@ -256,6 +256,7 @@ const CrossBookingAuditPanel = () => {
               </TableBody>
             </Table>
           </div>
+          </CollapsibleSection>
         )}
       </CardContent>
     </Card>
