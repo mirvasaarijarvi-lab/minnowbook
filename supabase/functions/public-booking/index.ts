@@ -704,7 +704,6 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
       // ../_shared/booking-dedup.ts so they are unit tested in isolation.
       const dupQuery = applyDedupFilters(baseDupQuery, {
         start_time,
-        resource_id,
         room_type,
         check_out_date,
         guests_count,
