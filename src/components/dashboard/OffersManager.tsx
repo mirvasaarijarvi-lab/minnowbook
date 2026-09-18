@@ -352,14 +352,14 @@ const OffersManager = () => {
       publishConfirmStatus(
         composeOfferStatusMessage([
           t("offers.confirmedSuccess"),
-          kitchenFailed ? t("offers.kitchenOrdersFailed") : kitchenDescription,
-          missingPrice.length > 0 ? t("offers.confirmedWithoutPrice") : null,
+          kitchenFailed ? t("offers.kitchenOrdersFailedAnnounce") : kitchenDescription,
+          missingPrice.length > 0 ? t("offers.confirmedWithoutPriceAnnounce") : null,
         ]),
         kitchenFailed || missingPrice.length > 0,
       );
     } catch {
       toast.error(t("offers.confirmError"));
-      publishConfirmStatus(t("offers.confirmError"), true);
+      publishConfirmStatus(t("offers.confirmErrorAnnounce"), true);
     }
   };
 
@@ -372,7 +372,7 @@ const OffersManager = () => {
       plan = await buildConfirmPlan(offer);
     } catch {
       toast.error(t("offers.confirmError"));
-      publishConfirmStatus(t("offers.confirmError"), true);
+      publishConfirmStatus(t("offers.confirmErrorAnnounce"), true);
       return;
     }
 

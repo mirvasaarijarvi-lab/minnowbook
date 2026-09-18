@@ -1894,6 +1894,9 @@ type TranslationKeys = {
   "offers.confirmedSuccess": string;
   "offers.confirmedWithoutPrice": string;
   "offers.statusRegionLabel": string;
+  "offers.kitchenOrdersFailedAnnounce": string;
+  "offers.confirmErrorAnnounce": string;
+  "offers.confirmedWithoutPriceAnnounce": string;
   "offers.kitchenOrdersFailed": string;
   "offers.confirmedKitchenSentOne": string;
   "offers.confirmedKitchenSent": string;
@@ -3974,6 +3977,9 @@ const en: TranslationKeys = {
   "offers.confirmedSuccess": "Offer confirmed",
   "offers.confirmedWithoutPrice": "Some bookings were saved without a price. Add the price before invoicing them.",
   "offers.statusRegionLabel": "Latest offer result",
+  "offers.kitchenOrdersFailedAnnounce": "The bookings were saved, but the food and drink lines could not be sent to the Kitchen tab. Open the Kitchen tab and add them by hand.",
+  "offers.confirmErrorAnnounce": "The offer could not be confirmed and no bookings were created. Please check the offer details and try again.",
+  "offers.confirmedWithoutPriceAnnounce": "Some bookings were saved without a price. Open each booking and add the price before invoicing.",
   "offers.kitchenOrdersFailed": "The bookings were saved, but the menu could not be sent to the kitchen. Please add it in the Kitchen tab.",
   "offers.confirmedKitchenSentOne": "1 food and drink line from the offer was sent to the Kitchen tab.",
   "offers.confirmedKitchenSent": "{count} food and drink lines from the offer were sent to the Kitchen tab.",
@@ -6051,6 +6057,9 @@ const fi: TranslationKeys = {
   "offers.confirmedSuccess": "Tarjous vahvistettu",
   "offers.confirmedWithoutPrice": "Osa varauksista tallennettiin ilman hintaa. Lisää hinta ennen laskutusta.",
   "offers.statusRegionLabel": "Tarjouksen viimeisin tulos",
+  "offers.kitchenOrdersFailedAnnounce": "Varaukset tallennettiin, mutta ruoka- ja juomarivejä ei saatu vietyä Keittiö-välilehdelle. Avaa Keittiö-välilehti ja lisää ne käsin.",
+  "offers.confirmErrorAnnounce": "Tarjousta ei voitu vahvistaa, eikä varauksia luotu. Tarkista tarjouksen tiedot ja yritä uudelleen.",
+  "offers.confirmedWithoutPriceAnnounce": "Osa varauksista tallennettiin ilman hintaa. Avaa jokainen varaus ja lisää hinta ennen laskutusta.",
   "offers.kitchenOrdersFailed": "Varaukset tallennettiin, mutta menua ei saatu vietyä keittiölle. Lisää se Keittiö-välilehdellä.",
   "offers.confirmedKitchenSentOne": "Tarjouksesta vietiin 1 ruoka- ja juomarivi Keittiö-välilehdelle.",
   "offers.confirmedKitchenSent": "Tarjouksesta vietiin {count} ruoka- ja juomariviä Keittiö-välilehdelle.",
@@ -8128,6 +8137,9 @@ const sv: TranslationKeys = {
   "offers.confirmedSuccess": "Erbjudande bekräftat",
   "offers.confirmedWithoutPrice": "Vissa bokningar sparades utan pris. Lägg till priset innan du fakturerar dem.",
   "offers.statusRegionLabel": "Senaste resultat för erbjudandet",
+  "offers.kitchenOrdersFailedAnnounce": "Bokningarna sparades, men mat- och dryckesraderna kunde inte skickas till Kök-fliken. Öppna Kök-fliken och lägg till dem manuellt.",
+  "offers.confirmErrorAnnounce": "Erbjudandet kunde inte bekräftas och inga bokningar skapades. Kontrollera uppgifterna och försök igen.",
+  "offers.confirmedWithoutPriceAnnounce": "Vissa bokningar sparades utan pris. Öppna varje bokning och lägg till priset innan fakturering.",
   "offers.kitchenOrdersFailed": "Bokningarna sparades, men menyn kunde inte skickas till köket. Lägg till den i Kök-fliken.",
   "offers.confirmedKitchenSentOne": "1 mat- och dryckesrad från erbjudandet skickades till Kök-fliken.",
   "offers.confirmedKitchenSent": "{count} mat- och dryckesrader från erbjudandet skickades till Kök-fliken.",
