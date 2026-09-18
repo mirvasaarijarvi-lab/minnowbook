@@ -63,6 +63,7 @@ const COVERED_TABLES = new Set<string>([
   "site_settings",
   "site_users",
   "sites",
+  "special_occasions",
   "support_requests",
   "tenant_email_templates",
   "tenant_opening_hours",
