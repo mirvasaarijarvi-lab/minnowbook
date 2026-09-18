@@ -14,10 +14,10 @@ import {
 describe("tier-limits: Professional tier", () => {
   const tier = "professional";
 
-  it("exposes maxReservationTypes = 5 with no per-type cap", () => {
+  it("exposes maxReservationTypes = 5 and 5 resources per type", () => {
     const limits = getTierLimits(tier);
     expect(limits.maxReservationTypes).toBe(5);
-    expect(limits.maxResourcesPerType).toBeNull();
+    expect(limits.maxResourcesPerType).toBe(5);
     expect(limits.maxResourcesTotal).toBeNull();
   });
 
