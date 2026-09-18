@@ -88,9 +88,13 @@ const SEOHead = ({ title, description, path, keywords, type = "website", image, 
       ? (image.startsWith("http") ? image : `${BASE_URL}${image}`)
       : `${BASE_URL}/og-image.png`;
 
+    // Share copy: falls back to the search title and description.
+    const shareTitle = ogTitle || title;
+    const shareDescription = ogDescription || description;
+
     // Open Graph
-    setMeta("property", "og:title", title);
-    setMeta("property", "og:description", description);
+    setMeta("property", "og:title", shareTitle);
+    setMeta("property", "og:description", shareDescription);
     setMeta("property", "og:url", url);
     setMeta("property", "og:type", type);
     setMeta("property", "og:image", resolvedImage);
