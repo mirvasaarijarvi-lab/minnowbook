@@ -8127,6 +8127,7 @@ const sv: TranslationKeys = {
   "offers.fillRequired": "Fyll i alla obligatoriska fält",
   "offers.confirmedSuccess": "Erbjudande bekräftat",
   "offers.confirmedWithoutPrice": "Vissa bokningar sparades utan pris. Lägg till priset innan du fakturerar dem.",
+  "offers.statusRegionLabel": "Senaste resultat för erbjudandet",
   "offers.kitchenOrdersFailed": "Bokningarna sparades, men menyn kunde inte skickas till köket. Lägg till den i Kök-fliken.",
   "offers.confirmedKitchenSentOne": "1 mat- och dryckesrad från erbjudandet skickades till Kök-fliken.",
   "offers.confirmedKitchenSent": "{count} mat- och dryckesrader från erbjudandet skickades till Kök-fliken.",
