@@ -18,6 +18,7 @@ import {
   describeOfferReservationPrice,
   pickOfferResource,
 } from "@/lib/offer-reservation-pricing";
+import { offerKitchenMessage } from "@/lib/offer-kitchen-message";
 import { buildKitchenOrderRows, type OfferMenuLeg } from "@/lib/offer-kitchen-orders";
 import { announceOfferStatus, composeOfferStatusMessage } from "@/lib/offer-status-announcer";
 
@@ -319,10 +320,7 @@ const OffersManager = () => {
       });
 
       const missingPrice = plan.legs.filter((l) => (prices[l.key] ?? null) == null);
-      const kitchenDescription =
-        kitchenRows.length > 0
-          ? t("offers.confirmedKitchenSent").replace("{count}", String(kitchenRows.length))
-          : t("offers.confirmedNoKitchen");
+      const kitchenDescription = offerKitchenMessage(kitchenRows.length, (key) => t(key));
       toast.success(t("offers.confirmedSuccess"), { description: kitchenDescription });
       if (missingPrice.length > 0) {
         toast.warning(t("offers.confirmedWithoutPrice"));
