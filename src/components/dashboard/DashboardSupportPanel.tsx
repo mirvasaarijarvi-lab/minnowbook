@@ -383,14 +383,14 @@ const DashboardSupportPanel = () => {
                     value={escalateSubject}
                     onChange={(e) => setEscalateSubject(e.target.value)}
                     placeholder={t("help.subjectPlaceholder" as TranslationKey)}
-                    className="w-full text-sm bg-secondary/30 border border-border rounded-lg px-3 py-2 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                    className="w-full text-sm bg-secondary/30 border border-border rounded-lg px-3 py-2 text-foreground placeholder:text-muted-foreground focus:outline-hidden focus:ring-1 focus:ring-ring"
                   />
                   <textarea
                     value={chatInput}
                     onChange={(e) => setChatInput(e.target.value)}
                     placeholder={t("help.describePlaceholder" as TranslationKey)}
                     rows={2}
-                    className="w-full text-sm bg-secondary/30 border border-border rounded-lg px-3 py-2 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring resize-none"
+                    className="w-full text-sm bg-secondary/30 border border-border rounded-lg px-3 py-2 text-foreground placeholder:text-muted-foreground focus:outline-hidden focus:ring-1 focus:ring-ring resize-none"
                   />
                   <Button
                     size="sm"
@@ -415,7 +415,7 @@ const DashboardSupportPanel = () => {
                     value={chatInput}
                     onChange={(e) => setChatInput(e.target.value)}
                     placeholder={t("help.typePlaceholder" as TranslationKey)}
-                    className="flex-1 text-sm bg-secondary/30 border border-border rounded-lg px-3 py-2 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                    className="flex-1 text-sm bg-secondary/30 border border-border rounded-lg px-3 py-2 text-foreground placeholder:text-muted-foreground focus:outline-hidden focus:ring-1 focus:ring-ring"
                     disabled={isLoading}
                   />
                   <Button type="submit" size="sm" variant="default" disabled={!chatInput.trim() || isLoading} className="shrink-0">

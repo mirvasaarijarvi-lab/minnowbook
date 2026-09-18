@@ -504,14 +504,14 @@ const SupportChatWidget = ({ businessTier = false }: SupportChatWidgetProps) => 
                       value={escalateSubject}
                       onChange={(e) => setEscalateSubject(e.target.value)}
                       placeholder={t("aid.subjectPlaceholder" as TranslationKey)}
-                      className="w-full text-sm bg-secondary/30 border border-border rounded-lg px-3 py-2 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                      className="w-full text-sm bg-secondary/30 border border-border rounded-lg px-3 py-2 text-foreground placeholder:text-muted-foreground focus:outline-hidden focus:ring-1 focus:ring-ring"
                     />
                     <textarea
                       value={input}
                       onChange={(e) => setInput(e.target.value)}
                       placeholder={t("aid.messagePlaceholder" as TranslationKey)}
                       rows={3}
-                      className="w-full text-sm bg-secondary/30 border border-border rounded-lg px-3 py-2 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring resize-none"
+                      className="w-full text-sm bg-secondary/30 border border-border rounded-lg px-3 py-2 text-foreground placeholder:text-muted-foreground focus:outline-hidden focus:ring-1 focus:ring-ring resize-none"
                     />
                     <Button
                       size="sm"
@@ -536,7 +536,7 @@ const SupportChatWidget = ({ businessTier = false }: SupportChatWidgetProps) => 
                       value={input}
                       onChange={(e) => setInput(e.target.value)}
                       placeholder={t("aid.typePlaceholder" as TranslationKey)}
-                      className="flex-1 text-sm bg-secondary/30 border border-border rounded-lg px-3 py-2 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                      className="flex-1 text-sm bg-secondary/30 border border-border rounded-lg px-3 py-2 text-foreground placeholder:text-muted-foreground focus:outline-hidden focus:ring-1 focus:ring-ring"
                       disabled={isLoading}
                     />
                     <Button
