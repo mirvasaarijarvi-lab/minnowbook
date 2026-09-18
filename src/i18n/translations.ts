@@ -3973,6 +3973,7 @@ const en: TranslationKeys = {
   "offers.fillRequired": "Please fill in all required fields",
   "offers.confirmedSuccess": "Offer confirmed",
   "offers.confirmedWithoutPrice": "Some bookings were saved without a price. Add the price before invoicing them.",
+  "offers.statusRegionLabel": "Latest offer result",
   "offers.kitchenOrdersFailed": "The bookings were saved, but the menu could not be sent to the kitchen. Please add it in the Kitchen tab.",
   "offers.confirmedKitchenSentOne": "1 food and drink line from the offer was sent to the Kitchen tab.",
   "offers.confirmedKitchenSent": "{count} food and drink lines from the offer were sent to the Kitchen tab.",
