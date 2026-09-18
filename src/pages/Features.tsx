@@ -2,8 +2,12 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   ArrowRight, CalendarCheck, Palette, Users, Globe, BarChart3, Mail,
-  Shield, Clock, Smartphone, Languages, CreditCard, Settings,
+  Shield, Clock, Smartphone, Languages, CreditCard,
   Bell, Tag, Layers, Building2, FileText, Link2, FileOutput,
+  UserCheck, ListOrdered, CalendarClock, Star, ChefHat, BookOpen,
+  Printer, CalendarSync, PartyPopper, Receipt, TrendingUp, PieChart,
+  MailCheck, KeyRound, ScrollText, LockKeyhole, DatabaseZap, Share2,
+  Moon, ListChecks, LifeBuoy,
 } from "lucide-react";
 import MarketingHeader from "@/components/MarketingHeader";
 import MarketingFooter from "@/components/MarketingFooter";
