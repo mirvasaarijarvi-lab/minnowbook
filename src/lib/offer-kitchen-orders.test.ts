@@ -115,6 +115,22 @@ describe("buildKitchenOrderRows", () => {
     ]);
   });
 
+  it("gives each kitchen function its own order from its own menu field", () => {
+    const rows = buildKitchenOrderRows("t-1", [
+      { reservationId: "r-venue", reservationType: "venue", menu: "Welcome bites\nSparkling wine" },
+      { reservationId: "r-rest", reservationType: "restaurant", menu: "Roast beef\nCoffee" },
+      { reservationId: "r-room", reservationType: "guesthouse", menu: "Breakfast basket" },
+    ]);
+    expect(rows.map((r) => [r.reservation_id, r.item_name, r.sort_order])).toEqual([
+      ["r-venue", "Welcome bites", 0],
+      ["r-venue", "Sparkling wine", 1],
+      ["r-rest", "Roast beef", 0],
+      ["r-rest", "Coffee", 1],
+      // The room is not shown in the Kitchen tab, so its field joins the dining leg.
+      ["r-rest", "Breakfast basket", 2],
+    ]);
+  });
+
   it("writes nothing when there is no menu or no kitchen leg", () => {
     expect(buildKitchenOrderRows("t-1", [
       { reservationId: "r-1", reservationType: "venue", menu: null },
