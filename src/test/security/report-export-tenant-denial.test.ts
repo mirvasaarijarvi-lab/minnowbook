@@ -11,7 +11,11 @@
  * Fully offline: no database, no network.
  */
 import { describe, it, expect } from "vitest";
-import { buildReportCsv, reportCsvFileName, sanitizeCsvCell } from "@/lib/report-csv-export";
+import {
+  buildReportCsv,
+  reportCsvFileName,
+  sanitizeCsvCell,
+} from "@/lib/report-csv-export";
 import { buildReportPdf } from "@/lib/reportsPdf";
 import type { PostgrestError } from "@supabase/supabase-js";
 import {
@@ -23,8 +27,15 @@ import {
   rowsFromDenial,
   type ExportSurface,
 } from "./fixtures/report-export-matrix";
-import { expectReadDenied, expectNoForeignTenantRows, type QueryContext } from "./rls-assert";
-import { applyReportGuard, WITHHELD_NOTICE } from "./fixtures/report-render-guard";
+import {
+  expectReadDenied,
+  expectNoForeignTenantRows,
+  type QueryContext,
+} from "./rls-assert";
+import {
+  applyReportGuard,
+  WITHHELD_NOTICE,
+} from "./fixtures/report-render-guard";
 import type { TenantGuardRecord } from "./fixtures/tenant-guard-record";
 import { renderHtml, type ReportPayload } from "./rls-report-reporter";
 
@@ -58,9 +69,16 @@ const buildExport = (
   surface: ExportSurface,
   rows: string[][],
 ): { text: string; fileName: string } => {
-  const fileName = reportCsvFileName(surface.fileNamePrefix, "1.9.2026 - 30.9.2026", "Own Site");
+  const fileName = reportCsvFileName(
+    surface.fileNamePrefix,
+    "1.9.2026 - 30.9.2026",
+    "Own Site",
+  );
   if (surface.format === "csv") {
-    return { text: buildReportCsv(surface.headers, [...rows, ...surface.summaryRows]), fileName };
+    return {
+      text: buildReportCsv(surface.headers, [...rows, ...surface.summaryRows]),
+      fileName,
+    };
   }
   return { text: pdfText(surface, rows, fileName), fileName };
 };
@@ -82,7 +100,9 @@ describe("report exports on tenant deny cases", () => {
   it("covers both export formats", () => {
     expect(EXPORT_SURFACES.some((s) => s.format === "csv")).toBe(true);
     expect(EXPORT_SURFACES.some((s) => s.format === "pdf")).toBe(true);
-    expect(new Set(EXPORT_SURFACES.map((s) => s.label)).size).toBe(EXPORT_SURFACES.length);
+    expect(new Set(EXPORT_SURFACES.map((s) => s.label)).size).toBe(
+      EXPORT_SURFACES.length,
+    );
   });
 
   for (const surface of EXPORT_SURFACES) {
@@ -103,7 +123,9 @@ describe("report exports on tenant deny cases", () => {
           // 3. The export carries no foreign value anywhere, file name included.
           const { text, fileName } = buildExport(surface, rows);
           for (const secret of FOREIGN_EXPORT_METADATA) {
-            expect(text, `${surface.label} leaked ${secret}`).not.toContain(secret);
+            expect(text, `${surface.label} leaked ${secret}`).not.toContain(
+              secret,
+            );
             expect(fileName).not.toContain(secret);
           }
 
@@ -142,7 +164,13 @@ describe("report exports on tenant deny cases", () => {
         expect(() =>
           expectNoForeignTenantRows(
             ctxFor(surface),
-            { data: [{ tenant_id: ACTING_TENANT }, { tenant_id: TARGET_TENANT }], error: null },
+            {
+              data: [
+                { tenant_id: ACTING_TENANT },
+                { tenant_id: TARGET_TENANT },
+              ],
+              error: null,
+            },
             TARGET_TENANT,
           ),
         ).toThrow(new RegExp(surface.table));
@@ -207,7 +235,11 @@ describe("report exports on tenant deny cases", () => {
         skipped: 0,
         durationMs: 12,
       },
-      entries: EXPORT_SURFACES.map((s) => ({ suite, name: s.label, status: "passed" })),
+      entries: EXPORT_SURFACES.map((s) => ({
+        suite,
+        name: s.label,
+        status: "passed",
+      })),
       tenantGuard: [],
     } as unknown as ReportPayload;
     const json = JSON.stringify(payload);

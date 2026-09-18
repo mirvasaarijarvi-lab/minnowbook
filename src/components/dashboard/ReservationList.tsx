@@ -8,17 +8,63 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { CalendarDays, CalendarIcon, User, Mail, Phone, MoreVertical, CheckCircle2, XCircle, Pencil, Receipt, PackageCheck, Coffee, Plus, Building2, Tag, Bell, MailCheck, MailX, Search, Link2, Trash2, ShieldAlert, Download } from "lucide-react";
+import {
+  CalendarDays,
+  CalendarIcon,
+  User,
+  Mail,
+  Phone,
+  MoreVertical,
+  CheckCircle2,
+  XCircle,
+  Pencil,
+  Receipt,
+  PackageCheck,
+  Coffee,
+  Plus,
+  Building2,
+  Tag,
+  Bell,
+  MailCheck,
+  MailX,
+  Search,
+  Link2,
+  Trash2,
+  ShieldAlert,
+  Download,
+} from "lucide-react";
 import { useIsSystemAdmin } from "@/hooks/useIsSystemAdmin";
 import EditReservationDialog from "./EditReservationDialog";
 import ReservationDetailDialog from "./ReservationDetailDialog";
@@ -51,26 +97,45 @@ interface ReservationListProps {
   initialCheckoutToday?: boolean;
 }
 
-const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCheckoutToday }: ReservationListProps) => {
+const ReservationList = ({
+  initialStatusFilter,
+  initialInvoicedFilter,
+  initialCheckoutToday,
+}: ReservationListProps) => {
   const { tenantId, tenant } = useTenant();
   const { selectedSiteId } = useSiteContext();
   const { applySiteFilter, siteIds } = useUserSites();
-  const [viewTab, setViewTab] = useState<"active" | "cancelled">(initialStatusFilter === "cancelled" ? "cancelled" : "active");
+  const [viewTab, setViewTab] = useState<"active" | "cancelled">(
+    initialStatusFilter === "cancelled" ? "cancelled" : "active",
+  );
   const [statusFilter, setStatusFilter] = useState<string>(
-    initialStatusFilter && initialStatusFilter !== "cancelled" ? initialStatusFilter : "all"
+    initialStatusFilter && initialStatusFilter !== "cancelled"
+      ? initialStatusFilter
+      : "all",
   );
   const [typeFilter, setTypeFilter] = useState<string>("all");
-  const [dateFilter, setDateFilter] = useState<string>(initialCheckoutToday ? "all" : "all");
-  const [invoicedFilter, setInvoicedFilter] = useState<string>(initialInvoicedFilter === false ? "uninvoiced" : "all");
-  const [checkoutTodayFilter, setCheckoutTodayFilter] = useState<boolean>(!!initialCheckoutToday);
+  const [dateFilter, setDateFilter] = useState<string>(
+    initialCheckoutToday ? "all" : "all",
+  );
+  const [invoicedFilter, setInvoicedFilter] = useState<string>(
+    initialInvoicedFilter === false ? "uninvoiced" : "all",
+  );
+  const [checkoutTodayFilter, setCheckoutTodayFilter] =
+    useState<boolean>(!!initialCheckoutToday);
   const [specificDate, setSpecificDate] = useState<Date | undefined>(undefined);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [debouncedSearch, setDebouncedSearch] = useState<string>("");
   useEffect(() => {
-    const handle = setTimeout(() => setDebouncedSearch(searchQuery.trim()), 300);
+    const handle = setTimeout(
+      () => setDebouncedSearch(searchQuery.trim()),
+      300,
+    );
     return () => clearTimeout(handle);
   }, [searchQuery]);
-  const [confirmDialog, setConfirmDialog] = useState<{ id: string; action: "confirmed" | "cancelled" } | null>(null);
+  const [confirmDialog, setConfirmDialog] = useState<{
+    id: string;
+    action: "confirmed" | "cancelled";
+  } | null>(null);
   const [sendCancelEmail, setSendCancelEmail] = useState(true);
   const [sendConfirmEmail, setSendConfirmEmail] = useState(true);
   useEffect(() => {
@@ -81,12 +146,29 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
     if (confirmDialog?.action === "confirmed") setSendConfirmEmail(true);
   }, [confirmDialog]);
   const [reminderDialog, setReminderDialog] = useState<string | null>(null);
-  const [editingReservation, setEditingReservation] = useState<any | null>(null);
+  const [editingReservation, setEditingReservation] = useState<any | null>(
+    null,
+  );
   const [detailReservation, setDetailReservation] = useState<any | null>(null);
   const [newReservationOpen, setNewReservationOpen] = useState(false);
-  const [linkedUsedPrompt, setLinkedUsedPrompt] = useState<{ reservationId: string; linkedIds: string[]; linkedNames: string[]; value: boolean } | null>(null);
-  const [linkedInvoicedPrompt, setLinkedInvoicedPrompt] = useState<{ reservationId: string; linkedIds: string[]; linkedNames: string[]; value: boolean } | null>(null);
-  const [linkedCancelPrompt, setLinkedCancelPrompt] = useState<{ reservationId: string; linkedIds: string[]; linkedNames: string[]; suppressEmail: boolean } | null>(null);
+  const [linkedUsedPrompt, setLinkedUsedPrompt] = useState<{
+    reservationId: string;
+    linkedIds: string[];
+    linkedNames: string[];
+    value: boolean;
+  } | null>(null);
+  const [linkedInvoicedPrompt, setLinkedInvoicedPrompt] = useState<{
+    reservationId: string;
+    linkedIds: string[];
+    linkedNames: string[];
+    value: boolean;
+  } | null>(null);
+  const [linkedCancelPrompt, setLinkedCancelPrompt] = useState<{
+    reservationId: string;
+    linkedIds: string[];
+    linkedNames: string[];
+    suppressEmail: boolean;
+  } | null>(null);
   const t = useT();
   const { showRefusal, clearRefusal } = useInvoiceRefusalNotice();
   const tDynamic = useTDynamic();
@@ -106,7 +188,9 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
       if (!tenantId) return null;
       const { data } = await supabase
         .from("tenant_settings")
-        .select("logo_url, business_name, business_email, business_phone, business_address, primary_color")
+        .select(
+          "logo_url, business_name, business_email, business_phone, business_address, primary_color",
+        )
         .eq("tenant_id", tenantId)
         .maybeSingle();
       return data;
@@ -166,7 +250,10 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
     queryKey: ["sites", tenantId],
     queryFn: async () => {
       if (!tenantId) return [];
-      const { data, error } = await supabase.from("sites").select("id, name").eq("tenant_id", tenantId);
+      const { data, error } = await supabase
+        .from("sites")
+        .select("id, name")
+        .eq("tenant_id", tenantId);
       if (error) throw error;
       return data ?? [];
     },
@@ -207,13 +294,42 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
     setPage(0);
     setSelectAllAcrossPages(false);
     setSelectedIds(new Set());
-  }, [tenantId, selectedSiteId, viewTab, statusFilter, typeFilter, dateFilter, invoicedFilter, checkoutTodayFilter, specificDate, debouncedSearch]);
+  }, [
+    tenantId,
+    selectedSiteId,
+    viewTab,
+    statusFilter,
+    typeFilter,
+    dateFilter,
+    invoicedFilter,
+    checkoutTodayFilter,
+    specificDate,
+    debouncedSearch,
+  ]);
 
   const { data: reservationsPage, isLoading } = useQuery({
-    queryKey: ["reservations", tenantId, selectedSiteId, siteIds, viewTab, statusFilter, typeFilter, dateFilter, invoicedFilter, checkoutTodayFilter, specificDate ? format(specificDate, "yyyy-MM-dd") : null, debouncedSearch, page],
+    queryKey: [
+      "reservations",
+      tenantId,
+      selectedSiteId,
+      siteIds,
+      viewTab,
+      statusFilter,
+      typeFilter,
+      dateFilter,
+      invoicedFilter,
+      checkoutTodayFilter,
+      specificDate ? format(specificDate, "yyyy-MM-dd") : null,
+      debouncedSearch,
+      page,
+    ],
     queryFn: async () => {
       if (!tenantId) return { rows: [], total: 0 };
-      let query = supabase.from("reservations").select("*", { count: "exact" }).eq("tenant_id", tenantId).order("date", { ascending: false });
+      let query = supabase
+        .from("reservations")
+        .select("*", { count: "exact" })
+        .eq("tenant_id", tenantId)
+        .order("date", { ascending: false });
       query = applyReservationFilters(query);
       const from = page * PAGE_SIZE;
       const to = from + PAGE_SIZE - 1;
@@ -231,7 +347,10 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
   // "Select all N matching" + bulk delete across the entire result set).
   const fetchAllMatchingIds = async (): Promise<string[]> => {
     if (!tenantId) return [];
-    let query = supabase.from("reservations").select("id").eq("tenant_id", tenantId);
+    let query = supabase
+      .from("reservations")
+      .select("id")
+      .eq("tenant_id", tenantId);
     query = applyReservationFilters(query);
     const { data, error } = await query.limit(10000);
     if (error) throw error;
@@ -254,7 +373,15 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
   });
 
   const updateStatus = useMutation({
-    mutationFn: async ({ id, status, suppressEmail }: { id: string; status: string; suppressEmail?: boolean }) => {
+    mutationFn: async ({
+      id,
+      status,
+      suppressEmail,
+    }: {
+      id: string;
+      status: string;
+      suppressEmail?: boolean;
+    }) => {
       const reservation = reservations?.find((r) => r.id === id);
       const { error } = await supabase
         .from("reservations")
@@ -267,10 +394,19 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
       // `suppressEmail` lets staff cancel without notifying the guest, e.g. for
       // duplicate bookings, internal test rows, or guests who already cancelled
       // out of band by phone.
-      if (reservation && !reservation.no_email_confirm && !suppressEmail && status === "confirmed") {
-        supabase.functions.invoke("send-reminder", {
-          body: { reservationId: id, emailType: "confirmation" },
-        }).catch((err) => console.error("Failed to send confirmation email:", err));
+      if (
+        reservation &&
+        !reservation.no_email_confirm &&
+        !suppressEmail &&
+        status === "confirmed"
+      ) {
+        supabase.functions
+          .invoke("send-reminder", {
+            body: { reservationId: id, emailType: "confirmation" },
+          })
+          .catch((err) =>
+            console.error("Failed to send confirmation email:", err),
+          );
       }
       if (
         reservation &&
@@ -278,9 +414,13 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
         !suppressEmail &&
         status === "cancelled"
       ) {
-        supabase.functions.invoke("send-reminder", {
-          body: { reservationId: id, emailType: "cancellation" },
-        }).catch((err) => console.error("Failed to send cancellation email:", err));
+        supabase.functions
+          .invoke("send-reminder", {
+            body: { reservationId: id, emailType: "cancellation" },
+          })
+          .catch((err) =>
+            console.error("Failed to send cancellation email:", err),
+          );
       }
     },
     onSuccess: async (_data, vars) => {
@@ -299,17 +439,24 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
             .select("id, guest_name, reservation_type, status")
             .in("id", siblingIds)
             .eq("tenant_id", tenantId);
-          const stillActive = (linkedReservations || []).filter((r: any) => r.status !== "cancelled");
+          const stillActive = (linkedReservations || []).filter(
+            (r: any) => r.status !== "cancelled",
+          );
           if (stillActive.length > 0) {
             setLinkedCancelPrompt({
               reservationId: vars.id,
               linkedIds: stillActive.map((r: any) => r.id),
-              linkedNames: stillActive.map((r: any) => `${r.guest_name} (${r.reservation_type})`),
+              linkedNames: stillActive.map(
+                (r: any) => `${r.guest_name} (${r.reservation_type})`,
+              ),
               suppressEmail: !!vars.suppressEmail,
             });
           }
         } catch (err) {
-          console.error("Failed to check linked siblings for cancel propagation:", err);
+          console.error(
+            "Failed to check linked siblings for cancel propagation:",
+            err,
+          );
         }
       }
     },
@@ -321,7 +468,13 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
   // Cancel every still-active sibling in a linked cross-booking group.
   // Mirrors the cancellation email behaviour of the single-row updateStatus.
   const cancelLinkedSiblings = useMutation({
-    mutationFn: async ({ ids, suppressEmail }: { ids: string[]; suppressEmail: boolean }) => {
+    mutationFn: async ({
+      ids,
+      suppressEmail,
+    }: {
+      ids: string[];
+      suppressEmail: boolean;
+    }) => {
       // Fetch rows up-front so we know which ones opted out of cancellation emails.
       const { data: rows, error: fetchErr } = await supabase
         .from("reservations")
@@ -341,8 +494,12 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
         for (const r of rows ?? []) {
           if ((r as any).no_email_cancel) continue;
           supabase.functions
-            .invoke("send-reminder", { body: { reservationId: r.id, emailType: "cancellation" } })
-            .catch((err) => console.error("Failed to send sibling cancellation email:", err));
+            .invoke("send-reminder", {
+              body: { reservationId: r.id, emailType: "cancellation" },
+            })
+            .catch((err) =>
+              console.error("Failed to send sibling cancellation email:", err),
+            );
         }
       }
     },
@@ -360,7 +517,10 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
     mutationFn: async ({ id, checked }: { id: string; checked: boolean }) => {
       const { error } = await supabase
         .from("reservations")
-        .update({ is_checked_in: checked, updated_at: new Date().toISOString() } as any)
+        .update({
+          is_checked_in: checked,
+          updated_at: new Date().toISOString(),
+        } as any)
         .eq("id", id)
         .eq("tenant_id", tenantId!);
       if (error) throw error;
@@ -377,7 +537,10 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
     mutationFn: async ({ id, checked }: { id: string; checked: boolean }) => {
       const { error } = await supabase
         .from("reservations")
-        .update({ is_used: checked, updated_at: new Date().toISOString() } as any)
+        .update({
+          is_used: checked,
+          updated_at: new Date().toISOString(),
+        } as any)
         .eq("id", id)
         .eq("tenant_id", tenantId!);
       if (error) throw error;
@@ -401,7 +564,9 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
     },
     onSuccess: (_data, vars) => {
       queryClient.invalidateQueries({ queryKey: ["reservations"] });
-      toast.success(vars.value ? t("dashboard.used") : t("dashboard.statusUpdated"));
+      toast.success(
+        vars.value ? t("dashboard.used") : t("dashboard.statusUpdated"),
+      );
       setLinkedUsedPrompt(null);
     },
     onError: () => {
@@ -463,12 +628,16 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
       .eq("tenant_id", tenantId);
 
     // Show siblings whose current value differs from the new value.
-    const mismatched = (linkedReservations || []).filter((r) => !!r.is_used !== checked);
+    const mismatched = (linkedReservations || []).filter(
+      (r) => !!r.is_used !== checked,
+    );
     if (mismatched.length > 0) {
       setLinkedUsedPrompt({
         reservationId: id,
         linkedIds: mismatched.map((r) => r.id),
-        linkedNames: mismatched.map((r) => `${r.guest_name} (${r.reservation_type})`),
+        linkedNames: mismatched.map(
+          (r) => `${r.guest_name} (${r.reservation_type})`,
+        ),
         value: checked,
       });
     }
@@ -478,14 +647,19 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
     mutationFn: async ({ ids, value }: { ids: string[]; value: boolean }) => {
       const { error } = await supabase
         .from("reservations")
-        .update({ is_invoiced: value, updated_at: new Date().toISOString() } as any)
+        .update({
+          is_invoiced: value,
+          updated_at: new Date().toISOString(),
+        } as any)
         .in("id", ids)
         .eq("tenant_id", tenantId!);
       if (error) throw error;
     },
     onSuccess: (_data, vars) => {
       queryClient.invalidateQueries({ queryKey: ["reservations"] });
-      toast.success(vars.value ? t("dashboard.invoiced") : t("dashboard.statusUpdated"));
+      toast.success(
+        vars.value ? t("dashboard.invoiced") : t("dashboard.statusUpdated"),
+      );
       setLinkedInvoicedPrompt(null);
       // A successful retry must not leave the previous refusal on screen.
       clearRefusal();
@@ -499,7 +673,10 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
     mutationFn: async ({ id, checked }: { id: string; checked: boolean }) => {
       const { error } = await supabase
         .from("reservations")
-        .update({ is_invoiced: checked, updated_at: new Date().toISOString() } as any)
+        .update({
+          is_invoiced: checked,
+          updated_at: new Date().toISOString(),
+        } as any)
         .eq("id", id)
         .eq("tenant_id", tenantId!);
       if (error) throw error;
@@ -523,7 +700,8 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
   // one leg of a bundle holds the package total.
   const linkedGroupHasPrice = async (id: string): Promise<boolean> => {
     const current: any = reservations?.find((r) => r.id === id);
-    if (current && current.price_eur != null && Number(current.price_eur) > 0) return true;
+    if (current && current.price_eur != null && Number(current.price_eur) > 0)
+      return true;
     const siblingIds = await collectLinkedSiblingIds(id);
     if (siblingIds.length === 0) return false;
     const { data } = await supabase
@@ -531,7 +709,9 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
       .select("price_eur")
       .in("id", siblingIds)
       .eq("tenant_id", tenantId!);
-    return (data ?? []).some((r: any) => r.price_eur != null && Number(r.price_eur) > 0);
+    return (data ?? []).some(
+      (r: any) => r.price_eur != null && Number(r.price_eur) > 0,
+    );
   };
 
   const handleToggleInvoiced = async (id: string, checked: boolean) => {
@@ -557,12 +737,16 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
       .in("id", linkedIdsArray)
       .eq("tenant_id", tenantId);
 
-    const mismatched = (linkedReservations || []).filter((r) => !!r.is_invoiced !== checked);
+    const mismatched = (linkedReservations || []).filter(
+      (r) => !!r.is_invoiced !== checked,
+    );
     if (mismatched.length > 0) {
       setLinkedInvoicedPrompt({
         reservationId: id,
         linkedIds: mismatched.map((r) => r.id),
-        linkedNames: mismatched.map((r) => `${r.guest_name} (${r.reservation_type})`),
+        linkedNames: mismatched.map(
+          (r) => `${r.guest_name} (${r.reservation_type})`,
+        ),
         value: checked,
       });
     }
@@ -577,8 +761,8 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
         confirmDialog.action === "cancelled"
           ? !sendCancelEmail
           : confirmDialog.action === "confirmed"
-          ? !sendConfirmEmail
-          : undefined,
+            ? !sendConfirmEmail
+            : undefined,
     });
   };
 
@@ -602,14 +786,23 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2" data-tour="reservations-filters">
+      <div
+        className="flex flex-col sm:flex-row sm:items-center justify-between gap-2"
+        data-tour="reservations-filters"
+      >
         <div className="flex items-center gap-2">
-          <h2 className="text-xl sm:text-2xl font-serif font-bold text-foreground">{t("nav.reservations")}</h2>
+          <h2 className="text-xl sm:text-2xl font-serif font-bold text-foreground">
+            {t("nav.reservations")}
+          </h2>
           <DashboardTooltip text="View, filter, and manage all reservations. Use status and type filters to narrow results. Click a reservation to edit details, confirm, cancel, or check in guests." />
         </div>
         <div className="flex gap-2 flex-wrap">
           {canCreate && (
-            <Button size="sm" className="gap-1.5" onClick={() => setNewReservationOpen(true)}>
+            <Button
+              size="sm"
+              className="gap-1.5"
+              onClick={() => setNewReservationOpen(true)}
+            >
               <Plus className="h-4 w-4" />
               {t("dashboard.newReservation")}
             </Button>
@@ -630,16 +823,29 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
               <Button
                 variant={specificDate ? "default" : "outline"}
                 size="sm"
-                className={cn("gap-1.5", !specificDate && "text-muted-foreground")}
+                className={cn(
+                  "gap-1.5",
+                  !specificDate && "text-muted-foreground",
+                )}
               >
                 <CalendarIcon className="h-4 w-4" />
-                {specificDate ? format(specificDate, "PP") : (t("common.date") || "Date")}
+                {specificDate
+                  ? format(specificDate, "PP")
+                  : t("common.date") || "Date"}
                 {specificDate && (
                   <span
                     role="button"
                     tabIndex={0}
-                    onClick={(e) => { e.stopPropagation(); setSpecificDate(undefined); }}
-                    onKeyDown={(e) => { if (e.key === "Enter") { e.stopPropagation(); setSpecificDate(undefined); } }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSpecificDate(undefined);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.stopPropagation();
+                        setSpecificDate(undefined);
+                      }
+                    }}
                     className="ml-1 rounded-full hover:bg-muted-foreground/20 p-0.5"
                     aria-label="Clear date"
                   >
@@ -652,42 +858,71 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
               <Calendar
                 mode="single"
                 selected={specificDate}
-                onSelect={(d) => { setSpecificDate(d ?? undefined); if (d) setDateFilter("all"); }}
+                onSelect={(d) => {
+                  setSpecificDate(d ?? undefined);
+                  if (d) setDateFilter("all");
+                }}
                 initialFocus
                 className={cn("p-3 pointer-events-auto")}
               />
             </PopoverContent>
           </Popover>
           <Button
-            variant={dateFilter === "today" && !specificDate ? "default" : "outline"}
+            variant={
+              dateFilter === "today" && !specificDate ? "default" : "outline"
+            }
             size="sm"
-            onClick={() => { setSpecificDate(undefined); setDateFilter(dateFilter === "today" ? "all" : "today"); }}
+            onClick={() => {
+              setSpecificDate(undefined);
+              setDateFilter(dateFilter === "today" ? "all" : "today");
+            }}
           >
             {t("dashboard.todayFilter")}
           </Button>
-          <Select value={statusFilter} onValueChange={setStatusFilter} disabled={viewTab === "cancelled"}>
-            <SelectTrigger className="w-full sm:w-[140px]"><SelectValue placeholder={t("common.status")} /></SelectTrigger>
+          <Select
+            value={statusFilter}
+            onValueChange={setStatusFilter}
+            disabled={viewTab === "cancelled"}
+          >
+            <SelectTrigger className="w-full sm:w-[140px]">
+              <SelectValue placeholder={t("common.status")} />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{t("dashboard.allStatuses")}</SelectItem>
               <SelectItem value="pending">{t("dashboard.pending")}</SelectItem>
-              <SelectItem value="confirmed">{t("dashboard.confirmed")}</SelectItem>
+              <SelectItem value="confirmed">
+                {t("dashboard.confirmed")}
+              </SelectItem>
             </SelectContent>
           </Select>
           <Select value={typeFilter} onValueChange={setTypeFilter}>
-            <SelectTrigger className="w-full sm:w-[160px]"><SelectValue placeholder={t("common.type")} /></SelectTrigger>
+            <SelectTrigger className="w-full sm:w-[160px]">
+              <SelectValue placeholder={t("common.type")} />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{t("dashboard.allTypes")}</SelectItem>
-              {((tenant?.allowed_reservation_types as string[] | undefined) ?? []).map((type) => (
-                <SelectItem key={type} value={type}>{typeLabel(type)}</SelectItem>
+              {(
+                (tenant?.allowed_reservation_types as string[] | undefined) ??
+                []
+              ).map((type) => (
+                <SelectItem key={type} value={type}>
+                  {typeLabel(type)}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
           <Select value={invoicedFilter} onValueChange={setInvoicedFilter}>
-            <SelectTrigger className="w-full sm:w-[140px]"><SelectValue placeholder="Invoice status" /></SelectTrigger>
+            <SelectTrigger className="w-full sm:w-[140px]">
+              <SelectValue placeholder="Invoice status" />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{t("dashboard.allStatuses")}</SelectItem>
-              <SelectItem value="uninvoiced">{t("dashboard.uninvoiced")}</SelectItem>
-              <SelectItem value="invoiced">{t("dashboard.invoiced")}</SelectItem>
+              <SelectItem value="uninvoiced">
+                {t("dashboard.uninvoiced")}
+              </SelectItem>
+              <SelectItem value="invoiced">
+                {t("dashboard.invoiced")}
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -727,11 +962,15 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
                   variant="outline"
                   onClick={() => {
                     setSelectAllAcrossPages(false);
-                    const visibleIds = (reservations ?? []).map((r: any) => r.id);
+                    const visibleIds = (reservations ?? []).map(
+                      (r: any) => r.id,
+                    );
                     const allSelected =
                       visibleIds.length > 0 &&
                       visibleIds.every((id) => selectedIds.has(id));
-                    setSelectedIds(allSelected ? new Set() : new Set(visibleIds));
+                    setSelectedIds(
+                      allSelected ? new Set() : new Set(visibleIds),
+                    );
                   }}
                   disabled={(reservations?.length ?? 0) === 0}
                 >
@@ -754,7 +993,9 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
                         // Mirror visible IDs locally so the page checkboxes
                         // appear ticked; the delete handler still re-fetches
                         // the full ID set from the server at submit time.
-                        setSelectedIds(new Set((reservations ?? []).map((r: any) => r.id)));
+                        setSelectedIds(
+                          new Set((reservations ?? []).map((r: any) => r.id)),
+                        );
                       }
                     }}
                   >
@@ -767,11 +1008,18 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
                   size="sm"
                   variant="destructive"
                   className="gap-1.5"
-                  disabled={selectAllAcrossPages ? totalMatching === 0 : selectedIds.size === 0}
+                  disabled={
+                    selectAllAcrossPages
+                      ? totalMatching === 0
+                      : selectedIds.size === 0
+                  }
                   onClick={() => setBulkConfirmOpen(true)}
                 >
                   <Trash2 className="h-4 w-4" />
-                  Delete {selectAllAcrossPages ? `all ${totalMatching}` : `selected (${selectedIds.size})`}
+                  Delete{" "}
+                  {selectAllAcrossPages
+                    ? `all ${totalMatching}`
+                    : `selected (${selectedIds.size})`}
                 </Button>
               </>
             )}
@@ -795,10 +1043,18 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
         </div>
       )}
 
-      <Tabs value={viewTab} onValueChange={(v) => { setViewTab(v as "active" | "cancelled"); exitBulkMode(); }}>
+      <Tabs
+        value={viewTab}
+        onValueChange={(v) => {
+          setViewTab(v as "active" | "cancelled");
+          exitBulkMode();
+        }}
+      >
         <TabsList>
           <TabsTrigger value="active">Active</TabsTrigger>
-          <TabsTrigger value="cancelled">{t("dashboard.cancelled")}</TabsTrigger>
+          <TabsTrigger value="cancelled">
+            {t("dashboard.cancelled")}
+          </TabsTrigger>
         </TabsList>
       </Tabs>
 
@@ -807,233 +1063,351 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
       {isLoading ? (
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
-            <Card key={i} className="animate-pulse"><CardContent className="p-4 h-20" /></Card>
+            <Card key={i} className="animate-pulse">
+              <CardContent className="p-4 h-20" />
+            </Card>
           ))}
         </div>
       ) : !reservations?.length ? (
-        <Card><CardContent className="p-8 text-center text-muted-foreground">{t("dashboard.noReservations")}</CardContent></Card>
+        <Card>
+          <CardContent className="p-8 text-center text-muted-foreground">
+            {t("dashboard.noReservations")}
+          </CardContent>
+        </Card>
       ) : (
         <div className="space-y-2">
           {reservations.map((r) => {
             const groupColor = linkedGroupColor((r as any).linked_group_id);
             return (
-            <Card
-              key={r.id}
-              className={cn(
-                "hover:shadow-hover transition-shadow cursor-pointer",
-                bulkMode && isSystemAdmin && selectedIds.has(r.id) && "border-destructive bg-destructive/5"
-              )}
-              role={bulkMode && isSystemAdmin ? "checkbox" : "button"}
-              aria-checked={bulkMode && isSystemAdmin ? selectedIds.has(r.id) : undefined}
-              tabIndex={0}
-              style={
-                groupColor
-                  ? { borderLeft: `4px solid ${groupColor.solid}` }
-                  : undefined
-              }
-              onClick={(e) => {
-                const target = e.target as HTMLElement;
-                if (target.closest('button,input,a,[role="menuitem"],[role="checkbox"],label')) return;
-                if (bulkMode && isSystemAdmin) {
-                  toggleSelected(r.id, !selectedIds.has(r.id));
-                  return;
+              <Card
+                key={r.id}
+                className={cn(
+                  "hover:shadow-hover transition-shadow cursor-pointer",
+                  bulkMode &&
+                    isSystemAdmin &&
+                    selectedIds.has(r.id) &&
+                    "border-destructive bg-destructive/5",
+                )}
+                role={bulkMode && isSystemAdmin ? "checkbox" : "button"}
+                aria-checked={
+                  bulkMode && isSystemAdmin ? selectedIds.has(r.id) : undefined
                 }
-                setDetailReservation(r);
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
+                tabIndex={0}
+                style={
+                  groupColor
+                    ? { borderLeft: `4px solid ${groupColor.solid}` }
+                    : undefined
+                }
+                onClick={(e) => {
                   const target = e.target as HTMLElement;
-                  if (target.closest('button,input,a,[role="menuitem"],[role="checkbox"],label')) return;
-                  e.preventDefault();
+                  if (
+                    target.closest(
+                      'button,input,a,[role="menuitem"],[role="checkbox"],label',
+                    )
+                  )
+                    return;
                   if (bulkMode && isSystemAdmin) {
                     toggleSelected(r.id, !selectedIds.has(r.id));
                     return;
                   }
                   setDetailReservation(r);
-                }
-              }}
-            >
-              <CardContent className="p-4">
-                <div className="flex items-start justify-between gap-2 sm:gap-4 min-w-0">
-                  <div className="flex items-start gap-3 flex-1 min-w-0">
-                    {bulkMode && isSystemAdmin ? (
-                      <Checkbox
-                        checked={selectedIds.has(r.id)}
-                        className="mt-1"
-                        aria-label="Select reservation for deletion"
-                        onClick={(e) => e.stopPropagation()}
-                        onCheckedChange={(checked) => toggleSelected(r.id, !!checked)}
-                      />
-                    ) : canEdit ? (
-                      <Checkbox
-                        checked={(r as any).is_checked_in ?? false}
-                        className="mt-1"
-                        onCheckedChange={(checked) => {
-                          toggleCheckIn.mutate({ id: r.id, checked: !!checked });
-                        }}
-                      />
-                    ) : null}
-                    <div className="flex-1 min-w-0">
-                    <div className="flex flex-wrap items-center gap-1.5 mb-1">
-                      <span className="font-semibold text-foreground break-words min-w-0">{r.guest_name}</span>
-                      <Badge variant="outline" className="text-xs capitalize">{typeLabel(r.reservation_type)}</Badge>
-                      {groupColor && (
-                        <Badge
-                          className="text-xs gap-1 border"
-                          style={{
-                            backgroundColor: groupColor.tint,
-                            color: groupColor.text,
-                            borderColor: groupColor.solid,
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    const target = e.target as HTMLElement;
+                    if (
+                      target.closest(
+                        'button,input,a,[role="menuitem"],[role="checkbox"],label',
+                      )
+                    )
+                      return;
+                    e.preventDefault();
+                    if (bulkMode && isSystemAdmin) {
+                      toggleSelected(r.id, !selectedIds.has(r.id));
+                      return;
+                    }
+                    setDetailReservation(r);
+                  }
+                }}
+              >
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between gap-2 sm:gap-4 min-w-0">
+                    <div className="flex items-start gap-3 flex-1 min-w-0">
+                      {bulkMode && isSystemAdmin ? (
+                        <Checkbox
+                          checked={selectedIds.has(r.id)}
+                          className="mt-1"
+                          aria-label="Select reservation for deletion"
+                          onClick={(e) => e.stopPropagation()}
+                          onCheckedChange={(checked) =>
+                            toggleSelected(r.id, !!checked)
+                          }
+                        />
+                      ) : canEdit ? (
+                        <Checkbox
+                          checked={(r as any).is_checked_in ?? false}
+                          className="mt-1"
+                          onCheckedChange={(checked) => {
+                            toggleCheckIn.mutate({
+                              id: r.id,
+                              checked: !!checked,
+                            });
                           }}
-                          title={`${t("offers.linkedReservations")} #${groupColor.shortId}`}
-                        >
-                          <Link2 className="h-3 w-3" />
-                          {t("offers.linkedBadge")} #{groupColor.shortId}
-                        </Badge>
-                      )}
-                        <Badge className={`text-xs ${statusColors[r.status ?? "pending"] ?? ""}`}>{tDynamic(`dashboard.${r.status ?? "pending"}`)}</Badge>
-                        {showSiteLabel && r.site_id && siteMap[r.site_id] && (
-                          <Badge variant="outline" className="text-xs font-normal gap-1">
-                            <Building2 className="h-3 w-3" />
-                            {siteMap[r.site_id]}
+                        />
+                      ) : null}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-wrap items-center gap-1.5 mb-1">
+                          <span className="font-semibold text-foreground break-words min-w-0">
+                            {r.guest_name}
+                          </span>
+                          <Badge
+                            variant="outline"
+                            className="text-xs capitalize"
+                          >
+                            {typeLabel(r.reservation_type)}
                           </Badge>
-                        )}
-                        {(r as any).is_checked_in && (
-                          <Badge className="text-xs bg-success/10 text-success border-success/20">{t("dashboard.checkedIn")}</Badge>
-                        )}
-                        {(r as any).reminder_email_sent_at && (
-                          <Badge variant="outline" className="text-xs gap-1 bg-info/10 text-info border-info/20">
-                            <Bell className="h-3 w-3" />
-                            {t("dashboard.reminderSentAt")}
+                          {groupColor && (
+                            <Badge
+                              className="text-xs gap-1 border"
+                              style={{
+                                backgroundColor: groupColor.tint,
+                                color: groupColor.text,
+                                borderColor: groupColor.solid,
+                              }}
+                              title={`${t("offers.linkedReservations")} #${groupColor.shortId}`}
+                            >
+                              <Link2 className="h-3 w-3" />
+                              {t("offers.linkedBadge")} #{groupColor.shortId}
+                            </Badge>
+                          )}
+                          <Badge
+                            className={`text-xs ${statusColors[r.status ?? "pending"] ?? ""}`}
+                          >
+                            {tDynamic(`dashboard.${r.status ?? "pending"}`)}
                           </Badge>
-                        )}
-                        {(r as any).confirmation_email_sent_at && (
-                          <Badge variant="outline" className="text-xs gap-1 bg-success/10 text-success border-success/20">
-                            <MailCheck className="h-3 w-3" />
-                            {t("dashboard.confirmationSentAt")}
-                          </Badge>
-                        )}
-                        {(r as any).cancellation_email_sent_at && (
-                          <Badge variant="outline" className="text-xs gap-1 bg-destructive/10 text-destructive border-destructive/20">
-                            <MailX className="h-3 w-3" />
-                            {t("dashboard.cancellationSentAt")}
-                          </Badge>
-                        )}
-                        {r.discount_type && (
-                          <Badge variant="outline" className="text-xs gap-1 bg-primary/10 text-primary border-primary/20">
-                            <Tag className="h-3 w-3" />
-                            {r.discount_type === "percentage" ? `−${r.discount_value}%` : `−€${r.discount_value}`}
-                            {r.discount_reason && <span className="font-normal text-primary/70 ml-0.5">· {r.discount_reason}</span>}
-                          </Badge>
+                          {showSiteLabel && r.site_id && siteMap[r.site_id] && (
+                            <Badge
+                              variant="outline"
+                              className="text-xs font-normal gap-1"
+                            >
+                              <Building2 className="h-3 w-3" />
+                              {siteMap[r.site_id]}
+                            </Badge>
+                          )}
+                          {(r as any).is_checked_in && (
+                            <Badge className="text-xs bg-success/10 text-success border-success/20">
+                              {t("dashboard.checkedIn")}
+                            </Badge>
+                          )}
+                          {(r as any).reminder_email_sent_at && (
+                            <Badge
+                              variant="outline"
+                              className="text-xs gap-1 bg-info/10 text-info border-info/20"
+                            >
+                              <Bell className="h-3 w-3" />
+                              {t("dashboard.reminderSentAt")}
+                            </Badge>
+                          )}
+                          {(r as any).confirmation_email_sent_at && (
+                            <Badge
+                              variant="outline"
+                              className="text-xs gap-1 bg-success/10 text-success border-success/20"
+                            >
+                              <MailCheck className="h-3 w-3" />
+                              {t("dashboard.confirmationSentAt")}
+                            </Badge>
+                          )}
+                          {(r as any).cancellation_email_sent_at && (
+                            <Badge
+                              variant="outline"
+                              className="text-xs gap-1 bg-destructive/10 text-destructive border-destructive/20"
+                            >
+                              <MailX className="h-3 w-3" />
+                              {t("dashboard.cancellationSentAt")}
+                            </Badge>
+                          )}
+                          {r.discount_type && (
+                            <Badge
+                              variant="outline"
+                              className="text-xs gap-1 bg-primary/10 text-primary border-primary/20"
+                            >
+                              <Tag className="h-3 w-3" />
+                              {r.discount_type === "percentage"
+                                ? `−${r.discount_value}%`
+                                : `−€${r.discount_value}`}
+                              {r.discount_reason && (
+                                <span className="font-normal text-primary/70 ml-0.5">
+                                  · {r.discount_reason}
+                                </span>
+                              )}
+                            </Badge>
+                          )}
+                        </div>
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
+                          <span className="flex items-center gap-1">
+                            <CalendarDays className="h-3.5 w-3.5 shrink-0" />
+                            {format(new Date(r.date), "PPP", {
+                              locale: dateFnsLocale,
+                            })}
+                            {r.start_time &&
+                              ` ${t("email.at")} ${r.start_time.slice(0, 5)}`}
+                          </span>
+                          <span className="flex items-center gap-1 min-w-0">
+                            <Mail className="h-3.5 w-3.5 shrink-0" />
+                            <span className="truncate">{r.guest_email}</span>
+                          </span>
+                          {r.guest_phone && (
+                            <span className="flex items-center gap-1">
+                              <Phone className="h-3.5 w-3.5 shrink-0" />
+                              {r.guest_phone}
+                            </span>
+                          )}
+                          {r.guests_count && (
+                            <span className="flex items-center gap-1">
+                              <User className="h-3.5 w-3.5 shrink-0" />
+                              {r.guests_count} {t("common.guests")}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Used & Invoiced toggles */}
+                        {canEdit && !bulkMode && (
+                          <div className="flex items-center gap-4 mt-2 pt-2 border-t border-border">
+                            <label
+                              className="flex items-center gap-1.5 text-xs cursor-pointer select-none"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <Checkbox
+                                checked={(r as any).is_used ?? false}
+                                onCheckedChange={(checked) => {
+                                  handleToggleUsed(r.id, !!checked);
+                                }}
+                              />
+                              <PackageCheck className="h-3.5 w-3.5 text-muted-foreground" />
+                              <span className="text-muted-foreground">
+                                {t("dashboard.used")}
+                              </span>
+                            </label>
+                            <label
+                              className="flex items-center gap-1.5 text-xs cursor-pointer select-none"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <Checkbox
+                                checked={r.is_invoiced ?? false}
+                                onCheckedChange={(checked) => {
+                                  handleToggleInvoiced(r.id, !!checked);
+                                }}
+                              />
+                              <Receipt className="h-3.5 w-3.5 text-muted-foreground" />
+                              <span className="text-muted-foreground">
+                                {t("dashboard.invoiced")}
+                              </span>
+                            </label>
+                            {r.breakfast_included && (
+                              <Badge className="text-xs bg-warning/10 text-warning-foreground border-warning/20 gap-1">
+                                <Coffee className="h-3 w-3" />
+                                {t("reports.breakfast")}
+                              </Badge>
+                            )}
+                          </div>
                         )}
                       </div>
-                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <CalendarDays className="h-3.5 w-3.5 shrink-0" />
-                        {format(new Date(r.date), "PPP", { locale: dateFnsLocale })}
-                        {r.start_time && ` ${t("email.at")} ${r.start_time.slice(0, 5)}`}
-                      </span>
-                      <span className="flex items-center gap-1 min-w-0"><Mail className="h-3.5 w-3.5 shrink-0" /><span className="truncate">{r.guest_email}</span></span>
-                      {r.guest_phone && <span className="flex items-center gap-1"><Phone className="h-3.5 w-3.5 shrink-0" />{r.guest_phone}</span>}
-                      {r.guests_count && <span className="flex items-center gap-1"><User className="h-3.5 w-3.5 shrink-0" />{r.guests_count} {t("common.guests")}</span>}
-                      
                     </div>
-
-                    {/* Used & Invoiced toggles */}
-                    {canEdit && !bulkMode && (
-                    <div className="flex items-center gap-4 mt-2 pt-2 border-t border-border">
-                      <label
-                        className="flex items-center gap-1.5 text-xs cursor-pointer select-none"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <Checkbox
-                          checked={(r as any).is_used ?? false}
-                          onCheckedChange={(checked) => {
-                            handleToggleUsed(r.id, !!checked);
+                    <div className="flex items-center gap-2 shrink-0">
+                      {r.reservation_type === "restaurant" &&
+                      (r as any).pricing_type === "menu" ? (
+                        <span className="text-sm text-muted-foreground whitespace-nowrap">
+                          —
+                        </span>
+                      ) : r.price_eur != null ? (
+                        <span className="text-sm font-semibold text-foreground whitespace-nowrap">
+                          €{Number(r.price_eur).toFixed(2)}
+                        </span>
+                      ) : null}
+                      {r.price_eur != null && !bulkMode && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="gap-1.5 h-8"
+                          disabled={invoicePdfBusyId === r.id}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDownloadInvoicePdf(r);
                           }}
-                        />
-                        <PackageCheck className="h-3.5 w-3.5 text-muted-foreground" />
-                        <span className="text-muted-foreground">{t("dashboard.used")}</span>
-                      </label>
-                      <label
-                        className="flex items-center gap-1.5 text-xs cursor-pointer select-none"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <Checkbox
-                          checked={r.is_invoiced ?? false}
-                          onCheckedChange={(checked) => {
-                            handleToggleInvoiced(r.id, !!checked);
-                          }}
-                        />
-                        <Receipt className="h-3.5 w-3.5 text-muted-foreground" />
-                        <span className="text-muted-foreground">{t("dashboard.invoiced")}</span>
-                      </label>
-                      {r.breakfast_included && (
-                        <Badge className="text-xs bg-warning/10 text-warning-foreground border-warning/20 gap-1"><Coffee className="h-3 w-3" />{t("reports.breakfast")}</Badge>
+                          data-testid="download-invoice-pdf"
+                        >
+                          <Download className="h-3.5 w-3.5" />
+                          <span className="hidden md:inline">
+                            {t("dashboard.downloadInvoicePdf")}
+                          </span>
+                          <span className="md:hidden">PDF</span>
+                        </Button>
+                      )}
+                      {(canEdit || canDelete) && !bulkMode && (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                            >
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            {canEdit && (
+                              <DropdownMenuItem
+                                onClick={() => setEditingReservation(r)}
+                                className="gap-2"
+                              >
+                                <Pencil className="h-4 w-4" />
+                                {t("dashboard.editReservation")}
+                              </DropdownMenuItem>
+                            )}
+                            {canEdit && r.status !== "confirmed" && (
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  setConfirmDialog({
+                                    id: r.id,
+                                    action: "confirmed",
+                                  })
+                                }
+                                className="gap-2"
+                              >
+                                <CheckCircle2 className="h-4 w-4 text-primary" />
+                                {t("dashboard.confirmReservation")}
+                              </DropdownMenuItem>
+                            )}
+                            {canEdit && r.status !== "cancelled" && (
+                              <DropdownMenuItem
+                                onClick={() => setReminderDialog(r.id)}
+                                className="gap-2"
+                              >
+                                <Bell className="h-4 w-4" />
+                                {t("dashboard.sendReminder")}
+                              </DropdownMenuItem>
+                            )}
+                            {canDelete && r.status !== "cancelled" && (
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  setConfirmDialog({
+                                    id: r.id,
+                                    action: "cancelled",
+                                  })
+                                }
+                                className="gap-2 text-destructive focus:text-destructive"
+                              >
+                                <XCircle className="h-4 w-4" />
+                                {t("dashboard.cancelReservation")}
+                              </DropdownMenuItem>
+                            )}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       )}
                     </div>
-                    )}
-                    </div>
                   </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    {r.reservation_type === "restaurant" && (r as any).pricing_type === "menu" ? (
-                      <span className="text-sm text-muted-foreground whitespace-nowrap">—</span>
-                    ) : r.price_eur != null ? (
-                      <span className="text-sm font-semibold text-foreground whitespace-nowrap">€{Number(r.price_eur).toFixed(2)}</span>
-                    ) : null}
-                    {r.price_eur != null && !bulkMode && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="gap-1.5 h-8"
-                        disabled={invoicePdfBusyId === r.id}
-                        onClick={(e) => { e.stopPropagation(); handleDownloadInvoicePdf(r); }}
-                        data-testid="download-invoice-pdf"
-                      >
-                        <Download className="h-3.5 w-3.5" />
-                        <span className="hidden md:inline">{t("dashboard.downloadInvoicePdf")}</span>
-                        <span className="md:hidden">PDF</span>
-                      </Button>
-                    )}
-                    {(canEdit || canDelete) && !bulkMode && (
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          {canEdit && (
-                           <DropdownMenuItem onClick={() => setEditingReservation(r)} className="gap-2">
-                             <Pencil className="h-4 w-4" />
-                             {t("dashboard.editReservation")}
-                           </DropdownMenuItem>
-                          )}
-                          {canEdit && r.status !== "confirmed" && (
-                           <DropdownMenuItem onClick={() => setConfirmDialog({ id: r.id, action: "confirmed" })} className="gap-2">
-                             <CheckCircle2 className="h-4 w-4 text-primary" />
-                             {t("dashboard.confirmReservation")}
-                           </DropdownMenuItem>
-                         )}
-                         {canEdit && r.status !== "cancelled" && (
-                           <DropdownMenuItem onClick={() => setReminderDialog(r.id)} className="gap-2">
-                             <Bell className="h-4 w-4" />
-                             {t("dashboard.sendReminder")}
-                           </DropdownMenuItem>
-                         )}
-                         {canDelete && r.status !== "cancelled" && (
-                           <DropdownMenuItem onClick={() => setConfirmDialog({ id: r.id, action: "cancelled" })} className="gap-2 text-destructive focus:text-destructive">
-                             <XCircle className="h-4 w-4" />
-                             {t("dashboard.cancelReservation")}
-                           </DropdownMenuItem>
-                         )}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
             );
           })}
         </div>
@@ -1070,118 +1444,166 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
         </div>
       )}
 
-
       {/* Confirmation dialog */}
-      <Dialog open={!!confirmDialog} onOpenChange={(open) => !open && setConfirmDialog(null)}>
-        <DialogContent className={confirmDialog?.action === "cancelled" || confirmDialog?.action === "confirmed" ? "sm:max-w-2xl max-h-[90vh] overflow-y-auto" : ""}>
+      <Dialog
+        open={!!confirmDialog}
+        onOpenChange={(open) => !open && setConfirmDialog(null)}
+      >
+        <DialogContent
+          className={
+            confirmDialog?.action === "cancelled" ||
+            confirmDialog?.action === "confirmed"
+              ? "sm:max-w-2xl max-h-[90vh] overflow-y-auto"
+              : ""
+          }
+        >
           <DialogHeader>
             <DialogTitle>
-              {confirmDialog?.action === "confirmed" ? t("dashboard.confirmReservation") : t("dashboard.cancelReservation")}
+              {confirmDialog?.action === "confirmed"
+                ? t("dashboard.confirmReservation")
+                : t("dashboard.cancelReservation")}
             </DialogTitle>
             <DialogDescription>
-              {confirmDialog?.action === "confirmed" ? t("dashboard.confirmReservationMsg") : t("dashboard.cancelReservationMsg")}
+              {confirmDialog?.action === "confirmed"
+                ? t("dashboard.confirmReservationMsg")
+                : t("dashboard.cancelReservationMsg")}
             </DialogDescription>
           </DialogHeader>
-          {confirmDialog?.action === "cancelled" && (() => {
-            const r = reservations?.find((res) => res.id === confirmDialog.id);
-            if (!r) return null;
-            return (
-              <ConfirmationEmailPreview
-                variant="cancellation"
-                reservation={{
-                  guest_name: r.guest_name,
-                  guest_email: r.guest_email,
-                  date: r.date,
-                  start_time: r.start_time,
-                  reservation_type: r.reservation_type,
-                  guests_count: r.guests_count,
-                  check_out_date: r.check_out_date,
-                  room_type: r.room_type,
-                  breakfast_included: r.breakfast_included ?? false,
-                  event_type: r.event_type,
-                  estimated_guests: r.estimated_guests,
-                  catering_needed: r.catering_needed ?? false,
-                  special_requests: r.special_requests,
-                  price_eur: r.price_eur,
-                }}
-                business={{
-                  business_name: settings?.business_name ?? tenant?.name ?? "",
-                  business_email: settings?.business_email ?? "",
-                  business_phone: settings?.business_phone ?? "",
-                  business_address: settings?.business_address ?? "",
-                  primary_color: settings?.primary_color ?? "#1e3a5f",
-                  accent_color: settings?.accent_color ?? "#d4a853",
-                  logo_url: settings?.logo_url ?? "",
-                }}
-              />
-            );
-          })()}
-          {confirmDialog?.action === "cancelled" && (() => {
-            const r = reservations?.find((res) => res.id === confirmDialog.id);
-            // If the reservation was already flagged "no cancellation email"
-            // (e.g. internal booking), there's nothing to toggle, hide the row.
-            if (!r || r.no_email_cancel) return null;
-            return (
-              <label className="flex items-start gap-2 rounded-md border border-border bg-muted/30 px-3 py-2 text-sm cursor-pointer select-none">
-                <Checkbox
-                  checked={sendCancelEmail}
-                  onCheckedChange={(checked) => setSendCancelEmail(!!checked)}
-                  className="mt-0.5"
+          {confirmDialog?.action === "cancelled" &&
+            (() => {
+              const r = reservations?.find(
+                (res) => res.id === confirmDialog.id,
+              );
+              if (!r) return null;
+              return (
+                <ConfirmationEmailPreview
+                  variant="cancellation"
+                  reservation={{
+                    guest_name: r.guest_name,
+                    guest_email: r.guest_email,
+                    date: r.date,
+                    start_time: r.start_time,
+                    reservation_type: r.reservation_type,
+                    guests_count: r.guests_count,
+                    check_out_date: r.check_out_date,
+                    room_type: r.room_type,
+                    breakfast_included: r.breakfast_included ?? false,
+                    event_type: r.event_type,
+                    estimated_guests: r.estimated_guests,
+                    catering_needed: r.catering_needed ?? false,
+                    special_requests: r.special_requests,
+                    price_eur: r.price_eur,
+                  }}
+                  business={{
+                    business_name:
+                      settings?.business_name ?? tenant?.name ?? "",
+                    business_email: settings?.business_email ?? "",
+                    business_phone: settings?.business_phone ?? "",
+                    business_address: settings?.business_address ?? "",
+                    primary_color: settings?.primary_color ?? "#1e3a5f",
+                    accent_color: settings?.accent_color ?? "#d4a853",
+                    logo_url: settings?.logo_url ?? "",
+                  }}
                 />
-                <span>
-                  <span className="font-medium text-foreground">Send cancellation email to guest</span>
-                  <span className="block text-xs text-muted-foreground">
-                    Uncheck to cancel silently without notifying {r.guest_name || "the guest"}.
+              );
+            })()}
+          {confirmDialog?.action === "cancelled" &&
+            (() => {
+              const r = reservations?.find(
+                (res) => res.id === confirmDialog.id,
+              );
+              // If the reservation was already flagged "no cancellation email"
+              // (e.g. internal booking), there's nothing to toggle, hide the row.
+              if (!r || r.no_email_cancel) return null;
+              return (
+                <label className="flex items-start gap-2 rounded-md border border-border bg-muted/30 px-3 py-2 text-sm cursor-pointer select-none">
+                  <Checkbox
+                    checked={sendCancelEmail}
+                    onCheckedChange={(checked) => setSendCancelEmail(!!checked)}
+                    className="mt-0.5"
+                  />
+                  <span>
+                    <span className="font-medium text-foreground">
+                      Send cancellation email to guest
+                    </span>
+                    <span className="block text-xs text-muted-foreground">
+                      Uncheck to cancel silently without notifying{" "}
+                      {r.guest_name || "the guest"}.
+                    </span>
                   </span>
-                </span>
-              </label>
-            );
-          })()}
-          {confirmDialog?.action === "confirmed" && (() => {
-            const r = reservations?.find((res) => res.id === confirmDialog.id);
-            // If the reservation was already flagged "no confirmation email"
-            // (e.g. internal booking), there's nothing to toggle, hide the row.
-            if (!r || r.no_email_confirm) return null;
-            return (
-              <label className="flex items-start gap-2 rounded-md border border-border bg-muted/30 px-3 py-2 text-sm cursor-pointer select-none">
-                <Checkbox
-                  checked={sendConfirmEmail}
-                  onCheckedChange={(checked) => setSendConfirmEmail(!!checked)}
-                  className="mt-0.5"
-                />
-                <span>
-                  <span className="font-medium text-foreground">Send confirmation email to guest</span>
-                  <span className="block text-xs text-muted-foreground">
-                    Uncheck to confirm silently without notifying {r.guest_name || "the guest"}.
+                </label>
+              );
+            })()}
+          {confirmDialog?.action === "confirmed" &&
+            (() => {
+              const r = reservations?.find(
+                (res) => res.id === confirmDialog.id,
+              );
+              // If the reservation was already flagged "no confirmation email"
+              // (e.g. internal booking), there's nothing to toggle, hide the row.
+              if (!r || r.no_email_confirm) return null;
+              return (
+                <label className="flex items-start gap-2 rounded-md border border-border bg-muted/30 px-3 py-2 text-sm cursor-pointer select-none">
+                  <Checkbox
+                    checked={sendConfirmEmail}
+                    onCheckedChange={(checked) =>
+                      setSendConfirmEmail(!!checked)
+                    }
+                    className="mt-0.5"
+                  />
+                  <span>
+                    <span className="font-medium text-foreground">
+                      Send confirmation email to guest
+                    </span>
+                    <span className="block text-xs text-muted-foreground">
+                      Uncheck to confirm silently without notifying{" "}
+                      {r.guest_name || "the guest"}.
+                    </span>
                   </span>
-                </span>
-              </label>
-            );
-          })()}
+                </label>
+              );
+            })()}
           <DialogFooter>
-            <Button variant="outline" onClick={() => setConfirmDialog(null)}>{t("common.cancel")}</Button>
+            <Button variant="outline" onClick={() => setConfirmDialog(null)}>
+              {t("common.cancel")}
+            </Button>
             <Button
-              variant={confirmDialog?.action === "cancelled" ? "destructive" : "default"}
+              variant={
+                confirmDialog?.action === "cancelled"
+                  ? "destructive"
+                  : "default"
+              }
               onClick={handleAction}
               disabled={updateStatus.isPending}
             >
-              {confirmDialog?.action === "confirmed" ? t("dashboard.confirmReservation") : t("dashboard.cancelReservation")}
+              {confirmDialog?.action === "confirmed"
+                ? t("dashboard.confirmReservation")
+                : t("dashboard.cancelReservation")}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {/* Reminder dialog */}
-      <Dialog open={!!reminderDialog} onOpenChange={(open) => !open && setReminderDialog(null)}>
+      <Dialog
+        open={!!reminderDialog}
+        onOpenChange={(open) => !open && setReminderDialog(null)}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{t("dashboard.sendReminder")}</DialogTitle>
-            <DialogDescription>{t("dashboard.sendReminderMsg")}</DialogDescription>
+            <DialogDescription>
+              {t("dashboard.sendReminderMsg")}
+            </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setReminderDialog(null)}>{t("common.cancel")}</Button>
+            <Button variant="outline" onClick={() => setReminderDialog(null)}>
+              {t("common.cancel")}
+            </Button>
             <Button
-              onClick={() => reminderDialog && sendReminder.mutate(reminderDialog)}
+              onClick={() =>
+                reminderDialog && sendReminder.mutate(reminderDialog)
+              }
               disabled={sendReminder.isPending}
             >
               <Bell className="h-4 w-4 mr-1.5" />
@@ -1192,11 +1614,16 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
       </Dialog>
 
       {/* Linked used prompt dialog */}
-      <Dialog open={!!linkedUsedPrompt} onOpenChange={(open) => !open && setLinkedUsedPrompt(null)}>
+      <Dialog
+        open={!!linkedUsedPrompt}
+        onOpenChange={(open) => !open && setLinkedUsedPrompt(null)}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{t("dashboard.markLinkedUsed")}</DialogTitle>
-            <DialogDescription>{t("dashboard.markLinkedUsedMsg")}</DialogDescription>
+            <DialogDescription>
+              {t("dashboard.markLinkedUsedMsg")}
+            </DialogDescription>
           </DialogHeader>
           {linkedUsedPrompt && (
             <ul className="text-sm space-y-1 pl-4 list-disc text-muted-foreground">
@@ -1206,9 +1633,17 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
             </ul>
           )}
           <DialogFooter>
-            <Button variant="outline" onClick={() => setLinkedUsedPrompt(null)}>{t("common.cancel")}</Button>
+            <Button variant="outline" onClick={() => setLinkedUsedPrompt(null)}>
+              {t("common.cancel")}
+            </Button>
             <Button
-              onClick={() => linkedUsedPrompt && markLinkedUsed.mutate({ ids: linkedUsedPrompt.linkedIds, value: linkedUsedPrompt.value })}
+              onClick={() =>
+                linkedUsedPrompt &&
+                markLinkedUsed.mutate({
+                  ids: linkedUsedPrompt.linkedIds,
+                  value: linkedUsedPrompt.value,
+                })
+              }
               disabled={markLinkedUsed.isPending}
             >
               <PackageCheck className="h-4 w-4 mr-1.5" />
@@ -1219,11 +1654,16 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
       </Dialog>
 
       {/* Linked invoiced prompt dialog */}
-      <Dialog open={!!linkedInvoicedPrompt} onOpenChange={(open) => !open && setLinkedInvoicedPrompt(null)}>
+      <Dialog
+        open={!!linkedInvoicedPrompt}
+        onOpenChange={(open) => !open && setLinkedInvoicedPrompt(null)}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{t("dashboard.markLinkedInvoiced")}</DialogTitle>
-            <DialogDescription>{t("dashboard.markLinkedInvoicedMsg")}</DialogDescription>
+            <DialogDescription>
+              {t("dashboard.markLinkedInvoicedMsg")}
+            </DialogDescription>
           </DialogHeader>
           {linkedInvoicedPrompt && (
             <ul className="text-sm space-y-1 pl-4 list-disc text-muted-foreground">
@@ -1233,9 +1673,20 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
             </ul>
           )}
           <DialogFooter>
-            <Button variant="outline" onClick={() => setLinkedInvoicedPrompt(null)}>{t("common.cancel")}</Button>
             <Button
-              onClick={() => linkedInvoicedPrompt && markLinkedInvoiced.mutate({ ids: linkedInvoicedPrompt.linkedIds, value: linkedInvoicedPrompt.value })}
+              variant="outline"
+              onClick={() => setLinkedInvoicedPrompt(null)}
+            >
+              {t("common.cancel")}
+            </Button>
+            <Button
+              onClick={() =>
+                linkedInvoicedPrompt &&
+                markLinkedInvoiced.mutate({
+                  ids: linkedInvoicedPrompt.linkedIds,
+                  value: linkedInvoicedPrompt.value,
+                })
+              }
               disabled={markLinkedInvoiced.isPending}
             >
               <Receipt className="h-4 w-4 mr-1.5" />
@@ -1246,13 +1697,17 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
       </Dialog>
 
       {/* Linked cancel prompt dialog: keep cross-booking groups in sync */}
-      <Dialog open={!!linkedCancelPrompt} onOpenChange={(open) => !open && setLinkedCancelPrompt(null)}>
+      <Dialog
+        open={!!linkedCancelPrompt}
+        onOpenChange={(open) => !open && setLinkedCancelPrompt(null)}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Cancel linked reservations?</DialogTitle>
             <DialogDescription>
-              This reservation is part of a cross-booking group. The following linked
-              reservations are still active. Cancel them as well so the group stays consistent?
+              This reservation is part of a cross-booking group. The following
+              linked reservations are still active. Cancel them as well so the
+              group stays consistent?
             </DialogDescription>
           </DialogHeader>
           {linkedCancelPrompt && (
@@ -1263,7 +1718,10 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
             </ul>
           )}
           <DialogFooter>
-            <Button variant="outline" onClick={() => setLinkedCancelPrompt(null)}>
+            <Button
+              variant="outline"
+              onClick={() => setLinkedCancelPrompt(null)}
+            >
               Keep them active
             </Button>
             <Button
@@ -1283,9 +1741,6 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-
-
 
       <EditReservationDialog
         reservation={editingReservation}
@@ -1314,7 +1769,9 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
         onOpenChange={(open) => !open && setDetailReservation(null)}
         onEdit={(r) => setEditingReservation(r)}
         canEdit={canEdit}
-        siteName={detailReservation?.site_id ? siteMap[detailReservation.site_id] : null}
+        siteName={
+          detailReservation?.site_id ? siteMap[detailReservation.site_id] : null
+        }
         onSelectLinked={async (lr) => {
           // Jump from the read-only detail of one cross-booking leg to
           // another. We close the detail dialog and open the new leg's
@@ -1339,26 +1796,47 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
       />
 
       {/* Superadmin bulk delete confirmation */}
-      <Dialog open={bulkConfirmOpen} onOpenChange={(open) => !bulkDeleting && setBulkConfirmOpen(open)}>
+      <Dialog
+        open={bulkConfirmOpen}
+        onOpenChange={(open) => !bulkDeleting && setBulkConfirmOpen(open)}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-destructive">
               <ShieldAlert className="h-5 w-5" />
-              Permanently delete {selectAllAcrossPages ? totalMatching : selectedIds.size} reservation{(selectAllAcrossPages ? totalMatching : selectedIds.size) === 1 ? "" : "s"}?
+              Permanently delete{" "}
+              {selectAllAcrossPages ? totalMatching : selectedIds.size}{" "}
+              reservation
+              {(selectAllAcrossPages ? totalMatching : selectedIds.size) === 1
+                ? ""
+                : "s"}
+              ?
             </DialogTitle>
             <DialogDescription>
-              This action cannot be undone. {selectAllAcrossPages
+              This action cannot be undone.{" "}
+              {selectAllAcrossPages
                 ? `All ${totalMatching} reservations matching the current filters and search will be removed across every page.`
-                : "Selected rows will be removed from the reservations table immediately."} Linked cross-booking siblings are not auto-included; select them explicitly if you want to remove the whole group.
+                : "Selected rows will be removed from the reservations table immediately."}{" "}
+              Linked cross-booking siblings are not auto-included; select them
+              explicitly if you want to remove the whole group.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setBulkConfirmOpen(false)} disabled={bulkDeleting}>
+            <Button
+              variant="outline"
+              onClick={() => setBulkConfirmOpen(false)}
+              disabled={bulkDeleting}
+            >
               Cancel
             </Button>
             <Button
               variant="destructive"
-              disabled={bulkDeleting || (selectAllAcrossPages ? totalMatching === 0 : selectedIds.size === 0)}
+              disabled={
+                bulkDeleting ||
+                (selectAllAcrossPages
+                  ? totalMatching === 0
+                  : selectedIds.size === 0)
+              }
               onClick={async () => {
                 setBulkDeleting(true);
                 let ids: string[] = [];
@@ -1368,10 +1846,15 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
                     : Array.from(selectedIds);
                 } catch (err: any) {
                   setBulkDeleting(false);
-                  toast.error(`Could not load matching reservations: ${err?.message ?? err}`);
+                  toast.error(
+                    `Could not load matching reservations: ${err?.message ?? err}`,
+                  );
                   return;
                 }
-                console.log("[bulk-delete] starting", { count: ids.length, acrossPages: selectAllAcrossPages });
+                console.log("[bulk-delete] starting", {
+                  count: ids.length,
+                  acrossPages: selectAllAcrossPages,
+                });
                 if (ids.length === 0) {
                   setBulkDeleting(false);
                   toast.error("No reservations matched the current filters.");
@@ -1389,27 +1872,40 @@ const ReservationList = ({ initialStatusFilter, initialInvoicedFilter, initialCh
                     .delete({ count: "exact" })
                     .in("id", chunk)
                     .select("id");
-                  if (error) { lastError = error; break; }
+                  if (error) {
+                    lastError = error;
+                    break;
+                  }
                   totalDeleted += data?.length ?? count ?? 0;
                 }
                 setBulkDeleting(false);
-                console.log("[bulk-delete] response", { totalDeleted, requested: ids.length, lastError });
+                console.log("[bulk-delete] response", {
+                  totalDeleted,
+                  requested: ids.length,
+                  lastError,
+                });
                 if (lastError) {
                   toast.error(`Bulk delete failed: ${lastError.message}`);
                   return;
                 }
                 if (totalDeleted === 0) {
-                  toast.error("No reservations were deleted. RLS may be blocking access.");
+                  toast.error(
+                    "No reservations were deleted. RLS may be blocking access.",
+                  );
                   return;
                 }
-                toast.success(`Deleted ${totalDeleted} reservation${totalDeleted === 1 ? "" : "s"}`);
+                toast.success(
+                  `Deleted ${totalDeleted} reservation${totalDeleted === 1 ? "" : "s"}`,
+                );
                 setBulkConfirmOpen(false);
                 exitBulkMode();
                 setPage(0);
                 queryClient.invalidateQueries({ queryKey: ["reservations"] });
               }}
             >
-              {bulkDeleting ? "Deleting..." : `Delete ${selectAllAcrossPages ? totalMatching : selectedIds.size}`}
+              {bulkDeleting
+                ? "Deleting..."
+                : `Delete ${selectAllAcrossPages ? totalMatching : selectedIds.size}`}
             </Button>
           </DialogFooter>
         </DialogContent>

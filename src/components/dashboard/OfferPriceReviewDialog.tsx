@@ -58,7 +58,13 @@ const parseAmount = (raw: string): number | null => {
   return isFinite(n) && n >= 0 ? Math.round(n * 100) / 100 : null;
 };
 
-const OfferPriceReviewDialog = ({ open, onOpenChange, legs, onConfirm, isSubmitting }: Props) => {
+const OfferPriceReviewDialog = ({
+  open,
+  onOpenChange,
+  legs,
+  onConfirm,
+  isSubmitting,
+}: Props) => {
   const t = useT();
 
   const missing = useMemo(() => legs.filter((l) => l.price == null), [legs]);
@@ -76,7 +82,9 @@ const OfferPriceReviewDialog = ({ open, onOpenChange, legs, onConfirm, isSubmitt
 
   // Every leg without an automatic price needs either an amount or an explicit
   // "leave empty" decision before staff can continue.
-  const unresolved = missing.filter((l) => !skipped[l.key] && legPrice(l) == null);
+  const unresolved = missing.filter(
+    (l) => !skipped[l.key] && legPrice(l) == null,
+  );
   const canSubmit = unresolved.length === 0 && !isSubmitting;
 
   const submit = () => {
@@ -97,7 +105,9 @@ const OfferPriceReviewDialog = ({ open, onOpenChange, legs, onConfirm, isSubmitt
           <Alert variant="destructive" data-testid="offer-price-warning">
             <AlertTriangle className="h-4 w-4" />
             <AlertTitle>{t("offers.priceReviewWarnTitle")}</AlertTitle>
-            <AlertDescription>{t("offers.priceReviewWarnDesc")}</AlertDescription>
+            <AlertDescription>
+              {t("offers.priceReviewWarnDesc")}
+            </AlertDescription>
           </Alert>
         )}
 
@@ -146,7 +156,10 @@ const OfferPriceReviewDialog = ({ open, onOpenChange, legs, onConfirm, isSubmitt
                         size="sm"
                         variant="outline"
                         onClick={() =>
-                          setValues((v) => ({ ...v, [leg.key]: String(c.price) }))
+                          setValues((v) => ({
+                            ...v,
+                            [leg.key]: String(c.price),
+                          }))
                         }
                       >
                         {c.name}: {c.price} €
@@ -156,7 +169,10 @@ const OfferPriceReviewDialog = ({ open, onOpenChange, legs, onConfirm, isSubmitt
                 )}
 
                 <div className="flex items-center gap-2">
-                  <Label htmlFor={`price-${leg.key}`} className="text-xs whitespace-nowrap">
+                  <Label
+                    htmlFor={`price-${leg.key}`}
+                    className="text-xs whitespace-nowrap"
+                  >
                     {t("offers.priceReviewAmount")}
                   </Label>
                   <Input
@@ -165,7 +181,9 @@ const OfferPriceReviewDialog = ({ open, onOpenChange, legs, onConfirm, isSubmitt
                     className="h-8"
                     disabled={!!skipped[leg.key]}
                     value={legValue(leg)}
-                    onChange={(e) => setValues((v) => ({ ...v, [leg.key]: e.target.value }))}
+                    onChange={(e) =>
+                      setValues((v) => ({ ...v, [leg.key]: e.target.value }))
+                    }
                   />
                 </div>
 
@@ -178,7 +196,10 @@ const OfferPriceReviewDialog = ({ open, onOpenChange, legs, onConfirm, isSubmitt
                         setSkipped((s) => ({ ...s, [leg.key]: c === true }))
                       }
                     />
-                    <Label htmlFor={`skip-${leg.key}`} className="text-xs cursor-pointer">
+                    <Label
+                      htmlFor={`skip-${leg.key}`}
+                      className="text-xs cursor-pointer"
+                    >
                       {t("offers.priceReviewSkip")}
                     </Label>
                   </div>
@@ -192,7 +213,11 @@ const OfferPriceReviewDialog = ({ open, onOpenChange, legs, onConfirm, isSubmitt
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             {t("common.cancel")}
           </Button>
-          <Button onClick={submit} disabled={!canSubmit} data-testid="offer-price-confirm">
+          <Button
+            onClick={submit}
+            disabled={!canSubmit}
+            data-testid="offer-price-confirm"
+          >
             {t("offers.priceReviewConfirm")}
           </Button>
         </DialogFooter>

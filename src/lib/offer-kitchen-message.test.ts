@@ -12,23 +12,24 @@ const translator = (language: Language) => (key: any) =>
   (translations[language] as Record<string, string>)[key];
 
 /** The exact sentences staff should read, per language. */
-const EXPECTED: Record<Language, { one: string; many: string; none: string }> = {
-  en: {
-    one: "1 food and drink line from the offer was sent to the Kitchen tab.",
-    many: "3 food and drink lines from the offer were sent to the Kitchen tab.",
-    none: "This offer had no food or drinks, so a regular reservation was created and nothing was sent to the Kitchen tab.",
-  },
-  fi: {
-    one: "Tarjouksesta vietiin 1 ruoka- ja juomarivi Keittiö-välilehdelle.",
-    many: "Tarjouksesta vietiin 3 ruoka- ja juomariviä Keittiö-välilehdelle.",
-    none: "Tarjouksessa ei ollut ruokia eikä juomia, joten tehtiin tavallinen varaus eikä Keittiö-välilehdelle viety mitään.",
-  },
-  sv: {
-    one: "1 mat- och dryckesrad från erbjudandet skickades till Kök-fliken.",
-    many: "3 mat- och dryckesrader från erbjudandet skickades till Kök-fliken.",
-    none: "Erbjudandet hade ingen mat eller dryck, så en vanlig bokning skapades och inget skickades till Kök-fliken.",
-  },
-};
+const EXPECTED: Record<Language, { one: string; many: string; none: string }> =
+  {
+    en: {
+      one: "1 food and drink line from the offer was sent to the Kitchen tab.",
+      many: "3 food and drink lines from the offer were sent to the Kitchen tab.",
+      none: "This offer had no food or drinks, so a regular reservation was created and nothing was sent to the Kitchen tab.",
+    },
+    fi: {
+      one: "Tarjouksesta vietiin 1 ruoka- ja juomarivi Keittiö-välilehdelle.",
+      many: "Tarjouksesta vietiin 3 ruoka- ja juomariviä Keittiö-välilehdelle.",
+      none: "Tarjouksessa ei ollut ruokia eikä juomia, joten tehtiin tavallinen varaus eikä Keittiö-välilehdelle viety mitään.",
+    },
+    sv: {
+      one: "1 mat- och dryckesrad från erbjudandet skickades till Kök-fliken.",
+      many: "3 mat- och dryckesrader från erbjudandet skickades till Kök-fliken.",
+      none: "Erbjudandet hade ingen mat eller dryck, så en vanlig bokning skapades och inget skickades till Kök-fliken.",
+    },
+  };
 
 describe("offer kitchen confirmation wording", () => {
   it("picks the singular, plural or nothing-sent key by line count", () => {

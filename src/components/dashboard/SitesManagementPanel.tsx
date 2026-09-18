@@ -43,7 +43,19 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { toast } from "@/hooks/use-toast";
-import { Plus, MapPin, Pencil, Trash2, Building2, UtensilsCrossed, Hotel, CalendarDays, ChevronDown, ChevronRight, Users } from "lucide-react";
+import {
+  Plus,
+  MapPin,
+  Pencil,
+  Trash2,
+  Building2,
+  UtensilsCrossed,
+  Hotel,
+  CalendarDays,
+  ChevronDown,
+  ChevronRight,
+  Users,
+} from "lucide-react";
 import DashboardTooltip from "./DashboardTooltip";
 import BulkAssignUsersDialog from "./BulkAssignUsersDialog";
 import TierUpgradePrompt from "./TierUpgradePrompt";
@@ -80,7 +92,6 @@ const typeIcons: Record<string, React.ElementType> = {
   venue: CalendarDays,
 };
 
-
 const SitesManagementPanel = () => {
   const t = useT();
   const formatTierError = useTierErrorMessage();
@@ -88,7 +99,9 @@ const SitesManagementPanel = () => {
   // localized message; everything else falls back to the raw server text.
   const showError = (err: unknown) => {
     const tierErr = formatTierError(err);
-    const description = tierErr ? tierErr.message : (err as { message?: string })?.message;
+    const description = tierErr
+      ? tierErr.message
+      : (err as { message?: string })?.message;
     toast({ title: "Error", description, variant: "destructive" });
   };
   const { tenantId, tenant } = useTenant();
@@ -114,7 +127,10 @@ const SitesManagementPanel = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingSite, setEditingSite] = useState<Site | null>(null);
   const [expandedSites, setExpandedSites] = useState<Set<string>>(new Set());
-  const [bulkAssignSite, setBulkAssignSite] = useState<{ id: string; name: string } | null>(null);
+  const [bulkAssignSite, setBulkAssignSite] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
   const [form, setForm] = useState({
     name: "",
@@ -130,7 +146,13 @@ const SitesManagementPanel = () => {
     queryKey: ["approval-queue-count", tenantId],
     queryFn: async () => {
       let count = 0;
-      const tables = ["resources", "blocked_slots", "recurring_blocked_slots", "tenant_opening_hours", "tenant_email_templates"] as const;
+      const tables = [
+        "resources",
+        "blocked_slots",
+        "recurring_blocked_slots",
+        "tenant_opening_hours",
+        "tenant_email_templates",
+      ] as const;
       for (const table of tables) {
         const { count: c } = await supabase
           .from(table)
@@ -223,19 +245,29 @@ const SitesManagementPanel = () => {
 
   const createMutation = useMutation({
     mutationFn: async () => {
-      const { data, error } = await supabase.from("sites").insert({
-        tenant_id: tenantId!,
-        name: form.name,
-        slug: form.slug.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, ""),
-        location: form.location || null,
-        description: form.description || null,
-      }).select("id").single();
+      const { data, error } = await supabase
+        .from("sites")
+        .insert({
+          tenant_id: tenantId!,
+          name: form.name,
+          slug: form.slug
+            .toLowerCase()
+            .replace(/\s+/g, "-")
+            .replace(/[^a-z0-9-]/g, ""),
+          location: form.location || null,
+          description: form.description || null,
+        })
+        .select("id")
+        .single();
       if (error) throw error;
 
-      const { error: copyError } = await supabase.rpc("copy_tenant_defaults_to_site", {
-        p_tenant_id: tenantId!,
-        p_site_id: data.id,
-      });
+      const { error: copyError } = await supabase.rpc(
+        "copy_tenant_defaults_to_site",
+        {
+          p_tenant_id: tenantId!,
+          p_site_id: data.id,
+        },
+      );
       if (copyError) console.error("Failed to copy defaults:", copyError);
     },
     onSuccess: () => {
@@ -248,7 +280,11 @@ const SitesManagementPanel = () => {
       // Tier-limit errors win first (they have stable codes + i18n).
       const tierErr = formatTierError(err);
       if (tierErr) {
-        toast({ title: "Error", description: tierErr.message, variant: "destructive" });
+        toast({
+          title: "Error",
+          description: tierErr.message,
+          variant: "destructive",
+        });
         return;
       }
       toast({
@@ -267,7 +303,10 @@ const SitesManagementPanel = () => {
         .from("sites")
         .update({
           name: form.name,
-          slug: form.slug.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, ""),
+          slug: form.slug
+            .toLowerCase()
+            .replace(/\s+/g, "-")
+            .replace(/[^a-z0-9-]/g, ""),
           location: form.location || null,
           description: form.description || null,
         })
@@ -281,12 +320,22 @@ const SitesManagementPanel = () => {
       toast({ title: t("sites.siteUpdated") });
     },
     onError: (err: any) => {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      toast({
+        title: "Error",
+        description: err.message,
+        variant: "destructive",
+      });
     },
   });
 
   const toggleActiveMutation = useMutation({
-    mutationFn: async ({ id, is_active }: { id: string; is_active: boolean }) => {
+    mutationFn: async ({
+      id,
+      is_active,
+    }: {
+      id: string;
+      is_active: boolean;
+    }) => {
       const { error } = await supabase
         .from("sites")
         .update({ is_active })
@@ -297,7 +346,11 @@ const SitesManagementPanel = () => {
       queryClient.invalidateQueries({ queryKey: ["sites", tenantId] });
     },
     onError: (err: any) => {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      toast({
+        title: "Error",
+        description: err.message,
+        variant: "destructive",
+      });
     },
   });
 
@@ -311,7 +364,11 @@ const SitesManagementPanel = () => {
       toast({ title: t("sites.siteDeleted") });
     },
     onError: (err: any) => {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      toast({
+        title: "Error",
+        description: err.message,
+        variant: "destructive",
+      });
     },
   });
 
@@ -328,13 +385,18 @@ const SitesManagementPanel = () => {
   const renderResourceTypeSummary = (siteId: string) => {
     const counts = getResourceTypeSummary(siteId);
     const entries = Object.entries(counts);
-    if (!entries.length) return <span className="text-xs text-muted-foreground">—</span>;
+    if (!entries.length)
+      return <span className="text-xs text-muted-foreground">—</span>;
     return (
       <div className="flex items-center gap-1.5 flex-wrap">
         {entries.map(([type, count]) => {
           const Icon = typeIcons[type] ?? Building2;
           return (
-            <Badge key={type} variant="secondary" className="text-[10px] gap-1 py-0.5 px-1.5">
+            <Badge
+              key={type}
+              variant="secondary"
+              className="text-[10px] gap-1 py-0.5 px-1.5"
+            >
               <Icon className="h-3 w-3" />
               {count} {type}
             </Badge>
@@ -349,7 +411,9 @@ const SitesManagementPanel = () => {
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-2">
           <Building2 className="h-5 w-5 text-primary" />
-          <h2 className="text-xl font-serif font-semibold">{t("sites.title")}</h2>
+          <h2 className="text-xl font-serif font-semibold">
+            {t("sites.title")}
+          </h2>
           <DashboardTooltip text={t("sites.tooltip")} />
         </div>
         {/* Company name header */}
@@ -366,14 +430,16 @@ const SitesManagementPanel = () => {
         )}
       </div>
 
-
       <Tabs defaultValue="sites">
         <TabsList>
           <TabsTrigger value="sites">{t("sites.allSites")}</TabsTrigger>
           <TabsTrigger value="approvals" className="gap-1.5">
             {t("sites.approvals")}
             {(pendingCount ?? 0) > 0 && (
-              <Badge variant="destructive" className="h-5 min-w-[20px] px-1.5 text-[10px]">
+              <Badge
+                variant="destructive"
+                className="h-5 min-w-[20px] px-1.5 text-[10px]"
+              >
                 {pendingCount}
               </Badge>
             )}
@@ -406,7 +472,10 @@ const SitesManagementPanel = () => {
                         name: e.target.value,
                         slug: editingSite
                           ? form.slug
-                          : e.target.value.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, ""),
+                          : e.target.value
+                              .toLowerCase()
+                              .replace(/\s+/g, "-")
+                              .replace(/[^a-z0-9-]/g, ""),
                       });
                     }}
                     placeholder="e.g. Wiurila Estate"
@@ -416,14 +485,13 @@ const SitesManagementPanel = () => {
                   <Label>{t("sites.slug")}</Label>
                   <Input
                     value={form.slug}
-                    onChange={(e) =>
-                      setForm({ ...form, slug: e.target.value })
-                    }
+                    onChange={(e) => setForm({ ...form, slug: e.target.value })}
                     placeholder="e.g. wiurila-estate"
                     className="font-mono text-sm"
                   />
                   <p className="text-xs text-muted-foreground mt-1">
-                    {t("sites.slugHint")}<strong>{form.slug || "..."}</strong>
+                    {t("sites.slugHint")}
+                    <strong>{form.slug || "..."}</strong>
                   </p>
                 </div>
                 <div>
@@ -453,7 +521,11 @@ const SitesManagementPanel = () => {
                   onClick={handleSubmit}
                   disabled={!form.name || !form.slug || isPending}
                 >
-                  {isPending ? t("common.saving") : editingSite ? t("sites.updateSite") : t("sites.createSite")}
+                  {isPending
+                    ? t("common.saving")
+                    : editingSite
+                      ? t("sites.updateSite")
+                      : t("sites.createSite")}
                 </Button>
               </div>
             </DialogContent>
@@ -462,7 +534,10 @@ const SitesManagementPanel = () => {
           {isLoading ? (
             <div className="space-y-3">
               {[1, 2].map((i) => (
-                <div key={i} className="h-20 rounded-md bg-muted animate-pulse" />
+                <div
+                  key={i}
+                  className="h-20 rounded-md bg-muted animate-pulse"
+                />
               ))}
             </div>
           ) : !sites?.length ? (
@@ -478,11 +553,18 @@ const SitesManagementPanel = () => {
 
                 return (
                   <Card key={site.id} className="overflow-hidden">
-                    <Collapsible open={isExpanded} onOpenChange={() => toggleExpanded(site.id)}>
+                    <Collapsible
+                      open={isExpanded}
+                      onOpenChange={() => toggleExpanded(site.id)}
+                    >
                       <CardHeader className="py-3 px-4">
                         <div className="flex items-center gap-3 flex-wrap">
                           <CollapsibleTrigger asChild>
-                            <Button variant="ghost" size="sm" className="h-7 w-7 p-0 shrink-0">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-7 w-7 p-0 shrink-0"
+                            >
                               {isExpanded ? (
                                 <ChevronDown className="h-4 w-4" />
                               ) : (
@@ -494,7 +576,9 @@ const SitesManagementPanel = () => {
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
                               <Building2 className="h-4 w-4 text-primary shrink-0" />
-                              <span className="font-serif font-semibold text-sm">{site.name}</span>
+                              <span className="font-serif font-semibold text-sm">
+                                {site.name}
+                              </span>
                               {site.location && (
                                 <span className="text-xs text-muted-foreground flex items-center gap-1">
                                   <MapPin className="h-3 w-3" />
@@ -509,10 +593,15 @@ const SitesManagementPanel = () => {
                                     : "border-warning/30 text-warning bg-warning/10"
                                 }`}
                               >
-                                {site.is_active ? t("sites.active") : t("sites.draft")}
+                                {site.is_active
+                                  ? t("sites.active")
+                                  : t("sites.draft")}
                               </Badge>
                               {companyName && (
-                                <Badge variant="secondary" className="text-[10px] gap-1">
+                                <Badge
+                                  variant="secondary"
+                                  className="text-[10px] gap-1"
+                                >
                                   <Building2 className="h-3 w-3" />
                                   {companyName}
                                 </Badge>
@@ -528,7 +617,10 @@ const SitesManagementPanel = () => {
                               <Switch
                                 checked={site.is_active}
                                 onCheckedChange={(checked) =>
-                                  toggleActiveMutation.mutate({ id: site.id, is_active: checked })
+                                  toggleActiveMutation.mutate({
+                                    id: site.id,
+                                    is_active: checked,
+                                  })
                                 }
                               />
                             )}
@@ -538,16 +630,30 @@ const SitesManagementPanel = () => {
                                   variant="outline"
                                   size="sm"
                                   className="gap-1 text-xs h-7"
-                                  onClick={() => setBulkAssignSite({ id: site.id, name: site.name })}
+                                  onClick={() =>
+                                    setBulkAssignSite({
+                                      id: site.id,
+                                      name: site.name,
+                                    })
+                                  }
                                 >
                                   <Users className="h-3 w-3" />
                                 </Button>
-                                <Button variant="outline" size="sm" className="gap-1 text-xs h-7" onClick={() => openEdit(site)}>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="gap-1 text-xs h-7"
+                                  onClick={() => openEdit(site)}
+                                >
                                   <Pencil className="h-3 w-3" />
                                 </Button>
                                 <AlertDialog>
                                   <AlertDialogTrigger asChild>
-                                    <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive h-7 w-7 p-0">
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="text-destructive hover:text-destructive h-7 w-7 p-0"
+                                    >
                                       <Trash2 className="h-3.5 w-3.5" />
                                     </Button>
                                   </AlertDialogTrigger>
@@ -561,10 +667,14 @@ const SitesManagementPanel = () => {
                                       </AlertDialogDescription>
                                     </AlertDialogHeader>
                                     <AlertDialogFooter>
-                                      <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
+                                      <AlertDialogCancel>
+                                        {t("common.cancel")}
+                                      </AlertDialogCancel>
                                       <AlertDialogAction
                                         className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                        onClick={() => deleteMutation.mutate(site.id)}
+                                        onClick={() =>
+                                          deleteMutation.mutate(site.id)
+                                        }
                                       >
                                         {t("common.delete")}
                                       </AlertDialogAction>
@@ -580,26 +690,42 @@ const SitesManagementPanel = () => {
                       <CollapsibleContent>
                         <CardContent className="pt-0 pb-3 px-4">
                           {site.description && (
-                            <p className="text-xs text-muted-foreground mb-3 ml-10">{site.description}</p>
+                            <p className="text-xs text-muted-foreground mb-3 ml-10">
+                              {site.description}
+                            </p>
                           )}
                           {siteResources.length === 0 ? (
-                            <p className="text-xs text-muted-foreground ml-10">{t("sites.noResourcesInSite")}</p>
+                            <p className="text-xs text-muted-foreground ml-10">
+                              {t("sites.noResourcesInSite")}
+                            </p>
                           ) : (
                             <Table>
                               <TableHeader>
                                 <TableRow>
-                                  <TableHead className="text-xs">{t("sites.resourceName")}</TableHead>
-                                  <TableHead className="text-xs">{t("sites.resourceType")}</TableHead>
-                                  <TableHead className="text-xs text-center">{t("sites.capacity")}</TableHead>
-                                  <TableHead className="text-xs text-center">{t("sites.status")}</TableHead>
+                                  <TableHead className="text-xs">
+                                    {t("sites.resourceName")}
+                                  </TableHead>
+                                  <TableHead className="text-xs">
+                                    {t("sites.resourceType")}
+                                  </TableHead>
+                                  <TableHead className="text-xs text-center">
+                                    {t("sites.capacity")}
+                                  </TableHead>
+                                  <TableHead className="text-xs text-center">
+                                    {t("sites.status")}
+                                  </TableHead>
                                 </TableRow>
                               </TableHeader>
                               <TableBody>
                                 {siteResources.map((resource) => {
-                                  const Icon = typeIcons[resource.resource_type] ?? Building2;
+                                  const Icon =
+                                    typeIcons[resource.resource_type] ??
+                                    Building2;
                                   return (
                                     <TableRow key={resource.id}>
-                                      <TableCell className="text-sm font-medium">{resource.name}</TableCell>
+                                      <TableCell className="text-sm font-medium">
+                                        {resource.name}
+                                      </TableCell>
                                       <TableCell>
                                         <span className="flex items-center gap-1.5 text-muted-foreground text-xs">
                                           <Icon className="h-3.5 w-3.5" />
@@ -612,13 +738,15 @@ const SitesManagementPanel = () => {
                                       <TableCell className="text-center">
                                         <Badge
                                           variant="outline"
-                                           className={`text-[10px] ${
+                                          className={`text-[10px] ${
                                             resource.is_active
                                               ? "border-success/30 text-success bg-success/10"
                                               : "border-warning/30 text-warning bg-warning/10"
                                           }`}
                                         >
-                                          {resource.is_active ? t("sites.active") : t("sites.draft")}
+                                          {resource.is_active
+                                            ? t("sites.active")
+                                            : t("sites.draft")}
                                         </Badge>
                                       </TableCell>
                                     </TableRow>
@@ -649,7 +777,9 @@ const SitesManagementPanel = () => {
       {/* Bulk assign users dialog */}
       <BulkAssignUsersDialog
         open={!!bulkAssignSite}
-        onOpenChange={(open) => { if (!open) setBulkAssignSite(null); }}
+        onOpenChange={(open) => {
+          if (!open) setBulkAssignSite(null);
+        }}
         siteId={bulkAssignSite?.id ?? ""}
         siteName={bulkAssignSite?.name ?? ""}
       />

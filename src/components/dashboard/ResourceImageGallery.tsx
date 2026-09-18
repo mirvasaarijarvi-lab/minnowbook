@@ -43,13 +43,21 @@ const ResourceImageGallery = ({ resourceId, tenantId }: Props) => {
 
   const uploadMutation = useMutation({
     mutationFn: async (file: File) => {
-      const { sanitizeFileExtension, sanitizePathSegment } = await import("@/lib/sanitize-path");
-      const { assertSafeStorageObjectPath } = await import("@/lib/storage-path");
+      const { sanitizeFileExtension, sanitizePathSegment } =
+        await import("@/lib/sanitize-path");
+      const { assertSafeStorageObjectPath } =
+        await import("@/lib/storage-path");
       const ext = sanitizeFileExtension(file.name.split(".").pop());
       const fileName = `gallery-${Date.now()}.${ext}`;
       const safeTenant = sanitizePathSegment(tenantId);
       const safeResource = sanitizePathSegment(resourceId);
-      const filePath = assertSafeStorageObjectPath(`${safeTenant}/resources/${safeResource}/${fileName}`, { callsite: "resource-gallery:upload", tenantId: tenantId ?? undefined });
+      const filePath = assertSafeStorageObjectPath(
+        `${safeTenant}/resources/${safeResource}/${fileName}`,
+        {
+          callsite: "resource-gallery:upload",
+          tenantId: tenantId ?? undefined,
+        },
+      );
 
       const { error: uploadError } = await supabase.storage
         .from("tenant-assets")
@@ -73,7 +81,9 @@ const ResourceImageGallery = ({ resourceId, tenantId }: Props) => {
       if (insertError) throw insertError;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["resource-images", resourceId] });
+      queryClient.invalidateQueries({
+        queryKey: ["resource-images", resourceId],
+      });
       toast({ title: t("dashboard.imageUploaded") });
     },
     onError: async (err) => {
@@ -96,7 +106,9 @@ const ResourceImageGallery = ({ resourceId, tenantId }: Props) => {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["resource-images", resourceId] });
+      queryClient.invalidateQueries({
+        queryKey: ["resource-images", resourceId],
+      });
       toast({ title: t("dashboard.imageDeleted") });
     },
   });
@@ -108,18 +120,22 @@ const ResourceImageGallery = ({ resourceId, tenantId }: Props) => {
         supabase
           .from("resource_images")
           .update({ sort_order: item.sort_order })
-          .eq("id", item.id)
+          .eq("id", item.id),
       );
       const results = await Promise.all(updates);
       const failed = results.find((r) => r.error);
       if (failed?.error) throw failed.error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["resource-images", resourceId] });
+      queryClient.invalidateQueries({
+        queryKey: ["resource-images", resourceId],
+      });
     },
     onError: () => {
       toast({ title: t("settings.saveError"), variant: "destructive" });
-      queryClient.invalidateQueries({ queryKey: ["resource-images", resourceId] });
+      queryClient.invalidateQueries({
+        queryKey: ["resource-images", resourceId],
+      });
     },
   });
 
@@ -128,11 +144,19 @@ const ResourceImageGallery = ({ resourceId, tenantId }: Props) => {
     if (!file) return;
 
     if (!ALLOWED.includes(file.type)) {
-      toast({ title: "Error", description: "Use PNG, JPG or WebP.", variant: "destructive" });
+      toast({
+        title: "Error",
+        description: "Use PNG, JPG or WebP.",
+        variant: "destructive",
+      });
       return;
     }
     if (file.size > MAX_SIZE) {
-      toast({ title: "Error", description: "Max 5 MB.", variant: "destructive" });
+      toast({
+        title: "Error",
+        description: "Max 5 MB.",
+        variant: "destructive",
+      });
       return;
     }
     if (images.length >= MAX_IMAGES) {
@@ -159,20 +183,26 @@ const ResourceImageGallery = ({ resourceId, tenantId }: Props) => {
     setOverIndex(index);
   }, []);
 
-  const commitReorder = useCallback((fromIndex: number, toIndex: number) => {
-    if (fromIndex === toIndex) return;
-    const reordered = [...images];
-    const [moved] = reordered.splice(fromIndex, 1);
-    reordered.splice(toIndex, 0, moved);
+  const commitReorder = useCallback(
+    (fromIndex: number, toIndex: number) => {
+      if (fromIndex === toIndex) return;
+      const reordered = [...images];
+      const [moved] = reordered.splice(fromIndex, 1);
+      reordered.splice(toIndex, 0, moved);
 
-    const updates = reordered.map((img: any, i: number) => ({
-      id: img.id,
-      sort_order: i,
-    }));
+      const updates = reordered.map((img: any, i: number) => ({
+        id: img.id,
+        sort_order: i,
+      }));
 
-    queryClient.setQueryData(["resource-images", resourceId], reordered.map((img: any, i: number) => ({ ...img, sort_order: i })));
-    reorderMutation.mutate(updates);
-  }, [images, queryClient, resourceId, reorderMutation]);
+      queryClient.setQueryData(
+        ["resource-images", resourceId],
+        reordered.map((img: any, i: number) => ({ ...img, sort_order: i })),
+      );
+      reorderMutation.mutate(updates);
+    },
+    [images, queryClient, resourceId, reorderMutation],
+  );
 
   const handleDragEnd = useCallback(() => {
     if (dragIndex !== null && overIndex !== null && dragIndex !== overIndex) {
@@ -183,24 +213,27 @@ const ResourceImageGallery = ({ resourceId, tenantId }: Props) => {
   }, [dragIndex, overIndex, commitReorder]);
 
   /* ── Touch handlers for mobile ── */
-  const getTouchTargetIndex = useCallback((touch: { clientX: number; clientY: number }): number | null => {
-    const container = containerRef.current;
-    if (!container) return null;
-    const children = Array.from(container.children) as HTMLElement[];
-    for (let i = 0; i < images.length; i++) {
-      const rect = children[i]?.getBoundingClientRect();
-      if (!rect) continue;
-      if (
-        touch.clientX >= rect.left &&
-        touch.clientX <= rect.right &&
-        touch.clientY >= rect.top &&
-        touch.clientY <= rect.bottom
-      ) {
-        return i;
+  const getTouchTargetIndex = useCallback(
+    (touch: { clientX: number; clientY: number }): number | null => {
+      const container = containerRef.current;
+      if (!container) return null;
+      const children = Array.from(container.children) as HTMLElement[];
+      for (let i = 0; i < images.length; i++) {
+        const rect = children[i]?.getBoundingClientRect();
+        if (!rect) continue;
+        if (
+          touch.clientX >= rect.left &&
+          touch.clientX <= rect.right &&
+          touch.clientY >= rect.top &&
+          touch.clientY <= rect.bottom
+        ) {
+          return i;
+        }
       }
-    }
-    return null;
-  }, [images.length]);
+      return null;
+    },
+    [images.length],
+  );
 
   const handleTouchStart = useCallback((e: React.TouchEvent, index: number) => {
     const touch = e.touches[0];
@@ -215,24 +248,27 @@ const ResourceImageGallery = ({ resourceId, tenantId }: Props) => {
     }, 400);
   }, []);
 
-  const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    const touch = e.touches[0];
-    // Cancel long press if finger moved too much before activation
-    if (!isTouchDragging && touchStartPos.current) {
-      const dx = Math.abs(touch.clientX - touchStartPos.current.x);
-      const dy = Math.abs(touch.clientY - touchStartPos.current.y);
-      if (dx > 10 || dy > 10) {
-        if (longPressTimer.current) clearTimeout(longPressTimer.current);
+  const handleTouchMove = useCallback(
+    (e: React.TouchEvent) => {
+      const touch = e.touches[0];
+      // Cancel long press if finger moved too much before activation
+      if (!isTouchDragging && touchStartPos.current) {
+        const dx = Math.abs(touch.clientX - touchStartPos.current.x);
+        const dy = Math.abs(touch.clientY - touchStartPos.current.y);
+        if (dx > 10 || dy > 10) {
+          if (longPressTimer.current) clearTimeout(longPressTimer.current);
+        }
       }
-    }
-    if (isTouchDragging) {
-      e.preventDefault(); // prevent scroll while dragging
-      const targetIndex = getTouchTargetIndex(touch);
-      if (targetIndex !== null) {
-        setOverIndex(targetIndex);
+      if (isTouchDragging) {
+        e.preventDefault(); // prevent scroll while dragging
+        const targetIndex = getTouchTargetIndex(touch);
+        if (targetIndex !== null) {
+          setOverIndex(targetIndex);
+        }
       }
-    }
-  }, [isTouchDragging, getTouchTargetIndex]);
+    },
+    [isTouchDragging, getTouchTargetIndex],
+  );
 
   const handleTouchEnd = useCallback(() => {
     if (longPressTimer.current) clearTimeout(longPressTimer.current);
@@ -250,7 +286,12 @@ const ResourceImageGallery = ({ resourceId, tenantId }: Props) => {
       <Label>{t("dashboard.gallery")}</Label>
 
       {/* Thumbnails grid with drag-and-drop */}
-      <div ref={containerRef} className="flex flex-wrap gap-2" onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}>
+      <div
+        ref={containerRef}
+        className="flex flex-wrap gap-2"
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
         {images.map((img: any, index: number) => (
           <div
             key={img.id}
@@ -280,7 +321,9 @@ const ResourceImageGallery = ({ resourceId, tenantId }: Props) => {
               type="button"
               onClick={() => deleteMutation.mutate(img.id)}
               className={`absolute -top-1.5 -right-1.5 h-6 w-6 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center transition-opacity ${
-                isTouchDragging ? "opacity-0" : "sm:opacity-0 sm:group-hover:opacity-100"
+                isTouchDragging
+                  ? "opacity-0"
+                  : "sm:opacity-0 sm:group-hover:opacity-100"
               }`}
             >
               <X className="h-3 w-3" />

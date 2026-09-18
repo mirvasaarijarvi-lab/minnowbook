@@ -112,7 +112,9 @@ function skipReason(): string {
 
 /** SHA-256 of canonical access-code form. Mirrors `lookup_access_code_by_plaintext`. */
 function hashCode(plaintext: string): string {
-  return createHash("sha256").update(plaintext.trim().toUpperCase()).digest("hex");
+  return createHash("sha256")
+    .update(plaintext.trim().toUpperCase())
+    .digest("hex");
 }
 
 function freshPlaintext(): string {
@@ -150,7 +152,10 @@ async function ensureFixtureUser(
 ): Promise<{ userId: string; tenantId: string }> {
   let userId: string | null = null;
   for (let page = 1; page <= 5; page++) {
-    const { data, error } = await admin.auth.admin.listUsers({ page, perPage: 200 });
+    const { data, error } = await admin.auth.admin.listUsers({
+      page,
+      perPage: 200,
+    });
     if (error) throw new Error(`listUsers failed: ${error.message}`);
     const users = data.users as Array<{ id: string; email?: string }>;
     const found = users.find(
@@ -168,8 +173,10 @@ async function ensureFixtureUser(
       password: spec.password,
       email_confirm: true,
     });
-    if (error) throw new Error(`createUser(${spec.email}) failed: ${error.message}`);
-    if (!data.user) throw new Error(`createUser(${spec.email}) returned no user`);
+    if (error)
+      throw new Error(`createUser(${spec.email}) failed: ${error.message}`);
+    if (!data.user)
+      throw new Error(`createUser(${spec.email}) returned no user`);
     userId = data.user.id;
   }
 
@@ -192,17 +199,25 @@ async function ensureFixtureUser(
     password: spec.password,
   });
   if (signInErr) {
-    throw new Error(`fixture sign-in (${spec.email}) failed: ${signInErr.message}`);
+    throw new Error(
+      `fixture sign-in (${spec.email}) failed: ${signInErr.message}`,
+    );
   }
-  const { data: tenantId, error: rpcErr } = await userClient.rpc("create_tenant", {
-    p_name: spec.tenantName,
-    p_slug: spec.tenantSlug,
-    p_tier: "basic",
-  });
+  const { data: tenantId, error: rpcErr } = await userClient.rpc(
+    "create_tenant",
+    {
+      p_name: spec.tenantName,
+      p_slug: spec.tenantSlug,
+      p_tier: "basic",
+    },
+  );
   if (rpcErr) {
-    throw new Error(`create_tenant(${spec.tenantSlug}) failed: ${rpcErr.message}`);
+    throw new Error(
+      `create_tenant(${spec.tenantSlug}) failed: ${rpcErr.message}`,
+    );
   }
-  if (!tenantId) throw new Error(`create_tenant(${spec.tenantSlug}) returned no id`);
+  if (!tenantId)
+    throw new Error(`create_tenant(${spec.tenantSlug}) returned no id`);
   return { userId, tenantId: tenantId as string };
 }
 
@@ -242,7 +257,8 @@ async function signInAndGetToken(spec: FixtureOwner): Promise<string> {
     email: spec.email,
     password: spec.password,
   });
-  if (error) throw new Error(`sign-in (${spec.email}) failed: ${error.message}`);
+  if (error)
+    throw new Error(`sign-in (${spec.email}) failed: ${error.message}`);
   if (!data.session?.access_token) {
     throw new Error(`sign-in (${spec.email}) returned no access token`);
   }
@@ -276,7 +292,12 @@ function bodyCode(body: unknown): string {
 async function resetTenantBaseline(
   admin: SupabaseClient,
   tenantId: string,
-): Promise<{ tier: string; sample_start_date: string | null; sample_end_date: string | null; subscription_status: string | null }> {
+): Promise<{
+  tier: string;
+  sample_start_date: string | null;
+  sample_end_date: string | null;
+  subscription_status: string | null;
+}> {
   await admin
     .from("tenants")
     .update({
@@ -451,7 +472,9 @@ suite(
       // 1. There is EXACTLY one redemption for this code overall.
       const { data: allRows, error: allErr } = await admin
         .from("access_code_redemptions")
-        .select("id, tenant_id, redeemed_by, granted_tier, granted_until, is_active")
+        .select(
+          "id, tenant_id, redeemed_by, granted_tier, granted_until, is_active",
+        )
         .eq("access_code_id", accessCodeId);
       expect(allErr, `ledger read failed: ${allErr?.message}`).toBeNull();
       expect(
@@ -465,7 +488,9 @@ suite(
         row.tenant_id,
         `ledger row tenant_id (${row.tenant_id}) must be tenant B (${tenantIdB}), NOT tenant A (${tenantIdA})`,
       ).toBe(tenantIdB);
-      expect(row.redeemed_by, "ledger row must be attributed to user B").toBe(userIdB);
+      expect(row.redeemed_by, "ledger row must be attributed to user B").toBe(
+        userIdB,
+      );
       expect(row.granted_tier).toBe("business");
       expect(row.is_active).toBe(true);
 
@@ -529,7 +554,9 @@ suite(
         .select("tier, sample_end_date, subscription_status")
         .eq("id", tenantIdB)
         .single();
-      expect(bTenant?.tier, "tenant B must be upgraded to business").toBe("business");
+      expect(bTenant?.tier, "tenant B must be upgraded to business").toBe(
+        "business",
+      );
       expect(bTenant?.sample_end_date).toBe(payload.granted_until);
       expect(
         bTenant?.subscription_status,
@@ -556,9 +583,10 @@ suite(
 
       const tokenB = await signInAndGetToken(FIXTURE_B);
       const burn = await callRedeem(tokenB, plaintext);
-      expect(burn.status, `tenant B burn-redeem must succeed: ${burn.rawText}`).toBe(
-        200,
-      );
+      expect(
+        burn.status,
+        `tenant B burn-redeem must succeed: ${burn.rawText}`,
+      ).toBe(200);
 
       // Now tenant A's owner — the user the code was conceptually
       // "intended for" — tries to redeem. Must be rejected with the
@@ -588,9 +616,10 @@ suite(
         allRows?.length,
         `reclaim attempt must NOT add a ledger row; got ${allRows?.length}`,
       ).toBe(1);
-      expect(allRows![0].tenant_id, "winning ledger row must remain tenant B").toBe(
-        tenantIdB,
-      );
+      expect(
+        allRows![0].tenant_id,
+        "winning ledger row must remain tenant B",
+      ).toBe(tenantIdB);
 
       const { data: aRows } = await admin
         .from("access_code_redemptions")
@@ -622,7 +651,9 @@ suite(
         .eq("id", tenantIdA)
         .single();
       expect(aTenant?.tier).toBe(baselineA.tier);
-      expect(aTenant?.sample_start_date ?? null).toBe(baselineA.sample_start_date);
+      expect(aTenant?.sample_start_date ?? null).toBe(
+        baselineA.sample_start_date,
+      );
       expect(aTenant?.sample_end_date ?? null).toBe(baselineA.sample_end_date);
     }, 60_000);
   },

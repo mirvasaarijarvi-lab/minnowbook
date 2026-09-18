@@ -12,7 +12,7 @@ const ALLOWED_ORIGINS = [
 
 function isOriginAllowed(origin: string): boolean {
   return ALLOWED_ORIGINS.some((o) =>
-    typeof o === "string" ? o === origin : o.test(origin)
+    typeof o === "string" ? o === origin : o.test(origin),
   );
 }
 
@@ -59,7 +59,9 @@ describe("CORS Origin Validation - Security Regression Tests", () => {
       const staticWildcard = /"Access-Control-Allow-Origin":\s*"\*"/;
 
       // The getCorsHeaders function should exist in authenticated functions
-      expect(dynamicCorsPattern.test("const corsHeaders = getCorsHeaders(req)")).toBe(true);
+      expect(
+        dynamicCorsPattern.test("const corsHeaders = getCorsHeaders(req)"),
+      ).toBe(true);
 
       // Wildcard should NOT be the pattern in authenticated functions
       const authenticatedFunctionCode = `const corsHeaders = getCorsHeaders(req);`;
@@ -106,8 +108,15 @@ describe("CORS Origin Validation - Security Regression Tests", () => {
 
   describe("Permissions-Policy header", () => {
     it("disables unnecessary browser APIs", () => {
-      const policy = "camera=(), microphone=(), geolocation=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()";
-      const disabledApis = ["camera", "microphone", "geolocation", "payment", "usb"];
+      const policy =
+        "camera=(), microphone=(), geolocation=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()";
+      const disabledApis = [
+        "camera",
+        "microphone",
+        "geolocation",
+        "payment",
+        "usb",
+      ];
       for (const api of disabledApis) {
         expect(policy).toContain(`${api}=()`);
       }
@@ -117,7 +126,10 @@ describe("CORS Origin Validation - Security Regression Tests", () => {
   describe("session persistence", () => {
     it("no idle timeout is enforced (users stay signed in until they sign out)", async () => {
       const fs = await import("fs");
-      const src = await fs.promises.readFile("src/contexts/AuthContext.tsx", "utf8");
+      const src = await fs.promises.readFile(
+        "src/contexts/AuthContext.tsx",
+        "utf8",
+      );
       expect(src).not.toMatch(/IDLE_TIMEOUT_MS/);
       expect(src).not.toMatch(/idleTimerRef/);
     });

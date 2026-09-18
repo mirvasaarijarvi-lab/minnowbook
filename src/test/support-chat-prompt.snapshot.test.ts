@@ -6,7 +6,7 @@ import { prompt, extractSection } from "./utils/prompt-sections";
 
 const SNAPSHOT_FILE = resolve(
   __dirname,
-  "__snapshots__/support-chat-prompt.snapshot.test.ts.snap"
+  "__snapshots__/support-chat-prompt.snapshot.test.ts.snap",
 );
 
 /**
@@ -34,7 +34,10 @@ function readStoredSnapshot(snapshotKey: string): string | null {
   }
   let body = raw.slice(bodyStart, i);
   // Unescape: \` → `, \\ → \, \${ → ${ (vitest snapshot format)
-  body = body.replace(/\\`/g, "`").replace(/\\\$\{/g, "${").replace(/\\\\/g, "\\");
+  body = body
+    .replace(/\\`/g, "`")
+    .replace(/\\\$\{/g, "${")
+    .replace(/\\\\/g, "\\");
   // The snapshot wraps the value as a quoted string on its own lines.
   // Strip surrounding newlines and the outer wrapping quotes for string snapshots.
   body = body.replace(/^\n/, "").replace(/\n$/, "");
@@ -52,7 +55,7 @@ function readStoredSnapshot(snapshotKey: string): string | null {
 function expectMatchesSnapshotWithDiff(
   actual: string,
   snapshotKey: string,
-  matcher: () => void
+  matcher: () => void,
 ): void {
   try {
     matcher();
@@ -64,7 +67,7 @@ function expectMatchesSnapshotWithDiff(
         const original = err instanceof Error ? err.message : String(err);
         const wrapped = new Error(
           `${original}\n\nUnified diff (snapshot vs current "${snapshotKey}"):\n${diff}\n\n` +
-            `If this change is intentional, re-run with \`vitest -u\` to update the snapshot.`
+            `If this change is intentional, re-run with \`vitest -u\` to update the snapshot.`,
         );
         wrapped.stack = err instanceof Error ? err.stack : undefined;
         throw wrapped;
@@ -84,7 +87,7 @@ describe("support-chat system prompt — snapshot lock", () => {
     expectMatchesSnapshotWithDiff(
       section,
       "support-chat system prompt — snapshot lock > locks the 'Recent additions' section",
-      () => expect(section).toMatchSnapshot()
+      () => expect(section).toMatchSnapshot(),
     );
   });
 

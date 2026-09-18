@@ -31,33 +31,39 @@ function projectRef(): string | null {
 type Lang = "en" | "fi" | "sv";
 
 /** Localized labels and expected announcements, copied from src/i18n/translations.ts. */
-const L: Record<Lang, {
-  offersNav: string;
-  confirm: string;
-  confirmed: string;
-  one: string;
-  many: (count: number) => string;
-}> = {
+const L: Record<
+  Lang,
+  {
+    offersNav: string;
+    confirm: string;
+    confirmed: string;
+    one: string;
+    many: (count: number) => string;
+  }
+> = {
   en: {
     offersNav: "Offers",
     confirm: "Confirm",
     confirmed: "Offer confirmed",
     one: "1 food and drink line from the offer was sent to the Kitchen tab.",
-    many: (c) => `${c} food and drink lines from the offer were sent to the Kitchen tab.`,
+    many: (c) =>
+      `${c} food and drink lines from the offer were sent to the Kitchen tab.`,
   },
   fi: {
     offersNav: "Tarjoukset",
     confirm: "Vahvista",
     confirmed: "Tarjous vahvistettu",
     one: "Tarjouksesta vietiin 1 ruoka- ja juomarivi Keittiö-välilehdelle.",
-    many: (c) => `Tarjouksesta vietiin ${c} ruoka- ja juomariviä Keittiö-välilehdelle.`,
+    many: (c) =>
+      `Tarjouksesta vietiin ${c} ruoka- ja juomariviä Keittiö-välilehdelle.`,
   },
   sv: {
     offersNav: "Erbjudanden",
     confirm: "Bekräfta",
     confirmed: "Erbjudande bekräftat",
     one: "1 mat- och dryckesrad från erbjudandet skickades till Kök-fliken.",
-    many: (c) => `${c} mat- och dryckesrader från erbjudandet skickades till Kök-fliken.`,
+    many: (c) =>
+      `${c} mat- och dryckesrader från erbjudandet skickades till Kök-fliken.`,
   },
 };
 
@@ -140,7 +146,11 @@ function offerRow(overrides: Record<string, unknown>) {
   };
 }
 
-const json = (route: Route, body: unknown, headers: Record<string, string> = {}) =>
+const json = (
+  route: Route,
+  body: unknown,
+  headers: Record<string, string> = {},
+) =>
   route.fulfill({
     status: 200,
     contentType: "application/json",
@@ -176,7 +186,9 @@ async function mockBackend(page: Page, offer: Record<string, unknown>) {
 
   // Subscription and other edge-function beacons are irrelevant here, and the
   // real endpoints are not reachable from the test environment.
-  await page.route(/\/functions\/v1\//, (route) => json(route, { subscribed: true }));
+  await page.route(/\/functions\/v1\//, (route) =>
+    json(route, { subscribed: true }),
+  );
 
   await page.route(/\/rest\/v1\/.*/, async (route: Route) => {
     const request = route.request();
@@ -244,7 +256,9 @@ async function mockBackend(page: Page, offer: Record<string, unknown>) {
         const row = { id: `reservation-${reservations.length + 1}`, ...body };
         reservations.push(row);
         // .single() asks for a single object, not an array.
-        const wantsObject = (request.headers()["accept"] ?? "").includes("pgrst.object");
+        const wantsObject = (request.headers()["accept"] ?? "").includes(
+          "pgrst.object",
+        );
         return json(route, wantsObject ? row : [row]);
       }
       return json(route, []);
@@ -253,7 +267,8 @@ async function mockBackend(page: Page, offer: Record<string, unknown>) {
     if (path.startsWith("kitchen_orders")) {
       if (method === "POST") {
         const body = request.postDataJSON();
-        for (const row of Array.isArray(body) ? body : [body]) kitchenRows.push(row);
+        for (const row of Array.isArray(body) ? body : [body])
+          kitchenRows.push(row);
         return json(route, Array.isArray(body) ? body : [body]);
       }
       // The Kitchen tab reads back exactly the rows the offer wrote.
@@ -279,8 +294,13 @@ async function mockBackend(page: Page, offer: Record<string, unknown>) {
 async function openOffers(page: Page, lang: Lang = "en") {
   await seedFakeSession(page, ref!, lang);
   await page.goto("/dashboard");
-  await page.getByRole("button", { name: L[lang].offersNav, exact: true }).first().click();
-  await expect(page.getByText("Kitchen E2E Guest").first()).toBeVisible({ timeout: 15_000 });
+  await page
+    .getByRole("button", { name: L[lang].offersNav, exact: true })
+    .first()
+    .click();
+  await expect(page.getByText("Kitchen E2E Guest").first()).toBeVisible({
+    timeout: 15_000,
+  });
 }
 
 /** Wait for the confirmation toast and return its full text. */
@@ -304,7 +324,10 @@ test.describe("Offer confirmation states the Kitchen tab result", () => {
   // sandbox starves the preview server, so keep them serial.
   test.describe.configure({ mode: "serial" });
 
-  test.skip(!ref, "VITE_SUPABASE_URL is required to compute the auth-token key");
+  test.skip(
+    !ref,
+    "VITE_SUPABASE_URL is required to compute the auth-token key",
+  );
 
   test("offer with food and drinks: confirmation names the lines sent to the kitchen", async ({
     page,
@@ -312,12 +335,19 @@ test.describe("Offer confirmation states the Kitchen tab result", () => {
     const recorded = await mockBackend(
       page,
       offerRow({
-        menu: ["20 x Roast beef", "4 x Vegan plate (no nuts)", "20 x Red wine"].join("\n"),
+        menu: [
+          "20 x Roast beef",
+          "4 x Vegan plate (no nuts)",
+          "20 x Red wine",
+        ].join("\n"),
       }),
     );
 
     await openOffers(page);
-    await page.getByRole("button", { name: "Confirm", exact: true }).first().click();
+    await page
+      .getByRole("button", { name: "Confirm", exact: true })
+      .first()
+      .click();
 
     // Toast: headline plus the kitchen count.
     // Toasts auto-dismiss, so capture the text once and assert on the snapshot.
@@ -339,7 +369,9 @@ test.describe("Offer confirmation states the Kitchen tab result", () => {
     await expect
       .poll(() => recorded.kitchenRows.length, { timeout: 10_000 })
       .toBe(3);
-    expect(recorded.kitchenRows.map((r) => [r.item_name, r.quantity, r.category])).toEqual([
+    expect(
+      recorded.kitchenRows.map((r) => [r.item_name, r.quantity, r.category]),
+    ).toEqual([
       ["Roast beef", 20, "food"],
       ["Vegan plate", 4, "food"],
       ["Red wine", 20, "drink"],
@@ -350,10 +382,16 @@ test.describe("Offer confirmation states the Kitchen tab result", () => {
   test("offer without food or drinks: confirmation says nothing was sent to the kitchen", async ({
     page,
   }) => {
-    const recorded = await mockBackend(page, offerRow({ id: "offer-e2e-2", menu: "   \n \n" }));
+    const recorded = await mockBackend(
+      page,
+      offerRow({ id: "offer-e2e-2", menu: "   \n \n" }),
+    );
 
     await openOffers(page);
-    await page.getByRole("button", { name: "Confirm", exact: true }).first().click();
+    await page
+      .getByRole("button", { name: "Confirm", exact: true })
+      .first()
+      .click();
 
     const toastText = await readToast(page);
     expect(toastText).toContain("Offer confirmed");
@@ -365,11 +403,15 @@ test.describe("Offer confirmation states the Kitchen tab result", () => {
     await expect(region).toContainText("nothing was sent to the Kitchen tab");
 
     // One plain reservation, no kitchen lines at all.
-    await expect.poll(() => recorded.reservations.length, { timeout: 10_000 }).toBe(1);
+    await expect
+      .poll(() => recorded.reservations.length, { timeout: 10_000 })
+      .toBe(1);
     expect(recorded.kitchenRows).toHaveLength(0);
   });
 
-  test("accepted offer's food and drink lines show up in the Kitchen tab", async ({ page }) => {
+  test("accepted offer's food and drink lines show up in the Kitchen tab", async ({
+    page,
+  }) => {
     // The event is today so the Kitchen tab, which opens on today, lists it.
     const recorded = await mockBackend(
       page,
@@ -385,14 +427,24 @@ test.describe("Offer confirmation states the Kitchen tab result", () => {
     );
 
     await openOffers(page);
-    await page.getByRole("button", { name: "Confirm", exact: true }).first().click();
+    await page
+      .getByRole("button", { name: "Confirm", exact: true })
+      .first()
+      .click();
 
     // Wait until the kitchen lines have been written by the confirmation.
-    await expect.poll(() => recorded.kitchenRows.length, { timeout: 15_000 }).toBe(3);
+    await expect
+      .poll(() => recorded.kitchenRows.length, { timeout: 15_000 })
+      .toBe(3);
 
     // Now open the Kitchen tab and check the guest and the lines are listed.
-    await page.getByRole("button", { name: "Kitchen", exact: true }).first().click();
-    await expect(page.getByText("Kitchen E2E Guest").first()).toBeVisible({ timeout: 15_000 });
+    await page
+      .getByRole("button", { name: "Kitchen", exact: true })
+      .first()
+      .click();
+    await expect(page.getByText("Kitchen E2E Guest").first()).toBeVisible({
+      timeout: 15_000,
+    });
 
     const itemNames = page.getByRole("textbox", { name: "Item" });
     await expect(itemNames).toHaveCount(3);
@@ -411,7 +463,9 @@ test.describe("Offer confirmation states the Kitchen tab result", () => {
     await expect(notes.nth(1)).toHaveValue("no nuts");
 
     // Category comes through as food / drink.
-    await expect(page.getByRole("combobox", { name: "Category" }).nth(2)).toContainText("Drink");
+    await expect(
+      page.getByRole("combobox", { name: "Category" }).nth(2),
+    ).toContainText("Drink");
   });
 });
 
@@ -420,19 +474,27 @@ test.describe("Kitchen tab announcement wording per language", () => {
   // sandbox starves the preview server, so keep them serial.
   test.describe.configure({ mode: "serial" });
 
-  test.skip(!ref, "VITE_SUPABASE_URL is required to compute the auth-token key");
+  test.skip(
+    !ref,
+    "VITE_SUPABASE_URL is required to compute the auth-token key",
+  );
 
   const languages: Lang[] = ["en", "fi", "sv"];
 
   for (const lang of languages) {
-    test(`${lang}: one food or drink line is announced in the singular`, async ({ page }) => {
+    test(`${lang}: one food or drink line is announced in the singular`, async ({
+      page,
+    }) => {
       const recorded = await mockBackend(
         page,
         offerRow({ id: `offer-one-${lang}`, menu: "1 x Roast beef" }),
       );
 
       await openOffers(page, lang);
-      await page.getByRole("button", { name: L[lang].confirm, exact: true }).first().click();
+      await page
+        .getByRole("button", { name: L[lang].confirm, exact: true })
+        .first()
+        .click();
 
       const region = page.locator("#offer-status-live-region");
       await expect(region).toHaveAttribute("aria-live", "polite");
@@ -443,20 +505,29 @@ test.describe("Kitchen tab announcement wording per language", () => {
       await expect(region).not.toContainText(L[lang].many(1));
       await expect(region).not.toContainText("{count}");
 
-      await expect.poll(() => recorded.kitchenRows.length, { timeout: 10_000 }).toBe(1);
+      await expect
+        .poll(() => recorded.kitchenRows.length, { timeout: 10_000 })
+        .toBe(1);
     });
 
-    test(`${lang}: several food and drink lines are announced in the plural`, async ({ page }) => {
+    test(`${lang}: several food and drink lines are announced in the plural`, async ({
+      page,
+    }) => {
       const recorded = await mockBackend(
         page,
         offerRow({
           id: `offer-many-${lang}`,
-          menu: ["20 x Roast beef", "4 x Vegan plate", "20 x Red wine"].join("\n"),
+          menu: ["20 x Roast beef", "4 x Vegan plate", "20 x Red wine"].join(
+            "\n",
+          ),
         }),
       );
 
       await openOffers(page, lang);
-      await page.getByRole("button", { name: L[lang].confirm, exact: true }).first().click();
+      await page
+        .getByRole("button", { name: L[lang].confirm, exact: true })
+        .first()
+        .click();
 
       const region = page.locator("#offer-status-live-region");
       await expect(region).toContainText(L[lang].confirmed);
@@ -464,7 +535,9 @@ test.describe("Kitchen tab announcement wording per language", () => {
       await expect(region).not.toContainText(L[lang].one);
       await expect(region).not.toContainText("{count}");
 
-      await expect.poll(() => recorded.kitchenRows.length, { timeout: 10_000 }).toBe(3);
+      await expect
+        .poll(() => recorded.kitchenRows.length, { timeout: 10_000 })
+        .toBe(3);
     });
   }
 });

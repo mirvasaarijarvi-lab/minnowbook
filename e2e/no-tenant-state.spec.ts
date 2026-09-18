@@ -52,7 +52,7 @@ async function loginAs(page: Page, email: string, password: string) {
 test.describe("NoTenantState for logged-in users without a tenant", () => {
   test.skip(
     !enabled,
-    "Set E2E_NO_TENANT_EMAIL and E2E_NO_TENANT_PASSWORD to run this suite."
+    "Set E2E_NO_TENANT_EMAIL and E2E_NO_TENANT_PASSWORD to run this suite.",
   );
 
   test.beforeEach(async ({ page }) => {
@@ -102,7 +102,7 @@ test.describe("NoTenantState for logged-in users without a tenant", () => {
 
       // Headline that NoTenantState renders for the superadmin area.
       await expect(
-        page.getByRole("heading", { name: /superadmin area unavailable/i })
+        page.getByRole("heading", { name: /superadmin area unavailable/i }),
       ).toBeVisible({ timeout: 10_000 });
     });
 
@@ -125,9 +125,11 @@ test.describe("NoTenantState for logged-in users without a tenant", () => {
       expect(new URL(page.url()).pathname).toBe("/onboarding");
 
       // Wizard surface should render — i.e., we didn't loop back.
-      await expect(page.getByRole("heading", { level: 1 }).first()).toBeVisible({
-        timeout: 10_000,
-      });
+      await expect(page.getByRole("heading", { level: 1 }).first()).toBeVisible(
+        {
+          timeout: 10_000,
+        },
+      );
     });
 
     test("'Contact support' CTA opens /support with prefilled area + email", async ({

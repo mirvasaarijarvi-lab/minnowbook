@@ -14,13 +14,23 @@ import {
   type TenantSchemaView,
 } from "./fixtures/tenant-manifest-drift";
 
-const MANIFEST = ["reservations", "resources", "booking_idempotency", "legacy_invoices"];
+const MANIFEST = [
+  "reservations",
+  "resources",
+  "booking_idempotency",
+  "legacy_invoices",
+];
 const DECLARED = ["reservations", "resources", "booking_idempotency"];
 
 /** Tenant A is fully up to date. */
 const healthy: TenantSchemaView = {
   tenant: "tenant-a-up-to-date",
-  liveTables: ["reservations", "resources", "booking_idempotency", "legacy_invoices"],
+  liveTables: [
+    "reservations",
+    "resources",
+    "booking_idempotency",
+    "legacy_invoices",
+  ],
 };
 /** Tenant B lags on migrations: booking_idempotency is not applied yet. */
 const lagging: TenantSchemaView = {
@@ -73,7 +83,9 @@ describe("manifest drift across multiple tenants", () => {
     const withHealthyFirst = classify([healthy, stale]);
     const staleOnly = classify([stale]);
     expect(withHealthyFirst.staleTenants).toEqual(["tenant-c-table-dropped"]);
-    expect(withHealthyFirst.perTenant[1].drift).toEqual(staleOnly.perTenant[0].drift);
+    expect(withHealthyFirst.perTenant[1].drift).toEqual(
+      staleOnly.perTenant[0].drift,
+    );
   });
 
   it("does not let one tenant's migration lag excuse another tenant's stale table", () => {
@@ -95,14 +107,19 @@ describe("manifest drift across multiple tenants", () => {
   it("tolerates migration lag across all tenants without failing", () => {
     const result = classify([lagging, { ...lagging, tenant: "tenant-f" }]);
     expect(result.staleTenants).toEqual([]);
-    expect(result.pendingTenants).toEqual(["tenant-b-migrations-pending", "tenant-f"]);
-    expect(pendingMigrationWarning(result.perTenant[0].drift.pendingMigration)).toContain(
-      "booking_idempotency",
-    );
+    expect(result.pendingTenants).toEqual([
+      "tenant-b-migrations-pending",
+      "tenant-f",
+    ]);
+    expect(
+      pendingMigrationWarning(result.perTenant[0].drift.pendingMigration),
+    ).toContain("booking_idempotency");
   });
 
   it("names every offending tenant and its own tables in the failure text", () => {
-    const message = staleTenantsError(classify([healthy, lagging, stale, both]));
+    const message = staleTenantsError(
+      classify([healthy, lagging, stale, both]),
+    );
     expect(message).toContain("2 tenant(s)");
     expect(message).toContain("tenant-c-table-dropped: legacy_invoices");
     expect(message).toContain("tenant-d-both: legacy_invoices");

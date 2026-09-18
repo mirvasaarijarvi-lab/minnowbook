@@ -7,7 +7,11 @@ import { useDateLocale } from "@/hooks/useDateLocale";
 import { Bell, CheckCircle2, Receipt, X, CheckCheck } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -46,7 +50,8 @@ const NotificationBell = () => {
         .eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["notifications", tenantId] }),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ["notifications", tenantId] }),
   });
 
   const markAllRead = useMutation({
@@ -59,7 +64,8 @@ const NotificationBell = () => {
         .eq("is_read", false);
       if (error) throw error;
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["notifications", tenantId] }),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ["notifications", tenantId] }),
   });
 
   const handleOpenChange = (isOpen: boolean) => {
@@ -98,7 +104,9 @@ const NotificationBell = () => {
         sideOffset={8}
       >
         <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-          <h3 className="font-semibold text-sm text-foreground">{t("notifications.title")}</h3>
+          <h3 className="font-semibold text-sm text-foreground">
+            {t("notifications.title")}
+          </h3>
           <div className="flex items-center gap-1">
             {unreadCount > 0 && (
               <Button
@@ -126,21 +134,31 @@ const NotificationBell = () => {
                   key={n.id}
                   className={cn(
                     "flex gap-3 px-4 py-3 text-sm transition-colors",
-                    !n.is_read && "bg-primary/5"
+                    !n.is_read && "bg-primary/5",
                   )}
                 >
                   <div className="mt-0.5">{getIcon(n.type)}</div>
                   <div className="flex-1 min-w-0">
-                    <p className={cn("text-foreground", !n.is_read && "font-medium")}>
+                    <p
+                      className={cn(
+                        "text-foreground",
+                        !n.is_read && "font-medium",
+                      )}
+                    >
                       {n.type === "reservation_used"
                         ? t("notifications.used")
                         : n.type === "reservation_invoiced"
-                        ? t("notifications.invoiced")
-                        : n.title}
+                          ? t("notifications.invoiced")
+                          : n.title}
                     </p>
-                    <p className="text-xs text-muted-foreground mt-0.5 truncate">{n.message}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5 truncate">
+                      {n.message}
+                    </p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      {formatDistanceToNow(new Date(n.created_at), { addSuffix: true, locale: dateFnsLocale })}
+                      {formatDistanceToNow(new Date(n.created_at), {
+                        addSuffix: true,
+                        locale: dateFnsLocale,
+                      })}
                     </p>
                   </div>
                   {!n.is_read && (

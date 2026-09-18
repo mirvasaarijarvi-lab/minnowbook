@@ -193,9 +193,7 @@ describe("useInvalidateIsSystemAdmin (hook form)", () => {
       await result.current.invalidate("user-A");
     });
 
-    await waitFor(() =>
-      expect(result.current.data.isSystemAdmin).toBe(false),
-    );
+    await waitFor(() => expect(result.current.data.isSystemAdmin).toBe(false));
     expect(rpcSpy).toHaveBeenCalledTimes(2);
   });
 });

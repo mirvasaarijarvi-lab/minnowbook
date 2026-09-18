@@ -73,7 +73,10 @@ if (Number.isFinite(LIVE_FETCH_TIMEOUT_MS) && LIVE_FETCH_TIMEOUT_MS > 0) {
   const originalFetch = globalThis.fetch?.bind(globalThis);
   if (originalFetch) {
     globalThis.fetch = ((input: any, init?: RequestInit) => {
-      if (init?.signal || (input && typeof input === "object" && input.signal)) {
+      if (
+        init?.signal ||
+        (input && typeof input === "object" && input.signal)
+      ) {
         return originalFetch(input, init);
       }
       return originalFetch(input, {
@@ -85,7 +88,6 @@ if (Number.isFinite(LIVE_FETCH_TIMEOUT_MS) && LIVE_FETCH_TIMEOUT_MS > 0) {
 }
 
 Object.defineProperty(window, "matchMedia", {
-
   writable: true,
   value: (query: string) => ({
     matches: false,

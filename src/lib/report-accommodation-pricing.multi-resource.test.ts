@@ -30,7 +30,10 @@ const nightsLater = (start: string, nights: number) =>
     .toISOString()
     .slice(0, 10);
 
-const stayRow = (label: string, over: Partial<AccommodationPricingRow>): Row => ({
+const stayRow = (
+  label: string,
+  over: Partial<AccommodationPricingRow>,
+): Row => ({
   label,
   reservation_type: "guesthouse",
   date: "2026-08-01",
@@ -52,7 +55,9 @@ const reconcile = (rows: Row[]) => {
     const breakfast = calcBreakfastPrice(r);
     const charged = effectiveChargedTotal(r);
     // Per row: the two report lines equal the row's charged amount.
-    expect(roundCents(room + breakfast), `row ${r.label}`).toBe(roundCents(charged));
+    expect(roundCents(room + breakfast), `row ${r.label}`).toBe(
+      roundCents(charged),
+    );
     roomCents += Math.round(room * 100);
     breakfastCents += Math.round(breakfast * 100);
     chargedCents += Math.round(charged * 100);
@@ -80,7 +85,10 @@ describe("stays spanning multiple resources", () => {
     expect(calcBreakfastPrice(twin)).toBe(108);
     expect(calcRoomPrice(twin)).toBe(270);
 
-    const { roomCents, breakfastCents, chargedCents } = reconcile([suite, twin]);
+    const { roomCents, breakfastCents, chargedCents } = reconcile([
+      suite,
+      twin,
+    ]);
     expect(roomCents + breakfastCents).toBe(chargedCents);
     expect(chargedCents).toBe(Math.round((528 + 378) * 100));
   });
@@ -107,7 +115,10 @@ describe("stays spanning multiple resources", () => {
     expect(calcBreakfastPrice(hotelLeg)).toBe(86);
     expect(calcBreakfastPrice(houseLeg)).toBe(71.6);
 
-    const { roomCents, breakfastCents, chargedCents } = reconcile([hotelLeg, houseLeg]);
+    const { roomCents, breakfastCents, chargedCents } = reconcile([
+      hotelLeg,
+      houseLeg,
+    ]);
     expect(roomCents + breakfastCents).toBe(chargedCents);
     expect(chargedCents).toBe(Math.round((396 + 383.6) * 100));
   });
@@ -155,7 +166,9 @@ describe("stays spanning multiple resources", () => {
     const missingRate = stayRow("missing rate", {
       breakfast_price_per_person: null,
       guests_count: 2,
-      price_eur: roundCents(96 * 3 + DEFAULT_BREAKFAST_PRICE_PER_PERSON * 2 * 3), // 378
+      price_eur: roundCents(
+        96 * 3 + DEFAULT_BREAKFAST_PRICE_PER_PERSON * 2 * 3,
+      ), // 378
     });
     const discounted = stayRow("discounted leg", {
       breakfast_price_per_person: 12,
@@ -226,7 +239,10 @@ describe("stays spanning multiple resources", () => {
     expect(calcBreakfastPrice(cheapLeg)).toBe(40);
     expect(calcRoomPrice(cheapLeg)).toBe(0);
 
-    const { roomCents, breakfastCents, chargedCents } = reconcile([cheapLeg, fullLeg]);
+    const { roomCents, breakfastCents, chargedCents } = reconcile([
+      cheapLeg,
+      fullLeg,
+    ]);
     expect(roomCents + breakfastCents).toBe(chargedCents);
     expect(chargedCents).toBe(Math.round((40 + 522) * 100));
   });

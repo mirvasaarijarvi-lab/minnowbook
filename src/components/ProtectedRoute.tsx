@@ -18,10 +18,13 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     }
     try {
       const { data: factorsData } = await supabase.auth.mfa.listFactors();
-      const verifiedFactor = factorsData?.totp?.find((f: any) => f.status === "verified");
+      const verifiedFactor = factorsData?.totp?.find(
+        (f: any) => f.status === "verified",
+      );
       if (verifiedFactor) {
         // Check current AAL level
-        const { data: aalData } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+        const { data: aalData } =
+          await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
         if (aalData && aalData.currentLevel !== aalData.nextLevel) {
           // User has MFA but hasn't completed the challenge yet
           setMfaFactorId(verifiedFactor.id);

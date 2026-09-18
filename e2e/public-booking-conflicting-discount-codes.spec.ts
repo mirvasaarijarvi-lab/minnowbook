@@ -46,7 +46,10 @@ test.describe("Conflicting discount code combinations", () => {
     !(process.env.SERVICE_ROLE_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY),
     "Set SERVICE_ROLE_KEY to run this spec.",
   );
-  test.skip(!SUPABASE_ANON_KEY, "Set VITE_SUPABASE_PUBLISHABLE_KEY to run this spec.");
+  test.skip(
+    !SUPABASE_ANON_KEY,
+    "Set VITE_SUPABASE_PUBLISHABLE_KEY to run this spec.",
+  );
 
   test("are selected or refused by one policy, whatever the order or duplication", async ({
     ephemeralTenant,
@@ -217,7 +220,8 @@ test.describe("Conflicting discount code combinations", () => {
         codeField: Record<string, unknown>,
         expectedMessage: string,
       ) => {
-        const email = `ci+conflict-${label}-${stamp}@mimmobook.test`.toLowerCase();
+        const email =
+          `ci+conflict-${label}-${stamp}@mimmobook.test`.toLowerCase();
         const before = await Promise.all([
           usedCount(PERCENT_CODE),
           usedCount(FIXED_CODE),
@@ -227,8 +231,12 @@ test.describe("Conflicting discount code combinations", () => {
         const res = await post(basePayload(codeField, email));
         expect(res.status(), `${label}: refused with 400`).toBe(400);
         const body = await res.json();
-        expect(String(body.error), `${label}: policy message`).toContain(expectedMessage);
-        expect(await rowsFor(email), `${label}: nothing stored`).toHaveLength(0);
+        expect(String(body.error), `${label}: policy message`).toContain(
+          expectedMessage,
+        );
+        expect(await rowsFor(email), `${label}: nothing stored`).toHaveLength(
+          0,
+        );
         const after = await Promise.all([
           usedCount(PERCENT_CODE),
           usedCount(FIXED_CODE),
@@ -239,8 +247,16 @@ test.describe("Conflicting discount code combinations", () => {
       };
 
       // ---------- 1. Order never decides the outcome ----------
-      await expectRefused("order-ab", { promo_code: `${PERCENT_CODE},${FIXED_CODE}` }, MULTI_CODE_ERROR);
-      await expectRefused("order-ba", { promo_code: `${FIXED_CODE},${PERCENT_CODE}` }, MULTI_CODE_ERROR);
+      await expectRefused(
+        "order-ab",
+        { promo_code: `${PERCENT_CODE},${FIXED_CODE}` },
+        MULTI_CODE_ERROR,
+      );
+      await expectRefused(
+        "order-ba",
+        { promo_code: `${FIXED_CODE},${PERCENT_CODE}` },
+        MULTI_CODE_ERROR,
+      );
       await expectRefused(
         "order-array-ab",
         { promo_code: [PERCENT_CODE, FIXED_CODE] },
@@ -315,10 +331,26 @@ test.describe("Conflicting discount code combinations", () => {
       }
 
       // ---------- 4. A lone invalid code is a different refusal ----------
-      await expectRefused("lone-unknown", { promo_code: UNKNOWN_CODE }, INVALID_CODE_ERROR);
-      await expectRefused("lone-expired", { promo_code: EXPIRED_CODE }, INVALID_CODE_ERROR);
-      await expectRefused("lone-exhausted", { promo_code: EXHAUSTED_CODE }, INVALID_CODE_ERROR);
-      await expectRefused("lone-foreign", { promo_code: FOREIGN_CODE }, INVALID_CODE_ERROR);
+      await expectRefused(
+        "lone-unknown",
+        { promo_code: UNKNOWN_CODE },
+        INVALID_CODE_ERROR,
+      );
+      await expectRefused(
+        "lone-expired",
+        { promo_code: EXPIRED_CODE },
+        INVALID_CODE_ERROR,
+      );
+      await expectRefused(
+        "lone-exhausted",
+        { promo_code: EXHAUSTED_CODE },
+        INVALID_CODE_ERROR,
+      );
+      await expectRefused(
+        "lone-foreign",
+        { promo_code: FOREIGN_CODE },
+        INVALID_CODE_ERROR,
+      );
 
       // The foreign business's code was never touched by any of this.
       const { data: foreignRow } = await admin
@@ -327,7 +359,10 @@ test.describe("Conflicting discount code combinations", () => {
         .eq("tenant_id", foreignTenant!.id)
         .eq("code", FOREIGN_CODE)
         .single();
-      expect(Number(foreignRow!.used_count), "another business's code is untouched").toBe(0);
+      expect(
+        Number(foreignRow!.used_count),
+        "another business's code is untouched",
+      ).toBe(0);
 
       // ---------- 5. Codes hidden in free text stay inert ----------
       const freeTextEmail = `ci+conflict-freetext-${stamp}@mimmobook.test`;
@@ -343,7 +378,10 @@ test.describe("Conflicting discount code combinations", () => {
       expect(freeTextRes.status(), await freeTextRes.text()).toBe(200);
       const freeTextRows = await rowsFor(freeTextEmail);
       expect(freeTextRows, "the booking is stored").toHaveLength(1);
-      expect(freeTextRows[0].discount_code_id, "no code applied from free text").toBeNull();
+      expect(
+        freeTextRows[0].discount_code_id,
+        "no code applied from free text",
+      ).toBeNull();
       expect(Number(freeTextRows[0].price_eur), "full price").toBe(GROSS_EUR);
       expect(await usedCount(PERCENT_CODE), "free text spends no use").toBe(0);
       expect(await usedCount(FIXED_CODE), "free text spends no use").toBe(0);
@@ -358,20 +396,31 @@ test.describe("Conflicting discount code combinations", () => {
       expect(okRows, "one booking stored").toHaveLength(1);
       const okRow = okRows[0] as Record<string, any>;
       const expected = roundCents(GROSS_EUR * (1 - PERCENT_OFF / 100)); // 224
-      expect(Number(okRow.original_price_eur), "list price from the resource").toBe(GROSS_EUR);
-      expect(Number(okRow.price_eur), "the single code applied once").toBe(expected);
+      expect(
+        Number(okRow.original_price_eur),
+        "list price from the resource",
+      ).toBe(GROSS_EUR);
+      expect(Number(okRow.price_eur), "the single code applied once").toBe(
+        expected,
+      );
       expect(okRow.discount_type).toBe("percentage");
       expect(Number(okRow.discount_value)).toBe(PERCENT_OFF);
       expect(okRow.discount_reason).toContain("Promo code:");
       expect(await usedCount(PERCENT_CODE), "exactly one use spent").toBe(1);
-      expect(await usedCount(FIXED_CODE), "the other code is untouched").toBe(0);
+      expect(await usedCount(FIXED_CODE), "the other code is untouched").toBe(
+        0,
+      );
 
       // Report lines agree with the charged amount to the cent.
       const amounts = reportAmounts(okRow as any);
       expect(roundCents(amounts.room + amounts.breakfast)).toBe(expected);
 
       // ---------- 7. The now-exhausted code cannot be reused, alone or paired ----------
-      await expectRefused("spent-alone", { promo_code: PERCENT_CODE }, INVALID_CODE_ERROR);
+      await expectRefused(
+        "spent-alone",
+        { promo_code: PERCENT_CODE },
+        INVALID_CODE_ERROR,
+      );
       await expectRefused(
         "spent-paired",
         { promo_code: `${PERCENT_CODE},${FIXED_CODE}` },
@@ -380,13 +429,16 @@ test.describe("Conflicting discount code combinations", () => {
 
       // The still-live fixed code works on its own afterwards.
       const fixedEmail = `ci+conflict-fixed-${stamp}@mimmobook.test`;
-      const fixedRes = await post(basePayload({ promo_code: FIXED_CODE }, fixedEmail));
+      const fixedRes = await post(
+        basePayload({ promo_code: FIXED_CODE }, fixedEmail),
+      );
       expect(fixedRes.status(), await fixedRes.text()).toBe(200);
       const fixedRows = await rowsFor(fixedEmail);
       expect(fixedRows, "one booking stored").toHaveLength(1);
-      expect(Number(fixedRows[0].price_eur), "fixed amount off the recalculated total").toBe(
-        roundCents(GROSS_EUR - FIXED_OFF),
-      );
+      expect(
+        Number(fixedRows[0].price_eur),
+        "fixed amount off the recalculated total",
+      ).toBe(roundCents(GROSS_EUR - FIXED_OFF));
       expect(await usedCount(FIXED_CODE), "one use spent").toBe(1);
     } finally {
       await cleanupForeign();

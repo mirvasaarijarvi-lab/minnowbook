@@ -45,7 +45,9 @@ const NIGHTLY_EUR = 83.33;
 const BREAKFAST_EUR = 6.67;
 const NIGHTS = 3;
 const GUESTS = 3;
-const GROSS_EUR = roundCents(NIGHTLY_EUR * NIGHTS + BREAKFAST_EUR * GUESTS * NIGHTS); // 310.02
+const GROSS_EUR = roundCents(
+  NIGHTLY_EUR * NIGHTS + BREAKFAST_EUR * GUESTS * NIGHTS,
+); // 310.02
 
 interface Case {
   label: string;
@@ -61,7 +63,11 @@ const CASES: Case[] = [
   { label: "one third percent 33.333", type: "percentage", value: 33.333 },
   { label: "near one hundred percent", type: "percentage", value: 99.99 },
   { label: "exactly one hundred percent", type: "percentage", value: 100 },
-  { label: "fixed one cent below the total", type: "fixed", value: GROSS_EUR - 0.01 },
+  {
+    label: "fixed one cent below the total",
+    type: "fixed",
+    value: GROSS_EUR - 0.01,
+  },
   { label: "fixed above the total", type: "fixed", value: GROSS_EUR + 500 },
   { label: "fixed awkward amount", type: "fixed", value: 33.335 },
 ];
@@ -90,7 +96,10 @@ test.describe("Discount rounding edge cases", () => {
     !(process.env.SERVICE_ROLE_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY),
     "Set SERVICE_ROLE_KEY to run this spec.",
   );
-  test.skip(!SUPABASE_ANON_KEY, "Set VITE_SUPABASE_PUBLISHABLE_KEY to run this spec.");
+  test.skip(
+    !SUPABASE_ANON_KEY,
+    "Set VITE_SUPABASE_PUBLISHABLE_KEY to run this spec.",
+  );
 
   test("always round to the same cent in every persisted report", async ({
     ephemeralTenant,
@@ -144,7 +153,11 @@ test.describe("Discount rounding edge cases", () => {
 
     // 3. One booking per case, each on its own date and guest email so the
     //    retry de-duplication never merges two cases.
-    const stored: Array<{ label: string; expected: number; row: Record<string, unknown> }> = [];
+    const stored: Array<{
+      label: string;
+      expected: number;
+      row: Record<string, unknown>;
+    }> = [];
 
     for (const [i, c] of CASES.entries()) {
       const code = codes!.find((x) => x.code === `CIROUND${i}${stamp}`)!;
@@ -173,21 +186,36 @@ test.describe("Discount rounding edge cases", () => {
         .eq("tenant_id", tenantId)
         .eq("guest_email", guestEmail);
       expect(rowsErr, rowsErr?.message).toBeNull();
-      expect(rows, `${c.label} stored the wrong number of bookings`).toHaveLength(1);
+      expect(
+        rows,
+        `${c.label} stored the wrong number of bookings`,
+      ).toHaveLength(1);
 
       const row = rows![0];
-      expect(Number(row.original_price_eur), `${c.label} gross`).toBe(GROSS_EUR);
-      expect(Number(row.price_eur), `${c.label} charged total`).toBe(expectedFinal(c));
+      expect(Number(row.original_price_eur), `${c.label} gross`).toBe(
+        GROSS_EUR,
+      );
+      expect(Number(row.price_eur), `${c.label} charged total`).toBe(
+        expectedFinal(c),
+      );
       // A code worth nothing (0 %) is recorded as no discount at all: the
       // booking simply carries the full price, with no discount fields set.
-      const discountKept = c.value > 0 && !(c.type === "fixed" && c.value > GROSS_EUR);
+      const discountKept =
+        c.value > 0 && !(c.type === "fixed" && c.value > GROSS_EUR);
       if (!discountKept) {
-        expect(row.discount_code_id, `${c.label} should store no discount`).toBeNull();
+        expect(
+          row.discount_code_id,
+          `${c.label} should store no discount`,
+        ).toBeNull();
         expect(Number(row.price_eur)).toBe(GROSS_EUR);
       } else {
         expect(row.discount_code_id, `${c.label} discount code`).toBe(code.id);
       }
-      stored.push({ label: c.label, expected: expectedFinal(c), row: row as Record<string, unknown> });
+      stored.push({
+        label: c.label,
+        expected: expectedFinal(c),
+        row: row as Record<string, unknown>,
+      });
     }
 
     // 4. Every view agrees on the same cent.
@@ -213,18 +241,25 @@ test.describe("Discount rounding edge cases", () => {
 
       // Shared accessor: the single source of truth for report money.
       const amounts = reportAmounts(r);
-      expect(roundCents(amounts.charged), `${label} accessor charged`).toBe(expected);
-      expect(roundCents(amounts.room + amounts.breakfast), `${label} accessor split`).toBe(
+      expect(roundCents(amounts.charged), `${label} accessor charged`).toBe(
         expected,
       );
+      expect(
+        roundCents(amounts.room + amounts.breakfast),
+        `${label} accessor split`,
+      ).toBe(expected);
       expect(amounts.hasAmount, `${label} hasAmount`).toBe(hasAmount);
 
       // Lower level helpers agree with the accessor whenever there is money.
       if (hasAmount) {
-        expect(roundCents(effectiveChargedTotal(r)), `${label} charged helper`).toBe(expected);
-        expect(roundCents(calcRoomPrice(r) + calcBreakfastPrice(r)), `${label} helper split`).toBe(
-          expected,
-        );
+        expect(
+          roundCents(effectiveChargedTotal(r)),
+          `${label} charged helper`,
+        ).toBe(expected);
+        expect(
+          roundCents(calcRoomPrice(r) + calcBreakfastPrice(r)),
+          `${label} helper split`,
+        ).toBe(expected);
       }
 
       const csv = csvPriceCells(r, LABELS);
@@ -246,8 +281,14 @@ test.describe("Discount rounding edge cases", () => {
       // CSV: when a split is spelled out it parses back to the same cents.
       const parsed = parseCsvSplitCell(csv.total);
       if (amounts.breakfast > 0) {
-        expect(parsed, `${label} CSV split unparseable: ${csv.total}`).not.toBeNull();
-        expect(roundCents(parsed!.room + parsed!.breakfast), `${label} CSV split`).toBe(expected);
+        expect(
+          parsed,
+          `${label} CSV split unparseable: ${csv.total}`,
+        ).not.toBeNull();
+        expect(
+          roundCents(parsed!.room + parsed!.breakfast),
+          `${label} CSV split`,
+        ).toBe(expected);
         expect(roundCents(parsed!.total), `${label} CSV total`).toBe(expected);
       } else {
         expect(csv.total, `${label} CSV total`).toBe(expected.toFixed(2));
@@ -257,12 +298,18 @@ test.describe("Discount rounding edge cases", () => {
       // PDF columns: room + breakfast = total, on the printed strings.
       expect(pdf.total, `${label} PDF total`).toBe(expected.toFixed(2));
       expect(pdf.room, `${label} PDF room`).toBe(amounts.room.toFixed(2));
-      const pdfBreakfast = pdf.breakfast === PDF_NO_AMOUNT ? 0 : Number(pdf.breakfast);
-      expect(roundCents(Number(pdf.room) + pdfBreakfast), `${label} PDF split`).toBe(expected);
+      const pdfBreakfast =
+        pdf.breakfast === PDF_NO_AMOUNT ? 0 : Number(pdf.breakfast);
+      expect(
+        roundCents(Number(pdf.room) + pdfBreakfast),
+        `${label} PDF split`,
+      ).toBe(expected);
 
       // Print view carries the very same cents.
       expect(print.total, `${label} print total`).toContain(fmtEur(expected));
-      expect(print.price, `${label} print room cell`).toBe(fmtEur(amounts.room));
+      expect(print.price, `${label} print room cell`).toBe(
+        fmtEur(amounts.room),
+      );
 
       // Never negative, never above the gross.
       expect(amounts.room).toBeGreaterThanOrEqual(0);
@@ -280,12 +327,19 @@ test.describe("Discount rounding edge cases", () => {
     // 6. The extremes behave as policy expects.
     const zero = stored.find((s) => s.label === "zero percent")!;
     expect(Number(zero.row.price_eur)).toBe(GROSS_EUR);
-    const comped = stored.find((s) => s.label === "exactly one hundred percent")!;
+    const comped = stored.find(
+      (s) => s.label === "exactly one hundred percent",
+    )!;
     expect(Number(comped.row.price_eur)).toBe(0);
     const overFixed = stored.find((s) => s.label === "fixed above the total")!;
     expect(Number(overFixed.row.price_eur)).toBe(GROSS_EUR);
-    expect(overFixed.row.discount_type, "an over-sized coupon must be cleared").toBeNull();
-    const oneCent = stored.find((s) => s.label === "fixed one cent below the total")!;
+    expect(
+      overFixed.row.discount_type,
+      "an over-sized coupon must be cleared",
+    ).toBeNull();
+    const oneCent = stored.find(
+      (s) => s.label === "fixed one cent below the total",
+    )!;
     expect(Number(oneCent.row.price_eur)).toBe(0.01);
   });
 });

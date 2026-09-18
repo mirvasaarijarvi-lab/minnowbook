@@ -79,7 +79,9 @@ function skipReason(): string {
 }
 
 function hashCode(plaintext: string): string {
-  return createHash("sha256").update(plaintext.trim().toUpperCase()).digest("hex");
+  return createHash("sha256")
+    .update(plaintext.trim().toUpperCase())
+    .digest("hex");
 }
 
 function freshPlaintext(): string {
@@ -98,7 +100,10 @@ async function ensureFixtureUser(admin: SupabaseClient): Promise<{
 }> {
   let userId: string | null = null;
   for (let page = 1; page <= 5; page++) {
-    const { data, error } = await admin.auth.admin.listUsers({ page, perPage: 200 });
+    const { data, error } = await admin.auth.admin.listUsers({
+      page,
+      perPage: 200,
+    });
     if (error) throw new Error(`listUsers failed: ${error.message}`);
     const users = data.users as Array<{ id: string; email?: string }>;
     const found = users.find(
@@ -138,12 +143,16 @@ async function ensureFixtureUser(admin: SupabaseClient): Promise<{
     email: FIXTURE_EMAIL,
     password: FIXTURE_PASSWORD,
   });
-  if (signInErr) throw new Error(`fixture sign-in failed: ${signInErr.message}`);
-  const { data: tenantId, error: rpcErr } = await userClient.rpc("create_tenant", {
-    p_name: FIXTURE_TENANT_NAME,
-    p_slug: FIXTURE_TENANT_SLUG,
-    p_tier: "basic",
-  });
+  if (signInErr)
+    throw new Error(`fixture sign-in failed: ${signInErr.message}`);
+  const { data: tenantId, error: rpcErr } = await userClient.rpc(
+    "create_tenant",
+    {
+      p_name: FIXTURE_TENANT_NAME,
+      p_slug: FIXTURE_TENANT_SLUG,
+      p_tier: "basic",
+    },
+  );
   if (rpcErr) throw new Error(`create_tenant failed: ${rpcErr.message}`);
   if (!tenantId) throw new Error("create_tenant returned no id");
   return { userId, tenantId: tenantId as string };
@@ -259,7 +268,12 @@ const GENERIC_FAILURE_BODY = Object.freeze({
 });
 
 function assertGenericFailure(
-  result: { status: number; body: unknown; rawText: string; headers: Record<string, string> },
+  result: {
+    status: number;
+    body: unknown;
+    rawText: string;
+    headers: Record<string, string>;
+  },
   context: string,
 ) {
   // Status must be exactly 400 — not "any 4xx".
@@ -270,7 +284,9 @@ function assertGenericFailure(
 
   // Body must be a plain object (not a string, not null).
   expect(
-    result.body !== null && typeof result.body === "object" && !Array.isArray(result.body),
+    result.body !== null &&
+      typeof result.body === "object" &&
+      !Array.isArray(result.body),
     `${context}: body must be a JSON object, got ${typeof result.body}: ${result.rawText}`,
   ).toBe(true);
 
@@ -282,8 +298,12 @@ function assertGenericFailure(
     `${context}: body keys drifted, got [${keys.join(", ")}]. Body: ${result.rawText}`,
   ).toEqual(["code", "error"]);
   // Exact values, byte-for-byte.
-  expect(bodyObj.error, `${context}: error message drifted`).toBe(GENERIC_FAILURE_BODY.error);
-  expect(bodyObj.code, `${context}: error code drifted`).toBe(GENERIC_FAILURE_BODY.code);
+  expect(bodyObj.error, `${context}: error message drifted`).toBe(
+    GENERIC_FAILURE_BODY.error,
+  );
+  expect(bodyObj.code, `${context}: error code drifted`).toBe(
+    GENERIC_FAILURE_BODY.code,
+  );
 
   // Header contract.
   const ct = result.headers["content-type"] ?? "";
@@ -422,7 +442,11 @@ suite(
       // Reset tenant + ledger so this test starts from a known clean slate.
       await admin
         .from("tenants")
-        .update({ tier: "basic", sample_start_date: null, sample_end_date: null })
+        .update({
+          tier: "basic",
+          sample_start_date: null,
+          sample_end_date: null,
+        })
         .eq("id", tenantId);
       await admin
         .from("access_code_redemptions")
@@ -471,7 +495,9 @@ suite(
       // ----- Ledger integrity invariants -----
       const { data: redemptions, error: rErr } = await admin
         .from("access_code_redemptions")
-        .select("id, redeemed_by, tenant_id, granted_tier, granted_until, is_active")
+        .select(
+          "id, redeemed_by, tenant_id, granted_tier, granted_until, is_active",
+        )
         .eq("access_code_id", accessCodeId)
         .eq("tenant_id", tenantId);
       expect(rErr, `ledger query error: ${rErr?.message}`).toBeNull();
@@ -485,7 +511,10 @@ suite(
 
       const row = redemptions![0];
       // (ii) Owned by the caller.
-      expect(row.redeemed_by, "ledger row must be attributed to the caller").toBe(userId);
+      expect(
+        row.redeemed_by,
+        "ledger row must be attributed to the caller",
+      ).toBe(userId);
       // (iii) Active and tier-correct.
       expect(row.is_active).toBe(true);
       expect(row.granted_tier).toBe("business");
@@ -526,7 +555,11 @@ suite(
 
       await admin
         .from("tenants")
-        .update({ tier: "basic", sample_start_date: null, sample_end_date: null })
+        .update({
+          tier: "basic",
+          sample_start_date: null,
+          sample_end_date: null,
+        })
         .eq("id", tenantId);
       await admin
         .from("access_code_redemptions")
@@ -541,7 +574,10 @@ suite(
 
       // Both must converge on the same status and body shape (success or the
       // exact same failure — racing the cache, neither call should crash).
-      expect(a.status, `a status ${a.status}, b status ${b.status}`).toBeLessThan(500);
+      expect(
+        a.status,
+        `a status ${a.status}, b status ${b.status}`,
+      ).toBeLessThan(500);
       expect(b.status).toBeLessThan(500);
       expect(a.status).toBe(b.status);
       // Whichever one populated the cache wins; the other is a replay of it.
@@ -558,7 +594,9 @@ suite(
         assertGenericFailure(b, "same-idem-key call B (failure path)");
         // Body must be byte-identical between the two calls — proving the
         // replay is a verbatim cache hit, not a freshly-computed response.
-        expect(a.rawText, "same-idem-key replay must be byte-identical").toBe(b.rawText);
+        expect(a.rawText, "same-idem-key replay must be byte-identical").toBe(
+          b.rawText,
+        );
       }
 
       // Exactly one ledger row, regardless of cache-hit ordering.
@@ -593,7 +631,11 @@ suite(
 
       await admin
         .from("tenants")
-        .update({ tier: "basic", sample_start_date: null, sample_end_date: null })
+        .update({
+          tier: "basic",
+          sample_start_date: null,
+          sample_end_date: null,
+        })
         .eq("id", tenantId);
       await admin
         .from("access_code_redemptions")
@@ -603,7 +645,9 @@ suite(
       const PARALLEL = 8;
       const results = await Promise.all(
         Array.from({ length: PARALLEL }, () =>
-          callRedeem(token, plaintext, { idempotencyKey: freshIdempotencyKey() }),
+          callRedeem(token, plaintext, {
+            idempotencyKey: freshIdempotencyKey(),
+          }),
         ),
       );
 

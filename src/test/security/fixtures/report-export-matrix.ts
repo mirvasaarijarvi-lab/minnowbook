@@ -122,7 +122,14 @@ export const EXPORT_SURFACES: ExportSurface[] = [
     format: "csv",
     table: "storage_rejection_events",
     attemptedQuery: `select * from storage_rejection_events where tenant_id = '${TARGET_TENANT}'`,
-    headers: ["id", "created_at", "tenant_id", "callsite", "reason", "input_length"],
+    headers: [
+      "id",
+      "created_at",
+      "tenant_id",
+      "callsite",
+      "reason",
+      "input_length",
+    ],
     summaryRows: [],
     foreignRows: [
       [

@@ -14,10 +14,18 @@ interface ActionAlertsBannerProps {
   pendingCount: number;
   uninvoicedCount: number;
   checkoutsToday: number;
-  onNavigate?: (view: string, filter?: { status?: string; invoiced?: boolean; checkoutToday?: boolean }) => void;
+  onNavigate?: (
+    view: string,
+    filter?: { status?: string; invoiced?: boolean; checkoutToday?: boolean },
+  ) => void;
 }
 
-const ActionAlertsBanner = ({ pendingCount, uninvoicedCount, checkoutsToday, onNavigate }: ActionAlertsBannerProps) => {
+const ActionAlertsBanner = ({
+  pendingCount,
+  uninvoicedCount,
+  checkoutsToday,
+  onNavigate,
+}: ActionAlertsBannerProps) => {
   const t = useT();
 
   const alerts: ActionAlert[] = [
@@ -58,32 +66,40 @@ const ActionAlertsBanner = ({ pendingCount, uninvoicedCount, checkoutsToday, onN
               "w-full flex items-center gap-3 px-4 py-3 rounded-lg border text-left transition-all hover:shadow-md group",
               alert.type === "warning"
                 ? "bg-warning/10 border-warning/30"
-                : "bg-info/10 border-info/30"
+                : "bg-info/10 border-info/30",
             )}
           >
-            <div className={cn(
-              "flex items-center justify-center h-8 w-8 rounded-full shrink-0",
-              alert.type === "warning"
-                ? "bg-warning/20"
-                : "bg-info/20"
-            )}>
-              <Icon className={cn(
-                "h-4 w-4",
-                alert.type === "warning" ? "text-warning" : "text-info"
-              )} />
+            <div
+              className={cn(
+                "flex items-center justify-center h-8 w-8 rounded-full shrink-0",
+                alert.type === "warning" ? "bg-warning/20" : "bg-info/20",
+              )}
+            >
+              <Icon
+                className={cn(
+                  "h-4 w-4",
+                  alert.type === "warning" ? "text-warning" : "text-info",
+                )}
+              />
             </div>
             <div className="flex-1 min-w-0">
-              <p className={cn(
-                "text-sm font-medium",
-                alert.type === "warning" ? "text-warning-foreground" : "text-info-foreground"
-              )}>
+              <p
+                className={cn(
+                  "text-sm font-medium",
+                  alert.type === "warning"
+                    ? "text-warning-foreground"
+                    : "text-info-foreground",
+                )}
+              >
                 {alert.count} {alert.label}
               </p>
             </div>
-            <ArrowRight className={cn(
-              "h-4 w-4 shrink-0 transition-transform group-hover:translate-x-1",
-              alert.type === "warning" ? "text-warning" : "text-info"
-            )} />
+            <ArrowRight
+              className={cn(
+                "h-4 w-4 shrink-0 transition-transform group-hover:translate-x-1",
+                alert.type === "warning" ? "text-warning" : "text-info",
+              )}
+            />
           </button>
         );
       })}

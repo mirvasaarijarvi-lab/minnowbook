@@ -6,8 +6,9 @@ import { mkdtempSync, writeFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const mod = (await import("../../../scripts/ci/preflight-manifest-drift.mjs" as any)) as any;
+const mod = (await import(
+  "../../../scripts/ci/preflight-manifest-drift.mjs" as any
+)) as any;
 const { collectDrift, parseBunLock, parseNpmLock } = mod;
 
 function scratch(files: Record<string, string>) {
@@ -56,7 +57,10 @@ describe("preflight: manifest drift", () => {
     const dir = scratch({
       "package.json": JSON.stringify(PKG_BASE),
       "bun.lock": bunLockOf(PKG_BASE.dependencies, PKG_BASE.devDependencies),
-      "package-lock.json": npmLockOf(PKG_BASE.dependencies, PKG_BASE.devDependencies),
+      "package-lock.json": npmLockOf(
+        PKG_BASE.dependencies,
+        PKG_BASE.devDependencies,
+      ),
     });
     try {
       const r = collectDrift({ root: dir });
@@ -71,12 +75,16 @@ describe("preflight: manifest drift", () => {
   it("flags the @types/node drift class (range-mismatch)", () => {
     const dir = scratch({
       "package.json": JSON.stringify(PKG_BASE),
-      "bun.lock": bunLockOf(PKG_BASE.dependencies, { "@types/node": "^26.0.0" }),
+      "bun.lock": bunLockOf(PKG_BASE.dependencies, {
+        "@types/node": "^26.0.0",
+      }),
     });
     try {
       const r = collectDrift({ root: dir });
       expect(r.ok).toBe(false);
-      const d = r.drifts.find((x: { name: string }) => x.name === "@types/node");
+      const d = r.drifts.find(
+        (x: { name: string }) => x.name === "@types/node",
+      );
       expect(d).toMatchObject({
         kind: "range-mismatch",
         expected: "^22.16.5",
@@ -90,7 +98,10 @@ describe("preflight: manifest drift", () => {
   it("flags extras pinned only in the lockfile", () => {
     const dir = scratch({
       "package.json": JSON.stringify(PKG_BASE),
-      "bun.lock": bunLockOf({ ...PKG_BASE.dependencies, leftover: "1.0.0" }, PKG_BASE.devDependencies),
+      "bun.lock": bunLockOf(
+        { ...PKG_BASE.dependencies, leftover: "1.0.0" },
+        PKG_BASE.devDependencies,
+      ),
     });
     try {
       const r = collectDrift({ root: dir });
@@ -135,7 +146,12 @@ describe("preflight: real repo manifests", () => {
         `Repo manifest drift detected:\n` +
           r.drifts
             .map(
-              (d: { source: string; name: string; expected: string | null; actual: string | null }) =>
+              (d: {
+                source: string;
+                name: string;
+                expected: string | null;
+                actual: string | null;
+              }) =>
                 `  [${d.source}] ${d.name}: pkg=${d.expected ?? "(none)"} lock=${d.actual ?? "(none)"}`,
             )
             .join("\n"),

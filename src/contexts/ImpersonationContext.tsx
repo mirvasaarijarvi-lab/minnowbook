@@ -1,4 +1,11 @@
-import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useEffect,
+  ReactNode,
+} from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface ImpersonationState {
@@ -13,18 +20,24 @@ interface ImpersonationContextType {
   isImpersonating: boolean;
 }
 
-const ImpersonationContext = createContext<ImpersonationContextType | null>(null);
+const ImpersonationContext = createContext<ImpersonationContextType | null>(
+  null,
+);
 
 const STORAGE_KEY = "mimmobook-impersonation";
 
 function readStored(): ImpersonationState {
-  if (typeof window === "undefined") return { tenantId: null, tenantName: null };
+  if (typeof window === "undefined")
+    return { tenantId: null, tenantName: null };
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return { tenantId: null, tenantName: null };
     const parsed = JSON.parse(raw);
     if (parsed && typeof parsed.tenantId === "string") {
-      return { tenantId: parsed.tenantId, tenantName: parsed.tenantName ?? null };
+      return {
+        tenantId: parsed.tenantId,
+        tenantName: parsed.tenantName ?? null,
+      };
     }
   } catch {
     /* ignore */
@@ -39,7 +52,9 @@ async function logImpersonationEvent(
   tenantName: string | null,
 ) {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) return;
 
     await supabase.from("audit_log").insert({
@@ -47,9 +62,10 @@ async function logImpersonationEvent(
       user_id: user.id,
       table_name: "impersonation",
       action,
-      summary: action === "START"
-        ? `System admin started impersonating tenant "${tenantName ?? tenantId}"`
-        : `System admin stopped impersonating tenant "${tenantName ?? tenantId}"`,
+      summary:
+        action === "START"
+          ? `System admin started impersonating tenant "${tenantName ?? tenantId}"`
+          : `System admin stopped impersonating tenant "${tenantName ?? tenantId}"`,
       new_data: { tenant_id: tenantId, tenant_name: tenantName } as any,
     });
   } catch {
@@ -58,7 +74,9 @@ async function logImpersonationEvent(
 }
 
 export function ImpersonationProvider({ children }: { children: ReactNode }) {
-  const [impersonating, setImpersonating] = useState<ImpersonationState>(() => readStored());
+  const [impersonating, setImpersonating] = useState<ImpersonationState>(() =>
+    readStored(),
+  );
 
   // Sync across tabs: when a superadmin clicks "Open Backend" in one tab,
   // the new tab (or other open tabs) immediately picks up the impersonation.
@@ -85,16 +103,23 @@ export function ImpersonationProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const startImpersonation = useCallback((tenantId: string, tenantName: string) => {
-    const next = { tenantId, tenantName };
-    setImpersonating(next);
-    persist(next);
-    logImpersonationEvent("START", tenantId, tenantName);
-  }, [persist]);
+  const startImpersonation = useCallback(
+    (tenantId: string, tenantName: string) => {
+      const next = { tenantId, tenantName };
+      setImpersonating(next);
+      persist(next);
+      logImpersonationEvent("START", tenantId, tenantName);
+    },
+    [persist],
+  );
 
   const stopImpersonation = useCallback(() => {
     if (impersonating.tenantId) {
-      logImpersonationEvent("STOP", impersonating.tenantId, impersonating.tenantName);
+      logImpersonationEvent(
+        "STOP",
+        impersonating.tenantId,
+        impersonating.tenantName,
+      );
     }
     const next = { tenantId: null, tenantName: null };
     setImpersonating(next);
@@ -131,4 +156,3 @@ export function useImpersonation() {
   }
   return ctx;
 }
-

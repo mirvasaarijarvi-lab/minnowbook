@@ -26,7 +26,8 @@ import {
  */
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string | undefined;
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as
+  string | undefined;
 
 const hasSupabaseConfig = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
 
@@ -107,7 +108,9 @@ describe("Tenant Table Manifest — Coverage Guard", () => {
             `Confirm the migration creating list_tenant_scoped_tables() has been applied.`,
         );
       }
-      liveTables = (data ?? []).map((row: { table_name: string }) => row.table_name);
+      liveTables = (data ?? []).map(
+        (row: { table_name: string }) => row.table_name,
+      );
     });
 
     it("RPC returns at least one tenant-scoped table (sanity)", () => {

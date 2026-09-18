@@ -27,7 +27,12 @@ const textSizeClasses = {
   lg: "text-2xl",
 };
 
-const Logo = ({ variant = "color", size = "md", showText = true, className = "" }: LogoProps) => {
+const Logo = ({
+  variant = "color",
+  size = "md",
+  showText = true,
+  className = "",
+}: LogoProps) => {
   return (
     <div className={`flex items-center gap-2.5 ${className}`}>
       <img

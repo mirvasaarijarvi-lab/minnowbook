@@ -84,9 +84,14 @@ function validateSerialized(
   });
 }
 
-function seatsStored(bookings: OccasionBookingLike[], startTime?: string | null): number {
+function seatsStored(
+  bookings: OccasionBookingLike[],
+  startTime?: string | null,
+): number {
   return bookings
-    .filter((b) => (startTime === undefined ? true : b.start_time === startTime))
+    .filter((b) =>
+      startTime === undefined ? true : b.start_time === startTime,
+    )
     .filter((b) => (b.status ?? "") !== "cancelled")
     .reduce((sum, b) => sum + (b.guests_count ?? 1), 0);
 }
@@ -134,7 +139,11 @@ describe("special occasions: seat limits when bookings arrive one after another"
       { startTime: "12:00", guests: 4 },
       { startTime: "13:00", guests: 3 },
     ]);
-    const refusal = results[1].check as { ok: boolean; reason?: string; remaining?: number };
+    const refusal = results[1].check as {
+      ok: boolean;
+      reason?: string;
+      remaining?: number;
+    };
     expect(refusal.ok).toBe(false);
     expect(refusal.reason).toBe("FULL");
     expect(refusal.remaining).toBe(1);
@@ -195,7 +204,9 @@ describe("special occasions: simultaneous requests need the database seat guard"
       { startTime: "17:00", guests: 4 },
     ]);
     expect(results.every((r) => !r.ok)).toBe(true);
-    const reasons = (results as Array<{ reason?: string }>).map((r) => r.reason);
+    const reasons = (results as Array<{ reason?: string }>).map(
+      (r) => r.reason,
+    );
     expect(reasons).toEqual(["FULL", "FULL", "FULL"]);
   });
 

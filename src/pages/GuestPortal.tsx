@@ -8,8 +8,30 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { CalendarDays, Clock, Users, MapPin, Mail, Phone, CheckCircle, XCircle, Loader2, UtensilsCrossed, Home, Building2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  CalendarDays,
+  Clock,
+  Users,
+  MapPin,
+  Mail,
+  Phone,
+  CheckCircle,
+  XCircle,
+  Loader2,
+  UtensilsCrossed,
+  Home,
+  Building2,
+} from "lucide-react";
 import { format } from "date-fns";
 import Logo from "@/components/Logo";
 import SEOHead from "@/components/SEOHead";
@@ -50,7 +72,8 @@ const GuestPortal = () => {
       );
       if (fnErr) throw fnErr;
       const payload = res as any;
-      if (!payload?.ok) throw new Error(payload?.code || payload?.error || "not_found");
+      if (!payload?.ok)
+        throw new Error(payload?.code || payload?.error || "not_found");
 
       return {
         reservation: payload.reservation,
@@ -63,15 +86,18 @@ const GuestPortal = () => {
 
   const rescheduleMutation = useMutation({
     mutationFn: async () => {
-      const { data: res, error } = await supabase.functions.invoke("guest-booking-portal", {
-        body: {
-          action: "reschedule",
-          token,
-          requested_date: newDate,
-          requested_start_time: newTime || null,
-          guest_note: note || null,
+      const { data: res, error } = await supabase.functions.invoke(
+        "guest-booking-portal",
+        {
+          body: {
+            action: "reschedule",
+            token,
+            requested_date: newDate,
+            requested_start_time: newTime || null,
+            guest_note: note || null,
+          },
         },
-      });
+      );
       if (error) throw error;
       if ((res as any)?.error) throw new Error((res as any).error);
       return res;
@@ -97,9 +123,12 @@ const GuestPortal = () => {
     mutationFn: async () => {
       // Guests are unauthenticated, so the cancellation runs server-side
       // through the booking token instead of a direct table write.
-      const { data: res, error } = await supabase.functions.invoke("guest-booking-portal", {
-        body: { action: "cancel", token },
-      });
+      const { data: res, error } = await supabase.functions.invoke(
+        "guest-booking-portal",
+        {
+          body: { action: "cancel", token },
+        },
+      );
       if (error) throw error;
       if ((res as any)?.error) throw new Error((res as any).error);
       return res;
@@ -128,8 +157,12 @@ const GuestPortal = () => {
         <Card className="max-w-md w-full">
           <CardContent className="pt-6 text-center space-y-4">
             <CheckCircle className="h-12 w-12 text-primary mx-auto" />
-            <h2 className="text-xl font-serif font-semibold">{t("guest.portal.cancelSuccess")}</h2>
-            <p className="text-muted-foreground text-sm">{t("guest.portal.questionsFooter")}</p>
+            <h2 className="text-xl font-serif font-semibold">
+              {t("guest.portal.cancelSuccess")}
+            </h2>
+            <p className="text-muted-foreground text-sm">
+              {t("guest.portal.questionsFooter")}
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -152,14 +185,18 @@ const GuestPortal = () => {
           <CardContent className="pt-6 text-center space-y-4">
             <XCircle className="h-12 w-12 text-destructive mx-auto" />
             <h2 className="text-xl font-serif font-semibold">
-              {msg === "expired" ? t("guest.portal.linkExpiredTitle") : msg === "revoked" ? t("guest.portal.linkRevokedTitle") : t("guest.portal.notFoundTitle")}
+              {msg === "expired"
+                ? t("guest.portal.linkExpiredTitle")
+                : msg === "revoked"
+                  ? t("guest.portal.linkRevokedTitle")
+                  : t("guest.portal.notFoundTitle")}
             </h2>
             <p className="text-muted-foreground">
               {msg === "expired"
                 ? t("guest.portal.linkExpiredBody")
                 : msg === "revoked"
-                ? t("guest.portal.linkRevokedBody")
-                : t("guest.portal.notFoundBody")}
+                  ? t("guest.portal.linkRevokedBody")
+                  : t("guest.portal.notFoundBody")}
             </p>
           </CardContent>
         </Card>
@@ -172,11 +209,12 @@ const GuestPortal = () => {
   const isPast = new Date(res.date) < new Date(new Date().toDateString());
   const TypeIcon = typeIcons[res.reservation_type] ?? CalendarDays;
 
-  const statusColor = {
-    confirmed: "border-emerald-500/30 text-emerald-600 bg-emerald-500/10",
-    pending: "border-amber-500/30 text-amber-600 bg-amber-500/10",
-    cancelled: "border-destructive/30 text-destructive bg-destructive/10",
-  }[res.status ?? "pending"] ?? "border-border text-muted-foreground";
+  const statusColor =
+    {
+      confirmed: "border-emerald-500/30 text-emerald-600 bg-emerald-500/10",
+      pending: "border-amber-500/30 text-amber-600 bg-amber-500/10",
+      cancelled: "border-destructive/30 text-destructive bg-destructive/10",
+    }[res.status ?? "pending"] ?? "border-border text-muted-foreground";
 
   return (
     <div className="min-h-screen bg-background">
@@ -189,7 +227,9 @@ const GuestPortal = () => {
       <header className="border-b border-border bg-card px-4 py-4">
         <div className="max-w-2xl mx-auto flex items-center justify-between">
           <Logo variant="color" size="sm" />
-          <span className="text-sm text-muted-foreground">{t("guest.portal.label")}</span>
+          <span className="text-sm text-muted-foreground">
+            {t("guest.portal.label")}
+          </span>
         </div>
       </header>
 
@@ -202,18 +242,28 @@ const GuestPortal = () => {
                   <TypeIcon className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <CardTitle className="font-serif text-lg">{t("guest.portal.title")}</CardTitle>
+                  <CardTitle className="font-serif text-lg">
+                    {t("guest.portal.title")}
+                  </CardTitle>
                   {res.guest_name ? (
-                    <p className="text-sm font-medium" data-testid="guest-portal-name">
+                    <p
+                      className="text-sm font-medium"
+                      data-testid="guest-portal-name"
+                    >
                       {res.guest_name}
                     </p>
                   ) : null}
-                  <p className="text-sm text-muted-foreground capitalize">{res.reservation_type}</p>
+                  <p className="text-sm text-muted-foreground capitalize">
+                    {res.reservation_type}
+                  </p>
                 </div>
               </div>
               <Badge variant="outline" className={statusColor}>
-                {res.status === "confirmed" && <CheckCircle className="h-3 w-3 mr-1" />}
-                {(res.status ?? "pending").charAt(0).toUpperCase() + (res.status ?? "pending").slice(1)}
+                {res.status === "confirmed" && (
+                  <CheckCircle className="h-3 w-3 mr-1" />
+                )}
+                {(res.status ?? "pending").charAt(0).toUpperCase() +
+                  (res.status ?? "pending").slice(1)}
               </Badge>
             </div>
           </CardHeader>
@@ -226,34 +276,49 @@ const GuestPortal = () => {
               {res.start_time && (
                 <div className="flex items-center gap-2 text-sm">
                   <Clock className="h-4 w-4 text-muted-foreground shrink-0" />
-                  <span>{res.start_time}{res.end_time ? ` — ${res.end_time}` : ""}</span>
+                  <span>
+                    {res.start_time}
+                    {res.end_time ? ` — ${res.end_time}` : ""}
+                  </span>
                 </div>
               )}
               {(res.guests_count || res.estimated_guests) && (
                 <div className="flex items-center gap-2 text-sm">
                   <Users className="h-4 w-4 text-muted-foreground shrink-0" />
-                  <span>{res.guests_count || res.estimated_guests} {t("guest.portal.guestsSuffix")}</span>
+                  <span>
+                    {res.guests_count || res.estimated_guests}{" "}
+                    {t("guest.portal.guestsSuffix")}
+                  </span>
                 </div>
               )}
               {res.check_out_date && (
                 <div className="flex items-center gap-2 text-sm">
                   <CalendarDays className="h-4 w-4 text-muted-foreground shrink-0" />
-                  <span>{t("guest.portal.checkOut")}: {format(new Date(res.check_out_date), "MMM d, yyyy")}</span>
+                  <span>
+                    {t("guest.portal.checkOut")}:{" "}
+                    {format(new Date(res.check_out_date), "MMM d, yyyy")}
+                  </span>
                 </div>
               )}
             </div>
 
             {res.special_requests && (
               <div className="border-t border-border pt-3">
-                <p className="text-xs text-muted-foreground mb-1">{t("guest.portal.specialRequests")}</p>
+                <p className="text-xs text-muted-foreground mb-1">
+                  {t("guest.portal.specialRequests")}
+                </p>
                 <p className="text-sm">{res.special_requests}</p>
               </div>
             )}
 
             {res.price_eur != null && (
               <div className="border-t border-border pt-3">
-                <p className="text-xs text-muted-foreground mb-1">{t("guest.portal.total")}</p>
-                <p className="text-lg font-semibold">€{Number(res.price_eur).toFixed(2)}</p>
+                <p className="text-xs text-muted-foreground mb-1">
+                  {t("guest.portal.total")}
+                </p>
+                <p className="text-lg font-semibold">
+                  €{Number(res.price_eur).toFixed(2)}
+                </p>
               </div>
             )}
 
@@ -265,10 +330,17 @@ const GuestPortal = () => {
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    <p className="text-sm font-medium">{t("guest.portal.needDifferentDate")}</p>
+                    <p className="text-sm font-medium">
+                      {t("guest.portal.needDifferentDate")}
+                    </p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div className="space-y-1">
-                        <Label htmlFor="reschedule-date" className="text-xs text-muted-foreground">{t("guest.portal.newDate")}</Label>
+                        <Label
+                          htmlFor="reschedule-date"
+                          className="text-xs text-muted-foreground"
+                        >
+                          {t("guest.portal.newDate")}
+                        </Label>
                         <Input
                           id="reschedule-date"
                           type="date"
@@ -278,7 +350,12 @@ const GuestPortal = () => {
                         />
                       </div>
                       <div className="space-y-1">
-                        <Label htmlFor="reschedule-time" className="text-xs text-muted-foreground">{t("guest.portal.newTime")}</Label>
+                        <Label
+                          htmlFor="reschedule-time"
+                          className="text-xs text-muted-foreground"
+                        >
+                          {t("guest.portal.newTime")}
+                        </Label>
                         <Input
                           id="reschedule-time"
                           type="time"
@@ -288,7 +365,12 @@ const GuestPortal = () => {
                       </div>
                     </div>
                     <div className="space-y-1">
-                      <Label htmlFor="reschedule-note" className="text-xs text-muted-foreground">{t("guest.portal.message")}</Label>
+                      <Label
+                        htmlFor="reschedule-note"
+                        className="text-xs text-muted-foreground"
+                      >
+                        {t("guest.portal.message")}
+                      </Label>
                       <Textarea
                         id="reschedule-note"
                         value={note}
@@ -302,7 +384,9 @@ const GuestPortal = () => {
                       disabled={!newDate || rescheduleMutation.isPending}
                       onClick={() => rescheduleMutation.mutate()}
                     >
-                      {rescheduleMutation.isPending ? t("guest.portal.sending") : t("guest.portal.requestNewDate")}
+                      {rescheduleMutation.isPending
+                        ? t("guest.portal.sending")
+                        : t("guest.portal.requestNewDate")}
                     </Button>
                   </div>
                 )}
@@ -341,12 +425,16 @@ const GuestPortal = () => {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>{t("guest.portal.keepBooking")}</AlertDialogCancel>
+            <AlertDialogCancel>
+              {t("guest.portal.keepBooking")}
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={() => cancelMutation.mutate()}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {cancelMutation.isPending ? t("guest.portal.cancelling") : t("guest.portal.yesCancel")}
+              {cancelMutation.isPending
+                ? t("guest.portal.cancelling")
+                : t("guest.portal.yesCancel")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

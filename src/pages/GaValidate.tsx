@@ -70,7 +70,9 @@ function extractEvent(entry: unknown): Observation | null {
   if (!entry) return null;
   // gtag("event", name, params) is stored as an Arguments-like object.
   if (typeof entry === "object") {
-    const anyEntry = entry as Record<string, unknown> & { [k: number]: unknown };
+    const anyEntry = entry as Record<string, unknown> & {
+      [k: number]: unknown;
+    };
     // Arguments object from gtag.
     if (anyEntry["0"] === "event" && typeof anyEntry["1"] === "string") {
       return {
@@ -81,7 +83,10 @@ function extractEvent(entry: unknown): Observation | null {
       };
     }
     if (typeof anyEntry.event === "string") {
-      const { event, ...rest } = anyEntry as { event: string } & Record<string, unknown>;
+      const { event, ...rest } = anyEntry as { event: string } & Record<
+        string,
+        unknown
+      >;
       return { source: "dataLayer", name: event, params: rest, ts: Date.now() };
     }
   }
@@ -162,9 +167,9 @@ export default function GaValidate() {
     <main className="container mx-auto max-w-5xl px-4 py-8">
       <h1 className="font-serif text-3xl mb-2">GA4 event validation</h1>
       <p className="text-muted-foreground mb-6">
-        Compares expected events against what is actually dispatched in
-        this browser session. Use this together with GA4, Admin,
-        DebugView to confirm Google receives the same events.
+        Compares expected events against what is actually dispatched in this
+        browser session. Use this together with GA4, Admin, DebugView to confirm
+        Google receives the same events.
       </p>
 
       <Card className="mb-6">
@@ -205,7 +210,9 @@ export default function GaValidate() {
                         )}
                       </td>
                       <td className="py-2 pr-3">
-                        <Badge variant={row.dataLayer ? "default" : "secondary"}>
+                        <Badge
+                          variant={row.dataLayer ? "default" : "secondary"}
+                        >
                           {row.dataLayer ? "yes" : "no"}
                         </Badge>
                       </td>
@@ -259,8 +266,8 @@ export default function GaValidate() {
         <CardContent>
           {unexpected.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              No stray events. Everything dispatched matches the
-              expected catalog.
+              No stray events. Everything dispatched matches the expected
+              catalog.
             </p>
           ) : (
             <ul className="space-y-1 text-sm">
@@ -287,30 +294,33 @@ export default function GaValidate() {
         <CardContent>
           {observations.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              Nothing observed yet. Fire a test event above or navigate
-              the app in another tab.
+              Nothing observed yet. Fire a test event above or navigate the app
+              in another tab.
             </p>
           ) : (
             <ol className="space-y-2 text-xs">
-              {[...observations].slice(-25).reverse().map((o, idx) => (
-                <li
-                  key={`${o.ts}-${idx}`}
-                  className="rounded border bg-muted/30 p-2 font-mono"
-                >
-                  <div className="mb-1 flex items-center justify-between text-muted-foreground">
-                    <span>
-                      {o.name}{" "}
-                      <Badge variant="outline" className="ml-1">
-                        {o.source}
-                      </Badge>
-                    </span>
-                    <span>{new Date(o.ts).toLocaleTimeString()}</span>
-                  </div>
-                  <pre className="overflow-x-auto whitespace-pre-wrap break-words">
-                    {JSON.stringify(o.params, null, 2)}
-                  </pre>
-                </li>
-              ))}
+              {[...observations]
+                .slice(-25)
+                .reverse()
+                .map((o, idx) => (
+                  <li
+                    key={`${o.ts}-${idx}`}
+                    className="rounded border bg-muted/30 p-2 font-mono"
+                  >
+                    <div className="mb-1 flex items-center justify-between text-muted-foreground">
+                      <span>
+                        {o.name}{" "}
+                        <Badge variant="outline" className="ml-1">
+                          {o.source}
+                        </Badge>
+                      </span>
+                      <span>{new Date(o.ts).toLocaleTimeString()}</span>
+                    </div>
+                    <pre className="overflow-x-auto whitespace-pre-wrap break-words">
+                      {JSON.stringify(o.params, null, 2)}
+                    </pre>
+                  </li>
+                ))}
             </ol>
           )}
         </CardContent>

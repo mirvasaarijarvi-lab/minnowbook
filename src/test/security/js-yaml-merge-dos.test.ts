@@ -21,7 +21,9 @@ import { describe, it, expect } from "vitest";
 import * as yaml from "js-yaml";
 
 function buildMergeBombYaml(keys: number, repeats: number): string {
-  const entries = Array.from({ length: keys }, (_, i) => `k${i}: ${i}`).join(", ");
+  const entries = Array.from({ length: keys }, (_, i) => `k${i}: ${i}`).join(
+    ", ",
+  );
   const aliases = Array.from({ length: repeats }, () => "*a").join(", ");
   return `a: &a {${entries}}\nb:\n  <<: [${aliases}]\n  z: 1\n`;
 }
@@ -31,7 +33,11 @@ function buildMergeBombYaml(keys: number, repeats: number): string {
  * and "rejected by maxMergeSeqLength guard" are valid CVE mitigations.
  * Any other thrown error (or hang) is a regression.
  */
-function safeParse(payload: string): { elapsed: number; parsed: unknown; rejected: boolean } {
+function safeParse(payload: string): {
+  elapsed: number;
+  parsed: unknown;
+  rejected: boolean;
+} {
   const start = performance.now();
   let parsed: unknown = undefined;
   let rejected = false;
@@ -63,8 +69,14 @@ describe("js-yaml merge-key DoS regression (CVE-2026-53550)", () => {
     const { elapsed, parsed, rejected } = safeParse(payload);
 
     if (!rejected) {
-      const result = parsed as { a: Record<string, number>; b: Record<string, number> };
-      const mergeExpanded = !Object.prototype.hasOwnProperty.call(result.b, "<<");
+      const result = parsed as {
+        a: Record<string, number>;
+        b: Record<string, number>;
+      };
+      const mergeExpanded = !Object.prototype.hasOwnProperty.call(
+        result.b,
+        "<<",
+      );
       if (mergeExpanded) {
         // Parser applied merge keys: the merged object must contain all K
         // alias keys plus its own (i.e. dedup worked correctly).
@@ -78,7 +90,6 @@ describe("js-yaml merge-key DoS regression (CVE-2026-53550)", () => {
       }
       expect(result.b.z).toBe(1);
     }
-
 
     expect(
       elapsed,
@@ -96,7 +107,8 @@ describe("js-yaml merge-key DoS regression (CVE-2026-53550)", () => {
     // and large repeat count stays well under the quadratic blow-up
     // factor (16x for a 4x payload growth).
     const KEYS = 1000;
-    const measure = (repeats: number) => safeParse(buildMergeBombYaml(KEYS, repeats)).elapsed;
+    const measure = (repeats: number) =>
+      safeParse(buildMergeBombYaml(KEYS, repeats)).elapsed;
 
     // Warm up the parser to stabilize JIT.
     measure(100);

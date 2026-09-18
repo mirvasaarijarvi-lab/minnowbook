@@ -1,6 +1,9 @@
 import { describe, it, expect, beforeEach } from "vitest";
 
-import { decideOfferStatusFocus, focusOfferStatusPanel } from "./offer-status-focus";
+import {
+  decideOfferStatusFocus,
+  focusOfferStatusPanel,
+} from "./offer-status-focus";
 
 function panelEl(): HTMLElement {
   const el = document.createElement("div");
@@ -21,41 +24,51 @@ describe("decideOfferStatusFocus", () => {
   });
 
   it("skips when there is no panel", () => {
-    expect(decideOfferStatusFocus({ panel: null, active: buttonEl(), trigger: null })).toBe(
-      "skip-no-panel",
-    );
+    expect(
+      decideOfferStatusFocus({
+        panel: null,
+        active: buttonEl(),
+        trigger: null,
+      }),
+    ).toBe("skip-no-panel");
   });
 
   it("focuses when the confirm button was removed and focus was dropped", () => {
     const panel = panelEl();
     const trigger = buttonEl();
     trigger.remove();
-    expect(decideOfferStatusFocus({ panel, active: document.body, trigger })).toBe("focus");
+    expect(
+      decideOfferStatusFocus({ panel, active: document.body, trigger }),
+    ).toBe("focus");
   });
 
   it("focuses when focus is still on the confirm button", () => {
     const panel = panelEl();
     const trigger = buttonEl();
-    expect(decideOfferStatusFocus({ panel, active: trigger, trigger })).toBe("focus");
+    expect(decideOfferStatusFocus({ panel, active: trigger, trigger })).toBe(
+      "focus",
+    );
   });
 
   it("focuses when the focused element is no longer in the document", () => {
     const panel = panelEl();
     const gone = buttonEl();
     gone.remove();
-    expect(decideOfferStatusFocus({ panel, active: gone, trigger: null })).toBe("focus");
+    expect(decideOfferStatusFocus({ panel, active: gone, trigger: null })).toBe(
+      "focus",
+    );
   });
 
   it("does not re-focus when focus is already inside the panel", () => {
     const panel = panelEl();
     const inner = document.createElement("button");
     panel.appendChild(inner);
-    expect(decideOfferStatusFocus({ panel, active: panel, trigger: null })).toBe(
-      "skip-already-inside",
-    );
-    expect(decideOfferStatusFocus({ panel, active: inner, trigger: null })).toBe(
-      "skip-already-inside",
-    );
+    expect(
+      decideOfferStatusFocus({ panel, active: panel, trigger: null }),
+    ).toBe("skip-already-inside");
+    expect(
+      decideOfferStatusFocus({ panel, active: inner, trigger: null }),
+    ).toBe("skip-already-inside");
   });
 
   it("does not steal focus the user moved elsewhere", () => {
@@ -63,7 +76,9 @@ describe("decideOfferStatusFocus", () => {
     const trigger = buttonEl();
     const search = document.createElement("input");
     document.body.appendChild(search);
-    expect(decideOfferStatusFocus({ panel, active: search, trigger })).toBe("skip-user-moved");
+    expect(decideOfferStatusFocus({ panel, active: search, trigger })).toBe(
+      "skip-user-moved",
+    );
   });
 });
 
@@ -75,7 +90,9 @@ describe("focusOfferStatusPanel", () => {
   it("moves focus to the panel when the decision allows it", () => {
     const panel = panelEl();
     const trigger = buttonEl();
-    expect(focusOfferStatusPanel({ panel, active: trigger, trigger })).toBe(true);
+    expect(focusOfferStatusPanel({ panel, active: trigger, trigger })).toBe(
+      true,
+    );
     expect(document.activeElement).toBe(panel);
   });
 
@@ -84,7 +101,9 @@ describe("focusOfferStatusPanel", () => {
     const search = document.createElement("input");
     document.body.appendChild(search);
     search.focus();
-    expect(focusOfferStatusPanel({ panel, active: search, trigger: null })).toBe(false);
+    expect(
+      focusOfferStatusPanel({ panel, active: search, trigger: null }),
+    ).toBe(false);
     expect(document.activeElement).toBe(search);
   });
 });

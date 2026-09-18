@@ -63,7 +63,10 @@ test.describe("Server recalculates discounts, ignoring the client", () => {
     !(process.env.SERVICE_ROLE_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY),
     "Set SERVICE_ROLE_KEY to run this spec.",
   );
-  test.skip(!SUPABASE_ANON_KEY, "Set VITE_SUPABASE_PUBLISHABLE_KEY to run this spec.");
+  test.skip(
+    !SUPABASE_ANON_KEY,
+    "Set VITE_SUPABASE_PUBLISHABLE_KEY to run this spec.",
+  );
 
   test("applies only tenant-configured promo codes to resource-level prices", async ({
     ephemeralTenant,
@@ -124,7 +127,8 @@ test.describe("Server recalculates discounts, ignoring the client", () => {
       .select("id, code, used_count");
     expect(codeErr, codeErr?.message).toBeNull();
     expect(codes).toHaveLength(2);
-    const percentCodeId = codes!.find((c) => c.code === percentCode)!.id as string;
+    const percentCodeId = codes!.find((c) => c.code === percentCode)!
+      .id as string;
     const fixedCodeId = codes!.find((c) => c.code === fixedCode)!.id as string;
 
     // A promo code belonging to a DIFFERENT tenant, never usable here.
@@ -148,13 +152,15 @@ test.describe("Server recalculates discounts, ignoring the client", () => {
       is_active: true,
     });
     expect(foreignTenantErr, foreignTenantErr?.message).toBeNull();
-    const { error: foreignCodeErr } = await service.from("discount_codes").insert({
-      tenant_id: foreignTenantId,
-      code: foreignCode,
-      discount_type: "percentage",
-      discount_value: 75,
-      is_active: true,
-    });
+    const { error: foreignCodeErr } = await service
+      .from("discount_codes")
+      .insert({
+        tenant_id: foreignTenantId,
+        code: foreignCode,
+        discount_type: "percentage",
+        discount_value: 75,
+        is_active: true,
+      });
     expect(foreignCodeErr, foreignCodeErr?.message).toBeNull();
 
     const booking = (label: string, extra: Record<string, unknown> = {}) => ({
@@ -218,7 +224,10 @@ test.describe("Server recalculates discounts, ignoring the client", () => {
 
     // ── 2. Real -20% code, client claims -90% and a 1 EUR total ────────
     const pct = await post(
-      booking("percent", { ...FAKE_DISCOUNT, promo_code: percentCode.toLowerCase() }),
+      booking("percent", {
+        ...FAKE_DISCOUNT,
+        promo_code: percentCode.toLowerCase(),
+      }),
     );
     expect(pct.status(), await pct.text()).toBe(200);
     const pctRows = await readRow("percent");
@@ -230,7 +239,9 @@ test.describe("Server recalculates discounts, ignoring the client", () => {
     // The code's own value, never the 90 the client asked for.
     expect(Number(discounted.discount_value)).toBe(PERCENT_OFF);
     expect(discounted.discount_code_id).toBe(percentCodeId);
-    expect(discounted.discount_reason).toBe(`Promo code: ${percentCode.toLowerCase()}`);
+    expect(discounted.discount_reason).toBe(
+      `Promo code: ${percentCode.toLowerCase()}`,
+    );
     expect(discounted.discount_reason).not.toContain("SELFGRANTED90");
     expect(discounted.is_invoiced).toBe(false);
     expectReportSplitMatches(discounted);
@@ -286,7 +297,10 @@ test.describe("Server recalculates discounts, ignoring the client", () => {
     expect(Number(foreignAfter?.used_count)).toBe(0);
 
     // ── Cleanup of the extra tenant created for the cross-tenant case ──
-    await service.from("discount_codes").delete().eq("tenant_id", foreignTenantId);
+    await service
+      .from("discount_codes")
+      .delete()
+      .eq("tenant_id", foreignTenantId);
     await service.from("tenants").delete().eq("id", foreignTenantId);
     await service.auth.admin.deleteUser(foreignUserId);
   });

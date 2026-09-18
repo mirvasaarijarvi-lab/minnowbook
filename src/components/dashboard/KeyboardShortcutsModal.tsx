@@ -1,4 +1,9 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Keyboard } from "lucide-react";
 
 interface KeyboardShortcutsModalProps {
@@ -18,7 +23,10 @@ const shortcuts = [
   { keys: ["?"], action: "Show this dialog" },
 ];
 
-const KeyboardShortcutsModal = ({ open, onOpenChange }: KeyboardShortcutsModalProps) => {
+const KeyboardShortcutsModal = ({
+  open,
+  onOpenChange,
+}: KeyboardShortcutsModalProps) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
@@ -30,7 +38,10 @@ const KeyboardShortcutsModal = ({ open, onOpenChange }: KeyboardShortcutsModalPr
         </DialogHeader>
         <div className="space-y-2">
           {shortcuts.map((s) => (
-            <div key={s.action} className="flex items-center justify-between py-1.5 border-b border-border last:border-0">
+            <div
+              key={s.action}
+              className="flex items-center justify-between py-1.5 border-b border-border last:border-0"
+            >
               <span className="text-sm text-foreground">{s.action}</span>
               <div className="flex items-center gap-1">
                 {s.keys.map((k) => (

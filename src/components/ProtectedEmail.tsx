@@ -41,7 +41,10 @@ const ProtectedEmail = ({
 
   if (address) {
     return (
-      <a href={href()} className={className ?? "text-accent hover:underline font-medium"}>
+      <a
+        href={href()}
+        className={className ?? "text-accent hover:underline font-medium"}
+      >
         {address}
       </a>
     );

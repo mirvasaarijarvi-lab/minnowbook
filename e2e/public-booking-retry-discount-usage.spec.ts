@@ -49,7 +49,10 @@ test.describe("Retried booking requests and coupon usage", () => {
     !(process.env.SERVICE_ROLE_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY),
     "Set SERVICE_ROLE_KEY to run this spec.",
   );
-  test.skip(!SUPABASE_ANON_KEY, "Set VITE_SUPABASE_PUBLISHABLE_KEY to run this spec.");
+  test.skip(
+    !SUPABASE_ANON_KEY,
+    "Set VITE_SUPABASE_PUBLISHABLE_KEY to run this spec.",
+  );
 
   test("count a coupon once no matter how often the client retries", async ({
     ephemeralTenant,
@@ -145,7 +148,10 @@ test.describe("Retried booking requests and coupon usage", () => {
       expect(retry.status(), `retry ${i + 1}: ${text}`).toBe(200);
       const body = JSON.parse(text);
       expect(body.success).toBe(true);
-      expect(body.duplicate, `retry ${i + 1} was treated as a new booking`).toBe(true);
+      expect(
+        body.duplicate,
+        `retry ${i + 1} was treated as a new booking`,
+      ).toBe(true);
       expect(String(body.reservation.id)).toBe(reservationId);
       expect(await usedCount(code!.id)).toBe(1);
     }
@@ -182,9 +188,9 @@ test.describe("Retried booking requests and coupon usage", () => {
     };
     const charged = effectiveChargedTotal(reportRow);
     expect(roundCents(charged)).toBe(FINAL_EUR);
-    expect(roundCents(calcRoomPrice(reportRow) + calcBreakfastPrice(reportRow))).toBe(
-      roundCents(charged),
-    );
+    expect(
+      roundCents(calcRoomPrice(reportRow) + calcBreakfastPrice(reportRow)),
+    ).toBe(roundCents(charged));
 
     // 5. A genuinely different booking still consumes a use: with max_uses = 1
     //    already spent, another date is refused and nothing is stored for it.

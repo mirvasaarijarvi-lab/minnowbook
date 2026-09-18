@@ -19,7 +19,12 @@ import { test, expect, Page } from "@playwright/test";
  *   E2E_NO_TENANT_PASSWORD=...
  */
 
-const PROTECTED_ROUTES = ["/dashboard", "/onboarding", "/guide", "/superadmin"] as const;
+const PROTECTED_ROUTES = [
+  "/dashboard",
+  "/onboarding",
+  "/guide",
+  "/superadmin",
+] as const;
 
 const noTenantEmail = process.env.E2E_NO_TENANT_EMAIL;
 const noTenantPassword = process.env.E2E_NO_TENANT_PASSWORD;
@@ -29,9 +34,14 @@ async function loginAs(page: Page, email: string, password: string) {
   await page.goto("/login");
   await page.locator("input[type='email']").fill(email);
   await page.locator("input[type='password']").first().fill(password);
-  await page.getByRole("button", { name: /log in|sign in/i }).first().click();
+  await page
+    .getByRole("button", { name: /log in|sign in/i })
+    .first()
+    .click();
   // Wait for either redirect away from /login or for an MFA / error state
-  await page.waitForURL((url) => !url.pathname.startsWith("/login"), { timeout: 15_000 });
+  await page.waitForURL((url) => !url.pathname.startsWith("/login"), {
+    timeout: 15_000,
+  });
 }
 
 test.describe("Anonymous users hitting protected routes", () => {
@@ -46,7 +56,10 @@ test.describe("Anonymous users hitting protected routes", () => {
 });
 
 test.describe("Authenticated user without tenant membership", () => {
-  test.skip(!authedMode, "Set E2E_NO_TENANT_EMAIL and E2E_NO_TENANT_PASSWORD to run");
+  test.skip(
+    !authedMode,
+    "Set E2E_NO_TENANT_EMAIL and E2E_NO_TENANT_PASSWORD to run",
+  );
 
   test.beforeEach(async ({ page }) => {
     await loginAs(page, noTenantEmail!, noTenantPassword!);
@@ -58,15 +71,17 @@ test.describe("Authenticated user without tenant membership", () => {
     expect(new URL(page.url()).pathname).toBe("/onboarding");
   });
 
-  test("/onboarding renders the wizard (no redirect loop)", async ({ page }) => {
+  test("/onboarding renders the wizard (no redirect loop)", async ({
+    page,
+  }) => {
     await page.goto("/onboarding");
     // Stay on /onboarding
     await page.waitForLoadState("networkidle");
     expect(new URL(page.url()).pathname).toBe("/onboarding");
     // Onboarding shows a heading from the wizard
-    await expect(
-      page.getByRole("heading", { level: 1 }).first()
-    ).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByRole("heading", { level: 1 }).first()).toBeVisible({
+      timeout: 10_000,
+    });
   });
 
   test("/guide renders without requiring a tenant", async ({ page }) => {
@@ -77,7 +92,9 @@ test.describe("Authenticated user without tenant membership", () => {
     await expect(page.locator("body")).not.toBeEmpty();
   });
 
-  test("/superadmin denies non-admin and bounces to onboarding", async ({ page }) => {
+  test("/superadmin denies non-admin and bounces to onboarding", async ({
+    page,
+  }) => {
     await page.goto("/superadmin");
     // Superadmin redirects non-admin to /dashboard, which then redirects to /onboarding
     await page.waitForURL(/\/onboarding|\/dashboard/, { timeout: 10_000 });
@@ -90,7 +107,9 @@ test.describe("Authenticated user without tenant membership", () => {
     expect(new URL(page.url()).pathname).toBe("/onboarding");
   });
 
-  test("full navigation loop: dashboard -> onboarding -> guide -> superadmin", async ({ page }) => {
+  test("full navigation loop: dashboard -> onboarding -> guide -> superadmin", async ({
+    page,
+  }) => {
     await page.goto("/dashboard");
     await page.waitForURL(/\/onboarding/);
 

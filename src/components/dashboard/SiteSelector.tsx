@@ -4,8 +4,18 @@ import { useTenant } from "@/hooks/useTenant";
 import { useSiteContext } from "@/hooks/useSiteContext";
 import { useUserSites } from "@/hooks/useUserSites";
 import { useT } from "@/contexts/I18nContext";
-import { Building2, Hotel, UtensilsCrossed, CalendarDays, ChevronDown } from "lucide-react";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Building2,
+  Hotel,
+  UtensilsCrossed,
+  CalendarDays,
+  ChevronDown,
+} from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -20,7 +30,12 @@ const typeIcons: Record<string, React.ElementType> = {
 
 const SiteSelector = () => {
   const { tenantId, tenant } = useTenant();
-  const { selectedSiteId, setSelectedSiteId, selectedResourceId, setSelectedResourceId } = useSiteContext();
+  const {
+    selectedSiteId,
+    setSelectedSiteId,
+    selectedResourceId,
+    setSelectedResourceId,
+  } = useSiteContext();
   const { siteIds: allowedSiteIds, isRestricted } = useUserSites();
   const t = useT();
   const [open, setOpen] = useState(false);
@@ -56,9 +71,10 @@ const SiteSelector = () => {
   });
 
   // Filter sites to only those the user is allowed to access
-  const visibleSites = isRestricted && allowedSiteIds
-    ? (sites ?? []).filter((s) => allowedSiteIds.includes(s.id))
-    : (sites ?? []);
+  const visibleSites =
+    isRestricted && allowedSiteIds
+      ? (sites ?? []).filter((s) => allowedSiteIds.includes(s.id))
+      : (sites ?? []);
 
   if (visibleSites.length < 1) return null;
 
@@ -122,7 +138,7 @@ const SiteSelector = () => {
                   "w-full text-left px-2.5 py-2 rounded-md text-sm font-medium transition-colors",
                   !selectedSiteId && !selectedResourceId
                     ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                    : "text-foreground/80 hover:bg-muted"
+                    : "text-foreground/80 hover:bg-muted",
                 )}
               >
                 {t("sites.allSites") || "All sites"}
@@ -132,7 +148,8 @@ const SiteSelector = () => {
             {/* Grouped sites with resources */}
             {visibleSites.map((site) => {
               const siteResources = getResourcesForSite(site.id);
-              const isSiteSelected = selectedSiteId === site.id && !selectedResourceId;
+              const isSiteSelected =
+                selectedSiteId === site.id && !selectedResourceId;
 
               return (
                 <div key={site.id} className="mt-1">
@@ -143,13 +160,16 @@ const SiteSelector = () => {
                       "w-full text-left px-2.5 py-2 rounded-md text-sm font-semibold transition-colors flex items-center gap-2",
                       isSiteSelected
                         ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                        : "text-foreground hover:bg-muted"
+                        : "text-foreground hover:bg-muted",
                     )}
                   >
                     <Building2 className="h-3.5 w-3.5 shrink-0 text-primary" />
                     <span className="truncate flex-1">{site.name}</span>
                     {siteResources.length > 0 && (
-                      <Badge variant="secondary" className="text-[10px] h-4 px-1">
+                      <Badge
+                        variant="secondary"
+                        className="text-[10px] h-4 px-1"
+                      >
                         {siteResources.length}
                       </Badge>
                     )}
@@ -159,17 +179,21 @@ const SiteSelector = () => {
                   {siteResources.length > 0 && (
                     <div className="ml-3 border-l border-border/50 pl-2 space-y-0.5 mt-0.5">
                       {siteResources.map((resource) => {
-                        const Icon = typeIcons[resource.resource_type] ?? Building2;
-                        const isResSelected = selectedResourceId === resource.id;
+                        const Icon =
+                          typeIcons[resource.resource_type] ?? Building2;
+                        const isResSelected =
+                          selectedResourceId === resource.id;
                         return (
                           <button
                             key={resource.id}
-                            onClick={() => handleSelectResource(site.id, resource.id)}
+                            onClick={() =>
+                              handleSelectResource(site.id, resource.id)
+                            }
                             className={cn(
                               "w-full text-left px-2.5 py-1.5 rounded-md text-xs transition-colors flex items-center gap-2",
                               isResSelected
                                 ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
-                                : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                                : "text-muted-foreground hover:bg-muted hover:text-foreground",
                             )}
                           >
                             <Icon className="h-3 w-3 shrink-0" />

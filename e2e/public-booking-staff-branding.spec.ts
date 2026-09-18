@@ -58,7 +58,10 @@ test.describe("Public booking page branding for authenticated staff", () => {
     !(process.env.SERVICE_ROLE_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY),
     "Set SERVICE_ROLE_KEY to run this spec.",
   );
-  test.skip(!SUPABASE_ANON_KEY, "Set VITE_SUPABASE_PUBLISHABLE_KEY to run this spec.");
+  test.skip(
+    !SUPABASE_ANON_KEY,
+    "Set VITE_SUPABASE_PUBLISHABLE_KEY to run this spec.",
+  );
 
   test("shows site name, colours and logo to a staff user", async ({
     ephemeralTenant,
@@ -107,11 +110,12 @@ test.describe("Public booking page branding for authenticated staff", () => {
 
     // 3. A staff member of this tenant (deliberately NOT owner/admin, so the
     //    site_settings row itself stays unreadable for them).
-    const { data: staffUser, error: staffErr } = await admin.auth.admin.createUser({
-      email: staffEmail,
-      password: staffPassword,
-      email_confirm: true,
-    });
+    const { data: staffUser, error: staffErr } =
+      await admin.auth.admin.createUser({
+        email: staffEmail,
+        password: staffPassword,
+        email_confirm: true,
+      });
     expect(staffErr, staffErr?.message).toBeNull();
     const staffUserId = staffUser!.user!.id;
 
@@ -128,11 +132,15 @@ test.describe("Public booking page branding for authenticated staff", () => {
       const anon = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
         auth: { persistSession: false, autoRefreshToken: false },
       });
-      const { data: signIn, error: signInErr } = await anon.auth.signInWithPassword({
-        email: staffEmail,
-        password: staffPassword,
-      });
-      expect(signInErr, `staff sign-in failed: ${signInErr?.message}`).toBeNull();
+      const { data: signIn, error: signInErr } =
+        await anon.auth.signInWithPassword({
+          email: staffEmail,
+          password: staffPassword,
+        });
+      expect(
+        signInErr,
+        `staff sign-in failed: ${signInErr?.message}`,
+      ).toBeNull();
       expect(signIn.session?.access_token).toBeTruthy();
       await seedSession(page, signIn.session);
 
@@ -158,7 +166,10 @@ test.describe("Public booking page branding for authenticated staff", () => {
       await expect(page).toHaveURL(new RegExp(`/book/${slug}`));
 
       // Business name from site_settings (not the tenant name).
-      const heading = page.getByRole("heading", { level: 1, name: siteBusinessName });
+      const heading = page.getByRole("heading", {
+        level: 1,
+        name: siteBusinessName,
+      });
       await expect(heading).toBeVisible();
 
       // Colours: header uses the primary colour, page body the secondary.
@@ -197,10 +208,15 @@ test.describe("Public booking page branding for authenticated staff", () => {
 
       // The degraded-branding notice must NOT appear for this user.
       await expect(
-        page.getByText(/could not be loaded|ei voitu ladata|kunde inte laddas/i),
+        page.getByText(
+          /could not be loaded|ei voitu ladata|kunde inte laddas/i,
+        ),
       ).toHaveCount(0);
     } finally {
-      await admin.storage.from(BRANDING_BUCKET).remove([logoPath]).catch(() => {});
+      await admin.storage
+        .from(BRANDING_BUCKET)
+        .remove([logoPath])
+        .catch(() => {});
       await admin.from("tenant_users").delete().eq("user_id", staffUserId);
       await admin.auth.admin.deleteUser(staffUserId).catch(() => {});
     }

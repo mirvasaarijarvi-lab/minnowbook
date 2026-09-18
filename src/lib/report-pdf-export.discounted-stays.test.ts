@@ -195,85 +195,95 @@ const pdfText = (bytes: Uint8Array) => {
 };
 
 describe("period report PDF for discounted multi-night stays", () => {
-  it.skipIf(!hasPdfToText)("prints the guest-charged total, split to the cent", () => {
-    const text = pdfText(buildPdfBytes());
-    const lines = text.split("\n");
+  it.skipIf(!hasPdfToText)(
+    "prints the guest-charged total, split to the cent",
+    () => {
+      const text = pdfText(buildPdfBytes());
+      const lines = text.split("\n");
 
-    let priced = 0;
-    let placeholders = 0;
-    let cappedBreakfast = 0;
-    let totalCents = 0;
+      let priced = 0;
+      let placeholders = 0;
+      let cappedBreakfast = 0;
+      let totalCents = 0;
 
-    CASES.forEach((c, i) => {
-      const why = `${c.label} (row ${i + 1})`;
-      const a = reportAmounts(c.row);
-      const line = lines.find((l) => l.includes(`Guest ${i + 1}`));
-      expect(line, `${why} missing from the PDF`).toBeTruthy();
+      CASES.forEach((c, i) => {
+        const why = `${c.label} (row ${i + 1})`;
+        const a = reportAmounts(c.row);
+        const line = lines.find((l) => l.includes(`Guest ${i + 1}`));
+        expect(line, `${why} missing from the PDF`).toBeTruthy();
 
-      const money = line!
-        .trim()
-        .split(/\s{2,}|\s+/)
-        .slice(-3);
+        const money = line!
+          .trim()
+          .split(/\s{2,}|\s+/)
+          .slice(-3);
 
-      if (money[2] === PDF_NO_AMOUNT) {
-        // No amount: all three columns show a dash, never 0.00.
-        expect(money, why).toEqual([PDF_NO_AMOUNT, PDF_NO_AMOUNT, PDF_NO_AMOUNT]);
-        expect(a.hasAmount, why).toBe(false);
-        placeholders++;
-        return;
+        if (money[2] === PDF_NO_AMOUNT) {
+          // No amount: all three columns show a dash, never 0.00.
+          expect(money, why).toEqual([
+            PDF_NO_AMOUNT,
+            PDF_NO_AMOUNT,
+            PDF_NO_AMOUNT,
+          ]);
+          expect(a.hasAmount, why).toBe(false);
+          placeholders++;
+          return;
+        }
+
+        const room = Number(money[0]);
+        const breakfast = money[1] === PDF_NO_AMOUNT ? 0 : Number(money[1]);
+        const total = Number(money[2]);
+
+        // The printed split adds up, and equals what the guest is charged.
+        expect(Math.round(room * 100) + Math.round(breakfast * 100), why).toBe(
+          Math.round(total * 100),
+        );
+        expect(total, why).toBeCloseTo(c.row.price_eur ?? 0, 10);
+        expect(total, why).toBeCloseTo(a.charged, 10);
+        expect(room >= 0, why).toBe(true);
+        if (breakfast > 0 && room === 0) cappedBreakfast++;
+
+        totalCents += Math.round(total * 100);
+        priced++;
+      });
+
+      expect(priced).toBeGreaterThan(6);
+      expect(placeholders).toBeGreaterThan(0);
+      expect(cappedBreakfast).toBeGreaterThan(0);
+
+      // The grand total printed at the top equals the sum of the printed totals.
+      const grandTotal = sumReportAmounts(CASES.map((c) => c.row)).charged;
+      expect(totalCents).toBe(Math.round(grandTotal * 100));
+      expect(text).toContain(`${grandTotal.toFixed(2)} EUR`);
+    },
+  );
+
+  it.skipIf(!hasPdfToText)(
+    "never prints a list price or a discount step",
+    () => {
+      const text = pdfText(buildPdfBytes());
+
+      // A figure is only forbidden if no row legitimately charges that amount
+      // (two different stays can coincide, e.g. one stay's list price equals
+      // another stay's discounted total).
+      const chargedCents = new Set(
+        CASES.map((c) => Math.round(reportAmounts(c.row).charged * 100)),
+      );
+
+      for (const c of CASES) {
+        const forbidden = [c.listPrice, ...c.intermediates].filter(
+          (v) => !chargedCents.has(Math.round(v * 100)),
+        );
+        for (const value of forbidden) {
+          expect(
+            text.includes(value.toFixed(2)),
+            `${c.label}: ${value.toFixed(2)} must not appear in the PDF`,
+          ).toBe(false);
+        }
       }
 
-      const room = Number(money[0]);
-      const breakfast = money[1] === PDF_NO_AMOUNT ? 0 : Number(money[1]);
-      const total = Number(money[2]);
-
-      // The printed split adds up, and equals what the guest is charged.
-      expect(Math.round(room * 100) + Math.round(breakfast * 100), why).toBe(
-        Math.round(total * 100),
-      );
-      expect(total, why).toBeCloseTo(c.row.price_eur ?? 0, 10);
-      expect(total, why).toBeCloseTo(a.charged, 10);
-      expect(room >= 0, why).toBe(true);
-      if (breakfast > 0 && room === 0) cappedBreakfast++;
-
-      totalCents += Math.round(total * 100);
-      priced++;
-    });
-
-    expect(priced).toBeGreaterThan(6);
-    expect(placeholders).toBeGreaterThan(0);
-    expect(cappedBreakfast).toBeGreaterThan(0);
-
-    // The grand total printed at the top equals the sum of the printed totals.
-    const grandTotal = sumReportAmounts(CASES.map((c) => c.row)).charged;
-    expect(totalCents).toBe(Math.round(grandTotal * 100));
-    expect(text).toContain(`${grandTotal.toFixed(2)} EUR`);
-  });
-
-  it.skipIf(!hasPdfToText)("never prints a list price or a discount step", () => {
-    const text = pdfText(buildPdfBytes());
-
-    // A figure is only forbidden if no row legitimately charges that amount
-    // (two different stays can coincide, e.g. one stay's list price equals
-    // another stay's discounted total).
-    const chargedCents = new Set(
-      CASES.map((c) => Math.round(reportAmounts(c.row).charged * 100)),
-    );
-
-    for (const c of CASES) {
-      const forbidden = [c.listPrice, ...c.intermediates].filter(
-        (v) => !chargedCents.has(Math.round(v * 100)),
-      );
-      for (const value of forbidden) {
-        expect(
-          text.includes(value.toFixed(2)),
-          `${c.label}: ${value.toFixed(2)} must not appear in the PDF`,
-        ).toBe(false);
-      }
-    }
-
-    // A menu-priced dinner contributes nothing, discount or not.
-    const menuCase = CASES.find((c) => c.row.pricing_type === "menu")!;
-    expect(reportAmounts(menuCase.row).charged).toBe(0);
-  });
+      // A menu-priced dinner contributes nothing, discount or not.
+      const menuCase = CASES.find((c) => c.row.pricing_type === "menu")!;
+      expect(reportAmounts(menuCase.row).charged).toBe(0);
+    },
+  );
 });

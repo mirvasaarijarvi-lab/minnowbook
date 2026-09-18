@@ -1,6 +1,10 @@
 import { Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { getMaxStaffUsers, getTierLabel } from "@/lib/tier-limits";
 import { cn } from "@/lib/utils";
 

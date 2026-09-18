@@ -100,7 +100,11 @@ export function selectTile(tile: TypeTile): {
   selected_sub_services: CustomSubService[];
 } {
   if (tile.kind === "builtin") {
-    return { reservation_type: tile.type, resource_id: "", selected_sub_services: [] };
+    return {
+      reservation_type: tile.type,
+      resource_id: "",
+      selected_sub_services: [],
+    };
   }
   // custom + wellness both pin to a specific resource_id.
   return {

@@ -20,7 +20,8 @@ export const sanitizeCsvCell = (v: string): string => {
     .replace(/\u2014/g, "-")
     .replace(/\u20AC/g, "EUR");
   const isSafeValue = cleaned === "-" || /^-?\d+([.,]\d+)?%?$/.test(cleaned);
-  const guarded = !isSafeValue && /^[=+\-@\t]/.test(cleaned) ? `'${cleaned}` : cleaned;
+  const guarded =
+    !isSafeValue && /^[=+\-@\t]/.test(cleaned) ? `'${cleaned}` : cleaned;
   return guarded.replace(/"/g, '""');
 };
 

@@ -35,14 +35,27 @@ const OG_LOCALES: Record<Language, string> = {
 export const localizedUrl = (path: string, lang: Language) =>
   lang === "en" ? `${BASE_URL}${path}` : `${BASE_URL}${path}?lang=${lang}`;
 
-const SEOHead = ({ title, description, path, keywords, type = "website", image, imageAlt, ogTitle, ogDescription, jsonLd }: SEOHeadProps) => {
+const SEOHead = ({
+  title,
+  description,
+  path,
+  keywords,
+  type = "website",
+  image,
+  imageAlt,
+  ogTitle,
+  ogDescription,
+  jsonLd,
+}: SEOHeadProps) => {
   const { language } = useI18n();
 
   useEffect(() => {
     document.title = title;
 
     const setMeta = (attr: string, key: string, content: string) => {
-      let el = document.querySelector(`meta[${attr}="${key}"]`) as HTMLMetaElement | null;
+      let el = document.querySelector(
+        `meta[${attr}="${key}"]`,
+      ) as HTMLMetaElement | null;
       if (!el) {
         el = document.createElement("meta");
         el.setAttribute(attr, key);
@@ -52,7 +65,9 @@ const SEOHead = ({ title, description, path, keywords, type = "website", image, 
     };
 
     const setLink = (rel: string, href: string) => {
-      let el = document.querySelector(`link[rel="${rel}"]`) as HTMLLinkElement | null;
+      let el = document.querySelector(
+        `link[rel="${rel}"]`,
+      ) as HTMLLinkElement | null;
       if (!el) {
         el = document.createElement("link");
         el.setAttribute("rel", rel);
@@ -85,7 +100,9 @@ const SEOHead = ({ title, description, path, keywords, type = "website", image, 
     setLink("canonical", url);
 
     const resolvedImage = image
-      ? (image.startsWith("http") ? image : `${BASE_URL}${image}`)
+      ? image.startsWith("http")
+        ? image
+        : `${BASE_URL}${image}`
       : `${BASE_URL}/og-image.png`;
 
     // Share copy: falls back to the search title and description.
@@ -123,9 +140,10 @@ const SEOHead = ({ title, description, path, keywords, type = "website", image, 
     setMeta("name", "twitter:domain", "mimmobook.com");
     if (imageAlt) setMeta("name", "twitter:image:alt", imageAlt);
 
-
     // JSON-LD
-    const existingScripts = document.querySelectorAll('script[data-seo-jsonld]');
+    const existingScripts = document.querySelectorAll(
+      "script[data-seo-jsonld]",
+    );
     existingScripts.forEach((s) => s.remove());
 
     const schemas = Array.isArray(jsonLd) ? jsonLd : jsonLd ? [jsonLd] : [];
@@ -138,12 +156,24 @@ const SEOHead = ({ title, description, path, keywords, type = "website", image, 
     });
 
     return () => {
-      document.querySelectorAll('script[data-seo-jsonld]').forEach((s) => s.remove());
+      document
+        .querySelectorAll("script[data-seo-jsonld]")
+        .forEach((s) => s.remove());
       document
         .querySelectorAll('link[rel="alternate"][data-seo-hreflang]')
         .forEach((el) => el.remove());
     };
-  }, [title, description, path, keywords, type, image, imageAlt, jsonLd, language]);
+  }, [
+    title,
+    description,
+    path,
+    keywords,
+    type,
+    image,
+    imageAlt,
+    jsonLd,
+    language,
+  ]);
 
   return null;
 };
@@ -182,7 +212,6 @@ export const organizationSchema = {
   ],
 };
 
-
 export const softwareSchema = {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
@@ -203,9 +232,7 @@ export const softwareSchema = {
     "Online reservations, Multi-site management, Branded booking pages, Automated emails, Team roles & permissions, Reports & analytics, Discount codes, Catering & popup support",
 };
 
-export const faqSchema = (
-  items: { question: string; answer: string }[]
-) => ({
+export const faqSchema = (items: { question: string; answer: string }[]) => ({
   "@context": "https://schema.org",
   "@type": "FAQPage",
   mainEntity: items.map((item) => ({
@@ -218,9 +245,7 @@ export const faqSchema = (
   })),
 });
 
-export const breadcrumbSchema = (
-  items: { name: string; url: string }[]
-) => ({
+export const breadcrumbSchema = (items: { name: string; url: string }[]) => ({
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
   itemListElement: items.map((item, i) => ({

@@ -10,8 +10,23 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { format, parseISO } from "date-fns";
-import { Plus, FileText, Check, Send, Printer, Archive, ArchiveRestore, Search, Clock } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Plus,
+  FileText,
+  Check,
+  Send,
+  Printer,
+  Archive,
+  ArchiveRestore,
+  Search,
+  Clock,
+} from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -19,17 +34,25 @@ import {
   pickOfferResource,
 } from "@/lib/offer-reservation-pricing";
 import { offerKitchenMessage } from "@/lib/offer-kitchen-message";
-import { buildKitchenOrderRows, type OfferMenuLeg } from "@/lib/offer-kitchen-orders";
+import {
+  buildKitchenOrderRows,
+  type OfferMenuLeg,
+} from "@/lib/offer-kitchen-orders";
 import {
   checkKitchenPreviewMatchesOutput,
   formatKitchenMismatches,
 } from "@/lib/offer-kitchen-consistency";
-import { announceOfferStatus, composeOfferStatusMessage } from "@/lib/offer-status-announcer";
+import {
+  announceOfferStatus,
+  composeOfferStatusMessage,
+} from "@/lib/offer-status-announcer";
 import { focusOfferStatusPanel } from "@/lib/offer-status-focus";
 
 import OfferCreateDialog from "./OfferCreateDialog";
 import OfferEmailDialog from "./OfferEmailDialog";
-import OfferPriceReviewDialog, { type OfferPriceLeg } from "./OfferPriceReviewDialog";
+import OfferPriceReviewDialog, {
+  type OfferPriceLeg,
+} from "./OfferPriceReviewDialog";
 import { useDateLocale } from "@/hooks/useDateLocale";
 import DashboardTooltip from "./DashboardTooltip";
 
@@ -49,13 +72,20 @@ const OffersManager = () => {
   const [createOpen, setCreateOpen] = useState(false);
   const [emailOffer, setEmailOffer] = useState<Offer | null>(null);
   const [editOffer, setEditOffer] = useState<Offer | null>(null);
-  const [priceReview, setPriceReview] = useState<{ offer: Offer; plan: ConfirmPlan } | null>(null);
+  const [priceReview, setPriceReview] = useState<{
+    offer: Offer;
+    plan: ConfirmPlan;
+  } | null>(null);
   const [confirming, setConfirming] = useState(false);
 
   // The confirm result is kept on screen in a focusable panel: the Confirm
   // button disappears once the offer is confirmed, so focus is moved here
   // instead of being dropped on the document body.
-  const [confirmStatus, setConfirmStatus] = useState<{ message: string; urgent: boolean; seq: number } | null>(null);
+  const [confirmStatus, setConfirmStatus] = useState<{
+    message: string;
+    urgent: boolean;
+    seq: number;
+  } | null>(null);
   const statusPanelRef = useRef<HTMLDivElement | null>(null);
   const confirmTriggerRef = useRef<Element | null>(null);
 
@@ -68,18 +98,27 @@ const OffersManager = () => {
     });
   }, [confirmStatus]);
 
-  const publishConfirmStatus = useCallback((message: string, urgent: boolean) => {
-    if (!message.trim()) return;
-    setConfirmStatus((prev) => ({ message, urgent, seq: (prev?.seq ?? 0) + 1 }));
-    announceOfferStatus(message, urgent ? "assertive" : "polite");
-  }, []);
+  const publishConfirmStatus = useCallback(
+    (message: string, urgent: boolean) => {
+      if (!message.trim()) return;
+      setConfirmStatus((prev) => ({
+        message,
+        urgent,
+        seq: (prev?.seq ?? 0) + 1,
+      }));
+      announceOfferStatus(message, urgent ? "assertive" : "polite");
+    },
+    [],
+  );
 
   const filteredOffers = useMemo(() => {
     if (!searchQuery.trim()) return offers;
     const q = searchQuery.toLowerCase().trim();
     return offers.filter((offer) => {
       const nameMatch = offer.guest_name.toLowerCase().includes(q);
-      const dateMatch = offer.event_date.includes(q) || format(parseISO(offer.event_date), "d.M.yyyy").includes(q);
+      const dateMatch =
+        offer.event_date.includes(q) ||
+        format(parseISO(offer.event_date), "d.M.yyyy").includes(q);
       const spaceMatch = offer.event_space.toLowerCase().includes(q);
       return nameMatch || dateMatch || spaceMatch;
     });
@@ -132,17 +171,25 @@ const OffersManager = () => {
 
   const statusColor = (s: string) => {
     switch (s) {
-      case "draft": return "secondary" as const;
-      case "sent": return "default" as const;
-      case "confirmed": return "default" as const;
-      case "expired": return "destructive" as const;
-      default: return "secondary" as const;
+      case "draft":
+        return "secondary" as const;
+      case "sent":
+        return "default" as const;
+      case "confirmed":
+        return "default" as const;
+      case "expired":
+        return "destructive" as const;
+      default:
+        return "secondary" as const;
     }
   };
 
   const handleArchive = async (offer: Offer) => {
     try {
-      await updateOffer.mutateAsync({ id: offer.id, archived_at: new Date().toISOString() } as any);
+      await updateOffer.mutateAsync({
+        id: offer.id,
+        archived_at: new Date().toISOString(),
+      } as any);
       toast.success(t("offers.archivedSuccess"));
     } catch {
       toast.error(t("offers.archiveError"));
@@ -170,7 +217,9 @@ const OffersManager = () => {
     // booking flow uses (room price per night, sub-service prices).
     const { data: resourceRows } = await supabase
       .from("resources")
-      .select("id, name, resource_type, price_per_night, breakfast_price_per_person, sub_services")
+      .select(
+        "id, name, resource_type, price_per_night, breakfast_price_per_person, sub_services",
+      )
       .eq("tenant_id", offer.tenant_id)
       .eq("is_active", true);
     const resources = (resourceRows ?? []) as any[];
@@ -186,7 +235,8 @@ const OffersManager = () => {
       mainType = mainResource.resource_type;
     }
     if (mainType === "venue") {
-      const allowed = (tenant?.allowed_reservation_types as string[] | undefined) ?? [];
+      const allowed =
+        (tenant?.allowed_reservation_types as string[] | undefined) ?? [];
       if (!allowed.includes("venue") && allowed.length > 0) {
         mainType = allowed[0];
       }
@@ -300,7 +350,11 @@ const OffersManager = () => {
             reservation_type: resType,
             status: "confirmed",
             date: offer.event_date,
-            start_time: lr.start_time ? `${lr.start_time}:00` : (offer.start_time ? `${offer.start_time}:00` : null),
+            start_time: lr.start_time
+              ? `${lr.start_time}:00`
+              : offer.start_time
+                ? `${offer.start_time}:00`
+                : null,
             end_time: lr.end_time ? `${lr.end_time}:00` : null,
             guest_name: offer.guest_name,
             guest_email: offer.guest_email,
@@ -308,7 +362,9 @@ const OffersManager = () => {
             guests_count: lr.guests_count || offer.guests_count,
             event_type: offer.event_type || null,
             room_type: lr.space || null,
-            special_requests: lr.special_requests ? `Cross-reservation via offer\n${lr.special_requests}` : "Cross-reservation via offer",
+            special_requests: lr.special_requests
+              ? `Cross-reservation via offer\n${lr.special_requests}`
+              : "Cross-reservation via offer",
             staff_notes: "Cross-reservation, offer",
             language: offer.language || "en",
             linked_group_id: linkedGroupId,
@@ -366,9 +422,16 @@ const OffersManager = () => {
         reservation_ids: resIds,
       });
 
-      const missingPrice = plan.legs.filter((l) => (prices[l.key] ?? null) == null);
-      const kitchenDescription = offerKitchenMessage(kitchenRows.length, (key) => t(key));
-      toast.success(t("offers.confirmedSuccess"), { description: kitchenDescription });
+      const missingPrice = plan.legs.filter(
+        (l) => (prices[l.key] ?? null) == null,
+      );
+      const kitchenDescription = offerKitchenMessage(
+        kitchenRows.length,
+        (key) => t(key),
+      );
+      toast.success(t("offers.confirmedSuccess"), {
+        description: kitchenDescription,
+      });
       if (missingPrice.length > 0) {
         toast.warning(t("offers.confirmedWithoutPrice"));
       }
@@ -376,8 +439,12 @@ const OffersManager = () => {
       publishConfirmStatus(
         composeOfferStatusMessage([
           t("offers.confirmedSuccess"),
-          kitchenFailed ? t("offers.kitchenOrdersFailedAnnounce") : kitchenDescription,
-          missingPrice.length > 0 ? t("offers.confirmedWithoutPriceAnnounce") : null,
+          kitchenFailed
+            ? t("offers.kitchenOrdersFailedAnnounce")
+            : kitchenDescription,
+          missingPrice.length > 0
+            ? t("offers.confirmedWithoutPriceAnnounce")
+            : null,
         ]),
         kitchenFailed || missingPrice.length > 0,
       );
@@ -431,10 +498,18 @@ const OffersManager = () => {
     <div className="space-y-4">
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-2">
-          <h3 className="text-xl sm:text-2xl font-serif font-bold text-foreground">{t("offers.title")}</h3>
+          <h3 className="text-xl sm:text-2xl font-serif font-bold text-foreground">
+            {t("offers.title")}
+          </h3>
           <DashboardTooltip text={t("offers.tooltip")} />
         </div>
-        <Button onClick={() => { setEditOffer(null); setCreateOpen(true); }} size="sm">
+        <Button
+          onClick={() => {
+            setEditOffer(null);
+            setCreateOpen(true);
+          }}
+          size="sm"
+        >
           <Plus className="h-4 w-4 mr-1" />
           {t("offers.create")}
         </Button>
@@ -452,8 +527,14 @@ const OffersManager = () => {
           />
         </div>
         <div className="flex items-center gap-2">
-          <Switch checked={showArchived} onCheckedChange={setShowArchived} id="show-archived" />
-          <Label htmlFor="show-archived" className="text-sm cursor-pointer">{t("offers.showArchived")}</Label>
+          <Switch
+            checked={showArchived}
+            onCheckedChange={setShowArchived}
+            id="show-archived"
+          />
+          <Label htmlFor="show-archived" className="text-sm cursor-pointer">
+            {t("offers.showArchived")}
+          </Label>
         </div>
       </div>
 
@@ -477,96 +558,169 @@ const OffersManager = () => {
       {isLoading ? (
         <p className="text-muted-foreground text-sm">{t("common.loading")}</p>
       ) : filteredOffers.length === 0 ? (
-        <Card><CardContent className="p-6 text-center text-muted-foreground">
-          {searchQuery.trim() ? t("offers.noResults") : t("offers.empty")}
-        </CardContent></Card>
+        <Card>
+          <CardContent className="p-6 text-center text-muted-foreground">
+            {searchQuery.trim() ? t("offers.noResults") : t("offers.empty")}
+          </CardContent>
+        </Card>
       ) : (
         <ul className="space-y-2 list-none p-0 m-0">
           {filteredOffers.map((offer) => {
             const isArchived = !!offer.archived_at;
             return (
               <li key={offer.id}>
-              <Card className={`hover:shadow-sm transition-shadow ${isArchived ? "opacity-60" : ""}`}>
-                <CardContent className="p-4">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-medium text-sm">{offer.guest_name}</span>
-                        <Badge variant={statusColor(offer.status)} className="text-[10px]">
-                          {t(`offers.status${offer.status.charAt(0).toUpperCase() + offer.status.slice(1)}` as any)}
-                        </Badge>
-                        {isArchived && (
-                          <Badge variant="outline" className="text-[10px]">{t("offers.archived")}</Badge>
-                        )}
-                        {isOfferStale(offer) && (
-                          <Badge variant="destructive" className="text-[10px]" title="All linked reservations have been cancelled">
-                            All bookings cancelled
+                <Card
+                  className={`hover:shadow-sm transition-shadow ${isArchived ? "opacity-60" : ""}`}
+                >
+                  <CardContent className="p-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-medium text-sm">
+                            {offer.guest_name}
+                          </span>
+                          <Badge
+                            variant={statusColor(offer.status)}
+                            className="text-[10px]"
+                          >
+                            {t(
+                              `offers.status${offer.status.charAt(0).toUpperCase() + offer.status.slice(1)}` as any,
+                            )}
                           </Badge>
+                          {isArchived && (
+                            <Badge variant="outline" className="text-[10px]">
+                              {t("offers.archived")}
+                            </Badge>
+                          )}
+                          {isOfferStale(offer) && (
+                            <Badge
+                              variant="destructive"
+                              className="text-[10px]"
+                              title="All linked reservations have been cancelled"
+                            >
+                              All bookings cancelled
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          {format(parseISO(offer.event_date), "PPP", {
+                            locale: dateLocale,
+                          })}{" "}
+                          • {offer.start_time}
+                          {offer.end_time ? ` – ${offer.end_time}` : ""} •{" "}
+                          {offer.guests_count}{" "}
+                          {t("common.guests").toLowerCase()} •{" "}
+                          {offer.event_space}
+                        </p>
+                        {offer.last_sent_at && (
+                          <p className="text-[11px] text-muted-foreground flex items-center gap-1 mt-0.5">
+                            <Clock className="h-3 w-3" />
+                            {t("offers.lastSent")}:{" "}
+                            {format(
+                              parseISO(offer.last_sent_at),
+                              "d.M.yyyy HH:mm",
+                              { locale: dateLocale },
+                            )}
+                          </p>
                         )}
                       </div>
-                      <p className="text-xs text-muted-foreground">
-                        {format(parseISO(offer.event_date), "PPP", { locale: dateLocale })} • {offer.start_time}{offer.end_time ? ` – ${offer.end_time}` : ""} • {offer.guests_count} {t("common.guests").toLowerCase()} • {offer.event_space}
-                      </p>
-                      {offer.last_sent_at && (
-                        <p className="text-[11px] text-muted-foreground flex items-center gap-1 mt-0.5">
-                          <Clock className="h-3 w-3" />
-                          {t("offers.lastSent")}: {format(parseISO(offer.last_sent_at), "d.M.yyyy HH:mm", { locale: dateLocale })}
-                        </p>
-                      )}
+                      <div className="flex items-center gap-1.5 flex-shrink-0 flex-wrap">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handlePrintPdf(offer)}
+                          title="PDF"
+                          aria-label={`${t("offers.printPdf")}: ${offer.guest_name}`}
+                        >
+                          <Printer className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setEditOffer(offer);
+                            setCreateOpen(true);
+                          }}
+                        >
+                          <FileText className="h-3.5 w-3.5 mr-1" />
+                          {t("common.edit")}
+                        </Button>
+                        {(offer.status === "draft" ||
+                          offer.status === "sent") &&
+                          !isArchived && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => setEmailOffer(offer)}
+                            >
+                              <Send className="h-3.5 w-3.5 mr-1" />
+                              {t("offers.send")}
+                            </Button>
+                          )}
+                        {(offer.status === "sent" ||
+                          offer.status === "draft") &&
+                          !isArchived && (
+                            <Button
+                              size="sm"
+                              onClick={() => handleConfirm(offer)}
+                            >
+                              <Check className="h-3.5 w-3.5 mr-1" />
+                              {t("offers.confirm")}
+                            </Button>
+                          )}
+                        {isArchived ? (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleUnarchive(offer)}
+                            title={t("offers.unarchive")}
+                            aria-label={`${t("offers.unarchive")}: ${offer.guest_name}`}
+                          >
+                            <ArchiveRestore className="h-3.5 w-3.5" />
+                          </Button>
+                        ) : (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleArchive(offer)}
+                            title={t("offers.archive")}
+                            aria-label={`${t("offers.archive")}: ${offer.guest_name}`}
+                          >
+                            <Archive className="h-3.5 w-3.5" />
+                          </Button>
+                        )}
+                      </div>
                     </div>
-                    <div className="flex items-center gap-1.5 flex-shrink-0 flex-wrap">
-                      <Button size="sm" variant="outline" onClick={() => handlePrintPdf(offer)} title="PDF" aria-label={`${t("offers.printPdf")}: ${offer.guest_name}`}>
-                        <Printer className="h-3.5 w-3.5" />
-                      </Button>
-                      <Button size="sm" variant="outline" onClick={() => { setEditOffer(offer); setCreateOpen(true); }}>
-                        <FileText className="h-3.5 w-3.5 mr-1" />
-                        {t("common.edit")}
-                      </Button>
-                      {(offer.status === "draft" || offer.status === "sent") && !isArchived && (
-                        <Button size="sm" variant="outline" onClick={() => setEmailOffer(offer)}>
-                          <Send className="h-3.5 w-3.5 mr-1" />
-                          {t("offers.send")}
-                        </Button>
-                      )}
-                      {(offer.status === "sent" || offer.status === "draft") && !isArchived && (
-                        <Button size="sm" onClick={() => handleConfirm(offer)}>
-                          <Check className="h-3.5 w-3.5 mr-1" />
-                          {t("offers.confirm")}
-                        </Button>
-                      )}
-                      {isArchived ? (
-                        <Button size="sm" variant="outline" onClick={() => handleUnarchive(offer)} title={t("offers.unarchive")} aria-label={`${t("offers.unarchive")}: ${offer.guest_name}`}>
-                          <ArchiveRestore className="h-3.5 w-3.5" />
-                        </Button>
-                      ) : (
-                        <Button size="sm" variant="outline" onClick={() => handleArchive(offer)} title={t("offers.archive")} aria-label={`${t("offers.archive")}: ${offer.guest_name}`}>
-                          <Archive className="h-3.5 w-3.5" />
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
               </li>
             );
           })}
         </ul>
       )}
 
-      <OfferCreateDialog open={createOpen} onOpenChange={setCreateOpen} editOffer={editOffer} />
+      <OfferCreateDialog
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        editOffer={editOffer}
+      />
 
       {emailOffer && (
         <OfferEmailDialog
           offer={emailOffer}
           open={!!emailOffer}
-          onOpenChange={(open) => { if (!open) setEmailOffer(null); }}
+          onOpenChange={(open) => {
+            if (!open) setEmailOffer(null);
+          }}
         />
       )}
 
       {priceReview && (
         <OfferPriceReviewDialog
           open={!!priceReview}
-          onOpenChange={(open) => { if (!open) setPriceReview(null); }}
+          onOpenChange={(open) => {
+            if (!open) setPriceReview(null);
+          }}
           legs={priceReview.plan.legs}
           isSubmitting={confirming}
           onConfirm={async (prices) => {

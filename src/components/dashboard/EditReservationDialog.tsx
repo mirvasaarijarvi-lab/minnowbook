@@ -44,7 +44,17 @@ import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { format } from "date-fns";
-import { CalendarIcon, Loader2, Mail, Pencil, XCircle, Tag, Link2, Unlink, CalendarClock } from "lucide-react";
+import {
+  CalendarIcon,
+  Loader2,
+  Mail,
+  Pencil,
+  XCircle,
+  Tag,
+  Link2,
+  Unlink,
+  CalendarClock,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import ConfirmationEmailPreview from "@/components/ConfirmationEmailPreview";
 import { Badge } from "@/components/ui/badge";
@@ -84,8 +94,6 @@ interface EditReservationDialogProps {
   /** Open another reservation from the linked group (cross-booking jump). */
   onSelectLinked?: (linked: { id: string; [key: string]: any }) => void;
 }
-
-
 
 const EditReservationDialog = ({
   reservation,
@@ -153,14 +161,19 @@ const EditReservationDialog = ({
   });
 
   // Fetch sibling reservations from the same offer
-  const siblingIds = (linkedOffer?.reservation_ids as string[] | null)?.filter((id) => id !== reservation?.id) ?? [];
+  const siblingIds =
+    (linkedOffer?.reservation_ids as string[] | null)?.filter(
+      (id) => id !== reservation?.id,
+    ) ?? [];
   const { data: offerSiblings = [] } = useQuery({
     queryKey: ["linked-reservations", siblingIds],
     queryFn: async () => {
       if (!siblingIds.length) return [];
       const { data, error } = await supabase
         .from("reservations")
-        .select("id, guest_name, reservation_type, date, start_time, room_type, price_eur, status, is_used, guests_count, check_out_date")
+        .select(
+          "id, guest_name, reservation_type, date, start_time, room_type, price_eur, status, is_used, guests_count, check_out_date",
+        )
         .in("id", siblingIds);
       if (error) throw error;
       return data ?? [];
@@ -176,7 +189,9 @@ const EditReservationDialog = ({
       if (!reservation?.linked_group_id) return [];
       const { data, error } = await supabase
         .from("reservations")
-        .select("id, guest_name, reservation_type, date, start_time, room_type, price_eur, status, is_used, guests_count, check_out_date")
+        .select(
+          "id, guest_name, reservation_type, date, start_time, room_type, price_eur, status, is_used, guests_count, check_out_date",
+        )
         .eq("linked_group_id", reservation.linked_group_id)
         .neq("status", "cancelled");
       if (error) throw error;
@@ -211,7 +226,11 @@ const EditReservationDialog = ({
 
   // Fetch resources for the selected reservation type
   const { data: resources = [] } = useQuery({
-    queryKey: ["resources-for-type", reservation?.tenant_id, form.reservation_type],
+    queryKey: [
+      "resources-for-type",
+      reservation?.tenant_id,
+      form.reservation_type,
+    ],
     queryFn: async () => {
       if (!reservation?.tenant_id || !form.reservation_type) return [];
       const { data, error } = await supabase
@@ -247,7 +266,8 @@ const EditReservationDialog = ({
         event_type: reservation.event_type ?? "",
         estimated_guests: reservation.estimated_guests?.toString() ?? "",
         catering_needed: reservation.catering_needed ?? false,
-        discount_type: (reservation.discount_type ?? "") as "" | "percentage" | "fixed" | "free_nights",
+        discount_type: (reservation.discount_type ?? "") as
+          "" | "percentage" | "fixed" | "free_nights",
         discount_value: reservation.discount_value?.toString() ?? "",
         discount_reason: reservation.discount_reason ?? "",
       });
@@ -273,8 +293,7 @@ const EditReservationDialog = ({
     mutationFn: async () => {
       if (!reservation) throw new Error("No reservation");
 
-      const willConfirm =
-        markAsConfirmed && reservation.status !== "confirmed";
+      const willConfirm = markAsConfirmed && reservation.status !== "confirmed";
 
       const updatePayload: Record<string, unknown> = {
         guest_name: form.guest_name.trim(),
@@ -292,10 +311,14 @@ const EditReservationDialog = ({
         room_type: form.room_type || null,
         breakfast_included: form.breakfast_included,
         event_type: form.event_type || null,
-        estimated_guests: form.estimated_guests ? parseInt(form.estimated_guests) : null,
+        estimated_guests: form.estimated_guests
+          ? parseInt(form.estimated_guests)
+          : null,
         catering_needed: form.catering_needed,
         discount_type: form.discount_type || null,
-        discount_value: form.discount_value ? parseFloat(form.discount_value) : null,
+        discount_value: form.discount_value
+          ? parseFloat(form.discount_value)
+          : null,
         discount_reason: form.discount_reason.trim() || null,
         updated_at: new Date().toISOString(),
         ...(willConfirm ? { status: "confirmed" } : {}),
@@ -348,7 +371,9 @@ const EditReservationDialog = ({
           .invoke("send-reminder", {
             body: { reservationId: reservation.id, emailType: "confirmation" },
           })
-          .catch((err) => console.error("Failed to send confirmation email:", err));
+          .catch((err) =>
+            console.error("Failed to send confirmation email:", err),
+          );
       }
     },
     onSuccess: () => {
@@ -400,7 +425,8 @@ const EditReservationDialog = ({
         const newCheckOut = shiftIso(row.check_out_date);
         const payload: Record<string, unknown> = { updated_at: nowIso };
         if (newDate && newDate !== row.date) payload.date = newDate;
-        if (newCheckOut !== row.check_out_date) payload.check_out_date = newCheckOut;
+        if (newCheckOut !== row.check_out_date)
+          payload.check_out_date = newCheckOut;
         if (Object.keys(payload).length === 1) continue; // only updated_at
         const { error: updErr } = await supabase
           .from("reservations")
@@ -416,7 +442,9 @@ const EditReservationDialog = ({
     onSuccess: (res) => {
       queryClient.invalidateQueries({ queryKey: ["reservations"] });
       queryClient.invalidateQueries({ queryKey: ["linked-reservations"] });
-      queryClient.invalidateQueries({ queryKey: ["linked-group-reservations"] });
+      queryClient.invalidateQueries({
+        queryKey: ["linked-group-reservations"],
+      });
       toast.success(`Rescheduled ${res?.shifted ?? 0} linked reservation(s)`);
       setRescheduleOpen(false);
       setRescheduleNewDate("");
@@ -431,11 +459,14 @@ const EditReservationDialog = ({
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
-  const isValid = form.guest_name.trim() && form.guest_email.trim() && form.date && form.reservation_type;
+  const isValid =
+    form.guest_name.trim() &&
+    form.guest_email.trim() &&
+    form.date &&
+    form.reservation_type;
 
   const isHotelType =
-    form.reservation_type === "guesthouse" ||
-    form.reservation_type === "hotel";
+    form.reservation_type === "guesthouse" || form.reservation_type === "hotel";
 
   const isVenueType = form.reservation_type === "venue";
 
@@ -458,7 +489,10 @@ const EditReservationDialog = ({
               <Mail className="h-3.5 w-3.5" />
               {t("email.confirmationTab")}
             </TabsTrigger>
-            <TabsTrigger value="cancel-email" className="gap-1.5 text-destructive">
+            <TabsTrigger
+              value="cancel-email"
+              className="gap-1.5 text-destructive"
+            >
               <XCircle className="h-3.5 w-3.5" />
               {t("email.cancellationTab")}
             </TabsTrigger>
@@ -491,7 +525,9 @@ const EditReservationDialog = ({
                   <label className="flex items-start gap-2 pl-6 text-sm cursor-pointer select-none">
                     <Checkbox
                       checked={sendConfirmEmail}
-                      onCheckedChange={(checked) => setSendConfirmEmail(!!checked)}
+                      onCheckedChange={(checked) =>
+                        setSendConfirmEmail(!!checked)
+                      }
                       className="mt-0.5"
                     />
                     <span>
@@ -516,7 +552,8 @@ const EditReservationDialog = ({
                 <div className="flex items-center justify-between gap-2 flex-wrap">
                   <Label className="font-medium flex items-center gap-1.5">
                     <Link2 className="h-3.5 w-3.5 text-accent" />
-                    {t("offers.linkedReservations")} ({linkedReservations.length})
+                    {t("offers.linkedReservations")} (
+                    {linkedReservations.length})
                   </Label>
                   {reservation?.linked_group_id && reservation?.date && (
                     <Button
@@ -536,18 +573,27 @@ const EditReservationDialog = ({
                 </div>
                 {linkedOffer && (
                   <p className="text-xs text-muted-foreground">
-                    {t("offers.crossBookingTitle")}, {linkedOffer.guest_name} ({linkedOffer.event_date})
+                    {t("offers.crossBookingTitle")}, {linkedOffer.guest_name} (
+                    {linkedOffer.event_date})
                   </p>
                 )}
                 <div className="space-y-1">
                   {linkedReservations.map((lr) => {
                     const isCurrent = lr.id === reservation?.id;
-                    const time = lr.start_time ? lr.start_time.slice(0, 5) : null;
+                    const time = lr.start_time
+                      ? lr.start_time.slice(0, 5)
+                      : null;
                     const dateStr = lr.date
-                      ? format(new Date(lr.date + "T00:00:00"), "PPP", { locale: dateFnsLocale })
+                      ? format(new Date(lr.date + "T00:00:00"), "PPP", {
+                          locale: dateFnsLocale,
+                        })
                       : null;
                     const checkOutStr = lr.check_out_date
-                      ? format(new Date(lr.check_out_date + "T00:00:00"), "PPP", { locale: dateFnsLocale })
+                      ? format(
+                          new Date(lr.check_out_date + "T00:00:00"),
+                          "PPP",
+                          { locale: dateFnsLocale },
+                        )
                       : null;
                     const clickable = !isCurrent && !!onSelectLinked;
                     return (
@@ -555,7 +601,9 @@ const EditReservationDialog = ({
                         key={lr.id}
                         role={clickable ? "button" : undefined}
                         tabIndex={clickable ? 0 : undefined}
-                        onClick={clickable ? () => onSelectLinked!(lr) : undefined}
+                        onClick={
+                          clickable ? () => onSelectLinked!(lr) : undefined
+                        }
                         onKeyDown={
                           clickable
                             ? (e) => {
@@ -566,10 +614,14 @@ const EditReservationDialog = ({
                               }
                             : undefined
                         }
-                        title={clickable ? t("offers.linkedRowOpen") : undefined}
+                        title={
+                          clickable ? t("offers.linkedRowOpen") : undefined
+                        }
                         className={cn(
                           "rounded px-3 py-2 text-sm space-y-1",
-                          isCurrent ? "bg-accent/20 border border-accent/50" : "bg-background border border-border",
+                          isCurrent
+                            ? "bg-accent/20 border border-accent/50"
+                            : "bg-background border border-border",
                           clickable &&
                             "cursor-pointer hover:bg-muted hover:border-accent focus:outline-hidden focus:ring-2 focus:ring-ring focus:ring-offset-1 transition-colors",
                         )}
@@ -577,10 +629,13 @@ const EditReservationDialog = ({
                         <div className="flex items-center justify-between gap-2 flex-wrap">
                           <div className="flex items-center gap-1.5 flex-wrap">
                             <span className="font-medium">
-                              {t("offers.linkedRowService")}: {typeLabel(lr.reservation_type)}
+                              {t("offers.linkedRowService")}:{" "}
+                              {typeLabel(lr.reservation_type)}
                             </span>
                             {lr.room_type && (
-                              <span className="text-muted-foreground">· {lr.room_type}</span>
+                              <span className="text-muted-foreground">
+                                · {lr.room_type}
+                              </span>
                             )}
                             {isCurrent ? (
                               <Badge className="text-[10px] bg-accent/30 text-accent-foreground border-accent/50">
@@ -592,12 +647,18 @@ const EditReservationDialog = ({
                               </Badge>
                             )}
                             {lr.is_used && (
-                              <Badge variant="secondary" className="text-[10px]">{t("dashboard.used")}</Badge>
+                              <Badge
+                                variant="secondary"
+                                className="text-[10px]"
+                              >
+                                {t("dashboard.used")}
+                              </Badge>
                             )}
                           </div>
                           {lr.price_eur != null && (
                             <span className="font-semibold tabular-nums">
-                              {t("offers.linkedRowPrice")}: {Number(lr.price_eur).toFixed(2)} €
+                              {t("offers.linkedRowPrice")}:{" "}
+                              {Number(lr.price_eur).toFixed(2)} €
                             </span>
                           )}
                         </div>
@@ -624,8 +685,12 @@ const EditReservationDialog = ({
                     <span>{t("offers.linkedGroupTotal")}</span>
                     <span className="tabular-nums">
                       {linkedReservations
-                        .reduce((sum, lr) => sum + (Number(lr.price_eur) || 0), 0)
-                        .toFixed(2)} €
+                        .reduce(
+                          (sum, lr) => sum + (Number(lr.price_eur) || 0),
+                          0,
+                        )
+                        .toFixed(2)}{" "}
+                      €
                     </span>
                   </div>
                 )}
@@ -649,7 +714,9 @@ const EditReservationDialog = ({
                   <SelectContent>
                     {(allowedTypes.length > 0
                       ? allowedTypes
-                      : (reservation?.reservation_type ? [reservation.reservation_type] : [])
+                      : reservation?.reservation_type
+                        ? [reservation.reservation_type]
+                        : []
                     ).map((type) => (
                       <SelectItem key={type} value={type}>
                         {tDynamic(`dashboard.${type}`)}
@@ -687,41 +754,92 @@ const EditReservationDialog = ({
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="space-y-1.5">
                 <Label htmlFor="edit-name">{t("common.name")} *</Label>
-                <Input id="edit-name" value={form.guest_name} onChange={(e) => updateField("guest_name", e.target.value)} maxLength={100} />
+                <Input
+                  id="edit-name"
+                  value={form.guest_name}
+                  onChange={(e) => updateField("guest_name", e.target.value)}
+                  maxLength={100}
+                />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="edit-email">{t("common.email")} *</Label>
-                <Input id="edit-email" type="email" value={form.guest_email} onChange={(e) => updateField("guest_email", e.target.value)} maxLength={255} />
+                <Input
+                  id="edit-email"
+                  type="email"
+                  value={form.guest_email}
+                  onChange={(e) => updateField("guest_email", e.target.value)}
+                  maxLength={255}
+                />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="edit-phone">{t("common.phone")}</Label>
-                <Input id="edit-phone" value={form.guest_phone} onChange={(e) => updateField("guest_phone", e.target.value)} maxLength={30} />
+                <Input
+                  id="edit-phone"
+                  value={form.guest_phone}
+                  onChange={(e) => updateField("guest_phone", e.target.value)}
+                  maxLength={30}
+                />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="edit-guests">{t("common.guests")}</Label>
-                <Input id="edit-guests" type="number" min={1} max={500} value={form.guests_count} onChange={(e) => updateField("guests_count", e.target.value)} />
+                <Input
+                  id="edit-guests"
+                  type="number"
+                  min={1}
+                  max={500}
+                  value={form.guests_count}
+                  onChange={(e) => updateField("guests_count", e.target.value)}
+                />
               </div>
             </div>
 
             {/* Date & time */}
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="space-y-1.5">
-                <Label>{t("booking.selectDateTime").split("&")[0].trim()} *</Label>
+                <Label>
+                  {t("booking.selectDateTime").split("&")[0].trim()} *
+                </Label>
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !form.date && "text-muted-foreground")}>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !form.date && "text-muted-foreground",
+                      )}
+                    >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {form.date ? format(new Date(form.date + "T00:00:00"), "PPP", { locale: dateFnsLocale }) : t("dashboard.selectDate")}
+                      {form.date
+                        ? format(new Date(form.date + "T00:00:00"), "PPP", {
+                            locale: dateFnsLocale,
+                          })
+                        : t("dashboard.selectDate")}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar mode="single" selected={form.date ? new Date(form.date + "T00:00:00") : undefined} onSelect={(d) => d && updateField("date", format(d, "yyyy-MM-dd"))} className={cn("p-3 pointer-events-auto")} />
+                    <Calendar
+                      mode="single"
+                      selected={
+                        form.date
+                          ? new Date(form.date + "T00:00:00")
+                          : undefined
+                      }
+                      onSelect={(d) =>
+                        d && updateField("date", format(d, "yyyy-MM-dd"))
+                      }
+                      className={cn("p-3 pointer-events-auto")}
+                    />
                   </PopoverContent>
                 </Popover>
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="edit-time">{t("booking.preferredTime")}</Label>
-                <Input id="edit-time" type="time" value={form.start_time} onChange={(e) => updateField("start_time", e.target.value)} />
+                <Input
+                  id="edit-time"
+                  type="time"
+                  value={form.start_time}
+                  onChange={(e) => updateField("start_time", e.target.value)}
+                />
               </div>
             </div>
 
@@ -733,27 +851,65 @@ const EditReservationDialog = ({
                     <Label>{t("dashboard.checkOutDate")}</Label>
                     <Popover>
                       <PopoverTrigger asChild>
-                        <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !form.check_out_date && "text-muted-foreground")}>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-start text-left font-normal",
+                            !form.check_out_date && "text-muted-foreground",
+                          )}
+                        >
                           <CalendarIcon className="mr-2 h-4 w-4" />
-                          {form.check_out_date ? format(new Date(form.check_out_date + "T00:00:00"), "PPP", { locale: dateFnsLocale }) : "—"}
+                          {form.check_out_date
+                            ? format(
+                                new Date(form.check_out_date + "T00:00:00"),
+                                "PPP",
+                                { locale: dateFnsLocale },
+                              )
+                            : "—"}
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar mode="single" selected={form.check_out_date ? new Date(form.check_out_date + "T00:00:00") : undefined} onSelect={(d) => d && updateField("check_out_date", format(d, "yyyy-MM-dd"))} className={cn("p-3 pointer-events-auto")} />
+                        <Calendar
+                          mode="single"
+                          selected={
+                            form.check_out_date
+                              ? new Date(form.check_out_date + "T00:00:00")
+                              : undefined
+                          }
+                          onSelect={(d) =>
+                            d &&
+                            updateField(
+                              "check_out_date",
+                              format(d, "yyyy-MM-dd"),
+                            )
+                          }
+                          className={cn("p-3 pointer-events-auto")}
+                        />
                       </PopoverContent>
                     </Popover>
                   </div>
                   <div className="space-y-1.5">
                     <Label>{t("booking.roomType")}</Label>
-                    <Select value={form.room_type} onValueChange={(v) => updateField("room_type", v)}>
+                    <Select
+                      value={form.room_type}
+                      onValueChange={(v) => updateField("room_type", v)}
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="—" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="single">{t("booking.roomSingle")}</SelectItem>
-                        <SelectItem value="double">{t("booking.roomDouble")}</SelectItem>
-                        <SelectItem value="suite">{t("booking.roomSuite")}</SelectItem>
-                        <SelectItem value="dorm">{t("booking.roomDorm")}</SelectItem>
+                        <SelectItem value="single">
+                          {t("booking.roomSingle")}
+                        </SelectItem>
+                        <SelectItem value="double">
+                          {t("booking.roomDouble")}
+                        </SelectItem>
+                        <SelectItem value="suite">
+                          {t("booking.roomSuite")}
+                        </SelectItem>
+                        <SelectItem value="dorm">
+                          {t("booking.roomDorm")}
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -762,7 +918,12 @@ const EditReservationDialog = ({
                   <Checkbox
                     id="edit-breakfast"
                     checked={form.breakfast_included}
-                    onCheckedChange={(checked) => setForm((prev) => ({ ...prev, breakfast_included: !!checked }))}
+                    onCheckedChange={(checked) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        breakfast_included: !!checked,
+                      }))
+                    }
                   />
                   <Label htmlFor="edit-breakfast" className="cursor-pointer">
                     {t("booking.breakfastIncluded")}
@@ -776,16 +937,29 @@ const EditReservationDialog = ({
               <div className="space-y-3 rounded-lg border border-border p-3">
                 <div className="space-y-1.5">
                   <Label>{t("booking.eventType")}</Label>
-                  <Select value={form.event_type} onValueChange={(v) => updateField("event_type", v)}>
+                  <Select
+                    value={form.event_type}
+                    onValueChange={(v) => updateField("event_type", v)}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="—" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="wedding">{t("booking.eventWedding")}</SelectItem>
-                      <SelectItem value="corporate">{t("booking.eventCorporate")}</SelectItem>
-                      <SelectItem value="birthday">{t("booking.eventBirthday")}</SelectItem>
-                      <SelectItem value="conference">{t("booking.eventConference")}</SelectItem>
-                      <SelectItem value="other">{t("booking.eventOther")}</SelectItem>
+                      <SelectItem value="wedding">
+                        {t("booking.eventWedding")}
+                      </SelectItem>
+                      <SelectItem value="corporate">
+                        {t("booking.eventCorporate")}
+                      </SelectItem>
+                      <SelectItem value="birthday">
+                        {t("booking.eventBirthday")}
+                      </SelectItem>
+                      <SelectItem value="conference">
+                        {t("booking.eventConference")}
+                      </SelectItem>
+                      <SelectItem value="other">
+                        {t("booking.eventOther")}
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -793,7 +967,12 @@ const EditReservationDialog = ({
                   <Checkbox
                     id="edit-catering"
                     checked={form.catering_needed}
-                    onCheckedChange={(checked) => setForm((prev) => ({ ...prev, catering_needed: !!checked }))}
+                    onCheckedChange={(checked) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        catering_needed: !!checked,
+                      }))
+                    }
                   />
                   <Label htmlFor="edit-catering" className="cursor-pointer">
                     {t("booking.cateringNeeded")}
@@ -811,22 +990,53 @@ const EditReservationDialog = ({
               <div className="grid gap-3 sm:grid-cols-3">
                 <div className="space-y-1.5">
                   <Label className="text-xs">{t("discount.type")}</Label>
-                  <Select value={form.discount_type} onValueChange={(v) => setForm((prev) => ({ ...prev, discount_type: v as "" | "percentage" | "fixed" | "free_nights" }))}>
-                    <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
+                  <Select
+                    value={form.discount_type}
+                    onValueChange={(v) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        discount_type: v as
+                          "" | "percentage" | "fixed" | "free_nights",
+                      }))
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="—" />
+                    </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="percentage">{t("discount.percentage")}</SelectItem>
-                      <SelectItem value="fixed">{t("discount.fixed")}</SelectItem>
-                      <SelectItem value="free_nights">{t("discount.freeNights")}</SelectItem>
+                      <SelectItem value="percentage">
+                        {t("discount.percentage")}
+                      </SelectItem>
+                      <SelectItem value="fixed">
+                        {t("discount.fixed")}
+                      </SelectItem>
+                      <SelectItem value="free_nights">
+                        {t("discount.freeNights")}
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-1.5">
                   <Label className="text-xs">{t("discount.value")}</Label>
-                  <Input type="number" step="0.01" min={0} value={form.discount_value} onChange={(e) => updateField("discount_value", e.target.value)} />
+                  <Input
+                    type="number"
+                    step="0.01"
+                    min={0}
+                    value={form.discount_value}
+                    onChange={(e) =>
+                      updateField("discount_value", e.target.value)
+                    }
+                  />
                 </div>
                 <div className="space-y-1.5">
                   <Label className="text-xs">{t("discount.reason")}</Label>
-                  <Input value={form.discount_reason} onChange={(e) => updateField("discount_reason", e.target.value)} maxLength={200} />
+                  <Input
+                    value={form.discount_reason}
+                    onChange={(e) =>
+                      updateField("discount_reason", e.target.value)
+                    }
+                    maxLength={200}
+                  />
                 </div>
               </div>
             </div>
@@ -835,23 +1045,57 @@ const EditReservationDialog = ({
             <div className="space-y-1.5">
               <Label htmlFor="edit-price">{t("dashboard.priceEur")}</Label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">€</span>
-                <Input id="edit-price" type="number" min={0} step={0.01} value={form.price_eur} onChange={(e) => updateField("price_eur", e.target.value)} className="pl-7" />
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
+                  €
+                </span>
+                <Input
+                  id="edit-price"
+                  type="number"
+                  min={0}
+                  step={0.01}
+                  value={form.price_eur}
+                  onChange={(e) => updateField("price_eur", e.target.value)}
+                  className="pl-7"
+                />
               </div>
             </div>
 
             {/* Notes */}
             <div className="space-y-1.5">
-              <Label htmlFor="edit-requests">{t("booking.specialRequests")}</Label>
-              <Textarea id="edit-requests" rows={2} value={form.special_requests} onChange={(e) => updateField("special_requests", e.target.value)} maxLength={1000} />
+              <Label htmlFor="edit-requests">
+                {t("booking.specialRequests")}
+              </Label>
+              <Textarea
+                id="edit-requests"
+                rows={2}
+                value={form.special_requests}
+                onChange={(e) =>
+                  updateField("special_requests", e.target.value)
+                }
+                maxLength={1000}
+              />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="edit-notes">{t("dashboard.internalNotes")}</Label>
-              <Textarea id="edit-notes" rows={2} value={form.internal_notes} onChange={(e) => updateField("internal_notes", e.target.value)} maxLength={1000} />
+              <Textarea
+                id="edit-notes"
+                rows={2}
+                value={form.internal_notes}
+                onChange={(e) => updateField("internal_notes", e.target.value)}
+                maxLength={1000}
+              />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="edit-staff-notes">{t("dashboard.staffNotes")}</Label>
-              <Textarea id="edit-staff-notes" rows={2} value={form.staff_notes} onChange={(e) => updateField("staff_notes", e.target.value)} maxLength={1000} />
+              <Label htmlFor="edit-staff-notes">
+                {t("dashboard.staffNotes")}
+              </Label>
+              <Textarea
+                id="edit-staff-notes"
+                rows={2}
+                value={form.staff_notes}
+                onChange={(e) => updateField("staff_notes", e.target.value)}
+                maxLength={1000}
+              />
             </div>
           </TabsContent>
 
@@ -875,12 +1119,16 @@ const EditReservationDialog = ({
                 date: form.date,
                 start_time: form.start_time || null,
                 reservation_type: form.reservation_type,
-                guests_count: form.guests_count ? parseInt(form.guests_count) : null,
+                guests_count: form.guests_count
+                  ? parseInt(form.guests_count)
+                  : null,
                 check_out_date: form.check_out_date || null,
                 room_type: form.room_type || null,
                 breakfast_included: form.breakfast_included,
                 event_type: form.event_type || null,
-                estimated_guests: form.guests_count ? parseInt(form.guests_count) : null,
+                estimated_guests: form.guests_count
+                  ? parseInt(form.guests_count)
+                  : null,
                 catering_needed: form.catering_needed,
                 special_requests: form.special_requests || null,
                 price_eur: form.price_eur ? parseFloat(form.price_eur) : null,
@@ -901,7 +1149,9 @@ const EditReservationDialog = ({
           {/* ── Cancellation Email Tab ── */}
           <TabsContent value="cancel-email" className="space-y-4 pt-2">
             <div className="space-y-2">
-              <Label htmlFor="cancel-custom-message">{t("email.customMessage")}</Label>
+              <Label htmlFor="cancel-custom-message">
+                {t("email.customMessage")}
+              </Label>
               <Textarea
                 id="cancel-custom-message"
                 rows={3}
@@ -919,12 +1169,16 @@ const EditReservationDialog = ({
                 date: form.date,
                 start_time: form.start_time || null,
                 reservation_type: form.reservation_type,
-                guests_count: form.guests_count ? parseInt(form.guests_count) : null,
+                guests_count: form.guests_count
+                  ? parseInt(form.guests_count)
+                  : null,
                 check_out_date: form.check_out_date || null,
                 room_type: form.room_type || null,
                 breakfast_included: form.breakfast_included,
                 event_type: form.event_type || null,
-                estimated_guests: form.guests_count ? parseInt(form.guests_count) : null,
+                estimated_guests: form.guests_count
+                  ? parseInt(form.guests_count)
+                  : null,
                 catering_needed: form.catering_needed,
                 special_requests: form.special_requests || null,
                 price_eur: form.price_eur ? parseFloat(form.price_eur) : null,
@@ -968,43 +1222,63 @@ const EditReservationDialog = ({
           <AlertDialogHeader>
             <AlertDialogTitle>Reschedule entire linked group</AlertDialogTitle>
             <AlertDialogDescription>
-              Pick a new date for this leg. Every linked sibling in the cross-booking
-              group will shift by the same number of days, preserving their relative
-              positions (including any check-out dates).
+              Pick a new date for this leg. Every linked sibling in the
+              cross-booking group will shift by the same number of days,
+              preserving their relative positions (including any check-out
+              dates).
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="space-y-2 py-2">
             <Label>New date for this leg</Label>
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !rescheduleNewDate && "text-muted-foreground")}>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !rescheduleNewDate && "text-muted-foreground",
+                  )}
+                >
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {rescheduleNewDate
-                    ? format(new Date(rescheduleNewDate + "T00:00:00"), "PPP", { locale: dateFnsLocale })
+                    ? format(new Date(rescheduleNewDate + "T00:00:00"), "PPP", {
+                        locale: dateFnsLocale,
+                      })
                     : t("dashboard.selectDate")}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
                   mode="single"
-                  selected={rescheduleNewDate ? new Date(rescheduleNewDate + "T00:00:00") : undefined}
-                  onSelect={(d) => d && setRescheduleNewDate(format(d, "yyyy-MM-dd"))}
+                  selected={
+                    rescheduleNewDate
+                      ? new Date(rescheduleNewDate + "T00:00:00")
+                      : undefined
+                  }
+                  onSelect={(d) =>
+                    d && setRescheduleNewDate(format(d, "yyyy-MM-dd"))
+                  }
                   className={cn("p-3 pointer-events-auto")}
                 />
               </PopoverContent>
             </Popover>
-            {reservation?.date && rescheduleNewDate && rescheduleNewDate !== reservation.date && (() => {
-              const delta = Math.round(
-                (new Date(rescheduleNewDate + "T00:00:00").getTime() -
-                  new Date(reservation.date + "T00:00:00").getTime()) / 86400000,
-              );
-              return (
-                <p className="text-xs text-muted-foreground">
-                  Shifts all {linkedReservations.length} linked reservation(s) by{" "}
-                  <strong>{delta > 0 ? `+${delta}` : delta} day(s)</strong>.
-                </p>
-              );
-            })()}
+            {reservation?.date &&
+              rescheduleNewDate &&
+              rescheduleNewDate !== reservation.date &&
+              (() => {
+                const delta = Math.round(
+                  (new Date(rescheduleNewDate + "T00:00:00").getTime() -
+                    new Date(reservation.date + "T00:00:00").getTime()) /
+                    86400000,
+                );
+                return (
+                  <p className="text-xs text-muted-foreground">
+                    Shifts all {linkedReservations.length} linked reservation(s)
+                    by <strong>{delta > 0 ? `+${delta}` : delta} day(s)</strong>
+                    .
+                  </p>
+                );
+              })()}
           </div>
           <AlertDialogFooter>
             <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>

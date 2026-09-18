@@ -1,4 +1,8 @@
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { HelpCircle } from "lucide-react";
 
 interface DashboardTooltipProps {
@@ -20,7 +24,10 @@ const DashboardTooltip = ({ text, className }: DashboardTooltipProps) => (
         <HelpCircle className="h-3.5 w-3.5" />
       </button>
     </TooltipTrigger>
-    <TooltipContent side="top" className="max-w-[240px] text-xs leading-relaxed">
+    <TooltipContent
+      side="top"
+      className="max-w-[240px] text-xs leading-relaxed"
+    >
       {text}
     </TooltipContent>
   </Tooltip>

@@ -122,13 +122,24 @@ export async function invokeWithRetry<T = unknown>(
 
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     if (signal?.aborted) {
-      return { data: null, error: new DOMException("Aborted", "AbortError"), attempts: attempt - 1 };
+      return {
+        data: null,
+        error: new DOMException("Aborted", "AbortError"),
+        attempts: attempt - 1,
+      };
     }
 
     try {
-      const { data, error } = await supabase.functions.invoke(functionName, invokeOptions);
+      const { data, error } = await supabase.functions.invoke(
+        functionName,
+        invokeOptions,
+      );
       if (!error) {
-        return { data: (data ?? null) as T | null, error: null, attempts: attempt };
+        return {
+          data: (data ?? null) as T | null,
+          error: null,
+          attempts: attempt,
+        };
       }
       lastError = error;
       lastData = (data ?? null) as T | null;
@@ -148,9 +159,11 @@ export async function invokeWithRetry<T = unknown>(
       }
     }
 
-    await sleep(computeDelay(attempt, baseDelayMs, maxDelayMs), signal).catch((err) => {
-      lastError = err;
-    });
+    await sleep(computeDelay(attempt, baseDelayMs, maxDelayMs), signal).catch(
+      (err) => {
+        lastError = err;
+      },
+    );
   }
 
   return { data: lastData, error: lastError, attempts: maxAttempts };

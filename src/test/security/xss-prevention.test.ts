@@ -23,7 +23,8 @@ describe("XSS Prevention - Security Regression Tests", () => {
     });
 
     it("strips dangerous data: URIs when using ALLOWED_URI_REGEXP", () => {
-      const dirty = '<a href="data:text/html,<script>alert(1)</script>">click</a>';
+      const dirty =
+        '<a href="data:text/html,<script>alert(1)</script>">click</a>';
       // DOMPurify strips dangerous href schemes on anchors by default
       const clean = DOMPurify.sanitize(dirty);
       expect(clean).not.toMatch(/href="data:/);
@@ -37,7 +38,7 @@ describe("XSS Prevention - Security Regression Tests", () => {
     });
 
     it("preserves safe HTML", () => {
-      const safe = '<p>Hello <strong>world</strong></p>';
+      const safe = "<p>Hello <strong>world</strong></p>";
       expect(DOMPurify.sanitize(safe)).toBe(safe);
     });
 

@@ -13,7 +13,11 @@
  * of each spec re-implementing its own ad-hoc diagnostics.
  */
 
-import { test, type APIRequestContext, type APIResponse } from "@playwright/test";
+import {
+  test,
+  type APIRequestContext,
+  type APIResponse,
+} from "@playwright/test";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./test-tenant";
 
 // Per-call HTTP timeout. Edge functions can cold-start (~1.5s typical, up
@@ -46,11 +50,11 @@ export function isPlatformDegraded(status: number, body: unknown): boolean {
   const code = typeof obj.code === "string" ? obj.code : "";
   const message = typeof obj.message === "string" ? obj.message : "";
   return (
-    /SUPABASE_EDGE_RUNTIME|SERVICE_DEGRADED|BOOT_ERROR|WORKER_LIMIT/i.test(code) ||
-    /temporarily unavailable|service is degraded/i.test(message)
+    /SUPABASE_EDGE_RUNTIME|SERVICE_DEGRADED|BOOT_ERROR|WORKER_LIMIT/i.test(
+      code,
+    ) || /temporarily unavailable|service is degraded/i.test(message)
   );
 }
-
 
 /** Validate `{ error: string }`. Returns human-readable problems (empty = OK). */
 export function validatePublicBookingErrorShape(body: unknown): string[] {
@@ -96,7 +100,10 @@ export function buildTraceparent(correlationId: string): string {
     h2 = Math.imul(h2 ^ c, 2246822519);
   }
   const traceId = (
-    hex(h1, 8) + hex(h2, 8) + hex(h1 ^ h2, 8) + hex(h1 + h2, 8)
+    hex(h1, 8) +
+    hex(h2, 8) +
+    hex(h1 ^ h2, 8) +
+    hex(h1 + h2, 8)
   ).slice(0, 32);
   const spanId = (hex(h2, 8) + hex(h1, 8)).slice(0, 16);
   return `00-${traceId}-${spanId}-01`;
@@ -119,7 +126,9 @@ export function buildHarEntry(args: {
   resContentType: string;
 }): HarEntry {
   const reqBodyText =
-    typeof args.reqBody === "string" ? args.reqBody : JSON.stringify(args.reqBody);
+    typeof args.reqBody === "string"
+      ? args.reqBody
+      : JSON.stringify(args.reqBody);
   const toHeaderArray = (h: Record<string, string>) =>
     Object.entries(h).map(([name, value]) => ({ name, value }));
   return {
@@ -188,7 +197,7 @@ export async function writeHarFile(opts: {
   try {
     fs.writeFileSync(opts.harPath, JSON.stringify(har, null, 2), "utf-8");
     const size = fs.statSync(opts.harPath).size;
-    // eslint-disable-next-line no-console
+
     console.log(
       `${opts.logPrefix ?? "[har]"} exported ${opts.entries.length} entries (${size} bytes) at ${opts.harPath}`,
     );
@@ -197,7 +206,6 @@ export async function writeHarFile(opts: {
       contentType: "application/json",
     });
   } catch (err) {
-    // eslint-disable-next-line no-console
     console.warn(
       `${opts.logPrefix ?? "[har]"} failed to write/attach HAR: ${(err as Error)?.message}`,
     );
@@ -286,7 +294,6 @@ export async function callPublicBooking(
           /* ignore */
         }
         if (isPlatformDegraded(res.status(), peeked)) {
-          // eslint-disable-next-line no-console
           console.warn(
             `${logPrefix} ${label} attempt ${attempt}/${PUBLIC_BOOKING_MAX_ATTEMPTS} hit platform degradation (HTTP ${res.status()}), retrying`,
           );
@@ -296,7 +303,6 @@ export async function callPublicBooking(
         }
       }
       break;
-
     } catch (err) {
       durationMs = Date.now() - startedAt;
       lastError = err;
@@ -314,7 +320,7 @@ export async function callPublicBooking(
           resContentType: "",
         }),
       );
-      // eslint-disable-next-line no-console
+
       console.warn(
         `${logPrefix} ${label} attempt ${attempt}/${PUBLIC_BOOKING_MAX_ATTEMPTS} threw after ${durationMs}ms (correlation_id=${attemptCorrelationId}): ${(err as Error)?.message ?? err}`,
       );
@@ -322,7 +328,10 @@ export async function callPublicBooking(
       await new Promise((r) => setTimeout(r, 750));
     }
   }
-  if (!res) throw lastError ?? new Error(`public-booking ${label} produced no response`);
+  if (!res)
+    throw (
+      lastError ?? new Error(`public-booking ${label} produced no response`)
+    );
 
   const status = res.status();
   const responseHeaders = res.headers();
@@ -351,7 +360,9 @@ export async function callPublicBooking(
 
   const traceIds = {
     sb_request_id:
-      responseHeaders["sb-request-id"] ?? responseHeaders["x-sb-request-id"] ?? null,
+      responseHeaders["sb-request-id"] ??
+      responseHeaders["x-sb-request-id"] ??
+      null,
     cf_ray: responseHeaders["cf-ray"] ?? null,
     deno_execution_id:
       responseHeaders["x-deno-execution-id"] ??
@@ -375,7 +386,12 @@ export async function callPublicBooking(
     traceIds,
     errorShapeProblems,
     request: { method: "POST", url, headers: redactedHeaders, body },
-    response: { status, durationMs, headers: responseHeaders, body: json ?? text },
+    response: {
+      status,
+      durationMs,
+      headers: responseHeaders,
+      body: json ?? text,
+    },
   };
 
   const traceLine =
@@ -386,7 +402,6 @@ export async function callPublicBooking(
     `deno-execution-id=${traceIds.deno_execution_id ?? "<none>"}`;
 
   if (status >= 400) {
-    // eslint-disable-next-line no-console
     console.error(
       `\n${logPrefix} ${label} FAILED (HTTP ${status}, ${durationMs}ms)\n` +
         `${logPrefix} ${label} edge-function trace: ${traceLine}\n` +
@@ -395,7 +410,6 @@ export async function callPublicBooking(
         "\n",
     );
   } else {
-    // eslint-disable-next-line no-console
     console.log(
       `${logPrefix} ${label} OK (HTTP ${status}, ${durationMs}ms) trace: ${traceLine}`,
     );

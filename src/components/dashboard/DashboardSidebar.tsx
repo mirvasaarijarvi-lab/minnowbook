@@ -1,10 +1,33 @@
-import { CalendarDays, List, Settings, LogOut, LayoutDashboard, Menu, X, ShieldCheck, Cog, BarChart3, LifeBuoy, Shield, Building2, Crown, UserCircle, FileText, ChefHat, ScrollText } from "lucide-react";
+import {
+  CalendarDays,
+  List,
+  Settings,
+  LogOut,
+  LayoutDashboard,
+  Menu,
+  X,
+  ShieldCheck,
+  Cog,
+  BarChart3,
+  LifeBuoy,
+  Shield,
+  Building2,
+  Crown,
+  UserCircle,
+  FileText,
+  ChefHat,
+  ScrollText,
+} from "lucide-react";
 import Logo from "@/components/Logo";
 import SiteSelector from "./SiteSelector";
 import { useTenant } from "@/hooks/useTenant";
 import { useTierGate } from "@/hooks/useTierGate";
 import { Button } from "@/components/ui/button";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { useT } from "@/contexts/I18nContext";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
@@ -24,7 +47,20 @@ import {
 import { useHasKitchenResources } from "@/hooks/useHasKitchenResources";
 import { usePendingGuestRequests } from "@/hooks/usePendingGuestRequests";
 
-export type DashboardView = "overview" | "calendar" | "reservations" | "resources" | "offers" | "kitchen" | "reports" | "settings" | "admin" | "bookingLog" | "support" | "sites" | "profile";
+export type DashboardView =
+  | "overview"
+  | "calendar"
+  | "reservations"
+  | "resources"
+  | "offers"
+  | "kitchen"
+  | "reports"
+  | "settings"
+  | "admin"
+  | "bookingLog"
+  | "support"
+  | "sites"
+  | "profile";
 
 interface DashboardSidebarProps {
   currentView: DashboardView;
@@ -36,23 +72,102 @@ interface DashboardSidebarProps {
   isAdmin?: boolean;
 }
 
-const navItems: { view: DashboardView; labelKey: TranslationKey; icon: React.ElementType; adminOnly?: boolean; permission?: string; tierRequired?: string; requiresKitchenResources?: boolean }[] = [
+const navItems: {
+  view: DashboardView;
+  labelKey: TranslationKey;
+  icon: React.ElementType;
+  adminOnly?: boolean;
+  permission?: string;
+  tierRequired?: string;
+  requiresKitchenResources?: boolean;
+}[] = [
   { view: "overview", labelKey: "nav.overview", icon: LayoutDashboard },
-  { view: "calendar", labelKey: "nav.calendar", icon: CalendarDays, permission: PERM_CALENDAR_VIEW },
-  { view: "reservations", labelKey: "nav.reservations", icon: List, permission: PERM_RESERVATIONS_VIEW },
-  { view: "resources", labelKey: "nav.resources", icon: Settings, permission: PERM_RESOURCES_VIEW },
-  { view: "offers", labelKey: "nav.offers" as TranslationKey, icon: FileText, permission: PERM_RESERVATIONS_VIEW },
-  { view: "kitchen", labelKey: "nav.kitchen" as TranslationKey, icon: ChefHat, permission: PERM_RESERVATIONS_VIEW, requiresKitchenResources: true },
-  { view: "reports", labelKey: "nav.reports", icon: BarChart3, permission: PERM_REPORTS_VIEW },
-  { view: "settings", labelKey: "nav.settings", icon: Cog, permission: PERM_SETTINGS_VIEW },
-  { view: "admin", labelKey: "nav.admin", icon: ShieldCheck, adminOnly: true, permission: PERM_ADMIN_VIEW },
-  { view: "bookingLog", labelKey: "nav.bookingLog" as TranslationKey, icon: ScrollText, adminOnly: true, permission: PERM_ADMIN_VIEW },
-  { view: "sites", labelKey: "nav.sites" as TranslationKey, icon: Building2, permission: PERM_SITES_VIEW, tierRequired: "business" },
-  { view: "support", labelKey: "nav.support", icon: LifeBuoy, permission: PERM_SUPPORT_VIEW },
-  { view: "profile", labelKey: "nav.profile" as TranslationKey, icon: UserCircle },
+  {
+    view: "calendar",
+    labelKey: "nav.calendar",
+    icon: CalendarDays,
+    permission: PERM_CALENDAR_VIEW,
+  },
+  {
+    view: "reservations",
+    labelKey: "nav.reservations",
+    icon: List,
+    permission: PERM_RESERVATIONS_VIEW,
+  },
+  {
+    view: "resources",
+    labelKey: "nav.resources",
+    icon: Settings,
+    permission: PERM_RESOURCES_VIEW,
+  },
+  {
+    view: "offers",
+    labelKey: "nav.offers" as TranslationKey,
+    icon: FileText,
+    permission: PERM_RESERVATIONS_VIEW,
+  },
+  {
+    view: "kitchen",
+    labelKey: "nav.kitchen" as TranslationKey,
+    icon: ChefHat,
+    permission: PERM_RESERVATIONS_VIEW,
+    requiresKitchenResources: true,
+  },
+  {
+    view: "reports",
+    labelKey: "nav.reports",
+    icon: BarChart3,
+    permission: PERM_REPORTS_VIEW,
+  },
+  {
+    view: "settings",
+    labelKey: "nav.settings",
+    icon: Cog,
+    permission: PERM_SETTINGS_VIEW,
+  },
+  {
+    view: "admin",
+    labelKey: "nav.admin",
+    icon: ShieldCheck,
+    adminOnly: true,
+    permission: PERM_ADMIN_VIEW,
+  },
+  {
+    view: "bookingLog",
+    labelKey: "nav.bookingLog" as TranslationKey,
+    icon: ScrollText,
+    adminOnly: true,
+    permission: PERM_ADMIN_VIEW,
+  },
+  {
+    view: "sites",
+    labelKey: "nav.sites" as TranslationKey,
+    icon: Building2,
+    permission: PERM_SITES_VIEW,
+    tierRequired: "business",
+  },
+  {
+    view: "support",
+    labelKey: "nav.support",
+    icon: LifeBuoy,
+    permission: PERM_SUPPORT_VIEW,
+  },
+  {
+    view: "profile",
+    labelKey: "nav.profile" as TranslationKey,
+    icon: UserCircle,
+  },
 ];
 
-const DashboardSidebar = ({ currentView, onViewChange, userEmail, onSignOut, mobileOpen, onMobileToggle, isAdmin: isAdminUser }: DashboardSidebarProps) => {
+const DashboardSidebar = ({
+  currentView,
+  onViewChange,
+  userEmail,
+  onSignOut,
+  mobileOpen,
+  onMobileToggle,
+  isAdmin: isAdminUser,
+}: DashboardSidebarProps) => {
   const t = useT();
   const { can, isSystemAdmin } = usePermissions();
   const { tenant } = useTenant();
@@ -91,53 +206,64 @@ const DashboardSidebar = ({ currentView, onViewChange, userEmail, onSignOut, mob
           "lg:relative lg:translate-x-0 lg:z-auto",
           // Mobile: fixed overlay with slide animation
           "fixed inset-y-0 left-0 z-50 transition-transform duration-200 ease-in-out",
-          mobileOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full lg:translate-x-0"
+          mobileOpen
+            ? "translate-x-0 shadow-2xl"
+            : "-translate-x-full lg:translate-x-0",
         )}
       >
         <div className="p-4 border-b border-sidebar-border space-y-3">
           <div className="flex items-center justify-between">
             <Logo variant="color" size="sm" />
-            <button className="lg:hidden p-1.5 rounded-md hover:bg-sidebar-accent/50 text-muted-foreground transition-colors" onClick={onMobileToggle} aria-label="Close menu">
+            <button
+              className="lg:hidden p-1.5 rounded-md hover:bg-sidebar-accent/50 text-muted-foreground transition-colors"
+              onClick={onMobileToggle}
+              aria-label="Close menu"
+            >
               <X className="h-5 w-5" />
             </button>
           </div>
           <LanguageSwitcher variant="compact" />
         </div>
 
-        {(isMultiSite) && <SiteSelector />}
-        <nav data-tour="sidebar-nav" className="flex-1 p-3 space-y-1 overflow-y-auto">
-          {visibleItems.map(({ view, labelKey, icon: Icon, tierRequired }, index) => (
-            <Tooltip key={view}>
-              <TooltipTrigger asChild>
-                <button
-                  onClick={() => handleNavClick(view)}
-                  className={cn(
-                    "flex items-center gap-3 w-full px-3 py-2.5 rounded-md text-sm font-medium transition-colors",
-                    currentView === view
-                      ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                      : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
-                  )}
-                >
-                  <Icon className="h-4 w-4 shrink-0" />
-                  <span className="truncate">{t(labelKey)}</span>
-                  {view === "reservations" && pendingCount > 0 && (
-                    <span
-                      className="ml-auto min-w-5 h-5 px-1.5 rounded-full bg-primary text-primary-foreground text-[11px] font-semibold flex items-center justify-center"
-                      aria-label={`${pendingCount} ${t("nav.pendingRequests")}`}
-                    >
-                      {pendingCount > 9 ? "9+" : pendingCount}
-                    </span>
-                  )}
-                  {tierRequired && (
-                    <Crown className="h-3 w-3 shrink-0 text-accent ml-auto" />
-                  )}
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="right" className="text-xs">
-                {tierRequired ? "Business" : `Alt+${index + 1}`}
-              </TooltipContent>
-            </Tooltip>
-          ))}
+        {isMultiSite && <SiteSelector />}
+        <nav
+          data-tour="sidebar-nav"
+          className="flex-1 p-3 space-y-1 overflow-y-auto"
+        >
+          {visibleItems.map(
+            ({ view, labelKey, icon: Icon, tierRequired }, index) => (
+              <Tooltip key={view}>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => handleNavClick(view)}
+                    className={cn(
+                      "flex items-center gap-3 w-full px-3 py-2.5 rounded-md text-sm font-medium transition-colors",
+                      currentView === view
+                        ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                        : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground",
+                    )}
+                  >
+                    <Icon className="h-4 w-4 shrink-0" />
+                    <span className="truncate">{t(labelKey)}</span>
+                    {view === "reservations" && pendingCount > 0 && (
+                      <span
+                        className="ml-auto min-w-5 h-5 px-1.5 rounded-full bg-primary text-primary-foreground text-[11px] font-semibold flex items-center justify-center"
+                        aria-label={`${pendingCount} ${t("nav.pendingRequests")}`}
+                      >
+                        {pendingCount > 9 ? "9+" : pendingCount}
+                      </span>
+                    )}
+                    {tierRequired && (
+                      <Crown className="h-3 w-3 shrink-0 text-accent ml-auto" />
+                    )}
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="right" className="text-xs">
+                  {tierRequired ? "Business" : `Alt+${index + 1}`}
+                </TooltipContent>
+              </Tooltip>
+            ),
+          )}
           {isSystemAdmin && (
             <button
               onClick={() => navigate("/superadmin")}
@@ -150,8 +276,15 @@ const DashboardSidebar = ({ currentView, onViewChange, userEmail, onSignOut, mob
         </nav>
 
         <div className="p-3 border-t border-sidebar-border space-y-2">
-          <p className="text-xs text-muted-foreground truncate px-3">{userEmail}</p>
-          <Button variant="outline" size="sm" className="w-full justify-start gap-2 border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive" onClick={onSignOut}>
+          <p className="text-xs text-muted-foreground truncate px-3">
+            {userEmail}
+          </p>
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full justify-start gap-2 border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
+            onClick={onSignOut}
+          >
             <LogOut className="h-4 w-4" />
             {t("common.logOut")}
           </Button>

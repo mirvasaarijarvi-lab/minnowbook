@@ -16,28 +16,58 @@ interface TierLimits {
   maxSites: number | null;
   maxReservationTypes: number | null;
   maxResourcesPerType: number | null; // null = no per-type cap
-  maxResourcesTotal: number | null;   // null = unlimited total
-  maxStaffUsers: number | null;       // null = unlimited
+  maxResourcesTotal: number | null; // null = unlimited total
+  maxStaffUsers: number | null; // null = unlimited
 }
 
 const TIER_LIMITS: Record<string, TierLimits> = {
-  basic:        { maxSites: 1,    maxReservationTypes: 2,    maxResourcesPerType: null, maxResourcesTotal: 2,    maxStaffUsers: 5 },
-  professional: { maxSites: 1,    maxReservationTypes: 5,    maxResourcesPerType: 5,    maxResourcesTotal: null, maxStaffUsers: 25 },
-  business:     { maxSites: null, maxReservationTypes: null, maxResourcesPerType: null, maxResourcesTotal: null, maxStaffUsers: 50 },
-  enterprise:   { maxSites: null, maxReservationTypes: null, maxResourcesPerType: null, maxResourcesTotal: null, maxStaffUsers: null },
+  basic: {
+    maxSites: 1,
+    maxReservationTypes: 2,
+    maxResourcesPerType: null,
+    maxResourcesTotal: 2,
+    maxStaffUsers: 5,
+  },
+  professional: {
+    maxSites: 1,
+    maxReservationTypes: 5,
+    maxResourcesPerType: 5,
+    maxResourcesTotal: null,
+    maxStaffUsers: 25,
+  },
+  business: {
+    maxSites: null,
+    maxReservationTypes: null,
+    maxResourcesPerType: null,
+    maxResourcesTotal: null,
+    maxStaffUsers: 50,
+  },
+  enterprise: {
+    maxSites: null,
+    maxReservationTypes: null,
+    maxResourcesPerType: null,
+    maxResourcesTotal: null,
+    maxStaffUsers: null,
+  },
 };
 
 export function getTierLimits(tier: string | null | undefined): TierLimits {
   return TIER_LIMITS[tier ?? "basic"] ?? TIER_LIMITS.basic;
 }
 
-export function canCreateSite(tier: string | null | undefined, currentSiteCount: number): boolean {
+export function canCreateSite(
+  tier: string | null | undefined,
+  currentSiteCount: number,
+): boolean {
   const { maxSites } = getTierLimits(tier);
   if (maxSites === null) return true;
   return currentSiteCount < maxSites;
 }
 
-export function canSelectMoreTypes(tier: string | null | undefined, currentCount: number): boolean {
+export function canSelectMoreTypes(
+  tier: string | null | undefined,
+  currentCount: number,
+): boolean {
   const { maxReservationTypes } = getTierLimits(tier);
   if (maxReservationTypes === null) return true;
   return currentCount < maxReservationTypes;
@@ -50,14 +80,19 @@ export function canSelectMoreTypes(tier: string | null | undefined, currentCount
 export function canCreateResourceOfType(
   tier: string | null | undefined,
   resourceType: string,
-  existingResources: { resource_type: string }[]
+  existingResources: { resource_type: string }[],
 ): boolean {
   const { maxResourcesPerType, maxResourcesTotal } = getTierLimits(tier);
-  if (maxResourcesTotal !== null && existingResources.length >= maxResourcesTotal) {
+  if (
+    maxResourcesTotal !== null &&
+    existingResources.length >= maxResourcesTotal
+  ) {
     return false;
   }
   if (maxResourcesPerType !== null) {
-    const count = existingResources.filter((r) => r.resource_type === resourceType).length;
+    const count = existingResources.filter(
+      (r) => r.resource_type === resourceType,
+    ).length;
     if (count >= maxResourcesPerType) return false;
   }
   return true;
@@ -67,7 +102,9 @@ export function canCreateResourceOfType(
  * Returns the max number of staff users (tenant_users rows) allowed for a tier.
  * `null` means unlimited. Mirrors the backend `get_tier_max_staff_users` function.
  */
-export function getMaxStaffUsers(tier: string | null | undefined): number | null {
+export function getMaxStaffUsers(
+  tier: string | null | undefined,
+): number | null {
   return getTierLimits(tier).maxStaffUsers;
 }
 
@@ -78,7 +115,7 @@ export function getMaxStaffUsers(tier: string | null | undefined): number | null
  */
 export function canAddStaffUser(
   tier: string | null | undefined,
-  currentStaffCount: number
+  currentStaffCount: number,
 ): boolean {
   const max = getMaxStaffUsers(tier);
   if (max === null) return true;
@@ -88,18 +125,23 @@ export function canAddStaffUser(
 export function isResourceTypeAllowed(
   tier: string | null | undefined,
   resourceType: string,
-  allowedTypes: string[]
+  allowedTypes: string[],
 ): boolean {
   return allowedTypes.includes(resourceType);
 }
 
 export function getTierLabel(tier: string): string {
   switch (tier) {
-    case "basic": return "Basic";
-    case "professional": return "Pro";
-    case "business": return "Business";
-    case "enterprise": return "Enterprise";
-    default: return tier;
+    case "basic":
+      return "Basic";
+    case "professional":
+      return "Pro";
+    case "business":
+      return "Business";
+    case "enterprise":
+      return "Enterprise";
+    default:
+      return tier;
   }
 }
 

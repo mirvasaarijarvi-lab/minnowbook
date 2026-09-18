@@ -5,7 +5,14 @@
  * public booking edge function leave `created_by` NULL, while staff-created
  * rows carry the acting user's id. That distinction is the channel signal.
  */
-import { eachMonthOfInterval, eachWeekOfInterval, format, isSameMonth, isSameWeek, parseISO } from "date-fns";
+import {
+  eachMonthOfInterval,
+  eachWeekOfInterval,
+  format,
+  isSameMonth,
+  isSameWeek,
+  parseISO,
+} from "date-fns";
 import type { Locale } from "date-fns";
 
 export type Channel = "public" | "staff";
@@ -33,9 +40,22 @@ export function computeChannelSplit(rows: ChannelRow[]): ChannelSplit {
   const total = rows.length;
   const publicCount = rows.filter((r) => resolveChannel(r) === "public").length;
   const staffCount = total - publicCount;
-  if (total === 0) return { total: 0, publicCount: 0, staffCount: 0, publicPct: 0, staffPct: 0 };
+  if (total === 0)
+    return {
+      total: 0,
+      publicCount: 0,
+      staffCount: 0,
+      publicPct: 0,
+      staffPct: 0,
+    };
   const publicPct = Math.round((publicCount / total) * 100);
-  return { total, publicCount, staffCount, publicPct, staffPct: 100 - publicPct };
+  return {
+    total,
+    publicCount,
+    staffCount,
+    publicPct,
+    staffPct: 100 - publicPct,
+  };
 }
 
 /** Channel split per service type plus an "all" roll-up. */
@@ -45,7 +65,9 @@ export function computeChannelSplitByType(
 ): Record<string, ChannelSplit> {
   const out: Record<string, ChannelSplit> = { all: computeChannelSplit(rows) };
   for (const type of types) {
-    out[type] = computeChannelSplit(rows.filter((r) => r.reservation_type === type));
+    out[type] = computeChannelSplit(
+      rows.filter((r) => r.reservation_type === type),
+    );
   }
   return out;
 }
@@ -76,10 +98,16 @@ export function buildTrendBuckets(opts: {
   });
 
   if (granularity === "week") {
-    return eachWeekOfInterval({ start, end }, { weekStartsOn: 1 }).map((weekStart) => ({
-      label: format(weekStart, "d.M.", { locale: dateLocale }),
-      ...summarize(rows.filter((r) => isSameWeek(dayOf(r), weekStart, { weekStartsOn: 1 }))),
-    }));
+    return eachWeekOfInterval({ start, end }, { weekStartsOn: 1 }).map(
+      (weekStart) => ({
+        label: format(weekStart, "d.M.", { locale: dateLocale }),
+        ...summarize(
+          rows.filter((r) =>
+            isSameWeek(dayOf(r), weekStart, { weekStartsOn: 1 }),
+          ),
+        ),
+      }),
+    );
   }
   return eachMonthOfInterval({ start, end }).map((monthStart) => ({
     label: format(monthStart, "LLL", { locale: dateLocale }),

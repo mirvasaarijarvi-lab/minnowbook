@@ -100,7 +100,8 @@ function loadLedger(): { path: string; payload: LedgerPayload } {
   // flavored file, then canonical fallback. Documented in detail there;
   // mirrored here so this script stays usable standalone.
   const explicit = process.env.STORAGE_ATTEMPTS_LEDGER;
-  const flavor = (process.env.RLS_REPORT_FLAVOR ?? "default").trim() || "default";
+  const flavor =
+    (process.env.RLS_REPORT_FLAVOR ?? "default").trim() || "default";
   const safeFlavor = flavor.replace(/[^a-zA-Z0-9_-]+/g, "-").toLowerCase();
   const candidates = [
     explicit,
@@ -152,7 +153,12 @@ interface RenderInput {
   jsonHref: string;
 }
 
-function renderHtml({ payload, ledgerSourcePath, pdfHref, jsonHref }: RenderInput): string {
+function renderHtml({
+  payload,
+  ledgerSourcePath,
+  pdfHref,
+  jsonHref,
+}: RenderInput): string {
   const adversarialUploads = payload.uploads.filter(isAdversarialUpload);
   const adversarialProbes = payload.cleanups.filter(isAdversarialProbe);
 
@@ -198,13 +204,23 @@ function renderHtml({ payload, ledgerSourcePath, pdfHref, jsonHref }: RenderInpu
   // breakdown table with denied / allowed / error totals.
   const byScenario = new Map<
     string,
-    { total: number; denied: number; allowed: number; error: number; expectedAllow: number }
+    {
+      total: number;
+      denied: number;
+      allowed: number;
+      error: number;
+      expectedAllow: number;
+    }
   >();
   for (const u of adversarialUploads) {
     const key = u.scenario ?? "(no scenario)";
-    const slot =
-      byScenario.get(key) ??
-      { total: 0, denied: 0, allowed: 0, error: 0, expectedAllow: 0 };
+    const slot = byScenario.get(key) ?? {
+      total: 0,
+      denied: 0,
+      allowed: 0,
+      error: 0,
+      expectedAllow: 0,
+    };
     slot.total += 1;
     if (u.expected === "allowed") slot.expectedAllow += 1;
     else if (u.outcome === "allowed") slot.allowed += 1;
@@ -234,20 +250,25 @@ function renderHtml({ payload, ledgerSourcePath, pdfHref, jsonHref }: RenderInpu
     .map((u) => {
       const isLeak = u.expected === "denied" && u.outcome === "allowed";
       const cls = isLeak ? "leak" : u.outcome === "denied" ? "ok" : "muted";
-      const outcomeBadge =
-        isLeak
-          ? `<span class="badge fail">ALLOWED (LEAK)</span>`
-          : u.outcome === "denied"
-            ? `<span class="badge ok">denied</span>`
-            : u.outcome === "allowed"
-              ? `<span class="badge muted">allowed (expected)</span>`
-              : `<span class="badge warn">error</span>`;
+      const outcomeBadge = isLeak
+        ? `<span class="badge fail">ALLOWED (LEAK)</span>`
+        : u.outcome === "denied"
+          ? `<span class="badge ok">denied</span>`
+          : u.outcome === "allowed"
+            ? `<span class="badge muted">allowed (expected)</span>`
+            : `<span class="badge warn">error</span>`;
       const status = u.httpStatus != null ? String(u.httpStatus) : "—";
-      const code = u.errorCode ? ` <code class="errcode">${escapeHtml(u.errorCode)}</code>` : "";
+      const code = u.errorCode
+        ? ` <code class="errcode">${escapeHtml(u.errorCode)}</code>`
+        : "";
       const errMsg = u.errorMessage
         ? `<div class="errmsg">${escapeHtml(u.errorMessage)}</div>`
         : "";
-      const anchor = rowAnchor("att", [u.attacker, u.scenario ?? "noscenario", u.path]);
+      const anchor = rowAnchor("att", [
+        u.attacker,
+        u.scenario ?? "noscenario",
+        u.path,
+      ]);
       return `<tr id="${anchor}" class="${cls}">
         <td><code>${escapeHtml(u.scenario ?? "(default)")}</code></td>
         <td>${escapeHtml(u.attacker)} → ${escapeHtml(u.owner ?? "—")}</td>
@@ -270,7 +291,9 @@ function renderHtml({ payload, ledgerSourcePath, pdfHref, jsonHref }: RenderInpu
         ? `<span class="badge fail">ALLOWED (LEAK)</span>`
         : `<span class="badge ok">denied</span>`;
       const status = p.httpStatus != null ? String(p.httpStatus) : "—";
-      const code = p.errorCode ? ` <code class="errcode">${escapeHtml(p.errorCode)}</code>` : "";
+      const code = p.errorCode
+        ? ` <code class="errcode">${escapeHtml(p.errorCode)}</code>`
+        : "";
       const noteHtml = p.note
         ? `<div class="errmsg">${escapeHtml(p.note)}</div>`
         : "";
@@ -441,7 +464,7 @@ ${probeRows || `<tr><td colspan="5" class="empty">No adversarial probes recorded
 
 async function main(): Promise<void> {
   const { path: ledgerSourcePath, payload } = loadLedger();
-  // eslint-disable-next-line no-console
+
   console.log(`[adversarial-html-summary] Loaded ledger: ${ledgerSourcePath}`);
 
   const safeFlavor =
@@ -459,14 +482,13 @@ async function main(): Promise<void> {
   const flavored = resolve(outDir, `adversarial-summary.${safeFlavor}.html`);
   writeFileSync(canonical, html, "utf-8");
   writeFileSync(flavored, html, "utf-8");
-  // eslint-disable-next-line no-console
+
   console.log(`[adversarial-html-summary] Wrote: ${canonical}`);
-  // eslint-disable-next-line no-console
+
   console.log(`[adversarial-html-summary] Wrote: ${flavored}`);
 }
 
 main().catch((err) => {
-  // eslint-disable-next-line no-console
   console.error("[adversarial-html-summary] Failed:", err);
   process.exit(1);
 });

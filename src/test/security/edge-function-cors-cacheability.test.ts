@@ -58,7 +58,10 @@ function fnUrl(name: string) {
 async function fetchWithRetry(
   input: string,
   init: RequestInit,
-  { attempts = 3, perAttemptTimeoutMs = 15000 }: { attempts?: number; perAttemptTimeoutMs?: number } = {},
+  {
+    attempts = 3,
+    perAttemptTimeoutMs = 15000,
+  }: { attempts?: number; perAttemptTimeoutMs?: number } = {},
 ): Promise<Response> {
   let lastErr: unknown;
   for (let i = 0; i < attempts; i++) {
@@ -100,7 +103,6 @@ async function postCall(name: string, origin: string) {
     body: JSON.stringify({ action: "list" }),
   });
 }
-
 
 function expectNonCacheable(res: Response, label: string) {
   // --- Cache-Control ---

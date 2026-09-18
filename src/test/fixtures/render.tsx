@@ -32,7 +32,10 @@ export function createTestQueryClient() {
   });
 }
 
-export function renderWithProviders(ui: ReactNode, opts: RenderWithProvidersOptions = {}) {
+export function renderWithProviders(
+  ui: ReactNode,
+  opts: RenderWithProvidersOptions = {},
+) {
   const {
     queryClient = createTestQueryClient(),
     routerProps,

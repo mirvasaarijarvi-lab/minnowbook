@@ -44,7 +44,7 @@ const HOSTILE: unknown[] = [
   "1 OR 1=1",
   "' OR '1'='1",
   "'; DROP TABLE reservations; --",
-  "\" OR \"\"=\"",
+  '" OR ""="',
   "11111111-1111-4111-8111-111111111111'; --",
   "11111111-1111-4111-8111-111111111111 UNION SELECT * FROM tenants",
   "%27%20OR%201=1",
@@ -94,7 +94,11 @@ const HOSTILE: unknown[] = [
 
 describe("tenant selector parameter", () => {
   it("accepts a plain uuid and canonicalises it", () => {
-    for (const raw of [VALID_UUID, VALID_UUID.toUpperCase(), `  ${VALID_UUID}  `]) {
+    for (const raw of [
+      VALID_UUID,
+      VALID_UUID.toUpperCase(),
+      `  ${VALID_UUID}  `,
+    ]) {
       const parsed = parseTenantSelector(raw);
       expect(parsed.ok, `should accept ${JSON.stringify(raw)}`).toBe(true);
       expect(parsed.tenantId).toBe(VALID_UUID);
@@ -105,9 +109,10 @@ describe("tenant selector parameter", () => {
     for (const raw of HOSTILE) {
       if (typeof raw === "string" && raw.trim() === VALID_UUID) continue;
       const parsed = parseTenantSelector(raw);
-      expect(parsed.ok, `should deny ${String(typeof raw === "symbol" ? "symbol" : raw)}`).toBe(
-        false,
-      );
+      expect(
+        parsed.ok,
+        `should deny ${String(typeof raw === "symbol" ? "symbol" : raw)}`,
+      ).toBe(false);
       expect(parsed.tenantId).toBeUndefined();
       expect(parsed.reasons.length).toBeGreaterThan(0);
     }
@@ -150,9 +155,10 @@ describe("report scope parameter", () => {
   it("denies every hostile value and falls back to a safe default scope", () => {
     for (const raw of HOSTILE) {
       const parsed = parseReportScope(raw);
-      expect(parsed.ok, `should deny ${String(typeof raw === "symbol" ? "symbol" : raw)}`).toBe(
-        false,
-      );
+      expect(
+        parsed.ok,
+        `should deny ${String(typeof raw === "symbol" ? "symbol" : raw)}`,
+      ).toBe(false);
       expect(parsed.scope).toBe("default");
       expect(parsed.safeScope).toBe("default");
       // Never usable as a path or an injection vector.

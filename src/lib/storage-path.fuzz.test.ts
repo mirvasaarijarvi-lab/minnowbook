@@ -61,7 +61,8 @@ function expectedRejection(path: unknown): StoragePathRejectionReason | null {
   if (/^[a-z][a-z0-9+.-]*:\/\//i.test(trimmed)) return "scheme";
   if (trimmed.startsWith("/")) return "absolute";
   for (const seg of trimmed.split("/")) {
-    if (seg === "" || seg === "." || seg === "..") return "traversal_or_empty_segment";
+    if (seg === "" || seg === "." || seg === "..")
+      return "traversal_or_empty_segment";
   }
   return null;
 }
@@ -74,24 +75,60 @@ function expectedRejection(path: unknown): StoragePathRejectionReason | null {
 // ---------------------------------------------------------------------------
 const ATOMS = [
   // Boring, mostly-safe atoms.
-  "a", "b", "c", "0", "1", "9", "logo", "hero", "image",
-  "_", "-", ".", ".png", ".jpg", ".pdf", "x".repeat(8),
+  "a",
+  "b",
+  "c",
+  "0",
+  "1",
+  "9",
+  "logo",
+  "hero",
+  "image",
+  "_",
+  "-",
+  ".",
+  ".png",
+  ".jpg",
+  ".pdf",
+  "x".repeat(8),
   // Path structure.
-  "/", "//", "///",
+  "/",
+  "//",
+  "///",
   // Traversal & relative.
-  "..", ".", "../", "./", "..\\",
+  "..",
+  ".",
+  "../",
+  "./",
+  "..\\",
   // Schemes & hosts.
-  "http://", "https://", "file://", "javascript:",
-  "//evil.example.com/", "data:text/plain,",
+  "http://",
+  "https://",
+  "file://",
+  "javascript:",
+  "//evil.example.com/",
+  "data:text/plain,",
   // Backslashes (Windows-style).
-  "\\", "\\..\\", "C:\\Users\\",
+  "\\",
+  "\\..\\",
+  "C:\\Users\\",
   // Control characters and NUL (the most important fuzz inputs).
-  "\u0000", "\u0001", "\u0007", "\u001f", "\u007f",
-  "\n", "\r", "\t",
+  "\u0000",
+  "\u0001",
+  "\u0007",
+  "\u001f",
+  "\u007f",
+  "\n",
+  "\r",
+  "\t",
   // High-bit Unicode that should be allowed when not a control char.
-  "café", "ümlaut", "日本語", "🙂",
+  "café",
+  "ümlaut",
+  "日本語",
+  "🙂",
   // Whitespace tricks around the edges.
-  " ", "  ",
+  " ",
+  "  ",
 ];
 
 function randomPathLike(rng: () => number): string {
@@ -231,7 +268,9 @@ const SENTINELS = {
   // Opaque token shape (e.g. a session id, signed-url fragment).
   // NOTE: assembled from segments so secret scanners do not flag this
   // synthetic test sentinel as a real leaked credential.
-  token: ["SENTINEL", "NOT", "A", "SECRET", "fuzztest", "placeholder"].join("_"),
+  token: ["SENTINEL", "NOT", "A", "SECRET", "fuzztest", "placeholder"].join(
+    "_",
+  ),
   // A non-UUID "tenantId" we deliberately pass to confirm safeTenantId
   // strips it before logging.
   badTenantId: "tenant-victim+leak@example.com",
@@ -329,7 +368,9 @@ describe("assertSafeStorageObjectPath (rejection log leakage invariants)", () =>
       const tenantId = ev.tenantId;
       if (typeof tenantId === "string") {
         expect(
-          /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(tenantId),
+          /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+            tenantId,
+          ),
           `event #${i} carried a non-UUID tenantId: ${String(tenantId)}`,
         ).toBe(true);
       }

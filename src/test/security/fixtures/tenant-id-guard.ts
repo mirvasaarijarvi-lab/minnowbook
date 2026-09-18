@@ -156,7 +156,9 @@ export async function assertTenantMembership(
     );
   }
   if (!data || data.length === 0) {
-    const who = opts.email ? `${opts.label} (${opts.email})` : `Tenant ${opts.label}`;
+    const who = opts.email
+      ? `${opts.label} (${opts.email})`
+      : `Tenant ${opts.label}`;
     throw new Error(
       `${who} is NOT a member of tenant ${opts.expectedTenantId}. ` +
         `Update ${envPrefix}_${opts.label}_ID or add the user to that tenant — otherwise ` +
@@ -195,7 +197,7 @@ export async function fetchTenantMembershipSnapshot(
     if (process.env.RLS_GUARD_QUIET === "1") return;
     const elapsed = Math.round(performance.now() - startedAt);
     const prefix = elapsed > 500 ? "[tenant-guard][SLOW]" : "[tenant-guard]";
-    // eslint-disable-next-line no-console
+
     console.log(
       `${prefix} fetchTenantMembershipSnapshot(tenant=${tenantId.slice(0, 8)}…) ${outcome} in ${elapsed}ms`,
     );
@@ -220,18 +222,31 @@ export async function fetchTenantMembershipSnapshot(
       found: true,
       userId: (data as { user_id?: string | null }).user_id ?? null,
       role: (data as { role?: string | null }).role ?? null,
-      customRoleKey: (data as { custom_role_key?: string | null }).custom_role_key ?? null,
-      isApproved: (data as { is_approved?: boolean | null }).is_approved ?? null,
+      customRoleKey:
+        (data as { custom_role_key?: string | null }).custom_role_key ?? null,
+      isApproved:
+        (data as { is_approved?: boolean | null }).is_approved ?? null,
     };
   } catch (err) {
     finish(`threw=${err instanceof Error ? err.message : String(err)}`);
-    return { found: false, lookupError: err instanceof Error ? err.message : String(err) };
+    return {
+      found: false,
+      lookupError: err instanceof Error ? err.message : String(err),
+    };
   }
 }
 
 export interface TenantPairGuardInput {
-  a: { client: SupabaseClient; tenantId: string | undefined | null; email?: string };
-  b: { client: SupabaseClient; tenantId: string | undefined | null; email?: string };
+  a: {
+    client: SupabaseClient;
+    tenantId: string | undefined | null;
+    email?: string;
+  };
+  b: {
+    client: SupabaseClient;
+    tenantId: string | undefined | null;
+    email?: string;
+  };
   /** Override labels / env-var prefix in error messages. */
   labels?: TenantPairLabels;
   /** Skip the membership probe (rarely useful — only when membership is
@@ -327,8 +342,14 @@ export async function guardTenantPair(
       tenantB: validB,
       // If we threw before completing a probe, mark it as failed so the
       // report distinguishes "skipped intentionally" from "blew up here".
-      membershipA: validA && !input.skipMembershipProbe ? membershipA || false : membershipA,
-      membershipB: validB && !input.skipMembershipProbe ? membershipB || false : membershipB,
+      membershipA:
+        validA && !input.skipMembershipProbe
+          ? membershipA || false
+          : membershipA,
+      membershipB:
+        validB && !input.skipMembershipProbe
+          ? membershipB || false
+          : membershipB,
       emailA: input.a.email,
       emailB: input.b.email,
       failure: err instanceof Error ? err.message : String(err),

@@ -49,7 +49,6 @@ describe("Supabase client persistence configuration", () => {
   });
 });
 
-
 // ---------- Runtime persistence behaviour ----------
 
 type AuthCallback = (event: string, session: any) => void;
@@ -86,7 +85,9 @@ vi.mock("@/integrations/supabase/client", () => ({
           data: {
             subscription: {
               unsubscribe: () => {
-                registeredCallbacks = registeredCallbacks.filter((x) => x !== cb);
+                registeredCallbacks = registeredCallbacks.filter(
+                  (x) => x !== cb,
+                );
               },
             },
           },
@@ -111,7 +112,11 @@ vi.mock("@/hooks/useIsSystemAdmin", () => ({
 }));
 vi.mock("@/lib/gtm", () => ({ gtm: { login: vi.fn() } }));
 
-const Harness = ({ onReady }: { onReady: (api: ReturnType<typeof useAuth>) => void }) => {
+const Harness = ({
+  onReady,
+}: {
+  onReady: (api: ReturnType<typeof useAuth>) => void;
+}) => {
   const api = useAuth();
   onReady(api);
   return null;
@@ -120,7 +125,11 @@ const Harness = ({ onReady }: { onReady: (api: ReturnType<typeof useAuth>) => vo
 const mount = () => {
   const ref: { current: ReturnType<typeof useAuth> | null } = { current: null };
   const utils = render(
-    <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+    <QueryClientProvider
+      client={
+        new QueryClient({ defaultOptions: { queries: { retry: false } } })
+      }
+    >
       <AuthProvider>
         <Harness onReady={(api) => (ref.current = api)} />
       </AuthProvider>

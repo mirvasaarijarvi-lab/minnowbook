@@ -117,76 +117,84 @@ const SOCIAL_DESCRIPTION =
   "Cloud reservations for restaurants, venues, hotels, guesthouses, wellness and service businesses. Multi-site with branded booking pages.";
 const OG_IMAGE = "https://mimmobook.com/og-image.png";
 
-export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  head: () => ({
-    meta: [
-      { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1.0" },
-      { title: SITE_TITLE },
-      { name: "title", content: SITE_TITLE },
-      { name: "description", content: SITE_DESCRIPTION },
-      { name: "keywords", content: SITE_KEYWORDS },
-      { name: "author", content: "MimmoBook" },
-      {
-        name: "robots",
-        content: "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1",
-      },
-      {
-        httpEquiv: "Content-Security-Policy",
-        content: "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://*.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://ssl.google-analytics.com https://tagmanager.google.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://tagmanager.google.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' https: data: blob:; connect-src 'self' https://*.supabase.co https://*.supabase.in wss://*.supabase.co https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com https://*.googletagmanager.com https://stats.g.doubleclick.net https://*.lovable.app https://api.pwnedpasswords.com https://connector-gateway.lovable.dev; frame-src 'self' https://www.googletagmanager.com https://www.youtube.com https://youtube.com https://www.youtube-nocookie.com https://youtube-nocookie.com; worker-src 'self' blob:; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests",
-      },
-      {
-        httpEquiv: "Permissions-Policy",
-        content: "camera=(), microphone=(), geolocation=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=(), interest-cohort=(), browsing-topics=()",
-      },
-      { httpEquiv: "X-Content-Type-Options", content: "nosniff" },
-      { name: "referrer", content: "strict-origin-when-cross-origin" },
-      { name: "color-scheme", content: "light dark" },
-      { name: "msvalidate.01", content: "54FDAA2E4DF27CE697F5FB071066237E" },
-      {
-        name: "google-site-verification",
-        content: "grmftut49V7_pI0Q6QhebcuqGgDXmOjAezfhqdWF8sY",
-      },
-      { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://mimmobook.com/" },
-      { property: "og:title", content: SOCIAL_TITLE },
-      { property: "og:description", content: SOCIAL_DESCRIPTION },
-      { property: "og:image", content: OG_IMAGE },
-      { property: "og:image:secure_url", content: OG_IMAGE },
-      { property: "og:image:type", content: "image/png" },
-      { property: "og:image:width", content: "1200" },
-      { property: "og:image:height", content: "630" },
-      { property: "og:image:alt", content: SOCIAL_TITLE },
-      { property: "og:site_name", content: "MimmoBook" },
-      { property: "og:locale", content: "en_US" },
-      { property: "og:locale:alternate", content: "fi_FI" },
-      { property: "og:locale:alternate", content: "sv_SE" },
-      { property: "twitter:card", content: "summary_large_image" },
-      { property: "twitter:url", content: "https://mimmobook.com/" },
-      { property: "twitter:title", content: SOCIAL_TITLE },
-      { property: "twitter:description", content: SOCIAL_DESCRIPTION },
-      { property: "twitter:image", content: OG_IMAGE },
-    ],
-    links: [
-      { rel: "stylesheet", href: appCss },
-      { rel: "icon", type: "image/png", href: "/favicon.png" },
-      { rel: "apple-touch-icon", href: "/favicon.png" },
-      { rel: "sitemap", type: "application/xml", href: "/sitemap.xml" },
-    ],
-    scripts: [
-      { children: CONSENT_MODE_BOOTSTRAP },
-      { children: GTM_BOOTSTRAP },
-      { src: "https://www.googletagmanager.com/gtag/js?id=G-C7CJERJ7BR", async: true },
-      { children: GA4_BOOTSTRAP },
-      { type: "application/ld+json", children: WEBSITE_JSON_LD },
-      { type: "application/ld+json", children: ORGANIZATION_JSON_LD },
-    ],
-  }),
-  shellComponent: RootShell,
-  component: RootComponent,
-  notFoundComponent: NotFound,
-  errorComponent: RootErrorComponent,
-});
+export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
+  {
+    head: () => ({
+      meta: [
+        { charSet: "utf-8" },
+        { name: "viewport", content: "width=device-width, initial-scale=1.0" },
+        { title: SITE_TITLE },
+        { name: "title", content: SITE_TITLE },
+        { name: "description", content: SITE_DESCRIPTION },
+        { name: "keywords", content: SITE_KEYWORDS },
+        { name: "author", content: "MimmoBook" },
+        {
+          name: "robots",
+          content:
+            "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1",
+        },
+        {
+          httpEquiv: "Content-Security-Policy",
+          content:
+            "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://*.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://ssl.google-analytics.com https://tagmanager.google.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://tagmanager.google.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' https: data: blob:; connect-src 'self' https://*.supabase.co https://*.supabase.in wss://*.supabase.co https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com https://*.googletagmanager.com https://stats.g.doubleclick.net https://*.lovable.app https://api.pwnedpasswords.com https://connector-gateway.lovable.dev; frame-src 'self' https://www.googletagmanager.com https://www.youtube.com https://youtube.com https://www.youtube-nocookie.com https://youtube-nocookie.com; worker-src 'self' blob:; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests",
+        },
+        {
+          httpEquiv: "Permissions-Policy",
+          content:
+            "camera=(), microphone=(), geolocation=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=(), interest-cohort=(), browsing-topics=()",
+        },
+        { httpEquiv: "X-Content-Type-Options", content: "nosniff" },
+        { name: "referrer", content: "strict-origin-when-cross-origin" },
+        { name: "color-scheme", content: "light dark" },
+        { name: "msvalidate.01", content: "54FDAA2E4DF27CE697F5FB071066237E" },
+        {
+          name: "google-site-verification",
+          content: "grmftut49V7_pI0Q6QhebcuqGgDXmOjAezfhqdWF8sY",
+        },
+        { property: "og:type", content: "website" },
+        { property: "og:url", content: "https://mimmobook.com/" },
+        { property: "og:title", content: SOCIAL_TITLE },
+        { property: "og:description", content: SOCIAL_DESCRIPTION },
+        { property: "og:image", content: OG_IMAGE },
+        { property: "og:image:secure_url", content: OG_IMAGE },
+        { property: "og:image:type", content: "image/png" },
+        { property: "og:image:width", content: "1200" },
+        { property: "og:image:height", content: "630" },
+        { property: "og:image:alt", content: SOCIAL_TITLE },
+        { property: "og:site_name", content: "MimmoBook" },
+        { property: "og:locale", content: "en_US" },
+        { property: "og:locale:alternate", content: "fi_FI" },
+        { property: "og:locale:alternate", content: "sv_SE" },
+        { property: "twitter:card", content: "summary_large_image" },
+        { property: "twitter:url", content: "https://mimmobook.com/" },
+        { property: "twitter:title", content: SOCIAL_TITLE },
+        { property: "twitter:description", content: SOCIAL_DESCRIPTION },
+        { property: "twitter:image", content: OG_IMAGE },
+      ],
+      links: [
+        { rel: "stylesheet", href: appCss },
+        { rel: "icon", type: "image/png", href: "/favicon.png" },
+        { rel: "apple-touch-icon", href: "/favicon.png" },
+        { rel: "sitemap", type: "application/xml", href: "/sitemap.xml" },
+      ],
+      scripts: [
+        { children: CONSENT_MODE_BOOTSTRAP },
+        { children: GTM_BOOTSTRAP },
+        {
+          src: "https://www.googletagmanager.com/gtag/js?id=G-C7CJERJ7BR",
+          async: true,
+        },
+        { children: GA4_BOOTSTRAP },
+        { type: "application/ld+json", children: WEBSITE_JSON_LD },
+        { type: "application/ld+json", children: ORGANIZATION_JSON_LD },
+      ],
+    }),
+    shellComponent: RootShell,
+    component: RootComponent,
+    notFoundComponent: NotFound,
+    errorComponent: RootErrorComponent,
+  },
+);
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
@@ -216,7 +224,12 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
+      <ThemeProvider
+        attribute="class"
+        defaultTheme="light"
+        enableSystem
+        disableTransitionOnChange
+      >
         <I18nProvider>
           <AuthProvider>
             <ImpersonationProvider>
@@ -237,7 +250,13 @@ function RootComponent() {
   );
 }
 
-function RootErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
+function RootErrorComponent({
+  error,
+  reset,
+}: {
+  error: Error;
+  reset: () => void;
+}) {
   const router = useRouter();
 
   useEffect(() => {
@@ -250,7 +269,8 @@ function RootErrorComponent({ error, reset }: { error: Error; reset: () => void 
       <div className="max-w-md w-full text-center space-y-4">
         <h1 className="text-xl font-serif">This page didn't load</h1>
         <p className="text-muted-foreground text-sm">
-          Something went wrong on our end. You can try again or head back to the front page.
+          Something went wrong on our end. You can try again or head back to the
+          front page.
         </p>
         <div className="flex gap-2 justify-center flex-wrap">
           <button

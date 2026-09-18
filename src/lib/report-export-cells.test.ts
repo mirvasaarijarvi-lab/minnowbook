@@ -8,7 +8,11 @@ import {
   parseCsvSplitCell,
   printPriceCells,
 } from "./report-export-cells";
-import { reportAmounts, roundCents, type ReportPricingRow } from "./report-pricing-accessor";
+import {
+  reportAmounts,
+  roundCents,
+  type ReportPricingRow,
+} from "./report-pricing-accessor";
 
 /**
  * Reads the exported data back: the CSV rows and the print-view table cells
@@ -19,16 +23,29 @@ import { reportAmounts, roundCents, type ReportPricingRow } from "./report-prici
 
 const LABELS = { breakfast: "Breakfast" };
 const fmtEur = (v: number) =>
-  v.toLocaleString("fi-FI", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
+  v.toLocaleString("fi-FI", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }) + " €";
 
 /** "1 234,50 €" (Finnish print formatting) back to a number. */
 const parseEur = (s: string) =>
-  Number(s.replace(/\s|\u00a0|\u202f/g, "").replace("€", "").replace(",", "."));
+  Number(
+    s
+      .replace(/\s|\u00a0|\u202f/g, "")
+      .replace("€", "")
+      .replace(",", "."),
+  );
 
 const parsePrintSplitCell = (cell: string) => {
   const nums = cell
     .split("<br>")
-    .map((part) => part.replace(/<[^>]+>/g, "").replace(/^\+\s.*?:\s/, "").trim())
+    .map((part) =>
+      part
+        .replace(/<[^>]+>/g, "")
+        .replace(/^\+\s.*?:\s/, "")
+        .trim(),
+    )
     .filter(Boolean)
     .map(parseEur);
   if (nums.length !== 3) return null;
@@ -55,13 +72,34 @@ const nightsLater = (start: string, nights: number) =>
 const buildRows = (): ReportPricingRow[] => {
   const rows: ReportPricingRow[] = [
     stay(),
-    stay({ breakfast_price_per_person: 8.95, guests_count: 3, price_eur: 383.6 }),
+    stay({
+      breakfast_price_per_person: 8.95,
+      guests_count: 3,
+      price_eur: 383.6,
+    }),
     stay({ breakfast_price_per_person: null, price_eur: 315 }),
-    stay({ breakfast_included: false, breakfast_price_per_person: null, price_eur: 225 }),
+    stay({
+      breakfast_included: false,
+      breakfast_price_per_person: null,
+      price_eur: 225,
+    }),
     stay({ breakfast_price_per_person: 18, guests_count: 3, price_eur: 40 }), // deep discount
-    stay({ reservation_type: "hotel", breakfast_price_per_person: 21.5, price_eur: 396 }),
-    stay({ reservation_type: "venue", breakfast_included: false, price_eur: 450 }),
-    stay({ reservation_type: "restaurant", pricing_type: "menu", breakfast_included: false, price_eur: 80 }),
+    stay({
+      reservation_type: "hotel",
+      breakfast_price_per_person: 21.5,
+      price_eur: 396,
+    }),
+    stay({
+      reservation_type: "venue",
+      breakfast_included: false,
+      price_eur: 450,
+    }),
+    stay({
+      reservation_type: "restaurant",
+      pricing_type: "menu",
+      breakfast_included: false,
+      price_eur: 80,
+    }),
     stay({ price_eur: null }),
   ];
   for (const rate of [0.33, 11.11, 12.345, 19.99]) {
@@ -101,9 +139,9 @@ describe("exported CSV data", () => {
 
       if (split) {
         // A stay with breakfast: the exported line items must add up exactly.
-        expect(Math.round(split.room * 100) + Math.round(split.breakfast * 100)).toBe(
-          Math.round(split.total * 100),
-        );
+        expect(
+          Math.round(split.room * 100) + Math.round(split.breakfast * 100),
+        ).toBe(Math.round(split.total * 100));
         expect(split.total).toBeCloseTo(a.charged, 10);
         // The price column is the room line of the same split.
         expect(Number(cells.price)).toBeCloseTo(split.room, 10);
@@ -125,8 +163,17 @@ describe("exported CSV data", () => {
 
   it("writes a placeholder, never an invented amount, when there is no price", () => {
     for (const r of [
-      stay({ reservation_type: "restaurant", pricing_type: "menu", breakfast_included: false, price_eur: 80 }),
-      stay({ reservation_type: "venue", breakfast_included: false, price_eur: null }),
+      stay({
+        reservation_type: "restaurant",
+        pricing_type: "menu",
+        breakfast_included: false,
+        price_eur: 80,
+      }),
+      stay({
+        reservation_type: "venue",
+        breakfast_included: false,
+        price_eur: null,
+      }),
     ]) {
       const cells = csvPriceCells(r, LABELS);
       expect(cells.price).toBe(CSV_NO_AMOUNT);
@@ -142,9 +189,9 @@ describe("exported print data", () => {
     expect(parsed.room).toBeCloseTo(225, 10);
     expect(parsed.breakfast).toBeCloseTo(72, 10);
     expect(parsed.total).toBeCloseTo(297, 10);
-    expect(Math.round(parsed.room * 100) + Math.round(parsed.breakfast * 100)).toBe(
-      Math.round(parsed.total * 100),
-    );
+    expect(
+      Math.round(parsed.room * 100) + Math.round(parsed.breakfast * 100),
+    ).toBe(Math.round(parsed.total * 100));
     expect(parseEur(cells.price)).toBeCloseTo(parsed.room, 10);
   });
 
@@ -158,7 +205,8 @@ describe("exported print data", () => {
 
       if (printSplit) {
         expect(
-          Math.round(printSplit.room * 100) + Math.round(printSplit.breakfast * 100),
+          Math.round(printSplit.room * 100) +
+            Math.round(printSplit.breakfast * 100),
         ).toBe(Math.round(printSplit.total * 100));
         expect(printSplit.total).toBeCloseTo(a.charged, 10);
         // The two exports never disagree.

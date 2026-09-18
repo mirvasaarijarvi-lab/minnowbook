@@ -82,7 +82,11 @@ const OBJECT_BODY = "bucket-privacy-config-probe";
  * hangs under jsdom (no streaming Blob support), so we POST the bytes
  * directly with the service-role key.
  */
-async function adminUpload(bucket: string, path: string, body: string): Promise<void> {
+async function adminUpload(
+  bucket: string,
+  path: string,
+  body: string,
+): Promise<void> {
   const url = `${SUPABASE_URL}/storage/v1/object/${bucket}/${path}`;
   const res = await fetch(url, {
     method: "POST",
@@ -114,7 +118,10 @@ async function adminRemove(bucket: string, path: string): Promise<void> {
   await res.text();
 }
 
-async function fetchPublicObject(bucket: string, path: string): Promise<Response> {
+async function fetchPublicObject(
+  bucket: string,
+  path: string,
+): Promise<Response> {
   const url = `${SUPABASE_URL}/storage/v1/object/public/${bucket}/${path}`;
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), 8000);
@@ -125,117 +132,144 @@ async function fetchPublicObject(bucket: string, path: string): Promise<Response
   }
 }
 
-describe.runIf(canRun)("tenant storage buckets stay private (config regression)", () => {
-  beforeAll(async () => {
-    admin = createClient(SUPABASE_URL!, SERVICE_ROLE_KEY!, {
-      auth: { persistSession: false, autoRefreshToken: false },
-    });
-    anon = createClient(SUPABASE_URL!, SUPABASE_ANON_KEY!, {
-      auth: { persistSession: false, autoRefreshToken: false },
-    });
-
-    const buckets = await withRetry("listBuckets", () => admin.storage.listBuckets());
-    bucketPublicFlags = Object.fromEntries(
-      (buckets ?? []).map((b: { name: string; public?: boolean }) => [
-        b.name,
-        Boolean(b.public),
-      ]),
-    );
-
-    for (const [bucket, path] of Object.entries(NON_BRANDING_OBJECTS)) {
-      await adminUpload(bucket, path, OBJECT_BODY);
-    }
-  }, 180_000);
-
-  afterAll(async () => {
-    if (!admin) return;
-    for (const [bucket, path] of Object.entries(NON_BRANDING_OBJECTS)) {
-      await adminRemove(bucket, path);
-    }
-  }, NET_TIMEOUT_MS);
-
-  for (const bucket of MUST_BE_PRIVATE) {
-    describe(`bucket: ${bucket}`, () => {
-      it("exists and is configured as private", () => {
-        expect(
-          Object.keys(bucketPublicFlags),
-          `bucket ${bucket} is missing entirely`,
-        ).toContain(bucket);
-        expect(
-          bucketPublicFlags[bucket],
-          `${bucket} became PUBLIC — non-branding files (avatars, resource photos, offer PDFs) would be world-readable`,
-        ).toBe(false);
+describe.runIf(canRun)(
+  "tenant storage buckets stay private (config regression)",
+  () => {
+    beforeAll(async () => {
+      admin = createClient(SUPABASE_URL!, SERVICE_ROLE_KEY!, {
+        auth: { persistSession: false, autoRefreshToken: false },
+      });
+      anon = createClient(SUPABASE_URL!, SUPABASE_ANON_KEY!, {
+        auth: { persistSession: false, autoRefreshToken: false },
       });
 
-      it("does not serve a planted non-branding object over the public endpoint", async () => {
-        const path = NON_BRANDING_OBJECTS[bucket];
-        const res = await fetchPublicObject(bucket, path);
-        expect(res.status).not.toBe(200);
-        const body = await res.text();
-        expect(body).not.toContain(OBJECT_BODY);
-      }, NET_TIMEOUT_MS);
+      const buckets = await withRetry("listBuckets", () =>
+        admin.storage.listBuckets(),
+      );
+      bucketPublicFlags = Object.fromEntries(
+        (buckets ?? []).map((b: { name: string; public?: boolean }) => [
+          b.name,
+          Boolean(b.public),
+        ]),
+      );
 
-      it("does not let anon download the planted non-branding object", async () => {
-        const path = NON_BRANDING_OBJECTS[bucket];
-        const res = await fetch(
-          `${SUPABASE_URL}/storage/v1/object/${bucket}/${path}`,
-          {
-            headers: {
-              Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-              apikey: SUPABASE_ANON_KEY!,
-            },
-          },
-        );
-        expect(res.status).not.toBe(200);
-        expect(await res.text()).not.toContain(OBJECT_BODY);
-      }, NET_TIMEOUT_MS);
-
-      it("still serves the object to a service-role signed URL (private, not broken)", async () => {
-        const path = NON_BRANDING_OBJECTS[bucket];
-        const { data, error } = await admin.storage
-          .from(bucket)
-          .createSignedUrl(path, 60);
-        expect(error).toBeNull();
-        expect(data?.signedUrl).toBeTruthy();
-        const res = await fetch(data!.signedUrl);
-        expect(res.status).toBe(200);
-        expect(await res.text()).toBe(OBJECT_BODY);
-      }, NET_TIMEOUT_MS);
-    });
-  }
-
-  it("tenant-branding is the ONLY public bucket in the project", () => {
-    const publicBuckets = Object.entries(bucketPublicFlags)
-      .filter(([, isPublic]) => isPublic)
-      .map(([name]) => name)
-      .sort();
-    expect(publicBuckets).toEqual(
-      publicBuckets.length === 0 ? [] : [PUBLIC_BRANDING_BUCKET],
-    );
-  });
-
-  it("tenant-branding holds branding assets only (no avatars/offers/private folders)", async () => {
-    // Sweep the tenant prefixes present in the public branding bucket and
-    // assert no non-branding folder names have crept in.
-    const forbiddenSegments = ["avatars", "offers", "invoices", "private", "documents"];
-    const roots = await withRetry("list branding root", () =>
-      admin.storage.from(PUBLIC_BRANDING_BUCKET).list("", { limit: 100 }),
-    );
-
-    for (const root of (roots ?? []) as { name: string }[]) {
-      const { data: children } = await admin.storage
-        .from(PUBLIC_BRANDING_BUCKET)
-        .list(root.name, { limit: 100 });
-      const names = (children ?? []).map((c) => c.name.toLowerCase());
-      for (const forbidden of forbiddenSegments) {
-        expect(
-          names,
-          `${PUBLIC_BRANDING_BUCKET}/${root.name} contains a non-branding folder "${forbidden}"`,
-        ).not.toContain(forbidden);
+      for (const [bucket, path] of Object.entries(NON_BRANDING_OBJECTS)) {
+        await adminUpload(bucket, path, OBJECT_BODY);
       }
+    }, 180_000);
+
+    afterAll(async () => {
+      if (!admin) return;
+      for (const [bucket, path] of Object.entries(NON_BRANDING_OBJECTS)) {
+        await adminRemove(bucket, path);
+      }
+    }, NET_TIMEOUT_MS);
+
+    for (const bucket of MUST_BE_PRIVATE) {
+      describe(`bucket: ${bucket}`, () => {
+        it("exists and is configured as private", () => {
+          expect(
+            Object.keys(bucketPublicFlags),
+            `bucket ${bucket} is missing entirely`,
+          ).toContain(bucket);
+          expect(
+            bucketPublicFlags[bucket],
+            `${bucket} became PUBLIC — non-branding files (avatars, resource photos, offer PDFs) would be world-readable`,
+          ).toBe(false);
+        });
+
+        it(
+          "does not serve a planted non-branding object over the public endpoint",
+          async () => {
+            const path = NON_BRANDING_OBJECTS[bucket];
+            const res = await fetchPublicObject(bucket, path);
+            expect(res.status).not.toBe(200);
+            const body = await res.text();
+            expect(body).not.toContain(OBJECT_BODY);
+          },
+          NET_TIMEOUT_MS,
+        );
+
+        it(
+          "does not let anon download the planted non-branding object",
+          async () => {
+            const path = NON_BRANDING_OBJECTS[bucket];
+            const res = await fetch(
+              `${SUPABASE_URL}/storage/v1/object/${bucket}/${path}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+                  apikey: SUPABASE_ANON_KEY!,
+                },
+              },
+            );
+            expect(res.status).not.toBe(200);
+            expect(await res.text()).not.toContain(OBJECT_BODY);
+          },
+          NET_TIMEOUT_MS,
+        );
+
+        it(
+          "still serves the object to a service-role signed URL (private, not broken)",
+          async () => {
+            const path = NON_BRANDING_OBJECTS[bucket];
+            const { data, error } = await admin.storage
+              .from(bucket)
+              .createSignedUrl(path, 60);
+            expect(error).toBeNull();
+            expect(data?.signedUrl).toBeTruthy();
+            const res = await fetch(data!.signedUrl);
+            expect(res.status).toBe(200);
+            expect(await res.text()).toBe(OBJECT_BODY);
+          },
+          NET_TIMEOUT_MS,
+        );
+      });
     }
-  }, NET_TIMEOUT_MS);
-});
+
+    it("tenant-branding is the ONLY public bucket in the project", () => {
+      const publicBuckets = Object.entries(bucketPublicFlags)
+        .filter(([, isPublic]) => isPublic)
+        .map(([name]) => name)
+        .sort();
+      expect(publicBuckets).toEqual(
+        publicBuckets.length === 0 ? [] : [PUBLIC_BRANDING_BUCKET],
+      );
+    });
+
+    it(
+      "tenant-branding holds branding assets only (no avatars/offers/private folders)",
+      async () => {
+        // Sweep the tenant prefixes present in the public branding bucket and
+        // assert no non-branding folder names have crept in.
+        const forbiddenSegments = [
+          "avatars",
+          "offers",
+          "invoices",
+          "private",
+          "documents",
+        ];
+        const roots = await withRetry("list branding root", () =>
+          admin.storage.from(PUBLIC_BRANDING_BUCKET).list("", { limit: 100 }),
+        );
+
+        for (const root of (roots ?? []) as { name: string }[]) {
+          const { data: children } = await admin.storage
+            .from(PUBLIC_BRANDING_BUCKET)
+            .list(root.name, { limit: 100 });
+          const names = (children ?? []).map((c) => c.name.toLowerCase());
+          for (const forbidden of forbiddenSegments) {
+            expect(
+              names,
+              `${PUBLIC_BRANDING_BUCKET}/${root.name} contains a non-branding folder "${forbidden}"`,
+            ).not.toContain(forbidden);
+          }
+        }
+      },
+      NET_TIMEOUT_MS,
+    );
+  },
+);
 
 describe.skipIf(canRun)(
   "tenant storage bucket privacy (skipped: missing live creds)",

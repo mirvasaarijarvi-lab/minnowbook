@@ -125,9 +125,12 @@ async function ensureUser(email: string, password: string): Promise<string> {
       }),
   );
   if (signInError) {
-    throw new Error(`sign-in for existing ${email} failed: ${signInError.message}`);
+    throw new Error(
+      `sign-in for existing ${email} failed: ${signInError.message}`,
+    );
   }
-  if (!signInData.user?.id) throw new Error(`sign-in for existing ${email} returned no user`);
+  if (!signInData.user?.id)
+    throw new Error(`sign-in for existing ${email} returned no user`);
   await existingUserClient.auth.signOut();
   return signInData.user.id;
 }
@@ -153,48 +156,58 @@ async function ensureTenant(
         .eq("user_id", userId)
         .maybeSingle(),
   );
-  if (lookupError) throw new Error(`tenant_users lookup failed: ${lookupError.message}`);
+  if (lookupError)
+    throw new Error(`tenant_users lookup failed: ${lookupError.message}`);
   if (existing?.tenant_id) return existing.tenant_id as string;
 
   // Create via the public RPC, which enforces the same path real users hit.
-  const { data, error } = await timed(`create_tenant rpc slug=${tenantSlug}`, () =>
-    userClient.rpc("create_tenant", {
-      p_name: tenantName,
-      p_slug: tenantSlug,
-      p_tier: "business",
-    }),
+  const { data, error } = await timed(
+    `create_tenant rpc slug=${tenantSlug}`,
+    () =>
+      userClient.rpc("create_tenant", {
+        p_name: tenantName,
+        p_slug: tenantSlug,
+        p_tier: "business",
+      }),
   );
-  if (error) throw new Error(`create_tenant(${tenantSlug}) failed: ${error.message}`);
+  if (error)
+    throw new Error(`create_tenant(${tenantSlug}) failed: ${error.message}`);
   if (!data) throw new Error(`create_tenant(${tenantSlug}) returned no id`);
   return data as string;
 }
 
 async function seedOne(spec: (typeof TENANTS)[number]): Promise<SeededTenant> {
-  return await timed(`seedOne tenant=${spec.label}`, async () => {
-    const userId = await ensureUser(spec.email, spec.password);
+  return await timed(
+    `seedOne tenant=${spec.label}`,
+    async () => {
+      const userId = await ensureUser(spec.email, spec.password);
 
-    // Use a fresh anon-key client per user so we never carry sessions over.
-    const userClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY!, {
-      auth: { persistSession: false, autoRefreshToken: false },
-    });
-    const { error: signInError } = await timed(`signIn ${spec.email}`, () =>
-      userClient.auth.signInWithPassword({
-        email: spec.email,
-        password: spec.password,
-      }),
-    );
-    if (signInError)
-      throw new Error(`sign-in for ${spec.email} failed: ${signInError.message}`);
+      // Use a fresh anon-key client per user so we never carry sessions over.
+      const userClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY!, {
+        auth: { persistSession: false, autoRefreshToken: false },
+      });
+      const { error: signInError } = await timed(`signIn ${spec.email}`, () =>
+        userClient.auth.signInWithPassword({
+          email: spec.email,
+          password: spec.password,
+        }),
+      );
+      if (signInError)
+        throw new Error(
+          `sign-in for ${spec.email} failed: ${signInError.message}`,
+        );
 
-    const tenantId = await ensureTenant(
-      userClient,
-      userId,
-      spec.tenantName,
-      spec.tenantSlug,
-    );
+      const tenantId = await ensureTenant(
+        userClient,
+        userId,
+        spec.tenantName,
+        spec.tenantSlug,
+      );
 
-    return { email: spec.email, password: spec.password, tenantId };
-  }, 5_000);
+      return { email: spec.email, password: spec.password, tenantId };
+    },
+    5_000,
+  );
 }
 
 (async () => {
@@ -203,7 +216,9 @@ async function seedOne(spec: (typeof TENANTS)[number]): Promise<SeededTenant> {
   for (const spec of TENANTS) {
     try {
       seeded[spec.label] = await seedOne(spec);
-      console.error(`[seed] ${spec.label}: ${spec.email} → tenant ${seeded[spec.label].tenantId}`);
+      console.error(
+        `[seed] ${spec.label}: ${spec.email} → tenant ${seeded[spec.label].tenantId}`,
+      );
     } catch (err) {
       console.error(`[seed] FAILED for tenant ${spec.label}:`, err);
       process.exit(1);

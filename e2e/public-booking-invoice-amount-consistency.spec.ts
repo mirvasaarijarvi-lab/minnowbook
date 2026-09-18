@@ -22,8 +22,10 @@ import { reportAmounts, roundCents } from "@/lib/report-pricing-accessor";
  * Requires SERVICE_ROLE_KEY; skips itself without it.
  */
 
-const AMOUNT_ERROR = "Invoice amount must match the recalculated room and breakfast totals.";
-const NO_PRICE_ERROR = "Add a price before marking this reservation as invoiced.";
+const AMOUNT_ERROR =
+  "Invoice amount must match the recalculated room and breakfast totals.";
+const NO_PRICE_ERROR =
+  "Add a price before marking this reservation as invoiced.";
 
 const NIGHTLY = 96;
 const BREAKFAST_RATE = 12.5;
@@ -42,7 +44,10 @@ test.describe("Invoice amounts must reconcile with the report split", () => {
     !(process.env.SERVICE_ROLE_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY),
     "Set SERVICE_ROLE_KEY to run this spec.",
   );
-  test.skip(!SUPABASE_ANON_KEY, "Set VITE_SUPABASE_PUBLISHABLE_KEY to run this spec.");
+  test.skip(
+    !SUPABASE_ANON_KEY,
+    "Set VITE_SUPABASE_PUBLISHABLE_KEY to run this spec.",
+  );
 
   test("rejects invoice amounts that do not match room + breakfast", async ({
     ephemeralTenant,
@@ -69,29 +74,33 @@ test.describe("Invoice amounts must reconcile with the report split", () => {
 
     const guestEmail = `ci+invoice-consistency-${stamp}@mimmobook.test`;
     const checkIn = isoDate(300);
-    const res = await request.post(`${SUPABASE_URL}/functions/v1/public-booking`, {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-        apikey: SUPABASE_ANON_KEY,
+    const res = await request.post(
+      `${SUPABASE_URL}/functions/v1/public-booking`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+          apikey: SUPABASE_ANON_KEY,
+        },
+        data: {
+          tenant_id: tenantId,
+          reservation_type: "guesthouse",
+          resource_id: resource!.id,
+          date: checkIn,
+          check_out_date: isoDate(300 + NIGHTS),
+          guests_count: GUESTS,
+          breakfast_included: true,
+          breakfast_price_per_person: 0.01, // tampered; must be ignored
+          price_eur: 1, // tampered; must be ignored
+          guest_name: `TEST CI Invoice Consistency ${stamp}`,
+          guest_email: guestEmail,
+          guest_phone: "+358401234567",
+          special_requests:
+            "Created by the invoice amount consistency E2E spec.",
+        },
+        timeout: 30_000,
       },
-      data: {
-        tenant_id: tenantId,
-        reservation_type: "guesthouse",
-        resource_id: resource!.id,
-        date: checkIn,
-        check_out_date: isoDate(300 + NIGHTS),
-        guests_count: GUESTS,
-        breakfast_included: true,
-        breakfast_price_per_person: 0.01, // tampered; must be ignored
-        price_eur: 1, // tampered; must be ignored
-        guest_name: `TEST CI Invoice Consistency ${stamp}`,
-        guest_email: guestEmail,
-        guest_phone: "+358401234567",
-        special_requests: "Created by the invoice amount consistency E2E spec.",
-      },
-      timeout: 30_000,
-    });
+    );
     expect(res.status(), await res.text()).toBe(200);
 
     const cols =
@@ -108,14 +117,19 @@ test.describe("Invoice amounts must reconcile with the report split", () => {
     };
 
     const stored = await fetchRow();
-    expect(Number(stored.price_eur), "server-recalculated total").toBe(EXPECTED_TOTAL);
-    expect(Number(stored.breakfast_price_per_person), "server breakfast rate").toBe(
-      BREAKFAST_RATE,
+    expect(Number(stored.price_eur), "server-recalculated total").toBe(
+      EXPECTED_TOTAL,
     );
+    expect(
+      Number(stored.breakfast_price_per_person),
+      "server breakfast rate",
+    ).toBe(BREAKFAST_RATE);
     expect(stored.is_invoiced).toBe(false);
 
     const split = reportAmounts(stored as any);
-    expect(roundCents(split.room + split.breakfast), "split reconciles").toBe(EXPECTED_TOTAL);
+    expect(roundCents(split.room + split.breakfast), "split reconciles").toBe(
+      EXPECTED_TOTAL,
+    );
     expect(roundCents(split.breakfast), "breakfast component").toBe(
       BREAKFAST_RATE * GUESTS * NIGHTS,
     );
@@ -123,11 +137,12 @@ test.describe("Invoice amounts must reconcile with the report split", () => {
     // --- Signed-in owner client -------------------------------------------
     const ownerEmail = `ci+invoice-consistency-owner-${stamp}@mimmobook.test`;
     const ownerPassword = `Ci-Tmp-${randomUUID()}-Z9!`;
-    const { data: ownerUser, error: ownerErr } = await admin.auth.admin.createUser({
-      email: ownerEmail,
-      password: ownerPassword,
-      email_confirm: true,
-    });
+    const { data: ownerUser, error: ownerErr } =
+      await admin.auth.admin.createUser({
+        email: ownerEmail,
+        password: ownerPassword,
+        email_confirm: true,
+      });
     expect(ownerErr, ownerErr?.message).toBeNull();
     const { error: memberErr } = await admin.from("tenant_users").insert({
       tenant_id: tenantId,
@@ -149,9 +164,21 @@ test.describe("Invoice amounts must reconcile with the report split", () => {
     // --- Every mismatching amount is refused ------------------------------
     const rejected: { label: string; price: number; message: string }[] = [
       { label: "sub-cent tail", price: 438.005, message: AMOUNT_ERROR },
-      { label: "sub-cent tail (long)", price: 437.999999, message: AMOUNT_ERROR },
-      { label: "below the breakfast component", price: 149.99, message: AMOUNT_ERROR },
-      { label: "one cent below breakfast", price: 149.99, message: AMOUNT_ERROR },
+      {
+        label: "sub-cent tail (long)",
+        price: 437.999999,
+        message: AMOUNT_ERROR,
+      },
+      {
+        label: "below the breakfast component",
+        price: 149.99,
+        message: AMOUNT_ERROR,
+      },
+      {
+        label: "one cent below breakfast",
+        price: 149.99,
+        message: AMOUNT_ERROR,
+      },
       { label: "zero", price: 0, message: NO_PRICE_ERROR },
       { label: "negative", price: -438, message: NO_PRICE_ERROR },
     ];
@@ -163,11 +190,18 @@ test.describe("Invoice amounts must reconcile with the report split", () => {
         .eq("id", stored.id)
         .eq("tenant_id", tenantId);
       expect(error, `${attempt.label} must be refused`).not.toBeNull();
-      expect(error!.message, `${attempt.label} message`).toContain(attempt.message);
+      expect(error!.message, `${attempt.label} message`).toContain(
+        attempt.message,
+      );
 
       const after = await fetchRow();
-      expect(after.is_invoiced, `${attempt.label}: still uninvoiced`).toBe(false);
-      expect(Number(after.price_eur), `${attempt.label}: amount untouched`).toBe(EXPECTED_TOTAL);
+      expect(after.is_invoiced, `${attempt.label}: still uninvoiced`).toBe(
+        false,
+      );
+      expect(
+        Number(after.price_eur),
+        `${attempt.label}: amount untouched`,
+      ).toBe(EXPECTED_TOTAL);
     }
 
     // A tampered breakfast rate that would break the split is refused too.
@@ -176,7 +210,10 @@ test.describe("Invoice amounts must reconcile with the report split", () => {
       .update({ is_invoiced: true, breakfast_price_per_person: 200 })
       .eq("id", stored.id)
       .eq("tenant_id", tenantId);
-    expect(rateErr, "breakfast rate above the total must be refused").not.toBeNull();
+    expect(
+      rateErr,
+      "breakfast rate above the total must be refused",
+    ).not.toBeNull();
     expect(rateErr!.message).toContain(AMOUNT_ERROR);
     expect((await fetchRow()).is_invoiced).toBe(false);
 
@@ -190,7 +227,9 @@ test.describe("Invoice amounts must reconcile with the report split", () => {
       .eq("id", stored.id);
     const afterAnon = await fetchRow();
     expect(afterAnon.is_invoiced, "guest cannot invoice").toBe(false);
-    expect(Number(afterAnon.price_eur), "guest cannot change the amount").toBe(EXPECTED_TOTAL);
+    expect(Number(afterAnon.price_eur), "guest cannot change the amount").toBe(
+      EXPECTED_TOTAL,
+    );
 
     // Nothing is invoiced so far.
     const { data: invoiced } = await admin
@@ -198,7 +237,10 @@ test.describe("Invoice amounts must reconcile with the report split", () => {
       .select("id")
       .eq("tenant_id", tenantId)
       .eq("is_invoiced", true);
-    expect(invoiced, "no booking invoiced by a mismatching amount").toHaveLength(0);
+    expect(
+      invoiced,
+      "no booking invoiced by a mismatching amount",
+    ).toHaveLength(0);
 
     // --- The recalculated amount is accepted ------------------------------
     const { error: okErr } = await staff
@@ -211,9 +253,10 @@ test.describe("Invoice amounts must reconcile with the report split", () => {
     const final = await fetchRow();
     expect(final.is_invoiced, "invoiced with the matching amount").toBe(true);
     const finalSplit = reportAmounts(final as any);
-    expect(roundCents(finalSplit.room + finalSplit.breakfast), "invoiced split reconciles").toBe(
-      EXPECTED_TOTAL,
-    );
+    expect(
+      roundCents(finalSplit.room + finalSplit.breakfast),
+      "invoiced split reconciles",
+    ).toBe(EXPECTED_TOTAL);
     expect(roundCents(finalSplit.charged)).toBe(EXPECTED_TOTAL);
 
     await admin.auth.admin.deleteUser(ownerUser!.user!.id);

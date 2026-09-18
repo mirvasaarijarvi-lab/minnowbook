@@ -54,7 +54,9 @@ export const isValidTimezone = (tz: string): boolean => {
 export const listSupportedTimezones = (): string[] => {
   // `Intl.supportedValuesOf` is available in modern browsers and Node 18+.
   // Fall back to a tiny curated list so the UI never breaks.
-  const intlAny = Intl as unknown as { supportedValuesOf?: (k: string) => string[] };
+  const intlAny = Intl as unknown as {
+    supportedValuesOf?: (k: string) => string[];
+  };
   if (typeof intlAny.supportedValuesOf === "function") {
     try {
       return intlAny.supportedValuesOf("timeZone");
@@ -105,13 +107,25 @@ export const tzToday = (tz: string, now: Date = new Date()): string => {
 };
 
 /** `{ date, time }` (yyyy-MM-dd, HH:mm) for "right now" in `tz`. */
-export const tzNow = (tz: string, now: Date = new Date()): { date: string; time: string } => {
+export const tzNow = (
+  tz: string,
+  now: Date = new Date(),
+): { date: string; time: string } => {
   const p = partsOf(now, tz);
-  return { date: `${p.year}-${p.month}-${p.day}`, time: `${p.hour}:${p.minute}` };
+  return {
+    date: `${p.year}-${p.month}-${p.day}`,
+    time: `${p.hour}:${p.minute}`,
+  };
 };
 
 const WEEKDAY_INDEX: Record<string, number> = {
-  Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6,
+  Sun: 0,
+  Mon: 1,
+  Tue: 2,
+  Wed: 3,
+  Thu: 4,
+  Fri: 5,
+  Sat: 6,
 };
 
 /** Day-of-week (Sunday = 0) for an ISO date string, evaluated in `tz`. */

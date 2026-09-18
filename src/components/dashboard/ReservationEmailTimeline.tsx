@@ -44,7 +44,9 @@ const ReservationEmailTimeline = ({ reservation }: Props) => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("email_send_log")
-        .select("id, message_id, template_name, status, error_message, created_at")
+        .select(
+          "id, message_id, template_name, status, error_message, created_at",
+        )
         .eq("recipient_email", email!)
         .order("created_at", { ascending: false })
         .limit(50);
@@ -66,9 +68,16 @@ const ReservationEmailTimeline = ({ reservation }: Props) => {
   const stages = STAGES.map((stage) => {
     const sentAt = reservation[stage.field] as string | null | undefined;
     return { label: t(stage.key), sentAt: sentAt ?? null };
-  }).filter((stage) => stage.sentAt || stage.label === t("an.mail.ack") || stage.label === t("an.mail.confirm"));
+  }).filter(
+    (stage) =>
+      stage.sentAt ||
+      stage.label === t("an.mail.ack") ||
+      stage.label === t("an.mail.confirm"),
+  );
 
-  const failures = latestLog.filter((row) => ["dlq", "failed", "bounced", "complained"].includes(String(row.status)));
+  const failures = latestLog.filter((row) =>
+    ["dlq", "failed", "bounced", "complained"].includes(String(row.status)),
+  );
 
   return (
     <div className="space-y-3">
@@ -83,7 +92,10 @@ const ReservationEmailTimeline = ({ reservation }: Props) => {
       ) : (
         <ul className="space-y-2">
           {stages.map((stage) => (
-            <li key={stage.label} className="flex items-center justify-between gap-3 rounded-md border px-3 py-2 text-sm">
+            <li
+              key={stage.label}
+              className="flex items-center justify-between gap-3 rounded-md border px-3 py-2 text-sm"
+            >
               <span className="flex items-center gap-2">
                 {stage.sentAt ? (
                   <CheckCircle2 className="h-4 w-4 text-primary" />
@@ -110,10 +122,16 @@ const ReservationEmailTimeline = ({ reservation }: Props) => {
             <div key={row.id} className="flex items-start gap-2 text-xs">
               <AlertTriangle className="mt-0.5 h-3.5 w-3.5 text-destructive" />
               <span>
-                <Badge variant="destructive" className="mr-2 align-middle">{String(row.status)}</Badge>
+                <Badge variant="destructive" className="mr-2 align-middle">
+                  {String(row.status)}
+                </Badge>
                 {String(row.template_name ?? "")}
-                {row.created_at ? ` · ${format(parseISO(String(row.created_at)), "d.M.yyyy HH:mm")}` : ""}
-                {row.error_message ? ` · ${String(row.error_message).slice(0, 120)}` : ""}
+                {row.created_at
+                  ? ` · ${format(parseISO(String(row.created_at)), "d.M.yyyy HH:mm")}`
+                  : ""}
+                {row.error_message
+                  ? ` · ${String(row.error_message).slice(0, 120)}`
+                  : ""}
               </span>
             </div>
           ))}

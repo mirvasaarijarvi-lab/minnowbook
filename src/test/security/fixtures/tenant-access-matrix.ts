@@ -17,7 +17,10 @@
  * that is not a fully verified, distinct, approved pair is DENIED, and only
  * an intentionally skipped probe is INCONCLUSIVE.
  */
-import type { TenantGuardRecord, TenantMembershipSnapshot } from "./tenant-guard-record";
+import type {
+  TenantGuardRecord,
+  TenantMembershipSnapshot,
+} from "./tenant-guard-record";
 
 /** Outcome of reading one guard record as an access decision. */
 export type TenantAccessVerdict = "allowed" | "denied" | "inconclusive";
@@ -28,7 +31,8 @@ export interface TenantAccessEvaluation {
   reasons: string[];
 }
 
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 function membershipReasons(
   side: "A" | "B",
@@ -39,7 +43,8 @@ function membershipReasons(
   if (probe === false) reasons.push(`membership_probe_failed_${side}`);
   if (row?.lookupError) reasons.push(`membership_lookup_error_${side}`);
   else if (row && !row.found) reasons.push(`membership_row_missing_${side}`);
-  else if (row?.found && row.isApproved === false) reasons.push(`membership_not_approved_${side}`);
+  else if (row?.found && row.isApproved === false)
+    reasons.push(`membership_not_approved_${side}`);
   return reasons;
 }
 
@@ -50,7 +55,9 @@ function membershipReasons(
  * ids are present, well-formed and distinct, both membership probes passed,
  * and neither membership row is missing, unreadable or unapproved.
  */
-export function evaluateTenantAccess(record: TenantGuardRecord): TenantAccessEvaluation {
+export function evaluateTenantAccess(
+  record: TenantGuardRecord,
+): TenantAccessEvaluation {
   const reasons: string[] = [];
 
   // Guard records arrive from a JSON side-channel written by worker
@@ -64,10 +71,18 @@ export function evaluateTenantAccess(record: TenantGuardRecord): TenantAccessEva
   if (!idA || !idA.trim()) {
     // Absent, blank or a non-string value: absent/blank counts as missing,
     // any other type as malformed.
-    reasons.push(idA === undefined && record.tenantA != null ? "malformed_tenant_a" : "missing_tenant_a");
+    reasons.push(
+      idA === undefined && record.tenantA != null
+        ? "malformed_tenant_a"
+        : "missing_tenant_a",
+    );
   } else if (!UUID_RE.test(idA.trim())) reasons.push("malformed_tenant_a");
   if (!idB || !idB.trim()) {
-    reasons.push(idB === undefined && record.tenantB != null ? "malformed_tenant_b" : "missing_tenant_b");
+    reasons.push(
+      idB === undefined && record.tenantB != null
+        ? "malformed_tenant_b"
+        : "missing_tenant_b",
+    );
   } else if (!UUID_RE.test(idB.trim())) reasons.push("malformed_tenant_b");
   if (
     idA &&
@@ -88,10 +103,15 @@ export function evaluateTenantAccess(record: TenantGuardRecord): TenantAccessEva
   if (userA && userB && userA === userB) reasons.push("same_user_both_tenants");
   const mailA = record.emailA?.trim().toLowerCase();
   const mailB = record.emailB?.trim().toLowerCase();
-  if (mailA && mailB && mailA === mailB) reasons.push("same_identity_both_tenants");
+  if (mailA && mailB && mailA === mailB)
+    reasons.push("same_identity_both_tenants");
 
-  reasons.push(...membershipReasons("A", record.membershipA, record.membershipRowA));
-  reasons.push(...membershipReasons("B", record.membershipB, record.membershipRowB));
+  reasons.push(
+    ...membershipReasons("A", record.membershipA, record.membershipRowA),
+  );
+  reasons.push(
+    ...membershipReasons("B", record.membershipB, record.membershipRowB),
+  );
 
   if (reasons.length > 0) return { verdict: "denied", reasons };
 
@@ -116,8 +136,18 @@ function base(overrides: Partial<TenantGuardRecord> = {}): TenantGuardRecord {
     membershipB: true,
     emailA: "a@example.test",
     emailB: "b@example.test",
-    membershipRowA: { role: "owner", isApproved: true, userId: "u-a", found: true },
-    membershipRowB: { role: "owner", isApproved: true, userId: "u-b", found: true },
+    membershipRowA: {
+      role: "owner",
+      isApproved: true,
+      userId: "u-a",
+      found: true,
+    },
+    membershipRowB: {
+      role: "owner",
+      isApproved: true,
+      userId: "u-b",
+      found: true,
+    },
     ...overrides,
   };
 }
@@ -199,7 +229,10 @@ export const TENANT_ACCESS_MATRIX: TenantAccessCase[] = [
   {
     label: "deny: membership lookup itself errored",
     record: base({
-      membershipRowA: { found: false, lookupError: "permission denied for table tenant_users" },
+      membershipRowA: {
+        found: false,
+        lookupError: "permission denied for table tenant_users",
+      },
     }),
     expected: "denied",
     expectedReasons: ["membership_lookup_error_A"],
@@ -214,7 +247,11 @@ export const TENANT_ACCESS_MATRIX: TenantAccessCase[] = [
   },
   {
     label: "deny: tenant id missing entirely",
-    record: base({ tenantA: undefined, membershipRowA: undefined, membershipA: "skipped" }),
+    record: base({
+      tenantA: undefined,
+      membershipRowA: undefined,
+      membershipA: "skipped",
+    }),
     expected: "denied",
     expectedReasons: ["missing_tenant_a"],
     expectedHtml: ["—"],
@@ -253,8 +290,18 @@ export const TENANT_ACCESS_MATRIX: TenantAccessCase[] = [
   {
     label: "allow: combined roles, owner in tenant A and staff in tenant B",
     record: base({
-      membershipRowA: { role: "owner", isApproved: true, userId: "u-a", found: true },
-      membershipRowB: { role: "staff", isApproved: true, userId: "u-b", found: true },
+      membershipRowA: {
+        role: "owner",
+        isApproved: true,
+        userId: "u-a",
+        found: true,
+      },
+      membershipRowB: {
+        role: "staff",
+        isApproved: true,
+        userId: "u-b",
+        found: true,
+      },
     }),
     expected: "allowed",
     expectedReasons: [],
@@ -283,7 +330,8 @@ export const TENANT_ACCESS_MATRIX: TenantAccessCase[] = [
     expectedHtml: ["front_desk", "kitchen_lead", "effective="],
   },
   {
-    label: "allow: custom role key duplicates the enum role (redundant overlap)",
+    label:
+      "allow: custom role key duplicates the enum role (redundant overlap)",
     record: base({
       membershipRowA: {
         role: "owner",
@@ -328,9 +376,15 @@ export const TENANT_ACCESS_MATRIX: TenantAccessCase[] = [
     expectedHtml: ["not approved", "super_manager"],
   },
   {
-    label: "deny: an approved privileged role on one side cannot cover the other side",
+    label:
+      "deny: an approved privileged role on one side cannot cover the other side",
     record: base({
-      membershipRowA: { role: "owner", isApproved: false, userId: "u-a", found: true },
+      membershipRowA: {
+        role: "owner",
+        isApproved: false,
+        userId: "u-a",
+        found: true,
+      },
       membershipRowB: {
         role: "staff",
         customRoleKey: "tenant_admin",
@@ -362,8 +416,18 @@ export const TENANT_ACCESS_MATRIX: TenantAccessCase[] = [
   {
     label: "deny: the same auth user acts for both tenants",
     record: base({
-      membershipRowA: { role: "owner", isApproved: true, userId: "u-shared", found: true },
-      membershipRowB: { role: "staff", isApproved: true, userId: "u-shared", found: true },
+      membershipRowA: {
+        role: "owner",
+        isApproved: true,
+        userId: "u-shared",
+        found: true,
+      },
+      membershipRowB: {
+        role: "staff",
+        isApproved: true,
+        userId: "u-shared",
+        found: true,
+      },
     }),
     expected: "denied",
     expectedReasons: ["same_user_both_tenants"],
@@ -371,7 +435,10 @@ export const TENANT_ACCESS_MATRIX: TenantAccessCase[] = [
   },
   {
     label: "deny: the same login email is used for both sides",
-    record: base({ emailA: "shared@example.test", emailB: "Shared@Example.Test" }),
+    record: base({
+      emailA: "shared@example.test",
+      emailB: "Shared@Example.Test",
+    }),
     expected: "denied",
     expectedReasons: ["same_identity_both_tenants"],
     expectedHtml: ["shared@example.test"],
@@ -381,10 +448,18 @@ export const TENANT_ACCESS_MATRIX: TenantAccessCase[] = [
     record: base({
       emailA: "shared@example.test",
       emailB: "shared@example.test",
-      membershipRowB: { role: "staff", isApproved: false, userId: "u-b", found: true },
+      membershipRowB: {
+        role: "staff",
+        isApproved: false,
+        userId: "u-b",
+        found: true,
+      },
     }),
     expected: "denied",
-    expectedReasons: ["same_identity_both_tenants", "membership_not_approved_B"],
+    expectedReasons: [
+      "same_identity_both_tenants",
+      "membership_not_approved_B",
+    ],
     expectedHtml: ["not approved"],
   },
   {
@@ -461,7 +536,8 @@ export const QUERY_PATH_MATRIX: QueryPathCase[] = [
     kind: "read",
     table: "resources",
     operation: "SELECT (list, ordered)",
-    attemptedQuery: "from('resources').select('id,name').order('name').limit(20)",
+    attemptedQuery:
+      "from('resources').select('id,name').order('name').limit(20)",
     leakedRows: [foreignRow({ name: "Foreign Sauna" })],
   },
   {
@@ -469,7 +545,8 @@ export const QUERY_PATH_MATRIX: QueryPathCase[] = [
     kind: "read",
     table: "reservations",
     operation: "SELECT (detail, single)",
-    attemptedQuery: "from('reservations').select('*').eq('id', FOREIGN_ID).single()",
+    attemptedQuery:
+      "from('reservations').select('*').eq('id', FOREIGN_ID).single()",
     scenario: "detail view leaks a foreign reservation",
     leakedRows: [foreignRow({ guest_email: "foreign@example.test" })],
   },
@@ -478,7 +555,8 @@ export const QUERY_PATH_MATRIX: QueryPathCase[] = [
     kind: "read",
     table: "offers",
     operation: "SELECT (detail, maybeSingle)",
-    attemptedQuery: "from('offers').select('*').eq('id', FOREIGN_ID).maybeSingle()",
+    attemptedQuery:
+      "from('offers').select('*').eq('id', FOREIGN_ID).maybeSingle()",
     leakedRows: [foreignRow()],
   },
   {
@@ -486,15 +564,19 @@ export const QUERY_PATH_MATRIX: QueryPathCase[] = [
     kind: "read",
     table: "resource_images",
     operation: "SELECT (detail, embedded join)",
-    attemptedQuery: "from('resource_images').select('*, resources(*)').eq('id', FOREIGN_ID)",
-    leakedRows: [foreignRow({ resources: { id: "r-1", tenant_id: TARGET_TENANT } })],
+    attemptedQuery:
+      "from('resource_images').select('*, resources(*)').eq('id', FOREIGN_ID)",
+    leakedRows: [
+      foreignRow({ resources: { id: "r-1", tenant_id: TARGET_TENANT } }),
+    ],
   },
   {
     label: "count path: head request with exact count",
     kind: "read",
     table: "reservations",
     operation: "SELECT (count, head)",
-    attemptedQuery: "from('reservations').select('*', { count: 'exact', head: true })",
+    attemptedQuery:
+      "from('reservations').select('*', { count: 'exact', head: true })",
     leakedRows: [foreignRow()],
   },
   {
@@ -502,7 +584,8 @@ export const QUERY_PATH_MATRIX: QueryPathCase[] = [
     kind: "read",
     table: "reservations",
     operation: "SELECT (search)",
-    attemptedQuery: "from('reservations').select('*').ilike('guest_search_text', '%foreign%')",
+    attemptedQuery:
+      "from('reservations').select('*').ilike('guest_search_text', '%foreign%')",
     leakedRows: [foreignRow()],
   },
   {
@@ -526,7 +609,8 @@ export const QUERY_PATH_MATRIX: QueryPathCase[] = [
     kind: "read",
     table: "storage.objects (tenant-private)",
     operation: "STORAGE DOWNLOAD",
-    attemptedQuery: "storage.from('tenant-private').download(`${TARGET}/offers/offer.pdf`)",
+    attemptedQuery:
+      "storage.from('tenant-private').download(`${TARGET}/offers/offer.pdf`)",
     leakedRows: [foreignRow()],
   },
   {
@@ -534,7 +618,8 @@ export const QUERY_PATH_MATRIX: QueryPathCase[] = [
     kind: "write",
     table: "reservations",
     operation: "INSERT",
-    attemptedQuery: "from('reservations').insert({ tenant_id: TARGET, ... }).select()",
+    attemptedQuery:
+      "from('reservations').insert({ tenant_id: TARGET, ... }).select()",
     leakedRows: [foreignRow()],
   },
   {
@@ -542,7 +627,8 @@ export const QUERY_PATH_MATRIX: QueryPathCase[] = [
     kind: "write",
     table: "reservations",
     operation: "UPDATE",
-    attemptedQuery: "from('reservations').update({ is_invoiced: true }).eq('id', FOREIGN_ID).select()",
+    attemptedQuery:
+      "from('reservations').update({ is_invoiced: true }).eq('id', FOREIGN_ID).select()",
     leakedRows: [foreignRow({ is_invoiced: true })],
   },
   {
@@ -550,7 +636,8 @@ export const QUERY_PATH_MATRIX: QueryPathCase[] = [
     kind: "write",
     table: "resources",
     operation: "UPSERT",
-    attemptedQuery: "from('resources').upsert({ id: FOREIGN_ID, tenant_id: TARGET }).select()",
+    attemptedQuery:
+      "from('resources').upsert({ id: FOREIGN_ID, tenant_id: TARGET }).select()",
     leakedRows: [foreignRow()],
   },
   {
@@ -558,7 +645,8 @@ export const QUERY_PATH_MATRIX: QueryPathCase[] = [
     kind: "write",
     table: "reservations",
     operation: "DELETE",
-    attemptedQuery: "from('reservations').delete().eq('id', FOREIGN_ID).select()",
+    attemptedQuery:
+      "from('reservations').delete().eq('id', FOREIGN_ID).select()",
     leakedRows: [foreignRow()],
   },
   {
@@ -575,7 +663,8 @@ export const QUERY_PATH_MATRIX: QueryPathCase[] = [
     kind: "scan",
     table: "booking_tokens",
     operation: "SELECT (detail, no tenant filter)",
-    attemptedQuery: "from('booking_tokens').select('*').eq('token', FOREIGN_TOKEN)",
+    attemptedQuery:
+      "from('booking_tokens').select('*').eq('token', FOREIGN_TOKEN)",
     leakedRows: [foreignRow({ token: "tok_foreign" })],
     forbiddenTenantId: TARGET_TENANT,
   },
@@ -627,40 +716,53 @@ const OWN_ROWS_BY_LABEL: Record<string, Array<Record<string, unknown>>> = {
   ],
   "list view: paginated range read": [ownRow(), ownRow()],
   "list view: ordered and filtered list read": [ownRow({ name: "Own Sauna" })],
-  "detail view: single row by id": [ownRow({ guest_email: "own@example.test" })],
+  "detail view: single row by id": [
+    ownRow({ guest_email: "own@example.test" }),
+  ],
   "detail view: maybeSingle by id": [ownRow()],
   "detail view: embedded join pulls the parent row": [
     ownRow({ resources: { id: "own-resource", tenant_id: ACTING_TENANT } }),
   ],
   "count path: head request with exact count": [],
-  "search path: text filter across tenants": [ownRow({ guest_name: "Own Guest" })],
+  "search path: text filter across tenants": [
+    ownRow({ guest_name: "Own Guest" }),
+  ],
   "rpc path: security definer function returning rows": [ownRow({ rating: 5 })],
-  "storage path: listing another tenant's private objects": [ownRow({ name: "own-quote.pdf" })],
+  "storage path: listing another tenant's private objects": [
+    ownRow({ name: "own-quote.pdf" }),
+  ],
   "storage path: downloading another tenant's object": [ownRow()],
   "write path: insert into another tenant": [ownRow()],
   "write path: update another tenant's row": [ownRow({ is_invoiced: true })],
   "write path: upsert across tenants": [ownRow()],
   "write path: delete another tenant's row": [ownRow()],
-  "scan path: own-tenant list must contain no foreign rows": [ownRow(), ownRow()],
-  "scan path: detail lookup without a tenant filter": [ownRow({ token: "tok_own" })],
+  "scan path: own-tenant list must contain no foreign rows": [
+    ownRow(),
+    ownRow(),
+  ],
+  "scan path: detail lookup without a tenant filter": [
+    ownRow({ token: "tok_own" }),
+  ],
 };
 
-export const ALLOW_PATH_MATRIX: AllowPathCase[] = QUERY_PATH_MATRIX.map((deny) => {
-  const ownRows = OWN_ROWS_BY_LABEL[deny.label] ?? [];
-  return {
-    label: deny.label,
-    kind: deny.kind,
-    table: deny.table,
-    operation: deny.operation,
-    attemptedQuery: deny.attemptedQuery
-      .replace(/TARGET/g, "OWN")
-      .replace(/FOREIGN_ID/g, "OWN_ID")
-      .replace(/FOREIGN_TOKEN/g, "OWN_TOKEN")
-      .replace(/offers\/offer\.pdf/g, "offers/own-quote.pdf")
-      .replace(/foreign/g, "own")
-      .replace(new RegExp(TARGET_TENANT, "g"), ACTING_TENANT),
-    scenario: deny.scenario?.replace(/foreign/g, "own"),
-    ownRows,
-    minRows: ownRows.length,
-  };
-});
+export const ALLOW_PATH_MATRIX: AllowPathCase[] = QUERY_PATH_MATRIX.map(
+  (deny) => {
+    const ownRows = OWN_ROWS_BY_LABEL[deny.label] ?? [];
+    return {
+      label: deny.label,
+      kind: deny.kind,
+      table: deny.table,
+      operation: deny.operation,
+      attemptedQuery: deny.attemptedQuery
+        .replace(/TARGET/g, "OWN")
+        .replace(/FOREIGN_ID/g, "OWN_ID")
+        .replace(/FOREIGN_TOKEN/g, "OWN_TOKEN")
+        .replace(/offers\/offer\.pdf/g, "offers/own-quote.pdf")
+        .replace(/foreign/g, "own")
+        .replace(new RegExp(TARGET_TENANT, "g"), ACTING_TENANT),
+      scenario: deny.scenario?.replace(/foreign/g, "own"),
+      ownRows,
+      minRows: ownRows.length,
+    };
+  },
+);

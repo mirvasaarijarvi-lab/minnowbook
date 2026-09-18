@@ -47,11 +47,15 @@ describe("tier-limits: Professional tier", () => {
   });
 
   it("caps resources at 5 per type with no total cap", () => {
-    const fiveCustom = Array.from({ length: 5 }, () => ({ resource_type: "custom" }));
+    const fiveCustom = Array.from({ length: 5 }, () => ({
+      resource_type: "custom",
+    }));
     expect(canCreateResourceOfType(tier, "custom", fiveCustom)).toBe(false);
     // Other types are unaffected, and there is no overall total cap.
     expect(canCreateResourceOfType(tier, "restaurant", fiveCustom)).toBe(true);
-    const many = Array.from({ length: 50 }, () => ({ resource_type: "custom" }));
+    const many = Array.from({ length: 50 }, () => ({
+      resource_type: "custom",
+    }));
     expect(canCreateResourceOfType(tier, "hotel", many)).toBe(true);
     expect(canCreateResourceOfType(tier, "custom", many)).toBe(false);
   });
@@ -77,7 +81,9 @@ describe("tier-limits: Business tier (regression)", () => {
 
   it("has no resource or type caps", () => {
     expect(canSelectMoreTypes(tier, 999)).toBe(true);
-    const many = Array.from({ length: 1000 }, () => ({ resource_type: "custom" }));
+    const many = Array.from({ length: 1000 }, () => ({
+      resource_type: "custom",
+    }));
     expect(canCreateResourceOfType(tier, "custom", many)).toBe(true);
   });
 

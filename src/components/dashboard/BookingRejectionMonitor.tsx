@@ -27,7 +27,12 @@ const BookingRejectionMonitor = () => {
     [days],
   );
 
-  const { data: rows = [], isLoading, refetch, isRefetching } = useQuery({
+  const {
+    data: rows = [],
+    isLoading,
+    refetch,
+    isRefetching,
+  } = useQuery({
     queryKey: ["booking-rejection-monitor", tenantId, days],
     enabled: !!tenantId,
     queryFn: async () => {
@@ -54,8 +59,12 @@ const BookingRejectionMonitor = () => {
           <div className="flex items-center gap-2">
             <AlertTriangle className="h-4 w-4 text-muted-foreground" />
             <div>
-              <h3 className="font-semibold leading-none">{t("monitor.title")}</h3>
-              <p className="text-xs text-muted-foreground mt-1">{t("monitor.subtitle")}</p>
+              <h3 className="font-semibold leading-none">
+                {t("monitor.title")}
+              </h3>
+              <p className="text-xs text-muted-foreground mt-1">
+                {t("monitor.subtitle")}
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-1">
@@ -76,13 +85,17 @@ const BookingRejectionMonitor = () => {
               onClick={() => refetch()}
               disabled={isRefetching}
             >
-              <RefreshCw className={`h-4 w-4 ${isRefetching ? "animate-spin" : ""}`} />
+              <RefreshCw
+                className={`h-4 w-4 ${isRefetching ? "animate-spin" : ""}`}
+              />
             </Button>
           </div>
         </div>
 
         {isLoading ? (
-          <p className="text-sm text-muted-foreground">{t("monitor.loading")}</p>
+          <p className="text-sm text-muted-foreground">
+            {t("monitor.loading")}
+          </p>
         ) : total === 0 ? (
           <p className="text-sm text-muted-foreground">{t("monitor.empty")}</p>
         ) : (
@@ -94,10 +107,15 @@ const BookingRejectionMonitor = () => {
               {summary.map((entry) => {
                 const label = t(codeLabelKey(entry.code) as any);
                 return (
-                  <li key={entry.code} className="flex items-center justify-between gap-3 py-2">
+                  <li
+                    key={entry.code}
+                    className="flex items-center justify-between gap-3 py-2"
+                  >
                     <div className="min-w-0">
                       <p className="text-sm truncate">
-                        {label === codeLabelKey(entry.code) ? entry.code : label}
+                        {label === codeLabelKey(entry.code)
+                          ? entry.code
+                          : label}
                       </p>
                       {entry.lastSeen && (
                         <p className="text-xs text-muted-foreground">

@@ -15,7 +15,13 @@ import {
 } from "./__fixtures__/lint-blog-jsonld.fixtures";
 
 const messagesFor = (issues: Issue[], pathPrefix: string) =>
-  issues.filter((i) => i.path === pathPrefix || i.path.startsWith(`${pathPrefix}.`) || i.path.startsWith(`${pathPrefix}[`))
+  issues
+    .filter(
+      (i) =>
+        i.path === pathPrefix ||
+        i.path.startsWith(`${pathPrefix}.`) ||
+        i.path.startsWith(`${pathPrefix}[`),
+    )
     .map((i) => `${i.path}: ${i.message}`);
 
 describe("validateNodes — happy path", () => {
@@ -26,7 +32,10 @@ describe("validateNodes — happy path", () => {
   it("flags a non-array input as an empty graph", () => {
     const issues = validateNodes("example", null);
     expect(issues).toHaveLength(1);
-    expect(issues[0]).toMatchObject({ path: "$", message: /returned no nodes/ });
+    expect(issues[0]).toMatchObject({
+      path: "$",
+      message: /returned no nodes/,
+    });
   });
 
   it("flags an empty array as an empty graph", () => {
@@ -56,7 +65,9 @@ describe("validateNodes — BlogPosting required fields", () => {
     ]) {
       expect(
         issues.some(
-          (i) => i.path === `BlogPosting.${k}` && i.message === "missing required field",
+          (i) =>
+            i.path === `BlogPosting.${k}` &&
+            i.message === "missing required field",
         ),
         `expected 'missing required field' issue for BlogPosting.${k}`,
       ).toBe(true);
@@ -71,23 +82,27 @@ describe("validateNodes — format checks", () => {
     const issues = validateNodes("example", badFormatsBlogPostingGraph);
     expect(
       issues.some(
-        (i) => i.path === "BlogPosting.datePublished" && /ISO 8601/.test(i.message),
+        (i) =>
+          i.path === "BlogPosting.datePublished" && /ISO 8601/.test(i.message),
       ),
     ).toBe(true);
     expect(
       issues.some(
-        (i) => i.path === "BlogPosting.url" && /absolute https URL/.test(i.message),
+        (i) =>
+          i.path === "BlogPosting.url" && /absolute https URL/.test(i.message),
       ),
     ).toBe(true);
     expect(
       issues.some(
-        (i) => i.path === "BlogPosting.wordCount" && /wordCount must be > 0/.test(i.message),
+        (i) =>
+          i.path === "BlogPosting.wordCount" &&
+          /wordCount must be > 0/.test(i.message),
       ),
     ).toBe(true);
     // dateModified is well-formed so it must NOT be flagged.
-    expect(
-      issues.some((i) => i.path === "BlogPosting.dateModified"),
-    ).toBe(false);
+    expect(issues.some((i) => i.path === "BlogPosting.dateModified")).toBe(
+      false,
+    );
   });
 
   it("flags a relative image URL and missing width/height on the ImageObject", () => {
@@ -104,14 +119,21 @@ describe("validateNodes — format checks", () => {
 
 describe("validateNodes — authors", () => {
   it("only flags the invalid author when a multi-author list has one bad entry", () => {
-    const issues = validateNodes("example", multiAuthorBadSecondBlogPostingGraph);
+    const issues = validateNodes(
+      "example",
+      multiAuthorBadSecondBlogPostingGraph,
+    );
     // Author[0] is valid — no issues under that path.
-    expect(issues.some((i) => i.path.startsWith("BlogPosting.author[0]"))).toBe(false);
+    expect(issues.some((i) => i.path.startsWith("BlogPosting.author[0]"))).toBe(
+      false,
+    );
     // Author[1] is missing name/url/@id.
     for (const k of ["name", "url", "@id"]) {
       expect(
         issues.some(
-          (i) => i.path === `BlogPosting.author[1].${k}` && i.message === `missing/empty ${k}`,
+          (i) =>
+            i.path === `BlogPosting.author[1].${k}` &&
+            i.message === `missing/empty ${k}`,
         ),
         `expected missing ${k} on author[1]`,
       ).toBe(true);
@@ -143,7 +165,10 @@ describe("parseAllowlist", () => {
   const NOW = new Date("2026-07-07T00:00:00Z");
 
   it("returns no entries and no errors for an empty allowlist", () => {
-    expect(parseAllowlist({ entries: [] }, NOW)).toEqual({ entries: [], errors: [] });
+    expect(parseAllowlist({ entries: [] }, NOW)).toEqual({
+      entries: [],
+      errors: [],
+    });
   });
 
   it("compiles a valid entry", () => {
@@ -260,8 +285,16 @@ describe("applyAllowlist", () => {
     parseAllowlist({ entries: raw }, NOW).entries;
 
   const sampleIssues: Issue[] = [
-    { slug: "post-a", path: "BlogPosting.image.url", message: "url must be an absolute https URL" },
-    { slug: "post-b", path: "BlogPosting.datePublished", message: "must be ISO 8601 (got x)" },
+    {
+      slug: "post-a",
+      path: "BlogPosting.image.url",
+      message: "url must be an absolute https URL",
+    },
+    {
+      slug: "post-b",
+      path: "BlogPosting.datePublished",
+      message: "must be ISO 8601 (got x)",
+    },
   ];
 
   it("suppresses only issues whose slug+path+message all match", () => {
@@ -274,7 +307,10 @@ describe("applyAllowlist", () => {
         expires: "2099-01-01",
       },
     ]);
-    const { suppressed, remaining, staleErrors } = applyAllowlist(sampleIssues, entries);
+    const { suppressed, remaining, staleErrors } = applyAllowlist(
+      sampleIssues,
+      entries,
+    );
     expect(suppressed.map((s) => s.issue.slug)).toEqual(["post-a"]);
     expect(remaining.map((r) => r.slug)).toEqual(["post-b"]);
     expect(staleErrors).toEqual([]);
@@ -341,7 +377,10 @@ describe("applyAllowlist", () => {
   });
 
   it("returns everything when there are no allowlist entries", () => {
-    const { suppressed, remaining, staleErrors } = applyAllowlist(sampleIssues, []);
+    const { suppressed, remaining, staleErrors } = applyAllowlist(
+      sampleIssues,
+      [],
+    );
     expect(suppressed).toEqual([]);
     expect(remaining).toEqual(sampleIssues);
     expect(staleErrors).toEqual([]);

@@ -33,7 +33,9 @@ import { parseAuditReport, severityRank } from "./parse-audit.mjs";
 
 const [, , manager, auditPath, allowlistPath, levelArg] = process.argv;
 if (!manager || !auditPath || !allowlistPath || !levelArg) {
-  console.error("Usage: apply-allowlist.mjs <manager> <audit.json> <allowlist.json> <AUDIT_LEVEL>");
+  console.error(
+    "Usage: apply-allowlist.mjs <manager> <audit.json> <allowlist.json> <AUDIT_LEVEL>",
+  );
   process.exit(2);
 }
 
@@ -55,7 +57,9 @@ if (fs.existsSync(allowlistPath)) {
     const parsed = JSON.parse(fs.readFileSync(allowlistPath, "utf8"));
     if (Array.isArray(parsed.entries)) allowlist = parsed;
   } catch (e) {
-    console.error(`::error file=${allowlistPath}::Allowlist is not valid JSON: ${e.message}`);
+    console.error(
+      `::error file=${allowlistPath}::Allowlist is not valid JSON: ${e.message}`,
+    );
     process.exit(2);
   }
 }
@@ -64,7 +68,11 @@ const today = new Date();
 today.setUTCHours(0, 0, 0, 0);
 
 function isActive(entry) {
-  if (typeof entry.expires !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(entry.expires)) return false;
+  if (
+    typeof entry.expires !== "string" ||
+    !/^\d{4}-\d{2}-\d{2}$/.test(entry.expires)
+  )
+    return false;
   const exp = new Date(`${entry.expires}T00:00:00Z`);
   if (Number.isNaN(exp.getTime())) return false;
   return exp.getTime() >= today.getTime();
@@ -83,12 +91,19 @@ for (const [i, entry] of (allowlist.entries || []).entries()) {
     console.error(`::error file=${allowlistPath}::${at}.id is required.`);
     process.exit(2);
   }
-  if (typeof entry.expires !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(entry.expires)) {
-    console.error(`::error file=${allowlistPath}::${at}.expires must be YYYY-MM-DD.`);
+  if (
+    typeof entry.expires !== "string" ||
+    !/^\d{4}-\d{2}-\d{2}$/.test(entry.expires)
+  ) {
+    console.error(
+      `::error file=${allowlistPath}::${at}.expires must be YYYY-MM-DD.`,
+    );
     process.exit(2);
   }
   if (seenIds.has(entry.id)) {
-    console.error(`::error file=${allowlistPath}::${at}.id "${entry.id}" duplicates an earlier entry.`);
+    console.error(
+      `::error file=${allowlistPath}::${at}.id "${entry.id}" duplicates an earlier entry.`,
+    );
     process.exit(2);
   }
   seenIds.add(entry.id);
@@ -119,7 +134,9 @@ const allowById = new Map();
 for (const e of activeEntries) allowById.set(String(e.id), e);
 
 function matchAllowlist(adv) {
-  const candidates = [adv.ruleId, adv.ghsaId, ...(adv.cves || [])].filter(Boolean).map(String);
+  const candidates = [adv.ruleId, adv.ghsaId, ...(adv.cves || [])]
+    .filter(Boolean)
+    .map(String);
   for (const c of candidates) {
     if (allowById.has(c)) return allowById.get(c);
   }
@@ -231,9 +248,10 @@ const lines = [];
 lines.push(STICKY_MARKER);
 lines.push(`## Dependency audit (${manager})`);
 lines.push("");
-const verdict = blocking.length === 0
-  ? `**Result:** PASS at \`AUDIT_LEVEL=${level}\`.`
-  : `**Result:** FAIL. ${blocking.length} advisory/advisories at severity \`${level}\` or higher are not on the allowlist.`;
+const verdict =
+  blocking.length === 0
+    ? `**Result:** PASS at \`AUDIT_LEVEL=${level}\`.`
+    : `**Result:** FAIL. ${blocking.length} advisory/advisories at severity \`${level}\` or higher are not on the allowlist.`;
 lines.push(verdict);
 lines.push("");
 lines.push(`- Blocking: **${blocking.length}**`);
@@ -255,7 +273,9 @@ for (const sev of SEVERITIES) {
   );
 }
 lines.push("");
-lines.push(`<sub>"Gate?" marks severities at or above \`AUDIT_LEVEL=${level}\` that count toward the pass/fail decision.</sub>`);
+lines.push(
+  `<sub>"Gate?" marks severities at or above \`AUDIT_LEVEL=${level}\` that count toward the pass/fail decision.</sub>`,
+);
 lines.push("");
 
 if (blocking.length > 0) {
@@ -274,7 +294,9 @@ if (blocking.length > 0) {
 if (waivedEntries.length > 0) {
   lines.push("### Waived by allowlist");
   lines.push("");
-  lines.push("| Severity | Package | Advisory | Title | Affected range | Expires | Reason |");
+  lines.push(
+    "| Severity | Package | Advisory | Title | Affected range | Expires | Reason |",
+  );
   lines.push("| --- | --- | --- | --- | --- | --- | --- |");
   for (const { adv, waiver } of waivedEntries) {
     const reason = (waiver.reason || "").replace(/\|/g, "\\|");
@@ -293,7 +315,9 @@ if (expiredEntries.length > 0) {
     lines.push(`| \`${e.id}\` | ${e.expires} | ${reason} |`);
   }
   lines.push("");
-  lines.push("These entries no longer waive their advisories. Remove them or extend the `expires` date.");
+  lines.push(
+    "These entries no longer waive their advisories. Remove them or extend the `expires` date.",
+  );
   lines.push("");
 }
 
@@ -303,7 +327,9 @@ lines.push(
 
 const commentPath = process.env.AUDIT_COMMENT_PATH || "audit-comment.md";
 fs.writeFileSync(commentPath, lines.join("\n") + "\n");
-console.log(`Wrote PR comment payload to ${commentPath} (${lines.length} lines).`);
+console.log(
+  `Wrote PR comment payload to ${commentPath} (${lines.length} lines).`,
+);
 
 // ---------------------------------------------------------------
 // GitHub PR check integration.
@@ -325,9 +351,9 @@ console.log(`Wrote PR comment payload to ${commentPath} (${lines.length} lines).
 //   3. Print a single ::notice:: with the headline. PR reviewers
 //      who are already in the run log see the same one-liner.
 // ---------------------------------------------------------------
-const breakdownParts = SEVERITIES
-  .filter((s) => severityRank(s) >= minRank)
-  .map((s) => `${s}=${blockingBySeverity[s]}`);
+const breakdownParts = SEVERITIES.filter((s) => severityRank(s) >= minRank).map(
+  (s) => `${s}=${blockingBySeverity[s]}`,
+);
 const headline = `AUDIT_LEVEL=${level} — ${blocking.length} blocking (${breakdownParts.join(", ") || "none"}), ${waivedEntries.length} waived, ${expiredEntries.length} expired`;
 
 function appendKV(target, key, value) {

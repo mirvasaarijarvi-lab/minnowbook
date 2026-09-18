@@ -9,8 +9,14 @@
  * silently as "the preview said something else".
  */
 
-import { buildKitchenOrderRows, type KitchenOrderRow } from "./offer-kitchen-orders";
-import { buildKitchenPreview, type PreviewLegInput } from "./offer-kitchen-preview";
+import {
+  buildKitchenOrderRows,
+  type KitchenOrderRow,
+} from "./offer-kitchen-orders";
+import {
+  buildKitchenPreview,
+  type PreviewLegInput,
+} from "./offer-kitchen-preview";
 
 export type KitchenMismatchKind =
   | "missing-lines"
@@ -105,7 +111,10 @@ export function checkKitchenPreviewMatchesOutput(
   const writtenByTarget = new Map<string, Line[]>();
   for (const row of rows) {
     const line = fromRow(row);
-    writtenByTarget.set(line.target, [...(writtenByTarget.get(line.target) ?? []), line]);
+    writtenByTarget.set(line.target, [
+      ...(writtenByTarget.get(line.target) ?? []),
+      line,
+    ]);
   }
 
   // Walk each field's expectation against the written stream of its target.
@@ -189,7 +198,9 @@ export function checkKitchenPreviewMatchesOutput(
 }
 
 /** One-line summary of a failed check, for logs and test failures. */
-export function formatKitchenMismatches(result: KitchenConsistencyResult): string {
+export function formatKitchenMismatches(
+  result: KitchenConsistencyResult,
+): string {
   if (result.ok) return "";
   return result.mismatches
     .map((m) => `${m.legName} [${m.kind}]: ${m.detail}`)

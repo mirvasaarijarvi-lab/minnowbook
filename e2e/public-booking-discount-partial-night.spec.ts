@@ -61,7 +61,10 @@ test.describe("Discounted partial-night stays", () => {
     !(process.env.SERVICE_ROLE_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY),
     "Set SERVICE_ROLE_KEY to run this spec.",
   );
-  test.skip(!SUPABASE_ANON_KEY, "Set VITE_SUPABASE_PUBLISHABLE_KEY to run this spec.");
+  test.skip(
+    !SUPABASE_ANON_KEY,
+    "Set VITE_SUPABASE_PUBLISHABLE_KEY to run this spec.",
+  );
 
   test("prices partial nights correctly and reflects them in the dashboard", async ({
     ephemeralTenant,
@@ -113,23 +116,26 @@ test.describe("Discounted partial-night stays", () => {
     expect(code!.used_count).toBe(0);
 
     const book = async (payload: Record<string, unknown>) => {
-      const res = await request.post(`${SUPABASE_URL}/functions/v1/public-booking`, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-          apikey: SUPABASE_ANON_KEY,
+      const res = await request.post(
+        `${SUPABASE_URL}/functions/v1/public-booking`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+            apikey: SUPABASE_ANON_KEY,
+          },
+          data: {
+            tenant_id: tenantId,
+            reservation_type: "guesthouse",
+            resource_id: resourceId,
+            guests_count: 2,
+            guest_phone: "+358401234567",
+            promo_code: promoCode.toLowerCase(), // case-insensitive claim
+            ...payload,
+          },
+          timeout: 30_000,
         },
-        data: {
-          tenant_id: tenantId,
-          reservation_type: "guesthouse",
-          resource_id: resourceId,
-          guests_count: 2,
-          guest_phone: "+358401234567",
-          promo_code: promoCode.toLowerCase(), // case-insensitive claim
-          ...payload,
-        },
-        timeout: 30_000,
-      });
+      );
       const bodyText = await res.text();
       expect(res.status(), `public-booking failed: ${bodyText}`).toBe(200);
     };
@@ -192,24 +198,31 @@ test.describe("Discounted partial-night stays", () => {
     expect(claimed!.used_count).toBe(2);
 
     // 4. Sign the owner in and inspect both bookings in the dashboard.
-    const { error: pwErr } = await admin.auth.admin.updateUserById(ownerUserId, {
-      password: ownerPassword,
-    });
+    const { error: pwErr } = await admin.auth.admin.updateUserById(
+      ownerUserId,
+      {
+        password: ownerPassword,
+      },
+    );
     expect(pwErr, pwErr?.message).toBeNull();
 
     const anon = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
       auth: { persistSession: false, autoRefreshToken: false },
     });
-    const { data: signIn, error: signInErr } = await anon.auth.signInWithPassword({
-      email: ownerEmail,
-      password: ownerPassword,
-    });
+    const { data: signIn, error: signInErr } =
+      await anon.auth.signInWithPassword({
+        email: ownerEmail,
+        password: ownerPassword,
+      });
     expect(signInErr, `owner sign-in failed: ${signInErr?.message}`).toBeNull();
     await seedSession(page, signIn.session);
 
     await page.goto("/dashboard");
     await expect(page).toHaveURL(/\/dashboard/);
-    await page.getByRole("button", { name: "Reservations", exact: true }).first().click();
+    await page
+      .getByRole("button", { name: "Reservations", exact: true })
+      .first()
+      .click();
 
     // 4a. Discounted multi-night stay: rounded total, badge, code, invoicing.
     const stayCard = page
@@ -218,10 +231,16 @@ test.describe("Discounted partial-night stays", () => {
       .filter({ hasText: `€${FINAL_EUR.toFixed(2)}` })
       .last();
     await expect(stayCard).toBeVisible({ timeout: 20_000 });
-    await expect(stayCard.getByText(`€${FINAL_EUR.toFixed(2)}`).first()).toBeVisible();
+    await expect(
+      stayCard.getByText(`€${FINAL_EUR.toFixed(2)}`).first(),
+    ).toBeVisible();
     // Discount badge uses a minus sign (U+2212) before the percentage.
-    await expect(stayCard.getByText(`\u2212${DISCOUNT_PERCENT}%`).first()).toBeVisible();
-    await expect(stayCard.getByText(new RegExp(promoCode, "i")).first()).toBeVisible();
+    await expect(
+      stayCard.getByText(`\u2212${DISCOUNT_PERCENT}%`).first(),
+    ).toBeVisible();
+    await expect(
+      stayCard.getByText(new RegExp(promoCode, "i")).first(),
+    ).toBeVisible();
     // The pre-discount gross must never leak into the row as the amount due.
     await expect(stayCard.getByText(`€${GROSS_EUR.toFixed(2)}`)).toHaveCount(0);
 
@@ -232,7 +251,9 @@ test.describe("Discounted partial-night stays", () => {
       .getByRole("checkbox");
     await expect(stayInvoiced).toHaveAttribute("data-state", "unchecked");
     await stayInvoiced.click();
-    await expect(stayInvoiced).toHaveAttribute("data-state", "checked", { timeout: 15_000 });
+    await expect(stayInvoiced).toHaveAttribute("data-state", "checked", {
+      timeout: 15_000,
+    });
     await expect
       .poll(
         async () => {
@@ -242,7 +263,8 @@ test.describe("Discounted partial-night stays", () => {
             .eq("id", stayRow.id)
             .single();
           return (
-            data?.is_invoiced === true && Math.abs(Number(data?.price_eur) - FINAL_EUR) < 0.005
+            data?.is_invoiced === true &&
+            Math.abs(Number(data?.price_eur) - FINAL_EUR) < 0.005
           );
         },
         { timeout: 15_000, intervals: [500, 1000, 2000] },
@@ -257,7 +279,9 @@ test.describe("Discounted partial-night stays", () => {
       .last();
     await expect(dayCard).toBeVisible({ timeout: 20_000 });
     await expect(dayCard.getByText(/^€\d/)).toHaveCount(0);
-    await expect(dayCard.getByText(`\u2212${DISCOUNT_PERCENT}%`).first()).toBeVisible();
+    await expect(
+      dayCard.getByText(`\u2212${DISCOUNT_PERCENT}%`).first(),
+    ).toBeVisible();
 
     const dayInvoiced = dayCard
       .locator("label")
@@ -267,7 +291,9 @@ test.describe("Discounted partial-night stays", () => {
     await expect(dayInvoiced).toHaveAttribute("data-state", "unchecked");
     await dayInvoiced.click();
     await expect(
-      page.getByText("Add a price before marking this reservation as invoiced."),
+      page.getByText(
+        "Add a price before marking this reservation as invoiced.",
+      ),
     ).toBeVisible({ timeout: 10_000 });
     await expect(dayInvoiced).toHaveAttribute("data-state", "unchecked");
 

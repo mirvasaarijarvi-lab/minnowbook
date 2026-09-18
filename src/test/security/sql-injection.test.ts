@@ -5,7 +5,8 @@ import { describe, it, expect } from "vitest";
  * Validates that all user inputs are properly sanitized before use.
  */
 
-const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const uuidRegex =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const roleRegex = /^[a-zA-Z0-9_-]{1,50}$/;
 
@@ -33,7 +34,7 @@ describe("SQL Injection Prevention - Security Regression Tests", () => {
     const emailInjections = [
       "admin@example.com' OR '1'='1",
       "'; DROP TABLE--@x.com",
-      "user@example.com\"; DELETE FROM",
+      'user@example.com"; DELETE FROM',
       "user@ex.com' UNION SELECT password FROM auth.users--",
     ];
 
@@ -76,7 +77,8 @@ describe("SQL Injection Prevention - Security Regression Tests", () => {
     it("no string concatenation in query building", () => {
       // Dangerous pattern: `SELECT * FROM users WHERE id = '${id}'`
       const dangerousPattern = /SELECT.*\$\{/;
-      const safeCode = 'adminClient.from("tenant_users").select("*").eq("tenant_id", tenantId)';
+      const safeCode =
+        'adminClient.from("tenant_users").select("*").eq("tenant_id", tenantId)';
       expect(dangerousPattern.test(safeCode)).toBe(false);
     });
   });

@@ -24,7 +24,9 @@ import {
 
 const cents = (n: number) => Math.round(n * 100);
 
-const row = (over: Partial<AccommodationPricingRow> = {}): AccommodationPricingRow => ({
+const row = (
+  over: Partial<AccommodationPricingRow> = {},
+): AccommodationPricingRow => ({
   reservation_type: "guesthouse",
   date: "2099-06-01",
   check_out_date: "2099-06-04",
@@ -47,20 +49,39 @@ const csvCells = (r: AccommodationPricingRow) => {
   if (isAccommodationRow(r)) {
     return {
       price: room.toFixed(2),
-      total: bf > 0 ? `${room.toFixed(2)} + Breakfast: ${bf.toFixed(2)} = ${total.toFixed(2)}` : total.toFixed(2),
+      total:
+        bf > 0
+          ? `${room.toFixed(2)} + Breakfast: ${bf.toFixed(2)} = ${total.toFixed(2)}`
+          : total.toFixed(2),
     };
   }
-  return { price: total > 0 ? total.toFixed(2) : "-", total: total > 0 ? total.toFixed(2) : "-" };
+  return {
+    price: total > 0 ? total.toFixed(2) : "-",
+    total: total > 0 ? total.toFixed(2) : "-",
+  };
 };
 
 const stays: AccommodationPricingRow[] = [
   row(),
-  row({ price_eur: 269.703, breakfast_price_per_person: 0.33, guests_count: 3 }),
+  row({
+    price_eur: 269.703,
+    breakfast_price_per_person: 0.33,
+    guests_count: 3,
+  }),
   row({ price_eur: 180.699, breakfast_included: false }),
-  row({ reservation_type: "hotel", price_eur: 1234.567, breakfast_price_per_person: 19.99 }),
+  row({
+    reservation_type: "hotel",
+    price_eur: 1234.567,
+    breakfast_price_per_person: 19.99,
+  }),
   row({ price_eur: 120, guests_count: 6, breakfast_price_per_person: 25 }),
   row({ reservation_type: "venue", price_eur: 450, breakfast_included: false }),
-  row({ reservation_type: "restaurant", pricing_type: "menu", price_eur: 99, breakfast_included: false }),
+  row({
+    reservation_type: "restaurant",
+    pricing_type: "menu",
+    price_eur: 99,
+    breakfast_included: false,
+  }),
 ];
 
 describe("period report exports use one accommodation calculation", () => {
@@ -73,7 +94,9 @@ describe("period report exports use one accommodation calculation", () => {
       expect(csvTotal).toBe(shown > 0 ? csvCells(r).total : "-");
       if (shown > 0) expect(csvTotal.endsWith(shown.toFixed(2))).toBe(true);
       if (isAccommodationRow(r)) {
-        expect(cents(calcRoomPrice(r)) + cents(calcBreakfastPrice(r))).toBe(cents(shown));
+        expect(cents(calcRoomPrice(r)) + cents(calcBreakfastPrice(r))).toBe(
+          cents(shown),
+        );
       }
     }
   });
@@ -85,14 +108,22 @@ describe("period report exports use one accommodation calculation", () => {
   });
 
   it("counts restaurant 'according to menu' bookings as no amount everywhere", () => {
-    const menu = row({ reservation_type: "restaurant", pricing_type: "menu", price_eur: 99, breakfast_included: false });
+    const menu = row({
+      reservation_type: "restaurant",
+      pricing_type: "menu",
+      price_eur: 99,
+      breakfast_included: false,
+    });
     expect(effectiveChargedTotal(menu)).toBe(0);
     expect(pdfTotalCell(menu)).toBe("-");
     expect(csvCells(menu).total).toBe("-");
   });
 
   it("makes the grand total equal the sum of the room and breakfast lines", () => {
-    const grandTotalC = stays.reduce((s, r) => s + cents(effectiveChargedTotal(r)), 0);
+    const grandTotalC = stays.reduce(
+      (s, r) => s + cents(effectiveChargedTotal(r)),
+      0,
+    );
     const linesC = stays.reduce(
       (s, r) =>
         s +
@@ -117,7 +148,11 @@ describe("period report exports use one accommodation calculation", () => {
     expect(src).not.toMatch(/return r\.price_eur \?\? 0/);
     expect(src).not.toMatch(/price_eur\s*\??\?\?\s*0\)\s*\*\s*calcNights/);
     // PDF, CSV and print all read the same three helpers.
-    for (const helper of ["effectivePrice(r)", "calcRoomPrice(r)", "calcBreakfastPrice(r)"]) {
+    for (const helper of [
+      "effectivePrice(r)",
+      "calcRoomPrice(r)",
+      "calcBreakfastPrice(r)",
+    ]) {
       expect(src).toContain(helper);
     }
   });

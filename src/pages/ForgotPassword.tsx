@@ -45,7 +45,9 @@ const ForgotPassword = () => {
             <div className="flex h-16 w-16 items-center justify-center rounded-full bg-accent/10 mx-auto mb-6">
               <Mail className="h-8 w-8 text-accent" />
             </div>
-            <h1 className="text-2xl font-serif font-bold text-foreground mb-2">{t("forgot.checkEmail")}</h1>
+            <h1 className="text-2xl font-serif font-bold text-foreground mb-2">
+              {t("forgot.checkEmail")}
+            </h1>
             <p className="text-muted-foreground mb-6">
               {t("forgot.checkEmailDesc")} <strong>{email}</strong>.
             </p>
@@ -58,22 +60,40 @@ const ForgotPassword = () => {
           </div>
         ) : (
           <>
-            <h1 className="text-2xl font-serif font-bold text-foreground mb-2">{t("forgot.title")}</h1>
+            <h1 className="text-2xl font-serif font-bold text-foreground mb-2">
+              {t("forgot.title")}
+            </h1>
             <p className="text-muted-foreground mb-8">{t("forgot.subtitle")}</p>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <Label htmlFor="email">{t("common.email")}</Label>
-                <Input id="email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
               </div>
 
-              <Button type="submit" variant="hero" size="lg" className="w-full" disabled={loading}>
+              <Button
+                type="submit"
+                variant="hero"
+                size="lg"
+                className="w-full"
+                disabled={loading}
+              >
                 {loading ? t("forgot.sending") : t("forgot.sendLink")}
               </Button>
             </form>
 
             <p className="mt-6 text-center text-sm text-muted-foreground">
-              <Link to="/login" className="text-accent font-medium hover:underline">
+              <Link
+                to="/login"
+                className="text-accent font-medium hover:underline"
+              >
                 <ArrowLeft className="h-3 w-3 inline mr-1" />
                 {t("forgot.backToLogin")}
               </Link>

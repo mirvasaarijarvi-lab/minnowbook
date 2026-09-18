@@ -53,23 +53,28 @@ export function ruleForIssue(issue: Issue): string {
   if (/must be an absolute https URL/i.test(m)) return "invalid-https-url";
   if (/ImageObject must declare numeric width and height/i.test(m))
     return "image-missing-dimensions";
-  if (/ImageObject is missing or not an object/i.test(m)) return "image-missing";
+  if (/ImageObject is missing or not an object/i.test(m))
+    return "image-missing";
   if (/expected ImageObject/i.test(m)) return "image-wrong-type";
   if (/author @type must be Person or Organization/i.test(m))
     return "author-invalid-type";
-  if (/author node is missing or not an object/i.test(m)) return "author-missing";
+  if (/author node is missing or not an object/i.test(m))
+    return "author-missing";
   if (/author array is empty/i.test(m)) return "author-empty-array";
   if (/publisher/i.test(issue.path) && /Organization/i.test(m))
     return "publisher-invalid-type";
-  if (/publisher/i.test(m) && /Organization/i.test(m)) return "publisher-invalid-type";
+  if (/publisher/i.test(m) && /Organization/i.test(m))
+    return "publisher-invalid-type";
   if (/missing publisher/i.test(m)) return "publisher-missing";
   if (/mainEntityOfPage/i.test(m)) return "main-entity-invalid";
   if (/wordCount must be > 0/i.test(m)) return "invalid-word-count";
   if (/must be a non-empty array of Question nodes/i.test(m))
     return "faq-empty-main-entity";
   if (/must be Question/i.test(m)) return "faq-question-invalid-type";
-  if (/missing\/empty question text/i.test(m)) return "faq-question-missing-name";
-  if (/must be Answer with non-empty text/i.test(m)) return "faq-answer-invalid";
+  if (/missing\/empty question text/i.test(m))
+    return "faq-question-missing-name";
+  if (/must be Answer with non-empty text/i.test(m))
+    return "faq-answer-invalid";
   if (/buildBlogPostJsonLd returned no nodes/i.test(m)) return "empty-jsonld";
   return "other";
 }
@@ -97,7 +102,9 @@ export function resolvePath(nodes: unknown, rawPath: string): unknown {
     const head = firstDot === -1 ? rawPath : rawPath.slice(0, firstDot);
     cursor = nodes.find(
       (n) =>
-        n && typeof n === "object" && (n as Record<string, unknown>)["@type"] === head,
+        n &&
+        typeof n === "object" &&
+        (n as Record<string, unknown>)["@type"] === head,
     );
     rest = firstDot === -1 ? "" : rawPath.slice(firstDot + 1);
   }
@@ -230,7 +237,9 @@ export function renderMarkdown(report: Report): string {
     if (post.entries.length === 0) continue;
     lines.push(
       `## \`${post.slug}\` — ${post.warningCount} warning(s)` +
-        (post.suppressedCount > 0 ? ` (+${post.suppressedCount} suppressed)` : ""),
+        (post.suppressedCount > 0
+          ? ` (+${post.suppressedCount} suppressed)`
+          : ""),
     );
     lines.push("");
     lines.push("| Rule | Field path | Value | Message | Status |");

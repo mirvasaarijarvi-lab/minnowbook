@@ -20,5 +20,7 @@ export const useAllowedReservationTypes = (): string[] => {
     },
   });
 
-  return (data?.allowed_reservation_types as string[] | undefined) ?? ["restaurant"];
+  return (
+    (data?.allowed_reservation_types as string[] | undefined) ?? ["restaurant"]
+  );
 };

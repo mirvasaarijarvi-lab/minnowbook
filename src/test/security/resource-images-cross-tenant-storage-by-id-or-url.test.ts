@@ -24,14 +24,17 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 const SUPABASE_URL =
-  (import.meta.env?.VITE_SUPABASE_URL as string | undefined) ?? process.env.SUPABASE_URL;
+  (import.meta.env?.VITE_SUPABASE_URL as string | undefined) ??
+  process.env.SUPABASE_URL;
 const SUPABASE_ANON_KEY =
   (import.meta.env?.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined) ??
   process.env.SUPABASE_ANON_KEY;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 const BUCKET = "tenant-assets";
-const canRun = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY && SUPABASE_SERVICE_ROLE_KEY);
+const canRun = Boolean(
+  SUPABASE_URL && SUPABASE_ANON_KEY && SUPABASE_SERVICE_ROLE_KEY,
+);
 
 const newService = (): SupabaseClient =>
   createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!, {
@@ -109,14 +112,21 @@ describe.runIf(canRun)(
 
       const fileName = `gallery-${stamp}.jpg`;
       const objectPath = `${tenantAId}/resources/${resourceId}/${fileName}`;
-      const fileBytes = new Uint8Array([0xff, 0xd8, 0xff, 0xd9, 0x55, 0x66, 0x77, 0x88]);
+      const fileBytes = new Uint8Array([
+        0xff, 0xd8, 0xff, 0xd9, 0x55, 0x66, 0x77, 0x88,
+      ]);
 
       const { error: upErr } = await service.storage
         .from(BUCKET)
-        .upload(objectPath, fileBytes, { contentType: "image/jpeg", upsert: true });
+        .upload(objectPath, fileBytes, {
+          contentType: "image/jpeg",
+          upsert: true,
+        });
       if (upErr) throw upErr;
 
-      const { data: urlData } = service.storage.from(BUCKET).getPublicUrl(objectPath);
+      const { data: urlData } = service.storage
+        .from(BUCKET)
+        .getPublicUrl(objectPath);
       const publicUrl = urlData.publicUrl;
 
       const { data: img, error: iErr } = await service
@@ -148,11 +158,12 @@ describe.runIf(canRun)(
 
       const email = `ci-resimg-xtidurl+${stamp}-${rand}@example.invalid`;
       const password = `Pw!staff${rand}${stamp}`;
-      const { data: created, error: cErr } = await service.auth.admin.createUser({
-        email,
-        password,
-        email_confirm: true,
-      });
+      const { data: created, error: cErr } =
+        await service.auth.admin.createUser({
+          email,
+          password,
+          email_confirm: true,
+        });
       if (cErr || !created?.user) throw cErr ?? new Error("auth create failed");
 
       const { error: tuErr } = await service.from("tenant_users").insert({
@@ -185,17 +196,30 @@ describe.runIf(canRun)(
     afterAll(async () => {
       await tenantBClient?.auth.signOut().catch(() => {});
       if (!seeded) return;
-      await service.storage.from(BUCKET).remove([seeded.objectPath]).catch(() => {});
+      await service.storage
+        .from(BUCKET)
+        .remove([seeded.objectPath])
+        .catch(() => {});
       await service.from("resource_images").delete().eq("id", seeded.imageId);
       await service.from("resources").delete().eq("id", seeded.resourceId);
-      await service.from("tenant_users").delete().eq("user_id", seeded.tenantBUser.userId);
-      await service.from("tenants").delete().in("id", [seeded.tenantAId, seeded.tenantBId]);
-      await service.auth.admin.deleteUser(seeded.tenantBUser.userId).catch(() => {});
+      await service
+        .from("tenant_users")
+        .delete()
+        .eq("user_id", seeded.tenantBUser.userId);
+      await service
+        .from("tenants")
+        .delete()
+        .in("id", [seeded.tenantAId, seeded.tenantBId]);
+      await service.auth.admin
+        .deleteUser(seeded.tenantBUser.userId)
+        .catch(() => {});
     }, 90_000);
 
     it("sanity: service role CAN download the seeded object", async () => {
       if (!seeded) throw new Error("seed missing");
-      const { data, error } = await service.storage.from(BUCKET).download(seeded.objectPath);
+      const { data, error } = await service.storage
+        .from(BUCKET)
+        .download(seeded.objectPath);
       expect(error).toBeNull();
       expect(data).toBeTruthy();
       const bytes = new Uint8Array(await (data as Blob).arrayBuffer());
@@ -205,7 +229,8 @@ describe.runIf(canRun)(
     type Caller = { kind: "anon" } | { kind: "tenantB" };
     const CALLERS: Caller[] = [{ kind: "anon" }, { kind: "tenantB" }];
 
-    const label = (c: Caller) => (c.kind === "anon" ? "anon" : "Tenant B staff");
+    const label = (c: Caller) =>
+      c.kind === "anon" ? "anon" : "Tenant B staff";
 
     function clientFor(caller: Caller): SupabaseClient {
       if (caller.kind === "anon") return newAnon();
@@ -264,7 +289,9 @@ describe.runIf(canRun)(
         if (!seeded) throw new Error("seed missing");
         const c = clientFor(caller);
         const path = objectPathFromPublicUrl(seeded.publicUrl, BUCKET);
-        const { data, error } = await c.storage.from(BUCKET).createSignedUrl(path, 60);
+        const { data, error } = await c.storage
+          .from(BUCKET)
+          .createSignedUrl(path, 60);
         if (error) {
           expect(data?.signedUrl ?? null).toBeNull();
         } else {

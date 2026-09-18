@@ -53,10 +53,20 @@ interface GeneratedCase {
   row: ReportPricingRow;
 }
 
-const RESERVATION_TYPES = ["guesthouse", "hotel", "venue", "restaurant", "wellness"] as const;
+const RESERVATION_TYPES = [
+  "guesthouse",
+  "hotel",
+  "venue",
+  "restaurant",
+  "wellness",
+] as const;
 
-const generate = (rand: () => number, seed: number, index: number): GeneratedCase => {
-  const pick = <T,>(arr: readonly T[]) => arr[Math.floor(rand() * arr.length)];
+const generate = (
+  rand: () => number,
+  seed: number,
+  index: number,
+): GeneratedCase => {
+  const pick = <T>(arr: readonly T[]) => arr[Math.floor(rand() * arr.length)];
   const between = (min: number, max: number, decimals = 2) => {
     const v = min + rand() * (max - min);
     return Number(v.toFixed(decimals));
@@ -69,7 +79,11 @@ const generate = (rand: () => number, seed: number, index: number): GeneratedCas
   // Breakfast rate: sometimes missing, sometimes zero, sometimes odd cents.
   const rateRoll = rand();
   const breakfastRate =
-    rateRoll < 0.15 ? null : rateRoll < 0.2 ? 0 : between(0.01, 45, rand() < 0.3 ? 3 : 2);
+    rateRoll < 0.15
+      ? null
+      : rateRoll < 0.2
+        ? 0
+        : between(0.01, 45, rand() < 0.3 ? 3 : 2);
   const breakfastIncluded = rand() < 0.75;
   const pricingType =
     reservationType === "restaurant"
@@ -79,7 +93,9 @@ const generate = (rand: () => number, seed: number, index: number): GeneratedCas
         : null;
 
   const effectiveRate = breakfastIncluded ? (breakfastRate ?? 15) : 0;
-  const listPrice = roundCents(nightly * nights + effectiveRate * guests * nights);
+  const listPrice = roundCents(
+    nightly * nights + effectiveRate * guests * nights,
+  );
 
   const kind = pick([
     "none",
@@ -159,9 +175,10 @@ describe("property: accommodation lines always sum to the charged total", () => 
       kindsSeen.add(c.kind);
 
       // The core invariant, in integer cents.
-      expect(Math.round(a.room * 100) + Math.round(a.breakfast * 100), why).toBe(
-        Math.round(a.charged * 100),
-      );
+      expect(
+        Math.round(a.room * 100) + Math.round(a.breakfast * 100),
+        why,
+      ).toBe(Math.round(a.charged * 100));
       // No negative or non-finite money ever reaches a report.
       for (const v of [a.charged, a.room, a.breakfast]) {
         expect(Number.isFinite(v), why).toBe(true);
@@ -212,18 +229,21 @@ describe("property: accommodation lines always sum to the charged total", () => 
 
       // The PDF's three money columns add up.
       const pdfRoom = Number(pdf.room);
-      const pdfBreakfast = pdf.breakfast === PDF_NO_AMOUNT ? 0 : Number(pdf.breakfast);
+      const pdfBreakfast =
+        pdf.breakfast === PDF_NO_AMOUNT ? 0 : Number(pdf.breakfast);
       const pdfTotal = Number(pdf.total);
-      expect(Math.round(pdfRoom * 100) + Math.round(pdfBreakfast * 100), why).toBe(
-        Math.round(pdfTotal * 100),
-      );
+      expect(
+        Math.round(pdfRoom * 100) + Math.round(pdfBreakfast * 100),
+        why,
+      ).toBe(Math.round(pdfTotal * 100));
       expect(pdfTotal, why).toBeCloseTo(a.charged, 10);
 
       // The CSV split, when spelled out, adds up to the same amount.
       if (split) {
-        expect(Math.round(split.room * 100) + Math.round(split.breakfast * 100), why).toBe(
-          Math.round(split.total * 100),
-        );
+        expect(
+          Math.round(split.room * 100) + Math.round(split.breakfast * 100),
+          why,
+        ).toBe(Math.round(split.total * 100));
         expect(split.total, why).toBeCloseTo(a.charged, 10);
       } else {
         expect(Number(csv.total), why).toBeCloseTo(a.charged, 10);

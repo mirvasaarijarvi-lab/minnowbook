@@ -46,9 +46,15 @@ export const PERMISSION_CATEGORIES = [
     category: "admin.catReservations",
     permissions: [
       { key: PERM_RESERVATIONS_VIEW, labelKey: "admin.permViewReservations" },
-      { key: PERM_RESERVATIONS_CREATE, labelKey: "admin.permCreateReservations" },
+      {
+        key: PERM_RESERVATIONS_CREATE,
+        labelKey: "admin.permCreateReservations",
+      },
       { key: PERM_RESERVATIONS_EDIT, labelKey: "admin.permEditReservations" },
-      { key: PERM_RESERVATIONS_DELETE, labelKey: "admin.permDeleteReservations" },
+      {
+        key: PERM_RESERVATIONS_DELETE,
+        labelKey: "admin.permDeleteReservations",
+      },
     ],
   },
   {

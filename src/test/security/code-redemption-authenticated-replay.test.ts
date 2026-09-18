@@ -89,7 +89,9 @@ function skipReason(): string {
 
 /** SHA-256 of the canonical access-code form. Mirrors `lookup_access_code_by_plaintext`. */
 function hashCode(plaintext: string): string {
-  return createHash("sha256").update(plaintext.trim().toUpperCase()).digest("hex");
+  return createHash("sha256")
+    .update(plaintext.trim().toUpperCase())
+    .digest("hex");
 }
 
 /** Generates a fresh BETA-style plaintext code per test, so seed/cleanup never collides. */
@@ -108,7 +110,10 @@ async function ensureFixtureUser(admin: SupabaseClient): Promise<{
 }> {
   let userId: string | null = null;
   for (let page = 1; page <= 5; page++) {
-    const { data, error } = await admin.auth.admin.listUsers({ page, perPage: 200 });
+    const { data, error } = await admin.auth.admin.listUsers({
+      page,
+      perPage: 200,
+    });
     if (error) throw new Error(`listUsers failed: ${error.message}`);
     const users = data.users as Array<{ id: string; email?: string }>;
     const found = users.find(
@@ -149,12 +154,16 @@ async function ensureFixtureUser(admin: SupabaseClient): Promise<{
     email: FIXTURE_EMAIL,
     password: FIXTURE_PASSWORD,
   });
-  if (signInErr) throw new Error(`fixture sign-in failed: ${signInErr.message}`);
-  const { data: tenantId, error: rpcErr } = await userClient.rpc("create_tenant", {
-    p_name: FIXTURE_TENANT_NAME,
-    p_slug: FIXTURE_TENANT_SLUG,
-    p_tier: "basic",
-  });
+  if (signInErr)
+    throw new Error(`fixture sign-in failed: ${signInErr.message}`);
+  const { data: tenantId, error: rpcErr } = await userClient.rpc(
+    "create_tenant",
+    {
+      p_name: FIXTURE_TENANT_NAME,
+      p_slug: FIXTURE_TENANT_SLUG,
+      p_tier: "basic",
+    },
+  );
   if (rpcErr) throw new Error(`create_tenant failed: ${rpcErr.message}`);
   if (!tenantId) throw new Error("create_tenant returned no id");
   return { userId, tenantId: tenantId as string };
@@ -321,7 +330,11 @@ suite(
       // Clean slate for this code.
       await admin
         .from("tenants")
-        .update({ tier: "basic", sample_start_date: null, sample_end_date: null })
+        .update({
+          tier: "basic",
+          sample_start_date: null,
+          sample_end_date: null,
+        })
         .eq("id", tenantId);
       await admin
         .from("access_code_redemptions")
@@ -388,7 +401,11 @@ suite(
 
       await admin
         .from("tenants")
-        .update({ tier: "basic", sample_start_date: null, sample_end_date: null })
+        .update({
+          tier: "basic",
+          sample_start_date: null,
+          sample_end_date: null,
+        })
         .eq("id", tenantId);
       await admin
         .from("access_code_redemptions")
@@ -397,7 +414,9 @@ suite(
 
       // First redeem — establishes the "used" state.
       const first = await callRedeem(token, plaintext);
-      expect(first.status, `first redeem must succeed: ${first.rawText}`).toBe(200);
+      expect(first.status, `first redeem must succeed: ${first.rawText}`).toBe(
+        200,
+      );
 
       // Replay 1 — must be a generic INVALID_OR_UNAVAILABLE_CODE 4xx.
       const replay1 = await callRedeem(token, plaintext);
@@ -444,16 +463,18 @@ suite(
       const replay2 = await callRedeem(token, plaintext);
       const replay3 = await callRedeem(token, plaintext);
 
-      expect(replay2.status, "replay status must be stable").toBe(replay1.status);
-      expect(replay3.status, "replay status must be stable").toBe(replay1.status);
-      expect(
-        bodyCode(replay2.body),
-        "replay error code must be stable",
-      ).toBe(bodyCode(replay1.body));
-      expect(
-        bodyCode(replay3.body),
-        "replay error code must be stable",
-      ).toBe(bodyCode(replay1.body));
+      expect(replay2.status, "replay status must be stable").toBe(
+        replay1.status,
+      );
+      expect(replay3.status, "replay status must be stable").toBe(
+        replay1.status,
+      );
+      expect(bodyCode(replay2.body), "replay error code must be stable").toBe(
+        bodyCode(replay1.body),
+      );
+      expect(bodyCode(replay3.body), "replay error code must be stable").toBe(
+        bodyCode(replay1.body),
+      );
       expect(
         replay2.rawText,
         "replay body must be byte-identical across repeats",
@@ -509,7 +530,11 @@ suite(
 
       await admin
         .from("tenants")
-        .update({ tier: "basic", sample_start_date: null, sample_end_date: null })
+        .update({
+          tier: "basic",
+          sample_start_date: null,
+          sample_end_date: null,
+        })
         .eq("id", tenantId);
       await admin
         .from("access_code_redemptions")

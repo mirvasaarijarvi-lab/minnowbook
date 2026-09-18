@@ -130,7 +130,10 @@ const PERMISSION_ERROR: PostgrestError = {
   details: "",
   hint: "",
   name: "PostgrestError",
-  toJSON: () => ({ code: "42501", message: "permission denied for table reservations" }),
+  toJSON: () => ({
+    code: "42501",
+    message: "permission denied for table reservations",
+  }),
 } as unknown as PostgrestError;
 
 type FuzzKind = "read" | "write" | "scan";
@@ -142,10 +145,12 @@ interface FuzzCase {
 }
 
 function makeCase(rand: () => number, index: number): FuzzCase {
-  const pick = <T,>(list: readonly T[]): T => list[Math.floor(rand() * list.length)];
+  const pick = <T>(list: readonly T[]): T =>
+    list[Math.floor(rand() * list.length)];
   const table = pick(TABLES);
   const operation = pick(OPERATIONS);
-  const kind: FuzzKind = operation === "SELECT" ? (rand() < 0.25 ? "scan" : "read") : "write";
+  const kind: FuzzKind =
+    operation === "SELECT" ? (rand() < 0.25 ? "scan" : "read") : "write";
 
   const limit = 1 + Math.floor(rand() * 200);
   const page = Math.floor(rand() * 40);
@@ -159,7 +164,9 @@ function makeCase(rand: () => number, index: number): FuzzCase {
 
   const clauses = [
     `from ${table}`,
-    kind === "scan" ? "no tenant filter (RLS must scope)" : `where tenant_id = '${id}'`,
+    kind === "scan"
+      ? "no tenant filter (RLS must scope)"
+      : `where tenant_id = '${id}'`,
     search ? `and guest_name ilike '%${search}%'` : "",
     `order by ${sortColumn} ${ascending ? "asc" : "desc"} nulls ${nullsFirst ? "first" : "last"}`,
     `range(${from}, ${to})`,
@@ -186,7 +193,10 @@ function makeCase(rand: () => number, index: number): FuzzCase {
 const DENIALS: Array<{ label: string; result: DenialResult }> = [
   { label: "empty result set", result: { data: [], error: null } },
   { label: "no result at all", result: { data: null, error: null } },
-  { label: "permission denied error", result: { data: null, error: PERMISSION_ERROR } },
+  {
+    label: "permission denied error",
+    result: { data: null, error: PERMISSION_ERROR },
+  },
 ];
 
 /**
@@ -233,7 +243,10 @@ function entryFor(name: string, errorMessage: string | null): ReportEntry {
   };
 }
 
-function payloadFor(entries: ReportEntry[], guard: TenantGuardRecord[]): ReportPayload {
+function payloadFor(
+  entries: ReportEntry[],
+  guard: TenantGuardRecord[],
+): ReportPayload {
   return {
     generatedAt: "2026-01-01T00:00:00.000Z",
     flavor: "verify-core",
@@ -258,20 +271,32 @@ const allowedGuard: TenantGuardRecord = {
   membershipB: true,
   emailA: "a@example.test",
   emailB: "b@example.test",
-  membershipRowA: { role: "owner", isApproved: true, userId: "u-a", found: true },
-  membershipRowB: { role: "owner", isApproved: true, userId: "u-b", found: true },
+  membershipRowA: {
+    role: "owner",
+    isApproved: true,
+    userId: "u-a",
+    found: true,
+  },
+  membershipRowB: {
+    role: "owner",
+    isApproved: true,
+    userId: "u-b",
+    found: true,
+  },
 };
 
 const deniedGuard: TenantGuardRecord = { ...allowedGuard, membershipA: false };
 
 const rand = rng(SEED);
-const FUZZ_CASES: FuzzCase[] = Array.from({ length: CASES }, (_, i) => makeCase(rand, i));
+const FUZZ_CASES: FuzzCase[] = Array.from({ length: CASES }, (_, i) =>
+  makeCase(rand, i),
+);
 
 describe(`rls-report deny fuzzing (pagination, sorting, search, ids) [seed=${SEED}, n=${CASES}]`, () => {
   it("generates a varied corpus", () => {
-    expect(new Set(FUZZ_CASES.map((c) => c.ctx.attemptedQuery)).size).toBeGreaterThan(
-      Math.floor(CASES * 0.6),
-    );
+    expect(
+      new Set(FUZZ_CASES.map((c) => c.ctx.attemptedQuery)).size,
+    ).toBeGreaterThan(Math.floor(CASES * 0.6));
     expect(new Set(FUZZ_CASES.map((c) => c.kind)).size).toBeGreaterThan(1);
   });
 
@@ -298,13 +323,19 @@ describe(`rls-report deny fuzzing (pagination, sorting, search, ids) [seed=${SEE
           expect(json).not.toContain(secret);
           expect(html).not.toContain(secret);
         }
-        for (const marker of ["RLS DENIAL FAILED", "Returned rows", "Attempted query"]) {
+        for (const marker of [
+          "RLS DENIAL FAILED",
+          "Returned rows",
+          "Attempted query",
+        ]) {
           expect(json).not.toContain(marker);
           expect(html).not.toContain(marker);
         }
-        expect(json).not.toContain("rlsDetails\":{");
+        expect(json).not.toContain('rlsDetails":{');
         expect(html).not.toContain(`<div class="rls-details"`);
-        expect(guarded.payload.entries.every((e) => e.rlsDetails === null)).toBe(true);
+        expect(
+          guarded.payload.entries.every((e) => e.rlsDetails === null),
+        ).toBe(true);
       });
     }
 
@@ -316,7 +347,10 @@ describe(`rls-report deny fuzzing (pagination, sorting, search, ids) [seed=${SEE
           { data: null, error: null },
         ] as DenialResult[]) {
           if (!isApplicableDenial(c, window)) continue;
-          expect(() => assertDenied(c, window), `${c.label} / ${JSON.stringify(window)}`).not.toThrow();
+          expect(
+            () => assertDenied(c, window),
+            `${c.label} / ${JSON.stringify(window)}`,
+          ).not.toThrow();
         }
       }
     });
@@ -338,12 +372,16 @@ describe(`rls-report deny fuzzing (pagination, sorting, search, ids) [seed=${SEE
         expect(message).toContain(c.ctx.attemptedQuery);
 
         // Allowed pair: the reviewer needs the details.
-        const open = applyReportGuard(payloadFor([entryFor(c.label, message)], [allowedGuard]));
+        const open = applyReportGuard(
+          payloadFor([entryFor(c.label, message)], [allowedGuard]),
+        );
         expect(open.denied).toBe(false);
         expect(renderHtml(open.payload)).toContain(SECRETS.guest);
 
         // Denied pair: nothing about it may be rendered or exported.
-        const closed = applyReportGuard(payloadFor([entryFor(c.label, message)], [deniedGuard]));
+        const closed = applyReportGuard(
+          payloadFor([entryFor(c.label, message)], [deniedGuard]),
+        );
         expect(closed.withheldEntries).toBe(1);
         const json = JSON.stringify(closed.payload);
         const html = renderHtml(closed.payload);

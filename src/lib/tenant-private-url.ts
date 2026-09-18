@@ -15,9 +15,16 @@
  */
 import { supabase } from "@/integrations/supabase/client";
 import { assertSafeStorageObjectPath } from "@/lib/storage-path";
-import { classifySignedUrlFailure, SignedUrlError } from "@/lib/signed-url-error";
+import {
+  classifySignedUrlFailure,
+  SignedUrlError,
+} from "@/lib/signed-url-error";
 
-export { SignedUrlError, isSignedUrlError, type SignedUrlErrorCode } from "@/lib/signed-url-error";
+export {
+  SignedUrlError,
+  isSignedUrlError,
+  type SignedUrlErrorCode,
+} from "@/lib/signed-url-error";
 
 /** 24 hours, in seconds. Matches the chosen TTL for shared private assets. */
 export const PRIVATE_SIGNED_URL_TTL_SECONDS = 24 * 60 * 60;
@@ -48,12 +55,19 @@ interface CacheEntry {
 
 const cache = new Map<string, CacheEntry>();
 
-function cacheKey(path: string, ttl: number, download: SignedUrlOptions["download"]): string {
+function cacheKey(
+  path: string,
+  ttl: number,
+  download: SignedUrlOptions["download"],
+): string {
   return `${path}::${ttl}::${typeof download === "string" ? `s:${download}` : download ? "1" : "0"}`;
 }
 
 function clampTtl(seconds: number | undefined): number {
-  return Math.min(Math.max(1, seconds ?? PRIVATE_SIGNED_URL_TTL_SECONDS), MAX_TTL_SECONDS);
+  return Math.min(
+    Math.max(1, seconds ?? PRIVATE_SIGNED_URL_TTL_SECONDS),
+    MAX_TTL_SECONDS,
+  );
 }
 
 async function mintSignedUrl(
@@ -159,7 +173,9 @@ export async function createTenantPrivateSignedUrls(
   paths: string[],
   options: SignedUrlOptions = {},
 ): Promise<string[]> {
-  return Promise.all(paths.map((p) => createTenantPrivateSignedUrl(p, options)));
+  return Promise.all(
+    paths.map((p) => createTenantPrivateSignedUrl(p, options)),
+  );
 }
 
 /** Drop a single cached entry (e.g., after the underlying object is replaced). */

@@ -56,7 +56,7 @@ function makeRng(seed: number): () => number {
 }
 
 const rng = makeRng(SEED);
-const pick = <T,>(arr: readonly T[]): T => arr[Math.floor(rng() * arr.length)];
+const pick = <T>(arr: readonly T[]): T => arr[Math.floor(rng() * arr.length)];
 
 function randomUuid(): string {
   // RFC4122 v4 using the seeded PRNG so reruns with the same seed match.
@@ -75,7 +75,8 @@ function randomCode(): string {
   const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_";
   const len = 3 + Math.floor(rng() * 18);
   let out = "";
-  for (let i = 0; i < len; i++) out += alphabet[Math.floor(rng() * alphabet.length)];
+  for (let i = 0; i < len; i++)
+    out += alphabet[Math.floor(rng() * alphabet.length)];
   return out;
 }
 
@@ -155,8 +156,26 @@ type FilterOp =
   | "or"
   | "not";
 
-const STRING_OPS: FilterOp[] = ["eq", "neq", "in", "like", "ilike", "or", "not"];
-const NUMERIC_OPS: FilterOp[] = ["eq", "neq", "in", "gt", "gte", "lt", "lte", "or", "not"];
+const STRING_OPS: FilterOp[] = [
+  "eq",
+  "neq",
+  "in",
+  "like",
+  "ilike",
+  "or",
+  "not",
+];
+const NUMERIC_OPS: FilterOp[] = [
+  "eq",
+  "neq",
+  "in",
+  "gt",
+  "gte",
+  "lt",
+  "lte",
+  "or",
+  "not",
+];
 const BOOL_OPS: FilterOp[] = ["eq", "is", "not"];
 const DATE_OPS: FilterOp[] = ["eq", "neq", "gt", "gte", "lt", "lte"];
 /**
@@ -175,21 +194,22 @@ const UUID_COLUMNS = new Set([
 
 function opsFor(column: string): FilterOp[] {
   if (UUID_COLUMNS.has(column)) return UUID_OPS;
-  if (column.includes("_at") || column.includes("until") || column.includes("from")) return DATE_OPS;
+  if (
+    column.includes("_at") ||
+    column.includes("until") ||
+    column.includes("from")
+  )
+    return DATE_OPS;
   if (column === "is_active" || column === "is_revoked") return BOOL_OPS;
   if (
-    [
-      "discount_value",
-      "min_price_eur",
-      "used_count",
-      "max_uses",
-    ].includes(column)
+    ["discount_value", "min_price_eur", "used_count", "max_uses"].includes(
+      column,
+    )
   ) {
     return NUMERIC_OPS;
   }
   return STRING_OPS;
 }
-
 
 interface FuzzFilter {
   description: string;
@@ -368,8 +388,13 @@ describe.runIf(liveAvailable)(
           // Patch payloads kept innocuous: setting columns to themselves where
           // possible. We never want a successful write to actually corrupt
           // data even on a leak — the assertion will still fail loudly.
-          const patches: Record<typeof TARGET_TABLES[number], Record<string, unknown>> = {
-            discount_codes: { description: `fuzz-probe-${Math.floor(rng() * 1e9)}` },
+          const patches: Record<
+            (typeof TARGET_TABLES)[number],
+            Record<string, unknown>
+          > = {
+            discount_codes: {
+              description: `fuzz-probe-${Math.floor(rng() * 1e9)}`,
+            },
             access_code_redemptions: { is_active: false },
           };
           for (let i = 0; i < ITERATIONS; i++) {
@@ -466,8 +491,11 @@ describe.runIf(liveAvailable)(
   },
 );
 
-describe.skipIf(liveAvailable)("RLS fuzzing (skipped — no live credentials)", () => {
-  it("requires live tenant pair fixture", () => {
-    expect(skipReason).toBeTruthy();
-  });
-});
+describe.skipIf(liveAvailable)(
+  "RLS fuzzing (skipped — no live credentials)",
+  () => {
+    it("requires live tenant pair fixture", () => {
+      expect(skipReason).toBeTruthy();
+    });
+  },
+);

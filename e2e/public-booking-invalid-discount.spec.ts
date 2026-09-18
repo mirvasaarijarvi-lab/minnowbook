@@ -1,6 +1,9 @@
 import { test, expect } from "./fixtures/ephemeral-tenant";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./fixtures/test-tenant";
-import { gotoAndWaitForSpa, assertPublicBookingReady } from "./fixtures/spa-waits";
+import {
+  gotoAndWaitForSpa,
+  assertPublicBookingReady,
+} from "./fixtures/spa-waits";
 
 /**
  * End-to-end: a guest enters a bad promo code on the public booking page.
@@ -38,7 +41,10 @@ test.describe("Public booking with an invalid or expired discount code", () => {
     !(process.env.SERVICE_ROLE_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY),
     "Set SERVICE_ROLE_KEY to run this spec.",
   );
-  test.skip(!SUPABASE_ANON_KEY, "Set VITE_SUPABASE_PUBLISHABLE_KEY to run this spec.");
+  test.skip(
+    !SUPABASE_ANON_KEY,
+    "Set VITE_SUPABASE_PUBLISHABLE_KEY to run this spec.",
+  );
 
   test("rejects the booking, shows an error, and writes no price or invoice data", async ({
     ephemeralTenant,
@@ -116,18 +122,29 @@ test.describe("Public booking with an invalid or expired discount code", () => {
       [unknownCode, "unknown"],
       [expiredCode, "expired"],
     ] as const) {
-      const res = await bookWith(promoCode, `TEST CI BadCode ${label} ${stamp}`);
+      const res = await bookWith(
+        promoCode,
+        `TEST CI BadCode ${label} ${stamp}`,
+      );
       const body = await res.text();
       // 5xx means the platform is degraded, not that the contract broke.
-      test.skip(res.status() >= 500, `public-booking degraded (${res.status()}): ${body}`);
-      expect(res.status(), `${label} code should be rejected. Body: ${body}`).toBe(400);
+      test.skip(
+        res.status() >= 500,
+        `public-booking degraded (${res.status()}): ${body}`,
+      );
+      expect(
+        res.status(),
+        `${label} code should be rejected. Body: ${body}`,
+      ).toBe(400);
       expect(body).toMatch(/promo code/i);
     }
 
     // ---- 2. Nothing was written -----------------------------------------
     const { data: rows, error: rowsErr } = await admin
       .from("reservations")
-      .select("id, price_eur, original_price_eur, discount_code_id, discount_value, is_invoiced")
+      .select(
+        "id, price_eur, original_price_eur, discount_code_id, discount_value, is_invoiced",
+      )
       .eq("tenant_id", tenantId);
     expect(rowsErr, rowsErr?.message).toBeNull();
     expect(
@@ -141,7 +158,9 @@ test.describe("Public booking with an invalid or expired discount code", () => {
       .eq("id", expiredId)
       .single();
     expect(codeAfterErr, codeAfterErr?.message).toBeNull();
-    expect(codeAfter!.used_count, "an expired code must not be consumed").toBe(0);
+    expect(codeAfter!.used_count, "an expired code must not be consumed").toBe(
+      0,
+    );
 
     // ---- 3. Browser: the guest sees an error, not a confirmation --------
     await page.addInitScript(() => {
@@ -163,16 +182,26 @@ test.describe("Public booking with an invalid or expired discount code", () => {
 
     const uiGuestName = `TEST CI BadCode UI ${stamp}`;
     await page.locator("#guest_name").fill(uiGuestName);
-    await page.locator("#guest_email").fill(`ci+baddiscount-ui-${stamp}@mimmobook.test`);
+    await page
+      .locator("#guest_email")
+      .fill(`ci+baddiscount-ui-${stamp}@mimmobook.test`);
     await page.locator("#guests_count").fill("2");
 
     // Pick check-in / check-out from next month, so the dates are always in
     // the future regardless of which day the suite runs on.
     const pickDay = async (day: string) => {
-      await page.getByRole("button", { name: /Pick a date/i }).first().click();
-      const popover = page.locator("[data-radix-popper-content-wrapper]").last();
+      await page
+        .getByRole("button", { name: /Pick a date/i })
+        .first()
+        .click();
+      const popover = page
+        .locator("[data-radix-popper-content-wrapper]")
+        .last();
       await popover.getByRole("button", { name: /next month/i }).click();
-      await popover.getByRole("gridcell", { name: day, exact: true }).first().click();
+      await popover
+        .getByRole("gridcell", { name: day, exact: true })
+        .first()
+        .click();
       await page.keyboard.press("Escape");
     };
     await pickDay("10");
@@ -200,7 +229,9 @@ test.describe("Public booking with an invalid or expired discount code", () => {
       .from("reservations")
       .select("id, price_eur, is_invoiced")
       .eq("tenant_id", tenantId);
-    expect(afterUi ?? [], "the browser attempt must not create a reservation").toHaveLength(0);
+    expect(
+      afterUi ?? [],
+      "the browser attempt must not create a reservation",
+    ).toHaveLength(0);
   });
 });
-

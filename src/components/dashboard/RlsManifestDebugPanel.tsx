@@ -109,7 +109,15 @@ interface ManifestDebugReport {
   };
 }
 
-const SectionHeading = ({ icon, title, hint }: { icon: React.ReactNode; title: string; hint?: string }) => (
+const SectionHeading = ({
+  icon,
+  title,
+  hint,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  hint?: string;
+}) => (
   <div className="flex items-center justify-between gap-2 mb-2">
     <div className="flex items-center gap-2">
       {icon}
@@ -138,17 +146,27 @@ const RlsManifestDebugPanel = () => {
       if (error) {
         liveError = error.message;
       } else {
-        live = (data ?? []).map((row: { table_name: string }) => row.table_name).sort();
+        live = (data ?? [])
+          .map((row: { table_name: string }) => row.table_name)
+          .sort();
       }
 
       const liveSet = new Set(live);
-      const uncovered = live.filter((t) => !COVERED_TABLES.has(t) && !(t in EXCLUDED_TABLES));
+      const uncovered = live.filter(
+        (t) => !COVERED_TABLES.has(t) && !(t in EXCLUDED_TABLES),
+      );
       const staleCovered = [...COVERED_TABLES].filter((t) => !liveSet.has(t));
-      const staleExcluded = Object.keys(EXCLUDED_TABLES).filter((t) => !liveSet.has(t));
+      const staleExcluded = Object.keys(EXCLUDED_TABLES).filter(
+        (t) => !liveSet.has(t),
+      );
       const overlap = [...COVERED_TABLES].filter((t) => t in EXCLUDED_TABLES);
 
       const hasErrors =
-        !!liveError || uncovered.length > 0 || staleCovered.length > 0 || staleExcluded.length > 0 || overlap.length > 0;
+        !!liveError ||
+        uncovered.length > 0 ||
+        staleCovered.length > 0 ||
+        staleExcluded.length > 0 ||
+        overlap.length > 0;
 
       return {
         generated_at,
@@ -191,7 +209,11 @@ const RlsManifestDebugPanel = () => {
       await navigator.clipboard.writeText(JSON.stringify(report, null, 2));
       toast({ title: "Copied", description: "Debug report copied as JSON." });
     } catch (e: any) {
-      toast({ title: "Copy failed", description: e?.message ?? "Clipboard unavailable.", variant: "destructive" });
+      toast({
+        title: "Copy failed",
+        description: e?.message ?? "Clipboard unavailable.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -200,7 +222,11 @@ const RlsManifestDebugPanel = () => {
       await navigator.clipboard.writeText(value);
       toast({ title: "Copied", description: `${label} copied to clipboard.` });
     } catch (e: any) {
-      toast({ title: "Copy failed", description: e?.message ?? "Clipboard unavailable.", variant: "destructive" });
+      toast({
+        title: "Copy failed",
+        description: e?.message ?? "Clipboard unavailable.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -218,10 +244,19 @@ const RlsManifestDebugPanel = () => {
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-2">
             <FileCode2 className="h-5 w-5 text-primary" />
-            <CardTitle className="font-serif text-base sm:text-lg">RLS Manifest Debug</CardTitle>
+            <CardTitle className="font-serif text-base sm:text-lg">
+              RLS Manifest Debug
+            </CardTitle>
             {report && (
-              <Badge variant="outline" className={`text-xs ${statusBadgeClass}`}>
-                {status === "ok" ? "In sync" : status === "warning" ? "Out of sync" : "Error"}
+              <Badge
+                variant="outline"
+                className={`text-xs ${statusBadgeClass}`}
+              >
+                {status === "ok"
+                  ? "In sync"
+                  : status === "warning"
+                    ? "Out of sync"
+                    : "Error"}
               </Badge>
             )}
           </div>
@@ -243,15 +278,18 @@ const RlsManifestDebugPanel = () => {
               onClick={() => refetch()}
               disabled={isFetching}
             >
-              <RefreshCw className={`h-3.5 w-3.5 ${isFetching ? "animate-spin" : ""}`} />
+              <RefreshCw
+                className={`h-3.5 w-3.5 ${isFetching ? "animate-spin" : ""}`}
+              />
               Re-run
             </Button>
           </div>
         </div>
         <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1.5">
           <Info className="h-3 w-3" />
-          Mirrors <code className="font-mono">tenant-table-manifest.test.ts</code> — the SQL below is what the test suite
-          runs against the live schema.
+          Mirrors{" "}
+          <code className="font-mono">tenant-table-manifest.test.ts</code> — the
+          SQL below is what the test suite runs against the live schema.
         </p>
       </CardHeader>
       <CardContent className="space-y-5">
@@ -281,8 +319,9 @@ const RlsManifestDebugPanel = () => {
               <div className="min-w-0">
                 <p className="font-medium">{report.summary.message}</p>
                 <p className="text-xs opacity-80 mt-0.5">
-                  Generated {new Date(report.generated_at).toLocaleString()} · {report.live_schema.count} live tenant-scoped
-                  table{report.live_schema.count === 1 ? "" : "s"}
+                  Generated {new Date(report.generated_at).toLocaleString()} ·{" "}
+                  {report.live_schema.count} live tenant-scoped table
+                  {report.live_schema.count === 1 ? "" : "s"}
                 </p>
               </div>
             </div>
@@ -296,7 +335,9 @@ const RlsManifestDebugPanel = () => {
               />
               <div className="rounded-md border bg-muted/40 overflow-hidden">
                 <div className="flex items-center justify-between px-3 py-1.5 border-b bg-muted/60">
-                  <span className="text-[10px] uppercase tracking-wide text-muted-foreground font-mono">SQL</span>
+                  <span className="text-[10px] uppercase tracking-wide text-muted-foreground font-mono">
+                    SQL
+                  </span>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -307,22 +348,30 @@ const RlsManifestDebugPanel = () => {
                     Copy
                   </Button>
                 </div>
-                <pre className="text-xs font-mono p-3 overflow-x-auto whitespace-pre">{report.rpc.sql}</pre>
+                <pre className="text-xs font-mono p-3 overflow-x-auto whitespace-pre">
+                  {report.rpc.sql}
+                </pre>
               </div>
               <div className="rounded-md border bg-muted/40 overflow-hidden mt-2">
                 <div className="flex items-center justify-between px-3 py-1.5 border-b bg-muted/60">
-                  <span className="text-[10px] uppercase tracking-wide text-muted-foreground font-mono">Invocation</span>
+                  <span className="text-[10px] uppercase tracking-wide text-muted-foreground font-mono">
+                    Invocation
+                  </span>
                   <Button
                     variant="ghost"
                     size="sm"
                     className="h-6 gap-1 text-xs"
-                    onClick={() => copyText("Invocation", report.rpc.invocation)}
+                    onClick={() =>
+                      copyText("Invocation", report.rpc.invocation)
+                    }
                   >
                     <Copy className="h-3 w-3" />
                     Copy
                   </Button>
                 </div>
-                <pre className="text-xs font-mono p-3 overflow-x-auto whitespace-pre">{report.rpc.invocation}</pre>
+                <pre className="text-xs font-mono p-3 overflow-x-auto whitespace-pre">
+                  {report.rpc.invocation}
+                </pre>
               </div>
             </div>
 
@@ -338,13 +387,21 @@ const RlsManifestDebugPanel = () => {
                 title="Stale in COVERED_TABLES"
                 description="COVERED_TABLES ∖ live"
                 items={report.integrity_checks.stale_covered}
-                tone={report.integrity_checks.stale_covered.length ? "warning" : "ok"}
+                tone={
+                  report.integrity_checks.stale_covered.length
+                    ? "warning"
+                    : "ok"
+                }
               />
               <FilterCard
                 title="Stale in EXCLUDED_TABLES"
                 description="EXCLUDED_TABLES ∖ live"
                 items={report.integrity_checks.stale_excluded}
-                tone={report.integrity_checks.stale_excluded.length ? "warning" : "ok"}
+                tone={
+                  report.integrity_checks.stale_excluded.length
+                    ? "warning"
+                    : "ok"
+                }
               />
               <FilterCard
                 title="Overlap"
@@ -362,8 +419,13 @@ const RlsManifestDebugPanel = () => {
                 onClick={() => setShowCovered((v) => !v)}
                 className="gap-1.5 -ml-2"
               >
-                {showCovered ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
-                {showCovered ? "Hide" : "Show"} live tables ({report.live_schema.count})
+                {showCovered ? (
+                  <ChevronUp className="h-3.5 w-3.5" />
+                ) : (
+                  <ChevronDown className="h-3.5 w-3.5" />
+                )}
+                {showCovered ? "Hide" : "Show"} live tables (
+                {report.live_schema.count})
               </Button>
               {showCovered && (
                 <ScrollArea className="h-48 mt-2 rounded-md border bg-muted/30 p-3">
@@ -382,7 +444,13 @@ const RlsManifestDebugPanel = () => {
                                 ? "border-amber-500/30 text-amber-700 dark:text-amber-400"
                                 : "border-destructive/30 text-destructive"
                           }`}
-                          title={excluded ? EXCLUDED_TABLES[t] : covered ? "covered" : "uncovered"}
+                          title={
+                            excluded
+                              ? EXCLUDED_TABLES[t]
+                              : covered
+                                ? "covered"
+                                : "uncovered"
+                          }
                         >
                           {t}
                         </Badge>
@@ -425,13 +493,21 @@ const FilterCard = ({
           {items.length}
         </Badge>
       </div>
-      <code className="text-[10px] text-muted-foreground font-mono block mb-2 break-all">{description}</code>
+      <code className="text-[10px] text-muted-foreground font-mono block mb-2 break-all">
+        {description}
+      </code>
       {items.length === 0 ? (
-        <p className="text-xs text-muted-foreground italic">None — all clear.</p>
+        <p className="text-xs text-muted-foreground italic">
+          None — all clear.
+        </p>
       ) : (
         <div className="flex flex-wrap gap-1">
           {items.map((t) => (
-            <Badge key={t} variant="outline" className="text-[10px] font-mono bg-background">
+            <Badge
+              key={t}
+              variant="outline"
+              className="text-[10px] font-mono bg-background"
+            >
               {t}
             </Badge>
           ))}

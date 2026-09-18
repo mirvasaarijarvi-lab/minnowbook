@@ -35,11 +35,14 @@ const SECRETS = {
   token: "tok_sekrit_9f2c",
   rowId: "99999999-9999-4999-8999-999999999999",
   file: "tenant-private/22222222/invoice-4711.pdf",
-  query: "select * from reservations where tenant_id = '22222222-2222-4222-8222-222222222222'",
+  query:
+    "select * from reservations where tenant_id = '22222222-2222-4222-8222-222222222222'",
   supabase: "permission denied for table reservations (42501)",
 };
 
-function guardRecord(overrides: Partial<TenantGuardRecord> = {}): TenantGuardRecord {
+function guardRecord(
+  overrides: Partial<TenantGuardRecord> = {},
+): TenantGuardRecord {
   return {
     suite: "cross-tenant RLS",
     recordedAt: "2026-01-01T00:00:00.000Z",
@@ -49,8 +52,18 @@ function guardRecord(overrides: Partial<TenantGuardRecord> = {}): TenantGuardRec
     membershipB: true,
     emailA: "a@example.test",
     emailB: "b@example.test",
-    membershipRowA: { role: "owner", isApproved: true, userId: "u-a", found: true },
-    membershipRowB: { role: "owner", isApproved: true, userId: "u-b", found: true },
+    membershipRowA: {
+      role: "owner",
+      isApproved: true,
+      userId: "u-a",
+      found: true,
+    },
+    membershipRowB: {
+      role: "owner",
+      isApproved: true,
+      userId: "u-b",
+      found: true,
+    },
     ...overrides,
   };
 }
@@ -116,21 +129,46 @@ const DENIED_RECORDS: Array<[string, TenantGuardRecord]> = [
   ["missing membership row", guardRecord({ membershipRowB: { found: false } })],
   [
     "unapproved membership",
-    guardRecord({ membershipRowA: { role: "staff", isApproved: false, userId: "u-a", found: true } }),
+    guardRecord({
+      membershipRowA: {
+        role: "staff",
+        isApproved: false,
+        userId: "u-a",
+        found: true,
+      },
+    }),
   ],
   [
     "membership lookup error",
-    guardRecord({ membershipRowA: { found: false, lookupError: "permission denied" } }),
+    guardRecord({
+      membershipRowA: { found: false, lookupError: "permission denied" },
+    }),
   ],
-  ["guard precondition failure", guardRecord({ failure: "tenant ids must differ" })],
+  [
+    "guard precondition failure",
+    guardRecord({ failure: "tenant ids must differ" }),
+  ],
   [
     "same auth user on both sides",
     guardRecord({
-      membershipRowA: { role: "owner", isApproved: true, userId: "u-same", found: true },
-      membershipRowB: { role: "owner", isApproved: true, userId: "u-same", found: true },
+      membershipRowA: {
+        role: "owner",
+        isApproved: true,
+        userId: "u-same",
+        found: true,
+      },
+      membershipRowB: {
+        role: "owner",
+        isApproved: true,
+        userId: "u-same",
+        found: true,
+      },
     }),
   ],
-  ["same login email on both sides", guardRecord({ emailB: "A@Example.test", emailA: "a@example.test" })],
+  [
+    "same login email on both sides",
+    guardRecord({ emailB: "A@Example.test", emailA: "a@example.test" }),
+  ],
   [
     "probe skipped so the pair is unverified",
     guardRecord({
@@ -156,44 +194,58 @@ describe("rls-report render/export guard", () => {
       const outcome = applyReportGuard(payload);
       expect(outcome.denied).toBe(false);
       expect(outcome.withheldEntries).toBe(0);
-      expect(outcome.payload.entries[0].rlsDetails?.returnedRows).toContain(SECRETS.guest);
+      expect(outcome.payload.entries[0].rlsDetails?.returnedRows).toContain(
+        SECRETS.guest,
+      );
     });
 
     it("matches suite labels loosely and fails closed on an unnamed guard", () => {
-      expect(suiteMatchesGuard("cross-tenant RLS > reservations", "cross-tenant RLS")).toBe(true);
-      expect(suiteMatchesGuard("Cross-Tenant RLS", "cross-tenant rls")).toBe(true);
+      expect(
+        suiteMatchesGuard(
+          "cross-tenant RLS > reservations",
+          "cross-tenant RLS",
+        ),
+      ).toBe(true);
+      expect(suiteMatchesGuard("Cross-Tenant RLS", "cross-tenant rls")).toBe(
+        true,
+      );
       expect(suiteMatchesGuard("anything at all", "")).toBe(true);
-      expect(suiteMatchesGuard("cross-tenant storage", "cross-tenant RLS")).toBe(false);
+      expect(
+        suiteMatchesGuard("cross-tenant storage", "cross-tenant RLS"),
+      ).toBe(false);
     });
   });
 
   describe("nothing is rendered or exported for a denied run", () => {
-    it.each(DENIED_RECORDS)("withholds details when denied: %s", (_label, record) => {
-      const outcome = applyReportGuard(payloadWith([record]));
-      expect(outcome.denied).toBe(true);
-      expect(outcome.withheldEntries).toBe(1);
+    it.each(DENIED_RECORDS)(
+      "withholds details when denied: %s",
+      (_label, record) => {
+        const outcome = applyReportGuard(payloadWith([record]));
+        expect(outcome.denied).toBe(true);
+        expect(outcome.withheldEntries).toBe(1);
 
-      const entry = outcome.payload.entries[0];
-      expect(entry.errorMessage).toBe(WITHHELD_NOTICE);
-      expect(entry.errorStack).toBeNull();
-      expect(entry.rlsDetails?.withheld).toBe(true);
-      expect(entry.rlsDetails?.returnedRows).toBeUndefined();
-      expect(entry.rlsDetails?.attemptedQuery).toBeUndefined();
-      expect(entry.rlsDetails?.supabaseError).toBeUndefined();
-      expect(entry.rlsDetails?.table).toBeUndefined();
+        const entry = outcome.payload.entries[0];
+        expect(entry.errorMessage).toBe(WITHHELD_NOTICE);
+        expect(entry.errorStack).toBeNull();
+        expect(entry.rlsDetails?.withheld).toBe(true);
+        expect(entry.rlsDetails?.returnedRows).toBeUndefined();
+        expect(entry.rlsDetails?.attemptedQuery).toBeUndefined();
+        expect(entry.rlsDetails?.supabaseError).toBeUndefined();
+        expect(entry.rlsDetails?.table).toBeUndefined();
 
-      // Export path: the JSON artifact.
-      const json = JSON.stringify(outcome.payload);
-      for (const secret of secretValues) expect(json).not.toContain(secret);
+        // Export path: the JSON artifact.
+        const json = JSON.stringify(outcome.payload);
+        for (const secret of secretValues) expect(json).not.toContain(secret);
 
-      // Render path: the HTML page.
-      const html = renderHtml(outcome.payload);
-      for (const secret of secretValues) expect(html).not.toContain(secret);
-      expect(html).toContain("Withheld by the report guard");
-      expect(html).not.toContain("Returned rows");
-      expect(html).not.toContain("Attempted query");
-      expect(html).not.toContain("Raw error / stack");
-    });
+        // Render path: the HTML page.
+        const html = renderHtml(outcome.payload);
+        for (const secret of secretValues) expect(html).not.toContain(secret);
+        expect(html).toContain("Withheld by the report guard");
+        expect(html).not.toContain("Returned rows");
+        expect(html).not.toContain("Attempted query");
+        expect(html).not.toContain("Raw error / stack");
+      },
+    );
 
     it("withholds every entry of the denied suite, including storage entries", () => {
       const entries = [
@@ -201,13 +253,20 @@ describe("rls-report render/export guard", () => {
         failingEntry("cross-tenant RLS > storage objects"),
         failingEntry("cross-tenant storage"),
       ];
-      const outcome = applyReportGuard(payloadWith([guardRecord({ membershipA: false })], entries));
+      const outcome = applyReportGuard(
+        payloadWith([guardRecord({ membershipA: false })], entries),
+      );
       expect(outcome.withheldEntries).toBe(2);
-      expect(outcome.payload.entries[2].rlsDetails?.returnedRows).toContain(SECRETS.guest);
+      expect(outcome.payload.entries[2].rlsDetails?.returnedRows).toContain(
+        SECRETS.guest,
+      );
     });
 
     it("withholds every entry when the denied guard record has no suite label", () => {
-      const entries = [failingEntry("cross-tenant RLS"), failingEntry("cross-tenant storage")];
+      const entries = [
+        failingEntry("cross-tenant RLS"),
+        failingEntry("cross-tenant storage"),
+      ];
       const outcome = applyReportGuard(
         payloadWith([guardRecord({ suite: "", membershipA: false })], entries),
       );
@@ -217,7 +276,9 @@ describe("rls-report render/export guard", () => {
     });
 
     it("records the refusal reasons in the exported payload", () => {
-      const outcome = applyReportGuard(payloadWith([guardRecord({ tenantB: TENANT_A })]));
+      const outcome = applyReportGuard(
+        payloadWith([guardRecord({ tenantB: TENANT_A })]),
+      );
       expect(outcome.payload.guardWithheld).toEqual({
         entries: 1,
         reasons: ["tenants_not_distinct"],
@@ -235,7 +296,10 @@ describe("rls-report render/export guard", () => {
         rlsDetails: null,
       };
       const outcome = applyReportGuard(
-        payloadWith([guardRecord({ membershipB: false })], [passing, failingEntry()]),
+        payloadWith(
+          [guardRecord({ membershipB: false })],
+          [passing, failingEntry()],
+        ),
       );
       expect(outcome.withheldEntries).toBe(1);
       expect(outcome.payload.entries[0].status).toBe("passed");
@@ -293,7 +357,10 @@ describe("rls-report render/export guard", () => {
 
     it("withholds when any one of several pairs is denied", () => {
       const outcome = applyReportGuard(
-        payloadWith([guardRecord(), guardRecord({ suite: "", membershipB: false })]),
+        payloadWith([
+          guardRecord(),
+          guardRecord({ suite: "", membershipB: false }),
+        ]),
       );
       expect(outcome.denied).toBe(true);
       expect(outcome.withheldEntries).toBe(1);

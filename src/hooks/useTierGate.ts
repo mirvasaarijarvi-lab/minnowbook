@@ -42,7 +42,8 @@ export function useTierGate() {
   const isMultiSite = isMultiSiteTier(effectiveTier);
 
   /** Whether the user can access business-level multi-site features (admin/owner on business, or system admin) */
-  const hasMultiSiteAccess = (isMultiSite && (isOwner || isAdmin)) || isSystemAdmin;
+  const hasMultiSiteAccess =
+    (isMultiSite && (isOwner || isAdmin)) || isSystemAdmin;
 
   /** Get tier limits with superadmin bypass applied */
   const limits = getTierLimits(effectiveTier);
@@ -56,13 +57,18 @@ export function useTierGate() {
   /** Whether a new resource of a given type can be created */
   const canCreateResourceCheck = (
     resourceType: string,
-    existingResources: { resource_type: string }[]
+    existingResources: { resource_type: string }[],
   ) => {
-    if (limits.maxResourcesTotal !== null && existingResources.length >= limits.maxResourcesTotal) {
+    if (
+      limits.maxResourcesTotal !== null &&
+      existingResources.length >= limits.maxResourcesTotal
+    ) {
       return false;
     }
     if (limits.maxResourcesPerType !== null) {
-      const count = existingResources.filter((r) => r.resource_type === resourceType).length;
+      const count = existingResources.filter(
+        (r) => r.resource_type === resourceType,
+      ).length;
       if (count >= limits.maxResourcesPerType) return false;
     }
     return true;

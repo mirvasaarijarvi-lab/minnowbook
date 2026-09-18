@@ -79,7 +79,9 @@ async function callRedeem(opts: CallOpts) {
     // callers).
     headers["Authorization"] = `Bearer ${SUPABASE_ANON_KEY}`;
   }
-  const body: Record<string, unknown> = { code: opts.code ?? FAKE_BUT_VALID_SHAPE };
+  const body: Record<string, unknown> = {
+    code: opts.code ?? FAKE_BUT_VALID_SHAPE,
+  };
   if (opts.idempotencyKey != null && !opts.asHeader) {
     body.idempotency_key = opts.idempotencyKey;
   }
@@ -138,7 +140,9 @@ describe("redeem-access-code — idempotency key contract", () => {
   });
 
   it("malformed idempotency_key (whitespace) is rejected with a stable code", async () => {
-    const res = await callRedeem({ idempotencyKey: "key with spaces in it!!!!!!" });
+    const res = await callRedeem({
+      idempotencyKey: "key with spaces in it!!!!!!",
+    });
     expect(res.status).toBeGreaterThanOrEqual(400);
     expect(res.status).toBeLessThan(500);
     const code = bodyCode(res.body);
@@ -180,8 +184,12 @@ describe("redeem-access-code — idempotency key contract", () => {
     expect(first.status).toBeLessThan(500);
 
     for (const r of results) {
-      expect(r.status, "status must be stable across replays").toBe(first.status);
-      expect(r.rawText, "raw body must be byte-identical across replays").toBe(first.rawText);
+      expect(r.status, "status must be stable across replays").toBe(
+        first.status,
+      );
+      expect(r.rawText, "raw body must be byte-identical across replays").toBe(
+        first.rawText,
+      );
     }
   }, 30_000);
 
@@ -194,7 +202,9 @@ describe("redeem-access-code — idempotency key contract", () => {
     const key = makeKey("parallel");
     const PARALLEL = 10;
     const results = await Promise.all(
-      Array.from({ length: PARALLEL }, () => callRedeem({ idempotencyKey: key })),
+      Array.from({ length: PARALLEL }, () =>
+        callRedeem({ idempotencyKey: key }),
+      ),
     );
     const statuses = new Set(results.map((r) => r.status));
     expect(
@@ -203,14 +213,14 @@ describe("redeem-access-code — idempotency key contract", () => {
     ).toBe(1);
 
     const bodies = new Set(results.map((r) => r.rawText));
-    expect(
-      bodies.size,
-      "parallel idempotent calls diverged on body",
-    ).toBe(1);
+    expect(bodies.size, "parallel idempotent calls diverged on body").toBe(1);
 
     // No 5xx allowed — concurrent cache writes must not crash.
     const crashes = results.filter((r) => r.status >= 500);
-    expect(crashes.length, `unexpected 5xx under concurrency: ${JSON.stringify(crashes)}`).toBe(0);
+    expect(
+      crashes.length,
+      `unexpected 5xx under concurrency: ${JSON.stringify(crashes)}`,
+    ).toBe(0);
   }, 90_000);
 
   it("different keys for the same input produce independent responses (no cross-key cache pollution)", async () => {
@@ -235,8 +245,14 @@ describe("redeem-access-code — idempotency key contract", () => {
     // honored. Replay behaviour must be identical for both shapes.
     const key = makeKey("hdr");
 
-    const viaHeader1 = await callRedeem({ idempotencyKey: key, asHeader: true });
-    const viaHeader2 = await callRedeem({ idempotencyKey: key, asHeader: true });
+    const viaHeader1 = await callRedeem({
+      idempotencyKey: key,
+      asHeader: true,
+    });
+    const viaHeader2 = await callRedeem({
+      idempotencyKey: key,
+      asHeader: true,
+    });
 
     expect(viaHeader1.status).toBe(viaHeader2.status);
     expect(viaHeader1.rawText).toBe(viaHeader2.rawText);

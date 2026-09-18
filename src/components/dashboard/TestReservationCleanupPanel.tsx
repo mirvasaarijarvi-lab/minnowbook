@@ -8,7 +8,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Trash2, ShieldAlert, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 
@@ -89,11 +96,14 @@ const TestReservationCleanupPanel = () => {
 
   const runNow = async () => {
     setRunning(true);
-    const { data, error } = await supabase.rpc("run_test_reservation_cleanup" as any, {
-      p_source: "manual",
-      p_override_pattern: pattern || null,
-      p_override_cutoff: cutoff || null,
-    });
+    const { data, error } = await supabase.rpc(
+      "run_test_reservation_cleanup" as any,
+      {
+        p_source: "manual",
+        p_override_pattern: pattern || null,
+        p_override_cutoff: cutoff || null,
+      },
+    );
     setRunning(false);
     setConfirmOpen(false);
     if (error) {
@@ -101,7 +111,11 @@ const TestReservationCleanupPanel = () => {
       return;
     }
     const n = Number(data ?? 0);
-    toast.success(n === 0 ? "No matching reservations to delete" : `Deleted ${n} reservation${n === 1 ? "" : "s"}`);
+    toast.success(
+      n === 0
+        ? "No matching reservations to delete"
+        : `Deleted ${n} reservation${n === 1 ? "" : "s"}`,
+    );
     qc.invalidateQueries({ queryKey: ["test-cleanup-log"] });
     qc.invalidateQueries({ queryKey: ["reservations"] });
   };
@@ -114,15 +128,17 @@ const TestReservationCleanupPanel = () => {
           Test Reservation Cleanup
         </CardTitle>
         <p className="text-sm text-muted-foreground">
-          Automatically remove test reservations whose guest name matches a pattern,
-          on or before a cutoff date. Used to keep production clean of synthetic
-          data like "TEST Lovable Cross". Every run is logged below.
+          Automatically remove test reservations whose guest name matches a
+          pattern, on or before a cutoff date. Used to keep production clean of
+          synthetic data like "TEST Lovable Cross". Every run is logged below.
         </p>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid gap-3 sm:grid-cols-3">
           <div className="space-y-1.5">
-            <Label htmlFor="cleanup-pattern">Guest name pattern (SQL ILIKE)</Label>
+            <Label htmlFor="cleanup-pattern">
+              Guest name pattern (SQL ILIKE)
+            </Label>
             <Input
               id="cleanup-pattern"
               value={pattern}
@@ -131,7 +147,9 @@ const TestReservationCleanupPanel = () => {
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="cleanup-cutoff">Cutoff date (delete on or before)</Label>
+            <Label htmlFor="cleanup-cutoff">
+              Cutoff date (delete on or before)
+            </Label>
             <Input
               id="cleanup-cutoff"
               type="date"
@@ -144,7 +162,9 @@ const TestReservationCleanupPanel = () => {
             <div className="flex items-center gap-2 h-10">
               <Switch checked={enabled} onCheckedChange={setEnabled} />
               <span className="text-sm text-muted-foreground">
-                {enabled ? "Cron runs will delete" : "Cron runs skip (log only)"}
+                {enabled
+                  ? "Cron runs will delete"
+                  : "Cron runs skip (log only)"}
               </span>
             </div>
           </div>
@@ -165,7 +185,9 @@ const TestReservationCleanupPanel = () => {
           <Button
             variant="outline"
             className="gap-1.5"
-            onClick={() => qc.invalidateQueries({ queryKey: ["test-cleanup-log"] })}
+            onClick={() =>
+              qc.invalidateQueries({ queryKey: ["test-cleanup-log"] })
+            }
           >
             <RefreshCw className="h-4 w-4" />
             Refresh log
@@ -178,7 +200,9 @@ const TestReservationCleanupPanel = () => {
           </div>
           <div className="divide-y">
             {(logs ?? []).length === 0 && (
-              <div className="p-4 text-sm text-muted-foreground">No cleanup runs yet.</div>
+              <div className="p-4 text-sm text-muted-foreground">
+                No cleanup runs yet.
+              </div>
             )}
             {(logs ?? []).map((row) => (
               <details key={row.id} className="group">
@@ -186,10 +210,16 @@ const TestReservationCleanupPanel = () => {
                   <span className="text-sm font-mono">
                     {format(new Date(row.triggered_at), "yyyy-MM-dd HH:mm")}
                   </span>
-                  <Badge variant={row.trigger_source === "cron" ? "secondary" : "outline"}>
+                  <Badge
+                    variant={
+                      row.trigger_source === "cron" ? "secondary" : "outline"
+                    }
+                  >
                     {row.trigger_source}
                   </Badge>
-                  <Badge variant={row.deleted_count > 0 ? "destructive" : "outline"}>
+                  <Badge
+                    variant={row.deleted_count > 0 ? "destructive" : "outline"}
+                  >
                     {row.deleted_count} deleted
                   </Badge>
                   <span className="text-xs text-muted-foreground truncate">
@@ -207,7 +237,10 @@ const TestReservationCleanupPanel = () => {
         </div>
       </CardContent>
 
-      <Dialog open={confirmOpen} onOpenChange={(open) => !running && setConfirmOpen(open)}>
+      <Dialog
+        open={confirmOpen}
+        onOpenChange={(open) => !running && setConfirmOpen(open)}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-destructive">
@@ -215,14 +248,26 @@ const TestReservationCleanupPanel = () => {
               Run test reservation cleanup?
             </DialogTitle>
             <DialogDescription>
-              This permanently deletes every reservation whose guest name matches
+              This permanently deletes every reservation whose guest name
+              matches
               <code className="mx-1">{pattern || "TEST Lovable Cross%"}</code>
-              {cutoff ? <>with a reservation date on or before <strong>{cutoff}</strong>.</> : "across all dates."}
-              {" "}The full list of deleted rows will be stored in the cleanup log.
+              {cutoff ? (
+                <>
+                  with a reservation date on or before <strong>{cutoff}</strong>
+                  .
+                </>
+              ) : (
+                "across all dates."
+              )}{" "}
+              The full list of deleted rows will be stored in the cleanup log.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setConfirmOpen(false)} disabled={running}>
+            <Button
+              variant="outline"
+              onClick={() => setConfirmOpen(false)}
+              disabled={running}
+            >
               Cancel
             </Button>
             <Button variant="destructive" onClick={runNow} disabled={running}>

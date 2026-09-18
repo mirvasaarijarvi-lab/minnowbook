@@ -28,7 +28,9 @@ export interface LinkedGroupColor {
   shortId: string;
 }
 
-export function linkedGroupColor(groupId: string | null | undefined): LinkedGroupColor | null {
+export function linkedGroupColor(
+  groupId: string | null | undefined,
+): LinkedGroupColor | null {
   if (!groupId) return null;
   const hue = HUES[hashString(groupId) % HUES.length];
   return {

@@ -23,14 +23,18 @@ export interface AccommodationPricingRow {
 
 export const DEFAULT_BREAKFAST_PRICE_PER_PERSON = 15;
 
-export const isAccommodationRow = (r: Pick<AccommodationPricingRow, "reservation_type">) =>
-  r.reservation_type === "guesthouse" || r.reservation_type === "hotel";
+export const isAccommodationRow = (
+  r: Pick<AccommodationPricingRow, "reservation_type">,
+) => r.reservation_type === "guesthouse" || r.reservation_type === "hotel";
 
 /** Nights between check-in and check-out; at least 1 (same-day or missing date). */
-export const calcNights = (r: Pick<AccommodationPricingRow, "date" | "check_out_date">) => {
+export const calcNights = (
+  r: Pick<AccommodationPricingRow, "date" | "check_out_date">,
+) => {
   if (!r.check_out_date) return 1;
   const d = Math.round(
-    (new Date(r.check_out_date + "T00:00:00").getTime() - new Date(r.date + "T00:00:00").getTime()) /
+    (new Date(r.check_out_date + "T00:00:00").getTime() -
+      new Date(r.date + "T00:00:00").getTime()) /
       86400000,
   );
   return d > 0 ? d : 1;
@@ -44,12 +48,15 @@ export const calcNights = (r: Pick<AccommodationPricingRow, "date" | "check_out_
  */
 export const roundCents = (n: number) => {
   if (!Number.isFinite(n)) return 0;
-  return Math.round((n + Number.EPSILON * Math.sign(n) * Math.abs(n)) * 100) / 100;
+  return (
+    Math.round((n + Number.EPSILON * Math.sign(n) * Math.abs(n)) * 100) / 100
+  );
 };
 
 /** The charged amount, snapped to cents: room + breakfast always equals this. */
-export const calcChargedTotal = (r: Pick<AccommodationPricingRow, "price_eur">) =>
-  roundCents(r.price_eur ?? 0);
+export const calcChargedTotal = (
+  r: Pick<AccommodationPricingRow, "price_eur">,
+) => roundCents(r.price_eur ?? 0);
 
 /**
  * Breakfast component of the stored total: price per person x guests x nights,
@@ -85,6 +92,7 @@ export const calcRoomPrice = (r: AccommodationPricingRow) => {
  * as 0 rather than as an invented price.
  */
 export const effectiveChargedTotal = (r: AccommodationPricingRow) => {
-  if (r.reservation_type === "restaurant" && r.pricing_type === "menu") return 0;
+  if (r.reservation_type === "restaurant" && r.pricing_type === "menu")
+    return 0;
   return calcChargedTotal(r);
 };

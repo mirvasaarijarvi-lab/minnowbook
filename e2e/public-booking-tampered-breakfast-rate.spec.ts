@@ -64,7 +64,10 @@ test.describe("Server recalculates breakfast from resource rules, ignoring the c
     !(process.env.SERVICE_ROLE_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY),
     "Set SERVICE_ROLE_KEY to run this spec.",
   );
-  test.skip(!SUPABASE_ANON_KEY, "Set VITE_SUPABASE_PUBLISHABLE_KEY to run this spec.");
+  test.skip(
+    !SUPABASE_ANON_KEY,
+    "Set VITE_SUPABASE_PUBLISHABLE_KEY to run this spec.",
+  );
 
   test("uses the resource breakfast rate whatever the browser claims", async ({
     ephemeralTenant,
@@ -156,7 +159,10 @@ test.describe("Server recalculates breakfast from resource rules, ignoring the c
     };
 
     /** The stored amount is exactly what reports split, to the cent. */
-    const expectReportSplitMatches = (row: Record<string, unknown>, label: string) => {
+    const expectReportSplitMatches = (
+      row: Record<string, unknown>,
+      label: string,
+    ) => {
       const reportRow = {
         reservation_type: row.reservation_type as string,
         date: row.date as string,
@@ -171,19 +177,25 @@ test.describe("Server recalculates breakfast from resource rules, ignoring the c
       };
       const room = calcRoomPrice(reportRow);
       const breakfast = calcBreakfastPrice(reportRow);
-      expect(roundCents(room + breakfast), `${label}: split must equal the charge`).toBe(
-        roundCents(Number(row.price_eur)),
-      );
+      expect(
+        roundCents(room + breakfast),
+        `${label}: split must equal the charge`,
+      ).toBe(roundCents(Number(row.price_eur)));
       return { room, breakfast };
     };
 
     // ── 1. Client claims an almost-free breakfast ──────────────────────
     const cheap = await post(
-      booking("cheap", { breakfast_price_per_person: 0.01, breakfast_price: 0.01 }),
+      booking("cheap", {
+        breakfast_price_per_person: 0.01,
+        breakfast_price: 0.01,
+      }),
     );
     expect(cheap.status(), await cheap.text()).toBe(200);
     const cheapRow = await readRow("cheap");
-    expect(Number(cheapRow.breakfast_price_per_person)).toBe(RESOURCE_BREAKFAST_EUR);
+    expect(Number(cheapRow.breakfast_price_per_person)).toBe(
+      RESOURCE_BREAKFAST_EUR,
+    );
     expect(Number(cheapRow.price_eur)).toBe(EXPECTED_TOTAL);
     expect(Number(cheapRow.original_price_eur)).toBe(EXPECTED_TOTAL);
     expect(cheapRow.is_invoiced).toBe(false);
@@ -200,7 +212,9 @@ test.describe("Server recalculates breakfast from resource rules, ignoring the c
     );
     expect(inflated.status(), await inflated.text()).toBe(200);
     const inflatedRow = await readRow("inflated");
-    expect(Number(inflatedRow.breakfast_price_per_person)).toBe(RESOURCE_BREAKFAST_EUR);
+    expect(Number(inflatedRow.breakfast_price_per_person)).toBe(
+      RESOURCE_BREAKFAST_EUR,
+    );
     expect(Number(inflatedRow.price_eur)).toBe(EXPECTED_TOTAL);
     expectReportSplitMatches(inflatedRow, "inflated");
 
@@ -253,7 +267,10 @@ test.describe("Server recalculates breakfast from resource rules, ignoring the c
       FALLBACK_BREAKFAST_EUR,
     );
     expect(Number(unconfiguredRow.price_eur)).toBe(FALLBACK_TOTAL);
-    const unconfiguredSplit = expectReportSplitMatches(unconfiguredRow, "unconfigured");
+    const unconfiguredSplit = expectReportSplitMatches(
+      unconfiguredRow,
+      "unconfigured",
+    );
     expect(unconfiguredSplit.breakfast).toBe(
       roundCents(FALLBACK_BREAKFAST_EUR * GUESTS * NIGHTS),
     );
@@ -276,7 +293,9 @@ test.describe("Server recalculates breakfast from resource rules, ignoring the c
     );
     expect(tampered.status(), await tampered.text()).toBe(200);
     const tamperedRow = await readRow("tampered");
-    expect(Number(tamperedRow.breakfast_price_per_person)).toBe(RESOURCE_BREAKFAST_EUR);
+    expect(Number(tamperedRow.breakfast_price_per_person)).toBe(
+      RESOURCE_BREAKFAST_EUR,
+    );
     expect(Number(tamperedRow.price_eur)).toBe(EXPECTED_TOTAL);
     expect(Number(tamperedRow.original_price_eur)).toBe(EXPECTED_TOTAL);
     expect(tamperedRow.discount_type).toBeNull();

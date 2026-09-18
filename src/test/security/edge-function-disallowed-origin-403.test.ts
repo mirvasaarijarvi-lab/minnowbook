@@ -50,7 +50,10 @@ const FORBIDDEN_BODY_SUBSTRINGS: Array<{ label: string; re: RegExp }> = [
   { label: "supabase URL", re: /https:\/\/[a-z0-9-]+\.supabase\.co/i },
   { label: "service role hint", re: /service[_-]?role/i },
   { label: "JWT", re: /eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/ },
-  { label: "PostgreSQL error code", re: /\b(?:PGRST|22\d{3}|23\d{3}|42\d{3})\b/ },
+  {
+    label: "PostgreSQL error code",
+    re: /\b(?:PGRST|22\d{3}|23\d{3}|42\d{3})\b/,
+  },
   { label: "table/column hint", re: /\b(?:tenant_users|auth\.users|pg_)\b/i },
   { label: "allowlist echo", re: /lovable\.app/i }, // body must NOT mention allowlist
   { label: "email address", re: /[\w.+-]+@[\w-]+\.[\w.-]+/ },
@@ -113,102 +116,104 @@ describe(
   "Edge functions — disallowed Origin returns explicit 403",
   { timeout: 30_000, retry: 2, concurrent: false },
   () => {
-  for (const fn of FUNCTIONS) {
-    describe(fn, () => {
-      it("allowed origin is NOT 403'd by the origin gate (positive control)", async () => {
-        const res = await postFromOrigin(fn, ALLOWED_ORIGIN, { ping: true });
-        const text = await res.text().catch(() => "");
-        // We do NOT expect 200 here — without a real session/body the
-        // function will fail auth/validation. The point is simply that the
-        // response is NOT the origin-gate's 403.
-        // If it IS 403, the body must not be the generic origin-gate one.
-        if (res.status === 403) {
-          // Permissible if the auth layer itself returns 403, but it must
-          // NOT be the origin gate's exact "Forbidden" payload triggered
-          // before auth runs.
-          expect(text).not.toBe(JSON.stringify({ error: "Forbidden" }));
-        }
-      });
+    for (const fn of FUNCTIONS) {
+      describe(fn, () => {
+        it("allowed origin is NOT 403'd by the origin gate (positive control)", async () => {
+          const res = await postFromOrigin(fn, ALLOWED_ORIGIN, { ping: true });
+          const text = await res.text().catch(() => "");
+          // We do NOT expect 200 here — without a real session/body the
+          // function will fail auth/validation. The point is simply that the
+          // response is NOT the origin-gate's 403.
+          // If it IS 403, the body must not be the generic origin-gate one.
+          if (res.status === 403) {
+            // Permissible if the auth layer itself returns 403, but it must
+            // NOT be the origin gate's exact "Forbidden" payload triggered
+            // before auth runs.
+            expect(text).not.toBe(JSON.stringify({ error: "Forbidden" }));
+          }
+        });
 
-      for (const origin of DISALLOWED_ORIGINS) {
-        it(`returns 403 for disallowed origin "${origin}"`, async () => {
-          const res = await postFromOrigin(fn, origin, { action: "list" });
+        for (const origin of DISALLOWED_ORIGINS) {
+          it(`returns 403 for disallowed origin "${origin}"`, async () => {
+            const res = await postFromOrigin(fn, origin, { action: "list" });
+            const text = await res.text().catch(() => "");
+
+            expect(
+              res.status,
+              `${fn} from ${origin}: expected 403, got ${res.status} (body: ${text.slice(0, 200)})`,
+            ).toBe(403);
+
+            expectBodyIsGeneric(text, `${fn} ${origin}`);
+            expectBodyHasNoSensitiveLeakage(text, `${fn} ${origin}`);
+          });
+
+          it(`403 from "${origin}" includes hardening security headers`, async () => {
+            const res = await postFromOrigin(fn, origin, { action: "list" });
+            await res.text().catch(() => "");
+            expect(res.headers.get("x-content-type-options")).toBe("nosniff");
+            expect(res.headers.get("x-frame-options")).toBe("DENY");
+            expect(res.headers.get("referrer-policy")).toBe(
+              "strict-origin-when-cross-origin",
+            );
+          });
+
+          it(`403 from "${origin}" never echoes the forbidden origin in ACAO`, async () => {
+            const res = await postFromOrigin(fn, origin, { action: "list" });
+            await res.text().catch(() => "");
+            const acao = res.headers.get("access-control-allow-origin");
+            expect(acao).not.toBe(origin);
+            expect(acao).not.toBe("*");
+          });
+        }
+
+        it("403 response is consistent across repeated probes (no oracle)", async () => {
+          // Run probes SEQUENTIALLY rather than via Promise.all. Hammering
+          // the same function with 5 concurrent requests routinely tripped
+          // the per-IP 5-req/min rate-limiter on the function side, which
+          // returned a 429 instead of 403 and looked like a real regression.
+          // A small inter-probe delay gives the rate-limiter window time to
+          // settle and keeps the assertions deterministic.
+          const bodies: string[] = [];
+          const statuses: number[] = [];
+          for (let i = 0; i < 5; i++) {
+            const r = await postFromOrigin(fn, "https://evil.example.com", {
+              action: "list",
+            });
+            statuses.push(r.status);
+            bodies.push(await r.text());
+            if (i < 4) await new Promise((res) => setTimeout(res, 150));
+          }
+
+          // Every probe must be 403.
+          for (const s of statuses) expect(s).toBe(403);
+
+          // All bodies must be identical — if they varied, an attacker could
+          // probe internal state via response differences.
+          expect(new Set(bodies).size).toBe(1);
+        });
+
+        it("does NOT 403 a request that omits the Origin header (server-to-server)", async () => {
+          // No Origin header at all — represents curl/server callers, which
+          // are NOT browser-CORS-bound and must reach the auth layer instead
+          // of being blanket-blocked.
+          const res = await fetch(fnUrl(fn), {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              apikey: SUPABASE_PUBLISHABLE_KEY,
+              Authorization: `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
+            },
+            body: JSON.stringify({ action: "list" }),
+          });
           const text = await res.text().catch(() => "");
 
-          expect(
-            res.status,
-            `${fn} from ${origin}: expected 403, got ${res.status} (body: ${text.slice(0, 200)})`,
-          ).toBe(403);
-
-          expectBodyIsGeneric(text, `${fn} ${origin}`);
-          expectBodyHasNoSensitiveLeakage(text, `${fn} ${origin}`);
+          // It may legitimately return 401/400/etc from auth/validation — but
+          // it must NOT be the origin-gate 403 with the generic body.
+          if (res.status === 403) {
+            expect(text).not.toBe(JSON.stringify({ error: "Forbidden" }));
+          }
         });
-
-        it(`403 from "${origin}" includes hardening security headers`, async () => {
-          const res = await postFromOrigin(fn, origin, { action: "list" });
-          await res.text().catch(() => "");
-          expect(res.headers.get("x-content-type-options")).toBe("nosniff");
-          expect(res.headers.get("x-frame-options")).toBe("DENY");
-          expect(res.headers.get("referrer-policy")).toBe(
-            "strict-origin-when-cross-origin",
-          );
-        });
-
-        it(`403 from "${origin}" never echoes the forbidden origin in ACAO`, async () => {
-          const res = await postFromOrigin(fn, origin, { action: "list" });
-          await res.text().catch(() => "");
-          const acao = res.headers.get("access-control-allow-origin");
-          expect(acao).not.toBe(origin);
-          expect(acao).not.toBe("*");
-        });
-      }
-
-      it("403 response is consistent across repeated probes (no oracle)", async () => {
-        // Run probes SEQUENTIALLY rather than via Promise.all. Hammering
-        // the same function with 5 concurrent requests routinely tripped
-        // the per-IP 5-req/min rate-limiter on the function side, which
-        // returned a 429 instead of 403 and looked like a real regression.
-        // A small inter-probe delay gives the rate-limiter window time to
-        // settle and keeps the assertions deterministic.
-        const bodies: string[] = [];
-        const statuses: number[] = [];
-        for (let i = 0; i < 5; i++) {
-          const r = await postFromOrigin(fn, "https://evil.example.com", { action: "list" });
-          statuses.push(r.status);
-          bodies.push(await r.text());
-          if (i < 4) await new Promise((res) => setTimeout(res, 150));
-        }
-
-        // Every probe must be 403.
-        for (const s of statuses) expect(s).toBe(403);
-
-        // All bodies must be identical — if they varied, an attacker could
-        // probe internal state via response differences.
-        expect(new Set(bodies).size).toBe(1);
       });
-
-      it("does NOT 403 a request that omits the Origin header (server-to-server)", async () => {
-        // No Origin header at all — represents curl/server callers, which
-        // are NOT browser-CORS-bound and must reach the auth layer instead
-        // of being blanket-blocked.
-        const res = await fetch(fnUrl(fn), {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            apikey: SUPABASE_PUBLISHABLE_KEY,
-            Authorization: `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
-          },
-          body: JSON.stringify({ action: "list" }),
-        });
-        const text = await res.text().catch(() => "");
-
-        // It may legitimately return 401/400/etc from auth/validation — but
-        // it must NOT be the origin-gate 403 with the generic body.
-        if (res.status === 403) {
-          expect(text).not.toBe(JSON.stringify({ error: "Forbidden" }));
-        }
-      });
-    });
-  }
+    }
   },
 );

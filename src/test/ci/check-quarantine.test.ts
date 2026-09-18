@@ -2,8 +2,10 @@
 // existing schema gate so the CI-tooling itself can't silently break.
 import { describe, it, expect } from "vitest";
 // Pure ESM script, no .d.ts; cast to any to avoid the TS resolver.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const { validateManifest } = (await import("../../../scripts/ci/check-quarantine.mjs" as any)) as any;
+
+const { validateManifest } = (await import(
+  "../../../scripts/ci/check-quarantine.mjs" as any
+)) as any;
 
 const NOW = new Date("2026-05-11T00:00:00Z");
 
@@ -28,7 +30,10 @@ describe("quarantine manifest hygiene", () => {
   });
 
   it("accepts a single valid entry", () => {
-    const r = validateManifest({ vitest: [entry()], playwright: [] }, { now: NOW });
+    const r = validateManifest(
+      { vitest: [entry()], playwright: [] },
+      { now: NOW },
+    );
     expect(r.ok, JSON.stringify(r.errors)).toBe(true);
   });
 
@@ -51,7 +56,10 @@ describe("quarantine manifest hygiene", () => {
 
   it("rejects expires more than 30 days after added", () => {
     const r = validateManifest(
-      { vitest: [entry({ added: "2026-01-01", expires: "2026-03-01" })], playwright: [] },
+      {
+        vitest: [entry({ added: "2026-01-01", expires: "2026-03-01" })],
+        playwright: [],
+      },
       { now: NOW },
     );
     expect(r.ok).toBe(false);
@@ -60,7 +68,10 @@ describe("quarantine manifest hygiene", () => {
 
   it("rejects expires <= added", () => {
     const r = validateManifest(
-      { vitest: [entry({ added: "2026-05-10", expires: "2026-05-10" })], playwright: [] },
+      {
+        vitest: [entry({ added: "2026-05-10", expires: "2026-05-10" })],
+        playwright: [],
+      },
       { now: NOW },
     );
     expect(r.ok).toBe(false);
@@ -69,7 +80,10 @@ describe("quarantine manifest hygiene", () => {
 
   it("rejects expired entries", () => {
     const r = validateManifest(
-      { vitest: [entry({ added: "2026-04-01", expires: "2026-04-30" })], playwright: [] },
+      {
+        vitest: [entry({ added: "2026-04-01", expires: "2026-04-30" })],
+        playwright: [],
+      },
       { now: NOW },
     );
     expect(r.ok).toBe(false);

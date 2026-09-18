@@ -116,7 +116,12 @@ vi.mock("@/hooks/useTenant", () => ({
     tenant: {
       id: TENANT_ID,
       tier: "business",
-      allowed_reservation_types: ["venue", "guesthouse", "restaurant", "wellness"],
+      allowed_reservation_types: [
+        "venue",
+        "guesthouse",
+        "restaurant",
+        "wellness",
+      ],
     },
     isOwner: true,
     isAdmin: true,
@@ -131,7 +136,10 @@ vi.mock("@/hooks/useOffers", async () => {
   return {
     ...actual,
     useOffers: () => ({ data: currentOffers, isLoading: false }),
-    useUpdateOffer: () => ({ mutateAsync: updateOfferMutate, isPending: false }),
+    useUpdateOffer: () => ({
+      mutateAsync: updateOfferMutate,
+      isPending: false,
+    }),
   };
 });
 
@@ -159,7 +167,8 @@ function makeChain(table: string) {
   chain.is = passthrough;
   chain.order = passthrough;
   chain.single = () => Promise.resolve({ data: rows[0] ?? null, error: null });
-  chain.maybeSingle = () => Promise.resolve({ data: rows[0] ?? null, error: null });
+  chain.maybeSingle = () =>
+    Promise.resolve({ data: rows[0] ?? null, error: null });
   chain.then = (resolve: (v: any) => void) => resolve(payload);
 
   chain.insert = (values: any) => {
@@ -171,7 +180,8 @@ function makeChain(table: string) {
     const insertChain: any = {
       select: () => insertChain,
       single: () => Promise.resolve({ data: inserted, error: null }),
-      then: (resolve: (v: any) => void) => resolve({ data: inserted, error: null }),
+      then: (resolve: (v: any) => void) =>
+        resolve({ data: inserted, error: null }),
     };
     return insertChain;
   };
@@ -247,7 +257,11 @@ describe("OffersManager: cross-booking pricing on offer confirmation", () => {
             end_time: "21:00",
           },
           // Disabled legs must never produce a reservation.
-          wellness: { enabled: false, resource_type: "wellness", space: "Sauna" },
+          wellness: {
+            enabled: false,
+            resource_type: "wellness",
+            space: "Sauna",
+          },
         },
       }),
     ];
@@ -280,7 +294,10 @@ describe("OffersManager: cross-booking pricing on offer confirmation", () => {
       expect(reportedPrice(row)).toBeGreaterThan(0);
       expect(reportedPrice(row)).toBe(row.price_eur);
     }
-    const total = insertedReservations.reduce((s, r) => s + reportedPrice(r), 0);
+    const total = insertedReservations.reduce(
+      (s, r) => s + reportedPrice(r),
+      0,
+    );
     expect(total).toBeCloseTo(450 + 89.5 + 42, 2);
 
     // And every leg can be marked invoiced.
@@ -309,10 +326,14 @@ describe("OffersManager: cross-booking pricing on offer confirmation", () => {
     currentOffers = [ambiguousOffer()];
     renderOffers();
 
-    await userEvent.click(await screen.findByRole("button", { name: /confirm/i }));
+    await userEvent.click(
+      await screen.findByRole("button", { name: /confirm/i }),
+    );
 
     // Nothing is written yet: staff see a warning instead of an empty total.
-    expect(await screen.findByTestId("offer-price-warning")).toBeInTheDocument();
+    expect(
+      await screen.findByTestId("offer-price-warning"),
+    ).toBeInTheDocument();
     expect(insertedReservations).toHaveLength(0);
     expect(updateOfferMutate).not.toHaveBeenCalled();
 
@@ -339,7 +360,9 @@ describe("OffersManager: cross-booking pricing on offer confirmation", () => {
     currentOffers = [ambiguousOffer()];
     renderOffers();
 
-    await userEvent.click(await screen.findByRole("button", { name: /confirm/i }));
+    await userEvent.click(
+      await screen.findByRole("button", { name: /confirm/i }),
+    );
     await screen.findByTestId("offer-price-warning");
 
     await userEvent.click(screen.getByRole("checkbox"));

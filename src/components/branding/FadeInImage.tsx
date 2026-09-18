@@ -27,7 +27,13 @@
  *  - Decorative usage (`alt=""`) keeps the slot out of the AT tree
  *    entirely by collapsing to `role="presentation"`.
  */
-import { useEffect, useRef, useState, type ImgHTMLAttributes, type ReactNode } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type ImgHTMLAttributes,
+  type ReactNode,
+} from "react";
 import { cn } from "@/lib/utils";
 
 export interface FadeInImageProps extends ImgHTMLAttributes<HTMLImageElement> {
@@ -134,11 +140,7 @@ export function FadeInImage({
         }}
       />
       {loadingLabel ? (
-        <span
-          role="status"
-          aria-live="polite"
-          className="sr-only"
-        >
+        <span role="status" aria-live="polite" className="sr-only">
           {isBusy ? loadingLabel : ""}
         </span>
       ) : null}

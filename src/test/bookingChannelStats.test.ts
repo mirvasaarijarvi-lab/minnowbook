@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { computeChannelSplit, computeChannelSplitByType, resolveChannel, buildTrendBuckets } from "@/lib/bookingChannelStats";
+import {
+  computeChannelSplit,
+  computeChannelSplitByType,
+  resolveChannel,
+  buildTrendBuckets,
+} from "@/lib/bookingChannelStats";
 import { enUS } from "date-fns/locale";
 
 const row = (date: string, type: string, createdBy: string | null) => ({
@@ -10,8 +15,12 @@ const row = (date: string, type: string, createdBy: string | null) => ({
 
 describe("bookingChannelStats", () => {
   it("treats rows without created_by as public bookings", () => {
-    expect(resolveChannel(row("2026-01-01", "restaurant", null))).toBe("public");
-    expect(resolveChannel(row("2026-01-01", "restaurant", "user-1"))).toBe("staff");
+    expect(resolveChannel(row("2026-01-01", "restaurant", null))).toBe(
+      "public",
+    );
+    expect(resolveChannel(row("2026-01-01", "restaurant", "user-1"))).toBe(
+      "staff",
+    );
   });
 
   it("splits percentages so they always add up to 100", () => {
@@ -26,7 +35,11 @@ describe("bookingChannelStats", () => {
 
   it("returns zeroes for an empty period", () => {
     expect(computeChannelSplit([])).toEqual({
-      total: 0, publicCount: 0, staffCount: 0, publicPct: 0, staffPct: 0,
+      total: 0,
+      publicCount: 0,
+      staffCount: 0,
+      publicPct: 0,
+      staffPct: 0,
     });
   });
 

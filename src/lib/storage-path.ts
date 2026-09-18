@@ -43,7 +43,9 @@ export class InvalidStoragePathError extends Error {
 }
 
 /** Type guard for caller branching. Tolerant of cross-realm errors. */
-export function isInvalidStoragePathError(err: unknown): err is InvalidStoragePathError {
+export function isInvalidStoragePathError(
+  err: unknown,
+): err is InvalidStoragePathError {
   if (!err || typeof err !== "object") return false;
   if (err instanceof InvalidStoragePathError) return true;
   return (err as { code?: unknown }).code === "INVALID_STORAGE_PATH";
@@ -85,12 +87,14 @@ export interface RejectedStoragePathEvent {
   rejectedAt: string;
 }
 
-export type RejectedStoragePathLogger = (event: RejectedStoragePathEvent) => void;
+export type RejectedStoragePathLogger = (
+  event: RejectedStoragePathEvent,
+) => void;
 
 const defaultLogger: RejectedStoragePathLogger = (event) => {
   // Single structured line, prefixed so it is grep-able and so log
   // pipelines can route it. No raw input is ever included.
-  // eslint-disable-next-line no-console
+
   console.warn("[security] storage-path rejected", event);
 };
 
@@ -107,7 +111,9 @@ export function setRejectedStoragePathLogger(
   activeLogger = logger ?? defaultLogger;
 }
 
-function classifyLeadingChar(ch: string | undefined): RejectedStoragePathEvent["leadingCharClass"] {
+function classifyLeadingChar(
+  ch: string | undefined,
+): RejectedStoragePathEvent["leadingCharClass"] {
   if (!ch) return "none";
   if (ch === "/") return "slash";
   if (ch === ".") return "dot";
@@ -122,7 +128,8 @@ function classifyLeadingChar(ch: string | undefined): RejectedStoragePathEvent["
  * doesn't match that shape, defence-in-depth against a future caller
  * accidentally passing an email or filename through `tenantId`.
  */
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 function safeTenantId(raw: unknown): string | undefined {
   if (typeof raw !== "string") return undefined;
@@ -139,16 +146,18 @@ function buildEvent(
   const isString = typeof rawInput === "string";
   const asString = isString ? (rawInput as string) : "";
   const cappedLength = Math.min(asString.length, 4096);
-  const segmentCount = isString && asString.length > 0
-    ? asString.trim().split("/").length
-    : null;
+  const segmentCount =
+    isString && asString.length > 0 ? asString.trim().split("/").length : null;
   return {
     reason,
     inputType: typeof rawInput,
     inputLength: isString ? cappedLength : 0,
     segmentCount,
-    leadingCharClass: classifyLeadingChar(isString ? asString.trim()[0] : undefined),
-    hasSchemeShape: isString && /^[a-z][a-z0-9+.-]*:\/\//i.test(asString.trim()),
+    leadingCharClass: classifyLeadingChar(
+      isString ? asString.trim()[0] : undefined,
+    ),
+    hasSchemeShape:
+      isString && /^[a-z][a-z0-9+.-]*:\/\//i.test(asString.trim()),
     hasBackslash: isString && asString.includes("\\"),
     // eslint-disable-next-line no-control-regex
     hasControlChar: isString && /[\u0000-\u001f\u007f]/.test(asString),
@@ -169,7 +178,9 @@ export function logRejectedStoragePath(
   context: { callsite?: string; tenantId?: string } = {},
 ): void {
   try {
-    activeLogger(buildEvent(reason, rawInput, context.callsite, context.tenantId));
+    activeLogger(
+      buildEvent(reason, rawInput, context.callsite, context.tenantId),
+    );
   } catch {
     // Logging must never break the calling code path.
   }

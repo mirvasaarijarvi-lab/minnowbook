@@ -8,7 +8,10 @@ import {
 describe("rejectionCodeFromReasons", () => {
   it("reads the tagged error code", () => {
     expect(
-      rejectionCodeFromReasons(["[error_code:OCCASION_FULL]", "[OCCASION_REFUSED] full"]),
+      rejectionCodeFromReasons([
+        "[error_code:OCCASION_FULL]",
+        "[OCCASION_REFUSED] full",
+      ]),
     ).toBe("OCCASION_FULL");
   });
 
@@ -22,8 +25,14 @@ describe("rejectionCodeFromReasons", () => {
 describe("summarizeRejections", () => {
   it("counts per code and keeps the newest occurrence", () => {
     const rows = [
-      { reasons: ["[error_code:OCCASION_FULL]"], created_at: "2026-09-01T10:00:00Z" },
-      { reasons: ["[error_code:OCCASION_FULL]"], created_at: "2026-09-03T10:00:00Z" },
+      {
+        reasons: ["[error_code:OCCASION_FULL]"],
+        created_at: "2026-09-01T10:00:00Z",
+      },
+      {
+        reasons: ["[error_code:OCCASION_FULL]"],
+        created_at: "2026-09-03T10:00:00Z",
+      },
       {
         reasons: ["[error_code:OCCASION_SEATING_UNAVAILABLE]"],
         created_at: "2026-09-02T10:00:00Z",
@@ -40,7 +49,9 @@ describe("summarizeRejections", () => {
   });
 
   it("groups untagged rows instead of dropping them", () => {
-    const summary = summarizeRejections([{ reasons: ["nothing useful"], created_at: null }]);
+    const summary = summarizeRejections([
+      { reasons: ["nothing useful"], created_at: null },
+    ]);
     expect(summary).toEqual([{ code: "UNTAGGED", count: 1, lastSeen: null }]);
   });
 

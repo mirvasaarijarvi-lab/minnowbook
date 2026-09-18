@@ -81,7 +81,7 @@ export function trackBookingError(
     // Always log a coarse warning so the signal is visible even
     // when GTM is blocked. Never include the raw Error object or
     // the server message, which could carry stack traces.
-    // eslint-disable-next-line no-console
+
     console.warn("[booking-telemetry]", evt);
   } catch {
     /* never let telemetry break the booking flow */
@@ -93,6 +93,8 @@ export function trackBookingError(
  * the misconfigured backend service-role key. Keeps the call site
  * in PublicBooking.tsx readable.
  */
-export function trackServiceRoleKeyMissing(ctx: BookingTelemetryContext = {}): void {
+export function trackServiceRoleKeyMissing(
+  ctx: BookingTelemetryContext = {},
+): void {
   trackBookingError(BOOKING_ERROR_CODES.SERVICE_ROLE_KEY_MISSING, ctx);
 }

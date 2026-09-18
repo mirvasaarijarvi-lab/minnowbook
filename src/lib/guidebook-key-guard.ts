@@ -21,7 +21,7 @@ export class MissingGuidebookKeyError extends Error {
     super(
       `Missing guidebook translation key "${key}" for language "${language}". ` +
         `Add it to src/i18n/translations.ts (and the English fallback) so the ` +
-        `dashboard guidebook does not render the raw key.`
+        `dashboard guidebook does not render the raw key.`,
     );
     this.name = "MissingGuidebookKeyError";
     this.key = key;
@@ -36,7 +36,9 @@ const isDevLikeEnv = (): boolean => {
   // In production builds DEV=false and MODE=production.
   // We treat anything that is not explicitly production as dev-like.
   try {
-    const env = (import.meta as unknown as { env?: { DEV?: boolean; MODE?: string } }).env;
+    const env = (
+      import.meta as unknown as { env?: { DEV?: boolean; MODE?: string } }
+    ).env;
     if (!env) return true;
     if (env.DEV === true) return true;
     if (env.MODE && env.MODE !== "production") return true;
@@ -53,7 +55,10 @@ const isDevLikeEnv = (): boolean => {
 export function assertGuidebookKey(
   key: string,
   language: Language = "en",
-  dicts: Record<Language, Dict> = translations as unknown as Record<Language, Dict>
+  dicts: Record<Language, Dict> = translations as unknown as Record<
+    Language,
+    Dict
+  >,
 ): void {
   if (!isGuidebookKey(key)) return;
   const langMap = dicts[language] ?? {};
@@ -65,8 +70,10 @@ export function assertGuidebookKey(
     throw new MissingGuidebookKeyError(key, language);
   }
   // Production: don't crash, but make it loud in the console.
-  // eslint-disable-next-line no-console
-  console.error(`[guidebook] Missing translation key "${key}" (lang=${language}).`);
+
+  console.error(
+    `[guidebook] Missing translation key "${key}" (lang=${language}).`,
+  );
 }
 
 /**
@@ -77,7 +84,7 @@ export function assertGuidebookKey(
 export function safeGuidebookT(
   key: string,
   resolver: (k: string) => string,
-  language: Language = "en"
+  language: Language = "en",
 ): string {
   assertGuidebookKey(key, language);
   return resolver(key);

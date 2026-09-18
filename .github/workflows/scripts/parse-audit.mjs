@@ -18,13 +18,23 @@
 //     range,         // affected version range
 //   }
 
-const SEVERITY_ORDER = { info: 0, low: 1, moderate: 2, medium: 2, high: 3, critical: 4 };
+const SEVERITY_ORDER = {
+  info: 0,
+  low: 1,
+  moderate: 2,
+  medium: 2,
+  high: 3,
+  critical: 4,
+};
 
 export function severityRank(sev) {
   return SEVERITY_ORDER[String(sev || "info").toLowerCase()] ?? 0;
 }
 
-function pushAdvisory(out, { ruleId, ghsaId, cves, pkg, severity, title, url, range }) {
+function pushAdvisory(
+  out,
+  { ruleId, ghsaId, cves, pkg, severity, title, url, range },
+) {
   const sev = String(severity || "info").toLowerCase();
   const finalRuleId = String(ruleId || `${pkg}:${title || "unknown"}`);
   out.push({
@@ -34,7 +44,12 @@ function pushAdvisory(out, { ruleId, ghsaId, cves, pkg, severity, title, url, ra
     pkg: String(pkg || "unknown"),
     severity: sev,
     title: String(title || `Vulnerability in ${pkg}`),
-    url: String(url || (ruleId ? `https://github.com/advisories/${ruleId}` : "https://github.com/advisories")),
+    url: String(
+      url ||
+        (ruleId
+          ? `https://github.com/advisories/${ruleId}`
+          : "https://github.com/advisories"),
+    ),
     range: String(range || "unknown"),
   });
 }
@@ -47,14 +62,17 @@ function parseNpm(report, out) {
     for (const v of via) {
       if (typeof v !== "object" || v === null) continue;
       const canonicalPkg = String(v.name || pkgName);
-      const ruleId = String(v.source ?? v.url ?? `${canonicalPkg}:${v.title ?? "unknown"}`);
+      const ruleId = String(
+        v.source ?? v.url ?? `${canonicalPkg}:${v.title ?? "unknown"}`,
+      );
       const dedupKey = `${ruleId}::${canonicalPkg}`;
       if (seen.has(dedupKey)) continue;
       seen.add(dedupKey);
       // npm v7+ does not always carry the GHSA id alongside `source`.
       // When `url` points at /advisories/<GHSA-...> we extract it so
       // the allowlist can be authored against either id form.
-      const ghsaMatch = typeof v.url === "string" ? /\/(GHSA-[a-z0-9-]+)/i.exec(v.url) : null;
+      const ghsaMatch =
+        typeof v.url === "string" ? /\/(GHSA-[a-z0-9-]+)/i.exec(v.url) : null;
       pushAdvisory(out, {
         ruleId,
         ghsaId: ghsaMatch ? ghsaMatch[1] : null,
@@ -97,7 +115,11 @@ function parseYarnClassic(text, out) {
     const trimmed = line.trim();
     if (!trimmed) continue;
     let obj;
-    try { obj = JSON.parse(trimmed); } catch { continue; }
+    try {
+      obj = JSON.parse(trimmed);
+    } catch {
+      continue;
+    }
     if (obj.type !== "auditAdvisory" || !obj.data?.advisory) continue;
     const a = obj.data.advisory;
     pushAdvisory(out, {
@@ -114,7 +136,11 @@ function parseYarnClassic(text, out) {
 }
 
 function safeJson(text) {
-  try { return JSON.parse(text); } catch { return {}; }
+  try {
+    return JSON.parse(text);
+  } catch {
+    return {};
+  }
 }
 
 export function parseAuditReport(manager, raw) {
@@ -139,8 +165,17 @@ export function parseAuditReport(manager, raw) {
 }
 
 export const DRIVERS = {
-  npm: { name: "npm-audit", informationUri: "https://docs.npmjs.com/cli/v10/commands/npm-audit" },
+  npm: {
+    name: "npm-audit",
+    informationUri: "https://docs.npmjs.com/cli/v10/commands/npm-audit",
+  },
   pnpm: { name: "pnpm-audit", informationUri: "https://pnpm.io/cli/audit" },
-  "yarn-classic": { name: "yarn-audit", informationUri: "https://classic.yarnpkg.com/lang/en/docs/cli/audit/" },
-  "yarn-berry": { name: "yarn-npm-audit", informationUri: "https://yarnpkg.com/cli/npm/audit" },
+  "yarn-classic": {
+    name: "yarn-audit",
+    informationUri: "https://classic.yarnpkg.com/lang/en/docs/cli/audit/",
+  },
+  "yarn-berry": {
+    name: "yarn-npm-audit",
+    informationUri: "https://yarnpkg.com/cli/npm/audit",
+  },
 };

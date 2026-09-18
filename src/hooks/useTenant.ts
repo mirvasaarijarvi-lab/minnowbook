@@ -55,7 +55,9 @@ export const useTenant = () => {
     // already-subscribed channel throws "cannot add postgres_changes callbacks
     // ... after subscribe()".
     const channel = supabase
-      .channel(`tenant-membership-${user.id}-${Math.random().toString(36).slice(2)}`)
+      .channel(
+        `tenant-membership-${user.id}-${Math.random().toString(36).slice(2)}`,
+      )
       .on(
         "postgres_changes",
         {
@@ -77,7 +79,7 @@ export const useTenant = () => {
           try {
             sessionStorage.setItem(
               "tenant-membership-removed",
-              JSON.stringify({ at: new Date().toISOString() })
+              JSON.stringify({ at: new Date().toISOString() }),
             );
           } catch {
             // sessionStorage may be unavailable (private mode, SSR) — non-fatal
@@ -86,7 +88,7 @@ export const useTenant = () => {
             description: "Redirecting to setup…",
           });
           scheduleInvalidate();
-        }
+        },
       )
       .subscribe();
 
@@ -115,8 +117,8 @@ export const useTenant = () => {
   // resolved value against a ref so we only emit once per real loss event,
   // and skip the initial mount (null → null) and impersonation sessions.
   const resolvedTenantId = isImpersonating
-    ? impersonating.tenantId ?? null
-    : tenantUser?.tenant_id ?? null;
+    ? (impersonating.tenantId ?? null)
+    : (tenantUser?.tenant_id ?? null);
 
   useEffect(() => {
     if (loadingTenantUser) return;
@@ -131,7 +133,10 @@ export const useTenant = () => {
           reason: lossReasonRef.current,
           user_id: user?.id ?? null,
           previous_tenant_id: previous,
-          pathname: typeof window !== "undefined" ? window.location.pathname : undefined,
+          pathname:
+            typeof window !== "undefined"
+              ? window.location.pathname
+              : undefined,
         });
       } catch {
         // analytics push is best-effort
@@ -139,7 +144,13 @@ export const useTenant = () => {
       lossReasonRef.current = "unknown";
     }
     lastTenantIdRef.current = resolvedTenantId;
-  }, [resolvedTenantId, loadingTenantUser, isImpersonating, user?.id, impersonating.tenantId]);
+  }, [
+    resolvedTenantId,
+    loadingTenantUser,
+    isImpersonating,
+    user?.id,
+    impersonating.tenantId,
+  ]);
 
   if (isImpersonating && impersonating.tenantId) {
     return {

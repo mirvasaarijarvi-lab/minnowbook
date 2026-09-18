@@ -54,7 +54,8 @@ import {
  */
 
 const SUPABASE_URL =
-  (import.meta.env?.VITE_SUPABASE_URL as string | undefined) ?? process.env.SUPABASE_URL;
+  (import.meta.env?.VITE_SUPABASE_URL as string | undefined) ??
+  process.env.SUPABASE_URL;
 const SUPABASE_ANON_KEY =
   (import.meta.env?.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined) ??
   process.env.SUPABASE_ANON_KEY;
@@ -72,8 +73,8 @@ interface RangeProbe {
    * What we must NEVER see: a server crash (5xx) or a row leak.
    */
   acceptableOutcome:
-    | "empty-or-clamped"   // data is [] OR PostgREST clamps to a valid range
-    | "client-error";      // 4xx — invalid range rejected up front
+    | "empty-or-clamped" // data is [] OR PostgREST clamps to a valid range
+    | "client-error"; // 4xx — invalid range rejected up front
 }
 
 /**
@@ -87,15 +88,60 @@ interface RangeProbe {
  *   - both negative: tests double-fault handling.
  */
 const RANGE_PROBES: ReadonlyArray<RangeProbe> = [
-  { label: "negative `from` (-1, 10)", from: -1, to: 10, acceptableOutcome: "empty-or-clamped" },
-  { label: "very negative `from` (-1000, 10)", from: -1000, to: 10, acceptableOutcome: "empty-or-clamped" },
-  { label: "negative `to` (0, -1)", from: 0, to: -1, acceptableOutcome: "empty-or-clamped" },
-  { label: "both negative (-5, -1)", from: -5, to: -1, acceptableOutcome: "empty-or-clamped" },
-  { label: "inverted (10, 5)", from: 10, to: 5, acceptableOutcome: "empty-or-clamped" },
-  { label: "huge `to` (0, 2_147_483_646)", from: 0, to: 2_147_483_646, acceptableOutcome: "empty-or-clamped" },
-  { label: "huge `from` and `to` (1_000_000_000, 2_000_000_000)", from: 1_000_000_000, to: 2_000_000_000, acceptableOutcome: "empty-or-clamped" },
-  { label: "zero-width (0, 0)", from: 0, to: 0, acceptableOutcome: "empty-or-clamped" },
-  { label: "zero-width far past end (999_999, 999_999)", from: 999_999, to: 999_999, acceptableOutcome: "empty-or-clamped" },
+  {
+    label: "negative `from` (-1, 10)",
+    from: -1,
+    to: 10,
+    acceptableOutcome: "empty-or-clamped",
+  },
+  {
+    label: "very negative `from` (-1000, 10)",
+    from: -1000,
+    to: 10,
+    acceptableOutcome: "empty-or-clamped",
+  },
+  {
+    label: "negative `to` (0, -1)",
+    from: 0,
+    to: -1,
+    acceptableOutcome: "empty-or-clamped",
+  },
+  {
+    label: "both negative (-5, -1)",
+    from: -5,
+    to: -1,
+    acceptableOutcome: "empty-or-clamped",
+  },
+  {
+    label: "inverted (10, 5)",
+    from: 10,
+    to: 5,
+    acceptableOutcome: "empty-or-clamped",
+  },
+  {
+    label: "huge `to` (0, 2_147_483_646)",
+    from: 0,
+    to: 2_147_483_646,
+    acceptableOutcome: "empty-or-clamped",
+  },
+  {
+    label: "huge `from` and `to` (1_000_000_000, 2_000_000_000)",
+    from: 1_000_000_000,
+    to: 2_000_000_000,
+    acceptableOutcome: "empty-or-clamped",
+  },
+  {
+    label: "zero-width (0, 0)",
+    from: 0,
+    to: 0,
+    acceptableOutcome: "empty-or-clamped",
+  },
+  {
+    label: "zero-width far past end (999_999, 999_999)",
+    from: 999_999,
+    to: 999_999,
+    acceptableOutcome: "empty-or-clamped",
+  },
 ];
 
 interface ProbeResult {
@@ -103,7 +149,8 @@ interface ProbeResult {
   rowCount: number;
   errorCode: string | null;
   /** Coarse error shape — used for asymmetry comparison. */
-  errorCategory: "ok" | "rls-empty" | "validation" | "permission" | "server-error" | "other";
+  errorCategory:
+    "ok" | "rls-empty" | "validation" | "permission" | "server-error" | "other";
 }
 
 async function probeRange(
@@ -127,8 +174,10 @@ async function probeRange(
   } else {
     const code = error.code ?? "";
     if (httpStatus !== null && httpStatus >= 500) category = "server-error";
-    else if (code === "42501" || /permission denied/i.test(error.message)) category = "permission";
-    else if (httpStatus === 416 || /range/i.test(error.message)) category = "validation";
+    else if (code === "42501" || /permission denied/i.test(error.message))
+      category = "permission";
+    else if (httpStatus === 416 || /range/i.test(error.message))
+      category = "validation";
     else category = "other";
   }
 
@@ -179,7 +228,9 @@ suite(
             .single();
           if (error) {
             // Fail loudly — without the seed the test is meaningless.
-            throw new Error(`failed to seed login_history in tenant A: ${error.message}`);
+            throw new Error(
+              `failed to seed login_history in tenant A: ${error.message}`,
+            );
           }
           const seededId = data?.id as string | undefined;
           return async () => {
@@ -203,7 +254,10 @@ suite(
             })
             .select("id")
             .single();
-          if (error) throw new Error(`failed to seed notifications in tenant A: ${error.message}`);
+          if (error)
+            throw new Error(
+              `failed to seed notifications in tenant A: ${error.message}`,
+            );
           const seededId = data?.id as string | undefined;
           return async () => {
             if (!admin || !seededId) return;
@@ -247,7 +301,13 @@ suite(
             // Anon: RLS must reject EVERY tenant-scoped read regardless of
             // how malformed the range is. We probe without `tenant_id` to
             // simulate an attacker who doesn't know which tenant exists.
-            const result = await probeRange(anonClient, table.name, null, probe.from, probe.to);
+            const result = await probeRange(
+              anonClient,
+              table.name,
+              null,
+              probe.from,
+              probe.to,
+            );
 
             // Hard contract: never 5xx, never any rows.
             expect(

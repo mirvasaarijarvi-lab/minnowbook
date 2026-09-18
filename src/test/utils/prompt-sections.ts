@@ -39,14 +39,17 @@ export const prompt: string = SUPPORT_CHAT_SYSTEM_PROMPT;
 export function extractSection(
   source: string,
   header: string,
-  nextHeaderPrefix: "###" | "### " | "####" = "###"
+  nextHeaderPrefix: "###" | "### " | "####" = "###",
 ): string {
   const start = source.indexOf(header);
   if (start === -1) {
     throw new Error(`Section not found in support-chat prompt: ${header}`);
   }
   const after = source.indexOf(`\n${nextHeaderPrefix} `, start + header.length);
-  const closing = source.indexOf("\nKeep answers concise", start + header.length);
+  const closing = source.indexOf(
+    "\nKeep answers concise",
+    start + header.length,
+  );
   const candidates = [after, closing].filter((i) => i !== -1);
   const end = candidates.length ? Math.min(...candidates) : source.length;
   return source.slice(start, end).trimEnd();

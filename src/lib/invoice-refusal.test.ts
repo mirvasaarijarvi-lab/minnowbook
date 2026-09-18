@@ -15,12 +15,16 @@ describe("classifyInvoiceRefusal", () => {
       message: "Add a price before marking this reservation as invoiced.",
     });
     expect(r.code).toBe("NO_PRICE");
-    expect(r.serverReason).toBe("Add a price before marking this reservation as invoiced.");
+    expect(r.serverReason).toBe(
+      "Add a price before marking this reservation as invoiced.",
+    );
   });
 
   it("recognises an amount that does not reconcile", () => {
     const r = classifyInvoiceRefusal(
-      new Error("Invoice amount must match the recalculated room and breakfast totals."),
+      new Error(
+        "Invoice amount must match the recalculated room and breakfast totals.",
+      ),
     );
     expect(r.code).toBe("AMOUNT_MISMATCH");
     expect(r.serverReason).toBe(
@@ -29,12 +33,14 @@ describe("classifyInvoiceRefusal", () => {
   });
 
   it("recognises an already invoiced booking and a permission refusal", () => {
-    expect(classifyInvoiceRefusal({ message: "This booking is already invoiced." }).code).toBe(
-      "INVOICED_LOCKED",
-    );
+    expect(
+      classifyInvoiceRefusal({ message: "This booking is already invoiced." })
+        .code,
+    ).toBe("INVOICED_LOCKED");
     expect(
       classifyInvoiceRefusal({
-        message: 'new row violates row-level security policy for table "reservations"',
+        message:
+          'new row violates row-level security policy for table "reservations"',
       }).code,
     ).toBe("NOT_PERMITTED");
   });
@@ -58,7 +64,10 @@ describe("classifyInvoiceRefusal", () => {
       'permission denied for relation "reservations"',
       "at line 12 of pl/pgsql function",
     ]) {
-      expect(classifyInvoiceRefusal({ message: raw }).serverReason, raw).toBeNull();
+      expect(
+        classifyInvoiceRefusal({ message: raw }).serverReason,
+        raw,
+      ).toBeNull();
     }
   });
 
@@ -74,9 +83,14 @@ describe("classifyInvoiceRefusal", () => {
 describe("composeInvoiceRefusalMessage", () => {
   it("appends the exact server reason after the explanation", () => {
     const refusal = classifyInvoiceRefusal({
-      message: "Invoice amount must match the recalculated room and breakfast totals.",
+      message:
+        "Invoice amount must match the recalculated room and breakfast totals.",
     });
-    const out = composeInvoiceRefusalMessage(refusal, "Correct the price, then try again.", "Reason:");
+    const out = composeInvoiceRefusalMessage(
+      refusal,
+      "Correct the price, then try again.",
+      "Reason:",
+    );
     expect(out).toBe(
       "Correct the price, then try again. Reason: Invoice amount must match the recalculated room and breakfast totals.",
     );
@@ -91,9 +105,9 @@ describe("composeInvoiceRefusalMessage", () => {
 
   it("shows only the explanation when there is no usable reason", () => {
     const refusal = classifyInvoiceRefusal({ message: "PGRST301" });
-    expect(composeInvoiceRefusalMessage(refusal, "Could not update.", "Reason:")).toBe(
-      "Could not update.",
-    );
+    expect(
+      composeInvoiceRefusalMessage(refusal, "Could not update.", "Reason:"),
+    ).toBe("Could not update.");
   });
 });
 
@@ -132,7 +146,9 @@ describe("refusal copy", () => {
       for (const code of codes) {
         const guest = map[invoiceRefusalTranslationKey(code, "guest")];
         expect(guest, `${lang}/guest/${code}`).toBeTruthy();
-        expect(guest, `${lang}/guest/${code} has no dashes`).not.toMatch(/[—–]/);
+        expect(guest, `${lang}/guest/${code} has no dashes`).not.toMatch(
+          /[—–]/,
+        );
       }
       // The staff explanations tell the reader to fix internal data; guest
       // wording never should.
@@ -145,13 +161,25 @@ describe("refusal copy", () => {
 
 describe("additional refusal codes", () => {
   const cases: ReadonlyArray<[string, unknown, string]> = [
-    ["a cancelled booking", { message: "Reservation is cancelled" }, "CANCELLED"],
-    ["a revoked booking link", { message: "This link has been revoked" }, "NOT_FOUND"],
+    [
+      "a cancelled booking",
+      { message: "Reservation is cancelled" },
+      "CANCELLED",
+    ],
+    [
+      "a revoked booking link",
+      { message: "This link has been revoked" },
+      "NOT_FOUND",
+    ],
     ["an expired session", { message: "JWT expired" }, "SESSION_EXPIRED"],
     ["a network failure", { message: "Failed to fetch" }, "OFFLINE"],
     ["a timeout", { message: "Request timed out" }, "OFFLINE"],
     ["throttling", { message: "Too many requests, slow down" }, "RATE_LIMITED"],
-    ["a concurrent edit", { message: "Row was modified by another user" }, "CONFLICT"],
+    [
+      "a concurrent edit",
+      { message: "Row was modified by another user" },
+      "CONFLICT",
+    ],
     ["a server fault", { message: "Internal server error" }, "SERVER_ERROR"],
   ];
 
@@ -168,16 +196,23 @@ describe("additional refusal codes", () => {
     [503, "SERVER_ERROR"],
   ];
 
-  it.each(statusCases)("classifies HTTP %i without a recognisable message", (status, expected) => {
-    expect(classifyInvoiceRefusal({ status, message: "Edge Function returned an error" }).code).toBe(
-      expected,
-    );
-  });
+  it.each(statusCases)(
+    "classifies HTTP %i without a recognisable message",
+    (status, expected) => {
+      expect(
+        classifyInvoiceRefusal({
+          status,
+          message: "Edge Function returned an error",
+        }).code,
+      ).toBe(expected);
+    },
+  );
 
   it("reads the status from a nested context (edge function errors)", () => {
-    expect(classifyInvoiceRefusal({ message: "boom", context: { status: 429 } }).code).toBe(
-      "RATE_LIMITED",
-    );
+    expect(
+      classifyInvoiceRefusal({ message: "boom", context: { status: 429 } })
+        .code,
+    ).toBe("RATE_LIMITED");
   });
 
   it("lets a business rule win over the HTTP status", () => {
@@ -189,7 +224,9 @@ describe("additional refusal codes", () => {
   });
 
   it("keeps unrelated failures UNKNOWN so surfaces can fall back", () => {
-    expect(classifyInvoiceRefusal({ message: "something odd happened" }).code).toBe("UNKNOWN");
+    expect(
+      classifyInvoiceRefusal({ message: "something odd happened" }).code,
+    ).toBe("UNKNOWN");
   });
 
   it("marks only transport-level refusals retriable", () => {
@@ -203,7 +240,11 @@ describe("additional refusal codes", () => {
   });
 
   it("keys guest wording into its own namespace", () => {
-    expect(invoiceRefusalTranslationKey("OFFLINE")).toBe("invoiceRefusal.OFFLINE");
-    expect(invoiceRefusalTranslationKey("OFFLINE", "guest")).toBe("invoiceRefusalGuest.OFFLINE");
+    expect(invoiceRefusalTranslationKey("OFFLINE")).toBe(
+      "invoiceRefusal.OFFLINE",
+    );
+    expect(invoiceRefusalTranslationKey("OFFLINE", "guest")).toBe(
+      "invoiceRefusalGuest.OFFLINE",
+    );
   });
 });

@@ -32,7 +32,8 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { randomUUID } from "node:crypto";
 
 const SUPABASE_URL =
-  (import.meta.env?.VITE_SUPABASE_URL as string | undefined) ?? process.env.SUPABASE_URL;
+  (import.meta.env?.VITE_SUPABASE_URL as string | undefined) ??
+  process.env.SUPABASE_URL;
 const SUPABASE_ANON_KEY =
   (import.meta.env?.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined) ??
   process.env.SUPABASE_ANON_KEY ??
@@ -168,213 +169,243 @@ const blocked = (error: unknown, data: unknown[] | null | undefined) =>
 const PRICING_COLUMNS =
   "id, price_eur, original_price_eur, discount_type, discount_value, discount_reason, pricing_type, pricing_details, breakfast_price_per_person, is_invoiced";
 
-describe.runIf(canRun)("reservation pricing fields — staff role matrix (live)", () => {
-  beforeAll(async () => {
-    ctx.service = newService();
+describe.runIf(canRun)(
+  "reservation pricing fields — staff role matrix (live)",
+  () => {
+    beforeAll(async () => {
+      ctx.service = newService();
 
-    ctx.owner = await createUser("owner");
-    ctx.admin = await createUser("admin");
-    ctx.staff = await createUser("staff");
-    ctx.unapproved = await createUser("unapproved");
-    ctx.outsider = await createUser("outsider");
-    ctx.otherOwner = await createUser("otherowner");
+      ctx.owner = await createUser("owner");
+      ctx.admin = await createUser("admin");
+      ctx.staff = await createUser("staff");
+      ctx.unapproved = await createUser("unapproved");
+      ctx.outsider = await createUser("outsider");
+      ctx.otherOwner = await createUser("otherowner");
 
-    ctx.tenantId = await createTenant(ctx.owner.userId);
-    ctx.otherTenantId = await createTenant(ctx.otherOwner.userId);
+      ctx.tenantId = await createTenant(ctx.owner.userId);
+      ctx.otherTenantId = await createTenant(ctx.otherOwner.userId);
 
-    await addMember(ctx.tenantId, ctx.owner, "owner");
-    await addMember(ctx.tenantId, ctx.admin, "admin");
-    await addMember(ctx.tenantId, ctx.staff, "staff");
-    await addMember(ctx.tenantId, ctx.unapproved, "staff", false);
-    await addMember(ctx.otherTenantId, ctx.otherOwner, "owner");
+      await addMember(ctx.tenantId, ctx.owner, "owner");
+      await addMember(ctx.tenantId, ctx.admin, "admin");
+      await addMember(ctx.tenantId, ctx.staff, "staff");
+      await addMember(ctx.tenantId, ctx.unapproved, "staff", false);
+      await addMember(ctx.otherTenantId, ctx.otherOwner, "owner");
 
-    // The booking every UPDATE attempt targets, priced by the server.
-    const { data, error } = await ctx.service
-      .from("reservations")
-      .insert({ ...baseBooking(ctx.tenantId, "target"), ...PRICING_FIELDS })
-      .select("id")
-      .single();
-    if (error || !data) throw error ?? new Error("target reservation insert failed");
-    ctx.targetReservationId = data.id as string;
-  }, 120_000);
-
-  afterAll(async () => {
-    if (!ctx.service) return;
-    const swallow = async (p: PromiseLike<unknown>) => {
-      try { await p; } catch { /* best-effort */ }
-    };
-    for (const t of ctx.cleanupTenants) {
-      await swallow(ctx.service.from("reservations").delete().eq("tenant_id", t));
-      await swallow(ctx.service.from("tenant_users").delete().eq("tenant_id", t));
-      await swallow(ctx.service.from("tenants").delete().eq("id", t));
-    }
-    for (const u of ctx.cleanupUsers) {
-      await swallow(ctx.service.auth.admin.deleteUser(u));
-    }
-  }, 90_000);
-
-  /** Reads the target booking with the service key, bypassing RLS. */
-  async function readTarget() {
-    const { data, error } = await ctx.service
-      .from("reservations")
-      .select(PRICING_COLUMNS)
-      .eq("id", ctx.targetReservationId)
-      .single();
-    if (error || !data) throw error ?? new Error("target read failed");
-    return data as Record<string, unknown>;
-  }
-
-  // ─── Unauthorized actors ────────────────────────────────────────────
-  it("anon guests cannot create a booking carrying any pricing field", async () => {
-    const anon = newAnon();
-    for (const [field, value] of Object.entries(PRICING_FIELDS)) {
-      const label = `anon-${field}`;
-      const { error, data } = await anon
+      // The booking every UPDATE attempt targets, priced by the server.
+      const { data, error } = await ctx.service
         .from("reservations")
-        .insert({ ...baseBooking(ctx.tenantId, label), [field]: value })
-        .select("id");
-      expect(blocked(error, data), `anon must not set ${field}`).toBe(true);
-
-      const { data: rows } = await ctx.service
-        .from("reservations")
+        .insert({ ...baseBooking(ctx.tenantId, "target"), ...PRICING_FIELDS })
         .select("id")
-        .eq("guest_email", `ci+pricing-${label}@mimmobook.test`);
-      expect(rows ?? [], `no row may exist after anon set ${field}`).toHaveLength(0);
+        .single();
+      if (error || !data)
+        throw error ?? new Error("target reservation insert failed");
+      ctx.targetReservationId = data.id as string;
+    }, 120_000);
+
+    afterAll(async () => {
+      if (!ctx.service) return;
+      const swallow = async (p: PromiseLike<unknown>) => {
+        try {
+          await p;
+        } catch {
+          /* best-effort */
+        }
+      };
+      for (const t of ctx.cleanupTenants) {
+        await swallow(
+          ctx.service.from("reservations").delete().eq("tenant_id", t),
+        );
+        await swallow(
+          ctx.service.from("tenant_users").delete().eq("tenant_id", t),
+        );
+        await swallow(ctx.service.from("tenants").delete().eq("id", t));
+      }
+      for (const u of ctx.cleanupUsers) {
+        await swallow(ctx.service.auth.admin.deleteUser(u));
+      }
+    }, 90_000);
+
+    /** Reads the target booking with the service key, bypassing RLS. */
+    async function readTarget() {
+      const { data, error } = await ctx.service
+        .from("reservations")
+        .select(PRICING_COLUMNS)
+        .eq("id", ctx.targetReservationId)
+        .single();
+      if (error || !data) throw error ?? new Error("target read failed");
+      return data as Record<string, unknown>;
     }
-  }, 120_000);
 
-  it("anon guests cannot edit pricing on an existing booking", async () => {
-    const before = await readTarget();
-    const anon = newAnon();
-    const { error, data } = await anon
-      .from("reservations")
-      .update({ price_eur: 1, is_invoiced: false, discount_value: 95 })
-      .eq("id", ctx.targetReservationId)
-      .select("id");
-    expect(blocked(error, data)).toBe(true);
-    expect(await readTarget()).toEqual(before);
-  }, 60_000);
-
-  it.each([
-    ["authenticated non-member", "outsider"],
-    ["unapproved tenant member", "unapproved"],
-    ["another tenant's owner", "otherOwner"],
-  ] as const)(
-    "%s can neither create nor edit priced bookings",
-    async (_label, key) => {
-      const actor = ctx[key as "outsider" | "unapproved" | "otherOwner"];
-      const client = await signedIn(actor);
-      try {
-        const label = `deny-${key}-${randomUUID().slice(0, 6)}`;
-        const ins = await client
+    // ─── Unauthorized actors ────────────────────────────────────────────
+    it("anon guests cannot create a booking carrying any pricing field", async () => {
+      const anon = newAnon();
+      for (const [field, value] of Object.entries(PRICING_FIELDS)) {
+        const label = `anon-${field}`;
+        const { error, data } = await anon
           .from("reservations")
-          .insert({ ...baseBooking(ctx.tenantId, label), ...PRICING_FIELDS })
+          .insert({ ...baseBooking(ctx.tenantId, label), [field]: value })
           .select("id");
-        expect(blocked(ins.error, ins.data), "insert must be blocked").toBe(true);
+        expect(blocked(error, data), `anon must not set ${field}`).toBe(true);
+
         const { data: rows } = await ctx.service
           .from("reservations")
           .select("id")
           .eq("guest_email", `ci+pricing-${label}@mimmobook.test`);
-        expect(rows ?? [], "no booking may be created").toHaveLength(0);
+        expect(
+          rows ?? [],
+          `no row may exist after anon set ${field}`,
+        ).toHaveLength(0);
+      }
+    }, 120_000);
 
-        const before = await readTarget();
+    it("anon guests cannot edit pricing on an existing booking", async () => {
+      const before = await readTarget();
+      const anon = newAnon();
+      const { error, data } = await anon
+        .from("reservations")
+        .update({ price_eur: 1, is_invoiced: false, discount_value: 95 })
+        .eq("id", ctx.targetReservationId)
+        .select("id");
+      expect(blocked(error, data)).toBe(true);
+      expect(await readTarget()).toEqual(before);
+    }, 60_000);
+
+    it.each([
+      ["authenticated non-member", "outsider"],
+      ["unapproved tenant member", "unapproved"],
+      ["another tenant's owner", "otherOwner"],
+    ] as const)(
+      "%s can neither create nor edit priced bookings",
+      async (_label, key) => {
+        const actor = ctx[key as "outsider" | "unapproved" | "otherOwner"];
+        const client = await signedIn(actor);
+        try {
+          const label = `deny-${key}-${randomUUID().slice(0, 6)}`;
+          const ins = await client
+            .from("reservations")
+            .insert({ ...baseBooking(ctx.tenantId, label), ...PRICING_FIELDS })
+            .select("id");
+          expect(blocked(ins.error, ins.data), "insert must be blocked").toBe(
+            true,
+          );
+          const { data: rows } = await ctx.service
+            .from("reservations")
+            .select("id")
+            .eq("guest_email", `ci+pricing-${label}@mimmobook.test`);
+          expect(rows ?? [], "no booking may be created").toHaveLength(0);
+
+          const before = await readTarget();
+          const upd = await client
+            .from("reservations")
+            .update({ price_eur: 1, original_price_eur: 1, is_invoiced: false })
+            .eq("id", ctx.targetReservationId)
+            .select("id");
+          expect(blocked(upd.error, upd.data), "update must be blocked").toBe(
+            true,
+          );
+          expect(await readTarget(), "not a cent may change").toEqual(before);
+        } finally {
+          await client.auth.signOut();
+        }
+      },
+      120_000,
+    );
+
+    // ─── Authorized staff roles ─────────────────────────────────────────
+    it.each(["owner", "admin", "staff"] as const)(
+      "%s can create a booking with pricing fields and they persist unchanged",
+      async (key) => {
+        const client = await signedIn(ctx[key]);
+        try {
+          const label = `allow-${key}-${randomUUID().slice(0, 6)}`;
+          const { data, error } = await client
+            .from("reservations")
+            .insert({ ...baseBooking(ctx.tenantId, label), ...PRICING_FIELDS })
+            .select(PRICING_COLUMNS)
+            .single();
+          expect(error, `${key} insert must succeed`).toBeNull();
+          expect(Number(data?.price_eur)).toBe(222.75);
+          expect(Number(data?.original_price_eur)).toBe(297);
+          expect(data?.discount_type).toBe("percentage");
+          expect(Number(data?.discount_value)).toBe(25);
+          expect(data?.discount_reason).toBe(PRICING_FIELDS.discount_reason);
+          expect(data?.pricing_type).toBe("fixed_price");
+          expect(data?.pricing_details).toBe(PRICING_FIELDS.pricing_details);
+          expect(Number(data?.breakfast_price_per_person)).toBe(12);
+          expect(data?.is_invoiced).toBe(true);
+        } finally {
+          await client.auth.signOut();
+        }
+      },
+      120_000,
+    );
+
+    it.each(["owner", "admin", "staff"] as const)(
+      "%s can edit pricing fields on an existing booking",
+      async (key) => {
+        const client = await signedIn(ctx[key]);
+        try {
+          const newPrice = 250 + Math.round(Math.random() * 5000) / 100;
+          const { data, error } = await client
+            .from("reservations")
+            .update({
+              price_eur: newPrice,
+              original_price_eur: 400,
+              pricing_details: `edited by ${key}`,
+            })
+            .eq("id", ctx.targetReservationId)
+            .select(PRICING_COLUMNS)
+            .single();
+          expect(error, `${key} update must succeed`).toBeNull();
+          expect(Number(data?.price_eur)).toBe(newPrice);
+          expect(Number(data?.original_price_eur)).toBe(400);
+          expect(data?.pricing_details).toBe(`edited by ${key}`);
+        } finally {
+          await client.auth.signOut();
+          // Restore the canonical target row for the remaining denial assertions.
+          await ctx.service
+            .from("reservations")
+            .update(PRICING_FIELDS)
+            .eq("id", ctx.targetReservationId);
+        }
+      },
+      120_000,
+    );
+
+    it("staff cannot reach another tenant's booking pricing", async () => {
+      const { data: other, error: insErr } = await ctx.service
+        .from("reservations")
+        .insert({
+          ...baseBooking(
+            ctx.otherTenantId,
+            `other-${randomUUID().slice(0, 6)}`,
+          ),
+          price_eur: 500,
+        })
+        .select("id")
+        .single();
+      if (insErr || !other)
+        throw insErr ?? new Error("other-tenant insert failed");
+
+      const client = await signedIn(ctx.staff);
+      try {
         const upd = await client
           .from("reservations")
-          .update({ price_eur: 1, original_price_eur: 1, is_invoiced: false })
-          .eq("id", ctx.targetReservationId)
+          .update({ price_eur: 1, is_invoiced: true })
+          .eq("id", other.id)
           .select("id");
-        expect(blocked(upd.error, upd.data), "update must be blocked").toBe(true);
-        expect(await readTarget(), "not a cent may change").toEqual(before);
-      } finally {
-        await client.auth.signOut();
-      }
-    },
-    120_000,
-  );
-
-  // ─── Authorized staff roles ─────────────────────────────────────────
-  it.each(["owner", "admin", "staff"] as const)(
-    "%s can create a booking with pricing fields and they persist unchanged",
-    async (key) => {
-      const client = await signedIn(ctx[key]);
-      try {
-        const label = `allow-${key}-${randomUUID().slice(0, 6)}`;
-        const { data, error } = await client
+        expect(blocked(upd.error, upd.data)).toBe(true);
+        const { data: after } = await ctx.service
           .from("reservations")
-          .insert({ ...baseBooking(ctx.tenantId, label), ...PRICING_FIELDS })
-          .select(PRICING_COLUMNS)
+          .select("price_eur, is_invoiced")
+          .eq("id", other.id)
           .single();
-        expect(error, `${key} insert must succeed`).toBeNull();
-        expect(Number(data?.price_eur)).toBe(222.75);
-        expect(Number(data?.original_price_eur)).toBe(297);
-        expect(data?.discount_type).toBe("percentage");
-        expect(Number(data?.discount_value)).toBe(25);
-        expect(data?.discount_reason).toBe(PRICING_FIELDS.discount_reason);
-        expect(data?.pricing_type).toBe("fixed_price");
-        expect(data?.pricing_details).toBe(PRICING_FIELDS.pricing_details);
-        expect(Number(data?.breakfast_price_per_person)).toBe(12);
-        expect(data?.is_invoiced).toBe(true);
+        expect(Number(after?.price_eur)).toBe(500);
+        expect(after?.is_invoiced).not.toBe(true);
       } finally {
         await client.auth.signOut();
+        await ctx.service.from("reservations").delete().eq("id", other.id);
       }
-    },
-    120_000,
-  );
-
-  it.each(["owner", "admin", "staff"] as const)(
-    "%s can edit pricing fields on an existing booking",
-    async (key) => {
-      const client = await signedIn(ctx[key]);
-      try {
-        const newPrice = 250 + Math.round(Math.random() * 5000) / 100;
-        const { data, error } = await client
-          .from("reservations")
-          .update({ price_eur: newPrice, original_price_eur: 400, pricing_details: `edited by ${key}` })
-          .eq("id", ctx.targetReservationId)
-          .select(PRICING_COLUMNS)
-          .single();
-        expect(error, `${key} update must succeed`).toBeNull();
-        expect(Number(data?.price_eur)).toBe(newPrice);
-        expect(Number(data?.original_price_eur)).toBe(400);
-        expect(data?.pricing_details).toBe(`edited by ${key}`);
-      } finally {
-        await client.auth.signOut();
-        // Restore the canonical target row for the remaining denial assertions.
-        await ctx.service
-          .from("reservations")
-          .update(PRICING_FIELDS)
-          .eq("id", ctx.targetReservationId);
-      }
-    },
-    120_000,
-  );
-
-  it("staff cannot reach another tenant's booking pricing", async () => {
-    const { data: other, error: insErr } = await ctx.service
-      .from("reservations")
-      .insert({ ...baseBooking(ctx.otherTenantId, `other-${randomUUID().slice(0, 6)}`), price_eur: 500 })
-      .select("id")
-      .single();
-    if (insErr || !other) throw insErr ?? new Error("other-tenant insert failed");
-
-    const client = await signedIn(ctx.staff);
-    try {
-      const upd = await client
-        .from("reservations")
-        .update({ price_eur: 1, is_invoiced: true })
-        .eq("id", other.id)
-        .select("id");
-      expect(blocked(upd.error, upd.data)).toBe(true);
-      const { data: after } = await ctx.service
-        .from("reservations")
-        .select("price_eur, is_invoiced")
-        .eq("id", other.id)
-        .single();
-      expect(Number(after?.price_eur)).toBe(500);
-      expect(after?.is_invoiced).not.toBe(true);
-    } finally {
-      await client.auth.signOut();
-      await ctx.service.from("reservations").delete().eq("id", other.id);
-    }
-  }, 120_000);
-});
+    }, 120_000);
+  },
+);

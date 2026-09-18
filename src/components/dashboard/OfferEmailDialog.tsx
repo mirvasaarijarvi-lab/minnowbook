@@ -3,7 +3,14 @@ import { useQuery } from "@tanstack/react-query";
 import { useT } from "@/contexts/I18nContext";
 import { useUpdateOffer, type Offer } from "@/hooks/useOffers";
 import { useTenant } from "@/hooks/useTenant";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -31,124 +38,163 @@ function blobToBase64(blob: Blob): Promise<string> {
   });
 }
 
-const OfferEmailDialog = forwardRef<HTMLDivElement, Props>(({ offer, open, onOpenChange }, ref) => {
-  const t = useT();
-  const updateOffer = useUpdateOffer();
-  const { tenant, tenantId } = useTenant();
-  const businessName = (tenant as any)?.name || "MimmoBook";
+const OfferEmailDialog = forwardRef<HTMLDivElement, Props>(
+  ({ offer, open, onOpenChange }, ref) => {
+    const t = useT();
+    const updateOffer = useUpdateOffer();
+    const { tenant, tenantId } = useTenant();
+    const businessName = (tenant as any)?.name || "MimmoBook";
 
-  const { data: tenantSettings } = useQuery({
-    queryKey: ["tenant-settings-branding", tenantId],
-    queryFn: async () => {
-      if (!tenantId) return null;
-      const { data } = await supabase
-        .from("tenant_settings")
-        .select("logo_url, business_name, business_email, business_phone, business_address, primary_color")
-        .eq("tenant_id", tenantId)
-        .maybeSingle();
-      return data;
-    },
-    enabled: !!tenantId,
-  });
+    const { data: tenantSettings } = useQuery({
+      queryKey: ["tenant-settings-branding", tenantId],
+      queryFn: async () => {
+        if (!tenantId) return null;
+        const { data } = await supabase
+          .from("tenant_settings")
+          .select(
+            "logo_url, business_name, business_email, business_phone, business_address, primary_color",
+          )
+          .eq("tenant_id", tenantId)
+          .maybeSingle();
+        return data;
+      },
+      enabled: !!tenantId,
+    });
 
-  const branding: TenantBranding = {
-    logoUrl: tenantSettings?.logo_url,
-    businessName: tenantSettings?.business_name || businessName,
-    businessEmail: tenantSettings?.business_email,
-    businessPhone: tenantSettings?.business_phone,
-    businessAddress: tenantSettings?.business_address,
-    primaryColor: tenantSettings?.primary_color,
-  };
+    const branding: TenantBranding = {
+      logoUrl: tenantSettings?.logo_url,
+      businessName: tenantSettings?.business_name || businessName,
+      businessEmail: tenantSettings?.business_email,
+      businessPhone: tenantSettings?.business_phone,
+      businessAddress: tenantSettings?.business_address,
+      primaryColor: tenantSettings?.primary_color,
+    };
 
-  const effectiveName = branding.businessName || businessName;
-  const defaultSubject = `Offer – ${effectiveName}`;
-  const defaultBody = `Dear ${offer.guest_name},\n\nPlease use the PDF download link in this email to review your offer details and confirm whether you would like to proceed.\n\nBest regards,\n${effectiveName}`;
+    const effectiveName = branding.businessName || businessName;
+    const defaultSubject = `Offer – ${effectiveName}`;
+    const defaultBody = `Dear ${offer.guest_name},\n\nPlease use the PDF download link in this email to review your offer details and confirm whether you would like to proceed.\n\nBest regards,\n${effectiveName}`;
 
-  const [subject, setSubject] = useState(defaultSubject);
-  const [body, setBody] = useState(defaultBody);
-  const [sending, setSending] = useState(false);
+    const [subject, setSubject] = useState(defaultSubject);
+    const [body, setBody] = useState(defaultBody);
+    const [sending, setSending] = useState(false);
 
-  const [lastOfferId, setLastOfferId] = useState(offer.id);
-  if (offer.id !== lastOfferId) {
-    setLastOfferId(offer.id);
-    setSubject(defaultSubject);
-    setBody(defaultBody);
-  }
-
-  const handleSend = async () => {
-    setSending(true);
-    try {
-      const { generateOfferPdf } = await import("@/lib/offerPdf");
-      const pdfBlob = await generateOfferPdf(offer, offer.language || "en", effectiveName, branding);
-      const pdfBase64 = await blobToBase64(pdfBlob);
-
-      const { data, error } = await supabase.functions.invoke("send-offer-email", {
-        body: {
-          to: offer.guest_email,
-          subject,
-          textBody: body,
-          pdfBase64,
-          pdfFilename: `Offer_${offer.guest_name.replace(/\s+/g, "_")}_${offer.event_date}.pdf`,
-          businessName: effectiveName,
-          businessEmail: branding.businessEmail || undefined,
-        },
-      });
-
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
-
-      if (data?.emailSent === false) {
-        toast.info(data.reason || "Email not configured yet");
-      }
-
-      await updateOffer.mutateAsync({
-        id: offer.id,
-        status: "sent",
-        last_sent_at: new Date().toISOString(),
-        last_send_provider_id: data?.providerId || null,
-      } as any);
-      toast.success(t("offers.emailSent"));
-      onOpenChange(false);
-    } catch (err: any) {
-      console.error("Send offer email error:", err);
-      toast.error(t("offers.emailError"));
-    } finally {
-      setSending(false);
+    const [lastOfferId, setLastOfferId] = useState(offer.id);
+    if (offer.id !== lastOfferId) {
+      setLastOfferId(offer.id);
+      setSubject(defaultSubject);
+      setBody(defaultBody);
     }
-  };
 
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent ref={ref} className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>{t("offers.sendEmail")}</DialogTitle>
-          <DialogDescription className="sr-only">Send offer via email</DialogDescription>
-        </DialogHeader>
-        <div className="space-y-4">
-          <div className="space-y-1.5">
-            <Label htmlFor="offer-email-to">{t("offers.emailTo")}</Label>
-            <Input id="offer-email-to" value={offer.guest_email} disabled />
+    const handleSend = async () => {
+      setSending(true);
+      try {
+        const { generateOfferPdf } = await import("@/lib/offerPdf");
+        const pdfBlob = await generateOfferPdf(
+          offer,
+          offer.language || "en",
+          effectiveName,
+          branding,
+        );
+        const pdfBase64 = await blobToBase64(pdfBlob);
+
+        const { data, error } = await supabase.functions.invoke(
+          "send-offer-email",
+          {
+            body: {
+              to: offer.guest_email,
+              subject,
+              textBody: body,
+              pdfBase64,
+              pdfFilename: `Offer_${offer.guest_name.replace(/\s+/g, "_")}_${offer.event_date}.pdf`,
+              businessName: effectiveName,
+              businessEmail: branding.businessEmail || undefined,
+            },
+          },
+        );
+
+        if (error) throw error;
+        if (data?.error) throw new Error(data.error);
+
+        if (data?.emailSent === false) {
+          toast.info(data.reason || "Email not configured yet");
+        }
+
+        await updateOffer.mutateAsync({
+          id: offer.id,
+          status: "sent",
+          last_sent_at: new Date().toISOString(),
+          last_send_provider_id: data?.providerId || null,
+        } as any);
+        toast.success(t("offers.emailSent"));
+        onOpenChange(false);
+      } catch (err: any) {
+        console.error("Send offer email error:", err);
+        toast.error(t("offers.emailError"));
+      } finally {
+        setSending(false);
+      }
+    };
+
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent
+          ref={ref}
+          className="max-w-2xl max-h-[90vh] overflow-y-auto"
+        >
+          <DialogHeader>
+            <DialogTitle>{t("offers.sendEmail")}</DialogTitle>
+            <DialogDescription className="sr-only">
+              Send offer via email
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="offer-email-to">{t("offers.emailTo")}</Label>
+              <Input id="offer-email-to" value={offer.guest_email} disabled />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="offer-email-subject">
+                {t("offers.emailSubject")}
+              </Label>
+              <Input
+                id="offer-email-subject"
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="offer-email-body">{t("offers.emailBody")}</Label>
+              <Textarea
+                id="offer-email-body"
+                value={body}
+                onChange={(e) => setBody(e.target.value)}
+                rows={10}
+              />
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {t("offers.pdfAttached")}
+            </p>
           </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="offer-email-subject">{t("offers.emailSubject")}</Label>
-            <Input id="offer-email-subject" value={subject} onChange={(e) => setSubject(e.target.value)} />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="offer-email-body">{t("offers.emailBody")}</Label>
-            <Textarea id="offer-email-body" value={body} onChange={(e) => setBody(e.target.value)} rows={10} />
-          </div>
-          <p className="text-xs text-muted-foreground">{t("offers.pdfAttached")}</p>
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>{t("common.cancel")}</Button>
-          <Button onClick={handleSend} disabled={sending}>
-            {sending ? <><Loader2 className="h-4 w-4 animate-spin mr-1" /> {t("common.saving")}</> : t("offers.send")}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-});
+          <DialogFooter>
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
+              {t("common.cancel")}
+            </Button>
+            <Button onClick={handleSend} disabled={sending}>
+              {sending ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-1" />{" "}
+                  {t("common.saving")}
+                </>
+              ) : (
+                t("offers.send")
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
+  },
+);
 
 OfferEmailDialog.displayName = "OfferEmailDialog";
 

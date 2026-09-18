@@ -18,7 +18,7 @@ import {
  */
 export const useEffectiveTimezone = (
   resourceId: string | null | undefined,
-  tenantId: string | null | undefined
+  tenantId: string | null | undefined,
 ): EffectiveTimezone & { isLoading: boolean } => {
   const tenantTzQuery = useQuery({
     queryKey: ["tenant-timezone", tenantId],
@@ -61,5 +61,8 @@ export const useEffectiveTimezone = (
     tenantTz: tenantTzQuery.data ?? null,
   });
 
-  return { ...resolved, isLoading: isLoading && resolved.tz === DEFAULT_TIMEZONE };
+  return {
+    ...resolved,
+    isLoading: isLoading && resolved.tz === DEFAULT_TIMEZONE,
+  };
 };

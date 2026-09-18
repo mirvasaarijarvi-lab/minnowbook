@@ -62,7 +62,8 @@ const CUSTOM_HEADER_SETS: Array<{ label: string; value: string }> = [
   },
   {
     label: "request tracing + impersonation",
-    value: "authorization, content-type, apikey, x-request-id, x-impersonate-tenant-id",
+    value:
+      "authorization, content-type, apikey, x-request-id, x-impersonate-tenant-id",
   },
   {
     label: "uppercase + spacing variants",
@@ -81,7 +82,6 @@ function fnUrl(name: string) {
 }
 
 import { fetchWithColdStartRetry } from "./cold-start-retry";
-
 
 /**
  * Two preflight "modes" exist in production:
@@ -130,8 +130,6 @@ async function preflight(
   });
 }
 
-
-
 async function postRequest(
   name: string,
   origin: string,
@@ -149,7 +147,6 @@ async function postRequest(
     body: JSON.stringify({ action: "list" }),
   });
 }
-
 
 function expectNoOriginEcho(
   res: Response,
@@ -169,7 +166,6 @@ function expectNoOriginEcho(
     ).toBe(false);
   }
 }
-
 
 function expectNoCredentialsEnabled(res: Response, label: string) {
   const acac = res.headers.get("access-control-allow-credentials");
@@ -236,10 +232,15 @@ describe("Edge function CORS — disallowed origin × custom-header preflights",
                 // must NOT return a value that breaks the legitimate
                 // client (empty / "null" / "undefined").
                 if (acao !== null) {
-                  expect(acao === "" || acao === "null" || acao === "undefined").toBe(false);
+                  expect(
+                    acao === "" || acao === "null" || acao === "undefined",
+                  ).toBe(false);
                 }
               }
-              expectNoCredentialsEnabled(res, `${fn} allowed ${set.label} [${apikeyMode}]`);
+              expectNoCredentialsEnabled(
+                res,
+                `${fn} allowed ${set.label} [${apikeyMode}]`,
+              );
             },
             NETWORK_TIMEOUT_MS,
           );
@@ -254,7 +255,13 @@ describe("Edge function CORS — disallowed origin × custom-header preflights",
               it(
                 `preflight ${method} from "${origin}" with "${set.label}" headers [${apikeyMode}] does not reflect origin or enable credentials`,
                 async () => {
-                  const res = await preflight(fn, origin, method, set.value, apikeyMode);
+                  const res = await preflight(
+                    fn,
+                    origin,
+                    method,
+                    set.value,
+                    apikeyMode,
+                  );
                   await res.text();
                   const label = `${fn} ${method} ${origin} [${set.label}] [${apikeyMode}]`;
                   // The Supabase gateway's fallback preflight (no-apikey
@@ -274,7 +281,9 @@ describe("Edge function CORS — disallowed origin × custom-header preflights",
                   // The gateway fallback (no-apikey) does not run the
                   // function, so we only assert these for with-apikey.
                   if (apikeyMode === "with-apikey") {
-                    expect(res.headers.get("x-content-type-options")).toBe("nosniff");
+                    expect(res.headers.get("x-content-type-options")).toBe(
+                      "nosniff",
+                    );
                     expect(res.headers.get("x-frame-options")).toBe("DENY");
                     expect(res.headers.get("referrer-policy")).toBe(
                       "strict-origin-when-cross-origin",
@@ -308,7 +317,6 @@ describe("Edge function CORS — disallowed origin × custom-header preflights",
           NETWORK_TIMEOUT_MS,
         );
       }
-
 
       // -------- preflight WITHOUT Origin (e.g. some non-browser callers) --------
       it(
@@ -370,7 +378,11 @@ describe("Edge function CORS — disallowed origin × custom-header preflights",
 
           // And critically, none echoes the attacker origin.
           for (const r of probes) {
-            expectNoOriginEcho(r, "https://evil.example.com", `${fn} repeat probe`);
+            expectNoOriginEcho(
+              r,
+              "https://evil.example.com",
+              `${fn} repeat probe`,
+            );
             expectNoCredentialsEnabled(r, `${fn} repeat probe`);
           }
         },

@@ -26,13 +26,19 @@ const anon = hasConfig
   : null;
 
 /** Denied means: an error, or an empty/no-op result. Never leaked rows. */
-function expectNoRows(result: { data: unknown; error: unknown }, label: string) {
+function expectNoRows(
+  result: { data: unknown; error: unknown },
+  label: string,
+) {
   if (result.error) {
     expect(result.error, `${label}: error path is acceptable`).toBeTruthy();
     return;
   }
   expect(Array.isArray(result.data), `${label}: expected an array`).toBe(true);
-  expect((result.data as unknown[]).length, `${label}: must not leak rows`).toBe(0);
+  expect(
+    (result.data as unknown[]).length,
+    `${label}: must not leak rows`,
+  ).toBe(0);
 }
 
 describe.skipIf(!hasConfig)("reschedule_requests — anon isolation", () => {

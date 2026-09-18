@@ -45,7 +45,9 @@ describe("booking telemetry", () => {
 
   it("pushes a SERVICE_ROLE_KEY_MISSING event onto window.dataLayer", () => {
     trackServiceRoleKeyMissing({ tenantSlug: "acme", locale: "fi" });
-    const dl = (window as unknown as { dataLayer: Array<Record<string, unknown>> }).dataLayer;
+    const dl = (
+      window as unknown as { dataLayer: Array<Record<string, unknown>> }
+    ).dataLayer;
     expect(dl).toHaveLength(1);
     expect(dl[0]).toMatchObject({
       event: "booking_error",
@@ -61,7 +63,9 @@ describe("booking telemetry", () => {
       resourceId: "r-1",
       locale: "sv",
     });
-    const dl = (window as unknown as { dataLayer: Array<Record<string, unknown>> }).dataLayer;
+    const dl = (
+      window as unknown as { dataLayer: Array<Record<string, unknown>> }
+    ).dataLayer;
     const payload = JSON.stringify(dl[0]);
     for (const banned of [
       "service_role",
@@ -91,14 +95,20 @@ describe("booking telemetry", () => {
   it("never throws even if dataLayer.push is broken", () => {
     Object.defineProperty(window, "dataLayer", {
       configurable: true,
-      value: { push: () => { throw new Error("blocked"); } },
+      value: {
+        push: () => {
+          throw new Error("blocked");
+        },
+      },
     });
     expect(() => trackServiceRoleKeyMissing()).not.toThrow();
   });
 
   it("omits optional context fields when not provided", () => {
     trackBookingError("SOME_OTHER_CODE");
-    const dl = (window as unknown as { dataLayer: Array<Record<string, unknown>> }).dataLayer;
+    const dl = (
+      window as unknown as { dataLayer: Array<Record<string, unknown>> }
+    ).dataLayer;
     expect(dl[0]).not.toHaveProperty("tenant_slug");
     expect(dl[0]).not.toHaveProperty("resource_id");
     expect(dl[0]).not.toHaveProperty("locale");

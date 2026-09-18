@@ -32,10 +32,28 @@ export default tseslint.config(
           ],
         },
       ],
-      "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
+      "react-refresh/only-export-components": [
+        "warn",
+        { allowConstantExport: true },
+      ],
       "@typescript-eslint/no-unused-vars": "off",
       "@typescript-eslint/no-explicit-any": "off",
     },
   },
   eslintPluginPrettier,
+  {
+    // Auto-generated integration clients are not hand-edited.
+    files: ["src/integrations/supabase/**/*.ts"],
+    rules: {
+      "prefer-const": "off",
+    },
+  },
+  {
+    // Test fixtures use Playwright/Vitest helpers named like React hooks.
+    files: ["e2e/**/*.ts", "src/test/**/*.ts"],
+    rules: {
+      "react-hooks/rules-of-hooks": "off",
+      "@typescript-eslint/no-require-imports": "off",
+    },
+  },
 );

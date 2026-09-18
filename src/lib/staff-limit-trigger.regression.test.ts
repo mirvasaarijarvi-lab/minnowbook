@@ -142,9 +142,7 @@ describe("no legacy max_staff_users references", () => {
     expect(
       offenders,
       `legacy max_staff_users references found:\n` +
-        offenders
-          .map((o) => `  ${o.file}:${o.line}  ${o.text}`)
-          .join("\n"),
+        offenders.map((o) => `  ${o.file}:${o.line}  ${o.text}`).join("\n"),
     ).toEqual([]);
   });
 });

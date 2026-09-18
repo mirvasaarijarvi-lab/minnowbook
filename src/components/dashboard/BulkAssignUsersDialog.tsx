@@ -53,10 +53,14 @@ const BulkAssignUsersDialog = ({
   // localized message; everything else falls back to the raw server text.
   const showError = (err: unknown) => {
     const tierErr = formatTierError(err);
-    const description = tierErr ? tierErr.message : (err as { message?: string })?.message;
+    const description = tierErr
+      ? tierErr.message
+      : (err as { message?: string })?.message;
     toast({ title: "Error", description, variant: "destructive" });
   };
-  const [selectedUserIds, setSelectedUserIds] = useState<Set<string>>(new Set());
+  const [selectedUserIds, setSelectedUserIds] = useState<Set<string>>(
+    new Set(),
+  );
   const [role, setRole] = useState("staff");
 
   const { data: users, isLoading } = useQuery({
@@ -76,7 +80,7 @@ const BulkAssignUsersDialog = ({
   const alreadyAssigned = new Set(
     (users ?? [])
       .filter((u) => u.site_assignments?.some((sa) => sa.site_id === siteId))
-      .map((u) => u.user_id)
+      .map((u) => u.user_id),
   );
 
   const toggleUser = (userId: string) => {
@@ -128,7 +132,7 @@ const BulkAssignUsersDialog = ({
   });
 
   const newSelections = Array.from(selectedUserIds).filter(
-    (id) => !alreadyAssigned.has(id)
+    (id) => !alreadyAssigned.has(id),
   );
 
   return (
@@ -170,11 +174,16 @@ const BulkAssignUsersDialog = ({
               {/* Select all */}
               <div className="flex items-center gap-2 pb-1 border-b border-border">
                 <Checkbox
-                  checked={users.length > 0 && selectedUserIds.size === users.length}
+                  checked={
+                    users.length > 0 && selectedUserIds.size === users.length
+                  }
                   onCheckedChange={toggleAll}
                   id="select-all"
                 />
-                <label htmlFor="select-all" className="text-xs font-medium cursor-pointer text-muted-foreground">
+                <label
+                  htmlFor="select-all"
+                  className="text-xs font-medium cursor-pointer text-muted-foreground"
+                >
                   {t("common.selectAll")} ({users.length})
                 </label>
               </div>

@@ -36,13 +36,13 @@ const renderPreview = (customMessage: string) =>
       reservation={baseReservation}
       business={baseBusiness}
       customMessage={customMessage}
-    />
+    />,
   );
 
 const XSS_PAYLOADS: { name: string; payload: string }[] = [
   {
     name: "raw script tag",
-    payload: '<script>window.__xss_fired = true;</script><p>after</p>',
+    payload: "<script>window.__xss_fired = true;</script><p>after</p>",
   },
   {
     name: "img onerror handler",
@@ -62,8 +62,7 @@ const XSS_PAYLOADS: { name: string; payload: string }[] = [
   },
   {
     name: "object/embed injection",
-    payload:
-      '<object data="evil.swf"></object><embed src="evil.swf"></embed>',
+    payload: '<object data="evil.swf"></object><embed src="evil.swf"></embed>',
   },
   {
     name: "form-based phishing",
@@ -72,11 +71,13 @@ const XSS_PAYLOADS: { name: string; payload: string }[] = [
   },
   {
     name: "meta refresh redirect",
-    payload: '<meta http-equiv="refresh" content="0;url=https://evil.example.com">',
+    payload:
+      '<meta http-equiv="refresh" content="0;url=https://evil.example.com">',
   },
   {
     name: "iframe srcdoc payload",
-    payload: '<iframe srcdoc="<script>window.__xss_fired=true</script>"></iframe>',
+    payload:
+      '<iframe srcdoc="<script>window.__xss_fired=true</script>"></iframe>',
   },
   {
     name: "data: URI in anchor",
@@ -99,47 +100,44 @@ describe("ConfirmationEmailPreview — customMessage sanitization", () => {
     expect(container.querySelector("iframe")).toBeNull();
   });
 
-  it.each(XSS_PAYLOADS)(
-    "neutralises XSS payload: $name",
-    ({ payload }) => {
-      const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
-      const { container } = renderPreview(payload);
-      const html = container.innerHTML;
+  it.each(XSS_PAYLOADS)("neutralises XSS payload: $name", ({ payload }) => {
+    const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
+    const { container } = renderPreview(payload);
+    const html = container.innerHTML;
 
-      // 1. No executable / framed elements survived sanitization.
-      expect(container.querySelector("script")).toBeNull();
-      expect(container.querySelector("iframe")).toBeNull();
-      expect(container.querySelector("object")).toBeNull();
-      expect(container.querySelector("embed")).toBeNull();
-      expect(container.querySelector("form")).toBeNull();
-      expect(container.querySelector("meta")).toBeNull();
+    // 1. No executable / framed elements survived sanitization.
+    expect(container.querySelector("script")).toBeNull();
+    expect(container.querySelector("iframe")).toBeNull();
+    expect(container.querySelector("object")).toBeNull();
+    expect(container.querySelector("embed")).toBeNull();
+    expect(container.querySelector("form")).toBeNull();
+    expect(container.querySelector("meta")).toBeNull();
 
-      // 2. No inline event handlers leaked through.
-      expect(html).not.toMatch(/\son\w+\s*=/i);
+    // 2. No inline event handlers leaked through.
+    expect(html).not.toMatch(/\son\w+\s*=/i);
 
-      // 3. No javascript: pseudo-URLs survived on hrefs.
-      expect(html).not.toMatch(/href\s*=\s*["']?\s*javascript:/i);
+    // 3. No javascript: pseudo-URLs survived on hrefs.
+    expect(html).not.toMatch(/href\s*=\s*["']?\s*javascript:/i);
 
-      // 4. No srcdoc attribute (allows nested HTML execution in iframes).
-      expect(html).not.toMatch(/\bsrcdoc\s*=/i);
+    // 4. No srcdoc attribute (allows nested HTML execution in iframes).
+    expect(html).not.toMatch(/\bsrcdoc\s*=/i);
 
-      // 5. No data: URI hrefs (DOMPurify strips dangerous schemes by default).
-      expect(html).not.toMatch(/href\s*=\s*["']?\s*data:/i);
+    // 5. No data: URI hrefs (DOMPurify strips dangerous schemes by default).
+    expect(html).not.toMatch(/href\s*=\s*["']?\s*data:/i);
 
-      // 6. The attacker payload's side-effect sentinel never fired.
-      expect(
-        (window as unknown as { __xss_fired?: boolean }).__xss_fired
-      ).toBeUndefined();
-      expect(alertSpy).not.toHaveBeenCalled();
+    // 6. The attacker payload's side-effect sentinel never fired.
+    expect(
+      (window as unknown as { __xss_fired?: boolean }).__xss_fired,
+    ).toBeUndefined();
+    expect(alertSpy).not.toHaveBeenCalled();
 
-      alertSpy.mockRestore();
-    }
-  );
+    alertSpy.mockRestore();
+  });
 
   it("preserves safe formatting tags from the allowlist", () => {
     const safe =
-      '<p>Welcome <strong>Alice</strong>, your booking is <em>confirmed</em>.</p>' +
-      '<ul><li>Item one</li><li>Item two</li></ul>' +
+      "<p>Welcome <strong>Alice</strong>, your booking is <em>confirmed</em>.</p>" +
+      "<ul><li>Item one</li><li>Item two</li></ul>" +
       '<a href="https://example.com" target="_blank">link</a>';
     const { container } = renderPreview(safe);
     const html = container.innerHTML;
@@ -159,7 +157,7 @@ describe("ConfirmationEmailPreview — customMessage sanitization", () => {
   });
 
   it("strips disallowed tags but keeps their inner text content", () => {
-    const mixed = '<script>alert(1)</script><p>visible text</p>';
+    const mixed = "<script>alert(1)</script><p>visible text</p>";
     const { container } = renderPreview(mixed);
 
     expect(container.querySelector("script")).toBeNull();

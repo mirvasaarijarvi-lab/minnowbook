@@ -7,7 +7,10 @@ import {
   type TenantGuardRecord,
   type TenantMembershipSnapshot,
 } from "./fixtures/tenant-guard-record";
-import { applyReportGuard, WITHHELD_NOTICE } from "./fixtures/report-render-guard";
+import {
+  applyReportGuard,
+  WITHHELD_NOTICE,
+} from "./fixtures/report-render-guard";
 import { parseReportScope } from "./fixtures/request-scope-guard";
 
 /**
@@ -102,7 +105,10 @@ function isTracked(filepath: string | undefined): boolean {
   return TRACKED_FILE_PATTERN.test(filepath.replace(/\\/g, "/"));
 }
 
-function flattenTasks(task: Task, suitePath: string[] = []): Array<{ task: Task; suite: string }> {
+function flattenTasks(
+  task: Task,
+  suitePath: string[] = [],
+): Array<{ task: Task; suite: string }> {
   if (task.type === "test") {
     return [{ task, suite: suitePath.join(" > ") || "(root)" }];
   }
@@ -118,7 +124,8 @@ function statusFromTask(task: Task): EntryStatus {
   if (!result) return "skipped";
   if (result.state === "pass") return "passed";
   if (result.state === "fail") return "failed";
-  if (result.state === "skip" || task.mode === "skip" || task.mode === "todo") return "skipped";
+  if (result.state === "skip" || task.mode === "skip" || task.mode === "todo")
+    return "skipped";
   return "skipped";
 }
 
@@ -126,7 +133,8 @@ function escapeHtml(value: string): string {
   // Guard records come from a JSON side-channel, so a "string" field can hold
   // any JSON value. Coerce defensively: the report must render the odd value
   // as visible text, never crash the whole report.
-  if (typeof value !== "string") return escapeHtml(value === undefined ? "" : String(value));
+  if (typeof value !== "string")
+    return escapeHtml(value === undefined ? "" : String(value));
   return value
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
@@ -141,7 +149,9 @@ function escapeHtml(value: string): string {
  * Format is intentionally line-oriented so it survives Vitest's serializer
  * and stays greppable in raw CI logs.
  */
-export function parseRlsFailure(message: string | null): RlsFailureDetails | null {
+export function parseRlsFailure(
+  message: string | null,
+): RlsFailureDetails | null {
   if (!message || !message.includes("RLS DENIAL FAILED:")) return null;
   const lines = message.split("\n");
   const details: RlsFailureDetails = {};
@@ -149,7 +159,8 @@ export function parseRlsFailure(message: string | null): RlsFailureDetails | nul
     const line = lines[i];
     const m = line.match(/^RLS DENIAL FAILED:\s*(.+)$/);
     if (m) details.scenario = m[1].trim();
-    else if (/^Table:\s+/.test(line)) details.table = line.replace(/^Table:\s+/, "").trim();
+    else if (/^Table:\s+/.test(line))
+      details.table = line.replace(/^Table:\s+/, "").trim();
     else if (/^Operation:\s+/.test(line))
       details.operation = line.replace(/^Operation:\s+/, "").trim();
     else if (/^Attempted query:\s+/.test(line))
@@ -158,7 +169,8 @@ export function parseRlsFailure(message: string | null): RlsFailureDetails | nul
       details.actingTenant = line.replace(/^Acting tenant:\s+/, "").trim();
     else if (/^Target tenant:\s+/.test(line))
       details.targetTenant = line.replace(/^Target tenant:\s+/, "").trim();
-    else if (/^Reason:\s+/.test(line)) details.reason = line.replace(/^Reason:\s+/, "").trim();
+    else if (/^Reason:\s+/.test(line))
+      details.reason = line.replace(/^Reason:\s+/, "").trim();
     else if (/^Supabase error:/.test(line)) {
       const errLines: string[] = [line.replace(/^Supabase error:\s*/, "")];
       while (i + 1 < lines.length && /^\s{2,}/.test(lines[i + 1])) {
@@ -167,7 +179,10 @@ export function parseRlsFailure(message: string | null): RlsFailureDetails | nul
       }
       details.supabaseError = errLines.filter(Boolean).join("\n");
     } else if (/^Returned rows:/.test(line)) {
-      details.returnedRows = lines.slice(i + 1).join("\n").trim();
+      details.returnedRows = lines
+        .slice(i + 1)
+        .join("\n")
+        .trim();
       break;
     }
   }
@@ -262,8 +277,12 @@ export function renderTenantGuardSection(records: TenantGuardRecord[]): string {
       const failureRow = r.failure
         ? `<div class="guard-failure">⚠ ${escapeHtml(r.failure)}</div>`
         : "";
-      const aLabel = r.emailA ? ` <span class="guard-email">(${escapeHtml(r.emailA)})</span>` : "";
-      const bLabel = r.emailB ? ` <span class="guard-email">(${escapeHtml(r.emailB)})</span>` : "";
+      const aLabel = r.emailA
+        ? ` <span class="guard-email">(${escapeHtml(r.emailA)})</span>`
+        : "";
+      const bLabel = r.emailB
+        ? ` <span class="guard-email">(${escapeHtml(r.emailB)})</span>`
+        : "";
       return `<tr>
           <td><code>${escapeHtml(r.suite)}</code></td>
           <td><code>${escapeHtml(r.tenantA ?? "—")}</code>${aLabel}</td>
@@ -302,10 +321,10 @@ export function renderHtml(payload: ReportPayload): string {
       const rawError = e.rlsDetails?.withheld
         ? ""
         : e.errorMessage
-        ? `<details${e.rlsDetails ? "" : " open"}><summary>Raw error / stack</summary><pre>${escapeHtml(e.errorMessage)}${
-            e.errorStack ? "\n\n" + escapeHtml(e.errorStack) : ""
-          }</pre></details>`
-        : "";
+          ? `<details${e.rlsDetails ? "" : " open"}><summary>Raw error / stack</summary><pre>${escapeHtml(e.errorMessage)}${
+              e.errorStack ? "\n\n" + escapeHtml(e.errorStack) : ""
+            }</pre></details>`
+          : "";
       const detailsCell = rlsBlock || rawError ? `${rlsBlock}${rawError}` : "";
       return `<tr class="${statusClass}">
           <td><span class="badge ${statusClass}">${e.status}</span></td>
@@ -439,7 +458,8 @@ export default class RlsReportReporter implements Reporter {
 
     const entries: ReportEntry[] = [];
     for (const file of tracked) {
-      const fileLabel = file.filepath?.split(/[\\/]/).pop() ?? file.name ?? "(unknown)";
+      const fileLabel =
+        file.filepath?.split(/[\\/]/).pop() ?? file.name ?? "(unknown)";
       for (const { task, suite } of flattenTasks(file)) {
         const status = statusFromTask(task);
         const errors = task.result?.errors ?? [];
@@ -499,7 +519,6 @@ export default class RlsReportReporter implements Reporter {
     });
     const staleGuardRecords = allGuardRecords.length - tenantGuard.length;
     if (staleGuardRecords > 0) {
-      // eslint-disable-next-line no-console
       console.warn(
         `[rls-report] ignored ${staleGuardRecords} tenant-guard record(s) from an earlier run`,
       );
@@ -534,8 +553,14 @@ export default class RlsReportReporter implements Reporter {
       // artifact downloads don't collide.
       const jsonPath = resolve(this.outDir, "rls-report.json");
       const htmlPath = resolve(this.outDir, "rls-report.html");
-      const flavoredJsonPath = resolve(this.outDir, `rls-report.${safeFlavor}.json`);
-      const flavoredHtmlPath = resolve(this.outDir, `rls-report.${safeFlavor}.html`);
+      const flavoredJsonPath = resolve(
+        this.outDir,
+        `rls-report.${safeFlavor}.json`,
+      );
+      const flavoredHtmlPath = resolve(
+        this.outDir,
+        `rls-report.${safeFlavor}.html`,
+      );
       const json = JSON.stringify(outPayload, null, 2);
       // Strip trailing whitespace so the artifact stays clean when an
       // optional section (e.g. the tenant guard) renders empty.
@@ -544,13 +569,12 @@ export default class RlsReportReporter implements Reporter {
       writeFileSync(htmlPath, html, "utf-8");
       writeFileSync(flavoredJsonPath, json, "utf-8");
       writeFileSync(flavoredHtmlPath, html, "utf-8");
-      // eslint-disable-next-line no-console
+
       console.log(
         `\n[rls-report] (${flavor}) ${totals.passed}/${totals.total} passed (${totals.failed} failed, ${totals.skipped} skipped)\n` +
           `[rls-report] JSON: ${jsonPath} (+ ${flavoredJsonPath})\n[rls-report] HTML: ${htmlPath} (+ ${flavoredHtmlPath})`,
       );
     } catch (err) {
-      // eslint-disable-next-line no-console
       console.error("[rls-report] Failed to write report:", err);
     }
     // ensure dirname helper isn't tree-shaken when bundled

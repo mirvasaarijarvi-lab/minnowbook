@@ -29,7 +29,13 @@ interface GuidedTourProps {
 const PADDING = 8;
 const TOOLTIP_GAP = 12;
 
-const GuidedTour = ({ steps, isOpen, onClose, onComplete, onNavigate }: GuidedTourProps) => {
+const GuidedTour = ({
+  steps,
+  isOpen,
+  onClose,
+  onComplete,
+  onNavigate,
+}: GuidedTourProps) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [tooltipStyle, setTooltipStyle] = useState<React.CSSProperties>({});
   const [spotlightStyle, setSpotlightStyle] = useState<React.CSSProperties>({});
@@ -144,7 +150,10 @@ const GuidedTour = ({ steps, isOpen, onClose, onComplete, onNavigate }: GuidedTo
   return (
     <div className="fixed inset-0 z-[9999]">
       {/* Overlay */}
-      <div className="absolute inset-0 bg-black/60 transition-opacity duration-300" onClick={onClose} />
+      <div
+        className="absolute inset-0 bg-black/60 transition-opacity duration-300"
+        onClick={onClose}
+      />
 
       {/* Spotlight cutout */}
       <div
@@ -186,12 +195,22 @@ const GuidedTour = ({ steps, isOpen, onClose, onComplete, onNavigate }: GuidedTo
 
           <div className="flex items-center gap-2">
             {!isFirst && (
-              <Button variant="ghost" size="sm" onClick={handlePrev} className="gap-1 h-8 px-2.5">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handlePrev}
+                className="gap-1 h-8 px-2.5"
+              >
                 <ChevronLeft className="h-3.5 w-3.5" />
                 Back
               </Button>
             )}
-            <Button variant="default" size="sm" onClick={handleNext} className="gap-1 h-8 px-3">
+            <Button
+              variant="default"
+              size="sm"
+              onClick={handleNext}
+              className="gap-1 h-8 px-3"
+            >
               {isLast ? "Finish" : "Next"}
               {!isLast && <ChevronRight className="h-3.5 w-3.5" />}
             </Button>
@@ -205,7 +224,9 @@ const GuidedTour = ({ steps, isOpen, onClose, onComplete, onNavigate }: GuidedTo
               key={i}
               className={cn(
                 "h-1.5 rounded-full transition-all duration-200",
-                i === currentStep ? "w-4 bg-accent" : "w-1.5 bg-muted-foreground/30"
+                i === currentStep
+                  ? "w-4 bg-accent"
+                  : "w-1.5 bg-muted-foreground/30",
               )}
             />
           ))}

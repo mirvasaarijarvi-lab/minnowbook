@@ -48,7 +48,9 @@ describe("parseSeatingTimes", () => {
   });
 
   it("drops duplicates and junk", () => {
-    expect(parseSeatingTimes(["12:00", "12:00:00", "nope", null, 5])).toEqual(["12:00"]);
+    expect(parseSeatingTimes(["12:00", "12:00:00", "nope", null, 5])).toEqual([
+      "12:00",
+    ]);
     expect(parseSeatingTimes(null)).toEqual([]);
     expect(parseSeatingTimes({})).toEqual([]);
   });
@@ -74,7 +76,9 @@ describe("seat counting", () => {
   });
 
   it("ignores cancelled and rejected bookings", () => {
-    expect(seatsTaken(openOccasion, [{ guests_count: 5, status: "rejected" }])).toBe(0);
+    expect(
+      seatsTaken(openOccasion, [{ guests_count: 5, status: "rejected" }]),
+    ).toBe(0);
   });
 
   it("falls back to estimated guests, then to one seat", () => {
@@ -84,12 +88,16 @@ describe("seat counting", () => {
   });
 
   it("never reports negative remaining seats", () => {
-    expect(remainingSeats({ ...openOccasion, capacity: 3 }, [{ guests_count: 40 }])).toBe(0);
+    expect(
+      remainingSeats({ ...openOccasion, capacity: 3 }, [{ guests_count: 40 }]),
+    ).toBe(0);
   });
 });
 
 describe("seatingAvailability and findSeatingWithCapacity", () => {
-  const bookings = [{ start_time: "12:00", guests_count: 20, status: "confirmed" }];
+  const bookings = [
+    { start_time: "12:00", guests_count: 20, status: "confirmed" },
+  ];
 
   it("marks a filled sitting as full", () => {
     const slots = seatingAvailability(seatingsOccasion, bookings);
@@ -103,51 +111,108 @@ describe("seatingAvailability and findSeatingWithCapacity", () => {
   });
 
   it("suggests the first sitting that fits the party", () => {
-    expect(findSeatingWithCapacity(seatingsOccasion, bookings, 4)).toBe("15:00");
+    expect(findSeatingWithCapacity(seatingsOccasion, bookings, 4)).toBe(
+      "15:00",
+    );
     expect(findSeatingWithCapacity(seatingsOccasion, bookings, 21)).toBeNull();
   });
 });
 
 describe("validateOccasionBooking", () => {
-  const base = { date: "2026-05-10", reservationType: "restaurant", bookings: [] as never[] };
+  const base = {
+    date: "2026-05-10",
+    reservationType: "restaurant",
+    bookings: [] as never[],
+  };
 
   it("accepts a valid sitting", () => {
-    expect(validateOccasionBooking({ ...base, occasion: seatingsOccasion, startTime: "12:00", guests: 4 }))
-      .toEqual({ ok: true, seating: "12:00", remaining: 20 });
+    expect(
+      validateOccasionBooking({
+        ...base,
+        occasion: seatingsOccasion,
+        startTime: "12:00",
+        guests: 4,
+      }),
+    ).toEqual({ ok: true, seating: "12:00", remaining: 20 });
   });
 
   it("rejects a missing occasion", () => {
-    expect(validateOccasionBooking({ ...base, occasion: null })).toEqual({ ok: false, reason: "NOT_FOUND" });
+    expect(validateOccasionBooking({ ...base, occasion: null })).toEqual({
+      ok: false,
+      reason: "NOT_FOUND",
+    });
   });
 
   it("rejects an inactive occasion", () => {
-    expect(validateOccasionBooking({ ...base, occasion: { ...seatingsOccasion, is_active: false }, startTime: "12:00" }))
-      .toEqual({ ok: false, reason: "INACTIVE" });
+    expect(
+      validateOccasionBooking({
+        ...base,
+        occasion: { ...seatingsOccasion, is_active: false },
+        startTime: "12:00",
+      }),
+    ).toEqual({ ok: false, reason: "INACTIVE" });
   });
 
   it("rejects a mismatched date or service", () => {
-    expect(validateOccasionBooking({ ...base, date: "2026-05-11", occasion: seatingsOccasion, startTime: "12:00" }))
-      .toEqual({ ok: false, reason: "WRONG_DATE" });
-    expect(validateOccasionBooking({ ...base, reservationType: "venue", occasion: seatingsOccasion, startTime: "12:00" }))
-      .toEqual({ ok: false, reason: "WRONG_TYPE" });
+    expect(
+      validateOccasionBooking({
+        ...base,
+        date: "2026-05-11",
+        occasion: seatingsOccasion,
+        startTime: "12:00",
+      }),
+    ).toEqual({ ok: false, reason: "WRONG_DATE" });
+    expect(
+      validateOccasionBooking({
+        ...base,
+        reservationType: "venue",
+        occasion: seatingsOccasion,
+        startTime: "12:00",
+      }),
+    ).toEqual({ ok: false, reason: "WRONG_TYPE" });
   });
 
   it("requires a known sitting time", () => {
-    expect(validateOccasionBooking({ ...base, occasion: seatingsOccasion, startTime: null }))
-      .toEqual({ ok: false, reason: "SEATING_REQUIRED" });
-    expect(validateOccasionBooking({ ...base, occasion: seatingsOccasion, startTime: "13:00" }))
-      .toEqual({ ok: false, reason: "INVALID_SEATING" });
+    expect(
+      validateOccasionBooking({
+        ...base,
+        occasion: seatingsOccasion,
+        startTime: null,
+      }),
+    ).toEqual({ ok: false, reason: "SEATING_REQUIRED" });
+    expect(
+      validateOccasionBooking({
+        ...base,
+        occasion: seatingsOccasion,
+        startTime: "13:00",
+      }),
+    ).toEqual({ ok: false, reason: "INVALID_SEATING" });
   });
 
   it("rejects a party larger than the seats left", () => {
-    const bookings = [{ start_time: "12:00", guests_count: 18, status: "confirmed" }];
-    expect(validateOccasionBooking({ ...base, bookings, occasion: seatingsOccasion, startTime: "12:00", guests: 4 }))
-      .toEqual({ ok: false, reason: "FULL", remaining: 2 });
+    const bookings = [
+      { start_time: "12:00", guests_count: 18, status: "confirmed" },
+    ];
+    expect(
+      validateOccasionBooking({
+        ...base,
+        bookings,
+        occasion: seatingsOccasion,
+        startTime: "12:00",
+        guests: 4,
+      }),
+    ).toEqual({ ok: false, reason: "FULL", remaining: 2 });
   });
 
   it("ignores the time for an open occasion but still enforces capacity", () => {
-    expect(validateOccasionBooking({ ...base, occasion: openOccasion, startTime: null, guests: 5 }))
-      .toEqual({ ok: true, seating: null, remaining: 30 });
+    expect(
+      validateOccasionBooking({
+        ...base,
+        occasion: openOccasion,
+        startTime: null,
+        guests: 5,
+      }),
+    ).toEqual({ ok: true, seating: null, remaining: 30 });
     expect(
       validateOccasionBooking({
         ...base,
@@ -163,7 +228,10 @@ describe("validateOccasionBooking", () => {
       validateOccasionBooking({
         ...base,
         date: "2026-05-10T00:00:00Z",
-        occasion: { ...seatingsOccasion, occasion_date: "2026-05-10T12:00:00Z" },
+        occasion: {
+          ...seatingsOccasion,
+          occasion_date: "2026-05-10T12:00:00Z",
+        },
         startTime: "12:00",
         guests: 2,
       }),

@@ -45,7 +45,11 @@ function validateChatPayload(body: unknown): ChatValidationResult {
   }
   for (const msg of messages) {
     if (!msg || typeof msg !== "object") {
-      return { ok: false, status: 400, error: "Each message must be an object" };
+      return {
+        ok: false,
+        status: 400,
+        error: "Each message must be an object",
+      };
     }
     const m = msg as { role?: unknown; content?: unknown };
     if (typeof m.role !== "string" || !CHAT_VALID_ROLES.includes(m.role)) {
@@ -101,22 +105,30 @@ type AdminValidationResult =
   | { ok: false; status: number; error: string };
 
 function validateEmail(v: unknown): string {
-  if (typeof v !== "string" || v.length === 0) throw new Error("Email is required");
+  if (typeof v !== "string" || v.length === 0)
+    throw new Error("Email is required");
   const trimmed = v.trim().toLowerCase();
   if (trimmed.length > MAX_EMAIL_LENGTH) throw new Error("Email too long");
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) throw new Error("Invalid email format");
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed))
+    throw new Error("Invalid email format");
   return trimmed;
 }
 
 function validatePassword(v: unknown): string {
-  if (typeof v !== "string" || v.length === 0) throw new Error("Password is required");
+  if (typeof v !== "string" || v.length === 0)
+    throw new Error("Password is required");
   if (v.length < MIN_PASSWORD_LENGTH)
-    throw new Error(`Password must be at least ${MIN_PASSWORD_LENGTH} characters`);
+    throw new Error(
+      `Password must be at least ${MIN_PASSWORD_LENGTH} characters`,
+    );
   if (v.length > MAX_PASSWORD_LENGTH) throw new Error("Password too long");
-  if (!/[A-Z]/.test(v)) throw new Error("Password must contain an uppercase letter");
-  if (!/[a-z]/.test(v)) throw new Error("Password must contain a lowercase letter");
+  if (!/[A-Z]/.test(v))
+    throw new Error("Password must contain an uppercase letter");
+  if (!/[a-z]/.test(v))
+    throw new Error("Password must contain a lowercase letter");
   if (!/[0-9]/.test(v)) throw new Error("Password must contain a number");
-  if (!/[^A-Za-z0-9]/.test(v)) throw new Error("Password must contain a special character");
+  if (!/[^A-Za-z0-9]/.test(v))
+    throw new Error("Password must contain a special character");
   return v;
 }
 
@@ -124,20 +136,25 @@ function validateDisplayName(v: unknown): string | null {
   if (v === undefined || v === null || v === "") return null;
   if (typeof v !== "string") throw new Error("Invalid display name");
   const trimmed = v.trim();
-  if (trimmed.length > MAX_NAME_LENGTH) throw new Error("Display name too long");
+  if (trimmed.length > MAX_NAME_LENGTH)
+    throw new Error("Display name too long");
   return trimmed || null;
 }
 
 function validateRole(v: unknown): string {
-  if (typeof v !== "string" || v.length === 0) throw new Error("Role is required");
+  if (typeof v !== "string" || v.length === 0)
+    throw new Error("Role is required");
   if (ADMIN_VALID_ROLES.includes(v)) return v;
   if (!/^[a-zA-Z0-9_-]{1,50}$/.test(v)) throw new Error("Invalid role format");
   return v;
 }
 
 function validateUuid(v: unknown, field: string): string {
-  if (typeof v !== "string" || v.length === 0) throw new Error(`${field} is required`);
-  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v))
+  if (typeof v !== "string" || v.length === 0)
+    throw new Error(`${field} is required`);
+  if (
+    !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v)
+  )
     throw new Error(`Invalid ${field} format`);
   return v;
 }
@@ -319,12 +336,18 @@ describe("Edge Function Schema Validation - admin-users", () => {
 
     it("rejects unknown action (privilege fishing)", () => {
       const r = validateAdminPayload({ action: "promote_to_superadmin" });
-      expect(r).toMatchObject({ ok: false, error: /Invalid or missing action/ });
+      expect(r).toMatchObject({
+        ok: false,
+        error: /Invalid or missing action/,
+      });
     });
 
     it("rejects non-string action", () => {
       const r = validateAdminPayload({ action: { $ne: null } });
-      expect(r).toMatchObject({ ok: false, error: /Invalid or missing action/ });
+      expect(r).toMatchObject({
+        ok: false,
+        error: /Invalid or missing action/,
+      });
     });
 
     it("rejects null body", () => {
@@ -368,7 +391,10 @@ describe("Edge Function Schema Validation - admin-users", () => {
     });
 
     it("rejects oversized password (DoS guard)", () => {
-      const r = validateAdminPayload({ ...base, password: "Aa1!" + "x".repeat(200) });
+      const r = validateAdminPayload({
+        ...base,
+        password: "Aa1!" + "x".repeat(200),
+      });
       expect(r).toMatchObject({ ok: false, error: /too long/ });
     });
 
@@ -378,7 +404,10 @@ describe("Edge Function Schema Validation - admin-users", () => {
     });
 
     it("rejects oversized display name", () => {
-      const r = validateAdminPayload({ ...base, display_name: "a".repeat(101) });
+      const r = validateAdminPayload({
+        ...base,
+        display_name: "a".repeat(101),
+      });
       expect(r).toMatchObject({ ok: false, error: /Display name too long/ });
     });
 
@@ -388,7 +417,10 @@ describe("Edge Function Schema Validation - admin-users", () => {
     });
 
     it("normalizes accepted email to trimmed lowercase", () => {
-      const r = validateAdminPayload({ ...base, email: "  USER@Example.COM  " });
+      const r = validateAdminPayload({
+        ...base,
+        email: "  USER@Example.COM  ",
+      });
       expect(r.ok).toBe(true);
       if (r.ok) expect(r.payload.email).toBe("user@example.com");
     });
@@ -408,7 +440,10 @@ describe("Edge Function Schema Validation - admin-users", () => {
     });
 
     it("rejects malformed uuid", () => {
-      const r = validateAdminPayload({ action: "update", user_id: "not-a-uuid" });
+      const r = validateAdminPayload({
+        action: "update",
+        user_id: "not-a-uuid",
+      });
       expect(r).toMatchObject({ ok: false, error: /Invalid user_id format/ });
     });
 
@@ -439,12 +474,18 @@ describe("Edge Function Schema Validation - admin-users", () => {
     });
 
     it("delete: rejects array as user_id", () => {
-      const r = validateAdminPayload({ action: "delete", user_id: [validUuid] });
+      const r = validateAdminPayload({
+        action: "delete",
+        user_id: [validUuid],
+      });
       expect(r).toMatchObject({ ok: false, error: /user_id is required/ });
     });
 
     it("resend_invite: accepts valid uuid", () => {
-      const r = validateAdminPayload({ action: "resend_invite", user_id: validUuid });
+      const r = validateAdminPayload({
+        action: "resend_invite",
+        user_id: validUuid,
+      });
       expect(r.ok).toBe(true);
     });
 

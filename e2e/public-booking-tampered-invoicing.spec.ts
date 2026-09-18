@@ -82,7 +82,10 @@ test.describe("Tampered bookings cannot be invoiced until totals are consistent"
     !(process.env.SERVICE_ROLE_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY),
     "Set SERVICE_ROLE_KEY to run this spec.",
   );
-  test.skip(!SUPABASE_ANON_KEY, "Set VITE_SUPABASE_PUBLISHABLE_KEY to run this spec.");
+  test.skip(
+    !SUPABASE_ANON_KEY,
+    "Set VITE_SUPABASE_PUBLISHABLE_KEY to run this spec.",
+  );
 
   test("blocks invoicing until the recalculated total is present and consistent", async ({
     ephemeralTenant,
@@ -230,20 +233,27 @@ test.describe("Tampered bookings cannot be invoiced until totals are consistent"
     }
 
     // 6. Staff view: sign the owner in.
-    const { error: pwErr } = await admin.auth.admin.updateUserById(ownerUserId, {
-      password: ownerPassword,
-    });
+    const { error: pwErr } = await admin.auth.admin.updateUserById(
+      ownerUserId,
+      {
+        password: ownerPassword,
+      },
+    );
     expect(pwErr, pwErr?.message).toBeNull();
-    const { data: signIn, error: signInErr } = await anon.auth.signInWithPassword({
-      email: ownerEmail,
-      password: ownerPassword,
-    });
+    const { data: signIn, error: signInErr } =
+      await anon.auth.signInWithPassword({
+        email: ownerEmail,
+        password: ownerPassword,
+      });
     expect(signInErr, `owner sign-in failed: ${signInErr?.message}`).toBeNull();
     await seedSession(page, signIn.session);
 
     await page.goto("/dashboard");
     await expect(page).toHaveURL(/\/dashboard/);
-    await page.getByRole("button", { name: "Reservations", exact: true }).first().click();
+    await page
+      .getByRole("button", { name: "Reservations", exact: true })
+      .first()
+      .click();
 
     const invoicedBox = (guest: string, amount?: string) => {
       let card = page.locator("div").filter({ hasText: guest });
@@ -260,10 +270,14 @@ test.describe("Tampered bookings cannot be invoiced until totals are consistent"
 
     // 6a. The unpriced dine-in booking cannot be invoiced.
     const dineBox = invoicedBox(dineGuest);
-    await expect(dineBox).toHaveAttribute("data-state", "unchecked", { timeout: 20_000 });
+    await expect(dineBox).toHaveAttribute("data-state", "unchecked", {
+      timeout: 20_000,
+    });
     await dineBox.click();
     await expect(
-      page.getByText("Add a price before marking this reservation as invoiced."),
+      page.getByText(
+        "Add a price before marking this reservation as invoiced.",
+      ),
     ).toBeVisible({ timeout: 10_000 });
     await expect(dineBox).toHaveAttribute("data-state", "unchecked");
     const { data: dineBlocked } = await admin
@@ -276,9 +290,13 @@ test.describe("Tampered bookings cannot be invoiced until totals are consistent"
 
     // 6b. The recalculated stay carries a consistent total and can be invoiced.
     const stayBox = invoicedBox(stayGuest, `€${STAY_TOTAL.toFixed(2)}`);
-    await expect(stayBox).toHaveAttribute("data-state", "unchecked", { timeout: 20_000 });
+    await expect(stayBox).toHaveAttribute("data-state", "unchecked", {
+      timeout: 20_000,
+    });
     await stayBox.click();
-    await expect(stayBox).toHaveAttribute("data-state", "checked", { timeout: 15_000 });
+    await expect(stayBox).toHaveAttribute("data-state", "checked", {
+      timeout: 15_000,
+    });
     await expect
       .poll(
         async () => {
@@ -288,7 +306,8 @@ test.describe("Tampered bookings cannot be invoiced until totals are consistent"
             .eq("id", stayRow.id)
             .single();
           return (
-            data?.is_invoiced === true && Math.abs(Number(data?.price_eur) - STAY_TOTAL) < 0.005
+            data?.is_invoiced === true &&
+            Math.abs(Number(data?.price_eur) - STAY_TOTAL) < 0.005
           );
         },
         { timeout: 15_000, intervals: [500, 1000, 2000] },
@@ -306,9 +325,9 @@ test.describe("Tampered bookings cannot be invoiced until totals are consistent"
       breakfast_price_per_person: Number(finalStay.breakfast_price_per_person),
       price_eur: Number(finalStay.price_eur),
     };
-    expect(roundCents(calcRoomPrice(reportRow) + calcBreakfastPrice(reportRow))).toBe(
-      roundCents(Number(finalStay.price_eur)),
-    );
+    expect(
+      roundCents(calcRoomPrice(reportRow) + calcBreakfastPrice(reportRow)),
+    ).toBe(roundCents(Number(finalStay.price_eur)));
 
     // 6c. Once staff set a real price, the previously blocked booking invoices.
     const { error: priceErr } = await admin
@@ -318,11 +337,21 @@ test.describe("Tampered bookings cannot be invoiced until totals are consistent"
     expect(priceErr, priceErr?.message).toBeNull();
 
     await page.reload();
-    await page.getByRole("button", { name: "Reservations", exact: true }).first().click();
-    const dineBoxAgain = invoicedBox(dineGuest, `€${STAFF_SET_PRICE.toFixed(2)}`);
-    await expect(dineBoxAgain).toHaveAttribute("data-state", "unchecked", { timeout: 20_000 });
+    await page
+      .getByRole("button", { name: "Reservations", exact: true })
+      .first()
+      .click();
+    const dineBoxAgain = invoicedBox(
+      dineGuest,
+      `€${STAFF_SET_PRICE.toFixed(2)}`,
+    );
+    await expect(dineBoxAgain).toHaveAttribute("data-state", "unchecked", {
+      timeout: 20_000,
+    });
     await dineBoxAgain.click();
-    await expect(dineBoxAgain).toHaveAttribute("data-state", "checked", { timeout: 15_000 });
+    await expect(dineBoxAgain).toHaveAttribute("data-state", "checked", {
+      timeout: 15_000,
+    });
     await expect
       .poll(
         async () => {

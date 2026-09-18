@@ -26,7 +26,11 @@ interface RequireTenantProps {
  * inline (when `inline` is set) so they can recover or set up a new
  * organization. Superadmin impersonation is treated as a valid tenant.
  */
-const RequireTenant = ({ children, inline = false, attemptedArea = "generic" }: RequireTenantProps) => {
+const RequireTenant = ({
+  children,
+  inline = false,
+  attemptedArea = "generic",
+}: RequireTenantProps) => {
   const { tenantId, loading } = useTenant();
   const { isImpersonating } = useImpersonation();
   const location = useLocation();
@@ -83,7 +87,9 @@ const RequireTenant = ({ children, inline = false, attemptedArea = "generic" }: 
       // return here after completing setup. No protected children mount.
       return <NoTenantState attemptedArea={attemptedArea} />;
     }
-    return <Navigate to="/onboarding" replace state={{ from: location.pathname }} />;
+    return (
+      <Navigate to="/onboarding" replace state={{ from: location.pathname }} />
+    );
   }
 
   return <>{children}</>;

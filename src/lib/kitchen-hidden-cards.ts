@@ -10,8 +10,9 @@
 
 const STORAGE_PREFIX = "mimmobook-kitchen-hidden";
 
-export const hiddenCardsStorageKey = (tenantId: string | null | undefined): string =>
-  `${STORAGE_PREFIX}:${tenantId ?? "unknown"}`;
+export const hiddenCardsStorageKey = (
+  tenantId: string | null | undefined,
+): string => `${STORAGE_PREFIX}:${tenantId ?? "unknown"}`;
 
 const safeStorage = (): Storage | null => {
   try {
@@ -21,7 +22,9 @@ const safeStorage = (): Storage | null => {
   }
 };
 
-export const loadHiddenCards = (tenantId: string | null | undefined): string[] => {
+export const loadHiddenCards = (
+  tenantId: string | null | undefined,
+): string[] => {
   const store = safeStorage();
   if (!store) return [];
   try {
@@ -29,7 +32,9 @@ export const loadHiddenCards = (tenantId: string | null | undefined): string[] =
     if (!raw) return [];
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
-    return parsed.filter((id): id is string => typeof id === "string" && id.length > 0);
+    return parsed.filter(
+      (id): id is string => typeof id === "string" && id.length > 0,
+    );
   } catch {
     return [];
   }
@@ -42,7 +47,10 @@ export const saveHiddenCards = (
   const store = safeStorage();
   if (!store) return;
   try {
-    store.setItem(hiddenCardsStorageKey(tenantId), JSON.stringify([...new Set(ids)]));
+    store.setItem(
+      hiddenCardsStorageKey(tenantId),
+      JSON.stringify([...new Set(ids)]),
+    );
   } catch {
     /* storage full or blocked: hiding is a convenience, never a hard failure */
   }
@@ -51,8 +59,10 @@ export const saveHiddenCards = (
 export const addHiddenCard = (ids: readonly string[], id: string): string[] =>
   ids.includes(id) ? [...ids] : [...ids, id];
 
-export const removeHiddenCard = (ids: readonly string[], id: string): string[] =>
-  ids.filter((existing) => existing !== id);
+export const removeHiddenCard = (
+  ids: readonly string[],
+  id: string,
+): string[] => ids.filter((existing) => existing !== id);
 
 export interface HiddenSplit<T> {
   visible: T[];

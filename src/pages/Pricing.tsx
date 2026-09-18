@@ -20,8 +20,13 @@ const Pricing = () => {
       staffUsers: t("pricing.basicStaff"),
       priceId: STRIPE_TIERS.basic.price_id,
       features: [
-        t("pricing.basicF1"), t("pricing.basicF2"), t("pricing.basicF3"),
-        t("pricing.basicF4"), t("pricing.basicF5"), t("pricing.offers"), t("pricing.crossReservations"),
+        t("pricing.basicF1"),
+        t("pricing.basicF2"),
+        t("pricing.basicF3"),
+        t("pricing.basicF4"),
+        t("pricing.basicF5"),
+        t("pricing.offers"),
+        t("pricing.crossReservations"),
       ],
     },
     {
@@ -33,8 +38,11 @@ const Pricing = () => {
       isPopular: true,
       priceId: STRIPE_TIERS.professional.price_id,
       features: [
-        t("pricing.proF1"), t("pricing.proF2"), t("pricing.proF3"),
-        t("pricing.offers"), t("pricing.crossReservations"),
+        t("pricing.proF1"),
+        t("pricing.proF2"),
+        t("pricing.proF3"),
+        t("pricing.offers"),
+        t("pricing.crossReservations"),
       ],
     },
     {
@@ -45,7 +53,9 @@ const Pricing = () => {
       staffUsers: t("pricing.businessStaff"),
       priceId: STRIPE_TIERS.business.price_id,
       features: [
-        t("pricing.businessF1"), t("pricing.businessF2"), t("pricing.businessF3"),
+        t("pricing.businessF1"),
+        t("pricing.businessF2"),
+        t("pricing.businessF3"),
         t("pricing.businessF4"),
       ],
     },
@@ -59,7 +69,9 @@ const Pricing = () => {
       ctaLabel: t("pricing.enterpriseCta"),
       ctaHref: "/support?contact=1",
       features: [
-        t("pricing.enterpriseF1"), t("pricing.enterpriseF2"), t("pricing.enterpriseF3"),
+        t("pricing.enterpriseF1"),
+        t("pricing.enterpriseF2"),
+        t("pricing.enterpriseF3"),
         t("pricing.enterpriseF4"),
       ],
     },
@@ -75,12 +87,48 @@ const Pricing = () => {
 
   const comparisonRows = [
     [t("pricing.monthlyPrice"), "€19", "€59", "€179", t("pricing.byOffer")],
-    [t("pricing.freeTrial"), t("pricing.days30"), t("pricing.days30"), t("pricing.days30"), "—"],
-    [t("pricing.sitesLocations"), "1", "1", t("pricing.unlimited"), t("pricing.unlimited")],
-    [t("pricing.reservationTypes"), "2", t("pricing.all"), t("pricing.all"), t("pricing.all")],
-    [t("pricing.operationTypes"), "2", t("pricing.onePerResType"), t("pricing.unlimited"), t("pricing.unlimited")],
-    [t("pricing.resourcesPerType"), t("pricing.basicResourcesTotal"), t("pricing.proResourcesPerType"), t("pricing.unlimited"), t("pricing.unlimited")],
-    [t("pricing.staffUsers"), "1 to 5", t("pricing.proStaff"), "50", t("pricing.unlimited")],
+    [
+      t("pricing.freeTrial"),
+      t("pricing.days30"),
+      t("pricing.days30"),
+      t("pricing.days30"),
+      "—",
+    ],
+    [
+      t("pricing.sitesLocations"),
+      "1",
+      "1",
+      t("pricing.unlimited"),
+      t("pricing.unlimited"),
+    ],
+    [
+      t("pricing.reservationTypes"),
+      "2",
+      t("pricing.all"),
+      t("pricing.all"),
+      t("pricing.all"),
+    ],
+    [
+      t("pricing.operationTypes"),
+      "2",
+      t("pricing.onePerResType"),
+      t("pricing.unlimited"),
+      t("pricing.unlimited"),
+    ],
+    [
+      t("pricing.resourcesPerType"),
+      t("pricing.basicResourcesTotal"),
+      t("pricing.proResourcesPerType"),
+      t("pricing.unlimited"),
+      t("pricing.unlimited"),
+    ],
+    [
+      t("pricing.staffUsers"),
+      "1 to 5",
+      t("pricing.proStaff"),
+      "50",
+      t("pricing.unlimited"),
+    ],
     [t("pricing.brandedBooking"), "✓", "✓", "✓", "✓"],
     [t("pricing.defaultTemplates"), "✓", "✓", "✓", "✓"],
     [t("pricing.customTemplates"), "—", "✓", "✓", "✓"],
@@ -88,11 +136,28 @@ const Pricing = () => {
     [t("pricing.multisiteManagement"), "—", "—", "✓", "✓"],
     [t("pricing.offers"), "✓", "✓", "✓", "✓"],
     [t("pricing.crossReservations"), "✓", "✓", "✓", "✓"],
-    [t("pricing.analyticsReports"), t("pricing.basic"), t("pricing.advanced"), t("pricing.advanced"), t("pricing.advanced")],
-    [t("pricing.supportLevel"), "AI chatbot", "AI chatbot", t("pricing.responseTime24h"), t("pricing.responseTime24h")],
+    [
+      t("pricing.analyticsReports"),
+      t("pricing.basic"),
+      t("pricing.advanced"),
+      t("pricing.advanced"),
+      t("pricing.advanced"),
+    ],
+    [
+      t("pricing.supportLevel"),
+      "AI chatbot",
+      "AI chatbot",
+      t("pricing.responseTime24h"),
+      t("pricing.responseTime24h"),
+    ],
   ];
 
-  const highlightFeatures = [t("pricing.sitesLocations"), t("pricing.reservationTypes"), t("pricing.operationTypes"), t("pricing.resourcesPerType")];
+  const highlightFeatures = [
+    t("pricing.sitesLocations"),
+    t("pricing.reservationTypes"),
+    t("pricing.operationTypes"),
+    t("pricing.resourcesPerType"),
+  ];
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -103,9 +168,21 @@ const Pricing = () => {
         keywords="booking software pricing, barber booking software price, hairdresser booking system cost, massage therapist booking app, personal trainer scheduling price, bakery order system, no commission booking"
         jsonLd={[
           faqSchema([
-            { question: "How much does MimmoBook cost?", answer: "MimmoBook offers four plans: Basic at €19/month, Professional at €59/month, Business at €179/month, and Enterprise, which is priced per offer. All listed prices include VAT." },
-            { question: "Is there a free trial?", answer: "Yes, all MimmoBook plans include a 30-day free trial with full access to features." },
-            { question: "Can I change plans later?", answer: "Yes, you can upgrade or downgrade your plan at any time from the dashboard." },
+            {
+              question: "How much does MimmoBook cost?",
+              answer:
+                "MimmoBook offers four plans: Basic at €19/month, Professional at €59/month, Business at €179/month, and Enterprise, which is priced per offer. All listed prices include VAT.",
+            },
+            {
+              question: "Is there a free trial?",
+              answer:
+                "Yes, all MimmoBook plans include a 30-day free trial with full access to features.",
+            },
+            {
+              question: "Can I change plans later?",
+              answer:
+                "Yes, you can upgrade or downgrade your plan at any time from the dashboard.",
+            },
           ]),
           breadcrumbSchema([
             { name: "Home", url: "https://mimmobook.com/" },
@@ -130,7 +207,9 @@ const Pricing = () => {
       {/* Tiers */}
       <section className="pb-20">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-serif font-bold text-foreground text-center mb-12">{t("pricing.plansTitle")}</h2>
+          <h2 className="text-3xl font-serif font-bold text-foreground text-center mb-12">
+            {t("pricing.plansTitle")}
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
             {tiers.map((tier, i) => (
               <PricingTier key={tier.name} {...tier} delay={i * 100} />
@@ -150,26 +229,59 @@ const Pricing = () => {
             <table className="w-full text-sm min-w-[720px]">
               <thead>
                 <tr className="border-b border-border">
-                  <th className="text-left py-4 pr-4 font-sans font-semibold text-muted-foreground">{t("pricing.feature")}</th>
-                  <th className="text-center py-4 px-3 font-serif font-semibold text-foreground">Basic</th>
-                  <th className="text-center py-4 px-3 font-serif font-semibold text-foreground">Pro</th>
-                  <th className="text-center py-4 px-3 font-serif font-semibold text-foreground">Business</th>
-                  <th className="text-center py-4 px-3 font-serif font-semibold text-foreground">Enterprise</th>
+                  <th className="text-left py-4 pr-4 font-sans font-semibold text-muted-foreground">
+                    {t("pricing.feature")}
+                  </th>
+                  <th className="text-center py-4 px-3 font-serif font-semibold text-foreground">
+                    Basic
+                  </th>
+                  <th className="text-center py-4 px-3 font-serif font-semibold text-foreground">
+                    Pro
+                  </th>
+                  <th className="text-center py-4 px-3 font-serif font-semibold text-foreground">
+                    Business
+                  </th>
+                  <th className="text-center py-4 px-3 font-serif font-semibold text-foreground">
+                    Enterprise
+                  </th>
                 </tr>
               </thead>
               <tbody>
-                {comparisonRows.map(([feature, basic, pro, business, enterprise]) => {
-                  const isHighlight = highlightFeatures.includes(feature);
-                  return (
-                    <tr key={feature} className={`border-b border-border/50 ${isHighlight ? "bg-accent/5" : ""}`}>
-                      <td className={`py-3 pr-4 ${isHighlight ? "text-foreground font-medium" : "text-foreground/80"}`}>{feature}</td>
-                      <td className="py-3 px-3 text-center text-muted-foreground">{basic}</td>
-                      <td className={`py-3 px-3 text-center font-medium ${isHighlight ? "text-accent" : "text-foreground"}`}>{pro}</td>
-                      <td className={`py-3 px-3 text-center font-medium ${isHighlight ? "text-accent" : "text-foreground"}`}>{business}</td>
-                      <td className={`py-3 px-3 text-center font-medium ${isHighlight ? "text-accent" : "text-foreground"}`}>{enterprise}</td>
-                    </tr>
-                  );
-                })}
+                {comparisonRows.map(
+                  ([feature, basic, pro, business, enterprise]) => {
+                    const isHighlight = highlightFeatures.includes(feature);
+                    return (
+                      <tr
+                        key={feature}
+                        className={`border-b border-border/50 ${isHighlight ? "bg-accent/5" : ""}`}
+                      >
+                        <td
+                          className={`py-3 pr-4 ${isHighlight ? "text-foreground font-medium" : "text-foreground/80"}`}
+                        >
+                          {feature}
+                        </td>
+                        <td className="py-3 px-3 text-center text-muted-foreground">
+                          {basic}
+                        </td>
+                        <td
+                          className={`py-3 px-3 text-center font-medium ${isHighlight ? "text-accent" : "text-foreground"}`}
+                        >
+                          {pro}
+                        </td>
+                        <td
+                          className={`py-3 px-3 text-center font-medium ${isHighlight ? "text-accent" : "text-foreground"}`}
+                        >
+                          {business}
+                        </td>
+                        <td
+                          className={`py-3 px-3 text-center font-medium ${isHighlight ? "text-accent" : "text-foreground"}`}
+                        >
+                          {enterprise}
+                        </td>
+                      </tr>
+                    );
+                  },
+                )}
               </tbody>
             </table>
           </div>
@@ -210,9 +322,16 @@ const Pricing = () => {
 
           <div className="max-w-2xl mx-auto space-y-6">
             {faqs.map((faq) => (
-              <div key={faq.q} className="border border-border rounded-xl p-6 bg-card shadow-card">
-                <h3 className="font-sans font-semibold text-foreground mb-2">{faq.q}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{faq.a}</p>
+              <div
+                key={faq.q}
+                className="border border-border rounded-xl p-6 bg-card shadow-card"
+              >
+                <h3 className="font-sans font-semibold text-foreground mb-2">
+                  {faq.q}
+                </h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {faq.a}
+                </p>
               </div>
             ))}
           </div>
@@ -235,7 +354,10 @@ const Pricing = () => {
             </Button>
           </Link>
           <p className="mt-6 text-sm text-primary-foreground/70">
-            <Link to="/blog/comparison-resy-tock-mimmobook" className="underline hover:text-primary-foreground">
+            <Link
+              to="/blog/comparison-resy-tock-mimmobook"
+              className="underline hover:text-primary-foreground"
+            >
               Compare MimmoBook vs Resy vs Tock
             </Link>
           </p>

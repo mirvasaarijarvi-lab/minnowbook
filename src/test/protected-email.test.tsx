@@ -70,8 +70,9 @@ describe("ProtectedEmail: no-script fallback", () => {
   // fallback is asserted against renderToStaticMarkup (the form a crawler or a
   // script-less reader would see).
   it("keeps a readable obfuscated form in the noscript block", () => {
-    const markup = renderToStaticMarkup(<ProtectedEmail user="privacy" />)
-      .replace(/\s+/g, " ");
+    const markup = renderToStaticMarkup(
+      <ProtectedEmail user="privacy" />,
+    ).replace(/\s+/g, " ");
     expect(markup).toMatch(/<noscript>.*privacy \[at\] mimmobook \[dot\] com/);
     expect(markup).not.toContain("privacy@mimmobook.com");
   });

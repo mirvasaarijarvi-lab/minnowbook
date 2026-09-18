@@ -37,7 +37,8 @@ import {
 } from "@/test/security/fixtures/tenant-pair";
 
 const SUPABASE_URL =
-  (import.meta.env?.VITE_SUPABASE_URL as string | undefined) ?? process.env.SUPABASE_URL;
+  (import.meta.env?.VITE_SUPABASE_URL as string | undefined) ??
+  process.env.SUPABASE_URL;
 const SUPABASE_ANON_KEY =
   (import.meta.env?.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined) ??
   process.env.SUPABASE_ANON_KEY;
@@ -48,8 +49,8 @@ const liveAvailable =
 const liveDescribe = liveAvailable ? describe : describe.skip;
 const skipReason = liveAvailable
   ? null
-  : tenantPairFixtureSkipReason() ??
-    "SUPABASE_SERVICE_ROLE_KEY required to seed booking_tokens for tenant-isolation tests";
+  : (tenantPairFixtureSkipReason() ??
+    "SUPABASE_SERVICE_ROLE_KEY required to seed booking_tokens for tenant-isolation tests");
 
 interface SeededToken {
   tenantId: string;
@@ -84,7 +85,9 @@ async function seedTokenForTenant(
     .select("id")
     .single();
   if (resErr || !reservation) {
-    throw new Error(`Failed to seed reservation for tenant ${tenantId}: ${resErr?.message}`);
+    throw new Error(
+      `Failed to seed reservation for tenant ${tenantId}: ${resErr?.message}`,
+    );
   }
 
   const { data: token, error: tokErr } = await admin
@@ -97,7 +100,9 @@ async function seedTokenForTenant(
     .select("id")
     .single();
   if (tokErr || !token) {
-    throw new Error(`Failed to seed booking_token for tenant ${tenantId}: ${tokErr?.message}`);
+    throw new Error(
+      `Failed to seed booking_token for tenant ${tenantId}: ${tokErr?.message}`,
+    );
   }
 
   return {
@@ -108,7 +113,10 @@ async function seedTokenForTenant(
   };
 }
 
-async function cleanupSeed(admin: SupabaseClient, seed: SeededToken): Promise<void> {
+async function cleanupSeed(
+  admin: SupabaseClient,
+  seed: SeededToken,
+): Promise<void> {
   await admin.from("booking_tokens").delete().eq("id", seed.tokenId);
   await admin.from("reservations").delete().eq("id", seed.reservationId);
 }
@@ -143,7 +151,10 @@ liveDescribe("lookup_booking_token — tenant isolation", () => {
 
   afterAll(async () => {
     if (!admin) return;
-    await Promise.allSettled([cleanupSeed(admin, seedA), cleanupSeed(admin, seedB)]);
+    await Promise.allSettled([
+      cleanupSeed(admin, seedA),
+      cleanupSeed(admin, seedB),
+    ]);
   });
 
   it("returns at most one row, and it belongs to the token's true tenant (A)", async () => {
@@ -154,7 +165,11 @@ liveDescribe("lookup_booking_token — tenant isolation", () => {
     expect(Array.isArray(data)).toBe(true);
     expect(data!.length).toBeLessThanOrEqual(1);
     expect(data!.length).toBe(1);
-    const row = data![0] as { tenant_id: string; reservation_id: string; id: string };
+    const row = data![0] as {
+      tenant_id: string;
+      reservation_id: string;
+      id: string;
+    };
     expect(row.tenant_id).toBe(seedA.tenantId);
     expect(row.tenant_id).not.toBe(seedB.tenantId);
     expect(row.reservation_id).toBe(seedA.reservationId);
@@ -179,7 +194,10 @@ liveDescribe("lookup_booking_token — tenant isolation", () => {
       p_token: seedA.tokenPlaintext,
     });
     expect(error).toBeNull();
-    const rows = (data ?? []) as Array<{ tenant_id: string; reservation_id: string }>;
+    const rows = (data ?? []) as Array<{
+      tenant_id: string;
+      reservation_id: string;
+    }>;
     for (const row of rows) {
       expect(row.tenant_id).not.toBe(seedB.tenantId);
       expect(row.reservation_id).not.toBe(seedB.reservationId);
@@ -220,8 +238,8 @@ liveDescribe("lookup_booking_token — tenant isolation", () => {
   });
 
   it("tenant A authenticated user cannot SELECT tenant B's reservation by id", async () => {
-    const { data, error } = await fixture.a!.client
-      .from("reservations")
+    const { data, error } = await fixture
+      .a!.client.from("reservations")
       .select("id, tenant_id, guest_email")
       .eq("id", seedB.reservationId);
     if (error) {
@@ -232,8 +250,8 @@ liveDescribe("lookup_booking_token — tenant isolation", () => {
   });
 
   it("tenant A authenticated user cannot SELECT tenant B's booking_token by id", async () => {
-    const { data, error } = await fixture.a!.client
-      .from("booking_tokens")
+    const { data, error } = await fixture
+      .a!.client.from("booking_tokens")
       .select("id, tenant_id, token, reservation_id")
       .eq("id", seedB.tokenId);
     if (error) {
@@ -247,17 +265,23 @@ liveDescribe("lookup_booking_token — tenant isolation", () => {
     // The RPC is SECURITY DEFINER on purpose — guests need it to work without
     // auth. The invariant is not "auth gates the RPC" but "the row returned
     // is exactly the one matching the token, scoped to its true tenant".
-    const { data, error } = await fixture.a!.client.rpc("lookup_booking_token", {
-      p_token: seedB.tokenPlaintext,
-    });
+    const { data, error } = await fixture.a!.client.rpc(
+      "lookup_booking_token",
+      {
+        p_token: seedB.tokenPlaintext,
+      },
+    );
     expect(error).toBeNull();
-    const rows = (data ?? []) as Array<{ tenant_id: string; reservation_id: string }>;
+    const rows = (data ?? []) as Array<{
+      tenant_id: string;
+      reservation_id: string;
+    }>;
     expect(rows.length).toBe(1);
     expect(rows[0].tenant_id).toBe(seedB.tenantId);
     expect(rows[0].reservation_id).toBe(seedB.reservationId);
     // And critically: tenant A still cannot SELECT that reservation
-    const followup = await fixture.a!.client
-      .from("reservations")
+    const followup = await fixture
+      .a!.client.from("reservations")
       .select("id")
       .eq("id", rows[0].reservation_id);
     if (!followup.error) {
@@ -309,7 +333,9 @@ liveDescribe("lookup_booking_token — tenant isolation", () => {
       expect(error).toBeNull();
       expect((data ?? []).length).toBe(0);
     } finally {
-      const future = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+      const future = new Date(
+        Date.now() + 30 * 24 * 60 * 60 * 1000,
+      ).toISOString();
       await admin
         .from("booking_tokens")
         .update({ expires_at: future })

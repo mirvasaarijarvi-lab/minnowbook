@@ -82,7 +82,10 @@ export class YamlGuardError extends Error {
  * legitimate input that happens to contain `&` in a quoted string)
  * are acceptable, because the guards are tunable per call site.
  */
-function countOutsideStringsAndComments(input: string, pattern: RegExp): number {
+function countOutsideStringsAndComments(
+  input: string,
+  pattern: RegExp,
+): number {
   // Strip line comments and the two YAML string forms before counting.
   const stripped = input
     // single-quoted strings (no escapes other than '')
@@ -107,7 +110,11 @@ function measureDepth(value: unknown, limit: number, current = 0): number {
     }
   } else {
     for (const key of Object.keys(value as Record<string, unknown>)) {
-      const d = measureDepth((value as Record<string, unknown>)[key], limit, current + 1);
+      const d = measureDepth(
+        (value as Record<string, unknown>)[key],
+        limit,
+        current + 1,
+      );
       if (d > max) max = d;
       if (max > limit) return max;
     }
@@ -122,17 +129,26 @@ function measureDepth(value: unknown, limit: number, current = 0): number {
  * `Error` (rethrown from js-yaml) when the document is syntactically
  * invalid.
  */
-export function safeLoadYaml<T = unknown>(input: string, opts: SafeYamlOptions = {}): T {
+export function safeLoadYaml<T = unknown>(
+  input: string,
+  opts: SafeYamlOptions = {},
+): T {
   const cfg = { ...DEFAULTS, ...opts };
   const source = opts.source;
 
   if (typeof input !== "string") {
-    throw new YamlGuardError("parse_error", "YAML input must be a string", source);
+    throw new YamlGuardError(
+      "parse_error",
+      "YAML input must be a string",
+      source,
+    );
   }
 
   // 1. Byte-size cap (UTF-8). Use TextEncoder when available for accuracy.
   const byteLength =
-    typeof TextEncoder !== "undefined" ? new TextEncoder().encode(input).length : input.length;
+    typeof TextEncoder !== "undefined"
+      ? new TextEncoder().encode(input).length
+      : input.length;
   if (byteLength > cfg.maxBytes) {
     throw new YamlGuardError(
       "too_large",
@@ -142,7 +158,10 @@ export function safeLoadYaml<T = unknown>(input: string, opts: SafeYamlOptions =
   }
 
   // 2-4. Pre-parse token caps (anchors, aliases, merge keys).
-  const anchorCount = countOutsideStringsAndComments(input, /(?:^|[\s,{[])&[A-Za-z0-9_-]+/g);
+  const anchorCount = countOutsideStringsAndComments(
+    input,
+    /(?:^|[\s,{[])&[A-Za-z0-9_-]+/g,
+  );
   if (anchorCount > cfg.maxAnchors) {
     throw new YamlGuardError(
       "too_many_anchors",
@@ -150,7 +169,10 @@ export function safeLoadYaml<T = unknown>(input: string, opts: SafeYamlOptions =
       source,
     );
   }
-  const aliasCount = countOutsideStringsAndComments(input, /(?:^|[\s,{[])\*[A-Za-z0-9_-]+/g);
+  const aliasCount = countOutsideStringsAndComments(
+    input,
+    /(?:^|[\s,{[])\*[A-Za-z0-9_-]+/g,
+  );
   if (aliasCount > cfg.maxAliases) {
     throw new YamlGuardError(
       "too_many_aliases",
@@ -159,7 +181,10 @@ export function safeLoadYaml<T = unknown>(input: string, opts: SafeYamlOptions =
       source,
     );
   }
-  const mergeKeyCount = countOutsideStringsAndComments(input, /(?:^|\s)<<\s*:/g);
+  const mergeKeyCount = countOutsideStringsAndComments(
+    input,
+    /(?:^|\s)<<\s*:/g,
+  );
   if (mergeKeyCount > cfg.maxMergeKeys) {
     throw new YamlGuardError(
       "too_many_merge_keys",
@@ -169,7 +194,8 @@ export function safeLoadYaml<T = unknown>(input: string, opts: SafeYamlOptions =
   }
 
   // 5. Parse with the default (safe) schema, then enforce structural and time caps.
-  const start = typeof performance !== "undefined" ? performance.now() : Date.now();
+  const start =
+    typeof performance !== "undefined" ? performance.now() : Date.now();
   let parsed: unknown;
   try {
     parsed = yaml.load(input);
@@ -177,7 +203,9 @@ export function safeLoadYaml<T = unknown>(input: string, opts: SafeYamlOptions =
     const msg = err instanceof Error ? err.message : String(err);
     throw new YamlGuardError("parse_error", `Invalid YAML: ${msg}`, source);
   }
-  const elapsed = (typeof performance !== "undefined" ? performance.now() : Date.now()) - start;
+  const elapsed =
+    (typeof performance !== "undefined" ? performance.now() : Date.now()) -
+    start;
 
   if (elapsed > cfg.maxParseMs) {
     throw new YamlGuardError(

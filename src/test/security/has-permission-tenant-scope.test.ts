@@ -42,7 +42,6 @@ describe.runIf(fixtureLikelyAvailable)(
     beforeAll(async () => {
       fixture = await createTenantPairFixture();
       if (!fixture.available) {
-        // eslint-disable-next-line no-console
         console.warn(
           `[has-permission-tenant-scope] fixture unavailable: ${fixture.skipReason}`,
         );
@@ -130,7 +129,6 @@ describe.skipIf(fixtureLikelyAvailable)(
   "has_permission tenant scoping (skipped, fixture unavailable)",
   () => {
     it("skipped: no tenant-pair fixture available", () => {
-      // eslint-disable-next-line no-console
       console.info(
         `[has-permission-tenant-scope] skipped: ${skipReason ?? "fixture unavailable"}`,
       );

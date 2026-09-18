@@ -25,7 +25,8 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 const SUPABASE_URL =
-  (import.meta.env?.VITE_SUPABASE_URL as string | undefined) ?? process.env.SUPABASE_URL;
+  (import.meta.env?.VITE_SUPABASE_URL as string | undefined) ??
+  process.env.SUPABASE_URL;
 const SUPABASE_ANON_KEY =
   (import.meta.env?.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined) ??
   process.env.SUPABASE_ANON_KEY;
@@ -33,7 +34,9 @@ const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 const BUCKET = "tenant-assets";
 
-const canRun = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY && SUPABASE_SERVICE_ROLE_KEY);
+const canRun = Boolean(
+  SUPABASE_URL && SUPABASE_ANON_KEY && SUPABASE_SERVICE_ROLE_KEY,
+);
 
 const newService = (): SupabaseClient =>
   createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!, {
@@ -79,7 +82,8 @@ describe.runIf(canRun)(
         })
         .select("id")
         .single();
-      if (tenantErr || !tenant) throw tenantErr ?? new Error("tenant insert returned no row");
+      if (tenantErr || !tenant)
+        throw tenantErr ?? new Error("tenant insert returned no row");
       const tenantId = tenant.id as string;
 
       // Parent resource is active + approved so the metadata row IS
@@ -105,16 +109,23 @@ describe.runIf(canRun)(
       const objectPath = `${prefix}/${fileName}`;
       // 1x1 red JPEG-ish payload; content type is what matters for the
       // download response, not the bytes themselves.
-      const fileBytes = new Uint8Array([0xff, 0xd8, 0xff, 0xd9, 0x00, 0x01, 0x02, 0x03]);
+      const fileBytes = new Uint8Array([
+        0xff, 0xd8, 0xff, 0xd9, 0x00, 0x01, 0x02, 0x03,
+      ]);
 
       const { error: upErr } = await service.storage
         .from(BUCKET)
-        .upload(objectPath, fileBytes, { contentType: "image/jpeg", upsert: true });
+        .upload(objectPath, fileBytes, {
+          contentType: "image/jpeg",
+          upsert: true,
+        });
       if (upErr) throw upErr;
 
       // Public URL is what the app persists into image_url. For a private
       // bucket this URL is guessable but not authorised.
-      const { data: urlData } = service.storage.from(BUCKET).getPublicUrl(objectPath);
+      const { data: urlData } = service.storage
+        .from(BUCKET)
+        .getPublicUrl(objectPath);
       const publicUrl = urlData.publicUrl;
 
       const { data: img, error: imgErr } = await service
@@ -142,7 +153,10 @@ describe.runIf(canRun)(
 
     afterAll(async () => {
       if (!seeded) return;
-      await service.storage.from(BUCKET).remove([seeded.objectPath]).catch(() => {});
+      await service.storage
+        .from(BUCKET)
+        .remove([seeded.objectPath])
+        .catch(() => {});
       await service.from("resource_images").delete().eq("id", seeded.imageId);
       await service.from("resources").delete().eq("id", seeded.resourceId);
       await service.from("tenants").delete().eq("id", seeded.tenantId);
@@ -150,7 +164,9 @@ describe.runIf(canRun)(
 
     it("sanity check: service role CAN download the seeded bytes", async () => {
       if (!seeded) throw new Error("seed missing");
-      const { data, error } = await service.storage.from(BUCKET).download(seeded.objectPath);
+      const { data, error } = await service.storage
+        .from(BUCKET)
+        .download(seeded.objectPath);
       expect(error).toBeNull();
       expect(data).toBeTruthy();
       const bytes = new Uint8Array(await (data as Blob).arrayBuffer());
@@ -160,7 +176,9 @@ describe.runIf(canRun)(
     it("anon .storage.download() is denied for a known object path", async () => {
       if (!seeded) throw new Error("seed missing");
       const anon = newAnon();
-      const { data, error } = await anon.storage.from(BUCKET).download(seeded.objectPath);
+      const { data, error } = await anon.storage
+        .from(BUCKET)
+        .download(seeded.objectPath);
       expect(data).toBeNull();
       expect(error).not.toBeNull();
     });
@@ -168,7 +186,9 @@ describe.runIf(canRun)(
     it("anon .storage.createSignedUrl() is denied for a known object path", async () => {
       if (!seeded) throw new Error("seed missing");
       const anon = newAnon();
-      const { data, error } = await anon.storage.from(BUCKET).createSignedUrl(seeded.objectPath, 60);
+      const { data, error } = await anon.storage
+        .from(BUCKET)
+        .createSignedUrl(seeded.objectPath, 60);
       // Either the call errors, or (defensively) it hands back a URL that
       // is itself unauthorised — assert both properties.
       if (error) {
@@ -184,7 +204,9 @@ describe.runIf(canRun)(
     it("anon .storage.list() does not disclose the object under the resource prefix", async () => {
       if (!seeded) throw new Error("seed missing");
       const anon = newAnon();
-      const { data, error } = await anon.storage.from(BUCKET).list(seeded.prefix);
+      const { data, error } = await anon.storage
+        .from(BUCKET)
+        .list(seeded.prefix);
       // Listing may either error (RLS denies) or return nothing. It must
       // never leak the seeded filename to anon.
       const names = (data ?? []).map((entry) => entry.name);
@@ -201,7 +223,10 @@ describe.runIf(canRun)(
       if (!seeded) throw new Error("seed missing");
       const url = `${SUPABASE_URL}/storage/v1/object/${BUCKET}/${seeded.objectPath}`;
       const resp = await fetch(url, {
-        headers: { apikey: SUPABASE_ANON_KEY!, Authorization: `Bearer ${SUPABASE_ANON_KEY!}` },
+        headers: {
+          apikey: SUPABASE_ANON_KEY!,
+          Authorization: `Bearer ${SUPABASE_ANON_KEY!}`,
+        },
       });
       await resp.arrayBuffer();
       expect(resp.ok).toBe(false);

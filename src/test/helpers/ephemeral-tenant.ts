@@ -39,7 +39,10 @@ export interface CreateEphemeralTenantOptions {
 }
 
 function assertSafeUrl(url: string) {
-  if (!url || (!url.includes("127.0.0.1") && !url.includes(EXPECTED_PROJECT_REF))) {
+  if (
+    !url ||
+    (!url.includes("127.0.0.1") && !url.includes(EXPECTED_PROJECT_REF))
+  ) {
     throw new Error(
       `Refusing to create ephemeral tenant: SUPABASE_URL "${url}" is not the expected CI project.`,
     );
@@ -59,7 +62,8 @@ export async function createEphemeralTenant(
   opts: CreateEphemeralTenantOptions = {},
 ): Promise<EphemeralTenant> {
   const url = process.env.SUPABASE_URL ?? "http://127.0.0.1:54321";
-  const serviceRole = process.env.SERVICE_ROLE_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const serviceRole =
+    process.env.SERVICE_ROLE_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!serviceRole) {
     throw new Error("createEphemeralTenant requires SERVICE_ROLE_KEY in env");
   }
@@ -72,7 +76,10 @@ export async function createEphemeralTenant(
   const worker = workerSuffix();
   const id = randomUUID();
   const shortId = id.slice(0, 8);
-  const label = (opts.label ?? "ci").replace(/[^a-z0-9-]/gi, "").slice(0, 20).toLowerCase();
+  const label = (opts.label ?? "ci")
+    .replace(/[^a-z0-9-]/gi, "")
+    .slice(0, 20)
+    .toLowerCase();
   const slug = `ci-${worker}-${label || "ci"}-${shortId}`;
   const name = `TEST CI ${label || "tenant"} ${shortId}`;
   const ownerEmail = `ci+${shortId}@mimmobook.test`;
@@ -82,7 +89,8 @@ export async function createEphemeralTenant(
     password: `Ci-Tmp-${randomUUID()}-Z9!`,
     email_confirm: true,
   });
-  if (ue || !u.user) throw ue ?? new Error("createEphemeralTenant: createUser failed");
+  if (ue || !u.user)
+    throw ue ?? new Error("createEphemeralTenant: createUser failed");
   const ownerUserId = u.user.id;
 
   const { error: te } = await admin.from("tenants").insert({
@@ -90,14 +98,22 @@ export async function createEphemeralTenant(
     name,
     slug,
     tier: opts.tier ?? "business",
-    allowed_reservation_types:
-      opts.allowedReservationTypes ?? ["restaurant", "guesthouse", "venue", "wellness"],
+    allowed_reservation_types: opts.allowedReservationTypes ?? [
+      "restaurant",
+      "guesthouse",
+      "venue",
+      "wellness",
+    ],
     owner_user_id: ownerUserId,
     subscription_status: "trialing",
     is_active: true,
   });
   if (te) {
-    try { await admin.auth.admin.deleteUser(ownerUserId); } catch { /* ignore */ }
+    try {
+      await admin.auth.admin.deleteUser(ownerUserId);
+    } catch {
+      /* ignore */
+    }
     throw te;
   }
 
@@ -134,7 +150,9 @@ async function dropEphemeralTenantById(
     }
   };
   await swallow(admin.from("reservations").delete().eq("tenant_id", tenantId));
-  await swallow(admin.from("archived_reservations").delete().eq("tenant_id", tenantId));
+  await swallow(
+    admin.from("archived_reservations").delete().eq("tenant_id", tenantId),
+  );
   await swallow(admin.from("audit_log").delete().eq("tenant_id", tenantId));
   await swallow(admin.from("tenant_users").delete().eq("tenant_id", tenantId));
   await swallow(admin.from("tenants").delete().eq("id", tenantId));

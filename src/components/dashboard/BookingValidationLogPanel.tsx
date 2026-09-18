@@ -60,7 +60,10 @@ interface LogRow {
   site_id: string | null;
 }
 
-const OUTCOME_META: Record<Outcome, { label: string; icon: React.ElementType; cls: string }> = {
+const OUTCOME_META: Record<
+  Outcome,
+  { label: string; icon: React.ElementType; cls: string }
+> = {
   accepted: {
     label: "Accepted",
     icon: CheckCircle2,
@@ -85,7 +88,12 @@ const BookingValidationLogPanel = () => {
   const [search, setSearch] = useState("");
   const [openRow, setOpenRow] = useState<string | null>(null);
 
-  const { data = [], isLoading, refetch, isFetching } = useQuery({
+  const {
+    data = [],
+    isLoading,
+    refetch,
+    isFetching,
+  } = useQuery({
     queryKey: ["booking-validation-log", tenantId, outcomeFilter],
     enabled: !!tenantId,
     queryFn: async () => {
@@ -114,7 +122,11 @@ const BookingValidationLogPanel = () => {
   }, [data, search]);
 
   const counts = useMemo(() => {
-    const byOutcome: Record<Outcome, number> = { accepted: 0, soft_warning: 0, rejected: 0 };
+    const byOutcome: Record<Outcome, number> = {
+      accepted: 0,
+      soft_warning: 0,
+      rejected: 0,
+    };
     for (const r of data) byOutcome[r.outcome]++;
     return byOutcome;
   }, [data]);
@@ -129,7 +141,13 @@ const BookingValidationLogPanel = () => {
           </h2>
           <DashboardTooltip text={t("bookingLog.tooltip" as any)} />
         </div>
-        <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching} className="gap-1.5">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => refetch()}
+          disabled={isFetching}
+          className="gap-1.5"
+        >
           <RefreshCw className={cn("h-4 w-4", isFetching && "animate-spin")} />
           {t("common.loading" as any)}
         </Button>
@@ -158,7 +176,9 @@ const BookingValidationLogPanel = () => {
 
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-base">{t("bookingLog.recentTitle" as any)}</CardTitle>
+          <CardTitle className="text-base">
+            {t("bookingLog.recentTitle" as any)}
+          </CardTitle>
           <div className="flex flex-col sm:flex-row gap-2 pt-2">
             <Input
               placeholder={t("bookingLog.searchPlaceholder" as any)}
@@ -166,15 +186,26 @@ const BookingValidationLogPanel = () => {
               onChange={(e) => setSearch(e.target.value)}
               className="h-9 sm:max-w-xs"
             />
-            <Select value={outcomeFilter} onValueChange={(v) => setOutcomeFilter(v as any)}>
+            <Select
+              value={outcomeFilter}
+              onValueChange={(v) => setOutcomeFilter(v as any)}
+            >
               <SelectTrigger className="h-9 sm:w-48">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">{t("bookingLog.allOutcomes" as any)}</SelectItem>
-                <SelectItem value="accepted">{OUTCOME_META.accepted.label}</SelectItem>
-                <SelectItem value="soft_warning">{OUTCOME_META.soft_warning.label}</SelectItem>
-                <SelectItem value="rejected">{OUTCOME_META.rejected.label}</SelectItem>
+                <SelectItem value="all">
+                  {t("bookingLog.allOutcomes" as any)}
+                </SelectItem>
+                <SelectItem value="accepted">
+                  {OUTCOME_META.accepted.label}
+                </SelectItem>
+                <SelectItem value="soft_warning">
+                  {OUTCOME_META.soft_warning.label}
+                </SelectItem>
+                <SelectItem value="rejected">
+                  {OUTCOME_META.rejected.label}
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -195,11 +226,15 @@ const BookingValidationLogPanel = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-32">{t("bookingLog.when" as any)}</TableHead>
+                    <TableHead className="w-32">
+                      {t("bookingLog.when" as any)}
+                    </TableHead>
                     <TableHead>{t("bookingLog.guest" as any)}</TableHead>
                     <TableHead>{t("bookingLog.type" as any)}</TableHead>
                     <TableHead>{t("bookingLog.date" as any)}</TableHead>
-                    <TableHead className="text-right">{t("bookingLog.capacity" as any)}</TableHead>
+                    <TableHead className="text-right">
+                      {t("bookingLog.capacity" as any)}
+                    </TableHead>
                     <TableHead>{t("bookingLog.outcome" as any)}</TableHead>
                     <TableHead className="w-8"></TableHead>
                   </TableRow>
@@ -210,43 +245,71 @@ const BookingValidationLogPanel = () => {
                     const Icon = meta.icon;
                     const isOpen = openRow === row.id;
                     return (
-                      <Collapsible asChild key={row.id} open={isOpen} onOpenChange={(o) => setOpenRow(o ? row.id : null)}>
+                      <Collapsible
+                        asChild
+                        key={row.id}
+                        open={isOpen}
+                        onOpenChange={(o) => setOpenRow(o ? row.id : null)}
+                      >
                         <>
                           <TableRow>
                             <TableCell className="text-xs text-muted-foreground">
-                              {format(new Date(row.created_at), "MMM d, HH:mm:ss")}
+                              {format(
+                                new Date(row.created_at),
+                                "MMM d, HH:mm:ss",
+                              )}
                             </TableCell>
                             <TableCell>
-                              <p className="text-sm font-medium">{row.guest_name || "—"}</p>
-                              <p className="text-xs text-muted-foreground">{row.guest_email || "—"}</p>
+                              <p className="text-sm font-medium">
+                                {row.guest_name || "—"}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {row.guest_email || "—"}
+                              </p>
                             </TableCell>
                             <TableCell>
-                              <Badge variant="outline" className="capitalize text-xs">
+                              <Badge
+                                variant="outline"
+                                className="capitalize text-xs"
+                              >
                                 {row.reservation_type || "—"}
                               </Badge>
-                              <p className="text-xs text-muted-foreground mt-0.5">{row.source}</p>
+                              <p className="text-xs text-muted-foreground mt-0.5">
+                                {row.source}
+                              </p>
                             </TableCell>
                             <TableCell className="text-xs">
                               {row.reservation_date || "—"}
                               {row.start_time && (
-                                <span className="text-muted-foreground"> · {row.start_time.slice(0, 5)}</span>
+                                <span className="text-muted-foreground">
+                                  {" "}
+                                  · {row.start_time.slice(0, 5)}
+                                </span>
                               )}
                             </TableCell>
                             <TableCell className="text-right text-xs tabular-nums">
                               {row.guests_requested ?? "—"} guests
                               <p className="text-muted-foreground">
-                                {(row.current_load ?? 0)}/{row.capacity_total ?? "—"} on date
+                                {row.current_load ?? 0}/
+                                {row.capacity_total ?? "—"} on date
                               </p>
                             </TableCell>
                             <TableCell>
-                              <Badge variant="outline" className={cn("gap-1", meta.cls)}>
+                              <Badge
+                                variant="outline"
+                                className={cn("gap-1", meta.cls)}
+                              >
                                 <Icon className="h-3 w-3" />
                                 {meta.label}
                               </Badge>
                             </TableCell>
                             <TableCell>
                               <CollapsibleTrigger asChild>
-                                <Button variant="ghost" size="icon" className="h-7 w-7">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-7 w-7"
+                                >
                                   <ChevronDown
                                     className={cn(
                                       "h-4 w-4 transition-transform",
@@ -265,7 +328,9 @@ const BookingValidationLogPanel = () => {
                                     {t("bookingLog.reasonsTitle" as any)}
                                   </p>
                                   {(row.reasons ?? []).length === 0 ? (
-                                    <p className="text-muted-foreground italic">{t("bookingLog.noReasons" as any)}</p>
+                                    <p className="text-muted-foreground italic">
+                                      {t("bookingLog.noReasons" as any)}
+                                    </p>
                                   ) : (
                                     <ul className="list-disc pl-5 space-y-0.5 text-muted-foreground">
                                       {(row.reasons ?? []).map((r, i) => (

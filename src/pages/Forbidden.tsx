@@ -84,7 +84,9 @@ const Forbidden = ({
   message,
   adminCheckState,
 }: ForbiddenProps) => {
-  const [beaconStatus, setBeaconStatus] = useState<number | "unreachable" | null>(null);
+  const [beaconStatus, setBeaconStatus] = useState<
+    number | "unreachable" | null
+  >(null);
   const [isRetrying, setIsRetrying] = useState(false);
   const invalidateAdminCache = useInvalidateIsSystemAdmin();
   // Resolve once per render: explicit slug wins, otherwise derive from the
@@ -108,7 +110,8 @@ const Forbidden = ({
       `Access has been denied as a precaution. This is usually temporary — please try again in a moment.`
     : `We're still verifying your permissions for ${attemptedArea}. ` +
       `Access has been denied as a precaution. Please try again in a moment.`;
-  const body = message ?? (isFallback ? defaultFallbackBody : defaultDeniedBody);
+  const body =
+    message ?? (isFallback ? defaultFallbackBody : defaultDeniedBody);
 
   const handleRetry = async () => {
     setIsRetrying(true);
@@ -275,14 +278,12 @@ const Forbidden = ({
           setAuditReason(error.message ?? "invoke_error");
           return;
         }
-        const payload = data as
-          | {
-              logged?: boolean;
-              reason?: string;
-              userId?: string;
-              at?: string;
-            }
-          | null;
+        const payload = data as {
+          logged?: boolean;
+          reason?: string;
+          userId?: string;
+          at?: string;
+        } | null;
         const logged = payload?.logged;
         const reason = payload?.reason ?? null;
         setAuditStatus(logged ? "logged" : "not_logged");
@@ -396,9 +397,7 @@ const Forbidden = ({
         }
         data-admin-check-status={adminCheckState?.status ?? ""}
         data-admin-check-fetch-status={adminCheckState?.fetchStatus ?? ""}
-        data-admin-check-data-updated-at={
-          adminCheckState?.dataUpdatedAt ?? ""
-        }
+        data-admin-check-data-updated-at={adminCheckState?.dataUpdatedAt ?? ""}
         // Distinguishes a "lookup failed / still loading" fallback render
         // from a confirmed "not an admin" denial. E2E tests and synthetic
         // monitors can assert on this without re-deriving from individual
@@ -449,9 +448,9 @@ const Forbidden = ({
               <AlertTriangle className="h-4 w-4" aria-hidden="true" />
               <AlertTitle>Permission lookup failed</AlertTitle>
               <AlertDescription>
-                The server didn't respond to our permission check. We've
-                blocked access as a precaution. Try again, or sign out and
-                back in if the problem persists.
+                The server didn't respond to our permission check. We've blocked
+                access as a precaution. Try again, or sign out and back in if
+                the problem persists.
               </AlertDescription>
             </Alert>
           )}
@@ -484,7 +483,6 @@ const Forbidden = ({
             </Button>
           </div>
 
-
           {/*
             Dev-only audit beacon indicator. Vite replaces `import.meta.env.DEV`
             at build time, so this entire block is tree-shaken out of production
@@ -503,8 +501,7 @@ const Forbidden = ({
                   "h-2 w-2 rounded-full " +
                   (auditStatus === "logged"
                     ? "bg-primary"
-                    : auditStatus === "not_logged" ||
-                        auditStatus === "skipped"
+                    : auditStatus === "not_logged" || auditStatus === "skipped"
                       ? "bg-muted-foreground"
                       : auditStatus === "error"
                         ? "bg-destructive"

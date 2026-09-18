@@ -45,7 +45,9 @@ function ensureRegion(politeness: "assertive" | "polite"): HTMLElement | null {
 }
 
 /** Join the confirmation headline with its detail sentences. */
-export function composeOfferStatusMessage(parts: Array<string | null | undefined>): string {
+export function composeOfferStatusMessage(
+  parts: Array<string | null | undefined>,
+): string {
   return parts
     .map((p) => (p ?? "").trim())
     .filter((p) => p.length > 0)

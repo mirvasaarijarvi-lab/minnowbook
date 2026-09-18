@@ -19,9 +19,7 @@ import { useT } from "@/contexts/I18nContext";
 import { gtm } from "@/lib/gtm";
 
 type PermissionEmptyStateSurface =
-  | "settings_panel"
-  | "settings_site"
-  | "public_booking_branding";
+  "settings_panel" | "settings_site" | "public_booking_branding";
 
 interface PermissionEmptyStateProps {
   title: string;
@@ -124,9 +122,17 @@ const PermissionEmptyState = ({
         <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-muted">
           <Lock className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
         </div>
-        <h3 className="text-base font-serif font-semibold text-foreground">{title}</h3>
-        <p className="mx-auto max-w-md text-sm text-muted-foreground">{description}</p>
-        {detail && <p className="text-xs text-muted-foreground/70 break-words">{detail}</p>}
+        <h3 className="text-base font-serif font-semibold text-foreground">
+          {title}
+        </h3>
+        <p className="mx-auto max-w-md text-sm text-muted-foreground">
+          {description}
+        </p>
+        {detail && (
+          <p className="text-xs text-muted-foreground/70 break-words">
+            {detail}
+          </p>
+        )}
 
         {canRequest && (
           <div className="pt-1">
@@ -146,7 +152,9 @@ const PermissionEmptyState = ({
                 <DialogContent className="sm:max-w-md">
                   <DialogHeader>
                     <DialogTitle>{t("access.requestTitle")}</DialogTitle>
-                    <DialogDescription>{t("access.requestDesc")}</DialogDescription>
+                    <DialogDescription>
+                      {t("access.requestDesc")}
+                    </DialogDescription>
                   </DialogHeader>
                   <Textarea
                     value={message}
@@ -156,10 +164,17 @@ const PermissionEmptyState = ({
                     aria-label={t("access.requestTitle")}
                   />
                   <DialogFooter>
-                    <Button onClick={handleSend} disabled={sending} className="gap-1.5">
+                    <Button
+                      onClick={handleSend}
+                      disabled={sending}
+                      className="gap-1.5"
+                    >
                       {sending ? (
                         <>
-                          <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                          <Loader2
+                            className="h-4 w-4 animate-spin"
+                            aria-hidden="true"
+                          />
                           {t("access.requestSending")}
                         </>
                       ) : (

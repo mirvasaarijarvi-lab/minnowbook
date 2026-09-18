@@ -19,7 +19,9 @@ export function getBookingErrorToastKey(err: unknown): TranslationKey {
   return resolveBookingError(err).i18nKey;
 }
 
-export function getBookingErrorToastOptions(err: unknown): { duration: number } {
+export function getBookingErrorToastOptions(err: unknown): {
+  duration: number;
+} {
   return { duration: resolveBookingError(err).toastDuration };
 }
 

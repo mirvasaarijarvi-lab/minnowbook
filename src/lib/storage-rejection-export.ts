@@ -55,7 +55,7 @@ export interface ExportContext {
 
 /** Strip every event to the allowlist, defensively. */
 export function toSafeEvents<T extends Record<string, unknown>>(
-  events: T[]
+  events: T[],
 ): SafeRejectionEvent[] {
   return events.map((e) => {
     const out: Record<string, unknown> = {};
@@ -77,14 +77,16 @@ function csvCell(value: unknown): string {
 export function buildCsv(events: SafeRejectionEvent[]): string {
   const header = SAFE_EVENT_FIELDS.join(",");
   const rows = events.map((e) =>
-    SAFE_EVENT_FIELDS.map((f) => csvCell((e as unknown as Record<string, unknown>)[f])).join(",")
+    SAFE_EVENT_FIELDS.map((f) =>
+      csvCell((e as unknown as Record<string, unknown>)[f]),
+    ).join(","),
   );
   return [header, ...rows].join("\r\n") + "\r\n";
 }
 
 export function buildJson(
   events: SafeRejectionEvent[],
-  ctx: ExportContext
+  ctx: ExportContext,
 ): string {
   return JSON.stringify(
     {
@@ -96,7 +98,7 @@ export function buildJson(
       events,
     },
     null,
-    2
+    2,
   );
 }
 
@@ -113,10 +115,7 @@ export function downloadBlob(filename: string, mime: string, body: string) {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-export function makeFilename(
-  windowKey: string,
-  ext: "csv" | "json"
-): string {
+export function makeFilename(windowKey: string, ext: "csv" | "json"): string {
   const stamp = new Date()
     .toISOString()
     .replace(/[:.]/g, "-")

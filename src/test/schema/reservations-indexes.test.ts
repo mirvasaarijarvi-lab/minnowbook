@@ -51,12 +51,12 @@ describe("reservations indexes (schema gate)", () => {
       // Match: CREATE [UNIQUE] INDEX [IF NOT EXISTS] <name> ON [public.]reservations
       const pattern = new RegExp(
         `CREATE\\s+(?:UNIQUE\\s+)?INDEX(?:\\s+IF\\s+NOT\\s+EXISTS)?\\s+${name}\\s+ON\\s+(?:public\\.)?reservations\\b`,
-        "i"
+        "i",
       );
       expect(
         pattern.test(corpus),
         `Expected index "${name}" to be created on public.reservations in some migration. ` +
-          `If you renamed or removed it, update EXPECTED_INDEXES in this file in the same PR.`
+          `If you renamed or removed it, update EXPECTED_INDEXES in this file in the same PR.`,
       ).toBe(true);
     });
   }

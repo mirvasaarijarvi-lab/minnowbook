@@ -28,7 +28,13 @@
 
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
-import { PDFDocument, StandardFonts, rgb, type PDFFont, type PDFPage } from "pdf-lib";
+import {
+  PDFDocument,
+  StandardFonts,
+  rgb,
+  type PDFFont,
+  type PDFPage,
+} from "pdf-lib";
 
 interface UploadAttemptRecord {
   bucket: string;
@@ -118,13 +124,17 @@ function loadLedger(): { path: string; payload: LedgerPayload } {
   // CI surfaces "wrong artifact" bugs instead of silently rendering them.
   const explicit = process.env.STORAGE_ATTEMPTS_LEDGER;
   const flavorEnv = (process.env.RLS_REPORT_FLAVOR ?? "").trim();
-  const safeFlavorEnv = flavorEnv.replace(/[^a-zA-Z0-9_-]+/g, "-").toLowerCase();
+  const safeFlavorEnv = flavorEnv
+    .replace(/[^a-zA-Z0-9_-]+/g, "-")
+    .toLowerCase();
   const reportsDir = resolve(process.cwd(), "reports");
 
   const candidates: string[] = [];
   if (explicit) candidates.push(explicit);
   if (safeFlavorEnv) {
-    candidates.push(resolve(reportsDir, `storage-attempts.${safeFlavorEnv}.json`));
+    candidates.push(
+      resolve(reportsDir, `storage-attempts.${safeFlavorEnv}.json`),
+    );
   }
   candidates.push(resolve(reportsDir, "storage-attempts.json"));
 
@@ -132,8 +142,11 @@ function loadLedger(): { path: string; payload: LedgerPayload } {
     if (existsSync(c)) {
       const payload = JSON.parse(readFileSync(c, "utf-8")) as LedgerPayload;
       const loadedFlavor = (payload.flavor ?? "").trim().toLowerCase();
-      if (flavorEnv && loadedFlavor && loadedFlavor !== flavorEnv.toLowerCase()) {
-        // eslint-disable-next-line no-console
+      if (
+        flavorEnv &&
+        loadedFlavor &&
+        loadedFlavor !== flavorEnv.toLowerCase()
+      ) {
         console.warn(
           `[storage-attempts-pdf] ⚠️  flavor mismatch: RLS_REPORT_FLAVOR="${flavorEnv}" ` +
             `but loaded ledger has flavor="${payload.flavor}" (path=${c}). ` +
@@ -141,7 +154,7 @@ function loadLedger(): { path: string; payload: LedgerPayload } {
             `delete reports/ between runs or set STORAGE_ATTEMPTS_LEDGER explicitly.`,
         );
       }
-      // eslint-disable-next-line no-console
+
       console.log(
         `[storage-attempts-pdf] Resolved ledger:\n` +
           `  path   = ${c}\n` +
@@ -170,7 +183,12 @@ function safe(s: string | null | undefined): string {
   return s.replace(/[^\x09\x0A\x0D\x20-\x7E\xA0-\xFF]/g, "?");
 }
 
-function ellipsise(s: string, font: PDFFont, size: number, maxW: number): string {
+function ellipsise(
+  s: string,
+  font: PDFFont,
+  size: number,
+  maxW: number,
+): string {
   // Sanitize FIRST — pdf-lib's StandardFont throws on non-WinAnsi codepoints
   // when measuring width, not just when drawing. `safe()` is idempotent so
   // re-applying it at drawText time is harmless.
@@ -213,7 +231,12 @@ function ensureSpace(c: Cursor, need: number): Cursor {
 function drawText(
   c: Cursor,
   text: string,
-  opts: { x?: number; size?: number; color?: ReturnType<typeof rgb>; font?: PDFFont } = {},
+  opts: {
+    x?: number;
+    size?: number;
+    color?: ReturnType<typeof rgb>;
+    font?: PDFFont;
+  } = {},
 ) {
   const size = opts.size ?? 10;
   const x = opts.x ?? MARGIN;
@@ -239,20 +262,49 @@ function rule(c: Cursor) {
 function drawCover(c: Cursor, p: LedgerPayload): Cursor {
   drawText(c, "Cross-Tenant Storage Attempts", { size: 18, font: c.bold });
   c.y -= 24;
-  drawText(c, `Flavor: ${p.flavor}    Run ID: ${p.runId}`, { size: 10, color: C.muted });
+  drawText(c, `Flavor: ${p.flavor}    Run ID: ${p.runId}`, {
+    size: 10,
+    color: C.muted,
+  });
   c.y -= 14;
   drawText(c, `Generated: ${p.generatedAt}`, { size: 10, color: C.muted });
   c.y -= 14;
-  drawText(c, `Tenant A: ${p.tenants.a ?? "(unset)"}`, { size: 10, color: C.muted });
+  drawText(c, `Tenant A: ${p.tenants.a ?? "(unset)"}`, {
+    size: 10,
+    color: C.muted,
+  });
   c.y -= 12;
-  drawText(c, `Tenant B: ${p.tenants.b ?? "(unset)"}`, { size: 10, color: C.muted });
+  drawText(c, `Tenant B: ${p.tenants.b ?? "(unset)"}`, {
+    size: 10,
+    color: C.muted,
+  });
   c.y -= 24;
 
   // Summary cards row
-  const cards: Array<{ label: string; value: string; bg: ReturnType<typeof rgb>; color: ReturnType<typeof rgb> }> = [
-    { label: "Upload attempts", value: String(p.summary.totalUploadAttempts), bg: C.cardBg, color: C.text },
-    { label: "Expected denied", value: String(p.summary.expectedDenied), bg: C.cardBg, color: C.text },
-    { label: "Expected allowed", value: String(p.summary.expectedAllowed), bg: C.cardBg, color: C.text },
+  const cards: Array<{
+    label: string;
+    value: string;
+    bg: ReturnType<typeof rgb>;
+    color: ReturnType<typeof rgb>;
+  }> = [
+    {
+      label: "Upload attempts",
+      value: String(p.summary.totalUploadAttempts),
+      bg: C.cardBg,
+      color: C.text,
+    },
+    {
+      label: "Expected denied",
+      value: String(p.summary.expectedDenied),
+      bg: C.cardBg,
+      color: C.text,
+    },
+    {
+      label: "Expected allowed",
+      value: String(p.summary.expectedAllowed),
+      bg: C.cardBg,
+      color: C.text,
+    },
     {
       label: "Unexpected leaks",
       value: String(p.summary.unexpectedAllowed),
@@ -354,7 +406,9 @@ function drawLeaksSection(c: Cursor, p: LedgerPayload): Cursor {
       borderWidth: 0.5,
     });
     c.page.drawText(
-      safe("OK  No unexpected leaks - every cross-tenant attempt was correctly denied."),
+      safe(
+        "OK  No unexpected leaks - every cross-tenant attempt was correctly denied.",
+      ),
       {
         x: MARGIN + 10,
         y: c.y - 18,
@@ -440,12 +494,20 @@ function drawLeaksSection(c: Cursor, p: LedgerPayload): Cursor {
 
     const ownerStr = leak.owner ?? "—";
     const statusStr = leak.httpStatus != null ? String(leak.httpStatus) : "—";
-    const cells: Array<[keyof typeof COLS, string, ReturnType<typeof rgb>, PDFFont, number]> = [
+    const cells: Array<
+      [keyof typeof COLS, string, ReturnType<typeof rgb>, PDFFont, number]
+    > = [
       ["bucket", leak.bucket, C.fail, c.bold, 9],
       ["actor", `${leak.attacker} → ${ownerStr}`, C.fail, c.bold, 9],
       ["status", statusStr, C.fail, c.bold, 9],
       ["scenario", leak.scenario ?? "(default)", C.fail, c.font, 9],
-      ["path", ellipsise(safe(leak.path), c.mono, 8, COLS.path.w), C.fail, c.mono, 8],
+      [
+        "path",
+        ellipsise(safe(leak.path), c.mono, 8, COLS.path.w),
+        C.fail,
+        c.mono,
+        8,
+      ],
     ];
 
     for (const [k, val, color, font, size] of cells) {
@@ -629,7 +691,10 @@ function drawCleanupSection(c: Cursor, p: LedgerPayload): Cursor {
   c.y -= 4;
 
   if (p.cleanups.length === 0) {
-    drawText(c, "(no cleanup operations recorded)", { size: 9, color: C.muted });
+    drawText(c, "(no cleanup operations recorded)", {
+      size: 9,
+      color: C.muted,
+    });
     c.y -= LINE_HEIGHT;
     return c;
   }
@@ -645,12 +710,20 @@ function drawCleanupSection(c: Cursor, p: LedgerPayload): Cursor {
     const pathOrNote = op.note ? `${op.path}  (${op.note})` : op.path;
     const httpStr = op.httpStatus != null ? String(op.httpStatus) : "—";
 
-    const cells: Array<[keyof typeof COLS, string, ReturnType<typeof rgb>, PDFFont, number]> = [
+    const cells: Array<
+      [keyof typeof COLS, string, ReturnType<typeof rgb>, PDFFont, number]
+    > = [
       ["role", op.role, C.text, c.font, 9],
       ["bucket", op.bucket, C.text, c.font, 9],
       ["state", statusText, statusColor, c.bold, 9],
       ["http", httpStr, C.muted, c.font, 9],
-      ["path", ellipsise(pathOrNote, c.mono, 8, COLS.path.w), C.text, c.mono, 8],
+      [
+        "path",
+        ellipsise(pathOrNote, c.mono, 8, COLS.path.w),
+        C.text,
+        c.mono,
+        8,
+      ],
     ];
 
     for (const [k, val, color, font, size] of cells) {
@@ -665,7 +738,12 @@ function drawCleanupSection(c: Cursor, p: LedgerPayload): Cursor {
     c.y -= LINE_HEIGHT;
 
     if (hasCodeLine) {
-      const detail = ellipsise(`code=${op.errorCode}`, c.mono, 7.5, CONTENT_W - 8);
+      const detail = ellipsise(
+        `code=${op.errorCode}`,
+        c.mono,
+        7.5,
+        CONTENT_W - 8,
+      );
       c.page.drawText(safe(detail), {
         x: MARGIN + 8,
         y: c.y - 8,
@@ -685,19 +763,24 @@ function drawCleanupSection(c: Cursor, p: LedgerPayload): Cursor {
 function drawFooters(doc: PDFDocument, font: PDFFont, flavor: string) {
   const pages = doc.getPages();
   pages.forEach((page, idx) => {
-    page.drawText(safe(`Cross-tenant storage report · ${flavor} · Page ${idx + 1}/${pages.length}`), {
-      x: MARGIN,
-      y: 18,
-      size: 8,
-      font,
-      color: C.muted,
-    });
+    page.drawText(
+      safe(
+        `Cross-tenant storage report · ${flavor} · Page ${idx + 1}/${pages.length}`,
+      ),
+      {
+        x: MARGIN,
+        y: 18,
+        size: 8,
+        font,
+        color: C.muted,
+      },
+    );
   });
 }
 
 async function main() {
   const { path: ledgerPath, payload } = loadLedger();
-  // eslint-disable-next-line no-console
+
   console.log(`[storage-attempts-pdf] Loaded ledger: ${ledgerPath}`);
 
   const doc = await PDFDocument.create();
@@ -719,19 +802,19 @@ async function main() {
 
   const bytes = await doc.save();
   const outDir = resolve(process.cwd(), "reports");
-  const safeFlavor = payload.flavor.replace(/[^a-zA-Z0-9_-]+/g, "-").toLowerCase() || "default";
+  const safeFlavor =
+    payload.flavor.replace(/[^a-zA-Z0-9_-]+/g, "-").toLowerCase() || "default";
   const canonical = resolve(outDir, "storage-attempts.pdf");
   const flavored = resolve(outDir, `storage-attempts.${safeFlavor}.pdf`);
   writeFileSync(canonical, bytes);
   writeFileSync(flavored, bytes);
-  // eslint-disable-next-line no-console
+
   console.log(`[storage-attempts-pdf] Wrote: ${canonical}`);
-  // eslint-disable-next-line no-console
+
   console.log(`[storage-attempts-pdf] Wrote: ${flavored}`);
 }
 
 main().catch((err) => {
-  // eslint-disable-next-line no-console
   console.error("[storage-attempts-pdf] Failed:", err);
   process.exit(1);
 });

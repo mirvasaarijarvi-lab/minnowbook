@@ -121,7 +121,9 @@ const subtractOne = (intervals: Interval[], block: Interval): Interval[] => {
  *
  * Returns an empty list when the resource is unavailable for the whole day.
  */
-export const resolveResourceAvailability = (input: ResolveInput): TimeWindow[] => {
+export const resolveResourceAvailability = (
+  input: ResolveInput,
+): TimeWindow[] => {
   const { date, dayOfWeek, weeklyHours, occasionalSlots, blocks } = input;
 
   const ivs: Interval[] = [];

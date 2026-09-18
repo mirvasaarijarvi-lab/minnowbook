@@ -48,7 +48,10 @@ async function loginAs(page: Page, email: string, password: string) {
   await page.goto("/login");
   await page.locator("input[type='email']").fill(email);
   await page.locator("input[type='password']").first().fill(password);
-  await page.getByRole("button", { name: /log in|sign in/i }).first().click();
+  await page
+    .getByRole("button", { name: /log in|sign in/i })
+    .first()
+    .click();
   await page.waitForURL((url) => !url.pathname.startsWith("/login"), {
     timeout: 20_000,
   });
@@ -57,7 +60,7 @@ async function loginAs(page: Page, email: string, password: string) {
 test.describe("Tenant membership revoked mid-session", () => {
   test.skip(
     !liveMode,
-    "Set E2E_SUPABASE_URL, E2E_SUPABASE_SERVICE_ROLE_KEY, E2E_MEMBERSHIP_TEST_EMAIL, E2E_MEMBERSHIP_TEST_PASSWORD, and E2E_MEMBERSHIP_TEST_TENANT_ID to run this test."
+    "Set E2E_SUPABASE_URL, E2E_SUPABASE_SERVICE_ROLE_KEY, E2E_MEMBERSHIP_TEST_EMAIL, E2E_MEMBERSHIP_TEST_PASSWORD, and E2E_MEMBERSHIP_TEST_TENANT_ID to run this test.",
   );
 
   // Run serially — we mutate shared fixture state (tenant_users row).
@@ -77,15 +80,16 @@ test.describe("Tenant membership revoked mid-session", () => {
 
     // Resolve the test user's auth UID via the admin API so we can target
     // the exact tenant_users row to delete (and later restore).
-    const { data: usersPage, error: listErr } = await admin.auth.admin.listUsers({
-      page: 1,
-      perPage: 200,
-    });
+    const { data: usersPage, error: listErr } =
+      await admin.auth.admin.listUsers({
+        page: 1,
+        perPage: 200,
+      });
     if (listErr) throw listErr;
     const match = usersPage.users.find((u) => u.email === TEST_EMAIL);
     if (!match) {
       throw new Error(
-        `E2E test user ${TEST_EMAIL} not found. Create it (and assign it to tenant ${TEST_TENANT_ID}) before running this suite.`
+        `E2E test user ${TEST_EMAIL} not found. Create it (and assign it to tenant ${TEST_TENANT_ID}) before running this suite.`,
       );
     }
     userId = match.id;
@@ -100,7 +104,7 @@ test.describe("Tenant membership revoked mid-session", () => {
     if (memErr) throw memErr;
     if (!membership) {
       throw new Error(
-        `Test user ${TEST_EMAIL} is not a member of tenant ${TEST_TENANT_ID}. Seed the membership before running this suite.`
+        `Test user ${TEST_EMAIL} is not a member of tenant ${TEST_TENANT_ID}. Seed the membership before running this suite.`,
       );
     }
     originalRole = (membership as any).role ?? "staff";
@@ -122,14 +126,14 @@ test.describe("Tenant membership revoked mid-session", () => {
         display_name: originalDisplayName,
         is_approved: originalIsApproved ?? true,
       },
-      { onConflict: "tenant_id,user_id" }
+      { onConflict: "tenant_id,user_id" },
     );
     if (error) {
       // Don't swallow — surface so the operator re-seeds manually.
-      // eslint-disable-next-line no-console
+
       console.error(
         "[e2e tenant-membership-removed] FAILED to restore membership:",
-        error
+        error,
       );
     }
   });
@@ -185,7 +189,7 @@ test.describe("Tenant membership revoked mid-session", () => {
 
     expect(
       settledOnOnboarding,
-      "after membership removal the user should either be redirected to /onboarding or see the no-tenant Complete setup CTA"
+      "after membership removal the user should either be redirected to /onboarding or see the no-tenant Complete setup CTA",
     ).toBe(true);
 
     if (!page.url().includes("/onboarding")) {

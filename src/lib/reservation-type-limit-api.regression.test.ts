@@ -28,7 +28,15 @@
  * error in a way that would break the UI's tier-error pipeline.
  */
 
-import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  afterAll,
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
 import { parseTierLimitError } from "./tier-error-codes";
 import { getTierLimits } from "./tier-limits";
 
@@ -48,7 +56,10 @@ vi.mock("@/integrations/supabase/client", () => {
   // In-memory store keyed by tenant id. Mirrors a real Postgres row so we
   // can assert that a rejected UPDATE never mutates the persisted value
   // (atomicity contract enforced by `enforce_reservation_type_limit`).
-  const store = new Map<string, { id: string; allowed_reservation_types: string[] }>();
+  const store = new Map<
+    string,
+    { id: string; allowed_reservation_types: string[] }
+  >();
 
   // To realistically simulate concurrent in-flight requests, every
   // store read/write yields one microtask before committing. That way
@@ -96,14 +107,18 @@ vi.mock("@/integrations/supabase/client", () => {
           await yieldTick();
           const row = store.get(id);
           return {
-            data: row ? { ...row, allowed_reservation_types: [...row.allowed_reservation_types] } : null,
+            data: row
+              ? {
+                  ...row,
+                  allowed_reservation_types: [...row.allowed_reservation_types],
+                }
+              : null,
             error: null,
           };
         },
       }),
     }),
   }));
-
 
   return {
     supabase: { from: fromMock },
@@ -115,16 +130,20 @@ vi.mock("@/integrations/supabase/client", () => {
 import * as supabaseModule from "@/integrations/supabase/client";
 const { supabase } = supabaseModule;
 // Internal handle to the in-memory store, exposed by the mock above.
-const tenantStore = (supabaseModule as unknown as {
-  __store: Map<string, { id: string; allowed_reservation_types: string[] }>;
-}).__store;
-
+const tenantStore = (
+  supabaseModule as unknown as {
+    __store: Map<string, { id: string; allowed_reservation_types: string[] }>;
+  }
+).__store;
 
 // ---- Helpers: the calls the Settings UI actually makes -----------------
 
 const TENANT_ID = "tenant-test";
 
-async function callReservationTypesApi(types: string[], id: string = TENANT_ID) {
+async function callReservationTypesApi(
+  types: string[],
+  id: string = TENANT_ID,
+) {
   return await supabase
     .from("tenants")
     .update({ allowed_reservation_types: types })
@@ -134,20 +153,24 @@ async function callReservationTypesApi(types: string[], id: string = TENANT_ID) 
 }
 
 /** Read the persisted row exactly as a follow-up SELECT from the UI would. */
-async function readPersistedTypes(id: string = TENANT_ID): Promise<string[] | null> {
+async function readPersistedTypes(
+  id: string = TENANT_ID,
+): Promise<string[] | null> {
   const { data } = await supabase
     .from("tenants")
     .select("allowed_reservation_types")
     .eq("id", id)
     .maybeSingle();
-  return data ? (data as { allowed_reservation_types: string[] }).allowed_reservation_types : null;
+  return data
+    ? (data as { allowed_reservation_types: string[] })
+        .allowed_reservation_types
+    : null;
 }
 
 /** Seed the in-memory tenant row with a known baseline. */
 function seedTenant(types: string[], id: string = TENANT_ID) {
   tenantStore.set(id, { id, allowed_reservation_types: [...types] });
 }
-
 
 // ---- Combinations under test -------------------------------------------
 
@@ -188,9 +211,18 @@ const SIX_TYPE_COMBOS: Array<{ name: string; types: string[] }> = [
  */
 const FIVE_TYPE_COMBOS: Array<{ name: string; types: string[] }> = [
   { name: "5 built-ins, no custom", types: [...BUILT_IN] },
-  { name: "4 built-ins + custom", types: ["hotel", "restaurant", "spa", "venue", "custom"] },
-  { name: "1 built-in + 4 custom", types: ["hotel", "custom", "custom", "custom", "custom"] },
-  { name: "5 customs", types: ["custom", "custom", "custom", "custom", "custom"] },
+  {
+    name: "4 built-ins + custom",
+    types: ["hotel", "restaurant", "spa", "venue", "custom"],
+  },
+  {
+    name: "1 built-in + 4 custom",
+    types: ["hotel", "custom", "custom", "custom", "custom"],
+  },
+  {
+    name: "5 customs",
+    types: ["custom", "custom", "custom", "custom", "custom"],
+  },
 ];
 
 // ---- Tests --------------------------------------------------------------
@@ -242,16 +274,20 @@ describe("reservations-type API: Professional 5-type cap", () => {
     lines.push(
       `  ${"-".repeat(4)}-+-${"-".repeat(7)}-+-${"-".repeat(4)}-+-${"-".repeat(50)}-+-${"-".repeat(40)}`,
     );
-    lines.push(`  Totals: ${pass} passed, ${fail} failed (of ${pass + fail} cases)`);
+    lines.push(
+      `  Totals: ${pass} passed, ${fail} failed (of ${pass + fail} cases)`,
+    );
     lines.push("");
-    // eslint-disable-next-line no-console
+
     console.log(lines.join("\n"));
   });
 
   it("frontend cap mirror agrees with the DB cap (5)", () => {
     // If these ever drift, the UI will show a wrong number while the
     // API keeps rejecting at a different threshold.
-    expect(getTierLimits("professional").maxReservationTypes).toBe(PROFESSIONAL_LIMIT);
+    expect(getTierLimits("professional").maxReservationTypes).toBe(
+      PROFESSIONAL_LIMIT,
+    );
   });
 
   describe.each(SIX_TYPE_COMBOS)(
@@ -316,7 +352,10 @@ describe("reservations-type API: Professional 5-type cap", () => {
     { name: "single built-in", types: ["restaurant"] },
     { name: "two built-ins", types: ["hotel", "spa"] },
     { name: "at-cap built-ins", types: [...BUILT_IN] },
-    { name: "at-cap mixed with custom", types: ["hotel", "restaurant", "spa", "venue", "custom"] },
+    {
+      name: "at-cap mixed with custom",
+      types: ["hotel", "restaurant", "spa", "venue", "custom"],
+    },
     { name: "only custom", types: ["custom"] },
     { name: "empty", types: [] },
   ];
@@ -343,7 +382,13 @@ describe("reservations-type API: Professional 5-type cap", () => {
             detail = `mutation detected: ${(e as Error).message.split("\n")[0]}`;
             throw e;
           } finally {
-            record({ status, kind: "atomic", name: caseName, size: combo.types.length, detail });
+            record({
+              status,
+              kind: "atomic",
+              name: caseName,
+              size: combo.types.length,
+              detail,
+            });
           }
         });
       }
@@ -364,7 +409,13 @@ describe("reservations-type API: Professional 5-type cap", () => {
         detail = `drift: ${(e as Error).message.split("\n")[0]}`;
         throw e;
       } finally {
-        record({ status, kind: "atomic", name: "sequential rejections", size: "--", detail });
+        record({
+          status,
+          kind: "atomic",
+          name: "sequential rejections",
+          size: "--",
+          detail,
+        });
       }
     });
 
@@ -388,7 +439,13 @@ describe("reservations-type API: Professional 5-type cap", () => {
         detail = `regression: ${(e as Error).message.split("\n")[0]}`;
         throw e;
       } finally {
-        record({ status, kind: "atomic", name: "accept between rejects", size: "--", detail });
+        record({
+          status,
+          kind: "atomic",
+          name: "accept between rejects",
+          size: "--",
+          detail,
+        });
       }
     });
 
@@ -396,7 +453,10 @@ describe("reservations-type API: Professional 5-type cap", () => {
       let status: "PASS" | "FAIL" = "PASS";
       let detail = "no phantom row created on rejection";
       try {
-        const { error } = await callReservationTypesApi([...BUILT_IN, "custom"], "ghost-tenant");
+        const { error } = await callReservationTypesApi(
+          [...BUILT_IN, "custom"],
+          "ghost-tenant",
+        );
         expect(error).not.toBeNull();
         expect(await readPersistedTypes("ghost-tenant")).toBeNull();
       } catch (e) {
@@ -404,7 +464,13 @@ describe("reservations-type API: Professional 5-type cap", () => {
         detail = `phantom row: ${(e as Error).message.split("\n")[0]}`;
         throw e;
       } finally {
-        record({ status, kind: "atomic", name: "ghost tenant", size: "--", detail });
+        record({
+          status,
+          kind: "atomic",
+          name: "ghost tenant",
+          size: "--",
+          detail,
+        });
       }
     });
   });
@@ -449,7 +515,10 @@ describe("reservations-type API: Professional 5-type cap", () => {
         ...Array.from({ length: Math.ceil(size / 2) }, () => "custom"),
         ...filler.slice(0, Math.floor(size / 2)),
       ];
-      out.push({ name: `size=${size}, ${Math.ceil(size / 2)} customs`, types: heavy });
+      out.push({
+        name: `size=${size}, ${Math.ceil(size / 2)} customs`,
+        types: heavy,
+      });
     }
     return out;
   }
@@ -489,7 +558,13 @@ describe("reservations-type API: Professional 5-type cap", () => {
           detail = `message contract broken: ${(e as Error).message.split("\n")[0]}`;
           throw e;
         } finally {
-          record({ status, kind: "invalid", name: `msg: ${name}`, size: types.length, detail });
+          record({
+            status,
+            kind: "invalid",
+            name: `msg: ${name}`,
+            size: types.length,
+            detail,
+          });
         }
       },
     );
@@ -558,7 +633,9 @@ describe("reservations-type API: Professional 5-type cap", () => {
         [all[i], all[j]] = [all[j], all[i]];
       }
 
-      const results = await Promise.all(all.map((p) => callReservationTypesApi(p)));
+      const results = await Promise.all(
+        all.map((p) => callReservationTypesApi(p)),
+      );
 
       let acceptedCount = 0;
       let rejectedCount = 0;
@@ -608,7 +685,9 @@ describe("reservations-type API: Professional 5-type cap", () => {
         `extra-${i}`, // 6 types each
       ]);
 
-      const results = await Promise.all(rejects.map((p) => callReservationTypesApi(p)));
+      const results = await Promise.all(
+        rejects.map((p) => callReservationTypesApi(p)),
+      );
 
       for (const r of results) {
         expect(r.error).not.toBeNull();
@@ -647,4 +726,3 @@ describe("reservations-type API: Professional 5-type cap", () => {
     });
   });
 });
-

@@ -108,7 +108,9 @@ async function mockSystemAdminLookup(page: Page, isAdmin: boolean) {
       contentType: "application/json",
       headers: { "content-range": isAdmin ? "0-0/1" : "*/0" },
       body: JSON.stringify(
-        isAdmin ? [{ user_id: FAKE_USER_ID, created_at: new Date().toISOString() }] : [],
+        isAdmin
+          ? [{ user_id: FAKE_USER_ID, created_at: new Date().toISOString() }]
+          : [],
       ),
     });
   });
@@ -120,18 +122,21 @@ async function mockSystemAdminLookup(page: Page, isAdmin: boolean) {
  * edge function is reachable from the test environment.
  */
 async function mockForbiddenStatusBeacon(page: Page) {
-  await page.route(/\/functions\/v1\/forbidden-status/, async (route: Route) => {
-    const url = new URL(route.request().url());
-    await route.fulfill({
-      status: 403,
-      contentType: "application/json",
-      body: JSON.stringify({
+  await page.route(
+    /\/functions\/v1\/forbidden-status/,
+    async (route: Route) => {
+      const url = new URL(route.request().url());
+      await route.fulfill({
         status: 403,
-        error: "forbidden",
-        message: `Access to ${url.searchParams.get("area") ?? "unknown"} is denied.`,
-      }),
-    });
-  });
+        contentType: "application/json",
+        body: JSON.stringify({
+          status: 403,
+          error: "forbidden",
+          message: `Access to ${url.searchParams.get("area") ?? "unknown"} is denied.`,
+        }),
+      });
+    },
+  );
 }
 
 /**
@@ -212,7 +217,9 @@ test.describe("/superadmin — mocked auth states (lightweight E2E)", () => {
     // The Forbidden marker must NOT be present — the user never reached
     // the role gate.
     await expect(page.locator('[data-http-status="403"]')).toHaveCount(0);
-    expect(statusBeaconHits, "status beacon must not fire for anonymous").toBe(0);
+    expect(statusBeaconHits, "status beacon must not fire for anonymous").toBe(
+      0,
+    );
     expect(auditBeaconHits, "audit beacon must not fire for anonymous").toBe(0);
   });
 
@@ -304,7 +311,9 @@ test.describe("/superadmin — mocked auth states (lightweight E2E)", () => {
 
       // Give any stray beacons a beat to fire (they shouldn't).
       await page.waitForTimeout(500);
-      expect(statusBeaconHits, "status beacon must not fire for admins").toBe(0);
+      expect(statusBeaconHits, "status beacon must not fire for admins").toBe(
+        0,
+      );
       expect(auditBeaconHits, "audit beacon must not fire for admins").toBe(0);
     });
   });

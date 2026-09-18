@@ -23,7 +23,8 @@ const en = {
   "an.noData": "No bookings in this period yet.",
 
   "an.peak.title": "Peak hours",
-  "an.peak.help": "Which times of day are busiest, based on booking start times.",
+  "an.peak.help":
+    "Which times of day are busiest, based on booking start times.",
   "an.peak.busiest": "Busiest hour",
   "an.peak.axis": "Hour of day",
 
@@ -32,14 +33,16 @@ const en = {
   "an.weekday.busiest": "Busiest day",
 
   "an.channel.title": "Where bookings come from",
-  "an.channel.help": "Split between your public booking page and bookings entered by staff.",
+  "an.channel.help":
+    "Split between your public booking page and bookings entered by staff.",
   "an.channel.public": "Booking page",
   "an.channel.staff": "Entered by staff",
   "an.channel.total": "Total",
   "an.channel.trend": "Trend",
 
   "an.cross.title": "Cross-booking audit",
-  "an.cross.help": "Guests with several bookings on the same day or in the same linked group.",
+  "an.cross.help":
+    "Guests with several bookings on the same day or in the same linked group.",
   "an.cross.group": "Linked group",
   "an.cross.guest": "Guest",
   "an.cross.date": "Date",
@@ -49,7 +52,8 @@ const en = {
   "an.cross.linkedOnly": "Linked groups only",
 
   "an.mail.title": "Message history",
-  "an.mail.help": "Every message sent for this booking and whether it went out.",
+  "an.mail.help":
+    "Every message sent for this booking and whether it went out.",
   "an.mail.stage": "Message",
   "an.mail.sentAt": "Sent",
   "an.mail.status": "Status",
@@ -86,14 +90,16 @@ const fi: Partial<Record<AnalyticsKey, string>> = {
   "an.weekday.busiest": "Vilkkain päivä",
 
   "an.channel.title": "Mistä varaukset tulevat",
-  "an.channel.help": "Jakauma julkisen varaussivun ja henkilöstön tekemien varausten välillä.",
+  "an.channel.help":
+    "Jakauma julkisen varaussivun ja henkilöstön tekemien varausten välillä.",
   "an.channel.public": "Varaussivu",
   "an.channel.staff": "Henkilöstön kirjaamat",
   "an.channel.total": "Yhteensä",
   "an.channel.trend": "Kehitys",
 
   "an.cross.title": "Ristiinvarausten seuranta",
-  "an.cross.help": "Vieraat, joilla on useita varauksia samalle päivälle tai samassa ryhmässä.",
+  "an.cross.help":
+    "Vieraat, joilla on useita varauksia samalle päivälle tai samassa ryhmässä.",
   "an.cross.group": "Liitetty ryhmä",
   "an.cross.guest": "Vieras",
   "an.cross.date": "Päivä",
@@ -138,14 +144,16 @@ const sv: Partial<Record<AnalyticsKey, string>> = {
   "an.weekday.busiest": "Mest bokad dag",
 
   "an.channel.title": "Var bokningarna kommer från",
-  "an.channel.help": "Fördelning mellan din bokningssida och bokningar som personalen lagt in.",
+  "an.channel.help":
+    "Fördelning mellan din bokningssida och bokningar som personalen lagt in.",
   "an.channel.public": "Bokningssida",
   "an.channel.staff": "Inlagda av personal",
   "an.channel.total": "Totalt",
   "an.channel.trend": "Utveckling",
 
   "an.cross.title": "Granskning av korsbokningar",
-  "an.cross.help": "Gäster med flera bokningar samma dag eller i samma länkade grupp.",
+  "an.cross.help":
+    "Gäster med flera bokningar samma dag eller i samma länkade grupp.",
   "an.cross.group": "Länkad grupp",
   "an.cross.guest": "Gäst",
   "an.cross.date": "Datum",
@@ -155,7 +163,8 @@ const sv: Partial<Record<AnalyticsKey, string>> = {
   "an.cross.linkedOnly": "Endast länkade grupper",
 
   "an.mail.title": "Meddelandehistorik",
-  "an.mail.help": "Alla meddelanden som skickats för denna bokning och deras status.",
+  "an.mail.help":
+    "Alla meddelanden som skickats för denna bokning och deras status.",
   "an.mail.stage": "Meddelande",
   "an.mail.sentAt": "Skickat",
   "an.mail.status": "Status",
@@ -167,7 +176,10 @@ const sv: Partial<Record<AnalyticsKey, string>> = {
   "an.mail.none": "Inga meddelanden registrerade för denna bokning.",
 };
 
-const maps = { en, fi, sv } as Record<string, Partial<Record<AnalyticsKey, string>>>;
+const maps = { en, fi, sv } as Record<
+  string,
+  Partial<Record<AnalyticsKey, string>>
+>;
 
 export function useAnalyticsT() {
   const { language } = useLanguage();

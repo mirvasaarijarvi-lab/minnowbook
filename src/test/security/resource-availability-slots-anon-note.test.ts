@@ -22,7 +22,8 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { randomUUID } from "node:crypto";
 
 const SUPABASE_URL =
-  (import.meta.env?.VITE_SUPABASE_URL as string | undefined) ?? process.env.SUPABASE_URL;
+  (import.meta.env?.VITE_SUPABASE_URL as string | undefined) ??
+  process.env.SUPABASE_URL;
 const SUPABASE_ANON_KEY =
   (import.meta.env?.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined) ??
   process.env.SUPABASE_ANON_KEY ??
@@ -63,153 +64,182 @@ const ctx: Ctx = {
   cleanupUsers: [],
 };
 
-describe.runIf(canRun)("resource_availability_slots.note anon-hidden (live)", () => {
-  beforeAll(async () => {
-    ctx.service = newService();
+describe.runIf(canRun)(
+  "resource_availability_slots.note anon-hidden (live)",
+  () => {
+    beforeAll(async () => {
+      ctx.service = newService();
 
-    const email = `ci+ras-${randomUUID().slice(0, 8)}@mimmobook.test`;
-    const password = `Ci-Ras-${randomUUID()}-Z9!`;
-    const { data: userRes, error: userErr } = await ctx.service.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true,
-    });
-    if (userErr || !userRes.user) throw userErr ?? new Error("createUser failed");
-    ctx.ownerId = userRes.user.id;
-    ctx.cleanupUsers.push(ctx.ownerId);
+      const email = `ci+ras-${randomUUID().slice(0, 8)}@mimmobook.test`;
+      const password = `Ci-Ras-${randomUUID()}-Z9!`;
+      const { data: userRes, error: userErr } =
+        await ctx.service.auth.admin.createUser({
+          email,
+          password,
+          email_confirm: true,
+        });
+      if (userErr || !userRes.user)
+        throw userErr ?? new Error("createUser failed");
+      ctx.ownerId = userRes.user.id;
+      ctx.cleanupUsers.push(ctx.ownerId);
 
-    const tenantId = randomUUID();
-    const shortId = tenantId.slice(0, 8);
-    const { error: tErr } = await ctx.service.from("tenants").insert({
-      id: tenantId,
-      name: `TEST CI ras ${shortId}`,
-      slug: `ci-ras-${shortId}`,
-      tier: "professional",
-      allowed_reservation_types: ["restaurant"],
-      owner_user_id: ctx.ownerId,
-      subscription_status: "trialing",
-      is_active: true,
-    });
-    if (tErr) throw tErr;
-    ctx.tenantId = tenantId;
-    ctx.cleanupTenants.push(tenantId);
-
-    await ctx.service.from("tenant_users").insert({
-      tenant_id: tenantId,
-      user_id: ctx.ownerId,
-      role: "owner",
-      is_approved: true,
-    });
-
-    const { data: resource, error: rErr } = await ctx.service
-      .from("resources")
-      .insert({
-        tenant_id: tenantId,
-        name: `TEST CI ras resource ${shortId}`,
-        resource_type: "restaurant",
+      const tenantId = randomUUID();
+      const shortId = tenantId.slice(0, 8);
+      const { error: tErr } = await ctx.service.from("tenants").insert({
+        id: tenantId,
+        name: `TEST CI ras ${shortId}`,
+        slug: `ci-ras-${shortId}`,
+        tier: "professional",
+        allowed_reservation_types: ["restaurant"],
+        owner_user_id: ctx.ownerId,
+        subscription_status: "trialing",
         is_active: true,
-      })
-      .select("id")
-      .single();
-    if (rErr || !resource) throw rErr ?? new Error("resource insert failed");
-    ctx.resourceId = resource.id;
+      });
+      if (tErr) throw tErr;
+      ctx.tenantId = tenantId;
+      ctx.cleanupTenants.push(tenantId);
 
-    const slotDate = new Date(Date.now() + 7 * 86_400_000).toISOString().slice(0, 10);
-    const { data: slot, error: sErr } = await ctx.service
-      .from("resource_availability_slots")
-      .insert({
+      await ctx.service.from("tenant_users").insert({
         tenant_id: tenantId,
-        resource_id: ctx.resourceId,
-        slot_date: slotDate,
-        start_time: "10:00",
-        end_time: "12:00",
-        note: NOTE_MARKER,
-      })
-      .select("id")
-      .single();
-    if (sErr || !slot) throw sErr ?? new Error("slot insert failed");
-    ctx.slotId = slot.id;
-  }, 60_000);
+        user_id: ctx.ownerId,
+        role: "owner",
+        is_approved: true,
+      });
 
-  afterAll(async () => {
-    if (!ctx.service) return;
-    const swallow = async (p: PromiseLike<unknown>) => {
-      try { await p; } catch { /* best-effort */ }
-    };
-    for (const t of ctx.cleanupTenants) {
-      await swallow(ctx.service.from("resource_availability_slots").delete().eq("tenant_id", t));
-      await swallow(ctx.service.from("resources").delete().eq("tenant_id", t));
-      await swallow(ctx.service.from("tenant_users").delete().eq("tenant_id", t));
-      await swallow(ctx.service.from("tenants").delete().eq("id", t));
-    }
-    for (const u of ctx.cleanupUsers) {
-      await swallow(ctx.service.auth.admin.deleteUser(u));
-    }
-  }, 60_000);
+      const { data: resource, error: rErr } = await ctx.service
+        .from("resources")
+        .insert({
+          tenant_id: tenantId,
+          name: `TEST CI ras resource ${shortId}`,
+          resource_type: "restaurant",
+          is_active: true,
+        })
+        .select("id")
+        .single();
+      if (rErr || !resource) throw rErr ?? new Error("resource insert failed");
+      ctx.resourceId = resource.id;
 
-  it("anon SELECT * must not return the note column value", async () => {
-    const anon = newAnon();
-    const { data, error } = await anon
-      .from("resource_availability_slots")
-      .select("*")
-      .eq("id", ctx.slotId);
+      const slotDate = new Date(Date.now() + 7 * 86_400_000)
+        .toISOString()
+        .slice(0, 10);
+      const { data: slot, error: sErr } = await ctx.service
+        .from("resource_availability_slots")
+        .insert({
+          tenant_id: tenantId,
+          resource_id: ctx.resourceId,
+          slot_date: slotDate,
+          start_time: "10:00",
+          end_time: "12:00",
+          note: NOTE_MARKER,
+        })
+        .select("id")
+        .single();
+      if (sErr || !slot) throw sErr ?? new Error("slot insert failed");
+      ctx.slotId = slot.id;
+    }, 60_000);
 
-    // Either PostgREST rejects the missing column privilege (error) or
-    // returns rows that do not contain the note payload.
-    if (error) {
-      // Denial path — nothing further to check on this call.
-      return;
-    }
-    const rows = (data ?? []) as Array<Record<string, unknown>>;
-    for (const row of rows) {
-      expect(row.note, "note column must not be readable by anon").toBeUndefined();
-      // Belt & suspenders: the marker value must not appear anywhere in the row.
-      const serialized = JSON.stringify(row);
-      expect(
-        serialized.includes(NOTE_MARKER),
-        "note marker string must not leak into any anon-visible field",
-      ).toBe(false);
-    }
-  });
+    afterAll(async () => {
+      if (!ctx.service) return;
+      const swallow = async (p: PromiseLike<unknown>) => {
+        try {
+          await p;
+        } catch {
+          /* best-effort */
+        }
+      };
+      for (const t of ctx.cleanupTenants) {
+        await swallow(
+          ctx.service
+            .from("resource_availability_slots")
+            .delete()
+            .eq("tenant_id", t),
+        );
+        await swallow(
+          ctx.service.from("resources").delete().eq("tenant_id", t),
+        );
+        await swallow(
+          ctx.service.from("tenant_users").delete().eq("tenant_id", t),
+        );
+        await swallow(ctx.service.from("tenants").delete().eq("id", t));
+      }
+      for (const u of ctx.cleanupUsers) {
+        await swallow(ctx.service.auth.admin.deleteUser(u));
+      }
+    }, 60_000);
 
-  it("anon explicit SELECT of the note column is denied", async () => {
-    const anon = newAnon();
-    const { data, error } = await anon
-      .from("resource_availability_slots")
-      .select("id, note")
-      .eq("id", ctx.slotId);
+    it("anon SELECT * must not return the note column value", async () => {
+      const anon = newAnon();
+      const { data, error } = await anon
+        .from("resource_availability_slots")
+        .select("*")
+        .eq("id", ctx.slotId);
 
-    // The correct posture is a permission error. If Postgres/PostgREST
-    // ever silently drops the column instead, ensure the marker is not
-    // present in the returned rows.
-    if (!error) {
+      // Either PostgREST rejects the missing column privilege (error) or
+      // returns rows that do not contain the note payload.
+      if (error) {
+        // Denial path — nothing further to check on this call.
+        return;
+      }
       const rows = (data ?? []) as Array<Record<string, unknown>>;
       for (const row of rows) {
-        expect(row.note, "explicit note projection must be denied").toBeUndefined();
+        expect(
+          row.note,
+          "note column must not be readable by anon",
+        ).toBeUndefined();
+        // Belt & suspenders: the marker value must not appear anywhere in the row.
+        const serialized = JSON.stringify(row);
+        expect(
+          serialized.includes(NOTE_MARKER),
+          "note marker string must not leak into any anon-visible field",
+        ).toBe(false);
       }
-      // Failing the assertion below documents the regression: if the
-      // grant matrix is widened, the test forces someone to re-evaluate
-      // whether that widening is intentional.
+    });
+
+    it("anon explicit SELECT of the note column is denied", async () => {
+      const anon = newAnon();
+      const { data, error } = await anon
+        .from("resource_availability_slots")
+        .select("id, note")
+        .eq("id", ctx.slotId);
+
+      // The correct posture is a permission error. If Postgres/PostgREST
+      // ever silently drops the column instead, ensure the marker is not
+      // present in the returned rows.
+      if (!error) {
+        const rows = (data ?? []) as Array<Record<string, unknown>>;
+        for (const row of rows) {
+          expect(
+            row.note,
+            "explicit note projection must be denied",
+          ).toBeUndefined();
+        }
+        // Failing the assertion below documents the regression: if the
+        // grant matrix is widened, the test forces someone to re-evaluate
+        // whether that widening is intentional.
+        expect(
+          error,
+          "anon selecting the note column should raise a permission error",
+        ).not.toBeNull();
+        return;
+      }
+      expect(error).toBeTruthy();
+    });
+
+    it("anon can still read neutral scheduling columns (regression: don't over-block)", async () => {
+      const anon = newAnon();
+      const { data, error } = await anon
+        .from("resource_availability_slots")
+        .select("id, tenant_id, resource_id, slot_date, start_time, end_time")
+        .eq("id", ctx.slotId)
+        .maybeSingle();
+
       expect(
         error,
-        "anon selecting the note column should raise a permission error",
-      ).not.toBeNull();
-      return;
-    }
-    expect(error).toBeTruthy();
-  });
-
-  it("anon can still read neutral scheduling columns (regression: don't over-block)", async () => {
-    const anon = newAnon();
-    const { data, error } = await anon
-      .from("resource_availability_slots")
-      .select("id, tenant_id, resource_id, slot_date, start_time, end_time")
-      .eq("id", ctx.slotId)
-      .maybeSingle();
-
-    expect(error, `neutral columns must remain readable: ${error?.message}`).toBeNull();
-    expect(data?.id).toBe(ctx.slotId);
-    expect(data?.tenant_id).toBe(ctx.tenantId);
-    expect(data?.resource_id).toBe(ctx.resourceId);
-  });
-});
+        `neutral columns must remain readable: ${error?.message}`,
+      ).toBeNull();
+      expect(data?.id).toBe(ctx.slotId);
+      expect(data?.tenant_id).toBe(ctx.tenantId);
+      expect(data?.resource_id).toBe(ctx.resourceId);
+    });
+  },
+);

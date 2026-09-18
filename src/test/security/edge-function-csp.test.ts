@@ -31,13 +31,19 @@ interface FunctionFixture {
 const FIXTURES: FunctionFixture[] = [
   {
     name: "admin-users",
-    path: resolve(__dirname, "../../../supabase/functions/admin-users/index.ts"),
+    path: resolve(
+      __dirname,
+      "../../../supabase/functions/admin-users/index.ts",
+    ),
     headerVarPattern: /\bcorsHeaders\b/,
     builderName: "getCorsHeaders",
   },
   {
     name: "support-chat",
-    path: resolve(__dirname, "../../../supabase/functions/support-chat/index.ts"),
+    path: resolve(
+      __dirname,
+      "../../../supabase/functions/support-chat/index.ts",
+    ),
     headerVarPattern: /\bcorsHeaders\b/,
     builderName: "getCorsHeaders",
   },
@@ -57,9 +63,12 @@ function loadSource(fixture: FunctionFixture): string {
     seen.add(m[1]);
     for (const ext of [".ts", ".tsx", ""]) {
       try {
-        combined += "\n" + readFileSync(resolve(sharedDir, `${m[1]}${ext}`), "utf-8");
+        combined +=
+          "\n" + readFileSync(resolve(sharedDir, `${m[1]}${ext}`), "utf-8");
         break;
-      } catch { /* not this extension */ }
+      } catch {
+        /* not this extension */
+      }
     }
   }
   return combined;
@@ -71,7 +80,9 @@ function loadSource(fixture: FunctionFixture): string {
  * response built from this bag will carry the CSP".
  */
 function extractBuilderBody(source: string, builderName: string): string {
-  const re = new RegExp(`function\\s+${builderName}\\s*\\([^)]*\\)[^{]*\\{([\\s\\S]*?)\\n\\}`);
+  const re = new RegExp(
+    `function\\s+${builderName}\\s*\\([^)]*\\)[^{]*\\{([\\s\\S]*?)\\n\\}`,
+  );
   const m = source.match(re);
   if (!m) {
     throw new Error(`Could not find body of ${builderName}() in source`);
@@ -133,14 +144,16 @@ describe("Edge Function CSP — admin-users & support-chat", () => {
       });
 
       it("declares X-Frame-Options: DENY (defence-in-depth alongside CSP)", () => {
-        const xfoScope = /X-Frame-Options/.test(builderBody) ? builderBody : source;
-        expect(xfoScope).toMatch(
-          /["']X-Frame-Options["']\s*:\s*["']DENY["']/,
-        );
+        const xfoScope = /X-Frame-Options/.test(builderBody)
+          ? builderBody
+          : source;
+        expect(xfoScope).toMatch(/["']X-Frame-Options["']\s*:\s*["']DENY["']/);
       });
 
       it("declares X-Content-Type-Options: nosniff to prevent MIME sniffing", () => {
-        const xctoScope = /X-Content-Type-Options/.test(builderBody) ? builderBody : source;
+        const xctoScope = /X-Content-Type-Options/.test(builderBody)
+          ? builderBody
+          : source;
         expect(xctoScope).toMatch(
           /["']X-Content-Type-Options["']\s*:\s*["']nosniff["']/,
         );
@@ -161,7 +174,9 @@ describe("Edge Function CSP — admin-users & support-chat", () => {
         expect(
           offenders,
           `Found ${offenders.length} response(s) in ${fixture.name} not spreading the header bag (CSP would be missing):\n` +
-            offenders.map((o) => `  L${o.line}: ${o.snippet.split("\n")[0].trim()}`).join("\n"),
+            offenders
+              .map((o) => `  L${o.line}: ${o.snippet.split("\n")[0].trim()}`)
+              .join("\n"),
         ).toEqual([]);
       });
 
@@ -175,9 +190,13 @@ describe("Edge Function CSP — admin-users & support-chat", () => {
 
       it("rate-limit (429) response carries the header bag", () => {
         // Find every Response with status 429 and assert the header bag is present
-        const re = /new\s+Response\s*\([\s\S]{0,400}?status:\s*429[\s\S]{0,200}?\}\s*\)/g;
+        const re =
+          /new\s+Response\s*\([\s\S]{0,400}?status:\s*429[\s\S]{0,200}?\}\s*\)/g;
         const matches = source.match(re) ?? [];
-        expect(matches.length, "expected at least one 429 response").toBeGreaterThan(0);
+        expect(
+          matches.length,
+          "expected at least one 429 response",
+        ).toBeGreaterThan(0);
         for (const m of matches) {
           expect(m).toMatch(fixture.headerVarPattern);
         }

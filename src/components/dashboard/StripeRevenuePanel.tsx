@@ -11,17 +11,29 @@ const StripeRevenuePanel = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("tenants")
-        .select("id, name, slug, tier, subscription_status, stripe_customer_id, stripe_subscription_id, created_at")
+        .select(
+          "id, name, slug, tier, subscription_status, stripe_customer_id, stripe_subscription_id, created_at",
+        )
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data ?? [];
     },
   });
 
-  const subscribedTenants = tenants.filter((t) => t.subscription_status === "active" || t.subscription_status === "trialing");
+  const subscribedTenants = tenants.filter(
+    (t) =>
+      t.subscription_status === "active" ||
+      t.subscription_status === "trialing",
+  );
   const activeSubs = tenants.filter((t) => t.subscription_status === "active");
-  const trialingSubs = tenants.filter((t) => t.subscription_status === "trialing");
-  const cancelledSubs = tenants.filter((t) => t.subscription_status === "canceled" || t.subscription_status === "cancelled");
+  const trialingSubs = tenants.filter(
+    (t) => t.subscription_status === "trialing",
+  );
+  const cancelledSubs = tenants.filter(
+    (t) =>
+      t.subscription_status === "canceled" ||
+      t.subscription_status === "cancelled",
+  );
   const withStripe = tenants.filter((t) => t.stripe_customer_id);
 
   // Estimate MRR based on tier pricing
@@ -31,13 +43,36 @@ const StripeRevenuePanel = () => {
     business: 99,
   };
 
-  const estimatedMRR = activeSubs.reduce((sum, t) => sum + (tierPricing[t.tier] ?? 0), 0);
+  const estimatedMRR = activeSubs.reduce(
+    (sum, t) => sum + (tierPricing[t.tier] ?? 0),
+    0,
+  );
 
   const stats = [
-    { label: "Est. MRR", value: `€${estimatedMRR}`, icon: DollarSign, color: "text-success-foreground bg-success/10" },
-    { label: "Active Subs", value: activeSubs.length, icon: TrendingUp, color: "text-primary bg-primary/10" },
-    { label: "Trialing", value: trialingSubs.length, icon: Users, color: "text-accent bg-accent/10" },
-    { label: "Stripe Customers", value: withStripe.length, icon: CreditCard, color: "text-secondary-foreground bg-secondary" },
+    {
+      label: "Est. MRR",
+      value: `€${estimatedMRR}`,
+      icon: DollarSign,
+      color: "text-success-foreground bg-success/10",
+    },
+    {
+      label: "Active Subs",
+      value: activeSubs.length,
+      icon: TrendingUp,
+      color: "text-primary bg-primary/10",
+    },
+    {
+      label: "Trialing",
+      value: trialingSubs.length,
+      icon: Users,
+      color: "text-accent bg-accent/10",
+    },
+    {
+      label: "Stripe Customers",
+      value: withStripe.length,
+      icon: CreditCard,
+      color: "text-secondary-foreground bg-secondary",
+    },
   ];
 
   if (isLoading) {
@@ -52,7 +87,9 @@ const StripeRevenuePanel = () => {
 
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-serif font-semibold text-foreground">Revenue & Subscriptions</h3>
+      <h3 className="text-lg font-serif font-semibold text-foreground">
+        Revenue & Subscriptions
+      </h3>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {stats.map((stat) => (
@@ -63,8 +100,12 @@ const StripeRevenuePanel = () => {
                   <stat.icon className="h-4 w-4" />
                 </div>
                 <div>
-                  <p className="text-lg font-bold text-foreground">{stat.value}</p>
-                  <p className="text-[11px] text-muted-foreground">{stat.label}</p>
+                  <p className="text-lg font-bold text-foreground">
+                    {stat.value}
+                  </p>
+                  <p className="text-[11px] text-muted-foreground">
+                    {stat.label}
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -75,23 +116,35 @@ const StripeRevenuePanel = () => {
       {/* Subscription breakdown */}
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium">Subscription Breakdown by Tier</CardTitle>
+          <CardTitle className="text-sm font-medium">
+            Subscription Breakdown by Tier
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
             {["basic", "professional", "business"].map((tier) => {
               const count = activeSubs.filter((t) => t.tier === tier).length;
-              const trialCount = trialingSubs.filter((t) => t.tier === tier).length;
+              const trialCount = trialingSubs.filter(
+                (t) => t.tier === tier,
+              ).length;
               const revenue = count * (tierPricing[tier] ?? 0);
               return (
-                <div key={tier} className="flex items-center justify-between py-1.5 border-b border-border last:border-0">
+                <div
+                  key={tier}
+                  className="flex items-center justify-between py-1.5 border-b border-border last:border-0"
+                >
                   <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="capitalize text-xs">{tier}</Badge>
+                    <Badge variant="outline" className="capitalize text-xs">
+                      {tier}
+                    </Badge>
                     <span className="text-sm text-muted-foreground">
-                      {count} active{trialCount > 0 ? `, ${trialCount} trial` : ""}
+                      {count} active
+                      {trialCount > 0 ? `, ${trialCount} trial` : ""}
                     </span>
                   </div>
-                  <span className="text-sm font-medium text-foreground">€{revenue}/mo</span>
+                  <span className="text-sm font-medium text-foreground">
+                    €{revenue}/mo
+                  </span>
                 </div>
               );
             })}

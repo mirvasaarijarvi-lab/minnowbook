@@ -30,15 +30,14 @@ describe("cold-start retry e2e: POST follow-up after simulated 503", () => {
     vi.restoreAllMocks();
   });
 
-  it(
-    "returns 200 with warmup payload and CORS headers after a single 503 retry",
-    async () => {
-      const realFetch = globalThis.fetch.bind(globalThis);
-      let callCount = 0;
+  it("returns 200 with warmup payload and CORS headers after a single 503 retry", async () => {
+    const realFetch = globalThis.fetch.bind(globalThis);
+    let callCount = 0;
 
-      const fetchSpy = vi
-        .spyOn(globalThis, "fetch")
-        .mockImplementation(async (input: RequestInfo | URL, init?: RequestInit) => {
+    const fetchSpy = vi
+      .spyOn(globalThis, "fetch")
+      .mockImplementation(
+        async (input: RequestInfo | URL, init?: RequestInit) => {
           callCount += 1;
           if (callCount === 1) {
             // Simulate a cold-start gateway blip on the very first attempt.
@@ -50,67 +49,66 @@ describe("cold-start retry e2e: POST follow-up after simulated 503", () => {
           }
           // Subsequent attempts pass through to the real edge function.
           return realFetch(input as never, init);
-        });
-
-      const res = await fetchWithColdStartRetry(ENDPOINT, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Origin: "https://minnowbook.lovable.app",
-          apikey: SUPABASE_PUBLISHABLE_KEY,
-          Authorization: `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
-          "x-warmup-source": "vitest:cold-start-retry.test",
         },
-        body: JSON.stringify({ warmup: true }),
-      });
+      );
 
-      // The helper must have retried exactly once after the synthetic 503.
-      expect(
-        fetchSpy.mock.calls.length,
-        `expected exactly 2 fetch attempts (1 synthetic 503 + 1 real), got ${fetchSpy.mock.calls.length}`,
-      ).toBe(2);
+    const res = await fetchWithColdStartRetry(ENDPOINT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Origin: "https://minnowbook.lovable.app",
+        apikey: SUPABASE_PUBLISHABLE_KEY,
+        Authorization: `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
+        "x-warmup-source": "vitest:cold-start-retry.test",
+      },
+      body: JSON.stringify({ warmup: true }),
+    });
 
-      // The returned response must be the REAL edge function response,
-      // not the synthetic 503 we injected.
-      expect(
-        res.status,
-        `expected retried POST to be 200, got ${res.status}`,
-      ).toBe(200);
+    // The helper must have retried exactly once after the synthetic 503.
+    expect(
+      fetchSpy.mock.calls.length,
+      `expected exactly 2 fetch attempts (1 synthetic 503 + 1 real), got ${fetchSpy.mock.calls.length}`,
+    ).toBe(2);
 
-      // Payload contract from the warmup branch.
-      const body = await res.json();
-      expect(body).toMatchObject({ ok: true, warmup: true });
-      expect(typeof body.request_id).toBe("string");
-      expect(body.request_id.length).toBeGreaterThan(0);
+    // The returned response must be the REAL edge function response,
+    // not the synthetic 503 we injected.
+    expect(
+      res.status,
+      `expected retried POST to be 200, got ${res.status}`,
+    ).toBe(200);
 
-      // CORS contract: ACAO must be set. `public-booking` is a browser-
-      // public endpoint that intentionally returns `*` (no credentials),
-      // but an echoed-origin response is equally acceptable. What must
-      // never happen is an empty ACAO, or credentials leaking alongside
-      // a wildcard.
-      const acao = res.headers.get("access-control-allow-origin");
-      expect(acao, "ACAO header missing from retried response").toBeTruthy();
-      expect(acao).not.toBe("");
-      const allowedAcao =
-        acao === "*" || acao === "https://minnowbook.lovable.app";
-      expect(
-        allowedAcao,
-        `unexpected ACAO on retried warmup response: ${acao}`,
-      ).toBe(true);
+    // Payload contract from the warmup branch.
+    const body = await res.json();
+    expect(body).toMatchObject({ ok: true, warmup: true });
+    expect(typeof body.request_id).toBe("string");
+    expect(body.request_id.length).toBeGreaterThan(0);
 
-      const acac = res.headers.get("access-control-allow-credentials");
-      if (acac !== null) {
-        expect(acac.toLowerCase()).not.toBe("true");
-      }
-      // Wildcard ACAO with credentials=true would be an unsafe combination.
-      if (acao === "*") {
-        expect(acac === null || acac.toLowerCase() !== "true").toBe(true);
-      }
+    // CORS contract: ACAO must be set. `public-booking` is a browser-
+    // public endpoint that intentionally returns `*` (no credentials),
+    // but an echoed-origin response is equally acceptable. What must
+    // never happen is an empty ACAO, or credentials leaking alongside
+    // a wildcard.
+    const acao = res.headers.get("access-control-allow-origin");
+    expect(acao, "ACAO header missing from retried response").toBeTruthy();
+    expect(acao).not.toBe("");
+    const allowedAcao =
+      acao === "*" || acao === "https://minnowbook.lovable.app";
+    expect(
+      allowedAcao,
+      `unexpected ACAO on retried warmup response: ${acao}`,
+    ).toBe(true);
 
-      // Warmup identification headers must survive the retry path.
-      expect(res.headers.get("x-warmup")).toBe("true");
-      expect(res.headers.get("x-request-id")).toBeTruthy();
-    },
-    30_000,
-  );
+    const acac = res.headers.get("access-control-allow-credentials");
+    if (acac !== null) {
+      expect(acac.toLowerCase()).not.toBe("true");
+    }
+    // Wildcard ACAO with credentials=true would be an unsafe combination.
+    if (acao === "*") {
+      expect(acac === null || acac.toLowerCase() !== "true").toBe(true);
+    }
+
+    // Warmup identification headers must survive the retry path.
+    expect(res.headers.get("x-warmup")).toBe("true");
+    expect(res.headers.get("x-request-id")).toBeTruthy();
+  }, 30_000);
 });

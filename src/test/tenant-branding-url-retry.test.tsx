@@ -90,11 +90,7 @@ describe("useBrandingSignedUrlState retry policy", () => {
 
     const states: { url: string; status: string }[] = [];
     render(
-      <HookProbe
-        storedUrl={PATH}
-        ttl={TTL}
-        onState={(s) => states.push(s)}
-      />,
+      <HookProbe storedUrl={PATH} ttl={TTL} onState={(s) => states.push(s)} />,
     );
 
     // Initial mint attempt (kicks off in load()).
@@ -132,11 +128,7 @@ describe("useBrandingSignedUrlState retry policy", () => {
 
     const states: { url: string; status: string }[] = [];
     render(
-      <HookProbe
-        storedUrl={PATH}
-        ttl={TTL}
-        onState={(s) => states.push(s)}
-      />,
+      <HookProbe storedUrl={PATH} ttl={TTL} onState={(s) => states.push(s)} />,
     );
 
     // Drain initial + 4 retry attempts.
@@ -195,7 +187,10 @@ describe("useBrandingSignedUrlState retry policy", () => {
     // the shared attempt counter.
     createSignedUrlMock
       .mockResolvedValueOnce({ data: null, error: { message: "boom" } })
-      .mockResolvedValueOnce({ data: { signedUrl: "https://signed/ok" }, error: null })
+      .mockResolvedValueOnce({
+        data: { signedUrl: "https://signed/ok" },
+        error: null,
+      })
       .mockResolvedValue({ data: null, error: { message: "boom-again" } });
 
     const retryRef: { current: (() => void) | null } = { current: null };

@@ -2,9 +2,21 @@ import { useState, useEffect, forwardRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
 import { toast } from "sonner";
-import { ShieldCheck, ShieldOff, Loader2, Copy, KeyRound, RefreshCw, Download } from "lucide-react";
+import {
+  ShieldCheck,
+  ShieldOff,
+  Loader2,
+  Copy,
+  KeyRound,
+  RefreshCw,
+  Download,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 const TwoFactorSettings = forwardRef<HTMLDivElement>((_, ref) => {
@@ -210,7 +222,9 @@ const TwoFactorSettings = forwardRef<HTMLDivElement>((_, ref) => {
           Two-Factor Authentication
           {verifiedFactor && (
             <span className="ml-auto">
-              <Badge variant="default" className="text-xs">Enabled</Badge>
+              <Badge variant="default" className="text-xs">
+                Enabled
+              </Badge>
             </span>
           )}
         </CardTitle>
@@ -220,8 +234,8 @@ const TwoFactorSettings = forwardRef<HTMLDivElement>((_, ref) => {
         {verifiedFactor && !qrCode && (
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Your account is protected with an authenticator app. You'll be asked
-              for a code each time you log in.
+              Your account is protected with an authenticator app. You'll be
+              asked for a code each time you log in.
             </p>
 
             {/* Recovery codes section */}
@@ -230,14 +244,17 @@ const TwoFactorSettings = forwardRef<HTMLDivElement>((_, ref) => {
                 <KeyRound className="h-4 w-4 text-primary" />
                 <span className="text-sm font-medium">Recovery Codes</span>
                 {recoveryCount !== null && (
-                  <Badge variant={recoveryCount <= 2 ? "destructive" : "secondary"} className="text-xs ml-auto">
+                  <Badge
+                    variant={recoveryCount <= 2 ? "destructive" : "secondary"}
+                    className="text-xs ml-auto"
+                  >
                     {recoveryCount} remaining
                   </Badge>
                 )}
               </div>
               <p className="text-xs text-muted-foreground">
-                Use a recovery code to sign in if you lose access to your authenticator app.
-                Each code can only be used once.
+                Use a recovery code to sign in if you lose access to your
+                authenticator app. Each code can only be used once.
               </p>
 
               {/* Show generated codes */}
@@ -245,7 +262,10 @@ const TwoFactorSettings = forwardRef<HTMLDivElement>((_, ref) => {
                 <div className="space-y-2">
                   <div className="grid grid-cols-2 gap-1.5 p-3 bg-muted rounded-md">
                     {recoveryCodes.map((code) => (
-                      <code key={code} className="text-xs font-mono text-center py-1">
+                      <code
+                        key={code}
+                        className="text-xs font-mono text-center py-1"
+                      >
                         {code}
                       </code>
                     ))}
@@ -254,13 +274,28 @@ const TwoFactorSettings = forwardRef<HTMLDivElement>((_, ref) => {
                     ⚠ Save these codes now. You won't be able to see them again.
                   </p>
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={handleCopyCodes} className="gap-1.5 text-xs">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleCopyCodes}
+                      className="gap-1.5 text-xs"
+                    >
                       <Copy className="h-3.5 w-3.5" /> Copy
                     </Button>
-                    <Button variant="outline" size="sm" onClick={handleDownloadCodes} className="gap-1.5 text-xs">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleDownloadCodes}
+                      className="gap-1.5 text-xs"
+                    >
                       <Download className="h-3.5 w-3.5" /> Download
                     </Button>
-                    <Button variant="ghost" size="sm" onClick={() => setRecoveryCodes(null)} className="text-xs ml-auto">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setRecoveryCodes(null)}
+                      className="text-xs ml-auto"
+                    >
                       Done
                     </Button>
                   </div>
@@ -336,14 +371,23 @@ const TwoFactorSettings = forwardRef<HTMLDivElement>((_, ref) => {
                 <code className="text-xs bg-muted px-2 py-1 rounded font-mono break-all">
                   {secret}
                 </code>
-                <Button variant="ghost" size="icon" onClick={handleCopySecret} className="h-7 w-7">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleCopySecret}
+                  className="h-7 w-7"
+                >
                   <Copy className="h-3.5 w-3.5" />
                 </Button>
               </div>
             )}
 
             <div className="flex justify-center">
-              <InputOTP maxLength={6} value={verifyCode} onChange={setVerifyCode}>
+              <InputOTP
+                maxLength={6}
+                value={verifyCode}
+                onChange={setVerifyCode}
+              >
                 <InputOTPGroup>
                   <InputOTPSlot index={0} />
                   <InputOTPSlot index={1} />

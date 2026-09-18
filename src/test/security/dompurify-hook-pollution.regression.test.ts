@@ -46,9 +46,11 @@ describe("DOMPurify regression: GHSA-cmwh-pvxp-8882 attribute leak", () => {
       if (data.attrName === "onerror") {
         // The historical bug: directly mutating allowedAttributes.
         // On unpatched versions this leaks into every later call.
-        (data as unknown as {
-          allowedAttributes: Record<string, boolean>;
-        }).allowedAttributes.onerror = true;
+        (
+          data as unknown as {
+            allowedAttributes: Record<string, boolean>;
+          }
+        ).allowedAttributes.onerror = true;
       }
     });
 
@@ -91,13 +93,12 @@ describe("DOMPurify regression: GHSA-cmwh-pvxp-8882 attribute leak", () => {
     // Hook mutates allowedAttributes for element A only. The bug
     // caused that allowance to apply to element B in a later call.
     purify.addHook("uponSanitizeAttribute", (node, data) => {
-      if (
-        node.nodeName === "DIV" &&
-        data.attrName === "onmouseover"
-      ) {
-        (data as unknown as {
-          allowedAttributes: Record<string, boolean>;
-        }).allowedAttributes.onmouseover = true;
+      if (node.nodeName === "DIV" && data.attrName === "onmouseover") {
+        (
+          data as unknown as {
+            allowedAttributes: Record<string, boolean>;
+          }
+        ).allowedAttributes.onmouseover = true;
       }
     });
     purify.setConfig({ USE_PROFILES: { html: true } });

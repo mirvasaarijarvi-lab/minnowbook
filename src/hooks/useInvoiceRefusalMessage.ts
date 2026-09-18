@@ -24,7 +24,9 @@ export interface FormattedInvoiceRefusal extends InvoiceRefusal {
  * detail dialog and by the guest portal, so every view explains the same
  * refusal the same way.
  */
-export function useInvoiceRefusalMessage(surface: InvoiceRefusalSurface = "staff") {
+export function useInvoiceRefusalMessage(
+  surface: InvoiceRefusalSurface = "staff",
+) {
   const { tDynamic } = useI18n();
 
   return useCallback(

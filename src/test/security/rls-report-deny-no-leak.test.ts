@@ -55,7 +55,9 @@ function contextOf(c: QueryPathCase): QueryContext {
  * The two shapes a correct denial takes in practice: an explicit Postgres
  * error, or a silent empty result (RLS filtered every row out).
  */
-function deniedResults(c: QueryPathCase): Array<{ label: string; result: DenialResult }> {
+function deniedResults(
+  c: QueryPathCase,
+): Array<{ label: string; result: DenialResult }> {
   const shapes: Array<{ label: string; result: DenialResult }> = [
     { label: "empty result", result: { data: [], error: null } },
     { label: "null data", result: { data: null, error: null } },
@@ -63,8 +65,14 @@ function deniedResults(c: QueryPathCase): Array<{ label: string; result: DenialR
   // A broad-scan check treats an unexpected error as a failure by design, so
   // only the row-free shapes count as denial there.
   if (c.kind !== "scan") {
-    shapes.push({ label: "permission denied error", result: { data: [], error: permissionDenied } });
-    shapes.push({ label: "error with null data", result: { data: null, error: permissionDenied } });
+    shapes.push({
+      label: "permission denied error",
+      result: { data: [], error: permissionDenied },
+    });
+    shapes.push({
+      label: "error with null data",
+      result: { data: null, error: permissionDenied },
+    });
   }
   return shapes;
 }
@@ -73,7 +81,11 @@ function assertDenied(c: QueryPathCase, result: DenialResult): void {
   const ctx = contextOf(c);
   if (c.kind === "write") expectWriteDenied(ctx, result);
   else if (c.kind === "scan")
-    expectNoForeignTenantRows(ctx, result, c.forbiddenTenantId ?? TARGET_TENANT);
+    expectNoForeignTenantRows(
+      ctx,
+      result,
+      c.forbiddenTenantId ?? TARGET_TENANT,
+    );
   else expectReadDenied(ctx, result);
 }
 
@@ -83,7 +95,8 @@ function forbiddenStrings(c: QueryPathCase): string[] {
   const walk = (value: unknown) => {
     if (typeof value === "string") out.add(value);
     else if (Array.isArray(value)) value.forEach(walk);
-    else if (value && typeof value === "object") Object.values(value).forEach(walk);
+    else if (value && typeof value === "object")
+      Object.values(value).forEach(walk);
   };
   c.leakedRows.forEach(walk);
   return [...out].filter((v) => v.length > 3);
@@ -104,7 +117,10 @@ function passedEntry(c: QueryPathCase, shapeLabel: string): ReportEntry {
   };
 }
 
-function payloadOf(entries: ReportEntry[], tenantGuard: TenantGuardRecord[] = []): ReportPayload {
+function payloadOf(
+  entries: ReportEntry[],
+  tenantGuard: TenantGuardRecord[] = [],
+): ReportPayload {
   return {
     generatedAt: "2026-01-01T00:00:00.000Z",
     flavor: "deny-audit",
@@ -121,52 +137,59 @@ function payloadOf(entries: ReportEntry[], tenantGuard: TenantGuardRecord[] = []
 }
 
 describe("rls-report deny cases return zero rows and leak no tenant metadata", () => {
-  describe.each(QUERY_PATH_MATRIX.map((c) => [c.label, c] as const))("%s", (_label, c) => {
-    it.each(deniedResults(c).map((s) => [s.label, s.result] as const))(
-      "accepts the denial and reports zero rows: %s",
-      (_shape, result) => {
-        expect(() => assertDenied(c, result)).not.toThrow();
-        expect(result.data ?? []).toHaveLength(0);
-      },
-    );
+  describe.each(QUERY_PATH_MATRIX.map((c) => [c.label, c] as const))(
+    "%s",
+    (_label, c) => {
+      it.each(deniedResults(c).map((s) => [s.label, s.result] as const))(
+        "accepts the denial and reports zero rows: %s",
+        (_shape, result) => {
+          expect(() => assertDenied(c, result)).not.toThrow();
+          expect(result.data ?? []).toHaveLength(0);
+        },
+      );
 
-    it("produces no failure message and no failure detail block", () => {
-      for (const { label, result } of deniedResults(c)) {
-        let message: string | null = null;
-        try {
-          assertDenied(c, result);
-        } catch (err) {
-          message = (err as Error).message;
+      it("produces no failure message and no failure detail block", () => {
+        for (const { label, result } of deniedResults(c)) {
+          let message: string | null = null;
+          try {
+            assertDenied(c, result);
+          } catch (err) {
+            message = (err as Error).message;
+          }
+          expect(message, `denial "${label}" must not fail`).toBeNull();
+          expect(parseRlsFailure(message)).toBeNull();
         }
-        expect(message, `denial "${label}" must not fail`).toBeNull();
-        expect(parseRlsFailure(message)).toBeNull();
-      }
-    });
+      });
 
-    it("keeps every foreign value out of the JSON artifact and the HTML report", () => {
-      const entries = deniedResults(c).map((s) => passedEntry(c, s.label));
-      const payload = payloadOf(entries);
-      const json = JSON.stringify(payload);
-      const html = renderHtml(payload);
-      for (const secret of forbiddenStrings(c)) {
-        expect(json, `JSON leaks "${secret}"`).not.toContain(secret);
-        expect(html, `HTML leaks "${secret}"`).not.toContain(secret);
-      }
-      expect(html).not.toContain(`<div class="rls-details"`);
-      expect(html).not.toContain("Returned rows");
-      expect(html).not.toContain("Attempted query");
-      expect(html).not.toContain(ACTING_TENANT);
-    });
-  });
+      it("keeps every foreign value out of the JSON artifact and the HTML report", () => {
+        const entries = deniedResults(c).map((s) => passedEntry(c, s.label));
+        const payload = payloadOf(entries);
+        const json = JSON.stringify(payload);
+        const html = renderHtml(payload);
+        for (const secret of forbiddenStrings(c)) {
+          expect(json, `JSON leaks "${secret}"`).not.toContain(secret);
+          expect(html, `HTML leaks "${secret}"`).not.toContain(secret);
+        }
+        expect(html).not.toContain(`<div class="rls-details"`);
+        expect(html).not.toContain("Returned rows");
+        expect(html).not.toContain("Attempted query");
+        expect(html).not.toContain(ACTING_TENANT);
+      });
+    },
+  );
 
   it("renders an all-passed report with no failure sections at all", () => {
-    const entries = QUERY_PATH_MATRIX.map((c) => passedEntry(c, "empty result"));
+    const entries = QUERY_PATH_MATRIX.map((c) =>
+      passedEntry(c, "empty result"),
+    );
     const payload = payloadOf(entries);
     const html = renderHtml(payload);
     expect(html).not.toContain(`<div class="rls-details"`);
-    expect(payload.entries.every((e) => e.errorMessage === null && e.rlsDetails === null)).toBe(
-      true,
-    );
+    expect(
+      payload.entries.every(
+        (e) => e.errorMessage === null && e.rlsDetails === null,
+      ),
+    ).toBe(true);
     const allSecrets = QUERY_PATH_MATRIX.flatMap(forbiddenStrings);
     for (const secret of new Set(allSecrets)) {
       expect(html, `HTML leaks "${secret}"`).not.toContain(secret);

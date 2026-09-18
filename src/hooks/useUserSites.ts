@@ -39,9 +39,14 @@ export const useUserSites = () => {
    * - Otherwise, for staff, filter to their assigned sites.
    * - For owners/admins, no filter is applied.
    */
-  const applySiteFilter = <T extends { eq: Function; in: Function }>(
+  const applySiteFilter = <
+    T extends {
+      eq: (...args: any[]) => any;
+      in: (...args: any[]) => any;
+    },
+  >(
     query: T,
-    selectedSiteId: string | null
+    selectedSiteId: string | null,
   ): T => {
     if (selectedSiteId) {
       return query.eq("site_id", selectedSiteId);

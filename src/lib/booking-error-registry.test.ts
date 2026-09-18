@@ -52,7 +52,10 @@ describe("BOOKING_ERROR_REGISTRY", () => {
   });
 
   it("ignores isStaff for entries without a staff-specific key", () => {
-    const desc = resolveBookingError({ code: "SOMETHING_NEW" }, { isStaff: true });
+    const desc = resolveBookingError(
+      { code: "SOMETHING_NEW" },
+      { isStaff: true },
+    );
     expect(desc.i18nKey).toBe("booking.submitError");
   });
 
@@ -68,7 +71,14 @@ describe("BOOKING_ERROR_REGISTRY", () => {
   });
 
   it("falls back when the error is null, undefined, or oddly shaped", () => {
-    for (const err of [null, undefined, {}, "string-error", 42, { code: 123 }]) {
+    for (const err of [
+      null,
+      undefined,
+      {},
+      "string-error",
+      42,
+      { code: 123 },
+    ]) {
       const desc = resolveBookingError(err);
       expect(desc.code).toBeNull();
       expect(desc.i18nKey).toBe("booking.submitError");
@@ -79,7 +89,9 @@ describe("BOOKING_ERROR_REGISTRY", () => {
 
   it("extractBookingErrorCode only returns known codes", () => {
     expect(
-      extractBookingErrorCode({ code: BOOKING_ERROR_CODES.SERVICE_ROLE_KEY_MISSING }),
+      extractBookingErrorCode({
+        code: BOOKING_ERROR_CODES.SERVICE_ROLE_KEY_MISSING,
+      }),
     ).toBe(BOOKING_ERROR_CODES.SERVICE_ROLE_KEY_MISSING);
     expect(extractBookingErrorCode({ code: "UNKNOWN" })).toBeNull();
     expect(extractBookingErrorCode(null)).toBeNull();

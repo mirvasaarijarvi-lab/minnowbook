@@ -15,7 +15,9 @@ describe("kitchen hidden cards", () => {
 
   it("scopes the storage key per tenant", () => {
     expect(hiddenCardsStorageKey("t1")).toBe("mimmobook-kitchen-hidden:t1");
-    expect(hiddenCardsStorageKey(null)).toBe("mimmobook-kitchen-hidden:unknown");
+    expect(hiddenCardsStorageKey(null)).toBe(
+      "mimmobook-kitchen-hidden:unknown",
+    );
   });
 
   it("returns an empty list when nothing is stored", () => {
@@ -37,7 +39,10 @@ describe("kitchen hidden cards", () => {
     expect(loadHiddenCards("t1")).toEqual([]);
     localStorage.setItem(hiddenCardsStorageKey("t1"), JSON.stringify({ a: 1 }));
     expect(loadHiddenCards("t1")).toEqual([]);
-    localStorage.setItem(hiddenCardsStorageKey("t1"), JSON.stringify(["a", 5, "", null]));
+    localStorage.setItem(
+      hiddenCardsStorageKey("t1"),
+      JSON.stringify(["a", 5, "", null]),
+    );
     expect(loadHiddenCards("t1")).toEqual(["a"]);
   });
 

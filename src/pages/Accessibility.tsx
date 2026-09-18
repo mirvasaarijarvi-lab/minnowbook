@@ -17,10 +17,16 @@ const Accessibility = () => {
 
   const dateStr = new Date().toLocaleDateString(
     language === "fi" ? "fi-FI" : language === "sv" ? "sv-SE" : "en-US",
-    { month: "long", day: "numeric", year: "numeric" }
+    { month: "long", day: "numeric", year: "numeric" },
   );
 
-  const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
+  const Section = ({
+    title,
+    children,
+  }: {
+    title: string;
+    children: React.ReactNode;
+  }) => (
     <section>
       <h2 className="text-xl font-serif font-bold text-foreground">{title}</h2>
       {children}
@@ -40,7 +46,9 @@ const Accessibility = () => {
       />
       <nav className="sticky top-0 z-50 border-b border-border bg-card/80 backdrop-blur-lg">
         <div className="max-w-4xl mx-auto flex items-center justify-between px-6 py-4">
-          <Link to="/"><Logo variant="color" size="sm" /></Link>
+          <Link to="/">
+            <Logo variant="color" size="sm" />
+          </Link>
           <Link to="/">
             <Button variant="ghost" size="sm" className="gap-1.5">
               <ArrowLeft className="h-4 w-4" /> {t("common.back")}
@@ -59,11 +67,15 @@ const Accessibility = () => {
 
         <div className="space-y-8">
           <Section title={t("a11y.s1Title")}>
-            <p className="text-muted-foreground leading-relaxed mt-2">{t("a11y.s1P1")}</p>
+            <p className="text-muted-foreground leading-relaxed mt-2">
+              {t("a11y.s1P1")}
+            </p>
           </Section>
 
           <Section title={t("a11y.s2Title")}>
-            <p className="text-muted-foreground leading-relaxed mt-2">{t("a11y.s2P1")}</p>
+            <p className="text-muted-foreground leading-relaxed mt-2">
+              {t("a11y.s2P1")}
+            </p>
             <ul className="list-disc pl-6 text-muted-foreground space-y-1 mt-2">
               <li>{t("a11y.s2Item1")}</li>
               <li>{t("a11y.s2Item2")}</li>
@@ -75,7 +87,9 @@ const Accessibility = () => {
           </Section>
 
           <Section title={t("a11y.s3Title")}>
-            <p className="text-muted-foreground leading-relaxed mt-2">{t("a11y.s3P1")}</p>
+            <p className="text-muted-foreground leading-relaxed mt-2">
+              {t("a11y.s3P1")}
+            </p>
             <ul className="list-disc pl-6 text-muted-foreground space-y-1 mt-2">
               <li>{t("a11y.s3Item1")}</li>
               <li>{t("a11y.s3Item2")}</li>
@@ -84,11 +98,15 @@ const Accessibility = () => {
           </Section>
 
           <Section title={t("a11y.s4Title")}>
-            <p className="text-muted-foreground leading-relaxed mt-2">{t("a11y.s4P1")}</p>
+            <p className="text-muted-foreground leading-relaxed mt-2">
+              {t("a11y.s4P1")}
+            </p>
           </Section>
 
           <Section title={t("a11y.s5Title")}>
-            <p className="text-muted-foreground leading-relaxed mt-2">{t("a11y.s5P1")}</p>
+            <p className="text-muted-foreground leading-relaxed mt-2">
+              {t("a11y.s5P1")}
+            </p>
           </Section>
         </div>
       </main>

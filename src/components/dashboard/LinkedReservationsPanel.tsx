@@ -32,7 +32,11 @@ interface Props {
  * ReservationDetailDialog so both views render cross-bookings identically.
  * Pulls siblings via legacy offers.reservation_ids AND modern linked_group_id.
  */
-const LinkedReservationsPanel = ({ reservation, headingAs = "label", onSelectLinked }: Props) => {
+const LinkedReservationsPanel = ({
+  reservation,
+  headingAs = "label",
+  onSelectLinked,
+}: Props) => {
   const t = useT();
   const dateFnsLocale = useDateLocale();
   const { typeLabel } = useResourceTypeLabel();
@@ -56,7 +60,9 @@ const LinkedReservationsPanel = ({ reservation, headingAs = "label", onSelectLin
   });
 
   const siblingIds =
-    (linkedOffer?.reservation_ids as string[] | null)?.filter((id) => id !== reservation?.id) ?? [];
+    (linkedOffer?.reservation_ids as string[] | null)?.filter(
+      (id) => id !== reservation?.id,
+    ) ?? [];
 
   const { data: offerSiblings = [] } = useQuery({
     queryKey: ["linked-reservations", siblingIds],
@@ -118,7 +124,8 @@ const LinkedReservationsPanel = ({ reservation, headingAs = "label", onSelectLin
       {Heading}
       {linkedOffer && (
         <p className="text-xs text-muted-foreground">
-          {t("offers.crossBookingTitle")} – {linkedOffer.guest_name} ({linkedOffer.event_date})
+          {t("offers.crossBookingTitle")} – {linkedOffer.guest_name} (
+          {linkedOffer.event_date})
         </p>
       )}
       <div className="space-y-1">
@@ -126,10 +133,14 @@ const LinkedReservationsPanel = ({ reservation, headingAs = "label", onSelectLin
           const isCurrent = lr.id === reservation?.id;
           const time = lr.start_time ? lr.start_time.slice(0, 5) : null;
           const dateStr = lr.date
-            ? format(new Date(lr.date + "T00:00:00"), "PPP", { locale: dateFnsLocale })
+            ? format(new Date(lr.date + "T00:00:00"), "PPP", {
+                locale: dateFnsLocale,
+              })
             : null;
           const checkOutStr = lr.check_out_date
-            ? format(new Date(lr.check_out_date + "T00:00:00"), "PPP", { locale: dateFnsLocale })
+            ? format(new Date(lr.check_out_date + "T00:00:00"), "PPP", {
+                locale: dateFnsLocale,
+              })
             : null;
           const clickable = !isCurrent && !!onSelectLinked;
           return (
@@ -161,9 +172,14 @@ const LinkedReservationsPanel = ({ reservation, headingAs = "label", onSelectLin
               <div className="flex items-center justify-between gap-2 flex-wrap">
                 <div className="flex items-center gap-1.5 flex-wrap">
                   <span className="font-medium">
-                    {t("offers.linkedRowService")}: {typeLabel(lr.reservation_type)}
+                    {t("offers.linkedRowService")}:{" "}
+                    {typeLabel(lr.reservation_type)}
                   </span>
-                  {lr.room_type && <span className="text-muted-foreground">· {lr.room_type}</span>}
+                  {lr.room_type && (
+                    <span className="text-muted-foreground">
+                      · {lr.room_type}
+                    </span>
+                  )}
                   {isCurrent && (
                     <Badge className="text-[10px] bg-accent/20 text-accent-foreground border-accent/40">
                       {t("offers.linkedGroupCurrent")}
@@ -177,7 +193,8 @@ const LinkedReservationsPanel = ({ reservation, headingAs = "label", onSelectLin
                 </div>
                 {lr.price_eur != null && (
                   <span className="font-semibold tabular-nums">
-                    {t("offers.linkedRowPrice")}: {Number(lr.price_eur).toFixed(2)} €
+                    {t("offers.linkedRowPrice")}:{" "}
+                    {Number(lr.price_eur).toFixed(2)} €
                   </span>
                 )}
               </div>

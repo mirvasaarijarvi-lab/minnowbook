@@ -33,7 +33,8 @@ const CONTROL_CHARS = /[\u0000-\u001f\u007f]/;
 /** Accepts only a plain uuid; everything else is denied with a reason. */
 export function parseTenantSelector(raw: unknown): TenantSelectorResult {
   const reasons: TenantSelectorReason[] = [];
-  if (raw === undefined || raw === null) return { ok: false, reasons: ["missing"] };
+  if (raw === undefined || raw === null)
+    return { ok: false, reasons: ["missing"] };
   if (typeof raw !== "string") return { ok: false, reasons: ["not_a_string"] };
   if (raw.trim().length === 0) return { ok: false, reasons: ["missing"] };
   if (raw.length > MAX_TENANT_LENGTH) reasons.push("too_long");
@@ -87,7 +88,8 @@ export function parseReportScope(raw: unknown): ReportScopeResult {
     reasons: [reason],
   });
 
-  if (raw === undefined || raw === null) return { ...deny("empty"), reasons: [] };
+  if (raw === undefined || raw === null)
+    return { ...deny("empty"), reasons: [] };
   if (typeof raw !== "string") return deny("not_a_string");
   if (raw.trim().length === 0) return deny("empty");
   if (raw.length > MAX_SCOPE_LENGTH) return deny("too_long");

@@ -40,16 +40,30 @@ const stay = (over: Partial<ReportPricingRow> = {}): ReportPricingRow => ({
 });
 
 const nightsLater = (nights: number) =>
-  new Date(Date.UTC(2026, 10, 2) + nights * 86400000).toISOString().slice(0, 10);
+  new Date(Date.UTC(2026, 10, 2) + nights * 86400000)
+    .toISOString()
+    .slice(0, 10);
 
 const ROWS: ReportPricingRow[] = [
   stay(),
   stay({ breakfast_price_per_person: 8.95, guests_count: 3, price_eur: 383.6 }),
   stay({ breakfast_price_per_person: null, price_eur: 315 }),
-  stay({ breakfast_included: false, breakfast_price_per_person: null, price_eur: 225 }),
+  stay({
+    breakfast_included: false,
+    breakfast_price_per_person: null,
+    price_eur: 225,
+  }),
   stay({ breakfast_price_per_person: 18, guests_count: 3, price_eur: 40 }), // deep discount
-  stay({ reservation_type: "hotel", breakfast_price_per_person: 21.5, price_eur: 396 }),
-  stay({ reservation_type: "venue", breakfast_included: false, price_eur: 450 }),
+  stay({
+    reservation_type: "hotel",
+    breakfast_price_per_person: 21.5,
+    price_eur: 396,
+  }),
+  stay({
+    reservation_type: "venue",
+    breakfast_included: false,
+    price_eur: 450,
+  }),
   stay({
     reservation_type: "restaurant",
     pricing_type: "menu",
@@ -191,6 +205,8 @@ describe("generated period report PDF", () => {
     expect(src).toContain("cells.breakfast");
     expect(src).toContain("cells.total");
     // The old inline PDF amount is gone.
-    expect(src).not.toMatch(/effectivePrice\(r\)\s*>\s*0\s*\?\s*effectivePrice\(r\)\.toFixed/);
+    expect(src).not.toMatch(
+      /effectivePrice\(r\)\s*>\s*0\s*\?\s*effectivePrice\(r\)\.toFixed/,
+    );
   });
 });

@@ -9,36 +9,88 @@ const CASES: Array<[string, PreviewLegInput[]]> = [
   [
     "full cross-booking",
     [
-      { key: "venue", name: "Event space", reservationType: "venue", menu: "20 x Bites\nWine" },
-      { key: "rest", name: "Restaurant", reservationType: "restaurant", menu: "Beef (rare)\nCoffee" },
-      { key: "rooms", name: "Rooms", reservationType: "guesthouse", menu: "2 x Breakfast" },
+      {
+        key: "venue",
+        name: "Event space",
+        reservationType: "venue",
+        menu: "20 x Bites\nWine",
+      },
+      {
+        key: "rest",
+        name: "Restaurant",
+        reservationType: "restaurant",
+        menu: "Beef (rare)\nCoffee",
+      },
+      {
+        key: "rooms",
+        name: "Rooms",
+        reservationType: "guesthouse",
+        menu: "2 x Breakfast",
+      },
     ],
   ],
   [
     "event only",
     [
-      { key: "venue", name: "Event space", reservationType: "venue", menu: "40 x Buffet" },
+      {
+        key: "venue",
+        name: "Event space",
+        reservationType: "venue",
+        menu: "40 x Buffet",
+      },
       { key: "rooms", name: "Rooms", reservationType: "guesthouse", menu: "" },
     ],
   ],
   [
     "mixed empty fields",
     [
-      { key: "venue", name: "Event space", reservationType: "venue", menu: "  " },
-      { key: "rest", name: "Restaurant", reservationType: "restaurant", menu: "Beef" },
-      { key: "sauna", name: "Sauna", reservationType: "sauna", menu: "6 x Beer" },
+      {
+        key: "venue",
+        name: "Event space",
+        reservationType: "venue",
+        menu: "  ",
+      },
+      {
+        key: "rest",
+        name: "Restaurant",
+        reservationType: "restaurant",
+        menu: "Beef",
+      },
+      {
+        key: "sauna",
+        name: "Sauna",
+        reservationType: "sauna",
+        menu: "6 x Beer",
+      },
     ],
   ],
   [
     "nothing at all",
     [
-      { key: "venue", name: "Event space", reservationType: "venue", menu: null },
-      { key: "rooms", name: "Rooms", reservationType: "guesthouse", menu: "\n-\n" },
+      {
+        key: "venue",
+        name: "Event space",
+        reservationType: "venue",
+        menu: null,
+      },
+      {
+        key: "rooms",
+        name: "Rooms",
+        reservationType: "guesthouse",
+        menu: "\n-\n",
+      },
     ],
   ],
   [
     "no kitchen booking in the offer",
-    [{ key: "rooms", name: "Rooms", reservationType: "guesthouse", menu: "Soup" }],
+    [
+      {
+        key: "rooms",
+        name: "Rooms",
+        reservationType: "guesthouse",
+        menu: "Soup",
+      },
+    ],
   ],
 ];
 
@@ -75,7 +127,12 @@ describe("the check catches drift", () => {
       ...CASES[0][1],
       // A second dining function would change routing, so a stale preview of
       // the first shape must not be accepted.
-      { key: "rest2", name: "Bistro", reservationType: "restaurant", menu: "Soup" },
+      {
+        key: "rest2",
+        name: "Bistro",
+        reservationType: "restaurant",
+        menu: "Soup",
+      },
     ]);
     expect(drifted.ok).toBe(true);
     expect(drifted.writtenLines).toBe(6);
@@ -91,7 +148,8 @@ describe("the check catches drift", () => {
           legKey: "rooms",
           legName: "Rooms",
           kind: "missing-lines" as const,
-          detail: "the preview shows 2 x Breakfast [food] -> rest but nothing was written",
+          detail:
+            "the preview shows 2 x Breakfast [food] -> rest but nothing was written",
         },
       ],
     };
@@ -102,7 +160,12 @@ describe("the check catches drift", () => {
 
   it("returns an empty summary for a passing result", () => {
     expect(
-      formatKitchenMismatches({ ok: true, mismatches: [], previewedLines: 0, writtenLines: 0 }),
+      formatKitchenMismatches({
+        ok: true,
+        mismatches: [],
+        previewedLines: 0,
+        writtenLines: 0,
+      }),
     ).toBe("");
   });
 });
@@ -112,12 +175,30 @@ describe("the check catches drift", () => {
  * what differs whenever the written output drifts from the preview. The rows
  * below are deliberately doctored versions of the honest output.
  */
-import { buildKitchenOrderRows, type KitchenOrderRow } from "./offer-kitchen-orders";
+import {
+  buildKitchenOrderRows,
+  type KitchenOrderRow,
+} from "./offer-kitchen-orders";
 
 const LEGS: PreviewLegInput[] = [
-  { key: "venue", name: "Event space", reservationType: "venue", menu: "20 x Bites\nWine" },
-  { key: "rest", name: "Restaurant", reservationType: "restaurant", menu: "Beef (rare)\nCoffee" },
-  { key: "rooms", name: "Rooms", reservationType: "guesthouse", menu: "2 x Breakfast" },
+  {
+    key: "venue",
+    name: "Event space",
+    reservationType: "venue",
+    menu: "20 x Bites\nWine",
+  },
+  {
+    key: "rest",
+    name: "Restaurant",
+    reservationType: "restaurant",
+    menu: "Beef (rare)\nCoffee",
+  },
+  {
+    key: "rooms",
+    name: "Rooms",
+    reservationType: "guesthouse",
+    menu: "2 x Breakfast",
+  },
 ];
 
 const honestRows = (): KitchenOrderRow[] =>
@@ -146,17 +227,28 @@ describe("validation failures", () => {
     expect(result.ok).toBe(false);
     expect(result.writtenLines).toBe(4);
     expect(result.mismatches).toHaveLength(1);
-    expect(result.mismatches[0]).toMatchObject({ legKey: "rooms", kind: "missing-lines" });
+    expect(result.mismatches[0]).toMatchObject({
+      legKey: "rooms",
+      kind: "missing-lines",
+    });
     expect(formatKitchenMismatches(result)).toContain("Rooms [missing-lines]");
     expect(formatKitchenMismatches(result)).toContain("Breakfast");
   });
 
   it("flags several missing lines at once", () => {
-    const result = check(honestRows().filter((r) => r.reservation_id !== "rest"));
+    const result = check(
+      honestRows().filter((r) => r.reservation_id !== "rest"),
+    );
     expect(result.ok).toBe(false);
     // Both dining lines and the room line that joins them are unaccounted for.
-    expect(result.mismatches.filter((m) => m.kind === "missing-lines")).toHaveLength(3);
-    expect(result.mismatches.map((m) => m.legKey)).toEqual(["rest", "rest", "rooms"]);
+    expect(
+      result.mismatches.filter((m) => m.kind === "missing-lines"),
+    ).toHaveLength(3);
+    expect(result.mismatches.map((m) => m.legKey)).toEqual([
+      "rest",
+      "rest",
+      "rooms",
+    ]);
   });
 
   it("flags an extra line the preview never showed", () => {
@@ -165,7 +257,10 @@ describe("validation failures", () => {
     const result = check(rows);
     expect(result.ok).toBe(false);
     expect(result.mismatches).toHaveLength(1);
-    expect(result.mismatches[0]).toMatchObject({ kind: "extra-lines", legKey: "venue" });
+    expect(result.mismatches[0]).toMatchObject({
+      kind: "extra-lines",
+      legKey: "venue",
+    });
     expect(formatKitchenMismatches(result)).toContain("Surprise cake");
   });
 
@@ -184,10 +279,15 @@ describe("validation failures", () => {
   });
 
   it("flags a changed quantity", () => {
-    const rows = honestRows().map((r) => (r.item_name === "Bites" ? { ...r, quantity: 5 } : r));
+    const rows = honestRows().map((r) =>
+      r.item_name === "Bites" ? { ...r, quantity: 5 } : r,
+    );
     const result = check(rows);
     expect(result.ok).toBe(false);
-    expect(result.mismatches[0]).toMatchObject({ legKey: "venue", kind: "wrong-line" });
+    expect(result.mismatches[0]).toMatchObject({
+      legKey: "venue",
+      kind: "wrong-line",
+    });
     expect(formatKitchenMismatches(result)).toContain("20 x Bites");
     expect(formatKitchenMismatches(result)).toContain("5 x Bites");
   });
@@ -195,13 +295,21 @@ describe("validation failures", () => {
   it("flags a changed item name, category and note", () => {
     const rows = honestRows().map((r) =>
       r.item_name === "Beef"
-        ? { ...r, item_name: "Bef", category: "drink" as const, notes: "well done" }
+        ? {
+            ...r,
+            item_name: "Bef",
+            category: "drink" as const,
+            notes: "well done",
+          }
         : r,
     );
     const result = check(rows);
     expect(result.ok).toBe(false);
     expect(result.mismatches).toHaveLength(1);
-    expect(result.mismatches[0]).toMatchObject({ legKey: "rest", kind: "wrong-line" });
+    expect(result.mismatches[0]).toMatchObject({
+      legKey: "rest",
+      kind: "wrong-line",
+    });
     const summary = formatKitchenMismatches(result);
     expect(summary).toContain("Beef");
     expect(summary).toContain("Bef");
@@ -225,7 +333,12 @@ describe("validation failures", () => {
 
   it("flags output written when the preview promised nothing", () => {
     const empty: PreviewLegInput[] = [
-      { key: "rest", name: "Restaurant", reservationType: "restaurant", menu: "  \n-\n" },
+      {
+        key: "rest",
+        name: "Restaurant",
+        reservationType: "restaurant",
+        menu: "  \n-\n",
+      },
     ];
     const rows: KitchenOrderRow[] = [
       {
@@ -252,7 +365,9 @@ describe("validation failures", () => {
     const result = check([]);
     expect(result.ok).toBe(false);
     expect(result.mismatches).toHaveLength(5);
-    expect(result.mismatches.every((m) => m.kind === "missing-lines")).toBe(true);
+    expect(result.mismatches.every((m) => m.kind === "missing-lines")).toBe(
+      true,
+    );
     expect(result.previewedLines).toBe(5);
     expect(result.writtenLines).toBe(0);
   });

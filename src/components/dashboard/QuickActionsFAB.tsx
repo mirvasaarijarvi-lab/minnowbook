@@ -33,7 +33,7 @@ const QuickActionsFAB = ({ onNavigate }: QuickActionsFABProps) => {
         className={cn(
           "h-14 w-14 rounded-full shadow-xl flex items-center justify-center transition-all",
           "bg-primary text-primary-foreground hover:bg-primary/90",
-          open && "rotate-45"
+          open && "rotate-45",
         )}
         aria-label="Quick actions"
       >

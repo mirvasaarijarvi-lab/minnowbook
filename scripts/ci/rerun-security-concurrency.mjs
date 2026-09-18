@@ -26,9 +26,12 @@ import { readFileSync, mkdirSync, appendFileSync, existsSync } from "node:fs";
 import { dirname } from "node:path";
 import { parseJunit } from "./parse-junit.mjs";
 
-const CONFIG_PATH = process.env.SEC_CONCURRENCY_CONFIG || ".github/security-concurrency-tests.json";
+const CONFIG_PATH =
+  process.env.SEC_CONCURRENCY_CONFIG ||
+  ".github/security-concurrency-tests.json";
 const HISTORY_PATH =
-  process.env.SEC_CONCURRENCY_HISTORY || ".github/security-concurrency-flake-history.jsonl";
+  process.env.SEC_CONCURRENCY_HISTORY ||
+  ".github/security-concurrency-flake-history.jsonl";
 const TRACKER = "scripts/ci/security-concurrency-flake-tracker.mjs";
 
 function loadConfig() {
@@ -46,7 +49,13 @@ function writeSummary(s) {
   }
 }
 
-function runVitest({ files, testNamePattern, junitOut, perTestTimeoutMs, singleFork }) {
+function runVitest({
+  files,
+  testNamePattern,
+  junitOut,
+  perTestTimeoutMs,
+  singleFork,
+}) {
   mkdirSync(dirname(junitOut), { recursive: true });
   const args = [
     "vitest",
@@ -113,7 +122,13 @@ function recordAttempt({ testId, outcome, attempt }) {
 function decisionFor(testId) {
   const res = spawnSync(
     "node",
-    [TRACKER, "decide", `--path=${HISTORY_PATH}`, `--config=${CONFIG_PATH}`, `--test-id=${testId}`],
+    [
+      TRACKER,
+      "decide",
+      `--path=${HISTORY_PATH}`,
+      `--config=${CONFIG_PATH}`,
+      `--test-id=${testId}`,
+    ],
     { encoding: "utf8" },
   );
   return (res.stdout || "").trim() || "STABLE";
@@ -134,7 +149,9 @@ async function main() {
 
   const missing = cfg.files.filter((f) => !existsSync(f));
   if (missing.length > 0) {
-    writeSummary(`::warning::Skipping missing concurrency-suite files:\n${missing.map((m) => `- ${m}`).join("\n")}\n\n`);
+    writeSummary(
+      `::warning::Skipping missing concurrency-suite files:\n${missing.map((m) => `- ${m}`).join("\n")}\n\n`,
+    );
   }
   const files = cfg.files.filter((f) => existsSync(f));
   if (files.length === 0) {
@@ -157,7 +174,8 @@ async function main() {
   // Record every failure from attempt 1. We deliberately do not attempt to
   // enumerate passes from the JUnit here — the tracker's failure signal is
   // what drives the quarantine recommendation.
-  for (const f of failures) recordAttempt({ testId: f.id, outcome: "fail", attempt });
+  for (const f of failures)
+    recordAttempt({ testId: f.id, outcome: "fail", attempt });
 
   if (first.status === 0 && failures.length === 0) {
     writeSummary(`## ✅ Security concurrency suite green on first attempt.\n`);
@@ -225,7 +243,8 @@ async function main() {
         passedTestIds.add(prev.id);
       }
     }
-    for (const f of nextFailures) recordAttempt({ testId: f.id, outcome: "fail", attempt });
+    for (const f of nextFailures)
+      recordAttempt({ testId: f.id, outcome: "fail", attempt });
 
     writeSummary(
       [

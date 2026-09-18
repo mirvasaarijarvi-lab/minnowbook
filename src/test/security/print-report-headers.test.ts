@@ -19,7 +19,10 @@ const reportsPanelSrc = readFileSync(
   resolve(repoRoot, "src/components/dashboard/ReportsPanel.tsx"),
   "utf8",
 );
-const indexHtml = readFileSync(resolve(repoRoot, "src/routes/__root.tsx"), "utf8");
+const indexHtml = readFileSync(
+  resolve(repoRoot, "src/routes/__root.tsx"),
+  "utf8",
+);
 
 /**
  * Pull a single CSP directive's source list out of a `content="..."` value.

@@ -52,7 +52,11 @@ export function createMockSupabaseClient(config: MockSupabaseConfig = {}) {
       insert: vi.fn((row: any) => {
         const arr = Array.isArray(row) ? row : [row];
         tables[name] = [...(tables[name] ?? []), ...arr];
-        return { select: () => ({ single: async () => ({ data: arr[0], error: null }) }) };
+        return {
+          select: () => ({
+            single: async () => ({ data: arr[0], error: null }),
+          }),
+        };
       }),
       update: vi.fn(() => chain),
       delete: vi.fn(() => chain),
@@ -80,11 +84,15 @@ export function createMockSupabaseClient(config: MockSupabaseConfig = {}) {
     storage: {
       from: vi.fn(() => ({
         createSignedUrl: vi.fn(async () => ({
-          data: { signedUrl: config.signedUrl ?? "https://test.invalid/signed" },
+          data: {
+            signedUrl: config.signedUrl ?? "https://test.invalid/signed",
+          },
           error: null,
         })),
         getPublicUrl: vi.fn(() => ({
-          data: { publicUrl: config.publicUrl ?? "https://test.invalid/public" },
+          data: {
+            publicUrl: config.publicUrl ?? "https://test.invalid/public",
+          },
         })),
         upload: vi.fn(async () => ({ data: { path: "test" }, error: null })),
       })),

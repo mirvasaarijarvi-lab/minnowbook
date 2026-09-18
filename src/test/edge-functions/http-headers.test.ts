@@ -63,14 +63,18 @@ describe("corsHeaders (static)", () => {
     expect(corsHeaders["Strict-Transport-Security"]).toBeDefined();
     expect(corsHeaders["Referrer-Policy"]).toBeDefined();
     expect(corsHeaders["Content-Security-Policy"]).toBeDefined();
-    expect(corsHeaders["Access-Control-Allow-Headers"]).toBe(DEFAULT_ALLOW_HEADERS);
+    expect(corsHeaders["Access-Control-Allow-Headers"]).toBe(
+      DEFAULT_ALLOW_HEADERS,
+    );
   });
 });
 
 describe("getCorsHeaders", () => {
   it("echoes allowed origin and omits header when disallowed", () => {
     const allowed = getCorsHeaders(reqWith("https://mimmobook.com"));
-    expect(allowed["Access-Control-Allow-Origin"]).toBe("https://mimmobook.com");
+    expect(allowed["Access-Control-Allow-Origin"]).toBe(
+      "https://mimmobook.com",
+    );
 
     const disallowed = getCorsHeaders(reqWith("https://evil.example.com"));
     expect(disallowed["Access-Control-Allow-Origin"]).toBeUndefined();
@@ -85,7 +89,9 @@ describe("getCorsHeaders", () => {
     const headers = getCorsHeaders(reqWith("https://mimmobook.com"), {
       extraAllowHeaders: "idempotency-key",
     });
-    expect(headers["Access-Control-Allow-Headers"]).toContain("idempotency-key");
+    expect(headers["Access-Control-Allow-Headers"]).toContain(
+      "idempotency-key",
+    );
     expect(headers["Access-Control-Allow-Headers"]).toContain("authorization");
   });
 
@@ -105,7 +111,9 @@ describe("getCorsHeaders", () => {
     expect(headers["Strict-Transport-Security"]).toBe(
       SECURITY_HEADERS["Strict-Transport-Security"],
     );
-    expect(headers["Referrer-Policy"]).toBe(SECURITY_HEADERS["Referrer-Policy"]);
+    expect(headers["Referrer-Policy"]).toBe(
+      SECURITY_HEADERS["Referrer-Policy"],
+    );
     expect(headers["Content-Security-Policy"]).toBe(
       SECURITY_HEADERS["Content-Security-Policy"],
     );
@@ -115,7 +123,9 @@ describe("getCorsHeaders", () => {
     const headers = getCorsHeaders(reqWith("https://only-this.test"), {
       allowOrigins: ["https://only-this.test"],
     });
-    expect(headers["Access-Control-Allow-Origin"]).toBe("https://only-this.test");
+    expect(headers["Access-Control-Allow-Origin"]).toBe(
+      "https://only-this.test",
+    );
   });
 
   it("DEFAULT_ALLOWED_ORIGINS includes the production hosts", () => {

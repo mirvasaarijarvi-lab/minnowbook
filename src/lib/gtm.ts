@@ -96,10 +96,14 @@ function track(event: string, params?: Record<string, unknown>) {
 }
 
 export const gtm = {
-  updateConsent: (accepted: boolean | { analytics: boolean; marketing: boolean }) => {
+  updateConsent: (
+    accepted: boolean | { analytics: boolean; marketing: boolean },
+  ) => {
     ensureTrackingGlobals();
-    const analytics = typeof accepted === "boolean" ? accepted : accepted.analytics === true;
-    const marketing = typeof accepted === "boolean" ? false : accepted.marketing === true;
+    const analytics =
+      typeof accepted === "boolean" ? accepted : accepted.analytics === true;
+    const marketing =
+      typeof accepted === "boolean" ? false : accepted.marketing === true;
     const analyticsStorage = analytics ? "granted" : "denied";
     const adStorage = marketing ? "granted" : "denied";
 
@@ -118,7 +122,10 @@ export const gtm = {
     });
   },
 
-  pageView: (source: "stored_consent" | "banner_accept" | "route_change" = "route_change") => {
+  pageView: (
+    source:
+      "stored_consent" | "banner_accept" | "route_change" = "route_change",
+  ) => {
     // SPA virtual page_view. Send directly to GA4 and also to GTM so the
     // reporting path works even when the GTM container is missing a GA4 tag.
     const pageParams = {

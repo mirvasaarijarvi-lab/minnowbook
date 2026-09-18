@@ -33,9 +33,11 @@ export const TEST_TENANT_ID =
 // against them satisfy public-booking validation and the per-table RLS policies.
 export const TEST_RESOURCES = {
   restaurant:
-    process.env.E2E_RESOURCE_RESTAURANT ?? "63137f6d-4da6-4128-b43b-0901771f2137",
+    process.env.E2E_RESOURCE_RESTAURANT ??
+    "63137f6d-4da6-4128-b43b-0901771f2137",
   guesthouse:
-    process.env.E2E_RESOURCE_GUESTHOUSE ?? "741ae83b-e626-4def-a6c0-27377de3ff28",
+    process.env.E2E_RESOURCE_GUESTHOUSE ??
+    "741ae83b-e626-4def-a6c0-27377de3ff28",
   venue:
     process.env.E2E_RESOURCE_VENUE ?? "3c5f9fc2-39f7-4e07-b45e-972e6afc9427",
 } as const;
@@ -118,9 +120,7 @@ export const test = base.extend<Fixtures>({
           `[${new Date().toISOString()}] ${err.name}: ${err.message}\n${err.stack ?? ""}`,
         );
       };
-      const onRequestFailed = (
-        req: import("@playwright/test").Request,
-      ) => {
+      const onRequestFailed = (req: import("@playwright/test").Request) => {
         errorLines.push(
           `[${new Date().toISOString()}] requestfailed ${req.method()} ${req.url()} -- ${req.failure()?.errorText ?? "unknown"}`,
         );

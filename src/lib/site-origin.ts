@@ -6,5 +6,7 @@
 export const PUBLIC_SITE_ORIGIN = "https://mimmobook.com";
 
 export function siteOrigin(): string {
-  return typeof window !== "undefined" ? window.location.origin : PUBLIC_SITE_ORIGIN;
+  return typeof window !== "undefined"
+    ? window.location.origin
+    : PUBLIC_SITE_ORIGIN;
 }

@@ -1,6 +1,9 @@
 import { PDFDocument, rgb, PDFFont, PDFPage } from "pdf-lib";
 import type { TenantBranding } from "@/lib/offerPdf";
-import { reportAmounts, type ReportPricingRow } from "@/lib/report-pricing-accessor";
+import {
+  reportAmounts,
+  type ReportPricingRow,
+} from "@/lib/report-pricing-accessor";
 
 /**
  * Invoice document for a single reservation.
@@ -11,22 +14,34 @@ import { reportAmounts, type ReportPricingRow } from "@/lib/report-pricing-acces
  */
 
 const L: Record<string, Record<string, string>> = {
-  title:        { fi: "Lasku", en: "Invoice", sv: "Faktura" },
-  invoice_no:   { fi: "Laskun numero:", en: "Invoice number:", sv: "Fakturanummer:" },
-  date:         { fi: "Päivämäärä:", en: "Date:", sv: "Datum:" },
-  check_out:    { fi: "Lähtöpäivä:", en: "Check-out:", sv: "Utcheckning:" },
-  customer:     { fi: "Asiakas", en: "Customer", sv: "Kund" },
-  name:         { fi: "Nimi:", en: "Name:", sv: "Namn:" },
-  email:        { fi: "Sähköposti:", en: "Email:", sv: "E-post:" },
-  phone:        { fi: "Puhelin:", en: "Phone:", sv: "Telefon:" },
-  guests:       { fi: "Henkilömäärä:", en: "Guests:", sv: "Gäster:" },
-  lines:        { fi: "Laskuerittely", en: "Invoice details", sv: "Fakturaspecifikation" },
-  subtotal:     { fi: "Välisumma", en: "Subtotal", sv: "Delsumma" },
-  discount:     { fi: "Alennus", en: "Discount", sv: "Rabatt" },
-  code:         { fi: "Alennuskoodi", en: "Discount code", sv: "Rabattkod" },
-  total:        { fi: "Loppusumma", en: "Total", sv: "Totalt" },
-  paid_status:  { fi: "Laskutettu", en: "Invoiced", sv: "Fakturerad" },
-  powered_by:   { fi: "Tehty MimmoBookilla", en: "Powered by MimmoBook", sv: "Drivs av MimmoBook" },
+  title: { fi: "Lasku", en: "Invoice", sv: "Faktura" },
+  invoice_no: {
+    fi: "Laskun numero:",
+    en: "Invoice number:",
+    sv: "Fakturanummer:",
+  },
+  date: { fi: "Päivämäärä:", en: "Date:", sv: "Datum:" },
+  check_out: { fi: "Lähtöpäivä:", en: "Check-out:", sv: "Utcheckning:" },
+  customer: { fi: "Asiakas", en: "Customer", sv: "Kund" },
+  name: { fi: "Nimi:", en: "Name:", sv: "Namn:" },
+  email: { fi: "Sähköposti:", en: "Email:", sv: "E-post:" },
+  phone: { fi: "Puhelin:", en: "Phone:", sv: "Telefon:" },
+  guests: { fi: "Henkilömäärä:", en: "Guests:", sv: "Gäster:" },
+  lines: {
+    fi: "Laskuerittely",
+    en: "Invoice details",
+    sv: "Fakturaspecifikation",
+  },
+  subtotal: { fi: "Välisumma", en: "Subtotal", sv: "Delsumma" },
+  discount: { fi: "Alennus", en: "Discount", sv: "Rabatt" },
+  code: { fi: "Alennuskoodi", en: "Discount code", sv: "Rabattkod" },
+  total: { fi: "Loppusumma", en: "Total", sv: "Totalt" },
+  paid_status: { fi: "Laskutettu", en: "Invoiced", sv: "Fakturerad" },
+  powered_by: {
+    fi: "Tehty MimmoBookilla",
+    en: "Powered by MimmoBook",
+    sv: "Drivs av MimmoBook",
+  },
 };
 
 function t(key: string, lang: string): string {
@@ -100,7 +115,8 @@ export function buildInvoiceModel(
   const final = num(reservation.price_eur) ?? 0;
   const original = num(reservation.original_price_eur);
   const discountValue = num(reservation.discount_value);
-  const hasDiscount = !!reservation.discount_type && discountValue != null && discountValue > 0;
+  const hasDiscount =
+    !!reservation.discount_type && discountValue != null && discountValue > 0;
 
   let subtotal = original != null && original > 0 ? original : final;
   let discountAmount = 0;
@@ -125,10 +141,13 @@ export function buildInvoiceModel(
   const total = round2(hasDiscount ? final : subtotal);
 
   const details: [string, string][] = [[t("date", lang), reservation.date]];
-  if (reservation.check_out_date) details.push([t("check_out", lang), reservation.check_out_date]);
+  if (reservation.check_out_date)
+    details.push([t("check_out", lang), reservation.check_out_date]);
   details.push([t("name", lang), reservation.guest_name]);
-  if (reservation.guest_email) details.push([t("email", lang), reservation.guest_email]);
-  if (reservation.guest_phone) details.push([t("phone", lang), reservation.guest_phone]);
+  if (reservation.guest_email)
+    details.push([t("email", lang), reservation.guest_email]);
+  if (reservation.guest_phone)
+    details.push([t("phone", lang), reservation.guest_phone]);
   const guests = reservation.guests_count ?? reservation.estimated_guests;
   if (guests != null) details.push([t("guests", lang), String(guests)]);
 
@@ -215,7 +234,9 @@ export function buildGroupInvoiceModel(
     }
     if (!leg.is_invoiced) allInvoiced = false;
 
-    const name = leg.resource_name?.trim() || tg(a.isAccommodation ? "room" : "service", lang);
+    const name =
+      leg.resource_name?.trim() ||
+      tg(a.isAccommodation ? "room" : "service", lang);
     const nightsLabel = a.isAccommodation
       ? ` (${a.nights} ${tg(a.nights === 1 ? "night" : "nights", lang)})`
       : "";
@@ -267,10 +288,29 @@ const ACCENT = rgb(0.28, 0.36, 0.45);
 const BODY = 10.5;
 const LINE_H = BODY * 1.6;
 
-function drawRow(page: PDFPage, y: number, label: string, value: string, labelFont: PDFFont, valueFont: PDFFont) {
-  page.drawText(label, { x: ML, y, size: BODY, font: labelFont, color: LABEL_CLR });
+function drawRow(
+  page: PDFPage,
+  y: number,
+  label: string,
+  value: string,
+  labelFont: PDFFont,
+  valueFont: PDFFont,
+) {
+  page.drawText(label, {
+    x: ML,
+    y,
+    size: BODY,
+    font: labelFont,
+    color: LABEL_CLR,
+  });
   const vw = valueFont.widthOfTextAtSize(value, BODY);
-  page.drawText(value, { x: PW - MR - vw, y, size: BODY, font: valueFont, color: TEXT_CLR });
+  page.drawText(value, {
+    x: PW - MR - vw,
+    y,
+    size: BODY,
+    font: valueFont,
+    color: TEXT_CLR,
+  });
 }
 
 export async function generateInvoicePdf(
@@ -298,25 +338,64 @@ export async function generateInvoicePdfBytes(
 
   let y = PH - 56;
 
-  page.drawText(model.businessName, { x: ML, y: y - 14, size: 15, font: bold, color: TEXT_CLR });
-  const contact = [branding?.businessEmail, branding?.businessPhone, branding?.businessAddress].filter(Boolean) as string[];
+  page.drawText(model.businessName, {
+    x: ML,
+    y: y - 14,
+    size: 15,
+    font: bold,
+    color: TEXT_CLR,
+  });
+  const contact = [
+    branding?.businessEmail,
+    branding?.businessPhone,
+    branding?.businessAddress,
+  ].filter(Boolean) as string[];
   let cy = y - 2;
   for (const line of contact) {
     const w = body.widthOfTextAtSize(line, 8.5);
-    page.drawText(line, { x: PW - MR - w, y: cy, size: 8.5, font: body, color: LABEL_CLR });
+    page.drawText(line, {
+      x: PW - MR - w,
+      y: cy,
+      size: 8.5,
+      font: body,
+      color: LABEL_CLR,
+    });
     cy -= 12;
   }
 
   y -= 46;
-  page.drawLine({ start: { x: ML, y }, end: { x: PW - MR, y }, thickness: 2, color: ACCENT });
+  page.drawLine({
+    start: { x: ML, y },
+    end: { x: PW - MR, y },
+    thickness: 2,
+    color: ACCENT,
+  });
   y -= 34;
 
-  page.drawText(model.title, { x: ML, y, size: 26, font: bold, color: TEXT_CLR });
+  page.drawText(model.title, {
+    x: ML,
+    y,
+    size: 26,
+    font: bold,
+    color: TEXT_CLR,
+  });
   y -= 26;
-  page.drawText(`${t("invoice_no", lang)} ${model.invoiceNumber}`, { x: ML, y, size: 9, font: body, color: LABEL_CLR });
+  page.drawText(`${t("invoice_no", lang)} ${model.invoiceNumber}`, {
+    x: ML,
+    y,
+    size: 9,
+    font: body,
+    color: LABEL_CLR,
+  });
   y -= 28;
 
-  page.drawText(t("customer", lang), { x: ML, y, size: 13, font: bold, color: TEXT_CLR });
+  page.drawText(t("customer", lang), {
+    x: ML,
+    y,
+    size: 13,
+    font: bold,
+    color: TEXT_CLR,
+  });
   y -= LINE_H;
   for (const [label, value] of model.details) {
     drawRow(page, y, label, value, body, bold);
@@ -324,10 +403,21 @@ export async function generateInvoicePdfBytes(
   }
 
   y -= 10;
-  page.drawLine({ start: { x: ML, y }, end: { x: PW - MR, y }, thickness: 0.5, color: DIVIDER_CLR });
+  page.drawLine({
+    start: { x: ML, y },
+    end: { x: PW - MR, y },
+    thickness: 0.5,
+    color: DIVIDER_CLR,
+  });
   y -= LINE_H;
 
-  page.drawText(t("lines", lang), { x: ML, y, size: 13, font: bold, color: TEXT_CLR });
+  page.drawText(t("lines", lang), {
+    x: ML,
+    y,
+    size: 13,
+    font: bold,
+    color: TEXT_CLR,
+  });
   y -= LINE_H;
 
   drawRow(page, y, t("subtotal", lang), formatEur(model.subtotal), body, body);
@@ -342,18 +432,35 @@ export async function generateInvoicePdfBytes(
   }
 
   y -= 4;
-  page.drawLine({ start: { x: ML, y: y + 8 }, end: { x: PW - MR, y: y + 8 }, thickness: 0.5, color: DIVIDER_CLR });
+  page.drawLine({
+    start: { x: ML, y: y + 8 },
+    end: { x: PW - MR, y: y + 8 },
+    thickness: 0.5,
+    color: DIVIDER_CLR,
+  });
   y -= LINE_H * 0.6;
   drawRow(page, y, t("total", lang), formatEur(model.total), bold, bold);
   y -= LINE_H;
 
   if (model.isInvoiced) {
-    page.drawText(t("paid_status", lang), { x: ML, y, size: 9, font: body, color: LABEL_CLR });
+    page.drawText(t("paid_status", lang), {
+      x: ML,
+      y,
+      size: 9,
+      font: body,
+      color: LABEL_CLR,
+    });
   }
 
   const footer = t("powered_by", lang);
   const fw = body.widthOfTextAtSize(footer, 7);
-  page.drawText(footer, { x: (PW - fw) / 2, y: 48, size: 7, font: body, color: rgb(0.72, 0.72, 0.72) });
+  page.drawText(footer, {
+    x: (PW - fw) / 2,
+    y: 48,
+    size: 7,
+    font: body,
+    color: rgb(0.72, 0.72, 0.72),
+  });
 
   void CW;
 

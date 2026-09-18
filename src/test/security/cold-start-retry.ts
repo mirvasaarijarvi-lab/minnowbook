@@ -23,7 +23,10 @@ export async function fetchWithColdStartRetry(
   const maxAttempts = 3; // 1 initial + 2 retries
   const baseDelayMs = 500;
 
-  async function attempt(): Promise<{ res: Response | null; aborted: boolean }> {
+  async function attempt(): Promise<{
+    res: Response | null;
+    aborted: boolean;
+  }> {
     const ctrl = new AbortController();
     const t = setTimeout(() => ctrl.abort(), PER_ATTEMPT_TIMEOUT_MS);
     try {
@@ -32,7 +35,9 @@ export async function fetchWithColdStartRetry(
     } catch (err) {
       const aborted =
         (err instanceof Error && err.name === "AbortError") ||
-        (typeof err === "object" && err !== null && (err as { name?: string }).name === "AbortError");
+        (typeof err === "object" &&
+          err !== null &&
+          (err as { name?: string }).name === "AbortError");
       if (!aborted) throw err;
       return { res: null, aborted: true };
     } finally {
@@ -44,7 +49,10 @@ export async function fetchWithColdStartRetry(
   for (let i = 1; i < maxAttempts; i++) {
     const transient =
       last.aborted ||
-      (last.res !== null && (last.res.status === 502 || last.res.status === 503 || last.res.status === 504));
+      (last.res !== null &&
+        (last.res.status === 502 ||
+          last.res.status === 503 ||
+          last.res.status === 504));
     if (!transient) return last.res as Response;
 
     // Drain body so the connection can be reused.
@@ -53,15 +61,19 @@ export async function fetchWithColdStartRetry(
     const expDelay = baseDelayMs * Math.pow(3, i - 1);
     const jitter = expDelay * 0.25 * (Math.random() * 2 - 1);
     const delay = Math.max(0, Math.round(expDelay + jitter));
-    const statusLabel = last.aborted ? `timeout(${PER_ATTEMPT_TIMEOUT_MS}ms)` : String(last.res!.status);
-    // eslint-disable-next-line no-console
+    const statusLabel = last.aborted
+      ? `timeout(${PER_ATTEMPT_TIMEOUT_MS}ms)`
+      : String(last.res!.status);
+
     console.warn(
       `[cors-gate] transient ${statusLabel} on ${method} ${input} (attempt ${i}/${maxAttempts}), retrying after ${delay}ms backoff`,
     );
     await new Promise((r) => setTimeout(r, delay));
     last = await attempt();
-    const resultLabel = last.aborted ? `timeout(${PER_ATTEMPT_TIMEOUT_MS}ms)` : `status=${last.res!.status}`;
-    // eslint-disable-next-line no-console
+    const resultLabel = last.aborted
+      ? `timeout(${PER_ATTEMPT_TIMEOUT_MS}ms)`
+      : `status=${last.res!.status}`;
+
     console.warn(
       `[cors-gate] retry result for ${method} ${input} (attempt ${i + 1}/${maxAttempts}): ${resultLabel}`,
     );
@@ -71,10 +83,15 @@ export async function fetchWithColdStartRetry(
   // All attempts aborted: surface a synthetic 504 so callers see a Response
   // (assertions will fail clearly instead of hanging) without throwing.
   return new Response(
-    JSON.stringify({ error: "cold-start retry exhausted (per-attempt timeout)" }),
+    JSON.stringify({
+      error: "cold-start retry exhausted (per-attempt timeout)",
+    }),
     {
       status: 504,
-      headers: { "content-type": "application/json", "x-cold-start-retry": "exhausted" },
+      headers: {
+        "content-type": "application/json",
+        "x-cold-start-retry": "exhausted",
+      },
     },
   );
 }

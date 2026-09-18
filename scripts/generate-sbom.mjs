@@ -20,8 +20,13 @@ const pkg = JSON.parse(readFileSync(`${ROOT}/package.json`, "utf8"));
 
 function gitMeta() {
   const safe = (cmd, fallback = "") => {
-    try { return execSync(cmd, { stdio: ["ignore", "pipe", "ignore"] }).toString().trim(); }
-    catch { return fallback; }
+    try {
+      return execSync(cmd, { stdio: ["ignore", "pipe", "ignore"] })
+        .toString()
+        .trim();
+    } catch {
+      return fallback;
+    }
   };
   // Use the commit that last touched dependency manifests so the SBOM
   // is deterministic across re-runs that don't actually change deps.
@@ -41,11 +46,16 @@ function gitMeta() {
 function deterministicUuid(input) {
   const h = createHash("sha1").update(input).digest("hex");
   return (
-    h.substring(0, 8) + "-" +
-    h.substring(8, 12) + "-" +
-    "5" + h.substring(13, 16) + "-" +
+    h.substring(0, 8) +
+    "-" +
+    h.substring(8, 12) +
+    "-" +
+    "5" +
+    h.substring(13, 16) +
+    "-" +
     ((parseInt(h.substring(16, 18), 16) & 0x3f) | 0x80).toString(16) +
-    h.substring(18, 20) + "-" +
+    h.substring(18, 20) +
+    "-" +
     h.substring(20, 32)
   );
 }
@@ -73,7 +83,11 @@ const components = Object.entries(allDeps)
   });
 
 const meta = gitMeta();
-const stableSeed = JSON.stringify({ name: pkg.name, version: pkg.version, components });
+const stableSeed = JSON.stringify({
+  name: pkg.name,
+  version: pkg.version,
+  components,
+});
 const sbom = {
   bomFormat: "CycloneDX",
   specVersion: "1.5",
@@ -88,9 +102,7 @@ const sbom = {
       name: pkg.name,
       version: pkg.version ?? "0.0.0",
       description: pkg.description ?? "MimmoBook reservation management SaaS",
-      properties: [
-        { name: "git:sha", value: meta.sha },
-      ],
+      properties: [{ name: "git:sha", value: meta.sha }],
     },
   },
   components,

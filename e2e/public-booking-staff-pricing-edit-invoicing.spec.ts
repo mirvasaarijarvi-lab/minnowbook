@@ -22,7 +22,8 @@ import { reportAmounts, roundCents } from "@/lib/report-pricing-accessor";
  * Requires SERVICE_ROLE_KEY; skips itself without it.
  */
 
-const AMOUNT_ERROR = "Invoice amount must match the recalculated room and breakfast totals.";
+const AMOUNT_ERROR =
+  "Invoice amount must match the recalculated room and breakfast totals.";
 
 const NIGHTLY = 105;
 const BREAKFAST_RATE = 14;
@@ -41,7 +42,10 @@ test.describe("Staff pricing edits and invoicing", () => {
     !(process.env.SERVICE_ROLE_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY),
     "Set SERVICE_ROLE_KEY to run this spec.",
   );
-  test.skip(!SUPABASE_ANON_KEY, "Set VITE_SUPABASE_PUBLISHABLE_KEY to run this spec.");
+  test.skip(
+    !SUPABASE_ANON_KEY,
+    "Set VITE_SUPABASE_PUBLISHABLE_KEY to run this spec.",
+  );
 
   test("blocks invoicing until the edited totals reconcile again", async ({
     ephemeralTenant,
@@ -68,27 +72,30 @@ test.describe("Staff pricing edits and invoicing", () => {
 
     const guestEmail = `ci+staff-edit-${stamp}@mimmobook.test`;
     const checkIn = isoDate(340);
-    const res = await request.post(`${SUPABASE_URL}/functions/v1/public-booking`, {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-        apikey: SUPABASE_ANON_KEY,
+    const res = await request.post(
+      `${SUPABASE_URL}/functions/v1/public-booking`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+          apikey: SUPABASE_ANON_KEY,
+        },
+        data: {
+          tenant_id: tenantId,
+          reservation_type: "guesthouse",
+          resource_id: resource!.id,
+          date: checkIn,
+          check_out_date: isoDate(340 + NIGHTS),
+          guests_count: GUESTS,
+          breakfast_included: true,
+          guest_name: `TEST CI Staff Pricing Edit ${stamp}`,
+          guest_email: guestEmail,
+          guest_phone: "+358401234567",
+          special_requests: "Created by the staff pricing edit E2E spec.",
+        },
+        timeout: 30_000,
       },
-      data: {
-        tenant_id: tenantId,
-        reservation_type: "guesthouse",
-        resource_id: resource!.id,
-        date: checkIn,
-        check_out_date: isoDate(340 + NIGHTS),
-        guests_count: GUESTS,
-        breakfast_included: true,
-        guest_name: `TEST CI Staff Pricing Edit ${stamp}`,
-        guest_email: guestEmail,
-        guest_phone: "+358401234567",
-        special_requests: "Created by the staff pricing edit E2E spec.",
-      },
-      timeout: 30_000,
-    });
+    );
     expect(res.status(), await res.text()).toBe(200);
 
     const cols =
@@ -105,21 +112,27 @@ test.describe("Staff pricing edits and invoicing", () => {
     };
 
     const booked = await fetchRow();
-    expect(Number(booked.price_eur), "server-calculated amount").toBe(BOOKED_TOTAL);
-    expect(Number(booked.breakfast_price_per_person), "server breakfast rate").toBe(
-      BREAKFAST_RATE,
+    expect(Number(booked.price_eur), "server-calculated amount").toBe(
+      BOOKED_TOTAL,
     );
+    expect(
+      Number(booked.breakfast_price_per_person),
+      "server breakfast rate",
+    ).toBe(BREAKFAST_RATE);
     const bookedSplit = reportAmounts(booked as any);
-    expect(roundCents(bookedSplit.room + bookedSplit.breakfast)).toBe(BOOKED_TOTAL);
+    expect(roundCents(bookedSplit.room + bookedSplit.breakfast)).toBe(
+      BOOKED_TOTAL,
+    );
 
     // --- Signed-in staff member -------------------------------------------
     const staffEmail = `ci+staff-edit-user-${stamp}@mimmobook.test`;
     const staffPassword = `Ci-Tmp-${randomUUID()}-Z9!`;
-    const { data: staffUser, error: userErr } = await admin.auth.admin.createUser({
-      email: staffEmail,
-      password: staffPassword,
-      email_confirm: true,
-    });
+    const { data: staffUser, error: userErr } =
+      await admin.auth.admin.createUser({
+        email: staffEmail,
+        password: staffPassword,
+        email_confirm: true,
+      });
     expect(userErr, userErr?.message).toBeNull();
     const { error: memberErr } = await admin.from("tenant_users").insert({
       tenant_id: tenantId,
@@ -163,14 +176,18 @@ test.describe("Staff pricing edits and invoicing", () => {
     // line at all. That is the signal the totals no longer reconcile.
     expect(Number(edited.guests_count)).toBe(newGuests);
     expect(Number(edited.breakfast_price_per_person)).toBe(newRate);
-    expect(Number(edited.price_eur), "the stored amount has not been raised").toBe(BOOKED_TOTAL);
+    expect(
+      Number(edited.price_eur),
+      "the stored amount has not been raised",
+    ).toBe(BOOKED_TOTAL);
     expect(
       expectedBreakfast > BOOKED_TOTAL,
       "the edit leaves the amount below the recalculated breakfast",
     ).toBe(true);
-    expect(roundCents(editedSplit.breakfast), "breakfast clamped to the amount").toBe(
-      BOOKED_TOTAL,
-    );
+    expect(
+      roundCents(editedSplit.breakfast),
+      "breakfast clamped to the amount",
+    ).toBe(BOOKED_TOTAL);
     expect(roundCents(editedSplit.room), "no room line left").toBe(0);
 
     // Invoicing is refused while the amount no longer reconciles.
@@ -179,7 +196,10 @@ test.describe("Staff pricing edits and invoicing", () => {
       .update({ is_invoiced: true })
       .eq("id", booked.id)
       .eq("tenant_id", tenantId);
-    expect(blockedErr, "invoicing must be refused after the edit").not.toBeNull();
+    expect(
+      blockedErr,
+      "invoicing must be refused after the edit",
+    ).not.toBeNull();
     expect(blockedErr!.message).toContain(AMOUNT_ERROR);
     expect((await fetchRow()).is_invoiced, "still uninvoiced").toBe(false);
 
@@ -202,11 +222,14 @@ test.describe("Staff pricing edits and invoicing", () => {
     expect(okErr, okErr?.message).toBeNull();
 
     const invoicedRow = await fetchRow();
-    expect(invoicedRow.is_invoiced, "invoiced once the totals match").toBe(true);
-    const invoicedSplit = reportAmounts(invoicedRow as any);
-    expect(roundCents(invoicedSplit.room + invoicedSplit.breakfast), "split reconciles").toBe(
-      recalculated,
+    expect(invoicedRow.is_invoiced, "invoiced once the totals match").toBe(
+      true,
     );
+    const invoicedSplit = reportAmounts(invoicedRow as any);
+    expect(
+      roundCents(invoicedSplit.room + invoicedSplit.breakfast),
+      "split reconciles",
+    ).toBe(recalculated);
     expect(roundCents(invoicedSplit.charged)).toBe(recalculated);
 
     // --- An invoiced booking cannot be edited into an inconsistent state --
@@ -222,12 +245,17 @@ test.describe("Staff pricing edits and invoicing", () => {
         .update(patch)
         .eq("id", booked.id)
         .eq("tenant_id", tenantId);
-      expect(error, `editing an invoiced booking with ${JSON.stringify(patch)}`).not.toBeNull();
+      expect(
+        error,
+        `editing an invoiced booking with ${JSON.stringify(patch)}`,
+      ).not.toBeNull();
       expect(error!.message).toContain(AMOUNT_ERROR);
     }
 
     const untouched = await fetchRow();
-    expect(Number(untouched.price_eur), "invoiced amount untouched").toBe(recalculated);
+    expect(Number(untouched.price_eur), "invoiced amount untouched").toBe(
+      recalculated,
+    );
     expect(Number(untouched.guests_count)).toBe(newGuests);
     expect(Number(untouched.breakfast_price_per_person)).toBe(newRate);
 
@@ -235,7 +263,10 @@ test.describe("Staff pricing edits and invoicing", () => {
     // edit that keeps the totals reconciled is accepted.
     const { error: noteErr } = await staff
       .from("reservations")
-      .update({ staff_notes: "Checked by the staff pricing edit spec.", status: "confirmed" })
+      .update({
+        staff_notes: "Checked by the staff pricing edit spec.",
+        status: "confirmed",
+      })
       .eq("id", booked.id)
       .eq("tenant_id", tenantId);
     expect(noteErr, noteErr?.message).toBeNull();
@@ -249,10 +280,13 @@ test.describe("Staff pricing edits and invoicing", () => {
 
     const final = await fetchRow();
     const finalSplit = reportAmounts(final as any);
-    expect(roundCents(finalSplit.room + finalSplit.breakfast), "final split reconciles").toBe(
-      recalculated + 50,
+    expect(
+      roundCents(finalSplit.room + finalSplit.breakfast),
+      "final split reconciles",
+    ).toBe(recalculated + 50);
+    expect(final.staff_notes).toContain(
+      "Checked by the staff pricing edit spec.",
     );
-    expect(final.staff_notes).toContain("Checked by the staff pricing edit spec.");
     expect(final.is_invoiced).toBe(true);
 
     await admin.auth.admin.deleteUser(staffUser!.user!.id);

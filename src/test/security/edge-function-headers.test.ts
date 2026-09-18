@@ -49,11 +49,15 @@ describe("Edge Function Security Headers - Regression Tests", () => {
     });
 
     it("includes Referrer-Policy", () => {
-      expect(adminUsersCorsHeaders["Referrer-Policy"]).toBe("strict-origin-when-cross-origin");
+      expect(adminUsersCorsHeaders["Referrer-Policy"]).toBe(
+        "strict-origin-when-cross-origin",
+      );
     });
 
     it("includes Content-Security-Policy", () => {
-      expect(adminUsersCorsHeaders["Content-Security-Policy"]).toContain("frame-ancestors 'none'");
+      expect(adminUsersCorsHeaders["Content-Security-Policy"]).toContain(
+        "frame-ancestors 'none'",
+      );
     });
 
     it("includes X-XSS-Protection", () => {
@@ -64,22 +68,32 @@ describe("Edge Function Security Headers - Regression Tests", () => {
   describe("public-booking headers", () => {
     for (const [header, value] of Object.entries(REQUIRED_SECURITY_HEADERS)) {
       it(`includes ${header}: ${value}`, () => {
-        expect(publicBookingCorsHeaders[header as keyof typeof publicBookingCorsHeaders]).toBe(value);
+        expect(
+          publicBookingCorsHeaders[
+            header as keyof typeof publicBookingCorsHeaders
+          ],
+        ).toBe(value);
       });
     }
   });
 
   describe("CORS configuration", () => {
     it("allows authorization header for authenticated endpoints", () => {
-      expect(adminUsersCorsHeaders["Access-Control-Allow-Headers"]).toContain("authorization");
+      expect(adminUsersCorsHeaders["Access-Control-Allow-Headers"]).toContain(
+        "authorization",
+      );
     });
 
     it("allows content-type header", () => {
-      expect(adminUsersCorsHeaders["Access-Control-Allow-Headers"]).toContain("content-type");
+      expect(adminUsersCorsHeaders["Access-Control-Allow-Headers"]).toContain(
+        "content-type",
+      );
     });
 
     it("allows apikey header for Supabase client", () => {
-      expect(adminUsersCorsHeaders["Access-Control-Allow-Headers"]).toContain("apikey");
+      expect(adminUsersCorsHeaders["Access-Control-Allow-Headers"]).toContain(
+        "apikey",
+      );
     });
   });
 });

@@ -72,7 +72,9 @@ vi.mock("./EditReservationDialog", () => ({ default: () => null }));
 vi.mock("./ReservationDetailDialog", () => ({ default: () => null }));
 vi.mock("./ManualReservationDialog", () => ({ default: () => null }));
 vi.mock("./SiteTabs", () => ({ default: () => null }));
-vi.mock("@/components/ConfirmationEmailPreview", () => ({ default: () => null }));
+vi.mock("@/components/ConfirmationEmailPreview", () => ({
+  default: () => null,
+}));
 
 // --- Fixture & supabase mock --------------------------------------------
 
@@ -160,7 +162,8 @@ function makeChain(table: string) {
   chain.is = passthrough;
   chain.limit = () => Promise.resolve(payload);
   chain.range = () => Promise.resolve(payload);
-  chain.maybeSingle = () => Promise.resolve({ data: payload.data ?? null, error: null });
+  chain.maybeSingle = () =>
+    Promise.resolve({ data: payload.data ?? null, error: null });
   chain.then = (resolve: (v: any) => void) => resolve(payload);
   return chain;
 }
@@ -224,7 +227,9 @@ describe("ReservationList: cross-booking UI", () => {
     expect(badgeNodes).toHaveLength(2);
 
     // And the unrelated solo reservation must not get a badge.
-    const soloCard = screen.getByText("Bob Solo").closest("[class*='Card'], div");
+    const soloCard = screen
+      .getByText("Bob Solo")
+      .closest("[class*='Card'], div");
     // Walk up to the card container and make sure it doesn't include the
     // badge text. Even if our closest() heuristic snaps to a wrapper,
     // the row's own subtree should never contain "Cross-booking".

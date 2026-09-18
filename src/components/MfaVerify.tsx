@@ -2,7 +2,11 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
 import { toast } from "sonner";
 import { ShieldCheck, Loader2, KeyRound } from "lucide-react";
 import Logo from "@/components/Logo";
@@ -64,7 +68,9 @@ const MfaVerify = ({ factorId, onSuccess, onCancel }: MfaVerifyProps) => {
         if (challengeError) {
           // If challenge fails, the recovery code was still consumed
           // but user needs to retry with TOTP or another recovery code
-          toast.error("Recovery code accepted but MFA challenge failed. Please use your authenticator app or another recovery code.");
+          toast.error(
+            "Recovery code accepted but MFA challenge failed. Please use your authenticator app or another recovery code.",
+          );
           setRecoveryCode("");
           setUseRecovery(false);
           setLoading(false);
@@ -82,7 +88,7 @@ const MfaVerify = ({ factorId, onSuccess, onCancel }: MfaVerifyProps) => {
         await supabase.auth.refreshSession();
 
         toast.success(
-          `Signed in with recovery code. ${data.remaining} code(s) remaining. Please re-enable 2FA in settings.`
+          `Signed in with recovery code. ${data.remaining} code(s) remaining. Please re-enable 2FA in settings.`,
         );
         onSuccess();
       }
@@ -179,10 +185,17 @@ const MfaVerify = ({ factorId, onSuccess, onCancel }: MfaVerifyProps) => {
             }}
             className="w-full text-xs text-muted-foreground"
           >
-            {useRecovery ? "Use authenticator app instead" : "Lost your device? Use a recovery code"}
+            {useRecovery
+              ? "Use authenticator app instead"
+              : "Lost your device? Use a recovery code"}
           </Button>
 
-          <Button variant="ghost" size="sm" onClick={onCancel} className="w-full">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onCancel}
+            className="w-full"
+          >
             Cancel
           </Button>
         </div>

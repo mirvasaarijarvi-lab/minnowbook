@@ -8,8 +8,6 @@
 import { organizationSchema, breadcrumbSchema } from "@/components/SEOHead";
 import ogComparisonAsset from "@/assets/og-comparison-resy-tock-mimmobook.jpg.asset.json";
 
-
-
 export interface BlogAuthor {
   type?: "Person" | "Organization";
   name: string;
@@ -60,9 +58,7 @@ export const buildAuthor = (a: BlogAuthor) => {
 
 export const buildAuthorField = (authors?: BlogAuthor[]) => {
   if (!authors || authors.length === 0) return defaultOrgAuthor;
-  const nodes = authors
-    .filter((a) => a && (a.name || a.url))
-    .map(buildAuthor);
+  const nodes = authors.filter((a) => a && (a.name || a.url)).map(buildAuthor);
   if (nodes.length === 0) return defaultOrgAuthor;
   return nodes.length === 1 ? nodes[0] : nodes;
 };
@@ -108,17 +104,28 @@ export interface BlogPostData {
   schemaType?: "BlogPosting" | "Article";
 }
 
-
 export const posts: Record<string, BlogPostData> = {
   "booking-software-for-service-professionals": {
     slug: "booking-software-for-service-professionals",
     titleKey: "blog.post9Title",
     dateKey: "2026-09-18",
     readTime: "8 min",
-    contentKeys: ["blog.post9C1", "blog.post9C2", "blog.post9C3", "blog.post9C4", "blog.post9C5", "blog.post9C6"],
+    contentKeys: [
+      "blog.post9C1",
+      "blog.post9C2",
+      "blog.post9C3",
+      "blog.post9C4",
+      "blog.post9C5",
+      "blog.post9C6",
+    ],
     seoTitle: "Booking Software for Service Professionals, MimmoBook",
-    seoDescription: "Online booking for barbers, hairdressers, massage therapists, bakers and personal trainers: fill your calendar, cut no-shows and stop booking by phone.",
-    relatedSlugs: ["wellness-industry-bookings-growth", "MimmoBook_compared_to_other_bookingsystems_for_wellness", "branded-booking-pages-matter"],
+    seoDescription:
+      "Online booking for barbers, hairdressers, massage therapists, bakers and personal trainers: fill your calendar, cut no-shows and stop booking by phone.",
+    relatedSlugs: [
+      "wellness-industry-bookings-growth",
+      "MimmoBook_compared_to_other_bookingsystems_for_wellness",
+      "branded-booking-pages-matter",
+    ],
     schemaType: "Article",
     about: [
       {
@@ -132,24 +139,47 @@ export const posts: Record<string, BlogPostData> = {
       },
     ],
     mentions: [
-      { "@type": "Occupation", name: "Barber", sameAs: "https://en.wikipedia.org/wiki/Barber" },
-      { "@type": "Occupation", name: "Hairdresser", sameAs: "https://en.wikipedia.org/wiki/Hairdresser" },
-      { "@type": "Occupation", name: "Massage therapist", sameAs: "https://en.wikipedia.org/wiki/Massage" },
-      { "@type": "Occupation", name: "Baker", sameAs: "https://en.wikipedia.org/wiki/Baker" },
-      { "@type": "Occupation", name: "Personal trainer", sameAs: "https://en.wikipedia.org/wiki/Personal_trainer" },
+      {
+        "@type": "Occupation",
+        name: "Barber",
+        sameAs: "https://en.wikipedia.org/wiki/Barber",
+      },
+      {
+        "@type": "Occupation",
+        name: "Hairdresser",
+        sameAs: "https://en.wikipedia.org/wiki/Hairdresser",
+      },
+      {
+        "@type": "Occupation",
+        name: "Massage therapist",
+        sameAs: "https://en.wikipedia.org/wiki/Massage",
+      },
+      {
+        "@type": "Occupation",
+        name: "Baker",
+        sameAs: "https://en.wikipedia.org/wiki/Baker",
+      },
+      {
+        "@type": "Occupation",
+        name: "Personal trainer",
+        sameAs: "https://en.wikipedia.org/wiki/Personal_trainer",
+      },
     ],
     faqs: [
       {
         question: "Which service businesses can use MimmoBook?",
-        answer: "Barbers, hairdressers, massage therapists and other treatment providers, bakers taking pickup orders, personal trainers and coaches, as well as restaurants, event venues, hotels and guesthouses.",
+        answer:
+          "Barbers, hairdressers, massage therapists and other treatment providers, bakers taking pickup orders, personal trainers and coaches, as well as restaurants, event venues, hotels and guesthouses.",
       },
       {
         question: "Does online booking reduce no-shows?",
-        answer: "Yes. Automated confirmation and reminder emails typically cut no-shows by around a third, and a cancellation reopens the slot automatically so another client can book it.",
+        answer:
+          "Yes. Automated confirmation and reminder emails typically cut no-shows by around a third, and a cancellation reopens the slot automatically so another client can book it.",
       },
       {
         question: "Is there a commission per booking?",
-        answer: "No. MimmoBook charges a flat monthly fee with no commission per booking, so a busy month costs the same as a quiet one.",
+        answer:
+          "No. MimmoBook charges a flat monthly fee with no commission per booking, so a busy month costs the same as a quiet one.",
       },
     ],
   },
@@ -158,18 +188,31 @@ export const posts: Record<string, BlogPostData> = {
     titleKey: "blog.post1Title",
     dateKey: "2026-03-10",
     readTime: "6 min",
-    contentKeys: ["blog.post1C1", "blog.post1C2", "blog.post1C3", "blog.post1C4", "blog.post1C5"],
+    contentKeys: [
+      "blog.post1C1",
+      "blog.post1C2",
+      "blog.post1C3",
+      "blog.post1C4",
+      "blog.post1C5",
+    ],
     seoTitle: "5 Reservation Challenges for Small Hospitality Businesses",
-    seoDescription: "Small restaurants, venues and guesthouses face unique booking challenges. Learn the top 5 problems and how cloud-based reservation management solves them.",
+    seoDescription:
+      "Small restaurants, venues and guesthouses face unique booking challenges. Learn the top 5 problems and how cloud-based reservation management solves them.",
   },
   "why-spreadsheets-fail-for-bookings": {
     slug: "why-spreadsheets-fail-for-bookings",
     titleKey: "blog.post2Title",
     dateKey: "2026-03-08",
     readTime: "5 min",
-    contentKeys: ["blog.post2C1", "blog.post2C2", "blog.post2C3", "blog.post2C4"],
+    contentKeys: [
+      "blog.post2C1",
+      "blog.post2C2",
+      "blog.post2C3",
+      "blog.post2C4",
+    ],
     seoTitle: "Why Spreadsheets Fail for Booking Management, MimmoBook",
-    seoDescription: "Still using spreadsheets for reservations? Discover why hospitality businesses are moving to dedicated booking software and the risks of manual tracking.",
+    seoDescription:
+      "Still using spreadsheets for reservations? Discover why hospitality businesses are moving to dedicated booking software and the risks of manual tracking.",
   },
   "branded-booking-pages-matter": {
     slug: "branded-booking-pages-matter",
@@ -178,27 +221,47 @@ export const posts: Record<string, BlogPostData> = {
     readTime: "4 min",
     contentKeys: ["blog.post3C1", "blog.post3C2", "blog.post3C3"],
     seoTitle: "Why Branded Booking Pages Matter for Your Business",
-    seoDescription: "A branded booking page builds trust and improves conversion. Learn why your reservation page should reflect your brand identity.",
-    relatedSlugs: ["comparison-resy-tock-mimmobook", "best-restaurant-reservation-apps"],
+    seoDescription:
+      "A branded booking page builds trust and improves conversion. Learn why your reservation page should reflect your brand identity.",
+    relatedSlugs: [
+      "comparison-resy-tock-mimmobook",
+      "best-restaurant-reservation-apps",
+    ],
   },
   "multi-site-management-hospitality": {
     slug: "multi-site-management-hospitality",
     titleKey: "blog.post4Title",
     dateKey: "2026-03-01",
     readTime: "5 min",
-    contentKeys: ["blog.post4C1", "blog.post4C2", "blog.post4C3", "blog.post4C4"],
+    contentKeys: [
+      "blog.post4C1",
+      "blog.post4C2",
+      "blog.post4C3",
+      "blog.post4C4",
+    ],
     seoTitle: "Multi-Site Management for Hospitality, MimmoBook",
-    seoDescription: "Managing reservations across multiple locations? Learn how centralized multi-site management saves time and reduces errors.",
-    relatedSlugs: ["comparison-resy-tock-mimmobook", "best-restaurant-reservation-apps"],
+    seoDescription:
+      "Managing reservations across multiple locations? Learn how centralized multi-site management saves time and reduces errors.",
+    relatedSlugs: [
+      "comparison-resy-tock-mimmobook",
+      "best-restaurant-reservation-apps",
+    ],
   },
   "wellness-industry-bookings-growth": {
     slug: "wellness-industry-bookings-growth",
     titleKey: "blog.post5Title",
     dateKey: "2026-06-12",
     readTime: "6 min",
-    contentKeys: ["blog.post5C1", "blog.post5C2", "blog.post5C3", "blog.post5C4", "blog.post5C5"],
+    contentKeys: [
+      "blog.post5C1",
+      "blog.post5C2",
+      "blog.post5C3",
+      "blog.post5C4",
+      "blog.post5C5",
+    ],
     seoTitle: "Wellness Bookings: Ease of Use Drives Growth",
-    seoDescription: "Discover how easy online bookings help spas, salons, yoga studios and wellness clinics grow with higher conversion, fewer no-shows and loyal clients.",
+    seoDescription:
+      "Discover how easy online bookings help spas, salons, yoga studios and wellness clinics grow with higher conversion, fewer no-shows and loyal clients.",
     relatedSlugs: ["MimmoBook_compared_to_other_bookingsystems_for_wellness"],
   },
   "best-restaurant-reservation-apps": {
@@ -206,22 +269,47 @@ export const posts: Record<string, BlogPostData> = {
     titleKey: "blog.post6Title",
     dateKey: "2026-07-07",
     readTime: "7 min",
-    contentKeys: ["blog.post6C1", "blog.post6C2", "blog.post6C3", "blog.post6C4", "blog.post6C5", "blog.post6C6"],
+    contentKeys: [
+      "blog.post6C1",
+      "blog.post6C2",
+      "blog.post6C3",
+      "blog.post6C4",
+      "blog.post6C5",
+      "blog.post6C6",
+    ],
     seoTitle: "Best Restaurant Reservation Apps 2026: Free vs Paid",
-    seoDescription: "Compare the best restaurant reservation apps in 2026. Free online booking systems, marketplaces and dedicated software for restaurants, cafés and venues.",
-    relatedSlugs: ["comparison-resy-tock-mimmobook", "branded-booking-pages-matter", "multi-site-management-hospitality"],
+    seoDescription:
+      "Compare the best restaurant reservation apps in 2026. Free online booking systems, marketplaces and dedicated software for restaurants, cafés and venues.",
+    relatedSlugs: [
+      "comparison-resy-tock-mimmobook",
+      "branded-booking-pages-matter",
+      "multi-site-management-hospitality",
+    ],
   },
   "comparison-resy-tock-mimmobook": {
     slug: "comparison-resy-tock-mimmobook",
     titleKey: "blog.post7Title",
     dateKey: "2026-07-22",
     readTime: "6 min",
-    contentKeys: ["blog.post7C1", "blog.post7C2", "blog.post7C3", "blog.post7C4", "blog.post7C5", "blog.post7C6"],
+    contentKeys: [
+      "blog.post7C1",
+      "blog.post7C2",
+      "blog.post7C3",
+      "blog.post7C4",
+      "blog.post7C5",
+      "blog.post7C6",
+    ],
     seoTitle: "MimmoBook vs Resy vs Tock: Reservation Software Compared",
-    seoDescription: "MimmoBook vs Resy vs Tock: compare pricing, brand control, multi-site management and ease of use for restaurant reservation software in 2026.",
+    seoDescription:
+      "MimmoBook vs Resy vs Tock: compare pricing, brand control, multi-site management and ease of use for restaurant reservation software in 2026.",
     image: ogComparisonAsset.url,
-    imageAlt: "MimmoBook vs Resy vs Tock comparison, reservation platforms compared",
-    relatedSlugs: ["best-restaurant-reservation-apps", "branded-booking-pages-matter", "multi-site-management-hospitality"],
+    imageAlt:
+      "MimmoBook vs Resy vs Tock comparison, reservation platforms compared",
+    relatedSlugs: [
+      "best-restaurant-reservation-apps",
+      "branded-booking-pages-matter",
+      "multi-site-management-hospitality",
+    ],
     schemaType: "Article",
     about: [
       {
@@ -277,15 +365,28 @@ export const posts: Record<string, BlogPostData> = {
       },
     ],
   },
-  "MimmoBook_compared_to_other_bookingsystems_for_wellness": {
+  MimmoBook_compared_to_other_bookingsystems_for_wellness: {
     slug: "MimmoBook_compared_to_other_bookingsystems_for_wellness",
     titleKey: "blog.post8Title",
     dateKey: "2026-07-22",
     readTime: "7 min",
-    contentKeys: ["blog.post8C1", "blog.post8C2", "blog.post8C3", "blog.post8C4", "blog.post8C5", "blog.post8C6"],
+    contentKeys: [
+      "blog.post8C1",
+      "blog.post8C2",
+      "blog.post8C3",
+      "blog.post8C4",
+      "blog.post8C5",
+      "blog.post8C6",
+    ],
     seoTitle: "MimmoBook vs Mindbody, Vagaro, Fresha, Acuity Compared",
-    seoDescription: "MimmoBook vs Mindbody, Vagaro, Fresha and Acuity: compare pricing, brand control, multi-site management and ease of use for wellness booking software.",
-    relatedSlugs: ["wellness-industry-bookings-growth", "comparison-resy-tock-mimmobook", "branded-booking-pages-matter", "multi-site-management-hospitality"],
+    seoDescription:
+      "MimmoBook vs Mindbody, Vagaro, Fresha and Acuity: compare pricing, brand control, multi-site management and ease of use for wellness booking software.",
+    relatedSlugs: [
+      "wellness-industry-bookings-growth",
+      "comparison-resy-tock-mimmobook",
+      "branded-booking-pages-matter",
+      "multi-site-management-hospitality",
+    ],
     schemaType: "Article",
     about: [
       {
@@ -321,9 +422,7 @@ export const posts: Record<string, BlogPostData> = {
         applicationCategory: "BusinessApplication",
         operatingSystem: "Web",
         url: "https://www.fresha.com",
-        sameAs: [
-          "https://en.wikipedia.org/wiki/Fresha",
-        ],
+        sameAs: ["https://en.wikipedia.org/wiki/Fresha"],
       },
       {
         "@type": "SoftwareApplication",
@@ -331,9 +430,7 @@ export const posts: Record<string, BlogPostData> = {
         applicationCategory: "BusinessApplication",
         operatingSystem: "Web",
         url: "https://acuityscheduling.com",
-        sameAs: [
-          "https://en.wikipedia.org/wiki/Squarespace",
-        ],
+        sameAs: ["https://en.wikipedia.org/wiki/Squarespace"],
       },
     ],
     mentions: [
@@ -349,8 +446,6 @@ export const posts: Record<string, BlogPostData> = {
     ],
   },
 };
-
-
 
 /**
  * Build the exact JSON-LD array shipped by /blog/:slug. `translate` is the
@@ -406,7 +501,9 @@ export const buildBlogPostJsonLd = (
       image: {
         "@type": "ImageObject",
         url: post.image
-          ? (post.image.startsWith("http") ? post.image : `https://mimmobook.com${post.image}`)
+          ? post.image.startsWith("http")
+            ? post.image
+            : `https://mimmobook.com${post.image}`
           : "https://mimmobook.com/og-image.png",
         width: 1200,
         height: 630,
@@ -437,10 +534,11 @@ export const buildBlogPostJsonLd = (
       },
       articleBody,
       ...(post.about && post.about.length > 0 ? { about: post.about } : {}),
-      ...(post.mentions && post.mentions.length > 0 ? { mentions: post.mentions } : {}),
+      ...(post.mentions && post.mentions.length > 0
+        ? { mentions: post.mentions }
+        : {}),
     },
   ];
-
 
   if (post.faqs && post.faqs.length > 0) {
     jsonLd.push({

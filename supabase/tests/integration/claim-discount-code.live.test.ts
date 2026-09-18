@@ -104,7 +104,10 @@ describe.skipIf(skip)("LIVE: claim_discount_code concurrent race", () => {
     );
     const errored = results.filter((r) => r.error);
 
-    expect(errored, `unexpected RPC errors: ${JSON.stringify(errored.map((r) => r.error))}`).toHaveLength(0);
+    expect(
+      errored,
+      `unexpected RPC errors: ${JSON.stringify(errored.map((r) => r.error))}`,
+    ).toHaveLength(0);
     expect(winners).toHaveLength(1);
     expect(losers).toHaveLength(CONCURRENCY - 1);
 

@@ -165,7 +165,8 @@ export function resolveBookingError(
 ): BookingErrorDescriptor {
   const code = extractBookingErrorCode(err);
   const entry = code ? BOOKING_ERROR_REGISTRY[code] : FALLBACK_ENTRY;
-  const i18nKey = ctx.isStaff && entry.staffI18nKey ? entry.staffI18nKey : entry.i18nKey;
+  const i18nKey =
+    ctx.isStaff && entry.staffI18nKey ? entry.staffI18nKey : entry.i18nKey;
   return {
     code,
     i18nKey,

@@ -30,7 +30,12 @@ const CalendarView = () => {
   // Load the tenant's actual active resource types so calendars only show
   // sections relevant to what the tenant manages.
   const { data: activeTypes = [] } = useQuery({
-    queryKey: ["calendar-active-resource-types", tenantId, selectedSiteId, siteIds],
+    queryKey: [
+      "calendar-active-resource-types",
+      tenantId,
+      selectedSiteId,
+      siteIds,
+    ],
     queryFn: async () => {
       if (!tenantId) return [] as { type: string; label: string | null }[];
       let query = supabase
@@ -48,7 +53,10 @@ const CalendarView = () => {
           map.set(r.resource_type, r.custom_type_label ?? null);
         }
       });
-      return Array.from(map.entries()).map(([type, label]) => ({ type, label }));
+      return Array.from(map.entries()).map(([type, label]) => ({
+        type,
+        label,
+      }));
     },
     enabled: !!tenantId,
   });
@@ -61,11 +69,18 @@ const CalendarView = () => {
       const custom = activeTypes.find((x) => x.type === t)?.label;
       return custom || typeLabel(t);
     };
-    const out: { key: string; title: string; reservationTypes: string[]; resourceTypes: string[] }[] = [];
+    const out: {
+      key: string;
+      title: string;
+      reservationTypes: string[];
+      resourceTypes: string[];
+    }[] = [];
     if (present.has("hotel") || present.has("guesthouse")) {
       out.push({
         key: "accommodation",
-        title: present.has("hotel") ? labelFor("hotel") : labelFor("guesthouse"),
+        title: present.has("hotel")
+          ? labelFor("hotel")
+          : labelFor("guesthouse"),
         reservationTypes: ["hotel", "guesthouse"],
         resourceTypes: ["hotel", "guesthouse"],
       });
@@ -88,11 +103,17 @@ const CalendarView = () => {
     <div className="space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <h2 className="text-xl sm:text-2xl font-serif font-bold text-foreground">{t("nav.calendar")}</h2>
+          <h2 className="text-xl sm:text-2xl font-serif font-bold text-foreground">
+            {t("nav.calendar")}
+          </h2>
           <DashboardTooltip text={t("dashboard.calendarTooltip")} />
         </div>
         {canCreate && (
-          <Button size="sm" className="gap-1.5 shrink-0" onClick={() => setNewReservationOpen(true)}>
+          <Button
+            size="sm"
+            className="gap-1.5 shrink-0"
+            onClick={() => setNewReservationOpen(true)}
+          >
             <Plus className="h-4 w-4" />
             {t("dashboard.newReservation")}
           </Button>
@@ -123,7 +144,8 @@ const CalendarView = () => {
 
       {sections.length === 0 ? (
         <div className="rounded-md border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
-          {t("dashboard.noResourcesYet" as any) || "No active resources yet. Add resources in Resource Management to see calendars here."}
+          {t("dashboard.noResourcesYet" as any) ||
+            "No active resources yet. Add resources in Resource Management to see calendars here."}
         </div>
       ) : (
         sections.map((section) => (

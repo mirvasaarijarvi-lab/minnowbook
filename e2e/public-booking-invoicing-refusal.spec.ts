@@ -2,7 +2,11 @@ import { test, expect } from "./fixtures/ephemeral-tenant";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./fixtures/test-tenant";
 import { createClient } from "@supabase/supabase-js";
 import { randomUUID } from "node:crypto";
-import { reportAmounts, sumReportAmounts, roundCents } from "@/lib/report-pricing-accessor";
+import {
+  reportAmounts,
+  sumReportAmounts,
+  roundCents,
+} from "@/lib/report-pricing-accessor";
 
 /**
  * End-to-end: when tampered pricing leaves a booking without a real amount,
@@ -40,7 +44,10 @@ test.describe("Invoicing refused for tampered pricing", () => {
     !(process.env.SERVICE_ROLE_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY),
     "Set SERVICE_ROLE_KEY to run this spec.",
   );
-  test.skip(!SUPABASE_ANON_KEY, "Set VITE_SUPABASE_PUBLISHABLE_KEY to run this spec.");
+  test.skip(
+    !SUPABASE_ANON_KEY,
+    "Set VITE_SUPABASE_PUBLISHABLE_KEY to run this spec.",
+  );
 
   test("returns a clear message and records nothing as invoiced", async ({
     ephemeralTenant,
@@ -67,34 +74,37 @@ test.describe("Invoicing refused for tampered pricing", () => {
 
     // --- A booking whose money fields were tampered with -------------------
     const guestEmail = `ci+invoice-refusal-${stamp}@mimmobook.test`;
-    const res = await request.post(`${SUPABASE_URL}/functions/v1/public-booking`, {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-        apikey: SUPABASE_ANON_KEY,
+    const res = await request.post(
+      `${SUPABASE_URL}/functions/v1/public-booking`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+          apikey: SUPABASE_ANON_KEY,
+        },
+        data: {
+          tenant_id: tenantId,
+          reservation_type: "restaurant",
+          restaurant_sub_type: "dine_in",
+          resource_id: resource!.id,
+          pricing_type: "fixed_price",
+          fixed_price: 500,
+          price_eur: 500,
+          original_price_eur: 500,
+          is_invoiced: true,
+          status: "confirmed",
+          pricing_details: "Agreed 500 EUR",
+          date: isoDate(240),
+          start_time: "18:00",
+          guests_count: 3,
+          guest_name: `TEST CI Invoice Refusal ${stamp}`,
+          guest_email: guestEmail,
+          guest_phone: "+358401234567",
+          special_requests: "Created by the invoicing refusal E2E spec.",
+        },
+        timeout: 30_000,
       },
-      data: {
-        tenant_id: tenantId,
-        reservation_type: "restaurant",
-        restaurant_sub_type: "dine_in",
-        resource_id: resource!.id,
-        pricing_type: "fixed_price",
-        fixed_price: 500,
-        price_eur: 500,
-        original_price_eur: 500,
-        is_invoiced: true,
-        status: "confirmed",
-        pricing_details: "Agreed 500 EUR",
-        date: isoDate(240),
-        start_time: "18:00",
-        guests_count: 3,
-        guest_name: `TEST CI Invoice Refusal ${stamp}`,
-        guest_email: guestEmail,
-        guest_phone: "+358401234567",
-        special_requests: "Created by the invoicing refusal E2E spec.",
-      },
-      timeout: 30_000,
-    });
+    );
     expect(res.status(), await res.text()).toBe(200);
 
     const cols =
@@ -113,17 +123,24 @@ test.describe("Invoicing refused for tampered pricing", () => {
     const stored = await fetchRow();
     expect(stored.status, "stored status").toBe("pending");
     expect(stored.is_invoiced, "stored invoiced flag").toBe(false);
-    expect(stored.price_eur, "the claimed 500 EUR must not be stored").toBeNull();
-    expect(stored.pricing_details, "claimed pricing notes must not be stored").toBeNull();
+    expect(
+      stored.price_eur,
+      "the claimed 500 EUR must not be stored",
+    ).toBeNull();
+    expect(
+      stored.pricing_details,
+      "claimed pricing notes must not be stored",
+    ).toBeNull();
 
     // --- A signed-in owner is refused, with the exact staff message --------
     const ownerEmail = `ci+invoice-owner-${stamp}@mimmobook.test`;
     const ownerPassword = `Ci-Tmp-${randomUUID()}-Z9!`;
-    const { data: ownerUser, error: ownerErr } = await admin.auth.admin.createUser({
-      email: ownerEmail,
-      password: ownerPassword,
-      email_confirm: true,
-    });
+    const { data: ownerUser, error: ownerErr } =
+      await admin.auth.admin.createUser({
+        email: ownerEmail,
+        password: ownerPassword,
+        email_confirm: true,
+      });
     expect(ownerErr, ownerErr?.message).toBeNull();
     const { error: memberErr } = await admin.from("tenant_users").insert({
       tenant_id: tenantId,
@@ -147,7 +164,10 @@ test.describe("Invoicing refused for tampered pricing", () => {
       .update({ is_invoiced: true })
       .eq("id", stored.id)
       .eq("tenant_id", tenantId);
-    expect(staffErr, "invoicing an unpriced booking must be refused").not.toBeNull();
+    expect(
+      staffErr,
+      "invoicing an unpriced booking must be refused",
+    ).not.toBeNull();
     expect(staffErr!.message, "refusal message").toContain(REFUSAL);
     expect((await fetchRow()).is_invoiced, "still not invoiced").toBe(false);
 
@@ -164,7 +184,10 @@ test.describe("Invoicing refused for tampered pricing", () => {
     const anon = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
       auth: { persistSession: false, autoRefreshToken: false },
     });
-    await anon.from("reservations").update({ is_invoiced: true }).eq("id", stored.id);
+    await anon
+      .from("reservations")
+      .update({ is_invoiced: true })
+      .eq("id", stored.id);
     expect((await fetchRow()).is_invoiced, "guest cannot invoice").toBe(false);
 
     // --- Nothing is recorded as invoiced ----------------------------------
@@ -178,8 +201,14 @@ test.describe("Invoicing refused for tampered pricing", () => {
 
     // ...and it contributes no revenue to a period report.
     const beforeRow = await fetchRow();
-    expect(reportAmounts(beforeRow as any).hasAmount, "no amount to report").toBe(false);
-    expect(sumReportAmounts([beforeRow as any]).charged, "no revenue to report").toBe(0);
+    expect(
+      reportAmounts(beforeRow as any).hasAmount,
+      "no amount to report",
+    ).toBe(false);
+    expect(
+      sumReportAmounts([beforeRow as any]).charged,
+      "no revenue to report",
+    ).toBe(0);
 
     // --- A bundle whose priced leg holds the total may be invoiced --------
     const groupId = randomUUID();
@@ -216,7 +245,10 @@ test.describe("Invoicing refused for tampered pricing", () => {
       .from("reservations")
       .update({ is_invoiced: true })
       .eq("id", freeLeg.id);
-    expect(bundleInvErr, "a bundle leg backed by a priced sibling may be invoiced").toBeNull();
+    expect(
+      bundleInvErr,
+      "a bundle leg backed by a priced sibling may be invoiced",
+    ).toBeNull();
 
     // --- Once a real amount exists, the same call succeeds ----------------
     const { error: priceErr } = await admin
@@ -235,9 +267,10 @@ test.describe("Invoicing refused for tampered pricing", () => {
     const afterRow = await fetchRow();
     expect(afterRow.is_invoiced, "invoiced after a real price").toBe(true);
     expect(Number(afterRow.price_eur), "stored amount").toBe(STAFF_PRICE);
-    expect(roundCents(reportAmounts(afterRow as any).charged), "reported amount").toBe(
-      STAFF_PRICE,
-    );
+    expect(
+      roundCents(reportAmounts(afterRow as any).charged),
+      "reported amount",
+    ).toBe(STAFF_PRICE);
 
     await admin.auth.admin.deleteUser(ownerUser!.user!.id);
   });

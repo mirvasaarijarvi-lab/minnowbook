@@ -119,7 +119,9 @@ describe("SERVICE_ROLE_KEY_MISSING UI guard", () => {
     await userEvent.click(submit);
 
     // Banner is rendered: tells the guest no reservation exists.
-    expect(await screen.findByTestId("booking-misconfig-banner")).toBeInTheDocument();
+    expect(
+      await screen.findByTestId("booking-misconfig-banner"),
+    ).toBeInTheDocument();
     // Submit is disabled: follow-up actions are visibly blocked.
     expect(submit).toBeDisabled();
     // Exactly one reservation attempt reached the network.
@@ -167,7 +169,9 @@ describe("SERVICE_ROLE_KEY_MISSING UI guard", () => {
   });
 
   it("does not pin the misconfig banner for unrelated errors", async () => {
-    const createReservation = vi.fn().mockRejectedValue(new Error("network blew up"));
+    const createReservation = vi
+      .fn()
+      .mockRejectedValue(new Error("network blew up"));
 
     render(<BookingHarness onCreateReservation={createReservation} />);
 

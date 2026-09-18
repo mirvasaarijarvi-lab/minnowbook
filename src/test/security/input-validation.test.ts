@@ -21,13 +21,22 @@ function validateEmail(email: string): string {
 }
 
 function validatePassword(password: string): string {
-  if (!password || typeof password !== "string") throw new Error("Password is required");
-  if (password.length < MIN_PASSWORD_LENGTH) throw new Error(`Password must be at least ${MIN_PASSWORD_LENGTH} characters`);
-  if (password.length > MAX_PASSWORD_LENGTH) throw new Error("Password too long");
-  if (!/[A-Z]/.test(password)) throw new Error("Password must contain an uppercase letter");
-  if (!/[a-z]/.test(password)) throw new Error("Password must contain a lowercase letter");
-  if (!/[0-9]/.test(password)) throw new Error("Password must contain a number");
-  if (!/[^A-Za-z0-9]/.test(password)) throw new Error("Password must contain a special character");
+  if (!password || typeof password !== "string")
+    throw new Error("Password is required");
+  if (password.length < MIN_PASSWORD_LENGTH)
+    throw new Error(
+      `Password must be at least ${MIN_PASSWORD_LENGTH} characters`,
+    );
+  if (password.length > MAX_PASSWORD_LENGTH)
+    throw new Error("Password too long");
+  if (!/[A-Z]/.test(password))
+    throw new Error("Password must contain an uppercase letter");
+  if (!/[a-z]/.test(password))
+    throw new Error("Password must contain a lowercase letter");
+  if (!/[0-9]/.test(password))
+    throw new Error("Password must contain a number");
+  if (!/[^A-Za-z0-9]/.test(password))
+    throw new Error("Password must contain a special character");
   return password;
 }
 
@@ -35,20 +44,24 @@ function validateDisplayName(name: string | undefined | null): string | null {
   if (!name) return null;
   if (typeof name !== "string") throw new Error("Invalid display name");
   const trimmed = name.trim();
-  if (trimmed.length > MAX_NAME_LENGTH) throw new Error("Display name too long");
+  if (trimmed.length > MAX_NAME_LENGTH)
+    throw new Error("Display name too long");
   return trimmed || null;
 }
 
 function validateRole(role: string): string {
   if (!role || typeof role !== "string") throw new Error("Role is required");
   if (VALID_ROLES.includes(role)) return role;
-  if (!/^[a-zA-Z0-9_-]{1,50}$/.test(role)) throw new Error("Invalid role format");
+  if (!/^[a-zA-Z0-9_-]{1,50}$/.test(role))
+    throw new Error("Invalid role format");
   return role;
 }
 
 function validateUuid(value: string, fieldName: string): string {
-  if (!value || typeof value !== "string") throw new Error(`${fieldName} is required`);
-  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!value || typeof value !== "string")
+    throw new Error(`${fieldName} is required`);
+  const uuidRegex =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   if (!uuidRegex.test(value)) throw new Error(`Invalid ${fieldName} format`);
   return value;
 }
@@ -60,7 +73,9 @@ describe("Input Validation - Security Regression Tests", () => {
     });
 
     it("rejects email without @", () => {
-      expect(() => validateEmail("invalid-email")).toThrow("Invalid email format");
+      expect(() => validateEmail("invalid-email")).toThrow(
+        "Invalid email format",
+      );
     });
 
     it("rejects email exceeding max length", () => {
@@ -77,7 +92,9 @@ describe("Input Validation - Security Regression Tests", () => {
     });
 
     it("rejects email with spaces in the middle", () => {
-      expect(() => validateEmail("user @example.com")).toThrow("Invalid email format");
+      expect(() => validateEmail("user @example.com")).toThrow(
+        "Invalid email format",
+      );
     });
   });
 
@@ -87,7 +104,9 @@ describe("Input Validation - Security Regression Tests", () => {
     });
 
     it("rejects password over 128 characters", () => {
-      expect(() => validatePassword("A1!" + "a".repeat(130))).toThrow("too long");
+      expect(() => validatePassword("A1!" + "a".repeat(130))).toThrow(
+        "too long",
+      );
     });
 
     it("requires uppercase letter", () => {
@@ -103,7 +122,9 @@ describe("Input Validation - Security Regression Tests", () => {
     });
 
     it("requires special character", () => {
-      expect(() => validatePassword("Abcdefghijkl12")).toThrow("special character");
+      expect(() => validatePassword("Abcdefghijkl12")).toThrow(
+        "special character",
+      );
     });
 
     it("accepts valid password", () => {
@@ -143,11 +164,15 @@ describe("Input Validation - Security Regression Tests", () => {
     });
 
     it("rejects role with invalid characters", () => {
-      expect(() => validateRole("role with spaces")).toThrow("Invalid role format");
+      expect(() => validateRole("role with spaces")).toThrow(
+        "Invalid role format",
+      );
     });
 
     it("rejects injection attempts in role", () => {
-      expect(() => validateRole("admin'; DROP TABLE--")).toThrow("Invalid role format");
+      expect(() => validateRole("admin'; DROP TABLE--")).toThrow(
+        "Invalid role format",
+      );
     });
 
     it("rejects empty role", () => {
@@ -162,12 +187,14 @@ describe("Input Validation - Security Regression Tests", () => {
   describe("UUID validation", () => {
     it("accepts valid UUID", () => {
       expect(validateUuid("550e8400-e29b-41d4-a716-446655440000", "id")).toBe(
-        "550e8400-e29b-41d4-a716-446655440000"
+        "550e8400-e29b-41d4-a716-446655440000",
       );
     });
 
     it("rejects malformed UUID", () => {
-      expect(() => validateUuid("not-a-uuid", "id")).toThrow("Invalid id format");
+      expect(() => validateUuid("not-a-uuid", "id")).toThrow(
+        "Invalid id format",
+      );
     });
 
     it("rejects empty UUID", () => {
@@ -175,13 +202,15 @@ describe("Input Validation - Security Regression Tests", () => {
     });
 
     it("rejects SQL injection in UUID field", () => {
-      expect(() => validateUuid("'; DROP TABLE users;--", "id")).toThrow("Invalid id format");
+      expect(() => validateUuid("'; DROP TABLE users;--", "id")).toThrow(
+        "Invalid id format",
+      );
     });
 
     it("rejects UUID with extra characters", () => {
-      expect(() => validateUuid("550e8400-e29b-41d4-a716-446655440000-extra", "id")).toThrow(
-        "Invalid id format"
-      );
+      expect(() =>
+        validateUuid("550e8400-e29b-41d4-a716-446655440000-extra", "id"),
+      ).toThrow("Invalid id format");
     });
   });
 });

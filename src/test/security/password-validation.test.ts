@@ -1,5 +1,9 @@
 import { describe, it, expect, afterEach, vi } from "vitest";
-import { validatePasswordSync, checkPasswordBreach, MIN_LENGTH } from "@/lib/password-validation";
+import {
+  validatePasswordSync,
+  checkPasswordBreach,
+  MIN_LENGTH,
+} from "@/lib/password-validation";
 
 async function sha1Hex(input: string): Promise<string> {
   const data = new TextEncoder().encode(input);
@@ -106,7 +110,9 @@ describe("Password Validation - Security Regression Tests", () => {
 
       expect(fetchMock).toHaveBeenCalledTimes(1);
       const requestedUrl = String(fetchMock.mock.calls[0][0]);
-      expect(requestedUrl).toMatch(/^https:\/\/api\.pwnedpasswords\.com\/range\/[A-F0-9]{5}$/);
+      expect(requestedUrl).toMatch(
+        /^https:\/\/api\.pwnedpasswords\.com\/range\/[A-F0-9]{5}$/,
+      );
     });
   });
 });

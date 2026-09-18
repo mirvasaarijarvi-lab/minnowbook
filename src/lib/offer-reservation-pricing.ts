@@ -74,10 +74,7 @@ export function resolveOfferReservationPrice(
 
 /** Why a price could (not) be resolved, so the UI can explain it to staff. */
 export type OfferPriceReason =
-  | "resolved"
-  | "no_resource"
-  | "unpriced"
-  | "ambiguous";
+  "resolved" | "no_resource" | "unpriced" | "ambiguous";
 
 export interface OfferPriceDescription {
   /** Resolved price, or null when staff must choose one. */
@@ -107,7 +104,10 @@ export function describeOfferReservationPrice(
   const subs = Array.isArray(res.sub_services) ? res.sub_services : [];
   const candidates = subs
     .map((s) => ({ name: (s?.name ?? "").trim(), price: num(s?.price_eur) }))
-    .filter((s): s is { name: string; price: number } => s.price != null && s.price > 0)
+    .filter(
+      (s): s is { name: string; price: number } =>
+        s.price != null && s.price > 0,
+    )
     .map((s) => ({ name: s.name, price: round2(s.price) }));
 
   return {
@@ -129,6 +129,8 @@ export function pickOfferResource<T extends OfferPricingResource>(
     );
     if (byName) return byName;
   }
-  const byType = resources.filter((r) => r.resource_type === opts.reservation_type);
+  const byType = resources.filter(
+    (r) => r.resource_type === opts.reservation_type,
+  );
   return byType.length === 1 ? byType[0] : (byType[0] ?? null);
 }

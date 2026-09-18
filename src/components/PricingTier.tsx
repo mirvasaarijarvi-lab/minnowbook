@@ -25,8 +25,18 @@ interface PricingTierProps {
 }
 
 const PricingTier = ({
-  name, price, description, features, reservationTypes, staffUsers,
-  isPopular = false, delay = 0, priceId, priceLabel, ctaLabel, ctaHref,
+  name,
+  price,
+  description,
+  features,
+  reservationTypes,
+  staffUsers,
+  isPopular = false,
+  delay = 0,
+  priceId,
+  priceLabel,
+  ctaLabel,
+  ctaHref,
 }: PricingTierProps) => {
   const t = useT();
   const [loading, setLoading] = useState(false);
@@ -35,22 +45,30 @@ const PricingTier = ({
     if (!priceId) return;
     setLoading(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       if (!session) {
         // Not logged in — redirect to signup
         window.location.href = "/signup";
         return;
       }
-      const { data, error } = await supabase.functions.invoke("create-checkout", {
-        body: { priceId },
-      });
+      const { data, error } = await supabase.functions.invoke(
+        "create-checkout",
+        {
+          body: { priceId },
+        },
+      );
       if (error) throw error;
       if (data?.url && typeof data.url === "string") {
         // Validate URL scheme against allowlist to prevent XSS via javascript:/data: URIs
         try {
           const parsed = new URL(data.url);
           const allowedHosts = ["checkout.stripe.com", "billing.stripe.com"];
-          if (parsed.protocol === "https:" && allowedHosts.includes(parsed.hostname)) {
+          if (
+            parsed.protocol === "https:" &&
+            allowedHosts.includes(parsed.hostname)
+          ) {
             window.open(parsed.toString(), "_blank", "noopener,noreferrer");
           } else {
             toast.error("Invalid checkout URL received");
@@ -74,7 +92,7 @@ const PricingTier = ({
           ? "border-accent ring-2 ring-accent/40 shadow-hero md:scale-[1.02] bg-accent/5"
           : isPopular
             ? "border-accent shadow-hero md:scale-[1.02] bg-card"
-            : "border-border shadow-card bg-card"
+            : "border-border shadow-card bg-card",
       )}
       style={{ animationDelay: `${delay}ms` }}
     >
@@ -87,33 +105,49 @@ const PricingTier = ({
       )}
 
       <div className="mb-6">
-        <h3 className="font-serif text-xl font-semibold text-foreground">{name}</h3>
+        <h3 className="font-serif text-xl font-semibold text-foreground">
+          {name}
+        </h3>
         <p className="text-sm text-muted-foreground mt-1">{description}</p>
       </div>
 
       <div className="mb-6">
         {priceLabel ? (
           <div className="flex items-baseline gap-1">
-            <span className="text-3xl font-serif font-bold text-foreground">{priceLabel}</span>
+            <span className="text-3xl font-serif font-bold text-foreground">
+              {priceLabel}
+            </span>
           </div>
         ) : (
           <>
             <div className="flex items-baseline gap-1">
-              <span className="text-4xl font-serif font-bold text-foreground">€{price}</span>
-              <span className="text-muted-foreground text-sm">{t("pricing.perMonth")}</span>
+              <span className="text-4xl font-serif font-bold text-foreground">
+                €{price}
+              </span>
+              <span className="text-muted-foreground text-sm">
+                {t("pricing.perMonth")}
+              </span>
             </div>
-            <p className="text-xs text-muted-foreground mt-1">{t("pricing.trialIncluded")} · Incl. VAT</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              {t("pricing.trialIncluded")} · Incl. VAT
+            </p>
           </>
         )}
       </div>
 
       <div className="mb-6 space-y-2 pb-6 border-b border-border">
         <div className="flex items-center justify-between text-sm">
-          <span className="text-muted-foreground">{t("pricing.reservationTypes")}</span>
-          <span className="font-medium text-foreground">{reservationTypes}</span>
+          <span className="text-muted-foreground">
+            {t("pricing.reservationTypes")}
+          </span>
+          <span className="font-medium text-foreground">
+            {reservationTypes}
+          </span>
         </div>
         <div className="flex items-center justify-between text-sm">
-          <span className="text-muted-foreground">{t("pricing.staffUsers")}</span>
+          <span className="text-muted-foreground">
+            {t("pricing.staffUsers")}
+          </span>
           <span className="font-medium text-foreground">{staffUsers}</span>
         </div>
       </div>
@@ -134,22 +168,22 @@ const PricingTier = ({
           <Link to={ctaHref}>{ctaLabel}</Link>
         </Button>
       ) : (
-      <Button
-        variant={isPopular ? "hero" : "default"}
-        size="lg"
-        className={cn("w-full", loading && "opacity-90")}
-        onClick={handleSubscribe}
-        disabled={loading}
-      >
-        {loading ? (
-          <>
-            <Loader2 className="h-4 w-4 animate-spin mr-2" />
-            {"Redirecting to checkout…"}
-          </>
-        ) : (
-          t("common.startFreeTrial")
-        )}
-      </Button>
+        <Button
+          variant={isPopular ? "hero" : "default"}
+          size="lg"
+          className={cn("w-full", loading && "opacity-90")}
+          onClick={handleSubscribe}
+          disabled={loading}
+        >
+          {loading ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              {"Redirecting to checkout…"}
+            </>
+          ) : (
+            t("common.startFreeTrial")
+          )}
+        </Button>
       )}
 
       {loading && (

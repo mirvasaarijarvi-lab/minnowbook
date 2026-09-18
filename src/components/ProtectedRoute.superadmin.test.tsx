@@ -40,7 +40,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 const mockUseAuth = vi.fn();
 vi.mock("@/contexts/AuthContext", () => ({
   useAuth: () => mockUseAuth(),
-  AuthProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  AuthProvider: ({ children }: { children: React.ReactNode }) => (
+    <>{children}</>
+  ),
 }));
 
 // Track invoke calls so we can assert they DON'T happen for anonymous users.
@@ -168,9 +170,7 @@ describe("Anonymous /superadmin visit (auth-gate before role-gate)", () => {
     expect(screen.queryByText(/403 · Access denied/i)).not.toBeInTheDocument();
     expect(screen.queryByTestId("superadmin-content")).not.toBeInTheDocument();
     // No <main data-http-status="403"> element should exist either.
-    expect(
-      document.querySelector('main[data-http-status="403"]'),
-    ).toBeNull();
+    expect(document.querySelector('main[data-http-status="403"]')).toBeNull();
   });
 
   it("does not invoke the forbidden-status or log-forbidden-access beacons", async () => {
@@ -185,7 +185,9 @@ describe("Anonymous /superadmin visit (auth-gate before role-gate)", () => {
     // the functions.invoke spy. This guarantees anonymous denials don't
     // pollute the audit log or the forbidden-status monitoring stream.
     const { supabase } = await import("@/integrations/supabase/client");
-    const invokeSpy = (supabase as unknown as { __invokeSpy: ReturnType<typeof vi.fn> }).__invokeSpy;
+    const invokeSpy = (
+      supabase as unknown as { __invokeSpy: ReturnType<typeof vi.fn> }
+    ).__invokeSpy;
     expect(invokeSpy).not.toHaveBeenCalled();
   });
 
@@ -203,6 +205,8 @@ describe("Anonymous /superadmin visit (auth-gate before role-gate)", () => {
     // should render — the user must see a neutral loading state.
     expect(screen.queryByTestId("login-page")).not.toBeInTheDocument();
     expect(screen.queryByText(/403 · Access denied/i)).not.toBeInTheDocument();
-    expect(screen.getByRole("status", { name: /loading/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("status", { name: /loading/i }),
+    ).toBeInTheDocument();
   });
 });

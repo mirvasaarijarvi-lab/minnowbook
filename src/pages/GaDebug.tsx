@@ -112,10 +112,10 @@ export default function GaDebug() {
     <main className="container mx-auto max-w-5xl px-4 py-8">
       <h1 className="font-serif text-3xl mb-2">GA4 / GTM diagnostics</h1>
       <p className="text-muted-foreground mb-6">
-        Fire test events and watch them land in the browser dataLayer.
-        Open GA4, Admin, DebugView in another tab to verify they reach
-        Google within seconds. The conversion column populates after the
-        daily processing cycle (typically 24 to 48 hours).
+        Fire test events and watch them land in the browser dataLayer. Open GA4,
+        Admin, DebugView in another tab to verify they reach Google within
+        seconds. The conversion column populates after the daily processing
+        cycle (typically 24 to 48 hours).
       </p>
 
       <Card className="mb-6">
@@ -133,15 +133,13 @@ export default function GaDebug() {
           </div>
           <div>
             <div className="text-muted-foreground">Analytics consent</div>
-            <Badge
-              variant={consent === "accepted" ? "default" : "secondary"}
-            >
+            <Badge variant={consent === "accepted" ? "default" : "secondary"}>
               {consent}
             </Badge>
             {consent !== "accepted" && (
               <p className="mt-1 text-xs text-muted-foreground">
-                Events still hit the dataLayer, but GTM tags will not
-                forward them to GA4 until consent is accepted.
+                Events still hit the dataLayer, but GTM tags will not forward
+                them to GA4 until consent is accepted.
               </p>
             )}
           </div>
@@ -151,8 +149,8 @@ export default function GaDebug() {
               {debugBridge ? "active on this host" : "inactive"}
             </Badge>
             <p className="mt-1 text-xs text-muted-foreground">
-              When active, events are also sent with debug_mode=true so
-              they appear in GA4 DebugView in near real-time.
+              When active, events are also sent with debug_mode=true so they
+              appear in GA4 DebugView in near real-time.
             </p>
           </div>
         </CardContent>
@@ -165,9 +163,7 @@ export default function GaDebug() {
         <CardContent className="flex flex-wrap gap-3">
           <Button
             onClick={() =>
-              fire("sign_up", () =>
-                pushDebug("sign_up", { method: "email" }),
-              )
+              fire("sign_up", () => pushDebug("sign_up", { method: "email" }))
             }
           >
             Push sign_up

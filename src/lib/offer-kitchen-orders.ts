@@ -83,7 +83,10 @@ interface ParsedLine {
  * "Salmon x 2", and any of those followed by " - no dill" or " (no dill)".
  */
 function parseLine(raw: string): ParsedLine | null {
-  let text = raw.trim().replace(/^[-*•\s]+/, "").trim();
+  let text = raw
+    .trim()
+    .replace(/^[-*•\s]+/, "")
+    .trim();
   if (!text) return null;
 
   let notes: string | null = null;
@@ -117,7 +120,9 @@ function parseLine(raw: string): ParsedLine | null {
 }
 
 /** Turn free-text menu content into kitchen order drafts. */
-export function buildKitchenOrderDrafts(menu: string | null | undefined): KitchenOrderDraft[] {
+export function buildKitchenOrderDrafts(
+  menu: string | null | undefined,
+): KitchenOrderDraft[] {
   if (typeof menu !== "string" || !menu.trim()) return [];
   const drafts: KitchenOrderDraft[] = [];
   for (const raw of menu.split(/\r?\n/)) {
@@ -145,14 +150,17 @@ export function pickKitchenReservationId(
   ownLeg: OfferMenuLeg,
 ): string | null {
   const isKitchen = (leg: OfferMenuLeg) =>
-    (KITCHEN_RESERVATION_TYPES as readonly string[]).includes(leg.reservationType) &&
-    !!leg.reservationId;
+    (KITCHEN_RESERVATION_TYPES as readonly string[]).includes(
+      leg.reservationType,
+    ) && !!leg.reservationId;
   if (isKitchen(ownLeg)) return ownLeg.reservationId;
   const restaurant = legs.find(
     (l) => l.reservationType === "restaurant" && !!l.reservationId,
   );
   if (restaurant) return restaurant.reservationId;
-  const venue = legs.find((l) => l.reservationType === "venue" && !!l.reservationId);
+  const venue = legs.find(
+    (l) => l.reservationType === "venue" && !!l.reservationId,
+  );
   return venue?.reservationId ?? null;
 }
 

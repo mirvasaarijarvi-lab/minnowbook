@@ -40,13 +40,19 @@ vi.mock("@/contexts/I18nContext", () => ({
 }));
 
 vi.mock("@/contexts/AuthContext", () => ({
-  useAuth: () => ({ session: { user: { id: "user-1" } }, user: { id: "user-1" } }),
+  useAuth: () => ({
+    session: { user: { id: "user-1" } },
+    user: { id: "user-1" },
+  }),
 }));
 
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 
 // `tenant_settings` read outcome, scripted per test.
-let settingsResult: { data: unknown; error: unknown } = { data: null, error: null };
+let settingsResult: { data: unknown; error: unknown } = {
+  data: null,
+  error: null,
+};
 
 vi.mock("@/integrations/supabase/client", () => {
   const chain = () => {
@@ -65,7 +71,11 @@ vi.mock("@/integrations/supabase/client", () => {
     supabase: {
       from: vi.fn(() => chain()),
       rpc: vi.fn(async () => ({ data: null, error: null })),
-      storage: { from: () => ({ createSignedUrl: vi.fn(async () => ({ data: null, error: null })) }) },
+      storage: {
+        from: () => ({
+          createSignedUrl: vi.fn(async () => ({ data: null, error: null })),
+        }),
+      },
       functions: { invoke: vi.fn(async () => ({ data: null, error: null })) },
       auth: { getSession: vi.fn(async () => ({ data: { session: null } })) },
     },
@@ -81,7 +91,7 @@ const renderPanel = () => {
   return render(
     <QueryClientProvider client={client}>
       <SettingsPanel />
-    </QueryClientProvider>
+    </QueryClientProvider>,
   );
 };
 
@@ -95,18 +105,23 @@ describe("SettingsPanel permission empty state", () => {
   it("shows the locked empty state with a request-access CTA when the settings read is denied", async () => {
     settingsResult = {
       data: null,
-      error: { message: "permission denied for table tenant_settings", code: "42501" },
+      error: {
+        message: "permission denied for table tenant_settings",
+        code: "42501",
+      },
     };
 
     renderPanel();
 
-    expect(await screen.findByText("settings.noAccessTitle")).toBeInTheDocument();
+    expect(
+      await screen.findByText("settings.noAccessTitle"),
+    ).toBeInTheDocument();
     expect(screen.getByText("settings.noAccessDesc")).toBeInTheDocument();
     expect(
-      screen.getByText("permission denied for table tenant_settings")
+      screen.getByText("permission denied for table tenant_settings"),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: /access.requestButton/ })
+      screen.getByRole("button", { name: /access.requestButton/ }),
     ).toBeInTheDocument();
   });
 
@@ -128,8 +143,10 @@ describe("SettingsPanel permission empty state", () => {
     renderPanel();
 
     await waitFor(() =>
-      expect(screen.queryByText("settings.noAccessTitle")).toBeNull()
+      expect(screen.queryByText("settings.noAccessTitle")).toBeNull(),
     );
-    expect(screen.queryByRole("button", { name: /access.requestButton/ })).toBeNull();
+    expect(
+      screen.queryByRole("button", { name: /access.requestButton/ }),
+    ).toBeNull();
   });
 });

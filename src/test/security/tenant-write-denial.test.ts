@@ -26,8 +26,15 @@ import {
   TARGET_TENANT,
   evaluateTenantAccess,
 } from "./fixtures/tenant-access-matrix";
-import { expectWriteDenied, type DenialResult, type QueryContext } from "./rls-assert";
-import { applyReportGuard, WITHHELD_NOTICE } from "./fixtures/report-render-guard";
+import {
+  expectWriteDenied,
+  type DenialResult,
+  type QueryContext,
+} from "./rls-assert";
+import {
+  applyReportGuard,
+  WITHHELD_NOTICE,
+} from "./fixtures/report-render-guard";
 import {
   parseRlsFailure,
   renderHtml,
@@ -47,7 +54,8 @@ const permissionDenied = {
 
 const rlsViolation = {
   code: "42501",
-  message: 'new row violates row-level security policy for table "reservations"',
+  message:
+    'new row violates row-level security policy for table "reservations"',
   details: null,
   hint: null,
   name: "PostgrestError",
@@ -56,10 +64,22 @@ const rlsViolation = {
 
 /** The three shapes a correct write denial takes in practice. */
 const DENIAL_SHAPES: Array<{ label: string; result: DenialResult }> = [
-  { label: "permission denied error", result: { data: null, error: permissionDenied } },
-  { label: "row-level security violation", result: { data: null, error: rlsViolation } },
-  { label: "silent no-op: zero affected rows", result: { data: [], error: null } },
-  { label: "silent no-op: no result at all", result: { data: undefined, error: null } },
+  {
+    label: "permission denied error",
+    result: { data: null, error: permissionDenied },
+  },
+  {
+    label: "row-level security violation",
+    result: { data: null, error: rlsViolation },
+  },
+  {
+    label: "silent no-op: zero affected rows",
+    result: { data: [], error: null },
+  },
+  {
+    label: "silent no-op: no result at all",
+    result: { data: undefined, error: null },
+  },
 ];
 
 function ctxFor(c: WriteDenialCase): QueryContext {
@@ -80,11 +100,24 @@ const deniedGuard: TenantGuardRecord = {
   tenantB: TARGET_TENANT,
   membershipA: true,
   membershipB: false,
-  membershipRowA: { role: "owner", isApproved: true, userId: "u-a", found: true },
-  membershipRowB: { role: "staff", isApproved: false, userId: "u-b", found: true },
+  membershipRowA: {
+    role: "owner",
+    isApproved: true,
+    userId: "u-a",
+    found: true,
+  },
+  membershipRowB: {
+    role: "staff",
+    isApproved: false,
+    userId: "u-b",
+    found: true,
+  },
 };
 
-function payloadFor(entries: ReportEntry[], guard = deniedGuard): ReportPayload {
+function payloadFor(
+  entries: ReportEntry[],
+  guard = deniedGuard,
+): ReportPayload {
   return {
     generatedAt: new Date().toISOString(),
     flavor: "verify-core",
@@ -126,12 +159,18 @@ function leakMessage(c: WriteDenialCase): string {
 describe("tenant-denied users cannot write across tenants", () => {
   it("covers create, update and delete on filtered and unfiltered paths", () => {
     const kinds = new Set(WRITE_DENIAL_MATRIX.map((c) => c.kind));
-    expect(kinds).toEqual(new Set(["insert", "update", "delete", "upsert", "rpc"]));
+    expect(kinds).toEqual(
+      new Set(["insert", "update", "delete", "upsert", "rpc"]),
+    );
     const ops = new Set(WRITE_DENIAL_MATRIX.map((c) => c.operation));
     expect(ops).toEqual(new Set(["INSERT", "UPDATE", "DELETE"]));
     expect(WRITE_DENIAL_MATRIX.some((c) => c.unfiltered)).toBe(true);
-    expect(WRITE_DENIAL_MATRIX.filter((c) => c.unfiltered).length).toBeGreaterThanOrEqual(5);
-    expect(new Set(WRITE_DENIAL_MATRIX.map((c) => c.label)).size).toBe(WRITE_DENIAL_MATRIX.length);
+    expect(
+      WRITE_DENIAL_MATRIX.filter((c) => c.unfiltered).length,
+    ).toBeGreaterThanOrEqual(5);
+    expect(new Set(WRITE_DENIAL_MATRIX.map((c) => c.label)).size).toBe(
+      WRITE_DENIAL_MATRIX.length,
+    );
   });
 
   it("treats the acting pair as denied, so nothing it captures may be published", () => {
@@ -139,46 +178,51 @@ describe("tenant-denied users cannot write across tenants", () => {
     expect(verdict.verdict).toBe("denied");
   });
 
-  describe.each(WRITE_DENIAL_MATRIX.map((c) => [c.label, c] as const))("%s", (_label, c) => {
-    it.each(DENIAL_SHAPES.map((s) => [s.label, s.result] as const))(
-      "accepts denial via %s",
-      (_shape, result) => {
-        expect(() => expectWriteDenied(ctxFor(c), result)).not.toThrow();
-      },
-    );
+  describe.each(WRITE_DENIAL_MATRIX.map((c) => [c.label, c] as const))(
+    "%s",
+    (_label, c) => {
+      it.each(DENIAL_SHAPES.map((s) => [s.label, s.result] as const))(
+        "accepts denial via %s",
+        (_shape, result) => {
+          expect(() => expectWriteDenied(ctxFor(c), result)).not.toThrow();
+        },
+      );
 
-    it("fails with full context when the write actually succeeds", () => {
-      const message = leakMessage(c);
-      expect(message).toContain("RLS DENIAL FAILED");
-      expect(message).toContain(`Table:           ${c.table}`);
-      expect(message).toContain(`Operation:       ${c.operation}`);
-      expect(message).toContain(`Attempted query: ${c.attemptedQuery}`);
-      expect(message).toContain(`Acting tenant:   ${ACTING_TENANT}`);
-      expect(message).toContain("Returned rows:");
-      expect(parseRlsFailure(message)).not.toBeNull();
-    });
+      it("fails with full context when the write actually succeeds", () => {
+        const message = leakMessage(c);
+        expect(message).toContain("RLS DENIAL FAILED");
+        expect(message).toContain(`Table:           ${c.table}`);
+        expect(message).toContain(`Operation:       ${c.operation}`);
+        expect(message).toContain(`Attempted query: ${c.attemptedQuery}`);
+        expect(message).toContain(`Acting tenant:   ${ACTING_TENANT}`);
+        expect(message).toContain("Returned rows:");
+        expect(parseRlsFailure(message)).not.toBeNull();
+      });
 
-    it("withholds the leak details from the report for a denied pair", () => {
-      const guarded = applyReportGuard(payloadFor([entryFor(c.label, leakMessage(c))]));
-      expect(guarded.denied).toBe(true);
-      const entry = guarded.payload.entries[0];
-      expect(entry.errorMessage).toBe(WITHHELD_NOTICE);
-      expect(entry.errorStack).toBeNull();
-      expect(entry.rlsDetails?.withheld).toBe(true);
+      it("withholds the leak details from the report for a denied pair", () => {
+        const guarded = applyReportGuard(
+          payloadFor([entryFor(c.label, leakMessage(c))]),
+        );
+        expect(guarded.denied).toBe(true);
+        const entry = guarded.payload.entries[0];
+        expect(entry.errorMessage).toBe(WITHHELD_NOTICE);
+        expect(entry.errorStack).toBeNull();
+        expect(entry.rlsDetails?.withheld).toBe(true);
 
-      const json = JSON.stringify(guarded.payload);
-      const html = renderHtml(guarded.payload);
-      for (const value of FOREIGN_WRITE_METADATA) {
-        if (value === TARGET_TENANT) continue; // guard section lists the pair ids only
-        expect(json).not.toContain(value);
-        expect(html).not.toContain(value);
-      }
-      expect(json).not.toContain(c.attemptedQuery);
-      expect(html).not.toContain(c.attemptedQuery);
-      expect(json).not.toContain("Returned rows");
-      expect(html).not.toContain("Returned rows");
-    });
-  });
+        const json = JSON.stringify(guarded.payload);
+        const html = renderHtml(guarded.payload);
+        for (const value of FOREIGN_WRITE_METADATA) {
+          if (value === TARGET_TENANT) continue; // guard section lists the pair ids only
+          expect(json).not.toContain(value);
+          expect(html).not.toContain(value);
+        }
+        expect(json).not.toContain(c.attemptedQuery);
+        expect(html).not.toContain(c.attemptedQuery);
+        expect(json).not.toContain("Returned rows");
+        expect(html).not.toContain("Returned rows");
+      });
+    },
+  );
 
   describe("a whole denied write run", () => {
     it("reports every mutation path as denied with nothing captured", () => {
@@ -197,25 +241,36 @@ describe("tenant-denied users cannot write across tenants", () => {
       const allowedGuard: TenantGuardRecord = {
         ...deniedGuard,
         membershipB: true,
-        membershipRowB: { role: "owner", isApproved: true, userId: "u-b", found: true },
+        membershipRowB: {
+          role: "owner",
+          isApproved: true,
+          userId: "u-b",
+          found: true,
+        },
       };
       expect(evaluateTenantAccess(allowedGuard).verdict).toBe("allowed");
-      const entries = WRITE_DENIAL_MATRIX.map((c) => entryFor(c.label, leakMessage(c)));
+      const entries = WRITE_DENIAL_MATRIX.map((c) =>
+        entryFor(c.label, leakMessage(c)),
+      );
       const guarded = applyReportGuard(payloadFor(entries, allowedGuard));
       expect(guarded.denied).toBe(false);
       const html = renderHtml(guarded.payload);
       expect(html).toContain("RLS DENIAL FAILED");
       for (const c of WRITE_DENIAL_MATRIX) {
-        expect(guarded.payload.entries.some((e) => e.name === c.label && e.status === "failed")).toBe(
-          true,
-        );
+        expect(
+          guarded.payload.entries.some(
+            (e) => e.name === c.label && e.status === "failed",
+          ),
+        ).toBe(true);
       }
     });
 
     it("never counts a denial as a leak, in any shape, for any path", () => {
       for (const c of WRITE_DENIAL_MATRIX) {
         for (const shape of DENIAL_SHAPES) {
-          expect(() => expectWriteDenied(ctxFor(c), shape.result)).not.toThrow();
+          expect(() =>
+            expectWriteDenied(ctxFor(c), shape.result),
+          ).not.toThrow();
         }
       }
     });

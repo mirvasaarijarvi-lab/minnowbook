@@ -22,7 +22,13 @@
 //             → prints one of: STABLE | OBSERVE | RECOMMEND_QUARANTINE
 //             → exit code 0 always; consumers key off stdout.
 
-import { readFileSync, appendFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
+import {
+  readFileSync,
+  appendFileSync,
+  writeFileSync,
+  existsSync,
+  mkdirSync,
+} from "node:fs";
 import { dirname, resolve, relative, isAbsolute } from "node:path";
 
 const DEFAULT_HISTORY = ".github/security-concurrency-flake-history.jsonl";
@@ -43,13 +49,19 @@ function safeResolve(inputPath, { label }) {
   if (inputPath.includes("\0")) {
     throw new Error(`${label}: path must not contain NUL bytes`);
   }
-  const abs = isAbsolute(inputPath) ? resolve(inputPath) : resolve(REPO_ROOT, inputPath);
+  const abs = isAbsolute(inputPath)
+    ? resolve(inputPath)
+    : resolve(REPO_ROOT, inputPath);
   const rel = relative(REPO_ROOT, abs);
   if (rel.startsWith("..") || isAbsolute(rel)) {
-    throw new Error(`${label}: path must stay inside the repo root (${REPO_ROOT})`);
+    throw new Error(
+      `${label}: path must stay inside the repo root (${REPO_ROOT})`,
+    );
   }
   if (!ALLOWED_EXTS.some((ext) => abs.toLowerCase().endsWith(ext))) {
-    throw new Error(`${label}: path must end with one of ${ALLOWED_EXTS.join(", ")}`);
+    throw new Error(
+      `${label}: path must end with one of ${ALLOWED_EXTS.join(", ")}`,
+    );
   }
   return abs;
 }
@@ -82,7 +94,9 @@ function loadHistory(path) {
       try {
         return JSON.parse(line);
       } catch (err) {
-        console.error(`[flake-tracker] skipping malformed line ${i + 1}: ${err.message}`);
+        console.error(
+          `[flake-tracker] skipping malformed line ${i + 1}: ${err.message}`,
+        );
         return null;
       }
     })
@@ -129,7 +143,9 @@ function statsFor(history, testId, windowDays) {
     const prev = byRun.get(key);
     if (!prev || r.attempt > prev.attempt) byRun.set(key, r);
   }
-  const failedRuns = [...byRun.values()].filter((r) => r.outcome === "fail").length;
+  const failedRuns = [...byRun.values()].filter(
+    (r) => r.outcome === "fail",
+  ).length;
   const totalRuns = byRun.size;
   return {
     testId,
@@ -171,7 +187,10 @@ function report({ path, configPath, testId, asJson }) {
     return { ...s, recommendation: decide(s, cfg.quarantineThresholds) };
   });
   if (asJson) {
-    process.stdout.write(JSON.stringify({ generatedAt: new Date().toISOString(), rows }, null, 2) + "\n");
+    process.stdout.write(
+      JSON.stringify({ generatedAt: new Date().toISOString(), rows }, null, 2) +
+        "\n",
+    );
     return;
   }
   if (rows.length === 0) {
@@ -186,7 +205,9 @@ function report({ path, configPath, testId, asJson }) {
   );
   console.log("");
   console.log("  Recommendation        | Fails/Runs | Rate  | Test");
-  console.log("  ----------------------+------------+-------+-----------------------------------------");
+  console.log(
+    "  ----------------------+------------+-------+-----------------------------------------",
+  );
   for (const r of rows) {
     console.log(
       `  ${r.recommendation.padEnd(21)} | ${String(r.failedRuns).padStart(4)}/${String(r.totalRuns).padEnd(5)} | ${(r.failureRate * 100).toFixed(0).padStart(4)}% | ${r.testId}`,
@@ -197,11 +218,17 @@ function report({ path, configPath, testId, asJson }) {
 function prune({ path, configPath }) {
   const cfg = loadConfig(configPath);
   const history = loadHistory(path);
-  const cutoff = Date.now() - cfg.quarantineThresholds.windowDays * 2 * 24 * 60 * 60 * 1000;
+  const cutoff =
+    Date.now() - cfg.quarantineThresholds.windowDays * 2 * 24 * 60 * 60 * 1000;
   const kept = history.filter((r) => Date.parse(r.ts) >= cutoff);
   const safe = ensureDir(path);
-  writeFileSync(safe, kept.map((r) => JSON.stringify(r)).join("\n") + (kept.length ? "\n" : ""));
-  console.log(`[flake-tracker] pruned ${history.length - kept.length} record(s); kept ${kept.length}.`);
+  writeFileSync(
+    safe,
+    kept.map((r) => JSON.stringify(r)).join("\n") + (kept.length ? "\n" : ""),
+  );
+  console.log(
+    `[flake-tracker] pruned ${history.length - kept.length} record(s); kept ${kept.length}.`,
+  );
 }
 
 const { sub, args } = parseArgs(process.argv.slice(2));
@@ -220,11 +247,18 @@ try {
         runId: args["run-id"],
         sha: args.sha,
       });
-      console.log(`[flake-tracker] recorded ${rec.outcome} attempt=${rec.attempt} test=${rec.testId}`);
+      console.log(
+        `[flake-tracker] recorded ${rec.outcome} attempt=${rec.attempt} test=${rec.testId}`,
+      );
       break;
     }
     case "report":
-      report({ path, configPath, testId: args["test-id"], asJson: args.json === "true" });
+      report({
+        path,
+        configPath,
+        testId: args["test-id"],
+        asJson: args.json === "true",
+      });
       break;
     case "prune":
       prune({ path, configPath });
@@ -233,7 +267,11 @@ try {
       if (!args["test-id"]) throw new Error("decide: --test-id required");
       const cfg = loadConfig(configPath);
       const history = loadHistory(path);
-      const s = statsFor(history, args["test-id"], cfg.quarantineThresholds.windowDays);
+      const s = statsFor(
+        history,
+        args["test-id"],
+        cfg.quarantineThresholds.windowDays,
+      );
       console.log(decide(s, cfg.quarantineThresholds));
       break;
     }

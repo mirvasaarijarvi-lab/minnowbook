@@ -9,7 +9,14 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { UtensilsCrossed, Building2, BedDouble, HeartPulse, Sparkles, Loader2 } from "lucide-react";
+import {
+  UtensilsCrossed,
+  Building2,
+  BedDouble,
+  HeartPulse,
+  Sparkles,
+  Loader2,
+} from "lucide-react";
 
 const TYPE_OPTIONS = [
   { id: "restaurant", icon: UtensilsCrossed },
@@ -62,7 +69,8 @@ const ReservationTypesCard = () => {
   const mutation = useMutation({
     mutationFn: async () => {
       if (!tenantId) throw new Error("No tenant");
-      if (selected.length === 0) throw new Error(t("settings.reservationTypesDesc"));
+      if (selected.length === 0)
+        throw new Error(t("settings.reservationTypesDesc"));
       const { error } = await supabase
         .from("tenants")
         .update({ allowed_reservation_types: selected })
@@ -89,15 +97,22 @@ const ReservationTypesCard = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg font-serif">{t("settings.reservationTypes")}</CardTitle>
-        <p className="text-sm text-muted-foreground">{t("settings.reservationTypesDesc")}</p>
+        <CardTitle className="text-lg font-serif">
+          {t("settings.reservationTypes")}
+        </CardTitle>
+        <p className="text-sm text-muted-foreground">
+          {t("settings.reservationTypesDesc")}
+        </p>
         {max !== null ? (
           <p className="text-xs text-muted-foreground">
-            {t("settings.reservationTypesLimit").replace("{max}", String(max))} ({selected.length}/{max})
+            {t("settings.reservationTypesLimit").replace("{max}", String(max))}{" "}
+            ({selected.length}/{max})
           </p>
         ) : (
           <p className="text-xs text-muted-foreground">
-            {isSystemAdmin ? "System admin: no limit (all types selectable)." : `${selected.length} selected`}
+            {isSystemAdmin
+              ? "System admin: no limit (all types selectable)."
+              : `${selected.length} selected`}
           </p>
         )}
       </CardHeader>
@@ -122,7 +137,9 @@ const ReservationTypesCard = () => {
                 <div className="flex-1 space-y-1">
                   <div className="flex items-center gap-2">
                     <Icon className="h-4 w-4 text-primary" />
-                    <Label className="font-medium cursor-pointer">{tDynamic(`dashboard.${id}`)}</Label>
+                    <Label className="font-medium cursor-pointer">
+                      {tDynamic(`dashboard.${id}`)}
+                    </Label>
                   </div>
                 </div>
               </label>
@@ -132,9 +149,13 @@ const ReservationTypesCard = () => {
         <div className="flex justify-end">
           <Button
             onClick={() => mutation.mutate()}
-            disabled={!dirty || mutation.isPending || selected.length === 0 || !isOwner}
+            disabled={
+              !dirty || mutation.isPending || selected.length === 0 || !isOwner
+            }
           >
-            {mutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {mutation.isPending && (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            )}
             {t("common.save")}
           </Button>
         </div>

@@ -86,7 +86,10 @@ test.describe("Tampered client pricing is recomputed server-side", () => {
     !(process.env.SERVICE_ROLE_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY),
     "Set SERVICE_ROLE_KEY to run this spec.",
   );
-  test.skip(!SUPABASE_ANON_KEY, "Set VITE_SUPABASE_PUBLISHABLE_KEY to run this spec.");
+  test.skip(
+    !SUPABASE_ANON_KEY,
+    "Set VITE_SUPABASE_PUBLISHABLE_KEY to run this spec.",
+  );
 
   test("ignores client-supplied prices and reports the resource-level amounts", async ({
     ephemeralTenant,
@@ -204,7 +207,9 @@ test.describe("Tampered client pricing is recomputed server-side", () => {
       guest_name: dineGuest,
       guest_email: dineEmail,
       guest_phone: "+358401234567",
-      selected_sub_services: [{ id: "set-menu", name: "Set menu", price_eur: 1, qty: 1 }],
+      selected_sub_services: [
+        { id: "set-menu", name: "Set menu", price_eur: 1, qty: 1 },
+      ],
       ...TAMPERED_MONEY_FIELDS,
     });
     const dineBody = await dineRes.text();
@@ -212,7 +217,9 @@ test.describe("Tampered client pricing is recomputed server-side", () => {
 
     const { data: dineRows, error: dineRowErr } = await admin
       .from("reservations")
-      .select("id, price_eur, original_price_eur, is_invoiced, status, pricing_type")
+      .select(
+        "id, price_eur, original_price_eur, is_invoiced, status, pricing_type",
+      )
       .eq("tenant_id", tenantId)
       .eq("guest_email", dineEmail);
     expect(dineRowErr, dineRowErr?.message).toBeNull();
@@ -236,30 +243,36 @@ test.describe("Tampered client pricing is recomputed server-side", () => {
     expect(calcNights(reportRow)).toBe(NIGHTS);
     expect(calcBreakfastPrice(reportRow)).toBeCloseTo(EXPECTED_BREAKFAST, 2);
     expect(calcRoomPrice(reportRow)).toBeCloseTo(EXPECTED_ROOM, 2);
-    expect(calcRoomPrice(reportRow) + calcBreakfastPrice(reportRow)).toBeCloseTo(
-      Number(stay.price_eur),
-      2,
-    );
+    expect(
+      calcRoomPrice(reportRow) + calcBreakfastPrice(reportRow),
+    ).toBeCloseTo(Number(stay.price_eur), 2);
 
     // 6. The dashboard shows the canonical amount, never the injected 1 EUR.
-    const { error: pwErr } = await admin.auth.admin.updateUserById(ownerUserId, {
-      password: ownerPassword,
-    });
+    const { error: pwErr } = await admin.auth.admin.updateUserById(
+      ownerUserId,
+      {
+        password: ownerPassword,
+      },
+    );
     expect(pwErr, pwErr?.message).toBeNull();
 
     const anon = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
       auth: { persistSession: false, autoRefreshToken: false },
     });
-    const { data: signIn, error: signInErr } = await anon.auth.signInWithPassword({
-      email: ownerEmail,
-      password: ownerPassword,
-    });
+    const { data: signIn, error: signInErr } =
+      await anon.auth.signInWithPassword({
+        email: ownerEmail,
+        password: ownerPassword,
+      });
     expect(signInErr, `owner sign-in failed: ${signInErr?.message}`).toBeNull();
     await seedSession(page, signIn.session);
 
     await page.goto("/dashboard");
     await expect(page).toHaveURL(/\/dashboard/);
-    await page.getByRole("button", { name: "Reservations", exact: true }).first().click();
+    await page
+      .getByRole("button", { name: "Reservations", exact: true })
+      .first()
+      .click();
 
     const card = page
       .locator("div")

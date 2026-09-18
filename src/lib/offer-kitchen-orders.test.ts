@@ -15,7 +15,9 @@ describe("buildKitchenOrderDrafts", () => {
   });
 
   it("makes one line per menu item, in order", () => {
-    const drafts = buildKitchenOrderDrafts("Starter salad\nRoast beef\nBerry pie");
+    const drafts = buildKitchenOrderDrafts(
+      "Starter salad\nRoast beef\nBerry pie",
+    );
     expect(drafts.map((d) => d.item_name)).toEqual([
       "Starter salad",
       "Roast beef",
@@ -27,9 +29,13 @@ describe("buildKitchenOrderDrafts", () => {
 
   it("reads quantities written in the common shapes", () => {
     const drafts = buildKitchenOrderDrafts(
-      ["20 x Roast beef", "12x Salmon", "5 Vegan plate", "Berry pie x 8", "- 3 kpl Soup"].join(
-        "\n",
-      ),
+      [
+        "20 x Roast beef",
+        "12x Salmon",
+        "5 Vegan plate",
+        "Berry pie x 8",
+        "- 3 kpl Soup",
+      ].join("\n"),
     );
     expect(drafts.map((d) => [d.item_name, d.quantity])).toEqual([
       ["Roast beef", 20],
@@ -41,9 +47,18 @@ describe("buildKitchenOrderDrafts", () => {
   });
 
   it("keeps trailing notes out of the item name", () => {
-    const drafts = buildKitchenOrderDrafts("2 x Salmon (no dill)\nRoast beef - medium rare");
-    expect(drafts[0]).toMatchObject({ item_name: "Salmon", quantity: 2, notes: "no dill" });
-    expect(drafts[1]).toMatchObject({ item_name: "Roast beef", notes: "medium rare" });
+    const drafts = buildKitchenOrderDrafts(
+      "2 x Salmon (no dill)\nRoast beef - medium rare",
+    );
+    expect(drafts[0]).toMatchObject({
+      item_name: "Salmon",
+      quantity: 2,
+      notes: "no dill",
+    });
+    expect(drafts[1]).toMatchObject({
+      item_name: "Roast beef",
+      notes: "medium rare",
+    });
   });
 
   it("strips bullet markers and skips blank lines", () => {
@@ -79,11 +94,15 @@ describe("pickKitchenReservationId", () => {
 
   it("falls back to a venue leg when there is no restaurant leg", () => {
     const noRestaurant = legs.filter((l) => l.reservationType !== "restaurant");
-    expect(pickKitchenReservationId(noRestaurant, noRestaurant[1])).toBe("r-venue");
+    expect(pickKitchenReservationId(noRestaurant, noRestaurant[1])).toBe(
+      "r-venue",
+    );
   });
 
   it("returns null when no leg is visible in the Kitchen tab", () => {
-    const rooms: OfferMenuLeg[] = [{ reservationId: "r-room", reservationType: "guesthouse" }];
+    const rooms: OfferMenuLeg[] = [
+      { reservationId: "r-room", reservationType: "guesthouse" },
+    ];
     expect(pickKitchenReservationId(rooms, rooms[0])).toBeNull();
   });
 });
@@ -91,7 +110,11 @@ describe("pickKitchenReservationId", () => {
 describe("buildKitchenOrderRows", () => {
   it("stamps tenant, reservation and received status on every row", () => {
     const rows = buildKitchenOrderRows("t-1", [
-      { reservationId: "r-1", reservationType: "restaurant", menu: "Soup\n2 x Red wine" },
+      {
+        reservationId: "r-1",
+        reservationType: "restaurant",
+        menu: "Soup\n2 x Red wine",
+      },
     ]);
     expect(rows).toHaveLength(2);
     for (const row of rows) {
@@ -105,11 +128,21 @@ describe("buildKitchenOrderRows", () => {
 
   it("merges menus from several legs onto one reservation with stable order", () => {
     const rows = buildKitchenOrderRows("t-1", [
-      { reservationId: "r-venue", reservationType: "venue", menu: "Welcome bites" },
-      { reservationId: "r-room", reservationType: "guesthouse", menu: "Breakfast basket" },
+      {
+        reservationId: "r-venue",
+        reservationType: "venue",
+        menu: "Welcome bites",
+      },
+      {
+        reservationId: "r-room",
+        reservationType: "guesthouse",
+        menu: "Breakfast basket",
+      },
     ]);
     // The room leg is not shown in the Kitchen tab, so its menu joins the venue.
-    expect(rows.map((r) => [r.reservation_id, r.item_name, r.sort_order])).toEqual([
+    expect(
+      rows.map((r) => [r.reservation_id, r.item_name, r.sort_order]),
+    ).toEqual([
       ["r-venue", "Welcome bites", 0],
       ["r-venue", "Breakfast basket", 1],
     ]);
@@ -117,11 +150,25 @@ describe("buildKitchenOrderRows", () => {
 
   it("gives each kitchen function its own order from its own menu field", () => {
     const rows = buildKitchenOrderRows("t-1", [
-      { reservationId: "r-venue", reservationType: "venue", menu: "Welcome bites\nSparkling wine" },
-      { reservationId: "r-rest", reservationType: "restaurant", menu: "Roast beef\nCoffee" },
-      { reservationId: "r-room", reservationType: "guesthouse", menu: "Breakfast basket" },
+      {
+        reservationId: "r-venue",
+        reservationType: "venue",
+        menu: "Welcome bites\nSparkling wine",
+      },
+      {
+        reservationId: "r-rest",
+        reservationType: "restaurant",
+        menu: "Roast beef\nCoffee",
+      },
+      {
+        reservationId: "r-room",
+        reservationType: "guesthouse",
+        menu: "Breakfast basket",
+      },
     ]);
-    expect(rows.map((r) => [r.reservation_id, r.item_name, r.sort_order])).toEqual([
+    expect(
+      rows.map((r) => [r.reservation_id, r.item_name, r.sort_order]),
+    ).toEqual([
       ["r-venue", "Welcome bites", 0],
       ["r-venue", "Sparkling wine", 1],
       ["r-rest", "Roast beef", 0],
@@ -132,23 +179,37 @@ describe("buildKitchenOrderRows", () => {
   });
 
   it("writes nothing when there is no menu or no kitchen leg", () => {
-    expect(buildKitchenOrderRows("t-1", [
-      { reservationId: "r-1", reservationType: "venue", menu: null },
-    ])).toEqual([]);
-    expect(buildKitchenOrderRows("t-1", [
-      { reservationId: "r-1", reservationType: "guesthouse", menu: "Soup" },
-    ])).toEqual([]);
-    expect(buildKitchenOrderRows("t-1", [
-      { reservationId: null, reservationType: "restaurant", menu: "Soup" },
-    ])).toEqual([]);
+    expect(
+      buildKitchenOrderRows("t-1", [
+        { reservationId: "r-1", reservationType: "venue", menu: null },
+      ]),
+    ).toEqual([]);
+    expect(
+      buildKitchenOrderRows("t-1", [
+        { reservationId: "r-1", reservationType: "guesthouse", menu: "Soup" },
+      ]),
+    ).toEqual([]);
+    expect(
+      buildKitchenOrderRows("t-1", [
+        { reservationId: null, reservationType: "restaurant", menu: "Soup" },
+      ]),
+    ).toEqual([]);
   });
 });
 
 describe("empty menu field on one leg of a cross-booking", () => {
   it("writes no kitchen row for that leg and nothing extra for the others", () => {
     const rows = buildKitchenOrderRows("t-1", [
-      { reservationId: "r-venue", reservationType: "venue", menu: "Welcome bites" },
-      { reservationId: "r-rest", reservationType: "restaurant", menu: "   \n-\n" },
+      {
+        reservationId: "r-venue",
+        reservationType: "venue",
+        menu: "Welcome bites",
+      },
+      {
+        reservationId: "r-rest",
+        reservationType: "restaurant",
+        menu: "   \n-\n",
+      },
       { reservationId: "r-room", reservationType: "guesthouse", menu: null },
     ]);
     expect(rows.map((r) => [r.reservation_id, r.item_name])).toEqual([

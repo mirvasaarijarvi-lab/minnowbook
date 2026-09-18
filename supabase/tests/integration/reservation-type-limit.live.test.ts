@@ -58,12 +58,17 @@ describe.skipIf(skip)("LIVE: reservation-type cap end-to-end", () => {
   });
 
   /** Create an isolated Professional-tier tenant per test. */
-  async function makeProfessionalTenant(seedTypes: string[] = ["restaurant"]): Promise<TestTenant> {
+  async function makeProfessionalTenant(
+    seedTypes: string[] = ["restaurant"],
+  ): Promise<TestTenant> {
     const ownerUserId = randomUUID();
     const tenantSlug = `lim-${ownerUserId.slice(0, 8)}`;
 
     // 1) auth user (service-role bypasses RLS).
-    const { error: userErr } = await admin.rpc("noop_unused", {}).then(() => ({ error: null })).catch(() => ({ error: null }));
+    const { error: userErr } = await admin
+      .rpc("noop_unused", {})
+      .then(() => ({ error: null }))
+      .catch(() => ({ error: null }));
     void userErr;
     const { error: insertUserErr } = await admin
       .schema("auth" as never)
@@ -79,7 +84,8 @@ describe.skipIf(skip)("LIVE: reservation-type cap end-to-end", () => {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       } as never);
-    if (insertUserErr) throw new Error(`seed auth user failed: ${insertUserErr.message}`);
+    if (insertUserErr)
+      throw new Error(`seed auth user failed: ${insertUserErr.message}`);
 
     // 2) tenant row directly (avoids create_tenant RPC's "one tenant per user" guard
     // tripping on parallel tests).
@@ -95,7 +101,8 @@ describe.skipIf(skip)("LIVE: reservation-type cap end-to-end", () => {
       })
       .select("id")
       .single();
-    if (tErr || !tenant) throw new Error(`seed tenant failed: ${tErr?.message}`);
+    if (tErr || !tenant)
+      throw new Error(`seed tenant failed: ${tErr?.message}`);
 
     const t: TestTenant = { tenantId: tenant.id, ownerUserId };
     created.push(t);
@@ -143,9 +150,18 @@ describe.skipIf(skip)("LIVE: reservation-type cap end-to-end", () => {
 
   const FIVE_COMBOS = [
     { name: "5 built-ins, no custom", types: [...BUILT_IN] },
-    { name: "4 built-ins + custom", types: ["hotel", "restaurant", "spa", "venue", "custom"] },
-    { name: "1 built-in + 4 custom", types: ["hotel", "custom", "custom", "custom", "custom"] },
-    { name: "5 customs", types: ["custom", "custom", "custom", "custom", "custom"] },
+    {
+      name: "4 built-ins + custom",
+      types: ["hotel", "restaurant", "spa", "venue", "custom"],
+    },
+    {
+      name: "1 built-in + 4 custom",
+      types: ["hotel", "custom", "custom", "custom", "custom"],
+    },
+    {
+      name: "5 customs",
+      types: ["custom", "custom", "custom", "custom", "custom"],
+    },
   ];
 
   it.each(FIVE_COMBOS)(
@@ -163,7 +179,10 @@ describe.skipIf(skip)("LIVE: reservation-type cap end-to-end", () => {
 
   const OVER_COMBOS = [
     { name: "5 built-ins + custom (appended)", types: [...BUILT_IN, "custom"] },
-    { name: "5 built-ins + custom (prepended)", types: ["custom", ...BUILT_IN] },
+    {
+      name: "5 built-ins + custom (prepended)",
+      types: ["custom", ...BUILT_IN],
+    },
     {
       name: "5 built-ins + custom (middle)",
       types: ["hotel", "restaurant", "custom", "spa", "venue", "activity"],
@@ -179,7 +198,16 @@ describe.skipIf(skip)("LIVE: reservation-type cap end-to-end", () => {
     },
     {
       name: "size 8, custom in middle",
-      types: ["hotel", "restaurant", "spa", "custom", "venue", "activity", "extra-1", "extra-2"],
+      types: [
+        "hotel",
+        "restaurant",
+        "spa",
+        "custom",
+        "venue",
+        "activity",
+        "extra-1",
+        "extra-2",
+      ],
     },
     {
       name: "size 10, all custom",
@@ -264,7 +292,9 @@ describe.skipIf(skip)("LIVE: reservation-type cap end-to-end", () => {
       all.push(rejected[i]);
     }
 
-    const results = await Promise.all(all.map((p) => updateTypes(t.tenantId, p)));
+    const results = await Promise.all(
+      all.map((p) => updateTypes(t.tenantId, p)),
+    );
 
     let acceptedCount = 0;
     let rejectedCount = 0;

@@ -13,7 +13,10 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import zlib from "node:zlib";
 
 vi.mock("@/hooks/useTenant", () => ({
-  useTenant: () => ({ tenantId: "tenant-1", tenant: { id: "tenant-1", name: "Villa Mimmi" } }),
+  useTenant: () => ({
+    tenantId: "tenant-1",
+    tenant: { id: "tenant-1", name: "Villa Mimmi" },
+  }),
 }));
 
 vi.mock("@/contexts/I18nContext", () => ({
@@ -112,10 +115,16 @@ let originalRevoke: typeof URL.revokeObjectURL;
 let originalClick: typeof HTMLAnchorElement.prototype.click;
 
 function renderDialog() {
-  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  const client = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
   return render(
     <QueryClientProvider client={client}>
-      <ReservationDetailDialog reservation={reservation} open onOpenChange={() => {}} />
+      <ReservationDetailDialog
+        reservation={reservation}
+        open
+        onOpenChange={() => {}}
+      />
     </QueryClientProvider>,
   );
 }
@@ -169,15 +178,24 @@ describe("ReservationDetailDialog invoice export", () => {
     expect(text).toContain("90.00 EUR");
 
     // The file offered to the user is a PDF download
-    await waitFor(() => expect(HTMLAnchorElement.prototype.click).toHaveBeenCalled());
+    await waitFor(() =>
+      expect(HTMLAnchorElement.prototype.click).toHaveBeenCalled(),
+    );
   });
 
   it("hides the invoice action when the reservation has no price", async () => {
-    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const client = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
     render(
       <QueryClientProvider client={client}>
         <ReservationDetailDialog
-          reservation={{ ...reservation, price_eur: null, discount_type: null, discount_value: null }}
+          reservation={{
+            ...reservation,
+            price_eur: null,
+            discount_type: null,
+            discount_value: null,
+          }}
           open
           onOpenChange={() => {}}
         />

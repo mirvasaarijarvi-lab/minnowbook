@@ -33,13 +33,16 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 const SUPABASE_URL =
-  (import.meta.env?.VITE_SUPABASE_URL as string | undefined) ?? process.env.SUPABASE_URL;
+  (import.meta.env?.VITE_SUPABASE_URL as string | undefined) ??
+  process.env.SUPABASE_URL;
 const SUPABASE_ANON_KEY =
   (import.meta.env?.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined) ??
   process.env.SUPABASE_ANON_KEY;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-const canRun = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY && SUPABASE_SERVICE_ROLE_KEY);
+const canRun = Boolean(
+  SUPABASE_URL && SUPABASE_ANON_KEY && SUPABASE_SERVICE_ROLE_KEY,
+);
 
 const newService = (): SupabaseClient =>
   createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!, {
@@ -86,7 +89,8 @@ describe.runIf(canRun)(
           })
           .select("id")
           .single();
-        if (error || !data) throw error ?? new Error(`tenant insert failed for ${label}`);
+        if (error || !data)
+          throw error ?? new Error(`tenant insert failed for ${label}`);
         return data.id as string;
       }
 
@@ -110,7 +114,8 @@ describe.runIf(canRun)(
           })
           .select("id")
           .single();
-        if (rErr || !res) throw rErr ?? new Error(`resource insert failed for ${label}`);
+        if (rErr || !res)
+          throw rErr ?? new Error(`resource insert failed for ${label}`);
         const imageUrl = `https://example.invalid/xtlist-${label}-${stamp}-${rand}.jpg`;
         const { data: img, error: iErr } = await service
           .from("resource_images")
@@ -122,20 +127,36 @@ describe.runIf(canRun)(
           })
           .select("id")
           .single();
-        if (iErr || !img) throw iErr ?? new Error(`image insert failed for ${label}`);
-        return { resourceId: res.id as string, imageId: img.id as string, imageUrl };
+        if (iErr || !img)
+          throw iErr ?? new Error(`image insert failed for ${label}`);
+        return {
+          resourceId: res.id as string,
+          imageId: img.id as string,
+          imageUrl,
+        };
       }
 
-      const pub = await seedResourceWithImage(tenantAId, "public", true, "approved");
-      const priv = await seedResourceWithImage(tenantAId, "private", false, "approved");
+      const pub = await seedResourceWithImage(
+        tenantAId,
+        "public",
+        true,
+        "approved",
+      );
+      const priv = await seedResourceWithImage(
+        tenantAId,
+        "private",
+        false,
+        "approved",
+      );
 
       const email = `ci-resimg-list+${stamp}-${rand}@example.invalid`;
       const password = `Pw!list${rand}${stamp}`;
-      const { data: created, error: cErr } = await service.auth.admin.createUser({
-        email,
-        password,
-        email_confirm: true,
-      });
+      const { data: created, error: cErr } =
+        await service.auth.admin.createUser({
+          email,
+          password,
+          email_confirm: true,
+        });
       if (cErr || !created?.user) throw cErr ?? new Error("auth create failed");
       const { error: tuErr } = await service.from("tenant_users").insert({
         tenant_id: tenantBId,
@@ -146,7 +167,10 @@ describe.runIf(canRun)(
       if (tuErr) throw tuErr;
 
       tenantBMember = newAnon();
-      const { error: signInErr } = await tenantBMember.auth.signInWithPassword({ email, password });
+      const { error: signInErr } = await tenantBMember.auth.signInWithPassword({
+        email,
+        password,
+      });
       if (signInErr) throw signInErr;
 
       seeded = {
@@ -172,8 +196,14 @@ describe.runIf(canRun)(
         .from("resources")
         .delete()
         .in("id", [seeded.publicResourceId, seeded.privateResourceId]);
-      await service.from("tenant_users").delete().eq("user_id", seeded.tenantBUserId);
-      await service.from("tenants").delete().in("id", [seeded.tenantAId, seeded.tenantBId]);
+      await service
+        .from("tenant_users")
+        .delete()
+        .eq("user_id", seeded.tenantBUserId);
+      await service
+        .from("tenants")
+        .delete()
+        .in("id", [seeded.tenantAId, seeded.tenantBId]);
       await service.auth.admin.deleteUser(seeded.tenantBUserId).catch(() => {});
     }, 60_000);
 
@@ -254,7 +284,10 @@ describe.runIf(canRun)(
           .from("resource_images")
           .select("id, tenant_id, resource_id")
           .eq("tenant_id", seeded.tenantAId)
-          .in("resource_id", [seeded.publicResourceId, seeded.privateResourceId]);
+          .in("resource_id", [
+            seeded.publicResourceId,
+            seeded.privateResourceId,
+          ]);
         expect(error).toBeNull();
         const ids = (data ?? []).map((r) => r.id);
         expect(ids).not.toContain(seeded.privateImageId);
@@ -319,7 +352,9 @@ describe.runIf(canRun)(
         const { data, error } = await getClient()
           .from("resource_images")
           .select("id")
-          .or(`id.eq.${seeded.privateImageId},image_url.eq.${seeded.privateImageUrl}`);
+          .or(
+            `id.eq.${seeded.privateImageId},image_url.eq.${seeded.privateImageUrl}`,
+          );
         expect(error).toBeNull();
         const ids = (data ?? []).map((r) => r.id);
         expect(ids).not.toContain(seeded.privateImageId);

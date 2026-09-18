@@ -27,7 +27,8 @@ export const useResourceTypeLabel = () => {
     enabled: !!tenantId,
   });
 
-  const customNames = (settings?.resource_type_names as Record<string, string>) ?? {};
+  const customNames =
+    (settings?.resource_type_names as Record<string, string>) ?? {};
 
   const defaultLabels: Record<string, string> = {
     restaurant: t("dashboard.restaurant"),
@@ -44,7 +45,7 @@ export const useResourceTypeLabel = () => {
       if (customNames[type]) return customNames[type];
       return defaultLabels[type] ?? type;
     },
-    [customNames, defaultLabels]
+    [customNames, defaultLabels],
   );
 
   /**
@@ -52,11 +53,18 @@ export const useResourceTypeLabel = () => {
    * Uses custom name for "hotel" if set, otherwise blocking translation.
    */
   const selectableTypeLabels: Record<string, string> = {
-    hotel: customNames["hotel"] || customNames["guesthouse"] || t("blocking.hotelGuesthouse"),
+    hotel:
+      customNames["hotel"] ||
+      customNames["guesthouse"] ||
+      t("blocking.hotelGuesthouse"),
     restaurant: customNames["restaurant"] || t("blocking.restaurant"),
     venue: customNames["venue"] || t("blocking.venueEventSpace"),
-    wellness: customNames["wellness"] || t("blocking.wellness" as any) || t("dashboard.wellness"),
-    custom: customNames["custom"] || t("dashboard.custom" as any) || "Custom service",
+    wellness:
+      customNames["wellness"] ||
+      t("blocking.wellness" as any) ||
+      t("dashboard.wellness"),
+    custom:
+      customNames["custom"] || t("dashboard.custom" as any) || "Custom service",
   };
 
   /** Returns a generic noun for the resource of a given type (e.g. "room", "table", "event space"). */

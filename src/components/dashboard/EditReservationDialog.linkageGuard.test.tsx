@@ -23,7 +23,11 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 vi.mock("@/hooks/useTenant", () => ({
   useTenant: () => ({
     tenantId: "tenant-1",
-    tenant: { id: "tenant-1", tier: "professional", allowed_reservation_types: ["restaurant", "venue"] },
+    tenant: {
+      id: "tenant-1",
+      tier: "professional",
+      allowed_reservation_types: ["restaurant", "venue"],
+    },
     isOwner: true,
     isAdmin: true,
     isSuperadmin: false,
@@ -38,7 +42,9 @@ vi.mock("@/hooks/useDateLocale", () => ({ useDateLocale: () => undefined }));
 vi.mock("@/hooks/useResourceTypeLabel", () => ({
   useResourceTypeLabel: () => ({ typeLabel: (t: string) => t }),
 }));
-vi.mock("@/components/ConfirmationEmailPreview", () => ({ default: () => null }));
+vi.mock("@/components/ConfirmationEmailPreview", () => ({
+  default: () => null,
+}));
 
 const toastSuccess = vi.fn();
 const toastError = vi.fn();
@@ -75,7 +81,12 @@ let groupIdAfterUpdate: string | null = SHARED_GROUP_ID;
 vi.mock("@/integrations/supabase/client", () => {
   // Build a chain that records `.update().eq().eq()` and resolves OK.
   const buildChain = (table: string, op: "select" | "update") => {
-    const state: any = { table, op, eqs: [] as Array<[string, any]>, payload: undefined };
+    const state: any = {
+      table,
+      op,
+      eqs: [] as Array<[string, any]>,
+      payload: undefined,
+    };
     const chain: any = {};
     chain.select = vi.fn(() => chain);
     chain.eq = vi.fn((col: string, val: any) => {
@@ -89,7 +100,10 @@ vi.mock("@/integrations/supabase/client", () => {
     chain.maybeSingle = vi.fn(async () => {
       // Verification re-read returns the (possibly mutated) linked_group_id.
       if (state.op === "select" && state.table === "reservations") {
-        return { data: { id: RESERVATION.id, linked_group_id: groupIdAfterUpdate }, error: null };
+        return {
+          data: { id: RESERVATION.id, linked_group_id: groupIdAfterUpdate },
+          error: null,
+        };
       }
       return { data: null, error: null };
     });
@@ -127,7 +141,11 @@ const renderDialog = () => {
   return render(
     <QueryClientProvider client={client}>
       <TooltipProvider>
-        <EditReservationDialog reservation={RESERVATION as any} open onOpenChange={() => {}} />
+        <EditReservationDialog
+          reservation={RESERVATION as any}
+          open
+          onOpenChange={() => {}}
+        />
       </TooltipProvider>
     </QueryClientProvider>,
   );

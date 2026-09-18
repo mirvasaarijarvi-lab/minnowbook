@@ -51,13 +51,18 @@ if (existsSync(allowlistPath)) {
     parsedEntries = parsed.entries;
     configErrors.push(...parsed.errors);
   } catch (e) {
-    configErrors.push(`allowlist file is not valid JSON: ${(e as Error).message}`);
+    configErrors.push(
+      `allowlist file is not valid JSON: ${(e as Error).message}`,
+    );
   }
 } else if (process.env.BLOG_JSONLD_ALLOWLIST) {
   configErrors.push(`BLOG_JSONLD_ALLOWLIST=${allowlistPath} does not exist`);
 }
 
-const { suppressed, remaining, staleErrors } = applyAllowlist(issues, parsedEntries);
+const { suppressed, remaining, staleErrors } = applyAllowlist(
+  issues,
+  parsedEntries,
+);
 
 // -------------------------------------------------------------------------
 // Write CI artifact (JSON + Markdown) BEFORE deciding to exit non-zero,
@@ -89,7 +94,9 @@ try {
 }
 
 if (suppressed.length > 0) {
-  console.log(`ℹ Suppressed ${suppressed.length} warning(s) via ${allowlistPath}:`);
+  console.log(
+    `ℹ Suppressed ${suppressed.length} warning(s) via ${allowlistPath}:`,
+  );
   for (const s of suppressed) {
     console.log(
       `  [${s.issue.slug}] ${s.issue.path}: ${s.issue.message}  — reason: ${s.entry.reason} (expires ${s.entry.expires})`,
@@ -101,7 +108,9 @@ const hardErrors = [...configErrors, ...staleErrors];
 
 if (remaining.length > 0 || hardErrors.length > 0) {
   if (remaining.length > 0) {
-    console.error(`\n❌ BlogPost JSON-LD lint FAILED with ${remaining.length} warning(s):\n`);
+    console.error(
+      `\n❌ BlogPost JSON-LD lint FAILED with ${remaining.length} warning(s):\n`,
+    );
     for (const issue of remaining) {
       console.error(`  [${issue.slug}] ${issue.path}: ${issue.message}`);
     }
@@ -118,8 +127,13 @@ if (remaining.length > 0 || hardErrors.length > 0) {
 
 const summary =
   `✅ BlogPost JSON-LD lint passed for ${Object.keys(posts).length} post(s)` +
-  (suppressed.length > 0 ? ` (${suppressed.length} suppressed via allowlist).` : ".");
+  (suppressed.length > 0
+    ? ` (${suppressed.length} suppressed via allowlist).`
+    : ".");
 console.log(summary);
 if (process.env.GITHUB_STEP_SUMMARY) {
-  appendFileSync(process.env.GITHUB_STEP_SUMMARY, `## Blog JSON-LD lint\n\n${summary}\n`);
+  appendFileSync(
+    process.env.GITHUB_STEP_SUMMARY,
+    `## Blog JSON-LD lint\n\n${summary}\n`,
+  );
 }

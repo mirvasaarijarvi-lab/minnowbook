@@ -18,7 +18,13 @@
  * here must NEVER fail a test. The reporter treats a missing file as
  * "guard didn't run" and omits the section.
  */
-import { mkdirSync, readFileSync, writeFileSync, existsSync, rmSync } from "node:fs";
+import {
+  mkdirSync,
+  readFileSync,
+  writeFileSync,
+  existsSync,
+  rmSync,
+} from "node:fs";
 import { dirname, resolve } from "node:path";
 
 /**
@@ -120,7 +126,9 @@ export function appendTenantGuardRecord(record: TenantGuardRecord): void {
  * Read the guard log. Returns an empty log when the file is missing or
  * unreadable. Used by the reporter.
  */
-export function readTenantGuardLog(path = tenantGuardRecordPath()): TenantGuardLog {
+export function readTenantGuardLog(
+  path = tenantGuardRecordPath(),
+): TenantGuardLog {
   try {
     if (!existsSync(path)) return { records: [] };
     const raw = readFileSync(path, "utf-8");

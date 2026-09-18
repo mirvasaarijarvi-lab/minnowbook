@@ -7,7 +7,10 @@
  *   - createEphemeralTenant refuses to run without credentials (safety check).
  */
 import { describe, it, expect } from "vitest";
-import { renderWithProviders, createTestQueryClient } from "@/test/fixtures/render";
+import {
+  renderWithProviders,
+  createTestQueryClient,
+} from "@/test/fixtures/render";
 import { createMockSupabaseClient } from "@/test/fixtures/mock-supabase";
 import { createEphemeralTenant } from "@/test/helpers/ephemeral-tenant";
 
@@ -25,7 +28,12 @@ describe("test infrastructure", () => {
 
   it("mock supabase client supports chained select+eq+then", async () => {
     const supabase = createMockSupabaseClient({
-      tables: { tenants: [{ id: "a", slug: "x" }, { id: "b", slug: "y" }] },
+      tables: {
+        tenants: [
+          { id: "a", slug: "x" },
+          { id: "b", slug: "y" },
+        ],
+      },
     });
     const res = await supabase.from("tenants").select("*").eq("slug", "y");
     expect(res.data).toEqual([{ id: "b", slug: "y" }]);

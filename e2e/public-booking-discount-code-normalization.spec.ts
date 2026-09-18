@@ -44,7 +44,10 @@ test.describe("Discount code normalization", () => {
     !(process.env.SERVICE_ROLE_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY),
     "Set SERVICE_ROLE_KEY to run this spec.",
   );
-  test.skip(!SUPABASE_ANON_KEY, "Set VITE_SUPABASE_PUBLISHABLE_KEY to run this spec.");
+  test.skip(
+    !SUPABASE_ANON_KEY,
+    "Set VITE_SUPABASE_PUBLISHABLE_KEY to run this spec.",
+  );
 
   test("casing, whitespace and URL-encoded input are cleaned before policy runs", async ({
     ephemeralTenant,
@@ -145,35 +148,67 @@ test.describe("Discount code normalization", () => {
     const DISCOUNTED = roundCents(GROSS_EUR * (1 - PERCENT_OFF / 100)); // 224
 
     /** A shape that must normalize to the stored code and discount the stay. */
-    const expectAccepted = async (label: string, sent: string, code: string, expectedUses: number) => {
+    const expectAccepted = async (
+      label: string,
+      sent: string,
+      code: string,
+      expectedUses: number,
+    ) => {
       const email = `ci+norm-${label}-${stamp}@mimmobook.test`.toLowerCase();
       const res = await post(basePayload({ promo_code: sent }, email));
-      expect(res.status(), `${label}: accepted (${await res.text()})`).toBe(200);
+      expect(res.status(), `${label}: accepted (${await res.text()})`).toBe(
+        200,
+      );
       const rows = await rowsFor(email);
       expect(rows, `${label}: one booking stored`).toHaveLength(1);
       const row = rows[0] as Record<string, any>;
-      expect(Number(row.original_price_eur), `${label}: list price from the resource`).toBe(GROSS_EUR);
-      expect(Number(row.price_eur), `${label}: discount applied once`).toBe(DISCOUNTED);
-      expect(row.discount_type, `${label}: percentage discount`).toBe("percentage");
-      expect(Number(row.discount_value), `${label}: own value`).toBe(PERCENT_OFF);
-      expect(row.discount_code_id, `${label}: linked to the code`).toBeTruthy();
-      expect(String(row.discount_reason), `${label}: reason records the code`).toContain("Promo code:");
-      expect(await usedCount(code), `${label}: exactly one further use spent`).toBe(expectedUses);
-      // Report lines still reconcile with the charged amount.
-      const amounts = reportAmounts(row as any);
-      expect(roundCents(amounts.room + amounts.breakfast), `${label}: report matches charge`).toBe(
+      expect(
+        Number(row.original_price_eur),
+        `${label}: list price from the resource`,
+      ).toBe(GROSS_EUR);
+      expect(Number(row.price_eur), `${label}: discount applied once`).toBe(
         DISCOUNTED,
       );
+      expect(row.discount_type, `${label}: percentage discount`).toBe(
+        "percentage",
+      );
+      expect(Number(row.discount_value), `${label}: own value`).toBe(
+        PERCENT_OFF,
+      );
+      expect(row.discount_code_id, `${label}: linked to the code`).toBeTruthy();
+      expect(
+        String(row.discount_reason),
+        `${label}: reason records the code`,
+      ).toContain("Promo code:");
+      expect(
+        await usedCount(code),
+        `${label}: exactly one further use spent`,
+      ).toBe(expectedUses);
+      // Report lines still reconcile with the charged amount.
+      const amounts = reportAmounts(row as any);
+      expect(
+        roundCents(amounts.room + amounts.breakfast),
+        `${label}: report matches charge`,
+      ).toBe(DISCOUNTED);
     };
 
     /** A shape that must be refused, with no booking and no use spent. */
-    const expectRefused = async (label: string, sent: string, expectedMessage: string) => {
+    const expectRefused = async (
+      label: string,
+      sent: string,
+      expectedMessage: string,
+    ) => {
       const email = `ci+norm-${label}-${stamp}@mimmobook.test`.toLowerCase();
-      const before = [await usedCount(CODE), await usedCount(LOWER_STORED_CODE)];
+      const before = [
+        await usedCount(CODE),
+        await usedCount(LOWER_STORED_CODE),
+      ];
       const res = await post(basePayload({ promo_code: sent }, email));
       expect(res.status(), `${label}: refused with 400`).toBe(400);
       const body = await res.json();
-      expect(String(body.error), `${label}: policy message`).toContain(expectedMessage);
+      expect(String(body.error), `${label}: policy message`).toContain(
+        expectedMessage,
+      );
       expect(await rowsFor(email), `${label}: nothing stored`).toHaveLength(0);
       expect(
         [await usedCount(CODE), await usedCount(LOWER_STORED_CODE)],
@@ -197,26 +232,67 @@ test.describe("Discount code normalization", () => {
     await expectAccepted("padded-newlines", `\n${CODE}\r\n`, CODE, 6);
     await expectAccepted("padded-nbsp", `\u00A0${CODE}\u00A0`, CODE, 7);
     // Stored lowercase, sent uppercase: matching is case-insensitive both ways.
-    await expectAccepted("stored-lowercase", LOWER_STORED_CODE.toUpperCase(), LOWER_STORED_CODE, 1);
+    await expectAccepted(
+      "stored-lowercase",
+      LOWER_STORED_CODE.toUpperCase(),
+      LOWER_STORED_CODE,
+      1,
+    );
 
     // ---------- Refused: whitespace inside the value means two codes ----------
     await expectRefused("inner-space", `${CODE} ${CODE}`, MULTI_CODE_ERROR);
-    await expectRefused("inner-space-single", `${CODE.slice(0, 4)} ${CODE.slice(4)}`, MULTI_CODE_ERROR);
-    await expectRefused("inner-tab", `${CODE}\t${LOWER_STORED_CODE}`, MULTI_CODE_ERROR);
-    await expectRefused("inner-newline", `${CODE}\n${LOWER_STORED_CODE}`, MULTI_CODE_ERROR);
-    await expectRefused("inner-nbsp", `${CODE}\u00A0${LOWER_STORED_CODE}`, MULTI_CODE_ERROR);
+    await expectRefused(
+      "inner-space-single",
+      `${CODE.slice(0, 4)} ${CODE.slice(4)}`,
+      MULTI_CODE_ERROR,
+    );
+    await expectRefused(
+      "inner-tab",
+      `${CODE}\t${LOWER_STORED_CODE}`,
+      MULTI_CODE_ERROR,
+    );
+    await expectRefused(
+      "inner-newline",
+      `${CODE}\n${LOWER_STORED_CODE}`,
+      MULTI_CODE_ERROR,
+    );
+    await expectRefused(
+      "inner-nbsp",
+      `${CODE}\u00A0${LOWER_STORED_CODE}`,
+      MULTI_CODE_ERROR,
+    );
 
     // ---------- Refused: URL-encoded input is not silently decoded ----------
     // "+" is treated as a separator (a URL-encoded space), so it is a two-code
     // request, not a single code named "A+B".
-    await expectRefused("plus-encoded-space", `${CODE}+${LOWER_STORED_CODE}`, MULTI_CODE_ERROR);
+    await expectRefused(
+      "plus-encoded-space",
+      `${CODE}+${LOWER_STORED_CODE}`,
+      MULTI_CODE_ERROR,
+    );
     // Percent escapes are never decoded into separators or into a valid code.
-    await expectRefused("percent-20", `${CODE}%20${LOWER_STORED_CODE}`, INVALID_CODE_ERROR);
-    await expectRefused("percent-2c", `${CODE}%2C${LOWER_STORED_CODE}`, INVALID_CODE_ERROR);
-    await expectRefused("percent-3b", `${CODE}%3B${LOWER_STORED_CODE}`, INVALID_CODE_ERROR);
+    await expectRefused(
+      "percent-20",
+      `${CODE}%20${LOWER_STORED_CODE}`,
+      INVALID_CODE_ERROR,
+    );
+    await expectRefused(
+      "percent-2c",
+      `${CODE}%2C${LOWER_STORED_CODE}`,
+      INVALID_CODE_ERROR,
+    );
+    await expectRefused(
+      "percent-3b",
+      `${CODE}%3B${LOWER_STORED_CODE}`,
+      INVALID_CODE_ERROR,
+    );
     await expectRefused("percent-0a", `${CODE}%0A`, INVALID_CODE_ERROR);
     await expectRefused("percent-padded", `%20${CODE}%20`, INVALID_CODE_ERROR);
-    await expectRefused("double-encoded", encodeURIComponent(`${CODE} ${CODE}`), INVALID_CODE_ERROR);
+    await expectRefused(
+      "double-encoded",
+      encodeURIComponent(`${CODE} ${CODE}`),
+      INVALID_CODE_ERROR,
+    );
 
     // ---------- The valid code is still usable after all the refusals ----------
     await expectAccepted("after-refusals", ` ${CODE.toLowerCase()} `, CODE, 8);

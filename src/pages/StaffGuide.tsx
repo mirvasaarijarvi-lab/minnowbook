@@ -4,10 +4,37 @@ import { Language } from "@/i18n/translations";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  Printer, ArrowLeft, Home, Calendar, ClipboardList, BarChart3,
-  Users, LogIn, Shield, Check, X, Lock, Pencil, Trash2, Search,
-  Download, KeyRound, Settings, LifeBuoy, BookOpen, Building2, MapPin,
-  Zap, Crown, Bell, Keyboard, UserCircle, Upload, Archive, FileOutput, Link2,
+  Printer,
+  ArrowLeft,
+  Home,
+  Calendar,
+  ClipboardList,
+  BarChart3,
+  Users,
+  LogIn,
+  Shield,
+  Check,
+  X,
+  Lock,
+  Pencil,
+  Trash2,
+  Search,
+  Download,
+  KeyRound,
+  Settings,
+  LifeBuoy,
+  BookOpen,
+  Building2,
+  MapPin,
+  Zap,
+  Crown,
+  Bell,
+  Keyboard,
+  UserCircle,
+  Upload,
+  Archive,
+  FileOutput,
+  Link2,
 } from "lucide-react";
 import { Link } from "@/lib/router-compat";
 
@@ -34,17 +61,29 @@ type GuideContent = {
 const MockupLogin = () => (
   <div className="border rounded-lg p-4 bg-muted/30 space-y-3 max-w-xs mx-auto print:bg-white">
     <div className="flex gap-2 border-b pb-2">
-      <span className="text-xs font-medium px-3 py-1 rounded bg-primary/10 text-primary">Log in</span>
-      <span className="text-xs font-medium px-3 py-1 rounded text-muted-foreground">Sign up</span>
+      <span className="text-xs font-medium px-3 py-1 rounded bg-primary/10 text-primary">
+        Log in
+      </span>
+      <span className="text-xs font-medium px-3 py-1 rounded text-muted-foreground">
+        Sign up
+      </span>
     </div>
     <div className="space-y-2">
       <div className="text-xs text-muted-foreground">Email</div>
-      <div className="h-8 rounded border bg-background px-2 flex items-center text-xs text-muted-foreground">user@example.com</div>
+      <div className="h-8 rounded border bg-background px-2 flex items-center text-xs text-muted-foreground">
+        user@example.com
+      </div>
       <div className="text-xs text-muted-foreground">Password</div>
-      <div className="h-8 rounded border bg-background px-2 flex items-center text-xs text-muted-foreground">••••••••</div>
+      <div className="h-8 rounded border bg-background px-2 flex items-center text-xs text-muted-foreground">
+        ••••••••
+      </div>
     </div>
-    <div className="h-8 rounded bg-primary flex items-center justify-center text-xs text-primary-foreground font-medium">Log in</div>
-    <div className="text-[10px] text-center text-muted-foreground underline">Forgot password?</div>
+    <div className="h-8 rounded bg-primary flex items-center justify-center text-xs text-primary-foreground font-medium">
+      Log in
+    </div>
+    <div className="text-[10px] text-center text-muted-foreground underline">
+      Forgot password?
+    </div>
   </div>
 );
 
@@ -57,7 +96,10 @@ const MockupOverview = () => (
         { label: "Guests", value: "24", icon: "👥" },
         { label: "Arrived", value: "2/5", icon: "✅" },
       ].map((kpi) => (
-        <div key={kpi.label} className="text-center p-2 rounded bg-background border">
+        <div
+          key={kpi.label}
+          className="text-center p-2 rounded bg-background border"
+        >
           <div className="text-sm">{kpi.icon}</div>
           <div className="font-bold text-sm">{kpi.value}</div>
           <div className="text-[10px] text-muted-foreground">{kpi.label}</div>
@@ -71,18 +113,29 @@ const MockupOverview = () => (
         { label: "Guests", value: "156", trend: "+8%" },
         { label: "Utilization", value: "72%", trend: "" },
       ].map((kpi) => (
-        <div key={kpi.label} className="text-center p-2 rounded bg-background border">
+        <div
+          key={kpi.label}
+          className="text-center p-2 rounded bg-background border"
+        >
           <div className="font-bold text-sm">{kpi.value}</div>
           <div className="text-[10px] text-muted-foreground">{kpi.label}</div>
-          {kpi.trend && <div className="text-[10px] text-success">{kpi.trend}</div>}
+          {kpi.trend && (
+            <div className="text-[10px] text-success">{kpi.trend}</div>
+          )}
         </div>
       ))}
     </div>
     <div className="h-16 rounded bg-background border p-2">
-      <div className="text-[10px] text-muted-foreground mb-1">Weekly revenue trend</div>
+      <div className="text-[10px] text-muted-foreground mb-1">
+        Weekly revenue trend
+      </div>
       <div className="flex items-end gap-1 h-8">
         {[40, 65, 80, 50, 70, 30, 90].map((h, i) => (
-          <div key={i} className="flex-1 bg-primary/20 rounded-t" style={{ height: `${h}%` }} />
+          <div
+            key={i}
+            className="flex-1 bg-primary/20 rounded-t"
+            style={{ height: `${h}%` }}
+          />
         ))}
       </div>
     </div>
@@ -94,26 +147,39 @@ const MockupCalendar = () => (
     <div className="flex items-center justify-between">
       <span className="text-xs">← Mar 3 – Mar 9, 2026 →</span>
       <div className="flex gap-1">
-        <span className="text-[10px] px-2 py-0.5 rounded bg-primary/10 text-primary border">Restaurant</span>
+        <span className="text-[10px] px-2 py-0.5 rounded bg-primary/10 text-primary border">
+          Restaurant
+        </span>
         <span className="text-[10px] px-2 py-0.5 rounded border">Venue</span>
         <span className="text-[10px] px-2 py-0.5 rounded border">Hotel</span>
       </div>
     </div>
     <div className="grid grid-cols-7 gap-1 text-[10px]">
       {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d) => (
-        <div key={d} className="text-center font-medium text-muted-foreground">{d}</div>
+        <div key={d} className="text-center font-medium text-muted-foreground">
+          {d}
+        </div>
       ))}
       {Array.from({ length: 7 }).map((_, day) => (
         <div key={day} className="space-y-0.5">
           {["Restaurant", "Venue Hall", "Room 1"].map((room, ri) => (
-            <div key={ri} className={`text-[9px] px-1 py-0.5 rounded flex items-center gap-1 ${
-              ri === 1 && day === 2 ? "bg-destructive/10 text-destructive" :
-              ri === 2 && day === 5 ? "bg-muted text-muted-foreground" :
-              "bg-success/10 text-success"
-            }`}>
-              {ri === 1 && day === 2 ? <X className="h-2 w-2" /> :
-               ri === 2 && day === 5 ? <Lock className="h-2 w-2" /> :
-               <Check className="h-2 w-2" />}
+            <div
+              key={ri}
+              className={`text-[9px] px-1 py-0.5 rounded flex items-center gap-1 ${
+                ri === 1 && day === 2
+                  ? "bg-destructive/10 text-destructive"
+                  : ri === 2 && day === 5
+                    ? "bg-muted text-muted-foreground"
+                    : "bg-success/10 text-success"
+              }`}
+            >
+              {ri === 1 && day === 2 ? (
+                <X className="h-2 w-2" />
+              ) : ri === 2 && day === 5 ? (
+                <Lock className="h-2 w-2" />
+              ) : (
+                <Check className="h-2 w-2" />
+              )}
               {room}
             </div>
           ))}
@@ -121,9 +187,15 @@ const MockupCalendar = () => (
       ))}
     </div>
     <div className="flex gap-3 text-[10px] justify-center text-muted-foreground">
-      <span className="flex items-center gap-1"><Check className="h-3 w-3 text-success" /> Available</span>
-      <span className="flex items-center gap-1"><X className="h-3 w-3 text-destructive" /> Full</span>
-      <span className="flex items-center gap-1"><Lock className="h-3 w-3" /> Blocked</span>
+      <span className="flex items-center gap-1">
+        <Check className="h-3 w-3 text-success" /> Available
+      </span>
+      <span className="flex items-center gap-1">
+        <X className="h-3 w-3 text-destructive" /> Full
+      </span>
+      <span className="flex items-center gap-1">
+        <Lock className="h-3 w-3" /> Blocked
+      </span>
     </div>
   </div>
 );
@@ -134,31 +206,80 @@ const MockupReservations = () => (
       <div className="flex-1 h-8 rounded border bg-background px-2 flex items-center gap-1 text-xs text-muted-foreground">
         <Search className="h-3 w-3" /> Search by name, email...
       </div>
-      <div className="h-8 rounded bg-primary px-3 flex items-center text-xs text-primary-foreground">+ New Reservation</div>
+      <div className="h-8 rounded bg-primary px-3 flex items-center text-xs text-primary-foreground">
+        + New Reservation
+      </div>
     </div>
     <div className="flex gap-1 text-[10px] flex-wrap">
-      <span className="px-2 py-1 rounded bg-primary text-primary-foreground">All 23</span>
+      <span className="px-2 py-1 rounded bg-primary text-primary-foreground">
+        All 23
+      </span>
       <span className="px-2 py-1 rounded border text-warning">Pending 8</span>
-      <span className="px-2 py-1 rounded border text-success">Confirmed 12</span>
-      <span className="px-2 py-1 rounded border text-destructive">Cancelled 3</span>
-      <span className="ml-auto px-2 py-1 rounded border bg-info/10 text-info font-medium">📅 Today</span>
+      <span className="px-2 py-1 rounded border text-success">
+        Confirmed 12
+      </span>
+      <span className="px-2 py-1 rounded border text-destructive">
+        Cancelled 3
+      </span>
+      <span className="ml-auto px-2 py-1 rounded border bg-info/10 text-info font-medium">
+        📅 Today
+      </span>
     </div>
     <div className="space-y-1">
       {[
-        { date: "03.03", guest: "John D.", type: "Hotel", status: "Confirmed", statusColor: "bg-success/10 text-success", used: true, invoiced: false },
-        { date: "03.03", guest: "Lisa K.", type: "Restaurant", status: "Confirmed", statusColor: "bg-success/10 text-success", used: true, invoiced: true },
-        { date: "03.03", guest: "Karl P.", type: "Venue", status: "Pending", statusColor: "bg-warning/10 text-warning", used: false, invoiced: false },
+        {
+          date: "03.03",
+          guest: "John D.",
+          type: "Hotel",
+          status: "Confirmed",
+          statusColor: "bg-success/10 text-success",
+          used: true,
+          invoiced: false,
+        },
+        {
+          date: "03.03",
+          guest: "Lisa K.",
+          type: "Restaurant",
+          status: "Confirmed",
+          statusColor: "bg-success/10 text-success",
+          used: true,
+          invoiced: true,
+        },
+        {
+          date: "03.03",
+          guest: "Karl P.",
+          type: "Venue",
+          status: "Pending",
+          statusColor: "bg-warning/10 text-warning",
+          used: false,
+          invoiced: false,
+        },
       ].map((r, i) => (
-        <div key={i} className="grid grid-cols-[3rem_1fr_4rem_4.5rem_1.5rem_1.5rem_1rem] gap-1 items-center text-[10px] p-2 rounded bg-background border">
+        <div
+          key={i}
+          className="grid grid-cols-[3rem_1fr_4rem_4.5rem_1.5rem_1.5rem_1rem] gap-1 items-center text-[10px] p-2 rounded bg-background border"
+        >
           <span className="text-muted-foreground">{r.date}</span>
           <span className="font-medium">{r.guest}</span>
           <span>{r.type}</span>
-          <span className={`px-1.5 py-0.5 rounded text-[9px] text-center ${r.statusColor}`}>{r.status}</span>
-          <div className={`w-3.5 h-3.5 rounded border ${r.used ? 'bg-primary border-primary' : 'border-muted-foreground'} flex items-center justify-center`}>
-            {r.used && <Check className="h-2.5 w-2.5 text-primary-foreground" />}
+          <span
+            className={`px-1.5 py-0.5 rounded text-[9px] text-center ${r.statusColor}`}
+          >
+            {r.status}
+          </span>
+          <div
+            className={`w-3.5 h-3.5 rounded border ${r.used ? "bg-primary border-primary" : "border-muted-foreground"} flex items-center justify-center`}
+          >
+            {r.used && (
+              <Check className="h-2.5 w-2.5 text-primary-foreground" />
+            )}
           </div>
-          <div className={`w-3.5 h-3.5 rounded border ${r.invoiced ? 'bg-primary border-primary' : 'border-muted-foreground'} flex items-center justify-center`}>
-            {r.invoiced && <Check className="h-2.5 w-2.5 text-primary-foreground" />}
+          <div
+            className={`w-3.5 h-3.5 rounded border ${r.invoiced ? "bg-primary border-primary" : "border-muted-foreground"} flex items-center justify-center`}
+          >
+            {r.invoiced && (
+              <Check className="h-2.5 w-2.5 text-primary-foreground" />
+            )}
           </div>
           <Pencil className="h-3 w-3 text-muted-foreground" />
         </div>
@@ -172,8 +293,12 @@ const MockupReports = () => (
     <div className="flex gap-2 items-center text-[10px]">
       <span className="px-2 py-1 rounded border">Weekly report</span>
       <span className="px-2 py-1 rounded border">Mar 3 – 9, 2026</span>
-      <span className="ml-auto flex items-center gap-1 px-2 py-1 rounded border"><Download className="h-3 w-3" /> CSV</span>
-      <span className="flex items-center gap-1 px-2 py-1 rounded border"><Printer className="h-3 w-3" /> Print</span>
+      <span className="ml-auto flex items-center gap-1 px-2 py-1 rounded border">
+        <Download className="h-3 w-3" /> CSV
+      </span>
+      <span className="flex items-center gap-1 px-2 py-1 rounded border">
+        <Printer className="h-3 w-3" /> Print
+      </span>
     </div>
     <div className="grid grid-cols-3 gap-2">
       {[
@@ -181,7 +306,10 @@ const MockupReports = () => (
         { label: "NOT INVOICED", value: "3 800 €", color: "text-warning" },
         { label: "TOTAL", value: "5 000 €", color: "text-foreground" },
       ].map((kpi) => (
-        <div key={kpi.label} className="p-2 rounded bg-background border text-center">
+        <div
+          key={kpi.label}
+          className="p-2 rounded bg-background border text-center"
+        >
           <div className="text-[9px] text-muted-foreground">{kpi.label}</div>
           <div className={`font-bold text-sm ${kpi.color}`}>{kpi.value}</div>
         </div>
@@ -193,19 +321,31 @@ const MockupReports = () => (
 const MockupResources = () => (
   <div className="border rounded-lg p-4 bg-muted/30 space-y-3 print:bg-white">
     <div className="flex justify-end">
-      <div className="h-7 rounded bg-primary px-3 flex items-center text-xs text-primary-foreground">+ Add resource</div>
+      <div className="h-7 rounded bg-primary px-3 flex items-center text-xs text-primary-foreground">
+        + Add resource
+      </div>
     </div>
     <div className="space-y-1 text-[10px]">
       {[
-        { name: "Restaurant Sigrid", type: "Restaurant", cap: "60", active: true },
+        {
+          name: "Restaurant Sigrid",
+          type: "Restaurant",
+          cap: "60",
+          active: true,
+        },
         { name: "Grand Hall", type: "Venue", cap: "180", active: true },
         { name: "Room 1", type: "Hotel", cap: "2", active: true },
       ].map((r, i) => (
-        <div key={i} className="grid grid-cols-5 gap-1 p-1.5 rounded bg-background border items-center">
+        <div
+          key={i}
+          className="grid grid-cols-5 gap-1 p-1.5 rounded bg-background border items-center"
+        >
           <span className="font-medium">{r.name}</span>
           <span>{r.type}</span>
           <span>{r.cap}</span>
-          <span className="px-1.5 py-0.5 rounded bg-success/10 text-success text-[9px] w-fit">Active</span>
+          <span className="px-1.5 py-0.5 rounded bg-success/10 text-success text-[9px] w-fit">
+            Active
+          </span>
           <span className="flex gap-1">
             <Pencil className="h-3 w-3 text-muted-foreground" />
             <Trash2 className="h-3 w-3 text-muted-foreground" />
@@ -222,11 +362,15 @@ const MockupSettings = () => (
       <div className="grid grid-cols-2 gap-2">
         <div className="space-y-1">
           <div className="text-muted-foreground">Business name</div>
-          <div className="h-7 rounded border bg-background px-2 flex items-center">My Business</div>
+          <div className="h-7 rounded border bg-background px-2 flex items-center">
+            My Business
+          </div>
         </div>
         <div className="space-y-1">
           <div className="text-muted-foreground">Email</div>
-          <div className="h-7 rounded border bg-background px-2 flex items-center">info@business.com</div>
+          <div className="h-7 rounded border bg-background px-2 flex items-center">
+            info@business.com
+          </div>
         </div>
       </div>
       <div className="text-muted-foreground mt-2">Brand Colors</div>
@@ -248,10 +392,17 @@ const MockupAdmin = () => (
         { name: "Staff User", role: "staff", approved: true },
         { name: "New User", role: "staff", approved: false },
       ].map((u, i) => (
-        <div key={i} className="flex items-center gap-2 text-[10px] p-1.5 rounded bg-background border">
+        <div
+          key={i}
+          className="flex items-center gap-2 text-[10px] p-1.5 rounded bg-background border"
+        >
           <span className="flex-1 font-medium">{u.name}</span>
-          <span className="px-1.5 py-0.5 rounded border text-[9px]">{u.role}</span>
-          <span className={`px-1.5 py-0.5 rounded text-[9px] ${u.approved ? "bg-success/10 text-success" : "bg-warning/10 text-warning"}`}>
+          <span className="px-1.5 py-0.5 rounded border text-[9px]">
+            {u.role}
+          </span>
+          <span
+            className={`px-1.5 py-0.5 rounded text-[9px] ${u.approved ? "bg-success/10 text-success" : "bg-warning/10 text-warning"}`}
+          >
             {u.approved ? "Approved" : "Pending"}
           </span>
           <KeyRound className="h-3 w-3 text-muted-foreground" />
@@ -271,11 +422,19 @@ const MockupSupport = () => (
     <div className="space-y-2 text-[10px]">
       <div className="p-2 rounded bg-background border">
         <div className="font-medium mb-1">All plans: AI Chatbot</div>
-        <div className="text-muted-foreground">MimmoAid (💬) provides instant self-service help, quick guides, and AI-powered answers.</div>
+        <div className="text-muted-foreground">
+          MimmoAid (💬) provides instant self-service help, quick guides, and
+          AI-powered answers.
+        </div>
       </div>
       <div className="p-2 rounded bg-accent/10 border border-accent/20">
-        <div className="font-medium mb-1 text-accent">Business plan: Priority Support</div>
-        <div className="text-muted-foreground">Submit tickets to admins with guaranteed 24-hour response. Track request status in real time.</div>
+        <div className="font-medium mb-1 text-accent">
+          Business plan: Priority Support
+        </div>
+        <div className="text-muted-foreground">
+          Submit tickets to admins with guaranteed 24-hour response. Track
+          request status in real time.
+        </div>
       </div>
     </div>
   </div>
@@ -286,20 +445,47 @@ const MockupMultisite = () => (
     <div className="flex items-center gap-2 text-xs font-medium">
       <Building2 className="h-4 w-4 text-primary" />
       <span>Sites</span>
-      <span className="ml-auto text-[10px] px-2 py-0.5 rounded bg-primary text-primary-foreground">Business</span>
+      <span className="ml-auto text-[10px] px-2 py-0.5 rounded bg-primary text-primary-foreground">
+        Business
+      </span>
     </div>
     <div className="space-y-1">
       {[
-        { name: "Wiurila Manor", type: "Venue", location: "Halikko", active: true },
-        { name: "Gasthaus Wiurila", type: "Hotel", location: "Halikko", active: true },
-        { name: "Restaurant Sigrid", type: "Restaurant", location: "Salo", active: false },
+        {
+          name: "Wiurila Manor",
+          type: "Venue",
+          location: "Halikko",
+          active: true,
+        },
+        {
+          name: "Gasthaus Wiurila",
+          type: "Hotel",
+          location: "Halikko",
+          active: true,
+        },
+        {
+          name: "Restaurant Sigrid",
+          type: "Restaurant",
+          location: "Salo",
+          active: false,
+        },
       ].map((s, i) => (
-        <div key={i} className="flex items-center gap-2 text-[10px] p-1.5 rounded bg-background border">
+        <div
+          key={i}
+          className="flex items-center gap-2 text-[10px] p-1.5 rounded bg-background border"
+        >
           <Building2 className="h-3 w-3 text-muted-foreground" />
           <span className="flex-1 font-medium">{s.name}</span>
-          <span className="px-1.5 py-0.5 rounded border text-[9px]">{s.type}</span>
-          <span className="flex items-center gap-0.5 text-muted-foreground"><MapPin className="h-2.5 w-2.5" />{s.location}</span>
-          <span className={`px-1.5 py-0.5 rounded text-[9px] ${s.active ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"}`}>
+          <span className="px-1.5 py-0.5 rounded border text-[9px]">
+            {s.type}
+          </span>
+          <span className="flex items-center gap-0.5 text-muted-foreground">
+            <MapPin className="h-2.5 w-2.5" />
+            {s.location}
+          </span>
+          <span
+            className={`px-1.5 py-0.5 rounded text-[9px] ${s.active ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"}`}
+          >
             {s.active ? "Active" : "Draft"}
           </span>
         </div>
@@ -309,9 +495,15 @@ const MockupMultisite = () => (
       <div className="flex-1 p-2 rounded bg-background border text-center">
         <div className="text-muted-foreground">Sidebar</div>
         <div className="mt-1 flex flex-col gap-0.5">
-          <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[9px]">All Sites</span>
-          <span className="px-1.5 py-0.5 rounded border text-[9px]">Wiurila Manor</span>
-          <span className="px-1.5 py-0.5 rounded border text-[9px]">Gasthaus</span>
+          <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[9px]">
+            All Sites
+          </span>
+          <span className="px-1.5 py-0.5 rounded border text-[9px]">
+            Wiurila Manor
+          </span>
+          <span className="px-1.5 py-0.5 rounded border text-[9px]">
+            Gasthaus
+          </span>
         </div>
       </div>
       <div className="flex-1 p-2 rounded bg-background border text-center">
@@ -335,45 +527,74 @@ const MockupProfile = () => (
       <span>Profile Settings</span>
     </div>
     <div className="flex items-center gap-3">
-      <div className="h-14 w-14 rounded-full bg-primary/10 border-2 border-border flex items-center justify-center text-sm font-bold text-primary">JD</div>
+      <div className="h-14 w-14 rounded-full bg-primary/10 border-2 border-border flex items-center justify-center text-sm font-bold text-primary">
+        JD
+      </div>
       <div className="space-y-1">
         <div className="h-6 rounded border bg-background px-2 flex items-center text-[10px]">
-          <Upload className="h-2.5 w-2.5 mr-1 text-muted-foreground" /> Upload photo
+          <Upload className="h-2.5 w-2.5 mr-1 text-muted-foreground" /> Upload
+          photo
         </div>
-        <div className="text-[9px] text-muted-foreground">JPG, PNG or WebP. Max 2MB.</div>
+        <div className="text-[9px] text-muted-foreground">
+          JPG, PNG or WebP. Max 2MB.
+        </div>
       </div>
     </div>
     <div className="space-y-1.5 text-[10px]">
       <div className="text-muted-foreground">Display Name</div>
-      <div className="h-7 rounded border bg-background px-2 flex items-center">John Doe</div>
+      <div className="h-7 rounded border bg-background px-2 flex items-center">
+        John Doe
+      </div>
       <div className="text-muted-foreground mt-1">Email</div>
-      <div className="h-7 rounded border bg-muted px-2 flex items-center text-muted-foreground">john@example.com</div>
+      <div className="h-7 rounded border bg-muted px-2 flex items-center text-muted-foreground">
+        john@example.com
+      </div>
     </div>
-    <div className="h-7 rounded bg-primary flex items-center justify-center text-[10px] text-primary-foreground font-medium">Save Changes</div>
+    <div className="h-7 rounded bg-primary flex items-center justify-center text-[10px] text-primary-foreground font-medium">
+      Save Changes
+    </div>
   </div>
 );
 
 const MockupOffers = () => (
   <div className="border rounded-lg p-4 bg-muted/30 space-y-3 print:bg-white">
     <div className="flex items-center justify-between">
-      <div className="text-xs font-medium flex items-center gap-1"><FileOutput className="h-3.5 w-3.5 text-primary" /> Offers</div>
-      <div className="h-6 px-2 rounded bg-primary flex items-center text-[10px] text-primary-foreground">+ New Offer</div>
+      <div className="text-xs font-medium flex items-center gap-1">
+        <FileOutput className="h-3.5 w-3.5 text-primary" /> Offers
+      </div>
+      <div className="h-6 px-2 rounded bg-primary flex items-center text-[10px] text-primary-foreground">
+        + New Offer
+      </div>
     </div>
     <div className="space-y-1.5">
       {[
         { guest: "Maria S.", date: "15 May", status: "Draft", linked: 2 },
         { guest: "John D.", date: "22 May", status: "Sent", linked: 3 },
       ].map((o) => (
-        <div key={o.guest} className="flex items-center justify-between p-2 rounded border bg-background text-[10px]">
-          <div><span className="font-medium">{o.guest}</span> · {o.date}</div>
+        <div
+          key={o.guest}
+          className="flex items-center justify-between p-2 rounded border bg-background text-[10px]"
+        >
+          <div>
+            <span className="font-medium">{o.guest}</span> · {o.date}
+          </div>
           <div className="flex items-center gap-2">
-            <span className="flex items-center gap-0.5"><Link2 className="h-2.5 w-2.5" />{o.linked}</span>
-            <span className={`px-1.5 py-0.5 rounded ${o.status === "Sent" ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"}`}>{o.status}</span>
+            <span className="flex items-center gap-0.5">
+              <Link2 className="h-2.5 w-2.5" />
+              {o.linked}
+            </span>
+            <span
+              className={`px-1.5 py-0.5 rounded ${o.status === "Sent" ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"}`}
+            >
+              {o.status}
+            </span>
           </div>
         </div>
       ))}
     </div>
-    <div className="text-[9px] text-muted-foreground text-center">Mark linked reservations as used / invoiced together</div>
+    <div className="text-[9px] text-muted-foreground text-center">
+      Mark linked reservations as used / invoiced together
+    </div>
   </div>
 );
 
@@ -394,7 +615,11 @@ const mockupComponents: Record<string, React.ReactNode> = {
 
 /* ─── Tier Overview Component ─── */
 
-const TierOverviewCard = ({ tierOverview }: { tierOverview: GuideContent["tierOverview"] }) => {
+const TierOverviewCard = ({
+  tierOverview,
+}: {
+  tierOverview: GuideContent["tierOverview"];
+}) => {
   const tierIcons = [
     <Zap className="h-5 w-5" />,
     <Crown className="h-5 w-5" />,
@@ -404,20 +629,32 @@ const TierOverviewCard = ({ tierOverview }: { tierOverview: GuideContent["tierOv
   return (
     <Card className="print:shadow-none print:border print:break-inside-avoid mb-8 print:mb-6 border-primary/20 bg-primary/5">
       <CardHeader className="pb-3 print:pb-2">
-        <CardTitle className="text-xl font-serif print:text-lg">{tierOverview.heading}</CardTitle>
+        <CardTitle className="text-xl font-serif print:text-lg">
+          {tierOverview.heading}
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 print:grid-cols-3">
           {tierOverview.tiers.map((tier, idx) => (
-            <div key={tier.name} className="rounded-xl border bg-card p-4 print:p-3 space-y-2">
+            <div
+              key={tier.name}
+              className="rounded-xl border bg-card p-4 print:p-3 space-y-2"
+            >
               <div className="flex items-center gap-2">
-                <span className="text-primary print:text-black">{tierIcons[idx]}</span>
+                <span className="text-primary print:text-black">
+                  {tierIcons[idx]}
+                </span>
                 <h3 className="font-semibold text-sm">{tier.name}</h3>
-                <span className="ml-auto text-xs font-medium text-muted-foreground">{tier.price}</span>
+                <span className="ml-auto text-xs font-medium text-muted-foreground">
+                  {tier.price}
+                </span>
               </div>
               <ul className="space-y-1">
                 {tier.features.map((f, fi) => (
-                  <li key={fi} className="flex items-start gap-1.5 text-xs text-foreground/80">
+                  <li
+                    key={fi}
+                    className="flex items-start gap-1.5 text-xs text-foreground/80"
+                  >
                     <Check className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5 print:text-black" />
                     <span>{f}</span>
                   </li>
@@ -495,7 +732,8 @@ const guideContent: Record<Language, GuideContent> = {
     },
     sections: [
       {
-        icon: <LogIn className="h-6 w-6" />, mockupId: "login",
+        icon: <LogIn className="h-6 w-6" />,
+        mockupId: "login",
         title: "1. Logging In",
         steps: [
           "Navigate to the Login page in your browser.",
@@ -507,7 +745,8 @@ const guideContent: Record<Language, GuideContent> = {
         tip: "Password must be at least 6 characters long.",
       },
       {
-        icon: <Home className="h-6 w-6" />, mockupId: "overview",
+        icon: <Home className="h-6 w-6" />,
+        mockupId: "overview",
         title: "2. Dashboard Overview",
         steps: [
           "The Overview tab shows today's summary: reservations, pending bookings, guests, and arrivals.",
@@ -522,7 +761,8 @@ const guideContent: Record<Language, GuideContent> = {
         ],
       },
       {
-        icon: <Calendar className="h-6 w-6" />, mockupId: "calendar",
+        icon: <Calendar className="h-6 w-6" />,
+        mockupId: "calendar",
         title: "3. Calendar",
         steps: [
           "The weekly calendar displays all resources and their availability.",
@@ -534,7 +774,8 @@ const guideContent: Record<Language, GuideContent> = {
         ],
       },
       {
-        icon: <ClipboardList className="h-6 w-6" />, mockupId: "reservations",
+        icon: <ClipboardList className="h-6 w-6" />,
+        mockupId: "reservations",
         title: "4. Reservations",
         steps: [
           "The Reservations view lists bookings by status: Pending, Confirmed, Cancelled.",
@@ -549,7 +790,8 @@ const guideContent: Record<Language, GuideContent> = {
         ],
       },
       {
-        icon: <BarChart3 className="h-6 w-6" />, mockupId: "reports",
+        icon: <BarChart3 className="h-6 w-6" />,
+        mockupId: "reports",
         title: "5. Reports",
         steps: [
           "Select a time period: Week, Month, Quarter, Half-year, Year, or custom range.",
@@ -563,7 +805,8 @@ const guideContent: Record<Language, GuideContent> = {
         tip: "All plans can view reports. CSV export and printing require Pro or Business.",
       },
       {
-        icon: <Settings className="h-6 w-6" />, mockupId: "resources",
+        icon: <Settings className="h-6 w-6" />,
+        mockupId: "resources",
         title: "6. Resources",
         steps: [
           "The Resources view shows all venues, rooms, and tables.",
@@ -586,7 +829,8 @@ const guideContent: Record<Language, GuideContent> = {
         ],
       },
       {
-        icon: <Settings className="h-6 w-6" />, mockupId: "settings",
+        icon: <Settings className="h-6 w-6" />,
+        mockupId: "settings",
         title: "7. Settings (Owner only)",
         steps: [
           "Upload your logo and hero image for the public booking page.",
@@ -608,7 +852,8 @@ const guideContent: Record<Language, GuideContent> = {
         ],
       },
       {
-        icon: <Shield className="h-6 w-6" />, mockupId: "admin",
+        icon: <Shield className="h-6 w-6" />,
+        mockupId: "admin",
         title: "8. Admin Panel (Owner/Admin)",
         steps: [
           "Manage all users: add new users, change roles, reset passwords, or remove users.",
@@ -622,7 +867,8 @@ const guideContent: Record<Language, GuideContent> = {
         ],
       },
       {
-        icon: <LifeBuoy className="h-6 w-6" />, mockupId: "support",
+        icon: <LifeBuoy className="h-6 w-6" />,
+        mockupId: "support",
         title: "9. Support",
         steps: [
           "All plans include the MimmoAid AI chatbot (💬) — available in the dashboard and as a floating widget.",
@@ -633,7 +879,8 @@ const guideContent: Record<Language, GuideContent> = {
         ],
       },
       {
-        icon: <UserCircle className="h-6 w-6" />, mockupId: "profile",
+        icon: <UserCircle className="h-6 w-6" />,
+        mockupId: "profile",
         title: "10. Profile Settings",
         steps: [
           "Click 'Profile' in the sidebar to open your personal settings.",
@@ -645,7 +892,8 @@ const guideContent: Record<Language, GuideContent> = {
         ],
       },
       {
-        icon: <Building2 className="h-6 w-6" />, mockupId: "multisite",
+        icon: <Building2 className="h-6 w-6" />,
+        mockupId: "multisite",
         title: "11. Multi-Site Management (Business plan)",
         steps: [
           "Business plan unlocks multi-site management — manage multiple locations from one dashboard.",
@@ -660,7 +908,8 @@ const guideContent: Record<Language, GuideContent> = {
         tip: "Not on Business plan? You'll see an upgrade prompt in Settings.",
       },
       {
-        icon: <Archive className="h-6 w-6" />, mockupId: "archive",
+        icon: <Archive className="h-6 w-6" />,
+        mockupId: "archive",
         title: "12. Automatic Archiving",
         steps: [
           "Reservations that are both marked as 'Used' and 'Invoiced' are automatically archived after 30 days.",
@@ -672,7 +921,8 @@ const guideContent: Record<Language, GuideContent> = {
         tip: "Make sure to mark reservations as both 'Used' and 'Invoiced' before they qualify for archiving.",
       },
       {
-        icon: <FileOutput className="h-6 w-6" />, mockupId: "offers",
+        icon: <FileOutput className="h-6 w-6" />,
+        mockupId: "offers",
         title: "13. Offers & Cross-Reservations",
         steps: [
           "Navigate to 'Offers' in the sidebar to manage proposals for guests.",
@@ -688,7 +938,8 @@ const guideContent: Record<Language, GuideContent> = {
         tip: "Offers are available on all plans. Cross-reservations (linking across types) require Pro or Business.",
       },
       {
-        icon: <Settings className="h-6 w-6" />, mockupId: "kitchen",
+        icon: <Settings className="h-6 w-6" />,
+        mockupId: "kitchen",
         title: "14. Kitchen Orders (Pro & Business)",
         steps: [
           "Open the Kitchen panel from the sidebar to manage food and drink orders for a selected day.",
@@ -700,7 +951,8 @@ const guideContent: Record<Language, GuideContent> = {
         tip: "Available on restaurant and venue resources. Use the notes field for allergies and special requests.",
       },
       {
-        icon: <Building2 className="h-6 w-6" />, mockupId: "resources",
+        icon: <Building2 className="h-6 w-6" />,
+        mockupId: "resources",
         title: "15. Hotel Rooms & Room Types",
         steps: [
           "On any accommodation resource, define one or more Room Types with name, capacity, base price, optional breakfast price, and bed configuration (singles, doubles, sofa beds, cribs).",
@@ -711,7 +963,8 @@ const guideContent: Record<Language, GuideContent> = {
         ],
       },
       {
-        icon: <Building2 className="h-6 w-6" />, mockupId: "multisite",
+        icon: <Building2 className="h-6 w-6" />,
+        mockupId: "multisite",
         title: "16. Multi-site Overrides (Business)",
         steps: [
           "On Business plan, almost every tenant-level setting can be overridden per site: opening hours, email templates, business name, reply-to email, branding (colors, logo, hero image), and booking page copy.",
@@ -722,7 +975,8 @@ const guideContent: Record<Language, GuideContent> = {
         ],
       },
       {
-        icon: <Link2 className="h-6 w-6" />, mockupId: "calendar",
+        icon: <Link2 className="h-6 w-6" />,
+        mockupId: "calendar",
         title: "17. Guest Portal, Timeline and Daily Digest",
         steps: [
           "Guests open 'Find my booking' and enter their email, MimmoBook mails them a secure link to their own booking page.",
@@ -735,7 +989,8 @@ const guideContent: Record<Language, GuideContent> = {
         tip: "The digest is sent at 06:00 local time for your venue timezone, all year, also over daylight saving changes.",
       },
       {
-        icon: <Link2 className="h-6 w-6" />, mockupId: "settings",
+        icon: <Link2 className="h-6 w-6" />,
+        mockupId: "settings",
         title: "18. Sharing the booking page on your own website",
         steps: [
           "Open the Overview page and click the 'Booking Link' button in the top right. The panel lists every ready made link and, below them, 'Add booking to your own website'.",
@@ -745,7 +1000,7 @@ const guideContent: Record<Language, GuideContent> = {
           "Embed on your site: open the 'Embed on your site' tab, press 'Copy code', then paste the code into your own website editor on the page where booking should appear, for example yoursite.com/booking.",
           "Where to paste it: WordPress uses a Custom HTML block, Squarespace a Code block, Wix an Embed HTML element, Webflow an Embed component, Shopify a Custom Liquid or HTML section. The code is a plain iframe, so every builder accepts it.",
           "The embed address ends in ?embed=1. That hides the MimmoBook top image, header and footer, so only the booking form shows inside your own page, while your logo, colours, texts, prices and opening hours still come from your settings.",
-          "Keep width=\"100%\" so the form fits phones. Change height=\"900\" if the form looks cut off or leaves empty space, for example 1200 for a long form or 700 for a short one.",
+          'Keep width="100%" so the form fits phones. Change height="900" if the form looks cut off or leaves empty space, for example 1200 for a long form or 700 for a short one.',
           "You can embed one service or one location only: inside the copied code add &type=guesthouse or &site=your-site-slug straight after embed=1, for example /book/your-slug?embed=1&type=restaurant.",
           "Link and button: open the 'Link and button' tab and copy the 'Book now' button code, or just the plain address. Paste the button code where you want the button. You may change the visible words and the colour value inside the code to match your own site.",
           "The button opens the booking page in a new tab, so your own website stays open behind it.",
@@ -756,7 +1011,8 @@ const guideContent: Record<Language, GuideContent> = {
         tip: "Guests never need an account, and the embedded form works on phones. Cookie consent is asked inside the embedded form, so you do not have to add anything for it on your own page.",
       },
       {
-        icon: <Zap className="h-6 w-6" />, mockupId: "reports",
+        icon: <Zap className="h-6 w-6" />,
+        mockupId: "reports",
         title: "19. Newest additions",
         steps: [
           "Booking invoice: open a booking with a price and press 'Download invoice'. The PDF shows the original amount, the promo code used, the discount and the final total, with your business details.",
@@ -772,7 +1028,8 @@ const guideContent: Record<Language, GuideContent> = {
         tip: "Prices always come from the resource settings, so keeping room prices, service prices and capacity up to date keeps booking, invoices and reports correct.",
       },
       {
-        icon: <Crown className="h-6 w-6" />, mockupId: "reports",
+        icon: <Crown className="h-6 w-6" />,
+        mockupId: "reports",
         title: "20. Special occasions and rejected bookings",
         steps: [
           "Open the reservation type settings and add a special occasion: name, date, total capacity, and either fixed sittings (guests pick one of your start times) or open booking (any time inside opening hours).",
@@ -785,7 +1042,8 @@ const guideContent: Record<Language, GuideContent> = {
         tip: "Check the rejected bookings card weekly, it shows demand you are turning away.",
       },
       {
-        icon: <ClipboardList className="h-6 w-6" />, mockupId: "reports",
+        icon: <ClipboardList className="h-6 w-6" />,
+        mockupId: "reports",
         title: "21. Food and drinks from an accepted offer",
         steps: [
           "Each function in an offer has its own food and drinks field: the event, the dining, the rooms.",
@@ -858,7 +1116,8 @@ const guideContent: Record<Language, GuideContent> = {
     },
     sections: [
       {
-        icon: <LogIn className="h-6 w-6" />, mockupId: "login",
+        icon: <LogIn className="h-6 w-6" />,
+        mockupId: "login",
         title: "1. Kirjautuminen",
         steps: [
           "Avaa kirjautumissivu selaimessa.",
@@ -870,7 +1129,8 @@ const guideContent: Record<Language, GuideContent> = {
         tip: "Salasanan tulee olla vähintään 6 merkkiä pitkä.",
       },
       {
-        icon: <Home className="h-6 w-6" />, mockupId: "overview",
+        icon: <Home className="h-6 w-6" />,
+        mockupId: "overview",
         title: "2. Hallintapaneelin yleiskatsaus",
         steps: [
           "Yleiskatsaus-välilehti näyttää päivän yhteenvedon: varaukset, odottavat, vieraat ja saapuneet.",
@@ -885,7 +1145,8 @@ const guideContent: Record<Language, GuideContent> = {
         ],
       },
       {
-        icon: <Calendar className="h-6 w-6" />, mockupId: "calendar",
+        icon: <Calendar className="h-6 w-6" />,
+        mockupId: "calendar",
         title: "3. Kalenteri",
         steps: [
           "Viikkokalenteri näyttää kaikki resurssit ja niiden saatavuuden.",
@@ -897,7 +1158,8 @@ const guideContent: Record<Language, GuideContent> = {
         ],
       },
       {
-        icon: <ClipboardList className="h-6 w-6" />, mockupId: "reservations",
+        icon: <ClipboardList className="h-6 w-6" />,
+        mockupId: "reservations",
         title: "4. Varaukset",
         steps: [
           "Varaukset-näkymä listaa varaukset tilan mukaan: Odottaa, Vahvistettu, Peruttu.",
@@ -912,7 +1174,8 @@ const guideContent: Record<Language, GuideContent> = {
         ],
       },
       {
-        icon: <BarChart3 className="h-6 w-6" />, mockupId: "reports",
+        icon: <BarChart3 className="h-6 w-6" />,
+        mockupId: "reports",
         title: "5. Raportit",
         steps: [
           "Valitse aikaväli: Viikko, Kuukausi, Neljännes, Puoli vuotta, Vuosi tai oma aikaväli.",
@@ -926,7 +1189,8 @@ const guideContent: Record<Language, GuideContent> = {
         tip: "Kaikki tilaukset voivat tarkastella raportteja. CSV-vienti ja tulostus vaativat Pro- tai Business-tilauksen.",
       },
       {
-        icon: <Settings className="h-6 w-6" />, mockupId: "resources",
+        icon: <Settings className="h-6 w-6" />,
+        mockupId: "resources",
         title: "6. Resurssit",
         steps: [
           "Resurssien hallinta -näkymässä näet kaikki tilat, huoneet ja pöydät.",
@@ -948,7 +1212,8 @@ const guideContent: Record<Language, GuideContent> = {
         ],
       },
       {
-        icon: <Settings className="h-6 w-6" />, mockupId: "settings",
+        icon: <Settings className="h-6 w-6" />,
+        mockupId: "settings",
         title: "7. Asetukset (vain omistaja)",
         steps: [
           "Lataa logo ja hero-kuva julkiselle varaussivulle.",
@@ -970,7 +1235,8 @@ const guideContent: Record<Language, GuideContent> = {
         ],
       },
       {
-        icon: <Shield className="h-6 w-6" />, mockupId: "admin",
+        icon: <Shield className="h-6 w-6" />,
+        mockupId: "admin",
         title: "8. Ylläpito (omistaja/ylläpitäjä)",
         steps: [
           "Hallitse käyttäjiä: lisää, vaihda roolia, vaihda salasana tai poista.",
@@ -984,7 +1250,8 @@ const guideContent: Record<Language, GuideContent> = {
         ],
       },
       {
-        icon: <LifeBuoy className="h-6 w-6" />, mockupId: "support",
+        icon: <LifeBuoy className="h-6 w-6" />,
+        mockupId: "support",
         title: "9. Tuki",
         steps: [
           "Kaikissa tilauksissa on MimmoAid AI-chatbot (💬) — käytettävissä hallintapaneelissa ja kelluvana widgettinä.",
@@ -995,7 +1262,8 @@ const guideContent: Record<Language, GuideContent> = {
         ],
       },
       {
-        icon: <UserCircle className="h-6 w-6" />, mockupId: "profile",
+        icon: <UserCircle className="h-6 w-6" />,
+        mockupId: "profile",
         title: "10. Profiiliasetukset",
         steps: [
           "Paina 'Profiili' sivupalkissa avataksesi henkilökohtaiset asetukset.",
@@ -1007,7 +1275,8 @@ const guideContent: Record<Language, GuideContent> = {
         ],
       },
       {
-        icon: <Building2 className="h-6 w-6" />, mockupId: "multisite",
+        icon: <Building2 className="h-6 w-6" />,
+        mockupId: "multisite",
         title: "11. Monitoimipistehallinnointi (Business)",
         steps: [
           "Business-tilaus avaa monitoimipistehallinnan — hallinnoi useita toimipisteitä yhdestä hallintapaneelista.",
@@ -1022,7 +1291,8 @@ const guideContent: Record<Language, GuideContent> = {
         tip: "Ei Business-tilausta? Päivityskehote näkyy Asetuksissa.",
       },
       {
-        icon: <Archive className="h-6 w-6" />, mockupId: "archive",
+        icon: <Archive className="h-6 w-6" />,
+        mockupId: "archive",
         title: "12. Automaattinen arkistointi",
         steps: [
           "Varaukset, jotka on merkitty sekä 'Käytetty' että 'Laskutettu', arkistoidaan automaattisesti 30 päivän jälkeen.",
@@ -1034,7 +1304,8 @@ const guideContent: Record<Language, GuideContent> = {
         tip: "Varmista, että varaukset on merkitty sekä 'Käytetty' että 'Laskutettu' ennen kuin ne siirtyvät arkistoon.",
       },
       {
-        icon: <FileOutput className="h-6 w-6" />, mockupId: "offers",
+        icon: <FileOutput className="h-6 w-6" />,
+        mockupId: "offers",
         title: "13. Tarjoukset ja ristiinvaraukset",
         steps: [
           "Siirry 'Tarjoukset'-osioon sivupalkissa hallinnoidaksesi ehdotuksia vieraille.",
@@ -1050,7 +1321,8 @@ const guideContent: Record<Language, GuideContent> = {
         tip: "Tarjoukset ja ristiinvaraukset ovat käytettävissä kaikissa tilauksissa — Basic, Pro ja Business.",
       },
       {
-        icon: <Link2 className="h-6 w-6" />, mockupId: "calendar",
+        icon: <Link2 className="h-6 w-6" />,
+        mockupId: "calendar",
         title: "14. Vieraan oma sivu, aikajana ja päivittäinen kooste",
         steps: [
           "Vieras avaa 'Etsi varaukseni' ja syöttää sähköpostinsa, MimmoBook lähettää turvallisen linkin hänen omalle varaussivulleen.",
@@ -1063,7 +1335,8 @@ const guideContent: Record<Language, GuideContent> = {
         tip: "Kooste lähtee klo 06.00 toimipaikkasi paikallista aikaa ympäri vuoden, myös kesäajan vaihtuessa.",
       },
       {
-        icon: <Link2 className="h-6 w-6" />, mockupId: "settings",
+        icon: <Link2 className="h-6 w-6" />,
+        mockupId: "settings",
         title: "18. Varaussivun jakaminen omilla verkkosivuilla",
         steps: [
           "Avaa Yleiskatsaus ja paina oikeasta yläkulmasta 'Varauslinkki'. Paneeli listaa valmiit linkit ja niiden alla kohdan 'Lisää varaus omille verkkosivuillesi'.",
@@ -1073,7 +1346,7 @@ const guideContent: Record<Language, GuideContent> = {
           "Liittäminen omille sivuille: avaa välilehti 'Liitä sivuillesi', paina 'Kopioi koodi' ja liitä koodi omassa sivueditorissasi sille sivulle, jolla varauksen pitää näkyä, esimerkiksi sivustosi.fi/varaa.",
           "Mihin koodi liitetään: WordPressissä Custom HTML -lohko, Squarespacessa Code-lohko, Wixissä Embed HTML -elementti, Webflowssa Embed-komponentti, Shopifyssa Custom Liquid tai HTML-osio. Koodi on tavallinen iframe, joten kaikki editorit hyväksyvät sen.",
           "Liitetyn osoitteen lopussa on ?embed=1. Se piilottaa MimmoBookin kuvan, ylä- ja alapalkin, joten omalla sivullasi näkyy vain varauslomake. Logo, värit, tekstit, hinnat ja aukioloajat tulevat silti omista asetuksistasi.",
-          "Jätä width=\"100%\" paikalleen, jotta lomake sopii puhelimeen. Muuta height=\"900\", jos lomake näyttää katkeavan tai jättää tyhjää tilaa, esimerkiksi 1200 pitkälle ja 700 lyhyelle lomakkeelle.",
+          'Jätä width="100%" paikalleen, jotta lomake sopii puhelimeen. Muuta height="900", jos lomake näyttää katkeavan tai jättää tyhjää tilaa, esimerkiksi 1200 pitkälle ja 700 lyhyelle lomakkeelle.',
           "Voit liittää myös vain yhden palvelun tai toimipisteen: lisää kopioidun koodin osoitteeseen heti embed=1:n perään &type=guesthouse tai &site=toimipisteen-tunnus, esimerkiksi /book/tunnuksesi?embed=1&type=restaurant.",
           "Linkki ja painike: avaa välilehti 'Linkki ja painike' ja kopioi 'Varaa nyt' -painikkeen koodi tai pelkkä osoite. Liitä painikkeen koodi haluamaasi kohtaan. Voit muuttaa koodissa näkyvän tekstin ja värin omaan ilmeeseesi sopivaksi.",
           "Painike avaa varaussivun uuteen välilehteen, joten omat sivusi jäävät taustalle auki.",
@@ -1084,7 +1357,8 @@ const guideContent: Record<Language, GuideContent> = {
         tip: "Asiakas ei tarvitse tunnusta, ja liitetty lomake toimii puhelimessa. Evästesuostumus kysytään lomakkeen sisällä, joten sitä varten ei tarvitse lisätä omille sivuille mitään.",
       },
       {
-        icon: <Zap className="h-6 w-6" />, mockupId: "reports",
+        icon: <Zap className="h-6 w-6" />,
+        mockupId: "reports",
         title: "19. Uusimmat lisäykset",
         steps: [
           "Varauksen lasku: avaa hinnoiteltu varaus ja paina 'Lataa lasku'. PDF näyttää alkuperäisen summan, käytetyn alennuskoodin, alennuksen ja loppusumman sekä yrityksesi tiedot.",
@@ -1100,7 +1374,8 @@ const guideContent: Record<Language, GuideContent> = {
         tip: "Hinnat tulevat aina resurssin asetuksista, joten kun huoneiden hinnat, palveluiden hinnat ja kapasiteetit ovat ajan tasalla, varaukset, laskut ja raportit pysyvät oikeina.",
       },
       {
-        icon: <Crown className="h-6 w-6" />, mockupId: "reports",
+        icon: <Crown className="h-6 w-6" />,
+        mockupId: "reports",
         title: "20. Erikoistilaisuudet ja hylätyt varaukset",
         steps: [
           "Avaa varaustyypin asetukset ja lisää erikoistilaisuus: nimi, päivä, kokonaiskapasiteetti ja joko kiinteät kattaukset (vieras valitsee yhden aloitusajoistasi) tai vapaa varaus (mikä tahansa aika aukioloaikojen sisällä).",
@@ -1113,7 +1388,8 @@ const guideContent: Record<Language, GuideContent> = {
         tip: "Tarkista hylätyt varaukset viikoittain, kortti näyttää kysynnän jonka käännytät pois.",
       },
       {
-        icon: <ClipboardList className="h-6 w-6" />, mockupId: "reports",
+        icon: <ClipboardList className="h-6 w-6" />,
+        mockupId: "reports",
         title: "21. Tarjouksen ruoat ja juomat",
         steps: [
           "Tarjouksen jokaisella osiolla on oma ruoka ja juoma -kenttä: tapahtuma, ruokailu, huoneet.",
@@ -1186,7 +1462,8 @@ const guideContent: Record<Language, GuideContent> = {
     },
     sections: [
       {
-        icon: <LogIn className="h-6 w-6" />, mockupId: "login",
+        icon: <LogIn className="h-6 w-6" />,
+        mockupId: "login",
         title: "1. Inloggning",
         steps: [
           "Öppna inloggningssidan i din webbläsare.",
@@ -1198,7 +1475,8 @@ const guideContent: Record<Language, GuideContent> = {
         tip: "Lösenordet måste vara minst 6 tecken långt.",
       },
       {
-        icon: <Home className="h-6 w-6" />, mockupId: "overview",
+        icon: <Home className="h-6 w-6" />,
+        mockupId: "overview",
         title: "2. Instrumentpanelens översikt",
         steps: [
           "Översiktsfliken visar dagens sammanfattning: bokningar, väntande, gäster och ankomster.",
@@ -1213,7 +1491,8 @@ const guideContent: Record<Language, GuideContent> = {
         ],
       },
       {
-        icon: <Calendar className="h-6 w-6" />, mockupId: "calendar",
+        icon: <Calendar className="h-6 w-6" />,
+        mockupId: "calendar",
         title: "3. Kalender",
         steps: [
           "Veckokalendern visar alla resurser och deras tillgänglighet.",
@@ -1225,7 +1504,8 @@ const guideContent: Record<Language, GuideContent> = {
         ],
       },
       {
-        icon: <ClipboardList className="h-6 w-6" />, mockupId: "reservations",
+        icon: <ClipboardList className="h-6 w-6" />,
+        mockupId: "reservations",
         title: "4. Bokningar",
         steps: [
           "Bokningsvyn listar bokningar efter status: Väntande, Bekräftad, Avbokad.",
@@ -1240,7 +1520,8 @@ const guideContent: Record<Language, GuideContent> = {
         ],
       },
       {
-        icon: <BarChart3 className="h-6 w-6" />, mockupId: "reports",
+        icon: <BarChart3 className="h-6 w-6" />,
+        mockupId: "reports",
         title: "5. Rapporter",
         steps: [
           "Välj tidsperiod: Vecka, Månad, Kvartal, Halvår, År eller anpassat intervall.",
@@ -1254,7 +1535,8 @@ const guideContent: Record<Language, GuideContent> = {
         tip: "Alla planer kan visa rapporter. CSV-export och utskrift kräver Pro eller Business.",
       },
       {
-        icon: <Settings className="h-6 w-6" />, mockupId: "resources",
+        icon: <Settings className="h-6 w-6" />,
+        mockupId: "resources",
         title: "6. Resurser",
         steps: [
           "Resursvyn visar alla lokaler, rum och bord.",
@@ -1276,7 +1558,8 @@ const guideContent: Record<Language, GuideContent> = {
         ],
       },
       {
-        icon: <Settings className="h-6 w-6" />, mockupId: "settings",
+        icon: <Settings className="h-6 w-6" />,
+        mockupId: "settings",
         title: "7. Inställningar (Endast ägare)",
         steps: [
           "Ladda upp logotyp och hero-bild för den publika bokningssidan.",
@@ -1298,7 +1581,8 @@ const guideContent: Record<Language, GuideContent> = {
         ],
       },
       {
-        icon: <Shield className="h-6 w-6" />, mockupId: "admin",
+        icon: <Shield className="h-6 w-6" />,
+        mockupId: "admin",
         title: "8. Adminpanel (Ägare/Admin)",
         steps: [
           "Hantera alla användare: lägg till, ändra roll, återställ lösenord eller ta bort.",
@@ -1312,7 +1596,8 @@ const guideContent: Record<Language, GuideContent> = {
         ],
       },
       {
-        icon: <LifeBuoy className="h-6 w-6" />, mockupId: "support",
+        icon: <LifeBuoy className="h-6 w-6" />,
+        mockupId: "support",
         title: "9. Support",
         steps: [
           "Alla planer inkluderar MimmoAid AI-chattbot (💬) — tillgänglig i instrumentpanelen och som flytande widget.",
@@ -1323,7 +1608,8 @@ const guideContent: Record<Language, GuideContent> = {
         ],
       },
       {
-        icon: <UserCircle className="h-6 w-6" />, mockupId: "profile",
+        icon: <UserCircle className="h-6 w-6" />,
+        mockupId: "profile",
         title: "10. Profilinställningar",
         steps: [
           "Klicka 'Profil' i sidofältet för att öppna dina personliga inställningar.",
@@ -1335,7 +1621,8 @@ const guideContent: Record<Language, GuideContent> = {
         ],
       },
       {
-        icon: <Building2 className="h-6 w-6" />, mockupId: "multisite",
+        icon: <Building2 className="h-6 w-6" />,
+        mockupId: "multisite",
         title: "11. Hantering av flera platser (Business)",
         steps: [
           "Business-planen låser upp hantering av flera platser — hantera flera lokaler från en instrumentpanel.",
@@ -1350,7 +1637,8 @@ const guideContent: Record<Language, GuideContent> = {
         tip: "Inte på Business-planen? Du ser en uppgraderingsuppmaning i Inställningar.",
       },
       {
-        icon: <Archive className="h-6 w-6" />, mockupId: "archive",
+        icon: <Archive className="h-6 w-6" />,
+        mockupId: "archive",
         title: "12. Automatisk arkivering",
         steps: [
           "Bokningar som är markerade som både 'Använd' och 'Fakturerad' arkiveras automatiskt efter 30 dagar.",
@@ -1362,7 +1650,8 @@ const guideContent: Record<Language, GuideContent> = {
         tip: "Se till att markera bokningar som både 'Använd' och 'Fakturerad' innan de kvalificerar för arkivering.",
       },
       {
-        icon: <FileOutput className="h-6 w-6" />, mockupId: "offers",
+        icon: <FileOutput className="h-6 w-6" />,
+        mockupId: "offers",
         title: "13. Erbjudanden och korsbokningar",
         steps: [
           "Navigera till 'Erbjudanden' i sidofältet för att hantera förslag till gäster.",
@@ -1378,7 +1667,8 @@ const guideContent: Record<Language, GuideContent> = {
         tip: "Erbjudanden och korsbokningar är tillgängliga på alla planer — Basic, Pro och Business.",
       },
       {
-        icon: <Link2 className="h-6 w-6" />, mockupId: "calendar",
+        icon: <Link2 className="h-6 w-6" />,
+        mockupId: "calendar",
         title: "14. Gästportal, tidslinje och dagligt sammandrag",
         steps: [
           "Gästen öppnar 'Hitta min bokning' och anger sin e-post, MimmoBook skickar en säker länk till gästens egen bokningssida.",
@@ -1391,7 +1681,8 @@ const guideContent: Record<Language, GuideContent> = {
         tip: "Sammandraget skickas kl. 06.00 lokal tid för din verksamhet, året om, även vid övergång till sommartid.",
       },
       {
-        icon: <Link2 className="h-6 w-6" />, mockupId: "settings",
+        icon: <Link2 className="h-6 w-6" />,
+        mockupId: "settings",
         title: "18. Dela bokningssidan på din egen webbplats",
         steps: [
           "Öppna Översikt och klicka på 'Bokningslänk' längst upp till höger. Panelen visar alla färdiga länkar och under dem 'Lägg till bokning på din egen webbplats'.",
@@ -1401,7 +1692,7 @@ const guideContent: Record<Language, GuideContent> = {
           "Bädda in på din sida: öppna fliken 'Bädda in på din sida', tryck 'Kopiera kod' och klistra in koden i din egen sidredigerare på den sida där bokningen ska visas, till exempel dinsida.se/bokning.",
           "Var koden klistras in: WordPress använder ett Custom HTML-block, Squarespace ett Code-block, Wix ett Embed HTML-element, Webflow en Embed-komponent, Shopify en Custom Liquid- eller HTML-sektion. Koden är en vanlig iframe, så alla verktyg accepterar den.",
           "Adressen i koden slutar med ?embed=1. Det gömmer MimmoBooks bild, sidhuvud och sidfot, så bara bokningsformuläret visas på din egen sida, medan logotyp, färger, texter, priser och öppettider fortfarande kommer från dina inställningar.",
-          "Behåll width=\"100%\" så att formuläret passar i mobilen. Ändra height=\"900\" om formuläret ser avklippt ut eller lämnar tomrum, till exempel 1200 för ett långt och 700 för ett kort formulär.",
+          'Behåll width="100%" så att formuläret passar i mobilen. Ändra height="900" om formuläret ser avklippt ut eller lämnar tomrum, till exempel 1200 för ett långt och 700 för ett kort formulär.',
           "Du kan bädda in bara en tjänst eller en plats: lägg till &type=guesthouse eller &site=din-plats-slug direkt efter embed=1 i den kopierade adressen, till exempel /book/din-slug?embed=1&type=restaurant.",
           "Länk och knapp: öppna fliken 'Länk och knapp' och kopiera koden för 'Boka nu'-knappen, eller bara adressen. Klistra in knappkoden där du vill ha knappen. Du kan ändra texten och färgvärdet i koden så att den matchar din egen stil.",
           "Knappen öppnar bokningssidan i en ny flik, så din egen webbplats förblir öppen bakom den.",
@@ -1412,7 +1703,8 @@ const guideContent: Record<Language, GuideContent> = {
         tip: "Gästen behöver inget konto och det inbäddade formuläret fungerar i mobilen. Cookiesamtycke frågas inne i formuläret, så du behöver inte lägga till något för det på din egen sida.",
       },
       {
-        icon: <Zap className="h-6 w-6" />, mockupId: "reports",
+        icon: <Zap className="h-6 w-6" />,
+        mockupId: "reports",
         title: "19. Senaste nyheterna",
         steps: [
           "Bokningsfaktura: öppna en bokning med pris och tryck 'Ladda ner faktura'. PDF:en visar originalsumman, rabattkoden, rabatten och slutsumman samt dina företagsuppgifter.",
@@ -1428,7 +1720,8 @@ const guideContent: Record<Language, GuideContent> = {
         tip: "Priserna kommer alltid från resursinställningarna, så när rumspriser, tjänstepriser och kapacitet är uppdaterade blir bokningar, fakturor och rapporter rätt.",
       },
       {
-        icon: <Crown className="h-6 w-6" />, mockupId: "reports",
+        icon: <Crown className="h-6 w-6" />,
+        mockupId: "reports",
         title: "20. Särskilda tillfällen och avvisade bokningar",
         steps: [
           "Öppna bokningstypens inställningar och lägg till ett särskilt tillfälle: namn, datum, total kapacitet och antingen fasta sittningar (gästen väljer en av dina starttider) eller fri bokning (valfri tid inom öppettiderna).",
@@ -1441,7 +1734,8 @@ const guideContent: Record<Language, GuideContent> = {
         tip: "Kontrollera kortet med avvisade bokningar varje vecka, det visar efterfrågan du tackar nej till.",
       },
       {
-        icon: <ClipboardList className="h-6 w-6" />, mockupId: "reports",
+        icon: <ClipboardList className="h-6 w-6" />,
+        mockupId: "reports",
         title: "21. Mat och dryck från en accepterad offert",
         steps: [
           "Varje del i en offert har sitt eget fält för mat och dryck: evenemanget, maten, rummen.",
@@ -1501,10 +1795,20 @@ const StaffGuide = () => {
       <main className="max-w-4xl mx-auto px-4 py-8 print:py-4 print:px-8 print:max-w-none">
         {/* Title */}
         <div className="text-center mb-10 print:mb-6">
-          <h1 className="text-3xl font-serif font-bold text-foreground print:text-2xl">{content.title}</h1>
-          <p className="text-muted-foreground mt-2 print:text-sm">{content.subtitle}</p>
+          <h1 className="text-3xl font-serif font-bold text-foreground print:text-2xl">
+            {content.title}
+          </h1>
+          <p className="text-muted-foreground mt-2 print:text-sm">
+            {content.subtitle}
+          </p>
           <p className="text-xs text-muted-foreground mt-1 print:block hidden">
-            {new Date().toLocaleDateString(guideLang === "fi" ? "fi-FI" : guideLang === "sv" ? "sv-SE" : "en-GB")}
+            {new Date().toLocaleDateString(
+              guideLang === "fi"
+                ? "fi-FI"
+                : guideLang === "sv"
+                  ? "sv-SE"
+                  : "en-GB",
+            )}
           </p>
         </div>
 
@@ -1514,10 +1818,15 @@ const StaffGuide = () => {
         {/* Sections */}
         <div className="space-y-8 print:space-y-6">
           {content.sections.map((section, idx) => (
-            <Card key={idx} className="print:shadow-none print:border print:break-inside-avoid">
+            <Card
+              key={idx}
+              className="print:shadow-none print:border print:break-inside-avoid"
+            >
               <CardHeader className="pb-3 print:pb-2">
                 <CardTitle className="flex items-center gap-3 text-xl font-serif print:text-lg">
-                  <span className="text-primary print:text-black">{section.icon}</span>
+                  <span className="text-primary print:text-black">
+                    {section.icon}
+                  </span>
                   {section.title}
                 </CardTitle>
               </CardHeader>
@@ -1532,7 +1841,10 @@ const StaffGuide = () => {
                 {/* Steps */}
                 <ol className="space-y-2 print:space-y-1">
                   {section.steps.map((step, stepIdx) => (
-                    <li key={stepIdx} className="flex gap-3 text-sm print:text-xs">
+                    <li
+                      key={stepIdx}
+                      className="flex gap-3 text-sm print:text-xs"
+                    >
                       <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-semibold print:bg-gray-200 print:text-black">
                         {stepIdx + 1}
                       </span>
@@ -1552,7 +1864,14 @@ const StaffGuide = () => {
 
         {/* Footer for print */}
         <div className="hidden print:block mt-8 pt-4 border-t text-center text-xs text-gray-500">
-          MimmoBook – {content.title} – {new Date().toLocaleDateString(guideLang === "fi" ? "fi-FI" : guideLang === "sv" ? "sv-SE" : "en-GB")}
+          MimmoBook – {content.title} –{" "}
+          {new Date().toLocaleDateString(
+            guideLang === "fi"
+              ? "fi-FI"
+              : guideLang === "sv"
+                ? "sv-SE"
+                : "en-GB",
+          )}
         </div>
       </main>
     </div>
