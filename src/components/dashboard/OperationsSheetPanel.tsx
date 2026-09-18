@@ -496,11 +496,7 @@ const OperationsSheetPanel = () => {
           <Skeleton className="h-24 w-full" />
         ) : (
           <>
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <h3 className="text-sm font-medium">Kitchen</h3>
-                <Badge variant="secondary">{kitchen.length}</Badge>
-              </div>
+            <CollapsibleSection title="Kitchen" count={kitchen.length}>
               {kitchen.length === 0 ? (
                 <p className="text-sm text-muted-foreground">No kitchen service for this day.</p>
               ) : (
