@@ -165,7 +165,19 @@ async function mockBackend(page: Page, offer: Record<string, unknown>) {
       return json(route, [TENANT_ROW]);
     }
 
-    if (path.startsWith("resources")) return json(route, [RESOURCE_ROW]);
+    if (path.startsWith("resources")) {
+      // The Kitchen nav entry is gated on a counted head request, which needs a
+      // real content-range so the client sees count = 1.
+      if (method === "HEAD") {
+        return route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          headers: { "content-range": "0-0/1" },
+          body: "",
+        });
+      }
+      return json(route, [RESOURCE_ROW], { "content-range": "0-0/1" });
+    }
 
     if (path.startsWith("offers")) {
       if (method === "GET") return json(route, [offer]);

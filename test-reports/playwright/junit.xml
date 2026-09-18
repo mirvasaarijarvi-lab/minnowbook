@@ -1,6 +1,6 @@
-<testsuites id="" name="" tests="3" failures="0" skipped="0" errors="1" time="32.658081">
-<testsuite name="offer-confirm-kitchen-confirmation.spec.ts" timestamp="2026-09-18T06:31:10.744Z" hostname="chromium" tests="3" failures="0" skipped="0" time="34.598" errors="1">
-<testcase name="Offer confirmation states the Kitchen tab result › offer with food and drinks: confirmation names the lines sent to the kitchen" classname="offer-confirm-kitchen-confirmation.spec.ts" time="2.059">
+<testsuites id="" name="" tests="3" failures="0" skipped="0" errors="1" time="32.260952">
+<testsuite name="offer-confirm-kitchen-confirmation.spec.ts" timestamp="2026-09-18T06:32:18.910Z" hostname="chromium" tests="3" failures="0" skipped="0" time="34.129" errors="1">
+<testcase name="Offer confirmation states the Kitchen tab result › offer with food and drinks: confirmation names the lines sent to the kitchen" classname="offer-confirm-kitchen-confirmation.spec.ts" time="1.819">
 <system-out>
 <![CDATA[
 [[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-917c1-e-lines-sent-to-the-kitchen-chromium/test-finished-1.png]]
@@ -11,7 +11,7 @@
 ]]>
 </system-out>
 </testcase>
-<testcase name="Offer confirmation states the Kitchen tab result › offer without food or drinks: confirmation says nothing was sent to the kitchen" classname="offer-confirm-kitchen-confirmation.spec.ts" time="2.067">
+<testcase name="Offer confirmation states the Kitchen tab result › offer without food or drinks: confirmation says nothing was sent to the kitchen" classname="offer-confirm-kitchen-confirmation.spec.ts" time="1.928">
 <system-out>
 <![CDATA[
 [[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-4b200-ing-was-sent-to-the-kitchen-chromium/test-finished-1.png]]
@@ -22,7 +22,7 @@
 ]]>
 </system-out>
 </testcase>
-<testcase name="Offer confirmation states the Kitchen tab result › accepted offer&apos;s food and drink lines show up in the Kitchen tab" classname="offer-confirm-kitchen-confirmation.spec.ts" time="30.472">
+<testcase name="Offer confirmation states the Kitchen tab result › accepted offer&apos;s food and drink lines show up in the Kitchen tab" classname="offer-confirm-kitchen-confirmation.spec.ts" time="30.382">
 <system-out>
 <![CDATA[
 [[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-f2433--show-up-in-the-Kitchen-tab-chromium/test-failed-1.png]]
@@ -35,7 +35,7 @@
 ]]>
 </system-out>
 <error message="Test timeout of 30000ms exceeded." type="Error">
-<![CDATA[  [chromium] › offer-confirm-kitchen-confirmation.spec.ts:314:3 › Offer confirmation states the Kitchen tab result › accepted offer's food and drink lines show up in the Kitchen tab 
+<![CDATA[  [chromium] › offer-confirm-kitchen-confirmation.spec.ts:326:3 › Offer confirmation states the Kitchen tab result › accepted offer's food and drink lines show up in the Kitchen tab 
 
     Test timeout of 30000ms exceeded.
 
@@ -44,14 +44,14 @@
       - waiting for getByRole('button', { name: 'Kitchen', exact: true }).first()
 
 
-      334 |
-      335 |     // Now open the Kitchen tab and check the guest and the lines are listed.
-    > 336 |     await page.getByRole("button", { name: "Kitchen", exact: true }).first().click();
+      346 |
+      347 |     // Now open the Kitchen tab and check the guest and the lines are listed.
+    > 348 |     await page.getByRole("button", { name: "Kitchen", exact: true }).first().click();
           |                                                                              ^
-      337 |     await expect(page.getByText("Kitchen E2E Guest").first()).toBeVisible({ timeout: 15_000 });
-      338 |
-      339 |     const itemNames = page.getByRole("textbox", { name: "Item" });
-        at /dev-server/e2e/offer-confirm-kitchen-confirmation.spec.ts:336:78
+      349 |     await expect(page.getByText("Kitchen E2E Guest").first()).toBeVisible({ timeout: 15_000 });
+      350 |
+      351 |     const itemNames = page.getByRole("textbox", { name: "Item" });
+        at /dev-server/e2e/offer-confirm-kitchen-confirmation.spec.ts:348:78
 
     attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
     ../test-results/offer-confirm-kitchen-conf-f2433--show-up-in-the-Kitchen-tab-chromium/test-failed-1.png
