@@ -360,7 +360,9 @@ const OfferCreateDialog = ({ open, onOpenChange, editOffer }: Props) => {
 
           {/* Menu */}
           <div className="space-y-1.5">
-            <Label htmlFor="offer-menu">{t("offers.menuKitchenLabel")}</Label>
+            <Label htmlFor="offer-menu">
+              {enabledLinked.length > 0 ? t("offers.menuKitchenLabelMain") : t("offers.menuKitchenLabel")}
+            </Label>
             <Textarea
               id="offer-menu"
               value={form.menu}
