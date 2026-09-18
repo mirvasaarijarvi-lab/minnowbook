@@ -18,6 +18,7 @@ import {
   describeOfferReservationPrice,
   pickOfferResource,
 } from "@/lib/offer-reservation-pricing";
+import { buildKitchenOrderRows, type OfferMenuLeg } from "@/lib/offer-kitchen-orders";
 
 import OfferCreateDialog from "./OfferCreateDialog";
 import OfferEmailDialog from "./OfferEmailDialog";
@@ -247,6 +248,15 @@ const OffersManager = () => {
       if (mainErr) throw mainErr;
       const resIds = [mainRes.id];
 
+      // Legs whose menu text becomes kitchen order lines.
+      const menuLegs: OfferMenuLeg[] = [
+        {
+          reservationId: mainRes.id,
+          reservationType: plan.mainType,
+          menu: offer.menu,
+        },
+      ];
+
       // Create linked reservations
       const linked = offer.linked_reservations || {};
       for (const [key, lr] of Object.entries(linked)) {
@@ -280,8 +290,22 @@ const OffersManager = () => {
 
         if (linkedErr) throw linkedErr;
         resIds.push(linkedRes.id);
+        menuLegs.push({
+          reservationId: linkedRes.id,
+          reservationType: resType,
+          menu: (lr as any).menu ?? null,
+        });
       }
 
+      // Forward the agreed menu to the Kitchen tab. A failure here must not
+      // undo the reservations, so staff are warned instead.
+      const kitchenRows = buildKitchenOrderRows(offer.tenant_id, menuLegs);
+      if (kitchenRows.length > 0) {
+        const { error: kitchenErr } = await supabase
+          .from("kitchen_orders")
+          .insert(kitchenRows as any);
+        if (kitchenErr) toast.warning(t("offers.kitchenOrdersFailed"));
+      }
 
       await updateOffer.mutateAsync({
         id: offer.id,
