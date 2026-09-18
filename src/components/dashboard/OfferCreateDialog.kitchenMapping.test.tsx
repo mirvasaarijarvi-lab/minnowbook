@@ -218,6 +218,30 @@ describe("displayed kitchen-order lines match the accepted offer output", () => 
     ).toBeTruthy();
   });
 
+  it("shows an empty dining field as having nothing, and writes no dining rows", async () => {
+    const o = offer({
+      linked_reservations: {
+        restaurant: { enabled: true, resource_type: "restaurant", menu: "   \n- \n" },
+        guesthouse: { enabled: true, resource_type: "guesthouse", menu: null },
+      } as any,
+    });
+    const panel = await renderDialog(o);
+    const T = translations.en;
+
+    // The dining function is still listed in the mapping, with no lines.
+    expect(texts(uls(panel)[0])[1]).toBe(
+      `${nameFor("restaurant", "en")} ${T["offers.kitchenMapOwn"]}`,
+    );
+    expect(screen.getAllByText(T["offers.kitchenPreviewNone"]).length).toBeGreaterThan(0);
+
+    const rows = buildKitchenOrderRows(TENANT_ID, legsFor(o));
+    expect(rows.every((r) => r.reservation_id === "main")).toBe(true);
+    expect(rows.map((r) => r.item_name)).toEqual(["Welcome bites", "Sparkling wine"]);
+    expect(uls(panel).slice(1).flatMap(texts)).toHaveLength(rows.length);
+  });
+
+
+
   it("shows no lines and writes none when every food and drinks field is empty", async () => {
     const o = offer({
       menu: "  \n- \n",

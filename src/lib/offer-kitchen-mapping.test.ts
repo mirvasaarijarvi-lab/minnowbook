@@ -145,3 +145,106 @@ describe("preview matches what the confirmation writes", () => {
     }
   });
 });
+
+/**
+ * Empty food and drinks fields must never produce a kitchen order, and must
+ * never spill content onto another function's dining or event kitchen order.
+ */
+const EMPTY_VARIANTS: Array<[string, string | null | undefined]> = [
+  ["missing", undefined],
+  ["null", null],
+  ["empty string", ""],
+  ["spaces", "   "],
+  ["tabs and newlines", "\t\n \n"],
+  ["blank lines", "\n\n\n"],
+  ["dash only", "-"],
+  ["bullet only", "•"],
+  ["star bullets", " * \n * \n"],
+  ["carriage returns", "\r\n\r\n"],
+];
+
+describe("empty menu fields create no kitchen order", () => {
+  it.each(EMPTY_VARIANTS)("a %s dining field writes nothing for the dining booking", (_label, menu) => {
+    const legs = inputs(
+      { key: "venue", name: "Event space", reservationType: "venue", menu: "20 x Bites" },
+      { key: "rest", name: "Restaurant", reservationType: "restaurant", menu },
+      { key: "rooms", name: "Rooms", reservationType: "guesthouse", menu: null },
+    );
+    const preview = buildKitchenPreview(legs);
+    expect(preview.legs[1].lines).toEqual([]);
+    expect(preview.legs[1].targetKey).toBeNull();
+    // The mapping is still shown, it simply has nothing to deliver.
+    expect(preview.legs[1].routeKey).toBe("rest");
+    expect(preview.totalLines).toBe(1);
+
+    const rows = buildKitchenOrderRows(
+      "t-1",
+      legs.map((l) => ({ reservationId: l.key, reservationType: l.reservationType, menu: l.menu })),
+    );
+    expect(rows.some((r) => r.reservation_id === "rest")).toBe(false);
+    expect(rows.map((r) => r.reservation_id)).toEqual(["venue"]);
+  });
+
+  it.each(EMPTY_VARIANTS)("a %s event field writes nothing for the event booking", (_label, menu) => {
+    const legs = inputs(
+      { key: "venue", name: "Event space", reservationType: "venue", menu },
+      { key: "rest", name: "Restaurant", reservationType: "restaurant", menu: "20 x Beef" },
+    );
+    const rows = buildKitchenOrderRows(
+      "t-1",
+      legs.map((l) => ({ reservationId: l.key, reservationType: l.reservationType, menu: l.menu })),
+    );
+    expect(rows.map((r) => [r.reservation_id, r.item_name])).toEqual([["rest", "Beef"]]);
+    expect(buildKitchenPreview(legs).legs[0].lines).toEqual([]);
+  });
+
+  it.each(EMPTY_VARIANTS)(
+    "a %s room field adds nothing to the dining kitchen order it would route to",
+    (_label, menu) => {
+      const legs = inputs(
+        { key: "rest", name: "Restaurant", reservationType: "restaurant", menu: "Beef" },
+        { key: "rooms", name: "Rooms", reservationType: "guesthouse", menu },
+      );
+      const rows = buildKitchenOrderRows(
+        "t-1",
+        legs.map((l) => ({ reservationId: l.key, reservationType: l.reservationType, menu: l.menu })),
+      );
+      expect(rows).toHaveLength(1);
+      expect(rows[0]).toMatchObject({ reservation_id: "rest", item_name: "Beef", sort_order: 0 });
+    },
+  );
+
+  it.each(EMPTY_VARIANTS)("every field %s writes no rows at all", (_label, menu) => {
+    const legs = inputs(
+      { key: "venue", name: "Event space", reservationType: "venue", menu },
+      { key: "rest", name: "Restaurant", reservationType: "restaurant", menu },
+      { key: "rooms", name: "Rooms", reservationType: "guesthouse", menu },
+    );
+    const preview = buildKitchenPreview(legs);
+    expect(preview.hasLines).toBe(false);
+    expect(preview.totalLines).toBe(0);
+    expect(
+      buildKitchenOrderRows(
+        "t-1",
+        legs.map((l) => ({ reservationId: l.key, reservationType: l.reservationType, menu: l.menu })),
+      ),
+    ).toEqual([]);
+  });
+
+  it("keeps the sort order of the remaining fields unbroken when one is empty", () => {
+    const legs = inputs(
+      { key: "venue", name: "Event space", reservationType: "venue", menu: "  " },
+      { key: "rest", name: "Restaurant", reservationType: "restaurant", menu: "Beef\nCoffee" },
+      { key: "rooms", name: "Rooms", reservationType: "guesthouse", menu: "Breakfast" },
+    );
+    const rows = buildKitchenOrderRows(
+      "t-1",
+      legs.map((l) => ({ reservationId: l.key, reservationType: l.reservationType, menu: l.menu })),
+    );
+    expect(rows.map((r) => [r.reservation_id, r.item_name, r.sort_order])).toEqual([
+      ["rest", "Beef", 0],
+      ["rest", "Coffee", 1],
+      ["rest", "Breakfast", 2],
+    ]);
+  });
+});
