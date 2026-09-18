@@ -3822,7 +3822,7 @@ const en: TranslationKeys = {
   "pricing.faqQ3": "What reservation types can I choose?",
   "pricing.faqA3": "Restaurant (table bookings), Venue (event space inquiries), Gasthaus/Guesthouse (room reservations), and Wellness Services (appointment bookings for hairdressers, masseurs, makeup artists, and similar providers). Basic lets you pick one. Pro unlocks all types, one per type, on a single site. Business adds unlimited sites.",
   "pricing.faqQ4": "Can I use my own domain?",
-  "pricing.faqA4": "Each business gets a branded subdomain (e.g., yourbusiness.mimmobook.com). Custom domain support is on our roadmap and will be then offered with an enterprise pricing.",
+  "pricing.faqA4": "Each business gets a branded subdomain (e.g., yourbusiness.mimmobook.com), and you can already use your own web address with it. In the dashboard, the \"Share booking page\" card has an \"Your own address\" tab: it shows how to point something like booking.yoursite.com at your booking page with a forward at your domain provider, and it gives you copy-paste code to embed the booking page or add a \"Book now\" button to your site, so your own address stays visible. Fully hosted custom domains are on our roadmap and will then be offered with enterprise pricing.",
   "pricing.faqQ5": "What's the difference between AI chatbot support and 24-hour response support?",
   "pricing.faqA5": "All plans include MimmoAid, our AI chatbot that can answer questions, help troubleshoot issues, and guide you through features instantly. The chatbot is available 24/7 in your dashboard. The Business plan adds 24-hour response support: you can escalate any conversation to our team on the platform via the chatbot and receive a guaranteed response within 24 hours.",
 
