@@ -141,6 +141,18 @@ function readJson(rel) {
   return JSON.parse(fs.readFileSync(path.join(repoRoot, rel), "utf8"));
 }
 
+/**
+ * Read an optional lockfile. Bun (`bun.lock`) is this repo's source of
+ * truth, so `package-lock.json` may be absent entirely; treat that as
+ * an empty npm lockfile rather than a hard failure. The bun.lock scan
+ * below still enforces every floor.
+ */
+function readOptionalJson(rel) {
+  const abs = path.join(repoRoot, rel);
+  if (!fs.existsSync(abs)) return { packages: {} };
+  return JSON.parse(fs.readFileSync(abs, "utf8"));
+}
+
 function findInstalledVersions(lockfile, pkgName) {
   const found = [];
   const packages = lockfile.packages ?? {};
@@ -173,7 +185,7 @@ function rangeMinimum(range) {
 }
 
 const pkgJson = readJson("package.json");
-const lock = readJson("package-lock.json");
+const lock = readOptionalJson("package-lock.json");
 
 const errors = [];
 const summary = [];
