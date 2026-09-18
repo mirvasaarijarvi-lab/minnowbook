@@ -71,6 +71,22 @@ const tierKeys = [
       "pricing.businessF4" as TranslationKey,
     ],
   },
+  {
+    nameKey: "pricing.enterpriseName" as TranslationKey,
+    price: 0,
+    priceLabelKey: "pricing.enterprisePrice" as TranslationKey,
+    ctaLabelKey: "pricing.enterpriseCta" as TranslationKey,
+    ctaHref: "/support?contact=1",
+    descriptionKey: "pricing.enterpriseDesc" as TranslationKey,
+    reservationTypesKey: "pricing.enterpriseTypes" as TranslationKey,
+    staffUsersKey: "pricing.enterpriseStaff" as TranslationKey,
+    featureKeys: [
+      "pricing.enterpriseF1" as TranslationKey,
+      "pricing.enterpriseF2" as TranslationKey,
+      "pricing.enterpriseF3" as TranslationKey,
+      "pricing.enterpriseF4" as TranslationKey,
+    ],
+  },
 ];
 
 const Index = () => {
@@ -89,7 +105,7 @@ const Index = () => {
           faqSchema([
             { question: "What is MimmoBook?", answer: "MimmoBook is a cloud-based SaaS reservation management platform designed for restaurants, venues, hotels, guesthouses, and wellness service providers like hairdressers, masseurs, and makeup artists. It provides branded booking pages, automated email confirmations, team management, and real-time reporting." },
             { question: "Who is MimmoBook for?", answer: "MimmoBook is built for hospitality and personal-service businesses including restaurants, event venues, hotels, guesthouses, catering services, and wellness providers that need to manage reservations and appointment bookings online." },
-            { question: "How much does MimmoBook cost?", answer: "MimmoBook offers three plans: Basic at €19/month, Professional at €59/month, and Business at €179/month. All prices include VAT. All plans include a 30-day free trial." },
+            { question: "How much does MimmoBook cost?", answer: "MimmoBook offers four plans: Basic at €19/month, Professional at €59/month, Business at €179/month, and Enterprise, which is priced per offer. All listed prices include VAT, and the monthly plans include a 30-day free trial." },
             { question: "Does MimmoBook support multiple locations?", answer: "Yes, the Enterprise plan supports unlimited sites and locations with centralized management, per-site branding, and independent booking pages." },
             { question: "What languages does MimmoBook support?", answer: "MimmoBook supports English, Finnish, and Swedish for both the management dashboard and public booking pages." },
           ]),
@@ -204,9 +220,9 @@ const Index = () => {
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">{t("pricing.simpleSubtitle")}</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
             {tierKeys.map((tier, i) => (
-              <PricingTier key={tier.nameKey} name={t(tier.nameKey)} description={t(tier.descriptionKey)} price={tier.price} reservationTypes={t(tier.reservationTypesKey)} staffUsers={t(tier.staffUsersKey)} features={tier.featureKeys.map(k => t(k))} isPopular={tier.isPopular} delay={i * 100} />
+              <PricingTier key={tier.nameKey} name={t(tier.nameKey)} description={t(tier.descriptionKey)} price={tier.price} reservationTypes={t(tier.reservationTypesKey)} staffUsers={t(tier.staffUsersKey)} features={tier.featureKeys.map(k => t(k))} isPopular={tier.isPopular} priceLabel={tier.priceLabelKey ? t(tier.priceLabelKey) : undefined} ctaLabel={tier.ctaLabelKey ? t(tier.ctaLabelKey) : undefined} ctaHref={tier.ctaHref} delay={i * 100} />
             ))}
           </div>
         </div>
