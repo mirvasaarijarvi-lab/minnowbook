@@ -6,6 +6,7 @@ import { useUserSites } from "@/hooks/useUserSites";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import CollapsibleSection from "@/components/dashboard/CollapsibleSection";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -403,10 +404,13 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
             {selectedDayReservations.length === 0 && selectedDayBlocks.length === 0 && selectedDayRecurring.length === 0 ? (
               <p className="text-muted-foreground text-sm">{t("dashboard.noReservationsDay")}</p>
             ) : selectedDayReservations.length > 0 ? (
-              <div className="space-y-2">
-                 {(selectedDayBlocks.length > 0 || selectedDayRecurring.length > 0) && (
-                   <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t("dashboard.reservationsLabel")}</p>
-                )}
+              <CollapsibleSection
+                title={t("dashboard.reservationsLabel")}
+                count={selectedDayReservations.length}
+                defaultOpen={selectedDayReservations.length <= 5}
+                className="space-y-2"
+              >
+                <div className="space-y-2">
                 {selectedDayReservations.map((r) => (
                   <div key={r.id} className="flex items-center justify-between p-3 rounded-md bg-secondary/50 border border-border">
                     <div>
@@ -428,7 +432,8 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
                     </div>
                   </div>
                 ))}
-              </div>
+                </div>
+              </CollapsibleSection>
             ) : null}
           </CardContent>
         </Card>
