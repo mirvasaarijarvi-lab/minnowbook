@@ -874,7 +874,32 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
           seatingTimes: parseSeatingTimes((occasion as any)?.seating_times),
           seating: start_time ? String(start_time).slice(0, 5) : null,
         } satisfies OccasionErrorContext;
+        // Production monitoring: record every occasion refusal with its
+        // machine-readable error code so staff can see how often occasions
+        // fill up, how often a sitting is gone, and how often a guest picks
+        // a date the occasion does not cover.
+        await logValidation(adminClient, {
+          tenant_id,
+          site_id,
+          source: "public_booking",
+          reservation_type,
+          reservation_date: date,
+          start_time,
+          guest_name,
+          guest_email,
+          guests_requested: guests_count ?? estimated_guests ?? null,
+          current_load: null,
+          capacity_total: (occasion as any)?.capacity ?? null,
+          outcome: "rejected",
+          reasons: [
+            rejectionTag((err as any).error_code),
+            `[OCCASION_REFUSED] ${(err as any).message} (occasion=${
+              (occasion as any)?.name ?? "unknown"
+            }, date=${date}, time=${start_time ?? "n/a"})`,
+          ],
+        });
         throw err;
+
       }
 
       validatedOccasionSeating = check.seating;
