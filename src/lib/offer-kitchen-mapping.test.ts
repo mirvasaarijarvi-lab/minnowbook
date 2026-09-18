@@ -373,3 +373,126 @@ describe("mixed empty and filled menu fields across a cross-booking", () => {
     ]);
   });
 });
+
+/**
+ * Real fields are messy: staff paste a menu with blank lines between courses,
+ * leftover bullets, dashed separators and section markers. Only the lines that
+ * name something must become kitchen order lines.
+ */
+describe("menu fields mixing valid items with empty and placeholder lines", () => {
+  const MESSY_DINING = [
+    "",
+    "- ",
+    "20 x Roast beef (medium rare)",
+    "   ",
+    "•",
+    "* ",
+    "20 x Red wine",
+    "\t",
+    "-",
+    "Berry pie x 20",
+    "",
+  ].join("\n");
+
+  it("creates one line per named item on the dining kitchen order, nothing for the rest", () => {
+    const legs = inputs(
+      { key: "venue", name: "Event space", reservationType: "venue", menu: "\n-\n" },
+      { key: "rest", name: "Restaurant", reservationType: "restaurant", menu: MESSY_DINING },
+    );
+    const preview = buildKitchenPreview(legs);
+    expect(preview.legs[0].lines).toEqual([]);
+    expect(preview.legs[1].lines.map((l) => [l.quantity, l.item_name, l.category, l.notes])).toEqual(
+      [
+        [20, "Roast beef", "food", "medium rare"],
+        [20, "Red wine", "drink", null],
+        [20, "Berry pie", "food", null],
+      ],
+    );
+    expect(preview.totalLines).toBe(3);
+    expect(rowsFor(legs).map((r) => [r.reservation_id, r.item_name, r.sort_order])).toEqual([
+      ["rest", "Roast beef", 0],
+      ["rest", "Red wine", 1],
+      ["rest", "Berry pie", 2],
+    ]);
+  });
+
+  it("numbers the kept lines consecutively, ignoring the skipped ones", () => {
+    const legs = inputs(
+      { key: "venue", name: "Event space", reservationType: "venue", menu: MESSY_DINING },
+    );
+    const rows = rowsFor(legs);
+    expect(rows.map((r) => r.sort_order)).toEqual([0, 1, 2]);
+    expect(rows.every((r) => r.reservation_id === "venue")).toBe(true);
+  });
+
+  it("keeps the messy room field's named items and drops its filler, on the dining order", () => {
+    const legs = inputs(
+      { key: "venue", name: "Event space", reservationType: "venue", menu: "40 x Buffet\n\n-\n" },
+      { key: "rest", name: "Restaurant", reservationType: "restaurant", menu: " \n" },
+      {
+        key: "rooms",
+        name: "Rooms",
+        reservationType: "guesthouse",
+        menu: "•\n2 x Breakfast basket (no egg)\n   \n- \n2 x Coffee\n",
+      },
+    );
+    const preview = buildKitchenPreview(legs);
+    expect(preview.legs[1].lines).toEqual([]);
+    expect(preview.legs[2].targetKey).toBe("rest");
+    expect(rowsFor(legs).map((r) => [r.reservation_id, r.item_name, r.quantity, r.notes])).toEqual([
+      ["venue", "Buffet", 40, null],
+      ["rest", "Breakfast basket", 2, "no egg"],
+      ["rest", "Coffee", 2, null],
+    ]);
+  });
+
+  it("treats the untouched field placeholder text as no content at all", () => {
+    // The grey hint in the form is not a value, so a field left alone is empty.
+    for (const menu of ["", null, undefined]) {
+      const legs = inputs(
+        { key: "rest", name: "Restaurant", reservationType: "restaurant", menu },
+        { key: "rooms", name: "Rooms", reservationType: "guesthouse", menu: "Soup" },
+      );
+      const rows = rowsFor(legs);
+      expect(rows.map((r) => [r.reservation_id, r.item_name, r.sort_order])).toEqual([
+        ["rest", "Soup", 0],
+      ]);
+    }
+  });
+
+  it("keeps section markers that name something and skips pure separators", () => {
+    const legs = inputs(
+      {
+        key: "venue",
+        name: "Event space",
+        reservationType: "venue",
+        menu: ["Starters", "----", "20 x Soup", "____", "", "Desserts", "20 x Berry pie"].join("\n"),
+      },
+    );
+    // A dashed separator carries no name, a written heading does.
+    expect(rowsFor(legs).map((r) => r.item_name)).toEqual([
+      "Starters",
+      "____",
+      "Soup",
+      "Desserts",
+      "Berry pie",
+    ]);
+  });
+
+  it("agrees with the form preview for a messy field", () => {
+    const legs = inputs(
+      { key: "venue", name: "Event space", reservationType: "venue", menu: MESSY_DINING },
+      { key: "rest", name: "Restaurant", reservationType: "restaurant", menu: "\n•\n" },
+      { key: "rooms", name: "Rooms", reservationType: "guesthouse", menu: "2 x Breakfast\n\n" },
+    );
+    const preview = buildKitchenPreview(legs);
+    const rows = rowsFor(legs);
+    expect(rows).toHaveLength(preview.totalLines);
+    const expected = preview.legs.flatMap((leg) =>
+      leg.targetKey ? leg.lines.map((l) => [leg.targetKey, l.item_name]) : [],
+    );
+    expect([...rows.map((r) => [r.reservation_id, r.item_name])].sort()).toEqual(
+      [...expected].sort(),
+    );
+  });
+});
