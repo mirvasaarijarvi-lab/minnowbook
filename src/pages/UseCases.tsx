@@ -23,6 +23,7 @@ const useCases = [
 
 const UseCases = () => {
   const t = useT();
+  const { language } = useLanguage();
 
   const serviceCatalog = {
     "@context": "https://schema.org",
