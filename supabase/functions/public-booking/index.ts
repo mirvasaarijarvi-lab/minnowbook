@@ -846,6 +846,9 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
       });
 
       if (!check.ok) {
+        // English fallback copy only, for non-localized clients. The
+        // booking page renders its own localized message from
+        // `error_code` + the `occasion` payload below.
         const messages: Record<string, string> = {
           NOT_FOUND: "This special occasion is no longer available",
           INACTIVE: "This special occasion is no longer available",
@@ -857,7 +860,16 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
             typeof check.remaining === "number" ? ` (${check.remaining} seat(s) left)` : ""
           }`,
         };
-        throw new Error(messages[check.reason] ?? "This special occasion cannot be booked");
+        const err = new Error(messages[check.reason] ?? "This special occasion cannot be booked");
+        (err as any).error_code = OCCASION_REASON_TO_CODE[check.reason] ??
+          OCCASION_ERROR_CODES.OCCASION_UNAVAILABLE;
+        (err as any).occasion = {
+          name: (occasion as any)?.name ?? null,
+          remaining: typeof check.remaining === "number" ? check.remaining : null,
+          seatingTimes: parseSeatingTimes((occasion as any)?.seating_times),
+          seating: start_time ? String(start_time).slice(0, 5) : null,
+        } satisfies OccasionErrorContext;
+        throw err;
       }
 
       validatedOccasionSeating = check.seating;
