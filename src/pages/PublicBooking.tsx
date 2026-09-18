@@ -798,6 +798,34 @@ const PublicBookingInner = () => {
     return dayHours?.is_closed === true;
   };
 
+  // ----- Special occasions (staff-defined event days) -----
+  const occasionDate = selectedDate ? format(selectedDate, "yyyy-MM-dd") : "";
+  const { data: specialOccasions = [] } = useQuery({
+    queryKey: ["public-special-occasions", tenant?.id, activeSiteId, form.reservation_type, occasionDate],
+    queryFn: async () => {
+      if (!tenant?.id || !occasionDate || !form.reservation_type) return [];
+      let query = supabase
+        .from("special_occasions")
+        .select("id, name, description, occasion_date, reservation_type, capacity, booking_type, seating_times, site_id")
+        .eq("tenant_id", tenant.id)
+        .eq("occasion_date", occasionDate)
+        .eq("reservation_type", form.reservation_type)
+        .eq("is_active", true);
+      if (activeSiteId) query = query.or(`site_id.eq.${activeSiteId},site_id.is.null`);
+      const { data, error } = await query.order("name");
+      if (error) return [];
+      return data ?? [];
+    },
+    enabled: !!tenant?.id && !!occasionDate && !!form.reservation_type,
+  });
+
+  const [selectedOccasionId, setSelectedOccasionId] = useState<string | null>(null);
+  const [occasionSeating, setOccasionSeating] = useState<string>("");
+  const selectedOccasion = useMemo(
+    () => (specialOccasions as any[]).find((o) => o.id === selectedOccasionId) ?? null,
+    [specialOccasions, selectedOccasionId]
+  );
+
   const submitMutation = useMutation({
     mutationFn: async () => {
       if (!tenant?.id) throw new Error("No tenant");
