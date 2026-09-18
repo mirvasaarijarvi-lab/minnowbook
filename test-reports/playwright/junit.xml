@@ -1,0 +1,77 @@
+<testsuites id="" name="" tests="3" failures="0" skipped="0" errors="1" time="32.658081">
+<testsuite name="offer-confirm-kitchen-confirmation.spec.ts" timestamp="2026-09-18T06:31:10.744Z" hostname="chromium" tests="3" failures="0" skipped="0" time="34.598" errors="1">
+<testcase name="Offer confirmation states the Kitchen tab result › offer with food and drinks: confirmation names the lines sent to the kitchen" classname="offer-confirm-kitchen-confirmation.spec.ts" time="2.059">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-917c1-e-lines-sent-to-the-kitchen-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-917c1-e-lines-sent-to-the-kitchen-chromium/video.webm]]
+
+[[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-917c1-e-lines-sent-to-the-kitchen-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Offer confirmation states the Kitchen tab result › offer without food or drinks: confirmation says nothing was sent to the kitchen" classname="offer-confirm-kitchen-confirmation.spec.ts" time="2.067">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-4b200-ing-was-sent-to-the-kitchen-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-4b200-ing-was-sent-to-the-kitchen-chromium/video.webm]]
+
+[[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-4b200-ing-was-sent-to-the-kitchen-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Offer confirmation states the Kitchen tab result › accepted offer&apos;s food and drink lines show up in the Kitchen tab" classname="offer-confirm-kitchen-confirmation.spec.ts" time="30.472">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-f2433--show-up-in-the-Kitchen-tab-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-f2433--show-up-in-the-Kitchen-tab-chromium/video.webm]]
+
+[[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-f2433--show-up-in-the-Kitchen-tab-chromium/error-context.md]]
+
+[[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-f2433--show-up-in-the-Kitchen-tab-chromium/trace.zip]]
+]]>
+</system-out>
+<error message="Test timeout of 30000ms exceeded." type="Error">
+<![CDATA[  [chromium] › offer-confirm-kitchen-confirmation.spec.ts:314:3 › Offer confirmation states the Kitchen tab result › accepted offer's food and drink lines show up in the Kitchen tab 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for getByRole('button', { name: 'Kitchen', exact: true }).first()
+
+
+      334 |
+      335 |     // Now open the Kitchen tab and check the guest and the lines are listed.
+    > 336 |     await page.getByRole("button", { name: "Kitchen", exact: true }).first().click();
+          |                                                                              ^
+      337 |     await expect(page.getByText("Kitchen E2E Guest").first()).toBeVisible({ timeout: 15_000 });
+      338 |
+      339 |     const itemNames = page.getByRole("textbox", { name: "Item" });
+        at /dev-server/e2e/offer-confirm-kitchen-confirmation.spec.ts:336:78
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../test-results/offer-confirm-kitchen-conf-f2433--show-up-in-the-Kitchen-tab-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../test-results/offer-confirm-kitchen-conf-f2433--show-up-in-the-Kitchen-tab-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/offer-confirm-kitchen-conf-f2433--show-up-in-the-Kitchen-tab-chromium/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../test-results/offer-confirm-kitchen-conf-f2433--show-up-in-the-Kitchen-tab-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace ../test-results/offer-confirm-kitchen-conf-f2433--show-up-in-the-Kitchen-tab-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</error>
+</testcase>
+</testsuite>
+</testsuites>
