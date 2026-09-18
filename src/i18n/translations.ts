@@ -2610,7 +2610,7 @@ const en: TranslationKeys = {
   "features.teamManagement": "User Management",
   "features.teamManagementDesc": "Invite staff members, assign roles, and manage permissions with ease.",
   "features.brandedPages": "Reservation Types",
-  "features.brandedPagesDesc": "Hotel/guesthouse, restaurant and event spaces.",
+  "features.brandedPagesDesc": "Hotel/guesthouse, restaurant, event spaces and service professionals such as massage therapists, barbers, hairdressers, bakers, make-up artists, treatment providers and personal trainers.",
   "features.reportsInsights": "Reports",
   "features.reportsInsightsDesc": "Track reservation trends, occupancy rates, and revenue at a glance.",
   "features.automatedEmails": "Automated Emails",
