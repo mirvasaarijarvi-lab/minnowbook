@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useT } from "@/contexts/I18nContext";
 import { useOffers, useUpdateOffer, type Offer } from "@/hooks/useOffers";
@@ -21,6 +21,7 @@ import {
 import { offerKitchenMessage } from "@/lib/offer-kitchen-message";
 import { buildKitchenOrderRows, type OfferMenuLeg } from "@/lib/offer-kitchen-orders";
 import { announceOfferStatus, composeOfferStatusMessage } from "@/lib/offer-status-announcer";
+import { focusOfferStatusPanel } from "@/lib/offer-status-focus";
 
 import OfferCreateDialog from "./OfferCreateDialog";
 import OfferEmailDialog from "./OfferEmailDialog";
@@ -46,6 +47,28 @@ const OffersManager = () => {
   const [editOffer, setEditOffer] = useState<Offer | null>(null);
   const [priceReview, setPriceReview] = useState<{ offer: Offer; plan: ConfirmPlan } | null>(null);
   const [confirming, setConfirming] = useState(false);
+
+  // The confirm result is kept on screen in a focusable panel: the Confirm
+  // button disappears once the offer is confirmed, so focus is moved here
+  // instead of being dropped on the document body.
+  const [confirmStatus, setConfirmStatus] = useState<{ message: string; urgent: boolean; seq: number } | null>(null);
+  const statusPanelRef = useRef<HTMLDivElement | null>(null);
+  const confirmTriggerRef = useRef<Element | null>(null);
+
+  useEffect(() => {
+    if (!confirmStatus) return;
+    focusOfferStatusPanel({
+      panel: statusPanelRef.current,
+      active: document.activeElement,
+      trigger: confirmTriggerRef.current,
+    });
+  }, [confirmStatus]);
+
+  const publishConfirmStatus = useCallback((message: string, urgent: boolean) => {
+    if (!message.trim()) return;
+    setConfirmStatus((prev) => ({ message, urgent, seq: (prev?.seq ?? 0) + 1 }));
+    announceOfferStatus(message, urgent ? "assertive" : "polite");
+  }, []);
 
   const filteredOffers = useMemo(() => {
     if (!searchQuery.trim()) return offers;
@@ -326,26 +349,30 @@ const OffersManager = () => {
         toast.warning(t("offers.confirmedWithoutPrice"));
       }
       // Screen readers get the same outcome, including the Kitchen tab result.
-      announceOfferStatus(
+      publishConfirmStatus(
         composeOfferStatusMessage([
           t("offers.confirmedSuccess"),
           kitchenFailed ? t("offers.kitchenOrdersFailed") : kitchenDescription,
           missingPrice.length > 0 ? t("offers.confirmedWithoutPrice") : null,
         ]),
-        kitchenFailed || missingPrice.length > 0 ? "assertive" : "polite",
+        kitchenFailed || missingPrice.length > 0,
       );
     } catch {
       toast.error(t("offers.confirmError"));
-      announceOfferStatus(t("offers.confirmError"), "assertive");
+      publishConfirmStatus(t("offers.confirmError"), true);
     }
   };
 
   const handleConfirm = async (offer: Offer) => {
+    // Remember where focus was, so the status panel only takes focus when the
+    // user has not moved on to something else in the meantime.
+    confirmTriggerRef.current = document.activeElement;
     let plan: ConfirmPlan;
     try {
       plan = await buildConfirmPlan(offer);
     } catch {
       toast.error(t("offers.confirmError"));
+      publishConfirmStatus(t("offers.confirmError"), true);
       return;
     }
 
@@ -405,6 +432,23 @@ const OffersManager = () => {
           <Label htmlFor="show-archived" className="text-sm cursor-pointer">{t("offers.showArchived")}</Label>
         </div>
       </div>
+
+      {confirmStatus && (
+        <div
+          key={confirmStatus.seq}
+          ref={statusPanelRef}
+          tabIndex={-1}
+          role="group"
+          aria-label={t("offers.statusRegionLabel")}
+          className={`rounded-md border p-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+            confirmStatus.urgent
+              ? "border-destructive/40 bg-destructive/10 text-foreground"
+              : "border-border bg-muted/50 text-foreground"
+          }`}
+        >
+          {confirmStatus.message}
+        </div>
+      )}
 
       {isLoading ? (
         <p className="text-muted-foreground text-sm">{t("common.loading")}</p>
