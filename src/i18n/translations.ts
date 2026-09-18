@@ -1772,6 +1772,32 @@ type TranslationKeys = {
   "useCases.wellnessDesc": string;
   "useCases.wellnessChallenges": string;
   "useCases.wellnessSolution": string;
+  "useCases.workflowsTitle": string;
+  "useCases.workflowsSubtitle": string;
+  "useCases.wf1Role": string;
+  "useCases.wf1Focus": string;
+  "useCases.wf1S1": string;
+  "useCases.wf1S2": string;
+  "useCases.wf1S3": string;
+  "useCases.wf1S4": string;
+  "useCases.wf2Role": string;
+  "useCases.wf2Focus": string;
+  "useCases.wf2S1": string;
+  "useCases.wf2S2": string;
+  "useCases.wf2S3": string;
+  "useCases.wf2S4": string;
+  "useCases.wf3Role": string;
+  "useCases.wf3Focus": string;
+  "useCases.wf3S1": string;
+  "useCases.wf3S2": string;
+  "useCases.wf3S3": string;
+  "useCases.wf3S4": string;
+  "useCases.wf4Role": string;
+  "useCases.wf4Focus": string;
+  "useCases.wf4S1": string;
+  "useCases.wf4S2": string;
+  "useCases.wf4S3": string;
+  "useCases.wf4S4": string;
   "useCases.ctaTitle": string;
   "useCases.ctaSubtitle": string;
 
@@ -3985,6 +4011,32 @@ const en: TranslationKeys = {
   "useCases.wellnessDesc": "Hairdressers, masseurs, makeup artists, and similar providers need customers to book the right amount of time, which varies by which services they pick.",
   "useCases.wellnessChallenges": "Customers do not always know how long their visit will take. Mixing different services in one appointment is hard to communicate by phone. Manually adding service durations together is error-prone.",
   "useCases.wellnessSolution": "MimmoBook lets you publish a tickable services menu with a price and duration per item (in 5 minute steps, up to 8 hours). The customer ticks what they want and the booking length adjusts automatically. No payments, only the time slot.",
+  "useCases.workflowsTitle": "How service professionals run their week",
+  "useCases.workflowsSubtitle": "Four everyday examples of bookings, waiting lists, prices and invoicing, and customer reviews in MimmoBook. Customers pay you in person or by invoice, MimmoBook keeps the times, prices and paperwork in order.",
+  "useCases.wf1Role": "Hairdresser or barber",
+  "useCases.wf1Focus": "Bookings",
+  "useCases.wf1S1": "You publish your services with a price and a duration each, and set your opening hours per day.",
+  "useCases.wf1S2": "A customer picks a service on your own booking page, and the length of the slot adjusts to what they ticked.",
+  "useCases.wf1S3": "They get an instant acknowledgement, you get the booking on your calendar and a notification in the app.",
+  "useCases.wf1S4": "A reminder email goes out before the visit, and you mark the customer as arrived at the chair.",
+  "useCases.wf2Role": "Massage therapist",
+  "useCases.wf2Focus": "Waiting list",
+  "useCases.wf2S1": "When your preferred hours are full, the customer joins the waiting list for the day they want.",
+  "useCases.wf2S2": "You see every waiting customer with their name, phone and preferred date in one list.",
+  "useCases.wf2S3": "A cancellation frees an hour, so you contact the first person on the list and mark them as notified.",
+  "useCases.wf2S4": "You add the booking yourself in a few clicks, or let the customer book the slot that is now open.",
+  "useCases.wf3Role": "Bakery or cake maker",
+  "useCases.wf3Focus": "Prices and invoicing",
+  "useCases.wf3S1": "Orders arrive with the pickup date, the quantity and any dietary notes the customer wrote.",
+  "useCases.wf3S2": "You set the price, or let your published service prices add up the total automatically.",
+  "useCases.wf3S3": "For business customers you send a branded offer as a PDF, and link several orders to one event.",
+  "useCases.wf3S4": "You tick the order as invoiced once you have billed it, and the reports show what is still unbilled.",
+  "useCases.wf4Role": "Personal trainer",
+  "useCases.wf4Focus": "Customer reviews",
+  "useCases.wf4S1": "After a session the customer gets a private link to leave a rating and a comment.",
+  "useCases.wf4S2": "Every review lands in your dashboard, and only the ones you publish become visible.",
+  "useCases.wf4S3": "Published reviews appear on your booking page, so new customers see real feedback before they book.",
+  "useCases.wf4S4": "Ratings over time show up in your reports next to bookings, busy hours and cancellations.",
   "useCases.ctaTitle": "Find Your Use Case?",
   "useCases.ctaSubtitle": "Start your free 30-day trial and set up your first booking page in minutes.",
 
@@ -6192,6 +6244,32 @@ const fi: TranslationKeys = {
   "useCases.wellnessDesc": "Kampaajat, hierojat, meikkitaiteilijat ja vastaavat palveluntarjoajat tarvitsevat asiakkailtaan oikean mittaisen ajanvarauksen, ja se vaihtelee valittujen palveluiden mukaan.",
   "useCases.wellnessChallenges": "Asiakkaat eivät aina tiedä, kuinka kauan käynti kestää. Useiden palveluiden yhdistäminen samaan käyntiin on vaikea kertoa puhelimessa. Palveluiden kestojen laskeminen käsin on virhealtista.",
   "useCases.wellnessSolution": "MimmoBookilla julkaiset valittavan palveluvalikon, jossa jokaisella palvelulla on hinta ja kesto (5 minuutin välein, korkeintaan 8 tuntia). Asiakas rastittaa haluamansa ja varauksen kesto mukautuu automaattisesti. Ei maksuja, vain ajanvaraus.",
+  "useCases.workflowsTitle": "Näin palvelualan ammattilainen hoitaa viikkonsa",
+  "useCases.workflowsSubtitle": "Neljä arkista esimerkkiä varauksista, jonotuslistasta, hinnoista ja laskutuksesta sekä asiakaspalautteista MimmoBookissa. Asiakas maksaa sinulle paikan päällä tai laskulla, MimmoBook pitää ajat, hinnat ja paperit järjestyksessä.",
+  "useCases.wf1Role": "Kampaaja tai parturi",
+  "useCases.wf1Focus": "Varaukset",
+  "useCases.wf1S1": "Julkaiset palvelusi, joilla on kullakin hinta ja kesto, ja asetat aukioloajat päivittäin.",
+  "useCases.wf1S2": "Asiakas valitsee palvelun omalla varaussivullasi, ja varauksen pituus mukautuu valittuun palveluun.",
+  "useCases.wf1S3": "Asiakas saa heti vahvistusviestin, sinä saat varauksen kalenteriin ja ilmoituksen sovellukseen.",
+  "useCases.wf1S4": "Muistutusviesti lähtee ennen käyntiä, ja merkitset asiakkaan saapuneeksi tuoliin.",
+  "useCases.wf2Role": "Hieroja",
+  "useCases.wf2Focus": "Jonotuslista",
+  "useCases.wf2S1": "Kun toivotut ajat ovat täynnä, asiakas liittyy haluamansa päivän jonotuslistalle.",
+  "useCases.wf2S2": "Näet kaikki jonottajat nimineen, puhelinnumeroineen ja toivepäivineen yhdessä listassa.",
+  "useCases.wf2S3": "Peruutus vapauttaa tunnin, joten otat yhteyttä listan ensimmäiseen ja merkitset hänet ilmoitetuksi.",
+  "useCases.wf2S4": "Lisäät varauksen itse parilla klikkauksella tai annat asiakkaan varata vapautuneen ajan.",
+  "useCases.wf3Role": "Leipomo tai kakkujen tekijä",
+  "useCases.wf3Focus": "Hinnat ja laskutus",
+  "useCases.wf3S1": "Tilaukset saapuvat noutopäivän, määrän ja asiakkaan kirjaamien ruokavaliotietojen kanssa.",
+  "useCases.wf3S2": "Asetat hinnan itse tai annat julkaistujen palveluhintojen laskea summan automaattisesti.",
+  "useCases.wf3S3": "Yritysasiakkaalle lähetät ilmeesi mukaisen tarjouksen PDF:nä ja liität useita tilauksia samaan tapahtumaan.",
+  "useCases.wf3S4": "Merkitset tilauksen laskutetuksi, ja raportit näyttävät mikä on vielä laskuttamatta.",
+  "useCases.wf4Role": "Personal trainer",
+  "useCases.wf4Focus": "Asiakaspalautteet",
+  "useCases.wf4S1": "Käynnin jälkeen asiakas saa henkilökohtaisen linkin, jolla hän antaa arvosanan ja kommentin.",
+  "useCases.wf4S2": "Kaikki palautteet tulevat hallintanäkymään, ja vain julkaisemasi näkyvät ulospäin.",
+  "useCases.wf4S3": "Julkaistut palautteet näkyvät varaussivullasi, joten uudet asiakkaat näkevät aitoa palautetta ennen varausta.",
+  "useCases.wf4S4": "Arvosanojen kehitys näkyy raporteissa varausten, ruuhkatuntien ja peruutusten rinnalla.",
   "useCases.ctaTitle": "Löysitkö käyttökohteesi?",
   "useCases.ctaSubtitle": "Aloita ilmainen 30 päivän kokeilu ja luo ensimmäinen varaussivusi minuuteissa.",
 
@@ -8399,6 +8477,32 @@ const sv: TranslationKeys = {
   "useCases.wellnessDesc": "Frisörer, massörer, makeupartister och liknande leverantörer behöver att kunderna bokar rätt mängd tid, vilket varierar beroende på vilka tjänster de väljer.",
   "useCases.wellnessChallenges": "Kunder vet inte alltid hur lång tid besöket tar. Att kombinera flera tjänster i ett besök är svårt att förklara via telefon. Att lägga ihop tjänstetider manuellt är felbenäget.",
   "useCases.wellnessSolution": "MimmoBook låter dig publicera en bockbar tjänstemeny med pris och tid per tjänst (i 5 minuters steg, upp till 8 timmar). Kunden bockar i det de vill ha och bokningstiden anpassas automatiskt. Inga betalningar, bara tidsbokningen.",
+  "useCases.workflowsTitle": "Så sköter yrkespersoner inom servicebranschen sin vecka",
+  "useCases.workflowsSubtitle": "Fyra vardagliga exempel på bokningar, väntelista, priser och fakturering samt kundomdömen i MimmoBook. Kunden betalar dig på plats eller mot faktura, MimmoBook håller ordning på tider, priser och papper.",
+  "useCases.wf1Role": "Frisör eller barberare",
+  "useCases.wf1Focus": "Bokningar",
+  "useCases.wf1S1": "Du publicerar dina tjänster med pris och tid för varje, och ställer in öppettiderna per dag.",
+  "useCases.wf1S2": "Kunden väljer en tjänst på din egen bokningssida, och tidens längd anpassas till valet.",
+  "useCases.wf1S3": "Kunden får en bekräftelse direkt, du får bokningen i kalendern och en notis i appen.",
+  "useCases.wf1S4": "Ett påminnelsemeddelande går ut före besöket, och du markerar kunden som anländ.",
+  "useCases.wf2Role": "Massör",
+  "useCases.wf2Focus": "Väntelista",
+  "useCases.wf2S1": "När de önskade tiderna är fullbokade går kunden med på väntelistan för den dag de vill.",
+  "useCases.wf2S2": "Du ser alla väntande med namn, telefonnummer och önskat datum i en enda lista.",
+  "useCases.wf2S3": "En avbokning frigör en timme, så du kontaktar den första i listan och markerar personen som meddelad.",
+  "useCases.wf2S4": "Du lägger in bokningen själv med några klick, eller låter kunden boka den lediga tiden.",
+  "useCases.wf3Role": "Bageri eller tårtbagare",
+  "useCases.wf3Focus": "Priser och fakturering",
+  "useCases.wf3S1": "Beställningarna kommer in med upphämtningsdag, antal och kundens anteckningar om kost.",
+  "useCases.wf3S2": "Du sätter priset själv, eller låter de publicerade tjänstepriserna räkna ut summan automatiskt.",
+  "useCases.wf3S3": "Till företagskunder skickar du en offert som PDF i din egen stil och kopplar flera beställningar till samma evenemang.",
+  "useCases.wf3S4": "Du markerar beställningen som fakturerad, och rapporterna visar vad som ännu inte fakturerats.",
+  "useCases.wf4Role": "Personlig tränare",
+  "useCases.wf4Focus": "Kundomdömen",
+  "useCases.wf4S1": "Efter passet får kunden en personlig länk för att ge betyg och en kommentar.",
+  "useCases.wf4S2": "Alla omdömen hamnar i din översikt, och bara de du publicerar syns utåt.",
+  "useCases.wf4S3": "Publicerade omdömen visas på din bokningssida, så nya kunder ser riktig återkoppling före bokningen.",
+  "useCases.wf4S4": "Betygens utveckling syns i rapporterna vid sidan av bokningar, rusningstider och avbokningar.",
   "useCases.ctaTitle": "Hittade du ditt användningsfall?",
   "useCases.ctaSubtitle": "Starta din 30-dagars gratis provperiod och skapa din första bokningssida på minuter.",
 
