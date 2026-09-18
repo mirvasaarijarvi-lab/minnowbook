@@ -92,7 +92,7 @@ class BookingErrorBoundary extends React.Component<
   static getDerivedStateFromError() {
     return { hasError: true };
   }
-  render() {
+  override render() {
     if (this.state.hasError) return this.props.fallback;
     return this.props.children;
   }
@@ -114,7 +114,7 @@ const AvailabilityCalendar = ({
   accentColor: string;
   thresholds: Record<string, number>;
   reservationType: string;
-  t: (key: string) => string;
+  t: (key: TranslationKey) => string;
 }) => {
   const [calMonth, setCalMonth] = useState(new Date());
 

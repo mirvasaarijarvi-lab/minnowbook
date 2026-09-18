@@ -341,7 +341,7 @@ const ResourceManagement = () => {
   const copyMutation = useMutation({
     mutationFn: async ({ source, count }: { source: any; count: number }) => {
       if (!tenantId) throw new Error("No tenant");
-      const copies = [];
+      const copies: any[] = [];
       for (let i = 1; i <= count; i++) {
         copies.push({
           tenant_id: tenantId,
@@ -384,7 +384,7 @@ const ResourceManagement = () => {
       const roomTypeLabel = t(`dashboard.roomType.${roomType}` as any);
       const resType = (tenant as any)?.allowed_reservation_types?.includes("hotel") ? "hotel" : "guesthouse";
 
-      const copies = [];
+      const copies: any[] = [];
       for (let i = 1; i <= qty; i++) {
         copies.push({
           tenant_id: tenantId,

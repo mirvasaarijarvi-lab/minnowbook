@@ -207,9 +207,11 @@ const DashboardSupportPanel = () => {
     }
 
     try {
+      const userId = session?.user?.id;
+      if (!userId) return;
       const { error } = await supabase.from("support_requests").insert({
         tenant_id: tenantId,
-        user_id: session?.user?.id,
+        user_id: userId,
         subject: escalateSubject.trim(),
         message: chatInput.trim(),
       });

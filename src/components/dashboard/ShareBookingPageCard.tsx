@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Code2, Copy, MousePointerClick, Globe } from "lucide-react";
 import { toast } from "sonner";
 import DashboardTooltip from "./DashboardTooltip";
+import { siteOrigin } from "@/lib/site-origin";
 
 const Snippet = ({ code, onCopy, label }: { code: string; onCopy: () => void; label: string }) => (
   <div className="space-y-2">
@@ -25,7 +26,7 @@ const ShareBookingPageCard = () => {
   const t = useT();
   const [tab, setTab] = useState("embed");
 
-  const bookingUrl = tenant?.slug ? `${window.location.origin}/book/${tenant.slug}` : "";
+  const bookingUrl = tenant?.slug ? `${siteOrigin()}/book/${tenant.slug}` : "";
 
   const embedCode = useMemo(
     () =>

@@ -90,6 +90,7 @@ const AccessCodesPanel = () => {
   const createMutation = useMutation({
     mutationFn: async () => {
       const plaintext = form.code.trim().toUpperCase();
+      // Generated types list these optional function arguments as required.
       const { error } = await supabase.rpc("create_access_code", {
         p_code: plaintext,
         p_description: form.description || null,
@@ -98,7 +99,7 @@ const AccessCodesPanel = () => {
         p_valid_from: form.valid_from || null,
         p_valid_until: form.valid_until || null,
         p_max_uses: form.max_uses ? parseInt(form.max_uses) : null,
-      });
+      } as never);
       if (error) throw error;
       return plaintext;
     },

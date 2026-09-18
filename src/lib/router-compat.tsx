@@ -149,6 +149,51 @@ export function Navigate({ to, replace, state }: { to: string; replace?: boolean
 
 export const Outlet = TSOutlet;
 
-// ---------- NavLink (minimal) ----------
+// ---------- NavLink ----------
 
-export const NavLink = Link;
+type NavLinkRenderState = { isActive: boolean; isPending: boolean; isTransitioning: boolean };
+
+export type NavLinkProps = Omit<LinkProps, "className" | "style" | "children"> & {
+  className?: string | ((state: NavLinkRenderState) => string);
+  style?: React.CSSProperties | ((state: NavLinkRenderState) => React.CSSProperties | undefined);
+  children?: ReactNode | ((state: NavLinkRenderState) => ReactNode);
+  end?: boolean;
+};
+
+export const NavLink = forwardRef<HTMLAnchorElement, NavLinkProps>(function NavLink(
+  { className, style, children, end, to, ...rest },
+  ref,
+) {
+  const loc = tsLocation();
+  const target = parseTo(to).pathname;
+  const current = loc.pathname;
+  const isActive = end
+    ? current === target
+    : current === target || current.startsWith(target.endsWith("/") ? target : `${target}/`);
+  const state: NavLinkRenderState = { isActive, isPending: false, isTransitioning: false };
+  return (
+    <Link
+      ref={ref}
+      to={to}
+      className={typeof className === "function" ? className(state) : className}
+      style={typeof style === "function" ? style(state) : style}
+      aria-current={isActive ? "page" : undefined}
+      {...(rest as Record<string, unknown>)}
+    >
+      {typeof children === "function" ? children(state) : children}
+    </Link>
+  );
+});
+
+// ---------- optional location (safe outside a router) ----------
+// Some hooks watch the current route but are also rendered in isolation
+// (tests, previews) where no router exists. Reading the location defensively
+// keeps those surfaces working without a route to watch.
+export function useOptionalLocationKey(): string | null {
+  try {
+    const loc = tsLocation();
+    return `${loc.pathname ?? ""}${loc.searchStr ? `?${loc.searchStr}` : ""}`;
+  } catch {
+    return null;
+  }
+}

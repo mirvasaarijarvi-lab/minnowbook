@@ -76,7 +76,7 @@ const OperationsSheetPanel = () => {
       const { data: row, error } = await supabase
         .from("tenant_settings")
         .select("ops_digest_enabled, ops_digest_recipients, business_email, guest_request_alerts_enabled, guest_request_alert_recipients, weekly_report_enabled, weekly_report_weekday, weekly_report_recipients")
-        .eq("tenant_id", tenantId)
+        .eq("tenant_id", tenantId!)
         .maybeSingle();
       if (error) throw error;
       return row;
@@ -103,7 +103,7 @@ const OperationsSheetPanel = () => {
       const { error } = await supabase
         .from("tenant_settings")
         .update({ ops_digest_enabled: digestEnabled, ops_digest_recipients: recipients })
-        .eq("tenant_id", tenantId);
+        .eq("tenant_id", tenantId!);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -125,7 +125,7 @@ const OperationsSheetPanel = () => {
           guest_request_alerts_enabled: alertsEnabled,
           guest_request_alert_recipients: recipients,
         })
-        .eq("tenant_id", tenantId);
+        .eq("tenant_id", tenantId!);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -148,7 +148,7 @@ const OperationsSheetPanel = () => {
           weekly_report_weekday: Number(weeklyDay),
           weekly_report_recipients: recipients,
         })
-        .eq("tenant_id", tenantId);
+        .eq("tenant_id", tenantId!);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -199,7 +199,7 @@ const OperationsSheetPanel = () => {
         .select(
           "id, reservation_type, status, date, check_out_date, start_time, end_time, guest_name, guest_phone, guests_count, estimated_guests, room_type, dietary_notes, special_requests, breakfast_included, catering_needed",
         )
-        .eq("tenant_id", tenantId)
+        .eq("tenant_id", tenantId!)
         .neq("status", "cancelled")
         .or(`date.eq.${date},check_out_date.eq.${date}`)
         .order("start_time", { ascending: true, nullsFirst: false });
@@ -214,7 +214,7 @@ const OperationsSheetPanel = () => {
       const { data: orders } = await supabase
         .from("kitchen_orders")
         .select("reservation_id, item_name, quantity, category, status")
-        .eq("tenant_id", tenantId)
+        .eq("tenant_id", tenantId!)
         .in("reservation_id", reservations.map((r) => r.id).length ? reservations.map((r) => r.id) : ["00000000-0000-0000-0000-000000000000"]);
 
       const ordersByReservation: Record<string, string[]> = {};

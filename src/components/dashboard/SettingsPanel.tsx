@@ -1101,7 +1101,7 @@ const SettingsPanel = () => {
       <ReservationTypesCard />
 
       {/* Resource Type Names & Descriptions */}
-      {tenant?.allowed_reservation_types?.length > 0 && (
+      {(tenant?.allowed_reservation_types?.length ?? 0) > 0 && tenant && (
         <Card>
           <CardHeader>
             <CardTitle className="text-lg font-serif">{t("settings.resourceTypeNames")}</CardTitle>
@@ -1136,7 +1136,7 @@ const SettingsPanel = () => {
       )}
 
       {/* Availability Thresholds */}
-      {tenant?.allowed_reservation_types?.length > 0 && (
+      {(tenant?.allowed_reservation_types?.length ?? 0) > 0 && tenant && (
         <Card>
           <CardHeader>
             <CardTitle className="text-lg font-serif">{t("settings.availabilityThresholds")}</CardTitle>

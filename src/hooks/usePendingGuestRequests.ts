@@ -19,7 +19,7 @@ export function usePendingGuestRequests() {
       const { count, error } = await supabase
         .from("reschedule_requests")
         .select("id", { count: "exact", head: true })
-        .eq("tenant_id", tenantId)
+        .eq("tenant_id", tenantId!)
         .eq("status", "pending");
       if (error) throw error;
       return count ?? 0;
