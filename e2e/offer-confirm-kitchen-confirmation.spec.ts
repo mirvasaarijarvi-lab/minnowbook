@@ -224,10 +224,11 @@ test.describe("Offer confirmation states the Kitchen tab result", () => {
     await page.getByRole("button", { name: "Confirm", exact: true }).first().click();
 
     // Toast: headline plus the kitchen count.
-    await expect(page.getByText("Offer confirmed").first()).toBeVisible({ timeout: 15_000 });
-    await expect(
-      page.getByText(/3 food and drink line\(s\) from the offer were sent to the Kitchen tab\./),
-    ).toBeVisible();
+    const toast = page.locator("[data-sonner-toast]").first();
+    await expect(toast).toContainText("Offer confirmed", { timeout: 15_000 });
+    await expect(toast).toContainText(
+      "3 food and drink line(s) from the offer were sent to the Kitchen tab.",
+    );
 
     // Screen-reader announcement carries the same outcome.
     const region = page.locator("#offer-status-live-region");
@@ -257,12 +258,11 @@ test.describe("Offer confirmation states the Kitchen tab result", () => {
     await openOffers(page);
     await page.getByRole("button", { name: "Confirm", exact: true }).first().click();
 
-    await expect(page.getByText("Offer confirmed").first()).toBeVisible({ timeout: 15_000 });
-    await expect(
-      page.getByText(
-        /This offer had no food or drinks, so a regular reservation was created and nothing was sent to the Kitchen tab\./,
-      ),
-    ).toBeVisible();
+    const toast = page.locator("[data-sonner-toast]").first();
+    await expect(toast).toContainText("Offer confirmed", { timeout: 15_000 });
+    await expect(toast).toContainText(
+      "This offer had no food or drinks, so a regular reservation was created and nothing was sent to the Kitchen tab.",
+    );
 
     const region = page.locator("#offer-status-live-region");
     await expect(region).toContainText("nothing was sent to the Kitchen tab");
