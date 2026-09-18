@@ -72,6 +72,14 @@ const blogPosts = [
     readTime: "7 min",
     categoryKey: "blog.catGuides" as const,
   },
+  {
+    slug: "booking-software-for-service-professionals",
+    titleKey: "blog.post9Title" as const,
+    excerptKey: "blog.post9Excerpt" as const,
+    date: "2026-09-18",
+    readTime: "8 min",
+    categoryKey: "blog.catGuides" as const,
+  },
 ];
 
 const Blog = () => {
