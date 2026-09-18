@@ -409,6 +409,7 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
                 defaultOpen={selectedDayReservations.length <= 5}
                 className="space-y-2"
               >
+                <div className="space-y-2">
                 {selectedDayReservations.map((r) => (
                   <div key={r.id} className="flex items-center justify-between p-3 rounded-md bg-secondary/50 border border-border">
                     <div>
