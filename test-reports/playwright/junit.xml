@@ -1,0 +1,37 @@
+<testsuites id="" name="" tests="3" failures="0" skipped="0" errors="0" time="7.453996999999999">
+<testsuite name="offer-confirm-kitchen-confirmation.spec.ts" timestamp="2026-09-18T06:34:13.590Z" hostname="chromium" tests="3" failures="0" skipped="0" time="12.007" errors="0">
+<testcase name="Offer confirmation states the Kitchen tab result › offer with food and drinks: confirmation names the lines sent to the kitchen" classname="offer-confirm-kitchen-confirmation.spec.ts" time="3.883">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-917c1-e-lines-sent-to-the-kitchen-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-917c1-e-lines-sent-to-the-kitchen-chromium/video.webm]]
+
+[[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-917c1-e-lines-sent-to-the-kitchen-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Offer confirmation states the Kitchen tab result › offer without food or drinks: confirmation says nothing was sent to the kitchen" classname="offer-confirm-kitchen-confirmation.spec.ts" time="3.882">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-4b200-ing-was-sent-to-the-kitchen-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-4b200-ing-was-sent-to-the-kitchen-chromium/video.webm]]
+
+[[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-4b200-ing-was-sent-to-the-kitchen-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Offer confirmation states the Kitchen tab result › accepted offer&apos;s food and drink lines show up in the Kitchen tab" classname="offer-confirm-kitchen-confirmation.spec.ts" time="4.242">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-f2433--show-up-in-the-Kitchen-tab-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-f2433--show-up-in-the-Kitchen-tab-chromium/video.webm]]
+
+[[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-f2433--show-up-in-the-Kitchen-tab-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+</testsuites>
