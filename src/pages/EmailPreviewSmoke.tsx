@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams } from "@/lib/router-compat";
 import ConfirmationEmailPreview from "@/components/ConfirmationEmailPreview";
 import { useLanguage } from "@/contexts/I18nContext";
 import type { Language } from "@/i18n/translations";

@@ -1,5 +1,5 @@
 /**
- * Router-compat shim — bridges react-router-dom v6 call sites to
+ * Router-compat shim — bridges @/lib/router-compat v6 call sites to
  * @tanstack/react-router without hand-rewriting every component.
  */
 import {
@@ -77,7 +77,7 @@ export function useParams<T extends Record<string, string | undefined> = Record<
   return tsParams({ strict: false } as never) as T;
 }
 
-// ---------- useSearchParams (react-router-dom compat) ----------
+// ---------- useSearchParams (@/lib/router-compat compat) ----------
 
 export function useSearchParams(): [URLSearchParams, (init: URLSearchParams | Record<string, string> | ((prev: URLSearchParams) => URLSearchParams), opts?: { replace?: boolean }) => void] {
   const loc = tsLocation();

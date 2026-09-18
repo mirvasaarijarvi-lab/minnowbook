@@ -93,9 +93,9 @@ vi.mock("@/hooks/useTierGate", () => ({
 
 // React Router is used for the Superadmin nav button. A no-op navigate
 // mock is enough — we never click that button.
-vi.mock("react-router-dom", async () => {
-  const actual = await vi.importActual<typeof import("react-router-dom")>(
-    "react-router-dom",
+vi.mock("@/lib/router-compat", async () => {
+  const actual = await vi.importActual<typeof import("@/lib/router-compat")>(
+    "@/lib/router-compat",
   );
   return {
     ...actual,

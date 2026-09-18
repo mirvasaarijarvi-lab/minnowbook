@@ -10,7 +10,7 @@ import { useT } from "@/contexts/I18nContext";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { TranslationKey } from "@/i18n/translations";
 import { usePermissions } from "@/hooks/usePermissions";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@/lib/router-compat";
 import {
   PERM_CALENDAR_VIEW,
   PERM_RESERVATIONS_VIEW,

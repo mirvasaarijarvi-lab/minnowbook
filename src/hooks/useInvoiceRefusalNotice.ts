@@ -1,5 +1,5 @@
 import { useCallback, useContext, useEffect, useRef } from "react";
-import { UNSAFE_LocationContext } from "react-router-dom";
+import { UNSAFE_LocationContext } from "@/lib/router-compat";
 import { toast } from "sonner";
 import { useInvoiceRefusalMessage, type FormattedInvoiceRefusal } from "@/hooks/useInvoiceRefusalMessage";
 import type { InvoiceRefusalSurface } from "@/lib/invoice-refusal";

@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import Logo from "@/components/Logo";
 import { useT } from "@/contexts/I18nContext";
 import { openCookieSettings } from "@/components/CookieConsent";

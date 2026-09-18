@@ -9,7 +9,7 @@
  */
 import { ReactNode } from "react";
 import { render, RenderOptions } from "@testing-library/react";
-import { MemoryRouter, MemoryRouterProps } from "react-router-dom";
+import { MemoryRouter, MemoryRouterProps } from "@/lib/router-compat";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { I18nProvider } from "@/contexts/I18nContext";
 import { ImpersonationProvider } from "@/contexts/ImpersonationContext";

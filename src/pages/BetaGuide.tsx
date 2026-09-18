@@ -8,7 +8,7 @@ import {
   Ticket, UserPlus, Settings, Sparkles, MessageSquare,
   CheckCircle2, ArrowRight, Heart, Shield, Rocket,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { Button } from "@/components/ui/button";
 
 const steps = [

@@ -9,7 +9,7 @@ import {
   Download, KeyRound, Settings, LifeBuoy, BookOpen, Building2, MapPin,
   Zap, Crown, Bell, Keyboard, UserCircle, Upload, Archive, FileOutput, Link2,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 
 type GuideContent = {
   title: string;

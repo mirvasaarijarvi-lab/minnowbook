@@ -3,7 +3,7 @@ import MarketingHeader from "@/components/MarketingHeader";
 import MarketingFooter from "@/components/MarketingFooter";
 import PricingTier from "@/components/PricingTier";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { ArrowRight, Building2 } from "lucide-react";
 import { useT } from "@/contexts/I18nContext";
 import { STRIPE_TIERS } from "@/lib/stripe-tiers";

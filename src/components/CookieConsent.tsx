@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, forwardRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Shield, Settings2 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { useT } from "@/contexts/I18nContext";
 import { gtm } from "@/lib/gtm";
 import {
