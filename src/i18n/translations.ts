@@ -872,6 +872,15 @@ type TranslationKeys = {
   "booking.occasionFull": string;
   "booking.occasionOpenHint": string;
   "booking.occasionSeatingRequired": string;
+  "booking.occasionErrUnavailable": string;
+  "booking.occasionErrWrongDate": string;
+  "booking.occasionErrWrongType": string;
+  "booking.occasionErrSeatingRequired": string;
+  "booking.occasionErrSeatingUnavailable": string;
+  "booking.occasionErrFull": string;
+  "booking.occasionErrFullWithSeats": string;
+  "booking.occasionNoneOnDate": string;
+  "booking.occasionNextDates": string;
   "blocking.blocksRemoved": string;
   "blocking.removeBlock": string;
   "blocking.removeBlockDesc": string;
@@ -2931,6 +2940,15 @@ const en: TranslationKeys = {
   "booking.occasionFull": "Fully booked",
   "booking.occasionOpenHint": "Choose any time during the day.",
   "booking.occasionSeatingRequired": "Please choose a sitting time",
+  "booking.occasionErrUnavailable": "That special occasion is no longer open for bookings. Please pick another occasion or book a normal time.",
+  "booking.occasionErrWrongDate": "That special occasion is held on a different day. Please choose its own date, or book a normal time for this day.",
+  "booking.occasionErrWrongType": "That special occasion is not offered for this service. Please choose another occasion or book a normal time.",
+  "booking.occasionErrSeatingRequired": "Please choose one of the sitting times for this occasion before sending your booking.",
+  "booking.occasionErrSeatingUnavailable": "That sitting time is no longer available. Please choose one of the times shown for this occasion.",
+  "booking.occasionErrFull": "This occasion is now fully booked. Please choose another sitting time or another date.",
+  "booking.occasionErrFullWithSeats": "Only {seats} seat(s) are left for this occasion, so we could not fit your party. Please try a smaller party, another sitting time or another date.",
+  "booking.occasionNoneOnDate": "There is no special occasion on this day, so you can book a normal time below.",
+  "booking.occasionNextDates": "Next occasions: {dates}",
   "blocking.blocksRemoved": "Blocks removed",
   "blocking.removeBlock": "Remove Block",
   "blocking.removeBlockDesc": "This will remove the block for {date}. Bookings will be allowed again.",
@@ -4970,6 +4988,15 @@ const fi: TranslationKeys = {
   "booking.occasionFull": "Täyteen varattu",
   "booking.occasionOpenHint": "Valitse mikä tahansa aika päivän aikana.",
   "booking.occasionSeatingRequired": "Valitse kattausaika",
+  "booking.occasionErrUnavailable": "Tätä tilaisuutta ei voi enää varata. Valitse toinen tilaisuus tai varaa tavallinen aika.",
+  "booking.occasionErrWrongDate": "Tilaisuus järjestetään toisena päivänä. Valitse sen oma päivä tai varaa tälle päivälle tavallinen aika.",
+  "booking.occasionErrWrongType": "Tätä tilaisuutta ei tarjota tälle palvelulle. Valitse toinen tilaisuus tai varaa tavallinen aika.",
+  "booking.occasionErrSeatingRequired": "Valitse tilaisuuden kattausaika ennen varauksen lähettämistä.",
+  "booking.occasionErrSeatingUnavailable": "Tämä kattausaika ei ole enää saatavilla. Valitse jokin tilaisuudelle näytetyistä ajoista.",
+  "booking.occasionErrFull": "Tilaisuus on nyt täynnä. Valitse toinen kattausaika tai toinen päivä.",
+  "booking.occasionErrFullWithSeats": "Tilaisuuteen on jäljellä vain {seats} paikkaa, joten seurueesi ei mahdu. Kokeile pienempää seuruetta, toista kattausaikaa tai toista päivää.",
+  "booking.occasionNoneOnDate": "Tälle päivälle ei ole erityistilaisuutta, joten voit varata tavallisen ajan alta.",
+  "booking.occasionNextDates": "Seuraavat tilaisuudet: {dates}",
   "blocking.blocksRemoved": "Estot poistettu",
   "blocking.removeBlock": "Poista esto",
   "blocking.removeBlockDesc": "Tämä poistaa eston päivälle {date}. Varaukset ovat jälleen mahdollisia.",
@@ -7008,6 +7035,15 @@ const sv: TranslationKeys = {
   "booking.occasionFull": "Fullbokat",
   "booking.occasionOpenHint": "Välj vilken tid som helst under dagen.",
   "booking.occasionSeatingRequired": "Välj en sittningstid",
+  "booking.occasionErrUnavailable": "Det tillfället går inte längre att boka. Välj ett annat tillfälle eller boka en vanlig tid.",
+  "booking.occasionErrWrongDate": "Tillfället hålls en annan dag. Välj dess egen dag eller boka en vanlig tid den här dagen.",
+  "booking.occasionErrWrongType": "Tillfället erbjuds inte för den här tjänsten. Välj ett annat tillfälle eller boka en vanlig tid.",
+  "booking.occasionErrSeatingRequired": "Välj en sittningstid för tillfället innan du skickar bokningen.",
+  "booking.occasionErrSeatingUnavailable": "Den sittningstiden är inte längre tillgänglig. Välj en av tiderna som visas för tillfället.",
+  "booking.occasionErrFull": "Tillfället är nu fullbokat. Välj en annan sittningstid eller en annan dag.",
+  "booking.occasionErrFullWithSeats": "Det finns bara {seats} platser kvar för tillfället, så ditt sällskap får inte plats. Prova ett mindre sällskap, en annan sittningstid eller en annan dag.",
+  "booking.occasionNoneOnDate": "Det finns inget särskilt tillfälle den här dagen, så du kan boka en vanlig tid nedan.",
+  "booking.occasionNextDates": "Kommande tillfällen: {dates}",
   "blocking.blocksRemoved": "Blockeringar borttagna",
   "blocking.removeBlock": "Ta bort blockering",
   "blocking.removeBlockDesc": "Detta tar bort blockeringen för {date}. Bokningar kommer att tillåtas igen.",

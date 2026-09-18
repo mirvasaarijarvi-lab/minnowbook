@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { gtm } from "@/lib/gtm";
 import { useParams, useSearchParams } from "react-router-dom";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useT, useTDynamic, useLanguage } from "@/contexts/I18nContext";
 import type { TranslationKey } from "@/i18n/translations";
@@ -31,6 +31,13 @@ import { buildTypeTiles } from "@/lib/booking-tiles";
 import { useBrandingSignedUrlState } from "@/lib/tenant-branding-url";
 import { BOOKING_ERROR_CODES } from "../../supabase/functions/_shared/booking-error-codes";
 import { resolveBookingError } from "@/lib/booking-error-registry";
+import {
+  applyOccasionErrorPlaceholders,
+  isOccasionErrorCode,
+  occasionErrorTranslationKey,
+  parseOccasionError,
+  OCCASION_ERROR_CODES,
+} from "@/lib/occasion-errors";
 import { trackBookingError } from "@/lib/booking-telemetry";
 import { useAuth } from "@/contexts/AuthContext";
 import { FadeInImage } from "@/components/branding/FadeInImage";
@@ -819,6 +826,30 @@ const PublicBookingInner = () => {
     enabled: !!tenant?.id && !!occasionDate && !!form.reservation_type,
   });
 
+  const queryClient = useQueryClient();
+
+  // Upcoming occasions for this service, used to tell a guest which days
+  // actually have an occasion when the chosen day has none.
+  const { data: upcomingOccasions = [] } = useQuery({
+    queryKey: ["public-upcoming-occasions", tenant?.id, activeSiteId, form.reservation_type],
+    queryFn: async () => {
+      if (!tenant?.id || !form.reservation_type) return [];
+      const today = format(new Date(), "yyyy-MM-dd");
+      let query = supabase
+        .from("special_occasions")
+        .select("id, name, occasion_date, site_id")
+        .eq("tenant_id", tenant.id)
+        .eq("reservation_type", form.reservation_type)
+        .eq("is_active", true)
+        .gte("occasion_date", today);
+      if (activeSiteId) query = query.or(`site_id.eq.${activeSiteId},site_id.is.null`);
+      const { data, error } = await query.order("occasion_date").limit(5);
+      if (error) return [];
+      return data ?? [];
+    },
+    enabled: !!tenant?.id && !!form.reservation_type,
+  });
+
   const [selectedOccasionId, setSelectedOccasionId] = useState<string | null>(null);
   const [occasionSeating, setOccasionSeating] = useState<string>("");
   const selectedOccasion = useMemo(
@@ -918,7 +949,7 @@ const PublicBookingInner = () => {
       // Special occasion (staff-defined event day, for example a Christmas dinner)
       if (selectedOccasion) {
         if (selectedOccasion.booking_type === "seatings") {
-          if (!occasionSeating) throw new Error(t("booking.occasionSeatingRequired"));
+          if (!occasionSeating) throw new Error(t("booking.occasionErrSeatingRequired"));
           payload.start_time = occasionSeating;
         }
         payload.special_occasion_id = selectedOccasion.id;
@@ -939,6 +970,7 @@ const PublicBookingInner = () => {
       if (error) {
         let errorCode: string | undefined;
         let serverMessage: string | undefined;
+        let occasionContext: unknown;
         const ctx: any = (error as any).context;
         if (ctx?.body) {
           try {
@@ -949,10 +981,20 @@ const PublicBookingInner = () => {
               const parsed = JSON.parse(text);
               errorCode = parsed?.error_code;
               serverMessage = parsed?.error;
+              occasionContext = parsed?.occasion;
             }
           } catch {
             /* fall through to generic error */
           }
+        }
+        // Special occasion refusals carry a structured code plus the
+        // seats/sittings context, so the guest gets a precise localized
+        // explanation instead of the English server fallback.
+        if (isOccasionErrorCode(errorCode)) {
+          const e = new Error(serverMessage ?? "Occasion unavailable");
+          (e as any).code = errorCode;
+          (e as any).occasion = occasionContext ?? {};
+          throw e;
         }
         if (errorCode === BOOKING_ERROR_CODES.SERVICE_ROLE_KEY_MISSING) {
           const e = new Error(serverMessage ?? "Service misconfigured");
@@ -981,6 +1023,22 @@ const PublicBookingInner = () => {
     onError: (err: any) => {
       // All branching for booking errors lives in the central
       // registry. PublicBooking just consumes the resolved descriptor.
+      const occasionInfo = parseOccasionError(err);
+      if (occasionInfo) {
+        const template = t(occasionErrorTranslationKey(occasionInfo));
+        toast.error(applyOccasionErrorPlaceholders(template, occasionInfo), { duration: 8000 });
+        // Drop a stale sitting choice so the guest must pick again from
+        // the times that are actually still open.
+        if (
+          occasionInfo.code === OCCASION_ERROR_CODES.OCCASION_SEATING_UNAVAILABLE ||
+          occasionInfo.code === OCCASION_ERROR_CODES.OCCASION_FULL
+        ) {
+          setOccasionSeating("");
+          updateField("start_time", "");
+        }
+        queryClient.invalidateQueries({ queryKey: ["public-special-occasions"] });
+        return;
+      }
       const descriptor = resolveBookingError(err, { isStaff });
       if (descriptor.pinMisconfigBanner) {
         // Pin the inline confirmation. The toast disappears after
@@ -1973,6 +2031,19 @@ const PublicBookingInner = () => {
                       </div>
                     </div>
                   )}
+                  {selectedDate &&
+                    (specialOccasions as any[]).length === 0 &&
+                    (upcomingOccasions as any[]).length > 0 && (
+                      <p className="text-xs text-muted-foreground" aria-live="polite">
+                        {t("booking.occasionNoneOnDate")}{" "}
+                        {t("booking.occasionNextDates").replace(
+                          "{dates}",
+                          (upcomingOccasions as any[])
+                            .map((o) => `${o.name} (${format(new Date(o.occasion_date), "d.M.yyyy")})`)
+                            .join(", "),
+                        )}
+                      </p>
+                    )}
                   {selectedDate && !selectedOccasion && timeSlots.length > 0 && (
                     <div className="space-y-2">
                       <Label className="flex items-center gap-1">

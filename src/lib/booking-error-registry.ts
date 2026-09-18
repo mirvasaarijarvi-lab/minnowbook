@@ -25,6 +25,7 @@
 import type { TranslationKey } from "@/i18n/translations";
 import {
   BOOKING_ERROR_CODES,
+  OCCASION_ERROR_CODES,
   type BookingErrorCode,
 } from "../../supabase/functions/_shared/booking-error-codes";
 
@@ -92,6 +93,46 @@ export const BOOKING_ERROR_REGISTRY: Record<BookingErrorCode, RegistryEntry> = {
     // Long duration so the reader has time to act on the message.
     toastDuration: 10000,
     pinMisconfigBanner: true,
+    emitTelemetry: true,
+  },
+  // Special occasion refusals. PublicBooking renders these through
+  // `src/lib/occasion-errors.ts`, which fills in the seats/sittings
+  // detail. These rows keep the registry exhaustive so any other
+  // caller still gets sensible, localized copy.
+  [OCCASION_ERROR_CODES.OCCASION_UNAVAILABLE]: {
+    i18nKey: "booking.occasionErrUnavailable",
+    toastDuration: 8000,
+    pinMisconfigBanner: false,
+    emitTelemetry: true,
+  },
+  [OCCASION_ERROR_CODES.OCCASION_WRONG_DATE]: {
+    i18nKey: "booking.occasionErrWrongDate",
+    toastDuration: 8000,
+    pinMisconfigBanner: false,
+    emitTelemetry: true,
+  },
+  [OCCASION_ERROR_CODES.OCCASION_WRONG_TYPE]: {
+    i18nKey: "booking.occasionErrWrongType",
+    toastDuration: 8000,
+    pinMisconfigBanner: false,
+    emitTelemetry: true,
+  },
+  [OCCASION_ERROR_CODES.OCCASION_SEATING_REQUIRED]: {
+    i18nKey: "booking.occasionErrSeatingRequired",
+    toastDuration: 8000,
+    pinMisconfigBanner: false,
+    emitTelemetry: true,
+  },
+  [OCCASION_ERROR_CODES.OCCASION_SEATING_UNAVAILABLE]: {
+    i18nKey: "booking.occasionErrSeatingUnavailable",
+    toastDuration: 8000,
+    pinMisconfigBanner: false,
+    emitTelemetry: true,
+  },
+  [OCCASION_ERROR_CODES.OCCASION_FULL]: {
+    i18nKey: "booking.occasionErrFull",
+    toastDuration: 8000,
+    pinMisconfigBanner: false,
     emitTelemetry: true,
   },
 };
