@@ -245,11 +245,9 @@ describe("OffersManager: offer confirmation forwards kitchen details", () => {
 
     // 5. Everything the Kitchen tab would load for that reservation is present.
     const loadedByKitchenTab = insertedKitchenOrders.filter(
-      (o) => o.tenant_id === TENANT_ID && o.reservation_id === main && false,
+      (o) => o.tenant_id === TENANT_ID && o.reservation_id === "r-1",
     );
-    expect(loadedByKitchenTab).toHaveLength(0);
-    const forReservation = insertedKitchenOrders.filter((o) => o.reservation_id === "r-1");
-    expect(forReservation).toHaveLength(3);
+    expect(loadedByKitchenTab).toHaveLength(3);
 
     expect(toast.error).not.toHaveBeenCalled();
     expect(toast.warning).not.toHaveBeenCalled();
