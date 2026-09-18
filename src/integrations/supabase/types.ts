@@ -190,6 +190,7 @@ export type Database = {
           room_type: string | null
           selected_sub_services: Json | null
           site_id: string | null
+          special_occasion_id: string | null
           special_requests: string | null
           staff_needed: boolean | null
           staff_notes: string | null
@@ -251,6 +252,7 @@ export type Database = {
           room_type?: string | null
           selected_sub_services?: Json | null
           site_id?: string | null
+          special_occasion_id?: string | null
           special_requests?: string | null
           staff_needed?: boolean | null
           staff_notes?: string | null
@@ -312,6 +314,7 @@ export type Database = {
           room_type?: string | null
           selected_sub_services?: Json | null
           site_id?: string | null
+          special_occasion_id?: string | null
           special_requests?: string | null
           staff_needed?: boolean | null
           staff_notes?: string | null
@@ -1541,6 +1544,7 @@ export type Database = {
           room_type: string | null
           selected_sub_services: Json | null
           site_id: string | null
+          special_occasion_id: string | null
           special_requests: string | null
           staff_needed: boolean | null
           staff_notes: string | null
@@ -1602,6 +1606,7 @@ export type Database = {
           room_type?: string | null
           selected_sub_services?: Json | null
           site_id?: string | null
+          special_occasion_id?: string | null
           special_requests?: string | null
           staff_needed?: boolean | null
           staff_notes?: string | null
@@ -1663,6 +1668,7 @@ export type Database = {
           room_type?: string | null
           selected_sub_services?: Json | null
           site_id?: string | null
+          special_occasion_id?: string | null
           special_requests?: string | null
           staff_needed?: boolean | null
           staff_notes?: string | null
@@ -1687,6 +1693,13 @@ export type Database = {
             columns: ["site_id"]
             isOneToOne: false
             referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reservations_special_occasion_id_fkey"
+            columns: ["special_occasion_id"]
+            isOneToOne: false
+            referencedRelation: "special_occasions"
             referencedColumns: ["id"]
           },
           {
@@ -2235,6 +2248,89 @@ export type Database = {
           },
           {
             foreignKeyName: "sites_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants_safe"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      special_occasions: {
+        Row: {
+          booking_type: string
+          capacity: number
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          occasion_date: string
+          reservation_type: string
+          resource_id: string | null
+          seating_times: Json
+          site_id: string | null
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          booking_type?: string
+          capacity?: number
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          occasion_date: string
+          reservation_type: string
+          resource_id?: string | null
+          seating_times?: Json
+          site_id?: string | null
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          booking_type?: string
+          capacity?: number
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          occasion_date?: string
+          reservation_type?: string
+          resource_id?: string | null
+          seating_times?: Json
+          site_id?: string | null
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "special_occasions_resource_id_fkey"
+            columns: ["resource_id"]
+            isOneToOne: false
+            referencedRelation: "resources"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "special_occasions_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "special_occasions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "special_occasions_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants_safe"

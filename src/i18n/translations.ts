@@ -829,6 +829,49 @@ type TranslationKeys = {
   "blocking.blockDays": string;
   "blocking.daysBlocked": string;
   "blocking.blockRemoved": string;
+  "occasions.title": string;
+  "occasions.subtitle": string;
+  "occasions.add": string;
+  "occasions.editTitle": string;
+  "occasions.name": string;
+  "occasions.namePlaceholder": string;
+  "occasions.description": string;
+  "occasions.descriptionPlaceholder": string;
+  "occasions.date": string;
+  "occasions.service": string;
+  "occasions.resource": string;
+  "occasions.anyResource": string;
+  "occasions.bookingType": string;
+  "occasions.seatings": string;
+  "occasions.openBooking": string;
+  "occasions.capacityPerSeating": string;
+  "occasions.capacityPerDay": string;
+  "occasions.capacityHintSeatings": string;
+  "occasions.capacityHintOpen": string;
+  "occasions.seatingTimes": string;
+  "occasions.addTime": string;
+  "occasions.active": string;
+  "occasions.inactive": string;
+  "occasions.save": string;
+  "occasions.cancel": string;
+  "occasions.delete": string;
+  "occasions.deleteConfirm": string;
+  "occasions.saved": string;
+  "occasions.deleted": string;
+  "occasions.empty": string;
+  "occasions.seats": string;
+  "occasions.seatsPerSeating": string;
+  "occasions.nameRequired": string;
+  "occasions.dateRequired": string;
+  "occasions.timesRequired": string;
+  "booking.occasionSectionTitle": string;
+  "booking.occasionHint": string;
+  "booking.occasionNormal": string;
+  "booking.occasionSeating": string;
+  "booking.occasionSeatsLeft": string;
+  "booking.occasionFull": string;
+  "booking.occasionOpenHint": string;
+  "booking.occasionSeatingRequired": string;
   "blocking.blocksRemoved": string;
   "blocking.removeBlock": string;
   "blocking.removeBlockDesc": string;
@@ -2845,6 +2888,49 @@ const en: TranslationKeys = {
   "blocking.blockDays": "Block {count} days",
   "blocking.daysBlocked": "{count} day(s) blocked",
   "blocking.blockRemoved": "Block removed",
+  "occasions.title": "Special occasions",
+  "occasions.subtitle": "Event days such as a Mother's Day lunch or a Christmas dinner. Guests can book the occasion on your booking page, alongside normal bookings.",
+  "occasions.add": "Add occasion",
+  "occasions.editTitle": "Edit occasion",
+  "occasions.name": "Occasion name",
+  "occasions.namePlaceholder": "For example Christmas dinner",
+  "occasions.description": "Description for guests",
+  "occasions.descriptionPlaceholder": "Menu, programme or anything guests should know",
+  "occasions.date": "Date",
+  "occasions.service": "Service",
+  "occasions.resource": "Space or room",
+  "occasions.anyResource": "Not tied to one space",
+  "occasions.bookingType": "How guests book",
+  "occasions.seatings": "Fixed sittings",
+  "occasions.openBooking": "Open booking",
+  "occasions.capacityPerSeating": "Seats per sitting",
+  "occasions.capacityPerDay": "Seats for the whole occasion",
+  "occasions.capacityHintSeatings": "Each sitting can take this many guests.",
+  "occasions.capacityHintOpen": "All bookings for this occasion share these seats.",
+  "occasions.seatingTimes": "Sitting times",
+  "occasions.addTime": "Add a time",
+  "occasions.active": "Visible to guests",
+  "occasions.inactive": "Hidden",
+  "occasions.save": "Save occasion",
+  "occasions.cancel": "Cancel",
+  "occasions.delete": "Delete",
+  "occasions.deleteConfirm": "Delete this occasion? Bookings already made stay in your list.",
+  "occasions.saved": "Occasion saved",
+  "occasions.deleted": "Occasion deleted",
+  "occasions.empty": "No special occasions yet.",
+  "occasions.seats": "seats",
+  "occasions.seatsPerSeating": "{cap} seats per sitting",
+  "occasions.nameRequired": "Please give the occasion a name",
+  "occasions.dateRequired": "Please choose a date",
+  "occasions.timesRequired": "Please add at least one sitting time",
+  "booking.occasionSectionTitle": "Special occasion on this date",
+  "booking.occasionHint": "Pick the occasion, or continue with a normal booking.",
+  "booking.occasionNormal": "Normal booking",
+  "booking.occasionSeating": "Sitting time",
+  "booking.occasionSeatsLeft": "{count} seats left",
+  "booking.occasionFull": "Fully booked",
+  "booking.occasionOpenHint": "Choose any time during the day.",
+  "booking.occasionSeatingRequired": "Please choose a sitting time",
   "blocking.blocksRemoved": "Blocks removed",
   "blocking.removeBlock": "Remove Block",
   "blocking.removeBlockDesc": "This will remove the block for {date}. Bookings will be allowed again.",
@@ -4841,6 +4927,49 @@ const fi: TranslationKeys = {
   "blocking.blockDays": "Estä {count} päivää",
   "blocking.daysBlocked": "{count} päivä(ä) estetty",
   "blocking.blockRemoved": "Esto poistettu",
+  "occasions.title": "Erikoistilaisuudet",
+  "occasions.subtitle": "Tapahtumapäivät, kuten äitienpäivälounas tai joulullinen illallinen. Vieraat voivat varata tilaisuuden varaussivullasi tavallisten varausten rinnalla.",
+  "occasions.add": "Lisää tilaisuus",
+  "occasions.editTitle": "Muokkaa tilaisuutta",
+  "occasions.name": "Tilaisuuden nimi",
+  "occasions.namePlaceholder": "Esimerkiksi joulullinen illallinen",
+  "occasions.description": "Kuvaus vieraille",
+  "occasions.descriptionPlaceholder": "Menu, ohjelma tai muu vieraiden hyvä tietää",
+  "occasions.date": "Päivä",
+  "occasions.service": "Palvelu",
+  "occasions.resource": "Tila tai huone",
+  "occasions.anyResource": "Ei sidottu yhteen tilaan",
+  "occasions.bookingType": "Miten vieraat varaavat",
+  "occasions.seatings": "Kiinteät kattaukset",
+  "occasions.openBooking": "Vapaa varaus",
+  "occasions.capacityPerSeating": "Paikkoja kattausta kohden",
+  "occasions.capacityPerDay": "Paikkoja koko tilaisuuteen",
+  "occasions.capacityHintSeatings": "Jokaiseen kattaukseen mahtuu näin monta vierasta.",
+  "occasions.capacityHintOpen": "Kaikki tilaisuuden varaukset jakavat nämä paikat.",
+  "occasions.seatingTimes": "Kattausajat",
+  "occasions.addTime": "Lisää aika",
+  "occasions.active": "Näkyy vieraille",
+  "occasions.inactive": "Piilotettu",
+  "occasions.save": "Tallenna tilaisuus",
+  "occasions.cancel": "Peruuta",
+  "occasions.delete": "Poista",
+  "occasions.deleteConfirm": "Poistetaanko tämä tilaisuus? Jo tehdyt varaukset jäävät listallesi.",
+  "occasions.saved": "Tilaisuus tallennettu",
+  "occasions.deleted": "Tilaisuus poistettu",
+  "occasions.empty": "Ei vielä erikoistilaisuuksia.",
+  "occasions.seats": "paikkaa",
+  "occasions.seatsPerSeating": "{cap} paikkaa kattausta kohden",
+  "occasions.nameRequired": "Anna tilaisuudelle nimi",
+  "occasions.dateRequired": "Valitse päivä",
+  "occasions.timesRequired": "Lisää vähintään yksi kattausaika",
+  "booking.occasionSectionTitle": "Erikoistilaisuus tänä päivänä",
+  "booking.occasionHint": "Valitse tilaisuus tai jatka tavallisella varauksella.",
+  "booking.occasionNormal": "Tavallinen varaus",
+  "booking.occasionSeating": "Kattausaika",
+  "booking.occasionSeatsLeft": "{count} paikkaa vapaana",
+  "booking.occasionFull": "Täyteen varattu",
+  "booking.occasionOpenHint": "Valitse mikä tahansa aika päivän aikana.",
+  "booking.occasionSeatingRequired": "Valitse kattausaika",
   "blocking.blocksRemoved": "Estot poistettu",
   "blocking.removeBlock": "Poista esto",
   "blocking.removeBlockDesc": "Tämä poistaa eston päivälle {date}. Varaukset ovat jälleen mahdollisia.",
@@ -6836,6 +6965,49 @@ const sv: TranslationKeys = {
   "blocking.blockDays": "Blockera {count} dagar",
   "blocking.daysBlocked": "{count} dag(ar) blockerad(e)",
   "blocking.blockRemoved": "Blockering borttagen",
+  "occasions.title": "Specialtillfällen",
+  "occasions.subtitle": "Evenemangsdagar som en morsdagslunch eller en julmiddag. Gäster kan boka tillfället på din bokningssida, vid sidan av vanliga bokningar.",
+  "occasions.add": "Lägg till tillfälle",
+  "occasions.editTitle": "Redigera tillfälle",
+  "occasions.name": "Tillfällets namn",
+  "occasions.namePlaceholder": "Till exempel julmiddag",
+  "occasions.description": "Beskrivning för gäster",
+  "occasions.descriptionPlaceholder": "Meny, program eller annat gästerna bör veta",
+  "occasions.date": "Datum",
+  "occasions.service": "Tjänst",
+  "occasions.resource": "Lokal eller rum",
+  "occasions.anyResource": "Inte bundet till en lokal",
+  "occasions.bookingType": "Så bokar gästerna",
+  "occasions.seatings": "Fasta sittningar",
+  "occasions.openBooking": "Fri bokning",
+  "occasions.capacityPerSeating": "Platser per sittning",
+  "occasions.capacityPerDay": "Platser för hela tillfället",
+  "occasions.capacityHintSeatings": "Varje sittning rymmer så här många gäster.",
+  "occasions.capacityHintOpen": "Alla bokningar för tillfället delar dessa platser.",
+  "occasions.seatingTimes": "Sittningstider",
+  "occasions.addTime": "Lägg till en tid",
+  "occasions.active": "Syns för gäster",
+  "occasions.inactive": "Dold",
+  "occasions.save": "Spara tillfälle",
+  "occasions.cancel": "Avbryt",
+  "occasions.delete": "Ta bort",
+  "occasions.deleteConfirm": "Ta bort det här tillfället? Bokningar som redan gjorts finns kvar i din lista.",
+  "occasions.saved": "Tillfället sparat",
+  "occasions.deleted": "Tillfället borttaget",
+  "occasions.empty": "Inga specialtillfällen ännu.",
+  "occasions.seats": "platser",
+  "occasions.seatsPerSeating": "{cap} platser per sittning",
+  "occasions.nameRequired": "Ge tillfället ett namn",
+  "occasions.dateRequired": "Välj ett datum",
+  "occasions.timesRequired": "Lägg till minst en sittningstid",
+  "booking.occasionSectionTitle": "Specialtillfälle detta datum",
+  "booking.occasionHint": "Välj tillfället eller fortsätt med en vanlig bokning.",
+  "booking.occasionNormal": "Vanlig bokning",
+  "booking.occasionSeating": "Sittningstid",
+  "booking.occasionSeatsLeft": "{count} platser kvar",
+  "booking.occasionFull": "Fullbokat",
+  "booking.occasionOpenHint": "Välj vilken tid som helst under dagen.",
+  "booking.occasionSeatingRequired": "Välj en sittningstid",
   "blocking.blocksRemoved": "Blockeringar borttagna",
   "blocking.removeBlock": "Ta bort blockering",
   "blocking.removeBlockDesc": "Detta tar bort blockeringen för {date}. Bokningar kommer att tillåtas igen.",

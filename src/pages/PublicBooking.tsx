@@ -798,6 +798,34 @@ const PublicBookingInner = () => {
     return dayHours?.is_closed === true;
   };
 
+  // ----- Special occasions (staff-defined event days) -----
+  const occasionDate = selectedDate ? format(selectedDate, "yyyy-MM-dd") : "";
+  const { data: specialOccasions = [] } = useQuery({
+    queryKey: ["public-special-occasions", tenant?.id, activeSiteId, form.reservation_type, occasionDate],
+    queryFn: async () => {
+      if (!tenant?.id || !occasionDate || !form.reservation_type) return [];
+      let query = supabase
+        .from("special_occasions")
+        .select("id, name, description, occasion_date, reservation_type, capacity, booking_type, seating_times, site_id")
+        .eq("tenant_id", tenant.id)
+        .eq("occasion_date", occasionDate)
+        .eq("reservation_type", form.reservation_type)
+        .eq("is_active", true);
+      if (activeSiteId) query = query.or(`site_id.eq.${activeSiteId},site_id.is.null`);
+      const { data, error } = await query.order("name");
+      if (error) return [];
+      return data ?? [];
+    },
+    enabled: !!tenant?.id && !!occasionDate && !!form.reservation_type,
+  });
+
+  const [selectedOccasionId, setSelectedOccasionId] = useState<string | null>(null);
+  const [occasionSeating, setOccasionSeating] = useState<string>("");
+  const selectedOccasion = useMemo(
+    () => (specialOccasions as any[]).find((o) => o.id === selectedOccasionId) ?? null,
+    [specialOccasions, selectedOccasionId]
+  );
+
   const submitMutation = useMutation({
     mutationFn: async () => {
       if (!tenant?.id) throw new Error("No tenant");
@@ -885,6 +913,15 @@ const PublicBookingInner = () => {
           payload.food_permits = form.food_permits || null;
           payload.stall_fee = form.stall_fee ? parseFloat(form.stall_fee) : null;
         }
+      }
+
+      // Special occasion (staff-defined event day, for example a Christmas dinner)
+      if (selectedOccasion) {
+        if (selectedOccasion.booking_type === "seatings") {
+          if (!occasionSeating) throw new Error(t("booking.occasionSeatingRequired"));
+          payload.start_time = occasionSeating;
+        }
+        payload.special_occasion_id = selectedOccasion.id;
       }
 
       // Promo code
@@ -1861,7 +1898,82 @@ const PublicBookingInner = () => {
                       </PopoverContent>
                     </Popover>
                   </div>
-                  {selectedDate && timeSlots.length > 0 && (
+                  {selectedDate && (specialOccasions as any[]).length > 0 && (
+                    <div className="space-y-2 rounded-md border p-3" style={{ borderColor: `${accentColor}55` }}>
+                      <Label className="flex items-center gap-1">
+                        <Sparkles className="h-3.5 w-3.5" />
+                        {t("booking.occasionSectionTitle")}
+                      </Label>
+                      <p className="text-xs text-muted-foreground">{t("booking.occasionHint")}</p>
+                      <div className="space-y-2">
+                        {(specialOccasions as any[]).map((occasion) => {
+                          const isSelected = selectedOccasionId === occasion.id;
+                          const times = Array.isArray(occasion.seating_times)
+                            ? (occasion.seating_times as unknown[]).map((x) => String(x).slice(0, 5))
+                            : [];
+                          return (
+                            <div
+                              key={occasion.id}
+                              className="rounded-md border p-3"
+                              style={{
+                                borderColor: isSelected ? accentColor : "#e5e5e5",
+                                backgroundColor: isSelected ? `${accentColor}12` : "transparent",
+                              }}
+                            >
+                              <button
+                                type="button"
+                                className="text-left w-full"
+                                onClick={() => {
+                                  setSelectedOccasionId(isSelected ? null : occasion.id);
+                                  setOccasionSeating("");
+                                  updateField("start_time", "");
+                                }}
+                              >
+                                <span className="font-medium" style={{ color: primaryColor }}>
+                                  {occasion.name}
+                                </span>
+                                {occasion.description && (
+                                  <span className="block text-sm text-muted-foreground">{occasion.description}</span>
+                                )}
+                                {occasion.booking_type === "open" && (
+                                  <span className="block text-xs text-muted-foreground mt-1">
+                                    {t("booking.occasionOpenHint")}
+                                  </span>
+                                )}
+                              </button>
+
+                              {isSelected && occasion.booking_type === "seatings" && times.length > 0 && (
+                                <div className="mt-3 space-y-2">
+                                  <Label className="text-xs">{t("booking.occasionSeating")}</Label>
+                                  <div className="flex flex-wrap gap-2">
+                                    {times.map((time: string) => (
+                                      <button
+                                        key={time}
+                                        type="button"
+                                        onClick={() => {
+                                          setOccasionSeating(time);
+                                          updateField("start_time", time);
+                                        }}
+                                        className="px-3 py-1.5 text-sm rounded-md border transition-all"
+                                        style={{
+                                          borderColor: occasionSeating === time ? accentColor : "#e5e5e5",
+                                          backgroundColor: occasionSeating === time ? `${accentColor}15` : "transparent",
+                                          color: primaryColor,
+                                        }}
+                                      >
+                                        {time}
+                                      </button>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                  {selectedDate && !selectedOccasion && timeSlots.length > 0 && (
                     <div className="space-y-2">
                       <Label className="flex items-center gap-1">
                         <Clock className="h-3.5 w-3.5" />

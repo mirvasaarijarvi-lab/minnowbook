@@ -3,6 +3,7 @@ import { computeReservationPrice } from "../_shared/reservation-pricing.ts";
 import { BOOKING_ERROR_CODES } from "../_shared/booking-error-codes.ts";
 import { corsHeaders } from "../_shared/http-headers.ts";
 import { applyDedupFilters, RETRY_WINDOW_MINUTES } from "../_shared/booking-dedup.ts";
+import { validateOccasionBooking } from "../_shared/special-occasions.ts";
 
 function escapeHtml(str: string): string {
   return String(str ?? "")
@@ -403,6 +404,11 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
     // shared `linked_group_id` (UUID) on every leg. Each leg is still its
     // own row, but they're discoverable as siblings via this column.
     const linked_group_id = validateUuid(body.linked_group_id, "linked_group_id", false);
+
+    // Optional special occasion (staff-defined event day, e.g. a Christmas
+    // dinner with fixed sittings). Validated against the stored occasion
+    // further below, once tenant and date are known.
+    const special_occasion_id = validateUuid(body.special_occasion_id, "special_occasion_id", false);
 
     const reservation_type = validateString(body.reservation_type, "reservation_type", 20, true)!;
     if (!VALID_TYPES.includes(reservation_type)) throw new Error("Invalid reservation type");
@@ -807,6 +813,56 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
       site_id = matchingSite?.site_id ?? null;
     }
 
+    // ---------- SPECIAL OCCASION VALIDATION (hard block) ----------
+    // An occasion has a real seat limit per sitting (or per day when it is
+    // open booking), so unlike the general capacity rule below this one
+    // refuses the booking instead of warning.
+    let validatedOccasionSeating: string | null = null;
+    if (special_occasion_id) {
+      const { data: occasion, error: occasionErr } = await adminClient
+        .from("special_occasions")
+        .select("id, name, occasion_date, reservation_type, capacity, booking_type, seating_times, is_active")
+        .eq("tenant_id", tenant_id)
+        .eq("id", special_occasion_id)
+        .maybeSingle();
+      if (occasionErr) {
+        console.error("[public-booking] special occasion lookup failed", occasionErr);
+        throw new Error("Special occasion could not be verified");
+      }
+
+      const { data: occasionBookings } = await adminClient
+        .from("reservations")
+        .select("start_time, guests_count, estimated_guests, status")
+        .eq("tenant_id", tenant_id)
+        .eq("special_occasion_id", special_occasion_id);
+
+      const check = validateOccasionBooking({
+        occasion: occasion as any,
+        date,
+        reservationType: reservation_type,
+        startTime: start_time,
+        guests: guests_count ?? estimated_guests ?? 1,
+        bookings: (occasionBookings ?? []) as any,
+      });
+
+      if (!check.ok) {
+        const messages: Record<string, string> = {
+          NOT_FOUND: "This special occasion is no longer available",
+          INACTIVE: "This special occasion is no longer available",
+          WRONG_DATE: "This special occasion is on a different date",
+          WRONG_TYPE: "This special occasion is not available for this service",
+          SEATING_REQUIRED: "Please choose a sitting time for this special occasion",
+          INVALID_SEATING: "Please choose one of the offered sitting times",
+          FULL: `This special occasion is fully booked${
+            typeof check.remaining === "number" ? ` (${check.remaining} seat(s) left)` : ""
+          }`,
+        };
+        throw new Error(messages[check.reason] ?? "This special occasion cannot be booked");
+      }
+
+      validatedOccasionSeating = check.seating;
+    }
+
     // ---------- CAPACITY OBSERVATION (no hard block) ----------
     const requestedGuests = guests_count ?? estimated_guests ?? 0;
     const { capacity_total, current_load } = await computeCapacity(
@@ -963,6 +1019,12 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
 
     if (linked_group_id) {
       insertData.linked_group_id = linked_group_id;
+    }
+
+    if (special_occasion_id) {
+      insertData.special_occasion_id = special_occasion_id;
+      // For a sittings occasion the validated sitting time is authoritative.
+      if (validatedOccasionSeating) insertData.start_time = `${validatedOccasionSeating}:00`;
     }
 
     if (discount_type && discount_value) {

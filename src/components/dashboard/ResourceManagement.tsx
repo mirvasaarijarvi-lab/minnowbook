@@ -25,6 +25,7 @@ import DashboardTooltip from "./DashboardTooltip";
 import SiteTabs from "./SiteTabs";
 import ResourceImageGallery from "./ResourceImageGallery";
 import BlockedSlotsPanel from "./BlockedSlotsPanel";
+import SpecialOccasionsPanel from "./SpecialOccasionsPanel";
 import ResourceOpeningHoursEditor from "./ResourceOpeningHoursEditor";
 import ResourceOccasionalSlotsEditor from "./ResourceOccasionalSlotsEditor";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -1048,6 +1049,7 @@ const ResourceManagement = () => {
       )}
 
       {canManage && <BlockedSlotsPanel />}
+      {canManage && <SpecialOccasionsPanel />}
 
       {/* Copy Resource Dialog */}
       <Dialog open={copyDialogOpen} onOpenChange={(open) => { setCopyDialogOpen(open); if (!open) { setCopySource(null); setCopyCount("1"); } }}>
