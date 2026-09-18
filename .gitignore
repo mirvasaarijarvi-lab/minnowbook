@@ -28,3 +28,6 @@ test-results/
 
 # Blog JSON-LD lint artifact
 blog-jsonld-report/
+
+# Offer kitchen mapping test artifact
+offer-kitchen-report/
