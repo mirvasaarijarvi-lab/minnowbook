@@ -11,6 +11,10 @@ interface SEOHeadProps {
   type?: string;
   image?: string;
   imageAlt?: string;
+  /** Share specific headline for Open Graph and Twitter. Falls back to title. */
+  ogTitle?: string;
+  /** Share specific summary for Open Graph and Twitter. Falls back to description. */
+  ogDescription?: string;
   jsonLd?: Record<string, unknown> | Record<string, unknown>[];
 }
 
