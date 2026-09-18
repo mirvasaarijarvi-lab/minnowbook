@@ -1798,6 +1798,26 @@ type TranslationKeys = {
   "useCases.wf4S2": string;
   "useCases.wf4S3": string;
   "useCases.wf4S4": string;
+  "useCases.tradeCtaTitle": string;
+  "useCases.tradeCtaSubtitle": string;
+  "useCases.tradeCtaBarberName": string;
+  "useCases.tradeCtaBarberLine": string;
+  "useCases.tradeCtaBarberButton": string;
+  "useCases.tradeCtaHairdresserName": string;
+  "useCases.tradeCtaHairdresserLine": string;
+  "useCases.tradeCtaHairdresserButton": string;
+  "useCases.tradeCtaMassageName": string;
+  "useCases.tradeCtaMassageLine": string;
+  "useCases.tradeCtaMassageButton": string;
+  "useCases.tradeCtaBakerName": string;
+  "useCases.tradeCtaBakerLine": string;
+  "useCases.tradeCtaBakerButton": string;
+  "useCases.tradeCtaMakeupName": string;
+  "useCases.tradeCtaMakeupLine": string;
+  "useCases.tradeCtaMakeupButton": string;
+  "useCases.tradeCtaTrainerName": string;
+  "useCases.tradeCtaTrainerLine": string;
+  "useCases.tradeCtaTrainerButton": string;
   "useCases.ctaTitle": string;
   "useCases.ctaSubtitle": string;
 
@@ -4037,6 +4057,26 @@ const en: TranslationKeys = {
   "useCases.wf4S2": "Every review lands in your dashboard, and only the ones you publish become visible.",
   "useCases.wf4S3": "Published reviews appear on your booking page, so new customers see real feedback before they book.",
   "useCases.wf4S4": "Ratings over time show up in your reports next to bookings, busy hours and cancellations.",
+  "useCases.tradeCtaTitle": "Start with a booking page made for your trade",
+  "useCases.tradeCtaSubtitle": "Pick the work you do and set up in an afternoon. Every plan starts with a 30 day free trial, no card needed.",
+  "useCases.tradeCtaBarberName": "Barbers",
+  "useCases.tradeCtaBarberLine": "Fixed cut and beard times, back to back, with reminders that cut no-shows.",
+  "useCases.tradeCtaBarberButton": "Set up barber bookings",
+  "useCases.tradeCtaHairdresserName": "Hairdressers",
+  "useCases.tradeCtaHairdresserLine": "Colour and treatment times that add up on their own when the customer picks services.",
+  "useCases.tradeCtaHairdresserButton": "Set up salon bookings",
+  "useCases.tradeCtaMassageName": "Massage therapists",
+  "useCases.tradeCtaMassageLine": "30, 60 and 90 minute treatments, plus a waiting list for your busiest hours.",
+  "useCases.tradeCtaMassageButton": "Set up treatment bookings",
+  "useCases.tradeCtaBakerName": "Bakers",
+  "useCases.tradeCtaBakerLine": "Cake and catering orders with pickup dates, dietary notes, prices and invoicing.",
+  "useCases.tradeCtaBakerButton": "Set up order bookings",
+  "useCases.tradeCtaMakeupName": "Make-up artists",
+  "useCases.tradeCtaMakeupLine": "Wedding and event bookings with the address, the number of faces and your own offer as a PDF.",
+  "useCases.tradeCtaMakeupButton": "Set up make-up bookings",
+  "useCases.tradeCtaTrainerName": "Personal trainers",
+  "useCases.tradeCtaTrainerLine": "Repeat sessions, check-ins at the door and published client reviews on your page.",
+  "useCases.tradeCtaTrainerButton": "Set up training bookings",
   "useCases.ctaTitle": "Find Your Use Case?",
   "useCases.ctaSubtitle": "Start your free 30-day trial and set up your first booking page in minutes.",
 
@@ -6270,6 +6310,26 @@ const fi: TranslationKeys = {
   "useCases.wf4S2": "Kaikki palautteet tulevat hallintanäkymään, ja vain julkaisemasi näkyvät ulospäin.",
   "useCases.wf4S3": "Julkaistut palautteet näkyvät varaussivullasi, joten uudet asiakkaat näkevät aitoa palautetta ennen varausta.",
   "useCases.wf4S4": "Arvosanojen kehitys näkyy raporteissa varausten, ruuhkatuntien ja peruutusten rinnalla.",
+  "useCases.tradeCtaTitle": "Aloita varaussivulla, joka on tehty juuri sinun alallesi",
+  "useCases.tradeCtaSubtitle": "Valitse työsi ja ota käyttöön saman iltapäivän aikana. Jokainen taso alkaa 30 päivän ilmaisella kokeilulla, korttia ei tarvita.",
+  "useCases.tradeCtaBarberName": "Parturit",
+  "useCases.tradeCtaBarberLine": "Kiinteät hius ja partaajat peräkkäin, ja muistutukset vähentävät turhia peruuntumisia.",
+  "useCases.tradeCtaBarberButton": "Ota parturivaraukset käyttöön",
+  "useCases.tradeCtaHairdresserName": "Kampaajat",
+  "useCases.tradeCtaHairdresserLine": "Väri ja hoitoajat lasketaan automaattisesti, kun asiakas valitsee palvelut.",
+  "useCases.tradeCtaHairdresserButton": "Ota kampaamovaraukset käyttöön",
+  "useCases.tradeCtaMassageName": "Hierojat",
+  "useCases.tradeCtaMassageLine": "30, 60 ja 90 minuutin hoidot sekä jonotuslista kiireisimmille tunneille.",
+  "useCases.tradeCtaMassageButton": "Ota hoitovaraukset käyttöön",
+  "useCases.tradeCtaBakerName": "Leipomot",
+  "useCases.tradeCtaBakerLine": "Kakku ja tilaustuotteet noutopäivän, ruokavaliotietojen, hintojen ja laskutuksen kanssa.",
+  "useCases.tradeCtaBakerButton": "Ota tilausvaraukset käyttöön",
+  "useCases.tradeCtaMakeupName": "Meikkitaiteilijat",
+  "useCases.tradeCtaMakeupLine": "Hää ja tapahtumavaraukset osoitteen, meikattavien määrän ja oman PDF-tarjouksen kanssa.",
+  "useCases.tradeCtaMakeupButton": "Ota meikkivaraukset käyttöön",
+  "useCases.tradeCtaTrainerName": "Personal trainerit",
+  "useCases.tradeCtaTrainerLine": "Toistuvat treenit, saapumisen kirjaus ja julkaistut asiakaspalautteet sivullasi.",
+  "useCases.tradeCtaTrainerButton": "Ota treenivaraukset käyttöön",
   "useCases.ctaTitle": "Löysitkö käyttökohteesi?",
   "useCases.ctaSubtitle": "Aloita ilmainen 30 päivän kokeilu ja luo ensimmäinen varaussivusi minuuteissa.",
 
@@ -8503,6 +8563,26 @@ const sv: TranslationKeys = {
   "useCases.wf4S2": "Alla omdömen hamnar i din översikt, och bara de du publicerar syns utåt.",
   "useCases.wf4S3": "Publicerade omdömen visas på din bokningssida, så nya kunder ser riktig återkoppling före bokningen.",
   "useCases.wf4S4": "Betygens utveckling syns i rapporterna vid sidan av bokningar, rusningstider och avbokningar.",
+  "useCases.tradeCtaTitle": "Börja med en bokningssida gjord för ditt yrke",
+  "useCases.tradeCtaSubtitle": "Välj ditt arbete och kom igång på en eftermiddag. Varje plan börjar med 30 dagars kostnadsfri provperiod, utan kort.",
+  "useCases.tradeCtaBarberName": "Barberare",
+  "useCases.tradeCtaBarberLine": "Fasta tider för klippning och skägg i följd, med påminnelser som minskar uteblivna besök.",
+  "useCases.tradeCtaBarberButton": "Kom igång med barberarbokningar",
+  "useCases.tradeCtaHairdresserName": "Frisörer",
+  "useCases.tradeCtaHairdresserLine": "Färg och behandlingstider räknas ut automatiskt när kunden väljer tjänster.",
+  "useCases.tradeCtaHairdresserButton": "Kom igång med salongsbokningar",
+  "useCases.tradeCtaMassageName": "Massörer",
+  "useCases.tradeCtaMassageLine": "Behandlingar på 30, 60 och 90 minuter, plus väntelista för dina mest bokade timmar.",
+  "useCases.tradeCtaMassageButton": "Kom igång med behandlingsbokningar",
+  "useCases.tradeCtaBakerName": "Bagare",
+  "useCases.tradeCtaBakerLine": "Tårt och cateringbeställningar med upphämtningsdag, kostnoteringar, priser och fakturering.",
+  "useCases.tradeCtaBakerButton": "Kom igång med beställningar",
+  "useCases.tradeCtaMakeupName": "Makeupartister",
+  "useCases.tradeCtaMakeupLine": "Bröllops och evenemangsbokningar med adress, antal personer och egen offert som PDF.",
+  "useCases.tradeCtaMakeupButton": "Kom igång med makeupbokningar",
+  "useCases.tradeCtaTrainerName": "Personliga tränare",
+  "useCases.tradeCtaTrainerLine": "Återkommande pass, incheckning på plats och publicerade kundomdömen på din sida.",
+  "useCases.tradeCtaTrainerButton": "Kom igång med träningsbokningar",
   "useCases.ctaTitle": "Hittade du ditt användningsfall?",
   "useCases.ctaSubtitle": "Starta din 30-dagars gratis provperiod och skapa din första bokningssida på minuter.",
 

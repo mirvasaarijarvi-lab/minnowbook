@@ -7,6 +7,7 @@ import MarketingHeader from "@/components/MarketingHeader";
 import MarketingFooter from "@/components/MarketingFooter";
 import SupportChatWidget from "@/components/SupportChatWidget";
 import ServiceWorkflowExamples from "@/components/ServiceWorkflowExamples";
+import TradeCallsToAction from "@/components/TradeCallsToAction";
 import SEOHead, { organizationSchema, breadcrumbSchema } from "@/components/SEOHead";
 import { useT } from "@/contexts/I18nContext";
 
@@ -107,6 +108,8 @@ const UseCases = () => {
       ))}
 
       <ServiceWorkflowExamples />
+
+      <TradeCallsToAction />
 
       {/* CTA */}
       <section className="py-20 bg-primary/5">
