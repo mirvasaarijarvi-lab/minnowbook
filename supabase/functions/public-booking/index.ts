@@ -2,6 +2,7 @@ import { createClient as _createClient } from "https://esm.sh/@supabase/supabase
 import { computeReservationPrice } from "../_shared/reservation-pricing.ts";
 import { BOOKING_ERROR_CODES } from "../_shared/booking-error-codes.ts";
 import { corsHeaders } from "../_shared/http-headers.ts";
+import { applyDedupFilters, RETRY_WINDOW_MINUTES } from "../_shared/booking-dedup.ts";
 
 function escapeHtml(str: string): string {
   return String(str ?? "")
