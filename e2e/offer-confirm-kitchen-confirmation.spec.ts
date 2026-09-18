@@ -199,6 +199,7 @@ async function mockBackend(page: Page, offer: Record<string, unknown>) {
 }
 
 async function openOffers(page: Page) {
+  await seedFakeSession(page, ref!);
   await page.goto("/dashboard");
   await page.getByRole("button", { name: "Offers", exact: true }).first().click();
   await expect(page.getByText("Kitchen E2E Guest").first()).toBeVisible({ timeout: 15_000 });
