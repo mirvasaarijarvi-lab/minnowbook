@@ -32,6 +32,7 @@ const staticEntries: SitemapEntry[] = [
   { path: "/blog/multi-site-management-hospitality", changefreq: "monthly", priority: "0.7" },
   { path: "/blog/best-restaurant-reservation-apps", changefreq: "monthly", priority: "0.8" },
   { path: "/blog/comparison-resy-tock-mimmobook", changefreq: "monthly", priority: "0.8" },
+  { path: "/blog/booking-software-for-service-professionals", changefreq: "monthly", priority: "0.8" },
   { path: "/about", changefreq: "monthly", priority: "0.7" },
   { path: "/support", changefreq: "monthly", priority: "0.6" },
   { path: "/beta-guide", changefreq: "monthly", priority: "0.6" },
