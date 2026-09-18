@@ -1726,6 +1726,9 @@ type TranslationKeys = {
 
 
   "useCases.badge": string;
+  "useCases.seoTitle": string;
+  "useCases.seoDescription": string;
+  "useCases.seoKeywords": string;
   "useCases.heroTitle": string;
   "useCases.heroSubtitle": string;
   "useCases.challengesLabel": string;
@@ -3925,6 +3928,9 @@ const en: TranslationKeys = {
 
   // Use Cases
   "useCases.badge": "Use Cases",
+  "useCases.seoTitle": "Use Cases, Barbers, Salons, Massage, Bakeries and Venues",
+  "useCases.seoDescription": "See how MimmoBook works for barbers, hairdressers, massage therapists, bakers, personal trainers, make-up artists, restaurants, venues, hotels, guesthouses, catering and pop-ups.",
+  "useCases.seoKeywords": "barber appointment software, hairdresser booking system, salon booking software, massage therapist booking, bakery order booking, personal trainer booking app, make-up artist booking, service business booking software, restaurant reservations, venue booking",
   "useCases.heroTitle": "Built for Every Type of Hospitality and Service Business",
   "useCases.heroSubtitle": "See how MimmoBook solves booking challenges for restaurants, venues, hotels, guesthouses, caterers, popup events, and service industry professionals: barbers, hairdressers, massage therapists, bakers, make-up artists and personal trainers.",
   "useCases.challengesLabel": "Common Challenges",
@@ -6118,6 +6124,9 @@ const fi: TranslationKeys = {
 
   // Use Cases
   "useCases.badge": "Käyttökohteet",
+  "useCases.seoTitle": "Käyttökohteet: parturit, kampaajat, hierojat, leipomot",
+  "useCases.seoDescription": "Katso miten MimmoBook toimii partureille, kampaajille, hierojille, leipureille, personal trainereille, meikkitaiteilijoille, ravintoloille, tiloille, hotelleille ja cateringille.",
+  "useCases.seoKeywords": "parturi ajanvaraus, kampaamo ajanvarausjärjestelmä, hieroja ajanvaraus, leipomo tilausjärjestelmä, personal trainer ajanvaraus, meikkitaiteilija ajanvaraus, palvelualan ajanvaraus, ravintolan pöytävaraus, tilavaraus",
   "useCases.heroTitle": "Rakennettu kaikenlaisille ravintola- ja palvelualan yrityksille",
   "useCases.heroSubtitle": "Katso miten MimmoBook ratkaisee varaushaasteet ravintoloille, tiloille, hotelleille, majataloille, cateringille, popup-tapahtumille ja palvelualan ammattilaisille: parturit, kampaajat, hierojat, leipurit, meikkitaiteilijat ja personal trainerit.",
   "useCases.challengesLabel": "Yleiset haasteet",
@@ -8311,6 +8320,9 @@ const sv: TranslationKeys = {
 
   // Use Cases
   "useCases.badge": "Användningsfall",
+  "useCases.seoTitle": "Användningsfall: barberare, frisörer, massörer, bagerier",
+  "useCases.seoDescription": "Se hur MimmoBook fungerar för barberare, frisörer, massörer, bagare, personliga tränare, makeupartister, restauranger, lokaler, hotell, gästhus och catering.",
+  "useCases.seoKeywords": "barberare bokningssystem, frisör bokning, massör bokning, bageri bokning, personlig tränare bokning, makeupartist bokning, bokningssystem för serviceföretag, restaurangbokning, lokalbokning",
   "useCases.heroTitle": "Byggd för alla typer av besöksnärings- och serviceföretag",
   "useCases.heroSubtitle": "Se hur MimmoBook löser bokningsutmaningar för restauranger, lokaler, hotell, gästhus, cateringföretag, popup-evenemang och serviceproffs: barberare, frisörer, massörer, bagare, makeupartister och personliga tränare.",
   "useCases.challengesLabel": "Vanliga utmaningar",
