@@ -25,9 +25,10 @@ const UseCases = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <SEOHead
-        title="MimmoBook Use Cases for Restaurants, Hotels and Venues"
-        description="See how MimmoBook powers restaurants, venues, hotels, guesthouses, catering, pop-ups and wellness providers with smart reservation management."
+        title="Use Cases, Barbers, Salons, Massage, Bakeries and Venues"
+        description="See how MimmoBook works for barbers, hairdressers, massage therapists, bakers, personal trainers, restaurants, venues, hotels, guesthouses, catering and pop-ups."
         path="/use-cases"
+        keywords="barber appointment software, hairdresser booking system, salon booking, massage therapist booking, bakery order booking, personal trainer booking app, restaurant reservations, venue booking, ajanvaraus palvelualalle"
         jsonLd={[
           organizationSchema,
           breadcrumbSchema([

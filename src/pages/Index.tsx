@@ -79,9 +79,10 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <SEOHead
-        title="MimmoBook – Reservation Management for Hospitality"
-        description="Cloud-based reservations for restaurants, venues, hotels, guesthouses, and wellness service providers. Multi-site, branded booking pages and automated emails."
+        title="MimmoBook, Booking Software for Service Pros & Hospitality"
+        description="Online booking for barbers, hairdressers, massage therapists, bakers, personal trainers, restaurants, venues and hotels. Branded booking pages and automated emails."
         path="/"
+        keywords="barber booking software, hairdresser booking system, massage therapist booking, bakery order booking, personal trainer booking app, restaurant reservation software, venue booking, hotel booking system, ajanvaraus, parturi ajanvaraus, kampaaja ajanvaraus, hieroja ajanvaraus, personal trainer ajanvaraus"
         jsonLd={[
           organizationSchema,
           softwareSchema,
