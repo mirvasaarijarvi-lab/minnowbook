@@ -812,6 +812,56 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
       site_id = matchingSite?.site_id ?? null;
     }
 
+    // ---------- SPECIAL OCCASION VALIDATION (hard block) ----------
+    // An occasion has a real seat limit per sitting (or per day when it is
+    // open booking), so unlike the general capacity rule below this one
+    // refuses the booking instead of warning.
+    let validatedOccasionSeating: string | null = null;
+    if (special_occasion_id) {
+      const { data: occasion, error: occasionErr } = await adminClient
+        .from("special_occasions")
+        .select("id, name, occasion_date, reservation_type, capacity, booking_type, seating_times, is_active")
+        .eq("tenant_id", tenant_id)
+        .eq("id", special_occasion_id)
+        .maybeSingle();
+      if (occasionErr) {
+        console.error("[public-booking] special occasion lookup failed", occasionErr);
+        throw new Error("Special occasion could not be verified");
+      }
+
+      const { data: occasionBookings } = await adminClient
+        .from("reservations")
+        .select("start_time, guests_count, estimated_guests, status")
+        .eq("tenant_id", tenant_id)
+        .eq("special_occasion_id", special_occasion_id);
+
+      const check = validateOccasionBooking({
+        occasion: occasion as any,
+        date,
+        reservationType: reservation_type,
+        startTime: start_time,
+        guests: guests_count ?? estimated_guests ?? 1,
+        bookings: (occasionBookings ?? []) as any,
+      });
+
+      if (!check.ok) {
+        const messages: Record<string, string> = {
+          NOT_FOUND: "This special occasion is no longer available",
+          INACTIVE: "This special occasion is no longer available",
+          WRONG_DATE: "This special occasion is on a different date",
+          WRONG_TYPE: "This special occasion is not available for this service",
+          SEATING_REQUIRED: "Please choose a sitting time for this special occasion",
+          INVALID_SEATING: "Please choose one of the offered sitting times",
+          FULL: `This special occasion is fully booked${
+            typeof check.remaining === "number" ? ` (${check.remaining} seat(s) left)` : ""
+          }`,
+        };
+        throw new Error(messages[check.reason] ?? "This special occasion cannot be booked");
+      }
+
+      validatedOccasionSeating = check.seating;
+    }
+
     // ---------- CAPACITY OBSERVATION (no hard block) ----------
     const requestedGuests = guests_count ?? estimated_guests ?? 0;
     const { capacity_total, current_load } = await computeCapacity(
