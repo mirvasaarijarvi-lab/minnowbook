@@ -46,10 +46,14 @@ describe("tier-limits: Professional tier", () => {
     expect(canSelectMoreTypes(tier, combo.length - 1)).toBe(true);
   });
 
-  it("does not enforce a per-type or total resource cap", () => {
+  it("caps resources at 5 per type with no total cap", () => {
+    const fiveCustom = Array.from({ length: 5 }, () => ({ resource_type: "custom" }));
+    expect(canCreateResourceOfType(tier, "custom", fiveCustom)).toBe(false);
+    // Other types are unaffected, and there is no overall total cap.
+    expect(canCreateResourceOfType(tier, "restaurant", fiveCustom)).toBe(true);
     const many = Array.from({ length: 50 }, () => ({ resource_type: "custom" }));
-    expect(canCreateResourceOfType(tier, "custom", many)).toBe(true);
-    expect(canCreateResourceOfType(tier, "restaurant", many)).toBe(true);
+    expect(canCreateResourceOfType(tier, "hotel", many)).toBe(true);
+    expect(canCreateResourceOfType(tier, "custom", many)).toBe(false);
   });
 });
 
