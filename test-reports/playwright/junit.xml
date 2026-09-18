@@ -1,40 +1,8 @@
-<testsuites id="" name="" tests="3" failures="0" skipped="0" errors="1" time="33.077127">
-<testsuite name="offer-confirm-kitchen-confirmation.spec.ts" timestamp="2026-09-18T06:33:10.511Z" hostname="chromium" tests="3" failures="0" skipped="0" time="35.479" errors="1">
-<testcase name="Offer confirmation states the Kitchen tab result › offer with food and drinks: confirmation names the lines sent to the kitchen" classname="offer-confirm-kitchen-confirmation.spec.ts" time="2.491">
+<testsuites id="" name="" tests="3" failures="0" skipped="0" errors="0" time="4.813128">
+<testsuite name="offer-confirm-kitchen-confirmation.spec.ts" timestamp="2026-09-18T06:33:59.271Z" hostname="chromium" tests="3" failures="0" skipped="0" time="7.546" errors="0">
+<testcase name="Offer confirmation states the Kitchen tab result › offer with food and drinks: confirmation names the lines sent to the kitchen" classname="offer-confirm-kitchen-confirmation.spec.ts" time="2.397">
 <system-out>
-<![CDATA[[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/tenant_users?select=*%2Ctenants_safe%28*%29&user_id=eq.00000000-0000-0000-0000-00000000f00d
-[rest] POST https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/rpc/is_system_admin
-[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/tenant_users?select=*%2Ctenants_safe%28*%29&user_id=eq.00000000-0000-0000-0000-00000000f00d
-[rest] HEAD https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/resources?select=id&tenant_id=eq.11111111-1111-1111-1111-111111111111&is_active=eq.true&resource_type=in.%28restaurant%2Cvenue%29
-[rest] HEAD https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reschedule_requests?select=id&tenant_id=eq.11111111-1111-1111-1111-111111111111&status=eq.pending
-[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/notifications?select=*&tenant_id=eq.11111111-1111-1111-1111-111111111111&order=created_at.desc&limit=50
-[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=id%2Cguest_name%2Cguest_email%2Cdate%2Cstart_time%2Creservation_type%2Creminder_email_sent_at%2Csite_id&tenant_id=eq.11111111-1111-1111-1111-111111111111&reminder_email_sent_at=not.is.null&reminder_email_sent_at=gte.2026-09-11T06%3A33%3A12.714Z&order=reminder_email_sent_at.desc&limit=10
-[rest] HEAD https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/resources?select=id&tenant_id=eq.11111111-1111-1111-1111-111111111111
-[rest] HEAD https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/tenant_opening_hours?select=id&tenant_id=eq.11111111-1111-1111-1111-111111111111
-[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/tenant_settings?select=business_name%2Clogo_url%2Cbusiness_email&tenant_id=eq.11111111-1111-1111-1111-111111111111
-[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/tenant_settings?select=resource_type_names&tenant_id=eq.11111111-1111-1111-1111-111111111111
-[rest] HEAD https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=id&tenant_id=eq.11111111-1111-1111-1111-111111111111&date=eq.2026-09-18&status=in.%28pending%2Cconfirmed%29
-[rest] HEAD https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=id&tenant_id=eq.11111111-1111-1111-1111-111111111111&status=eq.pending
-[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=guests_count%2Cestimated_guests&tenant_id=eq.11111111-1111-1111-1111-111111111111&date=eq.2026-09-18&status=in.%28pending%2Cconfirmed%29
-[rest] HEAD https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=id&tenant_id=eq.11111111-1111-1111-1111-111111111111&date=eq.2026-09-18&is_checked_in=eq.true
-[rest] HEAD https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=id&tenant_id=eq.11111111-1111-1111-1111-111111111111&date=eq.2026-09-18&status=eq.confirmed
-[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=id%2Cprice_eur%2Cguests_count%2Cestimated_guests%2Cdate&tenant_id=eq.11111111-1111-1111-1111-111111111111&date=gte.2026-09-14&date=lte.2026-09-20&status=in.%28pending%2Cconfirmed%29
-[rest] HEAD https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=id&tenant_id=eq.11111111-1111-1111-1111-111111111111&check_out_date=eq.2026-09-18&status=in.%28pending%2Cconfirmed%29
-[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=id%2Cprice_eur%2Cguests_count%2Cestimated_guests&tenant_id=eq.11111111-1111-1111-1111-111111111111&date=gte.2026-09-07&date=lte.2026-09-13&status=in.%28pending%2Cconfirmed%29
-[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/resources?select=id%2Ccapacity&tenant_id=eq.11111111-1111-1111-1111-111111111111&is_active=eq.true
-[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=reservation_type&tenant_id=eq.11111111-1111-1111-1111-111111111111&date=eq.2026-09-18&status=in.%28pending%2Cconfirmed%29
-[rest] HEAD https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=id&tenant_id=eq.11111111-1111-1111-1111-111111111111&is_invoiced=eq.false&status=in.%28pending%2Cconfirmed%29
-[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/tenant_users?select=*%2Ctenants_safe%28*%29&user_id=eq.00000000-0000-0000-0000-00000000f00d
-[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/tenant_settings?select=resource_type_names&tenant_id=eq.11111111-1111-1111-1111-111111111111
-[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/resources?select=name%2Cresource_type&tenant_id=eq.11111111-1111-1111-1111-111111111111&is_active=eq.true&order=name.asc
-[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/resources?select=resource_type&tenant_id=eq.11111111-1111-1111-1111-111111111111&is_active=eq.true
-[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/offers?select=*&tenant_id=eq.11111111-1111-1111-1111-111111111111&order=created_at.desc&archived_at=is.null
-[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/resources?select=id%2Cname%2Cresource_type%2Cprice_per_night%2Cbreakfast_price_per_person%2Csub_services&tenant_id=eq.11111111-1111-1111-1111-111111111111&is_active=eq.true
-[rest] POST https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=*
-[rest] POST https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/kitchen_orders?columns=%22item_name%22%2C%22quantity%22%2C%22category%22%2C%22notes%22%2C%22sort_order%22%2C%22tenant_id%22%2C%22reservation_id%22%2C%22status%22%2C%22unit_price_eur%22
-[rest] PATCH https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/offers?id=eq.offer-e2e-1&select=*
-[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/offers?select=*&tenant_id=eq.11111111-1111-1111-1111-111111111111&order=created_at.desc&archived_at=is.null
-
+<![CDATA[
 [[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-917c1-e-lines-sent-to-the-kitchen-chromium/test-finished-1.png]]
 
 [[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-917c1-e-lines-sent-to-the-kitchen-chromium/video.webm]]
@@ -43,40 +11,9 @@
 ]]>
 </system-out>
 </testcase>
-<testcase name="Offer confirmation states the Kitchen tab result › offer without food or drinks: confirmation says nothing was sent to the kitchen" classname="offer-confirm-kitchen-confirmation.spec.ts" time="2.337">
+<testcase name="Offer confirmation states the Kitchen tab result › offer without food or drinks: confirmation says nothing was sent to the kitchen" classname="offer-confirm-kitchen-confirmation.spec.ts" time="2.308">
 <system-out>
-<![CDATA[[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/tenant_users?select=*%2Ctenants_safe%28*%29&user_id=eq.00000000-0000-0000-0000-00000000f00d
-[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/tenant_users?select=*%2Ctenants_safe%28*%29&user_id=eq.00000000-0000-0000-0000-00000000f00d
-[rest] POST https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/rpc/is_system_admin
-[rest] HEAD https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/resources?select=id&tenant_id=eq.11111111-1111-1111-1111-111111111111&is_active=eq.true&resource_type=in.%28restaurant%2Cvenue%29
-[rest] HEAD https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reschedule_requests?select=id&tenant_id=eq.11111111-1111-1111-1111-111111111111&status=eq.pending
-[rest] HEAD https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/resources?select=id&tenant_id=eq.11111111-1111-1111-1111-111111111111
-[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/notifications?select=*&tenant_id=eq.11111111-1111-1111-1111-111111111111&order=created_at.desc&limit=50
-[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=id%2Cguest_name%2Cguest_email%2Cdate%2Cstart_time%2Creservation_type%2Creminder_email_sent_at%2Csite_id&tenant_id=eq.11111111-1111-1111-1111-111111111111&reminder_email_sent_at=not.is.null&reminder_email_sent_at=gte.2026-09-11T06%3A33%3A12.813Z&order=reminder_email_sent_at.desc&limit=10
-[rest] HEAD https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/tenant_opening_hours?select=id&tenant_id=eq.11111111-1111-1111-1111-111111111111
-[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/tenant_settings?select=business_name%2Clogo_url%2Cbusiness_email&tenant_id=eq.11111111-1111-1111-1111-111111111111
-[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/tenant_settings?select=resource_type_names&tenant_id=eq.11111111-1111-1111-1111-111111111111
-[rest] HEAD https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=id&tenant_id=eq.11111111-1111-1111-1111-111111111111&date=eq.2026-09-18&status=in.%28pending%2Cconfirmed%29
-[rest] HEAD https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=id&tenant_id=eq.11111111-1111-1111-1111-111111111111&status=eq.pending
-[rest] HEAD https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=id&tenant_id=eq.11111111-1111-1111-1111-111111111111&date=eq.2026-09-18&is_checked_in=eq.true
-[rest] HEAD https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=id&tenant_id=eq.11111111-1111-1111-1111-111111111111&date=eq.2026-09-18&status=eq.confirmed
-[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=guests_count%2Cestimated_guests&tenant_id=eq.11111111-1111-1111-1111-111111111111&date=eq.2026-09-18&status=in.%28pending%2Cconfirmed%29
-[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=id%2Cprice_eur%2Cguests_count%2Cestimated_guests%2Cdate&tenant_id=eq.11111111-1111-1111-1111-111111111111&date=gte.2026-09-14&date=lte.2026-09-20&status=in.%28pending%2Cconfirmed%29
-[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=id%2Cprice_eur%2Cguests_count%2Cestimated_guests&tenant_id=eq.11111111-1111-1111-1111-111111111111&date=gte.2026-09-07&date=lte.2026-09-13&status=in.%28pending%2Cconfirmed%29
-[rest] HEAD https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=id&tenant_id=eq.11111111-1111-1111-1111-111111111111&check_out_date=eq.2026-09-18&status=in.%28pending%2Cconfirmed%29
-[rest] HEAD https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=id&tenant_id=eq.11111111-1111-1111-1111-111111111111&is_invoiced=eq.false&status=in.%28pending%2Cconfirmed%29
-[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/resources?select=id%2Ccapacity&tenant_id=eq.11111111-1111-1111-1111-111111111111&is_active=eq.true
-[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=reservation_type&tenant_id=eq.11111111-1111-1111-1111-111111111111&date=eq.2026-09-18&status=in.%28pending%2Cconfirmed%29
-[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/tenant_users?select=*%2Ctenants_safe%28*%29&user_id=eq.00000000-0000-0000-0000-00000000f00d
-[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/tenant_settings?select=resource_type_names&tenant_id=eq.11111111-1111-1111-1111-111111111111
-[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/resources?select=name%2Cresource_type&tenant_id=eq.11111111-1111-1111-1111-111111111111&is_active=eq.true&order=name.asc
-[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/resources?select=resource_type&tenant_id=eq.11111111-1111-1111-1111-111111111111&is_active=eq.true
-[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/offers?select=*&tenant_id=eq.11111111-1111-1111-1111-111111111111&order=created_at.desc&archived_at=is.null
-[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/resources?select=id%2Cname%2Cresource_type%2Cprice_per_night%2Cbreakfast_price_per_person%2Csub_services&tenant_id=eq.11111111-1111-1111-1111-111111111111&is_active=eq.true
-[rest] POST https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=*
-[rest] PATCH https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/offers?id=eq.offer-e2e-2&select=*
-[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/offers?select=*&tenant_id=eq.11111111-1111-1111-1111-111111111111&order=created_at.desc&archived_at=is.null
-
+<![CDATA[
 [[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-4b200-ing-was-sent-to-the-kitchen-chromium/test-finished-1.png]]
 
 [[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-4b200-ing-was-sent-to-the-kitchen-chromium/video.webm]]
@@ -85,88 +22,16 @@
 ]]>
 </system-out>
 </testcase>
-<testcase name="Offer confirmation states the Kitchen tab result › accepted offer&apos;s food and drink lines show up in the Kitchen tab" classname="offer-confirm-kitchen-confirmation.spec.ts" time="30.651">
+<testcase name="Offer confirmation states the Kitchen tab result › accepted offer&apos;s food and drink lines show up in the Kitchen tab" classname="offer-confirm-kitchen-confirmation.spec.ts" time="2.841">
 <system-out>
-<![CDATA[[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/tenant_users?select=*%2Ctenants_safe%28*%29&user_id=eq.00000000-0000-0000-0000-00000000f00d
-[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/tenant_users?select=*%2Ctenants_safe%28*%29&user_id=eq.00000000-0000-0000-0000-00000000f00d
-[rest] POST https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/rpc/is_system_admin
-[rest] HEAD https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/resources?select=id&tenant_id=eq.11111111-1111-1111-1111-111111111111&is_active=eq.true&resource_type=in.%28restaurant%2Cvenue%29
-[rest] HEAD https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reschedule_requests?select=id&tenant_id=eq.11111111-1111-1111-1111-111111111111&status=eq.pending
-[rest] HEAD https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/resources?select=id&tenant_id=eq.11111111-1111-1111-1111-111111111111
-[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/notifications?select=*&tenant_id=eq.11111111-1111-1111-1111-111111111111&order=created_at.desc&limit=50
-[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=id%2Cguest_name%2Cguest_email%2Cdate%2Cstart_time%2Creservation_type%2Creminder_email_sent_at%2Csite_id&tenant_id=eq.11111111-1111-1111-1111-111111111111&reminder_email_sent_at=not.is.null&reminder_email_sent_at=gte.2026-09-11T06%3A33%3A12.742Z&order=reminder_email_sent_at.desc&limit=10
-[rest] HEAD https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/tenant_opening_hours?select=id&tenant_id=eq.11111111-1111-1111-1111-111111111111
-[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/tenant_settings?select=business_name%2Clogo_url%2Cbusiness_email&tenant_id=eq.11111111-1111-1111-1111-111111111111
-[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/tenant_settings?select=resource_type_names&tenant_id=eq.11111111-1111-1111-1111-111111111111
-[rest] HEAD https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=id&tenant_id=eq.11111111-1111-1111-1111-111111111111&date=eq.2026-09-18&status=in.%28pending%2Cconfirmed%29
-[rest] HEAD https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=id&tenant_id=eq.11111111-1111-1111-1111-111111111111&status=eq.pending
-[rest] HEAD https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=id&tenant_id=eq.11111111-1111-1111-1111-111111111111&date=eq.2026-09-18&is_checked_in=eq.true
-[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=guests_count%2Cestimated_guests&tenant_id=eq.11111111-1111-1111-1111-111111111111&date=eq.2026-09-18&status=in.%28pending%2Cconfirmed%29
-[rest] HEAD https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=id&tenant_id=eq.11111111-1111-1111-1111-111111111111&date=eq.2026-09-18&status=eq.confirmed
-[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=id%2Cprice_eur%2Cguests_count%2Cestimated_guests%2Cdate&tenant_id=eq.11111111-1111-1111-1111-111111111111&date=gte.2026-09-14&date=lte.2026-09-20&status=in.%28pending%2Cconfirmed%29
-[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=id%2Cprice_eur%2Cguests_count%2Cestimated_guests&tenant_id=eq.11111111-1111-1111-1111-111111111111&date=gte.2026-09-07&date=lte.2026-09-13&status=in.%28pending%2Cconfirmed%29
-[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/resources?select=id%2Ccapacity&tenant_id=eq.11111111-1111-1111-1111-111111111111&is_active=eq.true
-[rest] HEAD https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=id&tenant_id=eq.11111111-1111-1111-1111-111111111111&check_out_date=eq.2026-09-18&status=in.%28pending%2Cconfirmed%29
-[rest] HEAD https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=id&tenant_id=eq.11111111-1111-1111-1111-111111111111&is_invoiced=eq.false&status=in.%28pending%2Cconfirmed%29
-[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=reservation_type&tenant_id=eq.11111111-1111-1111-1111-111111111111&date=eq.2026-09-18&status=in.%28pending%2Cconfirmed%29
-[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/tenant_users?select=*%2Ctenants_safe%28*%29&user_id=eq.00000000-0000-0000-0000-00000000f00d
-[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/tenant_settings?select=resource_type_names&tenant_id=eq.11111111-1111-1111-1111-111111111111
-[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/resources?select=name%2Cresource_type&tenant_id=eq.11111111-1111-1111-1111-111111111111&is_active=eq.true&order=name.asc
-[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/resources?select=resource_type&tenant_id=eq.11111111-1111-1111-1111-111111111111&is_active=eq.true
-[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/offers?select=*&tenant_id=eq.11111111-1111-1111-1111-111111111111&order=created_at.desc&archived_at=is.null
-[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/resources?select=id%2Cname%2Cresource_type%2Cprice_per_night%2Cbreakfast_price_per_person%2Csub_services&tenant_id=eq.11111111-1111-1111-1111-111111111111&is_active=eq.true
-[rest] POST https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=*
-[rest] POST https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/kitchen_orders?columns=%22item_name%22%2C%22quantity%22%2C%22category%22%2C%22notes%22%2C%22sort_order%22%2C%22tenant_id%22%2C%22reservation_id%22%2C%22status%22%2C%22unit_price_eur%22
-[rest] PATCH https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/offers?id=eq.offer-e2e-3&select=*
-[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/offers?select=*&tenant_id=eq.11111111-1111-1111-1111-111111111111&order=created_at.desc&archived_at=is.null
-
-[[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-f2433--show-up-in-the-Kitchen-tab-chromium/test-failed-1.png]]
+<![CDATA[
+[[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-f2433--show-up-in-the-Kitchen-tab-chromium/test-finished-1.png]]
 
 [[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-f2433--show-up-in-the-Kitchen-tab-chromium/video.webm]]
-
-[[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-f2433--show-up-in-the-Kitchen-tab-chromium/error-context.md]]
 
 [[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-f2433--show-up-in-the-Kitchen-tab-chromium/trace.zip]]
 ]]>
 </system-out>
-<error message="Test timeout of 30000ms exceeded." type="Error">
-<![CDATA[  [chromium] › offer-confirm-kitchen-confirmation.spec.ts:327:3 › Offer confirmation states the Kitchen tab result › accepted offer's food and drink lines show up in the Kitchen tab 
-
-    Test timeout of 30000ms exceeded.
-
-    Error: locator.click: Test timeout of 30000ms exceeded.
-    Call log:
-      - waiting for getByRole('button', { name: 'Kitchen', exact: true }).first()
-
-
-      347 |
-      348 |     // Now open the Kitchen tab and check the guest and the lines are listed.
-    > 349 |     await page.getByRole("button", { name: "Kitchen", exact: true }).first().click();
-          |                                                                              ^
-      350 |     await expect(page.getByText("Kitchen E2E Guest").first()).toBeVisible({ timeout: 15_000 });
-      351 |
-      352 |     const itemNames = page.getByRole("textbox", { name: "Item" });
-        at /dev-server/e2e/offer-confirm-kitchen-confirmation.spec.ts:349:78
-
-    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
-    ../test-results/offer-confirm-kitchen-conf-f2433--show-up-in-the-Kitchen-tab-chromium/test-failed-1.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
-    ../test-results/offer-confirm-kitchen-conf-f2433--show-up-in-the-Kitchen-tab-chromium/video.webm
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    Error Context: ../test-results/offer-confirm-kitchen-conf-f2433--show-up-in-the-Kitchen-tab-chromium/error-context.md
-
-    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
-    ../test-results/offer-confirm-kitchen-conf-f2433--show-up-in-the-Kitchen-tab-chromium/trace.zip
-    Usage:
-
-        npx playwright show-trace ../test-results/offer-confirm-kitchen-conf-f2433--show-up-in-the-Kitchen-tab-chromium/trace.zip
-
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-]]>
-</error>
 </testcase>
 </testsuite>
 </testsuites>

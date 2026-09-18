@@ -111,7 +111,11 @@ const json = (route: Route, body: unknown, headers: Record<string, string> = {})
   route.fulfill({
     status: 200,
     contentType: "application/json",
-    headers: { "content-range": "*/*", ...headers },
+    headers: {
+      "content-range": "*/*",
+      "access-control-expose-headers": "content-range",
+      ...headers,
+    },
     body: JSON.stringify(body),
   });
 
@@ -173,7 +177,12 @@ async function mockBackend(page: Page, offer: Record<string, unknown>) {
         return route.fulfill({
           status: 200,
           contentType: "application/json",
-          headers: { "content-range": "0-0/1" },
+          headers: {
+            "content-range": "0-0/1",
+            // Cross-origin responses only expose content-range when asked, and
+            // the Kitchen nav gate reads its count from that header.
+            "access-control-expose-headers": "content-range",
+          },
           body: "",
         });
       }
