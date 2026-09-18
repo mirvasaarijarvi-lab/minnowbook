@@ -1675,6 +1675,52 @@ type TranslationKeys = {
   "features.f17Desc": string;
   "features.f18Title": string;
   "features.f18Desc": string;
+  "features.catGuests": string;
+  "features.catOperations": string;
+  "features.catSecurity": string;
+  "features.catPlatform": string;
+  "features.f19Title": string;
+  "features.f19Desc": string;
+  "features.f20Title": string;
+  "features.f20Desc": string;
+  "features.f21Title": string;
+  "features.f21Desc": string;
+  "features.f22Title": string;
+  "features.f22Desc": string;
+  "features.f23Title": string;
+  "features.f23Desc": string;
+  "features.f24Title": string;
+  "features.f24Desc": string;
+  "features.f25Title": string;
+  "features.f25Desc": string;
+  "features.f26Title": string;
+  "features.f26Desc": string;
+  "features.f27Title": string;
+  "features.f27Desc": string;
+  "features.f28Title": string;
+  "features.f28Desc": string;
+  "features.f29Title": string;
+  "features.f29Desc": string;
+  "features.f30Title": string;
+  "features.f30Desc": string;
+  "features.f31Title": string;
+  "features.f31Desc": string;
+  "features.f32Title": string;
+  "features.f32Desc": string;
+  "features.f33Title": string;
+  "features.f33Desc": string;
+  "features.f34Title": string;
+  "features.f34Desc": string;
+  "features.f35Title": string;
+  "features.f35Desc": string;
+  "features.f36Title": string;
+  "features.f36Desc": string;
+  "features.f37Title": string;
+  "features.f37Desc": string;
+  "features.f38Title": string;
+  "features.f38Desc": string;
+  "features.f39Title": string;
+  "features.f39Desc": string;
   "features.offersAndCross": string;
   "features.offersAndCrossDesc": string;
 
@@ -3828,6 +3874,52 @@ const en: TranslationKeys = {
   "features.f17Desc": "Create professional offers with PDF generation and send them directly to guests via email.",
   "features.f18Title": "Cross-Reservations",
   "features.f18Desc": "Link reservations across spaces and services. Mark linked bookings as used or invoiced together.",
+  "features.catGuests": "Guest Experience & Self Service",
+  "features.catOperations": "Daily Operations",
+  "features.catSecurity": "Security & Trust",
+  "features.catPlatform": "Platform & Productivity",
+  "features.f19Title": "Guest Portal",
+  "features.f19Desc": "Guests open their own booking page from a secure link to view or cancel, with no account needed.",
+  "features.f20Title": "Waitlist",
+  "features.f20Desc": "When a time is full, guests join the waitlist and get an email automatically as soon as a place opens.",
+  "features.f21Title": "Reschedule Requests",
+  "features.f21Desc": "Guests propose a new time from their booking page and your team approves or declines it.",
+  "features.f22Title": "Guest Reviews",
+  "features.f22Desc": "Post-visit emails invite a review, and the reviews you publish appear on your booking page.",
+  "features.f23Title": "Kitchen Orders",
+  "features.f23Desc": "Track food, drinks and notes per reservation with received, preparing, ready and served statuses.",
+  "features.f24Title": "Reusable Kitchen Menu",
+  "features.f24Desc": "Save your menu items once, then fill in name, category and price on an order line in one click.",
+  "features.f25Title": "Printable Pick Sheets",
+  "features.f25Desc": "Print kitchen, lodging and event sheets for any chosen day so the team can work off paper.",
+  "features.f26Title": "Calendar Sync",
+  "features.f26Desc": "Subscribe to your reservation feed from Google Calendar, Apple Calendar or Outlook.",
+  "features.f27Title": "Special Occasions",
+  "features.f27Desc": "Name a date, set its capacity and choose fixed sittings or open booking, replacing normal hours.",
+  "features.f28Title": "Booking Invoices",
+  "features.f28Desc": "Download an invoice PDF showing the original amount, promo code used, discount and final total.",
+  "features.f29Title": "Peak Hours & Busiest Day",
+  "features.f29Desc": "See which hours and weekdays fill up first so you can staff and price accordingly.",
+  "features.f30Title": "Booking Channel Split",
+  "features.f30Desc": "Compare how many bookings arrive from your public page versus bookings your team adds by hand.",
+  "features.f31Title": "Email Delivery Timeline",
+  "features.f31Desc": "Every reservation shows which emails were queued, sent or failed, and exactly when.",
+  "features.f32Title": "Two-Step Sign In",
+  "features.f32Desc": "Protect accounts with an authenticator app code and one-time recovery codes.",
+  "features.f33Title": "Audit Log",
+  "features.f33Desc": "See who changed what and when, filtered by action, date range or person.",
+  "features.f34Title": "Login Protection",
+  "features.f34Desc": "Long passwords, a check against known leaked passwords, and a limit on repeated login attempts.",
+  "features.f35Title": "Data Isolation & Retention",
+  "features.f35Desc": "Your data stays separate from every other business, with automatic archiving and deletion schedules.",
+  "features.f36Title": "Share & Embed",
+  "features.f36Desc": "Ready-made booking links, per-service and per-site links, plus an embed for your own website.",
+  "features.f37Title": "Dark Mode & Shortcuts",
+  "features.f37Desc": "Work in light or dark, and jump between panels with keyboard shortcuts on every screen.",
+  "features.f38Title": "Onboarding Checklist",
+  "features.f38Desc": "A setup progress card guides you through resources, opening hours and emails on day one.",
+  "features.f39Title": "Guide & Support Assistant",
+  "features.f39Desc": "A built-in guidebook, printable staff guide and a support assistant that answers questions in the app.",
   "features.offersAndCross": "Offers & Cross-Reservations",
   "features.offersAndCrossDesc": "Create offers, generate branded PDFs, and link reservations across spaces and manage everything together.",
 
@@ -5975,6 +6067,52 @@ const fi: TranslationKeys = {
   "features.f17Desc": "Luo ammattimaisia tarjouksia PDF-muodossa ja lähetä ne suoraan vieraille sähköpostilla.",
   "features.f18Title": "Ristiinvaraukset",
   "features.f18Desc": "Yhdistä varauksia eri tilojen ja palvelujen välillä. Merkitse yhdistetyt varaukset käytetyiksi tai laskutetuiksi yhdessä.",
+  "features.catGuests": "Vieraskokemus ja itsepalvelu",
+  "features.catOperations": "Päivittäinen toiminta",
+  "features.catSecurity": "Turvallisuus ja luottamus",
+  "features.catPlatform": "Alusta ja tehokkuus",
+  "features.f19Title": "Vieraan oma varaussivu",
+  "features.f19Desc": "Vieras avaa oman varauksensa turvallisesta linkistä, katsoo tai peruu sen ilman tiliä.",
+  "features.f20Title": "Jonotuslista",
+  "features.f20Desc": "Kun aika on täynnä, vieras liittyy jonoon ja saa sähköpostin heti kun paikka vapautuu.",
+  "features.f21Title": "Siirtopyynnöt",
+  "features.f21Desc": "Vieras ehdottaa uutta aikaa omalta varaussivultaan ja henkilökunta hyväksyy tai hylkää sen.",
+  "features.f22Title": "Vieraiden arviot",
+  "features.f22Desc": "Käynnin jälkeen lähtee arviopyyntö, ja julkaisemasi arviot näkyvät varaussivullasi.",
+  "features.f23Title": "Keittiötilaukset",
+  "features.f23Desc": "Seuraa ruokia, juomia ja huomioita varauskohtaisesti tiloissa vastaanotettu, valmistuksessa, valmis ja tarjoiltu.",
+  "features.f24Title": "Valmis keittiön menu",
+  "features.f24Desc": "Tallenna tuotteet kertaalleen, niin nimi, kategoria ja hinta täyttyvät tilausriville yhdellä klikkauksella.",
+  "features.f25Title": "Tulostettavat keräyslistat",
+  "features.f25Desc": "Tulosta keittiön, majoituksen ja tapahtumien listat valitulle päivälle, jotta tiimi voi työskennellä paperilta.",
+  "features.f26Title": "Kalenterisynkronointi",
+  "features.f26Desc": "Tilaa varaussyötteesi Google-, Apple- tai Outlook-kalenteriin.",
+  "features.f27Title": "Erikoistilaisuudet",
+  "features.f27Desc": "Nimeä päivä, aseta sen kapasiteetti ja valitse kiinteät kattaukset tai vapaa varaus normaalien aukioloaikojen sijaan.",
+  "features.f28Title": "Varauslaskut",
+  "features.f28Desc": "Lataa PDF-lasku, jossa näkyy alkuperäinen summa, käytetty alennuskoodi, alennus ja loppusumma.",
+  "features.f29Title": "Ruuhkatunnit ja vilkkain päivä",
+  "features.f29Desc": "Näe mitkä tunnit ja viikonpäivät täyttyvät ensin, ja mitoita työvuorot ja hinnat sen mukaan.",
+  "features.f30Title": "Varauskanavien jakauma",
+  "features.f30Desc": "Vertaa kuinka moni varaus tulee julkiselta sivulta ja kuinka moni henkilökunnan lisäämänä.",
+  "features.f31Title": "Sähköpostien aikajana",
+  "features.f31Desc": "Jokainen varaus näyttää mitkä sähköpostit jonotettiin, lähetettiin tai epäonnistuivat ja milloin.",
+  "features.f32Title": "Kaksivaiheinen kirjautuminen",
+  "features.f32Desc": "Suojaa tilit tunnistussovelluksen koodilla ja kertakäyttöisillä palautuskoodeilla.",
+  "features.f33Title": "Tapahtumaloki",
+  "features.f33Desc": "Näe kuka muutti mitä ja milloin, suodatettuna toiminnon, ajanjakson tai henkilön mukaan.",
+  "features.f34Title": "Kirjautumisen suojaus",
+  "features.f34Desc": "Pitkät salasanat, tarkistus tunnetuista vuotaneista salasanoista ja raja toistuville kirjautumisyrityksille.",
+  "features.f35Title": "Tietojen eriyttäminen ja säilytys",
+  "features.f35Desc": "Tietosi pysyvät erillään muista yrityksistä, ja arkistointi sekä poisto tapahtuvat automaattisesti aikataulun mukaan.",
+  "features.f36Title": "Jakaminen ja upotus",
+  "features.f36Desc": "Valmiit varauslinkit, palvelu- ja toimipistekohtaiset linkit sekä upotus omalle verkkosivullesi.",
+  "features.f37Title": "Tumma tila ja pikanäppäimet",
+  "features.f37Desc": "Työskentele vaalealla tai tummalla teemalla ja siirry näkymien välillä pikanäppäimillä.",
+  "features.f38Title": "Käyttöönoton muistilista",
+  "features.f38Desc": "Edistymiskortti ohjaa sinut resurssien, aukioloaikojen ja sähköpostien läpi heti ensimmäisenä päivänä.",
+  "features.f39Title": "Opas ja tukiavustaja",
+  "features.f39Desc": "Sisäänrakennettu opas, tulostettava henkilökunnan ohje ja tukiavustaja, joka vastaa kysymyksiin sovelluksessa.",
   "features.offersAndCross": "Tarjoukset ja ristiinvaraukset",
   "features.offersAndCrossDesc": "Luo tarjouksia, generoi brändätyt PDF:t ja yhdistä varauksia tilojen välillä ja hallitse kaikkea yhdessä.",
 
@@ -8122,6 +8260,52 @@ const sv: TranslationKeys = {
   "features.f17Desc": "Skapa professionella erbjudanden med PDF-generering och skicka dem direkt till gäster via e-post.",
   "features.f18Title": "Korsbokningar",
   "features.f18Desc": "Länka bokningar mellan utrymmen och tjänster. Markera länkade bokningar som använda eller fakturerade tillsammans.",
+  "features.catGuests": "Gästupplevelse och självbetjäning",
+  "features.catOperations": "Daglig drift",
+  "features.catSecurity": "Säkerhet och förtroende",
+  "features.catPlatform": "Plattform och effektivitet",
+  "features.f19Title": "Gästens egen bokningssida",
+  "features.f19Desc": "Gästen öppnar sin bokning via en säker länk och kan se eller avboka utan konto.",
+  "features.f20Title": "Väntelista",
+  "features.f20Desc": "När en tid är full ställer gästen sig i kö och får e-post så snart en plats blir ledig.",
+  "features.f21Title": "Ombokningsförfrågningar",
+  "features.f21Desc": "Gästen föreslår en ny tid från sin bokningssida och personalen godkänner eller avslår.",
+  "features.f22Title": "Gästomdömen",
+  "features.f22Desc": "Efter besöket skickas en förfrågan om omdöme, och de omdömen du publicerar visas på bokningssidan.",
+  "features.f23Title": "Köksordrar",
+  "features.f23Desc": "Följ mat, dryck och noteringar per bokning med statusarna mottagen, tillagas, klar och serverad.",
+  "features.f24Title": "Återanvändbar köksmeny",
+  "features.f24Desc": "Spara menyposterna en gång, sedan fylls namn, kategori och pris i på orderraden med ett klick.",
+  "features.f25Title": "Utskrivbara plocklistor",
+  "features.f25Desc": "Skriv ut listor för kök, logi och evenemang för valfri dag så teamet kan arbeta från papper.",
+  "features.f26Title": "Kalendersynk",
+  "features.f26Desc": "Prenumerera på ditt bokningsflöde i Google Kalender, Apple Kalender eller Outlook.",
+  "features.f27Title": "Specialtillfällen",
+  "features.f27Desc": "Namnge ett datum, ange kapacitet och välj fasta sittningar eller fri bokning i stället för ordinarie tider.",
+  "features.f28Title": "Bokningsfakturor",
+  "features.f28Desc": "Ladda ner en PDF-faktura med originalbelopp, använd rabattkod, rabatt och slutsumma.",
+  "features.f29Title": "Topptimmar och travaste dag",
+  "features.f29Desc": "Se vilka timmar och veckodagar som fylls först och bemanna och prissätt därefter.",
+  "features.f30Title": "Fördelning av bokningskanaler",
+  "features.f30Desc": "Jämför hur många bokningar som kommer från den publika sidan och hur många personalen lägger in.",
+  "features.f31Title": "Tidslinje för e-post",
+  "features.f31Desc": "Varje bokning visar vilka e-postmeddelanden som köades, skickades eller misslyckades och när.",
+  "features.f32Title": "Tvåstegsinloggning",
+  "features.f32Desc": "Skydda konton med en kod från en autentiseringsapp och engångskoder för återställning.",
+  "features.f33Title": "Händelselogg",
+  "features.f33Desc": "Se vem som ändrade vad och när, filtrerat på åtgärd, tidsperiod eller person.",
+  "features.f34Title": "Inloggningsskydd",
+  "features.f34Desc": "Långa lösenord, kontroll mot kända läckta lösenord och en gräns för upprepade inloggningsförsök.",
+  "features.f35Title": "Dataisolering och lagring",
+  "features.f35Desc": "Dina uppgifter hålls skilda från andra företag, med automatisk arkivering och gallring enligt schema.",
+  "features.f36Title": "Dela och bädda in",
+  "features.f36Desc": "Färdiga bokningslänkar, länkar per tjänst och per plats samt inbäddning på din egen webbplats.",
+  "features.f37Title": "Mörkt läge och kortkommandon",
+  "features.f37Desc": "Arbeta i ljust eller mörkt läge och hoppa mellan paneler med kortkommandon.",
+  "features.f38Title": "Checklista för start",
+  "features.f38Desc": "Ett förloppskort guidar dig genom resurser, öppettider och e-post redan första dagen.",
+  "features.f39Title": "Guide och supportassistent",
+  "features.f39Desc": "Inbyggd guidebok, utskrivbar personalguide och en supportassistent som svarar i appen.",
   "features.offersAndCross": "Erbjudanden och korsbokningar",
   "features.offersAndCrossDesc": "Skapa erbjudanden, generera varumärkesanpassade PDF:er och länka bokningar mellan utrymmen och hantera allt tillsammans.",
 
