@@ -148,6 +148,13 @@
       "when": 1789708293121,
       "tag": "0020_create_special_occasions",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1789710228338,
+      "tag": "0021_special_occasion_seat_guard",
+      "breakpoints": true
     }
   ]
 }
