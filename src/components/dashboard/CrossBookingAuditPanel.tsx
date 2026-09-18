@@ -18,6 +18,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import DashboardTooltip from "./DashboardTooltip";
+import CollapsibleSection from "./CollapsibleSection";
 
 type RangeKey = "30" | "90" | "365";
 
