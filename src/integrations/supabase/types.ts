@@ -3434,6 +3434,10 @@ export type Database = {
         Args: { p_tier: string }
         Returns: number
       }
+      get_tier_max_resources_per_type: {
+        Args: { p_tier: string }
+        Returns: number
+      }
       get_tier_max_resources_total: {
         Args: { p_tier: string }
         Returns: number
