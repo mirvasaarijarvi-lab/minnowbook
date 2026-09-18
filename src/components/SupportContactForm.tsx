@@ -132,6 +132,27 @@ const SupportContactForm = () => {
   const [submitting, setSubmitting] = useState(false);
   const [honeypot, setHoneypot] = useState("");
   const [revealedAddress, setRevealedAddress] = useState<string | null>(null);
+  const [challenge, setChallenge] = useState<AccessibleChallenge | null>(null);
+  const [challengeAnswer, setChallengeAnswer] = useState("");
+  const [challengeError, setChallengeError] = useState<string | null>(null);
+  const challengeInputRef = useRef<HTMLInputElement>(null);
+
+  // Ask the challenge as soon as the browser has already sent a couple of
+  // messages in this window, so a real person sees it before they type.
+  useEffect(() => {
+    if (readSubmitTimes().length >= CHALLENGE_AFTER_SUBMITS) {
+      setChallenge((current) => current ?? createAccessibleChallenge());
+    }
+  }, []);
+
+  /** Shows a fresh challenge and moves focus to it. */
+  const requireChallenge = (reason: string) => {
+    setChallenge(createAccessibleChallenge());
+    setChallengeAnswer("");
+    setChallengeError(reason);
+    requestAnimationFrame(() => challengeInputRef.current?.focus());
+  };
+
 
   // Initial prefill — runs when auth resolves or query params change.
   useEffect(() => {
