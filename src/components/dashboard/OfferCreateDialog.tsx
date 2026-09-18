@@ -51,7 +51,7 @@ const OfferCreateDialog = ({ open, onOpenChange, editOffer }: Props) => {
   // Fetch all active resources to populate the event-space dropdown. Offers
   // are not strictly venue-only; a wellness or custom tenant should still
   // see their own resources here.
-  const { data: venues = [] } = useQuery({
+  const { data: resourceRows = [] } = useQuery({
     queryKey: ["offer-event-space-resources", tenantId],
     queryFn: async () => {
       if (!tenantId) return [];
@@ -61,10 +61,11 @@ const OfferCreateDialog = ({ open, onOpenChange, editOffer }: Props) => {
         .eq("tenant_id", tenantId)
         .eq("is_active", true)
         .order("name");
-      return data?.map((r) => r.name) || [];
+      return (data || []) as { name: string; resource_type: string }[];
     },
     enabled: !!tenantId,
   });
+  const venues = useMemo(() => resourceRows.map((r) => r.name), [resourceRows]);
 
   // Fetch resource types for linked reservations (dynamic from tenant's resources)
   const { data: resourceTypes = [] } = useQuery({
