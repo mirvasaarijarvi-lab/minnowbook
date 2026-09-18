@@ -929,9 +929,15 @@ const PublicBookingInner = () => {
         throw e;
       }
       if (data?.error) throw new Error(data.error);
+      return data;
     },
-    onSuccess: () => {
+    onSuccess: (data: any) => {
       setServiceMisconfigured(false);
+      // The edge function answers `duplicate: true` when this exact booking
+      // (same guest, service, date, resource, dates, guest count and notes)
+      // was already received. No second reservation exists, so the guest must
+      // be told plainly instead of seeing a normal confirmation.
+      setDuplicateDetected(Boolean(data?.duplicate));
       setSubmitted(true);
     },
     onError: (err: any) => {
