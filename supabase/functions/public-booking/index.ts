@@ -1021,6 +1021,12 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
       insertData.linked_group_id = linked_group_id;
     }
 
+    if (special_occasion_id) {
+      insertData.special_occasion_id = special_occasion_id;
+      // For a sittings occasion the validated sitting time is authoritative.
+      if (validatedOccasionSeating) insertData.start_time = `${validatedOccasionSeating}:00`;
+    }
+
     if (discount_type && discount_value) {
       insertData.discount_type = discount_type;
       insertData.discount_value = discount_value;
