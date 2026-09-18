@@ -113,11 +113,14 @@ const SEOHead = ({ title, description, path, keywords, type = "website", image, 
       document.head.appendChild(el);
     });
 
-    // Twitter
+    // Twitter: mirrors the Open Graph share copy and image so a card and a
+    // link preview never disagree, and carries the page's own localized URL.
     setMeta("name", "twitter:card", "summary_large_image");
     setMeta("name", "twitter:title", shareTitle);
     setMeta("name", "twitter:description", shareDescription);
     setMeta("name", "twitter:image", resolvedImage);
+    setMeta("name", "twitter:url", url);
+    setMeta("name", "twitter:domain", "mimmobook.com");
     if (imageAlt) setMeta("name", "twitter:image:alt", imageAlt);
 
 
