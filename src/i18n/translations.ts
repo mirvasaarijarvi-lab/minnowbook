@@ -3790,7 +3790,7 @@ const en: TranslationKeys = {
   "features.f18Title": "Cross-Reservations",
   "features.f18Desc": "Link reservations across spaces and services. Mark linked bookings as used or invoiced together.",
   "features.offersAndCross": "Offers & Cross-Reservations",
-  "features.offersAndCrossDesc": "Create offers, generate branded PDFs, and link reservations across spaces — manage everything together.",
+  "features.offersAndCrossDesc": "Create offers, generate branded PDFs, and link reservations across spaces and manage everything together.",
 
   // Use Cases
   "useCases.badge": "Use Cases",
