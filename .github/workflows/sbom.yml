@@ -52,10 +52,10 @@ jobs:
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
           node-version: "20"
-          # Cache the npm HTTP store so SBOM regeneration on warm
-          # runs skips the cold-start registry walk that occasionally
-          # pushed this job past its previous 5-minute budget.
-          cache: 'npm'
+          # No dependency cache here: this repo uses bun.lock, and
+          # setup-node's npm cache requires a package-lock.json /
+          # npm-shrinkwrap.json / yarn.lock, so enabling it fails the job.
+          # The SBOM generator reads bun.lock directly and installs nothing.
       - name: Generate SBOM
         run: node scripts/generate-sbom.mjs
       - name: Verify committed SBOM matches lockfile
