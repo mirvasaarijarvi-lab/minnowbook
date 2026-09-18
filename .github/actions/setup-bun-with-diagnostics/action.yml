@@ -337,3 +337,18 @@ runs:
         INPUT_BUN_VERSION: ${{ inputs.bun-version }}
       run: |
         echo "::warning::bun-version='${INPUT_BUN_VERSION}' does not match the pin in bun-pin.env; checksum verification skipped. Update bun-pin.env to make this install verifiable."
+
+    - name: Verify Bun resolves in PowerShell (Windows)
+      # PowerShell is the default shell for `run:` steps on Windows
+      # runners. Fail here, with the PATH printed, rather than letting a
+      # later `bun install` fail with a bare "not recognized" error.
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        $ErrorActionPreference = "Stop"
+        if (-not (Get-Command bun -ErrorAction SilentlyContinue)) {
+          Write-Host "PATH: $env:PATH"
+          Write-Error "bun is not on PATH in PowerShell after setup."
+          exit 1
+        }
+        bun --version
