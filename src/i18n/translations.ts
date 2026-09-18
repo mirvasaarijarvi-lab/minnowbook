@@ -1008,6 +1008,17 @@ type TranslationKeys = {
   "pricing.businessDesc": string;
   "pricing.businessTypes": string;
   "pricing.businessStaff": string;
+  "pricing.enterpriseName": string;
+  "pricing.enterpriseDesc": string;
+  "pricing.enterpriseTypes": string;
+  "pricing.enterpriseStaff": string;
+  "pricing.enterpriseF1": string;
+  "pricing.enterpriseF2": string;
+  "pricing.enterpriseF3": string;
+  "pricing.enterpriseF4": string;
+  "pricing.enterprisePrice": string;
+  "pricing.enterpriseCta": string;
+  "pricing.byOffer": string;
   "pricing.basicF1": string;
   "pricing.basicF2": string;
   "pricing.basicF3": string;
@@ -3660,7 +3671,18 @@ const en: TranslationKeys = {
   "pricing.businessName": "Business",
   "pricing.businessDesc": "Feature-rich platform for businesses with multiple sites and operations.",
   "pricing.businessTypes": "All types, unlimited number",
-  "pricing.businessStaff": "Unlimited",
+  "pricing.businessStaff": "Up to 50",
+  "pricing.enterpriseName": "Enterprise",
+  "pricing.enterpriseDesc": "Tailored plan for large operations that need more than 50 staff users.",
+  "pricing.enterpriseTypes": "All types, unlimited number",
+  "pricing.enterpriseStaff": "Unlimited",
+  "pricing.enterpriseF1": "Everything in Business",
+  "pricing.enterpriseF2": "Unlimited staff users",
+  "pricing.enterpriseF3": "Priority support and onboarding help",
+  "pricing.enterpriseF4": "Pricing agreed per offer",
+  "pricing.enterprisePrice": "By offer",
+  "pricing.enterpriseCta": "Request an offer",
+  "pricing.byOffer": "By offer",
   "pricing.basicF1": "Custom branding (logo, colors, images)",
   "pricing.basicF2": "Default email templates",
   "pricing.basicF3": "Opening hours configuration",
@@ -3670,7 +3692,7 @@ const en: TranslationKeys = {
   "pricing.proF2": "Custom email templates",
   "pricing.proF3": "AI chatbot support",
   "pricing.businessF1": "Everything in Pro",
-  "pricing.businessF2": "Unlimited number of sites, operations and staff",
+  "pricing.businessF2": "Unlimited sites and operations, up to 50 staff users",
   "pricing.businessF3": "Advanced reporting",
   "pricing.businessF4": "Support (24h response)",
   "pricing.sitesLocations": "Sites / locations",
@@ -5856,7 +5878,18 @@ const fi: TranslationKeys = {
   "pricing.businessName": "Business taso",
   "pricing.businessDesc": "Monin ominaisuuksin varusteltu alusta yrityksille, joilla on useampia toimipisteitä ja toimintoja.",
   "pricing.businessTypes": "Kaikki tyypit, rajoittamaton määrä",
-  "pricing.businessStaff": "Rajoittamaton",
+  "pricing.businessStaff": "Enintään 50",
+  "pricing.enterpriseName": "Enterprise taso",
+  "pricing.enterpriseDesc": "Räätälöity taso suurille toimijoille, jotka tarvitsevat yli 50 käyttäjää.",
+  "pricing.enterpriseTypes": "Kaikki tyypit, rajoittamaton määrä",
+  "pricing.enterpriseStaff": "Rajoittamaton",
+  "pricing.enterpriseF1": "Kaikki Business tason toiminnot",
+  "pricing.enterpriseF2": "Rajoittamaton määrä henkilökunnan käyttäjiä",
+  "pricing.enterpriseF3": "Ensisijainen tuki ja käyttöönoton apu",
+  "pricing.enterpriseF4": "Hinta sovitaan tarjouksella",
+  "pricing.enterprisePrice": "Tarjouksen mukaan",
+  "pricing.enterpriseCta": "Pyydä tarjous",
+  "pricing.byOffer": "Tarjouksen mukaan",
   "pricing.basicF1": "Mukautettu brändäys (logo, värit, kuvat)",
   "pricing.basicF2": "Oletussähköpostipohjat",
   "pricing.basicF3": "Aukioloaikojen määritys",
@@ -5866,7 +5899,7 @@ const fi: TranslationKeys = {
   "pricing.proF2": "Mukautetut sähköpostipohjat",
   "pricing.proF3": "Tekoälyllä toimiva chatbot tuki",
   "pricing.businessF1": "Kaikki Protason toiminnot",
-  "pricing.businessF2": "Rajoittamaton määrä toimipisteitä, toimintoja ja henkilökuntaa",
+  "pricing.businessF2": "Rajoittamaton määrä toimipisteitä ja toimintoja, enintään 50 käyttäjää",
   "pricing.businessF3": "Edistyneet raportit",
   "pricing.businessF4": "Tuki (24 tunnin vasteaika)",
   "pricing.sitesLocations": "Toimipaikat / sijainnit",
@@ -8052,7 +8085,18 @@ const sv: TranslationKeys = {
   "pricing.businessName": "Business",
   "pricing.businessDesc": "Funktionsrik plattform för företag med flera platser och verksamheter.",
   "pricing.businessTypes": "Alla typer, obegränsat antal",
-  "pricing.businessStaff": "Obegränsat",
+  "pricing.businessStaff": "Upp till 50",
+  "pricing.enterpriseName": "Enterprise",
+  "pricing.enterpriseDesc": "Skräddarsydd plan för stora verksamheter som behöver mer än 50 användare.",
+  "pricing.enterpriseTypes": "Alla typer, obegränsat antal",
+  "pricing.enterpriseStaff": "Obegränsat",
+  "pricing.enterpriseF1": "Allt i Business",
+  "pricing.enterpriseF2": "Obegränsat antal personalanvändare",
+  "pricing.enterpriseF3": "Prioriterad support och hjälp med införandet",
+  "pricing.enterpriseF4": "Priset avtalas per offert",
+  "pricing.enterprisePrice": "Enligt offert",
+  "pricing.enterpriseCta": "Begär en offert",
+  "pricing.byOffer": "Enligt offert",
   "pricing.basicF1": "Egen varumärkesprofil (logotyp, färger, bilder)",
   "pricing.basicF2": "Standard e-postmallar",
   "pricing.basicF3": "Konfiguration av öppettider",
@@ -8062,7 +8106,7 @@ const sv: TranslationKeys = {
   "pricing.proF2": "Anpassade e-postmallar",
   "pricing.proF3": "AI-driven chatbot-support",
   "pricing.businessF1": "Alla Pro-funktioner",
-  "pricing.businessF2": "Obegränsat antal platser, verksamheter och personal",
+  "pricing.businessF2": "Obegränsat antal platser och verksamheter, upp till 50 användare",
   "pricing.businessF3": "Avancerade rapporter",
   "pricing.businessF4": "Support (24 timmars svarstid)",
   "pricing.sitesLocations": "Platser / platser",
