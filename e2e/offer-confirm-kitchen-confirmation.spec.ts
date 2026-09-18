@@ -178,7 +178,9 @@ async function mockBackend(page: Page, offer: Record<string, unknown>) {
         const body = request.postDataJSON();
         const row = { id: `reservation-${reservations.length + 1}`, ...body };
         reservations.push(row);
-        return json(route, [row]);
+        // .single() asks for a single object, not an array.
+        const wantsObject = (request.headers()["accept"] ?? "").includes("pgrst.object");
+        return json(route, wantsObject ? row : [row]);
       }
       return json(route, []);
     }
