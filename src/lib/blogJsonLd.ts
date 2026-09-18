@@ -110,6 +110,49 @@ export interface BlogPostData {
 
 
 export const posts: Record<string, BlogPostData> = {
+  "booking-software-for-service-professionals": {
+    slug: "booking-software-for-service-professionals",
+    titleKey: "blog.post9Title",
+    dateKey: "2026-09-18",
+    readTime: "8 min",
+    contentKeys: ["blog.post9C1", "blog.post9C2", "blog.post9C3", "blog.post9C4", "blog.post9C5", "blog.post9C6"],
+    seoTitle: "Booking Software for Service Professionals, MimmoBook",
+    seoDescription: "Online booking for barbers, hairdressers, massage therapists, bakers and personal trainers: fill your calendar, cut no-shows and stop booking by phone.",
+    relatedSlugs: ["wellness-industry-bookings-growth", "MimmoBook_compared_to_other_bookingsystems_for_wellness", "branded-booking-pages-matter"],
+    schemaType: "Article",
+    about: [
+      {
+        "@type": "SoftwareApplication",
+        "@id": "https://mimmobook.com/#software",
+        name: "MimmoBook",
+        applicationCategory: "BusinessApplication",
+        operatingSystem: "Web",
+        url: "https://mimmobook.com",
+        sameAs: ["https://www.linkedin.com/company/mimmobook"],
+      },
+    ],
+    mentions: [
+      { "@type": "Occupation", name: "Barber", sameAs: "https://en.wikipedia.org/wiki/Barber" },
+      { "@type": "Occupation", name: "Hairdresser", sameAs: "https://en.wikipedia.org/wiki/Hairdresser" },
+      { "@type": "Occupation", name: "Massage therapist", sameAs: "https://en.wikipedia.org/wiki/Massage" },
+      { "@type": "Occupation", name: "Baker", sameAs: "https://en.wikipedia.org/wiki/Baker" },
+      { "@type": "Occupation", name: "Personal trainer", sameAs: "https://en.wikipedia.org/wiki/Personal_trainer" },
+    ],
+    faqs: [
+      {
+        question: "Which service businesses can use MimmoBook?",
+        answer: "Barbers, hairdressers, massage therapists and other treatment providers, bakers taking pickup orders, personal trainers and coaches, as well as restaurants, event venues, hotels and guesthouses.",
+      },
+      {
+        question: "Does online booking reduce no-shows?",
+        answer: "Yes. Automated confirmation and reminder emails typically cut no-shows by around a third, and a cancellation reopens the slot automatically so another client can book it.",
+      },
+      {
+        question: "Is there a commission per booking?",
+        answer: "No. MimmoBook charges a flat monthly fee with no commission per booking, so a busy month costs the same as a quiet one.",
+      },
+    ],
+  },
   "reservation-challenges-small-hospitality": {
     slug: "reservation-challenges-small-hospitality",
     titleKey: "blog.post1Title",
