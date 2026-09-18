@@ -370,6 +370,35 @@ const SupportContactForm = () => {
               />
             </div>
 
+            {/* Accessible, text-only challenge. Appears only after suspicious
+                activity or repeated messages from this browser. */}
+            {challenge && (
+              <div className="rounded-md border border-primary/30 bg-muted/40 p-3 space-y-2">
+                <div aria-live="polite" className="text-xs text-muted-foreground">
+                  {challengeError}
+                </div>
+                <Label htmlFor="support-challenge" className="block leading-relaxed">
+                  {challenge.question}
+                </Label>
+                <Input
+                  id="support-challenge"
+                  ref={challengeInputRef}
+                  value={challengeAnswer}
+                  onChange={(e) => setChallengeAnswer(e.target.value)}
+                  aria-describedby="support-challenge-hint"
+                  autoComplete="off"
+                  maxLength={40}
+                  required
+                />
+                <p id="support-challenge-hint" className="text-xs text-muted-foreground">
+                  {challenge.hint} Prefer not to answer? Use "Email instead" below, your message
+                  still reaches us.
+                </p>
+              </div>
+            )}
+
+
+
             <div className="flex flex-col sm:flex-row gap-2 pt-2">
               <Button type="submit" disabled={submitting} className="gap-1.5 flex-1">
                 {submitting ? (
