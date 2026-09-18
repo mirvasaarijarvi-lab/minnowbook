@@ -9,7 +9,7 @@
  *      to add more.'`). `parseTierLimitError` must extract a tier and
  *      limit, and that limit must match the value the frontend's
  *      `getMaxStaffUsers(tier)` mirror returns — i.e. both layers agree
- *      on the cap (Basic=5, Professional=25, Business=unlimited).
+ *      on the cap (Basic=5, Professional=25, Business=50, Enterprise=unlimited).
  *
  *      Older messages that referenced a `max_staff_users` column directly
  *      (e.g. "Tenant max_staff_users limit reached") must NOT match —
@@ -39,6 +39,7 @@ describe("staff-user-limit trigger errors", () => {
   const cases: Array<{ tier: string; limit: number }> = [
     { tier: "basic", limit: 5 },
     { tier: "professional", limit: 25 },
+    { tier: "business", limit: 50 },
   ];
 
   for (const { tier, limit } of cases) {
