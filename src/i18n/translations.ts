@@ -1951,6 +1951,11 @@ type TranslationKeys = {
   "offers.menuKitchenHintLegMoved": string;
   "offers.menuKitchenSummary": string;
   "offers.kitchenPreviewTitle": string;
+  "offers.kitchenMapTitle": string;
+  "offers.kitchenMapRule": string;
+  "offers.kitchenMapOwn": string;
+  "offers.kitchenMapTo": string;
+  "offers.kitchenMapNone": string;
   "offers.kitchenPreviewTotal": string;
   "offers.kitchenPreviewEmpty": string;
   "offers.kitchenPreviewNone": string;
@@ -4057,6 +4062,11 @@ const en: TranslationKeys = {
   "offers.menuKitchenHintLegMoved": "{name} never appears in the Kitchen tab, so these lines are added to the kitchen order of the dining or event booking in this offer.",
   "offers.menuKitchenSummary": "Each part of this offer has its own food and drinks field. Every field creates its own kitchen order lines when the offer is accepted, and fields on parts that never appear in the Kitchen tab, such as rooms, are added to the dining or event booking instead.",
   "offers.kitchenPreviewTitle": "Kitchen order preview",
+  "offers.kitchenMapTitle": "Where each food and drinks field goes",
+  "offers.kitchenMapRule": "A dining or event booking keeps its own kitchen order. Other functions, such as rooms, have no place on the Kitchen tab, so their lines are added to the dining booking, or to the event booking if there is no dining one.",
+  "offers.kitchenMapOwn": "keeps its own kitchen order.",
+  "offers.kitchenMapTo": "goes to the kitchen order of {name}.",
+  "offers.kitchenMapNone": "has nowhere to go, since this offer has no dining or event booking.",
   "offers.kitchenPreviewTotal": "Kitchen order lines: {count}",
   "offers.kitchenPreviewEmpty": "No food or drinks yet, so accepting this offer creates the bookings only and nothing goes to the Kitchen tab.",
   "offers.kitchenPreviewNone": "No food or drinks in this field.",
@@ -6160,6 +6170,11 @@ const fi: TranslationKeys = {
   "offers.menuKitchenHintLegMoved": "{name} ei näy Keittiö-välilehdellä, joten nämä rivit lisätään tämän tarjouksen ravintola- tai tilavarauksen keittiötilaukseen.",
   "offers.menuKitchenSummary": "Jokaisella tarjouksen osalla on oma ruoat ja juomat -kenttä. Jokainen kenttä muodostaa omat keittiötilauksen rivinsä, kun tarjous hyväksytään, ja niiden osien kentät, jotka eivät näy Keittiö-välilehdellä, kuten huoneet, lisätään ravintola- tai tilavaraukseen.",
   "offers.kitchenPreviewTitle": "Keittiötilauksen esikatselu",
+  "offers.kitchenMapTitle": "Mihin kukin ruoat ja juomat -kenttä menee",
+  "offers.kitchenMapRule": "Ravintola- ja tilavaraus saavat oman keittiötilauksensa. Muut osat, kuten huoneet, eivät näy Keittiö-välilehdellä, joten niiden rivit lisätään ravintolavaraukselle, tai tilavaraukselle jos ravintolavarausta ei ole.",
+  "offers.kitchenMapOwn": "saa oman keittiötilauksensa.",
+  "offers.kitchenMapTo": "menee varauksen {name} keittiötilaukseen.",
+  "offers.kitchenMapNone": "ei mene minnekään, koska tarjouksessa ei ole ravintola- eikä tilavarausta.",
   "offers.kitchenPreviewTotal": "Keittiötilauksen rivejä: {count}",
   "offers.kitchenPreviewEmpty": "Ruokia tai juomia ei ole vielä kirjattu, joten tarjouksen hyväksyminen luo vain varaukset eikä mitään mene Keittiö-välilehdelle.",
   "offers.kitchenPreviewNone": "Tässä kentässä ei ole ruokia eikä juomia.",
@@ -8263,6 +8278,11 @@ const sv: TranslationKeys = {
   "offers.menuKitchenHintLegMoved": "{name} visas aldrig i Kök-fliken, så dessa rader läggs till köksordern för restaurang- eller lokalbokningen i det här erbjudandet.",
   "offers.menuKitchenSummary": "Varje del av erbjudandet har ett eget fält för mat och dryck. Varje fält skapar sina egna rader i köksordern när erbjudandet accepteras, och fält på delar som aldrig visas i Kök-fliken, till exempel rum, läggs i stället till restaurang- eller lokalbokningen.",
   "offers.kitchenPreviewTitle": "Förhandsvisning av köksordern",
+  "offers.kitchenMapTitle": "Vart varje fält för mat och dryck går",
+  "offers.kitchenMapRule": "En restaurang- eller lokalbokning får sin egen köksorder. Andra delar, som rum, visas inte på Kök-fliken, så deras rader läggs till restaurangbokningen, eller lokalbokningen om restaurangbokning saknas.",
+  "offers.kitchenMapOwn": "får sin egen köksorder.",
+  "offers.kitchenMapTo": "går till köksordern för {name}.",
+  "offers.kitchenMapNone": "har ingen mottagare, eftersom erbjudandet saknar restaurang- och lokalbokning.",
   "offers.kitchenPreviewTotal": "Rader i köksordern: {count}",
   "offers.kitchenPreviewEmpty": "Ingen mat eller dryck är ifylld, så att acceptera erbjudandet skapar bara bokningarna och inget går till Kök-fliken.",
   "offers.kitchenPreviewNone": "Ingen mat eller dryck i det här fältet.",

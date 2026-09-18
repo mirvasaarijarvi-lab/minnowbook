@@ -421,6 +421,25 @@ const OfferCreateDialog = ({ open, onOpenChange, editOffer }: Props) => {
                 )}
               </span>
             </div>
+
+            {/* The mapping itself: which field feeds which kitchen order */}
+            <div className="space-y-1">
+              <p className="text-xs font-medium">{t("offers.kitchenMapTitle")}</p>
+              <ul className="text-xs space-y-0.5">
+                {kitchenPreview.legs.map((leg) => (
+                  <li key={`map-${leg.key}`} className="text-muted-foreground">
+                    <span className="text-foreground">{leg.name}</span>{" "}
+                    {leg.routeName == null
+                      ? t("offers.kitchenMapNone")
+                      : leg.ownKitchenOrder
+                        ? t("offers.kitchenMapOwn")
+                        : t("offers.kitchenMapTo").replace("{name}", leg.routeName)}
+                  </li>
+                ))}
+              </ul>
+              <p className="text-xs text-muted-foreground">{t("offers.kitchenMapRule")}</p>
+            </div>
+
             {!kitchenPreview.hasLines ? (
               <p className="text-xs text-muted-foreground">{t("offers.kitchenPreviewEmpty")}</p>
             ) : (
