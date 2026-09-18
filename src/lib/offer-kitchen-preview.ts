@@ -64,10 +64,9 @@ export function buildKitchenPreview(inputs: PreviewLegInput[]): KitchenPreview {
 
   const previewLegs: PreviewLeg[] = inputs.map((input, index) => {
     const lines = buildKitchenOrderDrafts(input.menu);
-    // Routing is a property of the functions in the offer, not of the text,
-    // so it is resolved with a placeholder line when the field is still empty.
-    const routeKey =
-      pickKitchenReservationId(legs, { ...legs[index], menu: "placeholder" }) ?? null;
+    // Routing depends only on the functions in the offer, not on the text, so
+    // it is known even while the field is still empty.
+    const routeKey = pickKitchenReservationId(legs, legs[index]);
     const targetKey = lines.length > 0 ? routeKey : null;
     return {
       key: input.key,
