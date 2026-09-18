@@ -1940,6 +1940,11 @@ type TranslationKeys = {
   "offers.linkedReservations": string;
   "offers.specialRequests": string;
   "offers.menuPlaceholder": string;
+  "offers.menuKitchenLabel": string;
+  "offers.menuKitchenHint": string;
+  "offers.menuKitchenHintLeg": string;
+  "offers.menuFormatHint": string;
+  "offers.menuNoKitchenHint": string;
   "offers.language": string;
   "offers.emailTo": string;
   "offers.emailSubject": string;
@@ -4029,6 +4034,11 @@ const en: TranslationKeys = {
   "offers.linkedReservations": "Linked reservations",
   "offers.specialRequests": "Special requests",
   "offers.menuPlaceholder": "Enter menu details...",
+  "offers.menuKitchenLabel": "Food and drinks (becomes the kitchen order)",
+  "offers.menuKitchenHint": "Every line here becomes one kitchen order line on the dining or event booking when the offer is accepted. Leave it empty for a regular booking with nothing sent to the Kitchen tab.",
+  "offers.menuKitchenHintLeg": "Food and drinks written here also go to the kitchen order of the dining or event booking, since rooms and other bookings never appear in the Kitchen tab.",
+  "offers.menuFormatHint": "One item per line, for example: 2 x Salmon (no dill), 10 Coffee, Cake x 3.",
+  "offers.menuNoKitchenHint": "Not sent to the kitchen. Use the food and drinks field for that.",
   "offers.language": "Language",
   "offers.emailTo": "To",
   "offers.emailSubject": "Subject",
@@ -6115,6 +6125,11 @@ const fi: TranslationKeys = {
   "offers.linkedReservations": "Linkitetyt varaukset",
   "offers.specialRequests": "Erityistoiveet",
   "offers.menuPlaceholder": "Syötä menutiedot...",
+  "offers.menuKitchenLabel": "Ruoat ja juomat (muodostaa keittiötilauksen)",
+  "offers.menuKitchenHint": "Jokainen rivi muuttuu yhdeksi keittiötilauksen riviksi ravintola- tai tilavarauksella, kun tarjous hyväksytään. Jätä tyhjäksi, jos haluat tavallisen varauksen ilman mitään Keittiö-välilehdelle.",
+  "offers.menuKitchenHintLeg": "Tähän kirjatut ruoat ja juomat menevät myös ravintola- tai tilavarauksen keittiötilaukseen, koska huoneet ja muut varaukset eivät näy Keittiö-välilehdellä.",
+  "offers.menuFormatHint": "Yksi tuote per rivi, esimerkiksi: 2 x Lohi (ei tilliä), 10 Kahvi, Kakku x 3.",
+  "offers.menuNoKitchenHint": "Ei mene keittiöön. Käytä siihen ruoat ja juomat -kenttää.",
   "offers.language": "Kieli",
   "offers.emailTo": "Vastaanottaja",
   "offers.emailSubject": "Aihe",
@@ -8201,6 +8216,11 @@ const sv: TranslationKeys = {
   "offers.linkedReservations": "Länkade bokningar",
   "offers.specialRequests": "Specialönskemål",
   "offers.menuPlaceholder": "Ange menydetaljer...",
+  "offers.menuKitchenLabel": "Mat och dryck (blir köksordern)",
+  "offers.menuKitchenHint": "Varje rad blir en rad i köksordern på restaurang- eller lokalbokningen när erbjudandet accepteras. Lämna tomt för en vanlig bokning där inget skickas till Kök-fliken.",
+  "offers.menuKitchenHintLeg": "Mat och dryck som skrivs här går också till köksordern för restaurang- eller lokalbokningen, eftersom rum och andra bokningar aldrig visas i Kök-fliken.",
+  "offers.menuFormatHint": "En post per rad, till exempel: 2 x Lax (utan dill), 10 Kaffe, Tårta x 3.",
+  "offers.menuNoKitchenHint": "Skickas inte till köket. Använd fältet för mat och dryck till det.",
   "offers.language": "Språk",
   "offers.emailTo": "Till",
   "offers.emailSubject": "Ämne",
