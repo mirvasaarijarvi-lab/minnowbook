@@ -881,6 +881,23 @@ type TranslationKeys = {
   "booking.occasionErrFullWithSeats": string;
   "booking.occasionNoneOnDate": string;
   "booking.occasionNextDates": string;
+  "monitor.title": string;
+  "monitor.subtitle": string;
+  "monitor.days": string;
+  "monitor.refresh": string;
+  "monitor.loading": string;
+  "monitor.empty": string;
+  "monitor.total": string;
+  "monitor.lastSeen": string;
+  "monitor.code.OCCASION_FULL": string;
+  "monitor.code.OCCASION_SEATING_UNAVAILABLE": string;
+  "monitor.code.OCCASION_SEATING_REQUIRED": string;
+  "monitor.code.OCCASION_WRONG_DATE": string;
+  "monitor.code.OCCASION_WRONG_TYPE": string;
+  "monitor.code.OCCASION_UNAVAILABLE": string;
+  "monitor.code.DB_INSERT_FAILED": string;
+  "monitor.code.UNTAGGED": string;
+
   "blocking.blocksRemoved": string;
   "blocking.removeBlock": string;
   "blocking.removeBlockDesc": string;
