@@ -62,11 +62,11 @@ export function normalizeTime(value: unknown): string | null {
 /** Read the stored seating_times JSON into a sorted, de-duplicated "HH:MM" list. */
 export function parseSeatingTimes(value: unknown): string[] {
   let raw: unknown = value;
-  if (typeof raw === "string") {
+  if (typeof value === "string") {
     try {
-      raw = JSON.parse(raw);
+      raw = JSON.parse(value);
     } catch {
-      raw = raw.split(",");
+      raw = value.split(",");
     }
   }
   if (!Array.isArray(raw)) return [];
