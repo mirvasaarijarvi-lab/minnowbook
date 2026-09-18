@@ -1049,6 +1049,7 @@ const ResourceManagement = () => {
       )}
 
       {canManage && <BlockedSlotsPanel />}
+      {canManage && <SpecialOccasionsPanel />}
 
       {/* Copy Resource Dialog */}
       <Dialog open={copyDialogOpen} onOpenChange={(open) => { setCopyDialogOpen(open); if (!open) { setCopySource(null); setCopyCount("1"); } }}>
