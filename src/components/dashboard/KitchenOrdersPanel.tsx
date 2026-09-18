@@ -252,6 +252,23 @@ const KitchenOrdersPanel = () => {
     onError: () => toast.error(t("kitchen.error")),
   });
 
+  const deleteOrderForReservation = useMutation({
+    mutationFn: async (reservationId: string) => {
+      const { error } = await supabase
+        .from("kitchen_orders")
+        .delete()
+        .eq("tenant_id", tenantId!)
+        .eq("reservation_id", reservationId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      invalidate();
+      toast.success(t("kitchen.orderDeleted"));
+    },
+    onError: () => toast.error(t("kitchen.error")),
+  });
+
+
   const bulkUpdateStatus = useMutation({
     mutationFn: async ({ ids, status }: { ids: string[]; status: Status }) => {
       if (ids.length === 0) return 0;
