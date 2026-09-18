@@ -22,6 +22,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useDateLocale } from "@/hooks/useDateLocale";
 import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
 import { KITCHEN_RESERVATION_TYPES } from "@/lib/offer-kitchen-orders";
+import { buildKitchenPreview } from "@/lib/offer-kitchen-preview";
 
 const allTimes: string[] = [];
 for (let h = 6; h <= 23; h++) {
@@ -51,7 +52,7 @@ const OfferCreateDialog = ({ open, onOpenChange, editOffer }: Props) => {
   // Fetch all active resources to populate the event-space dropdown. Offers
   // are not strictly venue-only; a wellness or custom tenant should still
   // see their own resources here.
-  const { data: venues = [] } = useQuery({
+  const { data: resourceRows = [] } = useQuery({
     queryKey: ["offer-event-space-resources", tenantId],
     queryFn: async () => {
       if (!tenantId) return [];
@@ -61,10 +62,11 @@ const OfferCreateDialog = ({ open, onOpenChange, editOffer }: Props) => {
         .eq("tenant_id", tenantId)
         .eq("is_active", true)
         .order("name");
-      return data?.map((r) => r.name) || [];
+      return (data || []) as { name: string; resource_type: string }[];
     },
     enabled: !!tenantId,
   });
+  const venues = useMemo(() => resourceRows.map((r) => r.name), [resourceRows]);
 
   // Fetch resource types for linked reservations (dynamic from tenant's resources)
   const { data: resourceTypes = [] } = useQuery({
@@ -178,6 +180,32 @@ const OfferCreateDialog = ({ open, onOpenChange, editOffer }: Props) => {
   const typeLabels: Record<string, string> = Object.fromEntries(
     resourceTypes.map((tp) => [tp, typeLabel(tp)])
   );
+
+  // Type of the main booking: taken from the chosen space, venue by default.
+  const mainType =
+    resourceRows.find((r) => r.name === form.event_space)?.resource_type || "venue";
+
+  // Live preview of the kitchen order lines each menu field will create.
+  const kitchenPreview = useMemo(
+    () =>
+      buildKitchenPreview([
+        {
+          key: "main",
+          name: typeLabels[mainType] || typeLabel(mainType),
+          reservationType: mainType,
+          menu: form.menu,
+        },
+        ...enabledLinked.map((key) => ({
+          key,
+          name: typeLabels[key] || key,
+          reservationType: linked[key]?.resource_type || key,
+          menu: linked[key]?.menu ?? null,
+        })),
+      ]),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [form.menu, mainType, enabledLinked.join("|"), JSON.stringify(linked)],
+  );
+
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -376,7 +404,72 @@ const OfferCreateDialog = ({ open, onOpenChange, editOffer }: Props) => {
               {t("offers.menuKitchenHint")} {t("offers.menuFormatHint")}
             </p>
           </div>
+
+          {/* Kitchen order preview: what each menu field will create, and where */}
+          <div
+            className="border rounded-lg p-4 space-y-3"
+            aria-labelledby="offer-kitchen-preview-title"
+          >
+            <div className="flex items-baseline justify-between gap-2">
+              <h4 id="offer-kitchen-preview-title" className="font-medium text-sm">
+                {t("offers.kitchenPreviewTitle")}
+              </h4>
+              <span className="text-xs text-muted-foreground">
+                {t("offers.kitchenPreviewTotal").replace(
+                  "{count}",
+                  String(kitchenPreview.totalLines),
+                )}
+              </span>
+            </div>
+            {!kitchenPreview.hasLines ? (
+              <p className="text-xs text-muted-foreground">{t("offers.kitchenPreviewEmpty")}</p>
+            ) : (
+              <div className="space-y-3">
+                {kitchenPreview.legs.map((leg) => (
+                  <div key={leg.key} className="space-y-1">
+                    <p className="text-sm font-medium">{leg.name}</p>
+                    {leg.lines.length === 0 ? (
+                      <p className="text-xs text-muted-foreground">
+                        {t("offers.kitchenPreviewNone")}
+                      </p>
+                    ) : (
+                      <>
+                        <p className="text-xs text-muted-foreground">
+                          {leg.targetName == null
+                            ? t("offers.kitchenPreviewLost")
+                            : leg.staysHere
+                              ? t("offers.kitchenPreviewStays")
+                              : t("offers.kitchenPreviewMoved").replace(
+                                  "{name}",
+                                  leg.targetName,
+                                )}
+                        </p>
+                        <ul className="text-xs space-y-0.5">
+                          {leg.lines.map((line, i) => (
+                            <li key={`${leg.key}-${i}`} className="flex flex-wrap gap-x-2">
+                              <span className="font-medium">
+                                {line.quantity} x {line.item_name}
+                              </span>
+                              <span className="text-muted-foreground">
+                                {line.category === "drink"
+                                  ? t("kitchen.cat.drink")
+                                  : t("kitchen.cat.food")}
+                              </span>
+                              {line.notes && (
+                                <span className="text-muted-foreground">({line.notes})</span>
+                              )}
+                            </li>
+                          ))}
+                        </ul>
+                      </>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
+
 
         <DialogFooter className="mt-4">
           <Button variant="outline" onClick={() => onOpenChange(false)}>{t("common.cancel")}</Button>

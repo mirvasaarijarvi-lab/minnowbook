@@ -1950,6 +1950,13 @@ type TranslationKeys = {
   "offers.menuKitchenHintLegOwn": string;
   "offers.menuKitchenHintLegMoved": string;
   "offers.menuKitchenSummary": string;
+  "offers.kitchenPreviewTitle": string;
+  "offers.kitchenPreviewTotal": string;
+  "offers.kitchenPreviewEmpty": string;
+  "offers.kitchenPreviewNone": string;
+  "offers.kitchenPreviewStays": string;
+  "offers.kitchenPreviewMoved": string;
+  "offers.kitchenPreviewLost": string;
   "offers.language": string;
   "offers.emailTo": string;
   "offers.emailSubject": string;
@@ -4049,6 +4056,13 @@ const en: TranslationKeys = {
   "offers.menuKitchenHintLegOwn": "These lines become the kitchen order of the {name} booking in the Kitchen tab.",
   "offers.menuKitchenHintLegMoved": "{name} never appears in the Kitchen tab, so these lines are added to the kitchen order of the dining or event booking in this offer.",
   "offers.menuKitchenSummary": "Each part of this offer has its own food and drinks field. Every field creates its own kitchen order lines when the offer is accepted, and fields on parts that never appear in the Kitchen tab, such as rooms, are added to the dining or event booking instead.",
+  "offers.kitchenPreviewTitle": "Kitchen order preview",
+  "offers.kitchenPreviewTotal": "Kitchen order lines: {count}",
+  "offers.kitchenPreviewEmpty": "No food or drinks yet, so accepting this offer creates the bookings only and nothing goes to the Kitchen tab.",
+  "offers.kitchenPreviewNone": "No food or drinks in this field.",
+  "offers.kitchenPreviewStays": "These lines go to this booking's own kitchen order.",
+  "offers.kitchenPreviewMoved": "These lines go to the kitchen order of {name}.",
+  "offers.kitchenPreviewLost": "No dining or event booking in this offer, so these lines would not reach the Kitchen tab. Add one, or move the food and drinks there.",
   "offers.language": "Language",
   "offers.emailTo": "To",
   "offers.emailSubject": "Subject",
@@ -6145,6 +6159,13 @@ const fi: TranslationKeys = {
   "offers.menuKitchenHintLegOwn": "Nämä rivit muodostavat varauksen {name} keittiötilauksen Keittiö-välilehdellä.",
   "offers.menuKitchenHintLegMoved": "{name} ei näy Keittiö-välilehdellä, joten nämä rivit lisätään tämän tarjouksen ravintola- tai tilavarauksen keittiötilaukseen.",
   "offers.menuKitchenSummary": "Jokaisella tarjouksen osalla on oma ruoat ja juomat -kenttä. Jokainen kenttä muodostaa omat keittiötilauksen rivinsä, kun tarjous hyväksytään, ja niiden osien kentät, jotka eivät näy Keittiö-välilehdellä, kuten huoneet, lisätään ravintola- tai tilavaraukseen.",
+  "offers.kitchenPreviewTitle": "Keittiötilauksen esikatselu",
+  "offers.kitchenPreviewTotal": "Keittiötilauksen rivejä: {count}",
+  "offers.kitchenPreviewEmpty": "Ruokia tai juomia ei ole vielä kirjattu, joten tarjouksen hyväksyminen luo vain varaukset eikä mitään mene Keittiö-välilehdelle.",
+  "offers.kitchenPreviewNone": "Tässä kentässä ei ole ruokia eikä juomia.",
+  "offers.kitchenPreviewStays": "Nämä rivit menevät tämän varauksen omaan keittiötilaukseen.",
+  "offers.kitchenPreviewMoved": "Nämä rivit menevät varauksen {name} keittiötilaukseen.",
+  "offers.kitchenPreviewLost": "Tarjouksessa ei ole ravintola- tai tilavarausta, joten nämä rivit eivät päädy Keittiö-välilehdelle. Lisää varaus tai siirrä ruoat ja juomat sinne.",
   "offers.language": "Kieli",
   "offers.emailTo": "Vastaanottaja",
   "offers.emailSubject": "Aihe",
@@ -8241,6 +8262,13 @@ const sv: TranslationKeys = {
   "offers.menuKitchenHintLegOwn": "Dessa rader blir köksordern för bokningen {name} i Kök-fliken.",
   "offers.menuKitchenHintLegMoved": "{name} visas aldrig i Kök-fliken, så dessa rader läggs till köksordern för restaurang- eller lokalbokningen i det här erbjudandet.",
   "offers.menuKitchenSummary": "Varje del av erbjudandet har ett eget fält för mat och dryck. Varje fält skapar sina egna rader i köksordern när erbjudandet accepteras, och fält på delar som aldrig visas i Kök-fliken, till exempel rum, läggs i stället till restaurang- eller lokalbokningen.",
+  "offers.kitchenPreviewTitle": "Förhandsvisning av köksordern",
+  "offers.kitchenPreviewTotal": "Rader i köksordern: {count}",
+  "offers.kitchenPreviewEmpty": "Ingen mat eller dryck är ifylld, så att acceptera erbjudandet skapar bara bokningarna och inget går till Kök-fliken.",
+  "offers.kitchenPreviewNone": "Ingen mat eller dryck i det här fältet.",
+  "offers.kitchenPreviewStays": "Dessa rader går till den här bokningens egen köksorder.",
+  "offers.kitchenPreviewMoved": "Dessa rader går till köksordern för {name}.",
+  "offers.kitchenPreviewLost": "Erbjudandet har ingen restaurang- eller lokalbokning, så dessa rader når inte Kök-fliken. Lägg till en bokning eller flytta maten och drycken dit.",
   "offers.language": "Språk",
   "offers.emailTo": "Till",
   "offers.emailSubject": "Ämne",
