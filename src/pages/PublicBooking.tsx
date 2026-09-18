@@ -1126,15 +1126,34 @@ const PublicBookingInner = () => {
           <div className="max-w-2xl mx-auto space-y-6">
           <Card className="text-center">
             <CardContent className="pt-8 pb-8 space-y-4">
-              <CheckCircle className="h-16 w-16 mx-auto" style={{ color: accentColor }} />
-              <h2 className="text-2xl font-serif font-bold" style={{ color: primaryColor }}>
-                {t("booking.thankYou")}
-              </h2>
-              <p className="text-muted-foreground">{t("booking.confirmationMsg").replace("{name}", displayName)}</p>
-              <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-800 text-left">
-                <Mail className="h-4 w-4 mt-0.5 shrink-0" />
-                <p>{t("booking.checkSpam")}</p>
-              </div>
+              {duplicateDetected ? (
+                <>
+                  <Info className="h-16 w-16 mx-auto text-amber-600" aria-hidden="true" />
+                  <h2 className="text-2xl font-serif font-bold" style={{ color: primaryColor }}>
+                    {t("booking.duplicateTitle")}
+                  </h2>
+                  <div
+                    role="status"
+                    aria-live="polite"
+                    className="space-y-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800 text-left"
+                  >
+                    <p>{t("booking.duplicateMsg")}</p>
+                    <p>{t("booking.duplicateHint")}</p>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <CheckCircle className="h-16 w-16 mx-auto" style={{ color: accentColor }} />
+                  <h2 className="text-2xl font-serif font-bold" style={{ color: primaryColor }}>
+                    {t("booking.thankYou")}
+                  </h2>
+                  <p className="text-muted-foreground">{t("booking.confirmationMsg").replace("{name}", displayName)}</p>
+                  <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-800 text-left">
+                    <Mail className="h-4 w-4 mt-0.5 shrink-0" />
+                    <p>{t("booking.checkSpam")}</p>
+                  </div>
+                </>
+              )}
               <div className="flex flex-col sm:flex-row gap-2 justify-center">
                 <Button
                   variant="outline"
