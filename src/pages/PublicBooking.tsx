@@ -42,6 +42,7 @@ import { trackBookingError } from "@/lib/booking-telemetry";
 import { useAuth } from "@/contexts/AuthContext";
 import { FadeInImage } from "@/components/branding/FadeInImage";
 import SEOHead from "@/components/SEOHead";
+import { buildLocalBusinessSchema } from "@/lib/localBusinessSchema";
 
 // Types for public views (not in auto-generated types)
 interface PublicTenant {
@@ -1575,6 +1576,7 @@ const PublicBookingInner = () => {
         title={`Book at ${displayName} – MimmoBook`}
         description={(displayDescription ?? `Reserve online at ${displayName}. Quick, mobile-friendly booking powered by MimmoBook.`).slice(0, 155)}
         path={`/book/${slug ?? ""}`}
+        jsonLd={localBusinessJsonLd ?? undefined}
       />
       <main className="max-w-3xl mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
         {/* Show title below only when no hero (or when the hero failed and we degraded) */}
