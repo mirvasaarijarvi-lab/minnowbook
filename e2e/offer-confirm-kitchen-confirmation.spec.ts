@@ -151,7 +151,6 @@ async function mockBackend(page: Page, offer: Record<string, unknown>) {
     const method = request.method();
     const path = new URL(url).pathname.replace("/rest/v1/", "");
 
-    if (process.env.E2E_DEBUG) console.log("[rest]", method, url);
     if (path.startsWith("rpc/is_system_admin")) return json(route, false);
 
     if (path.startsWith("tenant_users")) {

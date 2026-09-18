@@ -4,9 +4,7 @@
       "/nix/store/31sh8fzcbg4sjahp3zj002j0ca8sfvvr-nodejs-22.22.0/bin/node",
       "/dev-server/node_modules/.bin/playwright",
       "test",
-      "e2e/offer-confirm-kitchen-confirmation.spec.ts",
-      "-g",
-      "Kitchen tab"
+      "e2e/offer-confirm-kitchen-confirmation.spec.ts"
     ],
     "configFile": "/dev-server/playwright.config.ts",
     "rootDir": "/dev-server/e2e",
@@ -94,7 +92,7 @@
         {
           "title": "Offer confirmation states the Kitchen tab result",
           "file": "offer-confirm-kitchen-confirmation.spec.ts",
-          "line": 270,
+          "line": 269,
           "column": 6,
           "specs": [
             {
@@ -113,12 +111,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 2397,
+                      "duration": 3883,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-18T06:33:59.981Z",
+                      "startTime": "2026-09-18T06:34:14.530Z",
                       "annotations": [],
                       "attachments": [
                         {
@@ -144,7 +142,7 @@
               ],
               "id": "e8756ec45a7a1cfe12f3-3a868a4a8d30e3640ec3",
               "file": "offer-confirm-kitchen-confirmation.spec.ts",
-              "line": 273,
+              "line": 272,
               "column": 3
             },
             {
@@ -163,12 +161,12 @@
                       "workerIndex": 1,
                       "parallelIndex": 1,
                       "status": "passed",
-                      "duration": 2308,
+                      "duration": 3882,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-18T06:33:59.981Z",
+                      "startTime": "2026-09-18T06:34:14.541Z",
                       "annotations": [],
                       "attachments": [
                         {
@@ -194,7 +192,7 @@
               ],
               "id": "e8756ec45a7a1cfe12f3-d50f7b15dc36c63d3853",
               "file": "offer-confirm-kitchen-confirmation.spec.ts",
-              "line": 314,
+              "line": 313,
               "column": 3
             },
             {
@@ -213,12 +211,12 @@
                       "workerIndex": 2,
                       "parallelIndex": 2,
                       "status": "passed",
-                      "duration": 2841,
+                      "duration": 4242,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-18T06:33:59.977Z",
+                      "startTime": "2026-09-18T06:34:14.631Z",
                       "annotations": [],
                       "attachments": [
                         {
@@ -244,7 +242,7 @@
               ],
               "id": "e8756ec45a7a1cfe12f3-23374397598126874fb4",
               "file": "offer-confirm-kitchen-confirmation.spec.ts",
-              "line": 336,
+              "line": 335,
               "column": 3
             }
           ]
@@ -254,8 +252,8 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-09-18T06:33:58.717Z",
-    "duration": 4813.128,
+    "startTime": "2026-09-18T06:34:12.496Z",
+    "duration": 7453.996999999999,
     "expected": 3,
     "skipped": 0,
     "unexpected": 0,
