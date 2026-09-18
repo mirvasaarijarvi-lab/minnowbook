@@ -289,8 +289,22 @@ const OffersManager = () => {
 
         if (linkedErr) throw linkedErr;
         resIds.push(linkedRes.id);
+        menuLegs.push({
+          reservationId: linkedRes.id,
+          reservationType: resType,
+          menu: (lr as any).menu ?? null,
+        });
       }
 
+      // Forward the agreed menu to the Kitchen tab. A failure here must not
+      // undo the reservations, so staff are warned instead.
+      const kitchenRows = buildKitchenOrderRows(offer.tenant_id, menuLegs);
+      if (kitchenRows.length > 0) {
+        const { error: kitchenErr } = await supabase
+          .from("kitchen_orders")
+          .insert(kitchenRows as any);
+        if (kitchenErr) toast.warning(t("offers.kitchenOrdersFailed"));
+      }
 
       await updateOffer.mutateAsync({
         id: offer.id,
