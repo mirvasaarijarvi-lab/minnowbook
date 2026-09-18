@@ -79,6 +79,7 @@ const TENANT_SCOPED_TABLES = [
   "resource_opening_hours",
   "resource_availability_slots",
   "resources",
+  "special_occasions",
 ] as const;
 
 const PRIVATE_ONLY_TABLES = new Set([
@@ -409,6 +410,18 @@ describe("Cross-Tenant RLS Regression Tests", () => {
             tenant_id: t,
             resource_type: "table",
             date: "2099-01-01",
+          }),
+        },
+        {
+          table: "special_occasions",
+          payload: (t) => ({
+            tenant_id: t,
+            reservation_type: "restaurant",
+            name: "rls probe",
+            occasion_date: "2099-01-01",
+            capacity: 10,
+            booking_type: "open",
+            seating_times: [],
           }),
         },
       ];
