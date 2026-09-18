@@ -57,6 +57,7 @@ const UseCases = () => {
         keywords={t("useCases.seoKeywords")}
         ogTitle={t("useCases.ogTitle")}
         ogDescription={t("useCases.ogDescription")}
+        image={`/og/use-cases-${language}.png`}
         imageAlt={t("useCases.ogImageAlt")}
         jsonLd={[
           organizationSchema,
