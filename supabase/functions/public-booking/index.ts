@@ -685,10 +685,9 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
     // the same evening) would be silently swallowed. When the client supplied an
     // explicit idempotency key, that mechanism above already covers retries and
     // this heuristic is skipped entirely.
-    const RETRY_WINDOW_MINUTES = 15;
     if (!idempotencyKey) {
       const since = new Date(Date.now() - RETRY_WINDOW_MINUTES * 60_000).toISOString();
-      let dupQuery = adminClient
+      const baseDupQuery = adminClient
         .from("reservations")
         .select("id, linked_group_id, guests_count, created_at")
         .eq("tenant_id", tenant_id)
@@ -700,19 +699,17 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
         .order("created_at", { ascending: true })
         .limit(1);
       // Every guest-variable field must match too, or two different bookings
-      // made in the same 15 minutes would collapse into one.
-      const eqOrNull = (col: string, value: unknown) => {
-        dupQuery = value === null || value === undefined
-          ? dupQuery.is(col, null)
-          : dupQuery.eq(col, value as never);
-      };
-      eqOrNull("start_time", start_time);
-      eqOrNull("resource_id", resource_id);
-      eqOrNull("room_type", room_type);
-      eqOrNull("check_out_date", check_out_date);
-      eqOrNull("guests_count", guests_count);
-      eqOrNull("estimated_guests", estimated_guests);
-      eqOrNull("special_requests", special_requests);
+      // made in the same 15 minutes would collapse into one. The rules live in
+      // ../_shared/booking-dedup.ts so they are unit tested in isolation.
+      const dupQuery = applyDedupFilters(baseDupQuery, {
+        start_time,
+        resource_id,
+        room_type,
+        check_out_date,
+        guests_count,
+        estimated_guests,
+        special_requests,
+      });
       const { data: existing, error: dupErr } = await dupQuery.maybeSingle();
 
       if (dupErr) {
