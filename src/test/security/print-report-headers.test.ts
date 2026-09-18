@@ -19,7 +19,7 @@ const reportsPanelSrc = readFileSync(
   resolve(repoRoot, "src/components/dashboard/ReportsPanel.tsx"),
   "utf8",
 );
-const indexHtml = readFileSync(resolve(repoRoot, "index.html"), "utf8");
+const indexHtml = readFileSync(resolve(repoRoot, "src/routes/__root.tsx"), "utf8");
 
 /**
  * Pull a single CSP directive's source list out of a `content="..."` value.
@@ -104,9 +104,9 @@ describe("Print-report popup: CSP and security meta tags", () => {
   });
 });
 
-describe("index.html shell: CSP and security headers", () => {
+describe("app shell (__root.tsx): CSP and security headers", () => {
   const cspMetaMatch = indexHtml.match(
-    /<meta\s+http-equiv="Content-Security-Policy"\s+content="([^"]+)"/i,
+    /httpEquiv:\s*"Content-Security-Policy",\s*\n?\s*content:\s*"([^"]+)"/i,
   );
 
   it("ships a Content-Security-Policy meta tag", () => {
@@ -145,7 +145,7 @@ describe("index.html shell: CSP and security headers", () => {
 
   it("ships a Permissions-Policy meta tag denying sensitive features", () => {
     const m = indexHtml.match(
-      /<meta\s+http-equiv="Permissions-Policy"\s+content="([^"]+)"/i,
+      /httpEquiv:\s*"Permissions-Policy",\s*\n?\s*content:\s*"([^"]+)"/i,
     );
     expect(m, "Permissions-Policy meta missing").not.toBeNull();
     const value = m![1];
@@ -166,13 +166,13 @@ describe("index.html shell: CSP and security headers", () => {
 
   it("ships X-Content-Type-Options: nosniff", () => {
     expect(indexHtml).toMatch(
-      /<meta\s+http-equiv="X-Content-Type-Options"\s+content="nosniff"/i,
+      /httpEquiv:\s*"X-Content-Type-Options",\s*content:\s*"nosniff"/i,
     );
   });
 
   it("ships a strict-origin-when-cross-origin referrer policy", () => {
     expect(indexHtml).toMatch(
-      /<meta\s+name="referrer"\s+content="strict-origin-when-cross-origin"/i,
+      /name:\s*"referrer",\s*content:\s*"strict-origin-when-cross-origin"/i,
     );
   });
 });
