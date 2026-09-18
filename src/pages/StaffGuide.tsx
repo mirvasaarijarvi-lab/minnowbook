@@ -472,11 +472,23 @@ const guideContent: Record<Language, GuideContent> = {
           price: "€179/mo",
           features: [
             "Unlimited sites & resources",
-            "Unlimited staff users",
+            "Up to 50 staff users",
             "Multi-site management",
             "Per-site branding & settings",
             "Advanced revenue reporting",
             "Priority support (24h response)",
+          ],
+        },
+        {
+          name: "Enterprise",
+          price: "By offer",
+          features: [
+            "Everything in Business",
+            "Unlimited staff users",
+            "Unlimited sites & resources",
+            "Tailored onboarding",
+            "Priority support",
+            "Request an offer from the pricing page",
           ],
         },
       ],
@@ -759,6 +771,30 @@ const guideContent: Record<Language, GuideContent> = {
         ],
         tip: "Prices always come from the resource settings, so keeping room prices, service prices and capacity up to date keeps booking, invoices and reports correct.",
       },
+      {
+        icon: <Crown className="h-6 w-6" />, mockupId: "reports",
+        title: "20. Special occasions and rejected bookings",
+        steps: [
+          "Open the reservation type settings and add a special occasion: name, date, total capacity, and either fixed sittings (guests pick one of your start times) or open booking (any time inside opening hours).",
+          "The price is never set on the occasion. Set it on the reservation, the resource or the service as usual.",
+          "Guests see the occasion as a choice on the public booking page for that date.",
+          "Capacity is enforced in the database, so two guests booking at the same second can never push an occasion over its capacity. The later one sees a clear 'this occasion is full' message in their own language.",
+          "The 'Rejected bookings' card on Overview lists bookings the system refused and why: occasion full, day closed, duplicate submission, or invalid details.",
+          "If a guest sends the same booking twice within 15 minutes, they see 'You already sent this booking' instead of creating a second reservation.",
+        ],
+        tip: "Check the rejected bookings card weekly, it shows demand you are turning away.",
+      },
+      {
+        icon: <ClipboardList className="h-6 w-6" />, mockupId: "reports",
+        title: "21. Food and drinks from an accepted offer",
+        steps: [
+          "Each function in an offer has its own food and drinks field: the event, the dining, the rooms.",
+          "On acceptance the lines go to the booking that serves them: event lines to the event booking, dining lines to the dining booking, room lines to the dining booking, or to the event booking when there is no dining. Rooms never get their own kitchen order.",
+          "Special requests are never forwarded to the kitchen, and an empty field creates no kitchen order at all.",
+          "Before accepting, open 'Kitchen order preview' to see the exact lines, who receives them and the total, and 'Where each food and drinks field goes' for the routing rules.",
+          "The confirmation states how many lines were sent, and warns you if the kitchen order failed while keeping the booking itself.",
+        ],
+      },
     ],
   },
   fi: {
@@ -771,11 +807,11 @@ const guideContent: Record<Language, GuideContent> = {
       tiers: [
         {
           name: "Basic",
-          price: "29 €/kk",
+          price: "19 €/kk",
           features: [
             "1 varaustyyppi (valitset itse)",
             "1 resurssi per tyyppi",
-            "1–3 henkilökuntaa",
+            "Jopa 5 henkilökuntaa",
             "Brändätty varaussivu",
             "Oletussähköpostimallit",
             "AI-chatbot-tuki",
@@ -783,10 +819,10 @@ const guideContent: Record<Language, GuideContent> = {
         },
         {
           name: "Pro",
-          price: "79 €/kk",
+          price: "59 €/kk",
           features: [
             "Kaikki varaustyypit (1 resurssi per tyyppi)",
-            "Jopa 10 henkilökuntaa",
+            "Jopa 25 henkilökuntaa",
             "Mukautetut sähköpostimallit",
             "Kehittyneet varaussäännöt",
             "Monikielinen varaussivu",
@@ -796,14 +832,26 @@ const guideContent: Record<Language, GuideContent> = {
         },
         {
           name: "Business",
-          price: "199 €/kk",
+          price: "179 €/kk",
           features: [
             "Rajattomat toimipisteet ja resurssit",
-            "Rajaton henkilökunta",
+            "Jopa 50 henkilökuntaa",
             "Monitoimipistehallinnointi",
             "Toimipistekohtainen brändäys",
             "Kehittyneet tuottoraportit",
             "Prioriteettituki (24h vasteaika)",
+          ],
+        },
+        {
+          name: "Enterprise",
+          price: "Tarjouksen mukaan",
+          features: [
+            "Kaikki Business-tason ominaisuudet",
+            "Rajaton henkilökunta",
+            "Rajattomat toimipisteet ja resurssit",
+            "Räätälöity käyttöönotto",
+            "Prioriteettituki",
+            "Pyydä tarjous hinnoittelusivulta",
           ],
         },
       ],
@@ -1051,6 +1099,30 @@ const guideContent: Record<Language, GuideContent> = {
         ],
         tip: "Hinnat tulevat aina resurssin asetuksista, joten kun huoneiden hinnat, palveluiden hinnat ja kapasiteetit ovat ajan tasalla, varaukset, laskut ja raportit pysyvät oikeina.",
       },
+      {
+        icon: <Crown className="h-6 w-6" />, mockupId: "reports",
+        title: "20. Erikoistilaisuudet ja hylätyt varaukset",
+        steps: [
+          "Avaa varaustyypin asetukset ja lisää erikoistilaisuus: nimi, päivä, kokonaiskapasiteetti ja joko kiinteät kattaukset (vieras valitsee yhden aloitusajoistasi) tai vapaa varaus (mikä tahansa aika aukioloaikojen sisällä).",
+          "Hintaa ei aseteta koskaan tilaisuudelle. Aseta se varaukselle, resurssille tai palvelulle kuten tavallisesti.",
+          "Vieraat näkevät tilaisuuden valintana julkisella varaussivulla kyseiselle päivälle.",
+          "Kapasiteetti valvotaan tietokannassa, joten kaksi samalla sekunnilla varaavaa vierasta ei voi ylittää tilaisuuden kapasiteettia. Jälkimmäinen saa selkeän 'tilaisuus on täynnä' -viestin omalla kielellään.",
+          "Yleiskatsauksen 'Hylätyt varaukset' -kortti listaa järjestelmän hylkäämät varaukset ja syyn: tilaisuus täynnä, päivä suljettu, kaksoislähetys tai virheelliset tiedot.",
+          "Jos vieras lähettää saman varauksen kahdesti 15 minuutin sisällä, hän näkee ilmoituksen 'Lähetit tämän varauksen jo' eikä toista varausta synny.",
+        ],
+        tip: "Tarkista hylätyt varaukset viikoittain, kortti näyttää kysynnän jonka käännytät pois.",
+      },
+      {
+        icon: <ClipboardList className="h-6 w-6" />, mockupId: "reports",
+        title: "21. Tarjouksen ruoat ja juomat",
+        steps: [
+          "Tarjouksen jokaisella osiolla on oma ruoka ja juoma -kenttä: tapahtuma, ruokailu, huoneet.",
+          "Hyväksymisen jälkeen rivit menevät sille varaukselle joka ne toteuttaa: tapahtuman rivit tapahtumavaraukselle, ruokailun rivit ruokailuvaraukselle, huoneiden rivit ruokailuvaraukselle tai tapahtumavaraukselle jos ruokailua ei ole. Huoneille ei koskaan synny omaa keittiötilausta.",
+          "Erikoistoiveita ei lähetetä keittiöön, eikä tyhjä kenttä luo keittiötilausta lainkaan.",
+          "Avaa ennen hyväksymistä 'Keittiötilauksen esikatselu' nähdäksesi tarkat rivit, vastaanottajan ja summan, sekä 'Minne mikä ruoka ja juoma -kenttä menee' ohjaussäännöt.",
+          "Vahvistus kertoo montako riviä lähetettiin ja varoittaa jos keittiötilaus epäonnistui, varaus jää silti voimaan.",
+        ],
+      },
     ],
   },
   sv: {
@@ -1063,11 +1135,11 @@ const guideContent: Record<Language, GuideContent> = {
       tiers: [
         {
           name: "Basic",
-          price: "29 €/mån",
+          price: "19 €/mån",
           features: [
             "1 bokningstyp (du väljer)",
             "1 resurs per typ",
-            "1–3 personalanvändare",
+            "Upp till 5 personalanvändare",
             "Anpassad bokningssida",
             "Standard e-postmallar",
             "AI-chatbot-support",
@@ -1075,7 +1147,7 @@ const guideContent: Record<Language, GuideContent> = {
         },
         {
           name: "Pro",
-          price: "79 €/mån",
+          price: "59 €/mån",
           features: [
             "Alla bokningstyper (1 resurs per typ)",
             "Upp till 10 personal",
@@ -1088,14 +1160,26 @@ const guideContent: Record<Language, GuideContent> = {
         },
         {
           name: "Business",
-          price: "199 €/mån",
+          price: "179 €/mån",
           features: [
             "Obegränsade platser & resurser",
-            "Obegränsad personal",
+            "Upp till 50 personalanvändare",
             "Hantering av flera platser",
             "Platsspecifik varumärkning",
             "Avancerade intäktsrapporter",
             "Prioritetssupport (24h svarstid)",
+          ],
+        },
+        {
+          name: "Enterprise",
+          price: "Enligt offert",
+          features: [
+            "Allt i Business",
+            "Obegränsad personal",
+            "Obegränsade platser & resurser",
+            "Skräddarsydd introduktion",
+            "Prioritetssupport",
+            "Begär offert från prissidan",
           ],
         },
       ],
@@ -1342,6 +1426,30 @@ const guideContent: Record<Language, GuideContent> = {
           "Gästen kan begära ett nytt datum eller avboka från sin egen bokningssida, och personalen godkänner eller avslår.",
         ],
         tip: "Priserna kommer alltid från resursinställningarna, så när rumspriser, tjänstepriser och kapacitet är uppdaterade blir bokningar, fakturor och rapporter rätt.",
+      },
+      {
+        icon: <Crown className="h-6 w-6" />, mockupId: "reports",
+        title: "20. Särskilda tillfällen och avvisade bokningar",
+        steps: [
+          "Öppna bokningstypens inställningar och lägg till ett särskilt tillfälle: namn, datum, total kapacitet och antingen fasta sittningar (gästen väljer en av dina starttider) eller fri bokning (valfri tid inom öppettiderna).",
+          "Priset sätts aldrig på tillfället. Sätt det på bokningen, resursen eller tjänsten som vanligt.",
+          "Gästerna ser tillfället som ett val på den publika bokningssidan för den dagen.",
+          "Kapaciteten kontrolleras i databasen, så två gäster som bokar samma sekund kan aldrig överboka ett tillfälle. Den senare får ett tydligt meddelande om att tillfället är fullt på sitt eget språk.",
+          "Kortet 'Avvisade bokningar' på Översikt listar bokningar som systemet nekade och orsaken: tillfället fullt, stängd dag, dubbelinskick eller felaktiga uppgifter.",
+          "Om en gäst skickar samma bokning två gånger inom 15 minuter visas 'Du har redan skickat denna bokning' i stället för att en andra bokning skapas.",
+        ],
+        tip: "Kontrollera kortet med avvisade bokningar varje vecka, det visar efterfrågan du tackar nej till.",
+      },
+      {
+        icon: <ClipboardList className="h-6 w-6" />, mockupId: "reports",
+        title: "21. Mat och dryck från en accepterad offert",
+        steps: [
+          "Varje del i en offert har sitt eget fält för mat och dryck: evenemanget, maten, rummen.",
+          "När offerten accepteras går raderna till den bokning som utför dem: evenemangsrader till evenemangsbokningen, matrader till matbokningen, rumsrader till matbokningen eller till evenemangsbokningen om matdel saknas. Rum får aldrig en egen köksbeställning.",
+          "Specialönskemål skickas aldrig till köket, och ett tomt fält skapar ingen köksbeställning alls.",
+          "Öppna 'Förhandsvisning av köksbeställning' innan du accepterar för att se exakta rader, mottagare och summa, samt 'Vart varje fält för mat och dryck går' för reglerna.",
+          "Bekräftelsen anger hur många rader som skickades och varnar om köksbeställningen misslyckades, bokningen behålls ändå.",
+        ],
       },
     ],
   },

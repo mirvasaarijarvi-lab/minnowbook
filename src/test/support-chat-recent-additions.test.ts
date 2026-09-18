@@ -59,6 +59,11 @@ const RECENT_FEATURES: Array<{ name: string; keywords: RegExp }> = [
   { name: "Kitchen menu", keywords: /kitchen menu/i },
   { name: "Permission notices", keywords: /permission notice|request access/i },
   { name: "Reschedule requests and guest cancellation", keywords: /reschedule request|guest cancellation/i },
+  { name: "Special occasions", keywords: /special occasion/i },
+  { name: "Booking rejection monitor", keywords: /rejected booking|rejection/i },
+  { name: "Duplicate booking guard", keywords: /duplicate booking/i },
+  { name: "Offer to kitchen routing", keywords: /kitchen routing|routed automatically/i },
+  { name: "Enterprise plan", keywords: /Enterprise/i },
 ];
 
 describe("'Recent additions' prompt section ↔ dashboard UI parity", () => {
@@ -71,6 +76,7 @@ describe("'Recent additions' prompt section ↔ dashboard UI parity", () => {
     translations.en["help.art10C3"],
     translations.en["help.art10C4"],
     translations.en["help.art10C5"],
+    translations.en["help.art10C6"],
     translations.en["help.guide6A"],
   ].join("\n");
 
