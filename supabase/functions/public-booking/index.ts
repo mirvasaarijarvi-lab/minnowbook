@@ -1,9 +1,14 @@
 import { createClient as _createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { computeReservationPrice } from "../_shared/reservation-pricing.ts";
-import { BOOKING_ERROR_CODES } from "../_shared/booking-error-codes.ts";
+import {
+  BOOKING_ERROR_CODES,
+  OCCASION_ERROR_CODES,
+  OCCASION_REASON_TO_CODE,
+  type OccasionErrorContext,
+} from "../_shared/booking-error-codes.ts";
 import { corsHeaders } from "../_shared/http-headers.ts";
 import { applyDedupFilters, RETRY_WINDOW_MINUTES } from "../_shared/booking-dedup.ts";
-import { validateOccasionBooking } from "../_shared/special-occasions.ts";
+import { parseSeatingTimes, validateOccasionBooking } from "../_shared/special-occasions.ts";
 
 function escapeHtml(str: string): string {
   return String(str ?? "")
@@ -1145,6 +1150,18 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
           .eq("idempotency_key", idempotencyKey)
           .is("reservation_id", null);
       }
+      // The special_occasions seat guard trigger rejects an insert that
+      // would oversell an occasion. Surface that as a precise
+      // "fully booked" refusal instead of a generic failure.
+      if (special_occasion_id && /fully booked/i.test(insertErr.message ?? "")) {
+        const fullErr = new Error(insertErr.message);
+        (fullErr as any).error_code = OCCASION_ERROR_CODES.OCCASION_FULL;
+        (fullErr as any).occasion = {
+          remaining: 0,
+          seating: validatedOccasionSeating ? validatedOccasionSeating.slice(0, 5) : null,
+        } satisfies OccasionErrorContext;
+        throw fullErr;
+      }
       throw new Error("Failed to create reservation");
     }
 
@@ -1399,7 +1416,13 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
     const message = error instanceof Error && typeof error.message === "string" && error.message.length > 0
       ? error.message
       : "Invalid request";
-    return new Response(JSON.stringify({ error: message }), {
+    const errorCode = (error as any)?.error_code;
+    const occasionContext = (error as any)?.occasion;
+    return new Response(JSON.stringify({
+      error: message,
+      ...(typeof errorCode === "string" ? { error_code: errorCode } : {}),
+      ...(occasionContext ? { occasion: occasionContext } : {}),
+    }), {
       status: 400,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
