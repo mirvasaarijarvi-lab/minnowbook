@@ -3925,8 +3925,8 @@ const en: TranslationKeys = {
 
   // Use Cases
   "useCases.badge": "Use Cases",
-  "useCases.heroTitle": "Built for Every Type of Hospitality Business",
-  "useCases.heroSubtitle": "See how MimmoBook solves booking challenges for restaurants, venues, hotels, guesthouses, caterers, popup events, and wellness service providers.",
+  "useCases.heroTitle": "Built for Every Type of Hospitality and Service Business",
+  "useCases.heroSubtitle": "See how MimmoBook solves booking challenges for restaurants, venues, hotels, guesthouses, caterers, popup events, and service industry professionals: barbers, hairdressers, massage therapists, bakers, make-up artists and personal trainers.",
   "useCases.challengesLabel": "Common Challenges",
   "useCases.solutionLabel": "How MimmoBook Helps",
   "useCases.restaurant": "Restaurant Reservations",
@@ -3953,7 +3953,7 @@ const en: TranslationKeys = {
   "useCases.popupDesc": "Popup event organizers need to manage vendor applications, stall assignments, and event logistics across temporary locations.",
   "useCases.popupChallenges": "Vendor management is chaotic via email. Stall assignments are tracked manually. No centralized view of vendor details and requirements. Fee tracking is inconsistent.",
   "useCases.popupSolution": "MimmoBook's popup reservation type captures stall size, fees, equipment needs, and vendor details. Organizers see all applications in one dashboard with approval workflows.",
-  "useCases.wellness": "Wellness Service Bookings",
+  "useCases.wellness": "Wellness and Service Industry Bookings",
   "useCases.wellnessDesc": "Hairdressers, masseurs, makeup artists, and similar providers need customers to book the right amount of time, which varies by which services they pick.",
   "useCases.wellnessChallenges": "Customers do not always know how long their visit will take. Mixing different services in one appointment is hard to communicate by phone. Manually adding service durations together is error-prone.",
   "useCases.wellnessSolution": "MimmoBook lets you publish a tickable services menu with a price and duration per item (in 5 minute steps, up to 8 hours). The customer ticks what they want and the booking length adjusts automatically. No payments, only the time slot.",
@@ -6118,8 +6118,8 @@ const fi: TranslationKeys = {
 
   // Use Cases
   "useCases.badge": "Käyttökohteet",
-  "useCases.heroTitle": "Rakennettu kaikenlaisille ravintola-alan yrityksille",
-  "useCases.heroSubtitle": "Katso miten MimmoBook ratkaisee varaushaasteet ravintoloille, tiloille, hotelleille, majataloille, cateringille, popup-tapahtumille ja hyvinvointipalveluiden tarjoajille.",
+  "useCases.heroTitle": "Rakennettu kaikenlaisille ravintola- ja palvelualan yrityksille",
+  "useCases.heroSubtitle": "Katso miten MimmoBook ratkaisee varaushaasteet ravintoloille, tiloille, hotelleille, majataloille, cateringille, popup-tapahtumille ja palvelualan ammattilaisille: parturit, kampaajat, hierojat, leipurit, meikkitaiteilijat ja personal trainerit.",
   "useCases.challengesLabel": "Yleiset haasteet",
   "useCases.solutionLabel": "Miten MimmoBook auttaa",
   "useCases.restaurant": "Ravintolavaraukset",
@@ -6146,7 +6146,7 @@ const fi: TranslationKeys = {
   "useCases.popupDesc": "Popup-tapahtumien järjestäjien on hallittava myyjähakemuksia, kojujen jakoa ja tapahtumien logistiikkaa tilapäisissä paikoissa.",
   "useCases.popupChallenges": "Myyjähallinta sähköpostilla on kaoottista. Kojujen jako tehdään manuaalisesti. Ei keskitettyä näkymää myyjätietoihin. Maksuseuranta on epäjohdonmukaista.",
   "useCases.popupSolution": "MimmoBookin popup-varaustyyppi tallentaa kojun koon, maksut, laitetarpeet ja myyjätiedot. Järjestäjät näkevät kaikki hakemukset yhdessä hallintapaneelissa hyväksyntätyönkulujen kanssa.",
-  "useCases.wellness": "Hyvinvointipalveluiden varaukset",
+  "useCases.wellness": "Hyvinvointi- ja palvelualan varaukset",
   "useCases.wellnessDesc": "Kampaajat, hierojat, meikkitaiteilijat ja vastaavat palveluntarjoajat tarvitsevat asiakkailtaan oikean mittaisen ajanvarauksen, ja se vaihtelee valittujen palveluiden mukaan.",
   "useCases.wellnessChallenges": "Asiakkaat eivät aina tiedä, kuinka kauan käynti kestää. Useiden palveluiden yhdistäminen samaan käyntiin on vaikea kertoa puhelimessa. Palveluiden kestojen laskeminen käsin on virhealtista.",
   "useCases.wellnessSolution": "MimmoBookilla julkaiset valittavan palveluvalikon, jossa jokaisella palvelulla on hinta ja kesto (5 minuutin välein, korkeintaan 8 tuntia). Asiakas rastittaa haluamansa ja varauksen kesto mukautuu automaattisesti. Ei maksuja, vain ajanvaraus.",
@@ -8311,8 +8311,8 @@ const sv: TranslationKeys = {
 
   // Use Cases
   "useCases.badge": "Användningsfall",
-  "useCases.heroTitle": "Byggd för alla typer av besöksnäringsföretag",
-  "useCases.heroSubtitle": "Se hur MimmoBook löser bokningsutmaningar för restauranger, lokaler, hotell, gästhus, cateringföretag, popup-evenemang och friskvårdsleverantörer.",
+  "useCases.heroTitle": "Byggd för alla typer av besöksnärings- och serviceföretag",
+  "useCases.heroSubtitle": "Se hur MimmoBook löser bokningsutmaningar för restauranger, lokaler, hotell, gästhus, cateringföretag, popup-evenemang och serviceproffs: barberare, frisörer, massörer, bagare, makeupartister och personliga tränare.",
   "useCases.challengesLabel": "Vanliga utmaningar",
   "useCases.solutionLabel": "Hur MimmoBook hjälper",
   "useCases.restaurant": "Restaurangbokningar",
@@ -8339,7 +8339,7 @@ const sv: TranslationKeys = {
   "useCases.popupDesc": "Popup-arrangemang behöver hantera leverantörsansökningar, ståndstilldelning och evenemangslogistik på tillfälliga platser.",
   "useCases.popupChallenges": "Leverantörshantering via e-post är kaotisk. Ståndstilldelning spåras manuellt. Ingen centraliserad vy över leverantörsdetaljer. Avgiftsspårning är inkonsekvent.",
   "useCases.popupSolution": "MimmoBooks popup-bokningstyp samlar ståndstorlek, avgifter, utrustningsbehov och leverantörsdetaljer. Arrangörer ser alla ansökningar i en instrumentpanel med godkännandeflöden.",
-  "useCases.wellness": "Friskvårdsbokningar",
+  "useCases.wellness": "Friskvårds- och servicebokningar",
   "useCases.wellnessDesc": "Frisörer, massörer, makeupartister och liknande leverantörer behöver att kunderna bokar rätt mängd tid, vilket varierar beroende på vilka tjänster de väljer.",
   "useCases.wellnessChallenges": "Kunder vet inte alltid hur lång tid besöket tar. Att kombinera flera tjänster i ett besök är svårt att förklara via telefon. Att lägga ihop tjänstetider manuellt är felbenäget.",
   "useCases.wellnessSolution": "MimmoBook låter dig publicera en bockbar tjänstemeny med pris och tid per tjänst (i 5 minuters steg, upp till 8 timmar). Kunden bockar i det de vill ha och bokningstiden anpassas automatiskt. Inga betalningar, bara tidsbokningen.",
