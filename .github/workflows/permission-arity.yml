@@ -38,10 +38,9 @@ jobs:
         uses: actions/setup-node@v7
         with:
           node-version: '20'
-          # Cache npm so the optional `pg` install on live-DB runs
-          # is served from a warm cache instead of a cold registry
-          # fetch, which has been a source of intermittent hangs.
-          cache: 'npm'
+          # No dependency cache: this repo uses bun.lock, and
+          # setup-node's npm cache requires a package-lock.json /
+          # yarn.lock, so enabling it fails the job outright.
 
       # Optional: install pg only if a DB URL is provided. Without it,
       # the script self-skips the live probe and still enforces the
