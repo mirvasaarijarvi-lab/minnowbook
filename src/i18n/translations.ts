@@ -1813,6 +1813,12 @@ type TranslationKeys = {
   "kitchen.title": string;
   "kitchen.tooltip": string;
   "kitchen.date": string;
+  "kitchen.prevDay": string;
+  "kitchen.nextDay": string;
+  "kitchen.pickDate": string;
+  "kitchen.ordersFor": string;
+  "kitchen.deleteItemNamed": string;
+  "kitchen.menu.priceLabel": string;
   "kitchen.today": string;
   "kitchen.noReservations": string;
   "kitchen.noOrders": string;
@@ -1872,6 +1878,8 @@ type TranslationKeys = {
   "offers.noResults": string;
   "offers.searchPlaceholder": string;
   "offers.showArchived": string;
+  "offers.printPdf": string;
+  "offers.searchLabel": string;
   "offers.archive": string;
   "offers.unarchive": string;
   "offers.archived": string;
@@ -3884,6 +3892,12 @@ const en: TranslationKeys = {
   "kitchen.title": "Kitchen Orders",
   "kitchen.tooltip": "Track food, drink, and other orders for restaurant and venue reservations",
   "kitchen.date": "Date",
+  "kitchen.prevDay": "Previous day",
+  "kitchen.nextDay": "Next day",
+  "kitchen.pickDate": "Choose a date",
+  "kitchen.ordersFor": "Kitchen orders for {name}",
+  "kitchen.deleteItemNamed": "Delete {name}",
+  "kitchen.menu.priceLabel": "Unit price in euros",
   "kitchen.today": "Today",
   "kitchen.noReservations": "No restaurant or venue reservations on this date.",
   "kitchen.noOrders": "No orders yet. Add the first item below.",
@@ -3943,6 +3957,8 @@ const en: TranslationKeys = {
   "offers.noResults": "No offers match your search",
   "offers.searchPlaceholder": "Search offers...",
   "offers.showArchived": "Show archived",
+  "offers.printPdf": "Print offer as PDF",
+  "offers.searchLabel": "Search offers",
   "offers.archive": "Archive",
   "offers.unarchive": "Unarchive",
   "offers.archived": "Archived",
@@ -5952,6 +5968,12 @@ const fi: TranslationKeys = {
   "kitchen.title": "Keittiötilaukset",
   "kitchen.tooltip": "Seuraa ruoka-, juoma- ja muita tilauksia ravintola- ja juhlatilavarauksille",
   "kitchen.date": "Päivämäärä",
+  "kitchen.prevDay": "Edellinen päivä",
+  "kitchen.nextDay": "Seuraava päivä",
+  "kitchen.pickDate": "Valitse päivä",
+  "kitchen.ordersFor": "Keittiötilaukset: {name}",
+  "kitchen.deleteItemNamed": "Poista {name}",
+  "kitchen.menu.priceLabel": "Yksikköhinta euroina",
   "kitchen.today": "Tänään",
   "kitchen.noReservations": "Ei ravintola- tai juhlatilavarauksia tälle päivälle.",
   "kitchen.noOrders": "Ei tilauksia vielä. Lisää ensimmäinen tuote alle.",
@@ -6011,6 +6033,8 @@ const fi: TranslationKeys = {
   "offers.noResults": "Hakuasi vastaavia tarjouksia ei löytynyt",
   "offers.searchPlaceholder": "Hae tarjouksia...",
   "offers.showArchived": "Näytä arkistoidut",
+  "offers.printPdf": "Tulosta tarjous PDF-tiedostona",
+  "offers.searchLabel": "Etsi tarjouksia",
   "offers.archive": "Arkistoi",
   "offers.unarchive": "Palauta arkistosta",
   "offers.archived": "Arkistoitu",
@@ -8020,6 +8044,12 @@ const sv: TranslationKeys = {
   "kitchen.title": "Köksbeställningar",
   "kitchen.tooltip": "Följ mat-, dryck- och andra beställningar för restaurang- och festlokalbokningar",
   "kitchen.date": "Datum",
+  "kitchen.prevDay": "Föregående dag",
+  "kitchen.nextDay": "Nästa dag",
+  "kitchen.pickDate": "Välj ett datum",
+  "kitchen.ordersFor": "Köksbeställningar: {name}",
+  "kitchen.deleteItemNamed": "Ta bort {name}",
+  "kitchen.menu.priceLabel": "Enhetspris i euro",
   "kitchen.today": "Idag",
   "kitchen.noReservations": "Inga restaurang- eller festlokalbokningar detta datum.",
   "kitchen.noOrders": "Inga beställningar än. Lägg till första objektet nedan.",
@@ -8079,6 +8109,8 @@ const sv: TranslationKeys = {
   "offers.noResults": "Inga erbjudanden matchar din sökning",
   "offers.searchPlaceholder": "Sök erbjudanden...",
   "offers.showArchived": "Visa arkiverade",
+  "offers.printPdf": "Skriv ut erbjudandet som PDF",
+  "offers.searchLabel": "Sök erbjudanden",
   "offers.archive": "Arkivera",
   "offers.unarchive": "Avarkivera",
   "offers.archived": "Arkiverad",

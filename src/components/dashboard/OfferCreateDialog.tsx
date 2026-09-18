@@ -188,28 +188,28 @@ const OfferCreateDialog = ({ open, onOpenChange, editOffer }: Props) => {
         <div className="space-y-5">
           {/* Validity */}
           <div className="space-y-1.5">
-            <Label>{t("offers.validity")}</Label>
-            <Input value={form.validity_date} onChange={(e) => updateField("validity_date", e.target.value)} placeholder={t("offers.validityPlaceholder")} />
+            <Label htmlFor="offer-validity">{t("offers.validity")}</Label>
+            <Input id="offer-validity" value={form.validity_date} onChange={(e) => updateField("validity_date", e.target.value)} placeholder={t("offers.validityPlaceholder")} />
           </div>
 
           {/* Customer info */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label>{t("common.name")} *</Label>
-              <Input value={form.guest_name} onChange={(e) => updateField("guest_name", e.target.value)} />
+              <Label htmlFor="offer-guest-name">{t("common.name")} *</Label>
+              <Input id="offer-guest-name" value={form.guest_name} onChange={(e) => updateField("guest_name", e.target.value)} />
             </div>
             <div className="space-y-1.5">
-              <Label>{t("common.email")} *</Label>
-              <Input type="email" value={form.guest_email} onChange={(e) => updateField("guest_email", e.target.value)} />
+              <Label htmlFor="offer-guest-email">{t("common.email")} *</Label>
+              <Input id="offer-guest-email" type="email" value={form.guest_email} onChange={(e) => updateField("guest_email", e.target.value)} />
             </div>
             <div className="space-y-1.5">
-              <Label>{t("common.phone")} *</Label>
-              <Input type="tel" value={form.guest_phone} onChange={(e) => updateField("guest_phone", e.target.value)} />
+              <Label htmlFor="offer-guest-phone">{t("common.phone")} *</Label>
+              <Input id="offer-guest-phone" type="tel" value={form.guest_phone} onChange={(e) => updateField("guest_phone", e.target.value)} />
             </div>
             <div className="space-y-1.5">
-              <Label>{t("offers.language")}</Label>
+              <Label htmlFor="offer-language">{t("offers.language")}</Label>
               <Select value={form.language} onValueChange={(v) => updateField("language", v)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger id="offer-language" aria-label={t("offers.language")}><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="en">English</SelectItem>
                   <SelectItem value="fi">Suomi</SelectItem>
@@ -222,10 +222,10 @@ const OfferCreateDialog = ({ open, onOpenChange, editOffer }: Props) => {
           {/* Date & Time */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-1.5">
-              <Label>{t("common.date")} *</Label>
+              <Label htmlFor="offer-event-date">{t("common.date")} *</Label>
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !form.event_date && "text-muted-foreground")}>
+                  <Button id="offer-event-date" aria-label={t("common.date")} variant="outline" className={cn("w-full justify-start text-left font-normal", !form.event_date && "text-muted-foreground")}>
                     <CalendarIcon className="mr-2 h-4 w-4" />
                     {form.event_date ? format(form.event_date, "PPP", { locale: dateLocale }) : t("common.date")}
                   </Button>
@@ -236,9 +236,9 @@ const OfferCreateDialog = ({ open, onOpenChange, editOffer }: Props) => {
               </Popover>
             </div>
             <div className="space-y-1.5">
-              <Label>{t("offers.startTime")} *</Label>
+              <Label htmlFor="offer-start-time">{t("offers.startTime")} *</Label>
               <Select value={form.start_time} onValueChange={(v) => updateField("start_time", v)}>
-                <SelectTrigger><SelectValue placeholder="HH:MM" /></SelectTrigger>
+                <SelectTrigger id="offer-start-time" aria-label={t("offers.startTime")}><SelectValue placeholder="HH:MM" /></SelectTrigger>
                 <SelectContent>
                   {allTimes.map((t2) => (
                     <SelectItem key={t2} value={t2}>{t2}</SelectItem>
@@ -247,9 +247,9 @@ const OfferCreateDialog = ({ open, onOpenChange, editOffer }: Props) => {
               </Select>
             </div>
             <div className="space-y-1.5">
-              <Label>{t("offers.endTime")}</Label>
+              <Label htmlFor="offer-end-time">{t("offers.endTime")}</Label>
               <Select value={form.end_time || "none"} onValueChange={(v) => updateField("end_time", v === "none" ? "" : v)}>
-                <SelectTrigger><SelectValue placeholder="–" /></SelectTrigger>
+                <SelectTrigger id="offer-end-time" aria-label={t("offers.endTime")}><SelectValue placeholder="–" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">–</SelectItem>
                   {allTimes.map((t2) => (
@@ -263,14 +263,14 @@ const OfferCreateDialog = ({ open, onOpenChange, editOffer }: Props) => {
           {/* Guests & Space */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label>{t("common.guests")} *</Label>
-              <Input type="number" min={1} value={form.guests_count} onChange={(e) => updateField("guests_count", e.target.value)} />
+              <Label htmlFor="offer-guests">{t("common.guests")} *</Label>
+              <Input id="offer-guests" type="number" min={1} value={form.guests_count} onChange={(e) => updateField("guests_count", e.target.value)} />
             </div>
             <div className="space-y-1.5">
-              <Label>{t("offers.eventSpace")} *</Label>
+              <Label htmlFor="offer-event-space">{t("offers.eventSpace")} *</Label>
               {venues.length > 0 ? (
                 <Select value={form.event_space} onValueChange={(v) => updateField("event_space", v)}>
-                  <SelectTrigger><SelectValue placeholder={t("offers.selectSpace")} /></SelectTrigger>
+                  <SelectTrigger id="offer-event-space" aria-label={t("offers.eventSpace")}><SelectValue placeholder={t("offers.selectSpace")} /></SelectTrigger>
                   <SelectContent>
                     {venues.map((v) => (
                       <SelectItem key={v} value={v}>{v}</SelectItem>
@@ -278,7 +278,7 @@ const OfferCreateDialog = ({ open, onOpenChange, editOffer }: Props) => {
                   </SelectContent>
                 </Select>
               ) : (
-                <Input value={form.event_space} onChange={(e) => updateField("event_space", e.target.value)} placeholder={t("offers.selectSpace")} />
+                <Input id="offer-event-space" value={form.event_space} onChange={(e) => updateField("event_space", e.target.value)} placeholder={t("offers.selectSpace")} />
               )}
             </div>
           </div>
@@ -286,19 +286,19 @@ const OfferCreateDialog = ({ open, onOpenChange, editOffer }: Props) => {
           {/* Event type & invoicing */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label>{t("offers.eventType")}</Label>
-              <Input value={form.event_type} onChange={(e) => updateField("event_type", e.target.value)} />
+              <Label htmlFor="offer-event-type">{t("offers.eventType")}</Label>
+              <Input id="offer-event-type" value={form.event_type} onChange={(e) => updateField("event_type", e.target.value)} />
             </div>
             <div className="space-y-1.5">
-              <Label>{t("offers.invoicing")}</Label>
-              <Input value={form.invoicing_details} onChange={(e) => updateField("invoicing_details", e.target.value)} />
+              <Label htmlFor="offer-invoicing">{t("offers.invoicing")}</Label>
+              <Input id="offer-invoicing" value={form.invoicing_details} onChange={(e) => updateField("invoicing_details", e.target.value)} />
             </div>
           </div>
 
           {/* Linked reservations (dynamic from resource types) — Pro+ only */}
           {canCrossReserve && resourceTypes.length > 0 && (
             <div className="space-y-2">
-              <Label className="text-sm font-semibold">{t("offers.linkedReservations")}</Label>
+              <span className="text-sm font-semibold">{t("offers.linkedReservations")}</span>
               <div className="grid grid-cols-2 gap-2">
                 {resourceTypes.map((key) => (
                   <label key={key} className="flex items-center gap-2 text-sm cursor-pointer">
@@ -315,26 +315,26 @@ const OfferCreateDialog = ({ open, onOpenChange, editOffer }: Props) => {
             <div key={key} className="border rounded-lg p-4 space-y-3 bg-muted/30">
               <h4 className="font-medium text-sm">{typeLabels[key] || key}</h4>
               <div className="space-y-1.5">
-                <Label>{t("offers.specialRequests")}</Label>
-                <Textarea value={linked[key]?.special_requests || ""} onChange={(e) => updateLinkedField(key, "special_requests", e.target.value)} rows={2} />
+                <Label htmlFor={`offer-linked-requests-${key}`}>{t("offers.specialRequests")}</Label>
+                <Textarea id={`offer-linked-requests-${key}`} value={linked[key]?.special_requests || ""} onChange={(e) => updateLinkedField(key, "special_requests", e.target.value)} rows={2} />
               </div>
               <div className="space-y-1.5">
-                <Label>Menu</Label>
-                <Textarea value={linked[key]?.menu || ""} onChange={(e) => updateLinkedField(key, "menu", e.target.value)} rows={3} />
+                <Label htmlFor={`offer-linked-menu-${key}`}>Menu</Label>
+                <Textarea id={`offer-linked-menu-${key}`} value={linked[key]?.menu || ""} onChange={(e) => updateLinkedField(key, "menu", e.target.value)} rows={3} />
               </div>
             </div>
           ))}
 
           {/* Special requests */}
           <div className="space-y-1.5">
-            <Label>{t("offers.specialRequests")}</Label>
-            <Textarea value={form.special_requests} onChange={(e) => updateField("special_requests", e.target.value)} rows={3} />
+            <Label htmlFor="offer-special-requests">{t("offers.specialRequests")}</Label>
+            <Textarea id="offer-special-requests" value={form.special_requests} onChange={(e) => updateField("special_requests", e.target.value)} rows={3} />
           </div>
 
           {/* Menu */}
           <div className="space-y-1.5">
-            <Label>Menu</Label>
-            <Textarea value={form.menu} onChange={(e) => updateField("menu", e.target.value)} rows={6} placeholder={t("offers.menuPlaceholder")} />
+            <Label htmlFor="offer-menu">Menu</Label>
+            <Textarea id="offer-menu" value={form.menu} onChange={(e) => updateField("menu", e.target.value)} rows={6} placeholder={t("offers.menuPlaceholder")} />
           </div>
         </div>
 
