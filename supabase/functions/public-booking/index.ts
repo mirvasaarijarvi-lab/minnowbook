@@ -404,6 +404,11 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
     // own row, but they're discoverable as siblings via this column.
     const linked_group_id = validateUuid(body.linked_group_id, "linked_group_id", false);
 
+    // Optional special occasion (staff-defined event day, e.g. a Christmas
+    // dinner with fixed sittings). Validated against the stored occasion
+    // further below, once tenant and date are known.
+    const special_occasion_id = validateUuid(body.special_occasion_id, "special_occasion_id", false);
+
     const reservation_type = validateString(body.reservation_type, "reservation_type", 20, true)!;
     if (!VALID_TYPES.includes(reservation_type)) throw new Error("Invalid reservation type");
 
