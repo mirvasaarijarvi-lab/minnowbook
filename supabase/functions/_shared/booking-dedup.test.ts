@@ -1,10 +1,14 @@
 // Regression tests for the public-booking retry de-duplication rules.
 //
-// The bug these guard against: a second booking by the same guest on the same
-// day was silently dropped because the duplicate lookup ignored the fields a
-// guest actually varies (room, resource, checkout date, guest count, time,
-// notes). Two rooms for the same nights, or a second table for the same
-// evening, returned "booking confirmed" while only one reservation existed.
+// Two bugs these guard against:
+//   1. A second booking by the same guest on the same day was silently dropped
+//      because the duplicate lookup ignored the fields a guest actually varies
+//      (time, guest count, room type, dates, notes). Two rooms for the same
+//      nights, or a second table for the same evening, returned "booking
+//      confirmed" while only one reservation existed.
+//   2. The lookup filtered on `resource_id`, which is NOT a column on
+//      reservations, so PostgREST rejected the query, the handler skipped
+//      de-duplication entirely and a double click created two reservations.
 //
 // Hermetic: no network, no database, no credentials.
 import {
@@ -50,7 +54,6 @@ function signatureOf(fields: DedupFields): string {
 /** A realistic hotel booking used as the baseline in the matrix below. */
 const BASE: DedupFields = {
   start_time: "18:30",
-  resource_id: "11111111-1111-4111-8111-111111111111",
   room_type: "double",
   check_out_date: "2026-10-05",
   guests_count: 2,
@@ -66,7 +69,6 @@ Deno.test("dedup: every guest-variable field is part of the comparison", () => {
   // If a field is dropped from this list, distinct bookings collapse again.
   assertEquals([...DEDUP_MATCH_COLUMNS], [
     "start_time",
-    "resource_id",
     "room_type",
     "check_out_date",
     "guests_count",
@@ -74,6 +76,26 @@ Deno.test("dedup: every guest-variable field is part of the comparison", () => {
     "special_requests",
   ]);
   assertEquals(buildDedupFilters(BASE).length, DEDUP_MATCH_COLUMNS.length);
+});
+
+Deno.test("dedup: request-only fields are never used as database filters", () => {
+  // `resource_id` is not a reservations column. Filtering on it made PostgREST
+  // reject the lookup, which disabled de-duplication completely.
+  const columns = new Set<string>(DEDUP_MATCH_COLUMNS);
+  for (const forbidden of ["resource_id", "site_id", "promo_code", "idempotency_key"]) {
+    assertEquals(
+      columns.has(forbidden),
+      false,
+      `"${forbidden}" is not a reservations column; filtering on it breaks the lookup`,
+    );
+  }
+  const q = new FakeQuery();
+  applyDedupFilters(q, { ...BASE, resource_id: "11111111-1111-4111-8111-111111111111" } as DedupFields);
+  assertEquals(
+    q.calls.some((c) => c.column === "resource_id"),
+    false,
+    "resource_id must never reach the query builder",
+  );
 });
 
 Deno.test("dedup: an exact repeat is treated as the same booking", () => {
@@ -93,16 +115,20 @@ Deno.test("dedup: absent and explicitly null values behave identically", () => {
 // guest-visible way and MUST therefore become its own reservation.
 const DISTINCT_BOOKINGS: Array<{ label: string; fields: DedupFields }> = [
   {
-    label: "a second room (different resource)",
-    fields: { ...BASE, resource_id: "22222222-2222-4222-8222-222222222222" },
+    label: "a second room of another type",
+    fields: { ...BASE, room_type: "suite" },
   },
   {
-    label: "a different room type",
-    fields: { ...BASE, room_type: "suite" },
+    label: "a dorm bed instead of a double room",
+    fields: { ...BASE, room_type: "dorm" },
   },
   {
     label: "different nights (checkout date)",
     fields: { ...BASE, check_out_date: "2026-10-07" },
+  },
+  {
+    label: "an open-ended stay vs a fixed checkout",
+    fields: { ...BASE, check_out_date: null },
   },
   {
     label: "a different number of guests",
@@ -121,16 +147,12 @@ const DISTINCT_BOOKINGS: Array<{ label: string; fields: DedupFields }> = [
     fields: { ...BASE, special_requests: "Ground floor, please" },
   },
   {
-    label: "notes added where there were none",
+    label: "notes removed",
     fields: { ...BASE, special_requests: null },
   },
   {
     label: "no time given (walk-in style) vs a timed booking",
     fields: { ...BASE, start_time: null },
-  },
-  {
-    label: "no resource chosen vs a specific resource",
-    fields: { ...BASE, resource_id: null },
   },
 ];
 
@@ -169,7 +191,6 @@ Deno.test("dedup: empty values use IS NULL, never = NULL", () => {
   const q = new FakeQuery();
   applyDedupFilters(q, {
     start_time: null,
-    resource_id: undefined,
     room_type: null,
     check_out_date: undefined,
     guests_count: null,
@@ -186,17 +207,16 @@ Deno.test("dedup: empty values use IS NULL, never = NULL", () => {
 Deno.test("dedup: present values use equality on the exact column", () => {
   const q = new FakeQuery();
   applyDedupFilters(q, BASE);
-  const eqColumns = q.calls.filter((c) => c.op === "eq").map((c) => c.column);
-  assertEquals(eqColumns, [
+  assertEquals(q.calls.filter((c) => c.op === "eq").map((c) => c.column), [
     "start_time",
-    "resource_id",
     "room_type",
     "check_out_date",
     "guests_count",
     "special_requests",
   ]);
-  const isColumns = q.calls.filter((c) => c.op === "is").map((c) => c.column);
-  assertEquals(isColumns, ["estimated_guests"]);
+  assertEquals(q.calls.filter((c) => c.op === "is").map((c) => c.column), [
+    "estimated_guests",
+  ]);
 });
 
 Deno.test("dedup: comparison is symmetric and order independent", () => {
