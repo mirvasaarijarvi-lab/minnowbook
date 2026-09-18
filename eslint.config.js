@@ -1,21 +1,12 @@
 import js from "@eslint/js";
+import eslintPluginPrettier from "eslint-plugin-prettier/recommended";
 import globals from "globals";
 import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-  {
-    ignores: [
-      "dist",
-      "supabase/functions/**",
-      // Deno populates `.deno-cache/` inside the workspace when the
-      // edge-function tests run in CI. Those vendored `@types/node`
-      // declarations are not our code and trip dozens of lint rules.
-      ".deno-cache/**",
-      "**/.deno-cache/**",
-    ],
-  },
+  { ignores: ["dist", ".output", ".vinxi", "supabase/functions"] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ["**/*.{ts,tsx}"],
@@ -29,29 +20,22 @@ export default tseslint.config(
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            {
+              name: "server-only",
+              message:
+                "TanStack Start does not use the Next.js `server-only` package. Rename the module to `*.server.ts` or mark it with `@tanstack/react-start/server-only`.",
+            },
+          ],
+        },
+      ],
       "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
       "@typescript-eslint/no-unused-vars": "off",
       "@typescript-eslint/no-explicit-any": "off",
-      "@typescript-eslint/no-require-imports": "off",
-      "@typescript-eslint/no-empty-object-type": "off",
-      "@typescript-eslint/no-unsafe-function-type": "off",
-      "@typescript-eslint/ban-types": "off",
-      "no-empty": "off",
     },
   },
-  {
-    // Auto-generated Lovable Cloud integration files: not hand-editable,
-    // so lint rules that would require touching them are disabled here.
-    files: ["src/integrations/supabase/**/*.{ts,tsx}"],
-    rules: {
-      "prefer-const": "off",
-    },
-  },
-  {
-    files: ["e2e/**/*.{ts,tsx}"],
-    rules: {
-      "react-hooks/rules-of-hooks": "off",
-      "react-hooks/exhaustive-deps": "off",
-    },
-  },
+  eslintPluginPrettier,
 );
