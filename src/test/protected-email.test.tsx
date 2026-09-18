@@ -14,6 +14,7 @@
 import { readFileSync } from "node:fs";
 import { describe, it, expect } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
+import { renderToStaticMarkup } from "react-dom/server";
 import ProtectedEmail from "@/components/ProtectedEmail";
 
 const PAGES = [
