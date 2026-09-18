@@ -61,20 +61,27 @@ const describe = (line: Line) =>
  * Compare the preview of every menu field with the rows an accepted offer
  * writes. Returns ok: true only when each field's lines, their order, their
  * details and their receiving kitchen order match exactly.
+ *
+ * `rowsOverride` lets a caller (and the tests) check a concrete set of rows,
+ * for example the rows actually about to be inserted, instead of recomputing
+ * them from the menu fields.
  */
 export function checkKitchenPreviewMatchesOutput(
   tenantId: string,
   inputs: PreviewLegInput[],
+  rowsOverride?: KitchenOrderRow[],
 ): KitchenConsistencyResult {
   const preview = buildKitchenPreview(inputs);
-  const rows = buildKitchenOrderRows(
-    tenantId,
-    inputs.map((i) => ({
-      reservationId: i.key,
-      reservationType: i.reservationType,
-      menu: i.menu,
-    })),
-  );
+  const rows =
+    rowsOverride ??
+    buildKitchenOrderRows(
+      tenantId,
+      inputs.map((i) => ({
+        reservationId: i.key,
+        reservationType: i.reservationType,
+        menu: i.menu,
+      })),
+    );
   const nameByKey = new Map(inputs.map((i) => [i.key, i.name]));
   const mismatches: KitchenMismatch[] = [];
 
