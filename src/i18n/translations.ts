@@ -8320,6 +8320,7 @@ const sv: TranslationKeys = {
   "pricing.basicTypes": "2 typer",
   "pricing.basicStaff": "1 till 5",
   "pricing.basicResourcesTotal": "2 totalt",
+  "pricing.proResourcesPerType": "Upp till 5",
   "pricing.proName": "Pro",
   "pricing.proDesc": "För företag som erbjuder hotell-, restaurang- och evenemangstjänster på ett ställe.",
   "pricing.proTypes": "Upp till 5 bokningstyper i valfri kombination (t.ex. två restauranger och ett hotell)",
