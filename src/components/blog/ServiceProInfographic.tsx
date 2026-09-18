@@ -10,14 +10,30 @@ import {
   Check,
 } from "lucide-react";
 import { useT } from "@/contexts/I18nContext";
-import heroImage from "@/assets/blog-service-professionals.jpg";
 
 /**
- * Visual block for the "booking software for service professionals" blog post:
- * a photo strip, a four step booking-flow infographic, outcome tiles, a
- * who-it-is-for list and a benefit bullet list. All copy comes from i18n so the
- * post reads correctly in EN, FI and SV.
+ * Visual block for the "booking software for service professionals" blog post.
+ * Deliberately illustration free: icons, a four step booking-flow infographic,
+ * a slot-grid diagram and outcome tiles only, no photography. All copy comes
+ * from i18n so the post reads correctly in EN, FI and SV.
  */
+
+/** Week grid: 6 slots per day, b = booked, o = open, l = lost to a no-show. */
+const slotGrid: ("b" | "o" | "l")[][] = [
+  ["b", "b", "o", "b", "l", "o"],
+  ["b", "b", "b", "o", "b", "b"],
+  ["o", "b", "b", "b", "b", "o"],
+  ["b", "b", "l", "b", "b", "b"],
+  ["b", "b", "b", "b", "b", "b"],
+  ["b", "b", "b", "b", "o", "b"],
+];
+
+const slotClass: Record<"b" | "o" | "l", string> = {
+  b: "bg-primary/70",
+  o: "bg-muted",
+  l: "bg-accent/60",
+};
+
 const ServiceProInfographic = () => {
   const t = useT();
 
@@ -50,19 +66,62 @@ const ServiceProInfographic = () => {
     t("blog.spBenefit6"),
   ];
 
+  const legend = [
+    { cls: slotClass.b, label: t("blog.spSlotsBooked") },
+    { cls: slotClass.o, label: t("blog.spSlotsOpen") },
+    { cls: slotClass.l, label: t("blog.spSlotsLost") },
+  ];
+
   return (
     <div className="not-prose mb-12 space-y-10">
-      {/* Photo */}
-      <figure className="m-0">
-        <img
-          src={heroImage}
-          alt={t("blog.spHeroAlt")}
-          width={1600}
-          height={912}
-          className="w-full rounded-xl border border-border object-cover shadow-card"
-        />
-        <figcaption className="mt-3 text-sm text-muted-foreground">{t("blog.spHeroCaption")}</figcaption>
-      </figure>
+      {/* Icon strip instead of photography */}
+      <div className="rounded-xl border border-border bg-card p-6 md:p-8 shadow-card">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          {who.map((w) => {
+            const Icon = w.icon;
+            return (
+              <div
+                key={w.label}
+                className="flex items-center justify-center rounded-lg bg-primary/5 py-6"
+                aria-hidden="true"
+              >
+                <Icon className="h-8 w-8 text-accent" />
+              </div>
+            );
+          })}
+        </div>
+        <p className="mt-4 text-sm text-muted-foreground leading-relaxed">{t("blog.spHeroCaption")}</p>
+      </div>
+
+      {/* Infographic: the week as slots */}
+      <section
+        aria-label={t("blog.spSlotsTitle")}
+        className="rounded-xl border border-border bg-card p-6 md:p-8 shadow-card"
+      >
+        <h2 className="font-serif text-xl md:text-2xl font-bold text-foreground mb-2">
+          {t("blog.spSlotsTitle")}
+        </h2>
+        <p className="text-sm text-muted-foreground mb-6">{t("blog.spSlotsCaption")}</p>
+
+        <div className="flex gap-2" aria-hidden="true">
+          {slotGrid.map((day, d) => (
+            <div key={d} className="flex flex-1 flex-col gap-2">
+              {day.map((slot, s) => (
+                <div key={s} className={`h-6 rounded-sm ${slotClass[slot]}`} />
+              ))}
+            </div>
+          ))}
+        </div>
+
+        <ul className="mt-6 flex flex-wrap gap-x-6 gap-y-2 list-none p-0 m-0">
+          {legend.map((l) => (
+            <li key={l.label} className="flex items-center gap-2 text-sm text-muted-foreground">
+              <span className={`h-3 w-3 rounded-sm ${l.cls}`} aria-hidden="true" />
+              {l.label}
+            </li>
+          ))}
+        </ul>
+      </section>
 
       {/* Infographic: booking flow */}
       <section
