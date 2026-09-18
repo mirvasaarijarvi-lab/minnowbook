@@ -69,7 +69,8 @@ describe("ProtectedEmail: no-script fallback", () => {
     const { container } = render(<ProtectedEmail user="privacy" />);
     const noscript = container.querySelector("noscript");
     expect(noscript).not.toBeNull();
-    const text = (noscript?.textContent ?? "").replace(/\s+/g, " ");
+    // jsdom keeps <noscript> content as unparsed markup, so read innerHTML.
+    const text = (noscript?.innerHTML ?? "").replace(/\s+/g, " ");
     expect(text).toContain("privacy [at] mimmobook [dot] com");
     expect(text).not.toContain("privacy@mimmobook.com");
   });
