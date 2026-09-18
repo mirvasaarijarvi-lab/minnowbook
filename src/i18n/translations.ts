@@ -1885,6 +1885,7 @@ type TranslationKeys = {
   "offers.fillRequired": string;
   "offers.confirmedSuccess": string;
   "offers.confirmedWithoutPrice": string;
+  "offers.kitchenOrdersFailed": string;
   "offers.priceReviewTitle": string;
   "offers.priceReviewDesc": string;
   "offers.priceReviewWarnTitle": string;
@@ -3952,6 +3953,7 @@ const en: TranslationKeys = {
   "offers.fillRequired": "Please fill in all required fields",
   "offers.confirmedSuccess": "Offer confirmed",
   "offers.confirmedWithoutPrice": "Some bookings were saved without a price. Add the price before invoicing them.",
+  "offers.kitchenOrdersFailed": "The bookings were saved, but the menu could not be sent to the kitchen. Please add it in the Kitchen tab.",
   "offers.priceReviewTitle": "Check the prices",
   "offers.priceReviewDesc": "These bookings will be created from the offer. Prices come from your resource settings.",
   "offers.priceReviewWarnTitle": "A price is missing",
@@ -6016,6 +6018,7 @@ const fi: TranslationKeys = {
   "offers.fillRequired": "Täytä kaikki pakolliset kentät",
   "offers.confirmedSuccess": "Tarjous vahvistettu",
   "offers.confirmedWithoutPrice": "Osa varauksista tallennettiin ilman hintaa. Lisää hinta ennen laskutusta.",
+  "offers.kitchenOrdersFailed": "Varaukset tallennettiin, mutta menua ei saatu vietyä keittiölle. Lisää se Keittiö-välilehdellä.",
   "offers.priceReviewTitle": "Tarkista hinnat",
   "offers.priceReviewDesc": "Nämä varaukset luodaan tarjouksesta. Hinnat tulevat resurssien asetuksista.",
   "offers.priceReviewWarnTitle": "Hinta puuttuu",
@@ -8080,6 +8083,7 @@ const sv: TranslationKeys = {
   "offers.fillRequired": "Fyll i alla obligatoriska fält",
   "offers.confirmedSuccess": "Erbjudande bekräftat",
   "offers.confirmedWithoutPrice": "Vissa bokningar sparades utan pris. Lägg till priset innan du fakturerar dem.",
+  "offers.kitchenOrdersFailed": "Bokningarna sparades, men menyn kunde inte skickas till köket. Lägg till den i Kök-fliken.",
   "offers.priceReviewTitle": "Kontrollera priserna",
   "offers.priceReviewDesc": "Dessa bokningar skapas från erbjudandet. Priserna kommer från resursinställningarna.",
   "offers.priceReviewWarnTitle": "Ett pris saknas",
