@@ -1893,6 +1893,7 @@ type TranslationKeys = {
   "offers.fillRequired": string;
   "offers.confirmedSuccess": string;
   "offers.confirmedWithoutPrice": string;
+  "offers.statusRegionLabel": string;
   "offers.kitchenOrdersFailed": string;
   "offers.confirmedKitchenSentOne": string;
   "offers.confirmedKitchenSent": string;
