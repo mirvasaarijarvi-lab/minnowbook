@@ -237,7 +237,7 @@ test.describe("Offer confirmation states the Kitchen tab result", () => {
     const toastText = await readToast(page);
     expect(toastText).toContain("Offer confirmed");
     expect(toastText).toContain(
-      "3 food and drink line(s) from the offer were sent to the Kitchen tab.",
+      "3 food and drink lines from the offer were sent to the Kitchen tab.",
     );
 
     // Screen-reader announcement carries the same outcome.
@@ -246,7 +246,7 @@ test.describe("Offer confirmation states the Kitchen tab result", () => {
     await expect(region).toHaveAttribute("role", "status");
     await expect(region).toHaveAttribute("aria-atomic", "true");
     await expect(region).toContainText("Offer confirmed");
-    await expect(region).toContainText("3 food and drink line(s)");
+    await expect(region).toContainText("3 food and drink lines");
 
     // The lines really were written for the Kitchen tab.
     await expect
