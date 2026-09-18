@@ -134,12 +134,10 @@ describe("special occasions: seat limits when bookings arrive one after another"
       { startTime: "12:00", guests: 4 },
       { startTime: "13:00", guests: 3 },
     ]);
-    const refusal = results[1].check;
+    const refusal = results[1].check as { ok: boolean; reason?: string; remaining?: number };
     expect(refusal.ok).toBe(false);
-    if (!refusal.ok) {
-      expect(refusal.reason).toBe("FULL");
-      expect(refusal.remaining).toBe(1);
-    }
+    expect(refusal.reason).toBe("FULL");
+    expect(refusal.remaining).toBe(1);
   });
 
   it("frees seats again when an earlier booking is cancelled", () => {
