@@ -126,16 +126,16 @@ const OfferEmailDialog = forwardRef<HTMLDivElement, Props>(({ offer, open, onOpe
         </DialogHeader>
         <div className="space-y-4">
           <div className="space-y-1.5">
-            <Label>{t("offers.emailTo")}</Label>
-            <Input value={offer.guest_email} disabled />
+            <Label htmlFor="offer-email-to">{t("offers.emailTo")}</Label>
+            <Input id="offer-email-to" value={offer.guest_email} disabled />
           </div>
           <div className="space-y-1.5">
-            <Label>{t("offers.emailSubject")}</Label>
-            <Input value={subject} onChange={(e) => setSubject(e.target.value)} />
+            <Label htmlFor="offer-email-subject">{t("offers.emailSubject")}</Label>
+            <Input id="offer-email-subject" value={subject} onChange={(e) => setSubject(e.target.value)} />
           </div>
           <div className="space-y-1.5">
-            <Label>{t("offers.emailBody")}</Label>
-            <Textarea value={body} onChange={(e) => setBody(e.target.value)} rows={10} />
+            <Label htmlFor="offer-email-body">{t("offers.emailBody")}</Label>
+            <Textarea id="offer-email-body" value={body} onChange={(e) => setBody(e.target.value)} rows={10} />
           </div>
           <p className="text-xs text-muted-foreground">{t("offers.pdfAttached")}</p>
         </div>

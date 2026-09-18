@@ -482,7 +482,7 @@ const OffersManager = () => {
               </li>
             );
           })}
-        </div>
+        </ul>
       )}
 
       <OfferCreateDialog open={createOpen} onOpenChange={setCreateOpen} editOffer={editOffer} />
