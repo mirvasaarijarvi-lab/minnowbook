@@ -20,9 +20,9 @@ export function useTierGate() {
 
   /**
    * The effective tier after applying superadmin bypass.
-   * System admins are treated as "business" (highest tier) for all gate checks.
+   * System admins are treated as "enterprise" (highest tier) for all gate checks.
    */
-  const effectiveTier = isSystemAdmin ? "business" : rawTier;
+  const effectiveTier = isSystemAdmin ? "enterprise" : rawTier;
 
   /** True if the effective tier equals the given tier (after superadmin bypass). */
   const isTier = (tier: string) => effectiveTier === tier;

@@ -532,13 +532,14 @@ const Superadmin = () => {
                   <SelectItem value="basic">Basic</SelectItem>
                   <SelectItem value="professional">Professional</SelectItem>
                   <SelectItem value="business">Business</SelectItem>
+                  <SelectItem value="enterprise">Enterprise (by offer)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-1">
               <Label>Max Staff Users</Label>
               <p className="text-sm text-muted-foreground">
-                Determined by tier — Basic: 5, Pro: 25, Business: unlimited.
+                Determined by tier — Basic: 5, Pro: 25, Business: 50, Enterprise: unlimited.
                 Enforced by the backend on new staff additions.
               </p>
             </div>
