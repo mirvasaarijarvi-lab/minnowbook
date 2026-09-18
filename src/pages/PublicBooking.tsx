@@ -949,7 +949,7 @@ const PublicBookingInner = () => {
       // Special occasion (staff-defined event day, for example a Christmas dinner)
       if (selectedOccasion) {
         if (selectedOccasion.booking_type === "seatings") {
-          if (!occasionSeating) throw new Error(t("booking.occasionSeatingRequired"));
+          if (!occasionSeating) throw new Error(t("booking.occasionErrSeatingRequired"));
           payload.start_time = occasionSeating;
         }
         payload.special_occasion_id = selectedOccasion.id;
