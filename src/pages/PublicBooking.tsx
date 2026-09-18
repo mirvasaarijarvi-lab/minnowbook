@@ -231,6 +231,7 @@ const PublicBookingInner = () => {
   const isStaff = !!user;
   const dateFnsLocale = useDateLocale();
   const [submitted, setSubmitted] = useState(false);
+  const [duplicateDetected, setDuplicateDetected] = useState(false);
   // Sticky flag set when the public-booking edge function reports
   // SERVICE_ROLE_KEY_MISSING. While set, the form blocks resubmits
   // and renders an inline confirmation that NO reservation was
