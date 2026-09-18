@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { format, addDays, parseISO, isToday } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
@@ -30,6 +30,7 @@ import {
   Calendar as CalendarIcon,
   Plus,
   Trash2,
+  RotateCcw,
   Users,
   Clock,
   UtensilsCrossed,
@@ -328,6 +329,11 @@ const KitchenOrdersPanel = () => {
     onError: () => toast.error(t("kitchen.error")),
   });
 
+  const { visible: visibleReservations, hidden: hiddenReservations } = useMemo(
+    () => splitHiddenCards(reservations, hiddenCards),
+    [reservations, hiddenCards],
+  );
+
   const guestsLabel = (r: Reservation) => r.guests_count ?? r.estimated_guests ?? "—";
 
   return (
@@ -409,6 +415,15 @@ const KitchenOrdersPanel = () => {
             <Printer className="h-4 w-4" />
             {t("kitchen.print")}
           </Button>
+          {hiddenReservations.length > 0 && (
+            <Button variant="ghost" size="sm" onClick={restoreAllCards} className="gap-1.5">
+              <RotateCcw className="h-4 w-4" />
+              {t("kitchen.restoreHidden").replace(
+                "{count}",
+                String(hiddenReservations.length),
+              )}
+            </Button>
+          )}
         </div>
       </div>
 
@@ -465,8 +480,7 @@ const KitchenOrdersPanel = () => {
                           <p className="text-base font-semibold">{total.toFixed(2)} €</p>
                         </div>
                       )}
-                      {(
-                        <Button
+                      <Button
                           variant="ghost"
                           size="icon"
                           className="h-9 w-9 text-destructive hover:text-destructive print:hidden"
@@ -478,7 +492,6 @@ const KitchenOrdersPanel = () => {
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
-                      )}
                     </div>
                   </div>
                 </CardHeader>
