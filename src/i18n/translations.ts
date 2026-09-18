@@ -1000,6 +1000,7 @@ type TranslationKeys = {
   "pricing.basicTypes": string;
   "pricing.basicStaff": string;
   "pricing.basicResourcesTotal": string;
+  "pricing.proResourcesPerType": string;
   "pricing.proName": string;
   "pricing.proDesc": string;
   "pricing.proTypes": string;
