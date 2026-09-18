@@ -1205,7 +1205,7 @@ const ReportsPanel = () => {
                 </Table>
               </div>
             )}
-          </div>
+          </CollapsibleSection>
         </>
       )}
     </div>
