@@ -300,11 +300,15 @@ const OffersManager = () => {
       // Forward the agreed menu to the Kitchen tab. A failure here must not
       // undo the reservations, so staff are warned instead.
       const kitchenRows = buildKitchenOrderRows(offer.tenant_id, menuLegs);
+      let kitchenFailed = false;
       if (kitchenRows.length > 0) {
         const { error: kitchenErr } = await supabase
           .from("kitchen_orders")
           .insert(kitchenRows as any);
-        if (kitchenErr) toast.warning(t("offers.kitchenOrdersFailed"));
+        if (kitchenErr) {
+          kitchenFailed = true;
+          toast.warning(t("offers.kitchenOrdersFailed"));
+        }
       }
 
       await updateOffer.mutateAsync({
@@ -314,17 +318,26 @@ const OffersManager = () => {
       });
 
       const missingPrice = plan.legs.filter((l) => (prices[l.key] ?? null) == null);
-      toast.success(t("offers.confirmedSuccess"), {
-        description:
-          kitchenRows.length > 0
-            ? t("offers.confirmedKitchenSent").replace("{count}", String(kitchenRows.length))
-            : t("offers.confirmedNoKitchen"),
-      });
+      const kitchenDescription =
+        kitchenRows.length > 0
+          ? t("offers.confirmedKitchenSent").replace("{count}", String(kitchenRows.length))
+          : t("offers.confirmedNoKitchen");
+      toast.success(t("offers.confirmedSuccess"), { description: kitchenDescription });
       if (missingPrice.length > 0) {
         toast.warning(t("offers.confirmedWithoutPrice"));
       }
+      // Screen readers get the same outcome, including the Kitchen tab result.
+      announceOfferStatus(
+        composeOfferStatusMessage([
+          t("offers.confirmedSuccess"),
+          kitchenFailed ? t("offers.kitchenOrdersFailed") : kitchenDescription,
+          missingPrice.length > 0 ? t("offers.confirmedWithoutPrice") : null,
+        ]),
+        kitchenFailed || missingPrice.length > 0 ? "assertive" : "polite",
+      );
     } catch {
       toast.error(t("offers.confirmError"));
+      announceOfferStatus(t("offers.confirmError"), "assertive");
     }
   };
 
