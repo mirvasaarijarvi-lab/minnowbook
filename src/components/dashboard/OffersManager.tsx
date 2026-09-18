@@ -314,7 +314,12 @@ const OffersManager = () => {
       });
 
       const missingPrice = plan.legs.filter((l) => (prices[l.key] ?? null) == null);
-      toast.success(t("offers.confirmedSuccess"));
+      toast.success(t("offers.confirmedSuccess"), {
+        description:
+          kitchenRows.length > 0
+            ? t("offers.confirmedKitchenSent")
+            : t("offers.confirmedNoKitchen"),
+      });
       if (missingPrice.length > 0) {
         toast.warning(t("offers.confirmedWithoutPrice"));
       }
