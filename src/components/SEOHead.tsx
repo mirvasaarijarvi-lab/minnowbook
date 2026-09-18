@@ -115,8 +115,8 @@ const SEOHead = ({ title, description, path, keywords, type = "website", image, 
 
     // Twitter
     setMeta("name", "twitter:card", "summary_large_image");
-    setMeta("name", "twitter:title", title);
-    setMeta("name", "twitter:description", description);
+    setMeta("name", "twitter:title", shareTitle);
+    setMeta("name", "twitter:description", shareDescription);
     setMeta("name", "twitter:image", resolvedImage);
     if (imageAlt) setMeta("name", "twitter:image:alt", imageAlt);
 
