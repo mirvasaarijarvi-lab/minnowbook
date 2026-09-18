@@ -14,6 +14,7 @@
 import "../_shared/load-env.ts";
 import { assert, assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import { makeReservationCleanup } from "../_shared/test-cleanup.ts";
+import { DEDUP_MATCH_COLUMNS } from "../_shared/booking-dedup.ts";
 
 function requireEnv(...names: string[]): string {
   for (const n of names) {
@@ -223,5 +224,34 @@ Deno.test({
       await cleanup();
       await assertEmpty();
     }
+  },
+});
+
+// Guard for the second half of the bug: the lookup once filtered on
+// `resource_id`, which is not a column on reservations. PostgREST rejected the
+// whole query, the handler logged a warning and skipped de-duplication, and a
+// double click created two reservations. This test fails the moment a dedup
+// column stops existing.
+Deno.test({
+  name: "public-booking: every de-duplication column exists on reservations",
+  ignore: SERVICE_KEY.length === 0,
+  sanitizeOps: true,
+  sanitizeResources: true,
+  sanitizeExit: true,
+  fn: async () => {
+    for (const column of DEDUP_MATCH_COLUMNS) {
+      const { res, text } = await adminFetch(
+        `/reservations?select=${column}&limit=1`,
+      );
+      assertEquals(
+        res.status,
+        200,
+        `de-duplication column "${column}" is not selectable on reservations: ${text}`,
+      );
+    }
+    // And the whole filter set together, exactly as the handler sends it.
+    const all = DEDUP_MATCH_COLUMNS.join(",");
+    const { res, text } = await adminFetch(`/reservations?select=${all}&limit=1`);
+    assertEquals(res.status, 200, `combined dedup select failed: ${text}`);
   },
 });
