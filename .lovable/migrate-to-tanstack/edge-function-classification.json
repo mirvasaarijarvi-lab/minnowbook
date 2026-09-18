@@ -1,0 +1,32 @@
+{
+  "functions": [
+    { "name": "admin-users", "classification": "internal-only", "signal": "called from src/ (3 files)", "outcome": "left" },
+    { "name": "archive-reservations", "classification": "cron target", "signal": "referenced from supabase/migrations", "outcome": "left" },
+    { "name": "auth-email-hook", "classification": "webhook receiver", "signal": "Supabase auth hook endpoint, fixed URL", "outcome": "left" },
+    { "name": "cancel-account-deletion", "classification": "internal-only", "signal": "called from src/", "outcome": "left" },
+    { "name": "check-subscription", "classification": "Deno-only dependency", "signal": "Stripe SDK via Deno/esm specifier", "outcome": "left" },
+    { "name": "create-checkout", "classification": "Deno-only dependency", "signal": "Stripe SDK via Deno/esm specifier", "outcome": "left" },
+    { "name": "customer-portal", "classification": "Deno-only dependency", "signal": "Stripe SDK via Deno/esm specifier", "outcome": "left" },
+    { "name": "daily-ops-digest", "classification": "cron target", "signal": "referenced from supabase/migrations (scheduled)", "outcome": "left" },
+    { "name": "export-user-data", "classification": "custom response", "signal": "returns a generated data archive", "outcome": "left" },
+    { "name": "forbidden-status", "classification": "internal-only", "signal": "called from src/", "outcome": "left" },
+    { "name": "guest-booking-portal", "classification": "internal-only", "signal": "called from src/; validates guest tokens with the service role", "outcome": "left" },
+    { "name": "ical-feed", "classification": "custom response", "signal": "public fixed URL serving text/calendar to external calendar clients", "outcome": "left" },
+    { "name": "log-forbidden-access", "classification": "unknown", "signal": "no internal call sites found", "outcome": "left" },
+    { "name": "mfa-recovery", "classification": "internal-only", "signal": "called from src/", "outcome": "left" },
+    { "name": "migrate-branding-assets", "classification": "unknown", "signal": "no internal call sites; one-off maintenance endpoint", "outcome": "left" },
+    { "name": "mint-tenant-private-url", "classification": "unknown", "signal": "no direct invoke call site found", "outcome": "left" },
+    { "name": "process-email-queue", "classification": "cron target", "signal": "queue drainer invoked on a schedule", "outcome": "left" },
+    { "name": "public-booking", "classification": "custom response", "signal": "public booking endpoint with CORS and fixed URL; referenced from migrations", "outcome": "left" },
+    { "name": "redeem-access-code", "classification": "internal-only", "signal": "called from src/ (many call sites)", "outcome": "left" },
+    { "name": "report-storage-rejection", "classification": "internal-only", "signal": "called from src/ telemetry", "outcome": "left" },
+    { "name": "request-account-deletion", "classification": "internal-only", "signal": "called from src/", "outcome": "left" },
+    { "name": "reschedule-review", "classification": "internal-only", "signal": "called from src/", "outcome": "left" },
+    { "name": "resend-confirmation", "classification": "webhook receiver", "signal": "email-flow endpoint with fixed URL", "outcome": "left" },
+    { "name": "send-auto-reminders", "classification": "cron target", "signal": "scheduled from supabase/migrations", "outcome": "left" },
+    { "name": "send-offer-email", "classification": "internal-only", "signal": "called from src/", "outcome": "left" },
+    { "name": "send-reminder", "classification": "internal-only", "signal": "called from src/ (3 files)", "outcome": "left" },
+    { "name": "support-chat", "classification": "Deno-only dependency", "signal": "streams AI gateway responses via Deno specifiers", "outcome": "left" },
+    { "name": "weekly-ops-report", "classification": "cron target", "signal": "scheduled from supabase/migrations", "outcome": "left" }
+  ]
+}

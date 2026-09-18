@@ -571,7 +571,7 @@ const EditReservationDialog = ({
                           "rounded px-3 py-2 text-sm space-y-1",
                           isCurrent ? "bg-accent/20 border border-accent/50" : "bg-background border border-border",
                           clickable &&
-                            "cursor-pointer hover:bg-muted hover:border-accent focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1 transition-colors",
+                            "cursor-pointer hover:bg-muted hover:border-accent focus:outline-hidden focus:ring-2 focus:ring-ring focus:ring-offset-1 transition-colors",
                         )}
                       >
                         <div className="flex items-center justify-between gap-2 flex-wrap">

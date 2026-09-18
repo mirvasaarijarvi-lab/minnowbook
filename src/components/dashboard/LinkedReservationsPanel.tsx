@@ -155,7 +155,7 @@ const LinkedReservationsPanel = ({ reservation, headingAs = "label", onSelectLin
                   ? "bg-accent/10 border border-accent/30"
                   : "bg-muted/50 border border-transparent",
                 clickable &&
-                  "cursor-pointer hover:bg-muted hover:border-border focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1 transition-colors",
+                  "cursor-pointer hover:bg-muted hover:border-border focus:outline-hidden focus:ring-2 focus:ring-ring focus:ring-offset-1 transition-colors",
               )}
             >
               <div className="flex items-center justify-between gap-2 flex-wrap">

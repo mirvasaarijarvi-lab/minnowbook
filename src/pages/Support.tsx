@@ -346,7 +346,7 @@ const Support = () => {
                         <AccordionTrigger
                           id={`${itemId}-trigger`}
                           aria-controls={`${itemId}-content`}
-                          className="px-4 py-4 text-left hover:no-underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
+                          className="px-4 py-4 text-left hover:no-underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden"
                         >
                           <span className="flex items-start gap-3">
                             <HelpCircle

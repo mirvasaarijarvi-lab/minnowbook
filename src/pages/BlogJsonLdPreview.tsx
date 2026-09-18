@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { toast } from "sonner";
 import { ArrowLeft, Copy, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";

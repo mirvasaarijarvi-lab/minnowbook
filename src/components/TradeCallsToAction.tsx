@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { ArrowRight, Scissors, Wind, Sparkles, CroissantIcon, Brush, Dumbbell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useT } from "@/contexts/I18nContext";

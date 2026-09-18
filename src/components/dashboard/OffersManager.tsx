@@ -464,7 +464,7 @@ const OffersManager = () => {
           tabIndex={-1}
           role="group"
           aria-label={t("offers.statusRegionLabel")}
-          className={`rounded-md border p-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+          className={`rounded-md border p-3 text-sm outline-hidden focus-visible:ring-2 focus-visible:ring-ring ${
             confirmStatus.urgent
               ? "border-destructive/40 bg-destructive/10 text-foreground"
               : "border-border bg-muted/50 text-foreground"

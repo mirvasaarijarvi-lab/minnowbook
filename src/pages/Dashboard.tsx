@@ -1,5 +1,5 @@
 import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@/lib/router-compat";
 import NoTenantState from "@/components/NoTenantState";
 import { useState, useEffect, useCallback } from "react";
 import { useTenant } from "@/hooks/useTenant";

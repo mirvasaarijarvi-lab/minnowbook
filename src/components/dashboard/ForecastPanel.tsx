@@ -301,7 +301,7 @@ const ForecastPanel = () => {
                           title={`${weekdayLabels[wd]} ${String(h).padStart(2, "0")}:00, ${v}`}
                           aria-label={`${weekdayLabels[wd]} ${String(h).padStart(2, "0")}:00, ${v}`}
                           onClick={() => setDrill({ wd, hour: h })}
-                          className="h-6 w-full rounded-sm border border-border/40 transition-colors hover:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                          className="h-6 w-full rounded-sm border border-border/40 transition-colors hover:border-primary focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
                           style={{ backgroundColor: `hsl(var(--primary) / ${v ? 0.12 + (v / maxHeat) * 0.7 : 0.04})` }}
                         />
                       </div>

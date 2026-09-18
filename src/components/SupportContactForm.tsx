@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams } from "@/lib/router-compat";
 import { toast } from "sonner";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";

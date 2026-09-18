@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Clock, CalendarDays } from "lucide-react";
 import MarketingHeader from "@/components/MarketingHeader";
