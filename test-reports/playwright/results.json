@@ -4,8 +4,7 @@
       "/nix/store/31sh8fzcbg4sjahp3zj002j0ca8sfvvr-nodejs-22.22.0/bin/node",
       "/dev-server/node_modules/.bin/playwright",
       "test",
-      "e2e/offer-confirm-kitchen-confirmation.spec.ts",
-      "--workers=1"
+      "e2e/offer-confirm-kitchen-confirmation.spec.ts"
     ],
     "configFile": "/dev-server/playwright.config.ts",
     "rootDir": "/dev-server/e2e",
@@ -19,7 +18,7 @@
     "grepInvert": null,
     "maxFailures": 0,
     "metadata": {
-      "actualWorkers": 1
+      "actualWorkers": 2
     },
     "preserveOutput": "always",
     "projects": [
@@ -28,7 +27,7 @@
         "repeatEach": 1,
         "retries": 0,
         "metadata": {
-          "actualWorkers": 1
+          "actualWorkers": 2
         },
         "id": "chromium",
         "name": "chromium",
@@ -75,7 +74,7 @@
     "updateSnapshots": "missing",
     "updateSourceMethod": "patch",
     "version": "1.62.1",
-    "workers": 1,
+    "workers": 8,
     "webServer": {
       "command": "bunx vite preview --port 4173",
       "port": 4173,
@@ -112,12 +111,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 1885,
+                      "duration": 3708,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-18T06:41:09.071Z",
+                      "startTime": "2026-09-18T06:41:41.098Z",
                       "annotations": [],
                       "attachments": [
                         {
@@ -143,7 +142,7 @@
               ],
               "id": "e8756ec45a7a1cfe12f3-3a868a4a8d30e3640ec3",
               "file": "offer-confirm-kitchen-confirmation.spec.ts",
-              "line": 305,
+              "line": 309,
               "column": 3
             },
             {
@@ -162,12 +161,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 1874,
+                      "duration": 2098,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-18T06:41:11.387Z",
+                      "startTime": "2026-09-18T06:41:45.487Z",
                       "annotations": [],
                       "attachments": [
                         {
@@ -193,7 +192,7 @@
               ],
               "id": "e8756ec45a7a1cfe12f3-d50f7b15dc36c63d3853",
               "file": "offer-confirm-kitchen-confirmation.spec.ts",
-              "line": 346,
+              "line": 350,
               "column": 3
             },
             {
@@ -212,12 +211,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 2367,
+                      "duration": 2625,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-18T06:41:13.415Z",
+                      "startTime": "2026-09-18T06:41:47.766Z",
                       "annotations": [],
                       "attachments": [
                         {
@@ -243,7 +242,7 @@
               ],
               "id": "e8756ec45a7a1cfe12f3-23374397598126874fb4",
               "file": "offer-confirm-kitchen-confirmation.spec.ts",
-              "line": 368,
+              "line": 372,
               "column": 3
             }
           ]
@@ -251,7 +250,7 @@
         {
           "title": "Kitchen tab announcement wording per language",
           "file": "offer-confirm-kitchen-confirmation.spec.ts",
-          "line": 414,
+          "line": 418,
           "column": 6,
           "specs": [
             {
@@ -267,15 +266,15 @@
                   "projectName": "chromium",
                   "results": [
                     {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
                       "status": "passed",
-                      "duration": 1903,
+                      "duration": 3715,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-18T06:41:15.971Z",
+                      "startTime": "2026-09-18T06:41:41.151Z",
                       "annotations": [],
                       "attachments": [
                         {
@@ -301,7 +300,7 @@
               ],
               "id": "e8756ec45a7a1cfe12f3-21d216eda85a99768031",
               "file": "offer-confirm-kitchen-confirmation.spec.ts",
-              "line": 420,
+              "line": 428,
               "column": 5
             },
             {
@@ -317,15 +316,15 @@
                   "projectName": "chromium",
                   "results": [
                     {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
                       "status": "passed",
-                      "duration": 2009,
+                      "duration": 2114,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-18T06:41:18.058Z",
+                      "startTime": "2026-09-18T06:41:45.554Z",
                       "annotations": [],
                       "attachments": [
                         {
@@ -351,7 +350,7 @@
               ],
               "id": "e8756ec45a7a1cfe12f3-6cdeb23ccd774397ace6",
               "file": "offer-confirm-kitchen-confirmation.spec.ts",
-              "line": 441,
+              "line": 449,
               "column": 5
             },
             {
@@ -367,15 +366,15 @@
                   "projectName": "chromium",
                   "results": [
                     {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
                       "status": "passed",
-                      "duration": 1596,
+                      "duration": 2221,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-18T06:41:20.203Z",
+                      "startTime": "2026-09-18T06:41:47.820Z",
                       "annotations": [],
                       "attachments": [
                         {
@@ -401,7 +400,7 @@
               ],
               "id": "e8756ec45a7a1cfe12f3-3236a26c3408b01710e4",
               "file": "offer-confirm-kitchen-confirmation.spec.ts",
-              "line": 420,
+              "line": 428,
               "column": 5
             },
             {
@@ -417,15 +416,15 @@
                   "projectName": "chromium",
                   "results": [
                     {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
                       "status": "passed",
-                      "duration": 1798,
+                      "duration": 1646,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-18T06:41:21.923Z",
+                      "startTime": "2026-09-18T06:41:50.199Z",
                       "annotations": [],
                       "attachments": [
                         {
@@ -451,7 +450,7 @@
               ],
               "id": "e8756ec45a7a1cfe12f3-0ac00ee4b34621775170",
               "file": "offer-confirm-kitchen-confirmation.spec.ts",
-              "line": 441,
+              "line": 449,
               "column": 5
             },
             {
@@ -467,15 +466,15 @@
                   "projectName": "chromium",
                   "results": [
                     {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
                       "status": "passed",
-                      "duration": 1659,
+                      "duration": 1645,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-18T06:41:23.854Z",
+                      "startTime": "2026-09-18T06:41:51.956Z",
                       "annotations": [],
                       "attachments": [
                         {
@@ -501,7 +500,7 @@
               ],
               "id": "e8756ec45a7a1cfe12f3-edfa4f5454070e495d30",
               "file": "offer-confirm-kitchen-confirmation.spec.ts",
-              "line": 420,
+              "line": 428,
               "column": 5
             },
             {
@@ -517,15 +516,15 @@
                   "projectName": "chromium",
                   "results": [
                     {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
                       "status": "passed",
-                      "duration": 1853,
+                      "duration": 1888,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-18T06:41:25.637Z",
+                      "startTime": "2026-09-18T06:41:53.711Z",
                       "annotations": [],
                       "attachments": [
                         {
@@ -551,7 +550,7 @@
               ],
               "id": "e8756ec45a7a1cfe12f3-c333de7cdd8f1cbfa12d",
               "file": "offer-confirm-kitchen-confirmation.spec.ts",
-              "line": 441,
+              "line": 449,
               "column": 5
             }
           ]
@@ -561,8 +560,8 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-09-18T06:41:08.057Z",
-    "duration": 19681.128999999997,
+    "startTime": "2026-09-18T06:41:39.098Z",
+    "duration": 16725.809999999998,
     "expected": 9,
     "skipped": 0,
     "unexpected": 0,

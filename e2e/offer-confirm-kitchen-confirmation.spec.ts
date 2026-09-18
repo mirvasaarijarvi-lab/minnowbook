@@ -300,6 +300,10 @@ function todayIso(): string {
 }
 
 test.describe("Offer confirmation states the Kitchen tab result", () => {
+  // Each test drives a full dashboard load; running them side by side in this
+  // sandbox starves the preview server, so keep them serial.
+  test.describe.configure({ mode: "serial" });
+
   test.skip(!ref, "VITE_SUPABASE_URL is required to compute the auth-token key");
 
   test("offer with food and drinks: confirmation names the lines sent to the kitchen", async ({
@@ -412,6 +416,10 @@ test.describe("Offer confirmation states the Kitchen tab result", () => {
 });
 
 test.describe("Kitchen tab announcement wording per language", () => {
+  // Each test drives a full dashboard load; running them side by side in this
+  // sandbox starves the preview server, so keep them serial.
+  test.describe.configure({ mode: "serial" });
+
   test.skip(!ref, "VITE_SUPABASE_URL is required to compute the auth-token key");
 
   const languages: Lang[] = ["en", "fi", "sv"];
