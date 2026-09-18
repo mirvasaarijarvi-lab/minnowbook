@@ -28,7 +28,40 @@ function projectRef(): string | null {
   return url.match(/^https?:\/\/([^.]+)\./)?.[1] ?? null;
 }
 
-async function seedFakeSession(page: Page, ref: string) {
+type Lang = "en" | "fi" | "sv";
+
+/** Localized labels and expected announcements, copied from src/i18n/translations.ts. */
+const L: Record<Lang, {
+  offersNav: string;
+  confirm: string;
+  confirmed: string;
+  one: string;
+  many: (count: number) => string;
+}> = {
+  en: {
+    offersNav: "Offers",
+    confirm: "Confirm",
+    confirmed: "Offer confirmed",
+    one: "1 food and drink line from the offer was sent to the Kitchen tab.",
+    many: (c) => `${c} food and drink lines from the offer were sent to the Kitchen tab.`,
+  },
+  fi: {
+    offersNav: "Tarjoukset",
+    confirm: "Vahvista",
+    confirmed: "Tarjous vahvistettu",
+    one: "Tarjouksesta vietiin 1 ruoka- ja juomarivi Keittiö-välilehdelle.",
+    many: (c) => `Tarjouksesta vietiin ${c} ruoka- ja juomariviä Keittiö-välilehdelle.`,
+  },
+  sv: {
+    offersNav: "Erbjudanden",
+    confirm: "Bekräfta",
+    confirmed: "Erbjudande bekräftat",
+    one: "1 mat- och dryckesrad från erbjudandet skickades till Kök-fliken.",
+    many: (c) => `${c} mat- och dryckesrader från erbjudandet skickades till Kök-fliken.`,
+  },
+};
+
+async function seedFakeSession(page: Page, ref: string, lang: Lang = "en") {
   const session = {
     access_token: "fake.jwt.token",
     refresh_token: "fake-refresh",
@@ -49,7 +82,7 @@ async function seedFakeSession(page: Page, ref: string) {
       window.localStorage.setItem(key, JSON.stringify(value));
       window.localStorage.setItem("mimmobook-lang", lang);
     },
-    { key: `sb-${ref}-auth-token`, value: session, lang: "en" },
+    { key: `sb-${ref}-auth-token`, value: session, lang },
   );
 }
 
@@ -243,10 +276,10 @@ async function mockBackend(page: Page, offer: Record<string, unknown>) {
   return { kitchenRows, reservations };
 }
 
-async function openOffers(page: Page) {
-  await seedFakeSession(page, ref!);
+async function openOffers(page: Page, lang: Lang = "en") {
+  await seedFakeSession(page, ref!, lang);
   await page.goto("/dashboard");
-  await page.getByRole("button", { name: "Offers", exact: true }).first().click();
+  await page.getByRole("button", { name: L[lang].offersNav, exact: true }).first().click();
   await expect(page.getByText("Kitchen E2E Guest").first()).toBeVisible({ timeout: 15_000 });
 }
 
@@ -376,4 +409,54 @@ test.describe("Offer confirmation states the Kitchen tab result", () => {
     // Category comes through as food / drink.
     await expect(page.getByRole("combobox", { name: "Category" }).nth(2)).toContainText("Drink");
   });
+});
+
+test.describe("Kitchen tab announcement wording per language", () => {
+  test.skip(!ref, "VITE_SUPABASE_URL is required to compute the auth-token key");
+
+  const languages: Lang[] = ["en", "fi", "sv"];
+
+  for (const lang of languages) {
+    test(`${lang}: one food or drink line is announced in the singular`, async ({ page }) => {
+      const recorded = await mockBackend(
+        page,
+        offerRow({ id: `offer-one-${lang}`, menu: "1 x Roast beef" }),
+      );
+
+      await openOffers(page, lang);
+      await page.getByRole("button", { name: L[lang].confirm, exact: true }).first().click();
+
+      const region = page.locator("#offer-status-live-region");
+      await expect(region).toHaveAttribute("aria-live", "polite");
+      await expect(region).toHaveAttribute("role", "status");
+      await expect(region).toContainText(L[lang].confirmed);
+      await expect(region).toContainText(L[lang].one);
+      // Singular wording only: no plural sentence and no leftover placeholder.
+      await expect(region).not.toContainText(L[lang].many(1));
+      await expect(region).not.toContainText("{count}");
+
+      await expect.poll(() => recorded.kitchenRows.length, { timeout: 10_000 }).toBe(1);
+    });
+
+    test(`${lang}: several food and drink lines are announced in the plural`, async ({ page }) => {
+      const recorded = await mockBackend(
+        page,
+        offerRow({
+          id: `offer-many-${lang}`,
+          menu: ["20 x Roast beef", "4 x Vegan plate", "20 x Red wine"].join("\n"),
+        }),
+      );
+
+      await openOffers(page, lang);
+      await page.getByRole("button", { name: L[lang].confirm, exact: true }).first().click();
+
+      const region = page.locator("#offer-status-live-region");
+      await expect(region).toContainText(L[lang].confirmed);
+      await expect(region).toContainText(L[lang].many(3));
+      await expect(region).not.toContainText(L[lang].one);
+      await expect(region).not.toContainText("{count}");
+
+      await expect.poll(() => recorded.kitchenRows.length, { timeout: 10_000 }).toBe(3);
+    });
+  }
 });

@@ -18,7 +18,7 @@
     "grepInvert": null,
     "maxFailures": 0,
     "metadata": {
-      "actualWorkers": 3
+      "actualWorkers": 8
     },
     "preserveOutput": "always",
     "projects": [
@@ -27,7 +27,7 @@
         "repeatEach": 1,
         "retries": 0,
         "metadata": {
-          "actualWorkers": 3
+          "actualWorkers": 8
         },
         "id": "chromium",
         "name": "chromium",
@@ -92,12 +92,12 @@
         {
           "title": "Offer confirmation states the Kitchen tab result",
           "file": "offer-confirm-kitchen-confirmation.spec.ts",
-          "line": 269,
+          "line": 302,
           "column": 6,
           "specs": [
             {
               "title": "offer with food and drinks: confirmation names the lines sent to the kitchen",
-              "ok": true,
+              "ok": false,
               "tags": [],
               "tests": [
                 {
@@ -110,24 +110,45 @@
                     {
                       "workerIndex": 0,
                       "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 3883,
-                      "errors": [],
+                      "status": "timedOut",
+                      "duration": 33718,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                        },
+                        {
+                          "location": {
+                            "file": "/dev-server/e2e/offer-confirm-kitchen-confirmation.spec.ts",
+                            "column": 84,
+                            "line": 282
+                          },
+                          "message": "Error: locator.click: Test timeout of 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: 'Offers', exact: true }).first()\u001b[22m\n\u001b[2m    - locator resolved to <button data-state=\"closed\" class=\"flex items-center gap-3 w-full px-3 py-2.5 rounded-md text-sm font-medium transition-colors text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground\">…</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <div class=\"absolute inset-0 bg-black/60 transition-opacity duration-300\"></div> from <div class=\"fixed inset-0 z-[9999]\">…</div> subtree intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <div class=\"absolute inset-0 bg-black/60 transition-opacity duration-300\"></div> from <div class=\"fixed inset-0 z-[9999]\">…</div> subtree intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    - waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m    - element is not stable\u001b[22m\n\u001b[2m  48 × retrying click action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n\u001b[2m       - waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m       - element is visible, enabled and stable\u001b[22m\n\u001b[2m       - scrolling into view if needed\u001b[22m\n\u001b[2m       - done scrolling\u001b[22m\n\u001b[2m       - <div class=\"absolute inset-0 bg-black/60 transition-opacity duration-300\"></div> from <div class=\"fixed inset-0 z-[9999]\">…</div> subtree intercepts pointer events\u001b[22m\n\u001b[2m  - retrying click action\u001b[22m\n\u001b[2m    - waiting 500ms\u001b[22m\n\n\n  280 |   await seedFakeSession(page, ref!, lang);\n  281 |   await page.goto(\"/dashboard\");\n> 282 |   await page.getByRole(\"button\", { name: L[lang].offersNav, exact: true }).first().click();\n      |                                                                                    ^\n  283 |   await expect(page.getByText(\"Kitchen E2E Guest\").first()).toBeVisible({ timeout: 15_000 });\n  284 | }\n  285 |\n    at openOffers (/dev-server/e2e/offer-confirm-kitchen-confirmation.spec.ts:282:84)\n    at /dev-server/e2e/offer-confirm-kitchen-confirmation.spec.ts:315:5"
+                        }
+                      ],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-18T06:34:14.530Z",
+                      "startTime": "2026-09-18T06:40:07.371Z",
                       "annotations": [],
                       "attachments": [
                         {
                           "name": "screenshot",
                           "contentType": "image/png",
-                          "path": "/dev-server/test-results/offer-confirm-kitchen-conf-917c1-e-lines-sent-to-the-kitchen-chromium/test-finished-1.png"
+                          "path": "/dev-server/test-results/offer-confirm-kitchen-conf-917c1-e-lines-sent-to-the-kitchen-chromium/test-failed-1.png"
                         },
                         {
                           "name": "video",
                           "contentType": "video/webm",
                           "path": "/dev-server/test-results/offer-confirm-kitchen-conf-917c1-e-lines-sent-to-the-kitchen-chromium/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/dev-server/test-results/offer-confirm-kitchen-conf-917c1-e-lines-sent-to-the-kitchen-chromium/error-context.md"
                         },
                         {
                           "name": "trace",
@@ -137,17 +158,17 @@
                       ]
                     }
                   ],
-                  "status": "expected"
+                  "status": "unexpected"
                 }
               ],
               "id": "e8756ec45a7a1cfe12f3-3a868a4a8d30e3640ec3",
               "file": "offer-confirm-kitchen-confirmation.spec.ts",
-              "line": 272,
+              "line": 305,
               "column": 3
             },
             {
               "title": "offer without food or drinks: confirmation says nothing was sent to the kitchen",
-              "ok": true,
+              "ok": false,
               "tags": [],
               "tests": [
                 {
@@ -160,24 +181,45 @@
                     {
                       "workerIndex": 1,
                       "parallelIndex": 1,
-                      "status": "passed",
-                      "duration": 3882,
-                      "errors": [],
+                      "status": "timedOut",
+                      "duration": 33590,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                        },
+                        {
+                          "location": {
+                            "file": "/dev-server/e2e/offer-confirm-kitchen-confirmation.spec.ts",
+                            "column": 84,
+                            "line": 282
+                          },
+                          "message": "Error: locator.click: Test timeout of 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: 'Offers', exact: true }).first()\u001b[22m\n\u001b[2m    - locator resolved to <button data-state=\"closed\" class=\"flex items-center gap-3 w-full px-3 py-2.5 rounded-md text-sm font-medium transition-colors text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground\">…</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <div class=\"absolute inset-0 bg-black/60 transition-opacity duration-300\"></div> from <div class=\"fixed inset-0 z-[9999]\">…</div> subtree intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <div class=\"absolute inset-0 bg-black/60 transition-opacity duration-300\"></div> from <div class=\"fixed inset-0 z-[9999]\">…</div> subtree intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    49 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m       - element is visible, enabled and stable\u001b[22m\n\u001b[2m       - scrolling into view if needed\u001b[22m\n\u001b[2m       - done scrolling\u001b[22m\n\u001b[2m       - <div class=\"absolute inset-0 bg-black/60 transition-opacity duration-300\"></div> from <div class=\"fixed inset-0 z-[9999]\">…</div> subtree intercepts pointer events\u001b[22m\n\u001b[2m     - retrying click action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n\n\n  280 |   await seedFakeSession(page, ref!, lang);\n  281 |   await page.goto(\"/dashboard\");\n> 282 |   await page.getByRole(\"button\", { name: L[lang].offersNav, exact: true }).first().click();\n      |                                                                                    ^\n  283 |   await expect(page.getByText(\"Kitchen E2E Guest\").first()).toBeVisible({ timeout: 15_000 });\n  284 | }\n  285 |\n    at openOffers (/dev-server/e2e/offer-confirm-kitchen-confirmation.spec.ts:282:84)\n    at /dev-server/e2e/offer-confirm-kitchen-confirmation.spec.ts:351:5"
+                        }
+                      ],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-18T06:34:14.541Z",
+                      "startTime": "2026-09-18T06:40:07.358Z",
                       "annotations": [],
                       "attachments": [
                         {
                           "name": "screenshot",
                           "contentType": "image/png",
-                          "path": "/dev-server/test-results/offer-confirm-kitchen-conf-4b200-ing-was-sent-to-the-kitchen-chromium/test-finished-1.png"
+                          "path": "/dev-server/test-results/offer-confirm-kitchen-conf-4b200-ing-was-sent-to-the-kitchen-chromium/test-failed-1.png"
                         },
                         {
                           "name": "video",
                           "contentType": "video/webm",
                           "path": "/dev-server/test-results/offer-confirm-kitchen-conf-4b200-ing-was-sent-to-the-kitchen-chromium/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/dev-server/test-results/offer-confirm-kitchen-conf-4b200-ing-was-sent-to-the-kitchen-chromium/error-context.md"
                         },
                         {
                           "name": "trace",
@@ -187,17 +229,17 @@
                       ]
                     }
                   ],
-                  "status": "expected"
+                  "status": "unexpected"
                 }
               ],
               "id": "e8756ec45a7a1cfe12f3-d50f7b15dc36c63d3853",
               "file": "offer-confirm-kitchen-confirmation.spec.ts",
-              "line": 313,
+              "line": 346,
               "column": 3
             },
             {
               "title": "accepted offer's food and drink lines show up in the Kitchen tab",
-              "ok": true,
+              "ok": false,
               "tags": [],
               "tests": [
                 {
@@ -210,24 +252,45 @@
                     {
                       "workerIndex": 2,
                       "parallelIndex": 2,
-                      "status": "passed",
-                      "duration": 4242,
-                      "errors": [],
+                      "status": "timedOut",
+                      "duration": 33746,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                        },
+                        {
+                          "location": {
+                            "file": "/dev-server/e2e/offer-confirm-kitchen-confirmation.spec.ts",
+                            "column": 84,
+                            "line": 282
+                          },
+                          "message": "Error: locator.click: Test timeout of 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: 'Offers', exact: true }).first()\u001b[22m\n\u001b[2m    - locator resolved to <button data-state=\"closed\" class=\"flex items-center gap-3 w-full px-3 py-2.5 rounded-md text-sm font-medium transition-colors text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground\">…</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <div class=\"absolute inset-0 bg-black/60 transition-opacity duration-300\"></div> from <div class=\"fixed inset-0 z-[9999]\">…</div> subtree intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <div class=\"absolute inset-0 bg-black/60 transition-opacity duration-300\"></div> from <div class=\"fixed inset-0 z-[9999]\">…</div> subtree intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    49 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m       - element is visible, enabled and stable\u001b[22m\n\u001b[2m       - scrolling into view if needed\u001b[22m\n\u001b[2m       - done scrolling\u001b[22m\n\u001b[2m       - <div class=\"absolute inset-0 bg-black/60 transition-opacity duration-300\"></div> from <div class=\"fixed inset-0 z-[9999]\">…</div> subtree intercepts pointer events\u001b[22m\n\u001b[2m     - retrying click action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n\n\n  280 |   await seedFakeSession(page, ref!, lang);\n  281 |   await page.goto(\"/dashboard\");\n> 282 |   await page.getByRole(\"button\", { name: L[lang].offersNav, exact: true }).first().click();\n      |                                                                                    ^\n  283 |   await expect(page.getByText(\"Kitchen E2E Guest\").first()).toBeVisible({ timeout: 15_000 });\n  284 | }\n  285 |\n    at openOffers (/dev-server/e2e/offer-confirm-kitchen-confirmation.spec.ts:282:84)\n    at /dev-server/e2e/offer-confirm-kitchen-confirmation.spec.ts:383:5"
+                        }
+                      ],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-18T06:34:14.631Z",
+                      "startTime": "2026-09-18T06:40:07.395Z",
                       "annotations": [],
                       "attachments": [
                         {
                           "name": "screenshot",
                           "contentType": "image/png",
-                          "path": "/dev-server/test-results/offer-confirm-kitchen-conf-f2433--show-up-in-the-Kitchen-tab-chromium/test-finished-1.png"
+                          "path": "/dev-server/test-results/offer-confirm-kitchen-conf-f2433--show-up-in-the-Kitchen-tab-chromium/test-failed-1.png"
                         },
                         {
                           "name": "video",
                           "contentType": "video/webm",
                           "path": "/dev-server/test-results/offer-confirm-kitchen-conf-f2433--show-up-in-the-Kitchen-tab-chromium/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/dev-server/test-results/offer-confirm-kitchen-conf-f2433--show-up-in-the-Kitchen-tab-chromium/error-context.md"
                         },
                         {
                           "name": "trace",
@@ -237,13 +300,426 @@
                       ]
                     }
                   ],
-                  "status": "expected"
+                  "status": "unexpected"
                 }
               ],
               "id": "e8756ec45a7a1cfe12f3-23374397598126874fb4",
               "file": "offer-confirm-kitchen-confirmation.spec.ts",
-              "line": 335,
+              "line": 368,
               "column": 3
+            }
+          ]
+        },
+        {
+          "title": "Kitchen tab announcement wording per language",
+          "file": "offer-confirm-kitchen-confirmation.spec.ts",
+          "line": 414,
+          "column": 6,
+          "specs": [
+            {
+              "title": "en: one food or drink line is announced in the singular",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 3,
+                      "status": "timedOut",
+                      "duration": 33737,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                        },
+                        {
+                          "location": {
+                            "file": "/dev-server/e2e/offer-confirm-kitchen-confirmation.spec.ts",
+                            "column": 84,
+                            "line": 282
+                          },
+                          "message": "Error: locator.click: Test timeout of 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: 'Offers', exact: true }).first()\u001b[22m\n\u001b[2m    - locator resolved to <button data-state=\"closed\" class=\"flex items-center gap-3 w-full px-3 py-2.5 rounded-md text-sm font-medium transition-colors text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground\">…</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <div class=\"absolute inset-0 bg-black/60 transition-opacity duration-300\"></div> from <div class=\"fixed inset-0 z-[9999]\">…</div> subtree intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <div class=\"absolute inset-0 bg-black/60 transition-opacity duration-300\"></div> from <div class=\"fixed inset-0 z-[9999]\">…</div> subtree intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    50 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m       - element is visible, enabled and stable\u001b[22m\n\u001b[2m       - scrolling into view if needed\u001b[22m\n\u001b[2m       - done scrolling\u001b[22m\n\u001b[2m       - <div class=\"absolute inset-0 bg-black/60 transition-opacity duration-300\"></div> from <div class=\"fixed inset-0 z-[9999]\">…</div> subtree intercepts pointer events\u001b[22m\n\u001b[2m     - retrying click action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n\n\n  280 |   await seedFakeSession(page, ref!, lang);\n  281 |   await page.goto(\"/dashboard\");\n> 282 |   await page.getByRole(\"button\", { name: L[lang].offersNav, exact: true }).first().click();\n      |                                                                                    ^\n  283 |   await expect(page.getByText(\"Kitchen E2E Guest\").first()).toBeVisible({ timeout: 15_000 });\n  284 | }\n  285 |\n    at openOffers (/dev-server/e2e/offer-confirm-kitchen-confirmation.spec.ts:282:84)\n    at /dev-server/e2e/offer-confirm-kitchen-confirmation.spec.ts:426:7"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-18T06:40:07.359Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/dev-server/test-results/offer-confirm-kitchen-conf-f2ec3-s-announced-in-the-singular-chromium/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/dev-server/test-results/offer-confirm-kitchen-conf-f2ec3-s-announced-in-the-singular-chromium/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/dev-server/test-results/offer-confirm-kitchen-conf-f2ec3-s-announced-in-the-singular-chromium/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/dev-server/test-results/offer-confirm-kitchen-conf-f2ec3-s-announced-in-the-singular-chromium/trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "e8756ec45a7a1cfe12f3-21d216eda85a99768031",
+              "file": "offer-confirm-kitchen-confirmation.spec.ts",
+              "line": 420,
+              "column": 5
+            },
+            {
+              "title": "en: several food and drink lines are announced in the plural",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 4,
+                      "status": "timedOut",
+                      "duration": 33628,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                        },
+                        {
+                          "location": {
+                            "file": "/dev-server/e2e/offer-confirm-kitchen-confirmation.spec.ts",
+                            "column": 84,
+                            "line": 282
+                          },
+                          "message": "Error: locator.click: Test timeout of 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: 'Offers', exact: true }).first()\u001b[22m\n\u001b[2m    - locator resolved to <button data-state=\"closed\" class=\"flex items-center gap-3 w-full px-3 py-2.5 rounded-md text-sm font-medium transition-colors text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground\">…</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <div class=\"absolute inset-0 bg-black/60 transition-opacity duration-300\"></div> from <div class=\"fixed inset-0 z-[9999]\">…</div> subtree intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <div class=\"absolute inset-0 bg-black/60 transition-opacity duration-300\"></div> from <div class=\"fixed inset-0 z-[9999]\">…</div> subtree intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    49 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m       - element is visible, enabled and stable\u001b[22m\n\u001b[2m       - scrolling into view if needed\u001b[22m\n\u001b[2m       - done scrolling\u001b[22m\n\u001b[2m       - <div class=\"absolute inset-0 bg-black/60 transition-opacity duration-300\"></div> from <div class=\"fixed inset-0 z-[9999]\">…</div> subtree intercepts pointer events\u001b[22m\n\u001b[2m     - retrying click action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n\u001b[2m    - waiting for element to be visible, enabled and stable\u001b[22m\n\n\n  280 |   await seedFakeSession(page, ref!, lang);\n  281 |   await page.goto(\"/dashboard\");\n> 282 |   await page.getByRole(\"button\", { name: L[lang].offersNav, exact: true }).first().click();\n      |                                                                                    ^\n  283 |   await expect(page.getByText(\"Kitchen E2E Guest\").first()).toBeVisible({ timeout: 15_000 });\n  284 | }\n  285 |\n    at openOffers (/dev-server/e2e/offer-confirm-kitchen-confirmation.spec.ts:282:84)\n    at /dev-server/e2e/offer-confirm-kitchen-confirmation.spec.ts:450:7"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-18T06:40:07.365Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/dev-server/test-results/offer-confirm-kitchen-conf-4c5cb-are-announced-in-the-plural-chromium/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/dev-server/test-results/offer-confirm-kitchen-conf-4c5cb-are-announced-in-the-plural-chromium/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/dev-server/test-results/offer-confirm-kitchen-conf-4c5cb-are-announced-in-the-plural-chromium/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/dev-server/test-results/offer-confirm-kitchen-conf-4c5cb-are-announced-in-the-plural-chromium/trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "e8756ec45a7a1cfe12f3-6cdeb23ccd774397ace6",
+              "file": "offer-confirm-kitchen-confirmation.spec.ts",
+              "line": 441,
+              "column": 5
+            },
+            {
+              "title": "fi: one food or drink line is announced in the singular",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 5,
+                      "parallelIndex": 5,
+                      "status": "timedOut",
+                      "duration": 33792,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                        },
+                        {
+                          "location": {
+                            "file": "/dev-server/e2e/offer-confirm-kitchen-confirmation.spec.ts",
+                            "column": 84,
+                            "line": 282
+                          },
+                          "message": "Error: locator.click: Test timeout of 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: 'Tarjoukset', exact: true }).first()\u001b[22m\n\u001b[2m    - locator resolved to <button data-state=\"closed\" class=\"flex items-center gap-3 w-full px-3 py-2.5 rounded-md text-sm font-medium transition-colors text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground\">…</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <div class=\"absolute inset-0 bg-black/60 transition-opacity duration-300\"></div> from <div class=\"fixed inset-0 z-[9999]\">…</div> subtree intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <div class=\"absolute inset-0 bg-black/60 transition-opacity duration-300\"></div> from <div class=\"fixed inset-0 z-[9999]\">…</div> subtree intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    49 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m       - element is visible, enabled and stable\u001b[22m\n\u001b[2m       - scrolling into view if needed\u001b[22m\n\u001b[2m       - done scrolling\u001b[22m\n\u001b[2m       - <div class=\"absolute inset-0 bg-black/60 transition-opacity duration-300\"></div> from <div class=\"fixed inset-0 z-[9999]\">…</div> subtree intercepts pointer events\u001b[22m\n\u001b[2m     - retrying click action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n\n\n  280 |   await seedFakeSession(page, ref!, lang);\n  281 |   await page.goto(\"/dashboard\");\n> 282 |   await page.getByRole(\"button\", { name: L[lang].offersNav, exact: true }).first().click();\n      |                                                                                    ^\n  283 |   await expect(page.getByText(\"Kitchen E2E Guest\").first()).toBeVisible({ timeout: 15_000 });\n  284 | }\n  285 |\n    at openOffers (/dev-server/e2e/offer-confirm-kitchen-confirmation.spec.ts:282:84)\n    at /dev-server/e2e/offer-confirm-kitchen-confirmation.spec.ts:426:7"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-18T06:40:07.385Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/dev-server/test-results/offer-confirm-kitchen-conf-13d64-s-announced-in-the-singular-chromium/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/dev-server/test-results/offer-confirm-kitchen-conf-13d64-s-announced-in-the-singular-chromium/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/dev-server/test-results/offer-confirm-kitchen-conf-13d64-s-announced-in-the-singular-chromium/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/dev-server/test-results/offer-confirm-kitchen-conf-13d64-s-announced-in-the-singular-chromium/trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "e8756ec45a7a1cfe12f3-3236a26c3408b01710e4",
+              "file": "offer-confirm-kitchen-confirmation.spec.ts",
+              "line": 420,
+              "column": 5
+            },
+            {
+              "title": "fi: several food and drink lines are announced in the plural",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 6,
+                      "parallelIndex": 6,
+                      "status": "timedOut",
+                      "duration": 33463,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                        },
+                        {
+                          "location": {
+                            "file": "/dev-server/e2e/offer-confirm-kitchen-confirmation.spec.ts",
+                            "column": 84,
+                            "line": 282
+                          },
+                          "message": "Error: locator.click: Test timeout of 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: 'Tarjoukset', exact: true }).first()\u001b[22m\n\u001b[2m    - locator resolved to <button data-state=\"closed\" class=\"flex items-center gap-3 w-full px-3 py-2.5 rounded-md text-sm font-medium transition-colors text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground\">…</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <div class=\"absolute inset-0 bg-black/60 transition-opacity duration-300\"></div> from <div class=\"fixed inset-0 z-[9999]\">…</div> subtree intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <div class=\"absolute inset-0 bg-black/60 transition-opacity duration-300\"></div> from <div class=\"fixed inset-0 z-[9999]\">…</div> subtree intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    49 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m       - element is visible, enabled and stable\u001b[22m\n\u001b[2m       - scrolling into view if needed\u001b[22m\n\u001b[2m       - done scrolling\u001b[22m\n\u001b[2m       - <div class=\"absolute inset-0 bg-black/60 transition-opacity duration-300\"></div> from <div class=\"fixed inset-0 z-[9999]\">…</div> subtree intercepts pointer events\u001b[22m\n\u001b[2m     - retrying click action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n\n\n  280 |   await seedFakeSession(page, ref!, lang);\n  281 |   await page.goto(\"/dashboard\");\n> 282 |   await page.getByRole(\"button\", { name: L[lang].offersNav, exact: true }).first().click();\n      |                                                                                    ^\n  283 |   await expect(page.getByText(\"Kitchen E2E Guest\").first()).toBeVisible({ timeout: 15_000 });\n  284 | }\n  285 |\n    at openOffers (/dev-server/e2e/offer-confirm-kitchen-confirmation.spec.ts:282:84)\n    at /dev-server/e2e/offer-confirm-kitchen-confirmation.spec.ts:450:7"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-18T06:40:07.397Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/dev-server/test-results/offer-confirm-kitchen-conf-de999-are-announced-in-the-plural-chromium/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/dev-server/test-results/offer-confirm-kitchen-conf-de999-are-announced-in-the-plural-chromium/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/dev-server/test-results/offer-confirm-kitchen-conf-de999-are-announced-in-the-plural-chromium/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/dev-server/test-results/offer-confirm-kitchen-conf-de999-are-announced-in-the-plural-chromium/trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "e8756ec45a7a1cfe12f3-0ac00ee4b34621775170",
+              "file": "offer-confirm-kitchen-confirmation.spec.ts",
+              "line": 441,
+              "column": 5
+            },
+            {
+              "title": "sv: one food or drink line is announced in the singular",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 7,
+                      "parallelIndex": 7,
+                      "status": "timedOut",
+                      "duration": 33795,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                        },
+                        {
+                          "location": {
+                            "file": "/dev-server/e2e/offer-confirm-kitchen-confirmation.spec.ts",
+                            "column": 84,
+                            "line": 282
+                          },
+                          "message": "Error: locator.click: Test timeout of 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: 'Erbjudanden', exact: true }).first()\u001b[22m\n\u001b[2m    - locator resolved to <button data-state=\"closed\" class=\"flex items-center gap-3 w-full px-3 py-2.5 rounded-md text-sm font-medium transition-colors text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground\">…</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <div class=\"absolute inset-0 bg-black/60 transition-opacity duration-300\"></div> from <div class=\"fixed inset-0 z-[9999]\">…</div> subtree intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <div class=\"absolute inset-0 bg-black/60 transition-opacity duration-300\"></div> from <div class=\"fixed inset-0 z-[9999]\">…</div> subtree intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    49 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m       - element is visible, enabled and stable\u001b[22m\n\u001b[2m       - scrolling into view if needed\u001b[22m\n\u001b[2m       - done scrolling\u001b[22m\n\u001b[2m       - <div class=\"absolute inset-0 bg-black/60 transition-opacity duration-300\"></div> from <div class=\"fixed inset-0 z-[9999]\">…</div> subtree intercepts pointer events\u001b[22m\n\u001b[2m     - retrying click action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n\n\n  280 |   await seedFakeSession(page, ref!, lang);\n  281 |   await page.goto(\"/dashboard\");\n> 282 |   await page.getByRole(\"button\", { name: L[lang].offersNav, exact: true }).first().click();\n      |                                                                                    ^\n  283 |   await expect(page.getByText(\"Kitchen E2E Guest\").first()).toBeVisible({ timeout: 15_000 });\n  284 | }\n  285 |\n    at openOffers (/dev-server/e2e/offer-confirm-kitchen-confirmation.spec.ts:282:84)\n    at /dev-server/e2e/offer-confirm-kitchen-confirmation.spec.ts:426:7"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-18T06:40:07.417Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/dev-server/test-results/offer-confirm-kitchen-conf-af630-s-announced-in-the-singular-chromium/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/dev-server/test-results/offer-confirm-kitchen-conf-af630-s-announced-in-the-singular-chromium/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/dev-server/test-results/offer-confirm-kitchen-conf-af630-s-announced-in-the-singular-chromium/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/dev-server/test-results/offer-confirm-kitchen-conf-af630-s-announced-in-the-singular-chromium/trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "e8756ec45a7a1cfe12f3-edfa4f5454070e495d30",
+              "file": "offer-confirm-kitchen-confirmation.spec.ts",
+              "line": 420,
+              "column": 5
+            },
+            {
+              "title": "sv: several food and drink lines are announced in the plural",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 8,
+                      "parallelIndex": 6,
+                      "status": "passed",
+                      "duration": 2389,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-18T06:40:45.453Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/dev-server/test-results/offer-confirm-kitchen-conf-924dc-are-announced-in-the-plural-chromium/test-finished-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/dev-server/test-results/offer-confirm-kitchen-conf-924dc-are-announced-in-the-plural-chromium/video.webm"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/dev-server/test-results/offer-confirm-kitchen-conf-924dc-are-announced-in-the-plural-chromium/trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "e8756ec45a7a1cfe12f3-c333de7cdd8f1cbfa12d",
+              "file": "offer-confirm-kitchen-confirmation.spec.ts",
+              "line": 441,
+              "column": 5
             }
           ]
         }
@@ -252,11 +728,11 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-09-18T06:34:12.496Z",
-    "duration": 7453.996999999999,
-    "expected": 3,
+    "startTime": "2026-09-18T06:40:05.860Z",
+    "duration": 42655.241,
+    "expected": 1,
     "skipped": 0,
-    "unexpected": 0,
+    "unexpected": 8,
     "flaky": 0
   }
 }
