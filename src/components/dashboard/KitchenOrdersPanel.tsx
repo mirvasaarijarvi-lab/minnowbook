@@ -403,12 +403,28 @@ const KitchenOrdersPanel = () => {
                         </p>
                       )}
                     </div>
-                    {total > 0 && (
-                      <div className="text-right">
-                        <p className="text-xs text-muted-foreground">{t("kitchen.total")}</p>
-                        <p className="text-base font-semibold">{total.toFixed(2)} €</p>
-                      </div>
-                    )}
+                    <div className="flex items-start gap-3">
+                      {total > 0 && (
+                        <div className="text-right">
+                          <p className="text-xs text-muted-foreground">{t("kitchen.total")}</p>
+                          <p className="text-base font-semibold">{total.toFixed(2)} €</p>
+                        </div>
+                      )}
+                      {items.length > 0 && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-9 w-9 text-destructive hover:text-destructive print:hidden"
+                          aria-label={t("kitchen.deleteOrderNamed").replace(
+                            "{name}",
+                            r.guest_name ?? "",
+                          )}
+                          onClick={() => setPendingOrderDelete(r.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-2">
