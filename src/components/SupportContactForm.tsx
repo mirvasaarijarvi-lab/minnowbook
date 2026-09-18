@@ -27,6 +27,9 @@ const MIN_FILL_SECONDS = 3;
 const RATE_WINDOW_MS = 10 * 60 * 1000;
 const RATE_MAX_SUBMITS = 3;
 const RATE_STORAGE_KEY = "mimmobook-support-submits";
+// From this many recent messages onwards, a text challenge is required.
+const CHALLENGE_AFTER_SUBMITS = 2;
+
 
 const contactSchema = z.object({
   name: z.string().trim().max(100, "Name must be under 100 characters."),
