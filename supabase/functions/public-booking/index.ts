@@ -155,7 +155,15 @@ const VALID_PRICING_TYPES = ["menu", "fixed_price", "quote"];
 const VALID_SUB_TYPES = ["dine_in", "catering", "popup"];
 const VALID_STALL_SIZES = ["small", "medium", "large"];
 
+// Monitoring tag: booking refusals carry their machine-readable error code in
+// the validation log so the dashboard can count them per code over time.
+// Keep the shape in sync with src/lib/booking-rejection-monitor.ts.
+function rejectionTag(code: unknown): string {
+  return `[error_code:${typeof code === "string" && code ? code : "UNKNOWN"}]`;
+}
+
 // Helper: write a row to booking_validation_log (best-effort, never throws)
+
 async function logValidation(
   adminClient: any,
   row: {
