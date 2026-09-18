@@ -548,7 +548,7 @@ const OperationsSheetPanel = () => {
                   </table>
                 </div>
               )}
-            </div>
+            </CollapsibleSection>
           </>
         )}
       </CardContent>
