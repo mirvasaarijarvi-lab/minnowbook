@@ -1377,6 +1377,23 @@ type TranslationKeys = {
   "help.art10C3": string;
   "help.art10C4": string;
   "help.art10C5": string;
+  "help.art10C6": string;
+  "help.art11Title": string;
+  "help.art11Desc": string;
+  "help.art11C1": string;
+  "help.art11C2": string;
+  "help.art11C3": string;
+  "help.art11C4": string;
+  "help.art12Title": string;
+  "help.art12Desc": string;
+  "help.art12C1": string;
+  "help.art12C2": string;
+  "help.art12C3": string;
+  "help.art12C4": string;
+  "help.guide7Q": string;
+  "help.guide7A": string;
+  "help.guide8Q": string;
+  "help.guide8A": string;
   "help.guide1Q": string;
   "help.guide1A": string;
   "help.guide2Q": string;
@@ -1444,6 +1461,12 @@ type TranslationKeys = {
   "aid.guideA10": string;
   "aid.guideQ11": string;
   "aid.guideA11": string;
+  "aid.guideQ12": string;
+  "aid.guideA12": string;
+  "aid.guideQ13": string;
+  "aid.guideA13": string;
+  "aid.guideQ14": string;
+  "aid.guideA14": string;
 
   // Sites
   "sites.title": string;
@@ -3497,6 +3520,23 @@ const en: TranslationKeys = {
   "help.art10C3": "Google Calendar sync: subscribe to your reservations via the iCal feed (Settings → Calendar Sync). CSV/PDF export from Reservations and Reports.",
   "help.art10C4": "Dashboard upgrades: dark mode, keyboard shortcuts (press ?), Quick Actions FAB on mobile, onboarding checklist, audit log filters, analytics charts, login rate limiting, backup status indicator, public reviews/testimonials, multi-language public booking, Kitchen orders for restaurant and venue reservations, and a Stripe revenue dashboard for superadmins.",
   "help.art10C5": "Newest additions: booking invoice PDF, report PDF downloads for period reports, peak hours and busiest weekday, pick sheets for kitchen, lodging and events, booking channel split (guest or staff), email delivery timeline per booking, cross-booking audit view, offer pricing from resources, kitchen menu with prices, permission notices with a Request access button, plus reschedule requests and guest cancellation.",
+  "help.art10C6": "Newest of all: special occasions with enforced capacity (for example Christmas dinner), a rejected bookings card showing why a guest could not book, a duplicate booking guard, kitchen lines routed automatically from an accepted offer, and the new Enterprise plan with unlimited staff.",
+  "help.art11Title": "Building your system step by step",
+  "help.art11Desc": "The recommended setup order, from business details to your first test booking.",
+  "help.art11C1": "1) Business details and branding: name, email, address, phone, logo, colours, hero image and booking page text in Settings.",
+  "help.art11C2": "2) Reservation types, sites (Business and Enterprise), then resources: rooms and room types, tables, event spaces or wellness services with capacity, duration, price and photos.",
+  "help.art11C3": "3) Opening hours (tenant defaults, site overrides, per-resource weekly hours), prices and discount codes, then email templates and the sender name and reply-to address.",
+  "help.art11C4": "4) Invite staff and set roles and site assignments, add special occasions and blocked slots, copy or embed your booking link, then make one test booking, check the email, download the invoice and cancel it.",
+  "help.art12Title": "Special occasions, kitchen routing and Enterprise",
+  "help.art12Desc": "The newest features and how they change daily work.",
+  "help.art12C1": "Special occasions: create a named date such as Christmas dinner with a total capacity and either fixed sittings or open booking. The price is set on the reservation, not on the occasion, and the database blocks simultaneous bookings from overselling.",
+  "help.art12C2": "Rejected bookings: a dashboard card lists bookings the system refused with the reason (occasion full, closed day, duplicate submission, invalid details), and repeat submissions within 15 minutes show the guest a You already sent this booking notice.",
+  "help.art12C3": "Kitchen routing from offers: accepting a cross-booking creates kitchen lines from each function's own food and drinks field. Event lines to the event booking, dining and room lines to the dining booking (or the event booking when there is no dining). Special requests are never sent, empty fields create nothing, and the Kitchen order preview shows exactly what will be sent.",
+  "help.art12C4": "Plans: Basic 5 staff, Pro 25, Business 50, Enterprise unlimited and priced by offer through Request an offer on the pricing page.",
+  "help.guide7Q": "How do I set up a special occasion such as Christmas dinner?",
+  "help.guide7A": "Open the reservation type settings and add a **special occasion**: name, date, total capacity, and either **fixed sittings** (guests choose one of your start times) or **open booking** (any time inside opening hours). Set the price on the reservation or the resource, never on the occasion. Guests then see the occasion on the booking page for that date, and the capacity cannot be oversold even when two guests book at the same moment.",
+  "help.guide8Q": "Where do the food and drinks from an accepted offer go?",
+  "help.guide8A": "Each function's own food and drinks field becomes kitchen lines on the booking that serves it: event lines on the event booking, dining lines on the dining booking, and room lines on the dining booking (or the event booking when there is no dining). **Special requests are never sent to the kitchen**, an empty field creates no order, and the **Kitchen order preview** plus the **Where each food and drinks field goes** panel show the routing and totals before you accept.",
   "help.guide1Q": "How do I manage reservations?",
   "help.guide1A": "Go to your **Dashboard → Reservations** to view, filter, edit, and manage all bookings. You can confirm or cancel reservations from the action menu on each card.",
   "help.guide2Q": "How do I customize my booking page?",
@@ -3565,6 +3605,12 @@ const en: TranslationKeys = {
    "aid.guideA10": "In **Dashboard → Calendar**, click on a date and use the **Block Slot** option to prevent bookings for specific dates, times, or resources.",
    "aid.guideQ11": "How do I manage recurring blocked slots?",
    "aid.guideA11": "Go to **Dashboard → Calendar** and open the **Recurring Blocks** panel. You can create weekly repeating blocks for specific days, time ranges, and resource types (e.g. close the restaurant every Monday). Toggle blocks on/off or delete them anytime. Changes apply immediately to the public booking page.",
+  "aid.guideQ12": "How do special occasions work?",
+  "aid.guideA12": "Add a **special occasion** in the reservation type settings: name, date, total capacity, and either fixed sittings or open booking. Guests pick it on the booking page for that date. The price goes on the reservation, not on the occasion, and the capacity can never be oversold.",
+  "aid.guideQ13": "Where do food and drinks from an offer go?",
+  "aid.guideA13": "Each function's own food and drinks field becomes kitchen lines on the booking that serves it: event lines on the event booking, dining and room lines on the dining booking (or the event booking when there is no dining). Special requests are never sent to the kitchen, and the **Kitchen order preview** shows every line before you accept.",
+  "aid.guideQ14": "In what order should I set my system up?",
+  "aid.guideA14": "1) Business details and branding, 2) reservation types, sites and resources, 3) opening hours, prices and discount codes, 4) email templates and sender details, 5) staff, roles and site assignments, 6) special occasions and blocked slots, 7) share or embed your booking link, then make one test booking end to end.",
   // Sites
   "sites.title": "Sites",
   "sites.addSite": "Add Site",
@@ -5754,6 +5800,23 @@ const fi: TranslationKeys = {
   "help.art10C3": "Google-kalenterisynkronointi: tilaa varauksesi iCal-syötteellä (Asetukset → Kalenterisynkronointi). CSV/PDF-vienti Varauksista ja Raporteista.",
   "help.art10C4": "Hallintapaneelin parannukset: tumma teema, pikanäppäimet (paina ?), pikatoimintojen FAB mobiilissa, käyttöönoton tarkistuslista, audit-lokin suodattimet, analytiikkakaaviot, kirjautumisen rate-rajoitus, varmuuskopion tilailmaisin, julkiset arvostelut/suosittelut, monikielinen julkinen varaussivu, keittiötilaukset ravintola- ja tilavarauksille, ja Stripe-tulospaneeli pääkäyttäjille.",
   "help.art10C5": "Uusimmat lisäykset: varauksen lasku-PDF, jaksoraporttien PDF-lataus, vilkkaimmat tunnit ja viikonpäivä, poimintalistat keittiölle, majoitukselle ja tapahtumille, varauskanavien jakauma (vieras vai henkilökunta), sähköpostien toimitusaikajana varauskohtaisesti, ristiinvarausten tarkastusnäkymä, tarjousten hinnat resursseista, keittiön menu hinnoilla, käyttöoikeusilmoitukset Pyydä käyttöoikeutta -painikkeella sekä siirtopyynnöt ja vieraan peruutus.",
+  "help.art10C6": "Aivan uusimmat: erikoistilaisuudet kapasiteettirajalla (esimerkiksi joulupäivällinen), hylätyt varaukset -kortti joka kertoo miksi vieras ei saanut varausta läpi, kaksoisvarausten esto, keittiörivien automaattinen ohjaus hyväksytystä tarjouksesta sekä uusi Enterprise-taso rajattomalla henkilökunnalla.",
+  "help.art11Title": "Järjestelmän rakentaminen vaihe vaiheelta",
+  "help.art11Desc": "Suositeltu järjestys yrityksen tiedoista ensimmäiseen testivaraukseen.",
+  "help.art11C1": "1) Yrityksen tiedot ja brändäys: nimi, sähköposti, osoite, puhelin, logo, värit, kuva ja varaussivun tekstit Asetuksissa.",
+  "help.art11C2": "2) Varaustyypit, toimipisteet (Business ja Enterprise) ja sitten resurssit: huoneet ja huonetyypit, pöydät, tilat tai hyvinvointipalvelut kapasiteetilla, kestolla, hinnalla ja kuvilla.",
+  "help.art11C3": "3) Aukioloajat (oletukset, toimipistekohtaiset poikkeukset, resurssin oma viikkoaikataulu), hinnat ja alennuskoodit, sitten sähköpostimallit sekä lähettäjän nimi ja vastausosoite.",
+  "help.art11C4": "4) Kutsu henkilökunta ja aseta roolit ja toimipisteet, lisää erikoistilaisuudet ja estot, kopioi tai upota varauslinkki ja tee lopuksi yksi testivaraus: tarkista sähköposti, lataa lasku ja peru varaus.",
+  "help.art12Title": "Erikoistilaisuudet, keittiöohjaus ja Enterprise",
+  "help.art12Desc": "Uusimmat ominaisuudet ja niiden vaikutus päivittäiseen työhön.",
+  "help.art12C1": "Erikoistilaisuudet: luo nimetty päivä, esimerkiksi joulupäivällinen, kokonaiskapasiteetilla ja joko kiinteillä kattauksilla tai vapaalla varauksella. Hinta asetetaan varaukselle, ei tilaisuudelle, ja tietokanta estää samanaikaisten varausten ylimyynnin.",
+  "help.art12C2": "Hylätyt varaukset: hallintapaneelin kortti listaa järjestelmän hylkäämät varaukset syineen (tilaisuus täynnä, suljettu päivä, kaksoislähetys, virheelliset tiedot), ja 15 minuutin sisällä toistettu lähetys näyttää vieraalle ilmoituksen Lähetit tämän varauksen jo.",
+  "help.art12C3": "Keittiöohjaus tarjouksista: ristiinvarauksen hyväksyminen luo keittiörivit kunkin osion omasta ruoka ja juoma -kentästä. Tapahtuman rivit tapahtumavaraukselle, ruokailun ja huoneiden rivit ruokailuvaraukselle (tai tapahtumavaraukselle jos ruokailua ei ole). Erikoistoiveita ei lähetetä koskaan, tyhjä kenttä ei luo mitään, ja Keittiötilauksen esikatselu näyttää tarkalleen mitä lähetetään.",
+  "help.art12C4": "Tasot: Basic 5 käyttäjää, Pro 25, Business 50, Enterprise rajaton ja hinnoiteltu tarjouksella Pyydä tarjous -painikkeesta hinnoittelusivulla.",
+  "help.guide7Q": "Miten luon erikoistilaisuuden, esimerkiksi joulupäivällisen?",
+  "help.guide7A": "Avaa varaustyypin asetukset ja lisää **erikoistilaisuus**: nimi, päivä, kokonaiskapasiteetti ja joko **kiinteät kattaukset** (vieras valitsee yhden aloitusajoistasi) tai **vapaa varaus** (mikä tahansa aika aukioloaikojen sisällä). Aseta hinta varaukselle tai resurssille, ei tilaisuudelle. Vieraat näkevät tilaisuuden varaussivulla kyseiselle päivälle, eikä kapasiteettia voi ylittää vaikka kaksi vierasta varaisi samalla hetkellä.",
+  "help.guide8Q": "Minne hyväksytyn tarjouksen ruoat ja juomat menevät?",
+  "help.guide8A": "Kunkin osion oma ruoka ja juoma -kenttä muuttuu keittiöriveiksi sille varaukselle joka sen toteuttaa: tapahtuman rivit tapahtumavaraukselle, ruokailun rivit ruokailuvaraukselle ja huoneiden rivit ruokailuvaraukselle (tai tapahtumavaraukselle jos ruokailua ei ole). **Erikoistoiveita ei lähetetä keittiöön**, tyhjä kenttä ei luo tilausta, ja **Keittiötilauksen esikatselu** sekä **Minne mikä kenttä menee** -paneeli näyttävät ohjauksen ja summat ennen hyväksymistä.",
   "help.guide1Q": "Miten hallitsen varauksia?",
   "help.guide1A": "Siirry kohtaan **Hallintapaneeli → Varaukset** selataksesi, suodattaaksesi, muokataksesi ja hallinnoitsesi kaikkia varauksia.",
   "help.guide2Q": "Miten mukautan varaussivua?",
@@ -5822,6 +5885,12 @@ const fi: TranslationKeys = {
    "aid.guideA10": "**Hallintapaneeli → Kalenteri** -näkymässä klikkaa päivämäärää ja käytä **Estä aika** -toimintoa estääksesi varaukset tietyille päiville, ajoille tai resursseille.",
    "aid.guideQ11": "Miten hallitsen toistuvia estoja?",
    "aid.guideA11": "Siirry **Hallintapaneeli → Kalenteri** ja avaa **Toistuvat estot** -paneeli. Voit luoda viikoittain toistuvia estoja tietyille päiville, aikaväleille ja resurssityypeille (esim. sulkea ravintolan joka maanantai). Vaihda estoja päälle/pois tai poista ne milloin tahansa. Muutokset näkyvät heti julkisella varaussivulla.",
+  "aid.guideQ12": "Miten erikoistilaisuudet toimivat?",
+  "aid.guideA12": "Lisää **erikoistilaisuus** varaustyypin asetuksissa: nimi, päivä, kokonaiskapasiteetti ja joko kiinteät kattaukset tai vapaa varaus. Vieraat valitsevat sen varaussivulla kyseiselle päivälle. Hinta asetetaan varaukselle, ei tilaisuudelle, eikä kapasiteettia voi ylittää.",
+  "aid.guideQ13": "Minne tarjouksen ruoat ja juomat menevät?",
+  "aid.guideA13": "Kunkin osion oma ruoka ja juoma -kenttä muuttuu keittiöriveiksi sille varaukselle joka sen toteuttaa: tapahtuman rivit tapahtumavaraukselle, ruokailun ja huoneiden rivit ruokailuvaraukselle (tai tapahtumavaraukselle jos ruokailua ei ole). Erikoistoiveita ei lähetetä keittiöön, ja **Keittiötilauksen esikatselu** näyttää kaikki rivit ennen hyväksymistä.",
+  "aid.guideQ14": "Missä järjestyksessä rakennan järjestelmän?",
+  "aid.guideA14": "1) Yrityksen tiedot ja brändäys, 2) varaustyypit, toimipisteet ja resurssit, 3) aukioloajat, hinnat ja alennuskoodit, 4) sähköpostimallit ja lähettäjän tiedot, 5) henkilökunta, roolit ja toimipisteet, 6) erikoistilaisuudet ja estot, 7) jaa tai upota varauslinkki ja tee lopuksi yksi testivaraus alusta loppuun.",
   // Sites
   "sites.title": "Toimipisteet",
   "sites.addSite": "Lisää toimipiste",
@@ -8010,6 +8079,23 @@ const sv: TranslationKeys = {
   "help.art10C3": "Google Kalender-synk: prenumerera på dina bokningar via iCal-flödet (Inställningar → Kalendersynk). CSV/PDF-export från Bokningar och Rapporter.",
   "help.art10C4": "Förbättringar i instrumentpanelen: mörkt läge, kortkommandon (tryck ?), Snabbåtgärds-FAB på mobil, introduktionscheckslista, granskningsloggfilter, analysdiagram, inloggningsbegränsning, säkerhetskopieringsstatus, publika omdömen/recensioner, flerspråkig publik bokningssida, kökets beställningar för restaurang- och lokalbokningar, och en Stripe-intäktspanel för superadmins.",
   "help.art10C5": "Senaste tilläggen: faktura-PDF per bokning, PDF-nedladdning av periodrapporter, mest bokade timmar och veckodag, plocklistor för kök, logi och evenemang, fördelning av bokningskanaler (gäst eller personal), tidslinje för e-postleveranser per bokning, granskningsvy för korsbokningar, offertpriser hämtade från resurserna, köksmeny med priser, behörighetsmeddelanden med knappen Begär åtkomst, samt ombokningsförfrågningar och avbokning av gäst.",
+  "help.art10C6": "Allra senast: särskilda tillfällen med kapacitetsgräns (till exempel julmiddag), ett kort för avvisade bokningar som visar varför en gäst inte kunde boka, skydd mot dubbelbokning, köksrader som styrs automatiskt från en accepterad offert, och den nya Enterprise-planen med obegränsad personal.",
+  "help.art11Title": "Bygg ditt system steg för steg",
+  "help.art11Desc": "Rekommenderad ordning, från företagsuppgifter till din första testbokning.",
+  "help.art11C1": "1) Företagsuppgifter och varumärke: namn, e-post, adress, telefon, logotyp, färger, bild och bokningssidans texter i Inställningar.",
+  "help.art11C2": "2) Bokningstyper, platser (Business och Enterprise) och sedan resurser: rum och rumstyper, bord, lokaler eller välmåendetjänster med kapacitet, längd, pris och bilder.",
+  "help.art11C3": "3) Öppettider (standard, platsspecifika undantag, resursens eget veckoschema), priser och rabattkoder, sedan e-postmallar samt avsändarnamn och svarsadress.",
+  "help.art11C4": "4) Bjud in personal och sätt roller och platser, lägg till särskilda tillfällen och blockeringar, kopiera eller bädda in bokningslänken och gör till sist en testbokning: kontrollera e-posten, ladda ner fakturan och avboka.",
+  "help.art12Title": "Särskilda tillfällen, köksstyrning och Enterprise",
+  "help.art12Desc": "De nyaste funktionerna och hur de påverkar det daliga arbetet.",
+  "help.art12C1": "Särskilda tillfällen: skapa en namngiven dag, till exempel julmiddag, med total kapacitet och antingen **fasta sittningar** eller fri bokning. Priset sätts på bokningen, inte på tillfället, och databasen hindrar samtidiga bokningar från att överboka.",
+  "help.art12C2": "Avvisade bokningar: ett kort på instrumentpanelen listar bokningar som systemet nekade med orsak (tillfället fullt, stängd dag, dubbelinskick, felaktiga uppgifter), och ett upprepat inskick inom 15 minuter visar gästen meddelandet Du har redan skickat denna bokning.",
+  "help.art12C3": "Köksstyrning från offerter: när en korsbokning accepteras skapas köksrader från varje dels eget fält för mat och dryck. Evenemangsrader till evenemangsbokningen, mat- och rumsrader till matbokningen (eller evenemangsbokningen om matdel saknas). Specialönskemål skickas aldrig, tomma fält skapar inget, och Förhandsvisning av köksbeställning visar exakt vad som skickas.",
+  "help.art12C4": "Planer: Basic 5 användare, Pro 25, Business 50, Enterprise obegränsat och prissatt per offert via Begär offert på prissidan.",
+  "help.guide7Q": "Hur skapar jag ett särskilt tillfälle, till exempel julmiddag?",
+  "help.guide7A": "Öppna bokningstypens inställningar och lägg till ett **särskilt tillfälle**: namn, datum, total kapacitet och antingen **fasta sittningar** (gästen väljer en av dina starttider) eller **fri bokning** (valfri tid inom öppettiderna). Sätt priset på bokningen eller resursen, aldrig på tillfället. Gästerna ser tillfället på bokningssidan för den dagen, och kapaciteten kan inte överskridas ens när två gäster bokar samtidigt.",
+  "help.guide8Q": "Vart går mat och dryck från en accepterad offert?",
+  "help.guide8A": "Varje dels eget fält för mat och dryck blir köksrader på den bokning som utför den: evenemangsrader på evenemangsbokningen, matrader på matbokningen och rumsrader på matbokningen (eller evenemangsbokningen om matdel saknas). **Specialönskemål skickas aldrig till köket**, ett tomt fält skapar ingen beställning, och **Förhandsvisning av köksbeställning** samt panelen **Vart varje fält går** visar styrningen och summorna innan du accepterar.",
   "help.guide1Q": "Hur hanterar jag bokningar?",
   "help.guide1A": "Gå till **Instrumentpanel → Bokningar** för att visa, filtrera, redigera och hantera alla bokningar.",
   "help.guide2Q": "Hur anpassar jag min bokningssida?",
@@ -8078,6 +8164,12 @@ const sv: TranslationKeys = {
    "aid.guideA10": "Under **Instrumentpanel → Kalender**, klicka på ett datum och använd **Blockera tid** för att förhindra bokningar för specifika datum, tider eller resurser.",
    "aid.guideQ11": "Hur hanterar jag återkommande blockeringar?",
    "aid.guideA11": "Gå till **Instrumentpanel → Kalender** och öppna panelen **Återkommande blockeringar**. Du kan skapa veckovis återkommande blockeringar för specifika dagar, tidsintervall och resurstyper (t.ex. stänga restaurangen varje måndag). Slå av/på eller ta bort blockeringar när som helst. Ändringar gäller direkt på den publika bokningssidan.",
+  "aid.guideQ12": "Hur fungerar särskilda tillfällen?",
+  "aid.guideA12": "Lägg till ett **särskilt tillfälle** i bokningstypens inställningar: namn, datum, total kapacitet och antingen fasta sittningar eller fri bokning. Gästerna väljer det på bokningssidan för den dagen. Priset sätts på bokningen, inte på tillfället, och kapaciteten kan aldrig överskridas.",
+  "aid.guideQ13": "Vart går mat och dryck från en offert?",
+  "aid.guideA13": "Varje dels eget fält för mat och dryck blir köksrader på den bokning som utför den: evenemangsrader på evenemangsbokningen, mat- och rumsrader på matbokningen (eller evenemangsbokningen om matdel saknas). Specialönskemål skickas aldrig till köket, och **Förhandsvisning av köksbeställning** visar varje rad innan du accepterar.",
+  "aid.guideQ14": "I vilken ordning bör jag bygga systemet?",
+  "aid.guideA14": "1) Företagsuppgifter och varumärke, 2) bokningstyper, platser och resurser, 3) öppettider, priser och rabattkoder, 4) e-postmallar och avsändaruppgifter, 5) personal, roller och platstilldelningar, 6) särskilda tillfällen och blockeringar, 7) dela eller bädda in bokningslänken och gör sedan en testbokning från början till slut.",
   // Sites
   "sites.title": "Platser",
   "sites.addSite": "Lägg till plats",
