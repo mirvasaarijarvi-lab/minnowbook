@@ -340,6 +340,7 @@ const OffersManager = () => {
           reservationType: leg.reservationType,
           menu: leg.menu,
         })),
+        kitchenRows,
       );
       if (!consistency.ok) {
         console.warn(
