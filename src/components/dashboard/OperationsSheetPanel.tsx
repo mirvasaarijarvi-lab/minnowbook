@@ -16,6 +16,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useT } from "@/contexts/I18nContext";
+import CollapsibleSection from "./CollapsibleSection";
 
 interface OpsReservation {
   id: string;
@@ -496,11 +497,7 @@ const OperationsSheetPanel = () => {
           <Skeleton className="h-24 w-full" />
         ) : (
           <>
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <h3 className="text-sm font-medium">Kitchen</h3>
-                <Badge variant="secondary">{kitchen.length}</Badge>
-              </div>
+            <CollapsibleSection title="Kitchen" count={kitchen.length}>
               {kitchen.length === 0 ? (
                 <p className="text-sm text-muted-foreground">No kitchen service for this day.</p>
               ) : (
@@ -525,13 +522,9 @@ const OperationsSheetPanel = () => {
                   </table>
                 </div>
               )}
-            </div>
+            </CollapsibleSection>
 
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <h3 className="text-sm font-medium">Lodging</h3>
-                <Badge variant="secondary">{lodging.length}</Badge>
-              </div>
+            <CollapsibleSection title="Lodging" count={lodging.length}>
               {lodging.length === 0 ? (
                 <p className="text-sm text-muted-foreground">No arrivals or departures for this day.</p>
               ) : (
@@ -556,7 +549,7 @@ const OperationsSheetPanel = () => {
                   </table>
                 </div>
               )}
-            </div>
+            </CollapsibleSection>
           </>
         )}
       </CardContent>

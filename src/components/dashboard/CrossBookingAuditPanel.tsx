@@ -18,6 +18,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import DashboardTooltip from "./DashboardTooltip";
+import CollapsibleSection from "./CollapsibleSection";
 
 type RangeKey = "30" | "90" | "365";
 
@@ -231,6 +232,7 @@ const CrossBookingAuditPanel = () => {
         ) : visible.length === 0 ? (
           <p className="py-10 text-center text-sm text-muted-foreground">{t("an.cross.none")}</p>
         ) : (
+          <CollapsibleSection title={t("an.cross.title")} count={visible.length}>
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
@@ -255,6 +257,7 @@ const CrossBookingAuditPanel = () => {
               </TableBody>
             </Table>
           </div>
+          </CollapsibleSection>
         )}
       </CardContent>
     </Card>

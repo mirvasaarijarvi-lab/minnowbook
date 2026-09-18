@@ -38,6 +38,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { escapeHtml } from "@/lib/html-escape";
 import DashboardTooltip from "./DashboardTooltip";
+import CollapsibleSection from "./CollapsibleSection";
 import { downloadReportPdf } from "@/lib/reportsPdf";
 import { useAnalyticsT } from "@/i18n/analytics";
 import {
@@ -1115,8 +1116,7 @@ const ReportsPanel = () => {
           <Separator />
 
           {/* Detailed table */}
-          <div>
-            <h3 className="text-sm font-medium mb-3">{t("reports.details")}</h3>
+          <CollapsibleSection title={t("reports.details")} count={reservations.length}>
             {reservations.length === 0 ? (
               <p className="text-sm text-muted-foreground text-center py-8">{t("dashboard.noReservations")}</p>
             ) : (
@@ -1206,7 +1206,7 @@ const ReportsPanel = () => {
                 </Table>
               </div>
             )}
-          </div>
+          </CollapsibleSection>
         </>
       )}
     </div>
