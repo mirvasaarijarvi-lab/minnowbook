@@ -56,3 +56,19 @@ describe("buildKitchenPreview", () => {
     expect(preview.hasLines).toBe(false);
   });
 });
+
+describe("empty menu field on one function", () => {
+  it("creates no lines for that function while the others are unaffected", () => {
+    const preview = buildKitchenPreview([
+      { key: "main", name: "Event space", reservationType: "venue", menu: "20 x Welcome bites" },
+      // Empty, whitespace-only and bullet-only fields must all add nothing.
+      { key: "restaurant", name: "Restaurant", reservationType: "restaurant", menu: "  \n\t\n- \n" },
+      { key: "guesthouse", name: "Rooms", reservationType: "guesthouse", menu: "" },
+    ]);
+    expect(preview.legs[1].lines).toEqual([]);
+    expect(preview.legs[1].targetKey).toBeNull();
+    expect(preview.legs[2].lines).toEqual([]);
+    expect(preview.totalLines).toBe(1);
+    expect(preview.legs[0].lines).toHaveLength(1);
+  });
+});

@@ -143,3 +143,26 @@ describe("buildKitchenOrderRows", () => {
     ])).toEqual([]);
   });
 });
+
+describe("empty menu field on one leg of a cross-booking", () => {
+  it("writes no kitchen row for that leg and nothing extra for the others", () => {
+    const rows = buildKitchenOrderRows("t-1", [
+      { reservationId: "r-venue", reservationType: "venue", menu: "Welcome bites" },
+      { reservationId: "r-rest", reservationType: "restaurant", menu: "   \n-\n" },
+      { reservationId: "r-room", reservationType: "guesthouse", menu: null },
+    ]);
+    expect(rows.map((r) => [r.reservation_id, r.item_name])).toEqual([
+      ["r-venue", "Welcome bites"],
+    ]);
+    expect(rows.some((r) => r.reservation_id === "r-rest")).toBe(false);
+  });
+
+  it("writes nothing at all when every field is empty", () => {
+    expect(
+      buildKitchenOrderRows("t-1", [
+        { reservationId: "r-venue", reservationType: "venue", menu: "" },
+        { reservationId: "r-rest", reservationType: "restaurant", menu: "  " },
+      ]),
+    ).toEqual([]);
+  });
+});
