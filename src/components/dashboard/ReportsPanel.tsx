@@ -38,6 +38,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { escapeHtml } from "@/lib/html-escape";
 import DashboardTooltip from "./DashboardTooltip";
+import CollapsibleSection from "./CollapsibleSection";
 import { downloadReportPdf } from "@/lib/reportsPdf";
 import { useAnalyticsT } from "@/i18n/analytics";
 import {
