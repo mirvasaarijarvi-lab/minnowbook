@@ -4440,7 +4440,7 @@ const en: TranslationKeys = {
   "tierError.STAFF_USER_LIMIT_REACHED": "Your plan allows up to {limit} staff users. Upgrade to add more team members.",
   "tierError.SITE_LIMIT_REACHED": "Your plan allows up to {limit} site. Upgrade to Business to manage multiple locations.",
   "tierError.RESERVATION_TYPE_LIMIT_REACHED": "Your plan allows up to {limit} reservation type. Upgrade to unlock additional booking categories.",
-  "tierError.RESOURCE_PER_TYPE_LIMIT_REACHED": "Your plan allows only {limit} resource per type. Upgrade to Business for unlimited resources.",
+  "tierError.RESOURCE_PER_TYPE_LIMIT_REACHED": "Your plan allows only {limit} resource(s) per type. Upgrade to Business for unlimited resources.",
 
   // Privacy & account deletion
   "privacy.panel.title": "Privacy and your data",
