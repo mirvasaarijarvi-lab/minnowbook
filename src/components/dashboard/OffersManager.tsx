@@ -325,6 +325,25 @@ const OffersManager = () => {
       // Forward the agreed menu to the Kitchen tab. A failure here must not
       // undo the reservations, so staff are warned instead.
       const kitchenRows = buildKitchenOrderRows(offer.tenant_id, menuLegs);
+
+      // Guard: what we are about to write must match the preview shown on the
+      // offer form for the very same menu fields.
+      const consistency = checkKitchenPreviewMatchesOutput(
+        offer.tenant_id,
+        menuLegs.map((leg) => ({
+          key: leg.reservationId ?? "",
+          name: leg.reservationType,
+          reservationType: leg.reservationType,
+          menu: leg.menu,
+        })),
+      );
+      if (!consistency.ok) {
+        console.warn(
+          "Offer kitchen preview and output differ:",
+          formatKitchenMismatches(consistency),
+        );
+      }
+
       let kitchenFailed = false;
       if (kitchenRows.length > 0) {
         const { error: kitchenErr } = await supabase
