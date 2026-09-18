@@ -6720,7 +6720,7 @@ const fi: TranslationKeys = {
   "tierError.STAFF_USER_LIMIT_REACHED": "Tilauksesi sallii enintään {limit} käyttäjää. Päivitä lisätäksesi tiimiläisiä.",
   "tierError.SITE_LIMIT_REACHED": "Tilauksesi sallii enintään {limit} toimipisteen. Päivitä Business-tasoon hallitaksesi useita.",
   "tierError.RESERVATION_TYPE_LIMIT_REACHED": "Tilauksesi sallii enintään {limit} varaustyypin. Päivitä lisätäksesi varauskategorioita.",
-  "tierError.RESOURCE_PER_TYPE_LIMIT_REACHED": "Tilauksesi sallii vain {limit} resurssin per tyyppi. Päivitä Business-tasoon saadaksesi rajattomat resurssit.",
+  "tierError.RESOURCE_PER_TYPE_LIMIT_REACHED": "Tilauksesi sallii vain {limit} resurssia per tyyppi. Päivitä Business-tasoon saadaksesi rajattomat resurssit.",
 
   // Yksityisyys & tilin poisto
   "privacy.panel.title": "Yksityisyys ja tietosi",
